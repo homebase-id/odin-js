@@ -1,8 +1,9 @@
 import {ProviderBase} from "./ProviderBase";
-import {EncryptedKeyHeader, UploadFileMetadata, KeyHeader, UploadFileDescriptor, UploadInstructionSet, UploadResult} from "./TransitTypes";
+import { UploadFileMetadata, UploadFileDescriptor, UploadInstructionSet, UploadResult} from "./TransitTypes";
 import {AesEncrypt} from "./AesEncrypt";
 import {Guid} from "guid-typescript";
 import {DataUtil} from "./DataUtil";
+import {EncryptedKeyHeader, KeyHeader} from "./DriveTypes";
 
 class TransitProvider extends ProviderBase {
 

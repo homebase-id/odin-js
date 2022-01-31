@@ -1,3 +1,5 @@
+import {DriveFileId, EncryptedKeyHeader} from './DriveTypes';
+
 export interface UploadInstructionSet {
     TransferIv: Uint8Array,
     StorageOptions: StorageOptions | null,
@@ -19,18 +21,6 @@ export interface UploadFileDescriptor {
     FileMetadata: UploadFileMetadata
 }
 
-export interface EncryptedKeyHeader {
-    EncryptionVersion: number,
-    Type: number //value is always 11
-    Iv: Uint8Array
-    EncryptedAesKey: Uint8Array
-}
-
-export interface KeyHeader {
-    Iv: Uint8Array
-    AesKey: Uint8Array
-}
-
 export interface UploadFileMetadata {
     ContentType: string,
     AppData: UploadAppFileMetaData
@@ -50,12 +40,7 @@ export interface UploadResult {
     recipientStatus: { [key: string]: TransferStatus; }//any //TODO: figure out how to represent c# dictionary<string,number>
 }
 
-export interface DriveFileId {
-    driveId: string,
-    fileId: string
-}
-
-enum TransferStatus {
+export enum TransferStatus {
     AwaitingTransferKey = 1,
     TransferKeyCreated = 3,
     Delivered = 5,

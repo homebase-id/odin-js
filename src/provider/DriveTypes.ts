@@ -1,4 +1,14 @@
-import {EncryptedKeyHeader, KeyHeader} from "./TransitTypes";
+export interface EncryptedKeyHeader {
+    EncryptionVersion: number,
+    Type: number //value is always 11
+    Iv: Uint8Array
+    EncryptedAesKey: Uint8Array
+}
+
+export interface KeyHeader {
+    Iv: Uint8Array
+    AesKey: Uint8Array
+}
 
 export interface EncryptedClientFileHeader {
     encryptedKeyHeader: EncryptedKeyHeader,

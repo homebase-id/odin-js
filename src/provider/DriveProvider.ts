@@ -1,9 +1,8 @@
 import {ProviderBase} from "./ProviderBase";
-import {EncryptedKeyHeader, KeyHeader} from "./TransitTypes";
 import {AesEncrypt} from "./AesEncrypt";
 import {Guid} from "guid-typescript";
 import {DataUtil} from "./DataUtil";
-import {EncryptedClientFileHeader, SearchResult, UnencryptedFileHeader} from "./DriveTypes";
+import {EncryptedClientFileHeader, SearchResult, UnencryptedFileHeader, EncryptedKeyHeader, KeyHeader} from "./DriveTypes";
 import {AxiosRequestConfig} from "axios";
 import querystring from 'query-string';
 import {PagedResult} from "./Types";
