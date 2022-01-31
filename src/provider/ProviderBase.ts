@@ -14,6 +14,13 @@ export class ProviderBase {
         return this._sharedSecret;
     }
     
+    protected AssertHasSharedSecret(){
+        if(this._sharedSecret == null)
+        {
+            throw new Error("Shared secret not configured");
+        }
+    }
+    
     //Returns the endpoint for the identity
     protected getEndpoint(): string {
         return "https://" + window.location.hostname + "/api/owner/v1";
