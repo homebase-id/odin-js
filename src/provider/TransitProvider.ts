@@ -1,4 +1,4 @@
-import {ProviderBase} from "./ProviderBase";
+import {ProviderBase, ProviderOptions} from "./ProviderBase";
 import { UploadFileMetadata, UploadFileDescriptor, UploadInstructionSet, UploadResult} from "./TransitTypes";
 import {AesEncrypt} from "./AesEncrypt";
 import {Guid} from "guid-typescript";
@@ -7,8 +7,8 @@ import {EncryptedKeyHeader, KeyHeader} from "./DriveTypes";
 
 class TransitProvider extends ProviderBase {
 
-    constructor(ss: Uint8Array) {
-        super(ss);
+    constructor(options: ProviderOptions | null) {
+        super(options);
     }
     
     async Upload(appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
@@ -20,7 +20,7 @@ class TransitProvider extends ProviderBase {
             FileMetadata: metadata
         }
         
-        console.log("md", metadata);
+        //console.log("md", metadata);
         
         let encryptedDescriptor = await this.encryptWithSharedSecret(descriptor, instructions.TransferIv);
         let encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
@@ -58,7 +58,7 @@ class TransitProvider extends ProviderBase {
         let ss = this.getSharedSecret();
         let json = DataUtil.JsonStringify64(o);
         
-        console.log(json);
+        //console.log(json);
         
         let content = new TextEncoder().encode(json);
         let cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);
@@ -98,6 +98,6 @@ class TransitProvider extends ProviderBase {
     }
 }
 
-export function createTransitProvider(sharedSecret:Uint8Array) {
-    return new TransitProvider(sharedSecret);
+export function createTransitProvider(options: ProviderOptions) {
+    return new TransitProvider(options);
 }

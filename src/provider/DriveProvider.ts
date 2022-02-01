@@ -1,4 +1,4 @@
-import {ProviderBase} from "./ProviderBase";
+import {ProviderBase, ProviderOptions} from "./ProviderBase";
 import {AesEncrypt} from "./AesEncrypt";
 import {Guid} from "guid-typescript";
 import {DataUtil} from "./DataUtil";
@@ -17,8 +17,8 @@ export interface QueryParams {
 
 class DriveProvider extends ProviderBase {
 
-    constructor(ss: Uint8Array) {
-        super(ss);
+    constructor(options: ProviderOptions | null) {
+        super(options);
     }
 
     // async GetFiles(appId: Guid, params:QueryParams): Promise<any> {
@@ -141,7 +141,7 @@ class DriveProvider extends ProviderBase {
             if (response.status == 404) {
                 return false;
             }
-            
+
             return false;
 
         }).catch(error => {
@@ -174,6 +174,6 @@ class DriveProvider extends ProviderBase {
     }
 }
 
-export function createDriveProvider(sharedSecret: Uint8Array) {
-    return new DriveProvider(sharedSecret);
+export function createDriveProvider(options: ProviderOptions) {
+    return new DriveProvider(options);
 }

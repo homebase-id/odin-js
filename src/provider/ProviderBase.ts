@@ -1,21 +1,32 @@
 import axios, {AxiosError} from "axios";
 import {Guid} from "guid-typescript";
 
+export interface ProviderOptions
+{
+    useOwnerApi?:boolean,
+    sharedSecret: Uint8Array | null
+}
+
 export class ProviderBase {
-    private _sharedSecret: Uint8Array;
 
-    constructor(sharedSecret: Uint8Array | null) {
+    private _options: ProviderOptions;
 
-        //@ts-ignore: ignoring since we check above
-        this._sharedSecret = sharedSecret;
+    constructor(options:ProviderOptions | null) {
+
+        this._options = options;
     }
 
     protected getSharedSecret(): Uint8Array {
-        return this._sharedSecret;
+        return this._options?.sharedSecret;
+    }
+    
+    protected getOptions():ProviderOptions
+    {
+        return this._options;
     }
     
     protected AssertHasSharedSecret(){
-        if(this._sharedSecret == null)
+        if(this._options?.sharedSecret == null)
         {
             throw new Error("Shared secret not configured");
         }
@@ -23,7 +34,8 @@ export class ProviderBase {
     
     //Returns the endpoint for the identity
     protected getEndpoint(): string {
-        return "https://" + window.location.hostname + "/api/owner/v1";
+        let root:string = this._options?.useOwnerApi ? "/api/owner/v1" : "/api/apps/v1";
+        return "https://" + window.location.hostname + root
     }
 
     //Gets an Axios client configured with token info
