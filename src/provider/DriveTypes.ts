@@ -6,8 +6,8 @@ export interface EncryptedKeyHeader {
 }
 
 export interface KeyHeader {
-    Iv: Uint8Array
-    AesKey: Uint8Array
+    iv: Uint8Array
+    aesKey: Uint8Array
 }
 
 export interface EncryptedClientFileHeader {
@@ -29,10 +29,11 @@ export interface FileMetadata {
 }
 
 export interface AppFileMetaData {
-    FileType: number,
-    CategoryId: string
-    ContentIsComplete: boolean
-    JsonContent: string
+    fileType: number,
+    primaryCategoryId: string
+    secondaryCategoryId: string
+    contentIsComplete: boolean
+    jsonContent: string
 }
 
 export interface DriveFileId {
@@ -45,7 +46,8 @@ export interface SearchResult<TJsonContent> {
     createdTimestamp: number,
     lastUpdatedTimestamp: number,
     fileType: number,
-    categoryId: number | null,
+    primaryCategoryId: number | null,
+    secondaryCategoryId: number | null,
     contentIsComplete: boolean,
     jsonContent: TJsonContent
 }

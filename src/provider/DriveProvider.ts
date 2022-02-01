@@ -9,7 +9,8 @@ import {PagedResult} from "./Types";
 
 export interface QueryParams {
     fileType?: number | undefined,
-    categoryId?: Guid | undefined,
+    primaryCategoryId?: Guid | undefined,
+    secondaryCategoryId?: Guid | undefined,
     includeContent?: boolean,
     pageNumber: number,
     pageSize: number
@@ -40,7 +41,8 @@ class DriveProvider extends ProviderBase {
                     createdTimestamp: d.createdTimestamp,
                     lastUpdatedTimestamp: d.lastUpdatedTimestamp,
                     fileType: d.fileType,
-                    categoryId: d.categoryId,
+                    primaryCategoryId: d.primaryCategoryId,
+                    secondaryCategoryId: d.secondaryCategoryId,
                     contentIsComplete: d.contentIsComplete,
                     jsonContent: JSON.parse(d.jsonContent)
                 }
@@ -152,7 +154,7 @@ class DriveProvider extends ProviderBase {
     }
 
     private async decryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
-        return await AesEncrypt.CbcDecrypt(cipher, keyHeader.Iv, keyHeader.AesKey);
+        return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
     }
 
     private async decryptKeyHeader(ekh: EncryptedKeyHeader): Promise<KeyHeader> {
@@ -166,8 +168,8 @@ class DriveProvider extends ProviderBase {
 
         let kh: KeyHeader =
             {
-                Iv: new Uint8Array(combined.slice(0, 16)),
-                AesKey: new Uint8Array(combined.slice(16, 32))
+                iv: new Uint8Array(combined.slice(0, 16)),
+                aesKey: new Uint8Array(combined.slice(16, 32))
             }
 
         return kh;

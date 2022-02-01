@@ -49,7 +49,7 @@ class TransitProvider extends ProviderBase {
     }
 
     private async encryptWithKeyheader(content: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
-        let cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.Iv, keyHeader.AesKey);
+        let cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
         return cipher;
     }
 
@@ -75,7 +75,7 @@ class TransitProvider extends ProviderBase {
     async EncryptKeyHeader(keyHeader: KeyHeader, transferIv: Uint8Array): Promise<EncryptedKeyHeader> {
 
         let sharedSecret = this.getSharedSecret();
-        let combined = [...Array.from(keyHeader.Iv), ...Array.from(keyHeader.AesKey)];
+        let combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
         let cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, sharedSecret);
 
         return {
@@ -88,8 +88,8 @@ class TransitProvider extends ProviderBase {
 
     GenerateKeyHeader(): KeyHeader {
         return {
-            Iv: this.Random16(),
-            AesKey: this.Random16()
+            iv: this.Random16(),
+            aesKey: this.Random16()
         }
     }
 
