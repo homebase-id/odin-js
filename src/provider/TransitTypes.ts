@@ -27,11 +27,10 @@ export interface UploadFileMetadata {
 }
 
 export interface UploadAppFileMetaData {
-    primaryCategoryId: string | null
-    secondaryCategoryId: string | null
-    ContentIsComplete: boolean,
-    FileType: number,
-    JsonContent: string | null
+    contentIsComplete: boolean,
+    fileType: number,
+    tags: string[] | null,
+    jsonContent: string | null
 }
 
 export interface UploadResult {

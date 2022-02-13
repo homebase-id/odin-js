@@ -9,8 +9,7 @@ import {PagedResult} from "./Types";
 
 export interface QueryParams {
     fileType?: number | undefined,
-    primaryCategoryId?: Guid | undefined,
-    secondaryCategoryId?: Guid | undefined,
+    tag?: string | undefined,
     includeContent?: boolean,
     pageNumber: number,
     pageSize: number
@@ -32,19 +31,18 @@ class DriveProvider extends ProviderBase {
     //     });
     // }
 
-    async GetFilesByType<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<SearchResult<TJsonContent>>> {
+    async GetFilesByTag<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<SearchResult<TJsonContent>>> {
         let client = this.createAxiosClient(appId);
-        return client.get("/drive/query/fileType?" + querystring.stringify(params)).then(response => {
+        return client.get("/drive/query/tag?" + querystring.stringify(params)).then(response => {
             response.data.results = response.data.results.map(d => {
                 let s: SearchResult<TJsonContent> = {
                     fileId: d.fileId,
                     createdTimestamp: d.createdTimestamp,
                     lastUpdatedTimestamp: d.lastUpdatedTimestamp,
                     fileType: d.fileType,
-                    primaryCategoryId: d.primaryCategoryId,
-                    secondaryCategoryId: d.secondaryCategoryId,
+                    tags: d.tags,
                     contentIsComplete: d.contentIsComplete,
-                    jsonContent: JSON.parse(d.jsonContent)
+                    jsonContent: params.includeContent ? JSON.parse(d.jsonContent) : null
                 }
 
                 return s;
@@ -53,6 +51,27 @@ class DriveProvider extends ProviderBase {
             return response.data;
         })
     }
+
+    // async GetFilesByType<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<SearchResult<TJsonContent>>> {
+    //     let client = this.createAxiosClient(appId);
+    //     return client.get("/drive/query/fileType?" + querystring.stringify(params)).then(response => {
+    //         response.data.results = response.data.results.map(d => {
+    //             let s: SearchResult<TJsonContent> = {
+    //                 fileId: d.fileId,
+    //                 createdTimestamp: d.createdTimestamp,
+    //                 lastUpdatedTimestamp: d.lastUpdatedTimestamp,
+    //                 fileType: d.fileType,
+    //                 tags: d.tags,
+    //                 contentIsComplete: d.contentIsComplete,
+    //                 jsonContent: params.includeContent ? JSON.parse(d.jsonContent) : null
+    //             }
+    //
+    //             return s;
+    //         })
+    //
+    //         return response.data;
+    //     })
+    // }
 
     async GetMetadata(appId: Guid, fileId: Guid): Promise<UnencryptedFileHeader> {
 

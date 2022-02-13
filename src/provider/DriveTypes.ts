@@ -30,8 +30,7 @@ export interface FileMetadata {
 
 export interface AppFileMetaData {
     fileType: number,
-    primaryCategoryId: string
-    secondaryCategoryId: string
+    tags: string[] | null,
     contentIsComplete: boolean
     jsonContent: string
 }
@@ -46,8 +45,7 @@ export interface SearchResult<TJsonContent> {
     createdTimestamp: number,
     lastUpdatedTimestamp: number,
     fileType: number,
-    primaryCategoryId: number | null,
-    secondaryCategoryId: number | null,
+    tags: string[] | null,
     contentIsComplete: boolean,
     jsonContent: TJsonContent
 }
