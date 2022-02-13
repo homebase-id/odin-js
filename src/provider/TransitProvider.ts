@@ -1,5 +1,5 @@
 import {ProviderBase, ProviderOptions} from "./ProviderBase";
-import { UploadFileMetadata, UploadFileDescriptor, UploadInstructionSet, UploadResult} from "./TransitTypes";
+import {UploadFileMetadata, UploadFileDescriptor, UploadInstructionSet, UploadResult} from "./TransitTypes";
 import {AesEncrypt} from "./AesEncrypt";
 import {Guid} from "guid-typescript";
 import {DataUtil} from "./DataUtil";
@@ -10,18 +10,14 @@ class TransitProvider extends ProviderBase {
     constructor(options: ProviderOptions | null) {
         super(options);
     }
-    
-    async Upload(appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
 
-        let keyHeader = this.GenerateKeyHeader();
+    async UploadUsingKeyHeader(keyHeader: KeyHeader, appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
 
         let descriptor: UploadFileDescriptor = {
             EncryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.TransferIv),
             FileMetadata: metadata
         }
-        
-        //console.log("md", metadata);
-        
+
         let encryptedDescriptor = await this.encryptWithSharedSecret(descriptor, instructions.TransferIv);
         let encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
 
@@ -48,6 +44,11 @@ class TransitProvider extends ProviderBase {
         });
     }
 
+    async Upload(appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
+        let keyHeader = this.GenerateKeyHeader();
+        return this.UploadUsingKeyHeader(keyHeader, appId, instructions, metadata, payload);
+    }
+
     private async encryptWithKeyheader(content: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
         let cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
         return cipher;
@@ -57,9 +58,9 @@ class TransitProvider extends ProviderBase {
         //encrypt metadata with shared secret
         let ss = this.getSharedSecret();
         let json = DataUtil.JsonStringify64(o);
-        
+
         //console.log(json);
-        
+
         let content = new TextEncoder().encode(json);
         let cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);
         return cipher;
