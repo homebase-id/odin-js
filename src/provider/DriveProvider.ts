@@ -114,7 +114,7 @@ class DriveProvider extends ProviderBase {
         return client.get("/drive/files/payload?fileId=" + fileId, config).then(response => {
             let cipher = new Uint8Array(response.data);
 
-            return this.decryptUsingKeyHeader(cipher, keyHeader).then(bytes => {
+            return this.DecryptUsingKeyHeader(cipher, keyHeader).then(bytes => {
                 let json = DataUtil.byteArrayToString(bytes);
                 let o = JSON.parse(json);
                 return o;
@@ -170,7 +170,7 @@ class DriveProvider extends ProviderBase {
         });
     }
 
-    private async decryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
+    async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
         return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
     }
 
