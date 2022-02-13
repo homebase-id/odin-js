@@ -2,18 +2,11 @@ import {ProviderBase, ProviderOptions} from "./ProviderBase";
 import {AesEncrypt} from "./AesEncrypt";
 import {Guid} from "guid-typescript";
 import {DataUtil} from "./DataUtil";
-import {EncryptedClientFileHeader, SearchResult, UnencryptedFileHeader, EncryptedKeyHeader, KeyHeader} from "./DriveTypes";
+import {EncryptedClientFileHeader, DriveSearchResult, UnencryptedFileHeader, EncryptedKeyHeader, KeyHeader, QueryParams} from "./DriveTypes";
 import {AxiosRequestConfig} from "axios";
 import querystring from 'query-string';
 import {PagedResult} from "./Types";
 
-export interface QueryParams {
-    fileType?: number | undefined,
-    tag?: string | undefined,
-    includeContent?: boolean,
-    pageNumber: number,
-    pageSize: number
-}
 
 class DriveProvider extends ProviderBase {
 
@@ -31,21 +24,27 @@ class DriveProvider extends ProviderBase {
     //     });
     // }
 
-    async GetFilesByTag<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<SearchResult<TJsonContent>>> {
+    async GetFilesByTag<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<DriveSearchResult<TJsonContent>>> {
         let client = this.createAxiosClient(appId);
         return client.get("/drive/query/tag?" + querystring.stringify(params)).then(response => {
-            response.data.results = response.data.results.map(d => {
-                let s: SearchResult<TJsonContent> = {
-                    fileId: d.fileId,
-                    createdTimestamp: d.createdTimestamp,
-                    lastUpdatedTimestamp: d.lastUpdatedTimestamp,
-                    fileType: d.fileType,
-                    tags: d.tags,
-                    contentIsComplete: d.contentIsComplete,
-                    jsonContent: params.includeContent ? JSON.parse(d.jsonContent) : null
-                }
+            response.data.results = response.data.results.map(item => {
+                // let s: DriveSearchResult<TJsonContent> = {
+                //     fileId: d.fileId,
+                //     tags: d.tags,
+                //     fileType: d.fileType,
+                //     contentIsComplete: d.contentIsComplete,
+                //     payloadIsEncrypted: boolean,
+                //     createdTimestamp: d.createdTimestamp,
+                //     senderDotYouId: d.senderDotYouId,
+                //     lastUpdatedTimestamp: d.lastUpdatedTimestamp,
+                //     payloadSize: number,
+                //     payloadTooLarge: boolean,
+                //     payloadContent: string
+                // }
 
-                return s;
+                let dsr: DriveSearchResult<TJsonContent> = {...item};
+                dsr.jsonContent = params.includeMetadataHeader ? JSON.parse(item.jsonContent) : null
+                return dsr;
             })
 
             return response.data;

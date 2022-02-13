@@ -40,12 +40,26 @@ export interface DriveFileId {
     driveId: string
 }
 
-export interface SearchResult<TJsonContent> {
+export interface DriveSearchResult<TJsonContent> {
     fileId: string,
-    createdTimestamp: number,
-    lastUpdatedTimestamp: number,
-    fileType: number,
     tags: string[] | null,
+    fileType: number,
     contentIsComplete: boolean,
+    payloadIsEncrypted: boolean,
     jsonContent: TJsonContent
+    createdTimestamp: number,
+    senderDotYouId: string | null
+    lastUpdatedTimestamp: number,
+    payloadSize: number,
+    payloadTooLarge: boolean,
+    payloadContent: string
+}
+
+export interface QueryParams {
+    fileType?: number | undefined,
+    tag?: string | undefined,
+    includeMetadataHeader?: boolean,
+    includePayload?: boolean,
+    pageNumber: number,
+    pageSize: number
 }
