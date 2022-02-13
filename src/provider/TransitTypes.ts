@@ -23,14 +23,31 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
     ContentType: string,
-    AppData: UploadAppFileMetaData
+    AppData: UploadAppFileMetaData,
+    SenderDotYouId?: string,
+    AccessControlList?: AccessControlList
+}
+
+export interface AccessControlList {
+    RequiredSecurityGroup: SecurityGroupType,
+    CircleId?: string,
+    DotYouIdentityList?: string[] | null
+}
+
+export enum SecurityGroupType {
+    Anonymous = 11,
+    YouAuthOrTransitCertificateIdentified = 22,
+    Connected = 33,
+    CircleConnected = 44,
+    CustomList = 55
 }
 
 export interface UploadAppFileMetaData {
     contentIsComplete: boolean,
     fileType: number,
     tags: string[] | null,
-    jsonContent: string | null
+    jsonContent: string | null,
+    payloadIsEncrypted: boolean
 }
 
 export interface UploadResult {

@@ -7,7 +7,6 @@ import {AxiosRequestConfig} from "axios";
 import querystring from 'query-string';
 import {PagedResult} from "./Types";
 
-
 class DriveProvider extends ProviderBase {
 
     constructor(options: ProviderOptions | null) {
