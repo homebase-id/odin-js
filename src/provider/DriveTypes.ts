@@ -1,3 +1,5 @@
+import {AccessControlList} from "./TransitTypes";
+
 export interface EncryptedKeyHeader {
     EncryptionVersion: number,
     Type: number //value is always 11
@@ -52,7 +54,8 @@ export interface DriveSearchResult<TJsonContent> {
     lastUpdatedTimestamp: number,
     payloadSize: number,
     payloadTooLarge: boolean,
-    payloadContent: string
+    payloadContent: string,
+    accessControlList: AccessControlList
 }
 
 export interface QueryParams {
