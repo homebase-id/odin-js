@@ -1,4 +1,13 @@
 import {AccessControlList} from "./TransitTypes";
+import {Guid} from "guid-typescript";
+
+export interface SecuredFileContent<TPayload> {
+    fileId: Guid | null,
+    tags: string[],
+    accessControlList: AccessControlList,
+    content: TPayload
+}
+
 
 export interface EncryptedKeyHeader {
     EncryptionVersion: number,
