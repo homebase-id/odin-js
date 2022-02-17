@@ -1,37 +1,37 @@
 import {DriveFileId, EncryptedKeyHeader} from './DriveTypes';
 
 export interface UploadInstructionSet {
-    TransferIv: Uint8Array,
-    StorageOptions: StorageOptions | null,
-    TransitOptions: TransitOptions | null
+    transferIv: Uint8Array,
+    storageOptions: StorageOptions | null,
+    transitOptions: TransitOptions | null
 }
 
 export interface StorageOptions {
-    DriveId?: string | null,
-    OverwriteFileId?: string | null,
-    ExpiresTimestamp?: number | null
+    driveId?: string | null,
+    dverwriteFileId?: string | null,
+    expiresTimestamp?: number | null
 }
 
 export interface TransitOptions {
-    Recipients: string[]
+    recipients: string[]
 }
 
 export interface UploadFileDescriptor {
-    EncryptedKeyHeader: EncryptedKeyHeader
-    FileMetadata: UploadFileMetadata
+    encryptedKeyHeader: EncryptedKeyHeader
+    fileMetadata: UploadFileMetadata
 }
 
 export interface UploadFileMetadata {
-    ContentType: string,
-    AppData: UploadAppFileMetaData,
-    SenderDotYouId?: string,
-    AccessControlList?: AccessControlList
+    contentType: string,
+    appData: UploadAppFileMetaData,
+    senderDotYouId?: string,
+    accessControlList?: AccessControlList
 }
 
 export interface AccessControlList {
-    RequiredSecurityGroup: SecurityGroupType,
-    CircleId?: string,
-    DotYouIdentityList?: string[] | null
+    requiredSecurityGroup: SecurityGroupType,
+    circleId?: string,
+    dotYouIdentityList?: string[] | null
 }
 
 export enum SecurityGroupType {

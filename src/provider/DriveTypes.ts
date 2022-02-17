@@ -10,10 +10,10 @@ export interface SecuredFileContent<TPayload> {
 
 
 export interface EncryptedKeyHeader {
-    EncryptionVersion: number,
-    Type: number //value is always 11
-    Iv: Uint8Array
-    EncryptedAesKey: Uint8Array
+    encryptionVersion: number,
+    type: number //value is always 11
+    iv: Uint8Array
+    encryptedAesKey: Uint8Array
 }
 
 export interface KeyHeader {
