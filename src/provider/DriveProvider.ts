@@ -77,10 +77,10 @@ class DriveProvider extends ProviderBase {
         return client.get("/drive/files/metadata?fileId=" + fileId).then(response => {
             let header: EncryptedClientFileHeader = {
                 encryptedKeyHeader: {
-                    EncryptedAesKey: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.encryptedAesKey),
-                    Iv: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.iv),
-                    EncryptionVersion: response.data.encryptedKeyHeader.encryptionVersion,
-                    Type: response.data.encryptedKeyHeader.type
+                    encryptedAesKey: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.encryptedAesKey), 
+                    iv: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.iv),
+                    encryptionVersion: response.data.encryptedKeyHeader.encryptionVersion,
+                    type: response.data.encryptedKeyHeader.type
                 },
                 fileMetadata: response.data.fileMetadata
             };
@@ -176,12 +176,12 @@ class DriveProvider extends ProviderBase {
 
     private async decryptKeyHeader(ekh: EncryptedKeyHeader): Promise<KeyHeader> {
 
-        if (ekh.EncryptionVersion != 1) {
-            throw "Encryption version " + ekh.EncryptionVersion + "not supported"
+        if (ekh.encryptionVersion != 1) {
+            throw "Encryption version " + ekh.encryptionVersion + "not supported"
         }
 
-        let cipher = ekh.EncryptedAesKey;
-        let combined = await AesEncrypt.CbcDecrypt(cipher, ekh.Iv, this.getSharedSecret());
+        let cipher = ekh.encryptedAesKey;
+        let combined = await AesEncrypt.CbcDecrypt(cipher, ekh.iv, this.getSharedSecret());
 
         let kh: KeyHeader =
             {

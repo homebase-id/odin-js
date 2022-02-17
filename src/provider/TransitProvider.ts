@@ -14,11 +14,11 @@ class TransitProvider extends ProviderBase {
     async UploadUsingKeyHeader(keyHeader: KeyHeader, appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
 
         let descriptor: UploadFileDescriptor = {
-            EncryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.TransferIv),
-            FileMetadata: metadata
+            encryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.transferIv),
+            fileMetadata: metadata
         }
 
-        let encryptedDescriptor = await this.encryptWithSharedSecret(descriptor, instructions.TransferIv);
+        let encryptedDescriptor = await this.encryptWithSharedSecret(descriptor, instructions.transferIv);
         let encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
 
         const data = new FormData();
@@ -80,10 +80,10 @@ class TransitProvider extends ProviderBase {
         let cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, sharedSecret);
 
         return {
-            Iv: transferIv,
-            EncryptedAesKey: cipher,
-            EncryptionVersion: 1,
-            Type: 11
+            iv: transferIv,
+            encryptedAesKey: cipher,
+            encryptionVersion: 1,
+            type: 11
         }
     }
 
