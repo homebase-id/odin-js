@@ -35,12 +35,20 @@ export interface AccessControlList {
 }
 
 export enum SecurityGroupType {
-    Anonymous = 11,
-    YouAuthOrTransitCertificateIdentified = 22,
-    Connected = 33,
-    CircleConnected = 44,
-    CustomList = 55
+    Anonymous = "Anonymous",
+    YouAuthOrTransitCertificateIdentified = "YouAuthOrTransitCertificateIdentified",
+    Connected = "Connected",
+    CircleConnected = "CircleConnected",
+    CustomList = "CustomList"
 }
+//
+// export enum SecurityGroupType {
+//     Anonymous = 11,
+//     YouAuthOrTransitCertificateIdentified = 22,
+//     Connected = 33,
+//     CircleConnected = 44,
+//     CustomList = 55
+// }
 
 export interface UploadAppFileMetaData {
     contentIsComplete: boolean,
