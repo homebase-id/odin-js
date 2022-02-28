@@ -68,6 +68,7 @@ export interface DriveSearchResult<TJsonContent> {
 }
 
 export interface QueryParams {
+    driveIdentifier:string,
     fileType?: number | undefined,
     tag?: string | undefined,
     includeMetadataHeader?: boolean,

@@ -7,7 +7,7 @@ export interface UploadInstructionSet {
 }
 
 export interface StorageOptions {
-    driveId?: string | null,
+    driveIdentifier?: string | null,
     overwriteFileId?: string | null,
     expiresTimestamp?: number | null
 }
