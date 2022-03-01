@@ -22,10 +22,20 @@ class ProfileDataProvider extends ProviderBase {
         return await this.getAttributeProvider().getAttributeDictionary(BuiltInProfiles.FinancialProfile, attributeId);
     }
 
+    async saveStandardProfileAttribute(attributeId: Guid, dictionary: SecureAttributeDictionary): Promise<SecureAttributeDictionary> {
+        return this.saveProfileAttributeDictionary(BuiltInProfiles.StandardProfile, attributeId, dictionary);
+    }
+
+    async saveFinancialProfileAttribute(attributeId: Guid, dictionary: SecureAttributeDictionary): Promise<SecureAttributeDictionary> {
+        return this.saveProfileAttributeDictionary(BuiltInProfiles.FinancialProfile, attributeId, dictionary);
+    }
+    
     //gets the data available for the specified attribute if available
     async getProfileAttributeDictionary(profileId: Guid, attributeId: Guid): Promise<SecureAttributeDictionary | null> {
         return this.getAttributeProvider().getAttributeDictionary(profileId, attributeId);
     }
+
+    
 
     async saveProfileAttributeDictionary(profileId: Guid, attributeId: Guid, dictionary: SecureAttributeDictionary): Promise<SecureAttributeDictionary> {
         return await this.getAttributeProvider().saveAttributeDictionary(profileId, BuiltInAttributes.PersonalInfo, dictionary);
