@@ -13,9 +13,9 @@ class DriveProvider extends ProviderBase {
         super(options);
     }
 
-    // async GetFiles(appId: Guid, params:QueryParams): Promise<any> {
+    // async GetFiles( params:QueryParams): Promise<any> {
     //    
-    //     let client = this.createAxiosClient(appId);
+    //     let client = this.createAxiosClient();
     //     let qs = querystring.stringify(params, {skipNull:true})
     //     return client.get("/drive/query/find?" + qs).then(results => {
     //         console.log(results.data);
@@ -23,8 +23,8 @@ class DriveProvider extends ProviderBase {
     //     });
     // }
 
-    async GetFilesByTag<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<DriveSearchResult<TJsonContent>>> {
-        let client = this.createAxiosClient(appId);
+    async GetFilesByTag<TJsonContent>(params: QueryParams): Promise<PagedResult<DriveSearchResult<TJsonContent>>> {
+        let client = this.createAxiosClient();
         return client.get("/drive/query/tag?" + querystring.stringify(params)).then(response => {
             response.data.results = response.data.results.map(item => {
                 // let s: DriveSearchResult<TJsonContent> = {
@@ -50,8 +50,8 @@ class DriveProvider extends ProviderBase {
         })
     }
 
-    // async GetFilesByType<TJsonContent>(appId: Guid, params: QueryParams): Promise<PagedResult<SearchResult<TJsonContent>>> {
-    //     let client = this.createAxiosClient(appId);
+    // async GetFilesByType<TJsonContent>( params: QueryParams): Promise<PagedResult<SearchResult<TJsonContent>>> {
+    //     let client = this.createAxiosClient();
     //     return client.get("/drive/query/fileType?" + querystring.stringify(params)).then(response => {
     //         response.data.results = response.data.results.map(d => {
     //             let s: SearchResult<TJsonContent> = {
@@ -71,13 +71,13 @@ class DriveProvider extends ProviderBase {
     //     })
     // }
 
-    async GetMetadata(appId: Guid, fileId: Guid): Promise<UnencryptedFileHeader> {
+    async GetMetadata(fileId: Guid): Promise<UnencryptedFileHeader> {
 
-        let client = this.createAxiosClient(appId);
+        let client = this.createAxiosClient();
         return client.get("/drive/files/metadata?fileId=" + fileId).then(response => {
             let header: EncryptedClientFileHeader = {
                 encryptedKeyHeader: {
-                    encryptedAesKey: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.encryptedAesKey), 
+                    encryptedAesKey: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.encryptedAesKey),
                     iv: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.iv),
                     encryptionVersion: response.data.encryptedKeyHeader.encryptionVersion,
                     type: response.data.encryptedKeyHeader.type
@@ -104,9 +104,9 @@ class DriveProvider extends ProviderBase {
     }
 
     //decrypts the payload and returns a JSON object
-    async GetPayloadAsJson<T>(appId: Guid, fileId: Guid, keyHeader: KeyHeader): Promise<T> {
+    async GetPayloadAsJson<T>(fileId: Guid, keyHeader: KeyHeader): Promise<T> {
 
-        let client = this.createAxiosClient(appId);
+        let client = this.createAxiosClient();
         const config: AxiosRequestConfig = {
             responseType: "arraybuffer",
         }
@@ -129,7 +129,7 @@ class DriveProvider extends ProviderBase {
         });
     }
 
-    async GetPayloadAsStream(appId: Guid, fileId: Guid, keyHeader: KeyHeader): Promise<any> {
+    async GetPayloadAsStream( fileId: Guid, keyHeader: KeyHeader): Promise<any> {
         throw "Not Implemented";
 
         /*
@@ -149,8 +149,8 @@ class DriveProvider extends ProviderBase {
         * */
     }
 
-    async DeleteFile(appId: Guid, fileId: Guid): Promise<boolean | void> {
-        let client = this.createAxiosClient(appId);
+    async DeleteFile( fileId: Guid): Promise<boolean | void> {
+        let client = this.createAxiosClient();
 
         return client.delete("/drive/files?fileId=" + fileId).then(response => {
             if (response.status == 200) {

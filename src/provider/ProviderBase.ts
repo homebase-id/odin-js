@@ -1,17 +1,23 @@
 import axios, {AxiosError} from "axios";
 import {Guid} from "guid-typescript";
 
-export interface ProviderOptions
-{
-    useOwnerApi?:boolean,
-    sharedSecret: Uint8Array | null
+export enum ApiType {
+    Owner,
+    App,
+    YouAuth,
+}
+
+export interface ProviderOptions {
+    api?: ApiType,
+    sharedSecret: Uint8Array | null,
+    appId: Guid
 }
 
 export class ProviderBase {
 
     private _options: ProviderOptions;
 
-    constructor(options:ProviderOptions | null) {
+    constructor(options: ProviderOptions | null) {
 
         this._options = options;
     }
@@ -19,33 +25,46 @@ export class ProviderBase {
     protected getSharedSecret(): Uint8Array {
         return this._options?.sharedSecret;
     }
-    
-    protected getOptions():ProviderOptions
-    {
+
+    protected getOptions(): ProviderOptions {
         return this._options;
     }
-    
-    protected AssertHasSharedSecret(){
-        if(this._options?.sharedSecret == null)
-        {
+
+    protected AssertHasSharedSecret() {
+        if (this._options?.sharedSecret == null) {
             throw new Error("Shared secret not configured");
         }
     }
-    
+
     //Returns the endpoint for the identity
     protected getEndpoint(): string {
-        let root:string = this._options?.useOwnerApi ? "/api/owner/v1" : "/api/apps/v1";
+        let root: string = "";
+        switch (this._options?.api) {
+
+            case ApiType.Owner:
+                root = "/api/owner/v1";
+                break;
+
+            case ApiType.App:
+                root = "/api/apps/v1";
+                break;
+
+            case ApiType.YouAuth:
+                root = "/api/youauth/v1";
+                break;
+        }
+        
         return "https://" + window.location.hostname + root
     }
 
     //Gets an Axios client configured with token info
-    protected createAxiosClient(appId: Guid | null = null) {
+    protected createAxiosClient() {
         return axios.create({
             baseURL: this.getEndpoint(),
             withCredentials: true,
             headers:
                 {
-                    'AppId': appId == null ? "": appId.toString()
+                    'AppId': this._options?.appId == null ? "" : this._options?.appId.toString()
                 }
         });
     }

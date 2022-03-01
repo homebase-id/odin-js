@@ -1,7 +1,6 @@
 import {ProviderBase, ProviderOptions} from "./ProviderBase";
 import {UploadFileMetadata, UploadFileDescriptor, UploadInstructionSet, UploadResult} from "./TransitTypes";
 import {AesEncrypt} from "./AesEncrypt";
-import {Guid} from "guid-typescript";
 import {DataUtil} from "./DataUtil";
 import {EncryptedKeyHeader, KeyHeader} from "./DriveTypes";
 
@@ -11,7 +10,7 @@ class TransitProvider extends ProviderBase {
         super(options);
     }
 
-    async UploadUsingKeyHeader(keyHeader: KeyHeader, appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
+    async UploadUsingKeyHeader(keyHeader: KeyHeader, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
 
         let descriptor: UploadFileDescriptor = {
             encryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.transferIv),
@@ -26,7 +25,7 @@ class TransitProvider extends ProviderBase {
         data.append('metaData', new Blob([encryptedDescriptor]));
         data.append('payload', new Blob([encryptedPayload]));
 
-        let client = this.createAxiosClient(appId);
+        let client = this.createAxiosClient();
         let url = "/transit/upload";
 
         const config = {
@@ -44,9 +43,9 @@ class TransitProvider extends ProviderBase {
         });
     }
 
-    async Upload(appId: Guid, instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
+    async Upload(instructions: UploadInstructionSet, metadata: UploadFileMetadata, payload: Uint8Array): Promise<UploadResult> {
         let keyHeader = this.GenerateKeyHeader();
-        return this.UploadUsingKeyHeader(keyHeader, appId, instructions, metadata, payload);
+        return this.UploadUsingKeyHeader(keyHeader, instructions, metadata, payload);
     }
 
     private async encryptWithKeyheader(content: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
