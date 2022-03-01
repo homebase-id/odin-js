@@ -4,9 +4,10 @@ import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {BuiltInAttributes, BuiltInProfiles, ProfileConfig} from "./ProfileConfig";
 import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
 
+export type ProfileDataProviderOptions = Omit<ProviderOptions, 'appId'>;
 class ProfileDataProvider extends ProviderBase {
 
-    constructor(options: Omit<ProviderOptions, 'appId'>) {
+    constructor(options: ProfileDataProviderOptions) {
         super({
             appId: ProfileConfig.AppId,
             api: options.api,
@@ -47,6 +48,6 @@ class ProfileDataProvider extends ProviderBase {
     }
 }
 
-export function createProfileDataProvider(options: ProviderOptions) {
+export function createProfileDataProvider(options: ProfileDataProviderOptions) {
     return new ProfileDataProvider(options);
 }
