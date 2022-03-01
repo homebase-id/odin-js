@@ -28,3 +28,4 @@ export class MinimalProfileFields {
     static readonly GiveNameId: string = fixAttribute(Guid.parse("33334444-2222-4444-4444-000000004444"));
     static readonly SurnameId: string = fixAttribute(Guid.parse("33334444-3333-4444-4444-000000004444"));
 }
+
