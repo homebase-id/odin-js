@@ -64,7 +64,8 @@ export interface DriveSearchResult<TJsonContent> {
     payloadSize: number,
     payloadTooLarge: boolean,
     payloadContent: string,
-    accessControlList: AccessControlList
+    accessControlList: AccessControlList,
+    priority:number
 }
 
 export interface QueryParams {

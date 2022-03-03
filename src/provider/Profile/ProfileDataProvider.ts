@@ -2,7 +2,7 @@ import {Guid} from "guid-typescript";
 import {SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {BuiltInAttributes, BuiltInProfiles, ProfileConfig} from "./ProfileConfig";
-import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
+import {createAttributeDataReadWriteProvider} from "../AttributeData/AttributeDataReadWriteProvider";
 
 export type ProfileDataProviderOptions = Omit<ProviderOptions, 'appId'>;
 class ProfileDataProvider extends ProviderBase {
@@ -44,7 +44,7 @@ class ProfileDataProvider extends ProviderBase {
     }
 
     private getAttributeProvider() {
-        return createAttributeDataProvider(this.getOptions());
+        return createAttributeDataReadWriteProvider(this.getOptions());
     }
 }
 

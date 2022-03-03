@@ -9,6 +9,7 @@ export interface Profile {
 
 export interface Attribute {
     id: string,
+    priority: number
     data: FieldDictionary
 }
 
@@ -17,6 +18,13 @@ type FieldDictionary = { [name: string]: Field }
 export interface Field {
     id: string,
     jsonValue: string
+}
+
+
+export type OrderedAttributeList = {
+    driveId: Guid,
+    attributeId: Guid
+    versions: Attribute[]
 }
 
 export type SecureAttributeDictionary = { [name in SecurityGroupType]: SecureAttribute }
@@ -32,7 +40,8 @@ export const defaultSecureAttribute: SecureAttribute = {
     fileId: null,
     content: {
         id: "",
-        data: {}
+        data: {},
+        priority: -1
     },
     tags: [],
     accessControlList: {

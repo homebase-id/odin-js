@@ -15,8 +15,8 @@ const FixedKeyHeader: KeyHeader =
         aesKey: new Uint8Array(Array(16).fill(1))
     };
 
-//TODO: move to transit-lib; rename transit-lib to youverse-lib
-class AttributeDataProvider extends ProviderBase {
+//Provides read write to attribute data
+class AttributeDataReadWriteProvider extends ProviderBase {
 
     constructor(options: ProviderOptions | null) {
         if (!options?.appId) {
@@ -75,6 +75,11 @@ class AttributeDataProvider extends ProviderBase {
                 accessControlList: dsr.accessControlList
             }
 
+            //Note: the access control list is null when the user is not the owner
+            //so for scenarios like youauth, this this attr.accesscontrolist will be null
+            //
+            // how to handle this?
+            
             dict[attr.accessControlList.requiredSecurityGroup] = attr;
         }
 
@@ -144,6 +149,6 @@ class AttributeDataProvider extends ProviderBase {
     }
 }
 
-export function createAttributeDataProvider(options: ProviderOptions) {
-    return new AttributeDataProvider(options);
+export function createAttributeDataReadWriteProvider(options: ProviderOptions) {
+    return new AttributeDataReadWriteProvider(options);
 }
