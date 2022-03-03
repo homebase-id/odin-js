@@ -2,7 +2,7 @@ import {Guid} from "guid-typescript";
 import {SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {BuiltInAttributes, BuiltInProfiles, ProfileConfig} from "./ProfileConfig";
-import {createAttributeDataProvider} from "../AttributeData/AttributeDataReadWriteProvider";
+import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
 
 export type ProfileDataProviderOptions = Omit<ProviderOptions, 'appId'>;
 class ProfileDataProvider extends ProviderBase {
