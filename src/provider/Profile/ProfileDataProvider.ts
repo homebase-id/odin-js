@@ -2,7 +2,7 @@ import {Guid} from "guid-typescript";
 import {SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {BuiltInAttributes, BuiltInProfiles, ProfileConfig} from "./ProfileConfig";
-import {createAttributeDataReadWriteProvider} from "../AttributeData/AttributeDataReadWriteProvider";
+import {createAttributeDataProvider} from "../AttributeData/AttributeDataReadWriteProvider";
 
 export type ProfileDataProviderOptions = Omit<ProviderOptions, 'appId'>;
 class ProfileDataProvider extends ProviderBase {
@@ -36,15 +36,12 @@ class ProfileDataProvider extends ProviderBase {
         return this.getAttributeProvider().getAttributeDictionary(profileId, attributeId);
     }
 
-    
-
     async saveProfileAttributeDictionary(profileId: Guid, attributeId: Guid, dictionary: SecureAttributeDictionary): Promise<SecureAttributeDictionary> {
         return await this.getAttributeProvider().saveAttributeDictionary(profileId, BuiltInAttributes.PersonalInfo, dictionary);
-
     }
 
     private getAttributeProvider() {
-        return createAttributeDataReadWriteProvider(this.getOptions());
+        return createAttributeDataProvider(this.getOptions());
     }
 }
 
