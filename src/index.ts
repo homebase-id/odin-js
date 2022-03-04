@@ -10,3 +10,10 @@ export * from "./provider/AttributeData/AttributeDataProvider"
 export * from "./provider/AttributeData/AttributeDataTypes"
 export * from "./provider/Profile/ProfileConfig"
 export * from "./provider/Profile/ProfileDataProvider"
+
+export * from "./provider/HomePage/HomePageProvider";
+export * from "./provider/HomePage/Types";
+export * from "./provider/HomePage/ThemeConfig";
+export * from "./templates/Types";
+export * from "./templates/CoverPageTemplate";
+export * from "./templates/SocialClassicTemplate";
