@@ -1,5 +1,5 @@
-import {SecureAttribute, SecureAttributeDictionary} from "@youfoundation/dotyoucore-transit-lib";
-import {SecurityGroupType} from "@youfoundation/dotyoucore-transit-lib/src/provider/TransitTypes";
+import {SecureAttribute, SecureAttributeDictionary} from "../provider/AttributeData/AttributeDataTypes";
+import {SecurityGroupType} from "../provider/TransitTypes";
 
 export function valueOrEmpty(dictionary: SecureAttributeDictionary | undefined | null, attributeId: string): string {
 

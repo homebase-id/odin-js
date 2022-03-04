@@ -6,7 +6,9 @@ import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
 import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
-import {BuiltInAttributes, createProfileDataProvider, MinimalProfileFields, SecureAttributeDictionary} from "@youfoundation/dotyoucore-transit-lib";
+import {SecureAttributeDictionary} from "../provider/AttributeData/AttributeDataTypes";
+import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
+import {BuiltInAttributes, MinimalProfileFields} from "../provider/Profile/ProfileConfig";
 
 interface State {
     homePage: SecureAttributeDictionary | null,
