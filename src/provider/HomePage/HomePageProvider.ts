@@ -1,15 +1,10 @@
-import {
-    Attribute,
-    createAttributeDataProvider,
-    OrderedAttributeList,
-    ProviderBase,
-    ProviderOptions,
-    SecureAttribute,
-    SecureAttributeDictionary,
-    SecurityGroupType
-} from "@youfoundation/dotyoucore-transit-lib";
+
 import {HomePageAttributes, HomePageConfig} from "./Types";
 import {Guid} from "guid-typescript";
+import {Attribute, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
+import {ProviderBase, ProviderOptions} from "../ProviderBase";
+import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
+import {SecurityGroupType} from "../TransitTypes";
 
 export type HomePageProviderOptions = Omit<ProviderOptions, 'appId'>;
 
