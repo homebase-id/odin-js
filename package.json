@@ -60,6 +60,7 @@
     "typescript": "^3.9.10"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.2",
     "axios": "^0.25.0",
     "cssnano": "^5.1.0",
     "guid-typescript": "^1.0.9",
