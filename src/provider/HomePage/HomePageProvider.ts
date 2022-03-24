@@ -1,4 +1,3 @@
-
 import {HomePageAttributes, HomePageConfig} from "./Types";
 import {Guid} from "guid-typescript";
 import {Attribute, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
@@ -23,7 +22,7 @@ export class HomePageProvider extends ProviderBase {
         let attr = await op.getAttributeVersions(HomePageConfig.DefaultDriveId, HomePageAttributes.Theme);
         return attr?.versions[0] ?? null
     }
-
+    
     async getConfig(): Promise<SecureAttribute | null> {
         const op = createAttributeDataProvider(this.getOptions());
         let dict = await op.getAttributeDictionary(HomePageConfig.DefaultDriveId, HomePageAttributes.Theme)
@@ -49,7 +48,7 @@ export class HomePageProvider extends ProviderBase {
 
         return await op.saveAttributeUnencrypted(cfg);
     }
-    
+
     async getAttributeVersions(attributeId: Guid): Promise<OrderedAttributeList | null> {
         const op = createAttributeDataProvider(this.getOptions());
         return op.getAttributeVersions(HomePageConfig.DefaultDriveId, attributeId);

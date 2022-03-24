@@ -23,12 +23,14 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
     componentDidMount() {
 
         const homePageProvider = createHomePageProvider(this.props.options);
-        homePageProvider.getAttributeDictionary(HomePageAttributes.HomePage).then(hp => {
-            this.setState({homePage: hp});
+        homePageProvider.getAttributeVersions(HomePageAttributes.HomePage).then(list => {
+            console.log(list);
+            this.setState({homePage: null});
         });
 
         const profileDataProvider = createProfileDataProvider(this.props.options)
         profileDataProvider.getStandardProfileAttribute(BuiltInAttributes.PersonalInfo).then(pi => {
+            console.log(pi);
             this.setState({personalInfo: pi});
         });
     }
