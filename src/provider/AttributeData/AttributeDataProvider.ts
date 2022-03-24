@@ -25,7 +25,7 @@ class AttributeDataProvider extends ProviderBase {
         super(options);
 
     }
-    
+
     //gets all versions of an attribute available to the caller
     async getAttributeVersions(driveId: Guid, attributeId: Guid): Promise<OrderedAttributeList | null> {
 
@@ -54,17 +54,20 @@ class AttributeDataProvider extends ProviderBase {
                 throw new Error("Attribute is encrypted:TODO support this");
             }
 
-            let attr: Attribute;
+            let attr: Attribute = {
+                id: attributeId.toString(),
+                priority: dsr.priority,
+                data: null
+            }
 
             if (dsr.payloadTooLarge) {
-                attr = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);
+                attr.data = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);
             } else {
                 let bytes = await dp.DecryptUsingKeyHeader(DataUtil.base64ToUint8Array(dsr.payloadContent), FixedKeyHeader);
                 let json = DataUtil.byteArrayToString(bytes);
-                attr = JSON.parse(json);
+                attr.data = JSON.parse(json);
             }
 
-            attr.priority = dsr.priority
             versions.push(attr);
         }
 
@@ -130,7 +133,7 @@ class AttributeDataProvider extends ProviderBase {
             //so for scenarios like youauth, this this attr.accesscontrolist will be null
             //
             // how to handle this?
-            
+
             dict[attr.accessControlList.requiredSecurityGroup] = attr;
         }
 

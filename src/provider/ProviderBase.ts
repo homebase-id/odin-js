@@ -22,7 +22,7 @@ export class ProviderBase {
         this._options = options;
     }
 
-    protected getSharedSecret(): Uint8Array {
+    protected getSharedSecret(): Uint8Array | null {
         return this._options?.sharedSecret;
     }
 
@@ -31,7 +31,7 @@ export class ProviderBase {
     }
 
     protected AssertHasSharedSecret() {
-        if (this._options?.sharedSecret == null) {
+        if (this.getSharedSecret() == null) {
             throw new Error("Shared secret not configured");
         }
     }
@@ -53,7 +53,7 @@ export class ProviderBase {
                 root = "/api/youauth/v1";
                 break;
         }
-        
+
         return "https://" + window.location.hostname + root
     }
 
