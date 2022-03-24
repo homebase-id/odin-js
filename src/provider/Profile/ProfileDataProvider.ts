@@ -1,10 +1,12 @@
 import {Guid} from "guid-typescript";
-import {SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
+import {OrderedAttributeList, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {BuiltInAttributes, BuiltInProfiles, ProfileConfig} from "./ProfileConfig";
 import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
 
+
 export type ProfileDataProviderOptions = Omit<ProviderOptions, 'appId'>;
+
 class ProfileDataProvider extends ProviderBase {
 
     constructor(options: ProfileDataProviderOptions) {
@@ -30,7 +32,7 @@ class ProfileDataProvider extends ProviderBase {
     async saveFinancialProfileAttribute(attributeId: Guid, dictionary: SecureAttributeDictionary): Promise<SecureAttributeDictionary> {
         return this.saveProfileAttributeDictionary(BuiltInProfiles.FinancialProfile, attributeId, dictionary);
     }
-    
+
     //gets the data available for the specified attribute if available
     async getProfileAttributeDictionary(profileId: Guid, attributeId: Guid): Promise<SecureAttributeDictionary | null> {
         return this.getAttributeProvider().getAttributeDictionary(profileId, attributeId);
@@ -40,6 +42,13 @@ class ProfileDataProvider extends ProviderBase {
         return await this.getAttributeProvider().saveAttributeDictionary(profileId, BuiltInAttributes.PersonalInfo, dictionary);
     }
 
+    ///
+
+    async getAttributeVersions(profileId: Guid, attributeId: Guid): Promise<OrderedAttributeList | null> {
+        const attrProvider = this.getAttributeProvider();
+        return attrProvider.getAttributeVersions(profileId, attributeId);
+    }
+    
     private getAttributeProvider() {
         return createAttributeDataProvider(this.getOptions());
     }

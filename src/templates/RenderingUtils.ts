@@ -1,24 +1,34 @@
-import {SecureAttribute, SecureAttributeDictionary} from "../provider/AttributeData/AttributeDataTypes";
-import {SecurityGroupType} from "../provider/TransitTypes";
+import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
 
-export function valueOrEmpty(dictionary: SecureAttributeDictionary | undefined | null, attributeId: string): string {
+// export function valueOrEmptyS(dictionary: SecureAttributeDictionary | undefined | null, attributeId: string): string {
+//
+//     if (!dictionary) {
+//         return "";
+//     }
+//    
+//     //TODO: need use sort order selection
+//    
+//     let sg: SecurityGroupType = SecurityGroupType.Anonymous;
+//     let dict: SecureAttribute = dictionary[sg];
+//     if (dict && dict.content) {
+//
+//         //@ts-ignore
+//         let attrData = dict.content[attributeId];
+//         return attrData ?? "";
+//     }
+//
+//     return "";
+// }
 
-    if (!dictionary) {
+
+export function valueOrEmpty(attribute: Attribute | undefined | null, field: string): string {
+
+    if (!attribute) {
         return "";
     }
-    
-    //TODO: need use sort order selection
-    
-    let sg: SecurityGroupType = SecurityGroupType.Anonymous;
-    let dict: SecureAttribute = dictionary[sg];
-    if (dict && dict.content) {
 
-        //@ts-ignore
-        let attrData = dict.content[attributeId];
-        return attrData ?? "";
-    }
-
-    return "";
+    //@ts-ignore
+    let attrData = attribute?.data[field]?.jsonValue;
+    return attrData ?? "";
 }
-
 

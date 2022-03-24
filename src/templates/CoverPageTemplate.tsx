@@ -4,13 +4,13 @@ import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
 import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
-import {SecureAttributeDictionary} from "../provider/AttributeData/AttributeDataTypes";
+import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
-import {BuiltInAttributes} from "../provider/Profile/ProfileConfig";
+import {BuiltInAttributes, BuiltInProfiles} from "../provider/Profile/ProfileConfig";
 
 interface State {
-    homePage: SecureAttributeDictionary | null,
-    personalInfo: SecureAttributeDictionary | null
+    homePage: Attribute | null,
+    personalInfo: Attribute | null
 }
 
 export class CoverPageTemplate extends React.Component<TemplateProps, State> {
@@ -20,17 +20,24 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
         personalInfo: null
     }
 
+    /*
+    export interface Attribute {
+        id: string,
+        priority: number
+        data: FieldDictionary
+    }
+    */
     componentDidMount() {
 
         const homePageProvider = createHomePageProvider(this.props.options);
         homePageProvider.getAttributeVersions(HomePageAttributes.HomePage).then(list => {
-            console.log(list);
-            this.setState({homePage: null});
+            let hp = list?.versions[0];
+            this.setState({homePage: hp});
         });
 
-        const profileDataProvider = createProfileDataProvider(this.props.options)
-        profileDataProvider.getStandardProfileAttribute(BuiltInAttributes.PersonalInfo).then(pi => {
-            console.log(pi);
+        const profileDataProvider = createProfileDataProvider(this.props.options);
+        profileDataProvider.getAttributeVersions(BuiltInProfiles.StandardProfile, BuiltInAttributes.PersonalInfo).then(list => {
+            let pi = list?.versions[0];
             this.setState({personalInfo: pi});
         });
     }

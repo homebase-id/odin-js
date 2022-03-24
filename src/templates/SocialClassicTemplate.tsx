@@ -6,13 +6,13 @@ import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
 import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
-import {SecureAttributeDictionary} from "../provider/AttributeData/AttributeDataTypes";
+import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
-import {BuiltInAttributes, MinimalProfileFields} from "../provider/Profile/ProfileConfig";
+import {BuiltInAttributes, BuiltInProfiles, MinimalProfileFields} from "../provider/Profile/ProfileConfig";
 
 interface State {
-    homePage: SecureAttributeDictionary | null,
-    personalInfo: SecureAttributeDictionary | null
+    homePage: Attribute | null,
+    personalInfo: Attribute | null
 }
 
 export class SocialClassicTemplate extends React.Component<TemplateProps, State> {
@@ -25,12 +25,14 @@ export class SocialClassicTemplate extends React.Component<TemplateProps, State>
     componentDidMount() {
 
         const homePageProvider = createHomePageProvider(this.props.options);
-        homePageProvider.getAttributeDictionary(HomePageAttributes.HomePage).then(hp => {
+        homePageProvider.getAttributeVersions(HomePageAttributes.HomePage).then(list => {
+            let hp = list?.versions[0];
             this.setState({homePage: hp});
         });
 
-        const profileDataProvider = createProfileDataProvider(this.props.options)
-        profileDataProvider.getStandardProfileAttribute(BuiltInAttributes.PersonalInfo).then(pi => {
+        const profileDataProvider = createProfileDataProvider(this.props.options);
+        profileDataProvider.getAttributeVersions(BuiltInProfiles.StandardProfile, BuiltInAttributes.PersonalInfo).then(list => {
+            let pi = list?.versions[0];
             this.setState({personalInfo: pi});
         });
     }
