@@ -41,8 +41,10 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
             this.setState({personalInfo: pi});
         });
     }
-
+    
     render() {
+        console.log('s',this.state);
+
         const {homePage} = this.state;
 
         if (!homePage) {
