@@ -43,7 +43,6 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
     }
     
     render() {
-        console.log('s',this.state);
 
         const {homePage} = this.state;
 

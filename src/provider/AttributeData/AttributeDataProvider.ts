@@ -173,6 +173,9 @@ class AttributeDataProvider extends ProviderBase {
         }
 
         let payloadJson: string = DataUtil.JsonStringify64(attribute.content);
+
+        console.debug("payload", payloadJson);
+        
         let payloadBytes = DataUtil.stringToUint8Array(payloadJson);
         let result: UploadResult = await tp.UploadUsingKeyHeader(FixedKeyHeader, instructionSet, metadata, payloadBytes);
 
