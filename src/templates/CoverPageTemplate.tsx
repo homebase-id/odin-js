@@ -4,13 +4,13 @@ import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
 import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
-import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
+import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
 import {BuiltInAttributes, BuiltInProfiles} from "../provider/Profile/ProfileConfig";
 
 interface State {
-    homePage: Attribute | null,
-    personalInfo: Attribute | null
+    homePage: AttributeData | null,
+    personalInfo: AttributeData | null
 }
 
 export class CoverPageTemplate extends React.Component<TemplateProps, State> {

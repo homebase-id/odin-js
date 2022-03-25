@@ -1,6 +1,6 @@
 import {Guid} from "guid-typescript";
 
-import {Attribute, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "./AttributeDataTypes";
+import {AttributeData, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "./AttributeDataTypes";
 
 import {DriveSearchResult, KeyHeader, QueryParams} from "../DriveTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
@@ -42,7 +42,7 @@ class AttributeDataProvider extends ProviderBase {
 
         let searchResults = await dp.GetFilesByTag<any>(qp);
 
-        let versions: Attribute[] = [];
+        let versions: AttributeData[] = [];
 
         for (const key in searchResults.results) {
 
@@ -54,8 +54,7 @@ class AttributeDataProvider extends ProviderBase {
                 throw new Error("Attribute is encrypted:TODO support this");
             }
 
-            let attr: Attribute = {
-                id: attributeId.toString(),
+            let attr: AttributeData = {
                 priority: dsr.priority,
                 data: null
             }
@@ -112,7 +111,7 @@ class AttributeDataProvider extends ProviderBase {
                 throw new Error("Attribute is encrypted:TODO support this");
             }
 
-            let payload: Attribute;
+            let payload: AttributeData;
 
             if (dsr.payloadTooLarge) {
                 payload = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);

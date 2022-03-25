@@ -1,4 +1,4 @@
-import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
+import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 
 // export function valueOrEmptyS(dictionary: SecureAttributeDictionary | undefined | null, attributeId: string): string {
 //
@@ -21,7 +21,7 @@ import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
 // }
 
 
-export function valueOrEmpty(attribute: Attribute | undefined | null, fieldName: string): string {
+export function valueOrEmpty(attribute: AttributeData | undefined | null, fieldName: string): string {
 
     if (!attribute) {
         return "";

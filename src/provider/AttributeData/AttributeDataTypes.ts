@@ -7,8 +7,8 @@ import {SecuredFileContent} from "../DriveTypes";
 //     display: string
 // }
 
-export interface Attribute {
-    id: string,
+export interface AttributeData {
+    // id: string,
     priority: number
     // data: FieldDictionary
     data: any
@@ -25,12 +25,12 @@ export interface Attribute {
 export type OrderedAttributeList = {
     driveId: Guid,
     attributeId: Guid
-    versions: Attribute[]
+    versions: AttributeData[]
 }
 
 export type SecureAttributeDictionary = { [name in SecurityGroupType]: SecureAttribute }
 
-export interface SecureAttribute extends SecuredFileContent<Attribute> {
+export interface SecureAttribute extends SecuredFileContent<AttributeData> {
     attributeId: Guid
 }
 
@@ -39,7 +39,7 @@ export const defaultSecureAttribute: SecureAttribute = {
     attributeId: null,
     fileId: null,
     content: {
-        id: "",
+        // id: "",
         data: {},
         priority: -1
     },

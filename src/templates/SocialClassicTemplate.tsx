@@ -6,13 +6,13 @@ import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
 import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
-import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
+import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
 import {BuiltInAttributes, BuiltInProfiles, MinimalProfileFields} from "../provider/Profile/ProfileConfig";
 
 interface State {
-    homePage: Attribute | null,
-    personalInfo: Attribute | null
+    homePage: AttributeData | null,
+    personalInfo: AttributeData | null
 }
 
 export class SocialClassicTemplate extends React.Component<TemplateProps, State> {

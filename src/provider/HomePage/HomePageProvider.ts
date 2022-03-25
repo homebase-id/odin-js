@@ -1,6 +1,6 @@
 import {HomePageAttributes, HomePageConfig} from "./Types";
 import {Guid} from "guid-typescript";
-import {Attribute, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
+import {AttributeData, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
 import {SecurityGroupType} from "../TransitTypes";
@@ -17,7 +17,7 @@ export class HomePageProvider extends ProviderBase {
         });
     }
 
-    async getPublicConfig(): Promise<Attribute | null> {
+    async getPublicConfig(): Promise<AttributeData | null> {
         const op = createAttributeDataProvider(this.getOptions());
         let attr = await op.getAttributeVersions(HomePageConfig.DefaultDriveId, HomePageAttributes.Theme);
         return attr?.versions[0] ?? null
