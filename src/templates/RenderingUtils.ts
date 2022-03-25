@@ -29,6 +29,6 @@ export function valueOrEmpty(attribute: AttributeData | undefined | null, fieldN
 
     
     let attrData = attribute?.data[fieldName];
-    return attrData?.jsonValue ?? "";
+    return attrData ?? "";
 }
 
