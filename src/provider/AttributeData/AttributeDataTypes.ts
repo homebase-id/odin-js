@@ -1,25 +1,26 @@
 import {Guid} from "guid-typescript";
 import {SecurityGroupType} from "../TransitTypes";
 import {SecuredFileContent} from "../DriveTypes";
-
-export interface Profile {
-    id: string,
-    display: string
-}
+//
+// export interface Profile {
+//     id: string,
+//     display: string
+// }
 
 export interface Attribute {
     id: string,
     priority: number
-    data: FieldDictionary
+    // data: FieldDictionary
+    data: any
 }
 
-type FieldDictionary = { [name: string]: Field }
-
-export interface Field {
-    id: string,
-    jsonValue: string
-}
-
+//
+// type FieldDictionary = { [name: string]: Field }
+//
+// export interface Field {
+//     id: string,
+//     jsonValue: string
+// }
 
 export type OrderedAttributeList = {
     driveId: Guid,
@@ -30,7 +31,6 @@ export type OrderedAttributeList = {
 export type SecureAttributeDictionary = { [name in SecurityGroupType]: SecureAttribute }
 
 export interface SecureAttribute extends SecuredFileContent<Attribute> {
-    driveId: Guid,
     attributeId: Guid
 }
 

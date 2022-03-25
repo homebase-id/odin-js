@@ -2,6 +2,7 @@ import {AccessControlList} from "./TransitTypes";
 import {Guid} from "guid-typescript";
 
 export interface SecuredFileContent<TPayload> {
+    driveId:Guid | null,
     fileId: Guid | null,
     tags: string[],
     accessControlList: AccessControlList,
