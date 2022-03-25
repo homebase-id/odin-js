@@ -20,13 +20,6 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
         personalInfo: null
     }
 
-    /*
-    export interface Attribute {
-        id: string,
-        priority: number
-        data: FieldDictionary
-    }
-    */
     componentDidMount() {
 
         const homePageProvider = createHomePageProvider(this.props.options);

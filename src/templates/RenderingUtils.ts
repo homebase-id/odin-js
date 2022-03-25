@@ -22,11 +22,9 @@ import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 
 
 export function valueOrEmpty(attribute: AttributeData | undefined | null, fieldName: string): string {
-
     if (!attribute) {
         return "";
     }
-
     
     let attrData = attribute?.data[fieldName];
     return attrData ?? "";

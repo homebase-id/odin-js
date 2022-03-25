@@ -55,21 +55,26 @@ class AttributeDataProvider extends ProviderBase {
             }
 
             let attr: AttributeData = {
-                priority: dsr.priority,
+                priority: -1,
                 data: null
             }
 
             if (dsr.payloadTooLarge) {
-                attr.data = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);
+                attr = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);
             } else {
                 let bytes = await dp.DecryptUsingKeyHeader(DataUtil.base64ToUint8Array(dsr.payloadContent), FixedKeyHeader);
                 let json = DataUtil.byteArrayToString(bytes);
-                attr.data = JSON.parse(json);
+                attr = JSON.parse(json);
             }
 
+            // TODO: this overwrites the priority stored in the 
+            // attribute.  Need to fix this by considering if the 
+            // server-set priority is always more important than the
+            // order set by the user
+            attr.priority = dsr.priority;
             versions.push(attr);
         }
-        
+
         //TODO: need to sort the attributes correctly.  where the lowest attribute is the highest priority info
 
         let list: OrderedAttributeList = {
