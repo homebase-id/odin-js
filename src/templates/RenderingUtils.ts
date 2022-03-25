@@ -21,14 +21,14 @@ import {Attribute} from "../provider/AttributeData/AttributeDataTypes";
 // }
 
 
-export function valueOrEmpty(attribute: Attribute | undefined | null, field: string): string {
+export function valueOrEmpty(attribute: Attribute | undefined | null, fieldName: string): string {
 
     if (!attribute) {
         return "";
     }
 
-    //@ts-ignore
-    let attrData = attribute?.data[field];
-    return attrData ?? "";
+    
+    let attrData = attribute?.data[fieldName];
+    return attrData?.jsonValue ?? "";
 }
 
