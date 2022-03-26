@@ -1,9 +1,8 @@
 import {HomePageAttributes, HomePageConfig} from "./Types";
 import {Guid} from "guid-typescript";
-import {AttributeData, OrderedAttributeList, SecureAttribute, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
+import {AttributeData, OrderedAttributeList, SecureAttributeDictionary} from "../AttributeData/AttributeDataTypes";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {createAttributeDataProvider} from "../AttributeData/AttributeDataProvider";
-import {SecurityGroupType} from "../TransitTypes";
 
 export type HomePageProviderOptions = Omit<ProviderOptions, 'appId'>;
 
@@ -21,32 +20,6 @@ export class HomePageProvider extends ProviderBase {
         const op = createAttributeDataProvider(this.getOptions());
         let attr = await op.getAttributeVersions(HomePageConfig.DefaultDriveId, HomePageAttributes.Theme);
         return attr?.versions[0] ?? null
-    }
-    
-    async getConfig(): Promise<SecureAttribute | null> {
-        const op = createAttributeDataProvider(this.getOptions());
-        let dict = await op.getAttributeDictionary(HomePageConfig.DefaultDriveId, HomePageAttributes.Theme)
-
-        //only support an anonymous file 
-        return dict ? dict[SecurityGroupType.Anonymous] : null;
-    }
-
-    //saves configuration and returns an updated version with a fileId
-    async saveConfig(cfg: SecureAttribute): Promise<SecureAttribute> {
-
-        this.AssertHasSharedSecret();
-
-        const op = createAttributeDataProvider(this.getOptions());
-        cfg.attributeId = HomePageAttributes.Theme;
-        cfg.driveId = HomePageConfig.DefaultDriveId;
-
-        if (cfg.accessControlList) {
-            cfg.accessControlList.requiredSecurityGroup = SecurityGroupType.Anonymous;
-        } else {
-            cfg.accessControlList = {requiredSecurityGroup: SecurityGroupType.Anonymous};
-        }
-
-        return await op.saveAttributeUnencrypted(cfg);
     }
 
     async getAttributeVersions(attributeId: Guid): Promise<OrderedAttributeList | null> {

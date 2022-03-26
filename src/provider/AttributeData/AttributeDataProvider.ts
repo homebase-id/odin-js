@@ -75,7 +75,11 @@ class AttributeDataProvider extends ProviderBase {
             versions.push(attr);
         }
 
-        //TODO: need to sort the attributes correctly.  where the lowest attribute is the highest priority info
+        //sort where lowest number is higher priority
+        versions = versions.sort((a, b) => {
+            return a.priority - b.priority
+        });
+
 
         let list: OrderedAttributeList = {
             driveId: driveId,
