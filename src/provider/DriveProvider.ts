@@ -71,10 +71,11 @@ class DriveProvider extends ProviderBase {
     //     })
     // }
 
-    async GetMetadata(fileId: Guid): Promise<UnencryptedFileHeader> {
+    async GetMetadata(driveIdentifier: Guid, fileId: Guid): Promise<UnencryptedFileHeader> {
 
         let client = this.createAxiosClient();
-        return client.get("/drive/files/metadata?fileId=" + fileId).then(response => {
+
+        return client.get("/drive/files/metadata?" + this.getDriveQuerystring(driveIdentifier, fileId)).then(response => {
             let header: EncryptedClientFileHeader = {
                 encryptedKeyHeader: {
                     encryptedAesKey: DataUtil.base64ToUint8Array(response.data.encryptedKeyHeader.encryptedAesKey),
@@ -104,22 +105,25 @@ class DriveProvider extends ProviderBase {
     }
 
     //decrypts the payload and returns a JSON object
-    async GetPayloadAsJson<T>(fileId: Guid, keyHeader: KeyHeader): Promise<T> {
+    async GetPayloadAsJson<T>(driveIdentifier: Guid, fileId: Guid, keyHeader: KeyHeader): Promise<T> {
 
+        return this.GetPayloadBytes(driveIdentifier, fileId, keyHeader).then(bytes => {
+            let json = DataUtil.byteArrayToString(new Uint8Array(bytes));
+            let o = JSON.parse(json);
+            return o;
+        });
+    }
+
+    async GetPayloadBytes(driveIdentifier: Guid, fileId: Guid, keyHeader: KeyHeader): Promise<ArrayBuffer> {
         let client = this.createAxiosClient();
         const config: AxiosRequestConfig = {
             responseType: "arraybuffer",
         }
 
-        return client.get("/drive/files/payload?fileId=" + fileId, config).then(response => {
+        return client.get("/drive/files/payload?" + this.getDriveQuerystring(driveIdentifier, fileId), config).then(response => {
             let cipher = new Uint8Array(response.data);
-
             return this.DecryptUsingKeyHeader(cipher, keyHeader).then(bytes => {
-                let json = DataUtil.byteArrayToString(bytes);
-                let o = JSON.parse(json);
-                return o;
-
-                // return new FileStreamResult(payload, "application/octet-stream");
+                return bytes;
             });
 
         }).catch(error => {
@@ -129,8 +133,28 @@ class DriveProvider extends ProviderBase {
         });
     }
 
-    async GetPayloadAsStream( fileId: Guid, keyHeader: KeyHeader): Promise<any> {
+    async GetPayloadAsStream(driveIdentifier: Guid, fileId: Guid, keyHeader: KeyHeader): Promise<any> {
+
         throw "Not Implemented";
+        // let client = this.createAxiosClient();
+        // const config: AxiosRequestConfig = {
+        //     responseType: "stream",
+        // }
+        //
+        // return client.get("/drive/files/payload?" + this.getDriveQuerystring(driveIdentifier, fileId), config).then(response => {
+        //     let cipher = new Uint8Array(response.data);
+        //
+        //     return this.DecryptUsingKeyHeader(cipher, keyHeader).then(bytes => {
+        //         let json = DataUtil.byteArrayToString(bytes);
+        //         let o = JSON.parse(json);
+        //         return o;
+        //         // return new FileStreamResult(payload, "application/octet-stream");
+        //     });
+        //
+        // }).catch(error => {
+        //     console.log(error);
+        //     throw error;
+        // });
 
         /*
         axios({
@@ -149,10 +173,10 @@ class DriveProvider extends ProviderBase {
         * */
     }
 
-    async DeleteFile( fileId: Guid): Promise<boolean | void> {
+    async DeleteFile(driveIdentifier: Guid, fileId: Guid): Promise<boolean | void> {
         let client = this.createAxiosClient();
 
-        return client.delete("/drive/files?fileId=" + fileId).then(response => {
+        return client.delete("/drive/files?" + this.getDriveQuerystring(driveIdentifier, fileId)).then(response => {
             if (response.status == 200) {
                 return true;
             }
@@ -172,6 +196,15 @@ class DriveProvider extends ProviderBase {
 
     async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
         return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
+    }
+
+    private getDriveQuerystring(driveIdentifier: Guid, fileId: Guid): string {
+        let qs = querystring.stringify({
+            driveIdentifier: driveIdentifier,
+            fileId: fileId
+        });
+
+        return qs;
     }
 
     private async decryptKeyHeader(ekh: EncryptedKeyHeader): Promise<KeyHeader> {

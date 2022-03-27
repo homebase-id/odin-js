@@ -27,12 +27,12 @@ class AttributeDataProvider extends ProviderBase {
     }
 
     //gets all versions of an attribute available to the caller
-    async getAttributeVersions(driveId: Guid, attributeId: Guid): Promise<OrderedAttributeList | null> {
+    async getAttributeVersions(driveIdentifier: Guid, attributeId: Guid): Promise<OrderedAttributeList | null> {
 
         const dp = createDriveProvider(this.getOptions());
 
         let qp: QueryParams = {
-            driveIdentifier: driveId.toString(),
+            driveIdentifier: driveIdentifier.toString(),
             includeMetadataHeader: false,
             includePayload: true,
             tag: attributeId.toString(),
@@ -60,7 +60,7 @@ class AttributeDataProvider extends ProviderBase {
             }
 
             if (dsr.payloadTooLarge) {
-                attr = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);
+                attr = await dp.GetPayloadAsJson<any>(driveIdentifier, fileId, FixedKeyHeader);
             } else {
                 let bytes = await dp.DecryptUsingKeyHeader(DataUtil.base64ToUint8Array(dsr.payloadContent), FixedKeyHeader);
                 let json = DataUtil.byteArrayToString(bytes);
@@ -82,7 +82,7 @@ class AttributeDataProvider extends ProviderBase {
 
 
         let list: OrderedAttributeList = {
-            driveId: driveId,
+            driveId: driveIdentifier,
             attributeId: attributeId,
             versions: versions
         };
@@ -91,12 +91,12 @@ class AttributeDataProvider extends ProviderBase {
     }
 
     //gets the data available for the specified attribute if available
-    async getAttributeDictionary(driveId: Guid, attributeId: Guid): Promise<SecureAttributeDictionary | null> {
+    async getAttributeDictionary(driveIdentifier: Guid, attributeId: Guid): Promise<SecureAttributeDictionary | null> {
 
         const dp = createDriveProvider(this.getOptions());
 
         let qp: QueryParams = {
-            driveIdentifier: driveId.toString(),
+            driveIdentifier: driveIdentifier.toString(),
             includeMetadataHeader: false,
             includePayload: true,
             tag: attributeId.toString(),
@@ -123,7 +123,7 @@ class AttributeDataProvider extends ProviderBase {
             let payload: AttributeData;
 
             if (dsr.payloadTooLarge) {
-                payload = await dp.GetPayloadAsJson<any>(fileId, FixedKeyHeader);
+                payload = await dp.GetPayloadAsJson<any>(driveIdentifier, fileId, FixedKeyHeader);
             } else {
                 let bytes = await dp.DecryptUsingKeyHeader(DataUtil.base64ToUint8Array(dsr.payloadContent), FixedKeyHeader);
                 let json = DataUtil.byteArrayToString(bytes);
@@ -131,7 +131,7 @@ class AttributeDataProvider extends ProviderBase {
             }
 
             let secureAttr: SecureAttribute = {
-                driveId: driveId,
+                driveId: driveIdentifier,
                 attributeId: attributeId,
                 fileId: fileId,
                 content: payload,
