@@ -10,6 +10,7 @@ export * from "./provider/AttributeData/AttributeDataProvider"
 export * from "./provider/AttributeData/AttributeDataTypes"
 export * from "./provider/Profile/ProfileConfig"
 export * from "./provider/Profile/ProfileDataProvider"
+export * from "./provider/Media/MediaProvider"
 
 export * from "./provider/HomePage/HomePageProvider";
 export * from "./provider/HomePage/Types";
