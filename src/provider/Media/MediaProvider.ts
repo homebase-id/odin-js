@@ -1,4 +1,3 @@
-
 import {Guid} from "guid-typescript";
 import {ProviderBase, ProviderOptions} from "../ProviderBase";
 import {KeyHeader} from "../DriveTypes";
