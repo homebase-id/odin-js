@@ -3,10 +3,13 @@ import Container from 'react-bootstrap/Container';
 import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
-import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
+import {HomePageAttributes, HomePageConfig, HomePageFields} from "../provider/HomePage/Types";
 import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
 import {BuiltInAttributes, BuiltInProfiles} from "../provider/Profile/ProfileConfig";
+import ImageView from "./components/ImageView";
+import {Guid} from "guid-typescript";
+import {ProviderOptions} from "../provider/ProviderBase";
 
 interface State {
     homePage: AttributeData | null,
@@ -34,15 +37,23 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
             this.setState({personalInfo: pi});
         });
     }
-    
+
     render() {
 
+        const fullOptions: ProviderOptions = {
+            appId: HomePageConfig.AppId,
+            api: this.props.options.api,
+            sharedSecret: this.props.options.sharedSecret
+        }
         const {homePage} = this.state;
 
         if (!homePage) {
             return <></>
         }
-
+        
+        let fileIdValue = valueOrEmpty(homePage, HomePageFields.HeaderImageId);
+        let fileId = Guid.isGuid(fileIdValue) ? Guid.parse(fileIdValue) : undefined;
+        
         return (
             <Container>
                 {/*{props.landingPage.headerImageUrl}*/}
@@ -52,7 +63,7 @@ export class CoverPageTemplate extends React.Component<TemplateProps, State> {
                 {/*{props.profile.surName}*/}
                 <div className="row flex-lg-row-reverse align-items-center g-5 py-5">
                     <div className="col-10 col-sm-8 col-lg-6">
-                        <img src={valueOrEmpty(homePage, HomePageFields.HeaderImageId)} className="rounded d-block mx-lg-auto img-fluid" alt="" loading="lazy" width="700" height="500"/>
+                        <ImageView options={fullOptions} driveIdentifier={HomePageConfig.DefaultDriveId} fileId={fileId} className="rounded d-block mx-lg-auto img-fluid" width="700" height="500"/>
                     </div>
                     <div className="col-lg-6">
                         <h1 className="display-5 fw-bold lh-1 mb-3">{valueOrEmpty(homePage, HomePageFields.TagLineId)}</h1>
