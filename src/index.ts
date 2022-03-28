@@ -17,4 +17,4 @@ export * from "./provider/HomePage/ThemeConfig";
 export * from "./templates/Types";
 export * from "./templates/CoverPageTemplate";
 export * from "./templates/SocialClassicTemplate";
-export * from "./templates/components/ImageView"
+export * from "./templates/ImageView"
