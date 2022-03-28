@@ -53,7 +53,7 @@ export class SocialClassicTemplate extends React.Component<TemplateProps, State>
         }
 
         let name: string = valueOrEmpty(personalInfo, MinimalProfileFields.GiveNameId) + " " + valueOrEmpty(personalInfo, MinimalProfileFields.SurnameId);
-        let fileIdValue = valueOrEmpty(homePage, MinimalProfileFields.ProfileImageUrlId);
+        let fileIdValue = valueOrEmpty(personalInfo, MinimalProfileFields.ProfileImageUrlId);
         let profileImagefileId = Guid.isGuid(fileIdValue) ? Guid.parse(fileIdValue) : undefined;
 
         const fullOptions: ProviderOptions = {
