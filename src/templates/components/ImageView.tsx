@@ -4,6 +4,7 @@ import React, {useEffect, useState} from "react";
 import {createMediaProvider} from "../../provider/Media/MediaProvider";
 import {ProviderOptions} from "../../provider/ProviderBase";
 
+
 export type ImageViewProps = {
     driveIdentifier: Guid,
     fileId: Guid,
@@ -12,6 +13,8 @@ export type ImageViewProps = {
     height: string,
     options: ProviderOptions
 }
+
+// export class ImageView extends React.Component<ImageViewProps> {}
 
 function ImageView(props: ImageViewProps) {
 

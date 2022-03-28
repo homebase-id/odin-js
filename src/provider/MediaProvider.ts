@@ -1,9 +1,9 @@
 import {Guid} from "guid-typescript";
-import {ProviderBase, ProviderOptions} from "../ProviderBase";
-import {KeyHeader} from "../DriveTypes";
-import {AccessControlList, UploadFileMetadata, UploadInstructionSet, UploadResult} from "../TransitTypes";
-import {createTransitProvider} from "../TransitProvider";
-import {createDriveProvider} from "../DriveProvider";
+import {ProviderBase, ProviderOptions} from "./ProviderBase";
+import {KeyHeader} from "./DriveTypes";
+import {AccessControlList, UploadFileMetadata, UploadInstructionSet, UploadResult} from "./TransitTypes";
+import {createTransitProvider} from "./TransitProvider";
+import {createDriveProvider} from "./DriveProvider";
 
 const FixedKeyHeader: KeyHeader =
     {

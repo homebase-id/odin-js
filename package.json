@@ -1,5 +1,5 @@
 {
-  "version": "0.2.119",
+  "version": "0.2.120",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
