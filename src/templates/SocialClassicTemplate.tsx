@@ -5,7 +5,7 @@ import './SocialClassic.css';
 import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
-import {HomePageAttributes, HomePageConfig, HomePageFields} from "../provider/HomePage/Types";
+import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
 import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
 import {BuiltInAttributes, BuiltInProfiles, MinimalProfileFields, ProfileConfig} from "../provider/Profile/ProfileConfig";
@@ -54,7 +54,7 @@ export class SocialClassicTemplate extends React.Component<TemplateProps, State>
 
         let name: string = valueOrEmpty(personalInfo, MinimalProfileFields.GiveNameId) + " " + valueOrEmpty(personalInfo, MinimalProfileFields.SurnameId);
         let fileIdValue = valueOrEmpty(personalInfo, MinimalProfileFields.ProfileImageUrlId);
-        let profileImagefileId = Guid.isGuid(fileIdValue) ? Guid.parse(fileIdValue) : undefined;
+        let profileImageFileId = Guid.isGuid(fileIdValue) ? Guid.parse(fileIdValue) : undefined;
 
         const fullOptions: ProviderOptions = {
             appId: ProfileConfig.AppId,
@@ -74,7 +74,7 @@ export class SocialClassicTemplate extends React.Component<TemplateProps, State>
                 </Row>
                 <Row className="mt-2">
                     <div className="col-10 col-sm-8 col-lg-2">
-                        <ImageView options={fullOptions} driveIdentifier={HomePageConfig.DefaultDriveId} fileId={profileImagefileId} className="rounded d-block mx-lg-auto img-fluid" width="250" height="250"/>
+                        <ImageView options={fullOptions} driveIdentifier={BuiltInProfiles.StandardProfile} fileId={profileImageFileId} className="rounded d-block mx-lg-auto img-fluid" width="250" height="250"/>
 
                     </div>
                     <div className="col-lg-8">
