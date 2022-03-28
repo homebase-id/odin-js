@@ -7,7 +7,7 @@ import {HomePageAttributes, HomePageConfig, HomePageFields} from "../provider/Ho
 import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
 import {BuiltInAttributes, BuiltInProfiles} from "../provider/Profile/ProfileConfig";
-import ImageView from "./components/ImageView";
+import ImageView from "./ImageView";
 import {Guid} from "guid-typescript";
 import {ProviderOptions} from "../provider/ProviderBase";
 
