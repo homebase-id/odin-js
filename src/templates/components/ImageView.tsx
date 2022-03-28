@@ -1,8 +1,9 @@
 import {Guid} from "guid-typescript";
 import {Image} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {createMediaProvider} from "../provider/MediaProvider";
-import {ProviderOptions} from "../provider/ProviderBase";
+import {ProviderOptions} from "../../provider/ProviderBase";
+import {createMediaProvider} from "../../provider/MediaProvider";
+
 
 
 export type ImageViewProps = {
