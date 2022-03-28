@@ -1,7 +1,7 @@
 import {Guid} from "guid-typescript";
 import {Image} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
-import {createMediaProvider} from "../../provider/Media/MediaProvider";
+import {createMediaProvider} from "../../provider/MediaProvider";
 import {ProviderOptions} from "../../provider/ProviderBase";
 
 
