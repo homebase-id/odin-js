@@ -5,10 +5,13 @@ import './SocialClassic.css';
 import {TemplateProps} from "./Types";
 import {valueOrEmpty} from "./RenderingUtils";
 import {createHomePageProvider} from "../provider/HomePage/HomePageProvider";
-import {HomePageAttributes, HomePageFields} from "../provider/HomePage/Types";
+import {HomePageAttributes, HomePageConfig, HomePageFields} from "../provider/HomePage/Types";
 import {AttributeData} from "../provider/AttributeData/AttributeDataTypes";
 import {createProfileDataProvider} from "../provider/Profile/ProfileDataProvider";
-import {BuiltInAttributes, BuiltInProfiles, MinimalProfileFields} from "../provider/Profile/ProfileConfig";
+import {BuiltInAttributes, BuiltInProfiles, MinimalProfileFields, ProfileConfig} from "../provider/Profile/ProfileConfig";
+import ImageView from "./components/ImageView";
+import {ProviderOptions} from "../provider/ProviderBase";
+import {Guid} from "guid-typescript";
 
 interface State {
     homePage: AttributeData | null,
@@ -49,9 +52,16 @@ export class SocialClassicTemplate extends React.Component<TemplateProps, State>
             backgroundImage: 'url(' + valueOrEmpty(homePage, HomePageFields.HeaderImageId) + ')'
         }
 
-        let profileImage = valueOrEmpty(personalInfo, MinimalProfileFields.ProfileImageUrlId);
         let name: string = valueOrEmpty(personalInfo, MinimalProfileFields.GiveNameId) + " " + valueOrEmpty(personalInfo, MinimalProfileFields.SurnameId);
+        let fileIdValue = valueOrEmpty(homePage, MinimalProfileFields.ProfileImageUrlId);
+        let profileImagefileId = Guid.isGuid(fileIdValue) ? Guid.parse(fileIdValue) : undefined;
 
+        const fullOptions: ProviderOptions = {
+            appId: ProfileConfig.AppId,
+            api: this.props.options.api,
+            sharedSecret: this.props.options.sharedSecret
+        }
+        
         return (
             <Container>
                 {/*{props.landingPage.headerImageUrl}*/}
@@ -64,7 +74,8 @@ export class SocialClassicTemplate extends React.Component<TemplateProps, State>
                 </Row>
                 <Row className="mt-2">
                     <div className="col-10 col-sm-8 col-lg-2">
-                        <img src={profileImage} className="rounded d-block mx-lg-auto img-fluid" alt="" loading="lazy" width="250" height="250"/>
+                        <ImageView options={fullOptions} driveIdentifier={HomePageConfig.DefaultDriveId} fileId={profileImagefileId} className="rounded d-block mx-lg-auto img-fluid" width="250" height="250"/>
+
                     </div>
                     <div className="col-lg-8">
                         <h1 className="display-5 fw-bold lh-1 mb-3">{name}</h1>
