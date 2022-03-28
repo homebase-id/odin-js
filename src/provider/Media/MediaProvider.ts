@@ -11,7 +11,7 @@ const FixedKeyHeader: KeyHeader =
         aesKey: new Uint8Array(Array(16).fill(1))
     };
 
-class MediaProvider extends ProviderBase {
+export class MediaProvider extends ProviderBase {
 
     constructor(options: ProviderOptions) {
         super({

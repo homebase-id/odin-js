@@ -4,7 +4,7 @@ import React, {useEffect, useState} from "react";
 import {createMediaProvider} from "../../provider/Media/MediaProvider";
 import {ProviderOptions} from "../../provider/ProviderBase";
 
-type ImageViewProps = {
+export type ImageViewProps = {
     driveIdentifier: Guid,
     fileId: Guid,
     className?: string
