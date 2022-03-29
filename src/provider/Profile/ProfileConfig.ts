@@ -22,9 +22,18 @@ export class BuiltInAttributes {
 }
 
 export class MinimalProfileFields {
-    static readonly ProfileImageUrlId: string = fixAttribute(Guid.parse("33334444-0000-4444-4444-000000004444"));
-    static readonly BioId: string = fixAttribute(Guid.parse("33334444-1111-4444-4444-000000004444"));
-    static readonly GiveNameId: string = fixAttribute(Guid.parse("33334444-2222-4444-4444-000000004444"));
-    static readonly SurnameId: string = fixAttribute(Guid.parse("33334444-3333-4444-4444-000000004444"));
+    static readonly ProfileImageUrlId: string = fixAttribute(Guid.parse("profileImageId"));
+    static readonly BioId: string = fixAttribute(Guid.parse("bio"));
+    static readonly GiveNameId: string = fixAttribute(Guid.parse("givenname"));
+    static readonly SurnameId: string = fixAttribute(Guid.parse("surname"));
 }
+
+export class SocialProfileFields {
+    static readonly Twitter: string = fixAttribute(Guid.parse("twitter"));
+    static readonly Facebook: string = fixAttribute(Guid.parse("facebook"));
+    static readonly LinkedIn: string = fixAttribute(Guid.parse("linkedin"));
+    static readonly Tiktok: string = fixAttribute(Guid.parse("tiktok"));
+    static readonly Instagram: string = fixAttribute(Guid.parse("instagram"));
+}
+
 
