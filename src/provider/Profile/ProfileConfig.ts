@@ -17,8 +17,8 @@ export class BuiltInAttributes {
     static readonly PersonalInfo: Guid = Guid.parse("33334444-4444-4444-4444-000000004440");
     static ProfilePhotos: Guid = Guid.parse("66664444-4444-4444-4444-000000004440");
     static Bio: Guid = Guid.parse("77774444-4444-4444-4444-000000004440");
-
     static CreditCards: Guid = Guid.parse("88884444-4444-4444-4444-000000004440");
+    static Social: Guid = Guid.parse("99994444-4444-4444-4444-000000004440");
 }
 
 export class MinimalProfileFields {
