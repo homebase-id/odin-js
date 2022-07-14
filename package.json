@@ -22,6 +22,16 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
   },
+  "size-limit": [
+    {
+      "path": "dist/cjs/index.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/esm/index.js",
+      "limit": "10 KB"
+    }
+  ],
   "dependencies": {
     "guid-typescript": "^1.0.9"
   },
