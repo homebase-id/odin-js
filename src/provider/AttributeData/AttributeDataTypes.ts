@@ -1,6 +1,6 @@
-import {Guid} from "guid-typescript";
-import {SecurityGroupType} from "../TransitTypes";
-import {SecuredFileContent} from "../DriveTypes";
+import { Guid } from 'guid-typescript';
+import { SecurityGroupType } from '../TransitTypes';
+import { SecuredFileContent } from '../DriveTypes';
 //
 // export interface Profile {
 //     id: string,
@@ -8,10 +8,10 @@ import {SecuredFileContent} from "../DriveTypes";
 // }
 
 export interface AttributeData {
-    // id: string,
-    priority: number
-    // data: FieldDictionary
-    data: any
+  // id: string,
+  priority: number;
+  // data: FieldDictionary
+  data: any;
 }
 
 //
@@ -23,46 +23,46 @@ export interface AttributeData {
 // }
 
 export type OrderedAttributeList = {
-    driveId: Guid,
-    attributeId: Guid
-    versions: AttributeData[]
-}
+  driveId: Guid;
+  attributeId: Guid;
+  versions: AttributeData[];
+};
 
-export type SecureAttributeDictionary = { [name in SecurityGroupType]: SecureAttribute }
+export type SecureAttributeDictionary = { [name in SecurityGroupType]: SecureAttribute };
 
 export interface SecureAttribute extends SecuredFileContent<AttributeData> {
-    attributeId: Guid
+  attributeId: Guid | null;
 }
 
 export const defaultSecureAttribute: SecureAttribute = {
-    driveId: null,
-    attributeId: null,
-    fileId: null,
-    content: {
-        // id: "",
-        data: {},
-        priority: -1
-    },
-    tags: [],
-    accessControlList: {
-        requiredSecurityGroup: SecurityGroupType.Anonymous,
-        dotYouIdentityList: [],
-        circleId: ""
-    }
-}
+  driveId: null,
+  attributeId: null,
+  fileId: null,
+  content: {
+    // id: "",
+    data: {},
+    priority: -1,
+  },
+  tags: [],
+  accessControlList: {
+    requiredSecurityGroup: SecurityGroupType.Anonymous,
+    dotYouIdentityList: [],
+    circleId: '',
+  },
+};
 
 export type SecurityGroupDefinition = {
-    groupType: SecurityGroupType,
-    display: string,
-    description: string
-}
+  groupType: SecurityGroupType;
+  display: string;
+  description: string;
+};
 
 export const fixAttribute = (id: Guid) => {
-    return "a_" + id.toString().replace(/-/g, "").toLowerCase() + "";
-}
+  return 'a_' + id.toString().replace(/-/g, '').toLowerCase() + '';
+};
 
 export type LandingPageLink = {
-    index: number,
-    title: string,
-    href: string,
-}
+  index: number;
+  title: string;
+  href: string;
+};
