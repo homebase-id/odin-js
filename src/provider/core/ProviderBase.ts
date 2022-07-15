@@ -1,5 +1,4 @@
 import axios, { AxiosError } from 'axios';
-import { Guid } from 'guid-typescript';
 
 export enum ApiType {
   Owner,
@@ -8,9 +7,8 @@ export enum ApiType {
 }
 
 export interface ProviderOptions {
-  api?: ApiType;
-  sharedSecret: Uint8Array | null;
-  appId: Guid;
+  api: ApiType;
+  sharedSecret: Uint8Array;
 }
 
 export class ProviderBase {
@@ -20,7 +18,7 @@ export class ProviderBase {
     this._options = options;
   }
 
-  protected getSharedSecret(): Uint8Array | null {
+  protected getSharedSecret(): Uint8Array {
     return this._options?.sharedSecret;
   }
 
@@ -36,7 +34,7 @@ export class ProviderBase {
 
   //Returns the endpoint for the identity
   protected getEndpoint(): string {
-    let root: string = '';
+    let root = '';
     switch (this._options?.api) {
       case ApiType.Owner:
         root = '/api/owner/v1';
@@ -59,9 +57,6 @@ export class ProviderBase {
     return axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: true,
-      headers: {
-        AppId: this._options?.appId == null ? '' : this._options?.appId.toString(),
-      },
     });
   }
 
