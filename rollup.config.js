@@ -11,6 +11,20 @@ export default [
   {
     input: 'src/index.ts',
     output: [
+      // {
+      //   // file: packageJson.main,
+      //   dir: './dist/cjs',
+      //   preserveModules: true,
+      //   format: 'cjs',
+      //   sourcemap: true,
+      // },
+      // {
+      //   preserveModules: true,
+      //   dir: './dist/esm',
+      //   // file: packageJson.module,
+      //   format: 'esm',
+      //   sourcemap: true,
+      // },
       {
         file: packageJson.main,
         format: 'cjs',

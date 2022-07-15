@@ -1,15 +1,15 @@
-import { ProviderBase, ProviderOptions } from './ProviderBase';
+import { ProviderBase, ProviderOptions } from '../ProviderBase';
 import {
   UploadFileMetadata,
   UploadFileDescriptor,
   UploadInstructionSet,
   UploadResult,
 } from './TransitTypes';
-import { AesEncrypt } from './AesEncrypt';
-import { DataUtil } from './DataUtil';
-import { EncryptedKeyHeader, KeyHeader } from './DriveTypes';
+import { AesEncrypt } from '../AesEncrypt';
+import { DataUtil } from '../DataUtil';
+import { EncryptedKeyHeader, KeyHeader } from '../DriveData/DriveTypes';
 
-class TransitProvider extends ProviderBase {
+export default class TransitProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
     super(options);
   }
@@ -20,24 +20,30 @@ class TransitProvider extends ProviderBase {
     metadata: UploadFileMetadata,
     payload: Uint8Array
   ): Promise<UploadResult> {
-    let descriptor: UploadFileDescriptor = {
+    //HACK: switch to byte array
+    if (metadata.appData.tags)
+      metadata.appData.tags = metadata.appData.tags.map((v) =>
+        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
+      );
+
+    const descriptor: UploadFileDescriptor = {
       encryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.transferIv),
       fileMetadata: metadata,
     };
 
-    let encryptedDescriptor = await this.encryptWithSharedSecret(
+    const encryptedDescriptor = await this.encryptWithSharedSecret(
       descriptor,
       instructions.transferIv
     );
-    let encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
+    const encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
 
     const data = new FormData();
     data.append('instructions', this.toBlob(instructions));
     data.append('metaData', new Blob([encryptedDescriptor]));
     data.append('payload', new Blob([encryptedPayload]));
 
-    let client = this.createAxiosClient();
-    let url = '/transit/upload';
+    const client = this.createAxiosClient();
+    const url = '/drive/files/upload';
 
     const config = {
       headers: {
@@ -62,7 +68,7 @@ class TransitProvider extends ProviderBase {
     metadata: UploadFileMetadata,
     payload: Uint8Array
   ): Promise<UploadResult> {
-    let keyHeader = this.GenerateKeyHeader();
+    const keyHeader = this.GenerateKeyHeader();
     return this.UploadUsingKeyHeader(keyHeader, instructions, metadata, payload);
   }
 
@@ -70,28 +76,28 @@ class TransitProvider extends ProviderBase {
     content: Uint8Array,
     keyHeader: KeyHeader
   ): Promise<Uint8Array> {
-    let cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
+    const cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
     return cipher;
   }
 
   private async encryptWithSharedSecret(o: any, iv: Uint8Array): Promise<Uint8Array> {
     //encrypt metadata with shared secret
-    let ss = this.getSharedSecret();
-    let json = DataUtil.JsonStringify64(o);
+    const ss = this.getSharedSecret();
+    const json = DataUtil.JsonStringify64(o);
 
-    //console.log(json);
     if (!ss) {
-      throw new Error('Missing SharedSecret from Configuration');
+      throw new Error('attempting to decrypt but missing the shared secret');
     }
+    //console.log(json);
 
-    let content = new TextEncoder().encode(json);
-    let cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);
+    const content = new TextEncoder().encode(json);
+    const cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);
     return cipher;
   }
 
   private toBlob(o: any): Blob {
-    let json = DataUtil.JsonStringify64(o);
-    let content = new TextEncoder().encode(json);
+    const json = DataUtil.JsonStringify64(o);
+    const content = new TextEncoder().encode(json);
     return new Blob([content]);
   }
 
@@ -100,13 +106,12 @@ class TransitProvider extends ProviderBase {
     keyHeader: KeyHeader,
     transferIv: Uint8Array
   ): Promise<EncryptedKeyHeader> {
-    let sharedSecret = this.getSharedSecret();
-    if (!sharedSecret) {
-      throw new Error('Missing SharedSecret from Configuration');
+    const ss = this.getSharedSecret();
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
     }
-
-    let combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
-    let cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, sharedSecret);
+    const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
+    const cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, ss);
 
     return {
       iv: transferIv,
@@ -126,8 +131,4 @@ class TransitProvider extends ProviderBase {
   Random16(): Uint8Array {
     return window.crypto.getRandomValues(new Uint8Array(16));
   }
-}
-
-export function createTransitProvider(options: ProviderOptions) {
-  return new TransitProvider(options);
 }
