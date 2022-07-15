@@ -20,6 +20,7 @@ export * from './provider/core/AttributeData/AttributeDataTypes';
 
 // Profile
 export * from './provider/profile/ProfileConfig';
+export * from './provider/profile/ProfileTypes';
 export * from './provider/profile/ProfileDataProvider';
 
 // Home
