@@ -7,11 +7,12 @@ import ProfileDataProvider from './profile/ProfileDataProvider';
 import ProfileDefinitionProvider from './profile/ProfileDefinitionProvider';
 import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
 import BlogPostProvider from './public/blog/BlogPostProvider';
+import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
 import HomePageProvider from './public/home/HomePageProvider';
 
 export interface ClientConfig {
   api: ApiType;
-  sharedSecret: Uint8Array;
+  sharedSecret?: Uint8Array;
 }
 
 export class Client {
@@ -30,6 +31,7 @@ export class Client {
   // Blog Providers:
   blogDefinitionProvider: BlogDefinitionProvider;
   blogPostProvider: BlogPostProvider;
+  blogPostReadonlyProvider: BlogPostReadonlyProvider;
 
   // Home Providers:
   homePageProvider: HomePageProvider;
@@ -73,6 +75,11 @@ export class Client {
       driveProvider: this.driveProvider,
       transitProvider: this.transitProvider,
       mediaProvider: this.mediaProvider,
+    });
+    this.blogPostReadonlyProvider = new BlogPostReadonlyProvider({
+      ...this._cfg,
+      blogDefinitionProvider: this.blogDefinitionProvider,
+      driveProvider: this.driveProvider,
     });
 
     // Home Providers:

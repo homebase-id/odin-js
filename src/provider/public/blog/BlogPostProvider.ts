@@ -98,7 +98,6 @@ export default class BlogPostProvider extends ProviderBase {
   ): Promise<BlogPostFile<T>[]> {
     //get all files tag as being a profile definition
     const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
-
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       tagsMatchAtLeastOne: [publishStatus.toString()],

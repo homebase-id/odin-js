@@ -8,7 +8,7 @@ export enum ApiType {
 
 export interface ProviderOptions {
   api: ApiType;
-  sharedSecret: Uint8Array;
+  sharedSecret?: Uint8Array;
 }
 
 export class ProviderBase {
@@ -18,7 +18,7 @@ export class ProviderBase {
     this._options = options;
   }
 
-  protected getSharedSecret(): Uint8Array {
+  protected getSharedSecret(): Uint8Array | undefined {
     return this._options?.sharedSecret;
   }
 
