@@ -135,7 +135,7 @@ class AttributeDataProvider extends ProviderBase {
                 attributeId: attributeId,
                 fileId: fileId,
                 content: payload,
-                tags: dsr.tags,
+                tags: dsr.tags ?? [],
                 accessControlList: dsr.accessControlList
             }
 
@@ -162,7 +162,7 @@ class AttributeDataProvider extends ProviderBase {
         let instructionSet: UploadInstructionSet = {
             transferIv: tp.Random16(),
             storageOptions: {
-                overwriteFileId: Guid.isGuid(attribute?.fileId ?? "") ? attribute.fileId.toString() : null,
+                overwriteFileId: Guid.isGuid(attribute?.fileId ?? "") ? attribute?.fileId?.toString() : null,
                 driveIdentifier: attribute.driveId.toString()
             },
             transitOptions: null
@@ -200,13 +200,13 @@ class AttributeDataProvider extends ProviderBase {
 
         const types = Object.keys(SecurityGroupType);
         for (const idx in types) {
-            let sg = types[idx];
-            let attr: SecureAttribute = dict[sg];
+            let sg:string = types[idx];
+            let attr: SecureAttribute = dict[sg as keyof typeof dict];
             if (attr) {
                 attr.attributeId = attributeId;
                 attr.driveId = driveId;
-                attr.accessControlList.requiredSecurityGroup = SecurityGroupType[sg];
-                dict[sg] = await this.saveAttributeUnencrypted(attr);
+                attr.accessControlList.requiredSecurityGroup = SecurityGroupType[sg as keyof typeof dict];
+                dict[sg as keyof typeof dict] = await this.saveAttributeUnencrypted(attr);
             }
         }
 
