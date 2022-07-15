@@ -85,6 +85,9 @@ export default class TransitProvider extends ProviderBase {
     const ss = this.getSharedSecret();
     const json = DataUtil.JsonStringify64(o);
 
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
+    }
     //console.log(json);
 
     const content = new TextEncoder().encode(json);
@@ -103,9 +106,12 @@ export default class TransitProvider extends ProviderBase {
     keyHeader: KeyHeader,
     transferIv: Uint8Array
   ): Promise<EncryptedKeyHeader> {
-    const sharedSecret = this.getSharedSecret();
+    const ss = this.getSharedSecret();
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
+    }
     const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
-    const cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, sharedSecret);
+    const cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, ss);
 
     return {
       iv: transferIv,

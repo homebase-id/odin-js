@@ -370,7 +370,11 @@ export default class DriveProvider extends ProviderBase {
     }
 
     const cipher = ekh.encryptedAesKey;
-    const combined = await AesEncrypt.CbcDecrypt(cipher, ekh.iv, this.getSharedSecret());
+    const ss = this.getSharedSecret();
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
+    }
+    const combined = await AesEncrypt.CbcDecrypt(cipher, ekh.iv, ss);
 
     const kh: KeyHeader = {
       iv: new Uint8Array(combined.slice(0, 16)),
