@@ -44,12 +44,14 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
   //gets posts.  if type is specified, returns a filtered list of the requested type; otherwise all types are returned
   async getPosts<T extends BlogContent>(
-    channelId: Guid,
+    channelId: Guid | string,
     type: BlogPostType,
     pageNumber = 1,
     pageSize = 10
   ): Promise<T[]> {
-    const targetDrive = this.getPublishChannelDrive(channelId);
+    const targetDrive = this.getPublishChannelDrive(
+      typeof channelId === 'string' ? Guid.parse(channelId) : channelId
+    );
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       tagsMatchAtLeastOne: type ? [blogPostTypeToTag(type).toString()] : undefined,
@@ -92,8 +94,13 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
   }
 
   //gets the content for a given post id
-  async getBlogContent<T extends BlogContent>(channelId: Guid, id: Guid): Promise<T | undefined> {
-    const targetDrive = this.getPublishChannelDrive(channelId);
+  async getBlogContent<T extends BlogContent>(
+    channelId: Guid | string,
+    id: Guid
+  ): Promise<T | undefined> {
+    const targetDrive = this.getPublishChannelDrive(
+      typeof channelId === 'string' ? Guid.parse(channelId) : channelId
+    );
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [id.toString()],
       targetDrive: targetDrive,

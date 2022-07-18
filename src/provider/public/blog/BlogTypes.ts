@@ -4,8 +4,15 @@ import { AccessControlList } from '../../core/TransitData/TransitTypes';
 export interface ChannelDefinition {
   channelId: string;
   name: string;
+  slug?: string;
   description: string;
   templateId?: number;
+}
+
+export enum ChannelTemplate {
+  MasonryLayout = 0,
+  LargeCards = 101,
+  ClassicBlog = 202,
 }
 
 export class BlogConfig {
@@ -70,6 +77,7 @@ export interface BlogContent {
   id: string;
   channelId: string;
   caption: string;
+  slug?: string;
   dateUnixTime: number;
   primaryImageFileId?: string;
   type: BlogPostType;

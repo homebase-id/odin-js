@@ -191,7 +191,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     const response = await this._driveProvider.QueryBatch<any>(qp, ro);
 
-    // console.log('get attribute search results', qp, searchResults);
+    // console.log('get attribute search results', qp, response);
 
     if (response.searchResults.length == 0) {
       return;

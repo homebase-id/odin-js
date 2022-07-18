@@ -26,6 +26,12 @@ export class HomePageAttributes {
   // static readonly Links: Guid = Guid.parse("99994444-4444-4444-4444-000000007777");
 }
 
+export enum HomePageTheme {
+  CoverPage = 111,
+  SocialClassic = 222,
+  ContentProducer = 333,
+}
+
 export class HomePageFields {
   static readonly HeaderImageId: string = 'headerImageUrl';
   static readonly TagLineId: string = 'tagLine';
