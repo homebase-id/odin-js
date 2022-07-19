@@ -63,7 +63,10 @@ export default class HomePageProvider extends ProviderBase {
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
     attribute.profileId = HomePageConfig.DefaultDriveId.toString();
-    attribute.type = HomePageConfig.AttributeTypeNotApplicable.toString();
+    // TODO: validate why type got overruled in all cases
+    if (!attribute.type) {
+      attribute.type = HomePageConfig.AttributeTypeNotApplicable.toString();
+    }
     attribute.sectionId = HomePageConfig.AttributeSectionNotApplicable.toString();
     return await this._attributeDataProvider.saveAttribute(attribute);
   }

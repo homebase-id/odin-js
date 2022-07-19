@@ -223,9 +223,13 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
     const response = await this._driveProvider.QueryBatch<any>(params);
 
-    // console.log(response);
-
-    if (response.searchResults.length == 1) {
+    // TODO Check Which one to take if multiple? Or only a first dev issue?
+    if (response.searchResults.length >= 1) {
+      if (response.searchResults.length !== 1) {
+        console.warn(
+          'profile [' + profileId.toString() + '] has more than one definition.  Using latest'
+        );
+      }
       const dsr = response.searchResults[0];
       const definition = await this.decryptDefinition(
         dsr,
@@ -234,7 +238,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       );
 
       //sort the sections where lowest number is higher priority
-      definition.sections = definition.sections.sort((a, b) => {
+      definition.sections = definition?.sections?.sort((a, b) => {
         return a.priority - b.priority;
       });
 
