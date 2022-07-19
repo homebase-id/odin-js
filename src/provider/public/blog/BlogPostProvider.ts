@@ -235,7 +235,7 @@ export default class BlogPostProvider extends ProviderBase {
     if (!fileId) {
       throw new Error('Blog post with this ID not found');
     }
-    await this._driveProvider.DeleteFile(
+    return await this._driveProvider.DeleteFile(
       this._blogDefinitionProvider.getPublishChannelDrive(channelId),
       fileId
     );

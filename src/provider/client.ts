@@ -14,17 +14,19 @@ export class Client {
   private _cfg: ProviderOptions;
 
   // Core Providers:
-  driveProvider: DriveProvider;
-  transitProvider: TransitProvider;
-  attributeDataProvider: AttributeDataProvider;
-  mediaProvider: MediaProvider;
+  private _driveProvider: DriveProvider;
+  private _transitProvider: TransitProvider;
+  private _attributeDataProvider: AttributeDataProvider;
+  private _mediaProvider: MediaProvider;
+
+  // Definition Providers
+  blogDefinitionProvider: BlogDefinitionProvider;
+  profileDefinitionProvider: ProfileDefinitionProvider;
 
   // Profile Providers
   profileDataProvider: ProfileDataProvider;
-  profileDefinitionProvider: ProfileDefinitionProvider;
 
   // Blog Providers:
-  blogDefinitionProvider: BlogDefinitionProvider;
   blogPostProvider: BlogPostProvider;
   blogPostReadonlyProvider: BlogPostReadonlyProvider;
 
@@ -35,54 +37,58 @@ export class Client {
     this._cfg = cfg;
 
     // Core Providers:
-    this.driveProvider = new DriveProvider(this._cfg);
-    this.transitProvider = new TransitProvider(this._cfg);
-    this.attributeDataProvider = new AttributeDataProvider({
+    this._driveProvider = new DriveProvider(this._cfg);
+    this._transitProvider = new TransitProvider(this._cfg);
+    this._attributeDataProvider = new AttributeDataProvider({
       ...this._cfg,
-      driveProvider: this.driveProvider,
-      transitProvider: this.transitProvider,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
     });
-    this.mediaProvider = new MediaProvider({
+    this._mediaProvider = new MediaProvider({
       ...this._cfg,
-      driveProvider: this.driveProvider,
-      transitProvider: this.transitProvider,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
+    });
+
+    // Definition Providers
+    this.blogDefinitionProvider = new BlogDefinitionProvider({
+      ...this._cfg,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
+    });
+    this.profileDefinitionProvider = new ProfileDefinitionProvider({
+      ...this._cfg,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
     });
 
     // Profile Providers
     this.profileDataProvider = new ProfileDataProvider({
       ...this._cfg,
-      attributeDataProvider: this.attributeDataProvider,
-    });
-    this.profileDefinitionProvider = new ProfileDefinitionProvider({
-      ...this._cfg,
-      driveProvider: this.driveProvider,
-      transitProvider: this.transitProvider,
+      attributeDataProvider: this._attributeDataProvider,
     });
 
     // Blog Providers:
-    this.blogDefinitionProvider = new BlogDefinitionProvider({
-      ...this._cfg,
-      driveProvider: this.driveProvider,
-      transitProvider: this.transitProvider,
-    });
+
     this.blogPostProvider = new BlogPostProvider({
       ...this._cfg,
-      driveProvider: this.driveProvider,
-      transitProvider: this.transitProvider,
-      mediaProvider: this.mediaProvider,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
+      mediaProvider: this._mediaProvider,
+      blogDefinitionProvider: this.blogDefinitionProvider,
     });
     this.blogPostReadonlyProvider = new BlogPostReadonlyProvider({
       ...this._cfg,
       blogDefinitionProvider: this.blogDefinitionProvider,
-      driveProvider: this.driveProvider,
+      driveProvider: this._driveProvider,
     });
 
     // Home Providers:
     this.homePageProvider = new HomePageProvider({
       ...this._cfg,
-      attributeDataProvider: this.attributeDataProvider,
-      driveProvider: this.driveProvider,
-      transitProvider: this.transitProvider,
+      attributeDataProvider: this._attributeDataProvider,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
     });
   }
 }
