@@ -146,6 +146,15 @@ export default class BlogDefinitionProvider extends ProviderBase {
     }
   }
 
+  public getPublishChannelDrive(channelId: Guid): TargetDrive {
+    const targetDrive: TargetDrive = {
+      alias: channelId.toString(),
+      type: BlogConfig.ChannelDriveType.toString(),
+    };
+
+    return targetDrive;
+  }
+
   // Internals:
   private async getChannelDefinitionInternal(
     id: Guid

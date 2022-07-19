@@ -35,3 +35,4 @@ export * from './provider/public/blog/BlogPostReadonlyProvider';
 export * from './provider/public/blog/BlogDefinitionProvider';
 
 export * from './provider/client';
+export * from './provider/deliveryClient';

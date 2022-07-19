@@ -28,11 +28,13 @@ import {
   blogPostTypeToTag,
   PublishTarget,
 } from './BlogTypes';
+import BlogDefinitionProvider from './BlogDefinitionProvider';
 
 interface BlostPostProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
   transitProvider: TransitProvider;
   mediaProvider: MediaProvider;
+  blogDefinitionProvider: BlogDefinitionProvider;
 }
 
 const FixedKeyHeader: KeyHeader = {
@@ -44,6 +46,7 @@ export default class BlogPostProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
   private _transitProvider: TransitProvider;
   private _mediaProvider: MediaProvider;
+  private _blogDefinitionProvider: BlogDefinitionProvider;
 
   constructor(options: BlostPostProviderOptions) {
     super({
@@ -53,6 +56,7 @@ export default class BlogPostProvider extends ProviderBase {
     this._driveProvider = options.driveProvider;
     this._transitProvider = options.transitProvider;
     this._mediaProvider = options.mediaProvider;
+    this._blogDefinitionProvider = options.blogDefinitionProvider;
   }
 
   public static getMasterContentTargetDrive(): TargetDrive {
@@ -231,7 +235,10 @@ export default class BlogPostProvider extends ProviderBase {
     if (!fileId) {
       throw new Error('Blog post with this ID not found');
     }
-    await this._driveProvider.DeleteFile(this.getPublishChannelDrive(channelId), fileId);
+    await this._driveProvider.DeleteFile(
+      this._blogDefinitionProvider.getPublishChannelDrive(channelId),
+      fileId
+    );
   }
 
   ///
@@ -252,7 +259,7 @@ export default class BlogPostProvider extends ProviderBase {
       const tag = Guid.createEmpty();
 
       const destinationMediaFileId = await this._mediaProvider.uploadImage(
-        this.getPublishChannelDrive(channelId),
+        this._blogDefinitionProvider.getPublishChannelDrive(channelId),
         tag,
         acl,
         new Uint8Array(bytes)
@@ -284,7 +291,7 @@ export default class BlogPostProvider extends ProviderBase {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
         overwriteFileId: existingPublishedFileId ? existingPublishedFileId.toString() : undefined,
-        drive: this.getPublishChannelDrive(channelId),
+        drive: this._blogDefinitionProvider.getPublishChannelDrive(channelId),
       },
       transitOptions: null,
     };
@@ -340,7 +347,7 @@ export default class BlogPostProvider extends ProviderBase {
 
   private async getPublishedFileId(channelId: Guid, id: Guid): Promise<Guid | undefined> {
     const params: FileQueryParams = {
-      targetDrive: this.getPublishChannelDrive(channelId),
+      targetDrive: this._blogDefinitionProvider.getPublishChannelDrive(channelId),
       tagsMatchAtLeastOne: [id.toString()],
     };
 
@@ -377,14 +384,5 @@ export default class BlogPostProvider extends ProviderBase {
         FixedKeyHeader
       );
     }
-  }
-
-  private getPublishChannelDrive(channelId: Guid): TargetDrive {
-    const targetDrive: TargetDrive = {
-      alias: channelId.toString(),
-      type: BlogConfig.ChannelDriveType.toString(),
-    };
-
-    return targetDrive;
   }
 }

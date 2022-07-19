@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 export enum ApiType {
   Owner,
@@ -20,16 +20,6 @@ export class ProviderBase {
 
   protected getSharedSecret(): Uint8Array | undefined {
     return this._options?.sharedSecret;
-  }
-
-  protected getOptions(): ProviderOptions {
-    return this._options;
-  }
-
-  protected AssertHasSharedSecret() {
-    if (this.getSharedSecret() == null) {
-      throw new Error('Shared secret not configured');
-    }
   }
 
   //Returns the endpoint for the identity
@@ -58,9 +48,5 @@ export class ProviderBase {
       baseURL: this.getEndpoint(),
       withCredentials: true,
     });
-  }
-
-  protected handleErrorResponse(error: AxiosError) {
-    throw error;
   }
 }

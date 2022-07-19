@@ -1,7 +1,7 @@
 import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
 import DriveProvider from './core/DriveData/DriveProvider';
 import MediaProvider from './core/MediaProvider';
-import { ApiType } from './core/ProviderBase';
+import { ProviderOptions } from './core/ProviderBase';
 import TransitProvider from './core/TransitData/TransitProvider';
 import ProfileDataProvider from './profile/ProfileDataProvider';
 import ProfileDefinitionProvider from './profile/ProfileDefinitionProvider';
@@ -10,13 +10,8 @@ import BlogPostProvider from './public/blog/BlogPostProvider';
 import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
 import HomePageProvider from './public/home/HomePageProvider';
 
-export interface ClientConfig {
-  api: ApiType;
-  sharedSecret?: Uint8Array;
-}
-
 export class Client {
-  private _cfg: ClientConfig;
+  private _cfg: ProviderOptions;
 
   // Core Providers:
   driveProvider: DriveProvider;
@@ -36,7 +31,7 @@ export class Client {
   // Home Providers:
   homePageProvider: HomePageProvider;
 
-  constructor(cfg: ClientConfig) {
+  constructor(cfg: ProviderOptions) {
     this._cfg = cfg;
 
     // Core Providers:

@@ -49,7 +49,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     pageNumber = 1,
     pageSize = 10
   ): Promise<T[]> {
-    const targetDrive = this.getPublishChannelDrive(
+    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(
       typeof channelId === 'string' ? Guid.parse(channelId) : channelId
     );
     const params: FileQueryParams = {
@@ -86,7 +86,12 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
     for (const key in channels) {
       const channel = channels[key];
-      const channelPosts = await this.getPosts<T>(Guid.parse(channel.channelId), type, 1, 10);
+      const channelPosts = await this.getPosts<T>(
+        Guid.parse(channel.channelId),
+        type,
+        pageNumber,
+        pageSize
+      );
       posts = posts.concat(channelPosts);
     }
 
@@ -98,7 +103,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     channelId: Guid | string,
     id: Guid
   ): Promise<T | undefined> {
-    const targetDrive = this.getPublishChannelDrive(
+    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(
       typeof channelId === 'string' ? Guid.parse(channelId) : channelId
     );
     const params: FileQueryParams = {
@@ -128,15 +133,6 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
   async getChannelDefinition(id: Guid) {
     return await this._blogDefinitionProvider.getChannelDefinition(id);
-  }
-
-  public getPublishChannelDrive(channelId: Guid): TargetDrive {
-    const targetDrive: TargetDrive = {
-      alias: channelId.toString(),
-      type: BlogConfig.ChannelDriveType.toString(),
-    };
-
-    return targetDrive;
   }
 
   ///
