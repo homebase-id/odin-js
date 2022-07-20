@@ -98,7 +98,9 @@ export default class MediaProvider extends ProviderBase {
   }
 
   //retrieves an image, decrypts, then returns a url to be passed to an image control
-  async getDecryptedImageUrl(targetDrive: TargetDrive, fileId: Guid): Promise<string> {
+  async getDecryptedImageUrl(targetDrive: TargetDrive, fileId: Guid | string): Promise<string> {
+    fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
+
     //it seems these will be fine for images but for vidoe and audio we must stream decrypt
 
     return this._driveProvider

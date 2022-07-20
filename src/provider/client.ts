@@ -17,7 +17,7 @@ export class Client {
   private _driveProvider: DriveProvider;
   private _transitProvider: TransitProvider;
   private _attributeDataProvider: AttributeDataProvider;
-  private _mediaProvider: MediaProvider;
+  mediaProvider: MediaProvider;
 
   // Definition Providers
   blogDefinitionProvider: BlogDefinitionProvider;
@@ -44,7 +44,7 @@ export class Client {
       driveProvider: this._driveProvider,
       transitProvider: this._transitProvider,
     });
-    this._mediaProvider = new MediaProvider({
+    this.mediaProvider = new MediaProvider({
       ...this._cfg,
       driveProvider: this._driveProvider,
       transitProvider: this._transitProvider,
@@ -74,7 +74,7 @@ export class Client {
       ...this._cfg,
       driveProvider: this._driveProvider,
       transitProvider: this._transitProvider,
-      mediaProvider: this._mediaProvider,
+      mediaProvider: this.mediaProvider,
       blogDefinitionProvider: this.blogDefinitionProvider,
     });
     this.blogPostReadonlyProvider = new BlogPostReadonlyProvider({

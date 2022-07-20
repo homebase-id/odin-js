@@ -1,5 +1,6 @@
 import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
 import DriveProvider from './core/DriveData/DriveProvider';
+import MediaProvider from './core/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
 import TransitProvider from './core/TransitData/TransitProvider';
 import ProfileDataProvider from './profile/ProfileDataProvider';
@@ -15,10 +16,10 @@ export class DeliveryClient {
   private _transitProvider: TransitProvider;
   private _attributeDataProvider: AttributeDataProvider;
 
-  // Definition Providers
+  // Definition Providers:
   private _blogDefinitionProvider: BlogDefinitionProvider;
 
-  // Profile Providers
+  // Profile Providers:
   profileDataProvider: ProfileDataProvider;
 
   // Blog Providers:
@@ -26,6 +27,9 @@ export class DeliveryClient {
 
   // Home Providers:
   homePageProvider: HomePageProvider;
+
+  // Media Provider:
+  mediaProvider: MediaProvider;
 
   constructor(cfg: ProviderOptions) {
     this._cfg = cfg;
@@ -62,6 +66,13 @@ export class DeliveryClient {
     this.homePageProvider = new HomePageProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
+      driveProvider: this._driveProvider,
+      transitProvider: this._transitProvider,
+    });
+
+    // Media Provider:
+    this.mediaProvider = new MediaProvider({
+      ...this._cfg,
       driveProvider: this._driveProvider,
       transitProvider: this._transitProvider,
     });
