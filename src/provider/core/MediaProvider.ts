@@ -86,8 +86,10 @@ export default class MediaProvider extends ProviderBase {
     return Guid.parse(result.file.fileId);
   }
 
-  async getDecryptedThumbnailUrl(targetDrive: TargetDrive, fileId: Guid): Promise<string> {
-    //it seems these will be fine for images but for vidoe and audio we must stream decrypt
+  async getDecryptedThumbnailUrl(targetDrive: TargetDrive, fileId: Guid | string): Promise<string> {
+    fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
+
+    //it seems these will be fine for images but for video and audio we must stream decrypt
 
     return this._driveProvider.GetMetadata(targetDrive, fileId).then((header) => {
       const thumbnail = JSON.parse(header.metadata.appData.jsonContent);
@@ -101,7 +103,7 @@ export default class MediaProvider extends ProviderBase {
   async getDecryptedImageUrl(targetDrive: TargetDrive, fileId: Guid | string): Promise<string> {
     fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
 
-    //it seems these will be fine for images but for vidoe and audio we must stream decrypt
+    //it seems these will be fine for images but for video and audio we must stream decrypt
 
     return this._driveProvider
       .GetPayloadBytes(targetDrive, fileId, FixedKeyHeader)
