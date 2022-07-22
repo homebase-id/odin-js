@@ -90,7 +90,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
         Guid.parse(channel.channelId),
         type,
         pageNumber,
-        pageSize
+        pageSize / channels.length // TODO: do this properly, now only works if all channels are equal and have the same dates
       );
       posts = posts.concat(channelPosts);
     }
