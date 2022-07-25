@@ -10,6 +10,7 @@ import {
   OrderedAttributeList,
 } from '../core/AttributeData/AttributeDataTypes';
 import AttributeDataProvider from '../core/AttributeData/AttributeDataProvider';
+import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
 
 interface ProfileDataProviderOptions extends ProviderOptions {
   attributeDataProvider: AttributeDataProvider;
@@ -106,6 +107,9 @@ export default class ProfileDataProvider extends ProviderBase {
     type: Guid
   ): Promise<Attribute | undefined> {
     const allVersions = await this.getAttributeVersions(profileId, sectionId, type);
+    if (type === AttributeDefinitions.Photo.type) {
+      console.log(allVersions);
+    }
     return allVersions?.versions[0];
   }
 
