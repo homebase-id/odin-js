@@ -17,6 +17,7 @@ import {
   UploadResult,
 } from '../../core/TransitData/TransitTypes';
 import {
+  Attribute,
   AttributeFile,
   LandingPageLink,
   LandingPageLinkFile,
@@ -59,6 +60,16 @@ export default class HomePageProvider extends ProviderBase {
 
   async getAttribute(attributeId: Guid): Promise<AttributeFile | undefined> {
     return this._attributeDataProvider.getAttribute(HomePageConfig.DefaultDriveId, attributeId);
+  }
+
+  async getBestAttributeVersion(type: Guid): Promise<Attribute | undefined> {
+    const allVersions = await this._attributeDataProvider.getAttributeVersions(
+      HomePageConfig.DefaultDriveId,
+      HomePageConfig.AttributeSectionNotApplicable,
+      type
+    );
+
+    return allVersions?.versions[0];
   }
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
