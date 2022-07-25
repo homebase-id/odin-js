@@ -107,9 +107,6 @@ export default class ProfileDataProvider extends ProviderBase {
     type: Guid
   ): Promise<Attribute | undefined> {
     const allVersions = await this.getAttributeVersions(profileId, sectionId, type);
-    if (type === AttributeDefinitions.Photo.type) {
-      console.log(allVersions);
-    }
     return allVersions?.versions[0];
   }
 
