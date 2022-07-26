@@ -209,8 +209,22 @@ export default class DriveProvider extends ProviderBase {
   ): Promise<T> {
     return this.GetPayloadBytes(targetDrive, fileId, keyHeader).then((bytes) => {
       const json = DataUtil.byteArrayToString(new Uint8Array(bytes));
-      const o = JSON.parse(json);
-      return o;
+      try {
+        const o = JSON.parse(json);
+        return o;
+      } catch (ex) {
+        console.warn('base JSON.parse failed');
+        const replaceAll = (str: string, find: string, replace: string) => {
+          return str.replace(new RegExp(find, 'g'), replace);
+        };
+
+        const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
+        const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
+
+        const o = JSON.parse(jsonWithRemovedEmDash);
+
+        return o;
+      }
     });
   }
 
