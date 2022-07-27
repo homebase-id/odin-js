@@ -189,7 +189,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       contentType: 'application/json',
       appData: {
         tags: [definition.profileId.toString()],
-        fileType: undefined, //TODO: determine if we need to define these for defintion files?
+        fileType: ProfileConfig.ProfileDefinitionFileType, //TODO: determine if we need to define these for defintion files?
         dataType: undefined, //TODO: determine if we need to define these for defintion files?
         contentIsComplete: false,
         jsonContent: null,
@@ -219,6 +219,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [profileId.toString()],
       targetDrive: targetDrive,
+      fileType: [ProfileConfig.ProfileDefinitionFileType],
     };
 
     const response = await this._driveProvider.QueryBatch<any>(params);
@@ -227,7 +228,9 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     if (response.searchResults.length >= 1) {
       if (response.searchResults.length !== 1) {
         console.warn(
-          'profile [' + profileId.toString() + '] has more than one definition.  Using latest'
+          `profile [${profileId.toString()}] has more than one definition (${
+            response.searchResults.length
+          }). Using latest`
         );
         // console.warn(response.searchResults);
 

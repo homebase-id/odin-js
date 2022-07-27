@@ -6,7 +6,7 @@ export class ProfileConfig {
   static readonly ProfileDriveType: Guid = Guid.parse('11112222-0000-0000-0000-000000001111');
 
   //Indicates that a file holds the profile definition for this drive
-  // static readonly ProfileDefinitionFileType: number = 77;
+  static readonly ProfileDefinitionFileType: number = 88;
 }
 
 export class BuiltInProfiles {
