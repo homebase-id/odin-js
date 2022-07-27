@@ -58,7 +58,7 @@ export default class HomePageProvider extends ProviderBase {
     );
   }
 
-  async getAttribute(attributeId: Guid): Promise<AttributeFile | undefined> {
+  async getAttribute(attributeId: Guid | string): Promise<AttributeFile | undefined> {
     return this._attributeDataProvider.getAttribute(HomePageConfig.DefaultDriveId, attributeId);
   }
 

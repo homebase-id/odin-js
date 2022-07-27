@@ -229,6 +229,18 @@ export default class ProfileDefinitionProvider extends ProviderBase {
         console.warn(
           'profile [' + profileId.toString() + '] has more than one definition.  Using latest'
         );
+        // console.warn(response.searchResults);
+
+        /// Debug Code:
+        // response.searchResults.map(async (profileDef) => {
+        //   console.log(profileDef.fileId);
+        //   const definition = await this.decryptDefinition(
+        //     profileDef,
+        //     targetDrive,
+        //     response.includeMetadataHeader
+        //   );
+        //   console.log(definition);
+        // });
       }
       const dsr = response.searchResults[0];
       const definition = await this.decryptDefinition(
@@ -272,10 +284,12 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     }
   }
 
-  public static getTargetDrive(profileId: Guid): TargetDrive {
+  public static getTargetDrive(profileId: Guid | string): TargetDrive {
     return {
-      alias: profileId.toString(),
+      alias: typeof profileId === 'string' ? profileId : profileId.toString(),
       type: ProfileConfig.ProfileDriveType.toString(),
     };
   }
 }
+
+export const getTargetDriveFromProfileId = ProfileDefinitionProvider.getTargetDrive;

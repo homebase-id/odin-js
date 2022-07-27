@@ -38,14 +38,16 @@ export default class MediaProvider extends ProviderBase {
   //gets the data available for the specified attribute if available
   async uploadImage(
     targetDrive: TargetDrive,
-    tag: Guid,
+    tag: Guid | undefined,
     acl: AccessControlList,
     imageBytes: Uint8Array,
-    fileId?: Guid
+    fileId?: Guid | string
   ): Promise<Guid | null> {
     if (!targetDrive) {
       throw 'Missing target drive';
     }
+
+    fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
 
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
@@ -67,7 +69,7 @@ export default class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [tag.toString()],
+        tags: [(tag ?? Guid.createEmpty()).toString()],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: thumbnailJson,

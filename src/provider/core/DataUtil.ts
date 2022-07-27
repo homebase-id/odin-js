@@ -65,4 +65,8 @@ export class DataUtil {
   static byteArrayToString(bytes: Uint8Array) {
     return String.fromCharCode(...Array.from(bytes));
   }
+
+  static getNewGuid() {
+    return Guid.create().toString();
+  }
 }

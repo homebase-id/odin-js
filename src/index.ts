@@ -22,6 +22,7 @@ export * from './provider/core/AttributeData/AttributeDataTypes';
 export * from './provider/profile/ProfileConfig';
 export * from './provider/profile/ProfileTypes';
 export * from './provider/profile/ProfileDataProvider';
+export * from './provider/profile/ProfileDefinitionProvider';
 
 // Home
 export * from './provider/public/home/HomeTypes';

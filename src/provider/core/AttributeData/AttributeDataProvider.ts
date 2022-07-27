@@ -174,7 +174,8 @@ export default class AttributeDataProvider extends ProviderBase {
     return list ?? null;
   }
 
-  async getAttribute(profileId: Guid, id: Guid): Promise<AttributeFile | undefined> {
+  async getAttribute(profileId: Guid, id: Guid | string): Promise<AttributeFile | undefined> {
+    id = typeof id === 'string' ? Guid.parse(id) : id;
     // console.log(`Looking for attribute: ${id} in profile ${profileId}`);
 
     const targetDrive = this.getTargetDrive(profileId);
@@ -263,7 +264,7 @@ export default class AttributeDataProvider extends ProviderBase {
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        overwriteFileId: Guid.isGuid(attribute?.fileId ?? '') ? attribute.fileId.toString() : null,
+        overwriteFileId: Guid.isGuid(attribute?.fileId ?? '') ? attribute.fileId?.toString() : null,
         drive: this.getTargetDrive(Guid.parse(attribute.profileId)),
       },
       transitOptions: null,

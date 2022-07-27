@@ -89,7 +89,7 @@ export default class ProfileDataProvider extends ProviderBase {
     );
   }
 
-  async getAttribute(profileId: Guid, id: Guid): Promise<AttributeFile | undefined> {
+  async getAttribute(profileId: Guid, id: Guid | string): Promise<AttributeFile | undefined> {
     return await this._attributeDataProvider.getAttribute(profileId, id);
   }
 

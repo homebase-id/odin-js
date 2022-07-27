@@ -73,7 +73,9 @@ export default class BlogDefinitionProvider extends ProviderBase {
     return definitions;
   }
 
-  async getChannelDefinition(id: Guid): Promise<ChannelDefinition | undefined> {
+  async getChannelDefinition(id: Guid | string): Promise<ChannelDefinition | undefined> {
+    id = typeof id === 'string' ? Guid.parse(id) : id;
+
     const { definition } = (await this.getChannelDefinitionInternal(id)) ?? {
       definition: undefined,
     };

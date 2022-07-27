@@ -386,3 +386,5 @@ export default class BlogPostProvider extends ProviderBase {
     }
   }
 }
+
+export const getBlogMasterContentTargetDrive = BlogPostProvider.getMasterContentTargetDrive;

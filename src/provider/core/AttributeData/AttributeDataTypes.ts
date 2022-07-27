@@ -2,7 +2,7 @@ import { Guid } from 'guid-typescript';
 import { AccessControlList, SecurityGroupType } from '../TransitData/TransitTypes';
 
 export interface AttributeFile extends Attribute {
-  fileId: Guid;
+  fileId?: Guid;
   acl: AccessControlList;
 }
 
