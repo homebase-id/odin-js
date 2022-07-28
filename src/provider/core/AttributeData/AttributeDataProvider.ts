@@ -174,7 +174,11 @@ export default class AttributeDataProvider extends ProviderBase {
     return list ?? null;
   }
 
-  async getAttribute(profileId: Guid, id: Guid | string): Promise<AttributeFile | undefined> {
+  async getAttribute(
+    profileId: Guid | string,
+    id: Guid | string
+  ): Promise<AttributeFile | undefined> {
+    profileId = typeof profileId === 'string' ? Guid.parse(profileId) : profileId;
     id = typeof id === 'string' ? Guid.parse(id) : id;
     // console.log(`Looking for attribute: ${id} in profile ${profileId}`);
 

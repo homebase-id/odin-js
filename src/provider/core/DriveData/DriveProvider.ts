@@ -223,6 +223,7 @@ export default class DriveProvider extends ProviderBase {
 
         const o = JSON.parse(jsonWithRemovedEmDash);
 
+        console.warn('... but we fixed it');
         return o;
       }
     });

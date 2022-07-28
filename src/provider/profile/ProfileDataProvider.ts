@@ -48,11 +48,14 @@ export default class ProfileDataProvider extends ProviderBase {
 
   //Returns the top version of each attribute by type for the given section.
   async getDisplayableSectionAttributes(
-    profileId: Guid,
-    sectionId: Guid,
+    profileId: Guid | string,
+    sectionId: Guid | string,
     pageNumber: number,
     pageSize: number
   ): Promise<AttributeDisplayHash> {
+    profileId = typeof profileId === 'string' ? Guid.parse(profileId) : profileId;
+    sectionId = typeof sectionId === 'string' ? Guid.parse(sectionId) : sectionId;
+
     const attributes = await this._attributeDataProvider.getProfileAttributes(
       profileId,
       sectionId,
@@ -76,11 +79,14 @@ export default class ProfileDataProvider extends ProviderBase {
   }
 
   async getProfileAttributes(
-    profileId: Guid,
-    sectionId: Guid | undefined,
+    profileId: Guid | string,
+    sectionId: Guid | string | undefined,
     pageNumber: number,
     pageSize: number
   ): Promise<Attribute[]> {
+    profileId = typeof profileId === 'string' ? Guid.parse(profileId) : profileId;
+    sectionId = typeof sectionId === 'string' ? Guid.parse(sectionId) : sectionId;
+
     return await this._attributeDataProvider.getProfileAttributes(
       profileId,
       sectionId,
@@ -89,7 +95,10 @@ export default class ProfileDataProvider extends ProviderBase {
     );
   }
 
-  async getAttribute(profileId: Guid, id: Guid | string): Promise<AttributeFile | undefined> {
+  async getAttribute(
+    profileId: Guid | string,
+    id: Guid | string
+  ): Promise<AttributeFile | undefined> {
     return await this._attributeDataProvider.getAttribute(profileId, id);
   }
 
