@@ -114,8 +114,13 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
   async ensureConfiguration() {
     const save = async (definition: ProfileDefinition) => {
-      const response = await this.getProfileDefinitionInternal(Guid.parse(definition.profileId));
-      if (response?.definition == null) {
+      try {
+        const response = await this.getProfileDefinitionInternal(Guid.parse(definition.profileId));
+        if (response?.definition == null) {
+          await this.saveProfileDefinition(definition);
+        }
+      } catch (ex) {
+        console.log('Profile definition failed to get, going to save directly');
         await this.saveProfileDefinition(definition);
       }
     };
