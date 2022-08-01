@@ -83,7 +83,7 @@ export default class ProfileDataProvider extends ProviderBase {
     sectionId: Guid | string | undefined,
     pageNumber: number,
     pageSize: number
-  ): Promise<Attribute[]> {
+  ): Promise<AttributeFile[]> {
     profileId = typeof profileId === 'string' ? Guid.parse(profileId) : profileId;
     sectionId = typeof sectionId === 'string' ? Guid.parse(sectionId) : sectionId;
 

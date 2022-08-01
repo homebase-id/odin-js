@@ -48,7 +48,7 @@ export default class AttributeDataProvider extends ProviderBase {
     sectionId: Guid | undefined,
     pageNumber: number,
     pageSize: number
-  ): Promise<Attribute[]> {
+  ): Promise<AttributeFile[]> {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
@@ -58,7 +58,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     const result = await this._driveProvider.QueryBatch<any>(qp);
 
-    let attributes: Attribute[] = [];
+    let attributes: AttributeFile[] = [];
 
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult<any> = result.searchResults[key];
@@ -68,13 +68,14 @@ export default class AttributeDataProvider extends ProviderBase {
         throw new Error('Attribute is encrypted:TODO support this');
       }
 
-      let attr: Attribute = {
+      let attr: AttributeFile = {
         id: '',
         type: '',
         sectionId: '',
         priority: -1,
         data: null,
         profileId: profileId.toString(),
+        acl: dsr.accessControlList,
       };
 
       if (dsr.contentIsComplete && result.includeMetadataHeader) {
@@ -87,6 +88,7 @@ export default class AttributeDataProvider extends ProviderBase {
       } else {
         attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
       }
+      attr.fileId = attr.fileId ?? fileId;
 
       // TODO: this overwrites the priority stored in the
       // attribute.  Need to fix this by considering if the
