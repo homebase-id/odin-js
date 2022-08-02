@@ -270,7 +270,10 @@ export default class AttributeDataProvider extends ProviderBase {
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        overwriteFileId: Guid.isGuid(attribute?.fileId ?? '') ? attribute.fileId?.toString() : null,
+        // The fact that it is guid can be lost along the way, so if not, we try the internal value of the object first
+        overwriteFileId: Guid.isGuid(attribute?.fileId ?? '')
+          ? attribute.fileId?.toString()
+          : attribute?.fileId?.['value'] ?? null,
         drive: this.getTargetDrive(Guid.parse(attribute.profileId)),
       },
       transitOptions: null,
