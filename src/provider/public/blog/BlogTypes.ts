@@ -94,18 +94,23 @@ export interface ReadTimeStats {
 export interface BlogArticle extends BlogContent {
   abstract: string;
   headerImageFileId: string;
-  body: string;
+  body: string | Record<string, unknown>[];
+  type: 'Article';
 }
 
 export interface ImagePost extends BlogContent {
   imageFileId: string;
+  type: 'ImagePost';
 }
 
 export interface VideoPost extends BlogContent {
   videoFileId: string;
+  type: 'Video';
 }
 
-export type Tweet = BlogContent;
+export interface Tweet extends BlogContent {
+  type: 'Tweet';
+}
 
 //
 // export interface ProfileSection {

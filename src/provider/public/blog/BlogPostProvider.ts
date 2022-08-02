@@ -124,7 +124,11 @@ export default class BlogPostProvider extends ProviderBase {
     return posts;
   }
 
-  async getBlogPostFile<T extends BlogContent>(id: Guid): Promise<BlogPostFile<T> | undefined> {
+  async getBlogPostFile<T extends BlogContent>(
+    id: Guid | string
+  ): Promise<BlogPostFile<T> | undefined> {
+    id = typeof id === 'string' ? Guid.parse(id) : id;
+
     const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
 
     const params: FileQueryParams = {
@@ -152,10 +156,18 @@ export default class BlogPostProvider extends ProviderBase {
     file: BlogPostFile<T>,
     publishState: BlogPostPublishStatus = BlogPostPublishStatus.Draft
   ): Promise<Guid> {
+    if (!file.content.id) {
+      file.content.id = Guid.create().toString();
+    }
+
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        overwriteFileId: file.fileId?.toString(),
+        // overwriteFileId: file.fileId?.toString(),
+        // The fact that it is guid can be lost along the way, so if not, we try the internal value of the object first
+        overwriteFileId: Guid.isGuid(file?.fileId ?? '')
+          ? file.fileId?.toString()
+          : file?.fileId?.['value'] ?? null,
         drive: BlogPostProvider.getMasterContentTargetDrive(),
       },
       transitOptions: null,
