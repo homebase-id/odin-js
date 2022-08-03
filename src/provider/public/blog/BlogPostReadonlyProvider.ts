@@ -1,4 +1,3 @@
-import { Guid } from 'guid-typescript';
 import { DataUtil } from '../../core/DataUtil';
 import DriveProvider from '../../core/DriveData/DriveProvider';
 import {
@@ -44,14 +43,12 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
   //gets posts.  if type is specified, returns a filtered list of the requested type; otherwise all types are returned
   async getPosts<T extends BlogContent>(
-    channelId: Guid | string,
+    channelId: string,
     type: BlogPostType,
     pageNumber = 1,
     pageSize = 10
   ): Promise<T[]> {
-    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(
-      typeof channelId === 'string' ? Guid.parse(channelId) : channelId
-    );
+    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       tagsMatchAtLeastOne: type ? [blogPostTypeToTag(type).toString()] : undefined,
@@ -63,7 +60,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       includeMetadataHeader: true,
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params, ro);
+    const response = await this._driveProvider.QueryBatch(params, ro);
 
     const posts: T[] = [];
     for (const key in response.searchResults) {
@@ -87,7 +84,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     for (const key in channels) {
       const channel = channels[key];
       const channelPosts = await this.getPosts<T>(
-        Guid.parse(channel.channelId),
+        channel.channelId,
         type,
         pageNumber,
         pageSize / channels.length // TODO: do this properly, now only works if all channels are equal and have the same dates
@@ -100,23 +97,21 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
   //gets the content for a given post id
   async getBlogContent<T extends BlogContent>(
-    channelId: Guid | string,
-    id: Guid
+    channelId: string,
+    id: string
   ): Promise<T | undefined> {
-    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(
-      typeof channelId === 'string' ? Guid.parse(channelId) : channelId
-    );
+    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(channelId);
     const params: FileQueryParams = {
-      tagsMatchAtLeastOne: [id.toString()],
+      tagsMatchAtLeastOne: [id],
       targetDrive: targetDrive,
       fileType: [BlogConfig.BlogPostFileType],
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params);
+    const response = await this._driveProvider.QueryBatch(params);
 
     if (response.searchResults.length >= 1) {
       if (response.searchResults.length > 1) {
-        console.warn(`Found more than one file with alias [${id.toString()}].  Using first entry.`);
+        console.warn(`Found more than one file with alias [${id}].  Using first entry.`);
       }
 
       const dsr = response.searchResults[0];
@@ -131,14 +126,14 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     return channels;
   }
 
-  async getChannelDefinition(id: Guid) {
+  async getChannelDefinition(id: string) {
     return await this._blogDefinitionProvider.getChannelDefinition(id);
   }
 
   ///
 
   private async dsrToBlogContent<T extends BlogContent>(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<T> {
@@ -147,13 +142,13 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
   }
 
   private async decryptBlogContent<T extends BlogContent>(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<T> {
-    if (dsr.contentIsComplete && includeMetadataHeader) {
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.jsonContent),
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
         FixedKeyHeader
       );
       const json = DataUtil.byteArrayToString(bytes);
@@ -161,7 +156,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     } else {
       return await this._driveProvider.GetPayloadAsJson<T>(
         targetDrive,
-        Guid.parse(dsr.fileId),
+        dsr.fileMetadata.file.fileId,
         FixedKeyHeader
       );
     }

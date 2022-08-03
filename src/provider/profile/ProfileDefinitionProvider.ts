@@ -108,19 +108,19 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     this._transitProvider = options.transitProvider;
   }
 
-  getDefaultProfileId(): Guid {
-    return BuiltInProfiles.StandardProfileId;
+  getDefaultProfileId(): string {
+    return BuiltInProfiles.StandardProfileId.toString();
   }
 
   async ensureConfiguration() {
     const save = async (definition: ProfileDefinition) => {
       try {
-        const response = await this.getProfileDefinitionInternal(Guid.parse(definition.profileId));
+        const response = await this.getProfileDefinitionInternal(definition.profileId);
         if (response?.definition == null) {
           await this.saveProfileDefinition(definition);
         }
       } catch (ex) {
-        console.log('Profile definition failed to get, going to save directly');
+        console.warn('Profile definition failed to get, going to save directly');
         await this.saveProfileDefinition(definition);
       }
     };
@@ -131,7 +131,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
   async getProfileDefinitions(): Promise<ProfileDefinition[]> {
     const drives = await this._driveProvider.GetDrivesByType(
-      ProfileConfig.ProfileDriveType,
+      ProfileConfig.ProfileDriveType.toString(),
       1,
       1000
     );
@@ -148,7 +148,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       const header = profileHeaders[key];
 
       //hit the drive for the profile definition file
-      const { definition } = (await this.getProfileDefinitionInternal(Guid.parse(header.id))) ?? {
+      const { definition } = (await this.getProfileDefinitionInternal(header.id)) ?? {
         definition: undefined,
       };
 
@@ -162,7 +162,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     return definitions;
   }
 
-  async getProfileDefinition(profileId: Guid): Promise<ProfileDefinition | undefined> {
+  async getProfileDefinition(profileId: string): Promise<ProfileDefinition | undefined> {
     const { definition } = (await this.getProfileDefinitionInternal(profileId)) ?? {
       definition: undefined,
     };
@@ -171,12 +171,10 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
   async saveProfileDefinition(definition: ProfileDefinition): Promise<void> {
     const driveMetadata = ''; //TODO: is this needed here?
-    const targetDrive = ProfileDefinitionProvider.getTargetDrive(Guid.parse(definition.profileId));
+    const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
 
-    const { fileId } = (await this.getProfileDefinitionInternal(
-      Guid.parse(definition.profileId)
-    )) ?? {
+    const { fileId } = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
       fileId: undefined,
     };
 
@@ -217,8 +215,8 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   ///
 
   private async getProfileDefinitionInternal(
-    profileId: Guid
-  ): Promise<{ definition: ProfileDefinition; fileId: Guid } | undefined> {
+    profileId: string
+  ): Promise<{ definition: ProfileDefinition; fileId: string } | undefined> {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
     const params: FileQueryParams = {
@@ -227,7 +225,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       fileType: [ProfileConfig.ProfileDefinitionFileType],
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params);
+    const response = await this._driveProvider.QueryBatch(params);
 
     // TODO Check Which one to take if multiple? Or only a first dev issue?
     if (response.searchResults.length >= 1) {
@@ -237,18 +235,6 @@ export default class ProfileDefinitionProvider extends ProviderBase {
             response.searchResults.length
           }). Using latest`
         );
-        // console.warn(response.searchResults);
-
-        /// Debug Code:
-        // response.searchResults.map(async (profileDef) => {
-        //   console.log(profileDef.fileId);
-        //   const definition = await this.decryptDefinition(
-        //     profileDef,
-        //     targetDrive,
-        //     response.includeMetadataHeader
-        //   );
-        //   console.log(definition);
-        // });
       }
       const dsr = response.searchResults[0];
       const definition = await this.decryptDefinition(
@@ -263,7 +249,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       });
 
       return {
-        fileId: Guid.parse(dsr.fileId),
+        fileId: dsr.fileMetadata.file.fileId,
         definition: definition,
       };
     }
@@ -272,13 +258,13 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   private async decryptDefinition(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<ProfileDefinition> {
-    if (dsr.contentIsComplete && includeMetadataHeader) {
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.jsonContent),
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
         FixedKeyHeader
       );
       const json = DataUtil.byteArrayToString(bytes);
@@ -286,15 +272,15 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     } else {
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
-        Guid.parse(dsr.fileId),
+        dsr.fileMetadata.file.fileId,
         FixedKeyHeader
       );
     }
   }
 
-  public static getTargetDrive(profileId: Guid | string): TargetDrive {
+  public static getTargetDrive(profileId: string): TargetDrive {
     return {
-      alias: typeof profileId === 'string' ? profileId : profileId.toString(),
+      alias: profileId,
       type: ProfileConfig.ProfileDriveType.toString(),
     };
   }

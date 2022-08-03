@@ -44,8 +44,8 @@ export default class AttributeDataProvider extends ProviderBase {
 
   //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
   async getProfileAttributes(
-    profileId: Guid,
-    sectionId: Guid | undefined,
+    profileId: string,
+    sectionId: string | undefined,
     pageNumber: number,
     pageSize: number
   ): Promise<AttributeFile[]> {
@@ -56,15 +56,15 @@ export default class AttributeDataProvider extends ProviderBase {
       tagsMatchAtLeastOne: sectionId ? [sectionId?.toString()] : [],
     };
 
-    const result = await this._driveProvider.QueryBatch<any>(qp);
+    const result = await this._driveProvider.QueryBatch(qp, { maxRecords: pageSize });
 
     let attributes: AttributeFile[] = [];
 
     for (const key in result.searchResults) {
-      const dsr: DriveSearchResult<any> = result.searchResults[key];
-      const fileId = Guid.parse(dsr.fileId);
+      const dsr: DriveSearchResult = result.searchResults[key];
+      const fileId = dsr.fileMetadata.file.fileId;
 
-      if (dsr.payloadIsEncrypted) {
+      if (dsr.fileMetadata.payloadIsEncrypted) {
         throw new Error('Attribute is encrypted:TODO support this');
       }
 
@@ -74,13 +74,13 @@ export default class AttributeDataProvider extends ProviderBase {
         sectionId: '',
         priority: -1,
         data: null,
-        profileId: profileId.toString(),
-        acl: dsr.accessControlList,
+        profileId: profileId,
+        acl: dsr.serverMetadata.accessControlList,
       };
 
-      if (dsr.contentIsComplete && result.includeMetadataHeader) {
+      if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
         const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-          DataUtil.base64ToUint8Array(dsr.jsonContent),
+          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
           FixedKeyHeader
         );
         const json = DataUtil.byteArrayToString(bytes);
@@ -108,40 +108,40 @@ export default class AttributeDataProvider extends ProviderBase {
 
   //gets all versions of an attribute available to the caller
   async getAttributeVersions(
-    profileId: Guid,
-    sectionId: Guid,
-    attributeType: Guid
+    profileId: string,
+    sectionId: string,
+    attributeType: string
   ): Promise<OrderedAttributeList | null> {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
-      tagsMatchAtLeastOne: [attributeType.toString()],
+      tagsMatchAll: [attributeType, sectionId],
     };
 
-    const result = await this._driveProvider.QueryBatch<any>(qp);
+    const result = await this._driveProvider.QueryBatch(qp);
     let versions: Attribute[] = [];
 
     for (const key in result.searchResults) {
-      const dsr: DriveSearchResult<any> = result.searchResults[key];
-      const fileId = Guid.parse(dsr.fileId);
+      const dsr: DriveSearchResult = result.searchResults[key];
+      const fileId = dsr.fileMetadata.file.fileId;
 
-      if (dsr.payloadIsEncrypted) {
+      if (dsr.fileMetadata.payloadIsEncrypted) {
         throw new Error('Attribute is encrypted:TODO support this');
       }
 
       let attr: Attribute = {
         id: '',
-        type: attributeType.toString(),
-        sectionId: '',
+        type: attributeType,
+        sectionId: sectionId,
         priority: -1,
         data: null,
-        profileId: profileId.toString(),
+        profileId: profileId,
       };
 
-      if (dsr.contentIsComplete && result.includeMetadataHeader) {
+      if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
         const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-          DataUtil.base64ToUint8Array(dsr.jsonContent),
+          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
           FixedKeyHeader
         );
         const json = DataUtil.byteArrayToString(bytes);
@@ -156,10 +156,7 @@ export default class AttributeDataProvider extends ProviderBase {
       // order set by the user
       attr.priority = dsr.priority;
 
-      //HACK: filter by section id until we can query by multiple tags on the server
-      if (sectionId.equals(Guid.parse(attr.sectionId))) {
-        versions.push(attr);
-      }
+      versions.push(attr);
     }
 
     //sort where lowest number is higher priority
@@ -176,18 +173,11 @@ export default class AttributeDataProvider extends ProviderBase {
     return list ?? null;
   }
 
-  async getAttribute(
-    profileId: Guid | string,
-    id: Guid | string
-  ): Promise<AttributeFile | undefined> {
-    profileId = typeof profileId === 'string' ? Guid.parse(profileId) : profileId;
-    id = typeof id === 'string' ? Guid.parse(id) : id;
-    // console.log(`Looking for attribute: ${id} in profile ${profileId}`);
-
+  async getAttribute(profileId: string, id: string): Promise<AttributeFile | undefined> {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
-      tagsMatchAll: [id.toString()],
+      tagsMatchAll: [id],
       fileType: [AttributeConfig.AttributeFileType],
     };
 
@@ -196,9 +186,7 @@ export default class AttributeDataProvider extends ProviderBase {
       includeMetadataHeader: true,
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(qp, ro);
-
-    // console.log('get attribute search results', qp, response);
+    const response = await this._driveProvider.QueryBatch(qp, ro);
 
     if (response.searchResults.length == 0) {
       return;
@@ -207,25 +195,25 @@ export default class AttributeDataProvider extends ProviderBase {
     if (response.searchResults.length > 1) {
       console.warn(
         'Attribute Id [' +
-          id.toString() +
+          id +
           '] in profile [' +
-          profileId.toString() +
+          profileId +
           '] has more than one file.  Using latest'
       );
     }
 
-    const dsr: DriveSearchResult<any> = response.searchResults[0];
-    if (dsr.payloadIsEncrypted) {
+    const dsr: DriveSearchResult = response.searchResults[0];
+    if (dsr.fileMetadata.payloadIsEncrypted) {
       throw new Error('Attribute is encrypted:TODO support this');
     }
 
-    const fileId = Guid.parse(dsr.fileId);
+    const fileId = dsr.fileMetadata.file.fileId;
 
     let payload: Attribute;
 
-    if (dsr.contentIsComplete && response.includeMetadataHeader) {
+    if (dsr.fileMetadata.appData.contentIsComplete && response.includeMetadataHeader) {
       const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.jsonContent),
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
         FixedKeyHeader
       );
       const json = DataUtil.byteArrayToString(bytes);
@@ -240,11 +228,10 @@ export default class AttributeDataProvider extends ProviderBase {
 
     const attributeFile: AttributeFile = {
       ...payload,
-      fileId: Guid.parse(dsr.fileId),
-      acl: dsr.accessControlList,
+      fileId: dsr.fileMetadata.file.fileId,
+      acl: dsr.serverMetadata.accessControlList,
     };
 
-    // console.log('get attribute', attributeFile);
     return attributeFile;
   }
 
@@ -270,11 +257,8 @@ export default class AttributeDataProvider extends ProviderBase {
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        // The fact that it is guid can be lost along the way, so if not, we try the internal value of the object first
-        overwriteFileId: Guid.isGuid(attribute?.fileId ?? '')
-          ? attribute.fileId?.toString()
-          : attribute?.fileId?.['value'] ?? null,
-        drive: this.getTargetDrive(Guid.parse(attribute.profileId)),
+        overwriteFileId: attribute?.fileId ?? '',
+        drive: this.getTargetDrive(attribute.profileId),
       },
       transitOptions: null,
     };
@@ -282,7 +266,7 @@ export default class AttributeDataProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id.toString()],
+        tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
         fileType: AttributeConfig.AttributeFileType,
         contentIsComplete: false,
         jsonContent: null,
@@ -302,13 +286,13 @@ export default class AttributeDataProvider extends ProviderBase {
     );
 
     //update server-side info
-    attribute.fileId = Guid.parse(result.file.fileId);
+    attribute.fileId = result.file.fileId;
     return attribute;
   }
 
-  private getTargetDrive(profileId: Guid) {
+  private getTargetDrive(profileId: string) {
     return {
-      alias: profileId.toString(),
+      alias: profileId,
       type: ProfileConfig.ProfileDriveType.toString(),
     };
   }

@@ -1,14 +1,4 @@
 import { AccessControlList } from '../TransitData/TransitTypes';
-import { Guid } from 'guid-typescript';
-
-export interface SecuredFileContent<TPayload> {
-  driveId: Guid | null;
-  fileId: Guid | null;
-  tags: string[];
-  accessControlList: AccessControlList;
-  content: TPayload;
-}
-
 export enum DrivePermissions {
   None = 0,
   Read = 1,
@@ -29,15 +19,10 @@ export interface KeyHeader {
   aesKey: Uint8Array;
 }
 
-export interface EncryptedClientFileHeader {
-  encryptedKeyHeader: EncryptedKeyHeader;
-  fileMetadata: FileMetadata;
-}
-
-export interface UnencryptedFileHeader {
-  keyHeader: KeyHeader;
-  metadata: FileMetadata;
-}
+// export interface EncryptedClientFileHeader {
+//   encryptedKeyHeader: EncryptedKeyHeader;
+//   fileMetadata: FileMetadata;
+// }
 
 export interface FileMetadata {
   file: ExternalFileIdentifier;
@@ -45,7 +30,14 @@ export interface FileMetadata {
   updated: number;
   contentType: string;
   payloadIsEncrypted: boolean;
+  senderDotYouId: boolean;
+  payloadSize: number;
+  originalRecipientList: string[];
   appData: AppFileMetaData;
+}
+
+export interface ServerMetaData {
+  accessControlList: AccessControlList;
 }
 
 export interface AppFileMetaData {
@@ -63,25 +55,26 @@ export interface ExternalFileIdentifier {
 export interface DriveDefinition {
   name: string;
   alias: string;
-  metadata: string;
   type: string;
-  allowAnonymousReads: boolean;
+  metadata: string;
   isReadonly: boolean;
+  allowAnonymousReads: boolean;
 }
 
-export interface DriveSearchResult<TJsonContent> {
-  fileId: string;
-  tags: string[] | null;
-  fileType: number;
-  contentIsComplete: boolean;
-  payloadIsEncrypted: boolean;
-  jsonContent: TJsonContent;
-  createdTimestamp: number;
-  senderDotYouId: string | null;
-  lastUpdatedTimestamp: number;
-  accessControlList: AccessControlList;
+export interface DriveSearchResult {
+  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+  fileMetadata: FileMetadata;
+  serverMetadata: ServerMetaData;
   priority: number;
 }
+
+// TODO: replace with regular DriveSearchResult without generic?
+// export interface UnencryptedFileHeader {
+//   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+//   fileMetadata: FileMetadata;
+//   serverMetadata: ServerMetaData;
+//   priority: number;
+// }
 
 export interface QueryParams {
   targetDrive: TargetDrive;
@@ -101,18 +94,19 @@ export interface FileQueryParams {
   targetDrive: TargetDrive;
   fileType?: number[] | undefined;
   dataType?: number[] | undefined;
-  userDate?: TimeRange;
-  threadId?: string[] | undefined; //list of base64 encoded byte arrays
   sender?: string[] | undefined; //list of base64 encoded byte arrays
+  threadId?: string[] | undefined; //list of base64 encoded byte arrays
+  userDate?: TimeRange;
   tagsMatchAtLeastOne?: string[] | undefined; //list of base64 encoded byte arrays
   tagsMatchAll?: string[] | undefined; //list of base64 encoded byte arrays
 }
 
-export interface GetRecentResultOptions {
+export interface GetModifiedResultOptions {
+  maxRecords: number;
+  includeJsonContent?: boolean;
+  excludePreviewThumbnail?: boolean;
   maxDate?: number | undefined;
   cursor?: number | undefined;
-  maxRecords: number;
-  includeMetadataHeader?: boolean;
 }
 
 export interface GetBatchQueryResultOptions {
@@ -124,16 +118,16 @@ export interface GetBatchQueryResultOptions {
   includeMetadataHeader?: boolean;
 }
 
-export interface QueryRecentResponse<T> {
-  cursorState: number;
-  includeMetadataHeader: boolean;
-  searchResults: DriveSearchResult<T>[];
+export interface QueryModifiedResponse {
+  includeJsonContent: boolean;
+  cursor: number;
+  searchResults: DriveSearchResult[];
 }
 
-export interface QueryBatchResponse<T> {
+export interface QueryBatchResponse {
   cursorState: string;
   includeMetadataHeader: boolean;
-  searchResults: DriveSearchResult<T>[];
+  searchResults: DriveSearchResult[];
 }
 
 export interface TargetDrive {

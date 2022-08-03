@@ -67,7 +67,7 @@ export interface BlogMasterPayload<T extends BlogContent> {
 }
 
 export interface BlogPostFile<T extends BlogContent> {
-  fileId?: Guid;
+  fileId?: string;
   acl: AccessControlList;
   publishTargets: PublishTarget[];
   content: T;
