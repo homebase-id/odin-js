@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
 import { DataUtil } from '../core/DataUtil';
-import DriveProvider from '../core/DriveData/DriveProvider';
+import { DriveProvider } from '../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
   FileQueryParams,
@@ -115,10 +115,10 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   async ensureConfiguration() {
     const save = async (definition: ProfileDefinition) => {
       try {
-        const response = await this.getProfileDefinitionInternal(definition.profileId);
-        if (response?.definition == null) {
-          await this.saveProfileDefinition(definition);
-        }
+        // const response = await this.getProfileDefinitionInternal(definition.profileId);
+        // if (response?.definition == null) {
+        await this.saveProfileDefinition(definition);
+        // }
       } catch (ex) {
         console.warn('Profile definition failed to get, going to save directly');
         await this.saveProfileDefinition(definition);

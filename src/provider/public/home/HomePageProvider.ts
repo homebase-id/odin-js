@@ -7,7 +7,7 @@ import {
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { DataUtil } from '../../core/DataUtil';
-import DriveProvider from '../../core/DriveData/DriveProvider';
+import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import AttributeDataProvider from '../../core/AttributeData/AttributeDataProvider';
 import {

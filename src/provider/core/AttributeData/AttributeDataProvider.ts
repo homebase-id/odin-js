@@ -17,7 +17,7 @@ import {
 import { DataUtil } from '../DataUtil';
 import { AttributeConfig } from './AttributeConfig';
 import { ProfileConfig } from '../../profile/ProfileConfig';
-import DriveProvider from '../DriveData/DriveProvider';
+import { DriveProvider } from '../DriveData/DriveProvider';
 import TransitProvider from '../TransitData/TransitProvider';
 
 const FixedKeyHeader: KeyHeader = {

@@ -9,7 +9,7 @@ import {
 } from './TransitData/TransitTypes';
 import * as imageResizeCompress from 'image-resize-compress';
 import { DataUtil } from './DataUtil';
-import DriveProvider from './DriveData/DriveProvider';
+import { DriveProvider } from './DriveData/DriveProvider';
 import TransitProvider from './TransitData/TransitProvider';
 
 const FixedKeyHeader: KeyHeader = {

@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import { DataUtil } from '../../core/DataUtil';
-import DriveProvider from '../../core/DriveData/DriveProvider';
+import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
   FileQueryParams,

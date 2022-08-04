@@ -31,7 +31,7 @@ interface GetFileRequest {
   fileId: string;
 }
 
-export default class DriveProvider extends ProviderBase {
+export class DriveProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
     super(options);
   }
