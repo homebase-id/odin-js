@@ -86,6 +86,10 @@ export default class MediaProvider extends ProviderBase {
     return result.file.fileId;
   }
 
+  removeImage = async (imageFileId: string, targetDrive: TargetDrive) => {
+    return this._driveProvider.DeleteFile(targetDrive, imageFileId);
+  };
+
   async getDecryptedThumbnailUrl(targetDrive: TargetDrive, fileId: string): Promise<string> {
     //it seems these will be fine for images but for video and audio we must stream decrypt
 

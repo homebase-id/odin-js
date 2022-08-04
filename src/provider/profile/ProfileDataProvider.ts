@@ -92,6 +92,10 @@ export default class ProfileDataProvider extends ProviderBase {
     return await this._attributeDataProvider.getAttribute(profileId, id);
   }
 
+  async removeAttribute(profileId: string, attributeFileId: string): Promise<void> {
+    return this._attributeDataProvider.removeAttribute(profileId, attributeFileId);
+  }
+
   async getAttributeVersions(
     profileId: string,
     sectionId: string,

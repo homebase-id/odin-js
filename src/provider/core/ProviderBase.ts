@@ -126,7 +126,9 @@ export class ProviderBase {
           const encryptedBytes = DataUtil.base64ToUint8Array(response.data.data);
           const bytes = await AesEncrypt.CbcDecrypt(encryptedBytes, iv, ss);
           const json = DataUtil.byteArrayToString(bytes);
-          response.data = JSON.parse(json);
+          if (json) {
+            response.data = JSON.parse(json);
+          }
         }
         return response;
       },

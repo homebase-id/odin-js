@@ -290,6 +290,11 @@ export default class AttributeDataProvider extends ProviderBase {
     return attribute;
   }
 
+  async removeAttribute(profileId: string, attributeFileId: string): Promise<void> {
+    const targetDrive = this.getTargetDrive(profileId);
+    this._driveProvider.DeleteFile(targetDrive, attributeFileId);
+  }
+
   private getTargetDrive(profileId: string) {
     return {
       alias: profileId,
