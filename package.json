@@ -12,12 +12,12 @@
     "lint": "eslint src/*",
     "test": ""
   },
-  "name": "@youfoundation/dotyoucore-transit-lib",
+  "name": "@youfoundation/transit-lib",
   "author": "YouFoundation",
   "description": "Lib for using Youverse transit and drive WebAPI",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-transit-lib.git"
+    "url": "https://github.com/YouFoundation/transit-lib.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
