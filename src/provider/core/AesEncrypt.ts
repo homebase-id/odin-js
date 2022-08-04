@@ -28,7 +28,6 @@ export class AesEncrypt {
     iv: Uint8Array,
     key: Uint8Array
   ): Promise<Uint8Array> {
-    // console.log("Decrypt IV = " + iv);
     const importedKey = await crypto.subtle.importKey(
       'raw',
       key,

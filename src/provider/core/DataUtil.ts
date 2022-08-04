@@ -69,4 +69,10 @@ export class DataUtil {
   static getNewGuid() {
     return Guid.create().toString();
   }
+
+  static stringify = (obj: any) => {
+    return Object.keys(obj)
+      .map((key) => key + '=' + obj[key])
+      .join('&');
+  };
 }

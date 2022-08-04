@@ -84,7 +84,12 @@ export default class BlogPostProvider extends ProviderBase {
       fileType: [BlogConfig.BlogPostFileType],
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params);
+    const ro: GetBatchQueryResultOptions = {
+      maxRecords: pageSize,
+      includeMetadataHeader: true,
+    };
+
+    const response = await this._driveProvider.QueryBatch(params, ro);
 
     const posts: BlogPostFile<T>[] = [];
     for (const key in response.searchResults) {
@@ -113,7 +118,7 @@ export default class BlogPostProvider extends ProviderBase {
       includeMetadataHeader: true,
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params, ro);
+    const response = await this._driveProvider.QueryBatch(params, ro);
 
     const posts: BlogPostFile<T>[] = [];
     for (const key in response.searchResults) {
@@ -124,24 +129,20 @@ export default class BlogPostProvider extends ProviderBase {
     return posts;
   }
 
-  async getBlogPostFile<T extends BlogContent>(
-    id: Guid | string
-  ): Promise<BlogPostFile<T> | undefined> {
-    id = typeof id === 'string' ? Guid.parse(id) : id;
-
+  async getBlogPostFile<T extends BlogContent>(id: string): Promise<BlogPostFile<T> | undefined> {
     const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
 
     const params: FileQueryParams = {
-      tagsMatchAtLeastOne: [id.toString()],
+      tagsMatchAtLeastOne: [id],
       targetDrive: targetDrive,
       fileType: [BlogConfig.BlogPostFileType],
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params);
+    const response = await this._driveProvider.QueryBatch(params);
 
     if (response.searchResults.length >= 1) {
       if (response.searchResults.length > 1) {
-        console.warn(`Found more than one file with alias [${id.toString()}].  Using first entry.`);
+        console.warn(`Found more than one file with alias [${id}].  Using first entry.`);
       }
 
       const dsr = response.searchResults[0];
@@ -155,7 +156,7 @@ export default class BlogPostProvider extends ProviderBase {
   async saveBlogPostMaster<T extends BlogContent>(
     file: BlogPostFile<T>,
     publishState: BlogPostPublishStatus = BlogPostPublishStatus.Draft
-  ): Promise<Guid> {
+  ): Promise<string> {
     if (!file.content.id) {
       file.content.id = Guid.create().toString();
     }
@@ -163,11 +164,7 @@ export default class BlogPostProvider extends ProviderBase {
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        // overwriteFileId: file.fileId?.toString(),
-        // The fact that it is guid can be lost along the way, so if not, we try the internal value of the object first
-        overwriteFileId: Guid.isGuid(file?.fileId ?? '')
-          ? file.fileId?.toString()
-          : file?.fileId?.['value'] ?? null,
+        overwriteFileId: file?.fileId ?? '',
         drive: BlogPostProvider.getMasterContentTargetDrive(),
       },
       transitOptions: null,
@@ -203,7 +200,7 @@ export default class BlogPostProvider extends ProviderBase {
       metadata,
       payloadBytes
     );
-    return Guid.parse(result.file.fileId);
+    return result.file.fileId;
   }
 
   async publishBlogPost<T extends BlogContent>(
@@ -218,18 +215,18 @@ export default class BlogPostProvider extends ProviderBase {
       return !exists;
     });
 
-    console.log('deletion targets', deletionTargets);
+    console.debug('deletion targets', deletionTargets);
 
     for (const key in deletionTargets) {
       const target = deletionTargets[key];
-      await this.deleteFromChannel(Guid.parse(target.channelId), Guid.parse(file.content.id));
+      await this.deleteFromChannel(target.channelId, file.content.id);
     }
 
     const resultingPublishTargets: PublishTarget[] = [];
     for (const key in newPublishTargets) {
       const newTarget = newPublishTargets[key];
       const publishTarget = await this.publishBlogPostToChannel(
-        Guid.parse(newTarget.channelId),
+        newTarget.channelId,
         newTarget.acl,
         file.content
       );
@@ -237,12 +234,12 @@ export default class BlogPostProvider extends ProviderBase {
     }
 
     file.publishTargets = resultingPublishTargets;
-    const masterFileId = await this.saveBlogPostMaster(file, BlogPostPublishStatus.Published);
+    await this.saveBlogPostMaster(file, BlogPostPublishStatus.Published);
 
     return resultingPublishTargets;
   }
 
-  async deleteFromChannel(channelId: Guid, id: Guid) {
+  async deleteFromChannel(channelId: string, id: string) {
     const fileId = await this.getPublishedFileId(channelId, id);
     if (!fileId) {
       throw new Error('Blog post with this ID not found');
@@ -256,7 +253,7 @@ export default class BlogPostProvider extends ProviderBase {
   ///
 
   private async publishDependencies<T extends BlogContent>(
-    channelId: Guid,
+    channelId: string,
     acl: AccessControlList,
     content: T
   ): Promise<any> {
@@ -264,11 +261,11 @@ export default class BlogPostProvider extends ProviderBase {
     if (content.primaryImageFileId) {
       const bytes = await this._driveProvider.GetPayloadBytes(
         BlogPostProvider.getMasterContentTargetDrive(),
-        Guid.parse(content.primaryImageFileId),
+        content.primaryImageFileId,
         FixedKeyHeader
       );
 
-      const tag = Guid.createEmpty();
+      const tag = Guid.createEmpty().toString();
 
       const destinationMediaFileId = await this._mediaProvider.uploadImage(
         this._blogDefinitionProvider.getPublishChannelDrive(channelId),
@@ -283,7 +280,7 @@ export default class BlogPostProvider extends ProviderBase {
 
   // Saves a blog post to a channel drive.  Does not save publish targets
   private async publishBlogPostToChannel<T extends BlogContent>(
-    channelId: Guid,
+    channelId: string,
     acl: AccessControlList,
     originalContent: T
   ): Promise<PublishTarget> {
@@ -294,10 +291,7 @@ export default class BlogPostProvider extends ProviderBase {
     await this.publishDependencies(channelId, acl, content);
     content.channelId = channelId.toString();
 
-    const existingPublishedFileId = await this.getPublishedFileId(
-      channelId,
-      Guid.parse(content.id)
-    );
+    const existingPublishedFileId = await this.getPublishedFileId(channelId, content.id);
 
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
@@ -341,15 +335,15 @@ export default class BlogPostProvider extends ProviderBase {
   }
 
   private async dsrToBlogPostFile<T extends BlogContent>(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<BlogPostFile<T>> {
     const masterPost = await this.decryptMasterPayload<T>(dsr, targetDrive, includeMetadataHeader);
 
     const file: BlogPostFile<T> = {
-      fileId: Guid.parse(dsr.fileId),
-      acl: dsr.accessControlList,
+      fileId: dsr.fileMetadata.file.fileId,
+      acl: dsr.serverMetadata.accessControlList,
       publishTargets: masterPost.publishTargets,
       content: masterPost.content,
     };
@@ -357,34 +351,34 @@ export default class BlogPostProvider extends ProviderBase {
     return file;
   }
 
-  private async getPublishedFileId(channelId: Guid, id: Guid): Promise<Guid | undefined> {
+  private async getPublishedFileId(channelId: string, id: string): Promise<string | undefined> {
     const params: FileQueryParams = {
       targetDrive: this._blogDefinitionProvider.getPublishChannelDrive(channelId),
-      tagsMatchAtLeastOne: [id.toString()],
+      tagsMatchAtLeastOne: [id],
     };
 
-    const query = await this._driveProvider.QueryBatch<any>(params);
+    const query = await this._driveProvider.QueryBatch(params);
 
     if (query.searchResults.length >= 1) {
       if (query.searchResults.length > 1) {
-        console.warn(`Found more than one file with alias [${id.toString()}].  Using first entry.`);
+        console.warn(`Found more than one file with alias [${id}].  Using first entry.`);
       }
 
       const dsr = query.searchResults[0];
-      return Guid.parse(dsr.fileId);
+      return dsr.fileMetadata.file.fileId;
     }
 
     return;
   }
 
   private async decryptMasterPayload<T extends BlogContent>(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<BlogMasterPayload<T>> {
-    if (dsr.contentIsComplete && includeMetadataHeader) {
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.jsonContent),
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
         FixedKeyHeader
       );
       const json = DataUtil.byteArrayToString(bytes);
@@ -392,7 +386,7 @@ export default class BlogPostProvider extends ProviderBase {
     } else {
       return await this._driveProvider.GetPayloadAsJson<BlogMasterPayload<T>>(
         targetDrive,
-        Guid.parse(dsr.fileId),
+        dsr.fileMetadata.file.fileId,
         FixedKeyHeader
       );
     }

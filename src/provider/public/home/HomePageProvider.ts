@@ -7,7 +7,6 @@ import {
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { DataUtil } from '../../core/DataUtil';
-import { Guid } from 'guid-typescript';
 import DriveProvider from '../../core/DriveData/DriveProvider';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import AttributeDataProvider from '../../core/AttributeData/AttributeDataProvider';
@@ -58,14 +57,17 @@ export default class HomePageProvider extends ProviderBase {
     );
   }
 
-  async getAttribute(attributeId: Guid | string): Promise<AttributeFile | undefined> {
-    return this._attributeDataProvider.getAttribute(HomePageConfig.DefaultDriveId, attributeId);
+  async getAttribute(attributeId: string): Promise<AttributeFile | undefined> {
+    return this._attributeDataProvider.getAttribute(
+      HomePageConfig.DefaultDriveId.toString(),
+      attributeId
+    );
   }
 
-  async getBestAttributeVersion(type: Guid): Promise<Attribute | undefined> {
+  async getBestAttributeVersion(type: string): Promise<Attribute | undefined> {
     const allVersions = await this._attributeDataProvider.getAttributeVersions(
-      HomePageConfig.DefaultDriveId,
-      HomePageConfig.AttributeSectionNotApplicable,
+      HomePageConfig.DefaultDriveId.toString(),
+      HomePageConfig.AttributeSectionNotApplicable.toString(),
       type
     );
 
@@ -87,12 +89,12 @@ export default class HomePageProvider extends ProviderBase {
     return linkFiles.map((lf) => lf as LandingPageLink);
   }
 
-  async saveLinkFile(link: LandingPageLinkFile) {
+  async saveLinkFile(link: LandingPageLinkFile): Promise<UploadResult> {
     let existingFileId: string | undefined;
-    if (link.fileId && link.fileId.isEmpty() == false) {
-      existingFileId = link.fileId.toString();
+    if (link.fileId?.length) {
+      existingFileId = link.fileId;
     } else {
-      const existingLink = await this.getLinkFile(Guid.parse(link.id));
+      const existingLink = await this.getLinkFile(link.id);
       existingFileId = existingLink?.fileId?.toString();
     }
 
@@ -119,7 +121,7 @@ export default class HomePageProvider extends ProviderBase {
 
     const payloadJson: string = DataUtil.JsonStringify64(link as LandingPageLink);
     const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    return await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,
@@ -127,7 +129,7 @@ export default class HomePageProvider extends ProviderBase {
     );
   }
 
-  async deleteLinkFile(fileId: Guid) {
+  async deleteLinkFile(fileId: string) {
     return this._driveProvider.DeleteFile(HomePageConfig.HomepageTargetDrive, fileId);
   }
 
@@ -151,21 +153,21 @@ export default class HomePageProvider extends ProviderBase {
       );
       links.push({
         ...link,
-        fileId: Guid.parse(dsr.fileId),
-        acl: dsr.accessControlList,
+        fileId: dsr.fileMetadata.file.fileId,
+        acl: dsr.serverMetadata.accessControlList,
       });
     }
 
     return links;
   }
 
-  private async getLinkFile(id: Guid): Promise<LandingPageLinkFile | null> {
+  private async getLinkFile(id: string): Promise<LandingPageLinkFile | null> {
     const params: FileQueryParams = {
       targetDrive: HomePageConfig.HomepageTargetDrive,
-      tagsMatchAtLeastOne: [id.toString()],
+      tagsMatchAtLeastOne: [id],
     };
 
-    const response = await this._driveProvider.QueryBatch<LandingPageLink>(params);
+    const response = await this._driveProvider.QueryBatch(params);
 
     if (response.searchResults.length == 0) {
       return null;
@@ -180,26 +182,26 @@ export default class HomePageProvider extends ProviderBase {
   }
 
   private async getLinkFileFromDsr(
-    dsr: DriveSearchResult<LandingPageLink>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<LandingPageLinkFile> {
     const link = await this.decryptLinkContent(dsr, targetDrive, includeMetadataHeader);
     return {
       ...link,
-      fileId: Guid.parse(dsr.fileId),
-      acl: dsr.accessControlList,
+      fileId: dsr.fileMetadata.file.fileId,
+      acl: dsr.serverMetadata.accessControlList,
     };
   }
 
   private async decryptLinkContent(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<LandingPageLink> {
-    if (dsr.contentIsComplete && includeMetadataHeader) {
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.jsonContent),
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
         FixedKeyHeader
       );
       const json = DataUtil.byteArrayToString(bytes);
@@ -207,7 +209,7 @@ export default class HomePageProvider extends ProviderBase {
     } else {
       return await this._driveProvider.GetPayloadAsJson<LandingPageLink>(
         targetDrive,
-        Guid.parse(dsr.fileId),
+        dsr.fileMetadata.file.fileId,
         FixedKeyHeader
       );
     }

@@ -38,21 +38,19 @@ export default class MediaProvider extends ProviderBase {
   //gets the data available for the specified attribute if available
   async uploadImage(
     targetDrive: TargetDrive,
-    tag: Guid | undefined,
+    tag: string | undefined,
     acl: AccessControlList,
     imageBytes: Uint8Array,
-    fileId?: Guid | string
-  ): Promise<Guid | null> {
+    fileId?: string
+  ): Promise<string | null> {
     if (!targetDrive) {
       throw 'Missing target drive';
     }
 
-    fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
-
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        overwriteFileId: fileId ? fileId.toString() : null,
+        overwriteFileId: fileId ?? null,
         drive: targetDrive,
       },
       transitOptions: null,
@@ -69,7 +67,7 @@ export default class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [(tag ?? Guid.createEmpty()).toString()],
+        tags: [tag ?? Guid.createEmpty().toString()],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: thumbnailJson,
@@ -85,16 +83,14 @@ export default class MediaProvider extends ProviderBase {
       imageBytes
     );
 
-    return Guid.parse(result.file.fileId);
+    return result.file.fileId;
   }
 
-  async getDecryptedThumbnailUrl(targetDrive: TargetDrive, fileId: Guid | string): Promise<string> {
-    fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
-
+  async getDecryptedThumbnailUrl(targetDrive: TargetDrive, fileId: string): Promise<string> {
     //it seems these will be fine for images but for video and audio we must stream decrypt
 
     return this._driveProvider.GetMetadata(targetDrive, fileId).then((header) => {
-      const thumbnail = JSON.parse(header.metadata.appData.jsonContent);
+      const thumbnail = JSON.parse(header.fileMetadata.appData.jsonContent);
       const buffer = DataUtil.base64ToUint8Array(thumbnail);
       const url = window.URL.createObjectURL(new Blob([buffer]));
       return url;
@@ -102,9 +98,7 @@ export default class MediaProvider extends ProviderBase {
   }
 
   //retrieves an image, decrypts, then returns a url to be passed to an image control
-  async getDecryptedImageUrl(targetDrive: TargetDrive, fileId: Guid | string): Promise<string> {
-    fileId = typeof fileId === 'string' ? Guid.parse(fileId) : fileId;
-
+  async getDecryptedImageUrl(targetDrive: TargetDrive, fileId: string): Promise<string> {
     //it seems these will be fine for images but for video and audio we must stream decrypt
 
     return this._driveProvider

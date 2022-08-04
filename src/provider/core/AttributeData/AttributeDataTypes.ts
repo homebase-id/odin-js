@@ -2,7 +2,7 @@ import { Guid } from 'guid-typescript';
 import { AccessControlList, SecurityGroupType } from '../TransitData/TransitTypes';
 
 export interface AttributeFile extends Attribute {
-  fileId?: Guid;
+  fileId?: string;
   acl: AccessControlList;
 }
 
@@ -29,7 +29,7 @@ export const emptyAttribute: Attribute = {
 };
 
 export const emptyAttributeFile: AttributeFile = {
-  fileId: Guid.createEmpty(),
+  fileId: Guid.createEmpty().toString(),
   acl: {
     requiredSecurityGroup: SecurityGroupType.Owner,
   },
@@ -37,8 +37,8 @@ export const emptyAttributeFile: AttributeFile = {
 };
 
 export type OrderedAttributeList = {
-  profileId: Guid;
-  attributeType: Guid;
+  profileId: string;
+  attributeType: string;
   versions: Attribute[];
 };
 
@@ -56,6 +56,6 @@ export type LandingPageLink = {
 };
 
 export interface LandingPageLinkFile extends LandingPageLink {
-  fileId?: Guid;
+  fileId?: string;
   acl: AccessControlList;
 }

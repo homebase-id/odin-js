@@ -42,7 +42,7 @@ export default class TransitProvider extends ProviderBase {
     data.append('metaData', new Blob([encryptedDescriptor]));
     data.append('payload', new Blob([encryptedPayload]));
 
-    const client = this.createAxiosClient();
+    const client = this.createAxiosClient(true);
     const url = '/drive/files/upload';
 
     const config = {
@@ -58,7 +58,7 @@ export default class TransitProvider extends ProviderBase {
       })
       .catch((error) => {
         //TODO: Handle this - the file was not uploaded
-        console.log(error);
+        console.error(error);
         throw error;
       });
   }
@@ -88,7 +88,6 @@ export default class TransitProvider extends ProviderBase {
     if (!ss) {
       throw new Error('attempting to decrypt but missing the shared secret');
     }
-    //console.log(json);
 
     const content = new TextEncoder().encode(json);
     const cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);

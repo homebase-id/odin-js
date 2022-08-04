@@ -9,7 +9,6 @@ import {
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { BlogConfig, ChannelDefinition } from './BlogTypes';
 import { DataUtil } from '../../core/DataUtil';
-import { Guid } from 'guid-typescript';
 import DriveProvider from '../../core/DriveData/DriveProvider';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import {
@@ -49,8 +48,8 @@ export default class BlogDefinitionProvider extends ProviderBase {
     this._transitProvider = options.transitProvider;
   }
 
-  getDefaultChannelId(): Guid {
-    return Guid.parse(defaultChannel.channelId);
+  getDefaultChannelId(): string {
+    return defaultChannel.channelId;
   }
 
   async getChannelDefinitions(): Promise<ChannelDefinition[]> {
@@ -60,7 +59,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       fileType: [BlogConfig.BlogChannelDefinitionFileType],
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params);
+    const response = await this._driveProvider.QueryBatch(params);
 
     const definitions: ChannelDefinition[] = [];
     for (const key in response.searchResults) {
@@ -73,9 +72,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     return definitions;
   }
 
-  async getChannelDefinition(id: Guid | string): Promise<ChannelDefinition | undefined> {
-    id = typeof id === 'string' ? Guid.parse(id) : id;
-
+  async getChannelDefinition(id: string): Promise<ChannelDefinition | undefined> {
     const { definition } = (await this.getChannelDefinitionInternal(id)) ?? {
       definition: undefined,
     };
@@ -86,7 +83,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     return definition;
   }
 
-  async saveChannelDefinition(definition: ChannelDefinition): Promise<void> {
+  async saveChannelDefinition(definition: ChannelDefinition): Promise<UploadResult> {
     const channelMetadata = '';
     const targetDrive: TargetDrive = {
       alias: definition.channelId,
@@ -94,14 +91,14 @@ export default class BlogDefinitionProvider extends ProviderBase {
     };
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, channelMetadata, true);
 
-    const { fileId } = (await this.getChannelDefinitionInternal(
-      Guid.parse(definition.channelId)
-    )) ?? { fileId: undefined };
+    const { fileId } = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
+      fileId: undefined,
+    };
 
     const instructionSet: UploadInstructionSet = {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
-        overwriteFileId: fileId?.toString(),
+        overwriteFileId: fileId,
         drive: BlogDefinitionProvider.getMasterContentTargetDrive(),
       },
       transitOptions: null,
@@ -110,7 +107,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [definition.channelId.toString()],
+        tags: [definition.channelId],
         contentIsComplete: false,
         fileType: BlogConfig.BlogChannelDefinitionFileType,
         jsonContent: null,
@@ -122,14 +119,12 @@ export default class BlogDefinitionProvider extends ProviderBase {
     const payloadJson: string = DataUtil.JsonStringify64(definition);
     const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
 
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    return await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,
       payloadBytes
     );
-
-    // console.log('upload result', result);
   }
 
   async ensureConfiguration() {
@@ -142,15 +137,15 @@ export default class BlogDefinitionProvider extends ProviderBase {
       true
     );
 
-    const x = await this.getChannelDefinitionInternal(Guid.parse(defaultChannel.channelId));
+    const x = await this.getChannelDefinitionInternal(defaultChannel.channelId);
     if (x?.fileId == null) {
       await this.saveChannelDefinition(defaultChannel);
     }
   }
 
-  public getPublishChannelDrive(channelId: Guid): TargetDrive {
+  public getPublishChannelDrive(channelId: string): TargetDrive {
     const targetDrive: TargetDrive = {
-      alias: channelId.toString(),
+      alias: channelId,
       type: BlogConfig.ChannelDriveType.toString(),
     };
 
@@ -159,8 +154,8 @@ export default class BlogDefinitionProvider extends ProviderBase {
 
   // Internals:
   private async getChannelDefinitionInternal(
-    id: Guid
-  ): Promise<{ definition: ChannelDefinition; fileId: Guid } | undefined> {
+    id: string
+  ): Promise<{ definition: ChannelDefinition; fileId: string } | undefined> {
     const targetDrive: TargetDrive = {
       alias: HomePageConfig.BlogMainContentDriveId.toString(),
       type: BlogConfig.DriveType.toString(),
@@ -173,7 +168,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       userDate: undefined,
       tagsMatchAll: undefined,
       sender: undefined,
-      tagsMatchAtLeastOne: [id.toString()],
+      tagsMatchAtLeastOne: [id],
     };
 
     const ro: GetBatchQueryResultOptions = {
@@ -182,7 +177,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       includeMetadataHeader: true,
     };
 
-    const response = await this._driveProvider.QueryBatch<any>(params, ro);
+    const response = await this._driveProvider.QueryBatch(params, ro);
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
@@ -193,7 +188,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       );
 
       return {
-        fileId: Guid.parse(dsr.fileId),
+        fileId: dsr.fileMetadata.file.fileId,
         definition: definition,
       };
     }
@@ -202,13 +197,13 @@ export default class BlogDefinitionProvider extends ProviderBase {
   }
 
   private async decryptDefinition(
-    dsr: DriveSearchResult<any>,
+    dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<ChannelDefinition> {
-    if (dsr.contentIsComplete && includeMetadataHeader) {
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.jsonContent),
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
         FixedKeyHeader
       );
       const json = DataUtil.byteArrayToString(bytes);
@@ -216,7 +211,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     } else {
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
-        Guid.parse(dsr.fileId),
+        dsr.fileMetadata.file.fileId,
         FixedKeyHeader
       );
     }
