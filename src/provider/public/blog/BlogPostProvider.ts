@@ -203,6 +203,12 @@ export default class BlogPostProvider extends ProviderBase {
     return result.file.fileId;
   }
 
+  async removeBlogPost(fileId: string) {
+    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+
+    this._driveProvider.DeleteFile(targetDrive, fileId);
+  }
+
   async publishBlogPost<T extends BlogContent>(
     file: BlogPostFile<T>,
     newPublishTargets: PublishTarget[]
