@@ -17,6 +17,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/TransitData/TransitTypes';
+import { Guid } from 'guid-typescript';
 
 const defaultChannel: ChannelDefinition = {
   channelId: '93999384-0000-0000-0000-000000004440',
@@ -85,6 +86,11 @@ export default class BlogDefinitionProvider extends ProviderBase {
 
   async saveChannelDefinition(definition: ChannelDefinition): Promise<UploadResult> {
     const channelMetadata = '';
+
+    if (!definition.channelId) {
+      definition.channelId = Guid.create().toString();
+    }
+
     const targetDrive: TargetDrive = {
       alias: definition.channelId,
       type: BlogConfig.ChannelDriveType.toString(),
