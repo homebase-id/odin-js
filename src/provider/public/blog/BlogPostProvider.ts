@@ -386,8 +386,6 @@ export default class BlogPostProvider extends ProviderBase {
       content: masterPost.content,
     };
 
-    console.log(file);
-
     return file;
   }
 
