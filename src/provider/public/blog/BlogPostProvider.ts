@@ -197,6 +197,16 @@ export default class BlogPostProvider extends ProviderBase {
       transitOptions: null,
     };
 
+    const payload: BlogMasterPayload<T> = {
+      publishTargets: file.publishTargets,
+      content: file.content,
+    };
+
+    const payloadJson: string = DataUtil.JsonStringify64(payload);
+    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
+    const shouldEmbedContent = payloadBytes.length < 2000;
+
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
@@ -205,26 +215,20 @@ export default class BlogPostProvider extends ProviderBase {
           publishState.toString(),
           file.content.id,
         ],
-        contentIsComplete: false,
+        contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogPostFileType,
-        jsonContent: null,
+        // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
+        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
       accessControlList: file.acl,
     };
 
-    //need to save file.publishTargets
-    const payload: BlogMasterPayload<T> = {
-      publishTargets: file.publishTargets,
-      content: file.content,
-    };
-
-    const payloadJson: string = DataUtil.JsonStringify64(payload);
-    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,
+      //TODO: Check what to pass as payload if everything fits in jsonContent already
       payloadBytes
     );
     return result.file.fileId;
@@ -381,6 +385,8 @@ export default class BlogPostProvider extends ProviderBase {
       content: masterPost.content,
     };
 
+    console.log(file);
+
     return file;
   }
 
@@ -410,11 +416,9 @@ export default class BlogPostProvider extends ProviderBase {
     includeMetadataHeader: boolean
   ): Promise<BlogMasterPayload<T>> {
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-        FixedKeyHeader
+      const json = DataUtil.byteArrayToString(
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
       );
-      const json = DataUtil.byteArrayToString(bytes);
       return JSON.parse(json);
     } else {
       return await this._driveProvider.GetPayloadAsJson<BlogMasterPayload<T>>(
