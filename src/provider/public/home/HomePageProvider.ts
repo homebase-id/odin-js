@@ -64,6 +64,15 @@ export default class HomePageProvider extends ProviderBase {
     );
   }
 
+  async getAttributes(type: string): Promise<AttributeFile[] | undefined> {
+    return await this._attributeDataProvider.getProfileAttributes(
+      HomePageConfig.DefaultDriveId.toString(),
+      type,
+      1,
+      10
+    );
+  }
+
   async getBestAttributeVersion(type: string): Promise<Attribute | undefined> {
     const allVersions = await this._attributeDataProvider.getAttributeVersions(
       HomePageConfig.DefaultDriveId.toString(),
