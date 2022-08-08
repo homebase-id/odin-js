@@ -205,7 +205,8 @@ export default class BlogPostProvider extends ProviderBase {
     const payloadJson: string = DataUtil.JsonStringify64(payload);
     const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
 
-    const shouldEmbedContent = payloadBytes.length < 2000;
+    // Set max of 3kb for jsonContent so enough room is left for metedata
+    const shouldEmbedContent = payloadBytes.length < 3000;
 
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
