@@ -100,6 +100,33 @@ export default class BlogPostProvider extends ProviderBase {
     return posts;
   }
 
+  async getMasterPosts<T extends BlogContent>(
+    pageNumber: number,
+    pageSize: number
+  ): Promise<BlogPostFile<T>[]> {
+    //get all files tag as being a profile definition
+    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    const params: FileQueryParams = {
+      targetDrive: targetDrive,
+      fileType: [BlogConfig.BlogPostFileType],
+    };
+
+    const ro: GetBatchQueryResultOptions = {
+      maxRecords: pageSize,
+      includeMetadataHeader: true,
+    };
+
+    const response = await this._driveProvider.QueryBatch(params, ro);
+
+    const posts: BlogPostFile<T>[] = [];
+    for (const key in response.searchResults) {
+      const dsr = response.searchResults[key];
+      posts.push(await this.dsrToBlogPostFile(dsr, targetDrive, response.includeMetadataHeader));
+    }
+
+    return posts;
+  }
+
   async getPosts<T extends BlogContent>(
     publishStatus: BlogPostPublishStatus,
     pageNumber: number,
@@ -204,33 +231,33 @@ export default class BlogPostProvider extends ProviderBase {
   }
 
   async removeBlogPost(fileId: string) {
-    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    // Get post and delete from publishTargets first
+    const blogPost = await this.getBlogPostFile(fileId);
+    if (!blogPost) {
+      return;
+    }
 
+    await Promise.all(
+      blogPost.publishTargets.map(async (target) => {
+        const channelTarget = this._blogDefinitionProvider.getPublishChannelDrive(target.channelId);
+        return await this._driveProvider.DeleteFile(channelTarget, fileId);
+      })
+    );
+
+    // Finally delete master copy
+    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
     this._driveProvider.DeleteFile(targetDrive, fileId);
   }
 
   async publishBlogPost<T extends BlogContent>(
     file: BlogPostFile<T>,
-    newPublishTargets: PublishTarget[]
+    publishTargets: PublishTarget[]
   ): Promise<PublishTarget[]> {
     //NOTE: we keep the same id (alias) across all drives
 
-    //first remove existing publish files that were unchecked
-    const deletionTargets = file.publishTargets.filter((pt) => {
-      const exists = newPublishTargets.find((np) => np.channelId == pt.channelId);
-      return !exists;
-    });
-
-    console.debug('deletion targets', deletionTargets);
-
-    for (const key in deletionTargets) {
-      const target = deletionTargets[key];
-      await this.deleteFromChannel(target.channelId, file.content.id);
-    }
-
     const resultingPublishTargets: PublishTarget[] = [];
-    for (const key in newPublishTargets) {
-      const newTarget = newPublishTargets[key];
+    for (const key in publishTargets) {
+      const newTarget = publishTargets[key];
       const publishTarget = await this.publishBlogPostToChannel(
         newTarget.channelId,
         newTarget.acl,
