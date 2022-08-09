@@ -10,7 +10,7 @@ import {
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import TransitProvider from '../../core/TransitData/TransitProvider';
-import MediaProvider from '../../core/MediaProvider';
+import MediaProvider from '../../core/MediaData/MediaProvider';
 import {
   AccessControlList,
   UploadFileMetadata,

@@ -2,7 +2,7 @@ export * from './provider/core/AesEncrypt';
 export * from './provider/core/DataUtil';
 
 export * from './provider/core/ProviderBase';
-export * from './provider/core/MediaProvider';
+export * from './provider/core/MediaData/MediaProvider';
 export * from './provider/core/Types';
 
 // DriveData
@@ -14,6 +14,7 @@ export * from './provider/core/TransitData/TransitProvider';
 export * from './provider/core/TransitData/TransitTypes';
 
 // AttributeData
+export * from './provider/core/AttributeData/AttributeConfig';
 export * from './provider/core/AttributeData/AttributeDefinitions';
 export * from './provider/core/AttributeData/AttributeDataProvider';
 export * from './provider/core/AttributeData/AttributeDataTypes';
@@ -35,5 +36,6 @@ export * from './provider/public/blog/BlogPostProvider';
 export * from './provider/public/blog/BlogPostReadonlyProvider';
 export * from './provider/public/blog/BlogDefinitionProvider';
 
+export * from './provider/publicClient';
+export * from './provider/coreClient';
 export * from './provider/client';
-export * from './provider/deliveryClient';

@@ -1,16 +1,16 @@
 import { Guid } from 'guid-typescript';
-import { ProviderBase, ProviderOptions } from './ProviderBase';
-import { KeyHeader, TargetDrive } from './DriveData/DriveTypes';
+import { ProviderBase, ProviderOptions } from '../ProviderBase';
+import { KeyHeader, TargetDrive } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from './TransitData/TransitTypes';
+} from '../TransitData/TransitTypes';
 import * as imageResizeCompress from 'image-resize-compress';
-import { DataUtil } from './DataUtil';
-import { DriveProvider } from './DriveData/DriveProvider';
-import TransitProvider from './TransitData/TransitProvider';
+import { DataUtil } from '../DataUtil';
+import { DriveProvider } from '../DriveData/DriveProvider';
+import TransitProvider from '../TransitData/TransitProvider';
 
 const FixedKeyHeader: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(1)),

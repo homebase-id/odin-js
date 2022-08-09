@@ -1,6 +1,6 @@
 import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
 import { DriveProvider } from './core/DriveData/DriveProvider';
-import MediaProvider from './core/MediaProvider';
+import MediaProvider from './core/MediaData/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
 import TransitProvider from './core/TransitData/TransitProvider';
 import ProfileDataProvider from './profile/ProfileDataProvider';

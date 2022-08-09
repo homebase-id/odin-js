@@ -79,11 +79,9 @@ export default class AttributeDataProvider extends ProviderBase {
       };
 
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-          FixedKeyHeader
+        const json = DataUtil.byteArrayToString(
+          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
         );
-        const json = DataUtil.byteArrayToString(bytes);
         attr = JSON.parse(json);
       } else {
         attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
@@ -140,11 +138,9 @@ export default class AttributeDataProvider extends ProviderBase {
       };
 
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-          FixedKeyHeader
+        const json = DataUtil.byteArrayToString(
+          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
         );
-        const json = DataUtil.byteArrayToString(bytes);
         attr = JSON.parse(json);
       } else {
         attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
@@ -212,11 +208,9 @@ export default class AttributeDataProvider extends ProviderBase {
     let payload: Attribute;
 
     if (dsr.fileMetadata.appData.contentIsComplete && response.includeMetadataHeader) {
-      const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-        FixedKeyHeader
+      const json = DataUtil.byteArrayToString(
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
       );
-      const json = DataUtil.byteArrayToString(bytes);
       payload = JSON.parse(json);
     } else {
       payload = await this._driveProvider.GetPayloadAsJson<any>(
@@ -263,21 +257,26 @@ export default class AttributeDataProvider extends ProviderBase {
       transitOptions: null,
     };
 
+    const payloadJson: string = DataUtil.JsonStringify64(attribute as Attribute);
+    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
+    // Set max of 3kb for jsonContent so enough room is left for metedata
+    const shouldEmbedContent = payloadBytes.length < 3000;
+
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
         tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
         fileType: AttributeConfig.AttributeFileType,
-        contentIsComplete: false,
-        jsonContent: null,
+        contentIsComplete: shouldEmbedContent,
+        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
       accessControlList: attribute.acl,
     };
 
     //note: downcasting so I don't store fileId and acl from AttributeFile
-    const payloadJson: string = DataUtil.JsonStringify64(attribute as Attribute);
-    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,

@@ -207,41 +207,30 @@ export class DriveProvider extends ProviderBase {
     keyHeader: KeyHeader
   ): Promise<any> {
     throw 'Not Implemented';
-    // let client = this.createAxiosClient();
-    // const config: AxiosRequestConfig = {
-    //     responseType: "stream",
-    // }
-    //
-    // return client.get("/drive/files/payload?" + this.getDriveQuerystring(targetDrive, fileId), config).then(response => {
-    //     let cipher = new Uint8Array(response.data);
-    //
-    //     return this.DecryptUsingKeyHeader(cipher, keyHeader).then(bytes => {
-    //         let json = DataUtil.byteArrayToString(bytes);
-    //         let o = JSON.parse(json);
-    //         return o;
-    //         // return new FileStreamResult(payload, "application/octet-stream");
-    //     });
-    //
-    // }).catch(error => {
-    //     console.log(error);
-    //     throw error;
-    // });
+  }
 
-    /*
-        axios({
-            url: 'http://api.dev/file-download', //your url
-            method: 'GET',
-            responseType: 'blob', // important
-        }).then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'file.pdf'); //or any other extension
-            document.body.appendChild(link);
-            link.click();
-        });
+  async DeleteFile(targetDrive: TargetDrive, fileId: string): Promise<boolean | void> {
+    const client = this.createAxiosClient();
 
-        * */
+    const request = {
+      targetDrive: targetDrive,
+      fileId: fileId,
+    };
+
+    return client
+      .post('/drive/files/delete', request)
+      .then((response) => {
+        if (response.status === 200) {
+          return true;
+        }
+
+        return false;
+      })
+      .catch((error) => {
+        //TODO: Handle this - the file was not uploaded
+        console.error(error);
+        throw error;
+      });
   }
 
   async EnsureDrive(
@@ -289,54 +278,9 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
-  async DeleteFile(targetDrive: TargetDrive, fileId: string): Promise<boolean | void> {
-    const client = this.createAxiosClient();
-
-    const request = {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    };
-
-    return client
-      .post('/drive/files/delete', request)
-      .then((response) => {
-        if (response.status === 200) {
-          return true;
-        }
-
-        return false;
-      })
-      .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
-        throw error;
-      });
-  }
-
   async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
   }
-
-  // TODO: check, as unclear if still needed ...
-  // private async decryptKeyHeader(ekh: EncryptedKeyHeader): Promise<KeyHeader> {
-  //   if (ekh.encryptionVersion != 1) {
-  //     throw 'Encryption version ' + ekh.encryptionVersion + 'not supported';
-  //   }
-
-  //   const cipher = ekh.encryptedAesKey;
-  //   const ss = this.getSharedSecret();
-  //   if (!ss) {
-  //     throw new Error('attempting to decrypt but missing the shared secret');
-  //   }
-  //   const combined = await AesEncrypt.CbcDecrypt(cipher, ekh.iv, ss);
-
-  //   const kh: KeyHeader = {
-  //     iv: new Uint8Array(combined.slice(0, 16)),
-  //     aesKey: new Uint8Array(combined.slice(16, 32)),
-  //   };
-
-  //   return kh;
-  // }
 
   private fixQueryParams(params: FileQueryParams): FileQueryParams {
     //HACK; convert all strings to byte arrays as base64 values; this is for a test

@@ -1,14 +1,15 @@
 import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
 import { DriveProvider } from './core/DriveData/DriveProvider';
-import MediaProvider from './core/MediaProvider';
+import MediaProvider from './core/MediaData/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
 import TransitProvider from './core/TransitData/TransitProvider';
 import ProfileDataProvider from './profile/ProfileDataProvider';
 import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
 import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
+import FileReadOnlyProvider from './public/file/FileReadOnlyProvider';
 import HomePageProvider from './public/home/HomePageProvider';
 
-export class DeliveryClient {
+export class PublicClient {
   private _cfg: ProviderOptions;
 
   // Core Providers:
@@ -21,6 +22,9 @@ export class DeliveryClient {
 
   // Profile Providers:
   profileDataProvider: ProfileDataProvider;
+
+  // File Providers
+  fileReadOnlyProvider: FileReadOnlyProvider;
 
   // Blog Providers:
   blogPostReadonlyProvider: BlogPostReadonlyProvider;
@@ -47,6 +51,10 @@ export class DeliveryClient {
     this.profileDataProvider = new ProfileDataProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
+    });
+
+    this.fileReadOnlyProvider = new FileReadOnlyProvider({
+      ...this._cfg,
     });
 
     // Blog Providers:

@@ -110,20 +110,23 @@ export default class BlogDefinitionProvider extends ProviderBase {
       transitOptions: null,
     };
 
+    const payloadJson: string = DataUtil.JsonStringify64(definition);
+    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
+    // Set max of 3kb for jsonContent so enough room is left for metedata
+    const shouldEmbedContent = payloadBytes.length < 3000;
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
         tags: [definition.channelId],
-        contentIsComplete: false,
+        contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogChannelDefinitionFileType,
-        jsonContent: null,
+        // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
+        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous }, //TODO: should this be owner only?
     };
-
-    const payloadJson: string = DataUtil.JsonStringify64(definition);
-    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
 
     return await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
@@ -208,13 +211,12 @@ export default class BlogDefinitionProvider extends ProviderBase {
     includeMetadataHeader: boolean
   ): Promise<ChannelDefinition> {
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-        FixedKeyHeader
+      const json = DataUtil.byteArrayToString(
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
       );
-      const json = DataUtil.byteArrayToString(bytes);
       return JSON.parse(json);
     } else {
+      console.log(`content wasn't complete... That seems wrong`);
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
