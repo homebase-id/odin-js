@@ -32,38 +32,40 @@ const initialStandardProfile: ProfileDefinition = {
     {
       sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
       name: 'Personal Info',
-      attributes: [
-        { attributeId: Guid.create().toString(), type: AttributeDefinitions.Name.type.toString() },
-        { attributeId: Guid.create().toString(), type: AttributeDefinitions.Photo.type.toString() },
-      ],
+      // TODO Move this into default Attribute File on create of the profile
+      // attributes: [
+      //   { attributeId: Guid.create().toString(), type: AttributeDefinitions.Name.type.toString() },
+      //   { attributeId: Guid.create().toString(), type: AttributeDefinitions.Photo.type.toString() },
+      // ],
       priority: 1,
       isSystemSection: true,
     },
     {
       sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
       name: 'Social Identities',
-      attributes: [
-        {
-          attributeId: Guid.create().toString(),
-          type: AttributeDefinitions.TwitterUsername.type.toString(),
-        },
-        {
-          attributeId: Guid.create().toString(),
-          type: AttributeDefinitions.FacebookUsername.type.toString(),
-        },
-        {
-          attributeId: Guid.create().toString(),
-          type: AttributeDefinitions.InstagramUsername.type.toString(),
-        },
-        {
-          attributeId: Guid.create().toString(),
-          type: AttributeDefinitions.TiktokUsername.type.toString(),
-        },
-        {
-          attributeId: Guid.create().toString(),
-          type: AttributeDefinitions.LinkedInUsername.type.toString(),
-        },
-      ],
+      // TODO Move this into default Attribute File on create of the profile
+      // attributes: [
+      //   {
+      //     attributeId: Guid.create().toString(),
+      //     type: AttributeDefinitions.TwitterUsername.type.toString(),
+      //   },
+      //   {
+      //     attributeId: Guid.create().toString(),
+      //     type: AttributeDefinitions.FacebookUsername.type.toString(),
+      //   },
+      //   {
+      //     attributeId: Guid.create().toString(),
+      //     type: AttributeDefinitions.InstagramUsername.type.toString(),
+      //   },
+      //   {
+      //     attributeId: Guid.create().toString(),
+      //     type: AttributeDefinitions.TiktokUsername.type.toString(),
+      //   },
+      //   {
+      //     attributeId: Guid.create().toString(),
+      //     type: AttributeDefinitions.LinkedInUsername.type.toString(),
+      //   },
+      // ],
       priority: 2,
       isSystemSection: true,
     },
@@ -78,12 +80,13 @@ const initialFinancialProfile: ProfileDefinition = {
     {
       sectionId: BuiltInProfiles.CreditCardsSectionId.toString(),
       name: 'Credit Cards',
-      attributes: [
-        {
-          attributeId: BuiltInProfileAttributes.CreditCards.toString(),
-          type: AttributeDefinitions.CreditCard.type.toString(),
-        },
-      ],
+      // TODO Move this into default Attribute File on create of the profile
+      // attributes: [
+      //   {
+      //     attributeId: BuiltInProfileAttributes.CreditCards.toString(),
+      //     type: AttributeDefinitions.CreditCard.type.toString(),
+      //   },
+      // ],
       priority: 1,
       isSystemSection: true,
     },

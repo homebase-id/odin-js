@@ -8,7 +8,6 @@ export interface ProfileDefinition {
 export interface ProfileSection {
   sectionId: string;
   name: string;
-  attributes: AttributeSpec[];
   priority: number;
   isSystemSection?: boolean;
 }
