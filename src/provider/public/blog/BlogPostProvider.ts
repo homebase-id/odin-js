@@ -19,6 +19,7 @@ import {
 } from '../../core/TransitData/TransitTypes';
 import { HomePageConfig } from '../home/HomeTypes';
 import {
+  BlogArticle,
   BlogConfig,
   BlogContent,
   BlogMasterPayload,
@@ -26,6 +27,7 @@ import {
   BlogPostPublishStatus,
   BlogPostType,
   blogPostTypeToTag,
+  BlogTypeUnion,
   PublishTarget,
 } from './BlogTypes';
 import BlogDefinitionProvider from './BlogDefinitionProvider';
@@ -212,7 +214,9 @@ export default class BlogPostProvider extends ProviderBase {
       contentType: 'application/json',
       appData: {
         tags: [
-          blogPostTypeToTag(file.content.type).toString(),
+          blogPostTypeToTag(
+            'type' in file.content ? (file.content as unknown as BlogTypeUnion).type : 'Article'
+          ).toString(),
           publishState.toString(),
           file.content.id,
         ],
@@ -290,16 +294,17 @@ export default class BlogPostProvider extends ProviderBase {
 
   ///
 
-  private async publishDependencies<T extends BlogContent>(
+  private async publishDependencies(
     channelId: string,
     acl: AccessControlList,
-    content: T
-  ): Promise<any> {
-    //TODO: handle other dependencies (i.e. videoFileId, etc.)
-    if (content.primaryImageFileId) {
+    originalContent: BlogContent
+  ): Promise<BlogContent | BlogArticle> {
+    let content: BlogContent | BlogArticle = { ...originalContent };
+
+    const publishImage = async (imageId: string) => {
       const bytes = await this._driveProvider.GetPayloadBytes(
         BlogPostProvider.getMasterContentTargetDrive(),
-        content.primaryImageFileId,
+        imageId,
         FixedKeyHeader
       );
 
@@ -312,21 +317,49 @@ export default class BlogPostProvider extends ProviderBase {
         new Uint8Array(bytes)
       );
 
-      content.primaryImageFileId = destinationMediaFileId?.toString();
+      console.log(destinationMediaFileId);
+
+      return destinationMediaFileId?.toString();
+    };
+
+    //TODO: handle other dependencies (i.e. videoFileId, etc.)
+    if (content.primaryImageFileId) {
+      content.primaryImageFileId = await publishImage(content.primaryImageFileId);
     }
+
+    if ((content as BlogTypeUnion).type === 'Article') {
+      const articleContent = content as BlogArticle;
+
+      if (typeof articleContent.body !== 'string') {
+        content = {
+          ...content,
+          body: await Promise.all(
+            articleContent.body.map(async (child) => {
+              if (child.type === 'image') {
+                return {
+                  ...child,
+                  imageFileId: await publishImage(child.imageFileId as string),
+                };
+              }
+              return child;
+            })
+          ),
+        };
+      }
+    }
+
+    return content;
   }
 
   // Saves a blog post to a channel drive.  Does not save publish targets
-  private async publishBlogPostToChannel<T extends BlogContent>(
+  private async publishBlogPostToChannel(
     channelId: string,
     acl: AccessControlList,
-    originalContent: T
+    originalContent: BlogContent
   ): Promise<PublishTarget> {
     //make a copy of content because we're going
     //to change it for this publish
-    const content = { ...originalContent };
-
-    await this.publishDependencies(channelId, acl, content);
+    const content = await this.publishDependencies(channelId, acl, originalContent);
     content.channelId = channelId.toString();
 
     const existingPublishedFileId = await this.getPublishedFileId(channelId, content.id);
@@ -340,21 +373,30 @@ export default class BlogPostProvider extends ProviderBase {
       transitOptions: null,
     };
 
+    const payloadJson: string = DataUtil.JsonStringify64(content);
+    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
+    const shouldEmbedContent = payloadBytes.length < 3000;
+
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [blogPostTypeToTag(content.type).toString()],
-        contentIsComplete: false,
+        tags: [
+          blogPostTypeToTag(
+            'type' in content ? (content as BlogTypeUnion).type : 'Article'
+          ).toString(),
+          content.id,
+        ],
+        contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogPostFileType,
-        jsonContent: null,
+        // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
+        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
         alias: content.id,
       },
       payloadIsEncrypted: false,
       accessControlList: acl,
     };
 
-    const payloadJson: string = DataUtil.JsonStringify64(content);
-    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
@@ -420,6 +462,7 @@ export default class BlogPostProvider extends ProviderBase {
       );
       return JSON.parse(json);
     } else {
+      console.log(`content wasn't complete... That seems wrong`);
       return await this._driveProvider.GetPayloadAsJson<BlogMasterPayload<T>>(
         targetDrive,
         dsr.fileMetadata.file.fileId,

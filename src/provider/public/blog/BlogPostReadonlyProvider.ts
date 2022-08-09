@@ -147,13 +147,12 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     includeMetadataHeader: boolean
   ): Promise<T> {
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-        FixedKeyHeader
+      const json = DataUtil.byteArrayToString(
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
       );
-      const json = DataUtil.byteArrayToString(bytes);
       return JSON.parse(json);
     } else {
+      console.log(`content wasn't complete... That seems wrong`);
       return await this._driveProvider.GetPayloadAsJson<T>(
         targetDrive,
         dsr.fileMetadata.file.fileId,

@@ -80,7 +80,6 @@ export interface BlogContent {
   slug?: string;
   dateUnixTime: number;
   primaryImageFileId?: string;
-  type: BlogPostType;
   readingTimeStats?: ReadTimeStats;
 }
 
@@ -111,6 +110,8 @@ export interface VideoPost extends BlogContent {
 export interface Tweet extends BlogContent {
   type: 'Tweet';
 }
+
+export type BlogTypeUnion = BlogArticle | ImagePost | VideoPost | Tweet;
 
 //
 // export interface ProfileSection {
