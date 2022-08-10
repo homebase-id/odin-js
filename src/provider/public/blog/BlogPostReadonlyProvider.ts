@@ -45,9 +45,12 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
   async getPosts<T extends BlogContent>(
     channelId: string,
     type: BlogPostType,
-    pageNumber = 1,
+    cursorState: string | undefined = undefined,
     pageSize = 10
-  ): Promise<T[]> {
+  ): Promise<{
+    cursorState: string;
+    posts: T[];
+  }> {
     const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
@@ -57,6 +60,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
     const ro: GetBatchQueryResultOptions = {
       maxRecords: pageSize,
+      cursorState: cursorState,
       includeMetadataHeader: true,
     };
 
@@ -68,15 +72,11 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       posts.push(await this.dsrToBlogContent(dsr, targetDrive, response.includeMetadataHeader));
     }
 
-    return posts;
+    return { cursorState: response.cursorState, posts };
   }
 
   //Gets posts across all channels, ordered by date
-  async getRecentPosts<T extends BlogContent>(
-    type: BlogPostType,
-    pageNumber = 1,
-    pageSize = 10
-  ): Promise<T[]> {
+  async getRecentPosts<T extends BlogContent>(type: BlogPostType, pageSize = 10): Promise<T[]> {
     const channels = await this.getChannels();
 
     let posts: T[] = [];
@@ -86,10 +86,10 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       const channelPosts = await this.getPosts<T>(
         channel.channelId,
         type,
-        pageNumber,
+        undefined,
         Math.ceil(pageSize / channels.length) // TODO: do this properly, now only works if all channels are equal and have the same dates
       );
-      posts = posts.concat(channelPosts);
+      posts = posts.concat(channelPosts.posts);
     }
 
     return posts;

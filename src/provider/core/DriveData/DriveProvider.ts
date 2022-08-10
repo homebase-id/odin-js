@@ -56,18 +56,18 @@ export class DriveProvider extends ProviderBase {
       pageSize: pageSize,
     };
 
-    if (this.getType() === ApiType.Owner) {
-      // Post needed
-      const client = this.createAxiosClient();
-      return client.post('drive/mgmt/type', params).then((response) => {
-        return response.data;
-      });
-    } else {
-      const client = this.createAxiosClient();
-      return client.get('drive/metadata/type?' + DataUtil.stringify(params)).then((response) => {
-        return response.data;
-      });
-    }
+    // if (this.getType() === ApiType.Owner) {
+    //   // Post needed
+    //   const client = this.createAxiosClient();
+    //   return client.post('drive/mgmt/type', params).then((response) => {
+    //     return response.data;
+    //   });
+    // } else {
+    const client = this.createAxiosClient();
+    return client.get('drive/metadata/type?' + DataUtil.stringify(params)).then((response) => {
+      return response.data;
+    });
+    // }
   }
 
   async QueryModified(

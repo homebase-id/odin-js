@@ -14,7 +14,7 @@ export default class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, staticFile>> {
     try {
       const httpClient = this.createAxiosClient();
-      const response = await httpClient.get(`/cdn/staticfile?filename=${fileName}`);
+      const response = await httpClient({ url: `/cdn/${fileName}`, baseURL: '' });
 
       const parsedResponse = await Promise.all(
         response.data?.map(async (dataSlice: any) => {

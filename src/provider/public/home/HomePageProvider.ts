@@ -68,7 +68,6 @@ export default class HomePageProvider extends ProviderBase {
     return await this._attributeDataProvider.getProfileAttributes(
       HomePageConfig.DefaultDriveId.toString(),
       type,
-      1,
       10
     );
   }

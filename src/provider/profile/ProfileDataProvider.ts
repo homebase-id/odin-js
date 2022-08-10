@@ -31,7 +31,6 @@ export default class ProfileDataProvider extends ProviderBase {
     return this.getDisplayableSectionAttributes(
       BuiltInProfiles.StandardProfileId.toString(),
       BuiltInProfiles.PersonalInfoSectionId.toString(),
-      1,
       100
     );
   }
@@ -40,7 +39,6 @@ export default class ProfileDataProvider extends ProviderBase {
     return this.getDisplayableSectionAttributes(
       BuiltInProfiles.StandardProfileId.toString(),
       BuiltInProfiles.SocialIdentitySectionId.toString(),
-      1,
       100
     );
   }
@@ -49,13 +47,11 @@ export default class ProfileDataProvider extends ProviderBase {
   async getDisplayableSectionAttributes(
     profileId: string,
     sectionId: string,
-    pageNumber: number,
     pageSize: number
   ): Promise<AttributeDisplayHash> {
     const attributes = await this._attributeDataProvider.getProfileAttributes(
       profileId,
       sectionId,
-      pageNumber,
       pageSize
     );
     return this.createAttributeDisplayHash(attributes);
@@ -77,15 +73,9 @@ export default class ProfileDataProvider extends ProviderBase {
   async getProfileAttributes(
     profileId: string,
     sectionId: string | undefined,
-    pageNumber: number,
     pageSize: number
   ): Promise<AttributeFile[]> {
-    return await this._attributeDataProvider.getProfileAttributes(
-      profileId,
-      sectionId,
-      pageNumber,
-      pageSize
-    );
+    return await this._attributeDataProvider.getProfileAttributes(profileId, sectionId, pageSize);
   }
 
   async getAttribute(profileId: string, id: string): Promise<AttributeFile | undefined> {

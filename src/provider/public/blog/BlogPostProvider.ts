@@ -61,23 +61,14 @@ export default class BlogPostProvider extends ProviderBase {
     this._blogDefinitionProvider = options.blogDefinitionProvider;
   }
 
-  public static getMasterContentTargetDrive(): TargetDrive {
-    const drive: TargetDrive = {
-      alias: HomePageConfig.BlogMainContentDriveId.toString(),
-      type: BlogConfig.DriveType.toString(),
-    };
-
-    return drive;
-  }
-
   async getPostsByType<T extends BlogContent>(
     type: BlogPostType,
-    pageNumber: number,
+    cursorState: string | undefined,
     pageSize: number
   ): Promise<BlogPostFile<T>[]> {
     const typeTag = blogPostTypeToTag(type);
 
-    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
     //get all files tag as being a profile definition
 
     const params: FileQueryParams = {
@@ -103,11 +94,11 @@ export default class BlogPostProvider extends ProviderBase {
   }
 
   async getMasterPosts<T extends BlogContent>(
-    pageNumber: number,
+    cursorState: string | undefined,
     pageSize: number
   ): Promise<BlogPostFile<T>[]> {
     //get all files tag as being a profile definition
-    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [BlogConfig.BlogPostFileType],
@@ -131,11 +122,11 @@ export default class BlogPostProvider extends ProviderBase {
 
   async getPosts<T extends BlogContent>(
     publishStatus: BlogPostPublishStatus,
-    pageNumber: number,
+    cursorState: string | undefined,
     pageSize: number
   ): Promise<BlogPostFile<T>[]> {
     //get all files tag as being a profile definition
-    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       tagsMatchAtLeastOne: [publishStatus.toString()],
@@ -159,7 +150,7 @@ export default class BlogPostProvider extends ProviderBase {
   }
 
   async getBlogPostFile<T extends BlogContent>(id: string): Promise<BlogPostFile<T> | undefined> {
-    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
 
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [id],
@@ -194,7 +185,7 @@ export default class BlogPostProvider extends ProviderBase {
       transferIv: this._transitProvider.Random16(),
       storageOptions: {
         overwriteFileId: file?.fileId ?? '',
-        drive: BlogPostProvider.getMasterContentTargetDrive(),
+        drive: BlogDefinitionProvider.getMasterContentTargetDrive(),
       },
       transitOptions: null,
     };
@@ -254,7 +245,7 @@ export default class BlogPostProvider extends ProviderBase {
     );
 
     // Finally delete master copy
-    const targetDrive = BlogPostProvider.getMasterContentTargetDrive();
+    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
     this._driveProvider.DeleteFile(targetDrive, fileId);
   }
 
@@ -303,7 +294,7 @@ export default class BlogPostProvider extends ProviderBase {
 
     const publishImage = async (imageId: string) => {
       const bytes = await this._driveProvider.GetPayloadBytes(
-        BlogPostProvider.getMasterContentTargetDrive(),
+        BlogDefinitionProvider.getMasterContentTargetDrive(),
         imageId,
         FixedKeyHeader
       );
@@ -472,4 +463,4 @@ export default class BlogPostProvider extends ProviderBase {
   }
 }
 
-export const getBlogMasterContentTargetDrive = BlogPostProvider.getMasterContentTargetDrive;
+export const getBlogMasterContentTargetDrive = BlogDefinitionProvider.getMasterContentTargetDrive;

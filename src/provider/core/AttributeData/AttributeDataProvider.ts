@@ -46,7 +46,6 @@ export default class AttributeDataProvider extends ProviderBase {
   async getProfileAttributes(
     profileId: string,
     sectionId: string | undefined,
-    pageNumber: number,
     pageSize: number
   ): Promise<AttributeFile[]> {
     const targetDrive = this.getTargetDrive(profileId);
