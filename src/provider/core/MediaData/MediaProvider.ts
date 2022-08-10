@@ -57,12 +57,14 @@ export default class MediaProvider extends ProviderBase {
     };
 
     // console.log("full size:", MediaProvider.formatSizeString(imageBytes.byteLength));
-    //create a thumbnail of the image bytes
-    const thumbnailBytes = await this.createImageThumbnail(imageBytes, 50, 500, 300);
+    // Create a thumbnail that fits scaled into a 300 x 300 canvas
+    const thumbnailBytesMaxW = await this.createImageThumbnail(imageBytes, 10, 300, 'auto');
+    const thumbnailBytesMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 300);
+    const thumbnailBytes =
+      thumbnailBytesMaxW > thumbnailBytesMaxH ? thumbnailBytesMaxH : thumbnailBytesMaxW;
     // console.log("thumbnail:", MediaProvider.formatSizeString(thumbnailBytes.byteLength));
 
     const thumbnailJson = DataUtil.JsonStringify64(thumbnailBytes);
-    // console.log('tnailjson', thumbnailJson);
 
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
@@ -116,8 +118,8 @@ export default class MediaProvider extends ProviderBase {
   private async createImageThumbnail(
     imageBytes: Uint8Array,
     quality = 80,
-    width = 0,
-    height = 0
+    width: number | 'auto' = 0,
+    height: number | 'auto' = 0
   ): Promise<Uint8Array> {
     // output width. 0 will keep its original width and 'auto' will calculate its scale from height.
     // output height. 0 will keep its original height and 'auto' will calculate its scale from width.
