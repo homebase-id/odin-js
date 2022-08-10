@@ -7,7 +7,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../TransitData/TransitTypes';
-import * as imageResizeCompress from 'image-resize-compress';
+import { fromBlob } from './Resizer/resize';
 import { DataUtil } from '../DataUtil';
 import { DriveProvider } from '../DriveData/DriveProvider';
 import TransitProvider from '../TransitData/TransitProvider';
@@ -21,6 +21,8 @@ interface MediaProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
   transitProvider: TransitProvider;
 }
+
+type ThumbnailMeta = { naturalSize: { width: number; height: number }; url: string };
 
 export default class MediaProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
@@ -57,14 +59,18 @@ export default class MediaProvider extends ProviderBase {
     };
 
     // console.log("full size:", MediaProvider.formatSizeString(imageBytes.byteLength));
+
+    // TODO Can be decreased even further, review which size gives optimal blurred preloader
     // Create a thumbnail that fits scaled into a 300 x 300 canvas
-    const thumbnailBytesMaxW = await this.createImageThumbnail(imageBytes, 10, 300, 'auto');
-    const thumbnailBytesMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 300);
-    const thumbnailBytes =
-      thumbnailBytesMaxW > thumbnailBytesMaxH ? thumbnailBytesMaxH : thumbnailBytesMaxW;
+    const thumbnailDataMaxW = await this.createImageThumbnail(imageBytes, 10, 300, 'auto');
+    const thumbnailDataMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 300);
+    const thumbnailData =
+      thumbnailDataMaxW.byteArray > thumbnailDataMaxH.byteArray
+        ? thumbnailDataMaxH
+        : thumbnailDataMaxW;
     // console.log("thumbnail:", MediaProvider.formatSizeString(thumbnailBytes.byteLength));
 
-    const thumbnailJson = DataUtil.JsonStringify64(thumbnailBytes);
+    const thumbnailJson = DataUtil.JsonStringify64(thumbnailData);
 
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
@@ -92,14 +98,16 @@ export default class MediaProvider extends ProviderBase {
     return this._driveProvider.DeleteFile(targetDrive, imageFileId);
   };
 
-  async getDecryptedThumbnailUrl(targetDrive: TargetDrive, fileId: string): Promise<string> {
+  async getDecryptedThumbnailMeta(
+    targetDrive: TargetDrive,
+    fileId: string
+  ): Promise<ThumbnailMeta> {
     //it seems these will be fine for images but for video and audio we must stream decrypt
-
     return this._driveProvider.GetMetadata(targetDrive, fileId).then((header) => {
       const thumbnail = JSON.parse(header.fileMetadata.appData.jsonContent);
-      const buffer = DataUtil.base64ToUint8Array(thumbnail);
+      const buffer = DataUtil.base64ToUint8Array(thumbnail.byteArray);
       const url = window.URL.createObjectURL(new Blob([buffer]));
-      return url;
+      return { naturalSize: thumbnail.naturalSize, url: url };
     });
   }
 
@@ -120,7 +128,7 @@ export default class MediaProvider extends ProviderBase {
     quality = 80,
     width: number | 'auto' = 0,
     height: number | 'auto' = 0
-  ): Promise<Uint8Array> {
+  ): Promise<{ naturalSize: { width: number; height: number }; byteArray: Uint8Array }> {
     // output width. 0 will keep its original width and 'auto' will calculate its scale from height.
     // output height. 0 will keep its original height and 'auto' will calculate its scale from width.
     // file format: png, jpeg, bmp, gif, webp. If null, original format will be used.
@@ -128,9 +136,9 @@ export default class MediaProvider extends ProviderBase {
 
     const blob: Blob = new Blob([imageBytes], {});
 
-    return imageResizeCompress.fromBlob(blob, quality, width, height, format).then((blob) => {
-      return blob.arrayBuffer().then((buffer) => {
-        return new Uint8Array(buffer);
+    return fromBlob(blob, quality, width, height, format).then((resizedData) => {
+      return resizedData.blob.arrayBuffer().then((buffer) => {
+        return { naturalSize: resizedData.naturalSize, byteArray: new Uint8Array(buffer) };
       });
     });
   }

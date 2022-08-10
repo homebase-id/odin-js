@@ -34,7 +34,6 @@
   ],
   "dependencies": {
     "guid-typescript": "^1.0.9",
-    "image-resize-compress": "^1.0.8",
     "js-md5": "^0.7.3",
     "lodash-es": "^4.17.21"
   },
