@@ -1,5 +1,3 @@
-import { Guid } from 'guid-typescript';
-import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
 import { DataUtil } from '../core/DataUtil';
 import { DriveProvider } from '../core/DriveData/DriveProvider';
 import {
@@ -16,7 +14,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../core/TransitData/TransitTypes';
-import { BuiltInProfileAttributes, BuiltInProfiles, ProfileConfig } from './ProfileConfig';
+import { BuiltInProfiles, ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition } from './ProfileTypes';
 
 const FixedKeyHeader: KeyHeader = {

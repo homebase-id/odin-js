@@ -7,7 +7,7 @@ import ProfileDataProvider from './profile/ProfileDataProvider';
 import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
 import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
 import FileReadOnlyProvider from './public/file/FileReadOnlyProvider';
-import HomePageProvider from './public/home/HomePageProvider';
+import HomePageReadOnlyProvider from './public/home/HomePageReadOnlyProvider';
 
 export class PublicClient {
   private _cfg: ProviderOptions;
@@ -30,7 +30,7 @@ export class PublicClient {
   blogPostReadonlyProvider: BlogPostReadonlyProvider;
 
   // Home Providers:
-  homePageProvider: HomePageProvider;
+  homePageReadOnlyProvider: HomePageReadOnlyProvider;
 
   // Media Provider:
   mediaProvider: MediaProvider;
@@ -71,11 +71,9 @@ export class PublicClient {
     });
 
     // Home Providers:
-    this.homePageProvider = new HomePageProvider({
+    this.homePageReadOnlyProvider = new HomePageReadOnlyProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
-      driveProvider: this._driveProvider,
-      transitProvider: this._transitProvider,
     });
 
     // Media Provider:

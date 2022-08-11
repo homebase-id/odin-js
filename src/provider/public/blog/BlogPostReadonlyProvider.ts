@@ -28,8 +28,8 @@ interface BlogPostReadonlyProviderOptions extends ProviderOptions {
 }
 
 export default class BlogPostReadonlyProvider extends ProviderBase {
-  private _driveProvider: DriveProvider;
-  private _blogDefinitionProvider: BlogDefinitionProvider;
+  protected _driveProvider: DriveProvider;
+  protected _blogDefinitionProvider: BlogDefinitionProvider;
 
   constructor(options: BlogPostReadonlyProviderOptions) {
     super({

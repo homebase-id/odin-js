@@ -8,7 +8,7 @@ import {
   KeyHeader,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
-import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
+import { ProviderOptions } from '../../core/ProviderBase';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import MediaProvider from '../../core/MediaData/MediaProvider';
 import {
@@ -17,7 +17,6 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/TransitData/TransitTypes';
-import { HomePageConfig } from '../home/HomeTypes';
 import {
   BlogArticle,
   BlogConfig,
@@ -31,6 +30,7 @@ import {
   PublishTarget,
 } from './BlogTypes';
 import BlogDefinitionProvider from './BlogDefinitionProvider';
+import BlogPostReadonlyProvider from './BlogPostReadonlyProvider';
 
 interface BlostPostProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -44,21 +44,20 @@ const FixedKeyHeader: KeyHeader = {
   aesKey: new Uint8Array(Array(16).fill(1)),
 };
 
-export default class BlogPostProvider extends ProviderBase {
-  private _driveProvider: DriveProvider;
+export default class BlogPostProvider extends BlogPostReadonlyProvider {
   private _transitProvider: TransitProvider;
   private _mediaProvider: MediaProvider;
-  private _blogDefinitionProvider: BlogDefinitionProvider;
 
   constructor(options: BlostPostProviderOptions) {
     super({
       api: options.api,
       sharedSecret: options.sharedSecret,
+      driveProvider: options.driveProvider,
+      blogDefinitionProvider: options.blogDefinitionProvider,
     });
-    this._driveProvider = options.driveProvider;
+
     this._transitProvider = options.transitProvider;
     this._mediaProvider = options.mediaProvider;
-    this._blogDefinitionProvider = options.blogDefinitionProvider;
   }
 
   async getPostsByType<T extends BlogContent>(
@@ -95,42 +94,15 @@ export default class BlogPostProvider extends ProviderBase {
 
   async getMasterPosts<T extends BlogContent>(
     cursorState: string | undefined,
-    pageSize: number
+    pageSize: number,
+    publishStatus?: BlogPostPublishStatus
   ): Promise<BlogPostFile<T>[]> {
     //get all files tag as being a profile definition
     const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [BlogConfig.BlogPostFileType],
-    };
-
-    const ro: GetBatchQueryResultOptions = {
-      maxRecords: pageSize,
-      includeMetadataHeader: true,
-    };
-
-    const response = await this._driveProvider.QueryBatch(params, ro);
-
-    const posts: BlogPostFile<T>[] = [];
-    for (const key in response.searchResults) {
-      const dsr = response.searchResults[key];
-      posts.push(await this.dsrToBlogPostFile(dsr, targetDrive, response.includeMetadataHeader));
-    }
-
-    return posts;
-  }
-
-  async getPosts<T extends BlogContent>(
-    publishStatus: BlogPostPublishStatus,
-    cursorState: string | undefined,
-    pageSize: number
-  ): Promise<BlogPostFile<T>[]> {
-    //get all files tag as being a profile definition
-    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
-    const params: FileQueryParams = {
-      targetDrive: targetDrive,
-      tagsMatchAtLeastOne: [publishStatus.toString()],
-      fileType: [BlogConfig.BlogPostFileType],
+      tagsMatchAtLeastOne: publishStatus ? [publishStatus.toString()] : undefined,
     };
 
     const ro: GetBatchQueryResultOptions = {
@@ -151,7 +123,6 @@ export default class BlogPostProvider extends ProviderBase {
 
   async getBlogPostFile<T extends BlogContent>(id: string): Promise<BlogPostFile<T> | undefined> {
     const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
-
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [id],
       targetDrive: targetDrive,

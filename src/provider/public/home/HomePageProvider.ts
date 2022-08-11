@@ -1,51 +1,28 @@
 import { HomePageConfig } from '../home/HomeTypes';
-import {
-  DriveSearchResult,
-  FileQueryParams,
-  KeyHeader,
-  TargetDrive,
-} from '../../core/DriveData/DriveTypes';
-import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
-import { DataUtil } from '../../core/DataUtil';
+
+import { ProviderOptions } from '../../core/ProviderBase';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import AttributeDataProvider from '../../core/AttributeData/AttributeDataProvider';
-import {
-  UploadFileMetadata,
-  UploadInstructionSet,
-  UploadResult,
-} from '../../core/TransitData/TransitTypes';
-import {
-  Attribute,
-  AttributeFile,
-  LandingPageLink,
-  LandingPageLinkFile,
-} from '../../core/AttributeData/AttributeDataTypes';
 
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
-
+import { AttributeFile } from '../../core/AttributeData/AttributeDataTypes';
+import HomePageReadOnlyProvider from './HomePageReadOnlyProvider';
 interface HomePageProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
   attributeDataProvider: AttributeDataProvider;
   transitProvider: TransitProvider;
 }
 
-export default class HomePageProvider extends ProviderBase {
+export default class HomePageProvider extends HomePageReadOnlyProvider {
   private _driveProvider: DriveProvider;
-  private _attributeDataProvider: AttributeDataProvider;
-  private _transitProvider: TransitProvider;
 
   constructor(options: HomePageProviderOptions) {
     super({
       api: options.api,
       sharedSecret: options.sharedSecret,
+      attributeDataProvider: options.attributeDataProvider,
     });
     this._driveProvider = options.driveProvider;
-    this._attributeDataProvider = options.attributeDataProvider;
-    this._transitProvider = options.transitProvider;
   }
 
   async ensureConfiguration() {
@@ -55,31 +32,6 @@ export default class HomePageProvider extends ProviderBase {
       '',
       true
     );
-  }
-
-  async getAttribute(attributeId: string): Promise<AttributeFile | undefined> {
-    return this._attributeDataProvider.getAttribute(
-      HomePageConfig.DefaultDriveId.toString(),
-      attributeId
-    );
-  }
-
-  async getAttributes(type: string): Promise<AttributeFile[] | undefined> {
-    return await this._attributeDataProvider.getProfileAttributes(
-      HomePageConfig.DefaultDriveId.toString(),
-      type,
-      10
-    );
-  }
-
-  async getBestAttributeVersion(type: string): Promise<Attribute | undefined> {
-    const allVersions = await this._attributeDataProvider.getAttributeVersions(
-      HomePageConfig.DefaultDriveId.toString(),
-      HomePageConfig.AttributeSectionNotApplicable.toString(),
-      type
-    );
-
-    return allVersions?.versions[0];
   }
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
@@ -93,6 +45,11 @@ export default class HomePageProvider extends ProviderBase {
   }
 
   /// TODO: migrate links into normal attributes
+
+  // const FixedKeyHeader: KeyHeader = {
+  //   iv: new Uint8Array(Array(16).fill(1)),
+  //   aesKey: new Uint8Array(Array(16).fill(1)),
+  // };
 
   // async getVisibleLinks(): Promise<LandingPageLink[]> {
   //   const linkFiles = await this.getLinkFiles();
