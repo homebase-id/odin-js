@@ -9,10 +9,15 @@ const FixedKeyHeader: KeyHeader = {
 };
 
 type staticFile = Record<string, any>;
+const _internalFileCache = new Map<string, Map<string, staticFile>>();
 
 export default class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, staticFile>> {
     try {
+      if (_internalFileCache.has(fileName)) {
+        return _internalFileCache.get(fileName) ?? new Map();
+      }
+
       const httpClient = this.createAxiosClient();
       const response = await httpClient({ url: `/cdn/${fileName}`, baseURL: '' });
 
@@ -46,7 +51,10 @@ export default class FileReadOnlyProvider extends ProviderBase {
         })
       );
 
-      return new Map(parsedResponse);
+      const responseMap: Map<string, staticFile> = new Map(parsedResponse);
+      _internalFileCache.set(fileName, responseMap);
+      console.log(_internalFileCache);
+      return responseMap;
     } catch (ex) {
       console.warn(`Fetching file with name ${fileName} failed`);
       return new Map();
