@@ -71,8 +71,6 @@ export default class FileReadOnlyProvider extends ProviderBase {
         })
       );
 
-      console.log(parsedResponse);
-
       const responseMap: Map<string, ResponseEntry[]> = new Map(parsedResponse);
       _internalFileCache.set(fileName, responseMap);
 
