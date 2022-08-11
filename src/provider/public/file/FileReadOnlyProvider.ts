@@ -1,6 +1,6 @@
 import { AesEncrypt } from '../../core/AesEncrypt';
 import { DataUtil } from '../../core/DataUtil';
-import { KeyHeader } from '../../core/DriveData/DriveTypes';
+import { DriveSearchResult, KeyHeader } from '../../core/DriveData/DriveTypes';
 import { ProviderBase } from '../../core/ProviderBase';
 
 const FixedKeyHeader: KeyHeader = {
@@ -8,11 +8,17 @@ const FixedKeyHeader: KeyHeader = {
   aesKey: new Uint8Array(Array(16).fill(1)),
 };
 
-type staticFile = Record<string, any>;
-const _internalFileCache = new Map<string, Map<string, staticFile>>();
+type ResponseEntry = {
+  additionalThumbnails: unknown[];
+  header: DriveSearchResult;
+  payload: Record<string, any>;
+};
+
+// type staticFile = Record<string, ResponseEntry[]>;
+const _internalFileCache = new Map<string, Map<string, ResponseEntry[]>>();
 
 export default class FileReadOnlyProvider extends ProviderBase {
-  async GetFile(fileName: string): Promise<Map<string, staticFile>> {
+  async GetFile(fileName: string): Promise<Map<string, ResponseEntry[]>> {
     try {
       if (_internalFileCache.has(fileName)) {
         return _internalFileCache.get(fileName) ?? new Map();
@@ -22,10 +28,12 @@ export default class FileReadOnlyProvider extends ProviderBase {
       const response = await httpClient({ url: `/cdn/${fileName}`, baseURL: '' });
 
       const parsedResponse = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response.data?.map(async (dataSlice: any) => {
           return [
             dataSlice.name,
             await Promise.all(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               dataSlice?.files.map(async (file: any) => {
                 let parsedObj = undefined;
 
@@ -63,7 +71,9 @@ export default class FileReadOnlyProvider extends ProviderBase {
         })
       );
 
-      const responseMap: Map<string, staticFile> = new Map(parsedResponse);
+      console.log(parsedResponse);
+
+      const responseMap: Map<string, ResponseEntry[]> = new Map(parsedResponse);
       _internalFileCache.set(fileName, responseMap);
 
       return responseMap;
