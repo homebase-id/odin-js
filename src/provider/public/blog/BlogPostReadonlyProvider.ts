@@ -92,6 +92,9 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       posts = posts.concat(channelPosts.posts);
     }
 
+    // Sorted descending
+    posts.sort((a, b) => b.dateUnixTime - a.dateUnixTime);
+
     return posts;
   }
 
