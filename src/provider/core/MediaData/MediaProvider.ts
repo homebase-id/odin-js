@@ -59,11 +59,9 @@ export default class MediaProvider extends ProviderBase {
     };
 
     // console.log("full size:", MediaProvider.formatSizeString(imageBytes.byteLength));
-
-    // TODO Can be decreased even further, review which size gives optimal blurred preloader
-    // Create a thumbnail that fits scaled into a 300 x 300 canvas
-    const thumbnailDataMaxW = await this.createImageThumbnail(imageBytes, 10, 300, 'auto');
-    const thumbnailDataMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 300);
+    // Create a thumbnail that fits scaled into a 70 x 70 canvas
+    const thumbnailDataMaxW = await this.createImageThumbnail(imageBytes, 10, 20, 'auto');
+    const thumbnailDataMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 20);
     const thumbnailData =
       thumbnailDataMaxW.byteArray > thumbnailDataMaxH.byteArray
         ? thumbnailDataMaxH
