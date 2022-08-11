@@ -53,7 +53,7 @@ export default class FileReadOnlyProvider extends ProviderBase {
 
       const responseMap: Map<string, staticFile> = new Map(parsedResponse);
       _internalFileCache.set(fileName, responseMap);
-      console.log(_internalFileCache);
+
       return responseMap;
     } catch (ex) {
       console.warn(`Fetching file with name ${fileName} failed`);

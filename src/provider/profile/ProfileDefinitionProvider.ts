@@ -190,6 +190,12 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       transitOptions: null,
     };
 
+    const payloadJson: string = DataUtil.JsonStringify64(definition);
+    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
+    // Set max of 3kb for jsonContent so enough room is left for metedata
+    const shouldEmbedContent = payloadBytes.length < 3000;
+
     //note: we tag it with the profile id AND also a tag indicating it is a definition
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
@@ -197,16 +203,14 @@ export default class ProfileDefinitionProvider extends ProviderBase {
         tags: [definition.profileId.toString()],
         fileType: ProfileConfig.ProfileDefinitionFileType, //TODO: determine if we need to define these for defintion files?
         dataType: undefined, //TODO: determine if we need to define these for defintion files?
-        contentIsComplete: false,
-        jsonContent: null,
+        contentIsComplete: shouldEmbedContent,
+        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous }, //TODO: should this be owner only?
     };
 
     //reshape the definition to group attributes by their type
-    const payloadJson: string = DataUtil.JsonStringify64(definition);
-    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
@@ -266,11 +270,9 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     includeMetadataHeader: boolean
   ): Promise<ProfileDefinition> {
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-        FixedKeyHeader
+      const json = DataUtil.byteArrayToString(
+        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
       );
-      const json = DataUtil.byteArrayToString(bytes);
       return JSON.parse(json);
     } else {
       return await this._driveProvider.GetPayloadAsJson<any>(

@@ -37,7 +37,6 @@ export default class MediaProvider extends ProviderBase {
     this._transitProvider = options.transitProvider;
   }
 
-  //gets the data available for the specified attribute if available
   async uploadImage(
     targetDrive: TargetDrive,
     tag: string | undefined,

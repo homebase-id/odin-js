@@ -92,134 +92,136 @@ export default class HomePageProvider extends ProviderBase {
     return await this._attributeDataProvider.saveAttribute(attribute);
   }
 
-  async getVisibleLinks(): Promise<LandingPageLink[]> {
-    const linkFiles = await this.getLinkFiles();
-    return linkFiles.map((lf) => lf as LandingPageLink);
-  }
+  /// TODO: migrate links into normal attributes
 
-  async saveLinkFile(link: LandingPageLinkFile): Promise<UploadResult> {
-    let existingFileId: string | undefined;
-    if (link.fileId?.length) {
-      existingFileId = link.fileId;
-    } else {
-      const existingLink = await this.getLinkFile(link.id);
-      existingFileId = existingLink?.fileId?.toString();
-    }
+  // async getVisibleLinks(): Promise<LandingPageLink[]> {
+  //   const linkFiles = await this.getLinkFiles();
+  //   return linkFiles.map((lf) => lf as LandingPageLink);
+  // }
 
-    const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
-      storageOptions: {
-        overwriteFileId: existingFileId,
-        drive: HomePageConfig.HomepageTargetDrive,
-      },
-      transitOptions: null,
-    };
+  // async saveLinkFile(link: LandingPageLinkFile): Promise<UploadResult> {
+  //   let existingFileId: string | undefined;
+  //   if (link.fileId?.length) {
+  //     existingFileId = link.fileId;
+  //   } else {
+  //     const existingLink = await this.getLinkFile(link.id);
+  //     existingFileId = existingLink?.fileId?.toString();
+  //   }
 
-    const metadata: UploadFileMetadata = {
-      contentType: 'application/json',
-      appData: {
-        tags: [link.id.toString()],
-        contentIsComplete: false,
-        fileType: HomePageConfig.LinkFileType,
-        jsonContent: null,
-      },
-      payloadIsEncrypted: false,
-      accessControlList: link.acl,
-    };
+  //   const instructionSet: UploadInstructionSet = {
+  //     transferIv: this._transitProvider.Random16(),
+  //     storageOptions: {
+  //       overwriteFileId: existingFileId,
+  //       drive: HomePageConfig.HomepageTargetDrive,
+  //     },
+  //     transitOptions: null,
+  //   };
 
-    const payloadJson: string = DataUtil.JsonStringify64(link as LandingPageLink);
-    const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
-    return await this._transitProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
-      instructionSet,
-      metadata,
-      payloadBytes
-    );
-  }
+  //   const metadata: UploadFileMetadata = {
+  //     contentType: 'application/json',
+  //     appData: {
+  //       tags: [link.id.toString()],
+  //       contentIsComplete: false,
+  //       fileType: HomePageConfig.LinkFileType,
+  //       jsonContent: null,
+  //     },
+  //     payloadIsEncrypted: false,
+  //     accessControlList: link.acl,
+  //   };
 
-  async deleteLinkFile(fileId: string) {
-    return this._driveProvider.DeleteFile(HomePageConfig.HomepageTargetDrive, fileId);
-  }
+  //   const payloadJson: string = DataUtil.JsonStringify64(link as LandingPageLink);
+  //   const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  //   return await this._transitProvider.UploadUsingKeyHeader(
+  //     FixedKeyHeader,
+  //     instructionSet,
+  //     metadata,
+  //     payloadBytes
+  //   );
+  // }
 
-  //returns the link files on the homepage drive
-  async getLinkFiles(): Promise<LandingPageLinkFile[]> {
-    const p: FileQueryParams = {
-      targetDrive: HomePageConfig.HomepageTargetDrive,
-      fileType: [HomePageConfig.LinkFileType],
-    };
+  // async deleteLinkFile(fileId: string) {
+  //   return this._driveProvider.DeleteFile(HomePageConfig.HomepageTargetDrive, fileId);
+  // }
 
-    const response = await this._driveProvider.QueryBatch(p);
+  // //returns the link files on the homepage drive
+  // async getLinkFiles(): Promise<LandingPageLinkFile[]> {
+  //   const p: FileQueryParams = {
+  //     targetDrive: HomePageConfig.HomepageTargetDrive,
+  //     fileType: [HomePageConfig.LinkFileType],
+  //   };
 
-    const links: LandingPageLinkFile[] = [];
-    for (const key in response.searchResults) {
-      const dsr = response.searchResults[key];
+  //   const response = await this._driveProvider.QueryBatch(p);
 
-      const link = await this.decryptLinkContent(
-        dsr,
-        HomePageConfig.HomepageTargetDrive,
-        response.includeMetadataHeader
-      );
-      links.push({
-        ...link,
-        fileId: dsr.fileMetadata.file.fileId,
-        acl: dsr.serverMetadata.accessControlList,
-      });
-    }
+  //   const links: LandingPageLinkFile[] = [];
+  //   for (const key in response.searchResults) {
+  //     const dsr = response.searchResults[key];
 
-    return links;
-  }
+  //     const link = await this.decryptLinkContent(
+  //       dsr,
+  //       HomePageConfig.HomepageTargetDrive,
+  //       response.includeMetadataHeader
+  //     );
+  //     links.push({
+  //       ...link,
+  //       fileId: dsr.fileMetadata.file.fileId,
+  //       acl: dsr.serverMetadata.accessControlList,
+  //     });
+  //   }
 
-  private async getLinkFile(id: string): Promise<LandingPageLinkFile | null> {
-    const params: FileQueryParams = {
-      targetDrive: HomePageConfig.HomepageTargetDrive,
-      tagsMatchAtLeastOne: [id],
-    };
+  //   return links;
+  // }
 
-    const response = await this._driveProvider.QueryBatch(params);
+  // private async getLinkFile(id: string): Promise<LandingPageLinkFile | null> {
+  //   const params: FileQueryParams = {
+  //     targetDrive: HomePageConfig.HomepageTargetDrive,
+  //     tagsMatchAtLeastOne: [id],
+  //   };
 
-    if (response.searchResults.length == 0) {
-      return null;
-    }
+  //   const response = await this._driveProvider.QueryBatch(params);
 
-    const link = await this.getLinkFileFromDsr(
-      response.searchResults[0],
-      HomePageConfig.HomepageTargetDrive,
-      response.includeMetadataHeader
-    );
-    return link;
-  }
+  //   if (response.searchResults.length == 0) {
+  //     return null;
+  //   }
 
-  private async getLinkFileFromDsr(
-    dsr: DriveSearchResult,
-    targetDrive: TargetDrive,
-    includeMetadataHeader: boolean
-  ): Promise<LandingPageLinkFile> {
-    const link = await this.decryptLinkContent(dsr, targetDrive, includeMetadataHeader);
-    return {
-      ...link,
-      fileId: dsr.fileMetadata.file.fileId,
-      acl: dsr.serverMetadata.accessControlList,
-    };
-  }
+  //   const link = await this.getLinkFileFromDsr(
+  //     response.searchResults[0],
+  //     HomePageConfig.HomepageTargetDrive,
+  //     response.includeMetadataHeader
+  //   );
+  //   return link;
+  // }
 
-  private async decryptLinkContent(
-    dsr: DriveSearchResult,
-    targetDrive: TargetDrive,
-    includeMetadataHeader: boolean
-  ): Promise<LandingPageLink> {
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-        FixedKeyHeader
-      );
-      const json = DataUtil.byteArrayToString(bytes);
-      return JSON.parse(json);
-    } else {
-      return await this._driveProvider.GetPayloadAsJson<LandingPageLink>(
-        targetDrive,
-        dsr.fileMetadata.file.fileId,
-        FixedKeyHeader
-      );
-    }
-  }
+  // private async getLinkFileFromDsr(
+  //   dsr: DriveSearchResult,
+  //   targetDrive: TargetDrive,
+  //   includeMetadataHeader: boolean
+  // ): Promise<LandingPageLinkFile> {
+  //   const link = await this.decryptLinkContent(dsr, targetDrive, includeMetadataHeader);
+  //   return {
+  //     ...link,
+  //     fileId: dsr.fileMetadata.file.fileId,
+  //     acl: dsr.serverMetadata.accessControlList,
+  //   };
+  // }
+
+  // private async decryptLinkContent(
+  //   dsr: DriveSearchResult,
+  //   targetDrive: TargetDrive,
+  //   includeMetadataHeader: boolean
+  // ): Promise<LandingPageLink> {
+  //   if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
+  //     const bytes = await this._driveProvider.DecryptUsingKeyHeader(
+  //       DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
+  //       FixedKeyHeader
+  //     );
+  //     const json = DataUtil.byteArrayToString(bytes);
+  //     return JSON.parse(json);
+  //   } else {
+  //     return await this._driveProvider.GetPayloadAsJson<LandingPageLink>(
+  //       targetDrive,
+  //       dsr.fileMetadata.file.fileId,
+  //       FixedKeyHeader
+  //     );
+  //   }
+  // }
 }
