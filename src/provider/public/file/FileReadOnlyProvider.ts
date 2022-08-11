@@ -30,13 +30,25 @@ export default class FileReadOnlyProvider extends ProviderBase {
                 let parsedObj = undefined;
 
                 try {
-                  // if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-                  const bytes = await this.DecryptUsingKeyHeader(
-                    DataUtil.base64ToUint8Array(file.payload),
-                    FixedKeyHeader
-                  );
-                  const json = DataUtil.byteArrayToString(bytes);
-                  parsedObj = JSON.parse(json);
+                  // Checking if there is actual content in jsonContent as could be excluded from the static file
+                  if (
+                    file.header.fileMetadata.appData.contentIsComplete &&
+                    file.header.fileMetadata.appData.jsonContent.length !== 0
+                  ) {
+                    const json = DataUtil.byteArrayToString(
+                      DataUtil.base64ToUint8Array(file.header.fileMetadata.appData.jsonContent)
+                    );
+
+                    parsedObj = JSON.parse(json);
+                  } else {
+                    const bytes = await this.DecryptUsingKeyHeader(
+                      DataUtil.base64ToUint8Array(file.payload),
+                      FixedKeyHeader
+                    );
+                    const json = DataUtil.byteArrayToString(bytes);
+
+                    parsedObj = JSON.parse(json);
+                  }
                 } catch (ex) {
                   console.warn(ex);
                 }
