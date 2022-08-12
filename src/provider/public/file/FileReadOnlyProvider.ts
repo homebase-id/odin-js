@@ -54,6 +54,25 @@ export default class FileReadOnlyProvider extends ProviderBase {
     }
   }
 
+  /// Looks through the _internalcache to find a ResponseEntry that matches the key provided
+  async getFileEntryFromCache(key: string) {
+    if (!_internalFileCache) {
+      return;
+    }
+    try {
+      for (const filePromise of _internalFileCache.values()) {
+        const responseEntries = await filePromise;
+
+        if (responseEntries.has(key)) {
+          return responseEntries.get(key);
+        }
+      }
+    } catch (ex) {
+      // The promises could be erroring out, so we need to return if anything fails before waisting any more time waiting on failing responses;
+      return;
+    }
+  }
+
   private convertFileToResponseEntry = async (file: any) => {
     let parsedObj = undefined;
 
@@ -68,7 +87,7 @@ export default class FileReadOnlyProvider extends ProviderBase {
         );
 
         parsedObj = JSON.parse(json);
-      } else {
+      } else if (file.payload) {
         const bytes = await this.DecryptUsingKeyHeader(
           DataUtil.base64ToUint8Array(file.payload),
           FixedKeyHeader

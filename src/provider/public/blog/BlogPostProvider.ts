@@ -270,16 +270,15 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         FixedKeyHeader
       );
 
-      const tag = Guid.createEmpty().toString();
+      const newFileId = Guid.create().toString();
 
       const destinationMediaFileId = await this._mediaProvider.uploadImage(
         this._blogDefinitionProvider.getPublishChannelDrive(channelId),
-        tag,
+        newFileId,
         acl,
-        new Uint8Array(bytes)
+        new Uint8Array(bytes),
+        newFileId
       );
-
-      console.log(destinationMediaFileId);
 
       return destinationMediaFileId?.toString();
     };
