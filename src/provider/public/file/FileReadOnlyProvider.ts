@@ -19,7 +19,6 @@ const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>
 export default class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, ResponseEntry[]>> {
     try {
-      console.log('check cache', fileName);
       if (_internalFileCache.has(fileName)) {
         return (await _internalFileCache.get(fileName)) ?? new Map();
       }
@@ -46,8 +45,6 @@ export default class FileReadOnlyProvider extends ProviderBase {
       };
 
       const promise = fetchResponseMap(fileName);
-
-      console.log('set cache', fileName);
       _internalFileCache.set(fileName, promise);
 
       return await promise;
