@@ -45,6 +45,12 @@ export interface AppFileMetaData {
   tags: string[] | null;
   contentIsComplete: boolean;
   jsonContent: string;
+  previewThumbnail?: {
+    pixelWidth: number;
+    pixelHeight: number;
+    contentType: string;
+    content: string;
+  };
 }
 
 export interface ExternalFileIdentifier {

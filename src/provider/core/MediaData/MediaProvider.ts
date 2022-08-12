@@ -57,17 +57,13 @@ export default class MediaProvider extends ProviderBase {
       transitOptions: null,
     };
 
-    // console.log("full size:", MediaProvider.formatSizeString(imageBytes.byteLength));
-    // Create a thumbnail that fits scaled into a 70 x 70 canvas
+    // Create a thumbnail that fits scaled into a 20 x 20 canvas
     const thumbnailDataMaxW = await this.createImageThumbnail(imageBytes, 10, 20, 'auto');
     const thumbnailDataMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 20);
     const thumbnailData =
       thumbnailDataMaxW.byteArray > thumbnailDataMaxH.byteArray
         ? thumbnailDataMaxH
         : thumbnailDataMaxW;
-    // console.log("thumbnail:", MediaProvider.formatSizeString(thumbnailBytes.byteLength));
-
-    const thumbnailJson = DataUtil.JsonStringify64(thumbnailData);
 
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
@@ -75,7 +71,13 @@ export default class MediaProvider extends ProviderBase {
         tags: [tag ?? Guid.createEmpty().toString()],
         contentIsComplete: false,
         fileType: 0,
-        jsonContent: thumbnailJson,
+        jsonContent: null,
+        previewThumbnail: {
+          pixelWidth: thumbnailData.pixelWidth,
+          pixelHeight: thumbnailData.pixelHeight,
+          contentType: thumbnailData.contentType,
+          content: DataUtil.uint8ArrayToBase64(thumbnailData.byteArray),
+        },
       },
       payloadIsEncrypted: false,
       accessControlList: acl,
@@ -98,13 +100,21 @@ export default class MediaProvider extends ProviderBase {
   async getDecryptedThumbnailMeta(
     targetDrive: TargetDrive,
     fileId: string
-  ): Promise<ThumbnailMeta> {
+  ): Promise<ThumbnailMeta | undefined> {
     //it seems these will be fine for images but for video and audio we must stream decrypt
     return this._driveProvider.GetMetadata(targetDrive, fileId).then((header) => {
-      const thumbnail = JSON.parse(header.fileMetadata.appData.jsonContent);
-      const buffer = DataUtil.base64ToUint8Array(thumbnail.byteArray);
+      if (!header.fileMetadata.appData.previewThumbnail) {
+        return;
+      }
+
+      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+      const buffer = DataUtil.base64ToUint8Array(previewThumbnail.content);
       const url = window.URL.createObjectURL(new Blob([buffer]));
-      return { naturalSize: thumbnail.naturalSize, url: url };
+
+      return {
+        naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+        url: url,
+      };
     });
   }
 
@@ -125,7 +135,12 @@ export default class MediaProvider extends ProviderBase {
     quality = 80,
     width: number | 'auto' = 0,
     height: number | 'auto' = 0
-  ): Promise<{ naturalSize: { width: number; height: number }; byteArray: Uint8Array }> {
+  ): Promise<{
+    pixelWidth: number;
+    pixelHeight: number;
+    contentType: string;
+    byteArray: Uint8Array;
+  }> {
     // output width. 0 will keep its original width and 'auto' will calculate its scale from height.
     // output height. 0 will keep its original height and 'auto' will calculate its scale from width.
     // file format: png, jpeg, bmp, gif, webp. If null, original format will be used.
@@ -135,7 +150,12 @@ export default class MediaProvider extends ProviderBase {
 
     return fromBlob(blob, quality, width, height, format).then((resizedData) => {
       return resizedData.blob.arrayBuffer().then((buffer) => {
-        return { naturalSize: resizedData.naturalSize, byteArray: new Uint8Array(buffer) };
+        return {
+          pixelWidth: resizedData.naturalSize.width,
+          pixelHeight: resizedData.naturalSize.height,
+          contentType: 'image/webp',
+          byteArray: new Uint8Array(buffer),
+        };
       });
     });
   }
