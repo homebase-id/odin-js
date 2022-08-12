@@ -14,72 +14,81 @@ type ResponseEntry = {
   payload: Record<string, any>;
 };
 
-// type staticFile = Record<string, ResponseEntry[]>;
-const _internalFileCache = new Map<string, Map<string, ResponseEntry[]>>();
+const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
 export default class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, ResponseEntry[]>> {
     try {
+      console.log('check cache', fileName);
       if (_internalFileCache.has(fileName)) {
-        return _internalFileCache.get(fileName) ?? new Map();
+        return (await _internalFileCache.get(fileName)) ?? new Map();
       }
 
       const httpClient = this.createAxiosClient();
-      const response = await httpClient({ url: `/cdn/${fileName}`, baseURL: '' });
 
-      const parsedResponse = await Promise.all(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response.data?.map(async (dataSlice: any) => {
-          return [
-            dataSlice.name,
-            await Promise.all(
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              dataSlice?.files.map(async (file: any) => {
-                let parsedObj = undefined;
+      const fetchResponseMap = async (fileName: string) => {
+        const response = await httpClient({ url: `/cdn/${fileName}`, baseURL: '' });
 
-                try {
-                  // Checking if there is actual content in jsonContent as could be excluded from the static file
-                  if (
-                    file.header.fileMetadata.appData.contentIsComplete &&
-                    file.header.fileMetadata.appData.jsonContent.length !== 0
-                  ) {
-                    const json = DataUtil.byteArrayToString(
-                      DataUtil.base64ToUint8Array(file.header.fileMetadata.appData.jsonContent)
-                    );
+        const parsedResponse = await Promise.all(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          response.data?.map(async (dataSlice: any) => {
+            return [
+              dataSlice.name,
+              await Promise.all(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                dataSlice?.files.map(async (file: any) => this.convertFileToResponseEntry(file))
+              ),
+            ];
+          })
+        );
 
-                    parsedObj = JSON.parse(json);
-                  } else {
-                    const bytes = await this.DecryptUsingKeyHeader(
-                      DataUtil.base64ToUint8Array(file.payload),
-                      FixedKeyHeader
-                    );
-                    const json = DataUtil.byteArrayToString(bytes);
+        return new Map(parsedResponse) as Map<string, ResponseEntry[]>;
+      };
 
-                    parsedObj = JSON.parse(json);
-                  }
-                } catch (ex) {
-                  console.warn(ex);
-                }
+      const promise = fetchResponseMap(fileName);
 
-                return {
-                  ...file,
-                  payload: parsedObj,
-                };
-              })
-            ),
-          ];
-        })
-      );
+      console.log('set cache', fileName);
+      _internalFileCache.set(fileName, promise);
 
-      const responseMap: Map<string, ResponseEntry[]> = new Map(parsedResponse);
-      _internalFileCache.set(fileName, responseMap);
-
-      return responseMap;
+      return await promise;
     } catch (ex) {
       console.warn(`Fetching file with name ${fileName} failed`);
       return new Map();
     }
   }
+
+  private convertFileToResponseEntry = async (file: any) => {
+    let parsedObj = undefined;
+
+    try {
+      // Checking if there is actual content in jsonContent as could be excluded from the static file
+      if (
+        file.header.fileMetadata.appData.contentIsComplete &&
+        file.header.fileMetadata.appData.jsonContent.length !== 0
+      ) {
+        const json = DataUtil.byteArrayToString(
+          DataUtil.base64ToUint8Array(file.header.fileMetadata.appData.jsonContent)
+        );
+
+        parsedObj = JSON.parse(json);
+      } else {
+        const bytes = await this.DecryptUsingKeyHeader(
+          DataUtil.base64ToUint8Array(file.payload),
+          FixedKeyHeader
+        );
+        const json = DataUtil.byteArrayToString(bytes);
+
+        parsedObj = JSON.parse(json);
+      }
+    } catch (ex) {
+      console.warn(ex);
+    }
+
+    return {
+      ...file,
+      payload: parsedObj,
+    };
+  };
 
   async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
