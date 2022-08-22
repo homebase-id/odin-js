@@ -240,7 +240,6 @@ export default class AttributeDataProvider extends ProviderBase {
 
     if (
       !Guid.isGuid(attribute.id) ||
-      !Guid.isGuid(attribute.profileId) ||
       !Guid.isGuid(attribute.type) ||
       !Guid.isGuid(attribute.sectionId)
     ) {
