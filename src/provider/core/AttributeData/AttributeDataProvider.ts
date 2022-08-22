@@ -296,7 +296,7 @@ export default class AttributeDataProvider extends ProviderBase {
   private getTargetDrive(profileId: string) {
     return {
       alias: profileId,
-      type: ProfileConfig.ProfileDriveType.toString(),
+      type: ProfileConfig.ProfileDriveType
     };
   }
 }

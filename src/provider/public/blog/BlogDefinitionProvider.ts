@@ -1,4 +1,4 @@
-import { HomePageConfig } from '../home/HomeTypes';
+import {HomePageConfig} from '../home/HomeTypes';
 import {
   DriveSearchResult,
   FileQueryParams,
@@ -6,10 +6,10 @@ import {
   KeyHeader,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
-import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
-import { BlogConfig, ChannelDefinition } from './BlogTypes';
-import { DataUtil } from '../../core/DataUtil';
-import { DriveProvider } from '../../core/DriveData/DriveProvider';
+import {ProviderBase, ProviderOptions} from '../../core/ProviderBase';
+import {BlogConfig, ChannelDefinition} from './BlogTypes';
+import {DataUtil} from '../../core/DataUtil';
+import {DriveProvider} from '../../core/DriveData/DriveProvider';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import {
   SecurityGroupType,
@@ -17,10 +17,11 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/TransitData/TransitTypes';
-import { Guid } from 'guid-typescript';
+import {Guid} from 'guid-typescript';
 
 const defaultChannel: ChannelDefinition = {
-  channelId: '93999384-0000-0000-0000-000000004440',
+  // channelId: '93999384-0000-0000-0000-000000004440',
+  channelId: DataUtil.toByteArrayId("default_blog_channel"),
   name: 'Public Blog',
   description: '',
   templateId: undefined,
@@ -74,7 +75,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
   }
 
   async getChannelDefinition(id: string): Promise<ChannelDefinition | undefined> {
-    const { definition } = (await this.getChannelDefinitionInternal(id)) ?? {
+    const {definition} = (await this.getChannelDefinitionInternal(id)) ?? {
       definition: undefined,
     };
     if (definition == null && id.toString() == defaultChannel.channelId) {
@@ -93,11 +94,11 @@ export default class BlogDefinitionProvider extends ProviderBase {
 
     const targetDrive: TargetDrive = {
       alias: definition.channelId,
-      type: BlogConfig.ChannelDriveType.toString(),
+      type: BlogConfig.ChannelDriveType,
     };
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, channelMetadata, true);
 
-    const { fileId } = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
+    const {fileId} = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
       fileId: undefined,
     };
 
@@ -125,7 +126,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
-      accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous }, //TODO: should this be owner only?
+      accessControlList: {requiredSecurityGroup: SecurityGroupType.Anonymous}, //TODO: should this be owner only?
     };
 
     return await this._transitProvider.UploadUsingKeyHeader(
@@ -155,7 +156,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
   public getPublishChannelDrive(channelId: string): TargetDrive {
     const targetDrive: TargetDrive = {
       alias: channelId,
-      type: BlogConfig.ChannelDriveType.toString(),
+      type: BlogConfig.ChannelDriveType,
     };
 
     return targetDrive;
@@ -166,8 +167,8 @@ export default class BlogDefinitionProvider extends ProviderBase {
     id: string
   ): Promise<{ definition: ChannelDefinition; fileId: string } | undefined> {
     const targetDrive: TargetDrive = {
-      alias: HomePageConfig.BlogMainContentDriveId.toString(),
-      type: BlogConfig.DriveType.toString(),
+      alias: HomePageConfig.BlogMainContentDriveId,
+      type: BlogConfig.DriveType,
     };
 
     const params: FileQueryParams = {
@@ -227,8 +228,8 @@ export default class BlogDefinitionProvider extends ProviderBase {
 
   public static getMasterContentTargetDrive(): TargetDrive {
     const drive: TargetDrive = {
-      alias: HomePageConfig.BlogMainContentDriveId.toString(),
-      type: BlogConfig.DriveType.toString(),
+      alias: HomePageConfig.BlogMainContentDriveId,
+      type: BlogConfig.DriveType,
     };
 
     return drive;

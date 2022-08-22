@@ -1,12 +1,12 @@
-import { DataUtil } from '../core/DataUtil';
-import { DriveProvider } from '../core/DriveData/DriveProvider';
+import {DataUtil} from '../core/DataUtil';
+import {DriveProvider} from '../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
   FileQueryParams,
   KeyHeader,
   TargetDrive,
 } from '../core/DriveData/DriveTypes';
-import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
+import {ProviderBase, ProviderOptions} from '../core/ProviderBase';
 import TransitProvider from '../core/TransitData/TransitProvider';
 import {
   SecurityGroupType,
@@ -14,8 +14,8 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../core/TransitData/TransitTypes';
-import { BuiltInProfiles, ProfileConfig } from './ProfileConfig';
-import { ProfileDefinition } from './ProfileTypes';
+import {BuiltInProfiles, ProfileConfig} from './ProfileConfig';
+import {ProfileDefinition} from './ProfileTypes';
 
 const FixedKeyHeader: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(1)),
@@ -23,7 +23,7 @@ const FixedKeyHeader: KeyHeader = {
 };
 
 const initialStandardProfile: ProfileDefinition = {
-  profileId: BuiltInProfiles.StandardProfileId.toString(),
+  profileId: BuiltInProfiles.StandardProfileId,
   name: 'Standard Info',
   description: '',
   sections: [
@@ -71,7 +71,7 @@ const initialStandardProfile: ProfileDefinition = {
 };
 
 const initialFinancialProfile: ProfileDefinition = {
-  profileId: BuiltInProfiles.FinancialProfileId.toString(),
+  profileId: BuiltInProfiles.FinancialProfileId,
   name: 'Financial Info',
   description: '',
   sections: [
@@ -110,7 +110,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   getDefaultProfileId(): string {
-    return BuiltInProfiles.StandardProfileId.toString();
+    return BuiltInProfiles.StandardProfileId;
   }
 
   async ensureConfiguration() {
@@ -132,13 +132,13 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
   async getProfileDefinitions(): Promise<ProfileDefinition[]> {
     const drives = await this._driveProvider.GetDrivesByType(
-      ProfileConfig.ProfileDriveType.toString(),
+      ProfileConfig.ProfileDriveType,
       1,
       1000
     );
     const profileHeaders = drives.results.map((drive) => {
       return {
-        id: drive.alias,
+        id: drive.targetDriveInfo.alias,
         name: drive.name,
       };
     });
@@ -149,7 +149,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       const header = profileHeaders[key];
 
       //hit the drive for the profile definition file
-      const { definition } = (await this.getProfileDefinitionInternal(header.id)) ?? {
+      const {definition} = (await this.getProfileDefinitionInternal(header.id)) ?? {
         definition: undefined,
       };
 
@@ -164,7 +164,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   async getProfileDefinition(profileId: string): Promise<ProfileDefinition | undefined> {
-    const { definition } = (await this.getProfileDefinitionInternal(profileId)) ?? {
+    const {definition} = (await this.getProfileDefinitionInternal(profileId)) ?? {
       definition: undefined,
     };
     return definition;
@@ -175,7 +175,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
 
-    const { fileId } = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
+    const {fileId} = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
       fileId: undefined,
     };
 
@@ -198,14 +198,14 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [definition.profileId.toString()],
+        tags: [definition.profileId],
         fileType: ProfileConfig.ProfileDefinitionFileType, //TODO: determine if we need to define these for defintion files?
         dataType: undefined, //TODO: determine if we need to define these for defintion files?
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
-      accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous }, //TODO: should this be owner only?
+      accessControlList: {requiredSecurityGroup: SecurityGroupType.Anonymous}, //TODO: should this be owner only?
     };
 
     //reshape the definition to group attributes by their type
@@ -284,7 +284,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   public static getTargetDrive(profileId: string): TargetDrive {
     return {
       alias: profileId,
-      type: ProfileConfig.ProfileDriveType.toString(),
+      type: ProfileConfig.ProfileDriveType,
     };
   }
 }

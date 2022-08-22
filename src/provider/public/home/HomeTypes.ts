@@ -1,9 +1,10 @@
-import { Guid } from 'guid-typescript';
-import { TargetDrive } from '../../core/DriveData/DriveTypes';
-import { ProfileConfig } from '../../profile/ProfileConfig';
+import {Guid} from 'guid-typescript';
+import {TargetDrive} from '../../core/DriveData/DriveTypes';
+import {ProfileConfig} from '../../profile/ProfileConfig';
+import {DataUtil} from "../../core/DataUtil";
 
 export class HomePageConfig {
-  static readonly DefaultDriveId = Guid.parse('99999789-6666-6666-6666-000000005555');
+  static readonly DefaultDriveId = DataUtil.toByteArrayId("homepage_drive");
 
   static readonly ChannelDefinitionAlias = Guid.parse('99999789-7777-7777-7777-000000007777');
   static readonly AttributeTypeNotApplicable = Guid.parse('00000000-0000-0000-0000-000000000000');
@@ -15,8 +16,8 @@ export class HomePageConfig {
   static readonly LinkFileType: number = 777;
 
   static readonly HomepageTargetDrive: TargetDrive = {
-    alias: Guid.parse('99999789-6666-6666-6666-000000005555').toString(),
-    type: ProfileConfig.ProfileDriveType.toString(),
+    alias: DataUtil.toByteArrayId("homepage_drive"),
+    type: ProfileConfig.ProfileDriveType,
   };
 }
 
