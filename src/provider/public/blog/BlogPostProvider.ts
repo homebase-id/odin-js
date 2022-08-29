@@ -13,6 +13,7 @@ import TransitProvider from '../../core/TransitData/TransitProvider';
 import MediaProvider from '../../core/MediaData/MediaProvider';
 import {
   AccessControlList,
+  SecurityGroupType,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -188,7 +189,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
-      accessControlList: file.acl,
+      accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner }, // Master Blogs are always Owner only,
     };
 
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(

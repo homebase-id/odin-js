@@ -1,4 +1,4 @@
-import {HomePageConfig} from '../home/HomeTypes';
+import { HomePageConfig } from '../home/HomeTypes';
 import {
   DriveSearchResult,
   FileQueryParams,
@@ -6,10 +6,10 @@ import {
   KeyHeader,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
-import {ProviderBase, ProviderOptions} from '../../core/ProviderBase';
-import {BlogConfig, ChannelDefinition} from './BlogTypes';
-import {DataUtil} from '../../core/DataUtil';
-import {DriveProvider} from '../../core/DriveData/DriveProvider';
+import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
+import { BlogConfig, ChannelDefinition } from './BlogTypes';
+import { DataUtil } from '../../core/DataUtil';
+import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import TransitProvider from '../../core/TransitData/TransitProvider';
 import {
   SecurityGroupType,
@@ -17,14 +17,14 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/TransitData/TransitTypes';
-import {Guid} from 'guid-typescript';
 
 const defaultChannel: ChannelDefinition = {
   // channelId: '93999384-0000-0000-0000-000000004440',
-  channelId: DataUtil.toByteArrayId("default_blog_channel"),
+  channelId: DataUtil.toByteArrayId('default_blog_channel'),
   name: 'Public Blog',
   description: '',
   templateId: undefined,
+  acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
 };
 
 const FixedKeyHeader: KeyHeader = {
@@ -66,16 +66,17 @@ export default class BlogDefinitionProvider extends ProviderBase {
     const definitions: ChannelDefinition[] = [];
     for (const key in response.searchResults) {
       const dsr = response.searchResults[key];
-      definitions.push(
-        await this.decryptDefinition(dsr, targetDrive, response.includeMetadataHeader)
-      );
+      definitions.push({
+        ...(await this.decryptDefinition(dsr, targetDrive, response.includeMetadataHeader)),
+        acl: dsr.serverMetadata?.accessControlList,
+      });
     }
 
     return definitions;
   }
 
   async getChannelDefinition(id: string): Promise<ChannelDefinition | undefined> {
-    const {definition} = (await this.getChannelDefinitionInternal(id)) ?? {
+    const { definition } = (await this.getChannelDefinitionInternal(id)) ?? {
       definition: undefined,
     };
     if (definition == null && id.toString() == defaultChannel.channelId) {
@@ -89,7 +90,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     const channelMetadata = '';
 
     if (!definition.channelId) {
-      definition.channelId = Guid.create().toString();
+      definition.channelId = DataUtil.toByteArrayId(definition.name);
     }
 
     const targetDrive: TargetDrive = {
@@ -98,7 +99,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     };
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, channelMetadata, true);
 
-    const {fileId} = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
+    const { fileId } = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
       fileId: undefined,
     };
 
@@ -126,7 +127,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
       payloadIsEncrypted: false,
-      accessControlList: {requiredSecurityGroup: SecurityGroupType.Anonymous}, //TODO: should this be owner only?
+      accessControlList: definition.acl,
     };
 
     return await this._transitProvider.UploadUsingKeyHeader(
