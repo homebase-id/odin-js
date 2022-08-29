@@ -41,25 +41,35 @@ const getMimeType = (format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null) => 
  * @param {Object} img - Image file for width and height reference
  * @param {number} img.naturalHeight - Original image height.
  * @param {number} img.naturalWidth - Original image width.
- * @param {(number | string)} width - Desired image width. If string will calculate based on height scale
- * @param {(number | string)} height - Desired image height. If string will calculate based on width scale
+ * @param {(number | string)} maxWidth - Desired image width. If string will calculate based on height scale
+ * @param {(number | string)} maxHeight - Desired image height. If string will calculate based on width scale
  * @returns {Size} Returns the image width and height
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getHeightWidth = (img: HTMLImageElement, width: any, height: any) => {
-  if (width > 0 && height > 0) return { width, height };
-  if (width > 0) {
-    if (height === 0) return { width, height: img.naturalHeight };
-    const ratio = img.naturalWidth / width;
-    return { width, height: Math.round((img.naturalHeight / ratio + Number.EPSILON) * 100) / 100 };
+const getTargetSize = (
+  img: HTMLImageElement,
+  maxWidth: number | undefined,
+  maxHeight: number | undefined
+) => {
+  const { naturalWidth, naturalHeight } = img;
+
+  if (!maxWidth || !maxHeight) return { width: naturalWidth, height: naturalHeight };
+
+  const originalAspectRatio = naturalWidth / naturalHeight;
+  const targetAspectRatio = maxWidth / maxHeight;
+
+  let outputWidth, outputHeight;
+
+  if (originalAspectRatio > targetAspectRatio) {
+    outputWidth = Math.min(naturalWidth, maxWidth);
+    outputHeight = outputWidth / originalAspectRatio;
+  } else {
+    outputHeight = Math.min(naturalHeight, maxHeight);
+    outputWidth = outputHeight * originalAspectRatio;
   }
-  if (height > 0) {
-    if (width === 0) return { width: img.naturalWidth, height };
-    const ratio = img.naturalHeight / height;
-    return { width: Math.round((img.naturalWidth / ratio + Number.EPSILON) * 100) / 100, height };
-  }
-  return { width: img.naturalWidth, height: img.naturalHeight };
+
+  return { width: outputWidth, height: outputHeight };
 };
 
 /**
@@ -76,15 +86,16 @@ const getHeightWidth = (img: HTMLImageElement, width: any, height: any) => {
 const fromBlob = (
   imgBlob: Blob,
   quality = 100,
-  width: number | 'auto' = 0,
-  height: number | 'auto' = 0,
+  width: number,
+  height: number,
   format: 'png' | 'webp' | 'bmp' | 'jpeg' | 'gif' | null = null
-): Promise<{ naturalSize: { width: number; height: number }; blob: Blob }> => {
+): Promise<{
+  naturalSize: { width: number; height: number };
+  size: { width: number; height: number };
+  blob: Blob;
+}> => {
   if (!(imgBlob instanceof Blob)) {
     throw new TypeError(`Expected blob or file! ${typeof imgBlob} given!`);
-  }
-  if (width < 0 || height < 0) {
-    throw new RangeError('Invalid width or height value!');
   }
   if (quality <= 0) {
     throw new RangeError('Quality must be higher than 0!');
@@ -103,7 +114,7 @@ const fromBlob = (
       img.src = reader.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const size = getHeightWidth(img, width, height);
+        const size = getTargetSize(img, width, height);
         canvas.width = size.width;
         canvas.height = size.height;
         canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -114,6 +125,7 @@ const fromBlob = (
             }
             resolve({
               naturalSize: { width: img.naturalWidth, height: img.naturalHeight },
+              size: { width: size.width, height: size.height },
               blob: new Blob([blob], {
                 type: mimeType,
               }),

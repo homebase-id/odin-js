@@ -23,6 +23,22 @@ interface MediaProviderOptions extends ProviderOptions {
 }
 
 type ThumbnailMeta = { naturalSize: { width: number; height: number }; url: string };
+type ThumbnailFile = {
+  naturalSize: {
+    pixelWidth: number;
+    pixelHeight: number;
+  };
+  pixelWidth: number;
+  pixelHeight: number;
+  content: string;
+  contentType: string;
+};
+
+const baseThumbSizes = [
+  { quality: 100, width: 250, height: 250 },
+  { quality: 100, width: 500, height: 500 },
+  { quality: 100, width: 1000, height: 1000 },
+];
 
 export default class MediaProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
@@ -58,12 +74,23 @@ export default class MediaProvider extends ProviderBase {
     };
 
     // Create a thumbnail that fits scaled into a 20 x 20 canvas
-    const thumbnailDataMaxW = await this.createImageThumbnail(imageBytes, 10, 20, 'auto');
-    const thumbnailDataMaxH = await this.createImageThumbnail(imageBytes, 10, 'auto', 20);
-    const thumbnailData =
-      thumbnailDataMaxW.byteArray > thumbnailDataMaxH.byteArray
-        ? thumbnailDataMaxH
-        : thumbnailDataMaxW;
+    const tinyThumb = await this.createImageThumbnail(imageBytes, 10, 20, 20);
+
+    // Create additionalThumbnails
+    const additionalThumbnails: ThumbnailFile[] = [
+      tinyThumb,
+      ...(await Promise.all(
+        baseThumbSizes.map(
+          async (thumbSize) =>
+            await this.createImageThumbnail(
+              imageBytes,
+              thumbSize.quality,
+              thumbSize.width,
+              thumbSize.height
+            )
+        )
+      )),
+    ];
 
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
@@ -73,15 +100,25 @@ export default class MediaProvider extends ProviderBase {
         fileType: 0,
         jsonContent: null,
         previewThumbnail: {
-          pixelWidth: thumbnailData.pixelWidth,
-          pixelHeight: thumbnailData.pixelHeight,
-          contentType: thumbnailData.contentType,
-          content: DataUtil.uint8ArrayToBase64(thumbnailData.byteArray),
+          pixelWidth: tinyThumb.naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
+          pixelHeight: tinyThumb.naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
+          contentType: tinyThumb.contentType,
+          content: tinyThumb.content,
         },
+        // TODO: enable additional thumbs
+        // additionalThumbnails: additionalThumbnails.map((thumb) => {
+        //   return {
+        //     pixelHeight: thumb.pixelHeight,
+        //     pixelWidth: thumb.pixelWidth,
+        //     contentType: thumb.contentType,
+        //   };
+        // }),
       },
       payloadIsEncrypted: false,
       accessControlList: acl,
     };
+
+    // TODO: do something with the additionathumb content, how to pass it along??
 
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
@@ -133,28 +170,27 @@ export default class MediaProvider extends ProviderBase {
   private async createImageThumbnail(
     imageBytes: Uint8Array,
     quality = 80,
-    width: number | 'auto' = 0,
-    height: number | 'auto' = 0
-  ): Promise<{
-    pixelWidth: number;
-    pixelHeight: number;
-    contentType: string;
-    byteArray: Uint8Array;
-  }> {
+    maxWidth: number,
+    maxHeight: number,
+    format: 'webp' | 'png' | 'bmp' | 'jpeg' | 'gif' = 'webp'
+  ): Promise<ThumbnailFile> {
     // output width. 0 will keep its original width and 'auto' will calculate its scale from height.
     // output height. 0 will keep its original height and 'auto' will calculate its scale from width.
     // file format: png, jpeg, bmp, gif, webp. If null, original format will be used.
-    const format = 'webp';
 
     const blob: Blob = new Blob([imageBytes], {});
 
-    return fromBlob(blob, quality, width, height, format).then((resizedData) => {
+    return fromBlob(blob, quality, maxWidth, maxHeight, format).then((resizedData) => {
       return resizedData.blob.arrayBuffer().then((buffer) => {
         return {
-          pixelWidth: resizedData.naturalSize.width,
-          pixelHeight: resizedData.naturalSize.height,
-          contentType: 'image/webp',
-          byteArray: new Uint8Array(buffer),
+          naturalSize: {
+            pixelWidth: resizedData.naturalSize.width,
+            pixelHeight: resizedData.naturalSize.height,
+          },
+          pixelWidth: resizedData.size.width,
+          pixelHeight: resizedData.size.height,
+          content: DataUtil.uint8ArrayToBase64(new Uint8Array(buffer)),
+          contentType: `image/${format}`,
         };
       });
     });

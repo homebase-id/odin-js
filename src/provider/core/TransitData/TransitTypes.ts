@@ -42,6 +42,12 @@ export enum SecurityGroupType {
   Owner = 'Owner',
 }
 
+export type AdditionalThumbnailMeta = {
+  pixelWidth: number;
+  pixelHeight: number;
+  contentType: string;
+};
+
 export type PreviewThumbnail = {
   pixelWidth: number;
   pixelHeight: number;
@@ -57,6 +63,7 @@ export interface UploadAppFileMetaData {
   contentIsComplete: boolean;
   jsonContent: string | null;
   previewThumbnail?: PreviewThumbnail;
+  additionalThumbnails?: AdditionalThumbnailMeta[];
   alias?: string;
 }
 
