@@ -1,7 +1,7 @@
-import { ApiType, ProviderBase, ProviderOptions } from '../ProviderBase';
-import { AesEncrypt } from '../AesEncrypt';
-import { Guid } from 'guid-typescript';
-import { DataUtil } from '../DataUtil';
+import {ApiType, ProviderBase, ProviderOptions} from '../ProviderBase';
+import {AesEncrypt} from '../AesEncrypt';
+import {Guid} from 'guid-typescript';
+import {DataUtil} from '../DataUtil';
 import {
   KeyHeader,
   DriveDefinition,
@@ -13,8 +13,8 @@ import {
   QueryModifiedResponse,
   DriveSearchResult,
 } from './DriveTypes';
-import { AxiosRequestConfig } from 'axios';
-import { PagedResult, PagingOptions } from '../Types';
+import {AxiosRequestConfig} from 'axios';
+import {PagedResult, PagingOptions} from '../Types';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -243,13 +243,11 @@ export class DriveProvider extends ProviderBase {
     const client = this.createAxiosClient();
 
     //TODO: this will change when we move away from paging
-    const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
+    const allDrives = await this.GetDrives({pageNumber: 1, pageSize: 1000});
 
-    const foundDrive = allDrives.results.find(
-      (d) =>
-        Guid.parse(d.alias).equals(Guid.parse(targetDrive.alias)) &&
-        Guid.parse(d.type).equals(Guid.parse(targetDrive.type))
-    );
+    const foundDrive = allDrives.results.find((d) =>
+        d.targetDriveInfo.alias == targetDrive.alias &&
+        d.targetDriveInfo.type == targetDrive.type);
 
     if (foundDrive) {
       return true;
@@ -282,8 +280,38 @@ export class DriveProvider extends ProviderBase {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
   }
 
+  private guidToBytes(guid: string): Uint8Array {
+    let bytes: any = [];
+    guid.split('-').map((number, index) => {
+      // @ts-ignore
+      let bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
+      // @ts-ignore
+      bytesInChar.map((byte) => {
+        bytes.push(parseInt(byte, 16));
+      })
+    });
+    return new Uint8Array(bytes);
+  }
+
   private fixQueryParams(params: FileQueryParams): FileQueryParams {
     //HACK; convert all strings to byte arrays as base64 values; this is for a test
+
+    // params.targetDrive = {
+    //     type: DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(params.targetDrive.type)),
+    //     alias: DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(params.targetDrive.alias)),
+    // };
+
+    // let t = this.guidToBytes(params.targetDrive.type);
+    // console.log('t', t);
+    // console.log('tt', DataUtil.uint8ArrayToBase64(t));
+
+    // params.targetDrive = {
+    //     type: DataUtil.uint8ArrayToBase64(this.guidToBytes(params.targetDrive.type)),
+    //     alias: DataUtil.uint8ArrayToBase64(this.guidToBytes(params.targetDrive.alias))
+    // };
+
+    // console.log("wtf mate");
+    // console.log(params);
 
     //HACK: until we decide where to handle byte arrays
     if (params.tagsMatchAtLeastOne)

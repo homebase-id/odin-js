@@ -1,5 +1,6 @@
-import { Guid } from 'guid-typescript';
-import { AccessControlList } from '../../core/TransitData/TransitTypes';
+import {Guid} from 'guid-typescript';
+import {AccessControlList} from '../../core/TransitData/TransitTypes';
+import {DataUtil} from "../../core/DataUtil";
 
 export interface ChannelDefinition {
   channelId: string;
@@ -19,8 +20,11 @@ export class BlogConfig {
   static readonly BlogPostFileType: number = 101;
   static readonly BlogChannelDefinitionFileType: number = 103;
 
-  static readonly ChannelDriveType: Guid = Guid.parse('77775555-7777-0000-0000-000000007777');
-  static readonly DriveType: Guid = Guid.parse('11114444-7777-5555-9999-000000099999');
+  // static readonly ChannelDriveType: Guid = Guid.parse('77775555-7777-0000-0000-000000007777');
+  static readonly ChannelDriveType: string = DataUtil.toByteArrayId("channel_drive_type");
+  
+  // static readonly DriveType: Guid = Guid.parse('11114444-7777-5555-9999-000000099999');
+  static readonly DriveType: string = DataUtil.toByteArrayId("blog_drive_type")
 }
 
 export class BlogPostPublishStatus {

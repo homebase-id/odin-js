@@ -60,8 +60,9 @@ export interface ExternalFileIdentifier {
 
 export interface DriveDefinition {
   name: string;
-  alias: string;
-  type: string;
+  targetDriveInfo: TargetDrive;
+  // alias: string;
+  // type: string;
   metadata: string;
   isReadonly: boolean;
   allowAnonymousReads: boolean;
@@ -140,6 +141,7 @@ export interface TargetDrive {
   alias: string;
   type: string;
 }
+
 
 export interface TimeRange {
   start: number;
