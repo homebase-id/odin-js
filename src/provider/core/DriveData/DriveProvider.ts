@@ -1,7 +1,7 @@
-import {ApiType, ProviderBase, ProviderOptions} from '../ProviderBase';
-import {AesEncrypt} from '../AesEncrypt';
-import {Guid} from 'guid-typescript';
-import {DataUtil} from '../DataUtil';
+import { ApiType, ProviderBase, ProviderOptions } from '../ProviderBase';
+import { AesEncrypt } from '../AesEncrypt';
+import { Guid } from 'guid-typescript';
+import { DataUtil } from '../DataUtil';
 import {
   KeyHeader,
   DriveDefinition,
@@ -13,8 +13,8 @@ import {
   QueryModifiedResponse,
   DriveSearchResult,
 } from './DriveTypes';
-import {AxiosRequestConfig} from 'axios';
-import {PagedResult, PagingOptions} from '../Types';
+import { AxiosRequestConfig } from 'axios';
+import { PagedResult, PagingOptions } from '../Types';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -56,18 +56,18 @@ export class DriveProvider extends ProviderBase {
       pageSize: pageSize,
     };
 
-    // if (this.getType() === ApiType.Owner) {
-    //   // Post needed
-    //   const client = this.createAxiosClient();
-    //   return client.post('drive/mgmt/type', params).then((response) => {
-    //     return response.data;
-    //   });
-    // } else {
-    const client = this.createAxiosClient();
-    return client.get('drive/metadata/type?' + DataUtil.stringify(params)).then((response) => {
-      return response.data;
-    });
-    // }
+    if (this.getType() === ApiType.Owner) {
+      // Post needed
+      const client = this.createAxiosClient();
+      return client.post('drive/mgmt/type', params).then((response) => {
+        return response.data;
+      });
+    } else {
+      const client = this.createAxiosClient();
+      return client.get('drive/metadata/type?' + DataUtil.stringify(params)).then((response) => {
+        return response.data;
+      });
+    }
   }
 
   async QueryModified(
@@ -243,11 +243,12 @@ export class DriveProvider extends ProviderBase {
     const client = this.createAxiosClient();
 
     //TODO: this will change when we move away from paging
-    const allDrives = await this.GetDrives({pageNumber: 1, pageSize: 1000});
+    const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
 
-    const foundDrive = allDrives.results.find((d) =>
-        d.targetDriveInfo.alias == targetDrive.alias &&
-        d.targetDriveInfo.type == targetDrive.type);
+    const foundDrive = allDrives.results.find(
+      (d) =>
+        d.targetDriveInfo.alias == targetDrive.alias && d.targetDriveInfo.type == targetDrive.type
+    );
 
     if (foundDrive) {
       return true;
@@ -281,14 +282,14 @@ export class DriveProvider extends ProviderBase {
   }
 
   private guidToBytes(guid: string): Uint8Array {
-    let bytes: any = [];
+    const bytes: any = [];
     guid.split('-').map((number, index) => {
       // @ts-ignore
-      let bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
+      const bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
       // @ts-ignore
       bytesInChar.map((byte) => {
         bytes.push(parseInt(byte, 16));
-      })
+      });
     });
     return new Uint8Array(bytes);
   }
