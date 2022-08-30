@@ -78,11 +78,22 @@ export default class MediaProvider extends ProviderBase {
     // Create a thumbnail that fits scaled into a 20 x 20 canvas
     const tinyThumb = await this.createImageThumbnail(imageBytes, 10, 20, 20);
 
+    const applicableThumbSizes = baseThumbSizes.reduce((currArray, thumbSize) => {
+      if (
+        tinyThumb.naturalSize.pixelWidth < thumbSize.width &&
+        tinyThumb.naturalSize.pixelHeight < thumbSize.height
+      ) {
+        return currArray;
+      } else {
+        return [...currArray, thumbSize];
+      }
+    }, [] as { quality: number; width: number; height: number }[]);
+
     // Create additionalThumbnails
     const additionalThumbnails: ThumbnailFile[] = [
       tinyThumb,
       ...(await Promise.all(
-        baseThumbSizes.map(
+        applicableThumbSizes.map(
           async (thumbSize) =>
             await this.createImageThumbnail(
               imageBytes,
