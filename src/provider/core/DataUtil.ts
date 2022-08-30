@@ -1,4 +1,4 @@
-import {Guid} from 'guid-typescript';
+import { Guid } from 'guid-typescript';
 
 export class DataUtil {
   static stringToMD5basedGuid(data: string): Guid {
@@ -7,14 +7,14 @@ export class DataUtil {
     const t = md5(data).toString();
     return Guid.parse(
       t.substring(0, 8) +
-      '-' +
-      t.substring(8, 12) +
-      '-' +
-      t.substring(12, 16) +
-      '-' +
-      t.substring(16, 20) +
-      '-' +
-      t.substring(20, 32)
+        '-' +
+        t.substring(8, 12) +
+        '-' +
+        t.substring(12, 16) +
+        '-' +
+        t.substring(16, 20) +
+        '-' +
+        t.substring(20, 32)
     );
   }
 
@@ -76,7 +76,7 @@ export class DataUtil {
       .join('&');
   };
 
-  //creates a base64 encoded byte array of the given input
+  // Creates a base64 encoded byte array of the given input
   static toByteArrayId(input: string): string {
     return DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(input));
   }

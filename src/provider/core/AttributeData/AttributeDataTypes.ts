@@ -1,4 +1,3 @@
-import { Guid } from 'guid-typescript';
 import { AccessControlList, SecurityGroupType } from '../TransitData/TransitTypes';
 
 export interface AttributeFile extends Attribute {
@@ -18,23 +17,6 @@ export interface Attribute {
   sectionId: string;
   data: any;
 }
-
-export const emptyAttribute: Attribute = {
-  id: '',
-  profileId: '',
-  type: '',
-  priority: -1,
-  sectionId: '',
-  data: {},
-};
-
-export const emptyAttributeFile: AttributeFile = {
-  fileId: Guid.createEmpty().toString(),
-  acl: {
-    requiredSecurityGroup: SecurityGroupType.Owner,
-  },
-  ...emptyAttribute,
-};
 
 export type OrderedAttributeList = {
   profileId: string;

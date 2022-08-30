@@ -1,5 +1,3 @@
-import { Guid } from 'guid-typescript';
-
 import { Attribute, OrderedAttributeList, AttributeFile } from './AttributeDataTypes';
 
 import {
@@ -19,6 +17,7 @@ import { AttributeConfig } from './AttributeConfig';
 import { ProfileConfig } from '../../profile/ProfileConfig';
 import { DriveProvider } from '../DriveData/DriveProvider';
 import TransitProvider from '../TransitData/TransitProvider';
+import { nanoid } from 'nanoid';
 
 const FixedKeyHeader: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(1)),
@@ -229,21 +228,13 @@ export default class AttributeDataProvider extends ProviderBase {
   }
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
-    //if a new attribute
+    // If a new attribute
     if (!attribute.id) {
-      attribute.id = Guid.create().toString();
+      attribute.id = nanoid();
     }
 
     if (!attribute.id || !attribute.profileId || !attribute.type || !attribute.sectionId) {
       throw 'Attribute is missing id, profileId, sectionId, or type';
-    }
-
-    if (
-      !Guid.isGuid(attribute.id) ||
-      !Guid.isGuid(attribute.type) ||
-      !Guid.isGuid(attribute.sectionId)
-    ) {
-      throw 'Attribute Id, profileId, sectionId, and type must be valid GUIDs';
     }
 
     const instructionSet: UploadInstructionSet = {
@@ -295,7 +286,7 @@ export default class AttributeDataProvider extends ProviderBase {
   private getTargetDrive(profileId: string) {
     return {
       alias: profileId,
-      type: ProfileConfig.ProfileDriveType
+      type: ProfileConfig.ProfileDriveType,
     };
   }
 }

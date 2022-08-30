@@ -1,6 +1,5 @@
 import { ApiType, ProviderBase, ProviderOptions } from '../ProviderBase';
 import { AesEncrypt } from '../AesEncrypt';
-import { Guid } from 'guid-typescript';
 import { DataUtil } from '../DataUtil';
 import {
   KeyHeader,
@@ -232,13 +231,13 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
-  async GetPayloadAsStream(
-    targetDrive: TargetDrive,
-    fileId: Guid,
-    keyHeader: KeyHeader
-  ): Promise<any> {
-    throw 'Not Implemented';
-  }
+  // async GetPayloadAsStream(
+  //   targetDrive: TargetDrive,
+  //   fileId: Guid,
+  //   keyHeader: KeyHeader
+  // ): Promise<any> {
+  //   throw 'Not Implemented';
+  // }
 
   async DeleteFile(targetDrive: TargetDrive, fileId: string): Promise<boolean | void> {
     const client = this.createAxiosClient();
@@ -312,18 +311,19 @@ export class DriveProvider extends ProviderBase {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
   }
 
-  private guidToBytes(guid: string): Uint8Array {
-    const bytes: any = [];
-    guid.split('-').map((number, index) => {
-      // @ts-ignore
-      const bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
-      // @ts-ignore
-      bytesInChar.map((byte) => {
-        bytes.push(parseInt(byte, 16));
-      });
-    });
-    return new Uint8Array(bytes);
-  }
+  // Debug method:
+  // private guidToBytes(guid: string): Uint8Array {
+  //   const bytes: any = [];
+  //   guid.split('-').map((number, index) => {
+  //     // @ts-ignore
+  //     const bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
+  //     // @ts-ignore
+  //     bytesInChar.map((byte) => {
+  //       bytes.push(parseInt(byte, 16));
+  //     });
+  //   });
+  //   return new Uint8Array(bytes);
+  // }
 
   private fixQueryParams(params: FileQueryParams): FileQueryParams {
     //HACK; convert all strings to byte arrays as base64 values; this is for a test

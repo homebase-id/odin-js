@@ -1,4 +1,4 @@
-import { Guid } from 'guid-typescript';
+import { nanoid } from 'nanoid';
 import { DataUtil } from '../../core/DataUtil';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import {
@@ -150,7 +150,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     publishState: BlogPostPublishStatus = BlogPostPublishStatus.Draft
   ): Promise<string> {
     if (!file.content.id) {
-      file.content.id = Guid.create().toString();
+      file.content.id = nanoid();
     }
 
     const instructionSet: UploadInstructionSet = {
@@ -271,7 +271,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         FixedKeyHeader
       );
 
-      const newFileId = Guid.create().toString();
+      const newFileId = nanoid();
 
       const destinationMediaFileId = await this._mediaProvider.uploadImage(
         this._blogDefinitionProvider.getPublishChannelDrive(channelId),

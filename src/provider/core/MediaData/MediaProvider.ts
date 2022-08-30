@@ -1,4 +1,3 @@
-import { Guid } from 'guid-typescript';
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
 import { EmbeddedThumb, KeyHeader, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
 import {
@@ -11,6 +10,7 @@ import { fromBlob } from './Resizer/resize';
 import { DataUtil } from '../DataUtil';
 import { DriveProvider } from '../DriveData/DriveProvider';
 import TransitProvider from '../TransitData/TransitProvider';
+import { nanoid } from 'nanoid';
 
 const FixedKeyHeader: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(1)),
@@ -108,7 +108,7 @@ export default class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [tag ?? Guid.createEmpty().toString()],
+        tags: [tag ?? nanoid()],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,
