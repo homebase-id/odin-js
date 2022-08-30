@@ -40,17 +40,23 @@ export interface ServerMetaData {
   accessControlList: AccessControlList;
 }
 
+export interface ThumbSize {
+  contentType: string;
+  pixelHeight: number;
+  pixelWidth: number;
+}
+
+export interface EmbeddedThumb extends ThumbSize {
+  content: string;
+}
+
 export interface AppFileMetaData {
   fileType: number;
   tags: string[] | null;
   contentIsComplete: boolean;
   jsonContent: string;
-  previewThumbnail?: {
-    pixelWidth: number;
-    pixelHeight: number;
-    contentType: string;
-    content: string;
-  };
+  previewThumbnail?: EmbeddedThumb;
+  additionalThumbnails?: ThumbSize[];
 }
 
 export interface ExternalFileIdentifier {
@@ -141,7 +147,6 @@ export interface TargetDrive {
   alias: string;
   type: string;
 }
-
 
 export interface TimeRange {
   start: number;

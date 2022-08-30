@@ -201,6 +201,37 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
+  async GetThumbBytes(
+    targetDrive: TargetDrive,
+    fileId: string,
+    keyHeader: KeyHeader,
+    width: number,
+    height: number
+  ): Promise<ArrayBuffer> {
+    const client = this.createAxiosClient();
+    const request: GetFileRequest = {
+      targetDrive: targetDrive,
+      fileId: fileId,
+    };
+    const config: AxiosRequestConfig = {
+      responseType: 'arraybuffer',
+    };
+
+    return client
+      .post('/drive/files/thumb', { file: request, width: width, height: height }, config)
+      .then((response) => {
+        const cipher = new Uint8Array(response.data);
+        return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
+          return bytes;
+        });
+      })
+      .catch((error) => {
+        //TODO: Handle this - the file was not uploaded
+        console.error(error);
+        throw error;
+      });
+  }
+
   async GetPayloadAsStream(
     targetDrive: TargetDrive,
     fileId: Guid,

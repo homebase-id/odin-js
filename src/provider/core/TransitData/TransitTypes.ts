@@ -1,4 +1,10 @@
-import { ExternalFileIdentifier, EncryptedKeyHeader, TargetDrive } from '../DriveData/DriveTypes';
+import {
+  ExternalFileIdentifier,
+  EncryptedKeyHeader,
+  TargetDrive,
+  ThumbSize,
+  EmbeddedThumb,
+} from '../DriveData/DriveTypes';
 
 export interface UploadInstructionSet {
   transferIv: Uint8Array;
@@ -42,19 +48,6 @@ export enum SecurityGroupType {
   Owner = 'Owner',
 }
 
-export type AdditionalThumbnailMeta = {
-  pixelWidth: number;
-  pixelHeight: number;
-  contentType: string;
-};
-
-export type PreviewThumbnail = {
-  pixelWidth: number;
-  pixelHeight: number;
-  contentType: string;
-  content: string;
-};
-
 export interface UploadAppFileMetaData {
   tags: string[] | null;
   fileType?: number;
@@ -62,8 +55,8 @@ export interface UploadAppFileMetaData {
   userDate?: number;
   contentIsComplete: boolean;
   jsonContent: string | null;
-  previewThumbnail?: PreviewThumbnail;
-  additionalThumbnails?: AdditionalThumbnailMeta[];
+  previewThumbnail?: EmbeddedThumb;
+  additionalThumbnails?: ThumbSize[];
   alias?: string;
 }
 

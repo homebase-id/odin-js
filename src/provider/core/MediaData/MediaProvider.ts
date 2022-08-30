@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
-import { KeyHeader, TargetDrive } from '../DriveData/DriveTypes';
+import { EmbeddedThumb, KeyHeader, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
   UploadFileMetadata,
@@ -22,18 +22,19 @@ interface MediaProviderOptions extends ProviderOptions {
   transitProvider: TransitProvider;
 }
 
-type ThumbnailMeta = { naturalSize: { width: number; height: number }; url: string };
-type ThumbnailFile = {
+type ThumbnailMeta = {
+  naturalSize: { width: number; height: number };
+  sizes?: ThumbSize[];
+  url: string;
+};
+
+interface ThumbnailFile extends EmbeddedThumb {
   naturalSize: {
     pixelWidth: number;
     pixelHeight: number;
   };
-  pixelWidth: number;
-  pixelHeight: number;
   contentAsByteArray: Uint8Array;
-  content: string;
-  contentType: string;
-};
+}
 
 const baseThumbSizes = [
   { quality: 100, width: 250, height: 250 },
@@ -106,7 +107,6 @@ export default class MediaProvider extends ProviderBase {
           contentType: tinyThumb.contentType,
           content: tinyThumb.content,
         },
-        // TODO: enable additional thumbs
         additionalThumbnails: additionalThumbnails.map((thumb) => {
           return {
             pixelHeight: thumb.pixelHeight,
@@ -156,34 +156,41 @@ export default class MediaProvider extends ProviderBase {
 
       return {
         naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+        sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
         url: url,
       };
     });
   }
 
-  //retrieves an image, decrypts, then returns a url to be passed to an image control
-  async getDecryptedImageUrl(targetDrive: TargetDrive, fileId: string): Promise<string> {
-    //it seems these will be fine for images but for video and audio we must stream decrypt
+  // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
+  async getDecryptedImageUrl(
+    targetDrive: TargetDrive,
+    fileId: string,
+    size?: ThumbSize
+  ): Promise<string> {
+    const getBytes = size
+      ? this._driveProvider.GetThumbBytes(
+          targetDrive,
+          fileId,
+          FixedKeyHeader,
+          size.pixelWidth,
+          size.pixelHeight
+        )
+      : this._driveProvider.GetPayloadBytes(targetDrive, fileId, FixedKeyHeader);
 
-    return this._driveProvider
-      .GetPayloadBytes(targetDrive, fileId, FixedKeyHeader)
-      .then((buffer) => {
-        const url = window.URL.createObjectURL(new Blob([buffer]));
-        return url;
-      });
+    return getBytes.then((buffer) => {
+      const url = window.URL.createObjectURL(new Blob([buffer]));
+      return url;
+    });
   }
 
   private async createImageThumbnail(
     imageBytes: Uint8Array,
-    quality = 80,
+    quality: number,
     maxWidth: number,
     maxHeight: number,
     format: 'webp' | 'png' | 'bmp' | 'jpeg' | 'gif' = 'webp'
   ): Promise<ThumbnailFile> {
-    // output width. 0 will keep its original width and 'auto' will calculate its scale from height.
-    // output height. 0 will keep its original height and 'auto' will calculate its scale from width.
-    // file format: png, jpeg, bmp, gif, webp. If null, original format will be used.
-
     const blob: Blob = new Blob([imageBytes], {});
 
     return fromBlob(blob, quality, maxWidth, maxHeight, format).then((resizedData) => {
@@ -203,15 +210,5 @@ export default class MediaProvider extends ProviderBase {
         };
       });
     });
-  }
-
-  private static formatSizeString(x: string) {
-    const units = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-    let l = 0,
-      n = parseInt(x, 10) || 0;
-    while (n >= 1024 && ++l) {
-      n = n / 1024;
-    }
-    return n.toFixed(n < 10 && l > 0 ? 1 : 0) + ' ' + units[l];
   }
 }
