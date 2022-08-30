@@ -18,6 +18,12 @@ const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>
 
 export default class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, ResponseEntry[]>> {
+    // If user has a shared secret, never return the static files, as
+    //   these only contain anonymous data which might not be optimal for the connected user
+    if (this.getSharedSecret()) {
+      return new Map();
+    }
+
     try {
       if (_internalFileCache.has(fileName)) {
         return (await _internalFileCache.get(fileName)) ?? new Map();
@@ -26,7 +32,12 @@ export default class FileReadOnlyProvider extends ProviderBase {
       const httpClient = this.createAxiosClient();
 
       const fetchResponseMap = async (fileName: string) => {
-        const response = await httpClient({ url: `/cdn/${fileName}`, baseURL: '' });
+        const response = await httpClient({
+          url: `/cdn/${fileName}`,
+          baseURL: '',
+          // Force headers to have the same as the preload manual fetch, and to allow a cached resource
+          //headers: { accept: '*/*', 'cache-control': 'max-age=20' },
+        });
 
         const parsedResponse = await Promise.all(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
