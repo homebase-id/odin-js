@@ -30,6 +30,7 @@ type ThumbnailFile = {
   };
   pixelWidth: number;
   pixelHeight: number;
+  contentAsByteArray: Uint8Array;
   content: string;
   contentType: string;
 };
@@ -106,25 +107,30 @@ export default class MediaProvider extends ProviderBase {
           content: tinyThumb.content,
         },
         // TODO: enable additional thumbs
-        // additionalThumbnails: additionalThumbnails.map((thumb) => {
-        //   return {
-        //     pixelHeight: thumb.pixelHeight,
-        //     pixelWidth: thumb.pixelWidth,
-        //     contentType: thumb.contentType,
-        //   };
-        // }),
+        additionalThumbnails: additionalThumbnails.map((thumb) => {
+          return {
+            pixelHeight: thumb.pixelHeight,
+            pixelWidth: thumb.pixelWidth,
+            contentType: thumb.contentType,
+          };
+        }),
       },
       payloadIsEncrypted: false,
       accessControlList: acl,
     };
 
     // TODO: do something with the additionathumb content, how to pass it along??
-
     const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,
-      imageBytes
+      imageBytes,
+      additionalThumbnails.map((thumb) => {
+        return {
+          payload: thumb.contentAsByteArray,
+          filename: `${thumb.pixelWidth}x${thumb.pixelHeight}`,
+        };
+      })
     );
 
     return result.file.fileId;
@@ -182,6 +188,8 @@ export default class MediaProvider extends ProviderBase {
 
     return fromBlob(blob, quality, maxWidth, maxHeight, format).then((resizedData) => {
       return resizedData.blob.arrayBuffer().then((buffer) => {
+        const contentByteArray = new Uint8Array(buffer);
+
         return {
           naturalSize: {
             pixelWidth: resizedData.naturalSize.width,
@@ -189,7 +197,8 @@ export default class MediaProvider extends ProviderBase {
           },
           pixelWidth: resizedData.size.width,
           pixelHeight: resizedData.size.height,
-          content: DataUtil.uint8ArrayToBase64(new Uint8Array(buffer)),
+          contentAsByteArray: contentByteArray,
+          content: DataUtil.uint8ArrayToBase64(contentByteArray),
           contentType: `image/${format}`,
         };
       });

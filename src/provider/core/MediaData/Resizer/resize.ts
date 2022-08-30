@@ -69,7 +69,7 @@ const getTargetSize = (
     outputWidth = outputHeight * originalAspectRatio;
   }
 
-  return { width: outputWidth, height: outputHeight };
+  return { width: Math.ceil(outputWidth), height: Math.ceil(outputHeight) };
 };
 
 /**

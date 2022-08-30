@@ -18,7 +18,8 @@ export default class TransitProvider extends ProviderBase {
     keyHeader: KeyHeader,
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
-    payload: Uint8Array
+    payload: Uint8Array,
+    thumbnails?: { filename: string; payload: Uint8Array }[]
   ): Promise<UploadResult> {
     //HACK: switch to byte array
     if (metadata.appData.tags)
@@ -41,6 +42,14 @@ export default class TransitProvider extends ProviderBase {
     data.append('instructions', this.toBlob(instructions));
     data.append('metaData', new Blob([encryptedDescriptor]));
     data.append('payload', new Blob([encryptedPayload]));
+
+    if (thumbnails) {
+      for (let i = 0; i < thumbnails.length; i++) {
+        const thumb = thumbnails[i];
+        const encryptedThumbnailBytes = await this.encryptWithKeyheader(thumb.payload, keyHeader);
+        data.append('thumbnail', new Blob([encryptedThumbnailBytes]), thumb.filename);
+      }
+    }
 
     const client = this.createAxiosClient(true);
     const url = '/drive/files/upload';
