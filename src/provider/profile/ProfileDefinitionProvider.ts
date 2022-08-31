@@ -80,8 +80,12 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   async ensureConfiguration() {
-    await this.saveProfileDefinition(initialStandardProfile);
-    await this.saveProfileDefinition(initialFinancialProfile);
+    if (!(await this.getProfileDefinition(initialStandardProfile.profileId))) {
+      await this.saveProfileDefinition(initialStandardProfile);
+    }
+    if (!(await this.getProfileDefinition(initialFinancialProfile.profileId))) {
+      await this.saveProfileDefinition(initialFinancialProfile);
+    }
   }
 
   async getProfileDefinitions(): Promise<ProfileDefinition[]> {
