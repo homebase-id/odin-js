@@ -129,7 +129,7 @@ export default class ProfileDataProvider extends ProviderBase {
     }
 
     // Financial Info Section:
-    const defaulCreditCardAttrId = DataUtil.toByteArrayId('default_linkedin_attribute');
+    const defaulCreditCardAttrId = DataUtil.toByteArrayId('default_creditcard_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.FinancialProfileId, defaulCreditCardAttrId))) {
       const defaulCreditCardAttrFile: AttributeFile = {
         id: defaulCreditCardAttrId,
