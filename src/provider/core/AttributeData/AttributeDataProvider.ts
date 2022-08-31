@@ -230,7 +230,7 @@ export default class AttributeDataProvider extends ProviderBase {
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
     // If a new attribute
     if (!attribute.id) {
-      attribute.id = nanoid();
+      attribute.id = DataUtil.toByteArrayId(nanoid());
     }
 
     if (!attribute.id || !attribute.profileId || !attribute.type || !attribute.sectionId) {

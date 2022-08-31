@@ -150,7 +150,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     publishState: BlogPostPublishStatus = BlogPostPublishStatus.Draft
   ): Promise<string> {
     if (!file.content.id) {
-      file.content.id = nanoid();
+      file.content.id = DataUtil.toByteArrayId(nanoid());
     }
 
     const instructionSet: UploadInstructionSet = {
@@ -271,7 +271,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         FixedKeyHeader
       );
 
-      const newFileId = nanoid();
+      const newFileId = DataUtil.toByteArrayId(nanoid());
 
       const destinationMediaFileId = await this._mediaProvider.uploadImage(
         this._blogDefinitionProvider.getPublishChannelDrive(channelId),

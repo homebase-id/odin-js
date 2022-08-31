@@ -108,7 +108,7 @@ export default class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [tag ?? nanoid()],
+        tags: [tag ?? DataUtil.toByteArrayId(nanoid())],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,

@@ -127,7 +127,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
   async saveProfileDefinition(definition: ProfileDefinition): Promise<void> {
     if (!definition.profileId) {
-      definition.profileId = nanoid();
+      definition.profileId = DataUtil.toByteArrayId(nanoid());
     }
 
     const driveMetadata = ''; //TODO: is this needed here?
