@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { DataUtil } from '../core/DataUtil';
 import { DriveProvider } from '../core/DriveData/DriveProvider';
 import {
@@ -125,6 +126,10 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   async saveProfileDefinition(definition: ProfileDefinition): Promise<void> {
+    if (!definition.profileId) {
+      definition.profileId = nanoid();
+    }
+
     const driveMetadata = ''; //TODO: is this needed here?
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
