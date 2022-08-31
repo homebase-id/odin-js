@@ -31,7 +31,7 @@ export const AttributeDefinitions = {
     description: 'An Instagram Username',
   },
 
-  LinkedInUsername: {
+  LinkedinUsername: {
     type: DataUtil.stringToMD5basedGuid('linkedin_username').toString(),
     name: 'LinkedIn',
     description: 'A LinkedIn username',
@@ -75,7 +75,7 @@ export const attributeViewRegistry: AttributeDefinition[] = [
   AttributeDefinitions.FacebookUsername,
   AttributeDefinitions.TiktokUsername,
   AttributeDefinitions.InstagramUsername,
-  AttributeDefinitions.LinkedInUsername,
+  AttributeDefinitions.LinkedinUsername,
   AttributeDefinitions.CreditCard,
   AttributeDefinitions.FullBio,
   AttributeDefinitions.ShortBio,

@@ -30,40 +30,12 @@ const initialStandardProfile: ProfileDefinition = {
     {
       sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
       name: 'Personal Info',
-      // TODO Move this into default Attribute File on create of the profile
-      // attributes: [
-      //   { attributeId: Guid.create().toString(), type: AttributeDefinitions.Name.type.toString() },
-      //   { attributeId: Guid.create().toString(), type: AttributeDefinitions.Photo.type.toString() },
-      // ],
       priority: 1,
       isSystemSection: true,
     },
     {
       sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
       name: 'Social Identities',
-      // TODO Move this into default Attribute File on create of the profile
-      // attributes: [
-      //   {
-      //     attributeId: Guid.create().toString(),
-      //     type: AttributeDefinitions.TwitterUsername.type.toString(),
-      //   },
-      //   {
-      //     attributeId: Guid.create().toString(),
-      //     type: AttributeDefinitions.FacebookUsername.type.toString(),
-      //   },
-      //   {
-      //     attributeId: Guid.create().toString(),
-      //     type: AttributeDefinitions.InstagramUsername.type.toString(),
-      //   },
-      //   {
-      //     attributeId: Guid.create().toString(),
-      //     type: AttributeDefinitions.TiktokUsername.type.toString(),
-      //   },
-      //   {
-      //     attributeId: Guid.create().toString(),
-      //     type: AttributeDefinitions.LinkedInUsername.type.toString(),
-      //   },
-      // ],
       priority: 2,
       isSystemSection: true,
     },
@@ -78,13 +50,6 @@ const initialFinancialProfile: ProfileDefinition = {
     {
       sectionId: BuiltInProfiles.CreditCardsSectionId.toString(),
       name: 'Credit Cards',
-      // TODO Move this into default Attribute File on create of the profile
-      // attributes: [
-      //   {
-      //     attributeId: BuiltInProfileAttributes.CreditCards.toString(),
-      //     type: AttributeDefinitions.CreditCard.type.toString(),
-      //   },
-      // ],
       priority: 1,
       isSystemSection: true,
     },
@@ -114,20 +79,8 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   async ensureConfiguration() {
-    const save = async (definition: ProfileDefinition) => {
-      try {
-        // const response = await this.getProfileDefinitionInternal(definition.profileId);
-        // if (response?.definition == null) {
-        await this.saveProfileDefinition(definition);
-        // }
-      } catch (ex) {
-        console.warn('Profile definition failed to get, going to save directly');
-        await this.saveProfileDefinition(definition);
-      }
-    };
-
-    await save(initialStandardProfile);
-    await save(initialFinancialProfile);
+    await this.saveProfileDefinition(initialStandardProfile);
+    await this.saveProfileDefinition(initialFinancialProfile);
   }
 
   async getProfileDefinitions(): Promise<ProfileDefinition[]> {

@@ -6,11 +6,8 @@ import { DataUtil } from '../../core/DataUtil';
 export class HomePageConfig {
   static readonly DefaultDriveId = DataUtil.toByteArrayId('homepage_drive');
 
-  static readonly ChannelDefinitionAlias = Guid.parse('99999789-7777-7777-7777-000000007777');
-  static readonly AttributeTypeNotApplicable = Guid.parse('00000000-0000-0000-0000-000000000000');
-  static readonly AttributeSectionNotApplicable = Guid.parse(
-    '00000000-0000-0000-0000-000000000000'
-  );
+  static readonly AttributeTypeNotApplicable = DataUtil.toByteArrayId('type_not_applicable');
+  static readonly AttributeSectionNotApplicable = DataUtil.toByteArrayId('section_not_applicable');
   static readonly BlogMainContentDriveId = HomePageConfig.DefaultDriveId;
 
   static readonly LinkFileType: number = 777;
