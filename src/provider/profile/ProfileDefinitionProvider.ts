@@ -123,10 +123,16 @@ export default class ProfileDefinitionProvider extends ProviderBase {
   }
 
   async getProfileDefinition(profileId: string): Promise<ProfileDefinition | undefined> {
-    const { definition } = (await this.getProfileDefinitionInternal(profileId)) ?? {
-      definition: undefined,
-    };
-    return definition;
+    try {
+      const { definition } = (await this.getProfileDefinitionInternal(profileId)) ?? {
+        definition: undefined,
+      };
+      return definition;
+    } catch (ex) {
+      // Profile drive probably doesn't exist
+      console.log(ex);
+      return;
+    }
   }
 
   async saveProfileDefinition(definition: ProfileDefinition): Promise<void> {
@@ -137,7 +143,6 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const driveMetadata = ''; //TODO: is this needed here?
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
-
     const { fileId } = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
       fileId: undefined,
     };
