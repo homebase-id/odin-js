@@ -6,6 +6,7 @@ import TransitProvider from './core/TransitData/TransitProvider';
 import ProfileDataProvider from './profile/ProfileDataProvider';
 import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
 import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
+import CircleNetworkReadOnlyProvider from './public/circleNetwork/CircleNetworkReadOnlyProvider';
 import FileReadOnlyProvider from './public/file/FileReadOnlyProvider';
 import HomePageReadOnlyProvider from './public/home/HomePageReadOnlyProvider';
 
@@ -31,6 +32,9 @@ export class PublicClient {
 
   // Home Providers:
   homePageReadOnlyProvider: HomePageReadOnlyProvider;
+
+  // Connection Providers:
+  circleNetworkReadOnlyProvider: CircleNetworkReadOnlyProvider;
 
   // Media Provider:
   mediaProvider: MediaProvider;
@@ -74,6 +78,10 @@ export class PublicClient {
     this.homePageReadOnlyProvider = new HomePageReadOnlyProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
+    });
+
+    this.circleNetworkReadOnlyProvider = new CircleNetworkReadOnlyProvider({
+      ...this._cfg,
     });
 
     // Media Provider:
