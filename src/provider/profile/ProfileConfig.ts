@@ -25,6 +25,11 @@ export class MinimalProfileFields {
   static readonly SurnameId: string = 'surname';
 }
 
+export class LinkProfileFields {
+  static readonly LinkText: string = 'link_text';
+  static readonly LinkTarget: string = 'link_target';
+}
+
 export class SocialProfileFields {
   static readonly Twitter: string = 'twitter';
   static readonly Facebook: string = 'facebook';

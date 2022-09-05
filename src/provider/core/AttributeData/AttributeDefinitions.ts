@@ -66,6 +66,12 @@ export const AttributeDefinitions = {
     name: 'Short Bio',
     description: 'A few lines describing yourself, your mission, your passions, etc.',
   },
+
+  Link: {
+    type: DataUtil.stringToMD5basedGuid('link').toString(),
+    name: 'Link',
+    description: 'Link entry, make your online world accessible',
+  },
 };
 
 export const attributeViewRegistry: AttributeDefinition[] = [
@@ -79,4 +85,5 @@ export const attributeViewRegistry: AttributeDefinition[] = [
   AttributeDefinitions.CreditCard,
   AttributeDefinitions.FullBio,
   AttributeDefinitions.ShortBio,
+  AttributeDefinitions.Link,
 ];
