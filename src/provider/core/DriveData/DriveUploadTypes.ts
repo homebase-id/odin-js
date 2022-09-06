@@ -50,6 +50,7 @@ export enum SecurityGroupType {
 
 export interface UploadAppFileMetaData {
   tags: string[] | null;
+  threadId?: string;
   fileType?: number;
   dataType?: number;
   userDate?: number;

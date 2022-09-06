@@ -38,7 +38,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
+        sectionId: BuiltInProfiles.PersonalInfoSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultNameAttributeFile);
@@ -51,7 +51,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
+        sectionId: BuiltInProfiles.PersonalInfoSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultPhotoAttributeFile);
@@ -66,7 +66,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
+        sectionId: BuiltInProfiles.SocialIdentitySectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultTwitterAttrFile);
@@ -80,7 +80,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
+        sectionId: BuiltInProfiles.SocialIdentitySectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultFacebookAttrFile);
@@ -94,7 +94,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
+        sectionId: BuiltInProfiles.SocialIdentitySectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultInstagramAttrFile);
@@ -108,7 +108,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
+        sectionId: BuiltInProfiles.SocialIdentitySectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultTiktokAttrFile);
@@ -122,7 +122,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId.toString(),
+        sectionId: BuiltInProfiles.SocialIdentitySectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultLinkedinAttrFile);
@@ -137,7 +137,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.FinancialProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.CreditCardsSectionId.toString(),
+        sectionId: BuiltInProfiles.CreditCardsSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaulCreditCardAttrFile);

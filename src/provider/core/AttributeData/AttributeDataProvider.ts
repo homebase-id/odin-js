@@ -47,7 +47,8 @@ export default class AttributeDataProvider extends ProviderBase {
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
-      tagsMatchAtLeastOne: sectionId ? [sectionId?.toString()] : [],
+      //TODO: threadId: sectionId ? [sectionId] : undefined,
+      tagsMatchAll: sectionId ? [sectionId] : undefined,
     };
 
     const result = await this._driveProvider.QueryBatch(qp, { maxRecords: pageSize });
@@ -108,6 +109,7 @@ export default class AttributeDataProvider extends ProviderBase {
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
+      //TODO: threadId: [sectionId],
       tagsMatchAll: [attributeType, sectionId],
     };
 
@@ -247,11 +249,11 @@ export default class AttributeDataProvider extends ProviderBase {
 
     // Set max of 3kb for jsonContent so enough room is left for metedata
     const shouldEmbedContent = payloadBytes.length < 3000;
-
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
         tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
+        threadId: attribute.sectionId,
         fileType: AttributeConfig.AttributeFileType,
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
@@ -259,8 +261,6 @@ export default class AttributeDataProvider extends ProviderBase {
       payloadIsEncrypted: false,
       accessControlList: attribute.acl,
     };
-
-    //note: downcasting so I don't store fileId and acl from AttributeFile
 
     const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,

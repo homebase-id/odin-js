@@ -2,7 +2,6 @@ export interface ProfileDefinition {
   profileId: string;
   name: string;
   description: string;
-  sections: ProfileSection[];
 }
 
 export interface ProfileSection {
