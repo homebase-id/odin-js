@@ -21,16 +21,13 @@ export default class HomePageReadOnlyProvider extends ProviderBase {
   }
 
   async getAttribute(attributeId: string): Promise<AttributeFile | undefined> {
-    return this._attributeDataProvider.getAttribute(
-      HomePageConfig.DefaultDriveId,
-      attributeId
-    );
+    return this._attributeDataProvider.getAttribute(HomePageConfig.DefaultDriveId, attributeId);
   }
 
   async getAttributes(type: string): Promise<AttributeFile[] | undefined> {
-    return await this._attributeDataProvider.getProfileAttributes(
+    return await this._attributeDataProvider.getAttributes(
       HomePageConfig.DefaultDriveId,
-      type,
+      [type],
       10
     );
   }

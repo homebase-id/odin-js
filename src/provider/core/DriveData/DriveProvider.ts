@@ -470,10 +470,6 @@ export class DriveProvider extends ProviderBase {
       params.sender = params.sender.map((v) =>
         DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
       );
-    if (params.threadId)
-      params.threadId = params.threadId.map((v) =>
-        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
-      );
 
     return params;
   }

@@ -238,7 +238,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [ProfileConfig.ProfileSectionFileType],
-      threadId: [profileId],
+      groupId: [profileId],
     };
 
     const response = await this._driveProvider.QueryBatch(params);

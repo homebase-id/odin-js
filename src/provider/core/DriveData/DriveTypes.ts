@@ -108,7 +108,7 @@ export interface FileQueryParams {
   fileType?: number[] | undefined;
   dataType?: number[] | undefined;
   sender?: string[] | undefined; //list of base64 encoded byte arrays
-  threadId?: string[] | undefined; //list of base64 encoded byte arrays
+  groupId?: string[] | undefined; //list of base64 encoded byte arrays
   userDate?: TimeRange;
   tagsMatchAtLeastOne?: string[] | undefined; //list of base64 encoded byte arrays
   tagsMatchAll?: string[] | undefined; //list of base64 encoded byte arrays

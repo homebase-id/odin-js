@@ -47,8 +47,7 @@ export default class AttributeDataProvider extends ProviderBase {
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
-      //TODO: threadId: sectionId ? [sectionId] : undefined,
-      tagsMatchAll: sectionId ? [sectionId] : undefined,
+      groupId: sectionId ? [sectionId] : undefined,
     };
 
     const result = await this._driveProvider.QueryBatch(qp, { maxRecords: pageSize });
@@ -109,8 +108,8 @@ export default class AttributeDataProvider extends ProviderBase {
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
-      //TODO: threadId: [sectionId],
-      tagsMatchAll: [attributeType, sectionId],
+      groupId: [sectionId],
+      tagsMatchAll: [attributeType],
     };
 
     const result = await this._driveProvider.QueryBatch(qp);
@@ -225,6 +224,66 @@ export default class AttributeDataProvider extends ProviderBase {
     return attributeFile;
   }
 
+  async getAttributes(
+    profileId: string,
+    tags: string[] | undefined,
+    pageSize: number
+  ): Promise<AttributeFile[]> {
+    const targetDrive = this.getTargetDrive(profileId);
+    const qp: FileQueryParams = {
+      targetDrive: targetDrive,
+      fileType: [AttributeConfig.AttributeFileType],
+      tagsMatchAll: tags ?? undefined,
+    };
+
+    const result = await this._driveProvider.QueryBatch(qp, { maxRecords: pageSize });
+
+    let attributes: AttributeFile[] = [];
+
+    for (const key in result.searchResults) {
+      const dsr: DriveSearchResult = result.searchResults[key];
+      const fileId = dsr.fileMetadata.file.fileId;
+
+      if (dsr.fileMetadata.payloadIsEncrypted) {
+        throw new Error('Attribute is encrypted:TODO support this');
+      }
+
+      let attr: AttributeFile = {
+        id: '',
+        type: '',
+        sectionId: '',
+        priority: -1,
+        data: null,
+        profileId: profileId,
+        acl: dsr.serverMetadata.accessControlList,
+      };
+
+      if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
+        const json = DataUtil.byteArrayToString(
+          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
+        );
+        attr = JSON.parse(json);
+      } else {
+        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
+      }
+      attr.fileId = attr.fileId ?? fileId;
+
+      // TODO: this overwrites the priority stored in the
+      // attribute.  Need to fix this by considering if the
+      // server-set priority is always more important than thex
+      // order set by the user
+      attr.priority = dsr.priority;
+      attributes.push(attr);
+    }
+
+    //sort where lowest number is higher priority
+    attributes = attributes.sort((a, b) => {
+      return a.priority - b.priority;
+    });
+
+    return attributes;
+  }
+
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
     // If a new attribute
     if (!attribute.id) {
@@ -253,7 +312,7 @@ export default class AttributeDataProvider extends ProviderBase {
       contentType: 'application/json',
       appData: {
         tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
-        threadId: attribute.sectionId,
+        threadId: attribute.sectionId, // TODO will be renamed to groupId
         fileType: AttributeConfig.AttributeFileType,
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
