@@ -1,5 +1,5 @@
 import { Guid } from 'guid-typescript';
-import { AccessControlList } from '../../core/TransitData/TransitTypes';
+import { AccessControlList } from '../../core/DriveData/DriveUploadTypes';
 import { DataUtil } from '../../core/DataUtil';
 
 export interface ChannelDefinition {

@@ -9,7 +9,6 @@ import {
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderOptions } from '../../core/ProviderBase';
-import TransitProvider from '../../core/TransitData/TransitProvider';
 import MediaProvider from '../../core/MediaData/MediaProvider';
 import {
   AccessControlList,
@@ -17,7 +16,7 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '../../core/TransitData/TransitTypes';
+} from '../../core/DriveData/DriveUploadTypes';
 import {
   BlogArticle,
   BlogConfig,
@@ -35,7 +34,6 @@ import BlogPostReadonlyProvider from './BlogPostReadonlyProvider';
 
 interface BlostPostProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
-  transitProvider: TransitProvider;
   mediaProvider: MediaProvider;
   blogDefinitionProvider: BlogDefinitionProvider;
 }
@@ -46,7 +44,6 @@ const FixedKeyHeader: KeyHeader = {
 };
 
 export default class BlogPostProvider extends BlogPostReadonlyProvider {
-  private _transitProvider: TransitProvider;
   private _mediaProvider: MediaProvider;
 
   constructor(options: BlostPostProviderOptions) {
@@ -57,7 +54,6 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       blogDefinitionProvider: options.blogDefinitionProvider,
     });
 
-    this._transitProvider = options.transitProvider;
     this._mediaProvider = options.mediaProvider;
   }
 
@@ -154,7 +150,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     }
 
     const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
+      transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: file?.fileId ?? '',
         drive: BlogDefinitionProvider.getMasterContentTargetDrive(),
@@ -192,7 +188,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner }, // Master Blogs are always Owner only,
     };
 
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,
@@ -327,7 +323,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     const existingPublishedFileId = await this.getPublishedFileId(channelId, content.id);
 
     const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
+      transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: existingPublishedFileId ? existingPublishedFileId.toString() : undefined,
         drive: this._blogDefinitionProvider.getPublishChannelDrive(channelId),
@@ -359,7 +355,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       accessControlList: acl,
     };
 
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,

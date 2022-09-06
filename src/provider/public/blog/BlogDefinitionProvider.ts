@@ -10,13 +10,12 @@ import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { BlogConfig, ChannelDefinition } from './BlogTypes';
 import { DataUtil } from '../../core/DataUtil';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
-import TransitProvider from '../../core/TransitData/TransitProvider';
 import {
   SecurityGroupType,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '../../core/TransitData/TransitTypes';
+} from '../../core/DriveData/DriveUploadTypes';
 
 const defaultChannel: ChannelDefinition = {
   // channelId: '93999384-0000-0000-0000-000000004440',
@@ -34,12 +33,10 @@ const FixedKeyHeader: KeyHeader = {
 
 interface BlogDefinitionProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
-  transitProvider: TransitProvider;
 }
 
 export default class BlogDefinitionProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
-  private _transitProvider: TransitProvider;
 
   constructor(options: BlogDefinitionProviderOptions) {
     super({
@@ -47,7 +44,6 @@ export default class BlogDefinitionProvider extends ProviderBase {
       sharedSecret: options.sharedSecret,
     });
     this._driveProvider = options.driveProvider;
-    this._transitProvider = options.transitProvider;
   }
 
   getDefaultChannelId(): string {
@@ -104,7 +100,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     };
 
     const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
+      transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: fileId,
         drive: BlogDefinitionProvider.getMasterContentTargetDrive(),
@@ -130,7 +126,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       accessControlList: definition.acl,
     };
 
-    return await this._transitProvider.UploadUsingKeyHeader(
+    return await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,

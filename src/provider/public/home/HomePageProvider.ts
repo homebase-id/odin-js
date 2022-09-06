@@ -2,7 +2,6 @@ import { HomePageConfig } from '../home/HomeTypes';
 
 import { ProviderOptions } from '../../core/ProviderBase';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
-import TransitProvider from '../../core/TransitData/TransitProvider';
 import AttributeDataProvider from '../../core/AttributeData/AttributeDataProvider';
 
 import { AttributeFile } from '../../core/AttributeData/AttributeDataTypes';
@@ -10,7 +9,6 @@ import HomePageReadOnlyProvider from './HomePageReadOnlyProvider';
 interface HomePageProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
   attributeDataProvider: AttributeDataProvider;
-  transitProvider: TransitProvider;
 }
 
 export default class HomePageProvider extends HomePageReadOnlyProvider {
@@ -43,142 +41,4 @@ export default class HomePageProvider extends HomePageReadOnlyProvider {
     attribute.sectionId = HomePageConfig.AttributeSectionNotApplicable.toString();
     return await this._attributeDataProvider.saveAttribute(attribute);
   }
-
-  /// TODO: migrate links into normal attributes
-
-  // const FixedKeyHeader: KeyHeader = {
-  //   iv: new Uint8Array(Array(16).fill(1)),
-  //   aesKey: new Uint8Array(Array(16).fill(1)),
-  // };
-
-  // async getVisibleLinks(): Promise<LandingPageLink[]> {
-  //   const linkFiles = await this.getLinkFiles();
-  //   return linkFiles.map((lf) => lf as LandingPageLink);
-  // }
-
-  // async saveLinkFile(link: LandingPageLinkFile): Promise<UploadResult> {
-  //   let existingFileId: string | undefined;
-  //   if (link.fileId?.length) {
-  //     existingFileId = link.fileId;
-  //   } else {
-  //     const existingLink = await this.getLinkFile(link.id);
-  //     existingFileId = existingLink?.fileId?.toString();
-  //   }
-
-  //   const instructionSet: UploadInstructionSet = {
-  //     transferIv: this._transitProvider.Random16(),
-  //     storageOptions: {
-  //       overwriteFileId: existingFileId,
-  //       drive: HomePageConfig.HomepageTargetDrive,
-  //     },
-  //     transitOptions: null,
-  //   };
-
-  //   const metadata: UploadFileMetadata = {
-  //     contentType: 'application/json',
-  //     appData: {
-  //       tags: [link.id.toString()],
-  //       contentIsComplete: false,
-  //       fileType: HomePageConfig.LinkFileType,
-  //       jsonContent: null,
-  //     },
-  //     payloadIsEncrypted: false,
-  //     accessControlList: link.acl,
-  //   };
-
-  //   const payloadJson: string = DataUtil.JsonStringify64(link as LandingPageLink);
-  //   const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
-  //   return await this._transitProvider.UploadUsingKeyHeader(
-  //     FixedKeyHeader,
-  //     instructionSet,
-  //     metadata,
-  //     payloadBytes
-  //   );
-  // }
-
-  // async deleteLinkFile(fileId: string) {
-  //   return this._driveProvider.DeleteFile(HomePageConfig.HomepageTargetDrive, fileId);
-  // }
-
-  // //returns the link files on the homepage drive
-  // async getLinkFiles(): Promise<LandingPageLinkFile[]> {
-  //   const p: FileQueryParams = {
-  //     targetDrive: HomePageConfig.HomepageTargetDrive,
-  //     fileType: [HomePageConfig.LinkFileType],
-  //   };
-
-  //   const response = await this._driveProvider.QueryBatch(p);
-
-  //   const links: LandingPageLinkFile[] = [];
-  //   for (const key in response.searchResults) {
-  //     const dsr = response.searchResults[key];
-
-  //     const link = await this.decryptLinkContent(
-  //       dsr,
-  //       HomePageConfig.HomepageTargetDrive,
-  //       response.includeMetadataHeader
-  //     );
-  //     links.push({
-  //       ...link,
-  //       fileId: dsr.fileMetadata.file.fileId,
-  //       acl: dsr.serverMetadata.accessControlList,
-  //     });
-  //   }
-
-  //   return links;
-  // }
-
-  // private async getLinkFile(id: string): Promise<LandingPageLinkFile | null> {
-  //   const params: FileQueryParams = {
-  //     targetDrive: HomePageConfig.HomepageTargetDrive,
-  //     tagsMatchAtLeastOne: [id],
-  //   };
-
-  //   const response = await this._driveProvider.QueryBatch(params);
-
-  //   if (response.searchResults.length == 0) {
-  //     return null;
-  //   }
-
-  //   const link = await this.getLinkFileFromDsr(
-  //     response.searchResults[0],
-  //     HomePageConfig.HomepageTargetDrive,
-  //     response.includeMetadataHeader
-  //   );
-  //   return link;
-  // }
-
-  // private async getLinkFileFromDsr(
-  //   dsr: DriveSearchResult,
-  //   targetDrive: TargetDrive,
-  //   includeMetadataHeader: boolean
-  // ): Promise<LandingPageLinkFile> {
-  //   const link = await this.decryptLinkContent(dsr, targetDrive, includeMetadataHeader);
-  //   return {
-  //     ...link,
-  //     fileId: dsr.fileMetadata.file.fileId,
-  //     acl: dsr.serverMetadata.accessControlList,
-  //   };
-  // }
-
-  // private async decryptLinkContent(
-  //   dsr: DriveSearchResult,
-  //   targetDrive: TargetDrive,
-  //   includeMetadataHeader: boolean
-  // ): Promise<LandingPageLink> {
-  //   if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-  //     const bytes = await this._driveProvider.DecryptUsingKeyHeader(
-  //       DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent),
-  //       FixedKeyHeader
-  //     );
-  //     const json = DataUtil.byteArrayToString(bytes);
-  //     return JSON.parse(json);
-  //   } else {
-  //     return await this._driveProvider.GetPayloadAsJson<LandingPageLink>(
-  //       targetDrive,
-  //       dsr.fileMetadata.file.fileId,
-  //       FixedKeyHeader
-  //     );
-  //   }
-  // }
 }

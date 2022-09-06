@@ -11,12 +11,11 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '../TransitData/TransitTypes';
+} from '../DriveData/DriveUploadTypes';
 import { DataUtil } from '../DataUtil';
 import { AttributeConfig } from './AttributeConfig';
 import { ProfileConfig } from '../../profile/ProfileConfig';
 import { DriveProvider } from '../DriveData/DriveProvider';
-import TransitProvider from '../TransitData/TransitProvider';
 import { nanoid } from 'nanoid';
 
 const FixedKeyHeader: KeyHeader = {
@@ -26,19 +25,16 @@ const FixedKeyHeader: KeyHeader = {
 
 interface AttributeDataproviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
-  transitProvider: TransitProvider;
 }
 
 //Provides read write to attribute data
 export default class AttributeDataProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
-  private _transitProvider: TransitProvider;
 
   constructor(options: AttributeDataproviderOptions) {
     super(options);
 
     this._driveProvider = options.driveProvider;
-    this._transitProvider = options.transitProvider;
   }
 
   //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
@@ -238,7 +234,7 @@ export default class AttributeDataProvider extends ProviderBase {
     }
 
     const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
+      transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: attribute?.fileId ?? '',
         drive: this.getTargetDrive(attribute.profileId),
@@ -266,7 +262,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     //note: downcasting so I don't store fileId and acl from AttributeFile
 
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,

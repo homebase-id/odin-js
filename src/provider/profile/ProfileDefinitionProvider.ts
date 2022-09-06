@@ -8,13 +8,12 @@ import {
   TargetDrive,
 } from '../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
-import TransitProvider from '../core/TransitData/TransitProvider';
 import {
   SecurityGroupType,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '../core/TransitData/TransitTypes';
+} from '../core/DriveData/DriveUploadTypes';
 import { BuiltInProfiles, ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition } from './ProfileTypes';
 
@@ -59,12 +58,10 @@ const initialFinancialProfile: ProfileDefinition = {
 
 interface ProfileDefinitionProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
-  transitProvider: TransitProvider;
 }
 
 export default class ProfileDefinitionProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
-  private _transitProvider: TransitProvider;
 
   constructor(options: ProfileDefinitionProviderOptions) {
     super({
@@ -72,7 +69,6 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       sharedSecret: options.sharedSecret,
     });
     this._driveProvider = options.driveProvider;
-    this._transitProvider = options.transitProvider;
   }
 
   getDefaultProfileId(): string {
@@ -148,7 +144,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     };
 
     const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
+      transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: fileId?.toString(),
         drive: targetDrive,
@@ -177,7 +173,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     };
 
     //reshape the definition to group attributes by their type
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,

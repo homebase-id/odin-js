@@ -2,7 +2,6 @@ import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
 import { DriveProvider } from './core/DriveData/DriveProvider';
 import MediaProvider from './core/MediaData/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
-import TransitProvider from './core/TransitData/TransitProvider';
 import ProfileDataProvider from './profile/ProfileDataProvider';
 import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
 import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
@@ -15,7 +14,6 @@ export class PublicClient {
 
   // Core Providers:
   private _driveProvider: DriveProvider;
-  private _transitProvider: TransitProvider;
   private _attributeDataProvider: AttributeDataProvider;
 
   // Definition Providers:
@@ -44,11 +42,9 @@ export class PublicClient {
 
     // Core Providers (Private):
     this._driveProvider = new DriveProvider(this._cfg);
-    this._transitProvider = new TransitProvider(this._cfg);
     this._attributeDataProvider = new AttributeDataProvider({
       ...this._cfg,
       driveProvider: this._driveProvider,
-      transitProvider: this._transitProvider,
     });
 
     // Profile Providers
@@ -65,7 +61,6 @@ export class PublicClient {
     this._blogDefinitionProvider = new BlogDefinitionProvider({
       ...this._cfg,
       driveProvider: this._driveProvider,
-      transitProvider: this._transitProvider,
     });
 
     this.blogPostReadonlyProvider = new BlogPostReadonlyProvider({
@@ -88,7 +83,6 @@ export class PublicClient {
     this.mediaProvider = new MediaProvider({
       ...this._cfg,
       driveProvider: this._driveProvider,
-      transitProvider: this._transitProvider,
     });
   }
 }

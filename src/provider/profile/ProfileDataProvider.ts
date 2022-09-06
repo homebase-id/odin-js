@@ -8,7 +8,7 @@ import AttributeDataProvider from '../core/AttributeData/AttributeDataProvider';
 import { DataUtil } from '../core/DataUtil';
 import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
 import { BuiltInProfiles } from './ProfileConfig';
-import { SecurityGroupType } from '../core/TransitData/TransitTypes';
+import { SecurityGroupType } from '../core/DriveData/DriveUploadTypes';
 
 interface ProfileDataProviderOptions extends ProviderOptions {
   attributeDataProvider: AttributeDataProvider;

@@ -1,4 +1,4 @@
-import { AccessControlList } from '../TransitData/TransitTypes';
+import { AccessControlList } from './DriveUploadTypes';
 export enum DrivePermissions {
   None = 0,
   Read = 1,

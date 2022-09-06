@@ -11,9 +11,16 @@ import {
   QueryBatchResponse,
   QueryModifiedResponse,
   DriveSearchResult,
+  EncryptedKeyHeader,
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../Types';
+import {
+  UploadFileDescriptor,
+  UploadFileMetadata,
+  UploadInstructionSet,
+  UploadResult,
+} from './DriveUploadTypes';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -43,6 +50,7 @@ export class DriveProvider extends ProviderBase {
     });
   }
 
+  /// Drive methods:
   //returns all drives for a given type
   async GetDrivesByType(
     type: string,
@@ -69,6 +77,51 @@ export class DriveProvider extends ProviderBase {
     }
   }
 
+  async EnsureDrive(
+    targetDrive: TargetDrive,
+    name: string,
+    metadata: string,
+    allowAnonymousReads: boolean
+  ): Promise<boolean> {
+    //create the drive if it does not exist
+    const client = this.createAxiosClient();
+
+    //TODO: this will change when we move away from paging
+    const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
+
+    const foundDrive = allDrives.results.find(
+      (d) =>
+        d.targetDriveInfo.alias == targetDrive.alias && d.targetDriveInfo.type == targetDrive.type
+    );
+
+    if (foundDrive) {
+      return true;
+    }
+
+    const data = {
+      name: name,
+      targetDrive: targetDrive,
+      metadata: metadata,
+      allowAnonymousReads: allowAnonymousReads,
+    };
+
+    return client
+      .post('/drive/mgmt/create', data)
+      .then((response) => {
+        if (response.status === 200) {
+          return true;
+        }
+
+        return false;
+      })
+      .catch((error) => {
+        //TODO: Handle this - the file was not uploaded
+        console.error(error);
+        throw error;
+      });
+  }
+
+  /// Query methods:
   async QueryModified(
     params: FileQueryParams,
     ro?: GetModifiedResultOptions
@@ -122,7 +175,8 @@ export class DriveProvider extends ProviderBase {
     });
   }
 
-  // TODO: check if metadata is still encrypted by keyheader?
+  /// Get methods:
+
   async GetMetadata(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
     const client = this.createAxiosClient();
 
@@ -143,7 +197,6 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
-  //decrypts the payload and returns a JSON object
   async GetPayloadAsJson<T>(
     targetDrive: TargetDrive,
     fileId: string,
@@ -239,6 +292,8 @@ export class DriveProvider extends ProviderBase {
   //   throw 'Not Implemented';
   // }
 
+  /// Delete methods:
+
   async DeleteFile(targetDrive: TargetDrive, fileId: string): Promise<boolean | void> {
     const client = this.createAxiosClient();
 
@@ -263,42 +318,58 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
-  async EnsureDrive(
-    targetDrive: TargetDrive,
-    name: string,
-    metadata: string,
-    allowAnonymousReads: boolean
-  ): Promise<boolean> {
-    //create the drive if it does not exist
-    const client = this.createAxiosClient();
+  /// Upload methods:
 
-    //TODO: this will change when we move away from paging
-    const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
+  async UploadUsingKeyHeader(
+    keyHeader: KeyHeader,
+    instructions: UploadInstructionSet,
+    metadata: UploadFileMetadata,
+    payload: Uint8Array,
+    thumbnails?: { filename: string; payload: Uint8Array }[]
+  ): Promise<UploadResult> {
+    //HACK: switch to byte array
+    if (metadata.appData.tags)
+      metadata.appData.tags = metadata.appData.tags.map((v) =>
+        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
+      );
 
-    const foundDrive = allDrives.results.find(
-      (d) =>
-        d.targetDriveInfo.alias == targetDrive.alias && d.targetDriveInfo.type == targetDrive.type
+    const descriptor: UploadFileDescriptor = {
+      encryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.transferIv),
+      fileMetadata: metadata,
+    };
+
+    const encryptedDescriptor = await this.encryptWithSharedSecret(
+      descriptor,
+      instructions.transferIv
     );
+    const encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
 
-    if (foundDrive) {
-      return true;
+    const data = new FormData();
+    data.append('instructions', this.toBlob(instructions));
+    data.append('metaData', new Blob([encryptedDescriptor]));
+    data.append('payload', new Blob([encryptedPayload]));
+
+    if (thumbnails) {
+      for (let i = 0; i < thumbnails.length; i++) {
+        const thumb = thumbnails[i];
+        const encryptedThumbnailBytes = await this.encryptWithKeyheader(thumb.payload, keyHeader);
+        data.append('thumbnail', new Blob([encryptedThumbnailBytes]), thumb.filename);
+      }
     }
 
-    const data = {
-      name: name,
-      targetDrive: targetDrive,
-      metadata: metadata,
-      allowAnonymousReads: allowAnonymousReads,
+    const client = this.createAxiosClient(true);
+    const url = '/drive/files/upload';
+
+    const config = {
+      headers: {
+        'content-type': 'multipart/form-data',
+      },
     };
 
     return client
-      .post('/drive/mgmt/create', data)
+      .post(url, data, config)
       .then((response) => {
-        if (response.status === 200) {
-          return true;
-        }
-
-        return false;
+        return response.data;
       })
       .catch((error) => {
         //TODO: Handle this - the file was not uploaded
@@ -307,26 +378,67 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
+  async Upload(
+    instructions: UploadInstructionSet,
+    metadata: UploadFileMetadata,
+    payload: Uint8Array
+  ): Promise<UploadResult> {
+    const keyHeader = this.GenerateKeyHeader();
+    return this.UploadUsingKeyHeader(keyHeader, instructions, metadata, payload);
+  }
+
+  /// Upload helpers:
+
+  private async encryptWithKeyheader(
+    content: Uint8Array,
+    keyHeader: KeyHeader
+  ): Promise<Uint8Array> {
+    const cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
+    return cipher;
+  }
+
+  private async encryptWithSharedSecret(o: any, iv: Uint8Array): Promise<Uint8Array> {
+    //encrypt metadata with shared secret
+    const ss = this.getSharedSecret();
+    const json = DataUtil.JsonStringify64(o);
+
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
+    }
+
+    const content = new TextEncoder().encode(json);
+    const cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);
+    return cipher;
+  }
+
+  private toBlob(o: any): Blob {
+    const json = DataUtil.JsonStringify64(o);
+    const content = new TextEncoder().encode(json);
+    return new Blob([content]);
+  }
+
+  /// Helper methods:
+
   async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
   }
 
-  // Debug method:
-  // private guidToBytes(guid: string): Uint8Array {
-  //   const bytes: any = [];
-  //   guid.split('-').map((number, index) => {
-  //     // @ts-ignore
-  //     const bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
-  //     // @ts-ignore
-  //     bytesInChar.map((byte) => {
-  //       bytes.push(parseInt(byte, 16));
-  //     });
-  //   });
-  //   return new Uint8Array(bytes);
-  // }
-
   private fixQueryParams(params: FileQueryParams): FileQueryParams {
     //HACK; convert all strings to byte arrays as base64 values; this is for a test
+
+    // Debug method:
+    // private guidToBytes(guid: string): Uint8Array {
+    //   const bytes: any = [];
+    //   guid.split('-').map((number, index) => {
+    //     // @ts-ignore
+    //     const bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
+    //     // @ts-ignore
+    //     bytesInChar.map((byte) => {
+    //       bytes.push(parseInt(byte, 16));
+    //     });
+    //   });
+    //   return new Uint8Array(bytes);
+    // }
 
     // params.targetDrive = {
     //     type: DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(params.targetDrive.type)),
@@ -364,5 +476,35 @@ export class DriveProvider extends ProviderBase {
       );
 
     return params;
+  }
+
+  async EncryptKeyHeader(
+    keyHeader: KeyHeader,
+    transferIv: Uint8Array
+  ): Promise<EncryptedKeyHeader> {
+    const ss = this.getSharedSecret();
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
+    }
+    const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
+    const cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, ss);
+
+    return {
+      iv: transferIv,
+      encryptedAesKey: cipher,
+      encryptionVersion: 1,
+      type: 11,
+    };
+  }
+
+  GenerateKeyHeader(): KeyHeader {
+    return {
+      iv: this.Random16(),
+      aesKey: this.Random16(),
+    };
+  }
+
+  Random16(): Uint8Array {
+    return window.crypto.getRandomValues(new Uint8Array(16));
   }
 }

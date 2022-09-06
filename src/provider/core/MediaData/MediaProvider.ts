@@ -5,11 +5,10 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
-} from '../TransitData/TransitTypes';
+} from '../DriveData/DriveUploadTypes';
 import { fromBlob } from './Resizer/resize';
 import { DataUtil } from '../DataUtil';
 import { DriveProvider } from '../DriveData/DriveProvider';
-import TransitProvider from '../TransitData/TransitProvider';
 import { nanoid } from 'nanoid';
 
 const FixedKeyHeader: KeyHeader = {
@@ -19,7 +18,6 @@ const FixedKeyHeader: KeyHeader = {
 
 interface MediaProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
-  transitProvider: TransitProvider;
 }
 
 type ThumbnailMeta = {
@@ -44,7 +42,6 @@ const baseThumbSizes = [
 
 export default class MediaProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
-  private _transitProvider: TransitProvider;
 
   constructor(options: MediaProviderOptions) {
     super({
@@ -52,7 +49,6 @@ export default class MediaProvider extends ProviderBase {
       sharedSecret: options.sharedSecret,
     });
     this._driveProvider = options.driveProvider;
-    this._transitProvider = options.transitProvider;
   }
 
   async uploadImage(
@@ -67,7 +63,7 @@ export default class MediaProvider extends ProviderBase {
     }
 
     const instructionSet: UploadInstructionSet = {
-      transferIv: this._transitProvider.Random16(),
+      transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: fileId ?? null,
         drive: targetDrive,
@@ -131,7 +127,7 @@ export default class MediaProvider extends ProviderBase {
     };
 
     // TODO: do something with the additionathumb content, how to pass it along??
-    const result: UploadResult = await this._transitProvider.UploadUsingKeyHeader(
+    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,
       metadata,

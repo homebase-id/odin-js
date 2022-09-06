@@ -1,4 +1,4 @@
-import { AccessControlList, SecurityGroupType } from '../TransitData/TransitTypes';
+import { AccessControlList, SecurityGroupType } from '../DriveData/DriveUploadTypes';
 
 export interface AttributeFile extends Attribute {
   fileId?: string;

@@ -4,7 +4,7 @@ import {
   TargetDrive,
   ThumbSize,
   EmbeddedThumb,
-} from '../DriveData/DriveTypes';
+} from './DriveTypes';
 
 export interface UploadInstructionSet {
   transferIv: Uint8Array;

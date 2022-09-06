@@ -8,10 +8,7 @@ export * from './provider/core/Types';
 // DriveData
 export * from './provider/core/DriveData/DriveProvider';
 export * from './provider/core/DriveData/DriveTypes';
-
-// TransitData
-export * from './provider/core/TransitData/TransitProvider';
-export * from './provider/core/TransitData/TransitTypes';
+export * from './provider/core/DriveData/DriveUploadTypes';
 
 // AttributeData
 export * from './provider/core/AttributeData/AttributeConfig';
