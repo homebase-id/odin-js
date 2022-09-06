@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import { nanoid } from 'nanoid';
 
 export class DataUtil {
   static stringToMD5basedGuid(data: string): Guid {
@@ -68,6 +69,10 @@ export class DataUtil {
 
   static getNewGuid() {
     return Guid.create().toString();
+  }
+
+  static getNewId() {
+    return DataUtil.toByteArrayId(nanoid());
   }
 
   static stringify = (obj: any) => {
