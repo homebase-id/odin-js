@@ -157,7 +157,7 @@ export class DriveProvider extends ProviderBase {
 
     if (!ro) {
       ro = {
-        cursorState: '',
+        cursorState: undefined,
         maxRecords: 10,
         includeMetadataHeader: true,
       };
