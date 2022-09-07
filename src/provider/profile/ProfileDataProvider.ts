@@ -168,7 +168,7 @@ export default class ProfileDataProvider extends ProviderBase {
 
   async getAttributeVersions(
     profileId: string,
-    sectionId: string,
+    sectionId: string | undefined,
     type: string
   ): Promise<OrderedAttributeList | null> {
     return this._attributeDataProvider.getAttributeVersions(profileId, sectionId, type);
@@ -176,7 +176,7 @@ export default class ProfileDataProvider extends ProviderBase {
 
   async getBestAttributeVersion(
     profileId: string,
-    sectionId: string,
+    sectionId: string | undefined,
     type: string
   ): Promise<Attribute | undefined> {
     const allVersions = await this.getAttributeVersions(profileId, sectionId, type);
