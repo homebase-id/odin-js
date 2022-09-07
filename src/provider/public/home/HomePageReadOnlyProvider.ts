@@ -35,7 +35,7 @@ export default class HomePageReadOnlyProvider extends ProviderBase {
   async getBestAttributeVersion(type: string): Promise<Attribute | undefined> {
     const allVersions = await this._attributeDataProvider.getAttributeVersions(
       HomePageConfig.DefaultDriveId,
-      HomePageConfig.AttributeSectionNotApplicable.toString(),
+      undefined,
       type
     );
 

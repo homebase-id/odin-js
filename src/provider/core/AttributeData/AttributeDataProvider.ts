@@ -101,14 +101,14 @@ export default class AttributeDataProvider extends ProviderBase {
   //gets all versions of an attribute available to the caller
   async getAttributeVersions(
     profileId: string,
-    sectionId: string,
+    sectionId: string | undefined,
     attributeType: string
   ): Promise<OrderedAttributeList | null> {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
-      groupId: [sectionId],
+      groupId: sectionId ? [sectionId] : undefined,
       tagsMatchAll: [attributeType],
     };
 
@@ -126,7 +126,7 @@ export default class AttributeDataProvider extends ProviderBase {
       let attr: Attribute = {
         id: '',
         type: attributeType,
-        sectionId: sectionId,
+        sectionId: sectionId ?? '',
         priority: -1,
         data: null,
         profileId: profileId,
@@ -312,7 +312,7 @@ export default class AttributeDataProvider extends ProviderBase {
       contentType: 'application/json',
       appData: {
         tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
-        threadId: attribute.sectionId, // TODO will be renamed to groupId
+        groupId: attribute.sectionId, // TODO will be renamed to groupId
         fileType: AttributeConfig.AttributeFileType,
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,

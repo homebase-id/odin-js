@@ -213,7 +213,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       contentType: 'application/json',
       appData: {
         tags: [profileId, profileSection.sectionId],
-        threadId: profileId,
+        groupId: profileId,
         fileType: ProfileConfig.ProfileSectionFileType, //TODO: determine if we need to define these for defintion files?
         dataType: undefined, //TODO: determine if we need to define these for defintion files?
         contentIsComplete: shouldEmbedContent,
