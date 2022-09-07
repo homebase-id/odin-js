@@ -25,7 +25,7 @@ const FixedKeyHeader: KeyHeader = {
 const initialStandardProfile: ProfileDefinition = {
   profileId: BuiltInProfiles.StandardProfileId,
   name: 'Standard Info',
-  description: '',
+  description: 'Standard Profile Information',
 };
 
 const initialPersonalInfoSection = {
@@ -45,7 +45,7 @@ const initialSocialIdentitySection = {
 const initialFinancialProfile: ProfileDefinition = {
   profileId: BuiltInProfiles.FinancialProfileId,
   name: 'Financial Info',
-  description: '',
+  description: 'Financial information',
 };
 
 const initialCreditCardSection = {
