@@ -66,6 +66,7 @@ export class ProviderBase {
     }
 
     const ss = this.getSharedSecret();
+    const isDebug = localStorage.getItem('debug') === '1';
 
     client.interceptors.request.use(
       async function (request) {
@@ -86,6 +87,8 @@ export class ProviderBase {
 
         request.data = payload;
 
+        isDebug && console.debug('request', request.url, request);
+
         return request;
       },
       function (error) {
@@ -103,6 +106,8 @@ export class ProviderBase {
         const bytes = await AesEncrypt.CbcDecrypt(encryptedBytes, iv, ss);
         const json = DataUtil.byteArrayToString(bytes);
         response.data = JSON.parse(json);
+
+        isDebug && console.debug('response', response.config?.url, response);
       }
 
       return response;
@@ -110,8 +115,6 @@ export class ProviderBase {
 
     client.interceptors.response.use(
       async function (response) {
-        //response.headers["content-type"].toLowerCase() == "encrypted/json";
-
         if (response.status == 204) {
           response.data = null;
           return response;
