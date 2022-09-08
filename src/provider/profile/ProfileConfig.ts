@@ -12,6 +12,7 @@ export class BuiltInProfiles {
 
   static readonly PersonalInfoSectionId: string = DataUtil.toByteArrayId('PersonalInfoSection');
   static readonly SocialIdentitySectionId: string = DataUtil.toByteArrayId('SocialIdentitySection');
+  static readonly PersonalLinksSectionId: string = DataUtil.toByteArrayId('PersonalLinksSection');
   static readonly CreditCardsSectionId: string = DataUtil.toByteArrayId('CreditCardsSection');
 }
 

@@ -42,6 +42,13 @@ const initialSocialIdentitySection = {
   isSystemSection: true,
 };
 
+const initialLinksSection = {
+  sectionId: BuiltInProfiles.PersonalLinksSectionId,
+  name: 'Public Links',
+  priority: 3,
+  isSystemSection: true,
+};
+
 const initialFinancialProfile: ProfileDefinition = {
   profileId: BuiltInProfiles.FinancialProfileId,
   name: 'Financial Info',
@@ -80,6 +87,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
       await this.saveProfileSection(initialStandardProfile.profileId, initialPersonalInfoSection);
       await this.saveProfileSection(initialStandardProfile.profileId, initialSocialIdentitySection);
+      await this.saveProfileSection(initialStandardProfile.profileId, initialLinksSection);
     }
     if (!(await this.getProfileDefinition(initialFinancialProfile.profileId))) {
       await this.saveProfileDefinition(initialFinancialProfile);
