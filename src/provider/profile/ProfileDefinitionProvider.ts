@@ -31,14 +31,14 @@ const initialStandardProfile: ProfileDefinition = {
 const initialPersonalInfoSection = {
   sectionId: BuiltInProfiles.PersonalInfoSectionId,
   name: 'Personal Info',
-  priority: 1,
+  priority: 1000,
   isSystemSection: true,
 };
 
 const initialLinksSection = {
   sectionId: BuiltInProfiles.ExternalLinksSectionId,
   name: 'Social Identities',
-  priority: 2,
+  priority: 2000,
   isSystemSection: true,
 };
 
@@ -51,7 +51,7 @@ const initialFinancialProfile: ProfileDefinition = {
 const initialCreditCardSection = {
   sectionId: BuiltInProfiles.CreditCardsSectionId,
   name: 'Credit Cards',
-  priority: 1,
+  priority: 1000,
   isSystemSection: true,
 };
 

@@ -37,7 +37,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.Name.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.PersonalInfoSectionId,
         data: undefined,
       };
@@ -50,7 +50,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.Photo.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.PersonalInfoSectionId,
         data: undefined,
       };
@@ -65,7 +65,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.TwitterUsername.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
@@ -79,7 +79,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.FacebookUsername.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
@@ -93,7 +93,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.InstagramUsername.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
@@ -107,7 +107,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.TiktokUsername.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
@@ -121,7 +121,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.LinkedinUsername.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
@@ -136,7 +136,7 @@ export default class ProfileDataProvider extends ProviderBase {
         type: AttributeDefinitions.CreditCard.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.FinancialProfileId,
-        priority: 0,
+        priority: 1000,
         sectionId: BuiltInProfiles.CreditCardsSectionId,
         data: undefined,
       };
