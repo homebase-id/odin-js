@@ -75,6 +75,8 @@ export class ProviderBase {
           return request;
         }
 
+        isDebug && console.debug('request', request.url, { ...request });
+
         const iv = window.crypto.getRandomValues(new Uint8Array(16));
         const json = DataUtil.JsonStringify64(request.data);
         const bytes = DataUtil.stringToUint8Array(json);
@@ -86,8 +88,6 @@ export class ProviderBase {
         };
 
         request.data = payload;
-
-        isDebug && console.debug('request', request.url, request);
 
         return request;
       },
