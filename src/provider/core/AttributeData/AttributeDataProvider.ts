@@ -86,7 +86,7 @@ export default class AttributeDataProvider extends ProviderBase {
       // attribute.  Need to fix this by considering if the
       // server-set priority is always more important than thex
       // order set by the user
-      attr.priority = dsr.priority;
+      //attr.priority = dsr.priority;
       attributes.push(attr);
     }
 
@@ -145,7 +145,7 @@ export default class AttributeDataProvider extends ProviderBase {
       // attribute.  Need to fix this by considering if the
       // server-set priority is always more important than the
       // order set by the user
-      attr.priority = dsr.priority;
+      //attr.priority = dsr.priority;
 
       versions.push(attr);
     }
@@ -272,7 +272,7 @@ export default class AttributeDataProvider extends ProviderBase {
       // attribute.  Need to fix this by considering if the
       // server-set priority is always more important than thex
       // order set by the user
-      attr.priority = dsr.priority;
+      //attr.priority = dsr.priority;
       attributes.push(attr);
     }
 
