@@ -66,7 +66,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId,
+        sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultTwitterAttrFile);
@@ -80,7 +80,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId,
+        sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultFacebookAttrFile);
@@ -94,7 +94,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId,
+        sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultInstagramAttrFile);
@@ -108,7 +108,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId,
+        sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultTiktokAttrFile);
@@ -122,7 +122,7 @@ export default class ProfileDataProvider extends ProviderBase {
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 0,
-        sectionId: BuiltInProfiles.SocialIdentitySectionId,
+        sectionId: BuiltInProfiles.ExternalLinksSectionId,
         data: undefined,
       };
       await this.saveAttribute(defaultLinkedinAttrFile);
