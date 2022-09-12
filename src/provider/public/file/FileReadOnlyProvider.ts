@@ -9,7 +9,12 @@ const FixedKeyHeader: KeyHeader = {
 };
 
 type ResponseEntry = {
-  additionalThumbnails: unknown[];
+  additionalThumbnails?: {
+    content: string;
+    contentType: string;
+    pixelHeight: number;
+    pixelWidth: number;
+  }[];
   header: DriveSearchResult;
   payload: Record<string, any>;
 };
@@ -34,7 +39,8 @@ export default class FileReadOnlyProvider extends ProviderBase {
       const fetchResponseMap = async (fileName: string) => {
         const response = await httpClient({
           url: `/cdn/${fileName}`,
-          baseURL: '',
+          baseURL: this.getRoot(),
+          withCredentials: false,
           // Force headers to have the same as the preload manual fetch, and to allow a cached resource
           //headers: { accept: '*/*', 'cache-control': 'max-age=20' },
         });

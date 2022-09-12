@@ -126,7 +126,6 @@ export default class MediaProvider extends ProviderBase {
       accessControlList: acl,
     };
 
-    // TODO: do something with the additionathumb content, how to pass it along??
     const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
       FixedKeyHeader,
       instructionSet,

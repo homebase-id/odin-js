@@ -16,6 +16,7 @@ interface SharedSecretEncryptedPayload {
 export interface ProviderOptions {
   api: ApiType;
   sharedSecret?: Uint8Array;
+  root?: string;
 }
 
 export class ProviderBase {
@@ -31,6 +32,10 @@ export class ProviderBase {
 
   protected getType(): ApiType {
     return this._options.api;
+  }
+
+  protected getRoot(): string {
+    return 'https://' + (this._options.root ?? window.location.hostname);
   }
 
   //Returns the endpoint for the identity

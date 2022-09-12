@@ -232,6 +232,18 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     );
   }
 
+  async removeProfileSection(profileId: string, sectionId: string) {
+    const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
+
+    const profileSection = await this.getProfileSectionInternal(profileId, sectionId);
+    if (!profileSection) {
+      console.error("Profile not found, can't delete");
+      return false;
+    }
+
+    return this._driveProvider.DeleteFile(targetDrive, profileSection.fileId);
+  }
+
   async getProfileSections(profileId: string): Promise<ProfileSection[]> {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
