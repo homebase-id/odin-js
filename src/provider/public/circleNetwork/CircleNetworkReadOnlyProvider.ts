@@ -1,6 +1,5 @@
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { PagedResult, PagingOptions } from '../../core/Types';
-import { DotYouProfile } from './CircleNetworkTypes';
 
 const stringify = (obj: any) => {
   return Object.keys(obj)
@@ -18,7 +17,7 @@ export default class CircleNetworkReadOnlyProvider extends ProviderBase {
     });
   }
 
-  async getConnections(data: PagingOptions): Promise<PagedResult<DotYouProfile>> {
+  async getConnections(data: PagingOptions): Promise<PagedResult<string>> {
     const client = super.createAxiosClient();
     const url = this.root + '/connected?' + stringify(data);
     return client.get(url).then((response) => {

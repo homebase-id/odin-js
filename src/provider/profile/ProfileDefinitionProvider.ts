@@ -37,7 +37,7 @@ const initialPersonalInfoSection = {
 
 const initialLinksSection = {
   sectionId: BuiltInProfiles.ExternalLinksSectionId,
-  name: 'Social Identities',
+  name: 'Links',
   priority: 2000,
   isSystemSection: true,
 };
