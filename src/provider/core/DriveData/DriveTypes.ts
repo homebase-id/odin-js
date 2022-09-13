@@ -1,4 +1,10 @@
 import { AccessControlList } from './DriveUploadTypes';
+
+export interface PermissionedDrive {
+  drive: TargetDrive;
+  permission: DrivePermissions;
+}
+
 export enum DrivePermissions {
   None = 0,
   Read = 1,
