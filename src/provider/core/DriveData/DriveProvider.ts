@@ -369,10 +369,10 @@ export class DriveProvider extends ProviderBase {
     if (thumbnails) {
       for (let i = 0; i < thumbnails.length; i++) {
         const thumb = thumbnails[i];
-        const encryptedThumbnailBytes = keyHeader
+        const thumbnailBytes = keyHeader
           ? await this.encryptWithKeyheader(thumb.payload, keyHeader)
           : thumb.payload;
-        data.append('thumbnail', new Blob([encryptedThumbnailBytes]), thumb.filename);
+        data.append('thumbnail', new Blob([thumbnailBytes]), thumb.filename);
       }
     }
 
