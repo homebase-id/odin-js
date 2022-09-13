@@ -1,26 +1,15 @@
 import { nanoid } from 'nanoid';
 import { DataUtil } from '../core/DataUtil';
 import { DriveProvider } from '../core/DriveData/DriveProvider';
-import {
-  DriveSearchResult,
-  FileQueryParams,
-  KeyHeader,
-  TargetDrive,
-} from '../core/DriveData/DriveTypes';
+import { DriveSearchResult, FileQueryParams, TargetDrive } from '../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
 import {
   SecurityGroupType,
   UploadFileMetadata,
   UploadInstructionSet,
-  UploadResult,
 } from '../core/DriveData/DriveUploadTypes';
 import { BuiltInProfiles, ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
-
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
 
 const initialStandardProfile: ProfileDefinition = {
   profileId: BuiltInProfiles.StandardProfileId,
@@ -133,6 +122,8 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       definition.profileId = DataUtil.toByteArrayId(nanoid());
     }
 
+    const encrypt = true;
+
     const driveMetadata = ''; //TODO: is this needed here?
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
@@ -165,21 +156,18 @@ export default class ProfileDefinitionProvider extends ProviderBase {
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
-      payloadIsEncrypted: false,
-      accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous }, //TODO: should this be owner only?
+      payloadIsEncrypted: encrypt,
+      accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
     };
 
     //reshape the definition to group attributes by their type
-    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
-      instructionSet,
-      metadata,
-      payloadBytes
-    );
+    await this._driveProvider.Upload(instructionSet, metadata, payloadBytes, undefined, encrypt);
+    return;
   }
 
   async saveProfileSection(profileId: string, profileSection: ProfileSection) {
     let isCreate = false;
+    const encrypt = true;
 
     if (!profileSection.sectionId) {
       profileSection.sectionId = DataUtil.toByteArrayId(nanoid());
@@ -219,17 +207,11 @@ export default class ProfileDefinitionProvider extends ProviderBase {
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
-      payloadIsEncrypted: false,
-      accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous }, //TODO: should this be owner only?
+      payloadIsEncrypted: encrypt,
+      accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
     };
 
-    //reshape the definition to group attributes by their type
-    await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
-      instructionSet,
-      metadata,
-      payloadBytes
-    );
+    await this._driveProvider.Upload(instructionSet, metadata, payloadBytes, undefined, encrypt);
   }
 
   async removeProfileSection(profileId: string, sectionId: string) {
@@ -323,10 +305,14 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       );
       return JSON.parse(json);
     } else {
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
+
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
-        FixedKeyHeader
+        keyheader
       );
     }
   }
@@ -376,10 +362,14 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       );
       return JSON.parse(json);
     } else {
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
+
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
-        FixedKeyHeader
+        keyheader
       );
     }
   }

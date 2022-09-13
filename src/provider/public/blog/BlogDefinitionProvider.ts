@@ -3,7 +3,6 @@ import {
   DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  KeyHeader,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
@@ -24,11 +23,6 @@ const defaultChannel: ChannelDefinition = {
   description: '',
   templateId: undefined,
   acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-};
-
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
 };
 
 interface BlogDefinitionProviderOptions extends ProviderOptions {
@@ -89,6 +83,11 @@ export default class BlogDefinitionProvider extends ProviderBase {
       definition.channelId = DataUtil.toByteArrayId(definition.name);
     }
 
+    const encrypt = !(
+      definition.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+      definition.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+    );
+
     const targetDrive: TargetDrive = {
       alias: definition.channelId,
       type: BlogConfig.ChannelDriveType,
@@ -122,15 +121,16 @@ export default class BlogDefinitionProvider extends ProviderBase {
         // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
-      payloadIsEncrypted: false,
+      payloadIsEncrypted: encrypt,
       accessControlList: definition.acl,
     };
 
-    return await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
+    return await this._driveProvider.Upload(
       instructionSet,
       metadata,
-      payloadBytes
+      payloadBytes,
+      undefined,
+      encrypt
     );
   }
 
@@ -215,10 +215,14 @@ export default class BlogDefinitionProvider extends ProviderBase {
       return JSON.parse(json);
     } else {
       console.log(`content wasn't complete... That seems wrong`);
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
+
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
-        FixedKeyHeader
+        keyheader
       );
     }
   }

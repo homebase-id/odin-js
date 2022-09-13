@@ -4,10 +4,10 @@ import {
   DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  KeyHeader,
 } from '../DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
 import {
+  SecurityGroupType,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -17,11 +17,6 @@ import { AttributeConfig } from './AttributeConfig';
 import { ProfileConfig } from '../../profile/ProfileConfig';
 import { DriveProvider } from '../DriveData/DriveProvider';
 import { nanoid } from 'nanoid';
-
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
 
 interface AttributeDataproviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -58,10 +53,6 @@ export default class AttributeDataProvider extends ProviderBase {
       const dsr: DriveSearchResult = result.searchResults[key];
       const fileId = dsr.fileMetadata.file.fileId;
 
-      if (dsr.fileMetadata.payloadIsEncrypted) {
-        throw new Error('Attribute is encrypted:TODO support this');
-      }
-
       let attr: AttributeFile = {
         id: '',
         type: '',
@@ -78,7 +69,11 @@ export default class AttributeDataProvider extends ProviderBase {
         );
         attr = JSON.parse(json);
       } else {
-        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
+        const keyheader = dsr.fileMetadata.payloadIsEncrypted
+          ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+          : undefined;
+
+        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
       }
       attr.fileId = attr.fileId ?? fileId;
 
@@ -138,7 +133,10 @@ export default class AttributeDataProvider extends ProviderBase {
         );
         attr = JSON.parse(json);
       } else {
-        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
+        const keyheader = dsr.fileMetadata.payloadIsEncrypted
+          ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+          : undefined;
+        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
       }
 
       // TODO: this overwrites the priority stored in the
@@ -208,11 +206,11 @@ export default class AttributeDataProvider extends ProviderBase {
       );
       payload = JSON.parse(json);
     } else {
-      payload = await this._driveProvider.GetPayloadAsJson<any>(
-        targetDrive,
-        fileId,
-        FixedKeyHeader
-      );
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
+
+      payload = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
     }
 
     const attributeFile: AttributeFile = {
@@ -264,7 +262,11 @@ export default class AttributeDataProvider extends ProviderBase {
         );
         attr = JSON.parse(json);
       } else {
-        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, FixedKeyHeader);
+        const keyheader = dsr.fileMetadata.payloadIsEncrypted
+          ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+          : undefined;
+
+        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
       }
       attr.fileId = attr.fileId ?? fileId;
 
@@ -289,6 +291,11 @@ export default class AttributeDataProvider extends ProviderBase {
     if (!attribute.id) {
       attribute.id = DataUtil.toByteArrayId(nanoid());
     }
+
+    const encrypt = !(
+      attribute.acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+      attribute.acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+    );
 
     if (!attribute.id || !attribute.profileId || !attribute.type || !attribute.sectionId) {
       throw 'Attribute is missing id, profileId, sectionId, or type';
@@ -317,15 +324,16 @@ export default class AttributeDataProvider extends ProviderBase {
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
-      payloadIsEncrypted: false,
+      payloadIsEncrypted: encrypt,
       accessControlList: attribute.acl,
     };
 
-    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
+    const result: UploadResult = await this._driveProvider.Upload(
       instructionSet,
       metadata,
-      payloadBytes
+      payloadBytes,
+      undefined,
+      encrypt
     );
 
     //update server-side info

@@ -4,7 +4,6 @@ import {
   DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  KeyHeader,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
@@ -16,11 +15,6 @@ import {
   blogPostTypeToTag,
   ChannelDefinition,
 } from './BlogTypes';
-
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
 
 interface BlogPostReadonlyProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -156,10 +150,15 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       return JSON.parse(json);
     } else {
       console.log(`content wasn't complete... That seems wrong`);
+
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
+
       return await this._driveProvider.GetPayloadAsJson<T>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
-        FixedKeyHeader
+        keyheader
       );
     }
   }

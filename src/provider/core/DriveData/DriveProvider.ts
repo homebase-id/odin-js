@@ -192,18 +192,7 @@ export class DriveProvider extends ProviderBase {
     return client
       .post('/drive/files/header', request)
       .then((response) => {
-        const encryptedKeyHeader = response.data.sharedSecretEncryptedKeyHeader;
-
-        return {
-          ...response.data,
-          sharedSecretEncryptedKeyHeader: encryptedKeyHeader
-            ? {
-                ...encryptedKeyHeader,
-                encryptedAesKey: DataUtil.base64ToUint8Array(encryptedKeyHeader.encryptedAesKey),
-                iv: DataUtil.base64ToUint8Array(encryptedKeyHeader.iv),
-              }
-            : undefined,
-        };
+        return response.data;
       })
       .catch((error) => {
         //TODO: Handle this - the file was not uploaded
@@ -215,7 +204,7 @@ export class DriveProvider extends ProviderBase {
   async GetPayloadAsJson<T>(
     targetDrive: TargetDrive,
     fileId: string,
-    keyHeader: KeyHeader
+    keyHeader: KeyHeader | undefined
   ): Promise<T> {
     return this.GetPayloadBytes(targetDrive, fileId, keyHeader).then((bytes) => {
       const json = DataUtil.byteArrayToString(new Uint8Array(bytes));
@@ -512,11 +501,18 @@ export class DriveProvider extends ProviderBase {
       throw new Error('attempting to decrypt but missing the shared secret');
     }
 
-    const bytes = await AesEncrypt.CbcDecrypt(
-      encryptedKeyHeader.encryptedAesKey,
-      encryptedKeyHeader.iv,
-      ss
-    );
+    // Check if used params aren't still base64 encoded if so parse to bytearrays
+    let encryptedAesKey = encryptedKeyHeader.encryptedAesKey;
+    if (typeof encryptedKeyHeader.encryptedAesKey === 'string') {
+      encryptedAesKey = DataUtil.base64ToUint8Array(encryptedKeyHeader.encryptedAesKey);
+    }
+
+    let receivedIv = encryptedKeyHeader.iv;
+    if (typeof encryptedKeyHeader.iv === 'string') {
+      receivedIv = DataUtil.base64ToUint8Array(encryptedKeyHeader.iv);
+    }
+
+    const bytes = await AesEncrypt.CbcDecrypt(encryptedAesKey, receivedIv, ss);
     const iv = bytes.subarray(0, 16);
     const aesKey = bytes.subarray(16);
 

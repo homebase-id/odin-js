@@ -38,11 +38,6 @@ interface BlostPostProviderOptions extends ProviderOptions {
   blogDefinitionProvider: BlogDefinitionProvider;
 }
 
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
-
 export default class BlogPostProvider extends BlogPostReadonlyProvider {
   private _mediaProvider: MediaProvider;
 
@@ -149,6 +144,11 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       file.content.id = DataUtil.toByteArrayId(nanoid());
     }
 
+    const encrypt = !(
+      file.acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+      file.acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+    );
+
     const instructionSet: UploadInstructionSet = {
       transferIv: this._driveProvider.Random16(),
       storageOptions: {
@@ -184,16 +184,17 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
       },
-      payloadIsEncrypted: false,
+      payloadIsEncrypted: encrypt,
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner }, // Master Blogs are always Owner only,
     };
 
-    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
+    const result: UploadResult = await this._driveProvider.Upload(
       instructionSet,
       metadata,
       //TODO: Check what to pass as payload if everything fits in jsonContent already
-      payloadBytes
+      payloadBytes,
+      undefined,
+      encrypt
     );
     return result.file.fileId;
   }
@@ -315,6 +316,10 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     acl: AccessControlList,
     originalContent: BlogContent
   ): Promise<PublishTarget> {
+    const encrypt = !(
+      acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+      acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+    );
     //make a copy of content because we're going
     //to change it for this publish
     const content = await this.publishDependencies(channelId, acl, originalContent);
@@ -351,15 +356,16 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
         alias: content.id,
       },
-      payloadIsEncrypted: false,
+      payloadIsEncrypted: encrypt,
       accessControlList: acl,
     };
 
-    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
+    const result: UploadResult = await this._driveProvider.Upload(
       instructionSet,
       metadata,
-      payloadBytes
+      payloadBytes,
+      undefined,
+      encrypt
     );
 
     const pt: PublishTarget = {
@@ -421,10 +427,14 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       return JSON.parse(json);
     } else {
       console.log(`content wasn't complete... That seems wrong`);
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
+
       return await this._driveProvider.GetPayloadAsJson<BlogMasterPayload<T>>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
-        FixedKeyHeader
+        keyheader
       );
     }
   }
