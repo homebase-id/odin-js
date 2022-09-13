@@ -3,11 +3,6 @@ import { DataUtil } from '../../core/DataUtil';
 import { DriveSearchResult, KeyHeader } from '../../core/DriveData/DriveTypes';
 import { ProviderBase } from '../../core/ProviderBase';
 
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
-
 type ResponseEntry = {
   additionalThumbnails?: {
     content: string;
@@ -105,10 +100,7 @@ export default class FileReadOnlyProvider extends ProviderBase {
 
         parsedObj = JSON.parse(json);
       } else if (file.payload) {
-        const bytes = await this.DecryptUsingKeyHeader(
-          DataUtil.base64ToUint8Array(file.payload),
-          FixedKeyHeader
-        );
+        const bytes = DataUtil.base64ToUint8Array(file.payload);
         const json = DataUtil.byteArrayToString(bytes);
 
         parsedObj = JSON.parse(json);
