@@ -114,10 +114,6 @@ export default class AttributeDataProvider extends ProviderBase {
       const dsr: DriveSearchResult = result.searchResults[key];
       const fileId = dsr.fileMetadata.file.fileId;
 
-      if (dsr.fileMetadata.payloadIsEncrypted) {
-        throw new Error('Attribute is encrypted:TODO support this');
-      }
-
       let attr: Attribute = {
         id: '',
         type: attributeType,
@@ -192,9 +188,6 @@ export default class AttributeDataProvider extends ProviderBase {
     }
 
     const dsr: DriveSearchResult = response.searchResults[0];
-    if (dsr.fileMetadata.payloadIsEncrypted) {
-      throw new Error('Attribute is encrypted:TODO support this');
-    }
 
     const fileId = dsr.fileMetadata.file.fileId;
 
@@ -241,10 +234,6 @@ export default class AttributeDataProvider extends ProviderBase {
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult = result.searchResults[key];
       const fileId = dsr.fileMetadata.file.fileId;
-
-      if (dsr.fileMetadata.payloadIsEncrypted) {
-        throw new Error('Attribute is encrypted:TODO support this');
-      }
 
       let attr: AttributeFile = {
         id: '',

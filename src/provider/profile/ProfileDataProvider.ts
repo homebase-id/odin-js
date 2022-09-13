@@ -134,7 +134,7 @@ export default class ProfileDataProvider extends ProviderBase {
       const defaulCreditCardAttrFile: AttributeFile = {
         id: defaulCreditCardAttrId,
         type: AttributeDefinitions.CreditCard.type,
-        acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+        acl: { requiredSecurityGroup: SecurityGroupType.Owner },
         profileId: BuiltInProfiles.FinancialProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.CreditCardsSectionId,
