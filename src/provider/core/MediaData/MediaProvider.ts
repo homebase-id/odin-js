@@ -1,7 +1,8 @@
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
-import { EmbeddedThumb, KeyHeader, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
+import { EmbeddedThumb, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
+  SecurityGroupType,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -10,11 +11,6 @@ import { fromBlob } from './Resizer/resize';
 import { DataUtil } from '../DataUtil';
 import { DriveProvider } from '../DriveData/DriveProvider';
 import { nanoid } from 'nanoid';
-
-const FixedKeyHeader: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(1)),
-  aesKey: new Uint8Array(Array(16).fill(1)),
-};
 
 interface MediaProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -61,6 +57,11 @@ export default class MediaProvider extends ProviderBase {
     if (!targetDrive) {
       throw 'Missing target drive';
     }
+
+    const encrypt = !(
+      acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+      acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+    );
 
     const instructionSet: UploadInstructionSet = {
       transferIv: this._driveProvider.Random16(),
@@ -122,12 +123,11 @@ export default class MediaProvider extends ProviderBase {
           };
         }),
       },
-      payloadIsEncrypted: false,
+      payloadIsEncrypted: encrypt,
       accessControlList: acl,
     };
 
-    const result: UploadResult = await this._driveProvider.UploadUsingKeyHeader(
-      FixedKeyHeader,
+    const result: UploadResult = await this._driveProvider.Upload(
       instructionSet,
       metadata,
       imageBytes,
@@ -136,7 +136,8 @@ export default class MediaProvider extends ProviderBase {
           payload: thumb.contentAsByteArray,
           filename: `${thumb.pixelWidth}x${thumb.pixelHeight}`,
         };
-      })
+      }),
+      encrypt
     );
 
     return result.file.fileId;
@@ -174,15 +175,20 @@ export default class MediaProvider extends ProviderBase {
     fileId: string,
     size?: ThumbSize
   ): Promise<string> {
+    const header = await this._driveProvider.GetMetadata(targetDrive, fileId);
+    const keyHeader = header.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(header.sharedSecretEncryptedKeyHeader)
+      : undefined;
+
     const getBytes = size
       ? this._driveProvider.GetThumbBytes(
           targetDrive,
           fileId,
-          FixedKeyHeader,
+          keyHeader,
           size.pixelWidth,
           size.pixelHeight
         )
-      : this._driveProvider.GetPayloadBytes(targetDrive, fileId, FixedKeyHeader);
+      : this._driveProvider.GetPayloadBytes(targetDrive, fileId, keyHeader);
 
     return getBytes.then((buffer) => {
       const url = window.URL.createObjectURL(new Blob([buffer]));

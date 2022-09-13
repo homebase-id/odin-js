@@ -23,7 +23,7 @@ export interface TransitOptions {
 }
 
 export interface UploadFileDescriptor {
-  encryptedKeyHeader: EncryptedKeyHeader;
+  encryptedKeyHeader?: EncryptedKeyHeader;
   fileMetadata: UploadFileMetadata;
 }
 

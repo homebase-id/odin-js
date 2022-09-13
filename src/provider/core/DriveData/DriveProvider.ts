@@ -37,6 +37,10 @@ interface GetFileRequest {
   fileId: string;
 }
 
+const EmptyKeyHeader: KeyHeader = {
+  iv: new Uint8Array(Array(16).fill(0)),
+  aesKey: new Uint8Array(Array(16).fill(0)),
+};
 export class DriveProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
     super(options);
@@ -188,7 +192,18 @@ export class DriveProvider extends ProviderBase {
     return client
       .post('/drive/files/header', request)
       .then((response) => {
-        return response.data;
+        const encryptedKeyHeader = response.data.sharedSecretEncryptedKeyHeader;
+
+        return {
+          ...response.data,
+          sharedSecretEncryptedKeyHeader: encryptedKeyHeader
+            ? {
+                ...encryptedKeyHeader,
+                encryptedAesKey: DataUtil.base64ToUint8Array(encryptedKeyHeader.encryptedAesKey),
+                iv: DataUtil.base64ToUint8Array(encryptedKeyHeader.iv),
+              }
+            : undefined,
+        };
       })
       .catch((error) => {
         //TODO: Handle this - the file was not uploaded
@@ -227,7 +242,7 @@ export class DriveProvider extends ProviderBase {
   async GetPayloadBytes(
     targetDrive: TargetDrive,
     fileId: string,
-    keyHeader: KeyHeader
+    keyHeader: KeyHeader | undefined
   ): Promise<ArrayBuffer> {
     const client = this.createAxiosClient();
     const request: GetFileRequest = {
@@ -241,10 +256,14 @@ export class DriveProvider extends ProviderBase {
     return client
       .post('/drive/files/payload', request, config)
       .then((response) => {
-        const cipher = new Uint8Array(response.data);
-        return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-          return bytes;
-        });
+        if (keyHeader) {
+          const cipher = new Uint8Array(response.data);
+          return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
+            return bytes;
+          });
+        } else {
+          return new Uint8Array(response.data);
+        }
       })
       .catch((error) => {
         //TODO: Handle this - the file was not uploaded
@@ -256,7 +275,7 @@ export class DriveProvider extends ProviderBase {
   async GetThumbBytes(
     targetDrive: TargetDrive,
     fileId: string,
-    keyHeader: KeyHeader,
+    keyHeader: KeyHeader | undefined,
     width: number,
     height: number
   ): Promise<ArrayBuffer> {
@@ -272,10 +291,14 @@ export class DriveProvider extends ProviderBase {
     return client
       .post('/drive/files/thumb', { file: request, width: width, height: height }, config)
       .then((response) => {
-        const cipher = new Uint8Array(response.data);
-        return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-          return bytes;
-        });
+        if (keyHeader) {
+          const cipher = new Uint8Array(response.data);
+          return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
+            return bytes;
+          });
+        } else {
+          return new Uint8Array(response.data);
+        }
       })
       .catch((error) => {
         //TODO: Handle this - the file was not uploaded
@@ -321,7 +344,7 @@ export class DriveProvider extends ProviderBase {
   /// Upload methods:
 
   async UploadUsingKeyHeader(
-    keyHeader: KeyHeader,
+    keyHeader: KeyHeader | undefined,
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
     payload: Uint8Array,
@@ -334,7 +357,10 @@ export class DriveProvider extends ProviderBase {
       );
 
     const descriptor: UploadFileDescriptor = {
-      encryptedKeyHeader: await this.EncryptKeyHeader(keyHeader, instructions.transferIv),
+      encryptedKeyHeader: await this.EncryptKeyHeader(
+        keyHeader ?? EmptyKeyHeader,
+        instructions.transferIv
+      ),
       fileMetadata: metadata,
     };
 
@@ -342,7 +368,9 @@ export class DriveProvider extends ProviderBase {
       descriptor,
       instructions.transferIv
     );
-    const encryptedPayload = await this.encryptWithKeyheader(payload, keyHeader);
+    const encryptedPayload = keyHeader
+      ? await this.encryptWithKeyheader(payload, keyHeader)
+      : payload;
 
     const data = new FormData();
     data.append('instructions', this.toBlob(instructions));
@@ -352,7 +380,9 @@ export class DriveProvider extends ProviderBase {
     if (thumbnails) {
       for (let i = 0; i < thumbnails.length; i++) {
         const thumb = thumbnails[i];
-        const encryptedThumbnailBytes = await this.encryptWithKeyheader(thumb.payload, keyHeader);
+        const encryptedThumbnailBytes = keyHeader
+          ? await this.encryptWithKeyheader(thumb.payload, keyHeader)
+          : thumb.payload;
         data.append('thumbnail', new Blob([encryptedThumbnailBytes]), thumb.filename);
       }
     }
@@ -381,10 +411,12 @@ export class DriveProvider extends ProviderBase {
   async Upload(
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
-    payload: Uint8Array
+    payload: Uint8Array,
+    thumbnails?: { filename: string; payload: Uint8Array }[],
+    encrypt = true
   ): Promise<UploadResult> {
-    const keyHeader = this.GenerateKeyHeader();
-    return this.UploadUsingKeyHeader(keyHeader, instructions, metadata, payload);
+    const keyHeader = encrypt ? this.GenerateKeyHeader() : undefined;
+    return this.UploadUsingKeyHeader(keyHeader, instructions, metadata, payload, thumbnails);
   }
 
   /// Upload helpers:
@@ -474,13 +506,33 @@ export class DriveProvider extends ProviderBase {
     return params;
   }
 
+  async DecryptKeyHeader(encryptedKeyHeader: EncryptedKeyHeader): Promise<KeyHeader> {
+    const ss = this.getSharedSecret();
+    if (!ss) {
+      throw new Error('attempting to decrypt but missing the shared secret');
+    }
+
+    const bytes = await AesEncrypt.CbcDecrypt(
+      encryptedKeyHeader.encryptedAesKey,
+      encryptedKeyHeader.iv,
+      ss
+    );
+    const iv = bytes.subarray(0, 16);
+    const aesKey = bytes.subarray(16);
+
+    return {
+      aesKey: aesKey,
+      iv: iv,
+    };
+  }
+
   async EncryptKeyHeader(
     keyHeader: KeyHeader,
     transferIv: Uint8Array
   ): Promise<EncryptedKeyHeader> {
     const ss = this.getSharedSecret();
     if (!ss) {
-      throw new Error('attempting to decrypt but missing the shared secret');
+      throw new Error('attempting to encrypt but missing the shared secret');
     }
     const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
     const cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, ss);

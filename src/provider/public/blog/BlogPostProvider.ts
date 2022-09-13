@@ -264,7 +264,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       const bytes = await this._driveProvider.GetPayloadBytes(
         BlogDefinitionProvider.getMasterContentTargetDrive(),
         imageId,
-        FixedKeyHeader
+        undefined // TODO Potentially Decrypt Keyheader
       );
 
       const newFileId = DataUtil.toByteArrayId(nanoid());
