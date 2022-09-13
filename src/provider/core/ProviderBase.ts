@@ -40,22 +40,22 @@ export class ProviderBase {
 
   //Returns the endpoint for the identity
   protected getEndpoint(): string {
-    let root = '';
+    let endpoint = '';
     switch (this._options?.api) {
       case ApiType.Owner:
-        root = '/api/owner/v1';
+        endpoint = '/api/owner/v1';
         break;
 
       case ApiType.App:
-        root = '/api/apps/v1';
+        endpoint = '/api/apps/v1';
         break;
 
       case ApiType.YouAuth:
-        root = '/api/youauth/v1';
+        endpoint = '/api/youauth/v1';
         break;
     }
 
-    return 'https://' + window.location.hostname + root;
+    return this.getRoot() + endpoint;
   }
 
   //Gets an Axios client configured with token info
