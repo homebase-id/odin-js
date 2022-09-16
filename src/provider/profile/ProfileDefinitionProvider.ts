@@ -223,6 +223,8 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       return false;
     }
 
+    // TODO: Remove Attributes within? Now done on owner-app itself
+
     return this._driveProvider.DeleteFile(targetDrive, profileSection.fileId);
   }
 

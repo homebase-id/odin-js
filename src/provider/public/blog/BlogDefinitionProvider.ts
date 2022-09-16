@@ -134,6 +134,11 @@ export default class BlogDefinitionProvider extends ProviderBase {
     );
   }
 
+  async removeChannelDefinition(id: string) {
+    // Not implemented as no API's available to remove a drive
+    throw new Error('Not supported');
+  }
+
   async ensureConfiguration() {
     //TODO: should this drive allow anon to read?  this is currently required so we can get channel definitions on the public site
     const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
