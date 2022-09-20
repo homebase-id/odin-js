@@ -175,12 +175,28 @@ export default class MediaProvider extends ProviderBase {
     fileId: string,
     size?: ThumbSize
   ): Promise<string> {
+    return this.getDecryptedImageData(targetDrive, fileId, size).then((data) => {
+      const url = window.URL.createObjectURL(new Blob([data.content]));
+      return url;
+    });
+  }
+
+  async getDecryptedImageData(
+    targetDrive: TargetDrive,
+    fileId: string,
+    size?: ThumbSize
+  ): Promise<{
+    pixelHeight: number;
+    pixelWidth: number;
+    contentType: string;
+    content: ArrayBuffer;
+  }> {
     const header = await this._driveProvider.GetMetadata(targetDrive, fileId);
     const keyHeader = header.fileMetadata.payloadIsEncrypted
       ? await this._driveProvider.DecryptKeyHeader(header.sharedSecretEncryptedKeyHeader)
       : undefined;
 
-    const getBytes = size
+    const bytesPromise = size
       ? this._driveProvider.GetThumbBytes(
           targetDrive,
           fileId,
@@ -190,10 +206,12 @@ export default class MediaProvider extends ProviderBase {
         )
       : this._driveProvider.GetPayloadBytes(targetDrive, fileId, keyHeader);
 
-    return getBytes.then((buffer) => {
-      const url = window.URL.createObjectURL(new Blob([buffer]));
-      return url;
-    });
+    return {
+      pixelHeight: header.fileMetadata.appData.previewThumbnail?.pixelHeight ?? 0,
+      pixelWidth: header.fileMetadata.appData.previewThumbnail?.pixelWidth ?? 0,
+      contentType: header.fileMetadata.appData.previewThumbnail?.contentType ?? '',
+      content: await bytesPromise,
+    };
   }
 
   private async createImageThumbnail(

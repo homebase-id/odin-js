@@ -19,7 +19,7 @@ export class MinimalProfileFields {
   static readonly ProfileImageUrlId: string = 'profileImageId';
   static readonly FullBioId: string = 'full_bio';
   static readonly ShortBioId: string = 'short_bio';
-  static readonly GiveNameId: string = 'givenName';
+  static readonly GivenNameId: string = 'givenName';
   static readonly SurnameId: string = 'surname';
 }
 
