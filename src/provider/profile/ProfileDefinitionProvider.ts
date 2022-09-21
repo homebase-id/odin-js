@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid';
 import { DataUtil } from '../core/DataUtil';
 import { DriveProvider } from '../core/DriveData/DriveProvider';
 import { DriveSearchResult, FileQueryParams, TargetDrive } from '../core/DriveData/DriveTypes';
@@ -119,7 +118,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
 
   async saveProfileDefinition(definition: ProfileDefinition): Promise<void> {
     if (!definition.profileId) {
-      definition.profileId = DataUtil.toByteArrayId(nanoid());
+      definition.profileId = DataUtil.getNewId();
     }
 
     const encrypt = true;
@@ -170,7 +169,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const encrypt = true;
 
     if (!profileSection.sectionId) {
-      profileSection.sectionId = DataUtil.toByteArrayId(nanoid());
+      profileSection.sectionId = DataUtil.getNewId();
       isCreate = true;
     }
 

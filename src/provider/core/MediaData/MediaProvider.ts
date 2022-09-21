@@ -10,7 +10,6 @@ import {
 import { fromBlob } from './Resizer/resize';
 import { DataUtil } from '../DataUtil';
 import { DriveProvider } from '../DriveData/DriveProvider';
-import { nanoid } from 'nanoid';
 
 interface MediaProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -105,7 +104,7 @@ export default class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [tag ?? DataUtil.toByteArrayId(nanoid())],
+        tags: [tag ?? DataUtil.getNewId()],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,

@@ -1,11 +1,9 @@
-import { nanoid } from 'nanoid';
 import { DataUtil } from '../../core/DataUtil';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  KeyHeader,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderOptions } from '../../core/ProviderBase';
@@ -141,7 +139,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     publishState: BlogPostPublishStatus = BlogPostPublishStatus.Draft
   ): Promise<string> {
     if (!file.content.id) {
-      file.content.id = DataUtil.toByteArrayId(nanoid());
+      file.content.id = DataUtil.getNewId();
     }
 
     const encrypt = !(
@@ -268,7 +266,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         undefined // TODO Potentially Decrypt Keyheader
       );
 
-      const newFileId = DataUtil.toByteArrayId(nanoid());
+      const newFileId = DataUtil.getNewId();
 
       const destinationMediaFileId = await this._mediaProvider.uploadImage(
         this._blogDefinitionProvider.getPublishChannelDrive(channelId),

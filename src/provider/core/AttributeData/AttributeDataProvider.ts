@@ -16,7 +16,6 @@ import { DataUtil } from '../DataUtil';
 import { AttributeConfig } from './AttributeConfig';
 import { ProfileConfig } from '../../profile/ProfileConfig';
 import { DriveProvider } from '../DriveData/DriveProvider';
-import { nanoid } from 'nanoid';
 
 interface AttributeDataproviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -278,7 +277,7 @@ export default class AttributeDataProvider extends ProviderBase {
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
     // If a new attribute
     if (!attribute.id) {
-      attribute.id = DataUtil.toByteArrayId(nanoid());
+      attribute.id = DataUtil.getNewId();
     }
 
     const encrypt = !(
