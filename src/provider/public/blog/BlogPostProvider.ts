@@ -180,7 +180,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogPostFileType,
         // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
-        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
+        jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner }, // Master Blogs are always Owner only,
@@ -351,7 +351,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
         contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogPostFileType,
         // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
-        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
+        jsonContent: shouldEmbedContent ? payloadJson : null,
         alias: content.id,
       },
       payloadIsEncrypted: encrypt,
@@ -418,16 +418,17 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<BlogMasterPayload<T>> {
+    const keyheader = dsr.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
+
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const json = DataUtil.byteArrayToString(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
+      return await this._driveProvider.DecryptJsonContent<BlogMasterPayload<T>>(
+        dsr.fileMetadata,
+        keyheader
       );
-      return JSON.parse(json);
     } else {
       console.log(`content wasn't complete... That seems wrong`);
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
 
       return await this._driveProvider.GetPayloadAsJson<BlogMasterPayload<T>>(
         targetDrive,

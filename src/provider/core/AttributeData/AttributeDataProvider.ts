@@ -62,16 +62,12 @@ export default class AttributeDataProvider extends ProviderBase {
         acl: dsr.serverMetadata.accessControlList,
       };
 
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        const json = DataUtil.byteArrayToString(
-          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-        );
-        attr = JSON.parse(json);
+        attr = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
       } else {
-        const keyheader = dsr.fileMetadata.payloadIsEncrypted
-          ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-          : undefined;
-
         attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
       }
       attr.fileId = attr.fileId ?? fileId;
@@ -122,15 +118,12 @@ export default class AttributeDataProvider extends ProviderBase {
         profileId: profileId,
       };
 
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        const json = DataUtil.byteArrayToString(
-          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-        );
-        attr = JSON.parse(json);
+        attr = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
       } else {
-        const keyheader = dsr.fileMetadata.payloadIsEncrypted
-          ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-          : undefined;
         attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
       }
 
@@ -192,16 +185,12 @@ export default class AttributeDataProvider extends ProviderBase {
 
     let payload: Attribute;
 
+    const keyheader = dsr.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
     if (dsr.fileMetadata.appData.contentIsComplete && response.includeMetadataHeader) {
-      const json = DataUtil.byteArrayToString(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-      );
-      payload = JSON.parse(json);
+      payload = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
     } else {
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
-
       payload = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
     }
 
@@ -244,16 +233,12 @@ export default class AttributeDataProvider extends ProviderBase {
         acl: dsr.serverMetadata.accessControlList,
       };
 
+      const keyheader = dsr.fileMetadata.payloadIsEncrypted
+        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+        : undefined;
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        const json = DataUtil.byteArrayToString(
-          DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-        );
-        attr = JSON.parse(json);
+        attr = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
       } else {
-        const keyheader = dsr.fileMetadata.payloadIsEncrypted
-          ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-          : undefined;
-
         attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
       }
       attr.fileId = attr.fileId ?? fileId;
@@ -310,7 +295,7 @@ export default class AttributeDataProvider extends ProviderBase {
         groupId: attribute.sectionId, // TODO will be renamed to groupId
         fileType: AttributeConfig.AttributeFileType,
         contentIsComplete: shouldEmbedContent,
-        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
+        jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
       accessControlList: attribute.acl,
