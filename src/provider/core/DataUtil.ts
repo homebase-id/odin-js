@@ -1,10 +1,10 @@
 import { Guid } from 'guid-typescript';
-import { nanoid } from 'nanoid';
+const md5 = require('js-md5');
 
 export class DataUtil {
   static stringToMD5basedGuid(data: string): Guid {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const md5 = require('js-md5');
+    //const md5 = require('js-md5');
     const t = md5(data).toString();
     return Guid.parse(
       t.substring(0, 8) +
@@ -67,12 +67,9 @@ export class DataUtil {
     return String.fromCharCode(...Array.from(bytes));
   }
 
-  static getNewGuid() {
-    return Guid.create().toString();
-  }
-
   static getNewId() {
-    return DataUtil.toByteArrayId(nanoid());
+    //return DataUtil.toByteArrayId(nanoid());
+    return Guid.create().toString().replace(/-/g, '');
   }
 
   static stringify = (obj: any) => {
@@ -83,6 +80,6 @@ export class DataUtil {
 
   // Creates a base64 encoded byte array of the given input
   static toByteArrayId(input: string): string {
-    return DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(input));
+    return md5(input).toString();
   }
 }
