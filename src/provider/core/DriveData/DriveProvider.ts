@@ -12,6 +12,7 @@ import {
   QueryModifiedResponse,
   DriveSearchResult,
   EncryptedKeyHeader,
+  FileMetadata,
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../Types';
@@ -296,6 +297,27 @@ export class DriveProvider extends ProviderBase {
       });
   }
 
+  public async DecryptJsonContent<T>(
+    fileMetaData: FileMetadata,
+    keyheader: KeyHeader | undefined
+  ): Promise<T> {
+    if (keyheader) {
+      try {
+        const cipher = DataUtil.base64ToUint8Array(fileMetaData.appData.jsonContent);
+        const json = DataUtil.byteArrayToString(
+          await this.DecryptUsingKeyHeader(cipher, keyheader)
+        );
+
+        return JSON.parse(json);
+      } catch (ex) {
+        console.error(ex);
+        console.error('Json Content Decryption failed. Trying to only parse JSON');
+      }
+    }
+
+    return JSON.parse(fileMetaData.appData.jsonContent);
+  }
+
   // async GetPayloadAsStream(
   //   targetDrive: TargetDrive,
   //   fileId: Guid,
@@ -345,12 +367,29 @@ export class DriveProvider extends ProviderBase {
         DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
       );
 
+    const encryptedMetaData = keyHeader
+      ? {
+          ...metadata,
+          appData: {
+            ...metadata.appData,
+            jsonContent: metadata.appData.jsonContent
+              ? DataUtil.uint8ArrayToBase64(
+                  await this.encryptWithKeyheader(
+                    DataUtil.stringToUint8Array(metadata.appData.jsonContent),
+                    keyHeader
+                  )
+                )
+              : null,
+          },
+        }
+      : metadata;
+
     const descriptor: UploadFileDescriptor = {
       encryptedKeyHeader: await this.EncryptKeyHeader(
         keyHeader ?? EmptyKeyHeader,
         instructions.transferIv
       ),
-      fileMetadata: metadata,
+      fileMetadata: encryptedMetaData,
     };
 
     const encryptedDescriptor = await this.encryptWithSharedSecret(

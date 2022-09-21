@@ -154,7 +154,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
         fileType: ProfileConfig.ProfileDefinitionFileType, //TODO: determine if we need to define these for defintion files?
         dataType: undefined, //TODO: determine if we need to define these for defintion files?
         contentIsComplete: shouldEmbedContent,
-        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
+        jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
@@ -205,7 +205,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
         fileType: ProfileConfig.ProfileSectionFileType, //TODO: determine if we need to define these for defintion files?
         dataType: undefined, //TODO: determine if we need to define these for defintion files?
         contentIsComplete: shouldEmbedContent,
-        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
+        jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
       accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
@@ -301,16 +301,13 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<ProfileDefinition> {
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const json = DataUtil.byteArrayToString(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-      );
-      return JSON.parse(json);
-    } else {
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
+    const keyheader = dsr.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
 
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
+      return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
+    } else {
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
@@ -358,17 +355,14 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<ProfileSection> {
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const json = DataUtil.byteArrayToString(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-      );
-      return JSON.parse(json);
-    } else {
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
+    const keyheader = dsr.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
 
-      return await this._driveProvider.GetPayloadAsJson<any>(
+    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
+      return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
+    } else {
+      return await this._driveProvider.GetPayloadAsJson<ProfileSection>(
         targetDrive,
         dsr.fileMetadata.file.fileId,
         keyheader

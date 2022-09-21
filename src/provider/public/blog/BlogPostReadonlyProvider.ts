@@ -143,17 +143,14 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<T> {
+    const keyheader = dsr.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
+
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const json = DataUtil.byteArrayToString(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-      );
-      return JSON.parse(json);
+      return await this._driveProvider.DecryptJsonContent<T>(dsr.fileMetadata, keyheader);
     } else {
       console.log(`content wasn't complete... That seems wrong`);
-
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
 
       return await this._driveProvider.GetPayloadAsJson<T>(
         targetDrive,

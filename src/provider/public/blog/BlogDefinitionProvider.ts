@@ -119,7 +119,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
         contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogChannelDefinitionFileType,
         // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
-        jsonContent: shouldEmbedContent ? DataUtil.uint8ArrayToBase64(payloadBytes) : null,
+        jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
       accessControlList: definition.acl,
@@ -213,16 +213,14 @@ export default class BlogDefinitionProvider extends ProviderBase {
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<ChannelDefinition> {
+    const keyheader = dsr.fileMetadata.payloadIsEncrypted
+      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
+
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      const json = DataUtil.byteArrayToString(
-        DataUtil.base64ToUint8Array(dsr.fileMetadata.appData.jsonContent)
-      );
-      return JSON.parse(json);
+      return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
     } else {
       console.log(`content wasn't complete... That seems wrong`);
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
 
       return await this._driveProvider.GetPayloadAsJson<any>(
         targetDrive,

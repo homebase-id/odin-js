@@ -94,11 +94,7 @@ export default class FileReadOnlyProvider extends ProviderBase {
         file.header.fileMetadata.appData.contentIsComplete &&
         file.header.fileMetadata.appData.jsonContent.length !== 0
       ) {
-        const json = DataUtil.byteArrayToString(
-          DataUtil.base64ToUint8Array(file.header.fileMetadata.appData.jsonContent)
-        );
-
-        parsedObj = JSON.parse(json);
+        parsedObj = JSON.parse(file.header.fileMetadata.appData.jsonContent);
       } else if (file.payload) {
         const bytes = DataUtil.base64ToUint8Array(file.payload);
         const json = DataUtil.byteArrayToString(bytes);
