@@ -17,7 +17,7 @@ export default class CircleNetworkReadOnlyProvider extends ProviderBase {
     });
   }
 
-  async getConnections(data: PagingOptions): Promise<PagedResult<string>> {
+  async getConnections(data: PagingOptions): Promise<PagedResult<{ dotYouId: string }>> {
     const client = super.createAxiosClient();
     const url = this.root + '/connected?' + stringify(data);
     return client.get(url).then((response) => {
