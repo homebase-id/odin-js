@@ -82,4 +82,8 @@ export class DataUtil {
   static toByteArrayId(input: string): string {
     return md5(input).toString();
   }
+
+  static StrinGuidsEqual(a: string, b: string) {
+    return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
+  }
 }
