@@ -106,12 +106,15 @@ export class ProviderBase {
 
       //TODO: determine if we should expect the payload to be encrypted or not
       if (encryptedPayload && encryptedPayload.data && encryptedPayload.iv && ss) {
-        const iv = DataUtil.base64ToUint8Array(response.data.iv);
-        const encryptedBytes = DataUtil.base64ToUint8Array(response.data.data);
-        const bytes = await AesEncrypt.CbcDecrypt(encryptedBytes, iv, ss);
-        const json = DataUtil.byteArrayToString(bytes);
-        response.data = JSON.parse(json);
-
+        try {
+          const iv = DataUtil.base64ToUint8Array(response.data.iv);
+          const encryptedBytes = DataUtil.base64ToUint8Array(response.data.data);
+          const bytes = await AesEncrypt.CbcDecrypt(encryptedBytes, iv, ss);
+          const json = DataUtil.byteArrayToString(bytes);
+          response.data = JSON.parse(json);
+        } catch (ex) {
+          response.data = undefined;
+        }
         isDebug && console.debug('response', response.config?.url, response);
       }
 

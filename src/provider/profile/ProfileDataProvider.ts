@@ -39,7 +39,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.PersonalInfoSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultNameAttributeFile);
     }
@@ -52,7 +52,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.PersonalInfoSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultPhotoAttributeFile);
     }
@@ -67,7 +67,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultTwitterAttrFile);
     }
@@ -81,7 +81,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultFacebookAttrFile);
     }
@@ -95,7 +95,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultInstagramAttrFile);
     }
@@ -109,7 +109,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultTiktokAttrFile);
     }
@@ -123,7 +123,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.StandardProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.ExternalLinksSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaultLinkedinAttrFile);
     }
@@ -138,7 +138,7 @@ export default class ProfileDataProvider extends ProviderBase {
         profileId: BuiltInProfiles.FinancialProfileId,
         priority: 1000,
         sectionId: BuiltInProfiles.CreditCardsSectionId,
-        data: undefined,
+        data: {},
       };
       await this.saveAttribute(defaulCreditCardAttrFile);
     }
