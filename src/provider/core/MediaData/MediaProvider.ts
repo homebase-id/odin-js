@@ -1,5 +1,5 @@
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
-import { EmbeddedThumb, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
+import { DriveSearchResult, EmbeddedThumb, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
   SecurityGroupType,
@@ -126,6 +126,8 @@ export default class MediaProvider extends ProviderBase {
       accessControlList: acl,
     };
 
+    console.log(metadata.accessControlList);
+
     const result: UploadResult = await this._driveProvider.Upload(
       instructionSet,
       metadata,
@@ -146,12 +148,16 @@ export default class MediaProvider extends ProviderBase {
     return this._driveProvider.DeleteFile(targetDrive, imageFileId);
   };
 
+  async getDecryptedMetadata(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
+    return await this._driveProvider.GetMetadata(targetDrive, fileId);
+  }
+
   async getDecryptedThumbnailMeta(
     targetDrive: TargetDrive,
     fileId: string
   ): Promise<ThumbnailMeta | undefined> {
     //it seems these will be fine for images but for video and audio we must stream decrypt
-    return this._driveProvider.GetMetadata(targetDrive, fileId).then((header) => {
+    return this.getDecryptedMetadata(targetDrive, fileId).then((header) => {
       if (!header.fileMetadata.appData.previewThumbnail) {
         return;
       }

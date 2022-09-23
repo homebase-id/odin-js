@@ -5,17 +5,21 @@ import {
   OrderedAttributeList,
 } from '../core/AttributeData/AttributeDataTypes';
 import AttributeDataProvider from '../core/AttributeData/AttributeDataProvider';
+import MediaProvider from '../core/MediaData/MediaProvider';
 import { DataUtil } from '../core/DataUtil';
 import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
-import { BuiltInProfiles } from './ProfileConfig';
+import { BuiltInProfiles, MinimalProfileFields } from './ProfileConfig';
 import { SecurityGroupType } from '../core/DriveData/DriveUploadTypes';
+import { getTargetDriveFromProfileId } from './ProfileDefinitionProvider';
 
 interface ProfileDataProviderOptions extends ProviderOptions {
   attributeDataProvider: AttributeDataProvider;
+  mediaProvider: MediaProvider;
 }
 
 export default class ProfileDataProvider extends ProviderBase {
   private _attributeDataProvider: AttributeDataProvider;
+  private _mediaProvider: MediaProvider;
 
   constructor(options: ProfileDataProviderOptions) {
     super({
@@ -24,6 +28,7 @@ export default class ProfileDataProvider extends ProviderBase {
     });
 
     this._attributeDataProvider = options.attributeDataProvider;
+    this._mediaProvider = options.mediaProvider;
   }
 
   async ensureConfiguration() {
@@ -145,8 +150,32 @@ export default class ProfileDataProvider extends ProviderBase {
   }
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
-    const result = await this._attributeDataProvider.saveAttribute(attribute);
+    if (attribute.type === AttributeDefinitions.Photo.type) {
+      // TODO: Is this the way forward, should there be another way of handling this?
+      // Update on an image holding attribute; We need to check the image file itself and potentially reupload to match the ACL
+      const imageFileId = attribute.data[MinimalProfileFields.ProfileImageId];
+      const targetDrive = getTargetDriveFromProfileId(attribute.profileId);
 
+      const imageFileMeta = await this._mediaProvider.getDecryptedMetadata(
+        targetDrive,
+        imageFileId
+      );
+
+      if (!DataUtil.compareAcl(attribute.acl, imageFileMeta.serverMetadata.accessControlList)) {
+        // Not what it should be, going to reupload it in full
+        const imageData = this._mediaProvider.getDecryptedImageData(targetDrive, imageFileId);
+
+        await this._mediaProvider.uploadImage(
+          targetDrive,
+          undefined,
+          attribute.acl,
+          new Uint8Array((await imageData).content),
+          imageFileId
+        );
+      }
+    }
+
+    const result = await this._attributeDataProvider.saveAttribute(attribute);
     return result;
   }
 

@@ -16,7 +16,7 @@ export class BuiltInProfiles {
 }
 
 export class MinimalProfileFields {
-  static readonly ProfileImageUrlId: string = 'profileImageId';
+  static readonly ProfileImageId: string = 'profileImageId';
   static readonly FullBioId: string = 'full_bio';
   static readonly ShortBioId: string = 'short_bio';
   static readonly GivenNameId: string = 'givenName';

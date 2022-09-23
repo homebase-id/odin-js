@@ -61,6 +61,7 @@ export class Client {
     this.profileDataProvider = new ProfileDataProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
+      mediaProvider: this.mediaProvider,
     });
 
     // Blog Providers:

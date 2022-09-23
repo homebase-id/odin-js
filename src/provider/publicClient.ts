@@ -47,10 +47,17 @@ export class PublicClient {
       driveProvider: this._driveProvider,
     });
 
+    // Media Provider:
+    this.mediaProvider = new MediaProvider({
+      ...this._cfg,
+      driveProvider: this._driveProvider,
+    });
+
     // Profile Providers
     this.profileDataProvider = new ProfileDataProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
+      mediaProvider: this.mediaProvider,
     });
 
     this.fileReadOnlyProvider = new FileReadOnlyProvider({
@@ -77,12 +84,6 @@ export class PublicClient {
 
     this.circleNetworkReadOnlyProvider = new CircleNetworkReadOnlyProvider({
       ...this._cfg,
-    });
-
-    // Media Provider:
-    this.mediaProvider = new MediaProvider({
-      ...this._cfg,
-      driveProvider: this._driveProvider,
     });
   }
 }

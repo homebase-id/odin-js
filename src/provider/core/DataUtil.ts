@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import { AccessControlList } from './DriveData/DriveUploadTypes';
 const md5 = require('js-md5');
 
 export class DataUtil {
@@ -85,5 +86,41 @@ export class DataUtil {
 
   static StrinGuidsEqual(a: string, b: string) {
     return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
+  }
+
+  static compareAcl(a: AccessControlList, b: AccessControlList) {
+    if (a.requiredSecurityGroup.toLowerCase() !== b.requiredSecurityGroup.toLowerCase()) {
+      return false;
+    }
+
+    if (a.circleIdList || b.circleIdList) {
+      const missingCircleIdInA = a.circleIdList?.some(
+        (aCircle) => !b.circleIdList?.find((bCircle) => DataUtil.StrinGuidsEqual(bCircle, aCircle))
+      );
+
+      const missingCircleIdInB = b.circleIdList?.some(
+        (bCircle) => !a.circleIdList?.find((aCircle) => DataUtil.StrinGuidsEqual(aCircle, bCircle))
+      );
+
+      if (missingCircleIdInA || missingCircleIdInB) {
+        return false;
+      }
+    }
+
+    if (a.dotYouIdentityList || b.dotYouIdentityList) {
+      const missingDotYouIdInA = a.dotYouIdentityList?.some(
+        (aIdentity) => !b.dotYouIdentityList?.find((bIdentity) => bIdentity === aIdentity)
+      );
+
+      const missingDotYouIdInB = b.dotYouIdentityList?.some(
+        (bIdentity) => !a.dotYouIdentityList?.find((aIdentity) => aIdentity === bIdentity)
+      );
+
+      if (missingDotYouIdInA || missingDotYouIdInB) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
