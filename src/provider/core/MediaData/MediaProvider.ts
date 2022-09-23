@@ -35,7 +35,7 @@ const baseThumbSizes = [
   { quality: 100, width: 1000, height: 1000 },
 ];
 
-export default class MediaProvider extends ProviderBase {
+export class MediaProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
 
   constructor(options: MediaProviderOptions) {
@@ -125,8 +125,6 @@ export default class MediaProvider extends ProviderBase {
       payloadIsEncrypted: encrypt,
       accessControlList: acl,
     };
-
-    console.log(metadata.accessControlList);
 
     const result: UploadResult = await this._driveProvider.Upload(
       instructionSet,

@@ -7,7 +7,7 @@ import {
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderOptions } from '../../core/ProviderBase';
-import MediaProvider from '../../core/MediaData/MediaProvider';
+import { MediaProvider } from '../../core/MediaData/MediaProvider';
 import {
   AccessControlList,
   SecurityGroupType,

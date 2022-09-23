@@ -5,7 +5,7 @@ import {
   OrderedAttributeList,
 } from '../core/AttributeData/AttributeDataTypes';
 import AttributeDataProvider from '../core/AttributeData/AttributeDataProvider';
-import MediaProvider from '../core/MediaData/MediaProvider';
+import { MediaProvider } from '../core/MediaData/MediaProvider';
 import { DataUtil } from '../core/DataUtil';
 import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
 import { BuiltInProfiles, MinimalProfileFields } from './ProfileConfig';
