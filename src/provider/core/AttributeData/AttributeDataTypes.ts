@@ -18,12 +18,6 @@ export interface Attribute {
   data: any;
 }
 
-export type OrderedAttributeList = {
-  profileId: string;
-  attributeType: string;
-  versions: Attribute[];
-};
-
 export type SecurityGroupDefinition = {
   groupType: SecurityGroupType;
   display: string;

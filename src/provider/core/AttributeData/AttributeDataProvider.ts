@@ -1,4 +1,4 @@
-import { Attribute, OrderedAttributeList, AttributeFile } from './AttributeDataTypes';
+import { Attribute, AttributeFile } from './AttributeDataTypes';
 
 import {
   DriveSearchResult,
@@ -102,7 +102,7 @@ export default class AttributeDataProvider extends ProviderBase {
     profileId: string,
     sectionId: string | undefined,
     attributeType: string
-  ): Promise<OrderedAttributeList | null> {
+  ): Promise<AttributeFile[] | undefined> {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
@@ -112,28 +112,35 @@ export default class AttributeDataProvider extends ProviderBase {
     };
 
     const result = await this._driveProvider.QueryBatch(qp);
-    let versions: Attribute[] = [];
+    let attributes: AttributeFile[] = [];
 
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult = result.searchResults[key];
       const fileId = dsr.fileMetadata.file.fileId;
 
-      let attr: Attribute = {
+      let attr: AttributeFile = {
         id: '',
         type: attributeType,
         sectionId: sectionId ?? '',
         priority: -1,
         data: null,
         profileId: profileId,
+        acl: dsr.serverMetadata.accessControlList,
       };
 
       const keyheader = dsr.fileMetadata.payloadIsEncrypted
         ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
         : undefined;
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        attr = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
+        attr = {
+          ...attr,
+          ...(await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader)),
+        };
       } else {
-        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
+        attr = {
+          ...attr,
+          ...(await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader)),
+        };
       }
 
       // TODO: this overwrites the priority stored in the
@@ -142,21 +149,15 @@ export default class AttributeDataProvider extends ProviderBase {
       // order set by the user
       //attr.priority = dsr.priority;
 
-      versions.push(attr);
+      attributes.push(attr);
     }
 
-    //sort where lowest number is higher priority
-    versions = versions.sort((a, b) => {
+    //sort where lowest number is higher priority (!! sort happens in place)
+    attributes = attributes.sort((a, b) => {
       return a.priority - b.priority;
     });
 
-    const list: OrderedAttributeList = {
-      profileId: profileId,
-      attributeType: attributeType,
-      versions: versions,
-    };
-
-    return list ?? null;
+    return attributes;
   }
 
   async getAttribute(profileId: string, id: string): Promise<AttributeFile | undefined> {

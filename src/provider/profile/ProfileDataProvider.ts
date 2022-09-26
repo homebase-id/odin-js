@@ -1,9 +1,5 @@
 import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
-import {
-  Attribute,
-  AttributeFile,
-  OrderedAttributeList,
-} from '../core/AttributeData/AttributeDataTypes';
+import { Attribute, AttributeFile } from '../core/AttributeData/AttributeDataTypes';
 import AttributeDataProvider from '../core/AttributeData/AttributeDataProvider';
 import { MediaProvider } from '../core/MediaData/MediaProvider';
 import { DataUtil } from '../core/DataUtil';
@@ -205,7 +201,7 @@ export default class ProfileDataProvider extends ProviderBase {
     profileId: string,
     sectionId: string | undefined,
     type: string
-  ): Promise<OrderedAttributeList | null> {
+  ): Promise<AttributeFile[] | undefined> {
     return this._attributeDataProvider.getAttributeVersions(profileId, sectionId, type);
   }
 
@@ -214,7 +210,7 @@ export default class ProfileDataProvider extends ProviderBase {
     sectionId: string | undefined,
     type: string
   ): Promise<Attribute | undefined> {
-    const allVersions = await this.getAttributeVersions(profileId, sectionId, type);
-    return allVersions?.versions[0];
+    const allAttributes = await this.getAttributeVersions(profileId, sectionId, type);
+    return allAttributes?.[0];
   }
 }
