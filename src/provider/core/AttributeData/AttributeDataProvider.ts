@@ -59,7 +59,7 @@ export default class AttributeDataProvider extends ProviderBase {
         priority: -1,
         data: null,
         profileId: profileId,
-        acl: dsr.serverMetadata.accessControlList,
+        acl: dsr.serverMetadata?.accessControlList,
       };
 
       const keyheader = dsr.fileMetadata.payloadIsEncrypted
@@ -125,7 +125,7 @@ export default class AttributeDataProvider extends ProviderBase {
         priority: -1,
         data: null,
         profileId: profileId,
-        acl: dsr.serverMetadata.accessControlList,
+        acl: dsr.serverMetadata?.accessControlList,
       };
 
       const keyheader = dsr.fileMetadata.payloadIsEncrypted
@@ -207,7 +207,7 @@ export default class AttributeDataProvider extends ProviderBase {
     const attributeFile: AttributeFile = {
       ...payload,
       fileId: dsr.fileMetadata.file.fileId,
-      acl: dsr.serverMetadata.accessControlList,
+      acl: dsr.serverMetadata?.accessControlList,
     };
 
     return attributeFile;
@@ -240,7 +240,7 @@ export default class AttributeDataProvider extends ProviderBase {
         priority: -1,
         data: null,
         profileId: profileId,
-        acl: dsr.serverMetadata.accessControlList,
+        acl: dsr.serverMetadata?.accessControlList,
       };
 
       const keyheader = dsr.fileMetadata.payloadIsEncrypted

@@ -385,7 +385,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
 
     const file: BlogPostFile<T> = {
       fileId: dsr.fileMetadata.file.fileId,
-      acl: dsr.serverMetadata.accessControlList,
+      acl: dsr.serverMetadata?.accessControlList,
       publishTargets: masterPost.publishTargets,
       content: masterPost.content,
     };

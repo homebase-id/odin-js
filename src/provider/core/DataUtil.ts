@@ -22,12 +22,14 @@ export class DataUtil {
 
   // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
   static stringToUint8Array(str: string): Uint8Array {
-    const buf = new ArrayBuffer(str.length);
-    const bufView = new Uint8Array(buf);
-    for (let i = 0, strLen = str.length; i < strLen; i++) {
-      bufView[i] = str.charCodeAt(i);
-    }
-    return bufView;
+    return new TextEncoder().encode(str);
+
+    // const buf = new ArrayBuffer(str.length);
+    // const bufView = new Uint8Array(buf);
+    // for (let i = 0, strLen = str.length; i < strLen; i++) {
+    //   bufView[i] = str.charCodeAt(i);
+    // }
+    // return bufView;
   }
 
   static base64ToUint8Array(base64: string): Uint8Array {
@@ -65,7 +67,9 @@ export class DataUtil {
   }
 
   static byteArrayToString(bytes: Uint8Array) {
-    return String.fromCharCode(...Array.from(bytes));
+    return new TextDecoder().decode(bytes);
+
+    // return String.fromCharCode(...Array.from(bytes));
   }
 
   static getNewId() {
@@ -84,10 +88,12 @@ export class DataUtil {
     return md5(input).toString();
   }
 
-  static StrinGuidsEqual(a: string, b: string) {
+  /// ...
+  static stringGuidsEqual(a: string, b: string) {
     return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
   }
 
+  /// ...
   static compareAcl(a: AccessControlList, b: AccessControlList) {
     if (a.requiredSecurityGroup.toLowerCase() !== b.requiredSecurityGroup.toLowerCase()) {
       return false;
@@ -95,11 +101,11 @@ export class DataUtil {
 
     if (a.circleIdList || b.circleIdList) {
       const missingCircleIdInA = a.circleIdList?.some(
-        (aCircle) => !b.circleIdList?.find((bCircle) => DataUtil.StrinGuidsEqual(bCircle, aCircle))
+        (aCircle) => !b.circleIdList?.find((bCircle) => DataUtil.stringGuidsEqual(bCircle, aCircle))
       );
 
       const missingCircleIdInB = b.circleIdList?.some(
-        (bCircle) => !a.circleIdList?.find((aCircle) => DataUtil.StrinGuidsEqual(aCircle, bCircle))
+        (bCircle) => !a.circleIdList?.find((aCircle) => DataUtil.stringGuidsEqual(aCircle, bCircle))
       );
 
       if (missingCircleIdInA || missingCircleIdInB) {
