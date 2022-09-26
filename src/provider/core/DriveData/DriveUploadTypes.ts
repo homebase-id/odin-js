@@ -42,10 +42,10 @@ export interface AccessControlList {
 }
 
 export enum SecurityGroupType {
-  Anonymous = 'Anonymous',
-  Authenticated = 'Authenticated',
-  Connected = 'Connected',
-  Owner = 'Owner',
+  Anonymous = 'anonymous',
+  Authenticated = 'authenticated',
+  Connected = 'connected',
+  Owner = 'owner',
 }
 
 export interface UploadAppFileMetaData {

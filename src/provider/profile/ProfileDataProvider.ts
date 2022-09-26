@@ -150,7 +150,8 @@ export default class ProfileDataProvider extends ProviderBase {
   }
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
-    if (attribute.type === AttributeDefinitions.Photo.type) {
+    // If the attribute is a photo attribute and there is a fileId (which means it already exists)
+    if (attribute.type === AttributeDefinitions.Photo.type && attribute.fileId) {
       // TODO: Is this the way forward, should there be another way of handling this?
       // Update on an image holding attribute; We need to check the image file itself and potentially reupload to match the ACL
       const imageFileId = attribute.data[MinimalProfileFields.ProfileImageId];
@@ -161,17 +162,22 @@ export default class ProfileDataProvider extends ProviderBase {
         imageFileId
       );
 
-      if (!DataUtil.compareAcl(attribute.acl, imageFileMeta.serverMetadata.accessControlList)) {
+      if (
+        imageFileMeta &&
+        !DataUtil.compareAcl(attribute.acl, imageFileMeta.serverMetadata.accessControlList)
+      ) {
         // Not what it should be, going to reupload it in full
         const imageData = this._mediaProvider.getDecryptedImageData(targetDrive, imageFileId);
 
-        await this._mediaProvider.uploadImage(
-          targetDrive,
-          undefined,
-          attribute.acl,
-          new Uint8Array((await imageData).content),
-          imageFileId
-        );
+        if (imageData) {
+          await this._mediaProvider.uploadImage(
+            targetDrive,
+            undefined,
+            attribute.acl,
+            new Uint8Array((await imageData).content),
+            imageFileId
+          );
+        }
       }
     }
 

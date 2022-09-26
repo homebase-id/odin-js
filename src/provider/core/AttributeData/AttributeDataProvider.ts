@@ -66,11 +66,20 @@ export default class AttributeDataProvider extends ProviderBase {
         ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
         : undefined;
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        attr = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
+        attr = {
+          ...attr,
+          ...(await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader)),
+        };
       } else {
-        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
+        attr = {
+          ...attr,
+          ...(await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader)),
+        };
       }
       attr.fileId = attr.fileId ?? fileId;
+      // attr.acl = attr.acl ?? {
+      //   requiredSecurityGroup: SecurityGroupType.Owner,
+      // };
 
       // TODO: this overwrites the priority stored in the
       // attribute.  Need to fix this by considering if the
@@ -283,7 +292,11 @@ export default class AttributeDataProvider extends ProviderBase {
       transitOptions: null,
     };
 
-    const payloadJson: string = DataUtil.JsonStringify64(attribute as Attribute);
+    const payloadJson: string = DataUtil.JsonStringify64({
+      ...attribute,
+      acl: undefined,
+      fileId: undefined,
+    } as Attribute);
     const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
 
     // Set max of 3kb for jsonContent so enough room is left for metedata
