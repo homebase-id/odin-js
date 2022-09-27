@@ -29,8 +29,8 @@ export default class ProfileDataProvider extends ProviderBase {
 
   async ensureConfiguration() {
     // Personal Info Section:
-    const defaultNameAttrId = DataUtil.toByteArrayId('default_name_attribute');
-    const defaultPhotoAttrId = DataUtil.toByteArrayId('default_photo_attribute');
+    const defaultNameAttrId = DataUtil.toGuidId('default_name_attribute');
+    const defaultPhotoAttrId = DataUtil.toGuidId('default_photo_attribute');
 
     if (!(await this.getAttribute(BuiltInProfiles.StandardProfileId, defaultNameAttrId))) {
       const defaultNameAttributeFile: AttributeFile = {
@@ -59,7 +59,7 @@ export default class ProfileDataProvider extends ProviderBase {
     }
 
     // Social Info Section:
-    const defaultTwitterAttrId = DataUtil.toByteArrayId('default_twitter_attribute');
+    const defaultTwitterAttrId = DataUtil.toGuidId('default_twitter_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.StandardProfileId, defaultTwitterAttrId))) {
       const defaultTwitterAttrFile: AttributeFile = {
         id: defaultTwitterAttrId,
@@ -73,7 +73,7 @@ export default class ProfileDataProvider extends ProviderBase {
       await this.saveAttribute(defaultTwitterAttrFile);
     }
 
-    const defaultFacebookAttrId = DataUtil.toByteArrayId('default_facebook_attribute');
+    const defaultFacebookAttrId = DataUtil.toGuidId('default_facebook_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.StandardProfileId, defaultFacebookAttrId))) {
       const defaultFacebookAttrFile: AttributeFile = {
         id: defaultFacebookAttrId,
@@ -87,7 +87,7 @@ export default class ProfileDataProvider extends ProviderBase {
       await this.saveAttribute(defaultFacebookAttrFile);
     }
 
-    const defaultInstagramAttrId = DataUtil.toByteArrayId('default_instagram_attribute');
+    const defaultInstagramAttrId = DataUtil.toGuidId('default_instagram_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.StandardProfileId, defaultInstagramAttrId))) {
       const defaultInstagramAttrFile: AttributeFile = {
         id: defaultInstagramAttrId,
@@ -101,7 +101,7 @@ export default class ProfileDataProvider extends ProviderBase {
       await this.saveAttribute(defaultInstagramAttrFile);
     }
 
-    const defaultTiktokAttrId = DataUtil.toByteArrayId('default_tiktok_attribute');
+    const defaultTiktokAttrId = DataUtil.toGuidId('default_tiktok_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.StandardProfileId, defaultTiktokAttrId))) {
       const defaultTiktokAttrFile: AttributeFile = {
         id: defaultTiktokAttrId,
@@ -115,7 +115,7 @@ export default class ProfileDataProvider extends ProviderBase {
       await this.saveAttribute(defaultTiktokAttrFile);
     }
 
-    const defaultLinkedinAttrId = DataUtil.toByteArrayId('default_linkedin_attribute');
+    const defaultLinkedinAttrId = DataUtil.toGuidId('default_linkedin_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.StandardProfileId, defaultLinkedinAttrId))) {
       const defaultLinkedinAttrFile: AttributeFile = {
         id: defaultLinkedinAttrId,
@@ -130,7 +130,7 @@ export default class ProfileDataProvider extends ProviderBase {
     }
 
     // Financial Info Section:
-    const defaulCreditCardAttrId = DataUtil.toByteArrayId('default_creditcard_attribute');
+    const defaulCreditCardAttrId = DataUtil.toGuidId('default_creditcard_attribute');
     if (!(await this.getAttribute(BuiltInProfiles.FinancialProfileId, defaulCreditCardAttrId))) {
       const defaulCreditCardAttrFile: AttributeFile = {
         id: defaulCreditCardAttrId,
@@ -160,7 +160,7 @@ export default class ProfileDataProvider extends ProviderBase {
 
       if (
         imageFileMeta &&
-        !DataUtil.compareAcl(attribute.acl, imageFileMeta.serverMetadata.accessControlList)
+        !DataUtil.aclEqual(attribute.acl, imageFileMeta.serverMetadata.accessControlList)
       ) {
         // Not what it should be, going to reupload it in full
         const imageData = this._mediaProvider.getDecryptedImageData(targetDrive, imageFileId);

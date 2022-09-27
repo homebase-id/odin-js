@@ -23,13 +23,6 @@ export class DataUtil {
   // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
   static stringToUint8Array(str: string): Uint8Array {
     return new TextEncoder().encode(str);
-
-    // const buf = new ArrayBuffer(str.length);
-    // const bufView = new Uint8Array(buf);
-    // for (let i = 0, strLen = str.length; i < strLen; i++) {
-    //   bufView[i] = str.charCodeAt(i);
-    // }
-    // return bufView;
   }
 
   static base64ToUint8Array(base64: string): Uint8Array {
@@ -68,12 +61,10 @@ export class DataUtil {
 
   static byteArrayToString(bytes: Uint8Array) {
     return new TextDecoder().decode(bytes);
-
-    // return String.fromCharCode(...Array.from(bytes));
   }
 
   static getNewId() {
-    //return DataUtil.toByteArrayId(nanoid());
+    //return DataUtil.toGuidId(nanoid());
     return Guid.create().toString().replace(/-/g, '');
   }
 
@@ -84,17 +75,17 @@ export class DataUtil {
   };
 
   // Creates a base64 encoded byte array of the given input
-  static toByteArrayId(input: string): string {
+  static toGuidId(input: string): string {
     return md5(input).toString();
   }
 
-  /// ...
-  static stringGuidsEqual(a: string, b: string) {
+  /// Compares two Guids that are string formatted; It compares the guids after removing all dashes and converting to lowercase
+  static stringGuidsEqual(a: string, b: string): boolean {
     return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
   }
 
-  /// ...
-  static compareAcl(a: AccessControlList, b: AccessControlList) {
+  /// Compares two ACLs; Compares the requiredSecurityGroup, CircleIds and DotYouIds of those ACLs and will return true or false;
+  static aclEqual(a: AccessControlList, b: AccessControlList): boolean {
     if (a.requiredSecurityGroup.toLowerCase() !== b.requiredSecurityGroup.toLowerCase()) {
       return false;
     }

@@ -1,18 +1,18 @@
 import { DataUtil } from '../core/DataUtil';
 
 export class ProfileConfig {
-  static readonly ProfileDriveType: string = DataUtil.toByteArrayId('profile_drive_type');
+  static readonly ProfileDriveType: string = DataUtil.toGuidId('profile_drive_type');
   static readonly ProfileDefinitionFileType: number = 88;
   static readonly ProfileSectionFileType: number = 99;
 }
 
 export class BuiltInProfiles {
-  static readonly StandardProfileId: string = DataUtil.toByteArrayId('StandardProfile');
-  static readonly FinancialProfileId: string = DataUtil.toByteArrayId('FinancialProfile');
+  static readonly StandardProfileId: string = DataUtil.toGuidId('StandardProfile');
+  static readonly FinancialProfileId: string = DataUtil.toGuidId('FinancialProfile');
 
-  static readonly PersonalInfoSectionId: string = DataUtil.toByteArrayId('PersonalInfoSection');
-  static readonly ExternalLinksSectionId: string = DataUtil.toByteArrayId('ExternalLinksSection');
-  static readonly CreditCardsSectionId: string = DataUtil.toByteArrayId('CreditCardsSection');
+  static readonly PersonalInfoSectionId: string = DataUtil.toGuidId('PersonalInfoSection');
+  static readonly ExternalLinksSectionId: string = DataUtil.toGuidId('ExternalLinksSection');
+  static readonly CreditCardsSectionId: string = DataUtil.toGuidId('CreditCardsSection');
 }
 
 export class MinimalProfileFields {

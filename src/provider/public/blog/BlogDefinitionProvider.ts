@@ -18,7 +18,7 @@ import {
 
 const defaultChannel: ChannelDefinition = {
   // channelId: '93999384-0000-0000-0000-000000004440',
-  channelId: DataUtil.toByteArrayId('default_blog_channel'),
+  channelId: DataUtil.toGuidId('default_blog_channel'),
   name: 'Public Blog',
   description: '',
   templateId: undefined,
@@ -80,7 +80,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     const channelMetadata = '';
 
     if (!definition.channelId) {
-      definition.channelId = DataUtil.toByteArrayId(definition.name);
+      definition.channelId = DataUtil.toGuidId(definition.name);
     }
 
     const encrypt = !(

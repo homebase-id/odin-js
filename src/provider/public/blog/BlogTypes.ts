@@ -20,8 +20,8 @@ export enum ChannelTemplate {
 export class BlogConfig {
   static readonly BlogPostFileType: number = 101;
   static readonly BlogChannelDefinitionFileType: number = 103;
-  static readonly ChannelDriveType: string = DataUtil.toByteArrayId('channel_drive_type');
-  static readonly DriveType: string = DataUtil.toByteArrayId('blog_drive_type');
+  static readonly ChannelDriveType: string = DataUtil.toGuidId('channel_drive_type');
+  static readonly DriveType: string = DataUtil.toGuidId('blog_drive_type');
 }
 
 export class BlogPostPublishStatus {
