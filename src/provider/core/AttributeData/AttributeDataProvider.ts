@@ -247,9 +247,15 @@ export default class AttributeDataProvider extends ProviderBase {
         ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
         : undefined;
       if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        attr = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
+        attr = {
+          ...attr,
+          ...(await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader)),
+        };
       } else {
-        attr = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
+        attr = {
+          ...attr,
+          ...(await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader)),
+        };
       }
       attr.fileId = attr.fileId ?? fileId;
 
