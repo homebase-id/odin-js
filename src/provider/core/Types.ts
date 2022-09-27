@@ -3,6 +3,11 @@ export interface PagedResult<T> {
   results: T[];
 }
 
+export interface CursoredResult<T> {
+  results: T;
+  cursorState: string;
+}
+
 export class PagingOptions {
   pageNumber = 1;
   pageSize = 25;

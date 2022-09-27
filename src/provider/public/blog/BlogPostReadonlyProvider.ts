@@ -1,4 +1,3 @@
-import { DataUtil } from '../../core/DataUtil';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
@@ -7,6 +6,7 @@ import {
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
+import { CursoredResult } from '../../core/Types';
 import BlogDefinitionProvider from './BlogDefinitionProvider';
 import {
   BlogConfig,
@@ -41,10 +41,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     type: BlogPostType,
     cursorState: string | undefined = undefined,
     pageSize = 10
-  ): Promise<{
-    cursorState: string;
-    posts: T[];
-  }> {
+  ): Promise<CursoredResult<T[]>> {
     const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
@@ -66,7 +63,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       posts.push(await this.dsrToBlogContent(dsr, targetDrive, response.includeMetadataHeader));
     }
 
-    return { cursorState: response.cursorState, posts };
+    return { cursorState: response.cursorState, results: posts };
   }
 
   //Gets posts across all channels, ordered by date
@@ -83,7 +80,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
         undefined,
         Math.ceil(pageSize / channels.length) // TODO: do this properly, now only works if all channels are equal and have the same dates
       );
-      posts = posts.concat(channelPosts.posts);
+      posts = posts.concat(channelPosts.results);
     }
 
     // Sorted descending

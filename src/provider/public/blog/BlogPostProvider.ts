@@ -29,6 +29,7 @@ import {
 } from './BlogTypes';
 import BlogDefinitionProvider from './BlogDefinitionProvider';
 import BlogPostReadonlyProvider from './BlogPostReadonlyProvider';
+import { CursoredResult } from '../../core/Types';
 
 interface BlostPostProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -86,7 +87,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     cursorState: string | undefined,
     pageSize: number,
     publishStatus?: BlogPostPublishStatus
-  ): Promise<BlogPostFile<T>[]> {
+  ): Promise<CursoredResult<BlogPostFile<T>[]>> {
     //get all files tag as being a profile definition
     const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
     const params: FileQueryParams = {
@@ -98,6 +99,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     const ro: GetBatchQueryResultOptions = {
       maxRecords: pageSize,
       includeMetadataHeader: true,
+      cursorState: cursorState,
     };
 
     const response = await this._driveProvider.QueryBatch(params, ro);
@@ -108,7 +110,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       posts.push(await this.dsrToBlogPostFile(dsr, targetDrive, response.includeMetadataHeader));
     }
 
-    return posts;
+    return { cursorState: response.cursorState, results: posts };
   }
 
   async getBlogPostFile<T extends BlogContent>(id: string): Promise<BlogPostFile<T> | undefined> {
