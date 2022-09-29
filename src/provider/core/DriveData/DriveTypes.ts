@@ -76,7 +76,7 @@ export interface DriveDefinition {
   // alias: string;
   // type: string;
   metadata: string;
-  isReadonly: boolean;
+  // isReadonly: boolean;
   allowAnonymousReads: boolean;
 }
 
