@@ -19,7 +19,11 @@ jobs:
 
       - run: npm ci
 
+      # Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
       - run: npm --no-git-tag-version version prerelease
+
+      # Push the version increment back into the repo
+      - run: git push
 
       - run: npm run build
 
