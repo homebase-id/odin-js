@@ -14,10 +14,10 @@
   },
   "name": "@youfoundation/dotyoucore-js",
   "author": "YouFoundation",
-  "description": "Lib for using Youverse transit and drive WebAPI",
+  "description": "Lib for using the DotYouCore api",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YouFoundation/transit-lib.git"
+    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
