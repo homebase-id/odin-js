@@ -17,16 +17,19 @@ jobs:
           # Defaults to the user or organization that owns the workflow file
           scope: '@octocat'
 
+      # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
+      - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version prerelease
+
       - run: npm ci
-
-      # Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
-      - run: npm version prerelease
-
-      # Push the version increment back into the repo
-      - run: git push
 
       - run: npm run build
 
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Push the version increment back into the repo
+      - run: git push
