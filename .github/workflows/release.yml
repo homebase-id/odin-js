@@ -19,6 +19,8 @@ jobs:
 
       - run: npm ci
 
+      - run: npm --no-git-tag-version version prerelease
+
       - run: npm run build
 
       - run: npm publish
