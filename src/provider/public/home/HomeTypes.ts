@@ -1,4 +1,3 @@
-import { Guid } from 'guid-typescript';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
 import { ProfileConfig } from '../../profile/ProfileConfig';
 import { DataUtil } from '../../core/DataUtil';
@@ -19,8 +18,8 @@ export class HomePageConfig {
 }
 
 export class HomePageAttributes {
-  static readonly Theme: Guid = Guid.parse('66664444-4444-4444-4444-000000007777');
-  static readonly HomePage: Guid = Guid.parse('88884444-4444-4444-4444-000000007777');
+  static readonly Theme = DataUtil.toGuidId('theme_attribute');
+  static readonly HomePage = DataUtil.toGuidId('homepage_attribute');
 }
 
 export enum HomePageTheme {

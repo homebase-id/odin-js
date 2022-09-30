@@ -28,6 +28,11 @@ export class LinkProfileFields {
   static readonly LinkTarget: string = 'link_target';
 }
 
+export class LocationProfileFields {
+  static readonly City: string = 'location_city';
+  static readonly Country: string = 'location_country';
+}
+
 export class SocialProfileFields {
   static readonly Twitter: string = 'twitter';
   static readonly Facebook: string = 'facebook';
