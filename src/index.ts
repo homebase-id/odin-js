@@ -1,5 +1,6 @@
 export * from './provider/core/AesEncrypt';
 export * from './provider/core/DataUtil';
+export * from './provider/core/MediaData/Resizer/resize';
 
 export * from './provider/core/ProviderBase';
 export * from './provider/core/MediaData/MediaProvider';
