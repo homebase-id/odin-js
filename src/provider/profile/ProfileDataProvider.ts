@@ -7,6 +7,7 @@ import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions
 import { BuiltInProfiles, MinimalProfileFields } from './ProfileConfig';
 import { SecurityGroupType } from '../core/DriveData/DriveUploadTypes';
 import { getTargetDriveFromProfileId } from './ProfileDefinitionProvider';
+import { HomePageAttributes, HomePageFields } from '../public/home/HomeTypes';
 
 interface ProfileDataProviderOptions extends ProviderOptions {
   attributeDataProvider: AttributeDataProvider;
@@ -147,10 +148,19 @@ export default class ProfileDataProvider extends ProviderBase {
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
     // If the attribute is a photo attribute and there is a fileId (which means it already exists)
-    if (attribute.type === AttributeDefinitions.Photo.type && attribute.fileId) {
+    if (
+      (attribute.type === AttributeDefinitions.Photo.type ||
+        attribute.type === HomePageAttributes.HomePage) &&
+      attribute.fileId
+    ) {
+      const imageFieldKey =
+        attribute.type === AttributeDefinitions.Photo.type
+          ? MinimalProfileFields.ProfileImageId
+          : HomePageFields.HeaderImageId;
+
       // TODO: Is this the way forward, should there be another way of handling this?
       // Update on an image holding attribute; We need to check the image file itself and potentially reupload to match the ACL
-      const imageFileId = attribute.data[MinimalProfileFields.ProfileImageId];
+      const imageFileId = attribute.data[imageFieldKey];
       const targetDrive = getTargetDriveFromProfileId(attribute.profileId);
 
       const imageFileMeta = await this._mediaProvider.getDecryptedMetadata(
