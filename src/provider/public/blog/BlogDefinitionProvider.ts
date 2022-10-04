@@ -200,7 +200,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       );
 
       return {
-        fileId: dsr.fileMetadata.file.fileId,
+        fileId: dsr.fileId,
         definition: definition,
       };
     }
@@ -222,11 +222,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
     } else {
       console.log(`content wasn't complete... That seems wrong`);
 
-      return await this._driveProvider.GetPayloadAsJson<any>(
-        targetDrive,
-        dsr.fileMetadata.file.fileId,
-        keyheader
-      );
+      return await this._driveProvider.GetPayloadAsJson<any>(targetDrive, dsr.fileId, keyheader);
     }
   }
 

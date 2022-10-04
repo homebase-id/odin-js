@@ -149,11 +149,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     } else {
       console.log(`content wasn't complete... That seems wrong`);
 
-      return await this._driveProvider.GetPayloadAsJson<T>(
-        targetDrive,
-        dsr.fileMetadata.file.fileId,
-        keyheader
-      );
+      return await this._driveProvider.GetPayloadAsJson<T>(targetDrive, dsr.fileId, keyheader);
     }
   }
 }

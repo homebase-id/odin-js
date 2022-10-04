@@ -111,7 +111,7 @@ export class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [...(tag ?? []), fileId],
+        tags: tag ? [tag, fileId] : [fileId],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,

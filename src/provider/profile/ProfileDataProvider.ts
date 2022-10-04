@@ -173,15 +173,16 @@ export default class ProfileDataProvider extends ProviderBase {
         !DataUtil.aclEqual(attribute.acl, imageFileMeta.serverMetadata.accessControlList)
       ) {
         // Not what it should be, going to reupload it in full
-        const imageData = this._mediaProvider.getDecryptedImageData(targetDrive, imageFileId);
+        const imageData = await this._mediaProvider.getDecryptedImageData(targetDrive, imageFileId);
 
         if (imageData) {
           await this._mediaProvider.uploadImage(
             targetDrive,
             undefined,
             attribute.acl,
-            new Uint8Array((await imageData).content),
-            imageFileId
+            new Uint8Array(imageData.content),
+            imageFileId,
+            imageData.contentType
           );
         }
       }

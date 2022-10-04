@@ -31,7 +31,6 @@ export interface KeyHeader {
 // }
 
 export interface FileMetadata {
-  file: ExternalFileIdentifier;
   created: number;
   updated: number;
   contentType: string;
@@ -81,6 +80,7 @@ export interface DriveDefinition {
 }
 
 export interface DriveSearchResult {
+  fileId: string;
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   fileMetadata: FileMetadata;
   serverMetadata: ServerMetaData;

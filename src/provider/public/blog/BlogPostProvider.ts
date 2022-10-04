@@ -369,8 +369,8 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     );
 
     const pt: PublishTarget = {
-      fileId: result.file.fileId.toString(),
-      channelId: channelId.toString(),
+      fileId: result.file.fileId,
+      channelId: channelId,
       acl: acl,
       lastPublishTime: new Date().getTime(),
     };
@@ -386,7 +386,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     const masterPost = await this.decryptMasterPayload<T>(dsr, targetDrive, includeMetadataHeader);
 
     const file: BlogPostFile<T> = {
-      fileId: dsr.fileMetadata.file.fileId,
+      fileId: dsr.fileId,
       acl: dsr.serverMetadata?.accessControlList,
       publishTargets: masterPost.publishTargets,
       content: masterPost.content,
@@ -409,7 +409,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
       }
 
       const dsr = query.searchResults[0];
-      return dsr.fileMetadata.file.fileId;
+      return dsr.fileId;
     }
 
     return;
@@ -434,7 +434,7 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
 
       return await this._driveProvider.GetPayloadAsJson<BlogMasterPayload<T>>(
         targetDrive,
-        dsr.fileMetadata.file.fileId,
+        dsr.fileId,
         keyheader
       );
     }

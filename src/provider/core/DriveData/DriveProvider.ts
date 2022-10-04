@@ -142,8 +142,6 @@ export class DriveProvider extends ProviderBase {
       };
     }
 
-    params = this.fixQueryParams(params);
-
     const request: GetModifiedRequest = {
       queryParams: params,
       resultOptions: ro,
@@ -167,8 +165,6 @@ export class DriveProvider extends ProviderBase {
         includeMetadataHeader: true,
       };
     }
-
-    params = this.fixQueryParams(params);
 
     const request: GetBatchRequest = {
       queryParams: params,
@@ -361,12 +357,6 @@ export class DriveProvider extends ProviderBase {
     payload: Uint8Array,
     thumbnails?: { filename: string; payload: Uint8Array }[]
   ): Promise<UploadResult> {
-    //HACK: switch to byte array
-    if (metadata.appData.tags)
-      metadata.appData.tags = metadata.appData.tags.map((v) =>
-        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
-      );
-
     const encryptedMetaData = keyHeader
       ? {
           ...metadata,
@@ -481,57 +471,6 @@ export class DriveProvider extends ProviderBase {
 
   async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
-  }
-
-  private fixQueryParams(params: FileQueryParams): FileQueryParams {
-    //HACK; convert all strings to byte arrays as base64 values; this is for a test
-
-    // Debug method:
-    // private guidToBytes(guid: string): Uint8Array {
-    //   const bytes: any = [];
-    //   guid.split('-').map((number, index) => {
-    //     // @ts-ignore
-    //     const bytesInChar = index < 3 ? number.match(/.{1,2}/g).reverse() : number.match(/.{1,2}/g);
-    //     // @ts-ignore
-    //     bytesInChar.map((byte) => {
-    //       bytes.push(parseInt(byte, 16));
-    //     });
-    //   });
-    //   return new Uint8Array(bytes);
-    // }
-
-    // params.targetDrive = {
-    //     type: DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(params.targetDrive.type)),
-    //     alias: DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(params.targetDrive.alias)),
-    // };
-
-    // let t = this.guidToBytes(params.targetDrive.type);
-    // console.log('t', t);
-    // console.log('tt', DataUtil.uint8ArrayToBase64(t));
-
-    // params.targetDrive = {
-    //     type: DataUtil.uint8ArrayToBase64(this.guidToBytes(params.targetDrive.type)),
-    //     alias: DataUtil.uint8ArrayToBase64(this.guidToBytes(params.targetDrive.alias))
-    // };
-
-    // console.log("wtf mate");
-    // console.log(params);
-
-    //HACK: until we decide where to handle byte arrays
-    if (params.tagsMatchAtLeastOne)
-      params.tagsMatchAtLeastOne = params.tagsMatchAtLeastOne.map((v) =>
-        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
-      );
-    if (params.tagsMatchAll)
-      params.tagsMatchAll = params.tagsMatchAll.map((v) =>
-        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
-      );
-    if (params.sender)
-      params.sender = params.sender.map((v) =>
-        DataUtil.uint8ArrayToBase64(DataUtil.stringToUint8Array(v))
-      );
-
-    return params;
   }
 
   async DecryptKeyHeader(encryptedKeyHeader: EncryptedKeyHeader): Promise<KeyHeader> {

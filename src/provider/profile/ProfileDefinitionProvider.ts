@@ -263,7 +263,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
     const params: FileQueryParams = {
-      tagsMatchAtLeastOne: [profileId.toString()],
+      tagsMatchAtLeastOne: [profileId],
       targetDrive: targetDrive,
       fileType: [ProfileConfig.ProfileDefinitionFileType],
     };
@@ -274,9 +274,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     if (response.searchResults.length >= 1) {
       if (response.searchResults.length !== 1) {
         console.warn(
-          `profile [${profileId.toString()}] has more than one definition (${
-            response.searchResults.length
-          }). Using latest`
+          `profile [${profileId}] has more than one definition (${response.searchResults.length}). Using latest`
         );
       }
       const dsr = response.searchResults[0];
@@ -287,7 +285,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       );
 
       return {
-        fileId: dsr.fileMetadata.file.fileId,
+        fileId: dsr.fileId,
         definition: definition,
       };
     }
@@ -307,11 +305,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
     } else {
-      return await this._driveProvider.GetPayloadAsJson<any>(
-        targetDrive,
-        dsr.fileMetadata.file.fileId,
-        keyheader
-      );
+      return await this._driveProvider.GetPayloadAsJson<any>(targetDrive, dsr.fileId, keyheader);
     }
   }
 
@@ -341,7 +335,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
       );
 
       return {
-        fileId: dsr.fileMetadata.file.fileId,
+        fileId: dsr.fileId,
         definition: definition,
       };
     }
@@ -363,7 +357,7 @@ export default class ProfileDefinitionProvider extends ProviderBase {
     } else {
       return await this._driveProvider.GetPayloadAsJson<ProfileSection>(
         targetDrive,
-        dsr.fileMetadata.file.fileId,
+        dsr.fileId,
         keyheader
       );
     }

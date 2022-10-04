@@ -50,7 +50,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult = result.searchResults[key];
-      const fileId = dsr.fileMetadata.file.fileId;
+      const fileId = dsr.fileId;
 
       let attr: AttributeFile = {
         id: '',
@@ -116,7 +116,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult = result.searchResults[key];
-      const fileId = dsr.fileMetadata.file.fileId;
+      const fileId = dsr.fileId;
 
       let attr: AttributeFile = {
         id: '',
@@ -191,7 +191,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     const dsr: DriveSearchResult = response.searchResults[0];
 
-    const fileId = dsr.fileMetadata.file.fileId;
+    const fileId = dsr.fileId;
 
     let payload: Attribute;
 
@@ -206,7 +206,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     const attributeFile: AttributeFile = {
       ...payload,
-      fileId: dsr.fileMetadata.file.fileId,
+      fileId: dsr.fileId,
       acl: dsr.serverMetadata?.accessControlList,
     };
 
@@ -231,7 +231,7 @@ export default class AttributeDataProvider extends ProviderBase {
 
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult = result.searchResults[key];
-      const fileId = dsr.fileMetadata.file.fileId;
+      const fileId = dsr.fileId;
 
       let attr: AttributeFile = {
         id: '',
@@ -312,7 +312,7 @@ export default class AttributeDataProvider extends ProviderBase {
       contentType: 'application/json',
       appData: {
         tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
-        groupId: attribute.sectionId, // TODO will be renamed to groupId
+        groupId: attribute.sectionId,
         fileType: AttributeConfig.AttributeFileType,
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? payloadJson : null,
