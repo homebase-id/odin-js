@@ -51,11 +51,14 @@ export class MediaProvider extends ProviderBase {
     tag: string | undefined,
     acl: AccessControlList,
     imageBytes: Uint8Array,
-    fileId?: string
+    fileId?: string,
+    type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string
   ): Promise<string | null> {
     if (!targetDrive) {
       throw 'Missing target drive';
     }
+
+    fileId = fileId ?? DataUtil.getNewId();
 
     const encrypt = !(
       acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -72,12 +75,16 @@ export class MediaProvider extends ProviderBase {
     };
 
     // Create a thumbnail that fits scaled into a 20 x 20 canvas
-    const tinyThumb = await this.createImageThumbnail(imageBytes, 10, 20, 20);
+    const tinyThumb =
+      type === 'image/svg+xml'
+        ? await this.createVectorThumbnail(imageBytes)
+        : await this.createImageThumbnail(imageBytes, 10, 20, 20);
 
     const applicableThumbSizes = baseThumbSizes.reduce((currArray, thumbSize) => {
       if (
-        tinyThumb.naturalSize.pixelWidth < thumbSize.width &&
-        tinyThumb.naturalSize.pixelHeight < thumbSize.height
+        (tinyThumb.naturalSize.pixelWidth < thumbSize.width &&
+          tinyThumb.naturalSize.pixelHeight < thumbSize.height) ||
+        tinyThumb.contentType === 'image/svg+xml'
       ) {
         return currArray;
       } else {
@@ -104,7 +111,7 @@ export class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
-        tags: [tag ?? DataUtil.getNewId()],
+        tags: [...(tag ?? []), fileId],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,
@@ -162,7 +169,9 @@ export class MediaProvider extends ProviderBase {
 
       const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
       const buffer = DataUtil.base64ToUint8Array(previewThumbnail.content);
-      const url = window.URL.createObjectURL(new Blob([buffer]));
+      const url = window.URL.createObjectURL(
+        new Blob([buffer], { type: previewThumbnail.contentType })
+      );
 
       return {
         naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
@@ -179,7 +188,7 @@ export class MediaProvider extends ProviderBase {
     size?: ThumbSize
   ): Promise<string> {
     return this.getDecryptedImageData(targetDrive, fileId, size).then((data) => {
-      const url = window.URL.createObjectURL(new Blob([data.content]));
+      const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
       return url;
     });
   }
@@ -214,6 +223,20 @@ export class MediaProvider extends ProviderBase {
       pixelWidth: header.fileMetadata.appData.previewThumbnail?.pixelWidth ?? 0,
       contentType: header.fileMetadata.appData.previewThumbnail?.contentType ?? '',
       content: await bytesPromise,
+    };
+  }
+
+  private async createVectorThumbnail(imageBytes: Uint8Array) {
+    return {
+      naturalSize: {
+        pixelWidth: 50,
+        pixelHeight: 50,
+      },
+      pixelWidth: 50,
+      pixelHeight: 50,
+      contentAsByteArray: imageBytes,
+      content: DataUtil.uint8ArrayToBase64(imageBytes),
+      contentType: `image/svg+xml`,
     };
   }
 
