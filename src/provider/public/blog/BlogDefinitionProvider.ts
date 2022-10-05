@@ -140,15 +140,6 @@ export default class BlogDefinitionProvider extends ProviderBase {
   }
 
   async ensureConfiguration() {
-    //TODO: should this drive allow anon to read?  this is currently required so we can get channel definitions on the public site
-    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
-    await this._driveProvider.EnsureDrive(
-      targetDrive,
-      'Drive for main blog content and definitions',
-      '',
-      true
-    );
-
     const x = await this.getChannelDefinitionInternal(defaultChannel.channelId);
     if (x?.fileId == null) {
       await this.saveChannelDefinition(defaultChannel);
@@ -235,3 +226,5 @@ export default class BlogDefinitionProvider extends ProviderBase {
     return drive;
   }
 }
+
+export const getBlogMasterContentTargetDrive = BlogDefinitionProvider.getMasterContentTargetDrive;

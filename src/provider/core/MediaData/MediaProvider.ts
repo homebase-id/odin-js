@@ -48,7 +48,7 @@ export class MediaProvider extends ProviderBase {
 
   async uploadImage(
     targetDrive: TargetDrive,
-    tag: string | undefined,
+    tag: string | undefined | string[],
     acl: AccessControlList,
     imageBytes: Uint8Array,
     fileId?: string,
@@ -109,9 +109,9 @@ export class MediaProvider extends ProviderBase {
     ];
 
     const metadata: UploadFileMetadata = {
-      contentType: 'application/json',
+      contentType: type ?? 'image/webp',
       appData: {
-        tags: tag ? [tag, fileId] : [fileId],
+        tags: tag ? [...(Array.isArray(tag) ? tag : [tag]), fileId] : [fileId],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,

@@ -82,7 +82,6 @@ export class Client {
     this.homePageProvider = new HomePageProvider({
       ...this._cfg,
       attributeDataProvider: this._attributeDataProvider,
-      driveProvider: this._driveProvider,
     });
   }
 }

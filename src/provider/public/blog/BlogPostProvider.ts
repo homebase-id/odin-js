@@ -440,5 +440,3 @@ export default class BlogPostProvider extends BlogPostReadonlyProvider {
     }
   }
 }
-
-export const getBlogMasterContentTargetDrive = BlogDefinitionProvider.getMasterContentTargetDrive;
