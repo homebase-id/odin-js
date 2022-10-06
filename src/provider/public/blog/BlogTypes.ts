@@ -1,11 +1,12 @@
 import { Guid } from 'guid-typescript';
-import { AccessControlList } from '../../core/DriveData/DriveUploadTypes';
+import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { DataUtil } from '../../core/DataUtil';
+import { TargetDrive } from '../../core/DriveData/DriveTypes';
 
 export interface ChannelDefinition {
   channelId: string;
   name: string;
-  slug?: string;
+  slug: string;
   description: string;
   templateId?: number;
   acl?: AccessControlList;
@@ -20,8 +21,21 @@ export enum ChannelTemplate {
 export class BlogConfig {
   static readonly BlogPostFileType: number = 101;
   static readonly BlogChannelDefinitionFileType: number = 103;
-  static readonly ChannelDriveType: string = DataUtil.toGuidId('channel_drive_type');
   static readonly DriveType: string = DataUtil.toGuidId('blog_drive_type');
+
+  static readonly PublicChannel: ChannelDefinition = {
+    channelId: DataUtil.toGuidId('public_channel_drive'),
+    name: 'Public Posts',
+    slug: 'public-posts',
+    description: '',
+    templateId: undefined,
+    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+  };
+
+  static readonly PublicChannelDrive: TargetDrive = {
+    alias: BlogConfig.PublicChannel.channelId,
+    type: BlogConfig.DriveType,
+  };
 }
 
 export class BlogPostPublishStatus {
@@ -37,13 +51,13 @@ export class BlogPostTags {
   static readonly TypeOfTweet: Guid = Guid.parse('11235132-1555-5555-5555-000000005555');
 }
 
-export type BlogPostType = 'Article' | 'ImagePost' | 'Video' | 'Tweet';
+export type BlogPostType = 'Article' | 'Image' | 'Video' | 'Tweet';
 
 export const blogPostTypeToTag = (type: BlogPostType): Guid => {
   switch (type) {
     case 'Article':
       return BlogPostTags.TypeOfArticle;
-    case 'ImagePost':
+    case 'Image':
       return BlogPostTags.TypeOfImage;
     case 'Tweet':
       return BlogPostTags.TypeOfTweet;
@@ -54,33 +68,26 @@ export const blogPostTypeToTag = (type: BlogPostType): Guid => {
   throw 'Invalid blog post type';
 };
 
-export interface PublishTarget {
-  fileId?: string; // the file id on the channel
-  channelId: string; // the channel to which it was published (also drive identifier)
-  acl: AccessControlList; //the permissions that should be set
-  lastPublishTime?: number;
-}
-
-//The storage structure for a blogpost stored on the main drive
-export interface BlogMasterPayload<T extends BlogContent> {
-  publishTargets: PublishTarget[];
-  content: T;
-}
-
-export interface BlogPostFile<T extends BlogContent> {
+export interface PostFile<T extends PostContent> {
   fileId?: string;
-  acl: AccessControlList;
-  publishTargets: PublishTarget[];
+  acl?: AccessControlList;
   content: T;
 }
 
-export interface BlogContent {
+export interface PostContent {
   id: string;
   channelId: string;
   caption: string;
-  slug?: string;
+  slug: string;
   dateUnixTime: number;
   primaryImageFileId?: string;
+}
+
+export interface BlogArticle extends PostContent {
+  abstract: string;
+  headerImageFileId: string;
+  body: string | Record<string, unknown>[];
+  type: 'Article';
   readingTimeStats?: ReadTimeStats;
 }
 
@@ -91,37 +98,18 @@ export interface ReadTimeStats {
   minutes: number;
 }
 
-export interface BlogArticle extends BlogContent {
-  abstract: string;
-  headerImageFileId: string;
-  body: string | Record<string, unknown>[];
-  type: 'Article';
-}
-
-export interface ImagePost extends BlogContent {
+export interface ImagePost extends PostContent {
   imageFileId: string;
-  type: 'ImagePost';
+  type: 'Image';
 }
 
-export interface VideoPost extends BlogContent {
+export interface VideoPost extends PostContent {
   videoFileId: string;
   type: 'Video';
 }
 
-export interface Tweet extends BlogContent {
+export interface Tweet extends PostContent {
   type: 'Tweet';
 }
 
 export type BlogTypeUnion = BlogArticle | ImagePost | VideoPost | Tweet;
-
-//
-// export interface ProfileSection {
-//     sectionId: string
-//     name: string
-//     attributes: AttributeSpec[]
-// }
-//
-// export interface AttributeSpec {
-//     attributeId?: string,
-//     type: string
-// }

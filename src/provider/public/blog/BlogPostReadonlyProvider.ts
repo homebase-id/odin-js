@@ -1,3 +1,4 @@
+import { DataUtil } from '../../core/DataUtil';
 import { DriveProvider } from '../../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
@@ -10,10 +11,11 @@ import { CursoredResult } from '../../core/Types';
 import BlogDefinitionProvider from './BlogDefinitionProvider';
 import {
   BlogConfig,
-  BlogContent,
+  PostContent,
   BlogPostType,
   blogPostTypeToTag,
   ChannelDefinition,
+  PostFile,
 } from './BlogTypes';
 
 interface BlogPostReadonlyProviderOptions extends ProviderOptions {
@@ -35,14 +37,14 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     this._blogDefinitionProvider = options.blogDefinitionProvider;
   }
 
-  //gets posts.  if type is specified, returns a filtered list of the requested type; otherwise all types are returned
-  async getPosts<T extends BlogContent>(
+  //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
+  async getPosts<T extends PostContent>(
     channelId: string,
-    type: BlogPostType,
+    type: BlogPostType | undefined,
     cursorState: string | undefined = undefined,
     pageSize = 10
-  ): Promise<CursoredResult<T[]>> {
-    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(channelId);
+  ): Promise<CursoredResult<PostFile<T>[]>> {
+    const targetDrive = this._blogDefinitionProvider.getTargetDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       tagsMatchAtLeastOne: type ? [blogPostTypeToTag(type).toString()] : undefined,
@@ -57,20 +59,23 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
     const response = await this._driveProvider.QueryBatch(params, ro);
 
-    const posts: T[] = [];
+    const posts: PostFile<T>[] = [];
     for (const key in response.searchResults) {
       const dsr = response.searchResults[key];
-      posts.push(await this.dsrToBlogContent(dsr, targetDrive, response.includeMetadataHeader));
+      posts.push(await this.dsrToPostFile(dsr, targetDrive, response.includeMetadataHeader));
     }
 
     return { cursorState: response.cursorState, results: posts };
   }
 
   //Gets posts across all channels, ordered by date
-  async getRecentPosts<T extends BlogContent>(type: BlogPostType, pageSize = 10): Promise<T[]> {
+  async getRecentPosts<T extends PostContent>(
+    type: BlogPostType,
+    pageSize = 10
+  ): Promise<PostFile<T>[]> {
     const channels = await this.getChannels();
 
-    let posts: T[] = [];
+    let posts: PostFile<T>[] = [];
 
     for (const key in channels) {
       const channel = channels[key];
@@ -84,17 +89,17 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     }
 
     // Sorted descending
-    posts.sort((a, b) => b.dateUnixTime - a.dateUnixTime);
+    posts.sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
 
     return posts;
   }
 
-  //gets the content for a given post id
-  async getBlogContent<T extends BlogContent>(
+  //Gets the content for a given post id
+  async getPost<T extends PostContent>(
     channelId: string,
     id: string
-  ): Promise<T | undefined> {
-    const targetDrive = this._blogDefinitionProvider.getPublishChannelDrive(channelId);
+  ): Promise<PostFile<T> | undefined> {
+    const targetDrive = this._blogDefinitionProvider.getTargetDrive(channelId);
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [id],
       targetDrive: targetDrive,
@@ -109,7 +114,40 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
       }
 
       const dsr = response.searchResults[0];
-      return await this.dsrToBlogContent<T>(dsr, targetDrive, response.includeMetadataHeader);
+      return await this.dsrToPostFile<T>(dsr, targetDrive, response.includeMetadataHeader);
+    }
+
+    return;
+  }
+
+  async getPostBySlug<T extends PostContent>(
+    channelSlug: string,
+    postSlug: string
+  ): Promise<{ postFile: PostFile<T>; channel: ChannelDefinition } | undefined> {
+    const channel = await this._blogDefinitionProvider.getChannelDefinitionBySlug(channelSlug);
+    if (!channel) {
+      return;
+    }
+
+    const targetDrive = this._blogDefinitionProvider.getTargetDrive(channel.channelId);
+    const params: FileQueryParams = {
+      tagsMatchAtLeastOne: [DataUtil.toGuidId(postSlug)],
+      targetDrive: targetDrive,
+      fileType: [BlogConfig.BlogPostFileType],
+    };
+
+    const response = await this._driveProvider.QueryBatch(params);
+
+    if (response.searchResults.length >= 1) {
+      if (response.searchResults.length > 1) {
+        console.warn(`Found more than one file with alias [${postSlug}].  Using first entry.`);
+      }
+
+      const dsr = response.searchResults[0];
+      return {
+        postFile: await this.dsrToPostFile<T>(dsr, targetDrive, response.includeMetadataHeader),
+        channel: channel,
+      };
     }
 
     return;
@@ -126,16 +164,23 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
   ///
 
-  private async dsrToBlogContent<T extends BlogContent>(
+  private async dsrToPostFile<T extends PostContent>(
     dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
-  ): Promise<T> {
-    const content = await this.decryptBlogContent<T>(dsr, targetDrive, includeMetadataHeader);
-    return content;
+  ): Promise<PostFile<T>> {
+    const content = await this.getPostPayload<T>(dsr, targetDrive, includeMetadataHeader);
+
+    const file: PostFile<T> = {
+      fileId: dsr.fileId,
+      acl: dsr.serverMetadata?.accessControlList,
+      content: content,
+    };
+
+    return file;
   }
 
-  private async decryptBlogContent<T extends BlogContent>(
+  private async getPostPayload<T extends PostContent>(
     dsr: DriveSearchResult,
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean

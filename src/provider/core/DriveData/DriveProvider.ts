@@ -77,7 +77,12 @@ export class DriveProvider extends ProviderBase {
     } else {
       const client = this.createAxiosClient();
       return client.get('drive/metadata/type?' + DataUtil.stringify(params)).then((response) => {
-        return response.data;
+        return {
+          ...response.data,
+          results: response?.data?.results?.map((result: { targetDrive: any }) => {
+            return { ...result, targetDriveInfo: result.targetDrive };
+          }),
+        };
       });
     }
   }

@@ -1,4 +1,3 @@
-import { HomePageConfig } from '../home/HomeTypes';
 import {
   DriveSearchResult,
   FileQueryParams,
@@ -16,15 +15,6 @@ import {
   UploadResult,
 } from '../../core/DriveData/DriveUploadTypes';
 
-const defaultChannel: ChannelDefinition = {
-  // channelId: '93999384-0000-0000-0000-000000004440',
-  channelId: DataUtil.toGuidId('default_blog_channel'),
-  name: 'Public Blog',
-  description: '',
-  templateId: undefined,
-  acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-};
-
 interface BlogDefinitionProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
 }
@@ -40,40 +30,40 @@ export default class BlogDefinitionProvider extends ProviderBase {
     this._driveProvider = options.driveProvider;
   }
 
-  getDefaultChannelId(): string {
-    return defaultChannel.channelId;
-  }
-
   async getChannelDefinitions(): Promise<ChannelDefinition[]> {
-    const targetDrive = BlogDefinitionProvider.getMasterContentTargetDrive();
-    const params: FileQueryParams = {
-      targetDrive: targetDrive,
-      fileType: [BlogConfig.BlogChannelDefinitionFileType],
-    };
+    const drives = await this._driveProvider.GetDrivesByType(BlogConfig.DriveType, 1, 1000);
 
-    const response = await this._driveProvider.QueryBatch(params);
+    const channelHeaders = drives.results.map((drive) => {
+      return {
+        id: drive.targetDriveInfo.alias,
+        name: drive.name,
+      };
+    });
 
-    const definitions: ChannelDefinition[] = [];
-    for (const key in response.searchResults) {
-      const dsr = response.searchResults[key];
-      definitions.push({
-        ...(await this.decryptDefinition(dsr, targetDrive, response.includeMetadataHeader)),
-        acl: dsr.serverMetadata?.accessControlList,
-      });
-    }
+    const definitions = await Promise.all(
+      channelHeaders.map(async (header) => {
+        const { definition } = (await this.getChannelDefinitionInternal(header.id)) ?? {
+          definition: undefined,
+        };
 
-    return definitions;
+        return definition;
+      })
+    );
+
+    return definitions.filter((channel) => channel !== undefined) as ChannelDefinition[];
   }
 
-  async getChannelDefinition(id: string): Promise<ChannelDefinition | undefined> {
-    const { definition } = (await this.getChannelDefinitionInternal(id)) ?? {
+  async getChannelDefinition(channelId: string): Promise<ChannelDefinition | undefined> {
+    const { definition } = (await this.getChannelDefinitionInternal(channelId)) ?? {
       definition: undefined,
     };
-    if (definition == null && id.toString() == defaultChannel.channelId) {
-      //fall back if built-in
-      return defaultChannel;
-    }
+
     return definition;
+  }
+
+  async getChannelDefinitionBySlug(slug: string) {
+    const channels = await this.getChannelDefinitions();
+    return channels.find((channel) => channel.slug === slug);
   }
 
   async saveChannelDefinition(definition: ChannelDefinition): Promise<UploadResult> {
@@ -88,10 +78,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       definition.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
     );
 
-    const targetDrive: TargetDrive = {
-      alias: definition.channelId,
-      type: BlogConfig.ChannelDriveType,
-    };
+    const targetDrive = this.getTargetDrive(definition.channelId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, channelMetadata, true);
 
     const { fileId } = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
@@ -102,7 +89,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       transferIv: this._driveProvider.Random16(),
       storageOptions: {
         overwriteFileId: fileId,
-        drive: BlogDefinitionProvider.getMasterContentTargetDrive(),
+        drive: targetDrive,
       },
       transitOptions: null,
     };
@@ -118,7 +105,6 @@ export default class BlogDefinitionProvider extends ProviderBase {
         tags: [definition.channelId],
         contentIsComplete: shouldEmbedContent,
         fileType: BlogConfig.BlogChannelDefinitionFileType,
-        // TODO optimize, if contents are too big we can fallback to store everything for a list view of the data
         jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
@@ -135,43 +121,36 @@ export default class BlogDefinitionProvider extends ProviderBase {
   }
 
   async removeChannelDefinition(id: string) {
+    // TODO: Remove Channel Definition File
+
     // Not implemented as no API's available to remove a drive
     throw new Error('Not supported');
   }
 
   async ensureConfiguration() {
-    const x = await this.getChannelDefinitionInternal(defaultChannel.channelId);
-    if (x?.fileId == null) {
-      await this.saveChannelDefinition(defaultChannel);
+    // Create Public Channel oon the (Default) Public Posts Drive
+    const publicDef = await this.getChannelDefinitionInternal(BlogConfig.PublicChannel.channelId);
+    if (!publicDef?.fileId) {
+      await this.saveChannelDefinition(BlogConfig.PublicChannel);
     }
   }
 
-  public getPublishChannelDrive(channelId: string): TargetDrive {
-    const targetDrive: TargetDrive = {
+  public getTargetDrive(channelId: string): TargetDrive {
+    return {
       alias: channelId,
-      type: BlogConfig.ChannelDriveType,
+      type: BlogConfig.DriveType,
     };
-
-    return targetDrive;
   }
 
   // Internals:
   private async getChannelDefinitionInternal(
-    id: string
+    channelId: string
   ): Promise<{ definition: ChannelDefinition; fileId: string } | undefined> {
-    const targetDrive: TargetDrive = {
-      alias: HomePageConfig.BlogMainContentDriveId,
-      type: BlogConfig.DriveType,
-    };
+    const targetDrive = this.getTargetDrive(channelId);
 
     const params: FileQueryParams = {
       targetDrive: targetDrive,
-      fileType: undefined,
-      dataType: undefined,
-      userDate: undefined,
-      tagsMatchAll: undefined,
-      sender: undefined,
-      tagsMatchAtLeastOne: [id],
+      tagsMatchAtLeastOne: [channelId],
     };
 
     const ro: GetBatchQueryResultOptions = {
@@ -180,20 +159,24 @@ export default class BlogDefinitionProvider extends ProviderBase {
       includeMetadataHeader: true,
     };
 
-    const response = await this._driveProvider.QueryBatch(params, ro);
+    try {
+      const response = await this._driveProvider.QueryBatch(params, ro);
 
-    if (response.searchResults.length == 1) {
-      const dsr = response.searchResults[0];
-      const definition = await this.decryptDefinition(
-        dsr,
-        targetDrive,
-        response.includeMetadataHeader
-      );
+      if (response.searchResults.length == 1) {
+        const dsr = response.searchResults[0];
+        const definition = await this.decryptDefinition(
+          dsr,
+          targetDrive,
+          response.includeMetadataHeader
+        );
 
-      return {
-        fileId: dsr.fileId,
-        definition: definition,
-      };
+        return {
+          fileId: dsr.fileId,
+          definition: definition,
+        };
+      }
+    } catch (ex) {
+      // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
     }
 
     return;
@@ -209,22 +192,24 @@ export default class BlogDefinitionProvider extends ProviderBase {
       : undefined;
 
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
+      return await this._driveProvider.DecryptJsonContent<ChannelDefinition>(
+        dsr.fileMetadata,
+        keyheader
+      );
     } else {
       console.log(`content wasn't complete... That seems wrong`);
-
-      return await this._driveProvider.GetPayloadAsJson<any>(targetDrive, dsr.fileId, keyheader);
+      return await this._driveProvider.GetPayloadAsJson<ChannelDefinition>(
+        targetDrive,
+        dsr.fileId,
+        keyheader
+      );
     }
-  }
-
-  public static getMasterContentTargetDrive(): TargetDrive {
-    const drive: TargetDrive = {
-      alias: HomePageConfig.BlogMainContentDriveId,
-      type: BlogConfig.DriveType,
-    };
-
-    return drive;
   }
 }
 
-export const getBlogMasterContentTargetDrive = BlogDefinitionProvider.getMasterContentTargetDrive;
+export const getChannelDrive = (channelId: string): TargetDrive => {
+  return {
+    alias: channelId,
+    type: BlogConfig.DriveType,
+  };
+};
