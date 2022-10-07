@@ -68,6 +68,7 @@ export interface PostContent {
   slug: string;
   dateUnixTime: number;
   primaryImageFileId?: string;
+  type: 'Article' | 'Image' | 'Video' | 'Tweet';
 }
 
 export interface Article extends PostContent {
@@ -86,7 +87,6 @@ export interface ReadTimeStats {
 }
 
 export interface Image extends PostContent {
-  imageFileId: string;
   type: 'Image';
 }
 
@@ -98,5 +98,3 @@ export interface Video extends PostContent {
 export interface Tweet extends PostContent {
   type: 'Tweet';
 }
-
-export type PostTypeUnion = Article | Image | Video | Tweet;

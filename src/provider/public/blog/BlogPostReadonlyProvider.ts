@@ -12,10 +12,10 @@ import { BlogDefinitionProvider } from './BlogDefinitionProvider';
 import {
   BlogConfig,
   PostContent,
-  PostType,
   postTypeToTag,
   ChannelDefinition,
   PostFile,
+  PostType,
 } from './BlogTypes';
 
 interface BlogPostReadonlyProviderOptions extends ProviderOptions {
@@ -70,7 +70,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
 
   //Gets posts across all channels, ordered by date
   async getRecentPosts<T extends PostContent>(
-    type: PostType,
+    type: PostType | undefined,
     pageSize = 10
   ): Promise<PostFile<T>[]> {
     const channels = await this.getChannels();
@@ -160,6 +160,10 @@ export class BlogPostReadonlyProvider extends ProviderBase {
 
   async getChannelDefinition(id: string) {
     return await this._blogDefinitionProvider.getChannelDefinition(id);
+  }
+
+  async getChannelDefinitionBySlug(slug: string) {
+    return await this._blogDefinitionProvider.getChannelDefinitionBySlug(slug);
   }
 
   ///
