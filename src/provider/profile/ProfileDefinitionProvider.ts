@@ -47,7 +47,7 @@ interface ProfileDefinitionProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
 }
 
-export default class ProfileDefinitionProvider extends ProviderBase {
+export class ProfileDefinitionProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
 
   constructor(options: ProfileDefinitionProviderOptions) {

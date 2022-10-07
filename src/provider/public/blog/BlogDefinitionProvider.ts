@@ -19,7 +19,7 @@ interface BlogDefinitionProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
 }
 
-export default class BlogDefinitionProvider extends ProviderBase {
+export class BlogDefinitionProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
 
   constructor(options: BlogDefinitionProviderOptions) {
@@ -104,7 +104,7 @@ export default class BlogDefinitionProvider extends ProviderBase {
       appData: {
         tags: [definition.channelId],
         contentIsComplete: shouldEmbedContent,
-        fileType: BlogConfig.BlogChannelDefinitionFileType,
+        fileType: BlogConfig.ChannelDefinitionFileType,
         jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,

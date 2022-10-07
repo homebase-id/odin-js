@@ -16,7 +16,7 @@ type ResponseEntry = {
 
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
-export default class FileReadOnlyProvider extends ProviderBase {
+export class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, ResponseEntry[]>> {
     // If user has a shared secret, never return the static files, as
     //   these only contain anonymous data which might not be optimal for the connected user

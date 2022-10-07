@@ -30,7 +30,7 @@ export * from './provider/public/home/HomePageProvider';
 
 // Blog
 export * from './provider/public/blog/BlogTypes';
-export * from './provider/public/blog/BlogPostProvider';
+// export * from './provider/public/blog/BlogPostProvider';
 export * from './provider/public/blog/BlogPostReadonlyProvider';
 export * from './provider/public/blog/BlogDefinitionProvider';
 

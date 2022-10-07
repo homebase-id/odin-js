@@ -7,7 +7,7 @@ const stringify = (obj: any) => {
     .join('&');
 };
 
-export default class CircleNetworkReadOnlyProvider extends ProviderBase {
+export class CircleNetworkReadOnlyProvider extends ProviderBase {
   private root = '/circles/connections';
 
   constructor(options: ProviderOptions) {

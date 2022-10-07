@@ -22,7 +22,7 @@ interface AttributeDataproviderOptions extends ProviderOptions {
 }
 
 //Provides read write to attribute data
-export default class AttributeDataProvider extends ProviderBase {
+export class AttributeDataProvider extends ProviderBase {
   private _driveProvider: DriveProvider;
 
   constructor(options: AttributeDataproviderOptions) {

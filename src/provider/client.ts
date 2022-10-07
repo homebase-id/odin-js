@@ -1,13 +1,12 @@
-import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
+import { AttributeDataProvider } from './core/AttributeData/AttributeDataProvider';
 import { DriveProvider } from './core/DriveData/DriveProvider';
 import { MediaProvider } from './core/MediaData/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
-import ProfileDataProvider from './profile/ProfileDataProvider';
-import ProfileDefinitionProvider from './profile/ProfileDefinitionProvider';
-import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
-import BlogPostProvider from './public/blog/BlogPostProvider';
-import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
-import HomePageProvider from './public/home/HomePageProvider';
+import { ProfileDataProvider } from './profile/ProfileDataProvider';
+import { ProfileDefinitionProvider } from './profile/ProfileDefinitionProvider';
+import { BlogDefinitionProvider } from './public/blog/BlogDefinitionProvider';
+import { BlogPostReadonlyProvider } from './public/blog/BlogPostReadonlyProvider';
+import { HomePageProvider } from './public/home/HomePageProvider';
 
 export class Client {
   private _cfg: ProviderOptions;
@@ -26,7 +25,6 @@ export class Client {
   profileDataProvider: ProfileDataProvider;
 
   // Blog Providers:
-  blogPostProvider: BlogPostProvider;
   blogPostReadonlyProvider: BlogPostReadonlyProvider;
 
   // Home Providers:
@@ -65,13 +63,6 @@ export class Client {
     });
 
     // Blog Providers:
-
-    this.blogPostProvider = new BlogPostProvider({
-      ...this._cfg,
-      driveProvider: this._driveProvider,
-      mediaProvider: this.mediaProvider,
-      blogDefinitionProvider: this.blogDefinitionProvider,
-    });
     this.blogPostReadonlyProvider = new BlogPostReadonlyProvider({
       ...this._cfg,
       blogDefinitionProvider: this.blogDefinitionProvider,

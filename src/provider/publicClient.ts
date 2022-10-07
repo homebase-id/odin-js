@@ -1,13 +1,13 @@
-import AttributeDataProvider from './core/AttributeData/AttributeDataProvider';
+import { AttributeDataProvider } from './core/AttributeData/AttributeDataProvider';
 import { DriveProvider } from './core/DriveData/DriveProvider';
 import { MediaProvider } from './core/MediaData/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
-import ProfileDataProvider from './profile/ProfileDataProvider';
-import BlogDefinitionProvider from './public/blog/BlogDefinitionProvider';
-import BlogPostReadonlyProvider from './public/blog/BlogPostReadonlyProvider';
-import CircleNetworkReadOnlyProvider from './public/circleNetwork/CircleNetworkReadOnlyProvider';
-import FileReadOnlyProvider from './public/file/FileReadOnlyProvider';
-import HomePageReadOnlyProvider from './public/home/HomePageReadOnlyProvider';
+import { ProfileDataProvider } from './profile/ProfileDataProvider';
+import { BlogDefinitionProvider } from './public/blog/BlogDefinitionProvider';
+import { BlogPostReadonlyProvider } from './public/blog/BlogPostReadonlyProvider';
+import { CircleNetworkReadOnlyProvider } from './public/circleNetwork/CircleNetworkReadOnlyProvider';
+import { FileReadOnlyProvider } from './public/file/FileReadOnlyProvider';
+import { HomePageReadOnlyProvider } from './public/home/HomePageReadOnlyProvider';
 
 export class PublicClient {
   private _cfg: ProviderOptions;

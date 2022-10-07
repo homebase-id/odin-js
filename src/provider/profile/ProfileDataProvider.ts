@@ -1,6 +1,6 @@
 import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
 import { Attribute, AttributeFile } from '../core/AttributeData/AttributeDataTypes';
-import AttributeDataProvider from '../core/AttributeData/AttributeDataProvider';
+import { AttributeDataProvider } from '../core/AttributeData/AttributeDataProvider';
 import { MediaProvider } from '../core/MediaData/MediaProvider';
 import { DataUtil } from '../core/DataUtil';
 import { AttributeDefinitions } from '../core/AttributeData/AttributeDefinitions';
@@ -14,7 +14,7 @@ interface ProfileDataProviderOptions extends ProviderOptions {
   mediaProvider: MediaProvider;
 }
 
-export default class ProfileDataProvider extends ProviderBase {
+export class ProfileDataProvider extends ProviderBase {
   private _attributeDataProvider: AttributeDataProvider;
   private _mediaProvider: MediaProvider;
 

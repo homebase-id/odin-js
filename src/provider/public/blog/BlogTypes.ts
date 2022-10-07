@@ -19,9 +19,9 @@ export enum ChannelTemplate {
 }
 
 export class BlogConfig {
-  static readonly BlogPostFileType: number = 101;
-  static readonly BlogChannelDefinitionFileType: number = 103;
-  static readonly DriveType: string = DataUtil.toGuidId('blog_drive_type');
+  static readonly PostFileType: number = 101;
+  static readonly ChannelDefinitionFileType: number = 103;
+  static readonly DriveType: string = DataUtil.toGuidId('post_drive_type');
 
   static readonly PublicChannel: ChannelDefinition = {
     channelId: DataUtil.toGuidId('public_channel_drive'),
@@ -38,34 +38,21 @@ export class BlogConfig {
   };
 }
 
-export class BlogPostPublishStatus {
-  static readonly Draft: Guid = Guid.parse('11111111-1111-1111-1111-111100001111');
-  static readonly Published: Guid = Guid.parse('22222222-1111-1111-1111-111100001111');
-}
+export type PostType = 'Article' | 'Image' | 'Video' | 'Tweet';
 
-export class BlogPostTags {
-  static readonly IsBlogPost: Guid = Guid.parse('11235132-1111-1111-1111-111100001111');
-  static readonly TypeOfArticle: Guid = Guid.parse('11235132-1888-8888-8888-000000008888');
-  static readonly TypeOfImage: Guid = Guid.parse('11235132-1777-7777-7777-000000007777');
-  static readonly TypeOfVideo: Guid = Guid.parse('11235132-1666-6666-6666-000000006666');
-  static readonly TypeOfTweet: Guid = Guid.parse('11235132-1555-5555-5555-000000005555');
-}
-
-export type BlogPostType = 'Article' | 'Image' | 'Video' | 'Tweet';
-
-export const blogPostTypeToTag = (type: BlogPostType): Guid => {
+export const postTypeToTag = (type: PostType): string => {
   switch (type) {
     case 'Article':
-      return BlogPostTags.TypeOfArticle;
+      return DataUtil.toGuidId('article');
     case 'Image':
-      return BlogPostTags.TypeOfImage;
+      return DataUtil.toGuidId('image');
     case 'Tweet':
-      return BlogPostTags.TypeOfTweet;
+      return DataUtil.toGuidId('video');
     case 'Video':
-      return BlogPostTags.TypeOfVideo;
+      return DataUtil.toGuidId('tweet');
   }
 
-  throw 'Invalid blog post type';
+  throw 'Invalid post type';
 };
 
 export interface PostFile<T extends PostContent> {
@@ -83,7 +70,7 @@ export interface PostContent {
   primaryImageFileId?: string;
 }
 
-export interface BlogArticle extends PostContent {
+export interface Article extends PostContent {
   abstract: string;
   headerImageFileId: string;
   body: string | Record<string, unknown>[];
@@ -98,12 +85,12 @@ export interface ReadTimeStats {
   minutes: number;
 }
 
-export interface ImagePost extends PostContent {
+export interface Image extends PostContent {
   imageFileId: string;
   type: 'Image';
 }
 
-export interface VideoPost extends PostContent {
+export interface Video extends PostContent {
   videoFileId: string;
   type: 'Video';
 }
@@ -112,4 +99,4 @@ export interface Tweet extends PostContent {
   type: 'Tweet';
 }
 
-export type BlogTypeUnion = BlogArticle | ImagePost | VideoPost | Tweet;
+export type PostTypeUnion = Article | Image | Video | Tweet;

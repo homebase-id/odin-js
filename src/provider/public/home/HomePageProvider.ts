@@ -1,15 +1,15 @@
 import { HomePageConfig } from '../home/HomeTypes';
 
 import { ProviderOptions } from '../../core/ProviderBase';
-import AttributeDataProvider from '../../core/AttributeData/AttributeDataProvider';
+import { AttributeDataProvider } from '../../core/AttributeData/AttributeDataProvider';
 
 import { AttributeFile } from '../../core/AttributeData/AttributeDataTypes';
-import HomePageReadOnlyProvider from './HomePageReadOnlyProvider';
+import { HomePageReadOnlyProvider } from './HomePageReadOnlyProvider';
 interface HomePageProviderOptions extends ProviderOptions {
   attributeDataProvider: AttributeDataProvider;
 }
 
-export default class HomePageProvider extends HomePageReadOnlyProvider {
+export class HomePageProvider extends HomePageReadOnlyProvider {
   constructor(options: HomePageProviderOptions) {
     super({
       api: options.api,

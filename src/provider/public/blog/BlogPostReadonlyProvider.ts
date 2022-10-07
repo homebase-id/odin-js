@@ -8,12 +8,12 @@ import {
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { CursoredResult } from '../../core/Types';
-import BlogDefinitionProvider from './BlogDefinitionProvider';
+import { BlogDefinitionProvider } from './BlogDefinitionProvider';
 import {
   BlogConfig,
   PostContent,
-  BlogPostType,
-  blogPostTypeToTag,
+  PostType,
+  postTypeToTag,
   ChannelDefinition,
   PostFile,
 } from './BlogTypes';
@@ -23,7 +23,7 @@ interface BlogPostReadonlyProviderOptions extends ProviderOptions {
   blogDefinitionProvider: BlogDefinitionProvider;
 }
 
-export default class BlogPostReadonlyProvider extends ProviderBase {
+export class BlogPostReadonlyProvider extends ProviderBase {
   protected _driveProvider: DriveProvider;
   protected _blogDefinitionProvider: BlogDefinitionProvider;
 
@@ -40,15 +40,15 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
   //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
   async getPosts<T extends PostContent>(
     channelId: string,
-    type: BlogPostType | undefined,
+    type: PostType | undefined,
     cursorState: string | undefined = undefined,
     pageSize = 10
   ): Promise<CursoredResult<PostFile<T>[]>> {
     const targetDrive = this._blogDefinitionProvider.getTargetDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
-      tagsMatchAtLeastOne: type ? [blogPostTypeToTag(type).toString()] : undefined,
-      fileType: [BlogConfig.BlogPostFileType],
+      tagsMatchAtLeastOne: type ? [postTypeToTag(type).toString()] : undefined,
+      fileType: [BlogConfig.PostFileType],
     };
 
     const ro: GetBatchQueryResultOptions = {
@@ -70,7 +70,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
 
   //Gets posts across all channels, ordered by date
   async getRecentPosts<T extends PostContent>(
-    type: BlogPostType,
+    type: PostType,
     pageSize = 10
   ): Promise<PostFile<T>[]> {
     const channels = await this.getChannels();
@@ -103,7 +103,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [id],
       targetDrive: targetDrive,
-      fileType: [BlogConfig.BlogPostFileType],
+      fileType: [BlogConfig.PostFileType],
     };
 
     const response = await this._driveProvider.QueryBatch(params);
@@ -133,7 +133,7 @@ export default class BlogPostReadonlyProvider extends ProviderBase {
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [DataUtil.toGuidId(postSlug)],
       targetDrive: targetDrive,
-      fileType: [BlogConfig.BlogPostFileType],
+      fileType: [BlogConfig.PostFileType],
     };
 
     const response = await this._driveProvider.QueryBatch(params);
