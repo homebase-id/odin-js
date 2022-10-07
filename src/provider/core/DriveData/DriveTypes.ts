@@ -77,6 +77,7 @@ export interface DriveDefinition {
   metadata: string;
   // isReadonly: boolean;
   allowAnonymousReads: boolean;
+  ownerOnly: boolean;
 }
 
 export interface DriveSearchResult {
