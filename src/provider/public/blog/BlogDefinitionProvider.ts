@@ -120,11 +120,14 @@ export class BlogDefinitionProvider extends ProviderBase {
     );
   }
 
-  async removeChannelDefinition(id: string) {
-    // TODO: Remove Channel Definition File
-
-    // Not implemented as no API's available to remove a drive
-    throw new Error('Not supported');
+  async removeChannelDefinition(channelId: string) {
+    const channelData = await this.getChannelDefinitionInternal(channelId);
+    if (channelData?.fileId) {
+      this._driveProvider.DeleteFile(this.getTargetDrive(channelId), channelData.fileId);
+      // TODO Should remove the Drive itself as well
+    } else {
+      throw new Error(`Remove Channel: Channel with id: ${channelId} not found`);
+    }
   }
 
   async ensureConfiguration() {
