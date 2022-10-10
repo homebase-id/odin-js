@@ -121,6 +121,10 @@ export class BlogDefinitionProvider extends ProviderBase {
   }
 
   async removeChannelDefinition(channelId: string) {
+    if (channelId === BlogConfig.PublicChannel.channelId) {
+      throw new Error(`Remove Channel: can't remove default channel`);
+    }
+
     const channelData = await this.getChannelDefinitionInternal(channelId);
     if (channelData?.fileId) {
       this._driveProvider.DeleteFile(this.getTargetDrive(channelId), channelData.fileId);
