@@ -196,8 +196,6 @@ export class BlogPostReadonlyProvider extends ProviderBase {
     if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
       return await this._driveProvider.DecryptJsonContent<T>(dsr.fileMetadata, keyheader);
     } else {
-      console.log(`content wasn't complete... That seems wrong`);
-
       return await this._driveProvider.GetPayloadAsJson<T>(targetDrive, dsr.fileId, keyheader);
     }
   }

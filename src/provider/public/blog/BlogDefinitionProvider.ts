@@ -204,7 +204,6 @@ export class BlogDefinitionProvider extends ProviderBase {
         keyheader
       );
     } else {
-      console.log(`content wasn't complete... That seems wrong`);
       return await this._driveProvider.GetPayloadAsJson<ChannelDefinition>(
         targetDrive,
         dsr.fileId,
