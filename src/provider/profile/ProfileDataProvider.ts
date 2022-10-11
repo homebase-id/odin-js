@@ -162,28 +162,32 @@ export class ProfileDataProvider extends ProviderBase {
       // Update on an image holding attribute; We need to check the image file itself and potentially reupload to match the ACL
       const imageFileId = attribute.data[imageFieldKey];
       const targetDrive = getTargetDriveFromProfileId(attribute.profileId);
+      if (imageFileId) {
+        const imageFileMeta = await this._mediaProvider.getDecryptedMetadata(
+          targetDrive,
+          imageFileId
+        );
 
-      const imageFileMeta = await this._mediaProvider.getDecryptedMetadata(
-        targetDrive,
-        imageFileId
-      );
-
-      if (
-        imageFileMeta &&
-        !DataUtil.aclEqual(attribute.acl, imageFileMeta.serverMetadata.accessControlList)
-      ) {
-        // Not what it should be, going to reupload it in full
-        const imageData = await this._mediaProvider.getDecryptedImageData(targetDrive, imageFileId);
-
-        if (imageData) {
-          await this._mediaProvider.uploadImage(
+        if (
+          imageFileMeta &&
+          !DataUtil.aclEqual(attribute.acl, imageFileMeta.serverMetadata.accessControlList)
+        ) {
+          // Not what it should be, going to reupload it in full
+          const imageData = await this._mediaProvider.getDecryptedImageData(
             targetDrive,
-            undefined,
-            attribute.acl,
-            new Uint8Array(imageData.content),
-            imageFileId,
-            imageData.contentType
+            imageFileId
           );
+
+          if (imageData) {
+            await this._mediaProvider.uploadImage(
+              targetDrive,
+              undefined,
+              attribute.acl,
+              new Uint8Array(imageData.content),
+              imageFileId,
+              imageData.contentType
+            );
+          }
         }
       }
     }

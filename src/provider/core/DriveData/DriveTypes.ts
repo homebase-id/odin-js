@@ -35,7 +35,7 @@ export interface FileMetadata {
   updated: number;
   contentType: string;
   payloadIsEncrypted: boolean;
-  senderDotYouId: boolean;
+  senderDotYouId: string;
   payloadSize: number;
   originalRecipientList: string[];
   appData: AppFileMetaData;
