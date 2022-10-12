@@ -32,7 +32,6 @@ export class BlogDefinitionProvider extends ProviderBase {
 
   async getChannelDefinitions(): Promise<ChannelDefinition[]> {
     const drives = await this._driveProvider.GetDrivesByType(BlogConfig.DriveType, 1, 1000);
-
     const channelHeaders = drives.results.map((drive) => {
       return {
         id: drive.targetDriveInfo.alias,
@@ -154,10 +153,10 @@ export class BlogDefinitionProvider extends ProviderBase {
     channelId: string
   ): Promise<{ definition: ChannelDefinition; fileId: string } | undefined> {
     const targetDrive = this.getTargetDrive(channelId);
-
     const params: FileQueryParams = {
       targetDrive: targetDrive,
       tagsMatchAtLeastOne: [channelId],
+      fileType: [BlogConfig.ChannelDefinitionFileType],
     };
 
     const ro: GetBatchQueryResultOptions = {
