@@ -279,6 +279,9 @@ export class AttributeDataProvider extends ProviderBase {
     // If a new attribute
     if (!attribute.id) {
       attribute.id = DataUtil.getNewId();
+    } else if (!attribute.fileId) {
+      attribute.fileId =
+        (await this.getAttribute(attribute.profileId, attribute.id))?.fileId ?? undefined;
     }
 
     const encrypt = !(
