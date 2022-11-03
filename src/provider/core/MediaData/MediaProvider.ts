@@ -58,8 +58,6 @@ export class MediaProvider extends ProviderBase {
       throw 'Missing target drive';
     }
 
-    fileId = fileId ?? DataUtil.getNewId();
-
     const encrypt = !(
       acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
       acl.requiredSecurityGroup === SecurityGroupType.Authenticated
@@ -111,7 +109,7 @@ export class MediaProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: type ?? 'image/webp',
       appData: {
-        tags: tag ? [...(Array.isArray(tag) ? tag : [tag]), fileId] : [fileId],
+        tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,

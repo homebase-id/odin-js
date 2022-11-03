@@ -12,9 +12,9 @@ export class Client {
   private _cfg: ProviderOptions;
 
   // Core Providers:
-  private _driveProvider: DriveProvider;
+  driveProvider: DriveProvider;
 
-  private _attributeDataProvider: AttributeDataProvider;
+  attributeDataProvider: AttributeDataProvider;
   mediaProvider: MediaProvider;
 
   // Definition Providers
@@ -34,31 +34,31 @@ export class Client {
     this._cfg = cfg;
 
     // Core Providers:
-    this._driveProvider = new DriveProvider(this._cfg);
+    this.driveProvider = new DriveProvider(this._cfg);
 
-    this._attributeDataProvider = new AttributeDataProvider({
+    this.attributeDataProvider = new AttributeDataProvider({
       ...this._cfg,
-      driveProvider: this._driveProvider,
+      driveProvider: this.driveProvider,
     });
     this.mediaProvider = new MediaProvider({
       ...this._cfg,
-      driveProvider: this._driveProvider,
+      driveProvider: this.driveProvider,
     });
 
     // Definition Providers
     this.blogDefinitionProvider = new BlogDefinitionProvider({
       ...this._cfg,
-      driveProvider: this._driveProvider,
+      driveProvider: this.driveProvider,
     });
     this.profileDefinitionProvider = new ProfileDefinitionProvider({
       ...this._cfg,
-      driveProvider: this._driveProvider,
+      driveProvider: this.driveProvider,
     });
 
     // Profile Providers
     this.profileDataProvider = new ProfileDataProvider({
       ...this._cfg,
-      attributeDataProvider: this._attributeDataProvider,
+      attributeDataProvider: this.attributeDataProvider,
       mediaProvider: this.mediaProvider,
     });
 
@@ -66,13 +66,13 @@ export class Client {
     this.blogPostReadonlyProvider = new BlogPostReadonlyProvider({
       ...this._cfg,
       blogDefinitionProvider: this.blogDefinitionProvider,
-      driveProvider: this._driveProvider,
+      driveProvider: this.driveProvider,
     });
 
     // Home Providers:
     this.homePageProvider = new HomePageProvider({
       ...this._cfg,
-      attributeDataProvider: this._attributeDataProvider,
+      attributeDataProvider: this.attributeDataProvider,
     });
   }
 }
