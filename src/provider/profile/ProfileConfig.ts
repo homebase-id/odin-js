@@ -1,14 +1,14 @@
 import { DataUtil } from '../core/DataUtil';
 
 export class ProfileConfig {
-  static readonly ProfileDriveType: string = '597241530e3ef24b28b9a75ec3a5c45c'; //DataUtil.toGuidId('profile_drive_type');
+  static readonly ProfileDriveType: string = '5e9a2cbbb13b443554b72618b9c5c2b2'; //DataUtil.toGuidId('profile_drive_type');
   static readonly ProfileDefinitionFileType: number = 88;
   static readonly ProfileSectionFileType: number = 99;
 }
 
 export class BuiltInProfiles {
   static readonly StandardProfileId: string = '8f12d8c4933813d378488d91ed23b64c'; //DataUtil.toGuidId('StandardProfile');
-  static readonly FinancialProfileId: string = DataUtil.toGuidId('FinancialProfile');
+  static readonly FinancialProfileId: string = 'a6f991e214b11c8c9796f664e1ec0cac' //DataUtil.toGuidId('FinancialProfile');
 
   static readonly PersonalInfoSectionId: string = DataUtil.toGuidId('PersonalInfoSection');
   static readonly ExternalLinksSectionId: string = DataUtil.toGuidId('ExternalLinksSection');
