@@ -52,7 +52,8 @@ export class MediaProvider extends ProviderBase {
     acl: AccessControlList,
     imageBytes: Uint8Array,
     fileId?: string,
-    type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string
+    type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string,
+    uniqueId?: string
   ): Promise<string | null> {
     if (!targetDrive) {
       throw 'Missing target drive';
@@ -110,6 +111,7 @@ export class MediaProvider extends ProviderBase {
       contentType: type ?? 'image/webp',
       appData: {
         tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],
+        uniqueId: uniqueId,
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,

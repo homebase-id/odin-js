@@ -29,7 +29,7 @@ export enum HomePageTheme {
 }
 
 export class HomePageFields {
-  static readonly HeaderImageId: string = 'headerImageUrl';
+  static readonly HeaderImageId: string = 'headerImageId';
   static readonly TagLineId: string = 'tagLine';
   static readonly LeadTextId: string = 'leadText';
 }
