@@ -31,7 +31,7 @@ const initialLinksSection = {
 };
 
 const initialFinancialProfile: ProfileDefinition = {
-  profileId: BuiltInProfiles.FinancialProfileId,
+  profileId: BuiltInProfiles.WalletId,
   name: 'Financial Info',
   description: 'Financial information',
 };

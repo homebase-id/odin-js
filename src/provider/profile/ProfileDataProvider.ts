@@ -132,12 +132,12 @@ export class ProfileDataProvider extends ProviderBase {
 
     // Financial Info Section:
     const defaulCreditCardAttrId = DataUtil.toGuidId('default_creditcard_attribute');
-    if (!(await this.getAttribute(BuiltInProfiles.FinancialProfileId, defaulCreditCardAttrId))) {
+    if (!(await this.getAttribute(BuiltInProfiles.WalletId, defaulCreditCardAttrId))) {
       const defaulCreditCardAttrFile: AttributeFile = {
         id: defaulCreditCardAttrId,
         type: AttributeDefinitions.CreditCard.type,
         acl: { requiredSecurityGroup: SecurityGroupType.Owner },
-        profileId: BuiltInProfiles.FinancialProfileId,
+        profileId: BuiltInProfiles.WalletId,
         priority: 1000,
         sectionId: BuiltInProfiles.CreditCardsSectionId,
         data: {},

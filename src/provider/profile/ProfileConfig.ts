@@ -8,7 +8,7 @@ export class ProfileConfig {
 
 export class BuiltInProfiles {
   static readonly StandardProfileId: string = '8f12d8c4933813d378488d91ed23b64c'; //DataUtil.toGuidId('StandardProfile');
-  static readonly FinancialProfileId: string = 'a6f991e214b11c8c9796f664e1ec0cac' //DataUtil.toGuidId('FinancialProfile');
+  static readonly WalletId: string = 'a6f991e214b11c8c9796f664e1ec0cac'; //DataUtil.toGuidId('FinancialProfile');
 
   static readonly PersonalInfoSectionId: string = DataUtil.toGuidId('PersonalInfoSection');
   static readonly ExternalLinksSectionId: string = DataUtil.toGuidId('ExternalLinksSection');
