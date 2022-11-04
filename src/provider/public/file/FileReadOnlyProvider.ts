@@ -25,8 +25,8 @@ export class FileReadOnlyProvider extends ProviderBase {
     }
 
     try {
-      if (_internalFileCache.has(fileName)) {
-        return (await _internalFileCache.get(fileName)) ?? new Map();
+      if (_internalFileCache.has(`${this.getRoot()}+${fileName}`)) {
+        return (await _internalFileCache.get(`${this.getRoot()}+${fileName}`)) ?? new Map();
       }
 
       const httpClient = this.createAxiosClient();
@@ -57,7 +57,7 @@ export class FileReadOnlyProvider extends ProviderBase {
       };
 
       const promise = fetchResponseMap(fileName);
-      _internalFileCache.set(fileName, promise);
+      _internalFileCache.set(`${this.getRoot()}+${fileName}`, promise);
 
       return await promise;
     } catch (ex) {
@@ -75,8 +75,8 @@ export class FileReadOnlyProvider extends ProviderBase {
       for (const filePromise of _internalFileCache.values()) {
         const responseEntries = await filePromise;
 
-        if (responseEntries.has(key)) {
-          return responseEntries.get(key);
+        if (responseEntries.has(`${this.getRoot()}+${key}`)) {
+          return responseEntries.get(`${this.getRoot()}+${key}`);
         }
       }
     } catch (ex) {
