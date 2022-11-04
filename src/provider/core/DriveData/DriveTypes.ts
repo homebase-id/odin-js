@@ -114,11 +114,13 @@ export interface FileQueryParams {
   targetDrive: TargetDrive;
   fileType?: number[] | undefined;
   dataType?: number[] | undefined;
-  sender?: string[] | undefined; //list of base64 encoded byte arrays
-  groupId?: string[] | undefined; //list of base64 encoded byte arrays
+  sender?: string[] | undefined;
+  groupId?: string[] | undefined;
   userDate?: TimeRange;
-  tagsMatchAtLeastOne?: string[] | undefined; //list of base64 encoded byte arrays
-  tagsMatchAll?: string[] | undefined; //list of base64 encoded byte arrays
+  tagsMatchAtLeastOne?: string[] | undefined;
+  tagsMatchAll?: string[] | undefined;
+  globalTransitId?: string[] | undefined;
+  clientUniqueIdAtLeastOne?: string[] | undefined;
 }
 
 export interface GetModifiedResultOptions {
