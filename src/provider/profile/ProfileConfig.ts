@@ -33,6 +33,13 @@ export class LocationProfileFields {
   static readonly Country: string = 'location_country';
 }
 
+export class BirthdayProfileFields {
+  static readonly Date: string = 'birtday_date';
+}
+export class PhoneProfileFields {
+  static readonly PhoneNumber: string = 'phone_number';
+}
+
 export class SocialProfileFields {
   static readonly Twitter: string = 'twitter';
   static readonly Facebook: string = 'facebook';

@@ -25,6 +25,18 @@ export const AttributeDefinitions = {
     description: 'A general location',
   },
 
+  Birthday: {
+    type: DataUtil.toGuidId('birthday'),
+    name: 'Birthday',
+    description: 'Your birthday',
+  },
+
+  PhoneNumber: {
+    type: DataUtil.toGuidId('phonenumber'),
+    name: 'PhoneNumber',
+    description: 'Your phone number',
+  },
+
   FacebookUsername: {
     type: DataUtil.toGuidId('facebook_username'),
     name: 'Facebook',
