@@ -33,7 +33,7 @@ export const AttributeDefinitions = {
 
   PhoneNumber: {
     type: DataUtil.toGuidId('phonenumber'),
-    name: 'PhoneNumber',
+    name: 'Phone number',
     description: 'Your phone number',
   },
 
