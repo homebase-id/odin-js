@@ -329,12 +329,21 @@ export class DriveProvider extends ProviderBase {
 
   /// Delete methods:
 
-  async DeleteFile(targetDrive: TargetDrive, fileId: string): Promise<boolean | void> {
+  async DeleteFile(
+    targetDrive: TargetDrive,
+    fileId: string,
+    deleteLinkedFiles?: boolean,
+    recipients?: string[]
+  ): Promise<boolean | void> {
     const client = this.createAxiosClient();
 
     const request = {
-      targetDrive: targetDrive,
-      fileId: fileId,
+      file: {
+        targetDrive: targetDrive,
+        fileId: fileId,
+      },
+      deleteLinkedFiles: deleteLinkedFiles ?? true,
+      recipients: recipients,
     };
 
     return client

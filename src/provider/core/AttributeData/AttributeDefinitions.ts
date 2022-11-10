@@ -9,7 +9,7 @@ export interface AttributeDefinition {
 export const AttributeDefinitions = {
   Name: {
     type: DataUtil.toGuidId('name'),
-    name: 'Name Information',
+    name: 'Name',
     description: 'First name, last name, etc.',
   },
 
