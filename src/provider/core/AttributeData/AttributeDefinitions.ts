@@ -15,7 +15,7 @@ export const AttributeDefinitions = {
 
   Photo: {
     type: DataUtil.toGuidId('photo'),
-    name: 'Photo/Image',
+    name: 'Profile photo',
     description: 'A photo or image of various formats',
   },
 
