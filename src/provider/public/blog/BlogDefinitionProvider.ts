@@ -1,5 +1,4 @@
 import {
-  DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
   TargetDrive,
@@ -170,9 +169,11 @@ export class BlogDefinitionProvider extends ProviderBase {
 
       if (response.searchResults.length == 1) {
         const dsr = response.searchResults[0];
-        const definition = await this.decryptDefinition(
-          dsr,
+        const definition = await this._driveProvider.GetPayload<ChannelDefinition>(
           targetDrive,
+          dsr.fileId,
+          dsr.fileMetadata,
+          dsr.sharedSecretEncryptedKeyHeader,
           response.includeMetadataHeader
         );
 
@@ -186,29 +187,6 @@ export class BlogDefinitionProvider extends ProviderBase {
     }
 
     return;
-  }
-
-  private async decryptDefinition(
-    dsr: DriveSearchResult,
-    targetDrive: TargetDrive,
-    includeMetadataHeader: boolean
-  ): Promise<ChannelDefinition> {
-    const keyheader = dsr.fileMetadata.payloadIsEncrypted
-      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-      : undefined;
-
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      return await this._driveProvider.DecryptJsonContent<ChannelDefinition>(
-        dsr.fileMetadata,
-        keyheader
-      );
-    } else {
-      return await this._driveProvider.GetPayloadAsJson<ChannelDefinition>(
-        targetDrive,
-        dsr.fileId,
-        keyheader
-      );
-    }
   }
 }
 

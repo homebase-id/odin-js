@@ -482,6 +482,23 @@ export class DriveProvider extends ProviderBase {
   }
 
   /// Helper methods:
+  async GetPayload<T>(
+    targetDrive: TargetDrive,
+    fileId: string,
+    fileMetadata: FileMetadata,
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader,
+    includesJsonContent: boolean
+  ): Promise<T> {
+    const keyheader = fileMetadata.payloadIsEncrypted
+      ? await this.DecryptKeyHeader(sharedSecretEncryptedKeyHeader)
+      : undefined;
+
+    if (fileMetadata.appData.contentIsComplete && includesJsonContent) {
+      return await this.DecryptJsonContent<T>(fileMetadata, keyheader);
+    } else {
+      return await this.GetPayloadAsJson<T>(targetDrive, fileId, keyheader);
+    }
+  }
 
   async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
     return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);

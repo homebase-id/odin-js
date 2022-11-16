@@ -62,20 +62,19 @@ export class AttributeDataProvider extends ProviderBase {
         acl: dsr.serverMetadata?.accessControlList,
       };
 
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
-      if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        attr = {
-          ...attr,
-          ...(await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader)),
-        };
-      } else {
-        attr = {
-          ...attr,
-          ...(await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader)),
-        };
-      }
+      const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
+        targetDrive,
+        dsr.fileId,
+        dsr.fileMetadata,
+        dsr.sharedSecretEncryptedKeyHeader,
+        result.includeMetadataHeader
+      );
+
+      attr = {
+        ...attr,
+        ...attrPayload,
+      };
+
       attr.fileId = attr.fileId ?? fileId;
       // attr.acl = attr.acl ?? {
       //   requiredSecurityGroup: SecurityGroupType.Owner,
@@ -116,7 +115,6 @@ export class AttributeDataProvider extends ProviderBase {
 
     for (const key in result.searchResults) {
       const dsr: DriveSearchResult = result.searchResults[key];
-      const fileId = dsr.fileId;
 
       let attr: AttributeFile = {
         id: '',
@@ -128,20 +126,18 @@ export class AttributeDataProvider extends ProviderBase {
         acl: dsr.serverMetadata?.accessControlList,
       };
 
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
-      if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        attr = {
-          ...attr,
-          ...(await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader)),
-        };
-      } else {
-        attr = {
-          ...attr,
-          ...(await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader)),
-        };
-      }
+      const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
+        targetDrive,
+        dsr.fileId,
+        dsr.fileMetadata,
+        dsr.sharedSecretEncryptedKeyHeader,
+        result.includeMetadataHeader
+      );
+
+      attr = {
+        ...attr,
+        ...attrPayload,
+      };
 
       // TODO: this overwrites the priority stored in the
       // attribute.  Need to fix this by considering if the
@@ -190,19 +186,13 @@ export class AttributeDataProvider extends ProviderBase {
     }
 
     const dsr: DriveSearchResult = response.searchResults[0];
-
-    const fileId = dsr.fileId;
-
-    let payload: Attribute;
-
-    const keyheader = dsr.fileMetadata.payloadIsEncrypted
-      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-      : undefined;
-    if (dsr.fileMetadata.appData.contentIsComplete && response.includeMetadataHeader) {
-      payload = await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
-    } else {
-      payload = await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader);
-    }
+    const payload = await this._driveProvider.GetPayload<AttributeFile>(
+      targetDrive,
+      dsr.fileId,
+      dsr.fileMetadata,
+      dsr.sharedSecretEncryptedKeyHeader,
+      response.includeMetadataHeader
+    );
 
     const attributeFile: AttributeFile = {
       ...payload,
@@ -243,20 +233,18 @@ export class AttributeDataProvider extends ProviderBase {
         acl: dsr.serverMetadata?.accessControlList,
       };
 
-      const keyheader = dsr.fileMetadata.payloadIsEncrypted
-        ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-        : undefined;
-      if (dsr.fileMetadata.appData.contentIsComplete && result.includeMetadataHeader) {
-        attr = {
-          ...attr,
-          ...(await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader)),
-        };
-      } else {
-        attr = {
-          ...attr,
-          ...(await this._driveProvider.GetPayloadAsJson<any>(targetDrive, fileId, keyheader)),
-        };
-      }
+      const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
+        targetDrive,
+        dsr.fileId,
+        dsr.fileMetadata,
+        dsr.sharedSecretEncryptedKeyHeader,
+        result.includeMetadataHeader
+      );
+
+      attr = {
+        ...attr,
+        ...attrPayload,
+      };
       attr.fileId = attr.fileId ?? fileId;
 
       // TODO: this overwrites the priority stored in the

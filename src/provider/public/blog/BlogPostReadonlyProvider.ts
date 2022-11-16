@@ -173,7 +173,13 @@ export class BlogPostReadonlyProvider extends ProviderBase {
     targetDrive: TargetDrive,
     includeMetadataHeader: boolean
   ): Promise<PostFile<T>> {
-    const content = await this.getPostPayload<T>(dsr, targetDrive, includeMetadataHeader);
+    const content = await this._driveProvider.GetPayload<T>(
+      targetDrive,
+      dsr.fileId,
+      dsr.fileMetadata,
+      dsr.sharedSecretEncryptedKeyHeader,
+      includeMetadataHeader
+    );
 
     const file: PostFile<T> = {
       fileId: dsr.fileId,
@@ -182,21 +188,5 @@ export class BlogPostReadonlyProvider extends ProviderBase {
     };
 
     return file;
-  }
-
-  private async getPostPayload<T extends PostContent>(
-    dsr: DriveSearchResult,
-    targetDrive: TargetDrive,
-    includeMetadataHeader: boolean
-  ): Promise<T> {
-    const keyheader = dsr.fileMetadata.payloadIsEncrypted
-      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-      : undefined;
-
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      return await this._driveProvider.DecryptJsonContent<T>(dsr.fileMetadata, keyheader);
-    } else {
-      return await this._driveProvider.GetPayloadAsJson<T>(targetDrive, dsr.fileId, keyheader);
-    }
   }
 }

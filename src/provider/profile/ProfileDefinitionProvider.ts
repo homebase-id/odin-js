@@ -243,7 +243,13 @@ export class ProfileDefinitionProvider extends ProviderBase {
       const sections = await Promise.all(
         response.searchResults.map(
           async (result) =>
-            await this.decryptSection(result, targetDrive, response.includeMetadataHeader)
+            await this._driveProvider.GetPayload<ProfileSection>(
+              targetDrive,
+              result.fileId,
+              result.fileMetadata,
+              result.sharedSecretEncryptedKeyHeader,
+              response.includeMetadataHeader
+            )
         )
       );
       sections.sort((a, b) => {
@@ -278,9 +284,11 @@ export class ProfileDefinitionProvider extends ProviderBase {
         );
       }
       const dsr = response.searchResults[0];
-      const definition = await this.decryptDefinition(
-        dsr,
+      const definition = await this._driveProvider.GetPayload<ProfileDefinition>(
         targetDrive,
+        dsr.fileId,
+        dsr.fileMetadata,
+        dsr.sharedSecretEncryptedKeyHeader,
         response.includeMetadataHeader
       );
 
@@ -291,22 +299,6 @@ export class ProfileDefinitionProvider extends ProviderBase {
     }
 
     return;
-  }
-
-  private async decryptDefinition(
-    dsr: DriveSearchResult,
-    targetDrive: TargetDrive,
-    includeMetadataHeader: boolean
-  ): Promise<ProfileDefinition> {
-    const keyheader = dsr.fileMetadata.payloadIsEncrypted
-      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-      : undefined;
-
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
-    } else {
-      return await this._driveProvider.GetPayloadAsJson<any>(targetDrive, dsr.fileId, keyheader);
-    }
   }
 
   private async getProfileSectionInternal(profileId: string, sectionId: string) {
@@ -328,9 +320,11 @@ export class ProfileDefinitionProvider extends ProviderBase {
         );
       }
       const dsr = response.searchResults[0];
-      const definition = await this.decryptSection(
-        dsr,
+      const definition = await this._driveProvider.GetPayload<ProfileSection>(
         targetDrive,
+        dsr.fileId,
+        dsr.fileMetadata,
+        dsr.sharedSecretEncryptedKeyHeader,
         response.includeMetadataHeader
       );
 
@@ -341,26 +335,6 @@ export class ProfileDefinitionProvider extends ProviderBase {
     }
 
     return;
-  }
-
-  private async decryptSection(
-    dsr: DriveSearchResult,
-    targetDrive: TargetDrive,
-    includeMetadataHeader: boolean
-  ): Promise<ProfileSection> {
-    const keyheader = dsr.fileMetadata.payloadIsEncrypted
-      ? await this._driveProvider.DecryptKeyHeader(dsr.sharedSecretEncryptedKeyHeader)
-      : undefined;
-
-    if (dsr.fileMetadata.appData.contentIsComplete && includeMetadataHeader) {
-      return await this._driveProvider.DecryptJsonContent<any>(dsr.fileMetadata, keyheader);
-    } else {
-      return await this._driveProvider.GetPayloadAsJson<ProfileSection>(
-        targetDrive,
-        dsr.fileId,
-        keyheader
-      );
-    }
   }
 
   public static getTargetDrive(profileId: string): TargetDrive {
