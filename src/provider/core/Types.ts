@@ -8,6 +8,11 @@ export interface CursoredResult<T> {
   cursorState: string;
 }
 
+export interface MultiRequestCursoredResult<T> {
+  results: T;
+  cursorState: Record<string, string>;
+}
+
 export class PagingOptions {
   pageNumber = 1;
   pageSize = 25;

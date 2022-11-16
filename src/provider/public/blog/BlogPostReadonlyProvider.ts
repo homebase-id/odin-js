@@ -7,7 +7,7 @@ import {
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
-import { CursoredResult } from '../../core/Types';
+import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
 import { BlogDefinitionProvider } from './BlogDefinitionProvider';
 import {
   BlogConfig,
@@ -71,27 +71,30 @@ export class BlogPostReadonlyProvider extends ProviderBase {
   //Gets posts across all channels, ordered by date
   async getRecentPosts<T extends PostContent>(
     type: PostType | undefined,
-    pageSize = 10
-  ): Promise<PostFile<T>[]> {
+    pageSize = 10,
+    cursorState: Record<string, string> | undefined = undefined
+  ): Promise<MultiRequestCursoredResult<PostFile<T>[]>> {
     const channels = await this.getChannels();
+    const allCursors: Record<string, string> = {};
+    const resultPerChannel = await Promise.all(
+      channels.map(async (channel) => {
+        const result = await this.getPosts<T>(
+          channel.channelId,
+          type,
+          cursorState?.[channel.channelId],
+          Math.ceil(pageSize / channels.length) // TODO: do this properly, now only works if all channels are equal and have the same dates
+        );
 
-    let posts: PostFile<T>[] = [];
-
-    for (const key in channels) {
-      const channel = channels[key];
-      const channelPosts = await this.getPosts<T>(
-        channel.channelId,
-        type,
-        undefined,
-        Math.ceil(pageSize / channels.length) // TODO: do this properly, now only works if all channels are equal and have the same dates
-      );
-      posts = posts.concat(channelPosts.results);
-    }
-
+        allCursors[channel.channelId] = result.cursorState;
+        return result.results;
+      })
+    );
     // Sorted descending
-    posts.sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
+    const sortedPosts = resultPerChannel
+      .flat(1)
+      .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
 
-    return posts;
+    return { results: sortedPosts, cursorState: allCursors };
   }
 
   //Gets the content for a given post id
