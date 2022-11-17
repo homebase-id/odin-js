@@ -43,6 +43,12 @@ export const AttributeDefinitions = {
     description: 'A facebook username',
   },
 
+  DotYouIdentity: {
+    type: DataUtil.toGuidId('dot_you_identity'),
+    name: 'Dot You Id',
+    description: 'A dot you identity',
+  },
+
   InstagramUsername: {
     type: DataUtil.toGuidId('instagram_username'),
     name: 'Instagram',
