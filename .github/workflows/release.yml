@@ -1,8 +1,13 @@
-name: Publish Package to Github Private NPM
+name: Publish Prerelease to Github Packages
 on:
   workflow_dispatch:
   release:
     types: [published]
+  push:
+    branches:
+      - 'main'
+     paths:
+      - 'src/**'
 jobs:
   build:
     runs-on: ubuntu-latest
