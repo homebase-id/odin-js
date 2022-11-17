@@ -46,7 +46,7 @@ export const AttributeDefinitions = {
   DotYouIdentity: {
     type: DataUtil.toGuidId('dot_you_identity'),
     name: 'Dot You Id',
-    description: 'A dot you identity',
+    description: 'A dot you id',
   },
 
   InstagramUsername: {
