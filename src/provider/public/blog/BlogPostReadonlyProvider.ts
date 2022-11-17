@@ -82,7 +82,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
           channel.channelId,
           type,
           cursorState?.[channel.channelId],
-          Math.ceil(pageSize / channels.length) // TODO: do this properly, now only works if all channels are equal and have the same dates
+          pageSize
         );
 
         allCursors[channel.channelId] = result.cursorState;
