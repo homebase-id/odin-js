@@ -42,6 +42,9 @@ const EmptyKeyHeader: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
   aesKey: new Uint8Array(Array(16).fill(0)),
 };
+
+const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
+
 export class DriveProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
     super(options);
@@ -95,8 +98,6 @@ export class DriveProvider extends ProviderBase {
   ): Promise<boolean> {
     //create the drive if it does not exist
     const client = this.createAxiosClient();
-
-    //TODO: this will change when we move away from paging
     const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
 
     const foundDrive = allDrives.results.find(
@@ -125,8 +126,7 @@ export class DriveProvider extends ProviderBase {
         return false;
       })
       .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
+        console.error('[DotYouCore-js]', error);
         throw error;
       });
   }
@@ -184,6 +184,12 @@ export class DriveProvider extends ProviderBase {
   /// Get methods:
 
   async GetMetadata(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
+    const cacheKey = `${targetDrive.alias}-${targetDrive.type}+${fileId}`;
+    if (_internalMetadataCache.has(cacheKey)) {
+      const cacheEntry = await _internalMetadataCache.get(cacheKey);
+      if (cacheEntry) return cacheEntry;
+    }
+
     const client = this.createAxiosClient();
 
     const request: GetFileRequest = {
@@ -191,16 +197,19 @@ export class DriveProvider extends ProviderBase {
       fileId: fileId,
     };
 
-    return client
+    const promise = client
       .post('/drive/files/header', request)
       .then((response) => {
         return response.data;
       })
       .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
+        console.error('[DotYouCore-js]', error);
         throw error;
       });
+
+    _internalMetadataCache.set(cacheKey, promise);
+
+    return promise;
   }
 
   async GetPayloadAsJson<T>(
@@ -257,8 +266,7 @@ export class DriveProvider extends ProviderBase {
         }
       })
       .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
+        console.error('[DotYouCore-js]', error);
         throw error;
       });
   }
@@ -292,8 +300,7 @@ export class DriveProvider extends ProviderBase {
         }
       })
       .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
+        console.error('[DotYouCore-js]', error);
         throw error;
       });
   }
@@ -310,9 +317,11 @@ export class DriveProvider extends ProviderBase {
         );
 
         return JSON.parse(json);
-      } catch (ex) {
-        console.error(ex);
-        console.error('Json Content Decryption failed. Trying to only parse JSON');
+      } catch (err) {
+        console.error(
+          '[DotYouCore-js]',
+          'Json Content Decryption failed. Trying to only parse JSON'
+        );
       }
     }
 
@@ -356,8 +365,7 @@ export class DriveProvider extends ProviderBase {
         return false;
       })
       .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
+        console.error('[DotYouCore-js]', error);
         throw error;
       });
   }
@@ -434,8 +442,7 @@ export class DriveProvider extends ProviderBase {
         return response.data;
       })
       .catch((error) => {
-        //TODO: Handle this - the file was not uploaded
-        console.error(error);
+        console.error('[DotYouCore-js]', error);
         throw error;
       });
   }

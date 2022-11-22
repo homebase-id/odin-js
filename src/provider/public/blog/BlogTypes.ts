@@ -1,4 +1,3 @@
-import { Guid } from 'guid-typescript';
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { DataUtil } from '../../core/DataUtil';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';

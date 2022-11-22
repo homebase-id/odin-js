@@ -134,7 +134,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
 
     const targetDrive = this._blogDefinitionProvider.getTargetDrive(channel.channelId);
     const params: FileQueryParams = {
-      tagsMatchAtLeastOne: [DataUtil.toGuidId(postSlug)],
+      clientUniqueIdAtLeastOne: [DataUtil.toGuidId(postSlug)],
       targetDrive: targetDrive,
       fileType: [BlogConfig.PostFileType],
     };

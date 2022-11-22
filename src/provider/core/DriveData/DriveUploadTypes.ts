@@ -66,7 +66,7 @@ export interface UploadResult {
   encryptedPayload: Uint8Array;
   encryptedKeyHeader: Uint8Array;
   file: ExternalFileIdentifier;
-  recipientStatus: { [key: string]: TransferStatus }; //any //TODO: figure out how to represent c# dictionary<string,number>
+  recipientStatus: { [key: string]: TransferStatus };
 }
 
 export enum TransferStatus {

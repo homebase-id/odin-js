@@ -158,7 +158,7 @@ export class ProfileDataProvider extends ProviderBase {
           ? MinimalProfileFields.ProfileImageId
           : HomePageFields.HeaderImageId;
 
-      // TODO: Is this the way forward, should there be another way of handling this?
+      // TODO: Is this the way forward, should there be another place of handling this?
       // Update on an image holding attribute; We need to check the image file itself and potentially reupload to match the ACL
       const imageFileId = attribute.data[imageFieldKey];
       const targetDrive = getTargetDriveFromProfileId(attribute.profileId);

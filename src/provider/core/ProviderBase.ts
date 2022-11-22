@@ -131,7 +131,7 @@ export class ProviderBase {
         return await decryptResponse(response);
       },
       async function (error) {
-        console.error(await decryptResponse(error.response));
+        console.error('[DotYouCore-js]', await decryptResponse(error.response));
 
         return Promise.reject(error);
       }

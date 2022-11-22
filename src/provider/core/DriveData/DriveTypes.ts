@@ -88,14 +88,6 @@ export interface DriveSearchResult {
   priority: number;
 }
 
-// TODO: replace with regular DriveSearchResult without generic?
-// export interface UnencryptedFileHeader {
-//   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
-//   fileMetadata: FileMetadata;
-//   serverMetadata: ServerMetaData;
-//   priority: number;
-// }
-
 export interface QueryParams {
   targetDrive: TargetDrive;
   fileType?: number | undefined;

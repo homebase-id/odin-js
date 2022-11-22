@@ -1,6 +1,6 @@
 import { DataUtil } from '../core/DataUtil';
 import { DriveProvider } from '../core/DriveData/DriveProvider';
-import { DriveSearchResult, FileQueryParams, TargetDrive } from '../core/DriveData/DriveTypes';
+import { FileQueryParams, TargetDrive } from '../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
 import {
   SecurityGroupType,
@@ -123,7 +123,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
 
     const encrypt = true;
 
-    const driveMetadata = ''; //TODO: is this needed here?
+    const driveMetadata = 'Drive that stores: ' + definition.name;
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
     const { fileId } = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
@@ -145,13 +145,13 @@ export class ProfileDefinitionProvider extends ProviderBase {
     // Set max of 3kb for jsonContent so enough room is left for metedata
     const shouldEmbedContent = payloadBytes.length < 3000;
 
-    //note: we tag it with the profile id AND also a tag indicating it is a definition
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
+        uniqueId: definition.profileId,
         tags: [definition.profileId],
-        fileType: ProfileConfig.ProfileDefinitionFileType, //TODO: determine if we need to define these for defintion files?
-        dataType: undefined, //TODO: determine if we need to define these for defintion files?
+        fileType: ProfileConfig.ProfileDefinitionFileType,
+        dataType: undefined,
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? payloadJson : null,
       },
@@ -201,8 +201,8 @@ export class ProfileDefinitionProvider extends ProviderBase {
       appData: {
         tags: [profileId, profileSection.sectionId],
         groupId: profileId,
-        fileType: ProfileConfig.ProfileSectionFileType, //TODO: determine if we need to define these for defintion files?
-        dataType: undefined, //TODO: determine if we need to define these for defintion files?
+        fileType: ProfileConfig.ProfileSectionFileType,
+        dataType: undefined,
         contentIsComplete: shouldEmbedContent,
         jsonContent: shouldEmbedContent ? payloadJson : null,
       },
@@ -218,11 +218,9 @@ export class ProfileDefinitionProvider extends ProviderBase {
 
     const profileSection = await this.getProfileSectionInternal(profileId, sectionId);
     if (!profileSection) {
-      console.error("Profile not found, can't delete");
+      console.error('[DotYouCore-js]', "Profile not found, can't delete");
       return false;
     }
-
-    // TODO: Remove Attributes within? Now done on owner-app itself
 
     return this._driveProvider.DeleteFile(targetDrive, profileSection.fileId);
   }
@@ -237,8 +235,6 @@ export class ProfileDefinitionProvider extends ProviderBase {
     };
 
     const response = await this._driveProvider.QueryBatch(params);
-
-    // TODO Check Which one to take if multiple? Or only a first dev issue?
     if (response.searchResults.length >= 1) {
       const sections = await Promise.all(
         response.searchResults.map(
@@ -269,14 +265,13 @@ export class ProfileDefinitionProvider extends ProviderBase {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
     const params: FileQueryParams = {
-      tagsMatchAtLeastOne: [profileId],
+      clientUniqueIdAtLeastOne: [profileId],
       targetDrive: targetDrive,
       fileType: [ProfileConfig.ProfileDefinitionFileType],
     };
 
     const response = await this._driveProvider.QueryBatch(params);
 
-    // TODO Check Which one to take if multiple? Or only a first dev issue?
     if (response.searchResults.length >= 1) {
       if (response.searchResults.length !== 1) {
         console.warn(
@@ -312,7 +307,6 @@ export class ProfileDefinitionProvider extends ProviderBase {
 
     const response = await this._driveProvider.QueryBatch(params);
 
-    // TODO Check Which one to take if multiple? Or only a first dev issue?
     if (response.searchResults.length >= 1) {
       if (response.searchResults.length !== 1) {
         console.warn(

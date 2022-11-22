@@ -20,7 +20,6 @@ export class HomePageProvider extends HomePageReadOnlyProvider {
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
     attribute.profileId = HomePageConfig.DefaultDriveId;
-    // TODO: validate why type got overruled in all cases
     if (!attribute.type) {
       attribute.type = HomePageConfig.AttributeTypeNotApplicable.toString();
     }

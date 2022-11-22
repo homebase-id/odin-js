@@ -76,15 +76,7 @@ export class AttributeDataProvider extends ProviderBase {
       };
 
       attr.fileId = attr.fileId ?? fileId;
-      // attr.acl = attr.acl ?? {
-      //   requiredSecurityGroup: SecurityGroupType.Owner,
-      // };
 
-      // TODO: this overwrites the priority stored in the
-      // attribute.  Need to fix this by considering if the
-      // server-set priority is always more important than thex
-      // order set by the user
-      //attr.priority = dsr.priority;
       attributes.push(attr);
     }
 
@@ -139,12 +131,6 @@ export class AttributeDataProvider extends ProviderBase {
         ...attrPayload,
       };
 
-      // TODO: this overwrites the priority stored in the
-      // attribute.  Need to fix this by considering if the
-      // server-set priority is always more important than the
-      // order set by the user
-      //attr.priority = dsr.priority;
-
       attributes.push(attr);
     }
 
@@ -160,7 +146,7 @@ export class AttributeDataProvider extends ProviderBase {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
-      tagsMatchAll: [id],
+      clientUniqueIdAtLeastOne: [id],
       fileType: [AttributeConfig.AttributeFileType],
     };
 
@@ -247,11 +233,6 @@ export class AttributeDataProvider extends ProviderBase {
       };
       attr.fileId = attr.fileId ?? fileId;
 
-      // TODO: this overwrites the priority stored in the
-      // attribute.  Need to fix this by considering if the
-      // server-set priority is always more important than thex
-      // order set by the user
-      //attr.priority = dsr.priority;
       attributes.push(attr);
     }
 
@@ -302,6 +283,7 @@ export class AttributeDataProvider extends ProviderBase {
     const metadata: UploadFileMetadata = {
       contentType: 'application/json',
       appData: {
+        uniqueId: attribute.id,
         tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
         groupId: attribute.sectionId,
         fileType: AttributeConfig.AttributeFileType,
