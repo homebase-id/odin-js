@@ -265,7 +265,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
     const params: FileQueryParams = {
-      clientUniqueIdAtLeastOne: [profileId],
+      tagsMatchAtLeastOne: [profileId], // TODO, search with uniqueId
       targetDrive: targetDrive,
       fileType: [ProfileConfig.ProfileDefinitionFileType],
     };

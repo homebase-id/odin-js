@@ -146,7 +146,7 @@ export class AttributeDataProvider extends ProviderBase {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
-      clientUniqueIdAtLeastOne: [id],
+      tagsMatchAtLeastOne: [id], // TODO, search with uniqueId
       fileType: [AttributeConfig.AttributeFileType],
     };
 
