@@ -1,4 +1,4 @@
-import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
+import { ApiType, ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { PagedResult, PagingOptions } from '../../core/Types';
 
 const stringify = (obj: any) => {
@@ -20,8 +20,16 @@ export class CircleNetworkReadOnlyProvider extends ProviderBase {
   async getConnections(data: PagingOptions): Promise<PagedResult<{ dotYouId: string }>> {
     const client = super.createAxiosClient();
     const url = this.root + '/connected?' + stringify(data);
-    return client.get(url).then((response) => {
-      return response.data;
-    });
+
+    if (this.getType() === ApiType.Owner) {
+      // Post needed
+      return client.post(url).then((response) => {
+        return response.data;
+      });
+    } else {
+      return client.get(url).then((response) => {
+        return response.data;
+      });
+    }
   }
 }

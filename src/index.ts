@@ -26,13 +26,15 @@ export * from './provider/profile/ProfileDefinitionProvider';
 // Home
 export * from './provider/public/home/HomeTypes';
 export * from './provider/public/home/HomePageProvider';
-// export * from './provider/public/home/ThemeConfig';
 
 // Blog
 export * from './provider/public/blog/BlogTypes';
-// export * from './provider/public/blog/BlogPostProvider';
 export * from './provider/public/blog/BlogPostReadonlyProvider';
 export * from './provider/public/blog/BlogDefinitionProvider';
+
+// Network
+export * from './provider/public/circleNetwork/CircleNetworkReadOnlyProvider';
+export * from './provider/public/circleNetwork/CircleNetworkTypes';
 
 export * from './provider/publicClient';
 export * from './provider/coreClient';
