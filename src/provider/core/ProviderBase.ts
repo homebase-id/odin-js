@@ -75,12 +75,12 @@ export class ProviderBase {
 
     client.interceptors.request.use(
       async function (request) {
-        //TODO: consider handling this on GET requests too?
-        if (request.method?.toUpperCase() != 'POST' || !ss) {
+
+        if (!ss) {
           return request;
         }
 
-        isDebug && console.debug('request', request.url, { ...request });
+        isDebug && console.debug('request', request.url, {...request});
 
         const iv = window.crypto.getRandomValues(new Uint8Array(16));
         const json = DataUtil.JsonStringify64(request.data);
@@ -92,7 +92,16 @@ export class ProviderBase {
           data: DataUtil.uint8ArrayToBase64(encryptedBytes),
         };
 
-        request.data = payload;
+        if (request.method?.toUpperCase() == 'POST') {
+          request.data = payload;
+        } else {
+          const encryptedPayload = DataUtil.JsonStringify64(payload);
+          
+          //TODO: detect if there's already a query string
+          let prefix = "?";
+          request.url += prefix + "ss=" + encryptedPayload;
+          return request;
+        }
 
         return request;
       },
