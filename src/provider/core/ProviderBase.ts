@@ -83,34 +83,44 @@ export class ProviderBase {
         isDebug && console.debug('request', request.url, {...request});
 
         const iv = window.crypto.getRandomValues(new Uint8Array(16));
-        const json = DataUtil.JsonStringify64(request.data);
-        const bytes = DataUtil.stringToUint8Array(json);
-
-        const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
-        const payload: SharedSecretEncryptedPayload = {
-          iv: DataUtil.uint8ArrayToBase64(iv),
-          data: DataUtil.uint8ArrayToBase64(encryptedBytes),
-        };
 
         if (request.method?.toUpperCase() == 'POST') {
-          request.data = payload;
-        } else {
+          const json = DataUtil.JsonStringify64(request.data);
+          const bytes = DataUtil.stringToUint8Array(json);
 
-          request.data = undefined;
+          const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
+          const payload: SharedSecretEncryptedPayload = {
+            iv: DataUtil.uint8ArrayToBase64(iv),
+            data: DataUtil.uint8ArrayToBase64(encryptedBytes),
+          };
+
+          request.data = payload;
+
+        } else {
+          const parts = (request.url ?? "").split("?");
+          const querystring = parts.length == 2 ? parts[1] : "";
+          const bytes = DataUtil.stringToUint8Array(querystring);
+
+          const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
+          const payload: SharedSecretEncryptedPayload = {
+            iv: DataUtil.uint8ArrayToBase64(iv),
+            data: DataUtil.uint8ArrayToBase64(encryptedBytes),
+          };
 
           const encryptedPayload = DataUtil.JsonStringify64(payload);
-          //TODO: detect if there's already a query string
-          let prefix = "?";
-          request.url += prefix + "ss=" + encryptedPayload;
+          request.url = parts[0] + "?ss=" + encryptedPayload;
           return request;
         }
-
+        
         return request;
-      },
+      }
+      ,
+
       function (error) {
         return Promise.reject(error);
       }
-    );
+    )
+    ;
 
     const decryptResponse = async (response: AxiosResponse<any, any>) => {
       const encryptedPayload = response.data;
