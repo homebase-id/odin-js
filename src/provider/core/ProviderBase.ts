@@ -99,6 +99,10 @@ export class ProviderBase {
         } else {
           const parts = (request.url ?? "").split("?");
           const querystring = parts.length == 2 ? parts[1] : "";
+          
+          console.log("url:", request.url);
+          console.log("qs:", querystring);
+          
           const bytes = DataUtil.stringToUint8Array(querystring);
 
           const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
