@@ -196,9 +196,9 @@ export class DriveProvider extends ProviderBase {
       targetDrive: targetDrive,
       fileId: fileId,
     };
-
+    
     const promise = client
-      .get('/drive/files/header?', {data: request})
+      .get('/drive/files/header?' + DataUtil.stringify(request) )
       .then((response) => {
         return response.data;
       })
