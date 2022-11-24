@@ -83,7 +83,7 @@ export class DriveProvider extends ProviderBase {
         return {
           ...response.data,
           results: response?.data?.results?.map((result: { targetDrive: any }) => {
-            return {...result, targetDriveInfo: result.targetDrive};
+            return { ...result, targetDriveInfo: result.targetDrive };
           }),
         };
       });
@@ -98,7 +98,7 @@ export class DriveProvider extends ProviderBase {
   ): Promise<boolean> {
     //create the drive if it does not exist
     const client = this.createAxiosClient();
-    const allDrives = await this.GetDrives({pageNumber: 1, pageSize: 1000});
+    const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
 
     const foundDrive = allDrives.results.find(
       (d) =>
@@ -192,13 +192,13 @@ export class DriveProvider extends ProviderBase {
 
     const client = this.createAxiosClient();
 
-    const request: GetFileRequest = {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    };
-    
+    // const request: GetFileRequest = {
+    //   targetDrive: targetDrive,
+    //   fileId: fileId,
+    // };
+
     const promise = client
-      .get('/drive/files/header?' + DataUtil.stringify(request) )
+      .get('/drive/files/header?' + DataUtil.stringify({ ...targetDrive, fileId }))
       .then((response) => {
         return response.data;
       })
@@ -288,7 +288,7 @@ export class DriveProvider extends ProviderBase {
     };
 
     return client
-      .post('/drive/files/thumb', {file: request, width: width, height: height}, config)
+      .post('/drive/files/thumb', { file: request, width: width, height: height }, config)
       .then((response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
@@ -381,19 +381,19 @@ export class DriveProvider extends ProviderBase {
   ): Promise<UploadResult> {
     const encryptedMetaData = keyHeader
       ? {
-        ...metadata,
-        appData: {
-          ...metadata.appData,
-          jsonContent: metadata.appData.jsonContent
-            ? DataUtil.uint8ArrayToBase64(
-              await this.encryptWithKeyheader(
-                DataUtil.stringToUint8Array(metadata.appData.jsonContent),
-                keyHeader
-              )
-            )
-            : null,
-        },
-      }
+          ...metadata,
+          appData: {
+            ...metadata.appData,
+            jsonContent: metadata.appData.jsonContent
+              ? DataUtil.uint8ArrayToBase64(
+                  await this.encryptWithKeyheader(
+                    DataUtil.stringToUint8Array(metadata.appData.jsonContent),
+                    keyHeader
+                  )
+                )
+              : null,
+          },
+        }
       : metadata;
 
     const descriptor: UploadFileDescriptor = {
