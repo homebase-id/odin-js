@@ -19,6 +19,36 @@ export interface ProviderOptions {
   root?: string;
 }
 
+const getIv = () => {
+  try {
+    const cachedIv = sessionStorage.getItem('iv');
+    if (cachedIv) {
+      const ivObj = JSON.parse(cachedIv);
+
+      if (ivObj.expiration >= new Date().getTime()) {
+        return DataUtil.base64ToUint8Array(ivObj.iv);
+      }
+    }
+
+    console.debug('Generating new iv');
+    const iv = window.crypto.getRandomValues(new Uint8Array(16));
+
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    sessionStorage.setItem(
+      'iv',
+      DataUtil.JsonStringify64({
+        expiration: now.getTime(),
+        iv: iv,
+      })
+    );
+
+    return iv;
+  } catch (ex) {
+    return window.crypto.getRandomValues(new Uint8Array(16));
+  }
+};
+
 export class ProviderBase {
   private _options: ProviderOptions;
 
@@ -82,7 +112,8 @@ export class ProviderBase {
         isDebug && console.debug('request', request.url, { ...request });
 
         //TODO: rotate IV in alignment with server caching time
-        const iv = window.crypto.getRandomValues(new Uint8Array(16));
+        // const iv = window.crypto.getRandomValues(new Uint8Array(16));
+        const iv = getIv();
 
         if (request.method?.toUpperCase() == 'POST') {
           const json = DataUtil.JsonStringify64(request.data);

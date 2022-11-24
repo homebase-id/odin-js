@@ -289,8 +289,7 @@ export class DriveProvider extends ProviderBase {
 
     return client
       .get(
-        '/drive/files/thumb?' +
-          DataUtil.stringify({ ...targetDrive, fileId, width: width, height: height }),
+        '/drive/files/thumb?' + DataUtil.stringify({ ...targetDrive, fileId, width, height }),
         config
       )
       .then((response) => {
