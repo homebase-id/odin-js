@@ -106,8 +106,8 @@ export class ProviderBase {
             data: DataUtil.uint8ArrayToBase64(encryptedBytes),
           };
 
-          const encryptedPayload = DataUtil.JsonStringify64(payload);
-          request.url = parts[0] + '?ss=' + encodeURIComponent(encryptedPayload);
+          const encryptedPayload = encodeURIComponent(DataUtil.JsonStringify64(payload));
+          request.url = parts[0] + '?ss=' + encryptedPayload;
           return request;
         }
 
