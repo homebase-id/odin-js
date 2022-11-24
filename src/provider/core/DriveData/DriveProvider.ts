@@ -288,7 +288,10 @@ export class DriveProvider extends ProviderBase {
     };
 
     return client
-      .post('/drive/files/thumb', { file: request, width: width, height: height }, config)
+      .get(
+        '/drive/files/thumb?' + DataUtil.stringify({ ...request, width: width, height: height }),
+        config
+      )
       .then((response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
