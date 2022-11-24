@@ -99,10 +99,10 @@ export class ProviderBase {
         } else {
           const parts = (request.url ?? "").split("?");
           const querystring = parts.length == 2 ? parts[1] : "";
-          
+
           console.log("url:", request.url);
           console.log("qs:", querystring);
-          
+
           const bytes = DataUtil.stringToUint8Array(querystring);
 
           const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
@@ -110,12 +110,12 @@ export class ProviderBase {
             iv: DataUtil.uint8ArrayToBase64(iv),
             data: DataUtil.uint8ArrayToBase64(encryptedBytes),
           };
-
-          const encryptedPayload = DataUtil.JsonStringify64(payload);
+          
+          const encryptedPayload = encodeURIComponent(DataUtil.JsonStringify64(payload));
           request.url = parts[0] + "?ss=" + encryptedPayload;
           return request;
         }
-        
+
         return request;
       }
       ,
