@@ -75,12 +75,11 @@ export class ProviderBase {
 
     client.interceptors.request.use(
       async function (request) {
-
         if (!ss) {
           return request;
         }
 
-        isDebug && console.debug('request', request.url, {...request});
+        isDebug && console.debug('request', request.url, { ...request });
 
         const iv = window.crypto.getRandomValues(new Uint8Array(16));
 
@@ -95,14 +94,10 @@ export class ProviderBase {
           };
 
           request.data = payload;
-
         } else {
-          const parts = (request.url ?? "").split("?");
-          const querystring = parts.length == 2 ? parts[1] : "";
-          
-          console.log("url:", request.url);
-          console.log("qs:", querystring);
-          
+          const parts = (request.url ?? '').split('?');
+          const querystring = parts.length == 2 ? parts[1] : '';
+
           const bytes = DataUtil.stringToUint8Array(querystring);
 
           const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
@@ -112,19 +107,16 @@ export class ProviderBase {
           };
 
           const encryptedPayload = DataUtil.JsonStringify64(payload);
-          request.url = parts[0] + "?ss=" + encryptedPayload;
+          request.url = parts[0] + '?ss=' + encodeURIComponent(encryptedPayload);
           return request;
         }
-        
-        return request;
-      }
-      ,
 
+        return request;
+      },
       function (error) {
         return Promise.reject(error);
       }
-    )
-    ;
+    );
 
     const decryptResponse = async (response: AxiosResponse<any, any>) => {
       const encryptedPayload = response.data;

@@ -245,16 +245,16 @@ export class DriveProvider extends ProviderBase {
     keyHeader: KeyHeader | undefined
   ): Promise<ArrayBuffer> {
     const client = this.createAxiosClient();
-    const request: GetFileRequest = {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    };
+    // const request: GetFileRequest = {
+    //   targetDrive: targetDrive,
+    //   fileId: fileId,
+    // };
     const config: AxiosRequestConfig = {
       responseType: 'arraybuffer',
     };
 
     return client
-      .post('/drive/files/payload', request, config)
+      .get('/drive/files/payload?' + DataUtil.stringify({ ...targetDrive, fileId }), config)
       .then((response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
