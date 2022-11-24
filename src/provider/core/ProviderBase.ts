@@ -81,26 +81,9 @@ export class ProviderBase {
 
         isDebug && console.debug('request', request.url, { ...request });
 
-        //const iv = window.crypto.getRandomValues(new Uint8Array(16));
+        //TODO: rotate IV in alignment with server caching time
+        const iv = window.crypto.getRandomValues(new Uint8Array(16));
 
-        const iv = new Uint8Array(16);
-        iv[0] = 13;
-        iv[1] = 33;
-        iv[2] = 77;
-        iv[3] = 889;
-        iv[4] = 33;
-        iv[5] = 7;
-        iv[6] = 89;
-        iv[7] = 66;
-        iv[8] = 22;
-        iv[9] = 55;
-        iv[10] = 77;
-        iv[11] = 45;
-        iv[12] = 86;
-        iv[13] = 11;
-        iv[14] = 88;
-        iv[15] = 101;
-        
         if (request.method?.toUpperCase() == 'POST') {
           const json = DataUtil.JsonStringify64(request.data);
           const bytes = DataUtil.stringToUint8Array(json);
