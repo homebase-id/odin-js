@@ -279,17 +279,18 @@ export class DriveProvider extends ProviderBase {
     height: number
   ): Promise<ArrayBuffer> {
     const client = this.createAxiosClient();
-    const request: GetFileRequest = {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    };
+    // const request: GetFileRequest = {
+    //   targetDrive: targetDrive,
+    //   fileId: fileId,
+    // };
     const config: AxiosRequestConfig = {
       responseType: 'arraybuffer',
     };
 
     return client
       .get(
-        '/drive/files/thumb?' + DataUtil.stringify({ ...request, width: width, height: height }),
+        '/drive/files/thumb?' +
+          DataUtil.stringify({ ...targetDrive, fileId, width: width, height: height }),
         config
       )
       .then((response) => {
