@@ -95,8 +95,10 @@ export class ProviderBase {
         if (request.method?.toUpperCase() == 'POST') {
           request.data = payload;
         } else {
+
+          request.data = undefined;
+
           const encryptedPayload = DataUtil.JsonStringify64(payload);
-          
           //TODO: detect if there's already a query string
           let prefix = "?";
           request.url += prefix + "ss=" + encryptedPayload;
