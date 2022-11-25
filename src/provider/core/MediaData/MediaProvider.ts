@@ -154,7 +154,7 @@ export class MediaProvider extends ProviderBase {
   };
 
   async getDecryptedMetadata(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
-    return await this._driveProvider.GetMetadata(targetDrive, fileId);
+    return await this._driveProvider.GetFileHeader(targetDrive, fileId);
   }
 
   async getDecryptedThumbnailMeta(
@@ -203,7 +203,7 @@ export class MediaProvider extends ProviderBase {
     contentType: string;
     content: ArrayBuffer;
   }> {
-    const header = await this._driveProvider.GetMetadata(targetDrive, fileId);
+    const header = await this._driveProvider.GetFileHeader(targetDrive, fileId);
     const keyHeader = header.fileMetadata.payloadIsEncrypted
       ? await this._driveProvider.DecryptKeyHeader(header.sharedSecretEncryptedKeyHeader)
       : undefined;

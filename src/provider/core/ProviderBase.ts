@@ -111,12 +111,9 @@ export class ProviderBase {
 
         isDebug && console.debug('request', request.url, { ...request });
 
-        //TODO: rotate IV in alignment with server caching time
-        // const iv = window.crypto.getRandomValues(new Uint8Array(16));
         const iv = getIv();
 
-        if (request.method?.toUpperCase() == 'POST') {
-          const json = DataUtil.JsonStringify64(request.data);
+        const encryptRequest = async (json: string) => {
           const bytes = DataUtil.stringToUint8Array(json);
 
           const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
@@ -125,18 +122,20 @@ export class ProviderBase {
             data: DataUtil.uint8ArrayToBase64(encryptedBytes),
           };
 
+          return payload;
+        };
+
+        if (request.method?.toUpperCase() == 'POST') {
+          const json = DataUtil.JsonStringify64(request.data);
+
+          const payload = await encryptRequest(json);
+
           request.data = payload;
         } else {
           const parts = (request.url ?? '').split('?');
           const querystring = parts.length == 2 ? parts[1] : '';
 
-          const bytes = DataUtil.stringToUint8Array(querystring);
-
-          const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
-          const payload: SharedSecretEncryptedPayload = {
-            iv: DataUtil.uint8ArrayToBase64(iv),
-            data: DataUtil.uint8ArrayToBase64(encryptedBytes),
-          };
+          const payload: SharedSecretEncryptedPayload = await encryptRequest(querystring);
 
           const encryptedPayload = encodeURIComponent(DataUtil.JsonStringify64(payload));
           request.url = parts[0] + '?ss=' + encryptedPayload;

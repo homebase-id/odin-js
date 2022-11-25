@@ -34,7 +34,8 @@ interface GetBatchRequest {
 }
 
 interface GetFileRequest {
-  targetDrive: TargetDrive;
+  alias: string;
+  type: string;
   fileId: string;
 }
 
@@ -183,7 +184,7 @@ export class DriveProvider extends ProviderBase {
 
   /// Get methods:
 
-  async GetMetadata(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
+  async GetFileHeader(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
     const cacheKey = `${targetDrive.alias}-${targetDrive.type}+${fileId}`;
     if (_internalMetadataCache.has(cacheKey)) {
       const cacheEntry = await _internalMetadataCache.get(cacheKey);
@@ -192,13 +193,13 @@ export class DriveProvider extends ProviderBase {
 
     const client = this.createAxiosClient();
 
-    // const request: GetFileRequest = {
-    //   targetDrive: targetDrive,
-    //   fileId: fileId,
-    // };
+    const request: GetFileRequest = {
+      ...targetDrive,
+      fileId,
+    };
 
     const promise = client
-      .get('/drive/files/header?' + DataUtil.stringify({ ...targetDrive, fileId }))
+      .get('/drive/files/header?' + DataUtil.stringify(request))
       .then((response) => {
         return response.data;
       })
@@ -245,16 +246,16 @@ export class DriveProvider extends ProviderBase {
     keyHeader: KeyHeader | undefined
   ): Promise<ArrayBuffer> {
     const client = this.createAxiosClient();
-    // const request: GetFileRequest = {
-    //   targetDrive: targetDrive,
-    //   fileId: fileId,
-    // };
+    const request: GetFileRequest = {
+      ...targetDrive,
+      fileId,
+    };
     const config: AxiosRequestConfig = {
       responseType: 'arraybuffer',
     };
 
     return client
-      .get('/drive/files/payload?' + DataUtil.stringify({ ...targetDrive, fileId }), config)
+      .get('/drive/files/payload?' + DataUtil.stringify(request), config)
       .then((response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
@@ -279,19 +280,16 @@ export class DriveProvider extends ProviderBase {
     height: number
   ): Promise<ArrayBuffer> {
     const client = this.createAxiosClient();
-    // const request: GetFileRequest = {
-    //   targetDrive: targetDrive,
-    //   fileId: fileId,
-    // };
+    const request: GetFileRequest = {
+      ...targetDrive,
+      fileId,
+    };
     const config: AxiosRequestConfig = {
       responseType: 'arraybuffer',
     };
 
     return client
-      .get(
-        '/drive/files/thumb?' + DataUtil.stringify({ ...targetDrive, fileId, width, height }),
-        config
-      )
+      .get('/drive/files/thumb?' + DataUtil.stringify({ ...request, width, height }), config)
       .then((response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
