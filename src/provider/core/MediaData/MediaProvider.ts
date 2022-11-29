@@ -111,7 +111,7 @@ export class MediaProvider extends ProviderBase {
       contentType: type ?? 'image/webp',
       appData: {
         tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],
-        uniqueId: uniqueId,
+        uniqueId: uniqueId ?? DataUtil.getNewId(),
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,
