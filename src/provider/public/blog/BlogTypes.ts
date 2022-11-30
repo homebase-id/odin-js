@@ -87,6 +87,7 @@ export interface ReadTimeStats {
 
 export interface Image extends PostContent {
   type: 'Image';
+  imageFileIds?: string[];
 }
 
 export interface Video extends PostContent {
