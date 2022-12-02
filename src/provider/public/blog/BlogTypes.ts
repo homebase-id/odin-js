@@ -1,6 +1,6 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { DataUtil } from '../../core/DataUtil';
-import { EmbeddedThumb, TargetDrive, ThumbSize } from '../../core/DriveData/DriveTypes';
+import { EmbeddedThumb, TargetDrive } from '../../core/DriveData/DriveTypes';
 
 export interface ChannelDefinition {
   channelId: string;
