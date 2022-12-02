@@ -92,14 +92,14 @@ export class AttributeDataProvider extends ProviderBase {
   async getAttributeVersions(
     profileId: string,
     sectionId: string | undefined,
-    attributeType: string
+    tags: string[]
   ): Promise<AttributeFile[] | undefined> {
     const targetDrive = this.getTargetDrive(profileId);
     const qp: FileQueryParams = {
       targetDrive: targetDrive,
       fileType: [AttributeConfig.AttributeFileType],
       groupId: sectionId ? [sectionId] : undefined,
-      tagsMatchAll: [attributeType],
+      tagsMatchAtLeastOne: tags,
     };
 
     const result = await this._driveProvider.QueryBatch(qp);
@@ -110,7 +110,7 @@ export class AttributeDataProvider extends ProviderBase {
 
       let attr: AttributeFile = {
         id: '',
-        type: attributeType,
+        type: '',
         sectionId: sectionId ?? '',
         priority: -1,
         data: null,

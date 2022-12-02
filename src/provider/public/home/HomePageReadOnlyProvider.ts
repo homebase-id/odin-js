@@ -32,11 +32,19 @@ export class HomePageReadOnlyProvider extends ProviderBase {
     );
   }
 
+  async getAttributeVersions(types: string[]): Promise<AttributeFile[] | undefined> {
+    return this._attributeDataProvider.getAttributeVersions(
+      HomePageConfig.DefaultDriveId,
+      undefined,
+      types
+    );
+  }
+
   async getBestAttributeVersion(type: string): Promise<Attribute | undefined> {
     const allAttributes = await this._attributeDataProvider.getAttributeVersions(
       HomePageConfig.DefaultDriveId,
       undefined,
-      type
+      [type]
     );
 
     return allAttributes?.[0];

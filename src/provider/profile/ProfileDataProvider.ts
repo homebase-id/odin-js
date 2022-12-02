@@ -215,7 +215,7 @@ export class ProfileDataProvider extends ProviderBase {
   async getAttributeVersions(
     profileId: string,
     sectionId: string | undefined,
-    type: string
+    type: string[]
   ): Promise<AttributeFile[] | undefined> {
     return this._attributeDataProvider.getAttributeVersions(profileId, sectionId, type);
   }
@@ -225,7 +225,7 @@ export class ProfileDataProvider extends ProviderBase {
     sectionId: string | undefined,
     type: string
   ): Promise<Attribute | undefined> {
-    const allAttributes = await this.getAttributeVersions(profileId, sectionId, type);
+    const allAttributes = await this.getAttributeVersions(profileId, sectionId, [type]);
     return allAttributes?.[0];
   }
 }
