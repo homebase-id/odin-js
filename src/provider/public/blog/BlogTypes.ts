@@ -1,6 +1,6 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { DataUtil } from '../../core/DataUtil';
-import { TargetDrive } from '../../core/DriveData/DriveTypes';
+import { EmbeddedThumb, TargetDrive, ThumbSize } from '../../core/DriveData/DriveTypes';
 
 export interface ChannelDefinition {
   channelId: string;
@@ -58,6 +58,7 @@ export interface PostFile<T extends PostContent> {
   fileId?: string;
   acl?: AccessControlList;
   content: T;
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export interface PostContent {

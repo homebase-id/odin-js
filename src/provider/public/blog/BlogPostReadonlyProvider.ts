@@ -188,6 +188,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
       fileId: dsr.fileId,
       acl: dsr.serverMetadata?.accessControlList,
       content: content,
+      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
     };
 
     return file;

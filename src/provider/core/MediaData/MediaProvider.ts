@@ -29,6 +29,11 @@ interface ThumbnailFile extends EmbeddedThumb {
   contentAsByteArray: Uint8Array;
 }
 
+export interface ImageUploadResult {
+  fileId: string;
+  previewThumbnail: EmbeddedThumb;
+}
+
 const baseThumbSizes = [
   { quality: 100, width: 250, height: 250 },
   { quality: 100, width: 500, height: 500 },
@@ -54,7 +59,7 @@ export class MediaProvider extends ProviderBase {
     fileId?: string,
     type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string,
     uniqueId?: string
-  ): Promise<string | null> {
+  ): Promise<ImageUploadResult | undefined> {
     if (!targetDrive) {
       throw 'Missing target drive';
     }
@@ -107,6 +112,21 @@ export class MediaProvider extends ProviderBase {
       )),
     ];
 
+    const previewThumbnail: EmbeddedThumb = {
+      pixelWidth: tinyThumb.naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
+      pixelHeight: tinyThumb.naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
+      contentType: tinyThumb.contentType,
+      content: tinyThumb.content,
+    };
+
+    const thumbsizes = additionalThumbnails.map((thumb) => {
+      return {
+        pixelHeight: thumb.pixelHeight,
+        pixelWidth: thumb.pixelWidth,
+        contentType: thumb.contentType,
+      };
+    });
+
     const metadata: UploadFileMetadata = {
       contentType: type ?? 'image/webp',
       appData: {
@@ -115,19 +135,8 @@ export class MediaProvider extends ProviderBase {
         contentIsComplete: false,
         fileType: 0,
         jsonContent: null,
-        previewThumbnail: {
-          pixelWidth: tinyThumb.naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          pixelHeight: tinyThumb.naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          contentType: tinyThumb.contentType,
-          content: tinyThumb.content,
-        },
-        additionalThumbnails: additionalThumbnails.map((thumb) => {
-          return {
-            pixelHeight: thumb.pixelHeight,
-            pixelWidth: thumb.pixelWidth,
-            contentType: thumb.contentType,
-          };
-        }),
+        previewThumbnail: previewThumbnail,
+        additionalThumbnails: thumbsizes,
       },
       payloadIsEncrypted: encrypt,
       accessControlList: acl,
@@ -146,7 +155,7 @@ export class MediaProvider extends ProviderBase {
       encrypt
     );
 
-    return result.file.fileId;
+    return { fileId: result.file.fileId, previewThumbnail };
   }
 
   removeImage = async (imageFileId: string, targetDrive: TargetDrive) => {
