@@ -63,6 +63,15 @@ export class DataUtil {
     return new TextDecoder().decode(bytes);
   }
 
+  static byteArrayToNumber = function (byteArray: Uint8Array) {
+    let value = 0;
+    for (let i = byteArray.length - 1; i >= 0; i--) {
+      value = value * 256 + byteArray[i];
+    }
+
+    return value;
+  };
+
   static getNewId() {
     //return DataUtil.toGuidId(nanoid());
     return Guid.create().toString().replace(/-/g, '');
