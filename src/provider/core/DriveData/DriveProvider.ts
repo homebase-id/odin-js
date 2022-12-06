@@ -218,8 +218,8 @@ export class DriveProvider extends ProviderBase {
     fileId: string,
     keyHeader: KeyHeader | undefined
   ): Promise<T> {
-    return this.GetPayloadBytes(targetDrive, fileId, keyHeader).then((bytes) => {
-      const json = DataUtil.byteArrayToString(new Uint8Array(bytes));
+    return this.GetPayloadBytes(targetDrive, fileId, keyHeader).then((data) => {
+      const json = DataUtil.byteArrayToString(new Uint8Array(data.bytes));
       try {
         const o = JSON.parse(json);
         return o;
@@ -244,7 +244,7 @@ export class DriveProvider extends ProviderBase {
     targetDrive: TargetDrive,
     fileId: string,
     keyHeader: KeyHeader | undefined
-  ): Promise<ArrayBuffer> {
+  ): Promise<{ bytes: ArrayBuffer; contentType: string }> {
     const client = this.createAxiosClient();
     const request: GetFileRequest = {
       ...targetDrive,
@@ -256,14 +256,33 @@ export class DriveProvider extends ProviderBase {
 
     return client
       .get('/drive/files/payload?' + DataUtil.stringify(request), config)
-      .then((response) => {
+      .then(async (response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
           return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-            return bytes;
+            return {
+              bytes,
+              contentType: `${response.headers.decryptedcontenttype}`,
+            };
           });
+        } else if (
+          response.headers.payloadencrypted === 'True' &&
+          response.headers.sharedsecretencryptedheader64
+        ) {
+          const encryptedKeyHeader = DataUtil.splitSharedSecretEncryptedKeyHeader(
+            response.headers.sharedsecretencryptedheader64
+          );
+
+          const keyHeader = await this.DecryptKeyHeader(encryptedKeyHeader);
+          const cipher = new Uint8Array(response.data);
+
+          const bytes = await this.DecryptUsingKeyHeader(cipher, keyHeader);
+          return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
         } else {
-          return new Uint8Array(response.data);
+          return {
+            bytes: new Uint8Array(response.data),
+            contentType: `${response.headers.decryptedcontenttype}`,
+          };
         }
       })
       .catch((error) => {
@@ -278,7 +297,7 @@ export class DriveProvider extends ProviderBase {
     keyHeader: KeyHeader | undefined,
     width: number,
     height: number
-  ): Promise<ArrayBuffer> {
+  ): Promise<{ bytes: ArrayBuffer; contentType: string }> {
     const client = this.createAxiosClient();
     const request: GetFileRequest = {
       ...targetDrive,
@@ -290,14 +309,33 @@ export class DriveProvider extends ProviderBase {
 
     return client
       .get('/drive/files/thumb?' + DataUtil.stringify({ ...request, width, height }), config)
-      .then((response) => {
+      .then(async (response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
           return this.DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-            return bytes;
+            return {
+              bytes,
+              contentType: `${response.headers.decryptedcontenttype}`,
+            };
           });
+        } else if (
+          response.headers.payloadencrypted === 'True' &&
+          response.headers.sharedsecretencryptedheader64
+        ) {
+          const encryptedKeyHeader = DataUtil.splitSharedSecretEncryptedKeyHeader(
+            response.headers.sharedsecretencryptedheader64
+          );
+
+          const keyHeader = await this.DecryptKeyHeader(encryptedKeyHeader);
+          const cipher = new Uint8Array(response.data);
+
+          const bytes = await this.DecryptUsingKeyHeader(cipher, keyHeader);
+          return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
         } else {
-          return new Uint8Array(response.data);
+          return {
+            bytes: new Uint8Array(response.data),
+            contentType: `${response.headers.decryptedcontenttype}`,
+          };
         }
       })
       .catch((error) => {

@@ -207,31 +207,24 @@ export class MediaProvider extends ProviderBase {
     fileId: string,
     size?: ThumbSize
   ): Promise<{
-    pixelHeight: number;
-    pixelWidth: number;
+    pixelHeight?: number;
+    pixelWidth?: number;
     contentType: string;
     content: ArrayBuffer;
   }> {
-    const header = await this._driveProvider.GetFileHeader(targetDrive, fileId);
-    const keyHeader = header.fileMetadata.payloadIsEncrypted
-      ? await this._driveProvider.DecryptKeyHeader(header.sharedSecretEncryptedKeyHeader)
-      : undefined;
-
-    const bytesPromise = size
+    const data = await (size
       ? this._driveProvider.GetThumbBytes(
           targetDrive,
           fileId,
-          keyHeader,
+          undefined,
           size.pixelWidth,
           size.pixelHeight
         )
-      : this._driveProvider.GetPayloadBytes(targetDrive, fileId, keyHeader);
+      : this._driveProvider.GetPayloadBytes(targetDrive, fileId, undefined));
 
     return {
-      pixelHeight: header.fileMetadata.appData.previewThumbnail?.pixelHeight ?? 0,
-      pixelWidth: header.fileMetadata.appData.previewThumbnail?.pixelWidth ?? 0,
-      contentType: header.fileMetadata.appData.previewThumbnail?.contentType ?? '',
-      content: await bytesPromise,
+      contentType: data.contentType,
+      content: data.bytes,
     };
   }
 

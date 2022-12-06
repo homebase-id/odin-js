@@ -1,4 +1,5 @@
 import { Guid } from 'guid-typescript';
+import { EncryptedKeyHeader } from './DriveData/DriveTypes';
 import { AccessControlList } from './DriveData/DriveUploadTypes';
 const md5 = require('js-md5');
 
@@ -128,5 +129,23 @@ export class DataUtil {
     }
 
     return true;
+  }
+
+  static splitSharedSecretEncryptedKeyHeader(
+    sharedsecretencryptedheader64: string
+  ): EncryptedKeyHeader {
+    const byteArray = DataUtil.base64ToUint8Array(sharedsecretencryptedheader64);
+
+    if (byteArray.length !== 68) {
+      throw new Error("shared secret encrypted keyheader has an unexpected length, can't split");
+    }
+
+    const iv = byteArray.slice(0, 16);
+    const encryptedAesKey = byteArray.slice(16, 64);
+    const version = byteArray.slice(64);
+
+    const parsedVersion = DataUtil.byteArrayToNumber(version);
+
+    return { encryptedAesKey, encryptionVersion: parsedVersion, iv, type: 11 };
   }
 }
