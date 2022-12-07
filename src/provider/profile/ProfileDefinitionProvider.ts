@@ -30,10 +30,10 @@ const initialLinksSection = {
   isSystemSection: true,
 };
 
-const initialFinancialProfile: ProfileDefinition = {
+const initialWallet: ProfileDefinition = {
   profileId: BuiltInProfiles.WalletId,
-  name: 'Financial Info',
-  description: 'Financial information',
+  name: 'Wallet',
+  description: 'My wallet',
 };
 
 const initialCreditCardSection = {
@@ -69,10 +69,10 @@ export class ProfileDefinitionProvider extends ProviderBase {
       await this.saveProfileSection(initialStandardProfile.profileId, initialPersonalInfoSection);
       await this.saveProfileSection(initialStandardProfile.profileId, initialLinksSection);
     }
-    if (!(await this.getProfileDefinition(initialFinancialProfile.profileId))) {
-      await this.saveProfileDefinition(initialFinancialProfile);
+    if (!(await this.getProfileDefinition(initialWallet.profileId))) {
+      await this.saveProfileDefinition(initialWallet);
 
-      await this.saveProfileSection(initialFinancialProfile.profileId, initialCreditCardSection);
+      await this.saveProfileSection(initialWallet.profileId, initialCreditCardSection);
     }
   }
 
