@@ -73,7 +73,6 @@ export interface PostContent {
 
 export interface Article extends PostContent {
   abstract: string;
-  headerImageFileId: string;
   body: string | Record<string, unknown>[];
   type: 'Article';
   readingTimeStats?: ReadTimeStats;
