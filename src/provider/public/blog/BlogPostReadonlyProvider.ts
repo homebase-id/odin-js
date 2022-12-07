@@ -9,14 +9,7 @@ import {
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
 import { BlogDefinitionProvider } from './BlogDefinitionProvider';
-import {
-  BlogConfig,
-  PostContent,
-  postTypeToTag,
-  ChannelDefinition,
-  PostFile,
-  PostType,
-} from './BlogTypes';
+import { BlogConfig, PostContent, ChannelDefinition, PostFile, PostType } from './BlogTypes';
 
 interface BlogPostReadonlyProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -40,14 +33,14 @@ export class BlogPostReadonlyProvider extends ProviderBase {
   //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
   async getPosts<T extends PostContent>(
     channelId: string,
-    type: PostType | undefined,
+    tags: string[] | undefined,
     cursorState: string | undefined = undefined,
     pageSize = 10
   ): Promise<CursoredResult<PostFile<T>[]>> {
     const targetDrive = this._blogDefinitionProvider.getTargetDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
-      tagsMatchAtLeastOne: type ? [postTypeToTag(type).toString()] : undefined,
+      tagsMatchAll: tags,
       fileType: [BlogConfig.PostFileType],
     };
 
@@ -70,7 +63,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
 
   //Gets posts across all channels, ordered by date
   async getRecentPosts<T extends PostContent>(
-    type: PostType | undefined,
+    tags: string[] | undefined,
     pageSize = 10,
     cursorState: Record<string, string> | undefined = undefined
   ): Promise<MultiRequestCursoredResult<PostFile<T>[]>> {
@@ -80,7 +73,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
       channels.map(async (channel) => {
         const result = await this.getPosts<T>(
           channel.channelId,
-          type,
+          tags,
           cursorState?.[channel.channelId],
           pageSize
         );

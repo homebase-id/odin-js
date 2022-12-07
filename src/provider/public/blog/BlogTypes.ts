@@ -54,6 +54,8 @@ export const postTypeToTag = (type: PostType): string => {
   throw 'Invalid post type';
 };
 
+export const DraftTag = DataUtil.toGuidId('draft');
+
 export interface PostFile<T extends PostContent> {
   fileId?: string;
   acl?: AccessControlList;
