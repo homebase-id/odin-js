@@ -454,7 +454,12 @@ export class DriveProvider extends ProviderBase {
     const data = new FormData();
     data.append('instructions', this.toBlob(instructions));
     data.append('metaData', new Blob([encryptedDescriptor]));
-    data.append('payload', new Blob([encryptedPayload]));
+
+    if (metadata.appData.contentIsComplete) {
+      data.append('payload', new Blob([]));
+    } else {
+      data.append('payload', new Blob([encryptedPayload]));
+    }
 
     if (thumbnails) {
       for (let i = 0; i < thumbnails.length; i++) {
