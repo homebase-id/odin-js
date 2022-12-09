@@ -9,7 +9,7 @@ import {
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
 import { BlogDefinitionProvider } from './BlogDefinitionProvider';
-import { BlogConfig, PostContent, ChannelDefinition, PostFile, PostType } from './BlogTypes';
+import { BlogConfig, PostContent, ChannelDefinition, PostFile, DraftTag } from './BlogTypes';
 
 interface BlogPostReadonlyProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -182,6 +182,9 @@ export class BlogPostReadonlyProvider extends ProviderBase {
       acl: dsr.serverMetadata?.accessControlList,
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      isDraft: dsr.fileMetadata.appData.tags?.some((tag) =>
+        DataUtil.stringGuidsEqual(tag, DraftTag)
+      ),
     };
 
     return file;
