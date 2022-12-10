@@ -44,7 +44,10 @@ export class AttributeDataProvider extends ProviderBase {
       groupId: sectionId ? [sectionId] : undefined,
     };
 
-    const result = await this._driveProvider.QueryBatch(qp, { maxRecords: pageSize });
+    const result = await this._driveProvider.QueryBatch(qp, {
+      maxRecords: pageSize,
+      includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
+    });
 
     let attributes: AttributeFile[] = [];
 
