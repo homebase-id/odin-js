@@ -105,7 +105,10 @@ export class AttributeDataProvider extends ProviderBase {
       tagsMatchAtLeastOne: tags,
     };
 
-    const result = await this._driveProvider.QueryBatch(qp);
+    const result = await this._driveProvider.QueryBatch(qp, {
+      maxRecords: 10,
+      includeMetadataHeader: true,
+    });
     let attributes: AttributeFile[] = [];
 
     for (const key in result.searchResults) {
@@ -204,7 +207,10 @@ export class AttributeDataProvider extends ProviderBase {
       tagsMatchAll: tags ?? undefined,
     };
 
-    const result = await this._driveProvider.QueryBatch(qp, { maxRecords: pageSize });
+    const result = await this._driveProvider.QueryBatch(qp, {
+      maxRecords: pageSize,
+      includeMetadataHeader: true,
+    });
 
     let attributes: AttributeFile[] = [];
 
