@@ -13,6 +13,12 @@ export const AttributeDefinitions = {
     description: 'First name, last name, etc.',
   },
 
+  Nickname: {
+    type: DataUtil.toGuidId('nickname'),
+    name: 'Nickname',
+    description: 'Friendly name',
+  },
+
   Photo: {
     type: DataUtil.toGuidId('photo'),
     name: 'Profile photo',
@@ -35,6 +41,12 @@ export const AttributeDefinitions = {
     type: DataUtil.toGuidId('phonenumber'),
     name: 'Phone number',
     description: 'Your phone number',
+  },
+
+  Email: {
+    type: DataUtil.toGuidId('email'),
+    name: 'Email',
+    description: 'Your email',
   },
 
   FacebookUsername: {

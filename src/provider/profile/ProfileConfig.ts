@@ -19,25 +19,48 @@ export class MinimalProfileFields {
   static readonly ProfileImageId: string = 'profileImageId';
   static readonly FullBioId: string = 'full_bio';
   static readonly ShortBioId: string = 'short_bio';
+
   static readonly GivenNameId: string = 'givenName';
+  static readonly AdditionalName: string = 'additionalName';
   static readonly SurnameId: string = 'surname';
 }
 
-export class LinkProfileFields {
+export class LinkFields {
   static readonly LinkText: string = 'link_text';
   static readonly LinkTarget: string = 'link_target';
 }
 
-export class LocationProfileFields {
+export class LocationFields {
+  static readonly Type: string = 'location_type';
+  static readonly Street: string = 'location_street';
+  static readonly Postcode: string = 'location_postcode';
   static readonly City: string = 'location_city';
   static readonly Country: string = 'location_country';
+  static readonly Locality: string = 'location_locality';
+  static readonly Region: string = 'location_region';
+  static readonly Coordinates: string = 'location_coordinates';
 }
 
-export class BirthdayProfileFields {
+export class NicknameFields {
+  static readonly NickName: string = 'nickName';
+}
+export class BirthdayFields {
   static readonly Date: string = 'birtday_date';
 }
-export class PhoneProfileFields {
+export class PhoneFields {
   static readonly PhoneNumber: string = 'phone_number';
+}
+
+export class EmailFields {
+  static readonly Email: string = 'email';
+}
+
+export class CredictCardFields {
+  static readonly Alias: string = 'cc_alias';
+  static readonly Name: string = 'cc_name';
+  static readonly Number: string = 'cc_number';
+  static readonly Expiration: string = 'cc_expiration';
+  static readonly Cvc: string = 'cc_cvc';
 }
 
 export class SocialProfileFields {
