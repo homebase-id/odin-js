@@ -546,6 +546,10 @@ export class DriveProvider extends ProviderBase {
 
     if (fileMetadata.appData.contentIsComplete && includesJsonContent) {
       return await this.DecryptJsonContent<T>(fileMetadata, keyheader);
+    } else if (fileMetadata.appData.contentIsComplete) {
+      // When contentIsComplete but !includesJsonContent the query before was done without including the jsonContent; So we just get and parse
+      const fileHeader = await this.GetFileHeader(targetDrive, fileId);
+      return await this.DecryptJsonContent<T>(fileHeader.fileMetadata, keyheader);
     } else {
       return await this.GetPayloadAsJson<T>(targetDrive, fileId, keyheader);
     }
