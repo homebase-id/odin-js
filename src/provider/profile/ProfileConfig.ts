@@ -23,6 +23,7 @@ export class MinimalProfileFields {
   static readonly GivenNameId: string = 'givenName';
   static readonly AdditionalName: string = 'additionalName';
   static readonly SurnameId: string = 'surname';
+  static readonly DisplayName: string = 'displayName';
 }
 
 export class LinkFields {
@@ -39,6 +40,7 @@ export class LocationFields {
   static readonly Locality: string = 'location_locality';
   static readonly Region: string = 'location_region';
   static readonly Coordinates: string = 'location_coordinates';
+  static readonly DisplayLocation: string = 'location_display';
 }
 
 export class NicknameFields {
@@ -63,7 +65,7 @@ export class CredictCardFields {
   static readonly Cvc: string = 'cc_cvc';
 }
 
-export class SocialProfileFields {
+export class SocialFields {
   static readonly Twitter: string = 'twitter';
   static readonly Facebook: string = 'facebook';
   static readonly LinkedIn: string = 'linkedin';
