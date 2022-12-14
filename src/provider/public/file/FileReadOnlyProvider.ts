@@ -3,7 +3,7 @@ import { DataUtil } from '../../core/DataUtil';
 import { DriveSearchResult, KeyHeader } from '../../core/DriveData/DriveTypes';
 import { ProviderBase } from '../../core/ProviderBase';
 
-type ResponseEntry = {
+export interface ResponseEntry {
   additionalThumbnails?: {
     content: string;
     contentType: string;
@@ -12,18 +12,12 @@ type ResponseEntry = {
   }[];
   header: DriveSearchResult;
   payload: Record<string, any>;
-};
+}
 
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
 export class FileReadOnlyProvider extends ProviderBase {
   async GetFile(fileName: string): Promise<Map<string, ResponseEntry[]>> {
-    // If user has a shared secret, never return the static files, as
-    //   these only contain anonymous data which might not be optimal for the connected user
-    if (this.getSharedSecret()) {
-      return new Map();
-    }
-
     try {
       if (_internalFileCache.has(`${this.getRoot()}+${fileName}`)) {
         return (await _internalFileCache.get(`${this.getRoot()}+${fileName}`)) ?? new Map();

@@ -36,6 +36,9 @@ export * from './provider/public/blog/BlogDefinitionProvider';
 export * from './provider/public/circleNetwork/CircleNetworkReadOnlyProvider';
 export * from './provider/public/circleNetwork/CircleNetworkTypes';
 
+// File
+export * from './provider/public/file/FileReadOnlyProvider';
+
 export * from './provider/publicClient';
 export * from './provider/coreClient';
 export * from './provider/client';
