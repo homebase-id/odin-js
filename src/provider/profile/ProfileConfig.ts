@@ -32,15 +32,14 @@ export class LinkFields {
 }
 
 export class LocationFields {
-  static readonly Type: string = 'location_type';
-  static readonly Street: string = 'location_street';
-  static readonly Postcode: string = 'location_postcode';
-  static readonly City: string = 'location_city';
-  static readonly Country: string = 'location_country';
-  static readonly Locality: string = 'location_locality';
-  static readonly Region: string = 'location_region';
-  static readonly Coordinates: string = 'location_coordinates';
-  static readonly DisplayLocation: string = 'location_display';
+  static readonly Label: string = 'label';
+  static readonly AddressLine1: string = 'address1';
+  static readonly AddressLine2: string = 'address2';
+  static readonly Postcode: string = 'postcode';
+  static readonly City: string = 'city';
+  static readonly Country: string = 'country';
+  static readonly Coordinates: string = 'coordinates';
+  static readonly DisplayLocation: string = 'display';
 }
 
 export class NicknameFields {
@@ -50,10 +49,12 @@ export class BirthdayFields {
   static readonly Date: string = 'birtday_date';
 }
 export class PhoneFields {
+  static readonly Label: string = 'label';
   static readonly PhoneNumber: string = 'phone_number';
 }
 
 export class EmailFields {
+  static readonly Label: string = 'label';
   static readonly Email: string = 'email';
 }
 
