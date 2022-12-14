@@ -23,7 +23,7 @@ export class FileReadOnlyProvider extends ProviderBase {
         return (await _internalFileCache.get(`${this.getRoot()}+${fileName}`)) ?? new Map();
       }
 
-      const httpClient = this.createAxiosClient();
+      const httpClient = this.createAxiosClient(true);
 
       const fetchResponseMap = async (fileName: string) => {
         const response = await httpClient({
