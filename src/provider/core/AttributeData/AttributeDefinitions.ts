@@ -25,10 +25,10 @@ export const AttributeDefinitions = {
     description: 'A photo or image of various formats',
   },
 
-  Location: {
+  Address: {
     type: DataUtil.toGuidId('location'),
-    name: 'Location',
-    description: 'A general location',
+    name: 'Address',
+    description: 'An address',
   },
 
   Birthday: {
@@ -113,7 +113,7 @@ export const AttributeDefinitions = {
 export const attributeViewRegistry: AttributeDefinition[] = [
   AttributeDefinitions.Name,
   AttributeDefinitions.Photo,
-  AttributeDefinitions.Location,
+  AttributeDefinitions.Address,
   AttributeDefinitions.TwitterUsername,
   AttributeDefinitions.FacebookUsername,
   AttributeDefinitions.TiktokUsername,
