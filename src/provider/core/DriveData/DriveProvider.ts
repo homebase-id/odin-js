@@ -46,6 +46,12 @@ const EmptyKeyHeader: KeyHeader = {
 
 const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
 
+const assertIfDefined = (key: string, value: unknown) => {
+  if (!value) {
+    throw new Error(`${key} undefined`);
+  }
+};
+
 export class DriveProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
     super(options);
@@ -185,6 +191,9 @@ export class DriveProvider extends ProviderBase {
   /// Get methods:
 
   async GetFileHeader(targetDrive: TargetDrive, fileId: string): Promise<DriveSearchResult> {
+    assertIfDefined('TargetDrive', targetDrive);
+    assertIfDefined('FileId', fileId);
+
     const cacheKey = `${targetDrive.alias}-${targetDrive.type}+${fileId}`;
     if (_internalMetadataCache.has(cacheKey)) {
       const cacheEntry = await _internalMetadataCache.get(cacheKey);
@@ -245,6 +254,9 @@ export class DriveProvider extends ProviderBase {
     fileId: string,
     keyHeader: KeyHeader | undefined
   ): Promise<{ bytes: ArrayBuffer; contentType: string }> {
+    assertIfDefined('TargetDrive', targetDrive);
+    assertIfDefined('FileId', fileId);
+
     const client = this.createAxiosClient();
     const request: GetFileRequest = {
       ...targetDrive,
@@ -298,6 +310,11 @@ export class DriveProvider extends ProviderBase {
     width: number,
     height: number
   ): Promise<{ bytes: ArrayBuffer; contentType: string }> {
+    assertIfDefined('TargetDrive', targetDrive);
+    assertIfDefined('FileId', fileId);
+    assertIfDefined('Width', width);
+    assertIfDefined('Height', height);
+
     const client = this.createAxiosClient();
     const request: GetFileRequest = {
       ...targetDrive,
@@ -383,6 +400,9 @@ export class DriveProvider extends ProviderBase {
     deleteLinkedFiles?: boolean,
     recipients?: string[]
   ): Promise<boolean | void> {
+    assertIfDefined('TargetDrive', targetDrive);
+    assertIfDefined('FileId', fileId);
+
     const client = this.createAxiosClient();
 
     const request = {
