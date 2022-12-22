@@ -13,6 +13,7 @@ import {
   DriveSearchResult,
   EncryptedKeyHeader,
   FileMetadata,
+  QueryBatchCollectionResponse,
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../Types';
@@ -186,6 +187,35 @@ export class DriveProvider extends ProviderBase {
     return client.post<QueryBatchResponse>('/drive/query/batch', request).then((response) => {
       return response.data;
     });
+  }
+
+  async QueryBatchCollection(
+    queries: {
+      name: string;
+      queryParams: FileQueryParams;
+      resultOptions?: GetBatchQueryResultOptions;
+    }[]
+  ): Promise<QueryBatchCollectionResponse> {
+    const client = this.createAxiosClient();
+
+    const updatedQueries = queries.map((query) => {
+      return {
+        ...query,
+        resultOptions: query.resultOptions ?? {
+          cursorState: undefined,
+          maxRecords: 10,
+          includeMetadataHeader: true,
+        },
+      };
+    });
+
+    return client
+      .post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
+        queries: updatedQueries,
+      })
+      .then((response) => {
+        return response.data;
+      });
   }
 
   /// Get methods:
