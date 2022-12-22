@@ -1,5 +1,5 @@
 {
-  "version": "0.2.133-alpha.57",
+  "version": "0.2.133-alpha.58",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
