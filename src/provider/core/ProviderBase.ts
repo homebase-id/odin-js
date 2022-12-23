@@ -152,7 +152,6 @@ export class ProviderBase {
     const decryptResponse = async (response: AxiosResponse<any, any>) => {
       const encryptedPayload = response.data;
 
-      //TODO: determine if we should expect the payload to be encrypted or not
       if (encryptedPayload && encryptedPayload.data && encryptedPayload.iv && ss) {
         try {
           const iv = DataUtil.base64ToUint8Array(response.data.iv);
