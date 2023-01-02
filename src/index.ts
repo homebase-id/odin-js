@@ -20,12 +20,10 @@ export * from './provider/core/AttributeData/AttributeDataTypes';
 // Profile
 export * from './provider/profile/ProfileConfig';
 export * from './provider/profile/ProfileTypes';
-export * from './provider/profile/ProfileDataProvider';
 export * from './provider/profile/ProfileDefinitionProvider';
 
 // Home
 export * from './provider/public/home/HomeTypes';
-export * from './provider/public/home/HomePageProvider';
 
 // Blog
 export * from './provider/public/blog/BlogTypes';

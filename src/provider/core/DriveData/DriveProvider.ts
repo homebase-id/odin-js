@@ -52,6 +52,17 @@ const assertIfDefined = (key: string, value: unknown) => {
     throw new Error(`${key} undefined`);
   }
 };
+export const DefaultQueryModifiedResultOption = {
+  cursor: undefined,
+  maxRecords: 10,
+  includeJsonContent: true,
+  excludePreviewThumbnail: false,
+};
+export const DefaultQueryBatchResultOption = {
+  cursorState: undefined,
+  maxRecords: 10,
+  includeMetadataHeader: true,
+};
 
 export class DriveProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
@@ -146,18 +157,9 @@ export class DriveProvider extends ProviderBase {
   ): Promise<QueryModifiedResponse> {
     const client = this.createAxiosClient();
 
-    if (!ro) {
-      ro = {
-        cursor: undefined,
-        maxRecords: 10,
-        includeJsonContent: true,
-        excludePreviewThumbnail: false,
-      };
-    }
-
     const request: GetModifiedRequest = {
       queryParams: params,
-      resultOptions: ro,
+      resultOptions: ro ?? DefaultQueryModifiedResultOption,
     };
 
     return client.post<QueryModifiedResponse>('/drive/query/modified', request).then((response) => {
@@ -171,17 +173,9 @@ export class DriveProvider extends ProviderBase {
   ): Promise<QueryBatchResponse> {
     const client = this.createAxiosClient();
 
-    if (!ro) {
-      ro = {
-        cursorState: undefined,
-        maxRecords: 10,
-        includeMetadataHeader: true,
-      };
-    }
-
     const request: GetBatchRequest = {
       queryParams: params,
-      resultOptionsRequest: ro,
+      resultOptionsRequest: ro ?? DefaultQueryBatchResultOption,
     };
 
     return client.post<QueryBatchResponse>('/drive/query/batch', request).then((response) => {
@@ -201,11 +195,7 @@ export class DriveProvider extends ProviderBase {
     const updatedQueries = queries.map((query) => {
       return {
         ...query,
-        resultOptions: query.resultOptions ?? {
-          cursorState: undefined,
-          maxRecords: 10,
-          includeMetadataHeader: true,
-        },
+        resultOptions: query.resultOptions ?? DefaultQueryBatchResultOption,
       };
     });
 
@@ -413,14 +403,6 @@ export class DriveProvider extends ProviderBase {
 
     return JSON.parse(fileMetaData.appData.jsonContent);
   }
-
-  // async GetPayloadAsStream(
-  //   targetDrive: TargetDrive,
-  //   fileId: Guid,
-  //   keyHeader: KeyHeader
-  // ): Promise<any> {
-  //   throw 'Not Implemented';
-  // }
 
   /// Delete methods:
 

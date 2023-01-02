@@ -1,5 +1,5 @@
 import { DataUtil } from '../core/DataUtil';
-import { DriveProvider } from '../core/DriveData/DriveProvider';
+import { DefaultQueryBatchResultOption, DriveProvider } from '../core/DriveData/DriveProvider';
 import { FileQueryParams, TargetDrive } from '../core/DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../core/ProviderBase';
 import {
@@ -9,39 +9,6 @@ import {
 } from '../core/DriveData/DriveUploadTypes';
 import { BuiltInProfiles, ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
-
-const initialStandardProfile: ProfileDefinition = {
-  profileId: BuiltInProfiles.StandardProfileId,
-  name: 'Standard Info',
-  description: 'Standard Profile Information',
-};
-
-const initialPersonalInfoSection = {
-  sectionId: BuiltInProfiles.PersonalInfoSectionId,
-  name: 'Personal Info',
-  priority: 1000,
-  isSystemSection: true,
-};
-
-const initialLinksSection = {
-  sectionId: BuiltInProfiles.ExternalLinksSectionId,
-  name: 'Links',
-  priority: 2000,
-  isSystemSection: true,
-};
-
-const initialWallet: ProfileDefinition = {
-  profileId: BuiltInProfiles.WalletId,
-  name: 'Wallet',
-  description: 'My wallet',
-};
-
-const initialCreditCardSection = {
-  sectionId: BuiltInProfiles.CreditCardsSectionId,
-  name: 'Credit Cards',
-  priority: 1000,
-  isSystemSection: true,
-};
 
 interface ProfileDefinitionProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -62,20 +29,6 @@ export class ProfileDefinitionProvider extends ProviderBase {
     return BuiltInProfiles.StandardProfileId;
   }
 
-  async ensureConfiguration() {
-    if (!(await this.getProfileDefinition(initialStandardProfile.profileId))) {
-      await this.saveProfileDefinition(initialStandardProfile);
-
-      await this.saveProfileSection(initialStandardProfile.profileId, initialPersonalInfoSection);
-      await this.saveProfileSection(initialStandardProfile.profileId, initialLinksSection);
-    }
-    if (!(await this.getProfileDefinition(initialWallet.profileId))) {
-      await this.saveProfileDefinition(initialWallet);
-
-      await this.saveProfileSection(initialWallet.profileId, initialCreditCardSection);
-    }
-  }
-
   async getProfileDefinitions(): Promise<ProfileDefinition[]> {
     const drives = await this._driveProvider.GetDrivesByType(
       ProfileConfig.ProfileDriveType,
@@ -90,13 +43,41 @@ export class ProfileDefinitionProvider extends ProviderBase {
       };
     });
 
-    const definitions = await Promise.all(
-      profileHeaders.map(async (header) => {
-        const { definition } = (await this.getProfileDefinitionInternal(header.id)) ?? {
-          definition: undefined,
-        };
+    const queries = profileHeaders.map((header) => {
+      const profileId = header.id;
+      const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
-        return definition;
+      const params: FileQueryParams = {
+        clientUniqueIdAtLeastOne: [profileId],
+        targetDrive: targetDrive,
+        fileType: [ProfileConfig.ProfileDefinitionFileType],
+      };
+
+      return {
+        name: profileId,
+        queryParams: params,
+        resultOptions: DefaultQueryBatchResultOption,
+      };
+    });
+
+    const response = await this._driveProvider.QueryBatchCollection(queries);
+
+    const definitions = await Promise.all(
+      response.results.map(async (response) => {
+        if (response.searchResults.length == 1) {
+          const profileDrive = ProfileDefinitionProvider.getTargetDrive(response.name);
+          const dsr = response.searchResults[0];
+
+          const definition = await this._driveProvider.GetPayload<ProfileDefinition>(
+            profileDrive,
+            dsr.fileId,
+            dsr.fileMetadata,
+            dsr.sharedSecretEncryptedKeyHeader,
+            response.includeMetadataHeader
+          );
+
+          return definition;
+        }
       })
     );
 

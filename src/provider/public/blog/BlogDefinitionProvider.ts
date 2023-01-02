@@ -67,8 +67,7 @@ export class BlogDefinitionProvider extends ProviderBase {
         if (response.searchResults.length == 1) {
           const channelDrive = getChannelDrive(response.name);
           const dsr = response.searchResults[0];
-          console.log({ dsr });
-          console.log({ response });
+
           const definition = await this._driveProvider.GetPayload<ChannelDefinition>(
             channelDrive,
             dsr.fileId,
@@ -81,16 +80,6 @@ export class BlogDefinitionProvider extends ProviderBase {
         }
       })
     );
-
-    // const definitions = await Promise.all(
-    //   channelHeaders.map(async (header) => {
-    //     const { definition } = (await this.getChannelDefinitionInternal(header.id)) ?? {
-    //       definition: undefined,
-    //     };
-
-    //     return definition;
-    //   })
-    // );
 
     return definitions.filter((channel) => channel !== undefined) as ChannelDefinition[];
   }
@@ -173,14 +162,6 @@ export class BlogDefinitionProvider extends ProviderBase {
       // TODO Should remove the Drive itself as well
     } else {
       throw new Error(`Remove Channel: Channel with id: ${channelId} not found`);
-    }
-  }
-
-  async ensureConfiguration() {
-    // Create Public Channel oon the (Default) Public Posts Drive
-    const publicDef = await this.getChannelDefinitionInternal(BlogConfig.PublicChannel.channelId);
-    if (!publicDef?.fileId) {
-      await this.saveChannelDefinition(BlogConfig.PublicChannel);
     }
   }
 

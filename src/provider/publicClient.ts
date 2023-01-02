@@ -2,34 +2,26 @@ import { AttributeDataProvider } from './core/AttributeData/AttributeDataProvide
 import { DriveProvider } from './core/DriveData/DriveProvider';
 import { MediaProvider } from './core/MediaData/MediaProvider';
 import { ProviderOptions } from './core/ProviderBase';
-import { ProfileDataProvider } from './profile/ProfileDataProvider';
 import { BlogDefinitionProvider } from './public/blog/BlogDefinitionProvider';
 import { BlogPostReadonlyProvider } from './public/blog/BlogPostReadonlyProvider';
 import { CircleNetworkReadOnlyProvider } from './public/circleNetwork/CircleNetworkReadOnlyProvider';
 import { FileReadOnlyProvider } from './public/file/FileReadOnlyProvider';
-import { HomePageReadOnlyProvider } from './public/home/HomePageReadOnlyProvider';
 
 export class PublicClient {
   private _cfg: ProviderOptions;
 
   // Core Providers:
   private _driveProvider: DriveProvider;
-  private _attributeDataProvider: AttributeDataProvider;
+  attributeDataProvider: AttributeDataProvider;
 
   // Definition Providers:
   private _blogDefinitionProvider: BlogDefinitionProvider;
-
-  // Profile Providers:
-  profileDataProvider: ProfileDataProvider;
 
   // File Providers
   fileReadOnlyProvider: FileReadOnlyProvider;
 
   // Blog Providers:
   blogPostReadonlyProvider: BlogPostReadonlyProvider;
-
-  // Home Providers:
-  homePageReadOnlyProvider: HomePageReadOnlyProvider;
 
   // Connection Providers:
   circleNetworkReadOnlyProvider: CircleNetworkReadOnlyProvider;
@@ -42,7 +34,7 @@ export class PublicClient {
 
     // Core Providers (Private):
     this._driveProvider = new DriveProvider(this._cfg);
-    this._attributeDataProvider = new AttributeDataProvider({
+    this.attributeDataProvider = new AttributeDataProvider({
       ...this._cfg,
       driveProvider: this._driveProvider,
     });
@@ -51,13 +43,6 @@ export class PublicClient {
     this.mediaProvider = new MediaProvider({
       ...this._cfg,
       driveProvider: this._driveProvider,
-    });
-
-    // Profile Providers
-    this.profileDataProvider = new ProfileDataProvider({
-      ...this._cfg,
-      attributeDataProvider: this._attributeDataProvider,
-      mediaProvider: this.mediaProvider,
     });
 
     this.fileReadOnlyProvider = new FileReadOnlyProvider({
@@ -76,12 +61,7 @@ export class PublicClient {
       driveProvider: this._driveProvider,
     });
 
-    // Home Providers:
-    this.homePageReadOnlyProvider = new HomePageReadOnlyProvider({
-      ...this._cfg,
-      attributeDataProvider: this._attributeDataProvider,
-    });
-
+    // Connection providers
     this.circleNetworkReadOnlyProvider = new CircleNetworkReadOnlyProvider({
       ...this._cfg,
     });
