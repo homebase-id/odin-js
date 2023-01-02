@@ -19,35 +19,7 @@ export interface ProviderOptions {
   root?: string;
 }
 
-const getIv = () => {
-  try {
-    const cachedIv = sessionStorage.getItem('iv');
-    if (cachedIv) {
-      const ivObj = JSON.parse(cachedIv);
-
-      if (ivObj.expiration >= new Date().getTime()) {
-        return DataUtil.base64ToUint8Array(ivObj.iv);
-      }
-    }
-
-    console.debug('Generating new iv');
-    const iv = window.crypto.getRandomValues(new Uint8Array(16));
-
-    const now = new Date();
-    now.setHours(now.getHours() + 1);
-    sessionStorage.setItem(
-      'iv',
-      DataUtil.JsonStringify64({
-        expiration: now.getTime(),
-        iv: iv,
-      })
-    );
-
-    return iv;
-  } catch (ex) {
-    return window.crypto.getRandomValues(new Uint8Array(16));
-  }
-};
+const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
 
 export class ProviderBase {
   private _options: ProviderOptions;
@@ -111,9 +83,7 @@ export class ProviderBase {
 
         isDebug && console.debug('request', request.url, { ...request });
 
-        const iv = getIv();
-
-        const encryptRequest = async (json: string) => {
+        const encryptRequest = async (json: string, iv: Uint8Array) => {
           const bytes = DataUtil.stringToUint8Array(json);
 
           const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
@@ -128,14 +98,23 @@ export class ProviderBase {
         if (request.method?.toUpperCase() == 'POST') {
           const json = DataUtil.JsonStringify64(request.data);
 
-          const payload = await encryptRequest(json);
+          const payload = await encryptRequest(json, getRandomIv());
 
           request.data = payload;
         } else {
           const parts = (request.url ?? '').split('?');
           const querystring = parts.length == 2 ? parts[1] : '';
 
-          const payload: SharedSecretEncryptedPayload = await encryptRequest(querystring);
+          const fileId = new URLSearchParams(querystring).get('fileId');
+          const hashedFileId = fileId
+            ? await crypto.subtle.digest('SHA-1', DataUtil.stringToUint8Array(fileId))
+            : undefined;
+          const dedicatedIv = hashedFileId ? new Uint8Array(hashedFileId.slice(0, 16)) : undefined;
+
+          const payload: SharedSecretEncryptedPayload = await encryptRequest(
+            querystring,
+            dedicatedIv?.length === 16 ? dedicatedIv : getRandomIv()
+          );
 
           const encryptedPayload = encodeURIComponent(DataUtil.JsonStringify64(payload));
           request.url = parts[0] + '?ss=' + encryptedPayload;
