@@ -145,6 +145,14 @@ export interface QueryBatchResponse {
   searchResults: DriveSearchResult[];
 }
 
+export interface QueryBatchResponseResult extends QueryBatchResponse {
+  name: string;
+}
+
+export interface QueryBatchCollectionResponse {
+  results: QueryBatchResponseResult[];
+}
+
 export interface TargetDrive {
   alias: string;
   type: string;

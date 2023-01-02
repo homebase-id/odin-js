@@ -38,15 +38,59 @@ export class BlogDefinitionProvider extends ProviderBase {
       };
     });
 
-    const definitions = await Promise.all(
-      channelHeaders.map(async (header) => {
-        const { definition } = (await this.getChannelDefinitionInternal(header.id)) ?? {
-          definition: undefined,
-        };
+    const queries = channelHeaders.map((header) => {
+      const channelId = header.id;
+      const targetDrive = this.getTargetDrive(channelId);
 
-        return definition;
+      const params: FileQueryParams = {
+        targetDrive: targetDrive,
+        tagsMatchAtLeastOne: [channelId],
+        fileType: [BlogConfig.ChannelDefinitionFileType],
+      };
+
+      const ro: GetBatchQueryResultOptions = {
+        cursorState: undefined,
+        maxRecords: 1,
+        includeMetadataHeader: true,
+      };
+
+      return {
+        name: channelId,
+        queryParams: params,
+        resultOptions: ro,
+      };
+    });
+
+    const response = await this._driveProvider.QueryBatchCollection(queries);
+    const definitions = await Promise.all(
+      response.results.map(async (response) => {
+        if (response.searchResults.length == 1) {
+          const channelDrive = getChannelDrive(response.name);
+          const dsr = response.searchResults[0];
+          console.log({ dsr });
+          console.log({ response });
+          const definition = await this._driveProvider.GetPayload<ChannelDefinition>(
+            channelDrive,
+            dsr.fileId,
+            dsr.fileMetadata,
+            dsr.sharedSecretEncryptedKeyHeader,
+            response.includeMetadataHeader
+          );
+
+          return definition;
+        }
       })
     );
+
+    // const definitions = await Promise.all(
+    //   channelHeaders.map(async (header) => {
+    //     const { definition } = (await this.getChannelDefinitionInternal(header.id)) ?? {
+    //       definition: undefined,
+    //     };
+
+    //     return definition;
+    //   })
+    // );
 
     return definitions.filter((channel) => channel !== undefined) as ChannelDefinition[];
   }
