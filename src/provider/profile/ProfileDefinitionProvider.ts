@@ -206,6 +206,19 @@ export class ProfileDefinitionProvider extends ProviderBase {
     return this._driveProvider.DeleteFile(targetDrive, profileSection.fileId);
   }
 
+  async removeProfileDefinition(profileId: string) {
+    const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
+
+    const profileDefinition = await this.getProfileDefinitionInternal(profileId);
+    if (!profileDefinition) {
+      console.error('[DotYouCore-js]', "Profile not found, can't delete");
+      return false;
+    }
+
+    // TODO: remove drive
+    return this._driveProvider.DeleteFile(targetDrive, profileDefinition.fileId);
+  }
+
   async getProfileSections(profileId: string): Promise<ProfileSection[]> {
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
 
