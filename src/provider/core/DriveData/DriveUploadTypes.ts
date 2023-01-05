@@ -20,8 +20,7 @@ export interface StorageOptions {
 
 export interface TransitOptions {
   recipients: string[];
-  useGlobalTransitId:boolean,
-
+  useGlobalTransitId?: boolean | undefined,
   schedule: ScheduleOptions
 }
 
