@@ -61,6 +61,7 @@ export interface PostFile<T extends PostContent> {
   acl?: AccessControlList;
   content: T;
   previewThumbnail?: EmbeddedThumb;
+  payloadIsEncrypted?: boolean;
   isDraft?: boolean;
 }
 

@@ -182,6 +182,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
       acl: dsr.serverMetadata?.accessControlList,
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
       isDraft: dsr.fileMetadata.appData.tags?.some((tag) =>
         DataUtil.stringGuidsEqual(tag, DraftTag)
       ),

@@ -193,32 +193,41 @@ export class MediaProvider extends ProviderBase {
   }
 
   // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
+  /**
+   * @param isProbablyEncrypted {boolean} Hints wether or not we can expect the image to be encrypted, when true no direct url is returned instead the contents are fetched and decrypted depending on their metadata; This allows to skip a probably unneeded header call, but does require an createObjectUrl
+   */
   async getDecryptedImageUrl(
     targetDrive: TargetDrive,
     fileId: string,
-    size?: ThumbSize
+    size?: ThumbSize,
+    isProbablyEncrypted?: boolean
   ): Promise<string> {
-    const meta = await this.getDecryptedMetadata(targetDrive, fileId);
-    if (!meta.fileMetadata.payloadIsEncrypted) {
-      const directUrl = `${this.getEndpoint()}/drive/files/${
-        size ? 'thumb' : 'payload'
-      }?${DataUtil.stringify({
-        ...targetDrive,
-        fileId,
-        ...(size
-          ? {
-              width: size.pixelWidth,
-              height: size.pixelHeight,
-            }
-          : {}),
-      })}`;
+    // If the contents is probably encrypted, we don't bother fetching the header, and directly download the data and potentially decrypt
+    if (!isProbablyEncrypted) {
+      const meta = await this.getDecryptedMetadata(targetDrive, fileId);
+      if (!meta.fileMetadata.payloadIsEncrypted) {
+        const directUrl = `${this.getEndpoint()}/drive/files/${
+          size ? 'thumb' : 'payload'
+        }?${DataUtil.stringify({
+          ...targetDrive,
+          fileId,
+          ...(size
+            ? {
+                width: size.pixelWidth,
+                height: size.pixelHeight,
+              }
+            : {}),
+        })}`;
 
-      const ss = this.getSharedSecret();
-      if (ss) {
-        return await encryptUrl(directUrl, ss);
+        const ss = this.getSharedSecret();
+        if (ss) {
+          return await encryptUrl(directUrl, ss);
+        }
+
+        return directUrl;
       }
-
-      return directUrl;
+    } else {
+      console.log("didn't fetch header as probably encrypted");
     }
 
     return this.getDecryptedImageData(targetDrive, fileId, size).then((data) => {
