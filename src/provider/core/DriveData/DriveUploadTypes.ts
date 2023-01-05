@@ -20,6 +20,14 @@ export interface StorageOptions {
 
 export interface TransitOptions {
   recipients: string[];
+  useGlobalTransitId:boolean,
+
+  schedule: ScheduleOptions
+}
+
+export enum ScheduleOptions {
+  SendNowAwaitResponse = 'sendNowAwaitResponse',
+  SendLater = 'sendLater'
 }
 
 export interface UploadFileDescriptor {
