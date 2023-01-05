@@ -1,6 +1,5 @@
-import { AesEncrypt } from '../../core/AesEncrypt';
 import { DataUtil } from '../../core/DataUtil';
-import { DriveSearchResult, KeyHeader } from '../../core/DriveData/DriveTypes';
+import { DriveSearchResult } from '../../core/DriveData/DriveTypes';
 import { ProviderBase } from '../../core/ProviderBase';
 
 export interface ResponseEntry {
