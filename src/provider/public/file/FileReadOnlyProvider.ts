@@ -68,9 +68,8 @@ export class FileReadOnlyProvider extends ProviderBase {
     try {
       for (const filePromise of _internalFileCache.values()) {
         const responseEntries = await filePromise;
-
-        if (responseEntries.has(`${this.getRoot()}+${key}`)) {
-          return responseEntries.get(`${this.getRoot()}+${key}`);
+        if (responseEntries.has(`${key}`)) {
+          return responseEntries.get(`${key}`);
         }
       }
     } catch (ex) {
@@ -104,8 +103,4 @@ export class FileReadOnlyProvider extends ProviderBase {
       payload: parsedObj,
     };
   };
-
-  async DecryptUsingKeyHeader(cipher: Uint8Array, keyHeader: KeyHeader): Promise<Uint8Array> {
-    return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
-  }
 }

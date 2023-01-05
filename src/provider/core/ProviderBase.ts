@@ -1,16 +1,11 @@
-import axios, { AxiosResponse } from 'axios';
-import { AesEncrypt } from './AesEncrypt';
+import axios from 'axios';
 import { DataUtil } from './DataUtil';
+import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
 
 export enum ApiType {
   Owner,
   App,
   YouAuth,
-}
-
-interface SharedSecretEncryptedPayload {
-  iv: string;
-  data: string;
 }
 
 export interface ProviderOptions {
@@ -83,42 +78,13 @@ export class ProviderBase {
 
         isDebug && console.debug('request', request.url, { ...request });
 
-        const encryptRequest = async (json: string, iv: Uint8Array) => {
-          const bytes = DataUtil.stringToUint8Array(json);
-
-          const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
-          const payload: SharedSecretEncryptedPayload = {
-            iv: DataUtil.uint8ArrayToBase64(iv),
-            data: DataUtil.uint8ArrayToBase64(encryptedBytes),
-          };
-
-          return payload;
-        };
-
         if (request.method?.toUpperCase() == 'POST') {
           const json = DataUtil.JsonStringify64(request.data);
-
-          const payload = await encryptRequest(json, getRandomIv());
+          const payload = await encryptData(json, getRandomIv(), ss);
 
           request.data = payload;
         } else {
-          const parts = (request.url ?? '').split('?');
-          const querystring = parts.length == 2 ? parts[1] : '';
-
-          const fileId = new URLSearchParams(querystring).get('fileId');
-          const hashedFileId = fileId
-            ? await crypto.subtle.digest('SHA-1', DataUtil.stringToUint8Array(fileId))
-            : undefined;
-          const dedicatedIv = hashedFileId ? new Uint8Array(hashedFileId.slice(0, 16)) : undefined;
-
-          const payload: SharedSecretEncryptedPayload = await encryptRequest(
-            querystring,
-            dedicatedIv?.length === 16 ? dedicatedIv : getRandomIv()
-          );
-
-          const encryptedPayload = encodeURIComponent(DataUtil.JsonStringify64(payload));
-          request.url = parts[0] + '?ss=' + encryptedPayload;
-          return request;
+          request.url = await encryptUrl(request.url ?? '', ss);
         }
 
         return request;
@@ -128,25 +94,6 @@ export class ProviderBase {
       }
     );
 
-    const decryptResponse = async (response: AxiosResponse<any, any>) => {
-      const encryptedPayload = response.data;
-
-      if (encryptedPayload && encryptedPayload.data && encryptedPayload.iv && ss) {
-        try {
-          const iv = DataUtil.base64ToUint8Array(response.data.iv);
-          const encryptedBytes = DataUtil.base64ToUint8Array(response.data.data);
-          const bytes = await AesEncrypt.CbcDecrypt(encryptedBytes, iv, ss);
-          const json = DataUtil.byteArrayToString(bytes);
-          response.data = JSON.parse(json);
-        } catch (ex) {
-          response.data = undefined;
-        }
-        isDebug && console.debug('response', response.config?.url, response);
-      }
-
-      return response;
-    };
-
     client.interceptors.response.use(
       async function (response) {
         if (response.status == 204) {
@@ -154,10 +101,24 @@ export class ProviderBase {
           return response;
         }
 
-        return await decryptResponse(response);
+        const encryptedPayload = response.data;
+
+        if (encryptedPayload && encryptedPayload.data && encryptedPayload.iv && ss) {
+          response.data = await decryptData(response.data.data, response.data.iv, ss);
+          isDebug && console.debug('response', response.config?.url, response);
+        }
+
+        return response;
       },
       async function (error) {
-        console.error('[DotYouCore-js]', await decryptResponse(error.response));
+        if (error?.response?.data?.data && ss) {
+          console.error(
+            '[DotYouCore-js]',
+            await decryptData(error.response.data.data, error.response.data.iv, ss)
+          );
+        } else {
+          console.error('[DotYouCore-js]', error);
+        }
 
         return Promise.reject(error);
       }

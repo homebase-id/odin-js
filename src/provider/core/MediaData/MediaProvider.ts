@@ -11,6 +11,8 @@ import { fromBlob } from './Resizer/resize';
 import { DataUtil } from '../DataUtil';
 import { DriveProvider } from '../DriveData/DriveProvider';
 
+import { encryptUrl } from '../InterceptionEncryptionUtil';
+
 interface MediaProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
 }
@@ -196,6 +198,29 @@ export class MediaProvider extends ProviderBase {
     fileId: string,
     size?: ThumbSize
   ): Promise<string> {
+    const meta = await this.getDecryptedMetadata(targetDrive, fileId);
+    if (!meta.fileMetadata.payloadIsEncrypted) {
+      const directUrl = `${this.getEndpoint()}/drive/files/${
+        size ? 'thumb' : 'payload'
+      }?${DataUtil.stringify({
+        ...targetDrive,
+        fileId,
+        ...(size
+          ? {
+              width: size.pixelWidth,
+              height: size.pixelHeight,
+            }
+          : {}),
+      })}`;
+
+      const ss = this.getSharedSecret();
+      if (ss) {
+        return await encryptUrl(directUrl, ss);
+      }
+
+      return directUrl;
+    }
+
     return this.getDecryptedImageData(targetDrive, fileId, size).then((data) => {
       const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
       return url;
