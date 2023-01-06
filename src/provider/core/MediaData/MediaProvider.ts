@@ -202,34 +202,43 @@ export class MediaProvider extends ProviderBase {
     size?: ThumbSize,
     isProbablyEncrypted?: boolean
   ): Promise<string> {
-    // If the contents is probably encrypted, we don't bother fetching the header, and directly download the data and potentially decrypt
+    const getDirectImageUrl = async () => {
+      const directUrl = `${this.getEndpoint()}/drive/files/${
+        size ? 'thumb' : 'payload'
+      }?${DataUtil.stringify({
+        ...targetDrive,
+        fileId,
+        ...(size
+          ? {
+              width: size.pixelWidth,
+              height: size.pixelHeight,
+            }
+          : {}),
+      })}`;
+
+      if (ss) {
+        return await encryptUrl(directUrl, ss);
+      }
+
+      return directUrl;
+    };
+
+    const ss = this.getSharedSecret();
+
+    // If there is no shared secret, we wouldn't even be able to decrypt
+    if (!ss) {
+      return await getDirectImageUrl();
+    }
+
+    // If the contents is probably encrypted, we don't bother fetching the header
     if (!isProbablyEncrypted) {
       const meta = await this.getDecryptedMetadata(targetDrive, fileId);
       if (!meta.fileMetadata.payloadIsEncrypted) {
-        const directUrl = `${this.getEndpoint()}/drive/files/${
-          size ? 'thumb' : 'payload'
-        }?${DataUtil.stringify({
-          ...targetDrive,
-          fileId,
-          ...(size
-            ? {
-                width: size.pixelWidth,
-                height: size.pixelHeight,
-              }
-            : {}),
-        })}`;
-
-        const ss = this.getSharedSecret();
-        if (ss) {
-          return await encryptUrl(directUrl, ss);
-        }
-
-        return directUrl;
+        return await getDirectImageUrl();
       }
-    } else {
-      console.log("didn't fetch header as probably encrypted");
     }
 
+    // Direct download of the data and potentially decrypt if response headers indicate encrypted
     return this.getDecryptedImageData(targetDrive, fileId, size).then((data) => {
       const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
       return url;
