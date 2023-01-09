@@ -120,7 +120,9 @@ export class BlogPostReadonlyProvider extends ProviderBase {
     channelSlug: string,
     postSlug: string
   ): Promise<{ postFile: PostFile<T>; channel: ChannelDefinition } | undefined> {
-    const channel = await this._blogDefinitionProvider.getChannelDefinitionBySlug(channelSlug);
+    const channel =
+      (await this._blogDefinitionProvider.getChannelDefinitionBySlug(channelSlug)) ??
+      (await this._blogDefinitionProvider.getChannelDefinition(channelSlug));
     if (!channel) {
       return;
     }
