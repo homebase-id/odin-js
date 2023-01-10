@@ -40,6 +40,7 @@ const baseThumbSizes = [
   { quality: 100, width: 250, height: 250 },
   { quality: 100, width: 500, height: 500 },
   { quality: 100, width: 1000, height: 1000 },
+  { quality: 100, width: 2000, height: 2000 },
 ];
 
 export class MediaProvider extends ProviderBase {
