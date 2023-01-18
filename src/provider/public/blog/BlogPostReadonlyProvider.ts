@@ -9,7 +9,14 @@ import {
 import { ProviderBase, ProviderOptions } from '../../core/ProviderBase';
 import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
 import { BlogDefinitionProvider } from './BlogDefinitionProvider';
-import { BlogConfig, PostContent, ChannelDefinition, PostFile, DraftTag } from './BlogTypes';
+import {
+  BlogConfig,
+  PostContent,
+  ChannelDefinition,
+  PostFile,
+  PostType,
+  postTypeToDataType,
+} from './BlogTypes';
 
 interface BlogPostReadonlyProviderOptions extends ProviderOptions {
   driveProvider: DriveProvider;
@@ -33,15 +40,22 @@ export class BlogPostReadonlyProvider extends ProviderBase {
   //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
   async getPosts<T extends PostContent>(
     channelId: string,
-    tags: string[] | undefined,
+    type: PostType | undefined,
+    includeDrafts: true | 'only' | false,
     cursorState: string | undefined = undefined,
     pageSize = 10
   ): Promise<CursoredResult<PostFile<T>[]>> {
     const targetDrive = this._blogDefinitionProvider.getTargetDrive(channelId);
     const params: FileQueryParams = {
       targetDrive: targetDrive,
-      tagsMatchAll: tags,
-      fileType: [BlogConfig.PostFileType],
+      dataType: type ? [postTypeToDataType(type)] : undefined,
+      fileType:
+        includeDrafts === 'only'
+          ? [BlogConfig.DraftPostFileType]
+          : [
+              BlogConfig.PostFileType,
+              ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
+            ],
     };
 
     const ro: GetBatchQueryResultOptions = {
@@ -63,9 +77,10 @@ export class BlogPostReadonlyProvider extends ProviderBase {
 
   //Gets posts across all channels, ordered by date
   async getRecentPosts<T extends PostContent>(
-    tags: string[] | undefined,
-    pageSize = 10,
-    cursorState: Record<string, string> | undefined = undefined
+    type: PostType | undefined,
+    includeDrafts: true | 'only' | false,
+    cursorState: Record<string, string> | undefined = undefined,
+    pageSize = 10
   ): Promise<MultiRequestCursoredResult<PostFile<T>[]>> {
     const channels = await this.getChannels();
     const allCursors: Record<string, string> = {};
@@ -73,7 +88,8 @@ export class BlogPostReadonlyProvider extends ProviderBase {
       channels.map(async (channel) => {
         const result = await this.getPosts<T>(
           channel.channelId,
-          tags,
+          type,
+          includeDrafts,
           cursorState?.[channel.channelId],
           pageSize
         );
@@ -99,7 +115,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
     const params: FileQueryParams = {
       tagsMatchAtLeastOne: [id],
       targetDrive: targetDrive,
-      fileType: [BlogConfig.PostFileType],
+      fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
     };
 
     const response = await this._driveProvider.QueryBatch(params);
@@ -131,7 +147,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
     const params: FileQueryParams = {
       clientUniqueIdAtLeastOne: [DataUtil.toGuidId(postSlug)],
       targetDrive: targetDrive,
-      fileType: [BlogConfig.PostFileType],
+      fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
     };
 
     const response = await this._driveProvider.QueryBatch(params);
@@ -185,9 +201,7 @@ export class BlogPostReadonlyProvider extends ProviderBase {
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
       payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-      isDraft: dsr.fileMetadata.appData.tags?.some((tag) =>
-        DataUtil.stringGuidsEqual(tag, DraftTag)
-      ),
+      isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
     };
 
     return file;

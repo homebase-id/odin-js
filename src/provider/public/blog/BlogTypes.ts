@@ -19,6 +19,7 @@ export enum ChannelTemplate {
 
 export class BlogConfig {
   static readonly PostFileType: number = 101;
+  static readonly DraftPostFileType: number = 102;
   static readonly ChannelDefinitionFileType: number = 103;
   static readonly DriveType: string = DataUtil.toGuidId('post_drive_type');
 
@@ -39,22 +40,20 @@ export class BlogConfig {
 
 export type PostType = 'Article' | 'Image' | 'Video' | 'Tweet';
 
-export const postTypeToTag = (type: PostType): string => {
+export const postTypeToDataType = (type: PostType): number => {
   switch (type) {
-    case 'Article':
-      return DataUtil.toGuidId('article');
-    case 'Image':
-      return DataUtil.toGuidId('image');
     case 'Tweet':
-      return DataUtil.toGuidId('video');
+      return 100;
+    case 'Image':
+      return 200;
+    case 'Article':
+      return 300;
     case 'Video':
-      return DataUtil.toGuidId('tweet');
+      return 400;
   }
 
   throw 'Invalid post type';
 };
-
-export const DraftTag = DataUtil.toGuidId('draft');
 
 export interface PostFile<T extends PostContent> {
   fileId?: string;
