@@ -233,8 +233,12 @@ export class DriveProvider extends ProviderBase {
         return response.data;
       })
       .catch((error) => {
-        console.error('[DotYouCore-js]', error);
-        throw error;
+        if (error.response?.status === 404) {
+          return undefined;
+        } else {
+          console.error('[DotYouCore-js]', error);
+          throw error;
+        }
       });
 
     _internalMetadataCache.set(cacheKey, promise);
