@@ -14,6 +14,7 @@ import {
 
 let webSocketClient: WebSocket;
 let isConnected = false;
+const handlers: ((data: TypedConnectionNotification) => void)[] = [];
 
 interface RawClientNotification {
   notificationType: NotificationType;
@@ -87,7 +88,18 @@ export class NotificationProvider extends ProviderBase {
       const endpoint = `/api/${apiType === ApiType.Owner ? 'owner' : 'apps'}/v1/notify/ws`;
 
       const url = `wss://${identity}${endpoint}`;
-      webSocketClient = new WebSocket(url);
+      handlers.push(handler);
+      console.log(`Adding new subscriber. Total amount of subscribers now: ${handlers.length}`);
+
+      // TODO manage handlers per url;
+      // TODO ignore existing connection when filters change;
+
+      if (webSocketClient && isConnected) {
+        // Already connected, no need to initiate a new connection
+        resolve();
+      }
+
+      webSocketClient = webSocketClient || new WebSocket(url);
 
       const connectionRequest: EstablishConnectionRequest = {
         drives: drives,
@@ -97,7 +109,7 @@ export class NotificationProvider extends ProviderBase {
         webSocketClient.send(JSON.stringify(connectionRequest));
       };
 
-      webSocketClient.onmessage = (e) => {
+      webSocketClient.onmessage = async (e) => {
         const notification: RawClientNotification = JSON.parse(e.data);
 
         if (!isConnected) {
@@ -109,7 +121,8 @@ export class NotificationProvider extends ProviderBase {
           }
         }
 
-        handler(this.ParseNotification(notification));
+        const parsedNotification = this.ParseNotification(notification);
+        handlers.map(async (handler) => await handler(parsedNotification));
       };
     });
   }
