@@ -2,6 +2,7 @@ import { AttributeDataProvider } from './core/AttributeData/AttributeDataProvide
 import { CommandProvider } from './core/CommandData/CommandProvider';
 import { DriveProvider } from './core/DriveData/DriveProvider';
 import { MediaProvider } from './core/MediaData/MediaProvider';
+import { NotificationProvider } from './core/NotificationData/NotificationProvider';
 import { ProviderOptions } from './core/ProviderBase';
 
 export class CoreClient {
@@ -12,6 +13,7 @@ export class CoreClient {
   attributeDataProvider: AttributeDataProvider;
   mediaProvider: MediaProvider;
   commandProvider: CommandProvider;
+  notificationProvider: NotificationProvider;
 
   constructor(cfg: ProviderOptions) {
     this._cfg = cfg;
@@ -27,6 +29,9 @@ export class CoreClient {
       driveProvider: this.driveProvider,
     });
     this.commandProvider = new CommandProvider({
+      ...this._cfg,
+    });
+    this.notificationProvider = new NotificationProvider({
       ...this._cfg,
     });
   }

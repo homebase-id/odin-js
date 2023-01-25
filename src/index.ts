@@ -1,21 +1,29 @@
+// Core helpers
 export * from './provider/core/AesEncrypt';
 export * from './provider/core/DataUtil';
-export * from './provider/core/MediaData/Resizer/resize';
 
+// ProviderBase
 export * from './provider/core/ProviderBase';
-export * from './provider/core/MediaData/MediaProvider';
 export * from './provider/core/Types';
-
-// DriveData
-export * from './provider/core/DriveData/DriveProvider';
-export * from './provider/core/DriveData/DriveTypes';
-export * from './provider/core/DriveData/DriveUploadTypes';
 
 // AttributeData
 export * from './provider/core/AttributeData/AttributeConfig';
 export * from './provider/core/AttributeData/AttributeDefinitions';
 export * from './provider/core/AttributeData/AttributeDataProvider';
 export * from './provider/core/AttributeData/AttributeDataTypes';
+
+// DriveData
+export * from './provider/core/DriveData/DriveProvider';
+export * from './provider/core/DriveData/DriveTypes';
+export * from './provider/core/DriveData/DriveUploadTypes';
+
+// MediaData
+export * from './provider/core/MediaData/Resizer/resize';
+export * from './provider/core/MediaData/MediaProvider';
+
+// NotificationData
+export * from './provider/core/NotificationData/NotificationProvider';
+export * from './provider/core/NotificationData/NotificationTypes';
 
 // Profile
 export * from './provider/profile/ProfileConfig';
