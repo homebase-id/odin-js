@@ -12,7 +12,7 @@ import {
   TypedConnectionNotification,
 } from './NotificationTypes';
 
-let webSocketClient: WebSocket;
+let webSocketClient: WebSocket | undefined;
 let isConnected = false;
 const handlers: ((data: TypedConnectionNotification) => void)[] = [];
 
@@ -83,30 +83,30 @@ export class NotificationProvider extends ProviderBase {
       throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
     }
 
+    // TODO manage handlers per url;
+    // TODO ignore existing connection when filters change;
     return new Promise<void>((resolve) => {
-      const identity = window.location.hostname;
-      const endpoint = `/api/${apiType === ApiType.Owner ? 'owner' : 'apps'}/v1/notify/ws`;
-
-      const url = `wss://${identity}${endpoint}`;
       handlers.push(handler);
       console.log(`Adding new subscriber. Total amount of subscribers now: ${handlers.length}`);
-
-      // TODO manage handlers per url;
-      // TODO ignore existing connection when filters change;
 
       if (webSocketClient && isConnected) {
         // Already connected, no need to initiate a new connection
         resolve();
+        return;
       }
+
+      const url = `wss://${window.location.hostname}/api/${
+        apiType === ApiType.Owner ? 'owner' : 'apps'
+      }/v1/notify/ws`;
 
       webSocketClient = webSocketClient || new WebSocket(url);
 
-      const connectionRequest: EstablishConnectionRequest = {
-        drives: drives,
-      };
-
       webSocketClient.onopen = () => {
-        webSocketClient.send(JSON.stringify(connectionRequest));
+        const connectionRequest: EstablishConnectionRequest = {
+          drives: drives,
+        };
+
+        webSocketClient?.send(JSON.stringify(connectionRequest));
       };
 
       webSocketClient.onmessage = async (e) => {
@@ -128,16 +128,29 @@ export class NotificationProvider extends ProviderBase {
   }
 
   Notify = (command: Command) => {
+    if (!webSocketClient) {
+      throw new Error('No active client to notify');
+    }
+
     console.log('Sending command:', JSON.stringify(command));
     webSocketClient.send(JSON.stringify(command));
   };
 
-  Disconnect = () => {
+  Disconnect = (handler: (data: TypedConnectionNotification) => void) => {
     if (!webSocketClient) {
-      console.log('No Client');
-      return;
+      throw new Error('No active client to disconnect');
     }
 
-    webSocketClient.close(1000, 'Normal Disconnect');
+    const index = handlers.indexOf(handler);
+    if (index !== -1) {
+      handlers.splice(index, 1);
+
+      if (handlers.length === 0 && isConnected) {
+        isConnected = false;
+        webSocketClient.close(1000, 'Normal Disconnect');
+
+        webSocketClient = undefined;
+      }
+    }
   };
 }
