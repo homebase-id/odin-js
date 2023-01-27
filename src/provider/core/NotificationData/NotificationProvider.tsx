@@ -21,6 +21,8 @@ interface RawClientNotification {
   data: string;
 }
 
+const isDebug = localStorage.getItem('debug') === '1';
+
 export class NotificationProvider extends ProviderBase {
   constructor(options: ProviderOptions) {
     super(options);
@@ -87,7 +89,7 @@ export class NotificationProvider extends ProviderBase {
     // TODO ignore existing connection when filters change;
     return new Promise<void>((resolve) => {
       handlers.push(handler);
-      console.log(`Adding new subscriber. Total amount of subscribers now: ${handlers.length}`);
+      if (isDebug) console.debug(`[NotificationProvider] New subscriber (${handlers.length})`);
 
       if (webSocketClient && isConnected) {
         // Already connected, no need to initiate a new connection
@@ -100,6 +102,7 @@ export class NotificationProvider extends ProviderBase {
       }/v1/notify/ws`;
 
       webSocketClient = webSocketClient || new WebSocket(url);
+      if (isDebug) console.debug(`[NotificationProvider] Client connected`);
 
       webSocketClient.onopen = () => {
         const connectionRequest: EstablishConnectionRequest = {
@@ -115,6 +118,7 @@ export class NotificationProvider extends ProviderBase {
         if (!isConnected) {
           // First message must be acknowledgement of successful handshake
           if (notification.notificationType == 'deviceHandshakeSuccess') {
+            if (isDebug) console.debug(`[NotificationProvider] Device handshake success`);
             isConnected = true;
             resolve();
             return;
@@ -132,7 +136,7 @@ export class NotificationProvider extends ProviderBase {
       throw new Error('No active client to notify');
     }
 
-    console.log('Sending command:', JSON.stringify(command));
+    if (isDebug) console.debug(`[NotificationProvider] Send command (${JSON.stringify(command)})`);
     webSocketClient.send(JSON.stringify(command));
   };
 
@@ -148,6 +152,7 @@ export class NotificationProvider extends ProviderBase {
       if (handlers.length === 0 && isConnected) {
         isConnected = false;
         webSocketClient.close(1000, 'Normal Disconnect');
+        if (isDebug) console.debug(`[NotificationProvider] Client disconnected`);
 
         webSocketClient = undefined;
       }
