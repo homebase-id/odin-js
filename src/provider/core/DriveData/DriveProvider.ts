@@ -193,9 +193,15 @@ export class DriveProvider extends ProviderBase {
     const client = this.createAxiosClient();
 
     const updatedQueries = queries.map((query) => {
+      const ro = query.resultOptions ?? DefaultQueryBatchResultOption;
       return {
         ...query,
-        resultOptions: query.resultOptions ?? DefaultQueryBatchResultOption,
+        resultOptions: {
+          maxRecords: ro.maxRecords,
+          includeJsonContent: ro.includeMetadataHeader,
+          excludePreviewThumbnail: !ro.includeMetadataHeader,
+          cursor: ro.cursorState,
+        },
       };
     });
 

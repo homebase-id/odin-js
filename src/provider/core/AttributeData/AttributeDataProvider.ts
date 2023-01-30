@@ -4,6 +4,7 @@ import {
   DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
+  TargetDrive,
 } from '../DriveData/DriveTypes';
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
 import {
@@ -49,39 +50,11 @@ export class AttributeDataProvider extends ProviderBase {
       includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
     });
 
-    let attributes: AttributeFile[] = [];
-
-    for (const key in result.searchResults) {
-      const dsr: DriveSearchResult = result.searchResults[key];
-      const fileId = dsr.fileId;
-
-      let attr: AttributeFile = {
-        id: '',
-        type: '',
-        sectionId: '',
-        priority: -1,
-        data: null,
-        profileId: profileId,
-        acl: dsr.serverMetadata?.accessControlList,
-      };
-
-      const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
-        targetDrive,
-        dsr.fileId,
-        dsr.fileMetadata,
-        dsr.sharedSecretEncryptedKeyHeader,
-        result.includeMetadataHeader
-      );
-
-      attr = {
-        ...attr,
-        ...attrPayload,
-      };
-
-      attr.fileId = attr.fileId ?? fileId;
-
-      attributes.push(attr);
-    }
+    let attributes: AttributeFile[] = await Promise.all(
+      result.searchResults.map(async (dsr) =>
+        this.dsrToAttributeFile(dsr, targetDrive, result.includeMetadataHeader)
+      )
+    );
 
     //sort where lowest number is higher priority
     attributes = attributes.sort((a, b) => {
@@ -109,36 +82,12 @@ export class AttributeDataProvider extends ProviderBase {
       maxRecords: 10,
       includeMetadataHeader: true,
     });
-    let attributes: AttributeFile[] = [];
 
-    for (const key in result.searchResults) {
-      const dsr: DriveSearchResult = result.searchResults[key];
-
-      let attr: AttributeFile = {
-        id: '',
-        type: '',
-        sectionId: sectionId ?? '',
-        priority: -1,
-        data: null,
-        profileId: profileId,
-        acl: dsr.serverMetadata?.accessControlList,
-      };
-
-      const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
-        targetDrive,
-        dsr.fileId,
-        dsr.fileMetadata,
-        dsr.sharedSecretEncryptedKeyHeader,
-        result.includeMetadataHeader
-      );
-
-      attr = {
-        ...attr,
-        ...attrPayload,
-      };
-
-      attributes.push(attr);
-    }
+    let attributes: AttributeFile[] = await Promise.all(
+      result.searchResults.map(async (dsr) =>
+        this.dsrToAttributeFile(dsr, targetDrive, result.includeMetadataHeader)
+      )
+    );
 
     //sort where lowest number is higher priority (!! sort happens in place)
     attributes = attributes.sort((a, b) => {
@@ -161,38 +110,20 @@ export class AttributeDataProvider extends ProviderBase {
       includeMetadataHeader: true,
     };
 
-    const response = await this._driveProvider.QueryBatch(qp, ro);
+    const result = await this._driveProvider.QueryBatch(qp, ro);
 
-    if (response.searchResults.length == 0) {
+    if (result.searchResults.length == 0) {
       return;
     }
 
-    if (response.searchResults.length > 1) {
+    if (result.searchResults.length > 1) {
       console.warn(
-        'Attribute Id [' +
-          id +
-          '] in profile [' +
-          profileId +
-          '] has more than one file.  Using latest'
+        `Attribute Id [${id}] in profile [${profileId}] has more than one file. Using latest`
       );
     }
 
-    const dsr: DriveSearchResult = response.searchResults[0];
-    const payload = await this._driveProvider.GetPayload<AttributeFile>(
-      targetDrive,
-      dsr.fileId,
-      dsr.fileMetadata,
-      dsr.sharedSecretEncryptedKeyHeader,
-      response.includeMetadataHeader
-    );
-
-    const attributeFile: AttributeFile = {
-      ...payload,
-      fileId: dsr.fileId,
-      acl: dsr.serverMetadata?.accessControlList,
-    };
-
-    return attributeFile;
+    const dsr: DriveSearchResult = result.searchResults[0];
+    return this.dsrToAttributeFile(dsr, targetDrive, result.includeMetadataHeader);
   }
 
   async getAttributes(
@@ -212,38 +143,11 @@ export class AttributeDataProvider extends ProviderBase {
       includeMetadataHeader: true,
     });
 
-    let attributes: AttributeFile[] = [];
-
-    for (const key in result.searchResults) {
-      const dsr: DriveSearchResult = result.searchResults[key];
-      const fileId = dsr.fileId;
-
-      let attr: AttributeFile = {
-        id: '',
-        type: '',
-        sectionId: '',
-        priority: -1,
-        data: null,
-        profileId: profileId,
-        acl: dsr.serverMetadata?.accessControlList,
-      };
-
-      const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
-        targetDrive,
-        dsr.fileId,
-        dsr.fileMetadata,
-        dsr.sharedSecretEncryptedKeyHeader,
-        result.includeMetadataHeader
-      );
-
-      attr = {
-        ...attr,
-        ...attrPayload,
-      };
-      attr.fileId = attr.fileId ?? fileId;
-
-      attributes.push(attr);
-    }
+    let attributes: AttributeFile[] = await Promise.all(
+      result.searchResults.map(async (dsr) =>
+        this.dsrToAttributeFile(dsr, targetDrive, result.includeMetadataHeader)
+      )
+    );
 
     //sort where lowest number is higher priority
     attributes = attributes.sort((a, b) => {
@@ -251,6 +155,25 @@ export class AttributeDataProvider extends ProviderBase {
     });
 
     return attributes;
+  }
+
+  async dsrToAttributeFile(
+    dsr: DriveSearchResult,
+    targetDrive: TargetDrive,
+    includeMetadataHeader: boolean
+  ): Promise<AttributeFile> {
+    const attrPayload = await this._driveProvider.GetPayload<AttributeFile>(
+      targetDrive,
+      dsr.fileId,
+      dsr.fileMetadata,
+      dsr.sharedSecretEncryptedKeyHeader,
+      includeMetadataHeader
+    );
+    return {
+      ...attrPayload,
+      fileId: attrPayload.fileId ?? dsr.fileId,
+      acl: dsr.serverMetadata?.accessControlList,
+    };
   }
 
   async saveAttribute(attribute: AttributeFile): Promise<AttributeFile> {
