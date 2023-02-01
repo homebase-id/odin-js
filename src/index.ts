@@ -8,7 +8,6 @@ export * from './provider/core/Types';
 
 // AttributeData
 export * from './provider/core/AttributeData/AttributeConfig';
-export * from './provider/core/AttributeData/AttributeDefinitions';
 export * from './provider/core/AttributeData/AttributeDataProvider';
 export * from './provider/core/AttributeData/AttributeDataTypes';
 
