@@ -14,6 +14,7 @@ import {
   EncryptedKeyHeader,
   FileMetadata,
   QueryBatchCollectionResponse,
+  ThumbnailFileTypes,
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../Types';
@@ -532,7 +533,7 @@ export class DriveProvider extends ProviderBase {
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
     payload: Uint8Array,
-    thumbnails?: { filename: string; payload: Uint8Array }[]
+    thumbnails?: { filename: string; payload: Uint8Array; contentType: ThumbnailFileTypes }[]
   ): Promise<UploadResult> {
     const encryptedMetaData = keyHeader
       ? {
@@ -583,7 +584,13 @@ export class DriveProvider extends ProviderBase {
         const thumbnailBytes = keyHeader
           ? await this.encryptWithKeyheader(thumb.payload, keyHeader)
           : thumb.payload;
-        data.append('thumbnail', new Blob([thumbnailBytes]), thumb.filename);
+        data.append(
+          'thumbnail',
+          new Blob([thumbnailBytes], {
+            type: thumb.contentType,
+          }),
+          thumb.filename
+        );
       }
     }
 
@@ -611,7 +618,7 @@ export class DriveProvider extends ProviderBase {
     instructions: UploadInstructionSet,
     metadata: UploadFileMetadata,
     payload: Uint8Array,
-    thumbnails?: { filename: string; payload: Uint8Array }[],
+    thumbnails?: { filename: string; payload: Uint8Array; contentType: ThumbnailFileTypes }[],
     encrypt = true
   ): Promise<UploadResult> {
     const keyHeader = encrypt ? this.GenerateKeyHeader() : undefined;

@@ -162,3 +162,11 @@ export interface TimeRange {
   start: number;
   end: number;
 }
+
+export type ThumbnailFileTypes =
+  | 'image/webp'
+  | 'image/png'
+  | 'image/bmp'
+  | 'image/jpeg'
+  | 'image/gif'
+  | 'image/svg+xml';

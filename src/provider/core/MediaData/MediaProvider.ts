@@ -1,5 +1,11 @@
 import { ProviderBase, ProviderOptions } from '../ProviderBase';
-import { DriveSearchResult, EmbeddedThumb, TargetDrive, ThumbSize } from '../DriveData/DriveTypes';
+import {
+  DriveSearchResult,
+  EmbeddedThumb,
+  TargetDrive,
+  ThumbnailFileTypes,
+  ThumbSize,
+} from '../DriveData/DriveTypes';
 import {
   AccessControlList,
   SecurityGroupType,
@@ -29,6 +35,7 @@ interface ThumbnailFile extends EmbeddedThumb {
     pixelHeight: number;
   };
   contentAsByteArray: Uint8Array;
+  contentType: ThumbnailFileTypes;
 }
 
 export interface ImageUploadResult {
@@ -84,7 +91,7 @@ export class MediaProvider extends ProviderBase {
     // Create a thumbnail that fits scaled into a 20 x 20 canvas
     const tinyThumb =
       type === 'image/svg+xml'
-        ? await this.createVectorThumbnail(imageBytes)
+        ? this.createVectorThumbnail(imageBytes)
         : await this.createImageThumbnail(imageBytes, 10, 20, 20);
 
     const applicableThumbSizes = baseThumbSizes.reduce((currArray, thumbSize) => {
@@ -153,6 +160,7 @@ export class MediaProvider extends ProviderBase {
         return {
           payload: thumb.contentAsByteArray,
           filename: `${thumb.pixelWidth}x${thumb.pixelHeight}`,
+          contentType: thumb.contentType,
         };
       }),
       encrypt
@@ -272,7 +280,7 @@ export class MediaProvider extends ProviderBase {
     };
   }
 
-  private async createVectorThumbnail(imageBytes: Uint8Array) {
+  private createVectorThumbnail(imageBytes: Uint8Array): ThumbnailFile {
     return {
       naturalSize: {
         pixelWidth: 50,
