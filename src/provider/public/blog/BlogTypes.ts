@@ -9,6 +9,7 @@ export interface ChannelDefinition {
   description: string;
   templateId?: number;
   acl?: AccessControlList;
+  commentAccess?: SecurityGroupType;
 }
 
 export enum ChannelTemplate {
@@ -58,6 +59,7 @@ export const postTypeToDataType = (type: PostType): number => {
 export interface PostFile<T extends PostContent> {
   fileId?: string;
   acl?: AccessControlList;
+  commentAccess?: SecurityGroupType;
   content: T;
   previewThumbnail?: EmbeddedThumb;
   payloadIsEncrypted?: boolean;
