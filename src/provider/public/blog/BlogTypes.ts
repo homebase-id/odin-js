@@ -22,7 +22,7 @@ export class BlogConfig {
   static readonly PostFileType: number = 101;
   static readonly DraftPostFileType: number = 102;
   static readonly ChannelDefinitionFileType: number = 103;
-  static readonly DriveType: string = DataUtil.toGuidId('channel_drive');
+  static readonly DriveType: string = "64665c7572e791259dabf9ac72ce8af2"; //DataUtil.toGuidId('channel_drive');
 
   static readonly PublicChannel: ChannelDefinition = {
     channelId: DataUtil.toGuidId('public_channel_drive'),
