@@ -22,6 +22,14 @@ export interface TransitOptions {
   recipients: string[];
   useGlobalTransitId?: boolean | undefined,
   schedule: ScheduleOptions
+  sendContents: SendContents
+}
+
+export enum SendContents {
+  HeaderOnly = 0,
+  Thumbnails = 1,
+  Payload = 2,
+  All = Thumbnails | Payload,
 }
 
 export enum ScheduleOptions {
@@ -35,6 +43,7 @@ export interface UploadFileDescriptor {
 }
 
 export interface UploadFileMetadata {
+  allowDistribution: boolean;
   contentType: string;
   senderDotYouId?: string;
   payloadIsEncrypted: boolean;
