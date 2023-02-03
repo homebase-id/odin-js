@@ -42,6 +42,8 @@ export interface FileMetadata {
 }
 
 export interface ServerMetaData {
+  doNotIndex: boolean;
+  allowDistribution: boolean;
   accessControlList: AccessControlList;
 }
 
@@ -80,7 +82,7 @@ export interface DriveDefinition {
   allowAnonymousReads: boolean;
 
   allowSubscriptions: boolean;
-  
+
   ownerOnly: boolean;
 }
 
