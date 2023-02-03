@@ -22,7 +22,7 @@ export class BlogConfig {
   static readonly PostFileType: number = 101;
   static readonly DraftPostFileType: number = 102;
   static readonly ChannelDefinitionFileType: number = 103;
-  static readonly DriveType: string = "64665c7572e791259dabf9ac72ce8af2"; //DataUtil.toGuidId('channel_drive');
+  static readonly DriveType: string = '64665c7572e791259dabf9ac72ce8af2'; //DataUtil.toGuidId('channel_drive');
 
   static readonly PublicChannel: ChannelDefinition = {
     channelId: DataUtil.toGuidId('public_channel_drive'),
@@ -36,6 +36,11 @@ export class BlogConfig {
   static readonly PublicChannelDrive: TargetDrive = {
     alias: BlogConfig.PublicChannel.channelId,
     type: BlogConfig.DriveType,
+  };
+
+  static readonly FeedDrive: TargetDrive = {
+    alias: '4db49422ebad02e99ab96e9c477d1e08',
+    type: 'a3227ffba87608beeb24fee9b70d92a6',
   };
 }
 
