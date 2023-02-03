@@ -86,7 +86,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
 
   async getProfileDefinition(profileId: string): Promise<ProfileDefinition | undefined> {
     try {
-      const { definition } = (await this.getProfileDefinitionInternal(profileId)) ?? {
+      const {definition} = (await this.getProfileDefinitionInternal(profileId)) ?? {
         definition: undefined,
       };
       return definition;
@@ -107,7 +107,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
     const driveMetadata = 'Drive that stores: ' + definition.name;
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(definition.profileId);
     await this._driveProvider.EnsureDrive(targetDrive, definition.name, driveMetadata, true);
-    const { fileId } = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
+    const {fileId} = (await this.getProfileDefinitionInternal(definition.profileId)) ?? {
       fileId: undefined,
     };
 
@@ -127,6 +127,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
     const shouldEmbedContent = payloadBytes.length < 3000;
 
     const metadata: UploadFileMetadata = {
+      allowDistribution: false,
       contentType: 'application/json',
       appData: {
         uniqueId: definition.profileId,
@@ -137,7 +138,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
         jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
-      accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      accessControlList: {requiredSecurityGroup: SecurityGroupType.Owner},
     };
 
     //reshape the definition to group attributes by their type
@@ -155,9 +156,9 @@ export class ProfileDefinitionProvider extends ProviderBase {
     }
 
     const targetDrive = ProfileDefinitionProvider.getTargetDrive(profileId);
-    const { fileId } = (!isCreate
+    const {fileId} = (!isCreate
       ? await this.getProfileSectionInternal(profileId, profileSection.sectionId)
-      : { fileId: undefined }) ?? {
+      : {fileId: undefined}) ?? {
       fileId: undefined,
     };
 
@@ -178,6 +179,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
 
     // Note: we tag it with the profile id AND also a tag indicating it is a definition
     const metadata: UploadFileMetadata = {
+      allowDistribution: false,
       contentType: 'application/json',
       appData: {
         tags: [profileId, profileSection.sectionId],
@@ -188,7 +190,7 @@ export class ProfileDefinitionProvider extends ProviderBase {
         jsonContent: shouldEmbedContent ? payloadJson : null,
       },
       payloadIsEncrypted: encrypt,
-      accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      accessControlList: {requiredSecurityGroup: SecurityGroupType.Owner},
     };
 
     await this._driveProvider.Upload(instructionSet, metadata, payloadBytes, undefined, encrypt);

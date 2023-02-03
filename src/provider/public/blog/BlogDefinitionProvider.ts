@@ -85,7 +85,7 @@ export class BlogDefinitionProvider extends ProviderBase {
   }
 
   async getChannelDefinition(channelId: string): Promise<ChannelDefinition | undefined> {
-    const { definition } = (await this.getChannelDefinitionInternal(channelId)) ?? {
+    const {definition} = (await this.getChannelDefinitionInternal(channelId)) ?? {
       definition: undefined,
     };
 
@@ -110,9 +110,9 @@ export class BlogDefinitionProvider extends ProviderBase {
     );
 
     const targetDrive = this.getTargetDrive(definition.channelId);
-    await this._driveProvider.EnsureDrive(targetDrive, definition.name, channelMetadata, true);
+    await this._driveProvider.EnsureDrive(targetDrive, definition.name, channelMetadata, true, true);
 
-    const { fileId } = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
+    const {fileId} = (await this.getChannelDefinitionInternal(definition.channelId)) ?? {
       fileId: undefined,
     };
 
@@ -131,6 +131,7 @@ export class BlogDefinitionProvider extends ProviderBase {
     // Set max of 3kb for jsonContent so enough room is left for metedata
     const shouldEmbedContent = payloadBytes.length < 3000;
     const metadata: UploadFileMetadata = {
+      allowDistribution: false,
       contentType: 'application/json',
       appData: {
         tags: [definition.channelId],
