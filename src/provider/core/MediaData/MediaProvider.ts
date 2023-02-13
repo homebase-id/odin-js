@@ -138,6 +138,7 @@ export class MediaProvider extends ProviderBase {
     });
 
     const metadata: UploadFileMetadata = {
+      allowDistribution: false,
       contentType: type ?? 'image/webp',
       appData: {
         tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],

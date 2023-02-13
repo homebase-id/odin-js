@@ -213,6 +213,7 @@ export class AttributeDataProvider extends ProviderBase {
     // Set max of 3kb for jsonContent so enough room is left for metedata
     const shouldEmbedContent = payloadBytes.length < 3000;
     const metadata: UploadFileMetadata = {
+      allowDistribution: false,
       contentType: 'application/json',
       appData: {
         uniqueId: attribute.id,

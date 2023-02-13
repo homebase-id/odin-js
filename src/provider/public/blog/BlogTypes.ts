@@ -64,7 +64,6 @@ export const postTypeToDataType = (type: PostType): number => {
 export interface PostFile<T extends PostContent> {
   fileId?: string;
   acl?: AccessControlList;
-  reactAccess?: SecurityGroupType;
   content: T;
   previewThumbnail?: EmbeddedThumb;
   payloadIsEncrypted?: boolean;
@@ -74,6 +73,7 @@ export interface PostFile<T extends PostContent> {
 export interface PostContent {
   id: string;
   channelId: string;
+  reactAccess?: SecurityGroupType;
   caption: string;
   slug: string;
   dateUnixTime: number;
