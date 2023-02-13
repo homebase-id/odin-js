@@ -103,7 +103,7 @@ export class DriveProvider extends ProviderBase {
         return {
           ...response.data,
           results: response?.data?.results?.map((result: { targetDrive: any }) => {
-            return {...result, targetDriveInfo: result.targetDrive};
+            return { ...result, targetDriveInfo: result.targetDrive };
           }),
         };
       });
@@ -115,11 +115,11 @@ export class DriveProvider extends ProviderBase {
     name: string,
     metadata: string,
     allowAnonymousReads: boolean,
-    allowSubscriptions: boolean = false
+    allowSubscriptions = false
   ): Promise<boolean> {
     //create the drive if it does not exist
     const client = this.createAxiosClient();
-    const allDrives = await this.GetDrives({pageNumber: 1, pageSize: 1000});
+    const allDrives = await this.GetDrives({ pageNumber: 1, pageSize: 1000 });
 
     const foundDrive = allDrives.results.find(
       (d) =>
@@ -135,7 +135,7 @@ export class DriveProvider extends ProviderBase {
       targetDrive: targetDrive,
       metadata: metadata,
       allowAnonymousReads: allowAnonymousReads,
-      allowSubscriptions: allowSubscriptions
+      allowSubscriptions: allowSubscriptions,
     };
 
     return client
@@ -322,7 +322,7 @@ export class DriveProvider extends ProviderBase {
           const cipher = new Uint8Array(response.data);
 
           const bytes = await this.DecryptUsingKeyHeader(cipher, keyHeader);
-          return {bytes, contentType: `${response.headers.decryptedcontenttype}`};
+          return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
         } else {
           return {
             bytes: new Uint8Array(response.data),
@@ -358,7 +358,7 @@ export class DriveProvider extends ProviderBase {
     };
 
     return client
-      .get('/drive/files/thumb?' + DataUtil.stringify({...request, width, height}), config)
+      .get('/drive/files/thumb?' + DataUtil.stringify({ ...request, width, height }), config)
       .then(async (response) => {
         if (keyHeader) {
           const cipher = new Uint8Array(response.data);
@@ -380,7 +380,7 @@ export class DriveProvider extends ProviderBase {
           const cipher = new Uint8Array(response.data);
 
           const bytes = await this.DecryptUsingKeyHeader(cipher, keyHeader);
-          return {bytes, contentType: `${response.headers.decryptedcontenttype}`};
+          return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
         } else {
           return {
             bytes: new Uint8Array(response.data),
@@ -465,7 +465,7 @@ export class DriveProvider extends ProviderBase {
     const getAllFilesOnDrive = async (drive: TargetDrive) => {
       const querySet = async (cursorState: string | undefined): Promise<QueryBatchResponse> => {
         return await this.QueryBatch(
-          {targetDrive: drive},
+          { targetDrive: drive },
           {
             maxRecords: pageSize,
             includeMetadataHeader: includeMetadataHeader,
@@ -539,19 +539,19 @@ export class DriveProvider extends ProviderBase {
   ): Promise<UploadResult> {
     const encryptedMetaData = keyHeader
       ? {
-        ...metadata,
-        appData: {
-          ...metadata.appData,
-          jsonContent: metadata.appData.jsonContent
-            ? DataUtil.uint8ArrayToBase64(
-              await this.encryptWithKeyheader(
-                DataUtil.stringToUint8Array(metadata.appData.jsonContent),
-                keyHeader
-              )
-            )
-            : null,
-        },
-      }
+          ...metadata,
+          appData: {
+            ...metadata.appData,
+            jsonContent: metadata.appData.jsonContent
+              ? DataUtil.uint8ArrayToBase64(
+                  await this.encryptWithKeyheader(
+                    DataUtil.stringToUint8Array(metadata.appData.jsonContent),
+                    keyHeader
+                  )
+                )
+              : null,
+          },
+        }
       : metadata;
 
     const descriptor: UploadFileDescriptor = {
