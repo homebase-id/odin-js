@@ -2,8 +2,8 @@
 export * from './provider/core/AesEncrypt';
 export * from './provider/core/DataUtil';
 
-// ProviderBase
-export * from './provider/core/ProviderBase';
+// DotYouClient
+export * from './provider/core/DotYouClient';
 export * from './provider/core/Types';
 
 // AttributeData
@@ -43,7 +43,3 @@ export * from './provider/public/circleNetwork/CircleNetworkTypes';
 
 // File
 export * from './provider/public/file/FileReadOnlyProvider';
-
-export * from './provider/publicClient';
-export * from './provider/coreClient';
-export * from './provider/client';

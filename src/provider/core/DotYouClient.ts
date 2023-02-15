@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { DataUtil } from './DataUtil';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
 
@@ -16,27 +16,27 @@ export interface ProviderOptions {
 
 const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
 
-export class ProviderBase {
+export class DotYouClient {
   private _options: ProviderOptions;
 
   constructor(options: ProviderOptions) {
     this._options = options;
   }
 
-  protected getSharedSecret(): Uint8Array | undefined {
+  getSharedSecret(): Uint8Array | undefined {
     return this._options?.sharedSecret;
   }
 
-  protected getType(): ApiType {
+  getType(): ApiType {
     return this._options.api;
   }
 
-  protected getRoot(): string {
+  getRoot(): string {
     return 'https://' + (this._options.root ?? window.location.hostname);
   }
 
   //Returns the endpoint for the identity
-  protected getEndpoint(): string {
+  getEndpoint(): string {
     let endpoint = '';
     switch (this._options?.api) {
       case ApiType.Owner:
@@ -56,7 +56,7 @@ export class ProviderBase {
   }
 
   //Gets an Axios client configured with token info
-  protected createAxiosClient(overrideEncryption?: boolean) {
+  createAxiosClient(overrideEncryption?: boolean) {
     const client = axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: true,
@@ -125,5 +125,9 @@ export class ProviderBase {
     );
 
     return client;
+  }
+
+  handleErrorResponse(error: AxiosError): undefined {
+    throw error;
   }
 }

@@ -1,4 +1,4 @@
-import { ApiType, ProviderBase, ProviderOptions } from '../../core/ProviderBase';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { PagedResult, PagingOptions } from '../../core/Types';
 
 const stringify = (obj: any) => {
@@ -7,29 +7,23 @@ const stringify = (obj: any) => {
     .join('&');
 };
 
-export class CircleNetworkReadOnlyProvider extends ProviderBase {
-  private root = '/circles/connections';
+const root = '/circles/connections';
 
-  constructor(options: ProviderOptions) {
-    super({
-      api: options.api,
-      sharedSecret: options.sharedSecret,
+export const getConnections = async (
+  dotYouClient: DotYouClient,
+  data: PagingOptions
+): Promise<PagedResult<{ dotYouId: string }>> => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/connected?' + stringify(data);
+
+  if (dotYouClient.getType() === ApiType.Owner) {
+    // Post needed
+    return client.post(url).then((response) => {
+      return response.data;
+    });
+  } else {
+    return client.get(url).then((response) => {
+      return response.data;
     });
   }
-
-  async getConnections(data: PagingOptions): Promise<PagedResult<{ dotYouId: string }>> {
-    const client = super.createAxiosClient();
-    const url = this.root + '/connected?' + stringify(data);
-
-    if (this.getType() === ApiType.Owner) {
-      // Post needed
-      return client.post(url).then((response) => {
-        return response.data;
-      });
-    } else {
-      return client.get(url).then((response) => {
-        return response.data;
-      });
-    }
-  }
-}
+};
