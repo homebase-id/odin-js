@@ -3,7 +3,7 @@ import {
   GetBatchQueryResultOptions,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
-import { BlogConfig, ChannelDefinition } from './BlogTypes';
+import { BlogConfig, ChannelDefinition } from './PostTypes';
 import { DataUtil } from '../../core/DataUtil';
 import {
   SecurityGroupType,
@@ -12,21 +12,21 @@ import {
   UploadResult,
 } from '../../core/DriveData/DriveUploadTypes';
 import {
-  DeleteFile,
-  EnsureDrive,
-  GetDrivesByType,
-  GetPayload,
-  QueryBatch,
-  QueryBatchCollection,
-  Random16,
-  Upload,
+  deleteFile,
+  ensureDrive,
+  getDrivesByType,
+  getPayload,
+  queryBatch,
+  queryBatchCollection,
+  getRandom16ByteArray,
+  uploadFile,
 } from '../../core/DriveData/DriveProvider';
 import { DotYouClient } from '../../core/DotYouClient';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
 ): Promise<ChannelDefinition[]> => {
-  const drives = await GetDrivesByType(dotYouClient, BlogConfig.DriveType, 1, 1000);
+  const drives = await getDrivesByType(dotYouClient, BlogConfig.DriveType, 1, 1000);
   const channelHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,
@@ -57,14 +57,14 @@ export const getChannelDefinitions = async (
     };
   });
 
-  const response = await QueryBatchCollection(dotYouClient, queries);
+  const response = await queryBatchCollection(dotYouClient, queries);
   const definitions = await Promise.all(
     response.results.map(async (response) => {
       if (response.searchResults.length == 1) {
         const channelDrive = getChannelDrive(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await GetPayload<ChannelDefinition>(
+        const definition = await getPayload<ChannelDefinition>(
           dotYouClient,
           channelDrive,
           dsr.fileId,
@@ -113,14 +113,14 @@ export const saveChannelDefinition = async (
   );
 
   const targetDrive = GetTargetDriveFromChannelId(definition.channelId);
-  await EnsureDrive(dotYouClient, targetDrive, definition.name, channelMetadata, true, true);
+  await ensureDrive(dotYouClient, targetDrive, definition.name, channelMetadata, true, true);
 
   const { fileId } = (await getChannelDefinitionInternal(dotYouClient, definition.channelId)) ?? {
     fileId: undefined,
   };
 
   const instructionSet: UploadInstructionSet = {
-    transferIv: Random16(),
+    transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: fileId,
       drive: targetDrive,
@@ -146,7 +146,7 @@ export const saveChannelDefinition = async (
     accessControlList: definition.acl,
   };
 
-  return await Upload(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  return await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
 };
 
 export const removeChannelDefinition = async (dotYouClient: DotYouClient, channelId: string) => {
@@ -156,7 +156,7 @@ export const removeChannelDefinition = async (dotYouClient: DotYouClient, channe
 
   const channelData = await getChannelDefinitionInternal(dotYouClient, channelId);
   if (channelData?.fileId) {
-    DeleteFile(dotYouClient, GetTargetDriveFromChannelId(channelId), channelData.fileId);
+    deleteFile(dotYouClient, GetTargetDriveFromChannelId(channelId), channelData.fileId);
     // TODO Should remove the Drive itself as well
   } else {
     throw new Error(`Remove Channel: Channel with id: ${channelId} not found`);
@@ -189,11 +189,11 @@ const getChannelDefinitionInternal = async (
   };
 
   try {
-    const response = await QueryBatch(dotYouClient, params, ro);
+    const response = await queryBatch(dotYouClient, params, ro);
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      const definition = await GetPayload<ChannelDefinition>(
+      const definition = await getPayload<ChannelDefinition>(
         dotYouClient,
         targetDrive,
         dsr.fileId,

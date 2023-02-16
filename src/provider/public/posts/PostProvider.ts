@@ -1,19 +1,31 @@
 import { DataUtil } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
-import { GetPayload, QueryBatch } from '../../core/DriveData/DriveProvider';
+import {
+  deleteFile,
+  getPayload,
+  getRandom16ByteArray,
+  queryBatch,
+  uploadFile,
+} from '../../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
   FileQueryParams,
   GetBatchQueryResultOptions,
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
+import {
+  SecurityGroupType,
+  UploadInstructionSet,
+  UploadFileMetadata,
+  UploadResult,
+} from '../../core/DriveData/DriveUploadTypes';
 import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
 import {
   getChannelDefinition,
   getChannelDefinitionBySlug,
   getChannelDefinitions,
   GetTargetDriveFromChannelId,
-} from './BlogDefinitionProvider';
+} from './PostDefinitionProvider';
 import {
   BlogConfig,
   PostContent,
@@ -21,7 +33,7 @@ import {
   PostFile,
   PostType,
   postTypeToDataType,
-} from './BlogTypes';
+} from './PostTypes';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
 export const getPosts = async <T extends PostContent>(
@@ -51,7 +63,7 @@ export const getPosts = async <T extends PostContent>(
     includeMetadataHeader: true,
   };
 
-  const response = await QueryBatch(dotYouClient, params, ro);
+  const response = await queryBatch(dotYouClient, params, ro);
 
   const posts: PostFile<T>[] = [];
   for (const key in response.searchResults) {
@@ -70,7 +82,7 @@ export const getRecentPosts = async <T extends PostContent>(
   cursorState: Record<string, string> | undefined = undefined,
   pageSize = 10
 ): Promise<MultiRequestCursoredResult<PostFile<T>[]>> => {
-  const channels = await getChannels(dotYouClient);
+  const channels = await getChannelDefinitions(dotYouClient);
   const allCursors: Record<string, string> = {};
   const resultPerChannel = await Promise.all(
     channels.map(async (channel) => {
@@ -108,7 +120,7 @@ export const getPost = async <T extends PostContent>(
     fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
 
-  const response = await QueryBatch(dotYouClient, params);
+  const response = await queryBatch(dotYouClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length > 1) {
@@ -141,7 +153,7 @@ export const getPostBySlug = async <T extends PostContent>(
     fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
 
-  const response = await QueryBatch(dotYouClient, params);
+  const response = await queryBatch(dotYouClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length > 1) {
@@ -163,9 +175,84 @@ export const getPostBySlug = async <T extends PostContent>(
   return;
 };
 
-export const getChannels = async (dotYouClient: DotYouClient): Promise<ChannelDefinition[]> => {
-  const channels = await getChannelDefinitions(dotYouClient);
-  return channels;
+export const savePost = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  file: PostFile<T>,
+  channelId: string
+): Promise<string> => {
+  if (!file.content.id) {
+    file.content.id = file.content.slug
+      ? DataUtil.toGuidId(file.content.slug)
+      : DataUtil.getNewId();
+  } else if (!file.fileId) {
+    // Check if content.id exists and with which fileId
+    file.fileId = (await getPost(dotYouClient, channelId, file.content.id))?.fileId ?? undefined;
+  }
+
+  const encrypt = !(
+    file.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+  );
+
+  const instructionSet: UploadInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    storageOptions: {
+      overwriteFileId: file?.fileId ?? '',
+      drive: GetTargetDriveFromChannelId(channelId),
+    },
+    transitOptions: null,
+  };
+
+  const payloadJson: string = DataUtil.JsonStringify64(file.content);
+  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+
+  const existingPostWithThisSlug = (
+    await getPostBySlug(dotYouClient, channelId, file.content.slug ?? file.content.id)
+  )?.postFile;
+  if (existingPostWithThisSlug && existingPostWithThisSlug?.content.id !== file.content.id) {
+    // There is clash with the current slug
+    file.content.slug = `${file.content.slug}-${new Date().getTime()}`;
+  }
+
+  const uniqueId = file.content.slug ? DataUtil.toGuidId(file.content.slug) : file.content.id;
+
+  // Set max of 3kb for jsonContent so enough room is left for metadata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+  const metadata: UploadFileMetadata = {
+    allowDistribution: true,
+    contentType: 'application/json',
+    appData: {
+      tags: [file.content.id],
+      uniqueId: uniqueId,
+      contentIsComplete: shouldEmbedContent,
+      fileType:
+        file.acl?.requiredSecurityGroup === SecurityGroupType.Owner
+          ? BlogConfig.DraftPostFileType
+          : BlogConfig.PostFileType,
+      jsonContent: shouldEmbedContent ? payloadJson : null,
+      previewThumbnail: file.previewThumbnail,
+      userDate: file.content.dateUnixTime,
+      dataType: postTypeToDataType(file.content.type),
+    },
+    payloadIsEncrypted: encrypt,
+    accessControlList: file.acl,
+  };
+
+  const result: UploadResult = await uploadFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    payloadBytes,
+    undefined,
+    encrypt
+  );
+
+  return result.file.fileId;
+};
+
+export const removePost = async (dotYouClient: DotYouClient, fileId: string, channelId: string) => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  deleteFile(dotYouClient, targetDrive, fileId);
 };
 
 ///
@@ -176,7 +263,7 @@ const dsrToPostFile = async <T extends PostContent>(
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<PostFile<T>> => {
-  const content = await GetPayload<T>(
+  const content = await getPayload<T>(
     dotYouClient,
     targetDrive,
     dsr.fileId,

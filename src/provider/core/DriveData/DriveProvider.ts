@@ -41,7 +41,7 @@ interface GetFileRequest {
   fileId: string;
 }
 
-const EmptyKeyHeader: KeyHeader = {
+const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
   aesKey: new Uint8Array(Array(16).fill(0)),
 };
@@ -53,19 +53,21 @@ const assertIfDefined = (key: string, value: unknown) => {
     throw new Error(`${key} undefined`);
   }
 };
-export const DefaultQueryModifiedResultOption = {
+
+export const DEFAULT_QUERY_MODIFIED_RESULT_OPTION = {
   cursor: undefined,
   maxRecords: 10,
   includeJsonContent: true,
   excludePreviewThumbnail: false,
 };
-export const DefaultQueryBatchResultOption = {
+
+export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
   cursorState: undefined,
   maxRecords: 10,
   includeMetadataHeader: true,
 };
 
-export const GetDrives = async (
+export const getDrives = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<DriveDefinition>> => {
@@ -78,7 +80,7 @@ export const GetDrives = async (
 
 /// Drive methods:
 //returns all drives for a given type
-export const GetDrivesByType = async (
+export const getDrivesByType = async (
   dotYouClient: DotYouClient,
   type: string,
   pageNumber: number,
@@ -109,7 +111,7 @@ export const GetDrivesByType = async (
   }
 };
 
-export const EnsureDrive = async (
+export const ensureDrive = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   name: string,
@@ -119,7 +121,7 @@ export const EnsureDrive = async (
 ): Promise<boolean> => {
   //create the drive if it does not exist
   const client = dotYouClient.createAxiosClient();
-  const allDrives = await GetDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
+  const allDrives = await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
 
   const foundDrive = allDrives.results.find(
     (d) =>
@@ -154,7 +156,7 @@ export const EnsureDrive = async (
 };
 
 /// Query methods:
-export const QueryModified = async (
+export const queryModified = async (
   dotYouClient: DotYouClient,
   params: FileQueryParams,
   ro?: GetModifiedResultOptions
@@ -163,7 +165,7 @@ export const QueryModified = async (
 
   const request: GetModifiedRequest = {
     queryParams: params,
-    resultOptions: ro ?? DefaultQueryModifiedResultOption,
+    resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   };
 
   return client.post<QueryModifiedResponse>('/drive/query/modified', request).then((response) => {
@@ -171,7 +173,7 @@ export const QueryModified = async (
   });
 };
 
-export const QueryBatch = async (
+export const queryBatch = async (
   dotYouClient: DotYouClient,
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
@@ -180,7 +182,7 @@ export const QueryBatch = async (
 
   const request: GetBatchRequest = {
     queryParams: params,
-    resultOptionsRequest: ro ?? DefaultQueryBatchResultOption,
+    resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
 
   return client.post<QueryBatchResponse>('/drive/query/batch', request).then((response) => {
@@ -188,7 +190,7 @@ export const QueryBatch = async (
   });
 };
 
-export const QueryBatchCollection = async (
+export const queryBatchCollection = async (
   dotYouClient: DotYouClient,
   queries: {
     name: string;
@@ -199,7 +201,7 @@ export const QueryBatchCollection = async (
   const client = dotYouClient.createAxiosClient();
 
   const updatedQueries = queries.map((query) => {
-    const ro = query.resultOptions ?? DefaultQueryBatchResultOption;
+    const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
     return {
       ...query,
       resultOptions: {
@@ -222,7 +224,7 @@ export const QueryBatchCollection = async (
 
 /// Get methods:
 
-export const GetFileHeader = async (
+export const getFileHeader = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string
@@ -262,13 +264,13 @@ export const GetFileHeader = async (
   return promise;
 };
 
-export const GetPayloadAsJson = async <T>(
+export const getPayloadAsJson = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader: KeyHeader | undefined
 ): Promise<T> => {
-  return GetPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader).then((data) => {
+  return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader).then((data) => {
     const json = DataUtil.byteArrayToString(new Uint8Array(data.bytes));
     try {
       const o = JSON.parse(json);
@@ -290,7 +292,7 @@ export const GetPayloadAsJson = async <T>(
   });
 };
 
-export const GetPayloadBytes = async (
+export const getPayloadBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
@@ -313,7 +315,7 @@ export const GetPayloadBytes = async (
     .then(async (response) => {
       if (keyHeader) {
         const cipher = new Uint8Array(response.data);
-        return DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
+        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
           return {
             bytes,
             contentType: `${response.headers.decryptedcontenttype}`,
@@ -327,10 +329,10 @@ export const GetPayloadBytes = async (
           response.headers.sharedsecretencryptedheader64
         );
 
-        const keyHeader = await DecryptKeyHeader(dotYouClient, encryptedKeyHeader);
+        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
         const cipher = new Uint8Array(response.data);
 
-        const bytes = await DecryptUsingKeyHeader(cipher, keyHeader);
+        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
         return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
       } else {
         return {
@@ -345,7 +347,7 @@ export const GetPayloadBytes = async (
     });
 };
 
-export const GetThumbBytes = async (
+export const getThumbBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
@@ -372,7 +374,7 @@ export const GetThumbBytes = async (
     .then(async (response) => {
       if (keyHeader) {
         const cipher = new Uint8Array(response.data);
-        return DecryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
+        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
           return {
             bytes,
             contentType: `${response.headers.decryptedcontenttype}`,
@@ -386,10 +388,10 @@ export const GetThumbBytes = async (
           response.headers.sharedsecretencryptedheader64
         );
 
-        const keyHeader = await DecryptKeyHeader(dotYouClient, encryptedKeyHeader);
+        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
         const cipher = new Uint8Array(response.data);
 
-        const bytes = await DecryptUsingKeyHeader(cipher, keyHeader);
+        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
         return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
       } else {
         return {
@@ -404,14 +406,14 @@ export const GetThumbBytes = async (
     });
 };
 
-export const DecryptJsonContent = async <T>(
+export const decryptJsonContent = async <T>(
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
 ): Promise<T> => {
   if (keyheader) {
     try {
       const cipher = DataUtil.base64ToUint8Array(fileMetaData.appData.jsonContent);
-      const json = DataUtil.byteArrayToString(await DecryptUsingKeyHeader(cipher, keyheader));
+      const json = DataUtil.byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
 
       return JSON.parse(json);
     } catch (err) {
@@ -424,7 +426,7 @@ export const DecryptJsonContent = async <T>(
 
 /// Delete methods:
 
-export const DeleteFile = async (
+export const deleteFile = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
@@ -461,7 +463,7 @@ export const DeleteFile = async (
 };
 
 // This is a temporary method, and should only be used as long as there is no way to fully remove all files on a drive in one go
-export const PurgeAllFiles = async (
+export const purgeAllFiles = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive
 ): Promise<boolean> => {
@@ -473,7 +475,7 @@ export const PurgeAllFiles = async (
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
     const querySet = async (cursorState: string | undefined): Promise<QueryBatchResponse> => {
-      return await QueryBatch(
+      return await queryBatch(
         dotYouClient,
         { targetDrive: drive },
         {
@@ -540,7 +542,7 @@ export const PurgeAllFiles = async (
 
 /// Upload methods:
 
-export const UploadUsingKeyHeader = async (
+export const uploadUsingKeyHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet,
@@ -566,9 +568,9 @@ export const UploadUsingKeyHeader = async (
     : metadata;
 
   const descriptor: UploadFileDescriptor = {
-    encryptedKeyHeader: await EncryptKeyHeader(
+    encryptedKeyHeader: await encryptKeyHeader(
       dotYouClient,
-      keyHeader ?? EmptyKeyHeader,
+      keyHeader ?? EMPTY_KEY_HEADER,
       instructions.transferIv
     ),
     fileMetadata: encryptedMetaData,
@@ -627,7 +629,7 @@ export const UploadUsingKeyHeader = async (
     });
 };
 
-export const Upload = async (
+export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
@@ -636,7 +638,7 @@ export const Upload = async (
   encrypt = true
 ): Promise<UploadResult> => {
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  return UploadUsingKeyHeader(dotYouClient, keyHeader, instructions, metadata, payload, thumbnails);
+  return uploadUsingKeyHeader(dotYouClient, keyHeader, instructions, metadata, payload, thumbnails);
 };
 
 /// Upload helpers:
@@ -674,7 +676,7 @@ const toBlob = (o: any): Blob => {
 };
 
 /// Helper methods:
-export const GetPayload = async <T>(
+export const getPayload = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
@@ -683,28 +685,28 @@ export const GetPayload = async <T>(
   includesJsonContent: boolean
 ): Promise<T> => {
   const keyheader = fileMetadata.payloadIsEncrypted
-    ? await DecryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
+    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;
 
   if (fileMetadata.appData.contentIsComplete && includesJsonContent) {
-    return await DecryptJsonContent<T>(fileMetadata, keyheader);
+    return await decryptJsonContent<T>(fileMetadata, keyheader);
   } else if (fileMetadata.appData.contentIsComplete) {
     // When contentIsComplete but !includesJsonContent the query before was done without including the jsonContent; So we just get and parse
-    const fileHeader = await GetFileHeader(dotYouClient, targetDrive, fileId);
-    return await DecryptJsonContent<T>(fileHeader.fileMetadata, keyheader);
+    const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId);
+    return await decryptJsonContent<T>(fileHeader.fileMetadata, keyheader);
   } else {
-    return await GetPayloadAsJson<T>(dotYouClient, targetDrive, fileId, keyheader);
+    return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, keyheader);
   }
 };
 
-export const DecryptUsingKeyHeader = async (
+export const decryptUsingKeyHeader = async (
   cipher: Uint8Array,
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
   return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
 };
 
-export const DecryptKeyHeader = async (
+export const decryptKeyHeader = async (
   dotYouClient: DotYouClient,
   encryptedKeyHeader: EncryptedKeyHeader
 ): Promise<KeyHeader> => {
@@ -734,7 +736,7 @@ export const DecryptKeyHeader = async (
   };
 };
 
-export const EncryptKeyHeader = async (
+export const encryptKeyHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader,
   transferIv: Uint8Array
@@ -756,11 +758,11 @@ export const EncryptKeyHeader = async (
 
 const GenerateKeyHeader = (): KeyHeader => {
   return {
-    iv: Random16(),
-    aesKey: Random16(),
+    iv: getRandom16ByteArray(),
+    aesKey: getRandom16ByteArray(),
   };
 };
 
-export const Random16 = (): Uint8Array => {
+export const getRandom16ByteArray = (): Uint8Array => {
   return window.crypto.getRandomValues(new Uint8Array(16));
 };

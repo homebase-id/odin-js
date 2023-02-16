@@ -1,15 +1,15 @@
 import { DataUtil } from '../core/DataUtil';
 import { DotYouClient } from '../core/DotYouClient';
 import {
-  DefaultQueryBatchResultOption,
-  DeleteFile,
-  EnsureDrive,
-  GetDrivesByType,
-  GetPayload,
-  QueryBatch,
-  QueryBatchCollection,
-  Random16,
-  Upload,
+  DEFAULT_QUERY_BATCH_RESULT_OPTION,
+  deleteFile,
+  ensureDrive,
+  getDrivesByType,
+  getPayload,
+  queryBatch,
+  queryBatchCollection,
+  getRandom16ByteArray,
+  uploadFile,
 } from '../core/DriveData/DriveProvider';
 import { FileQueryParams, TargetDrive } from '../core/DriveData/DriveTypes';
 import {
@@ -23,7 +23,7 @@ import { ProfileDefinition, ProfileSection } from './ProfileTypes';
 export const getProfileDefinitions = async (
   dotYouClient: DotYouClient
 ): Promise<ProfileDefinition[]> => {
-  const drives = await GetDrivesByType(dotYouClient, ProfileConfig.ProfileDriveType, 1, 1000);
+  const drives = await getDrivesByType(dotYouClient, ProfileConfig.ProfileDriveType, 1, 1000);
 
   const profileHeaders = drives.results.map((drive) => {
     return {
@@ -45,11 +45,11 @@ export const getProfileDefinitions = async (
     return {
       name: profileId,
       queryParams: params,
-      resultOptions: DefaultQueryBatchResultOption,
+      resultOptions: DEFAULT_QUERY_BATCH_RESULT_OPTION,
     };
   });
 
-  const response = await QueryBatchCollection(dotYouClient, queries);
+  const response = await queryBatchCollection(dotYouClient, queries);
 
   const definitions = await Promise.all(
     response.results.map(async (response) => {
@@ -57,7 +57,7 @@ export const getProfileDefinitions = async (
         const profileDrive = GetTargetDriveFromProfileId(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await GetPayload<ProfileDefinition>(
+        const definition = await getPayload<ProfileDefinition>(
           dotYouClient,
           profileDrive,
           dsr.fileId,
@@ -102,13 +102,13 @@ export const saveProfileDefinition = async (
 
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
-  await EnsureDrive(dotYouClient, targetDrive, definition.name, driveMetadata, true);
+  await ensureDrive(dotYouClient, targetDrive, definition.name, driveMetadata, true);
   const { fileId } = (await getProfileDefinitionInternal(dotYouClient, definition.profileId)) ?? {
     fileId: undefined,
   };
 
   const instructionSet: UploadInstructionSet = {
-    transferIv: Random16(),
+    transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: fileId?.toString(),
       drive: targetDrive,
@@ -138,7 +138,7 @@ export const saveProfileDefinition = async (
   };
 
   //reshape the definition to group attributes by their type
-  await Upload(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
   return;
 };
 
@@ -163,7 +163,7 @@ export const saveProfileSection = async (
   };
 
   const instructionSet: UploadInstructionSet = {
-    transferIv: Random16(),
+    transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: fileId ?? undefined,
       drive: targetDrive,
@@ -193,7 +193,7 @@ export const saveProfileSection = async (
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
   };
 
-  await Upload(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
 };
 
 export const removeProfileSection = async (
@@ -209,7 +209,7 @@ export const removeProfileSection = async (
     return false;
   }
 
-  return DeleteFile(dotYouClient, targetDrive, profileSection.fileId);
+  return deleteFile(dotYouClient, targetDrive, profileSection.fileId);
 };
 
 export const removeProfileDefinition = async (dotYouClient: DotYouClient, profileId: string) => {
@@ -222,7 +222,7 @@ export const removeProfileDefinition = async (dotYouClient: DotYouClient, profil
   }
 
   // TODO: remove drive
-  return DeleteFile(dotYouClient, targetDrive, profileDefinition.fileId);
+  return deleteFile(dotYouClient, targetDrive, profileDefinition.fileId);
 };
 
 export const getProfileSections = async (
@@ -237,12 +237,12 @@ export const getProfileSections = async (
     groupId: [profileId],
   };
 
-  const response = await QueryBatch(dotYouClient, params);
+  const response = await queryBatch(dotYouClient, params);
   if (response.searchResults.length >= 1) {
     const sections = await Promise.all(
       response.searchResults.map(
         async (result) =>
-          await GetPayload<ProfileSection>(
+          await getPayload<ProfileSection>(
             dotYouClient,
             targetDrive,
             result.fileId,
@@ -261,6 +261,13 @@ export const getProfileSections = async (
   return [];
 };
 
+export const GetTargetDriveFromProfileId = (profileId: string): TargetDrive => {
+  return {
+    alias: profileId,
+    type: ProfileConfig.ProfileDriveType,
+  };
+};
+
 ///
 
 const getProfileDefinitionInternal = async (
@@ -275,7 +282,7 @@ const getProfileDefinitionInternal = async (
     fileType: [ProfileConfig.ProfileDefinitionFileType],
   };
 
-  const response = await QueryBatch(dotYouClient, params);
+  const response = await queryBatch(dotYouClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length !== 1) {
@@ -284,7 +291,7 @@ const getProfileDefinitionInternal = async (
       );
     }
     const dsr = response.searchResults[0];
-    const definition = await GetPayload<ProfileDefinition>(
+    const definition = await getPayload<ProfileDefinition>(
       dotYouClient,
       targetDrive,
       dsr.fileId,
@@ -315,7 +322,7 @@ const getProfileSectionInternal = async (
     fileType: [ProfileConfig.ProfileSectionFileType],
   };
 
-  const response = await QueryBatch(dotYouClient, params);
+  const response = await queryBatch(dotYouClient, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length !== 1) {
@@ -324,7 +331,7 @@ const getProfileSectionInternal = async (
       );
     }
     const dsr = response.searchResults[0];
-    const definition = await GetPayload<ProfileSection>(
+    const definition = await getPayload<ProfileSection>(
       dotYouClient,
       targetDrive,
       dsr.fileId,
@@ -340,11 +347,4 @@ const getProfileSectionInternal = async (
   }
 
   return;
-};
-
-export const GetTargetDriveFromProfileId = (profileId: string): TargetDrive => {
-  return {
-    alias: profileId,
-    type: ProfileConfig.ProfileDriveType,
-  };
 };

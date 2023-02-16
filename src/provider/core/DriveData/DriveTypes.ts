@@ -13,6 +13,10 @@ export enum DrivePermissions {
   All = ReadWrite,
 }
 
+export interface PermissionSet {
+  keys: number[];
+}
+
 export interface EncryptedKeyHeader {
   encryptionVersion: number;
   type: number; //value is always 11

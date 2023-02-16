@@ -18,12 +18,12 @@ import { DataUtil } from '../DataUtil';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import { DotYouClient } from '../DotYouClient';
 import {
-  DeleteFile,
-  GetFileHeader,
-  GetPayloadBytes,
-  GetThumbBytes,
-  Random16,
-  Upload,
+  deleteFile,
+  getFileHeader,
+  getPayloadBytes,
+  getThumbBytes,
+  getRandom16ByteArray,
+  uploadFile,
 } from '../DriveData/DriveProvider';
 
 type ThumbnailMeta = {
@@ -73,7 +73,7 @@ export const uploadImage = async (
   );
 
   const instructionSet: UploadInstructionSet = {
-    transferIv: Random16(),
+    transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: fileId ?? null,
       drive: targetDrive,
@@ -146,7 +146,7 @@ export const uploadImage = async (
     accessControlList: acl,
   };
 
-  const result: UploadResult = await Upload(
+  const result: UploadResult = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
@@ -169,7 +169,7 @@ export const removeImage = async (
   imageFileId: string,
   targetDrive: TargetDrive
 ) => {
-  return DeleteFile(dotYouClient, targetDrive, imageFileId);
+  return deleteFile(dotYouClient, targetDrive, imageFileId);
 };
 
 export const getDecryptedMetadata = async (
@@ -177,7 +177,7 @@ export const getDecryptedMetadata = async (
   targetDrive: TargetDrive,
   fileId: string
 ): Promise<DriveSearchResult> => {
-  return await GetFileHeader(dotYouClient, targetDrive, fileId);
+  return await getFileHeader(dotYouClient, targetDrive, fileId);
 };
 
 export const getDecryptedThumbnailMeta = (
@@ -271,8 +271,8 @@ export const getDecryptedImageData = async (
   content: ArrayBuffer;
 }> => {
   const data = await (size
-    ? GetThumbBytes(dotYouClient, targetDrive, fileId, undefined, size.pixelWidth, size.pixelHeight)
-    : GetPayloadBytes(dotYouClient, targetDrive, fileId, undefined));
+    ? getThumbBytes(dotYouClient, targetDrive, fileId, undefined, size.pixelWidth, size.pixelHeight)
+    : getPayloadBytes(dotYouClient, targetDrive, fileId, undefined));
 
   return {
     contentType: data.contentType,

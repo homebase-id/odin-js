@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { DataUtil } from '../../core/DataUtil';
-import { DriveSearchResult } from '../../core/DriveData/DriveTypes';
+import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
 
 export interface ResponseEntry {
   additionalThumbnails?: {
@@ -13,7 +13,64 @@ export interface ResponseEntry {
   payload: Record<string, any>;
 }
 
+export type QueryParamsSection = {
+  name: string;
+  queryParams: FileQueryParams;
+  resultOptions: {
+    includeAdditionalThumbnails: boolean;
+    includeJsonContent: boolean;
+    includePayload: boolean;
+    excludePreviewThumbnail: boolean;
+  };
+};
+
+type PublishStaticFileRequest = {
+  filename: string;
+  config: { crossOriginBehavior: 'default' | 'allowAllOrigins'; contentType: string };
+  sections: QueryParamsSection[];
+};
+
+type PublishProfileImage = {
+  image64: string;
+  contentType: string;
+};
+
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
+
+export const publishFile = async (
+  dotYouClient: DotYouClient,
+  fileName: string,
+  sections: QueryParamsSection[],
+  crossOriginBehavior: 'allowAllOrigins' | 'default' = 'default'
+) => {
+  const httpClient = dotYouClient.createAxiosClient();
+
+  const fileRequest: PublishStaticFileRequest = {
+    filename: fileName,
+    config: {
+      crossOriginBehavior: crossOriginBehavior,
+      contentType: 'string',
+    },
+    sections: sections,
+  };
+
+  return await httpClient.post('/optimization/cdn/publish', fileRequest);
+};
+
+export const publishProfileImageFile = async (
+  dotYouClient: DotYouClient,
+  imageBuffer: Uint8Array,
+  contentType: string
+) => {
+  const httpClient = dotYouClient.createAxiosClient();
+
+  const fileRequest: PublishProfileImage = {
+    image64: DataUtil.uint8ArrayToBase64(imageBuffer),
+    contentType: contentType,
+  };
+
+  return await httpClient.post('/optimization/cdn/profileimage', fileRequest);
+};
 
 export const GetFile = async (
   dotYouClient: DotYouClient,

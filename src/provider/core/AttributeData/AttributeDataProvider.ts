@@ -15,9 +15,15 @@ import {
 } from '../DriveData/DriveUploadTypes';
 import { DataUtil } from '../DataUtil';
 import { AttributeConfig } from './AttributeConfig';
-import { ProfileConfig } from '../../profile/ProfileConfig';
 import { DotYouClient } from '../DotYouClient';
-import { DeleteFile, GetPayload, QueryBatch, Random16, Upload } from '../DriveData/DriveProvider';
+import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProvider';
+import {
+  deleteFile,
+  getPayload,
+  queryBatch,
+  getRandom16ByteArray,
+  uploadFile,
+} from '../DriveData/DriveProvider';
 
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
 export const getProfileAttributes = async (
@@ -26,14 +32,14 @@ export const getProfileAttributes = async (
   sectionId: string | undefined,
   pageSize: number
 ): Promise<AttributeFile[]> => {
-  const targetDrive = getTargetDrive(profileId);
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [AttributeConfig.AttributeFileType],
     groupId: sectionId ? [sectionId] : undefined,
   };
 
-  const result = await QueryBatch(dotYouClient, qp, {
+  const result = await queryBatch(dotYouClient, qp, {
     maxRecords: pageSize,
     includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
   });
@@ -59,7 +65,7 @@ export const getAttributeVersions = async (
   sectionId: string | undefined,
   tags: string[]
 ): Promise<AttributeFile[] | undefined> => {
-  const targetDrive = getTargetDrive(profileId);
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [AttributeConfig.AttributeFileType],
@@ -67,7 +73,7 @@ export const getAttributeVersions = async (
     tagsMatchAtLeastOne: tags,
   };
 
-  const result = await QueryBatch(dotYouClient, qp, {
+  const result = await queryBatch(dotYouClient, qp, {
     maxRecords: 10,
     includeMetadataHeader: true,
   });
@@ -91,7 +97,7 @@ export const getAttribute = async (
   profileId: string,
   id: string
 ): Promise<AttributeFile | undefined> => {
-  const targetDrive = getTargetDrive(profileId);
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
     clientUniqueIdAtLeastOne: [id],
@@ -103,7 +109,7 @@ export const getAttribute = async (
     includeMetadataHeader: true,
   };
 
-  const result = await QueryBatch(dotYouClient, qp, ro);
+  const result = await queryBatch(dotYouClient, qp, ro);
 
   if (result.searchResults.length == 0) {
     return;
@@ -125,14 +131,14 @@ export const getAttributes = async (
   tags: string[] | undefined,
   pageSize: number
 ): Promise<AttributeFile[]> => {
-  const targetDrive = getTargetDrive(profileId);
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [AttributeConfig.AttributeFileType],
     tagsMatchAll: tags ?? undefined,
   };
 
-  const result = await QueryBatch(dotYouClient, qp, {
+  const result = await queryBatch(dotYouClient, qp, {
     maxRecords: pageSize,
     includeMetadataHeader: true,
   });
@@ -157,7 +163,7 @@ export const dsrToAttributeFile = async (
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<AttributeFile> => {
-  const attrPayload = await GetPayload<AttributeFile>(
+  const attrPayload = await getPayload<AttributeFile>(
     dotYouClient,
     targetDrive,
     dsr.fileId,
@@ -194,10 +200,10 @@ export const saveAttribute = async (
   }
 
   const instructionSet: UploadInstructionSet = {
-    transferIv: Random16(),
+    transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: attribute?.fileId ?? '',
-      drive: getTargetDrive(attribute.profileId),
+      drive: GetTargetDriveFromProfileId(attribute.profileId),
     },
     transitOptions: null,
   };
@@ -226,7 +232,7 @@ export const saveAttribute = async (
     accessControlList: attribute.acl,
   };
 
-  const result: UploadResult = await Upload(
+  const result: UploadResult = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
@@ -245,13 +251,6 @@ export const removeAttribute = async (
   profileId: string,
   attributeFileId: string
 ): Promise<void> => {
-  const targetDrive = getTargetDrive(profileId);
-  DeleteFile(dotYouClient, targetDrive, attributeFileId);
-};
-
-const getTargetDrive = (profileId: string) => {
-  return {
-    alias: profileId,
-    type: ProfileConfig.ProfileDriveType,
-  };
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
+  deleteFile(dotYouClient, targetDrive, attributeFileId);
 };

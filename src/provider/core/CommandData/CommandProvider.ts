@@ -28,7 +28,7 @@ export const getCommands = (
     });
 };
 
-export const markComplete = (
+export const markCommandComplete = (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   commandIdList: string[]
