@@ -1,4 +1,4 @@
-import { DataUtil } from '../../core/DataUtil';
+import { toGuidId, getNewId, jsonStringify64, stringToUint8Array } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   deleteFile,
@@ -148,7 +148,7 @@ export const getPostBySlug = async <T extends PostContent>(
 
   const targetDrive = GetTargetDriveFromChannelId(channel.channelId);
   const params: FileQueryParams = {
-    clientUniqueIdAtLeastOne: [DataUtil.toGuidId(postSlug)],
+    clientUniqueIdAtLeastOne: [toGuidId(postSlug)],
     targetDrive: targetDrive,
     fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
   };
@@ -181,9 +181,7 @@ export const savePost = async <T extends PostContent>(
   channelId: string
 ): Promise<string> => {
   if (!file.content.id) {
-    file.content.id = file.content.slug
-      ? DataUtil.toGuidId(file.content.slug)
-      : DataUtil.getNewId();
+    file.content.id = file.content.slug ? toGuidId(file.content.slug) : getNewId();
   } else if (!file.fileId) {
     // Check if content.id exists and with which fileId
     file.fileId = (await getPost(dotYouClient, channelId, file.content.id))?.fileId ?? undefined;
@@ -203,8 +201,8 @@ export const savePost = async <T extends PostContent>(
     transitOptions: null,
   };
 
-  const payloadJson: string = DataUtil.JsonStringify64(file.content);
-  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  const payloadJson: string = jsonStringify64(file.content);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   const existingPostWithThisSlug = (
     await getPostBySlug(dotYouClient, channelId, file.content.slug ?? file.content.id)
@@ -214,7 +212,7 @@ export const savePost = async <T extends PostContent>(
     file.content.slug = `${file.content.slug}-${new Date().getTime()}`;
   }
 
-  const uniqueId = file.content.slug ? DataUtil.toGuidId(file.content.slug) : file.content.id;
+  const uniqueId = file.content.slug ? toGuidId(file.content.slug) : file.content.id;
 
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;

@@ -1,4 +1,4 @@
-import { DataUtil } from '../DataUtil';
+import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import {
   decryptKeyHeader,
@@ -96,7 +96,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
 ): Promise<T> => {
   return getPayloadBytesOverTransit(dotYouClient, dotYouId, targetDrive, fileId, keyHeader).then(
     (data) => {
-      const json = DataUtil.byteArrayToString(new Uint8Array(data.bytes));
+      const json = byteArrayToString(new Uint8Array(data.bytes));
       try {
         const o = JSON.parse(json);
         return o;
@@ -151,7 +151,7 @@ export const getPayloadBytesOverTransit = async (
         response.headers.payloadencrypted === 'True' &&
         response.headers.sharedsecretencryptedheader64
       ) {
-        const encryptedKeyHeader = DataUtil.splitSharedSecretEncryptedKeyHeader(
+        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
           response.headers.sharedsecretencryptedheader64
         );
 
@@ -212,7 +212,7 @@ export const getThumbBytesOverTransit = async (
         response.headers.payloadencrypted === 'True' &&
         response.headers.sharedsecretencryptedheader64
       ) {
-        const encryptedKeyHeader = DataUtil.splitSharedSecretEncryptedKeyHeader(
+        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
           response.headers.sharedsecretencryptedheader64
         );
 

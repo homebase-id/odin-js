@@ -13,7 +13,6 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../DriveData/DriveUploadTypes';
-import { DataUtil } from '../DataUtil';
 import { AttributeConfig } from './AttributeConfig';
 import { DotYouClient } from '../DotYouClient';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProvider';
@@ -24,6 +23,7 @@ import {
   getRandom16ByteArray,
   uploadFile,
 } from '../DriveData/DriveProvider';
+import { getNewId, jsonStringify64, stringToUint8Array } from '../DataUtil';
 
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
 export const getProfileAttributes = async (
@@ -184,7 +184,7 @@ export const saveAttribute = async (
 ): Promise<AttributeFile> => {
   // If a new attribute
   if (!attribute.id) {
-    attribute.id = DataUtil.getNewId();
+    attribute.id = getNewId();
   } else if (!attribute.fileId) {
     attribute.fileId =
       (await getAttribute(dotYouClient, attribute.profileId, attribute.id))?.fileId ?? undefined;
@@ -208,12 +208,12 @@ export const saveAttribute = async (
     transitOptions: null,
   };
 
-  const payloadJson: string = DataUtil.JsonStringify64({
+  const payloadJson: string = jsonStringify64({
     ...attribute,
     acl: undefined,
     fileId: undefined,
   } as Attribute);
-  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;

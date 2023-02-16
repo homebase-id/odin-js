@@ -1,5 +1,3 @@
-import { AesEncrypt } from '../AesEncrypt';
-import { DataUtil } from '../DataUtil';
 import {
   KeyHeader,
   DriveDefinition,
@@ -24,6 +22,16 @@ import {
   UploadResult,
 } from './DriveUploadTypes';
 import { ApiType, DotYouClient } from '../DotYouClient';
+import { cbcEncrypt, cbcDecrypt } from '../AesEncrypt';
+import {
+  stringify,
+  byteArrayToString,
+  splitSharedSecretEncryptedKeyHeader,
+  base64ToUint8Array,
+  uint8ArrayToBase64,
+  stringToUint8Array,
+  jsonStringify64,
+} from '../DataUtil';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -100,7 +108,7 @@ export const getDrivesByType = async (
     });
   } else {
     const client = dotYouClient.createAxiosClient();
-    return client.get('drive/metadata/type?' + DataUtil.stringify(params)).then((response) => {
+    return client.get('drive/metadata/type?' + stringify(params)).then((response) => {
       return {
         ...response.data,
         results: response?.data?.results?.map((result: { targetDrive: any }) => {
@@ -246,7 +254,7 @@ export const getFileHeader = async (
   };
 
   const promise = client
-    .get('/drive/files/header?' + DataUtil.stringify(request))
+    .get('/drive/files/header?' + stringify(request))
     .then((response) => {
       return response.data;
     })
@@ -271,7 +279,7 @@ export const getPayloadAsJson = async <T>(
   keyHeader: KeyHeader | undefined
 ): Promise<T> => {
   return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader).then((data) => {
-    const json = DataUtil.byteArrayToString(new Uint8Array(data.bytes));
+    const json = byteArrayToString(new Uint8Array(data.bytes));
     try {
       const o = JSON.parse(json);
       return o;
@@ -311,7 +319,7 @@ export const getPayloadBytes = async (
   };
 
   return client
-    .get('/drive/files/payload?' + DataUtil.stringify(request), config)
+    .get('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
       if (keyHeader) {
         const cipher = new Uint8Array(response.data);
@@ -325,7 +333,7 @@ export const getPayloadBytes = async (
         response.headers.payloadencrypted === 'True' &&
         response.headers.sharedsecretencryptedheader64
       ) {
-        const encryptedKeyHeader = DataUtil.splitSharedSecretEncryptedKeyHeader(
+        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
           response.headers.sharedsecretencryptedheader64
         );
 
@@ -370,7 +378,7 @@ export const getThumbBytes = async (
   };
 
   return client
-    .get('/drive/files/thumb?' + DataUtil.stringify({ ...request, width, height }), config)
+    .get('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
     .then(async (response) => {
       if (keyHeader) {
         const cipher = new Uint8Array(response.data);
@@ -384,7 +392,7 @@ export const getThumbBytes = async (
         response.headers.payloadencrypted === 'True' &&
         response.headers.sharedsecretencryptedheader64
       ) {
-        const encryptedKeyHeader = DataUtil.splitSharedSecretEncryptedKeyHeader(
+        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
           response.headers.sharedsecretencryptedheader64
         );
 
@@ -412,8 +420,8 @@ export const decryptJsonContent = async <T>(
 ): Promise<T> => {
   if (keyheader) {
     try {
-      const cipher = DataUtil.base64ToUint8Array(fileMetaData.appData.jsonContent);
-      const json = DataUtil.byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
+      const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
+      const json = byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
 
       return JSON.parse(json);
     } catch (err) {
@@ -556,9 +564,9 @@ export const uploadUsingKeyHeader = async (
         appData: {
           ...metadata.appData,
           jsonContent: metadata.appData.jsonContent
-            ? DataUtil.uint8ArrayToBase64(
+            ? uint8ArrayToBase64(
                 await encryptWithKeyheader(
-                  DataUtil.stringToUint8Array(metadata.appData.jsonContent),
+                  stringToUint8Array(metadata.appData.jsonContent),
                   keyHeader
                 )
               )
@@ -647,7 +655,7 @@ const encryptWithKeyheader = async (
   content: Uint8Array,
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
-  const cipher = await AesEncrypt.CbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
+  const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
   return cipher;
 };
 
@@ -658,19 +666,19 @@ const encryptWithSharedSecret = async (
 ): Promise<Uint8Array> => {
   //encrypt metadata with shared secret
   const ss = dotYouClient.getSharedSecret();
-  const json = DataUtil.JsonStringify64(o);
+  const json = jsonStringify64(o);
 
   if (!ss) {
     throw new Error('attempting to decrypt but missing the shared secret');
   }
 
   const content = new TextEncoder().encode(json);
-  const cipher = await AesEncrypt.CbcEncrypt(content, iv, ss);
+  const cipher = await cbcEncrypt(content, iv, ss);
   return cipher;
 };
 
 const toBlob = (o: any): Blob => {
-  const json = DataUtil.JsonStringify64(o);
+  const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
   return new Blob([content]);
 };
@@ -703,7 +711,7 @@ export const decryptUsingKeyHeader = async (
   cipher: Uint8Array,
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
-  return await AesEncrypt.CbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
+  return await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
 };
 
 export const decryptKeyHeader = async (
@@ -718,15 +726,15 @@ export const decryptKeyHeader = async (
   // Check if used params aren't still base64 encoded if so parse to bytearrays
   let encryptedAesKey = encryptedKeyHeader.encryptedAesKey;
   if (typeof encryptedKeyHeader.encryptedAesKey === 'string') {
-    encryptedAesKey = DataUtil.base64ToUint8Array(encryptedKeyHeader.encryptedAesKey);
+    encryptedAesKey = base64ToUint8Array(encryptedKeyHeader.encryptedAesKey);
   }
 
   let receivedIv = encryptedKeyHeader.iv;
   if (typeof encryptedKeyHeader.iv === 'string') {
-    receivedIv = DataUtil.base64ToUint8Array(encryptedKeyHeader.iv);
+    receivedIv = base64ToUint8Array(encryptedKeyHeader.iv);
   }
 
-  const bytes = await AesEncrypt.CbcDecrypt(encryptedAesKey, receivedIv, ss);
+  const bytes = await cbcDecrypt(encryptedAesKey, receivedIv, ss);
   const iv = bytes.subarray(0, 16);
   const aesKey = bytes.subarray(16);
 
@@ -746,7 +754,7 @@ export const encryptKeyHeader = async (
     throw new Error('attempting to encrypt but missing the shared secret');
   }
   const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
-  const cipher = await AesEncrypt.CbcEncrypt(new Uint8Array(combined), transferIv, ss);
+  const cipher = await cbcEncrypt(new Uint8Array(combined), transferIv, ss);
 
   return {
     iv: transferIv,

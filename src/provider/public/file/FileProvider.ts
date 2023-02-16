@@ -1,5 +1,5 @@
+import { uint8ArrayToBase64, base64ToUint8Array, byteArrayToString } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
-import { DataUtil } from '../../core/DataUtil';
 import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
 
 export interface ResponseEntry {
@@ -65,7 +65,7 @@ export const publishProfileImageFile = async (
   const httpClient = dotYouClient.createAxiosClient();
 
   const fileRequest: PublishProfileImage = {
-    image64: DataUtil.uint8ArrayToBase64(imageBuffer),
+    image64: uint8ArrayToBase64(imageBuffer),
     contentType: contentType,
   };
 
@@ -147,8 +147,8 @@ const convertFileToResponseEntry = async (file: any) => {
     ) {
       parsedObj = JSON.parse(file.header.fileMetadata.appData.jsonContent);
     } else if (file.payload) {
-      const bytes = DataUtil.base64ToUint8Array(file.payload);
-      const json = DataUtil.byteArrayToString(bytes);
+      const bytes = base64ToUint8Array(file.payload);
+      const json = byteArrayToString(bytes);
 
       parsedObj = JSON.parse(json);
     }

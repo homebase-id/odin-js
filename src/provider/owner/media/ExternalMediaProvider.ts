@@ -1,4 +1,4 @@
-import { DataUtil } from '../../core/DataUtil';
+import { base64ToUint8Array, stringify } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import { ThumbSize, TargetDrive, DriveSearchResult } from '../../core/DriveData/DriveTypes';
 import {
@@ -36,7 +36,7 @@ export const getDecryptedThumbnailMetaOverTransit = async (
       }
 
       const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-      const buffer = DataUtil.base64ToUint8Array(previewThumbnail.content);
+      const buffer = base64ToUint8Array(previewThumbnail.content);
       const url = window.URL.createObjectURL(
         new Blob([buffer], { type: previewThumbnail.contentType })
       );
@@ -61,7 +61,7 @@ export const getDecryptedImageUrlOverTransit = async (
   const meta = await getDecryptedMetadataOverTransit(dotYouClient, dotYouId, targetDrive, fileId);
   if (!meta.fileMetadata.payloadIsEncrypted && size) {
     // Build get url:
-    return `https://${dotYouId}/api/youauth/v1/drive/files/thumb?${DataUtil.stringify({
+    return `https://${dotYouId}/api/youauth/v1/drive/files/thumb?${stringify({
       ...targetDrive,
       fileId,
       width: size.pixelWidth,

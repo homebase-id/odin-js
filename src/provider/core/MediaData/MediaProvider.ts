@@ -13,7 +13,6 @@ import {
   UploadResult,
 } from '../DriveData/DriveUploadTypes';
 import { fromBlob } from './Resizer/resize';
-import { DataUtil } from '../DataUtil';
 
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import { DotYouClient } from '../DotYouClient';
@@ -25,6 +24,7 @@ import {
   getRandom16ByteArray,
   uploadFile,
 } from '../DriveData/DriveProvider';
+import { getNewId, base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../DataUtil';
 
 type ThumbnailMeta = {
   naturalSize: { width: number; height: number };
@@ -135,7 +135,7 @@ export const uploadImage = async (
     contentType: type ?? 'image/webp',
     appData: {
       tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],
-      uniqueId: uniqueId ?? DataUtil.getNewId(),
+      uniqueId: uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: 0,
       jsonContent: null,
@@ -192,7 +192,7 @@ export const getDecryptedThumbnailMeta = (
     }
 
     const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-    const buffer = DataUtil.base64ToUint8Array(previewThumbnail.content);
+    const buffer = base64ToUint8Array(previewThumbnail.content);
     const url = window.URL.createObjectURL(
       new Blob([buffer], { type: previewThumbnail.contentType })
     );
@@ -219,7 +219,7 @@ export const getDecryptedImageUrl = async (
   const getDirectImageUrl = async () => {
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
       size ? 'thumb' : 'payload'
-    }?${DataUtil.stringify({
+    }?${stringify({
       ...targetDrive,
       fileId,
       ...(size
@@ -289,7 +289,7 @@ const createVectorThumbnail = (imageBytes: Uint8Array): ThumbnailFile => {
     pixelWidth: 50,
     pixelHeight: 50,
     contentAsByteArray: imageBytes,
-    content: DataUtil.uint8ArrayToBase64(imageBytes),
+    content: uint8ArrayToBase64(imageBytes),
     contentType: `image/svg+xml`,
   };
 };
@@ -315,7 +315,7 @@ const createImageThumbnail = async (
         pixelWidth: resizedData.size.width,
         pixelHeight: resizedData.size.height,
         contentAsByteArray: contentByteArray,
-        content: DataUtil.uint8ArrayToBase64(contentByteArray),
+        content: uint8ArrayToBase64(contentByteArray),
         contentType: `image/${format}`,
       };
     });

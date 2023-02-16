@@ -1,4 +1,4 @@
-import { DataUtil } from '../../core/DataUtil';
+import { getNewId } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import { CircleDefinition } from './CircleDataTypes';
 
@@ -31,7 +31,7 @@ export const createCircleDefinition = async (
   const url = root + '/create';
 
   if (!circleDefinition.id) {
-    circleDefinition.id = DataUtil.getNewId();
+    circleDefinition.id = getNewId();
   }
 
   return client

@@ -1,5 +1,11 @@
-import { AesEncrypt } from './AesEncrypt';
-import { DataUtil } from './DataUtil';
+import { cbcEncrypt, cbcDecrypt } from './AesEncrypt';
+import {
+  stringToUint8Array,
+  uint8ArrayToBase64,
+  jsonStringify64,
+  base64ToUint8Array,
+  byteArrayToString,
+} from './DataUtil';
 
 export interface SharedSecretEncryptedPayload {
   iv: string;
@@ -9,12 +15,12 @@ export interface SharedSecretEncryptedPayload {
 export const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
 
 export const encryptData = async (data: string, iv: Uint8Array, ss: Uint8Array) => {
-  const bytes = DataUtil.stringToUint8Array(data);
+  const bytes = stringToUint8Array(data);
 
-  const encryptedBytes = await AesEncrypt.CbcEncrypt(bytes, iv, ss);
+  const encryptedBytes = await cbcEncrypt(bytes, iv, ss);
   const payload: SharedSecretEncryptedPayload = {
-    iv: DataUtil.uint8ArrayToBase64(iv),
-    data: DataUtil.uint8ArrayToBase64(encryptedBytes),
+    iv: uint8ArrayToBase64(iv),
+    data: uint8ArrayToBase64(encryptedBytes),
   };
 
   return payload;
@@ -23,7 +29,7 @@ export const encryptData = async (data: string, iv: Uint8Array, ss: Uint8Array) 
 export const getIvFromQueryString = async (querystring: string) => {
   const fileId = new URLSearchParams(querystring).get('fileId');
   const hashedFileId = fileId
-    ? await crypto.subtle.digest('SHA-1', DataUtil.stringToUint8Array(fileId))
+    ? await crypto.subtle.digest('SHA-1', stringToUint8Array(fileId))
     : undefined;
 
   if (!hashedFileId) {
@@ -50,18 +56,18 @@ export const encryptUrl = async (url: string, ss: Uint8Array) => {
     dedicatedIv ?? getRandomIv(),
     ss
   );
-  const encodedPayload = encodeURIComponent(DataUtil.JsonStringify64(encryptedPayload));
+  const encodedPayload = encodeURIComponent(jsonStringify64(encryptedPayload));
 
   return parts[0] + '?ss=' + encodedPayload;
 };
 
 export const decryptData = async (data: string, iv: string, ss: Uint8Array) => {
   try {
-    const ivAsByteArray = DataUtil.base64ToUint8Array(iv);
-    const encryptedBytes = DataUtil.base64ToUint8Array(data);
+    const ivAsByteArray = base64ToUint8Array(iv);
+    const encryptedBytes = base64ToUint8Array(data);
 
-    const bytes = await AesEncrypt.CbcDecrypt(encryptedBytes, ivAsByteArray, ss);
-    const json = DataUtil.byteArrayToString(bytes);
+    const bytes = await cbcDecrypt(encryptedBytes, ivAsByteArray, ss);
+    const json = byteArrayToString(bytes);
 
     return JSON.parse(json);
   } catch (ex) {

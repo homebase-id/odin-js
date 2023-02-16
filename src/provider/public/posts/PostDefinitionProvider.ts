@@ -4,7 +4,6 @@ import {
   TargetDrive,
 } from '../../core/DriveData/DriveTypes';
 import { BlogConfig, ChannelDefinition } from './PostTypes';
-import { DataUtil } from '../../core/DataUtil';
 import {
   SecurityGroupType,
   UploadFileMetadata,
@@ -22,6 +21,7 @@ import {
   uploadFile,
 } from '../../core/DriveData/DriveProvider';
 import { DotYouClient } from '../../core/DotYouClient';
+import { toGuidId, jsonStringify64, stringToUint8Array } from '../../core/DataUtil';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
@@ -104,7 +104,7 @@ export const saveChannelDefinition = async (
   const channelMetadata = '';
 
   if (!definition.channelId) {
-    definition.channelId = DataUtil.toGuidId(definition.name);
+    definition.channelId = toGuidId(definition.name);
   }
 
   const encrypt = !(
@@ -128,8 +128,8 @@ export const saveChannelDefinition = async (
     transitOptions: null,
   };
 
-  const payloadJson: string = DataUtil.JsonStringify64(definition);
-  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  const payloadJson: string = jsonStringify64(definition);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;

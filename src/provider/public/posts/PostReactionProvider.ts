@@ -1,4 +1,4 @@
-import { DataUtil } from '../../core/DataUtil';
+import { jsonStringify64, stringToUint8Array, getNewId } from '../../core/DataUtil';
 import { DotYouClient, ApiType } from '../../core/DotYouClient';
 import { getRandom16ByteArray, uploadFile } from '../../core/DriveData/DriveProvider';
 import {
@@ -68,8 +68,8 @@ export const saveComment = async (
   // TODO: Handle attachments
   // => Upload files with the mediaProvider
   // => Replace attachment array with fileIds of those
-  const payloadJson: string = DataUtil.JsonStringify64(comment.content);
-  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  const payloadJson: string = jsonStringify64(comment.content);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
@@ -79,7 +79,7 @@ export const saveComment = async (
     senderDotYouId: comment.authorDotYouId,
     appData: {
       tags: [],
-      uniqueId: comment.id ?? DataUtil.getNewId(),
+      uniqueId: comment.id ?? getNewId(),
       contentIsComplete: shouldEmbedContent,
       fileType: isEmoji ? ReactionConfig.EmojiFileType : ReactionConfig.CommentFileType,
       jsonContent: shouldEmbedContent ? payloadJson : null,
@@ -121,7 +121,7 @@ export const getComments = async (
 
   return [
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       authorDotYouId: 'samwise.digital',
       date: yesterday.getTime(),
       content: {
@@ -129,7 +129,7 @@ export const getComments = async (
       },
     },
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       authorDotYouId: 'samwise.digital',
       date: yesterday.getTime(),
       content: {
@@ -137,7 +137,7 @@ export const getComments = async (
       },
     },
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       authorDotYouId: 'samwise.digital',
       date: yesterday.getTime(),
       content: {
@@ -145,7 +145,7 @@ export const getComments = async (
       },
     },
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       commentThreadId: '123',
       authorDotYouId: 'frodo.digital',
       date: new Date().getTime(),
@@ -187,7 +187,7 @@ export const getReactions = async (
 
   return [
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       authorDotYouId: 'samwise.digital',
       date: yesterday.getTime(),
       content: {
@@ -195,7 +195,7 @@ export const getReactions = async (
       },
     },
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       authorDotYouId: 'frodo.digital',
       date: new Date().getTime(),
       content: {
@@ -203,7 +203,7 @@ export const getReactions = async (
       },
     },
     {
-      id: DataUtil.getNewId(),
+      id: getNewId(),
       authorDotYouId: 'merry.youfoundation.id',
       date: new Date().getTime(),
       content: {

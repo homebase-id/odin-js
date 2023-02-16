@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { DataUtil } from './DataUtil';
+import { jsonStringify64 } from './DataUtil';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
 
 export enum ApiType {
@@ -79,7 +79,7 @@ export class DotYouClient {
         isDebug && console.debug('request', request.url, { ...request });
 
         if (request.method?.toUpperCase() == 'POST') {
-          const json = DataUtil.JsonStringify64(request.data);
+          const json = jsonStringify64(request.data);
           const payload = await encryptData(json, getRandomIv(), ss);
 
           request.data = payload;

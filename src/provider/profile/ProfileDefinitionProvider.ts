@@ -1,4 +1,4 @@
-import { DataUtil } from '../core/DataUtil';
+import { getNewId, jsonStringify64, stringToUint8Array } from '../core/DataUtil';
 import { DotYouClient } from '../core/DotYouClient';
 import {
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
@@ -95,7 +95,7 @@ export const saveProfileDefinition = async (
   definition: ProfileDefinition
 ): Promise<void> => {
   if (!definition.profileId) {
-    definition.profileId = DataUtil.getNewId();
+    definition.profileId = getNewId();
   }
 
   const encrypt = true;
@@ -116,8 +116,8 @@ export const saveProfileDefinition = async (
     transitOptions: null,
   };
 
-  const payloadJson: string = DataUtil.JsonStringify64(definition);
-  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  const payloadJson: string = jsonStringify64(definition);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
@@ -151,7 +151,7 @@ export const saveProfileSection = async (
   const encrypt = true;
 
   if (!profileSection.sectionId) {
-    profileSection.sectionId = DataUtil.getNewId();
+    profileSection.sectionId = getNewId();
     isCreate = true;
   }
 
@@ -171,8 +171,8 @@ export const saveProfileSection = async (
     transitOptions: null,
   };
 
-  const payloadJson: string = DataUtil.JsonStringify64(profileSection);
-  const payloadBytes = DataUtil.stringToUint8Array(payloadJson);
+  const payloadJson: string = jsonStringify64(profileSection);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
