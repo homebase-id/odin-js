@@ -92,6 +92,7 @@ export interface DriveDefinition {
 
 export interface DriveSearchResult {
   fileId: string;
+  fileState: 'active';
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   fileMetadata: FileMetadata;
   serverMetadata: ServerMetaData;

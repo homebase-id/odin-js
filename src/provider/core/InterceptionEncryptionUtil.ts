@@ -69,9 +69,16 @@ export const decryptData = async (data: string, iv: string, ss: Uint8Array) => {
     const bytes = await cbcDecrypt(encryptedBytes, ivAsByteArray, ss);
     const json = byteArrayToString(bytes);
 
-    return JSON.parse(json);
-  } catch (ex) {
-    console.log('decrypt response failed', ex);
+    // Don't parse empty data (it will always fail)
+    return json?.length ? JSON.parse(json) : undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (ex: any) {
+    const isParseError = ex?.message.indexOf('JSON.parse') !== -1;
+    if (isParseError) {
+      console.error('[DotYouCore-js] bad response from server', ex.message);
+    } else {
+      console.error('[DotYouCore-js] decrypt response failed', ex);
+    }
     return undefined;
   }
 };

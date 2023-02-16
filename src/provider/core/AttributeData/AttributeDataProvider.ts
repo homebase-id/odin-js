@@ -44,11 +44,13 @@ export const getProfileAttributes = async (
     includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
   });
 
-  let attributes: AttributeFile[] = await Promise.all(
-    result.searchResults.map(async (dsr) =>
-      dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+  let attributes: AttributeFile[] = (
+    await Promise.all(
+      result.searchResults.map(async (dsr) =>
+        dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+      )
     )
-  );
+  ).filter((attr) => !!attr) as AttributeFile[];
 
   //sort where lowest number is higher priority
   attributes = attributes.sort((a, b) => {
@@ -78,11 +80,13 @@ export const getAttributeVersions = async (
     includeMetadataHeader: true,
   });
 
-  let attributes: AttributeFile[] = await Promise.all(
-    result.searchResults.map(async (dsr) =>
-      dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+  let attributes: AttributeFile[] = (
+    await Promise.all(
+      result.searchResults.map(async (dsr) =>
+        dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+      )
     )
-  );
+  ).filter((attr) => !!attr) as AttributeFile[];
 
   //sort where lowest number is higher priority (!! sort happens in place)
   attributes = attributes.sort((a, b) => {
@@ -143,11 +147,13 @@ export const getAttributes = async (
     includeMetadataHeader: true,
   });
 
-  let attributes: AttributeFile[] = await Promise.all(
-    result.searchResults.map(async (dsr) =>
-      dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+  let attributes: AttributeFile[] = (
+    await Promise.all(
+      result.searchResults.map(async (dsr) =>
+        dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+      )
     )
-  );
+  ).filter((attr) => !!attr) as AttributeFile[];
 
   //sort where lowest number is higher priority
   attributes = attributes.sort((a, b) => {
@@ -162,20 +168,25 @@ export const dsrToAttributeFile = async (
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<AttributeFile> => {
-  const attrPayload = await getPayload<AttributeFile>(
-    dotYouClient,
-    targetDrive,
-    dsr.fileId,
-    dsr.fileMetadata,
-    dsr.sharedSecretEncryptedKeyHeader,
-    includeMetadataHeader
-  );
-  return {
-    ...attrPayload,
-    fileId: attrPayload.fileId ?? dsr.fileId,
-    acl: dsr.serverMetadata?.accessControlList,
-  };
+): Promise<AttributeFile | undefined> => {
+  try {
+    const attrPayload = await getPayload<AttributeFile>(
+      dotYouClient,
+      targetDrive,
+      dsr.fileId,
+      dsr.fileMetadata,
+      dsr.sharedSecretEncryptedKeyHeader,
+      includeMetadataHeader
+    );
+    return {
+      ...attrPayload,
+      fileId: attrPayload.fileId ?? dsr.fileId,
+      acl: dsr.serverMetadata?.accessControlList,
+    };
+  } catch (ex) {
+    console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
+    return undefined;
+  }
 };
 
 export const saveAttribute = async (

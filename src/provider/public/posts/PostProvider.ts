@@ -65,11 +65,14 @@ export const getPosts = async <T extends PostContent>(
 
   const response = await queryBatch(dotYouClient, params, ro);
 
-  const posts: PostFile<T>[] = [];
-  for (const key in response.searchResults) {
-    const dsr = response.searchResults[key];
-    posts.push(await dsrToPostFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader));
-  }
+  const posts: PostFile<T>[] = (
+    await Promise.all(
+      response.searchResults.map(
+        async (dsr) =>
+          await dsrToPostFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader)
+      )
+    )
+  ).filter((post) => !!post) as PostFile<T>[];
 
   return { cursorState: response.cursorState, results: posts };
 };
@@ -161,13 +164,18 @@ export const getPostBySlug = async <T extends PostContent>(
     }
 
     const dsr = response.searchResults[0];
+    const postFile = await dsrToPostFile<T>(
+      dotYouClient,
+      dsr,
+      targetDrive,
+      response.includeMetadataHeader
+    );
+    if (!postFile) {
+      return undefined;
+    }
+
     return {
-      postFile: await dsrToPostFile<T>(
-        dotYouClient,
-        dsr,
-        targetDrive,
-        response.includeMetadataHeader
-      ),
+      postFile: postFile,
       channel: channel,
     };
   }
@@ -260,24 +268,29 @@ const dsrToPostFile = async <T extends PostContent>(
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<PostFile<T>> => {
-  const content = await getPayload<T>(
-    dotYouClient,
-    targetDrive,
-    dsr.fileId,
-    dsr.fileMetadata,
-    dsr.sharedSecretEncryptedKeyHeader,
-    includeMetadataHeader
-  );
+): Promise<PostFile<T> | undefined> => {
+  try {
+    const content = await getPayload<T>(
+      dotYouClient,
+      targetDrive,
+      dsr.fileId,
+      dsr.fileMetadata,
+      dsr.sharedSecretEncryptedKeyHeader,
+      includeMetadataHeader
+    );
 
-  const file: PostFile<T> = {
-    fileId: dsr.fileId,
-    acl: dsr.serverMetadata?.accessControlList,
-    content: content,
-    previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-    payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-    isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
-  };
+    const file: PostFile<T> = {
+      fileId: dsr.fileId,
+      acl: dsr.serverMetadata?.accessControlList,
+      content: content,
+      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+      isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
+    };
 
-  return file;
+    return file;
+  } catch (ex) {
+    console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
+    return undefined;
+  }
 };

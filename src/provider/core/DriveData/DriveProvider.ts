@@ -194,7 +194,12 @@ export const queryBatch = async (
   };
 
   return client.post<QueryBatchResponse>('/drive/query/batch', request).then((response) => {
-    return response.data;
+    const responseData = response.data;
+    return {
+      ...response.data,
+      // Remove deleted files
+      searchResults: responseData.searchResults.filter((dsr) => dsr.fileState === 'active'),
+    };
   });
 };
 
@@ -226,7 +231,16 @@ export const queryBatchCollection = async (
       queries: updatedQueries,
     })
     .then((response) => {
-      return response.data;
+      return {
+        ...response.data,
+        // Remove deleted files
+        results: response.data.results.map((result) => {
+          return {
+            ...result,
+            searchResults: result.searchResults.filter((dsr) => dsr.fileState === 'active'),
+          };
+        }),
+      };
     });
 };
 
