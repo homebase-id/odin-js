@@ -210,7 +210,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
     ?.map((attr) => attr?.data?.['profileImageId'] as string)
     .filter((fileId) => fileId !== undefined);
 
-  if (profilePhotoFileIds) {
+  if (profilePhotoFileIds?.length) {
     const imageData = await getDecryptedImageData(
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
