@@ -63,6 +63,9 @@ export interface EmbeddedThumb extends ThumbSize {
 
 export interface AppFileMetaData {
   fileType: number;
+  dataType: number;
+  groupId?: string;
+  userDate?: number;
   tags: string[] | null;
   uniqueId?: string;
   contentIsComplete: boolean;

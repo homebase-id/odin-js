@@ -10,6 +10,7 @@ export interface UploadInstructionSet {
   transferIv: Uint8Array;
   storageOptions: StorageOptions | null;
   transitOptions: TransitOptions | null;
+  systemFileType?: 'Standard' | 'Comment';
 }
 
 export interface StorageOptions {
@@ -20,9 +21,9 @@ export interface StorageOptions {
 
 export interface TransitOptions {
   recipients: string[];
-  useGlobalTransitId?: boolean | undefined,
-  schedule: ScheduleOptions
-  sendContents: SendContents
+  useGlobalTransitId?: boolean | undefined;
+  schedule: ScheduleOptions;
+  sendContents: SendContents;
 }
 
 export enum SendContents {
@@ -34,7 +35,7 @@ export enum SendContents {
 
 export enum ScheduleOptions {
   SendNowAwaitResponse = 'sendNowAwaitResponse',
-  SendLater = 'sendLater'
+  SendLater = 'sendLater',
 }
 
 export interface UploadFileDescriptor {
@@ -49,6 +50,7 @@ export interface UploadFileMetadata {
   payloadIsEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
+  referencedFile?: ExternalFileIdentifier;
 }
 
 export interface AccessControlList {

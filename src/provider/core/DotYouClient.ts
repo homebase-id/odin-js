@@ -31,8 +31,12 @@ export class DotYouClient {
     return this._options.api;
   }
 
+  getHostname(): string {
+    return this._options.root ?? window.location.hostname;
+  }
+
   getRoot(): string {
-    return 'https://' + (this._options.root ?? window.location.hostname);
+    return `https://${this.getHostname()}`;
   }
 
   //Returns the endpoint for the identity

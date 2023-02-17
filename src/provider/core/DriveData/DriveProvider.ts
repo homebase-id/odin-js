@@ -572,6 +572,12 @@ export const uploadUsingKeyHeader = async (
   payload: Uint8Array,
   thumbnails?: { filename: string; payload: Uint8Array; contentType: ThumbnailFileTypes }[]
 ): Promise<UploadResult> => {
+  const strippedInstructions: UploadInstructionSet = {
+    storageOptions: instructions.storageOptions,
+    transferIv: instructions.transferIv,
+    transitOptions: instructions.transitOptions,
+  };
+
   const encryptedMetaData = keyHeader
     ? {
         ...metadata,
@@ -606,7 +612,7 @@ export const uploadUsingKeyHeader = async (
   const encryptedPayload = keyHeader ? await encryptWithKeyheader(payload, keyHeader) : payload;
 
   const data = new FormData();
-  data.append('instructions', toBlob(instructions));
+  data.append('instructions', toBlob(strippedInstructions));
   data.append('metaData', new Blob([encryptedDescriptor]));
 
   if (metadata.appData.contentIsComplete) {
@@ -637,6 +643,7 @@ export const uploadUsingKeyHeader = async (
   const config = {
     headers: {
       'content-type': 'multipart/form-data',
+      'X-ODIN-FILE-SYSTEM-TYPE': instructions.systemFileType || 'Standard',
     },
   };
 
