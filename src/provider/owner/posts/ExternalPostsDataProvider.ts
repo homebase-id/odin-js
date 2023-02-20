@@ -67,7 +67,7 @@ export const getRecentsFromConnectionsOverTransit = async (
         content: isLocal
           ? await getPayload<PostContent>(dotYouClient, ...getPayloadParams)
           : await getPayloadOverTransit<PostContent>(dotYouClient, dotYouId, ...getPayloadParams),
-        dotYouId: dotYouId,
+        dotYouId: dsr.fileMetadata.senderDotYouId || dotYouId,
         previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
         additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
       } as PostFileVm<PostContent>;
