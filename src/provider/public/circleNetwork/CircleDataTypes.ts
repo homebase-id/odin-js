@@ -78,7 +78,7 @@ export interface CircleDefinition {
   description: string;
   disabled?: boolean;
   driveGrants?: DriveGrant[];
-  permissionsKey: {
+  permissions: {
     keys: number[];
   };
 }
