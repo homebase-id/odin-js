@@ -100,6 +100,7 @@ export interface DriveSearchResult {
   fileMetadata: FileMetadata;
   serverMetadata: ServerMetaData;
   priority: number;
+  reactionPreview: undefined;
 }
 
 export interface QueryParams {

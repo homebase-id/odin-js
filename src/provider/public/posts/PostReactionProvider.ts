@@ -118,70 +118,6 @@ export const saveComment = async (
   }
 };
 
-export const saveEmojiReaction = async (
-  dotYouClient: DotYouClient,
-  comment: ReactionVm
-): Promise<string> => {
-  console.log('[DotYouCore-js] Should attempt to react with emoji:', comment);
-  return '123';
-
-  // TODO: Set final endpoint
-
-  const encrypt = false;
-  const targetDrive = GetTargetDriveFromChannelId(comment.postDetails.channelId);
-
-  const instructionSet: UploadInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      overwriteFileId: undefined,
-      drive: targetDrive,
-    },
-    transitOptions: null,
-    systemFileType: 'Comment',
-  };
-
-  const payloadJson: string = jsonStringify64(comment.content);
-  const payloadBytes = stringToUint8Array(payloadJson);
-
-  // Set max of 3kb for jsonContent so enough room is left for metadata
-  const shouldEmbedContent = payloadBytes.length < 3000;
-  const metadata: UploadFileMetadata = {
-    allowDistribution: false,
-    contentType: 'application/json',
-    senderDotYouId: comment.authorDotYouId,
-    referencedFile: { targetDrive, fileId: comment.postDetails.postFileId },
-    appData: {
-      tags: [],
-      uniqueId: comment.id ?? getNewId(),
-      contentIsComplete: shouldEmbedContent,
-      fileType: ReactionConfig.EmojiFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: undefined,
-      userDate: comment.date ?? new Date().getTime(),
-      // groupId: comment.commentThreadId,
-    },
-    payloadIsEncrypted: encrypt,
-    accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-  };
-
-  if (dotYouClient.getHostname() === comment.postDetails.authorDotYouId) {
-    // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
-    const result: UploadResult = await uploadFile(
-      dotYouClient,
-      instructionSet,
-      metadata,
-      payloadBytes,
-      undefined,
-      encrypt
-    );
-
-    return result.file.fileId;
-  } else {
-    // Use transit endpoint for reactions ?
-    return '123';
-  }
-};
-
 export const getComments = async (
   dotYouClient: DotYouClient,
   dotYouId: string,
@@ -280,6 +216,63 @@ const dsrToComment = async (
   };
 };
 
+const emojiRoot = '/drive/files/reaction';
+export const saveEmojiReaction = async (
+  dotYouClient: DotYouClient,
+  comment: ReactionVm
+): Promise<string> => {
+  console.log('[DotYouCore-js] Should attempt to react with emoji:', comment);
+
+  const client = dotYouClient.createAxiosClient();
+  const url = emojiRoot + 's/add';
+
+  const data = {
+    dotYouId: comment.authorDotYouId,
+    reaction: comment.content.body,
+    file: {
+      targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
+      fileId: comment.postDetails.postFileId,
+    },
+  };
+
+  return client
+    .post(url, data)
+    .then((response) => {
+      return { ...response.data, status: response.data?.status?.toLowerCase() };
+    })
+    .catch(dotYouClient.handleErrorResponse);
+
+  // if (dotYouClient.getHostname() === comment.postDetails.authorDotYouId) {
+  //   // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
+  // } else {
+  //   // Use transit endpoint for reactions ?
+  // }
+};
+
+export const removeEmojiReaction = async (
+  dotYouClient: DotYouClient,
+  comment: ReactionVm
+): Promise<string> => {
+  const client = dotYouClient.createAxiosClient();
+  const url = emojiRoot + '/delete';
+
+  const data = {
+    dotYouId: comment.authorDotYouId,
+    reaction: comment.content.body,
+    file: {
+      targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
+      fileId: comment.postDetails.postFileId,
+    },
+  };
+
+  return client
+    .post(url, data)
+    .then((response) => {
+      return { ...response.data, status: response.data?.status?.toLowerCase() };
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};
+
 export const getReactionSummary = async (
   dotYouId: string,
   channelId: string,
@@ -300,15 +293,31 @@ export const getReactionSummary = async (
 };
 
 export const getReactions = async (
+  dotYouClient: DotYouClient,
   dotYouId: string,
   channelId: string,
   postFileId: string
-): Promise<ReactionFile[]> => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
+): Promise<ReactionFile[] | undefined> => {
   console.debug('Getting reactions for: ', { dotYouId, channelId, postFileId });
 
+  const client = dotYouClient.createAxiosClient();
+  const url = emojiRoot + '/list';
+
+  const data = {
+    targetDrive: GetTargetDriveFromChannelId(channelId),
+    fileId: postFileId,
+  };
+
+  client
+    .post(url, data)
+    .then((response) => {
+      console.log('get reactions:', response.data);
+      // return { ...response.data, status: response.data?.status?.toLowerCase() };
+    })
+    .catch(dotYouClient.handleErrorResponse);
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
   return [
     {
       id: getNewId(),
