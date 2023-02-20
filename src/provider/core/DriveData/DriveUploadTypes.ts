@@ -6,11 +6,13 @@ import {
   EmbeddedThumb,
 } from './DriveTypes';
 
+export type SystemFileType = 'Standard' | 'Comment';
+
 export interface UploadInstructionSet {
   transferIv: Uint8Array;
   storageOptions: StorageOptions | null;
   transitOptions: TransitOptions | null;
-  systemFileType?: 'Standard' | 'Comment';
+  systemFileType?: SystemFileType;
 }
 
 export interface StorageOptions {

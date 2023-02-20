@@ -55,6 +55,8 @@ const parsePermissions = (permission: unknown) => {
     ? 2
     : lowered === 'readwrite'
     ? 3
+    : lowered === 'writereactionsandcomments'
+    ? 4
     : permission;
 };
 

@@ -188,12 +188,21 @@ export const queryBatch = async (
 ): Promise<QueryBatchResponse> => {
   const client = dotYouClient.createAxiosClient();
 
+  const strippedQueryParams = { ...params };
+  delete strippedQueryParams.systemFileType;
+
   const request: GetBatchRequest = {
-    queryParams: params,
+    queryParams: strippedQueryParams,
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
 
-  return client.post<QueryBatchResponse>('/drive/query/batch', request).then((response) => {
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
+    },
+  };
+
+  return client.post<QueryBatchResponse>('/drive/query/batch', request, config).then((response) => {
     const responseData = response.data;
     return {
       ...response.data,

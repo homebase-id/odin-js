@@ -82,7 +82,7 @@ export const saveComment = async (
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    allowDistribution: false,
+    allowDistribution: true,
     contentType: 'application/json',
     senderDotYouId: comment.authorDotYouId,
     referencedFile: { targetDrive, fileId: comment.postDetails.postFileId },
@@ -172,6 +172,7 @@ export const getComments = async (
     targetDrive: targetDrive,
     fileType: [ReactionConfig.CommentFileType],
     groupId: [postFileId],
+    systemFileType: 'Comment',
   };
 
   const result = await queryBatch(dotYouClient, qp, {
@@ -216,7 +217,7 @@ const dsrToComment = async (
   };
 };
 
-const emojiRoot = '/drive/files/reaction';
+const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
   comment: ReactionVm
@@ -224,11 +225,11 @@ export const saveEmojiReaction = async (
   console.log('[DotYouCore-js] Should attempt to react with emoji:', comment);
 
   const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + 's/add';
+  const url = emojiRoot + '/add';
 
   const data = {
     dotYouId: comment.authorDotYouId,
-    reaction: comment.content.body,
+    reaction: JSON.stringify({ emoji: comment.content.body }),
     file: {
       targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
       fileId: comment.postDetails.postFileId,

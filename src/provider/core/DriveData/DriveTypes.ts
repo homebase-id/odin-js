@@ -1,4 +1,4 @@
-import { AccessControlList } from './DriveUploadTypes';
+import { AccessControlList, SystemFileType } from './DriveUploadTypes';
 
 export interface PermissionedDrive {
   drive: TargetDrive;
@@ -128,6 +128,7 @@ export interface FileQueryParams {
   tagsMatchAll?: string[] | undefined;
   globalTransitId?: string[] | undefined;
   clientUniqueIdAtLeastOne?: string[] | undefined;
+  systemFileType?: SystemFileType;
 }
 
 export interface GetModifiedResultOptions {
