@@ -94,7 +94,7 @@ export const saveComment = async (
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: undefined,
       userDate: comment.date ?? new Date().getTime(),
-      // groupId: comment.commentThreadId,
+      groupId: comment.commentThreadId, // TODO: Needs support on Server Side to actually accept a groupId
     },
     payloadIsEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
@@ -274,23 +274,44 @@ export const removeEmojiReaction = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
+export interface ReactionSummary {
+  emojis: string[];
+  totalCount: number;
+}
+
+interface ServerReactionsList {
+  reactions: string[];
+  totalCount: number;
+}
+
 export const getReactionSummary = async (
+  dotYouClient: DotYouClient,
   dotYouId: string,
   channelId: string,
   postFileId: string
-): Promise<{ emoji: string; count: number }[]> => {
+): Promise<ReactionSummary> => {
   console.debug('Getting reaction summary for: ', { dotYouId, channelId, postFileId });
 
-  return [
-    {
-      emoji: '❤️',
-      count: 2,
-    },
-    {
-      emoji: '🤔',
-      count: 1,
-    },
-  ];
+  const client = dotYouClient.createAxiosClient();
+  const url = emojiRoot + '/list';
+
+  const data = {
+    targetDrive: GetTargetDriveFromChannelId(channelId),
+    fileId: postFileId,
+  };
+
+  return client
+    .post<ServerReactionsList>(url, data)
+    .then((response) => {
+      return {
+        emojis: response.data.reactions.map((reaction) => JSON.parse(reaction).emoji as string),
+        totalCount: response.data.totalCount,
+      };
+    })
+    .catch((e) => {
+      dotYouClient.handleErrorResponse(e);
+      return { emojis: [], totalCount: 0 };
+    });
 };
 
 export const getReactions = async (
@@ -298,7 +319,7 @@ export const getReactions = async (
   dotYouId: string,
   channelId: string,
   postFileId: string
-): Promise<ReactionFile[] | undefined> => {
+): Promise<{ reactions: ReactionFile[]; totalCount: number } | undefined> => {
   console.debug('Getting reactions for: ', { dotYouId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
@@ -309,40 +330,19 @@ export const getReactions = async (
     fileId: postFileId,
   };
 
-  client
-    .post(url, data)
+  return client
+    .post<ServerReactionsList>(url, data)
     .then((response) => {
       console.log('get reactions:', response.data);
-      // return { ...response.data, status: response.data?.status?.toLowerCase() };
+      return {
+        reactions: response.data.reactions.map((reaction) => {
+          return {
+            authorDotYouId: 'unkown.identity', // TODO: who reacted this? Where to find out?
+            content: { body: JSON.parse(reaction).emoji },
+          };
+        }),
+        totalCount: response.data.totalCount,
+      };
     })
     .catch(dotYouClient.handleErrorResponse);
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return [
-    {
-      id: getNewId(),
-      authorDotYouId: 'samwise.digital',
-      date: yesterday.getTime(),
-      content: {
-        body: '❤️',
-      },
-    },
-    {
-      id: getNewId(),
-      authorDotYouId: 'frodo.digital',
-      date: new Date().getTime(),
-      content: {
-        body: '❤️',
-      },
-    },
-    {
-      id: getNewId(),
-      authorDotYouId: 'merry.youfoundation.id',
-      date: new Date().getTime(),
-      content: {
-        body: '🤔',
-      },
-    },
-  ];
 };

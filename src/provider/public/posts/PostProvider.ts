@@ -279,6 +279,8 @@ const dsrToPostFile = async <T extends PostContent>(
       includeMetadataHeader
     );
 
+    if (dsr.reactionPreview) console.log(dsr.reactionPreview);
+
     const file: PostFile<T> = {
       fileId: dsr.fileId,
       acl: dsr.serverMetadata?.accessControlList,
