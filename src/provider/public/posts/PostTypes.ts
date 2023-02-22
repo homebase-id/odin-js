@@ -98,13 +98,25 @@ export interface ReadTimeStats {
 export interface Image extends PostContent {
   type: 'Image';
   imageFileIds?: string[];
+  body: Record<string, unknown>[];
 }
 
 export interface Video extends PostContent {
   videoFileId: string;
   type: 'Video';
+  body: Record<string, unknown>[];
 }
+
+// On hold for now, needs a proxy to get the linkMeta externally
+// export interface LinkMeta {
+//   url: string;
+//   title: string;
+//   description?: string;
+//   imageUrl?: string;
+// }
 
 export interface Tweet extends PostContent {
   type: 'Tweet';
+  body: Record<string, unknown>[];
+  // linkMeta?: LinkMeta;
 }

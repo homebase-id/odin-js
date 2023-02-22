@@ -304,7 +304,16 @@ export const getReactionSummary = async (
     .post<ServerReactionsList>(url, data)
     .then((response) => {
       return {
-        emojis: response.data.reactions.map((reaction) => JSON.parse(reaction).emoji as string),
+        emojis: response.data.reactions
+          .map((reaction) => {
+            try {
+              return JSON.parse(reaction).emoji as string;
+            } catch (ex) {
+              console.error('[DotYouCore-js] parse failed for', reaction);
+              return;
+            }
+          })
+          .filter(Boolean) as string[],
         totalCount: response.data.totalCount,
       };
     })
