@@ -14,6 +14,7 @@ import {
   UploadResult,
 } from '../../core/DriveData/DriveUploadTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
+import { RichText } from './PostTypes';
 
 export interface ReactionContext {
   authorDotYouId: string;
@@ -24,6 +25,7 @@ export interface ReactionContext {
 
 interface ReactionContent {
   body: string;
+  bodyAsRichText?: RichText;
   attachmentIds?: string[];
 }
 
@@ -38,8 +40,7 @@ export interface ReactionFile {
   content: ReactionContent;
 }
 
-interface RawReactionContent {
-  body: string;
+interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
   attachments?: File[];
 }
 
