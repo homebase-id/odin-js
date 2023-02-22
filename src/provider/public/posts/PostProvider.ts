@@ -222,19 +222,18 @@ export const savePost = async <T extends PostContent>(
   const payloadJson: string = jsonStringify64(file.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
+  const isDraft = file.acl?.requiredSecurityGroup === SecurityGroupType.Owner;
+
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    allowDistribution: true,
+    allowDistribution: !isDraft,
     contentType: 'application/json',
     appData: {
       tags: [file.content.id],
       uniqueId: uniqueId,
       contentIsComplete: shouldEmbedContent,
-      fileType:
-        file.acl?.requiredSecurityGroup === SecurityGroupType.Owner
-          ? BlogConfig.DraftPostFileType
-          : BlogConfig.PostFileType,
+      fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: file.previewThumbnail,
       userDate: file.content.dateUnixTime,
