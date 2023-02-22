@@ -209,18 +209,18 @@ export const savePost = async <T extends PostContent>(
     transitOptions: null,
   };
 
-  const payloadJson: string = jsonStringify64(file.content);
-  const payloadBytes = stringToUint8Array(payloadJson);
-
   const existingPostWithThisSlug = (
     await getPostBySlug(dotYouClient, channelId, file.content.slug ?? file.content.id)
   )?.postFile;
+
   if (existingPostWithThisSlug && existingPostWithThisSlug?.content.id !== file.content.id) {
     // There is clash with the current slug
     file.content.slug = `${file.content.slug}-${new Date().getTime()}`;
   }
-
   const uniqueId = file.content.slug ? toGuidId(file.content.slug) : file.content.id;
+
+  const payloadJson: string = jsonStringify64(file.content);
+  const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
@@ -279,7 +279,7 @@ const dsrToPostFile = async <T extends PostContent>(
       includeMetadataHeader
     );
 
-    if (dsr.reactionPreview) console.log(dsr.reactionPreview);
+    // if (dsr.reactionPreview) console.debug(dsr.reactionPreview);
 
     const file: PostFile<T> = {
       fileId: dsr.fileId,
