@@ -97,8 +97,6 @@ export interface Article extends PostContent {
 }
 
 export interface ReadTimeStats {
-  text: string;
-  time: number;
   words: number;
   minutes: number;
 }
