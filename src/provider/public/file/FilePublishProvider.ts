@@ -218,7 +218,6 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       { pixelWidth: 300, pixelHeight: 300, contentType: 'image/webp' }
     );
     if (imageData) {
-      console.log('publishing profile image');
       await publishProfileImageFile(
         dotYouClient,
         new Uint8Array(imageData.content),

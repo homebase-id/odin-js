@@ -26,6 +26,7 @@ import {
   getChannelDefinitions,
   GetTargetDriveFromChannelId,
 } from './PostDefinitionProvider';
+import { parseReactionPreview } from './PostReactionProvider';
 import {
   BlogConfig,
   PostContent,
@@ -278,13 +279,12 @@ const dsrToPostFile = async <T extends PostContent>(
       includeMetadataHeader
     );
 
-    // if (dsr.reactionPreview) console.debug(dsr.reactionPreview);
-
     const file: PostFile<T> = {
       fileId: dsr.fileId,
       acl: dsr.serverMetadata?.accessControlList,
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      reactionPreview: parseReactionPreview(dsr.reactionPreview),
       payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
       isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
     };

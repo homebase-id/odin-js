@@ -9,6 +9,7 @@ import {
 import { CursoredResult } from '../../core/Types';
 import { getChannelDrive } from '../../public/posts/PostDefinitionProvider';
 import { getRecentPosts } from '../../public/posts/PostProvider';
+import { parseReactionPreview } from '../../public/posts/PostReactionProvider';
 import { ChannelDefinition, PostContent, PostFile, BlogConfig } from '../../public/posts/PostTypes';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
@@ -69,6 +70,7 @@ export const getRecentsFromConnectionsOverTransit = async (
           : await getPayloadOverTransit<PostContent>(dotYouClient, dotYouId, ...getPayloadParams),
         dotYouId: dsr.fileMetadata.senderDotYouId || dotYouId,
         previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+        reactionPreview: parseReactionPreview(dsr.reactionPreview),
         additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
       } as PostFileVm<PostContent>;
     })

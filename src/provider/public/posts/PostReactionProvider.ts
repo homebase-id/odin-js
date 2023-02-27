@@ -6,7 +6,12 @@ import {
   queryBatch,
   uploadFile,
 } from '../../core/DriveData/DriveProvider';
-import { DriveSearchResult, FileQueryParams, TargetDrive } from '../../core/DriveData/DriveTypes';
+import {
+  DriveSearchResult,
+  FileQueryParams,
+  ReactionPreview,
+  TargetDrive,
+} from '../../core/DriveData/DriveTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,
@@ -23,7 +28,7 @@ export interface ReactionContext {
   postId?: string;
 }
 
-interface ReactionContent {
+export interface ReactionContent {
   body: string;
   bodyAsRichText?: RichText;
   attachmentIds?: string[];
@@ -38,6 +43,20 @@ export interface ReactionFile {
   date?: number;
 
   content: ReactionContent;
+}
+
+export interface CommentReactionPreview extends ReactionFile {
+  reactions: EmojiReactionSummary;
+}
+
+export interface EmojiReactionSummary {
+  emojis: string[];
+  totalCount: number;
+}
+
+export interface CommentsReactionSummary {
+  comments: CommentReactionPreview[];
+  totalCount: number;
 }
 
 interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
@@ -128,45 +147,6 @@ export const getComments = async (
   cursorState?: string
 ): Promise<ReactionFile[]> => {
   console.debug('Getting comments for: ', { dotYouId, channelId, postFileId });
-
-  // const yesterday = new Date();
-  // yesterday.setDate(yesterday.getDate() - 1);
-
-  // return [
-  //   {
-  //     id: getNewId(),
-  //     authorDotYouId: 'samwise.digital',
-  //     date: yesterday.getTime(),
-  //     content: {
-  //       body: 'First 🏎️ 🏁',
-  //     },
-  //   },
-  //   {
-  //     id: getNewId(),
-  //     authorDotYouId: 'samwise.digital',
-  //     date: yesterday.getTime(),
-  //     content: {
-  //       body: 'My precious 🤣',
-  //     },
-  //   },
-  //   {
-  //     id: getNewId(),
-  //     authorDotYouId: 'samwise.digital',
-  //     date: yesterday.getTime(),
-  //     content: {
-  //       body: 'Lorem ipsum, Donec congue eget ante consectetur varius. Nulla nibh lorem, pharetra ac commodo vitae, ultricies vel massa.',
-  //     },
-  //   },
-  //   {
-  //     id: getNewId(),
-  //     commentThreadId: '123',
-  //     authorDotYouId: 'frodo.digital',
-  //     date: new Date().getTime(),
-  //     content: {
-  //       body: '"Lorem ipsum?" What do you mean?',
-  //     },
-  //   },
-  // ];
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const qp: FileQueryParams = {
@@ -275,11 +255,6 @@ export const removeEmojiReaction = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
-export interface ReactionSummary {
-  emojis: string[];
-  totalCount: number;
-}
-
 interface ServerReactionsList {
   reactions: string[];
   totalCount: number;
@@ -290,7 +265,7 @@ export const getReactionSummary = async (
   dotYouId: string,
   channelId: string,
   postFileId: string
-): Promise<ReactionSummary> => {
+): Promise<EmojiReactionSummary> => {
   console.debug('Getting reaction summary for: ', { dotYouId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
@@ -355,4 +330,54 @@ export const getReactions = async (
       };
     })
     .catch(dotYouClient.handleErrorResponse);
+};
+
+export const parseReactionPreview = (
+  reactionPreview: ReactionPreview | undefined
+): { comments: CommentsReactionSummary; reactions: EmojiReactionSummary } | undefined => {
+  const parseReactions = (
+    reactions: {
+      key: string;
+      count: string;
+    }[]
+  ) => {
+    return {
+      emojis: reactions.map((reaction) => reaction.key),
+      totalCount: reactions.reduce((prevVal, curVal) => {
+        return prevVal + parseInt(curVal.count);
+      }, 0),
+    };
+  };
+
+  if (reactionPreview) {
+    return {
+      comments: {
+        comments: reactionPreview.comments
+          .map((commentPreview) => {
+            let content: ReactionContent | undefined = undefined;
+
+            try {
+              content = JSON.parse(commentPreview.jsonContent);
+            } catch (ex) {
+              //
+            }
+
+            if (!content) {
+              return;
+            }
+
+            return {
+              authorDotYouId: commentPreview.dotYouId,
+              content: content,
+              reactions: parseReactions(commentPreview.reactions),
+            };
+          })
+          .filter(Boolean) as CommentReactionPreview[],
+        totalCount: reactionPreview.comments.length || 0,
+      },
+      reactions: parseReactions(reactionPreview.reactions),
+    };
+  }
+
+  return reactionPreview;
 };

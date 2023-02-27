@@ -1,6 +1,7 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { EmbeddedThumb, TargetDrive } from '../../core/DriveData/DriveTypes';
 import { toGuidId } from '../../core/DataUtil';
+import { CommentsReactionSummary, EmojiReactionSummary } from './PostReactionProvider';
 
 export interface ChannelDefinition {
   channelId: string;
@@ -66,6 +67,10 @@ export interface PostFile<T extends PostContent> {
   acl?: AccessControlList;
   content: T;
   previewThumbnail?: EmbeddedThumb;
+  reactionPreview?: {
+    reactions: EmojiReactionSummary;
+    comments: CommentsReactionSummary;
+  };
   payloadIsEncrypted?: boolean;
   isDraft?: boolean;
 }

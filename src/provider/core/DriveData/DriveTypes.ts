@@ -93,6 +93,15 @@ export interface DriveDefinition {
   ownerOnly: boolean;
 }
 
+export interface ReactionPreview {
+  comments: {
+    dotYouId: string;
+    jsonContent: string;
+    reactions: { key: string; count: string }[];
+  }[];
+  reactions: { key: string; count: string }[];
+}
+
 export interface DriveSearchResult {
   fileId: string;
   fileState: 'active';
@@ -100,7 +109,7 @@ export interface DriveSearchResult {
   fileMetadata: FileMetadata;
   serverMetadata: ServerMetaData;
   priority: number;
-  reactionPreview: undefined;
+  reactionPreview?: ReactionPreview;
 }
 
 export interface QueryParams {
