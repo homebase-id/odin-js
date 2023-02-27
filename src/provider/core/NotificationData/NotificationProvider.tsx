@@ -80,7 +80,7 @@ export const Subscribe = async (
   handler: (data: TypedConnectionNotification) => void
 ) => {
   const apiType = dotYouClient.getType();
-  if (apiType !== ApiType.Owner && apiType !== ApiType.App) {
+  if (apiType !== ApiType.Owner) {
     throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
   }
 
