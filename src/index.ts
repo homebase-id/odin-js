@@ -18,6 +18,7 @@ export * from './provider/core/DriveData/DriveUploadTypes';
 
 // TransitData
 export * from './provider/core/TransitData/TransitProvider';
+export * from './provider/core/TransitData/InboxProvider';
 
 // MediaData
 export * from './provider/core/MediaData/Resizer/resize';
