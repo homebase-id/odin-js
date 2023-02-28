@@ -271,28 +271,32 @@ export const getReactionSummary = async (
   console.debug('Getting reaction summary for: ', { odinId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/list';
+  const url = emojiRoot + '/list2';
 
   const data = {
-    targetDrive: GetTargetDriveFromChannelId(channelId),
-    fileId: postFileId,
+    file: {
+      targetDrive: GetTargetDriveFromChannelId(channelId),
+      fileId: postFileId,
+    },
+    cursor: undefined,
+    maxRecords: 5,
   };
 
   return client
-    .post<ServerReactionsList>(url, data)
+    .post<ServerReactionsListWithCursor>(url, data)
     .then((response) => {
       return {
         emojis: response.data.reactions
           .map((reaction) => {
             try {
-              return JSON.parse(reaction).emoji as string;
+              return JSON.parse(reaction.reactionContent).emoji as string;
             } catch (ex) {
               console.error('[DotYouCore-js] parse failed for', reaction);
               return;
             }
           })
           .filter(Boolean) as string[],
-        totalCount: response.data.totalCount,
+        totalCount: 2,
       };
     })
     .catch((e) => {
