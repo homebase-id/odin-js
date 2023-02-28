@@ -2,7 +2,7 @@
   AcceptRequestHeader,
   ConnectionRequest,
   ConnectionRequestHeader,
-  DotYouIdRequest,
+  OdinIdRequest,
 } from './CircleDataTypes';
 import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/Types';
@@ -33,11 +33,11 @@ export const getPendingRequests = async (
 
 export const getPendingRequest = async (
   dotYouClient: DotYouClient,
-  dotYouId: string
+  odinId: string
 ): Promise<ConnectionRequest> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/single';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
   return client
     .post(url, data)
     .then((response) => {
@@ -65,11 +65,11 @@ export const getSentRequests = async (
 
 export const getSentRequest = async (
   dotYouClient: DotYouClient,
-  dotYouId: string
+  odinId: string
 ): Promise<ConnectionRequest> => {
   const client = dotYouClient.createAxiosClient();
   const url = SentPathRoot + '/single';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post(url, data)
@@ -86,7 +86,7 @@ export const getSentRequest = async (
 
 export const acceptConnectionRequest = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   name: string,
   photoFileId?: string | undefined,
   circleIds?: string[]
@@ -95,7 +95,7 @@ export const acceptConnectionRequest = async (
   const url = PendingPathRoot + '/accept/';
 
   const header: AcceptRequestHeader = {
-    sender: dotYouId,
+    sender: odinId,
     circleIds: circleIds || [],
     permissions: undefined,
     contactData: { name },
@@ -115,11 +115,11 @@ export const acceptConnectionRequest = async (
 
 export const deletePendingRequest = async (
   dotYouClient: DotYouClient,
-  dotYouId: string
+  odinId: string
 ): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/delete';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post(url, data)
@@ -131,11 +131,11 @@ export const deletePendingRequest = async (
 
 export const deleteSentRequest = async (
   dotYouClient: DotYouClient,
-  dotYouId: string
+  odinId: string
 ): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient();
   const url = SentPathRoot + '/delete';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post(url, data)
@@ -147,7 +147,7 @@ export const deleteSentRequest = async (
 
 export const sendRequest = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   message: string,
   name: string,
   photoFileId: string | undefined,
@@ -155,7 +155,7 @@ export const sendRequest = async (
 ): Promise<boolean> => {
   const url = Root + '/sendrequest';
   const data: ConnectionRequestHeader = {
-    recipient: dotYouId,
+    recipient: odinId,
     message: message,
     contactData: { name },
     circleIds: circleIds,
@@ -174,10 +174,10 @@ export const sendRequest = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
-export const blockDotYouId = async (dotYouClient: DotYouClient, dotYouId: string) => {
+export const blockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
   const client = dotYouClient.createAxiosClient();
   const url = '/circles/connections/block';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post<boolean>(url, data)
@@ -190,10 +190,10 @@ export const blockDotYouId = async (dotYouClient: DotYouClient, dotYouId: string
     });
 };
 
-export const unblockDotYouId = async (dotYouClient: DotYouClient, dotYouId: string) => {
+export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) => {
   const client = dotYouClient.createAxiosClient();
   const url = '/circles/connections/unblock';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post<boolean>(url, data)

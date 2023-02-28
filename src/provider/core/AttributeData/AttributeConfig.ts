@@ -18,7 +18,7 @@ export class BuiltInAttributes {
   static readonly PhoneNumber = toGuidId('phonenumber');
   static readonly Email = toGuidId('email');
   static readonly FacebookUsername = toGuidId('facebook_username');
-  static readonly DotYouIdentity = toGuidId('dot_you_identity');
+  static readonly OdinIdentity = toGuidId('dot_you_identity');
   static readonly InstagramUsername = toGuidId('instagram_username');
   static readonly LinkedinUsername = toGuidId('linkedin_username');
   static readonly TiktokUsername = toGuidId('tiktok_username');

@@ -93,7 +93,7 @@ export const stringGuidsEqual = (a: string, b: string): boolean => {
   return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
 };
 
-/// Compares two ACLs; Compares the requiredSecurityGroup, CircleIds and DotYouIds of those ACLs and will return true or false;
+/// Compares two ACLs; Compares the requiredSecurityGroup, CircleIds and OdinIds of those ACLs and will return true or false;
 export const aclEqual = (a: AccessControlList, b: AccessControlList): boolean => {
   if (a.requiredSecurityGroup.toLowerCase() !== b.requiredSecurityGroup.toLowerCase()) {
     return false;
@@ -113,16 +113,16 @@ export const aclEqual = (a: AccessControlList, b: AccessControlList): boolean =>
     }
   }
 
-  if (a.dotYouIdentityList || b.dotYouIdentityList) {
-    const missingDotYouIdInA = a.dotYouIdentityList?.some(
-      (aIdentity) => !b.dotYouIdentityList?.find((bIdentity) => bIdentity === aIdentity)
+  if (a.odinIdList || b.odinIdList) {
+    const missingOdinIdInA = a.odinIdList?.some(
+      (aIdentity) => !b.odinIdList?.find((bIdentity) => bIdentity === aIdentity)
     );
 
-    const missingDotYouIdInB = b.dotYouIdentityList?.some(
-      (bIdentity) => !a.dotYouIdentityList?.find((aIdentity) => aIdentity === bIdentity)
+    const missingOdinIdInB = b.odinIdList?.some(
+      (bIdentity) => !a.odinIdList?.find((aIdentity) => aIdentity === bIdentity)
     );
 
-    if (missingDotYouIdInA || missingDotYouIdInB) {
+    if (missingOdinIdInA || missingOdinIdInB) {
       return false;
     }
   }

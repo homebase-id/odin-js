@@ -15,7 +15,7 @@ import { ChannelDefinition, PostContent, PostFile, BlogConfig } from '../../publ
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 
 export interface PostFileVm<T extends PostContent> extends PostFile<T> {
-  dotYouId: string;
+  odinId: string;
 }
 
 export interface RecentsFromConnectionsReturn extends CursoredResult<PostFileVm<PostContent>[]> {
@@ -47,13 +47,13 @@ export const getRecentsFromConnectionsOverTransit = async (
   const result = await queryBatch(dotYouClient, queryParams, ro);
 
   // Parse results and do getPayload (In most cases, data should be there in jsonContent, and nothing in actual payload);
-  // Parsing has to include the actual dotYouId of the author as well, so the render components can render the correct author and fetch from the right transit
+  // Parsing has to include the actual odinId of the author as well, so the render components can render the correct author and fetch from the right transit
   const allPostFiles = await Promise.all(
     result.searchResults.map(async (dsr) => {
-      const dotYouId = window.location.hostname; // Needs to be passed along into the header files on the feed drive
+      const odinId = window.location.hostname; // Needs to be passed along into the header files on the feed drive
       const targetDrive = BlogConfig.PublicChannelDrive; // Needs to be passed along into the header files on the feed drive
 
-      const isLocal = dotYouId === window.location.hostname;
+      const isLocal = odinId === window.location.hostname;
       const getPayloadParams = [
         targetDrive,
         dsr.fileId,
@@ -67,8 +67,8 @@ export const getRecentsFromConnectionsOverTransit = async (
         acl: dsr.serverMetadata?.accessControlList,
         content: isLocal
           ? await getPayload<PostContent>(dotYouClient, ...getPayloadParams)
-          : await getPayloadOverTransit<PostContent>(dotYouClient, dotYouId, ...getPayloadParams),
-        dotYouId: dsr.fileMetadata.senderDotYouId || dotYouId,
+          : await getPayloadOverTransit<PostContent>(dotYouClient, odinId, ...getPayloadParams),
+        odinId: dsr.fileMetadata.senderOdinId || odinId,
         previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
         reactionPreview: parseReactionPreview(dsr.reactionPreview),
         additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
@@ -100,7 +100,7 @@ export const getRecentsFromConnectionsOverTransit = async (
     const postsOfOwn = resultOfOwn.results
       .filter((file) => !file.isDraft)
       .map((postFile) => {
-        return { ...postFile, dotYouId: ownerDotYou } as PostFileVm<PostContent>;
+        return { ...postFile, odinId: ownerDotYou } as PostFileVm<PostContent>;
       });
 
     return {
@@ -116,8 +116,8 @@ export const getRecentsFromConnectionsOverTransit = async (
   };
 };
 
-export const getChannelsOverTransit = async (dotYouClient: DotYouClient, dotYouId: string) => {
-  const cacheKey = `${dotYouId}`;
+export const getChannelsOverTransit = async (dotYouClient: DotYouClient, odinId: string) => {
+  const cacheKey = `${odinId}`;
   if (_internalChannelCache.has(cacheKey)) {
     const cacheData = await _internalChannelCache.get(cacheKey);
     if (cacheData) {
@@ -130,7 +130,7 @@ export const getChannelsOverTransit = async (dotYouClient: DotYouClient, dotYouI
     BlogConfig.DriveType,
     1,
     1000,
-    dotYouId
+    odinId
   );
   const channelHeaders = drives.results.map((drive) => {
     return {
@@ -143,7 +143,7 @@ export const getChannelsOverTransit = async (dotYouClient: DotYouClient, dotYouI
     return (
       await Promise.all(
         channelHeaders.map(async (header) => {
-          const definition = await getChannelOverTransit(dotYouClient, dotYouId, header.id);
+          const definition = await getChannelOverTransit(dotYouClient, odinId, header.id);
           return definition;
         })
       )
@@ -157,7 +157,7 @@ export const getChannelsOverTransit = async (dotYouClient: DotYouClient, dotYouI
 
 export const getRecentsOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   maxRecords = 10,
   cursorState?: string,
   channelId?: string
@@ -175,7 +175,7 @@ export const getRecentsOverTransit = async (
     includeMetadataHeader: true,
   };
 
-  const result = await queryBatchOverTransit(dotYouClient, dotYouId, queryParams, ro);
+  const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams, ro);
 
   const posts = (
     await Promise.all(
@@ -185,14 +185,14 @@ export const getRecentsOverTransit = async (
           acl: dsr.serverMetadata?.accessControlList,
           content: await getPayloadOverTransit<PostContent>(
             dotYouClient,
-            dotYouId,
+            odinId,
             targetDrive,
             dsr.fileId,
             dsr.fileMetadata,
             dsr.sharedSecretEncryptedKeyHeader,
             result.includeMetadataHeader
           ),
-          dotYouId: dotYouId,
+          odinId: odinId,
           previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
           additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
         } as PostFileVm<PostContent>;
@@ -205,7 +205,7 @@ export const getRecentsOverTransit = async (
 
 export const getChannelOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   channelId: string
 ): Promise<ChannelDefinition | undefined> => {
   const targetDrive = getChannelDrive(channelId);
@@ -221,14 +221,14 @@ export const getChannelOverTransit = async (
     includeMetadataHeader: true,
   };
 
-  const response = await queryBatchOverTransit(dotYouClient, dotYouId, queryParams, ro);
+  const response = await queryBatchOverTransit(dotYouClient, odinId, queryParams, ro);
 
   try {
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
       return await getPayloadOverTransit<ChannelDefinition>(
         dotYouClient,
-        dotYouId,
+        odinId,
         targetDrive,
         dsr.fileId,
         dsr.fileMetadata,
@@ -243,11 +243,11 @@ export const getChannelOverTransit = async (
 
 export const getPostOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   channelId: string,
   postId: string
 ) => {
-  const channel = await getChannelOverTransit(dotYouClient, dotYouId, channelId);
+  const channel = await getChannelOverTransit(dotYouClient, odinId, channelId);
   if (!channel) {
     return;
   }
@@ -259,7 +259,7 @@ export const getPostOverTransit = async (
     fileType: [BlogConfig.PostFileType],
   };
 
-  const response = await queryBatchOverTransit(dotYouClient, dotYouId, params);
+  const response = await queryBatchOverTransit(dotYouClient, odinId, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length > 1) {
@@ -272,14 +272,14 @@ export const getPostOverTransit = async (
       acl: dsr.serverMetadata?.accessControlList,
       content: await getPayloadOverTransit<PostContent>(
         dotYouClient,
-        dotYouId,
+        odinId,
         targetDrive,
         dsr.fileId,
         dsr.fileMetadata,
         dsr.sharedSecretEncryptedKeyHeader,
         response.includeMetadataHeader
       ),
-      dotYouId: dotYouId,
+      odinId: odinId,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
       additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
     } as PostFileVm<PostContent>;

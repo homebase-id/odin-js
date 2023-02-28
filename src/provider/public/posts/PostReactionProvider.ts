@@ -22,7 +22,7 @@ import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { RichText } from './PostTypes';
 
 export interface ReactionContext {
-  authorDotYouId: string;
+  authorOdinId: string;
   channelId: string;
   postFileId: string;
   postId?: string;
@@ -39,7 +39,7 @@ export interface ReactionFile {
   id?: string;
   commentThreadId?: string;
 
-  authorDotYouId: string;
+  authorOdinId: string;
   date?: number;
 
   content: ReactionContent;
@@ -104,7 +104,7 @@ export const saveComment = async (
   const metadata: UploadFileMetadata = {
     allowDistribution: true,
     contentType: 'application/json',
-    senderDotYouId: comment.authorDotYouId,
+    senderOdinId: comment.authorOdinId,
     referencedFile: {
       targetDrive,
       fileId: comment.commentThreadId || comment.postDetails.postFileId,
@@ -123,7 +123,7 @@ export const saveComment = async (
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
 
-  if (dotYouClient.getHostname() === comment.postDetails.authorDotYouId) {
+  if (dotYouClient.getHostname() === comment.postDetails.authorOdinId) {
     // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
     const result: UploadResult = await uploadFile(
       dotYouClient,
@@ -143,13 +143,13 @@ export const saveComment = async (
 
 export const getComments = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   channelId: string,
   postFileId: string,
   pageSize = 25,
   cursorState?: string
 ): Promise<ReactionFile[]> => {
-  console.debug('Getting comments for: ', { dotYouId, channelId, postFileId });
+  console.debug('Getting comments for: ', { odinId, channelId, postFileId });
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const qp: FileQueryParams = {
@@ -194,7 +194,7 @@ const dsrToComment = async (
   return {
     fileId: dsr.fileId,
     id: dsr.fileMetadata.appData.uniqueId,
-    authorDotYouId: dsr.fileMetadata.senderDotYouId,
+    authorOdinId: dsr.fileMetadata.senderOdinId,
     commentThreadId: dsr.fileMetadata.appData.groupId,
     content: { ...contentData },
     date: dsr.fileMetadata.appData.userDate,
@@ -212,7 +212,7 @@ export const saveEmojiReaction = async (
   const url = emojiRoot + '/add';
 
   const data = {
-    dotYouId: comment.authorDotYouId,
+    odinId: comment.authorOdinId,
     reaction: JSON.stringify({ emoji: comment.content.body }),
     file: {
       targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
@@ -227,7 +227,7 @@ export const saveEmojiReaction = async (
     })
     .catch(dotYouClient.handleErrorResponse);
 
-  // if (dotYouClient.getHostname() === comment.postDetails.authorDotYouId) {
+  // if (dotYouClient.getHostname() === comment.postDetails.authorOdinId) {
   //   // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
   // } else {
   //   // Use transit endpoint for reactions ?
@@ -242,7 +242,7 @@ export const removeEmojiReaction = async (
   const url = emojiRoot + '/delete';
 
   const data = {
-    dotYouId: comment.authorDotYouId,
+    odinId: comment.authorOdinId,
     reaction: comment.content.body,
     file: {
       targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
@@ -265,11 +265,11 @@ interface ServerReactionsList {
 
 export const getReactionSummary = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   channelId: string,
   postFileId: string
 ): Promise<EmojiReactionSummary> => {
-  console.debug('Getting reaction summary for: ', { dotYouId, channelId, postFileId });
+  console.debug('Getting reaction summary for: ', { odinId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/list';
@@ -304,11 +304,11 @@ export const getReactionSummary = async (
 
 export const getReactions = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   channelId: string,
   postFileId: string
 ): Promise<{ reactions: ReactionFile[]; totalCount: number } | undefined> => {
-  console.debug('Getting reactions for: ', { dotYouId, channelId, postFileId });
+  console.debug('Getting reactions for: ', { odinId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/list';
@@ -325,7 +325,7 @@ export const getReactions = async (
       return {
         reactions: response.data.reactions.map((reaction) => {
           return {
-            authorDotYouId: 'unkown.identity', // TODO: who reacted this? Where to find out?
+            authorOdinId: 'unkown.identity', // TODO: who reacted this? Where to find out?
             content: { body: JSON.parse(reaction).emoji },
           };
         }),
@@ -370,7 +370,7 @@ export const parseReactionPreview = (
             }
 
             return {
-              authorDotYouId: commentPreview.dotYouId,
+              authorOdinId: commentPreview.odinId,
               content: content,
               reactions: parseReactions(commentPreview.reactions),
             };

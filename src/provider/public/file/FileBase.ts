@@ -40,7 +40,7 @@ const SocialQueryParam: FileQueryParams = {
     BuiltInAttributes.InstagramUsername,
     BuiltInAttributes.TiktokUsername,
     BuiltInAttributes.LinkedinUsername,
-    BuiltInAttributes.DotYouIdentity,
+    BuiltInAttributes.OdinIdentity,
   ],
 };
 

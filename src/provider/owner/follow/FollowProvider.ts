@@ -3,13 +3,13 @@ import { TargetDrive } from '../../core/DriveData/DriveTypes';
 import { CursoredResult } from '../../core/Types';
 
 export interface FollowRequest {
-  dotYouId: string;
+  odinId: string;
   notificationType: 'allNotifications';
   channels?: TargetDrive[];
 }
 
 export interface UnfollowRequest {
-  dotYouId: string;
+  odinId: string;
 }
 const root = '/followers';
 
@@ -30,10 +30,10 @@ export const fetchFollowing = async (
 
 export const fetchIdentityIFollow = (
   dotYouClient: DotYouClient,
-  dotYouId: string
+  odinId: string
 ): Promise<FollowRequest> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + `/IdentityIFollow?dotYouId=${dotYouId}`;
+  const url = root + `/IdentityIFollow?odinId=${odinId}`;
 
   return client
     .get(url)

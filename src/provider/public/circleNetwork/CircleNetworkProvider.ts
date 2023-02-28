@@ -1,6 +1,6 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { PagedResult, PagingOptions } from '../../core/Types';
-import { ConnectionInfo, DotYouIdRequest, DotYouProfile } from './CircleDataTypes';
+import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 
 const stringify = (obj: any) => {
   return Object.keys(obj)
@@ -12,11 +12,11 @@ const root = '/circles/connections';
 
 export const disconnectFromContact = (
   dotYouClient: DotYouClient,
-  dotYouId: string
+  odinId: string
 ): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/disconnect';
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
   return client
     .post(url, data)
     .then((response) => {
@@ -28,7 +28,7 @@ export const disconnectFromContact = (
 export const getConnections = async (
   dotYouClient: DotYouClient,
   data: PagingOptions
-): Promise<PagedResult<{ dotYouId: string } | DotYouProfile>> => {
+): Promise<PagedResult<{ odinId: string } | DotYouProfile>> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/connected?' + stringify(data);
 
@@ -60,13 +60,13 @@ export const getBlockedConnections = (
 
 export const getConnectionInfo = (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   includeContactData = false
 ): Promise<ConnectionInfo | undefined> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + `/status?omitContactData=${!includeContactData}`;
 
-  const data: DotYouIdRequest = { dotYouId: dotYouId };
+  const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post(url, data)

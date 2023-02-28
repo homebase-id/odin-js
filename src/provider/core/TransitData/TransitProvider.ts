@@ -19,7 +19,7 @@ import {
 import { PagedResult } from '../Types';
 
 interface GetFileRequest {
-  dotYouId: string;
+  odinId: string;
   file: {
     targetDrive: TargetDrive;
     fileId: string;
@@ -29,14 +29,14 @@ interface GetFileRequest {
 interface TransitQueryBatchRequest {
   queryParams: FileQueryParams;
   resultOptionsRequest: GetBatchQueryResultOptions;
-  dotYouId: string;
+  odinId: string;
 }
 
 const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
 
 export const queryBatchOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
 ): Promise<QueryBatchResponse> => {
@@ -53,7 +53,7 @@ export const queryBatchOverTransit = async (
   const request: TransitQueryBatchRequest = {
     queryParams: params,
     resultOptionsRequest: ro,
-    dotYouId: dotYouId,
+    odinId: odinId,
   };
 
   return client.post<QueryBatchResponse>('/transit/query/batch', request).then((response) => {
@@ -63,7 +63,7 @@ export const queryBatchOverTransit = async (
 
 export const getPayloadOverTransit = async <T>(
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
   fileMetadata: FileMetadata,
@@ -79,7 +79,7 @@ export const getPayloadOverTransit = async <T>(
   } else {
     return await getPayloadAsJsonOverTransit<T>(
       dotYouClient,
-      dotYouId,
+      odinId,
       targetDrive,
       fileId,
       keyheader
@@ -89,12 +89,12 @@ export const getPayloadOverTransit = async <T>(
 
 export const getPayloadAsJsonOverTransit = async <T>(
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader: KeyHeader | undefined
 ): Promise<T> => {
-  return getPayloadBytesOverTransit(dotYouClient, dotYouId, targetDrive, fileId, keyHeader).then(
+  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, keyHeader).then(
     (data) => {
       const json = byteArrayToString(new Uint8Array(data.bytes));
       try {
@@ -120,14 +120,14 @@ export const getPayloadAsJsonOverTransit = async <T>(
 
 export const getPayloadBytesOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader?: KeyHeader | undefined
 ): Promise<{ bytes: ArrayBuffer; contentType: string }> => {
   const client = dotYouClient.createAxiosClient();
   const request: GetFileRequest = {
-    dotYouId: dotYouId,
+    odinId: odinId,
     file: {
       targetDrive: targetDrive,
       fileId: fileId,
@@ -175,7 +175,7 @@ export const getPayloadBytesOverTransit = async (
 
 export const getThumbBytesOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader: KeyHeader | undefined,
@@ -184,7 +184,7 @@ export const getThumbBytesOverTransit = async (
 ): Promise<{ bytes: ArrayBuffer; contentType: string }> => {
   const client = dotYouClient.createAxiosClient();
   const request: GetFileRequest = {
-    dotYouId: dotYouId,
+    odinId: odinId,
     file: {
       targetDrive: targetDrive,
       fileId: fileId,
@@ -235,11 +235,11 @@ export const getThumbBytesOverTransit = async (
 
 export const getFileHeaderOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   targetDrive: TargetDrive,
   fileId: string
 ): Promise<DriveSearchResult> => {
-  const cacheKey = `${dotYouId}+${targetDrive.alias}-${targetDrive.type}+${fileId}`;
+  const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}`;
   if (_internalMetadataCache.has(cacheKey)) {
     const cacheData = await _internalMetadataCache.get(cacheKey);
     if (cacheData) {
@@ -250,7 +250,7 @@ export const getFileHeaderOverTransit = async (
   const client = dotYouClient.createAxiosClient();
 
   const request: GetFileRequest = {
-    dotYouId: dotYouId,
+    odinId: odinId,
     file: {
       targetDrive: targetDrive,
       fileId: fileId,
@@ -280,13 +280,13 @@ export const getDrivesByTypeOverTransit = async (
   type: string,
   pageNumber: number,
   pageSize: number,
-  dotYouId: string
+  odinId: string
 ): Promise<PagedResult<DriveDefinition>> => {
   const params = {
     driveType: type,
     pageNumber: pageNumber,
     pageSize: pageSize,
-    dotYouId: dotYouId,
+    odinId: odinId,
   };
 
   const client = dotYouClient.createAxiosClient();

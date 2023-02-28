@@ -5,7 +5,7 @@ const root = '/circles/connections/circles';
 //Handles management of Circles
 export const addMemberToCircle = async (
   dotYouClient: DotYouClient,
-  membershipGrant: { dotYouId: string; circleId: string }
+  membershipGrant: { odinId: string; circleId: string }
 ) => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/add';
@@ -20,7 +20,7 @@ export const addMemberToCircle = async (
 
 export const removeMemberFromCircle = async (
   dotYouClient: DotYouClient,
-  membershipGrant: { dotYouId: string; circleId: string }
+  membershipGrant: { odinId: string; circleId: string }
 ) => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/revoke';

@@ -11,7 +11,7 @@ import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProv
 
 export const getProfileAttributesOverTransit = async (
   dotYouClient: DotYouClient,
-  dotYouId: string,
+  odinId: string,
   attributeType?: string
 ): Promise<AttributeFile[]> => {
   const profileId = BuiltInProfiles.StandardProfileId;
@@ -23,7 +23,7 @@ export const getProfileAttributesOverTransit = async (
     tagsMatchAll: attributeType ? [attributeType] : undefined,
   };
 
-  const result = await queryBatchOverTransit(dotYouClient, dotYouId, queryParams);
+  const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams);
 
   //sort where lowest number is higher priority (!! sort happens in place)
   const searchResults = result.searchResults.sort((a, b) => {
@@ -35,7 +35,7 @@ export const getProfileAttributesOverTransit = async (
       searchResults.map(async (dsr) => {
         const attrPayLoad: AttributeFile = await getPayloadOverTransit<AttributeFile>(
           dotYouClient,
-          dotYouId,
+          odinId,
           targetDrive,
           dsr.fileId,
           dsr.fileMetadata,

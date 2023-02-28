@@ -48,7 +48,7 @@ export interface UploadFileDescriptor {
 export interface UploadFileMetadata {
   allowDistribution: boolean;
   contentType: string;
-  senderDotYouId?: string;
+  senderOdinId?: string;
   payloadIsEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
@@ -58,7 +58,7 @@ export interface UploadFileMetadata {
 export interface AccessControlList {
   requiredSecurityGroup: SecurityGroupType;
   circleIdList?: string[] | null;
-  dotYouIdentityList?: string[] | null;
+  odinIdList?: string[] | null;
 }
 
 export enum SecurityGroupType {

@@ -39,7 +39,7 @@ export interface FileMetadata {
   updated: number;
   contentType: string;
   payloadIsEncrypted: boolean;
-  senderDotYouId: string;
+  senderOdinId: string;
   payloadSize: number;
   originalRecipientList: string[];
   appData: AppFileMetaData;
@@ -95,7 +95,7 @@ export interface DriveDefinition {
 
 export interface ReactionPreview {
   comments: {
-    dotYouId: string;
+    odinId: string;
     jsonContent: string;
     reactions: { key: string; count: string }[];
   }[];

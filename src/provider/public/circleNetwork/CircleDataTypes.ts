@@ -13,7 +13,7 @@ export interface CircleNetworkNotification {
 }
 
 export interface DotYouProfile {
-  dotYouId: string;
+  odinId: string;
   originalContactData: ContactData;
 }
 
@@ -51,7 +51,7 @@ export interface ConnectionRequest {
   status: 'pending' | 'sent';
   recipient: string;
   message: string;
-  senderDotYouId: string;
+  senderOdinId: string;
   receivedTimestampMilliseconds: number;
   contactData?: ContactData;
 }
@@ -65,7 +65,7 @@ export interface AcknowledgedConnectionRequest {
   recipientGivenName: string;
   recipientSurname: string;
   connectionRequestId: string;
-  senderDotYouId: string;
+  senderOdinId: string;
   senderPublicKeyCertificate: string;
   receivedTimestampMilliseconds: string;
 }
@@ -94,6 +94,6 @@ export interface AcceptRequestHeader {
   contactData: ContactData;
 }
 
-export interface DotYouIdRequest {
-  dotYouId: string;
+export interface OdinIdRequest {
+  odinId: string;
 }
