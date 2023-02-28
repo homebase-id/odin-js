@@ -97,9 +97,11 @@ export interface ReactionPreview {
   comments: {
     odinId: string;
     jsonContent: string;
-    reactions: { key: string; count: string }[];
+    reactions: { key: string; count: string; reactionContent: string }[];
   }[];
-  reactions: { key: string; count: string }[];
+  reactions: { key: string; count: string; reactionContent: string }[];
+  reactions2: Record<string, { key: string; count: string; reactionContent: string }>;
+  totalCommentCount: number;
 }
 
 export interface DriveSearchResult {

@@ -25,7 +25,6 @@ export interface ReactionContext {
   authorOdinId: string;
   channelId: string;
   postFileId: string;
-  postId?: string;
 }
 
 export interface ReactionContent {
@@ -148,7 +147,7 @@ export const getComments = async (
   postFileId: string,
   pageSize = 25,
   cursorState?: string
-): Promise<ReactionFile[]> => {
+): Promise<{ comments: ReactionFile[]; cursorState: string }> => {
   console.debug('Getting comments for: ', { odinId, channelId, postFileId });
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -173,7 +172,7 @@ export const getComments = async (
     )
   ).filter((attr) => !!attr) as ReactionFile[];
 
-  return comments;
+  return { comments, cursorState: result.cursorState };
 };
 
 const dsrToComment = async (
@@ -302,34 +301,48 @@ export const getReactionSummary = async (
     });
 };
 
+interface ServerReactionsListWithCursor {
+  reactions: {
+    odinId: string;
+    reactionContent: string;
+  }[];
+  cursor: number;
+}
+
 export const getReactions = async (
   dotYouClient: DotYouClient,
   odinId: string,
   channelId: string,
-  postFileId: string
-): Promise<{ reactions: ReactionFile[]; totalCount: number } | undefined> => {
+  postFileId: string,
+  pageSize = 15,
+  cursor?: number
+): Promise<{ reactions: ReactionFile[]; cursor: number } | undefined> => {
   console.debug('Getting reactions for: ', { odinId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/list';
+  const url = emojiRoot + '/list2';
 
   const data = {
-    targetDrive: GetTargetDriveFromChannelId(channelId),
-    fileId: postFileId,
+    file: {
+      targetDrive: GetTargetDriveFromChannelId(channelId),
+      fileId: postFileId,
+    },
+    cursor: cursor,
+    maxRecords: pageSize,
   };
 
   return client
-    .post<ServerReactionsList>(url, data)
+    .post<ServerReactionsListWithCursor>(url, data)
     .then((response) => {
       console.log('get reactions:', response.data);
       return {
         reactions: response.data.reactions.map((reaction) => {
           return {
-            authorOdinId: 'unkown.identity', // TODO: who reacted this? Where to find out?
-            content: { body: JSON.parse(reaction).emoji },
+            authorOdinId: reaction.odinId,
+            content: { body: JSON.parse(reaction.reactionContent).emoji },
           };
         }),
-        totalCount: response.data.totalCount,
+        cursor: response.data.cursor,
       };
     })
     .catch(dotYouClient.handleErrorResponse);
@@ -342,10 +355,21 @@ export const parseReactionPreview = (
     reactions: {
       key: string;
       count: string;
+      reactionContent: string;
     }[]
   ) => {
     return {
-      emojis: reactions.map((reaction) => reaction.key),
+      emojis: reactions
+        .map((reaction) => {
+          try {
+            return JSON.parse(reaction.reactionContent).emoji;
+          } catch (ex) {
+            //
+          }
+
+          return;
+        })
+        .filter(Boolean),
       totalCount: reactions.reduce((prevVal, curVal) => {
         return prevVal + parseInt(curVal.count);
       }, 0),
@@ -376,9 +400,9 @@ export const parseReactionPreview = (
             };
           })
           .filter(Boolean) as CommentReactionPreview[],
-        totalCount: reactionPreview.comments.length || 0,
+        totalCount: reactionPreview.totalCommentCount || reactionPreview.comments.length || 0,
       },
-      reactions: parseReactions(reactionPreview.reactions),
+      reactions: parseReactions(Object.values(reactionPreview.reactions2)),
     };
   }
 
