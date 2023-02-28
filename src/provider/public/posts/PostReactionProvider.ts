@@ -105,7 +105,10 @@ export const saveComment = async (
     allowDistribution: true,
     contentType: 'application/json',
     senderDotYouId: comment.authorDotYouId,
-    referencedFile: { targetDrive, fileId: comment.postDetails.postFileId },
+    referencedFile: {
+      targetDrive,
+      fileId: comment.commentThreadId || comment.postDetails.postFileId,
+    },
     appData: {
       tags: [],
       uniqueId: comment.id ?? getNewId(),
@@ -114,7 +117,7 @@ export const saveComment = async (
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: undefined,
       userDate: comment.date ?? new Date().getTime(),
-      groupId: comment.commentThreadId, // TODO: Needs support on Server Side to actually accept a groupId
+      // groupId: comment.commentThreadId, // TODO: Needs support on Server Side to actually accept a groupId
     },
     payloadIsEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
@@ -213,7 +216,7 @@ export const saveEmojiReaction = async (
     reaction: JSON.stringify({ emoji: comment.content.body }),
     file: {
       targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
-      fileId: comment.postDetails.postFileId,
+      fileId: comment.commentThreadId || comment.postDetails.postFileId,
     },
   };
 
