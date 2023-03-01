@@ -134,7 +134,7 @@ export const saveChannelDefinition = async (
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    allowDistribution: false,
+    allowDistribution: true,
     contentType: 'application/json',
     appData: {
       tags: [definition.channelId],
