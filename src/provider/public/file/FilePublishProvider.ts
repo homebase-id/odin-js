@@ -8,7 +8,7 @@ import { getFileHeader } from '../../core/DriveData/DriveProvider';
 import { FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { getDecryptedImageData } from '../../core/MediaData/MediaProvider';
-import { BuiltInProfiles } from '../../profile/ProfileConfig';
+import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProvider';
 import {
   getChannelDefinitions,
@@ -19,7 +19,12 @@ import { getRecentPosts } from '../posts/PostProvider';
 import { BlogConfig } from '../posts/PostTypes';
 import { HomePageConfig, HomePageAttributes, HomePageFields } from '../home/HomeTypes';
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
-import { publishFile, publishProfileImageFile, QueryParamsSection } from './FileProvider';
+import {
+  publishFile,
+  publishProfileCardFile,
+  publishProfileImageFile,
+  QueryParamsSection,
+} from './FileProvider';
 
 export const publishProfile = async (dotYouClient: DotYouClient) => {
   const sections = [...DEFAULT_SECTIONS];
@@ -194,6 +199,27 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
   return await publishFile(dotYouClient, 'blogs.json', [...sections, ...imageSections]);
 };
 
+export const publishProfileCard = async (dotYouClient: DotYouClient) => {
+  const profileNameAttributes = await getAttributeVersions(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    BuiltInProfiles.PersonalInfoSectionId,
+    [BuiltInAttributes.Name]
+  );
+
+  const displayNames = profileNameAttributes
+    ?.filter(
+      (attr) =>
+        attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
+    )
+    ?.map((attr) => attr?.data?.[MinimalProfileFields.DisplayName] as string)
+    .filter((fileId) => fileId !== undefined);
+
+  if (displayNames?.length) {
+    await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
+  }
+};
+
 export const publishProfileImage = async (dotYouClient: DotYouClient) => {
   const profilePhotoAttributes = await getAttributeVersions(
     dotYouClient,
@@ -207,7 +233,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       (attr) =>
         attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
     )
-    ?.map((attr) => attr?.data?.['profileImageId'] as string)
+    ?.map((attr) => attr?.data?.[MinimalProfileFields.ProfileImageId] as string)
     .filter((fileId) => fileId !== undefined);
 
   if (profilePhotoFileIds?.length) {

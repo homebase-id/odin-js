@@ -35,6 +35,10 @@ type PublishProfileImage = {
   contentType: string;
 };
 
+type PublishProfileCard = {
+  name: string;
+};
+
 const _internalFileCache = new Map<string, Promise<Map<string, ResponseEntry[]>>>();
 
 export const publishFile = async (
@@ -55,6 +59,17 @@ export const publishFile = async (
   };
 
   return await httpClient.post('/optimization/cdn/publish', fileRequest);
+};
+
+export const publishProfileCardFile = async (
+  dotYouClient: DotYouClient,
+  profileCard: PublishProfileCard
+) => {
+  const httpClient = dotYouClient.createAxiosClient();
+
+  return await httpClient.post('/optimization/cdn/profilecard', {
+    profileCardJson: JSON.stringify(profileCard),
+  });
 };
 
 export const publishProfileImageFile = async (
