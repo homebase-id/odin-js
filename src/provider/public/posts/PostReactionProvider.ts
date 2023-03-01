@@ -1,6 +1,7 @@
 import { jsonStringify64, stringToUint8Array, getNewId } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import {
+  deleteFile,
   getPayload,
   getRandom16ByteArray,
   queryBatch,
@@ -40,6 +41,7 @@ export interface ReactionFile {
 
   authorOdinId: string;
   date?: number;
+  updated?: number;
 
   content: ReactionContent;
 }
@@ -82,7 +84,7 @@ export const saveComment = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: undefined,
+      overwriteFileId: comment.fileId || undefined,
       drive: targetDrive,
     },
     transitOptions: null,
@@ -138,6 +140,15 @@ export const saveComment = async (
   }
 };
 
+export const removeComment = async (
+  dotYouClient: DotYouClient,
+  context: ReactionContext,
+  commentFile: ReactionFile
+) => {
+  const targetDrive = GetTargetDriveFromChannelId(context.channelId);
+  if (commentFile.fileId) return await deleteFile(dotYouClient, targetDrive, commentFile.fileId);
+};
+
 export const getComments = async (
   dotYouClient: DotYouClient,
   odinId: string,
@@ -186,13 +197,16 @@ const dsrToComment = async (
     includeMetadataHeader
   );
 
+  console.log({ dsr, contentData });
+
   return {
     fileId: dsr.fileId,
     id: dsr.fileMetadata.appData.uniqueId,
     authorOdinId: dsr.fileMetadata.senderOdinId,
     commentThreadId: dsr.fileMetadata.appData.groupId,
     content: { ...contentData },
-    date: dsr.fileMetadata.appData.userDate,
+    date: dsr.fileMetadata.created,
+    updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
   };
 };
 

@@ -16,6 +16,7 @@ import {
 import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../Types';
 import {
+  SystemFileType,
   UploadFileDescriptor,
   UploadFileMetadata,
   UploadInstructionSet,
@@ -462,7 +463,8 @@ export const deleteFile = async (
   targetDrive: TargetDrive,
   fileId: string,
   deleteLinkedFiles?: boolean,
-  recipients?: string[]
+  recipients?: string[],
+  systemFileType?: SystemFileType
 ): Promise<boolean | void> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -478,8 +480,14 @@ export const deleteFile = async (
     recipients: recipients,
   };
 
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   return client
-    .post('/drive/files/delete', request)
+    .post('/drive/files/delete', request, config)
     .then((response) => {
       if (response.status === 200) {
         return true;
