@@ -49,7 +49,7 @@ export interface CommentReactionPreview extends ReactionFile {
 }
 
 export interface EmojiReactionSummary {
-  emojis: string[];
+  reactions: { emoji: string; count: number }[];
   totalCount: number;
 }
 
@@ -257,9 +257,9 @@ export const removeEmojiReaction = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
-interface ServerReactionsList {
-  reactions: string[];
-  totalCount: number;
+interface ServerReactionsSummary {
+  reactions: { reactionContent: string; count: number }[];
+  total: number;
 }
 
 export const getReactionSummary = async (
@@ -271,7 +271,7 @@ export const getReactionSummary = async (
   console.debug('Getting reaction summary for: ', { odinId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/list2';
+  const url = emojiRoot + '/summary';
 
   const data = {
     file: {
@@ -283,25 +283,28 @@ export const getReactionSummary = async (
   };
 
   return client
-    .post<ServerReactionsListWithCursor>(url, data)
+    .post<ServerReactionsSummary>(url, data)
     .then((response) => {
       return {
-        emojis: response.data.reactions
+        reactions: response.data.reactions
           .map((reaction) => {
             try {
-              return JSON.parse(reaction.reactionContent).emoji as string;
+              return {
+                emoji: JSON.parse(reaction.reactionContent).emoji as string,
+                count: reaction.count,
+              };
             } catch (ex) {
               console.error('[DotYouCore-js] parse failed for', reaction);
               return;
             }
           })
-          .filter(Boolean) as string[],
-        totalCount: 2,
+          .filter(Boolean) as { emoji: string; count: number }[],
+        totalCount: response.data.total,
       };
     })
     .catch((e) => {
       dotYouClient.handleErrorResponse(e);
-      return { emojis: [], totalCount: 0 };
+      return { reactions: [], totalCount: 0 };
     });
 };
 
@@ -324,7 +327,7 @@ export const getReactions = async (
   console.debug('Getting reactions for: ', { odinId, channelId, postFileId });
 
   const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/list2';
+  const url = emojiRoot + '/list';
 
   const data = {
     file: {
@@ -338,7 +341,6 @@ export const getReactions = async (
   return client
     .post<ServerReactionsListWithCursor>(url, data)
     .then((response) => {
-      console.log('get reactions:', response.data);
       return {
         reactions: response.data.reactions.map((reaction) => {
           return {
@@ -363,17 +365,20 @@ export const parseReactionPreview = (
     }[]
   ) => {
     return {
-      emojis: reactions
+      reactions: reactions
         .map((reaction) => {
           try {
-            return JSON.parse(reaction.reactionContent).emoji;
+            return {
+              emoji: JSON.parse(reaction.reactionContent).emoji as string,
+              count: parseInt(reaction.count),
+            };
           } catch (ex) {
             //
           }
 
           return;
         })
-        .filter(Boolean),
+        .filter(Boolean) as { emoji: string; count: number }[],
       totalCount: reactions.reduce((prevVal, curVal) => {
         return prevVal + parseInt(curVal.count);
       }, 0),
@@ -406,7 +411,7 @@ export const parseReactionPreview = (
           .filter(Boolean) as CommentReactionPreview[],
         totalCount: reactionPreview.totalCommentCount || reactionPreview.comments.length || 0,
       },
-      reactions: parseReactions(Object.values(reactionPreview.reactions2)),
+      reactions: parseReactions(Object.values(reactionPreview.reactions)),
     };
   }
 

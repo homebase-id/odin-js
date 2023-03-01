@@ -99,8 +99,7 @@ export interface ReactionPreview {
     jsonContent: string;
     reactions: { key: string; count: string; reactionContent: string }[];
   }[];
-  reactions: { key: string; count: string; reactionContent: string }[];
-  reactions2: Record<string, { key: string; count: string; reactionContent: string }>;
+  reactions: Record<string, { key: string; count: string; reactionContent: string }>;
   totalCommentCount: number;
 }
 
