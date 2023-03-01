@@ -76,8 +76,6 @@ export const saveComment = async (
   dotYouClient: DotYouClient,
   comment: ReactionVm
 ): Promise<string> => {
-  console.log('[DotYouCore-js] Should and attempts to react with comment:', comment);
-
   const encrypt = false;
   const targetDrive = GetTargetDriveFromChannelId(comment.postDetails.channelId);
 
@@ -148,8 +146,6 @@ export const getComments = async (
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: ReactionFile[]; cursorState: string }> => {
-  console.debug('Getting comments for: ', { odinId, channelId, postFileId });
-
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -205,8 +201,6 @@ export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
   comment: ReactionVm
 ): Promise<string> => {
-  console.log('[DotYouCore-js] Should attempt to react with emoji:', comment);
-
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/add';
 
@@ -268,8 +262,6 @@ export const getReactionSummary = async (
   channelId: string,
   postFileId: string
 ): Promise<EmojiReactionSummary> => {
-  console.debug('Getting reaction summary for: ', { odinId, channelId, postFileId });
-
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/summary';
 
@@ -324,8 +316,6 @@ export const getReactions = async (
   pageSize = 15,
   cursor?: number
 ): Promise<{ reactions: ReactionFile[]; cursor: number } | undefined> => {
-  console.debug('Getting reactions for: ', { odinId, channelId, postFileId });
-
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/list';
 
@@ -373,7 +363,8 @@ export const parseReactionPreview = (
               count: parseInt(reaction.count),
             };
           } catch (ex) {
-            //
+            console.error('[DotYouCore-js] parse failed for', reaction);
+            return;
           }
 
           return;
@@ -390,23 +381,16 @@ export const parseReactionPreview = (
       comments: {
         comments: reactionPreview.comments
           .map((commentPreview) => {
-            let content: ReactionContent | undefined = undefined;
-
             try {
-              content = JSON.parse(commentPreview.jsonContent);
+              return {
+                authorOdinId: commentPreview.odinId,
+                content: JSON.parse(commentPreview.jsonContent),
+                reactions: parseReactions(commentPreview.reactions),
+              };
             } catch (ex) {
-              //
-            }
-
-            if (!content) {
+              console.error('[DotYouCore-js] parse failed for', commentPreview);
               return;
             }
-
-            return {
-              authorOdinId: commentPreview.odinId,
-              content: content,
-              reactions: parseReactions(commentPreview.reactions),
-            };
           })
           .filter(Boolean) as CommentReactionPreview[],
         totalCount: reactionPreview.totalCommentCount || reactionPreview.comments.length || 0,
