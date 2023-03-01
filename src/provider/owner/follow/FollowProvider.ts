@@ -4,7 +4,7 @@ import { CursoredResult } from '../../core/Types';
 
 export interface FollowRequest {
   odinId: string;
-  notificationType: 'allNotifications';
+  notificationType: 'allNotifications' | 'selectedChannels';
   channels?: TargetDrive[];
 }
 

@@ -197,8 +197,6 @@ const dsrToComment = async (
     includeMetadataHeader
   );
 
-  console.log({ dsr, contentData });
-
   return {
     fileId: dsr.fileId,
     id: dsr.fileMetadata.appData.uniqueId,
