@@ -18,6 +18,8 @@ import {
   UploadInstructionSet,
   UploadFileMetadata,
   UploadResult,
+  ScheduleOptions,
+  SendContents,
 } from '../../core/DriveData/DriveUploadTypes';
 import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
 import {
@@ -207,7 +209,12 @@ export const savePost = async <T extends PostContent>(
       overwriteFileId: file?.fileId ?? '',
       drive: GetTargetDriveFromChannelId(channelId),
     },
-    transitOptions: null,
+    transitOptions: {
+      useGlobalTransitId: true,
+      recipients: [],
+      schedule: ScheduleOptions.SendLater,
+      sendContents: SendContents.All,
+    },
   };
 
   const existingPostWithThisSlug = (

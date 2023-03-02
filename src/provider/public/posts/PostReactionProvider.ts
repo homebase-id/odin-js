@@ -18,6 +18,8 @@ import {
   UploadFileMetadata,
   SecurityGroupType,
   UploadResult,
+  ScheduleOptions,
+  SendContents,
 } from '../../core/DriveData/DriveUploadTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { RichText } from './PostTypes';
@@ -87,7 +89,12 @@ export const saveComment = async (
       overwriteFileId: comment.fileId || undefined,
       drive: targetDrive,
     },
-    transitOptions: null,
+    transitOptions: {
+      useGlobalTransitId: true,
+      recipients: [],
+      schedule: ScheduleOptions.SendLater,
+      sendContents: SendContents.All,
+    },
     systemFileType: 'Comment',
   };
 
@@ -116,7 +123,6 @@ export const saveComment = async (
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: undefined,
       userDate: comment.date ?? new Date().getTime(),
-      // groupId: comment.commentThreadId, // TODO: Needs support on Server Side to actually accept a groupId
     },
     payloadIsEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
@@ -196,6 +202,8 @@ const dsrToComment = async (
     dsr.sharedSecretEncryptedKeyHeader,
     includeMetadataHeader
   );
+
+  console.log({ dsr, contentData });
 
   return {
     fileId: dsr.fileId,

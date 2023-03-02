@@ -5,7 +5,9 @@ import {
 } from '../../core/DriveData/DriveTypes';
 import { BlogConfig, ChannelDefinition } from './PostTypes';
 import {
+  ScheduleOptions,
   SecurityGroupType,
+  SendContents,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -125,7 +127,12 @@ export const saveChannelDefinition = async (
       overwriteFileId: fileId,
       drive: targetDrive,
     },
-    transitOptions: null,
+    transitOptions: {
+      useGlobalTransitId: true,
+      recipients: [],
+      schedule: ScheduleOptions.SendLater,
+      sendContents: SendContents.All,
+    },
   };
 
   const payloadJson: string = jsonStringify64(definition);
