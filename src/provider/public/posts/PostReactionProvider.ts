@@ -20,7 +20,9 @@ import {
   UploadResult,
   ScheduleOptions,
   SendContents,
+  TransitOptions,
 } from '../../core/DriveData/DriveUploadTypes';
+import { uploadImage } from '../../core/MediaData/MediaProvider';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { RichText } from './PostTypes';
 
@@ -82,6 +84,13 @@ export const saveComment = async (
 ): Promise<string> => {
   const encrypt = false;
   const targetDrive = GetTargetDriveFromChannelId(comment.postDetails.channelId);
+  const transitOptions: TransitOptions = {
+    useGlobalTransitId: true,
+    recipients: [],
+    schedule: ScheduleOptions.SendLater,
+    sendContents: SendContents.All,
+  };
+  const acl = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
@@ -89,18 +98,32 @@ export const saveComment = async (
       overwriteFileId: comment.fileId || undefined,
       drive: targetDrive,
     },
-    transitOptions: {
-      useGlobalTransitId: true,
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      sendContents: SendContents.All,
-    },
+    transitOptions: transitOptions,
     systemFileType: 'Comment',
   };
 
   // TODO: Handle attachments
   // => Upload files with the mediaProvider
   // => Replace attachment array with fileIds of those
+  comment.content.attachmentIds = [
+    ...(comment.content.attachmentIds || []),
+    ...(!comment.content.attachments
+      ? []
+      : ((
+          await Promise.all(
+            comment.content.attachments.map(async (file) => {
+              const imageBytes = new Uint8Array(await file.arrayBuffer());
+              return (
+                await uploadImage(dotYouClient, targetDrive, undefined, acl, imageBytes, {
+                  type: file.type,
+                })
+              )?.fileId;
+            })
+          )
+        ).filter(Boolean) as string[])),
+  ];
+
+  delete comment.content.attachments;
 
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
@@ -125,7 +148,7 @@ export const saveComment = async (
       userDate: comment.date ?? new Date().getTime(),
     },
     payloadIsEncrypted: encrypt,
-    accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+    accessControlList: acl,
   };
 
   if (dotYouClient.getHostname() === comment.postDetails.authorOdinId) {

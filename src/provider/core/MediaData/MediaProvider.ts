@@ -8,6 +8,7 @@ import {
 import {
   AccessControlList,
   SecurityGroupType,
+  TransitOptions,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -59,9 +60,13 @@ export const uploadImage = async (
   tag: string | undefined | string[],
   acl: AccessControlList,
   imageBytes: Uint8Array,
-  fileId?: string,
-  type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string,
-  uniqueId?: string
+  uploadMeta?: {
+    uniqueId?: string;
+    fileId?: string;
+    type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string;
+    transitOptions?: TransitOptions;
+    allowDistribution?: boolean;
+  }
 ): Promise<ImageUploadResult | undefined> => {
   if (!targetDrive) {
     throw 'Missing target drive';
@@ -75,15 +80,15 @@ export const uploadImage = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: fileId ?? null,
+      overwriteFileId: uploadMeta?.fileId ?? null,
       drive: targetDrive,
     },
-    transitOptions: null,
+    transitOptions: uploadMeta?.transitOptions || null,
   };
 
   // Create a thumbnail that fits scaled into a 20 x 20 canvas
   const tinyThumb =
-    type === 'image/svg+xml'
+    uploadMeta?.type === 'image/svg+xml'
       ? createVectorThumbnail(imageBytes)
       : await createImageThumbnail(imageBytes, 10, 20, 20);
 
@@ -131,11 +136,11 @@ export const uploadImage = async (
   });
 
   const metadata: UploadFileMetadata = {
-    allowDistribution: false,
-    contentType: type ?? 'image/webp',
+    allowDistribution: uploadMeta?.allowDistribution || false,
+    contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
       tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],
-      uniqueId: uniqueId ?? getNewId(),
+      uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: 0,
       jsonContent: null,
