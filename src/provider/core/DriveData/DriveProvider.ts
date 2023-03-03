@@ -227,12 +227,7 @@ export const queryBatchCollection = async (
     const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
     return {
       ...query,
-      resultOptions: {
-        maxRecords: ro.maxRecords,
-        includeJsonContent: ro.includeMetadataHeader,
-        excludePreviewThumbnail: !ro.includeMetadataHeader,
-        cursor: ro.cursorState,
-      },
+      resultOptionsRequest: ro,
     };
   });
 

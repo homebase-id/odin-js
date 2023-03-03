@@ -149,7 +149,14 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
   const imageSections = (
     await Promise.all(
       (
-        await getRecentPosts(dotYouClient, undefined, false, undefined, channels.length * 6)
+        await getRecentPosts(
+          dotYouClient,
+          undefined,
+          false,
+          undefined,
+          channels.length * 6,
+          channels
+        )
       ).results
         .filter(
           (blog) =>

@@ -5,6 +5,7 @@ import {
   getPayload,
   getRandom16ByteArray,
   queryBatch,
+  queryBatchCollection,
   uploadFile,
 } from '../../core/DriveData/DriveProvider';
 import {
@@ -86,28 +87,61 @@ export const getRecentPosts = async <T extends PostContent>(
   type: PostType | undefined,
   includeDrafts: true | 'only' | false,
   cursorState: Record<string, string> | undefined = undefined,
-  pageSize = 10
+  pageSize = 10,
+  channels?: ChannelDefinition[]
 ): Promise<MultiRequestCursoredResult<PostFile<T>[]>> => {
-  const channels = await getChannelDefinitions(dotYouClient);
+  const chnls = channels || (await getChannelDefinitions(dotYouClient));
   const allCursors: Record<string, string> = {};
-  const resultPerChannel = await Promise.all(
-    channels.map(async (channel) => {
-      const result = await getPosts<T>(
-        dotYouClient,
-        channel.channelId,
-        type,
-        includeDrafts,
-        cursorState?.[channel.channelId],
-        pageSize
-      );
 
-      allCursors[channel.channelId] = result.cursorState;
-      return result.results;
+  const queries = chnls.map((chnl) => {
+    const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
+    const params: FileQueryParams = {
+      targetDrive: targetDrive,
+      dataType: type ? [postTypeToDataType(type)] : undefined,
+      fileType:
+        includeDrafts === 'only'
+          ? [BlogConfig.DraftPostFileType]
+          : [
+              BlogConfig.PostFileType,
+              ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
+            ],
+    };
+
+    const ro: GetBatchQueryResultOptions = {
+      maxRecords: pageSize,
+      cursorState: cursorState?.[chnl.channelId],
+      includeMetadataHeader: true,
+    };
+
+    return {
+      name: chnl.channelId,
+      queryParams: params,
+      resultOptions: ro,
+    };
+  });
+
+  const response = await queryBatchCollection(dotYouClient, queries);
+  const postsPerChannel = await Promise.all(
+    response.results.map(async (result) => {
+      const targetDrive = GetTargetDriveFromChannelId(result.name);
+
+      const posts: PostFile<T>[] = (
+        await Promise.all(
+          result.searchResults.map(
+            async (dsr) =>
+              await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+          )
+        )
+      ).filter((post) => !!post) as PostFile<T>[];
+
+      allCursors[result.name] = result.cursorState;
+
+      return { posts, cursorState: result.cursorState };
     })
   );
-  // Sorted descending
-  const sortedPosts = resultPerChannel
-    .flat(1)
+
+  const sortedPosts = postsPerChannel
+    .flatMap((chnl) => chnl?.posts)
     .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
 
   return { results: sortedPosts, cursorState: allCursors };
@@ -230,10 +264,14 @@ export const savePost = async <T extends PostContent>(
   const payloadJson: string = jsonStringify64(file.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  const isDraft = file.acl?.requiredSecurityGroup === SecurityGroupType.Owner;
-
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
+  const jsonContent = shouldEmbedContent
+    ? payloadJson
+    : jsonStringify64({ channelId: file.content.channelId }); // If the full payload can't be embedded into the header file, at least pass the channelId so when getting the location is known
+
+  const isDraft = file.acl?.requiredSecurityGroup === SecurityGroupType.Owner;
+
   const metadata: UploadFileMetadata = {
     allowDistribution: !isDraft,
     contentType: 'application/json',
@@ -242,7 +280,7 @@ export const savePost = async <T extends PostContent>(
       uniqueId: uniqueId,
       contentIsComplete: shouldEmbedContent,
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      jsonContent: jsonContent,
       previewThumbnail: file.previewThumbnail,
       userDate: file.content.dateUnixTime,
       dataType: postTypeToDataType(file.content.type),
