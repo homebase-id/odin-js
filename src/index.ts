@@ -53,6 +53,7 @@ export * from './provider/public/circleNetwork/CircleDataTypes';
 // File
 export * from './provider/public/file/FileProvider';
 export * from './provider/public/file/FilePublishProvider';
+export * from './provider/public/file/ProfileCardProvider';
 
 /// Owner
 // Media
