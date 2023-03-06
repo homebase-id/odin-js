@@ -175,7 +175,15 @@ export const removeComment = async (
   commentFile: ReactionFile
 ) => {
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
-  if (commentFile.fileId) return await deleteFile(dotYouClient, targetDrive, commentFile.fileId);
+  if (commentFile.fileId)
+    return await deleteFile(
+      dotYouClient,
+      targetDrive,
+      commentFile.fileId,
+      false,
+      undefined,
+      'Comment'
+    );
 };
 
 export const getComments = async (
