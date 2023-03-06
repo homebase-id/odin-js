@@ -67,3 +67,7 @@ export * from './provider/owner/profile/ExternalProfileDataProvider';
 
 // Follow
 export * from './provider/owner/follow/FollowProvider';
+
+// Photos
+export * from './provider/owner/photos/PhotoTypes';
+export * from './provider/owner/photos/PhotoProvider';

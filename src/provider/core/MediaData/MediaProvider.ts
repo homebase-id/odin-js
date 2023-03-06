@@ -66,6 +66,7 @@ export const uploadImage = async (
     type?: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml' | string;
     transitOptions?: TransitOptions;
     allowDistribution?: boolean;
+    userDate?: number;
   }
 ): Promise<ImageUploadResult | undefined> => {
   if (!targetDrive) {
@@ -146,6 +147,7 @@ export const uploadImage = async (
       jsonContent: null,
       previewThumbnail: previewThumbnail,
       additionalThumbnails: thumbsizes,
+      userDate: uploadMeta?.userDate,
     },
     payloadIsEncrypted: encrypt,
     accessControlList: acl,
