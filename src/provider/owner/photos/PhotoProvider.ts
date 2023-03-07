@@ -8,6 +8,24 @@ export const getPhotoLibrary = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   pageSize: number,
+  cursorState?: string
+) => {
+  const reponse = await queryBatch(
+    dotYouClient,
+    { targetDrive: targetDrive },
+    { cursorState: cursorState, maxRecords: pageSize, includeMetadataHeader: true }
+  );
+
+  return {
+    results: reponse.searchResults,
+    cursorState: reponse.cursorState,
+  };
+};
+
+export const getPhotosFromLibrary = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  pageSize: number,
   cursorState?: string,
   size?: ThumbSize
 ) => {
