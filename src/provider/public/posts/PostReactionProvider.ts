@@ -448,5 +448,15 @@ export const parseReactionPreview = (
     };
   }
 
-  return reactionPreview;
+  // Empty reactionPreview object when undefined from server
+  return {
+    comments: {
+      comments: [],
+      totalCount: 0,
+    },
+    reactions: {
+      reactions: [],
+      totalCount: 0,
+    },
+  };
 };
