@@ -12,5 +12,4 @@ export class PhotoConfig {
 export interface PhotoFile {
   fileId: string;
   url: string;
-  date: number;
 }

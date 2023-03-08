@@ -13,7 +13,7 @@ export const getPhotoLibrary = async (
   const reponse = await queryBatch(
     dotYouClient,
     { targetDrive: targetDrive },
-    { cursorState: cursorState, maxRecords: pageSize, includeMetadataHeader: true }
+    { cursorState: cursorState, maxRecords: pageSize, includeMetadataHeader: false }
   );
 
   return {
@@ -32,7 +32,7 @@ export const getPhotosFromLibrary = async (
   const reponse = await queryBatch(
     dotYouClient,
     { targetDrive: targetDrive },
-    { cursorState: cursorState, maxRecords: pageSize, includeMetadataHeader: true }
+    { cursorState: cursorState, maxRecords: pageSize, includeMetadataHeader: false }
   );
 
   return {
@@ -49,21 +49,31 @@ export const getPhoto = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ThumbSize
-) => {
-  const searchResult = await getFileHeader(dotYouClient, targetDrive, fileId);
-  return dsrToPhoto(dotYouClient, targetDrive, searchResult, size);
+  size?: ThumbSize,
+  isProbablyEncrypted?: boolean
+): Promise<PhotoFile> => {
+  return {
+    fileId: fileId,
+    url: await getDecryptedImageUrl(dotYouClient, targetDrive, fileId, size, isProbablyEncrypted),
+  };
 };
 
 const dsrToPhoto = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   dsr: DriveSearchResult,
-  size?: ThumbSize
+  size?: ThumbSize,
+  isProbablyEncrypted?: boolean
 ): Promise<PhotoFile> => {
   return {
     fileId: dsr.fileId,
-    url: await getDecryptedImageUrl(dotYouClient, targetDrive, dsr.fileId, size),
-    date: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
+    url: await getDecryptedImageUrl(
+      dotYouClient,
+      targetDrive,
+      dsr.fileId,
+      size,
+      isProbablyEncrypted
+    ),
+    // date: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
   };
 };
