@@ -15,7 +15,8 @@ export interface Attribute {
   type: string;
   priority: number;
   sectionId: string;
-  data: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: Record<string, any>;
 }
 
 export type SecurityGroupDefinition = {

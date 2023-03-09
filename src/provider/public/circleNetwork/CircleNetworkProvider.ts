@@ -2,6 +2,7 @@ import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { PagedResult, PagingOptions } from '../../core/Types';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const stringify = (obj: any) => {
   return Object.keys(obj)
     .map((key) => key + '=' + obj[key])

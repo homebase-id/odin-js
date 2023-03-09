@@ -7,8 +7,7 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { getFileHeader } from '../../core/DriveData/DriveProvider';
 import { FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
-import { getDecryptedImageData } from '../../core/MediaData/MediaProvider';
-import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileConfig';
+import { BuiltInProfiles } from '../../profile/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProvider';
 import {
   getChannelDefinitions,
@@ -19,12 +18,7 @@ import { getRecentPosts } from '../posts/PostProvider';
 import { BlogConfig } from '../posts/PostTypes';
 import { HomePageConfig, HomePageAttributes, HomePageFields } from '../home/HomeTypes';
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
-import {
-  publishFile,
-  publishProfileCardFile,
-  publishProfileImageFile,
-  QueryParamsSection,
-} from './FileProvider';
+import { publishFile, QueryParamsSection } from './FileProvider';
 
 export const publishProfile = async (dotYouClient: DotYouClient) => {
   const sections = [...DEFAULT_SECTIONS];
@@ -43,7 +37,11 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
     try {
       const homeTargetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId.toString());
 
-      const imageFileHeader = await getFileHeader(dotYouClient, homeTargetDrive, homeFileId);
+      const imageFileHeader = await getFileHeader(
+        dotYouClient,
+        homeTargetDrive,
+        homeFileId.toString()
+      );
       const uniqueId = imageFileHeader.fileMetadata.appData.uniqueId;
 
       const headerImageQueryParam: FileQueryParams = {
@@ -56,7 +54,7 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
       }
 
       sections.push({
-        name: homeFileId,
+        name: homeFileId.toString(),
         queryParams: headerImageQueryParam,
         resultOptions: BASE_RESULT_OPTIONS,
       });

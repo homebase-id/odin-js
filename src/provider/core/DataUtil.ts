@@ -1,6 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { EncryptedKeyHeader } from './DriveData/DriveTypes';
 import { AccessControlList } from './DriveData/DriveUploadTypes';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const md5 = require('js-md5');
 
 export const stringToMD5basedGuid = (data: string): Guid => {
@@ -47,10 +48,10 @@ export const uint8ArrayToBase64 = (buffer: Uint8Array) => {
 };
 
 ///creates a JSON string from an object; uses base64 for byte arrays
-export const jsonStringify64 = (o: any): string => {
-  const replacer = (key: string, value: any) => {
+export const jsonStringify64 = (o: unknown): string => {
+  const replacer = (key: string, value: unknown) => {
     if (Object.prototype.toString.call(value) === '[object Uint8Array]') {
-      return uint8ArrayToBase64(value);
+      return uint8ArrayToBase64(value as Uint8Array);
     }
 
     return value;
@@ -77,6 +78,7 @@ export const getNewId = () => {
   return Guid.create().toString().replace(/-/g, '');
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const stringify = (obj: any) => {
   return Object.keys(obj)
     .map((key) => key + '=' + obj[key])

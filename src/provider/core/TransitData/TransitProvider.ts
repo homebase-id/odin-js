@@ -12,6 +12,7 @@ import {
   FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
+  ImageContentType,
   KeyHeader,
   QueryBatchResponse,
   TargetDrive,
@@ -124,7 +125,7 @@ export const getPayloadBytesOverTransit = async (
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader?: KeyHeader | undefined
-): Promise<{ bytes: ArrayBuffer; contentType: string }> => {
+): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   const client = dotYouClient.createAxiosClient();
   const request: GetFileRequest = {
     odinId: odinId,
@@ -144,7 +145,7 @@ export const getPayloadBytesOverTransit = async (
         return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
           return {
             bytes,
-            contentType: `${response.headers.decryptedcontenttype}`,
+            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
           };
         });
       } else if (
@@ -159,11 +160,14 @@ export const getPayloadBytesOverTransit = async (
         const cipher = new Uint8Array(response.data);
 
         const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
+        return {
+          bytes,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        };
       } else {
         return {
           bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}`,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
         };
       }
     })
@@ -181,7 +185,7 @@ export const getThumbBytesOverTransit = async (
   keyHeader: KeyHeader | undefined,
   width: number,
   height: number
-): Promise<{ bytes: ArrayBuffer; contentType: string }> => {
+): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   const client = dotYouClient.createAxiosClient();
   const request: GetFileRequest = {
     odinId: odinId,
@@ -205,7 +209,7 @@ export const getThumbBytesOverTransit = async (
         return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
           return {
             bytes,
-            contentType: `${response.headers.decryptedcontenttype}`,
+            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
           };
         });
       } else if (
@@ -220,11 +224,14 @@ export const getThumbBytesOverTransit = async (
         const cipher = new Uint8Array(response.data);
 
         const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
+        return {
+          bytes,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        };
       } else {
         return {
           bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}`,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
         };
       }
     })

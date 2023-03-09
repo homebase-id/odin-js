@@ -23,9 +23,11 @@ export interface StorageOptions {
 
 export interface TransitOptions {
   recipients: string[];
+  isTransient?: boolean; // File is removed after it's received by all recipients
   useGlobalTransitId?: boolean | undefined;
   schedule: ScheduleOptions;
   sendContents: SendContents;
+  overrideTargetDrive?: TargetDrive;
 }
 
 export enum SendContents {

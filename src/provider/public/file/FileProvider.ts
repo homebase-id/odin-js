@@ -1,15 +1,11 @@
 import { uint8ArrayToBase64, base64ToUint8Array, byteArrayToString } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
-import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
+import { DriveSearchResult, EmbeddedThumb, FileQueryParams } from '../../core/DriveData/DriveTypes';
 
 export interface ResponseEntry {
-  additionalThumbnails?: {
-    content: string;
-    contentType: string;
-    pixelHeight: number;
-    pixelWidth: number;
-  }[];
+  additionalThumbnails?: EmbeddedThumb[];
   header: DriveSearchResult;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>;
 }
 
@@ -151,6 +147,7 @@ export const GetFileEntryFromCache = async (key: string) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertFileToResponseEntry = async (file: any) => {
   let parsedObj = undefined;
 

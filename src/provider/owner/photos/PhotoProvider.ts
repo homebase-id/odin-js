@@ -1,6 +1,11 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getFileHeader, queryBatch } from '../../core/DriveData/DriveProvider';
-import { DriveSearchResult, TargetDrive, ThumbSize } from '../../core/DriveData/DriveTypes';
+import { queryBatch } from '../../core/DriveData/DriveProvider';
+import {
+  DriveSearchResult,
+  ImageSize,
+  TargetDrive,
+  ThumbSize,
+} from '../../core/DriveData/DriveTypes';
 import { getDecryptedImageUrl } from '../../core/MediaData/MediaProvider';
 import { PhotoFile } from './PhotoTypes';
 
@@ -49,7 +54,7 @@ export const getPhoto = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ThumbSize,
+  size?: ImageSize,
   isProbablyEncrypted?: boolean
 ): Promise<PhotoFile> => {
   return {
@@ -62,7 +67,7 @@ const dsrToPhoto = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   dsr: DriveSearchResult,
-  size?: ThumbSize,
+  size?: ImageSize,
   isProbablyEncrypted?: boolean
 ): Promise<PhotoFile> => {
   return {

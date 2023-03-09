@@ -10,8 +10,10 @@ import {
 import {
   DriveSearchResult,
   FileQueryParams,
+  ImageContentType,
   ReactionPreview,
   TargetDrive,
+  ThumbnailFile,
 } from '../../core/DriveData/DriveTypes';
 import {
   UploadInstructionSet,
@@ -22,9 +24,13 @@ import {
   SendContents,
   TransitOptions,
 } from '../../core/DriveData/DriveUploadTypes';
-import { uploadImage } from '../../core/MediaData/MediaProvider';
+import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
+import {
+  getPayloadOverTransit,
+  queryBatchOverTransit,
+} from '../../core/TransitData/TransitProvider';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { RichText } from './PostTypes';
+import { BlogConfig, RichText } from './PostTypes';
 
 export interface ReactionContext {
   authorOdinId: string;
@@ -35,7 +41,7 @@ export interface ReactionContext {
 export interface ReactionContent {
   body: string;
   bodyAsRichText?: RichText;
-  attachmentIds?: string[];
+  hasAttachment?: boolean;
 }
 
 export interface ReactionFile {
@@ -65,7 +71,7 @@ export interface CommentsReactionSummary {
 }
 
 interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
-  attachments?: File[];
+  attachment?: File;
 }
 
 export interface ReactionVm extends Omit<ReactionFile, 'content'> {
@@ -84,46 +90,22 @@ export const saveComment = async (
 ): Promise<string> => {
   const encrypt = false;
   const targetDrive = GetTargetDriveFromChannelId(comment.postDetails.channelId);
-  const transitOptions: TransitOptions = {
-    useGlobalTransitId: true,
-    recipients: [],
-    schedule: ScheduleOptions.SendLater,
-    sendContents: SendContents.All,
-  };
-  const acl = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 
-  const instructionSet: UploadInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      overwriteFileId: comment.fileId || undefined,
-      drive: targetDrive,
-    },
-    transitOptions: transitOptions,
-    systemFileType: 'Comment',
-  };
+  let additionalThumbnails: ThumbnailFile[] | undefined;
+  if (comment.content.attachment) {
+    const imageFile = comment.content.attachment;
+    const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
 
-  // TODO: Handle attachments
-  // => Upload files with the mediaProvider
-  // => Replace attachment array with fileIds of those
-  comment.content.attachmentIds = [
-    ...(comment.content.attachmentIds || []),
-    ...(!comment.content.attachments
-      ? []
-      : ((
-          await Promise.all(
-            comment.content.attachments.map(async (file) => {
-              const imageBytes = new Uint8Array(await file.arrayBuffer());
-              return (
-                await uploadImage(dotYouClient, targetDrive, undefined, acl, imageBytes, {
-                  type: file.type,
-                })
-              )?.fileId;
-            })
-          )
-        ).filter(Boolean) as string[])),
-  ];
+    const { additionalThumbnails: thumbs } = await createThumbnails(
+      imageBytes,
+      imageFile.type as ImageContentType,
+      [{ height: 250, width: 250, quality: 100 }]
+    );
+    additionalThumbnails = thumbs;
+    delete comment.content.attachment;
 
-  delete comment.content.attachments;
+    comment.content.hasAttachment = true;
+  }
 
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
@@ -131,7 +113,8 @@ export const saveComment = async (
   // Set max of 3kb for jsonContent so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    allowDistribution: true,
+    // allowDistribution: true, // Disable
+    allowDistribution: false,
     contentType: 'application/json',
     senderOdinId: comment.authorOdinId,
     referencedFile: {
@@ -148,24 +131,75 @@ export const saveComment = async (
       userDate: comment.date ?? new Date().getTime(),
     },
     payloadIsEncrypted: encrypt,
-    accessControlList: acl,
+    accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
 
   if (dotYouClient.getHostname() === comment.postDetails.authorOdinId) {
+    const transitOptions: TransitOptions = {
+      useGlobalTransitId: true,
+      recipients: [],
+      schedule: ScheduleOptions.SendLater,
+      sendContents: SendContents.All,
+    };
+
+    const instructionSet: UploadInstructionSet = {
+      transferIv: getRandom16ByteArray(),
+      storageOptions: {
+        overwriteFileId: comment.fileId || undefined,
+        drive: targetDrive,
+      },
+      transitOptions: transitOptions,
+      systemFileType: 'Comment',
+    };
+
     // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
     const result: UploadResult = await uploadFile(
       dotYouClient,
       instructionSet,
       metadata,
       payloadBytes,
-      undefined,
+      additionalThumbnails,
       encrypt
     );
 
     return result.file.fileId;
   } else {
-    // Use transit endpoint for reactions ?
-    return '123';
+    metadata.referencedFile = {
+      targetDrive: BlogConfig.FeedDrive,
+      fileId: comment.commentThreadId || comment.postDetails.postFileId,
+    };
+    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Owner };
+    metadata.allowDistribution = true;
+
+    const transitOptions: TransitOptions = {
+      useGlobalTransitId: true,
+      isTransient: true, // File is removed after it's received by all recipients
+      recipients: [comment.postDetails.authorOdinId],
+      schedule: ScheduleOptions.SendNowAwaitResponse,
+      sendContents: SendContents.All,
+      overrideTargetDrive: targetDrive,
+    };
+
+    const instructionSet: UploadInstructionSet = {
+      transferIv: getRandom16ByteArray(),
+      storageOptions: {
+        overwriteFileId: undefined, //comment.fileId || undefined,
+        drive: BlogConfig.FeedDrive,
+      },
+      transitOptions: transitOptions,
+      systemFileType: 'Comment',
+    };
+
+    const result: UploadResult = await uploadFile(
+      dotYouClient,
+      instructionSet,
+      metadata,
+      payloadBytes,
+      additionalThumbnails,
+      encrypt
+    );
+
+    return result.file.fileId;
   }
 };
 
@@ -201,17 +235,21 @@ export const getComments = async (
     groupId: [postFileId],
     systemFileType: 'Comment',
   };
-
-  const result = await queryBatch(dotYouClient, qp, {
+  const ro = {
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
-  });
+  };
+
+  const result =
+    odinId === dotYouClient.getHostname()
+      ? await queryBatch(dotYouClient, qp, ro)
+      : await queryBatchOverTransit(dotYouClient, odinId, qp, ro);
 
   const comments: ReactionFile[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
-        dsrToComment(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
+        dsrToComment(dotYouClient, odinId, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
   ).filter((attr) => !!attr) as ReactionFile[];
@@ -221,18 +259,23 @@ export const getComments = async (
 
 const dsrToComment = async (
   dotYouClient: DotYouClient,
+  odinId: string,
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<ReactionFile> => {
-  const contentData = await getPayload<RawReactionContent>(
-    dotYouClient,
+  const params = [
     targetDrive,
     dsr.fileId,
     dsr.fileMetadata,
     dsr.sharedSecretEncryptedKeyHeader,
-    includeMetadataHeader
-  );
+    includeMetadataHeader,
+  ] as const;
+
+  const contentData =
+    odinId === dotYouClient.getHostname()
+      ? await getPayload<RawReactionContent>(dotYouClient, ...params)
+      : await getPayloadOverTransit<RawReactionContent>(dotYouClient, odinId, ...params);
 
   return {
     fileId: dsr.fileId,

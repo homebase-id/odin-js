@@ -1,17 +1,17 @@
 import { base64ToUint8Array, stringify } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
-import { ThumbSize, TargetDrive, DriveSearchResult } from '../../core/DriveData/DriveTypes';
+import {
+  TargetDrive,
+  DriveSearchResult,
+  ImageContentType,
+  ImageSize,
+} from '../../core/DriveData/DriveTypes';
+import { ThumbnailMeta } from '../../core/MediaData/MediaTypes';
 import {
   getFileHeaderOverTransit,
   getThumbBytesOverTransit,
   getPayloadBytesOverTransit,
 } from '../../core/TransitData/TransitProvider';
-
-export type ThumbnailMeta = {
-  naturalSize: { width: number; height: number };
-  sizes?: ThumbSize[];
-  url: string;
-};
 
 export const getDecryptedMetadataOverTransit = async (
   dotYouClient: DotYouClient,
@@ -56,7 +56,7 @@ export const getDecryptedImageUrlOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ThumbSize
+  size?: ImageSize
 ): Promise<string> => {
   const meta = await getDecryptedMetadataOverTransit(dotYouClient, odinId, targetDrive, fileId);
   if (!meta.fileMetadata.payloadIsEncrypted && size) {
@@ -83,11 +83,11 @@ export const getDecryptedImageDataOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ThumbSize
+  size?: ImageSize
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
-  contentType: string;
+  contentType: ImageContentType;
   content: ArrayBuffer;
 }> => {
   const data = await (size

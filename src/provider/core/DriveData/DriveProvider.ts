@@ -11,7 +11,8 @@ import {
   EncryptedKeyHeader,
   FileMetadata,
   QueryBatchCollectionResponse,
-  ThumbnailFileTypes,
+  ThumbnailFile,
+  ImageContentType,
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../Types';
@@ -112,7 +113,7 @@ export const getDrivesByType = async (
     return client.get('drive/metadata/type?' + stringify(params)).then((response) => {
       return {
         ...response.data,
-        results: response?.data?.results?.map((result: { targetDrive: any }) => {
+        results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {
           return { ...result, targetDriveInfo: result.targetDrive };
         }),
       };
@@ -324,7 +325,7 @@ export const getPayloadBytes = async (
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader: KeyHeader | undefined
-): Promise<{ bytes: ArrayBuffer; contentType: string }> => {
+): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -345,7 +346,7 @@ export const getPayloadBytes = async (
         return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
           return {
             bytes,
-            contentType: `${response.headers.decryptedcontenttype}`,
+            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
           };
         });
       } else if (
@@ -360,11 +361,14 @@ export const getPayloadBytes = async (
         const cipher = new Uint8Array(response.data);
 
         const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
+        return {
+          bytes,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        };
       } else {
         return {
           bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}`,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
         };
       }
     })
@@ -381,7 +385,7 @@ export const getThumbBytes = async (
   keyHeader: KeyHeader | undefined,
   width: number,
   height: number
-): Promise<{ bytes: ArrayBuffer; contentType: string }> => {
+): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Width', width);
@@ -404,7 +408,7 @@ export const getThumbBytes = async (
         return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
           return {
             bytes,
-            contentType: `${response.headers.decryptedcontenttype}`,
+            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
           };
         });
       } else if (
@@ -419,11 +423,14 @@ export const getThumbBytes = async (
         const cipher = new Uint8Array(response.data);
 
         const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return { bytes, contentType: `${response.headers.decryptedcontenttype}` };
+        return {
+          bytes,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        };
       } else {
         return {
           bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}`,
+          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
         };
       }
     })
@@ -582,7 +589,7 @@ export const uploadUsingKeyHeader = async (
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
   payload: Uint8Array,
-  thumbnails?: { filename: string; payload: Uint8Array; contentType: ThumbnailFileTypes }[]
+  thumbnails?: ThumbnailFile[]
 ): Promise<UploadResult> => {
   const strippedInstructions: UploadInstructionSet = {
     storageOptions: instructions.storageOptions,
@@ -636,6 +643,8 @@ export const uploadUsingKeyHeader = async (
   if (thumbnails) {
     for (let i = 0; i < thumbnails.length; i++) {
       const thumb = thumbnails[i];
+      const filename = `${thumb.pixelWidth}x${thumb.pixelHeight}`;
+
       const thumbnailBytes = keyHeader
         ? await encryptWithKeyheader(thumb.payload, keyHeader)
         : thumb.payload;
@@ -644,7 +653,7 @@ export const uploadUsingKeyHeader = async (
         new Blob([thumbnailBytes], {
           type: thumb.contentType,
         }),
-        thumb.filename
+        filename
       );
     }
   }
@@ -675,7 +684,7 @@ export const uploadFile = async (
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
   payload: Uint8Array,
-  thumbnails?: { filename: string; payload: Uint8Array; contentType: ThumbnailFileTypes }[],
+  thumbnails?: ThumbnailFile[],
   encrypt = true
 ): Promise<UploadResult> => {
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
@@ -694,7 +703,7 @@ const encryptWithKeyheader = async (
 
 const encryptWithSharedSecret = async (
   dotYouClient: DotYouClient,
-  o: any,
+  o: unknown,
   iv: Uint8Array
 ): Promise<Uint8Array> => {
   //encrypt metadata with shared secret
@@ -710,7 +719,7 @@ const encryptWithSharedSecret = async (
   return cipher;
 };
 
-const toBlob = (o: any): Blob => {
+const toBlob = (o: unknown): Blob => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
   return new Blob([content]);

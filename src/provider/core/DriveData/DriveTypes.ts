@@ -51,14 +51,23 @@ export interface ServerMetaData {
   accessControlList: AccessControlList;
 }
 
-export interface ThumbSize {
-  contentType: string;
+export interface ImageSize {
   pixelHeight: number;
   pixelWidth: number;
 }
 
+export interface ThumbSize extends ImageSize {
+  contentType: ImageContentType;
+}
+
+// Thumb that gets embedded; E.g: previewThumbnail
 export interface EmbeddedThumb extends ThumbSize {
   content: string;
+}
+
+// Thumb that gets appended; E.g: additionalThumbnails
+export interface ThumbnailFile extends ThumbSize {
+  payload: Uint8Array;
 }
 
 export interface AppFileMetaData {
@@ -188,7 +197,7 @@ export interface TimeRange {
   end: number;
 }
 
-export type ThumbnailFileTypes =
+export type ImageContentType =
   | 'image/webp'
   | 'image/png'
   | 'image/bmp'

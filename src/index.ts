@@ -21,7 +21,8 @@ export * from './provider/core/TransitData/TransitProvider';
 export * from './provider/core/TransitData/InboxProvider';
 
 // MediaData
-export * from './provider/core/MediaData/Resizer/resize';
+export * from './provider/core/MediaData/MediaTypes';
+export * from './provider/core/MediaData/Thumbs/ImageResizer';
 export * from './provider/core/MediaData/MediaProvider';
 
 // NotificationData
