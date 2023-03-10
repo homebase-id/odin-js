@@ -36,6 +36,7 @@ export interface KeyHeader {
 
 export interface FileMetadata {
   created: number;
+  globalTransitId?: string;
   updated: number;
   contentType: string;
   payloadIsEncrypted: boolean;
@@ -85,6 +86,11 @@ export interface AppFileMetaData {
 
 export interface ExternalFileIdentifier {
   fileId: string;
+  targetDrive: TargetDrive;
+}
+
+export interface GlobalTransitIdFileIdentifier {
+  globalTransitId: string;
   targetDrive: TargetDrive;
 }
 

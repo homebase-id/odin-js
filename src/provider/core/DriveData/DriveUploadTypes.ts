@@ -4,6 +4,7 @@ import {
   TargetDrive,
   ThumbSize,
   EmbeddedThumb,
+  GlobalTransitIdFileIdentifier,
 } from './DriveTypes';
 
 export type SystemFileType = 'Standard' | 'Comment';
@@ -54,7 +55,7 @@ export interface UploadFileMetadata {
   payloadIsEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
-  referencedFile?: ExternalFileIdentifier;
+  referencedFile?: GlobalTransitIdFileIdentifier;
 }
 
 export interface AccessControlList {
@@ -88,6 +89,7 @@ export interface UploadResult {
   encryptedPayload: Uint8Array;
   encryptedKeyHeader: Uint8Array;
   file: ExternalFileIdentifier;
+  globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferStatus };
 }
 

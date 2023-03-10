@@ -326,6 +326,7 @@ const dsrToPostFile = async <T extends PostContent>(
 
     const file: PostFile<T> = {
       fileId: dsr.fileId,
+      globalTransitId: dsr.fileMetadata.globalTransitId,
       acl: dsr.serverMetadata?.accessControlList,
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,

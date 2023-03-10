@@ -112,6 +112,7 @@ export const getSocialFeed = async (
 
       return {
         fileId: dsr.fileId,
+        globalTransitId: dsr.fileMetadata.globalTransitId,
         acl: dsr.serverMetadata?.accessControlList,
         content: await getSocialFeedPostPayload(
           odinId,
@@ -230,6 +231,7 @@ export const getRecentsOverTransit = async (
       result.searchResults.map(async (dsr) => {
         return {
           fileId: dsr.fileId,
+          globalTransitId: dsr.fileMetadata.globalTransitId,
           acl: dsr.serverMetadata?.accessControlList,
           content: await getPayloadOverTransit<PostContent>(
             dotYouClient,
@@ -317,6 +319,7 @@ export const getPostOverTransit = async (
     const dsr = response.searchResults[0];
     return {
       fileId: dsr.fileId,
+      globalTransitId: dsr.fileMetadata.globalTransitId,
       acl: dsr.serverMetadata?.accessControlList,
       content: await getPayloadOverTransit<PostContent>(
         dotYouClient,

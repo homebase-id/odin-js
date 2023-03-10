@@ -4,6 +4,7 @@ import {
   decryptKeyHeader,
   decryptJsonContent,
   decryptUsingKeyHeader,
+  DEFAULT_QUERY_BATCH_RESULT_OPTION,
 } from '../DriveData/DriveProvider';
 import {
   DriveDefinition,
@@ -43,23 +44,26 @@ export const queryBatchOverTransit = async (
 ): Promise<QueryBatchResponse> => {
   const client = dotYouClient.createAxiosClient();
 
-  if (!ro) {
-    ro = {
-      cursorState: undefined,
-      maxRecords: 10,
-      includeMetadataHeader: true,
-    };
-  }
+  const strippedQueryParams = { ...params };
+  delete strippedQueryParams.systemFileType;
 
   const request: TransitQueryBatchRequest = {
-    queryParams: params,
-    resultOptionsRequest: ro,
+    queryParams: strippedQueryParams,
+    resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
     odinId: odinId,
   };
 
-  return client.post<QueryBatchResponse>('/transit/query/batch', request).then((response) => {
-    return response.data;
-  });
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
+    },
+  };
+
+  return client
+    .post<QueryBatchResponse>('/transit/query/batch', request, config)
+    .then((response) => {
+      return response.data;
+    });
 };
 
 export const getPayloadOverTransit = async <T>(

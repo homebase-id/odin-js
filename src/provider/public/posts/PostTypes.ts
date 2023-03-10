@@ -64,6 +64,7 @@ export const postTypeToDataType = (type: PostType): number => {
 
 export interface PostFile<T extends PostContent> {
   fileId?: string;
+  globalTransitId?: string;
   acl?: AccessControlList;
   content: T;
   previewThumbnail?: EmbeddedThumb;
