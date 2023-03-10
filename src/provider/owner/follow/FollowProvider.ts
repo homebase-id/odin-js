@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
 import { CursoredResult } from '../../core/Types';
 
@@ -18,7 +18,9 @@ export const fetchFollowing = async (
   cursorState?: string
 ): Promise<CursoredResult<string[]> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + `/IdentitiesIFollow${cursorState ? '?cursor=' + cursorState : ''}`;
+  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
+
+  const url = currentRoot + `/IdentitiesIFollow${cursorState ? '?cursor=' + cursorState : ''}`;
 
   return client
     .get(url)
