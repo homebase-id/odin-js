@@ -6,6 +6,7 @@ import {
   ImageContentType,
   ImageSize,
 } from '../../core/DriveData/DriveTypes';
+import { SystemFileType } from '../../core/DriveData/DriveUploadTypes';
 import { ThumbnailMeta } from '../../core/MediaData/MediaTypes';
 import {
   getFileHeaderOverTransit,
@@ -56,7 +57,8 @@ export const getDecryptedImageUrlOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ImageSize
+  size?: ImageSize,
+  systemFileType?: SystemFileType
 ): Promise<string> => {
   const meta = await getDecryptedMetadataOverTransit(dotYouClient, odinId, targetDrive, fileId);
   if (!meta.fileMetadata.payloadIsEncrypted && size) {
@@ -66,6 +68,7 @@ export const getDecryptedImageUrlOverTransit = async (
       fileId,
       width: size.pixelWidth,
       height: size.pixelHeight,
+      xfst: systemFileType || 'Standard',
     })}`;
   }
 

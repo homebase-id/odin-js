@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from 'axios';
 import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import {
@@ -18,6 +19,7 @@ import {
   QueryBatchResponse,
   TargetDrive,
 } from '../DriveData/DriveTypes';
+import { SystemFileType } from '../DriveData/DriveUploadTypes';
 import { PagedResult } from '../Types';
 
 interface GetFileRequest {
@@ -97,30 +99,36 @@ export const getPayloadAsJsonOverTransit = async <T>(
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader: KeyHeader | undefined
+  keyHeader: KeyHeader | undefined,
+  systemFileType?: SystemFileType
 ): Promise<T> => {
-  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, keyHeader).then(
-    (data) => {
-      const json = byteArrayToString(new Uint8Array(data.bytes));
-      try {
-        const o = JSON.parse(json);
-        return o;
-      } catch (ex) {
-        console.warn('base JSON.parse failed');
-        const replaceAll = (str: string, find: string, replace: string) => {
-          return str.replace(new RegExp(find, 'g'), replace);
-        };
+  return getPayloadBytesOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    keyHeader,
+    systemFileType
+  ).then((data) => {
+    const json = byteArrayToString(new Uint8Array(data.bytes));
+    try {
+      const o = JSON.parse(json);
+      return o;
+    } catch (ex) {
+      console.warn('base JSON.parse failed');
+      const replaceAll = (str: string, find: string, replace: string) => {
+        return str.replace(new RegExp(find, 'g'), replace);
+      };
 
-        const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
-        const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
+      const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
+      const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
 
-        const o = JSON.parse(jsonWithRemovedEmDash);
+      const o = JSON.parse(jsonWithRemovedEmDash);
 
-        console.warn('... but we fixed it');
-        return o;
-      }
+      console.warn('... but we fixed it');
+      return o;
     }
-  );
+  });
 };
 
 export const getPayloadBytesOverTransit = async (
@@ -128,7 +136,8 @@ export const getPayloadBytesOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader?: KeyHeader | undefined
+  keyHeader?: KeyHeader | undefined,
+  systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   const client = dotYouClient.createAxiosClient();
   const request: GetFileRequest = {
@@ -139,10 +148,15 @@ export const getPayloadBytesOverTransit = async (
     },
   };
 
+  const config: AxiosRequestConfig = {
+    responseType: 'arraybuffer',
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   return client
-    .post('/transit/query/payload', request, {
-      responseType: 'arraybuffer',
-    })
+    .post('/transit/query/payload', request, config)
     .then(async (response) => {
       if (keyHeader) {
         const cipher = new Uint8Array(response.data);
@@ -188,7 +202,8 @@ export const getThumbBytesOverTransit = async (
   fileId: string,
   keyHeader: KeyHeader | undefined,
   width: number,
-  height: number
+  height: number,
+  systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   const client = dotYouClient.createAxiosClient();
   const request: GetFileRequest = {
@@ -199,14 +214,15 @@ export const getThumbBytesOverTransit = async (
     },
   };
 
+  const config: AxiosRequestConfig = {
+    responseType: 'arraybuffer',
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   return client
-    .post(
-      '/transit/query/thumb',
-      { ...request, width: width, height: height },
-      {
-        responseType: 'arraybuffer',
-      }
-    )
+    .post('/transit/query/thumb', { ...request, width: width, height: height }, config)
     .then(async (response) => {
       if (keyHeader) {
         const cipher = new Uint8Array(response.data);
@@ -248,7 +264,8 @@ export const getFileHeaderOverTransit = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  systemFileType?: SystemFileType
 ): Promise<DriveSearchResult> => {
   const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}`;
   if (_internalMetadataCache.has(cacheKey)) {
@@ -268,8 +285,14 @@ export const getFileHeaderOverTransit = async (
     },
   };
 
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   const promise = client
-    .post('/transit/query/header', request)
+    .post('/transit/query/header', request, config)
     .then((response) => {
       return response.data as DriveSearchResult;
     })

@@ -220,7 +220,8 @@ export const queryBatchCollection = async (
     name: string;
     queryParams: FileQueryParams;
     resultOptions?: GetBatchQueryResultOptions;
-  }[]
+  }[],
+  systemFileType?: SystemFileType
 ): Promise<QueryBatchCollectionResponse> => {
   const client = dotYouClient.createAxiosClient();
 
@@ -232,10 +233,20 @@ export const queryBatchCollection = async (
     };
   });
 
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   return client
-    .post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
-      queries: updatedQueries,
-    })
+    .post<QueryBatchCollectionResponse>(
+      '/drive/query/batchcollection',
+      {
+        queries: updatedQueries,
+      },
+      config
+    )
     .then((response) => {
       return {
         ...response.data,
@@ -255,7 +266,8 @@ export const queryBatchCollection = async (
 export const getFileHeader = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  systemFileType?: SystemFileType
 ): Promise<DriveSearchResult> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -273,8 +285,14 @@ export const getFileHeader = async (
     fileId,
   };
 
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   const promise = client
-    .get('/drive/files/header?' + stringify(request))
+    .get('/drive/files/header?' + stringify(request), config)
     .then((response) => {
       return response.data;
     })
@@ -296,35 +314,39 @@ export const getPayloadAsJson = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader: KeyHeader | undefined
+  keyHeader: KeyHeader | undefined,
+  systemFileType?: SystemFileType
 ): Promise<T> => {
-  return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader).then((data) => {
-    const json = byteArrayToString(new Uint8Array(data.bytes));
-    try {
-      const o = JSON.parse(json);
-      return o;
-    } catch (ex) {
-      console.warn('base JSON.parse failed');
-      const replaceAll = (str: string, find: string, replace: string) => {
-        return str.replace(new RegExp(find, 'g'), replace);
-      };
+  return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader, systemFileType).then(
+    (data) => {
+      const json = byteArrayToString(new Uint8Array(data.bytes));
+      try {
+        const o = JSON.parse(json);
+        return o;
+      } catch (ex) {
+        console.warn('base JSON.parse failed');
+        const replaceAll = (str: string, find: string, replace: string) => {
+          return str.replace(new RegExp(find, 'g'), replace);
+        };
 
-      const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
-      const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
+        const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
+        const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
 
-      const o = JSON.parse(jsonWithRemovedEmDash);
+        const o = JSON.parse(jsonWithRemovedEmDash);
 
-      console.warn('... but we fixed it');
-      return o;
+        console.warn('... but we fixed it');
+        return o;
+      }
     }
-  });
+  );
 };
 
 export const getPayloadBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader: KeyHeader | undefined
+  keyHeader: KeyHeader | undefined,
+  systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -336,6 +358,9 @@ export const getPayloadBytes = async (
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
   };
 
   return client
@@ -384,7 +409,8 @@ export const getThumbBytes = async (
   fileId: string,
   keyHeader: KeyHeader | undefined,
   width: number,
-  height: number
+  height: number,
+  systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -398,6 +424,9 @@ export const getThumbBytes = async (
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
   };
 
   return client
@@ -559,8 +588,14 @@ export const purgeAllFiles = async (
       deleteLinkedFiles: true,
     };
 
+    const config = {
+      headers: {
+        'X-ODIN-FILE-SYSTEM-TYPE': 'Standard',
+      },
+    };
+
     return client
-      .post('/drive/files/harddelete', request)
+      .post('/drive/files/harddelete', request, config)
       .then((response) => {
         if (response.status === 200) {
           return true;
@@ -732,7 +767,8 @@ export const getPayload = async <T>(
   fileId: string,
   fileMetadata: FileMetadata,
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader,
-  includesJsonContent: boolean
+  includesJsonContent: boolean,
+  systemFileType?: SystemFileType
 ): Promise<T> => {
   const keyheader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
@@ -742,10 +778,10 @@ export const getPayload = async <T>(
     return await decryptJsonContent<T>(fileMetadata, keyheader);
   } else if (fileMetadata.appData.contentIsComplete) {
     // When contentIsComplete but !includesJsonContent the query before was done without including the jsonContent; So we just get and parse
-    const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId);
+    const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     return await decryptJsonContent<T>(fileHeader.fileMetadata, keyheader);
   } else {
-    return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, keyheader);
+    return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, keyheader, systemFileType);
   }
 };
 

@@ -8,6 +8,7 @@ import {
 import {
   AccessControlList,
   SecurityGroupType,
+  SystemFileType,
   TransitOptions,
   UploadFileMetadata,
   UploadInstructionSet,
@@ -160,7 +161,8 @@ export const getDecryptedImageUrl = async (
   targetDrive: TargetDrive,
   fileId: string,
   size?: ImageSize,
-  isProbablyEncrypted?: boolean
+  isProbablyEncrypted?: boolean,
+  systemFileType?: SystemFileType
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
@@ -174,6 +176,7 @@ export const getDecryptedImageUrl = async (
             height: size.pixelHeight,
           }
         : {}),
+      xfst: systemFileType || 'Standard',
     })}`;
 
     if (ss) {
