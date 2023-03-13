@@ -10,7 +10,6 @@ export interface ChannelDefinition {
   description: string;
   templateId?: number;
   acl?: AccessControlList;
-  reactAccess?: SecurityGroupType;
 }
 
 export enum ChannelTemplate {
@@ -81,7 +80,7 @@ export type RichText = Record<string, unknown>[];
 export interface PostContent {
   id: string;
   channelId: string;
-  reactAccess?: SecurityGroupType;
+  reactAccess?: SecurityGroupType.Owner | SecurityGroupType.Connected;
   caption: string;
   captionAsRichText?: RichText;
   slug: string;

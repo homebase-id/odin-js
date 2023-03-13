@@ -6,6 +6,10 @@ export * from './provider/core/DataUtil';
 export * from './provider/core/DotYouClient';
 export * from './provider/core/Types';
 
+// SecurityData
+export * from './provider/core/SecurityData/SecurityTypes';
+export * from './provider/core/SecurityData/SecurityProvider';
+
 // AttributeData
 export * from './provider/core/AttributeData/AttributeConfig';
 export * from './provider/core/AttributeData/AttributeDataProvider';

@@ -9,7 +9,8 @@ export enum DrivePermissions {
   None = 0,
   Read = 1,
   Write = 2,
-  ReadWrite = Read | Write,
+  React = 4,
+  ReadWrite = Read | Write | React,
   All = ReadWrite,
 }
 

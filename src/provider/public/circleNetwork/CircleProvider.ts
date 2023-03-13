@@ -42,7 +42,8 @@ export const createCircleDefinition = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
-const parsePermissions = (permission: unknown) => {
+/// Convert text based permission levels to the numbered type
+export const parsePermissions = (permission: unknown) => {
   if (typeof permission !== 'string') {
     return permission;
   }
