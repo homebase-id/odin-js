@@ -44,6 +44,7 @@ export interface FileMetadata {
   payloadSize: number;
   originalRecipientList: string[];
   appData: AppFileMetaData;
+  reactionPreview?: ReactionPreview;
 }
 
 export interface ServerMetaData {
@@ -125,7 +126,6 @@ export interface DriveSearchResult {
   fileMetadata: FileMetadata;
   serverMetadata: ServerMetaData;
   priority: number;
-  reactionPreview?: ReactionPreview;
 }
 
 export interface QueryParams {

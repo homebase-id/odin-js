@@ -73,12 +73,17 @@ export const getDecryptedImageUrlOverTransit = async (
   }
 
   // Fallback with download over transit
-  return getDecryptedImageDataOverTransit(dotYouClient, odinId, targetDrive, fileId, size).then(
-    (data) => {
-      const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
-      return url;
-    }
-  );
+  return getDecryptedImageDataOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    size,
+    systemFileType
+  ).then((data) => {
+    const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
+    return url;
+  });
 };
 
 export const getDecryptedImageDataOverTransit = async (
@@ -86,7 +91,8 @@ export const getDecryptedImageDataOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ImageSize
+  size?: ImageSize,
+  systemFileType?: SystemFileType
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
@@ -101,9 +107,17 @@ export const getDecryptedImageDataOverTransit = async (
         fileId,
         undefined,
         size.pixelWidth,
-        size.pixelHeight
+        size.pixelHeight,
+        systemFileType
       )
-    : getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId));
+    : getPayloadBytesOverTransit(
+        dotYouClient,
+        odinId,
+        targetDrive,
+        fileId,
+        undefined,
+        systemFileType
+      ));
 
   return {
     contentType: data.contentType,

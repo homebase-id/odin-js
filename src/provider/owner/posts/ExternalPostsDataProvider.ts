@@ -124,7 +124,7 @@ export const getSocialFeed = async (
         ),
         odinId: odinId,
         previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-        reactionPreview: parseReactionPreview(dsr.reactionPreview),
+        reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
         additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
       } as PostFileVm<PostContent>;
     })

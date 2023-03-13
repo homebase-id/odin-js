@@ -330,7 +330,7 @@ const dsrToPostFile = async <T extends PostContent>(
       acl: dsr.serverMetadata?.accessControlList,
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-      reactionPreview: parseReactionPreview(dsr.reactionPreview),
+      reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
       payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
       isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
     };

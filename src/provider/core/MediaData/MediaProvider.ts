@@ -122,9 +122,10 @@ export const removeImage = async (
 export const getDecryptedMetadata = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  systemFileType?: SystemFileType
 ): Promise<DriveSearchResult> => {
-  return await getFileHeader(dotYouClient, targetDrive, fileId);
+  return await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
 };
 
 export const getDecryptedThumbnailMeta = (
@@ -195,24 +196,27 @@ export const getDecryptedImageUrl = async (
 
   // If the contents is probably encrypted, we don't bother fetching the header
   if (!isProbablyEncrypted) {
-    const meta = await getDecryptedMetadata(dotYouClient, targetDrive, fileId);
+    const meta = await getDecryptedMetadata(dotYouClient, targetDrive, fileId, systemFileType);
     if (!meta.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();
     }
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getDecryptedImageData(dotYouClient, targetDrive, fileId, size).then((data) => {
-    const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
-    return url;
-  });
+  return getDecryptedImageData(dotYouClient, targetDrive, fileId, size, systemFileType).then(
+    (data) => {
+      const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
+      return url;
+    }
+  );
 };
 
 export const getDecryptedImageData = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  size?: ImageSize
+  size?: ImageSize,
+  systemFileType?: SystemFileType
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
@@ -220,8 +224,16 @@ export const getDecryptedImageData = async (
   content: ArrayBuffer;
 }> => {
   const data = await (size
-    ? getThumbBytes(dotYouClient, targetDrive, fileId, undefined, size.pixelWidth, size.pixelHeight)
-    : getPayloadBytes(dotYouClient, targetDrive, fileId, undefined));
+    ? getThumbBytes(
+        dotYouClient,
+        targetDrive,
+        fileId,
+        undefined,
+        size.pixelWidth,
+        size.pixelHeight,
+        systemFileType
+      )
+    : getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType));
 
   return {
     contentType: data.contentType,

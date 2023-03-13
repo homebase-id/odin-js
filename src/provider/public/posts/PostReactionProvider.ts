@@ -131,6 +131,13 @@ export const saveComment = async (
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: undefined,
       userDate: comment.date ?? new Date().getTime(),
+      additionalThumbnails: additionalThumbnails?.map((thumb) => {
+        return {
+          pixelHeight: thumb.pixelHeight,
+          pixelWidth: thumb.pixelWidth,
+          contentType: thumb.contentType,
+        };
+      }),
     },
     payloadIsEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
