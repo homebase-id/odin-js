@@ -174,7 +174,7 @@ export const saveComment = async (
     return result.file.fileId;
   } else {
     metadata.referencedFile = {
-      targetDrive: BlogConfig.FeedDrive,
+      targetDrive: targetDrive,
       globalTransitId: comment.commentThreadId || comment.postDetails.postGlobalTransitId,
     };
     metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Owner };

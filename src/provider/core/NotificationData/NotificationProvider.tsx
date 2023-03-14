@@ -84,8 +84,6 @@ export const Subscribe = async (
     throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
   }
 
-  // TODO manage handlers per url;
-  // TODO ignore existing connection when filters change;
   return new Promise<void>((resolve) => {
     handlers.push(handler);
     if (isDebug) console.debug(`[NotificationProvider] New subscriber (${handlers.length})`);
