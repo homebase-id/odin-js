@@ -23,12 +23,7 @@ import {
   SendContents,
 } from '../../core/DriveData/DriveUploadTypes';
 import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
-import {
-  getChannelDefinition,
-  getChannelDefinitionBySlug,
-  getChannelDefinitions,
-  GetTargetDriveFromChannelId,
-} from './PostDefinitionProvider';
+import { getChannelDefinitions, GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { parseReactionPreview } from './PostReactionProvider';
 import {
   BlogConfig,
@@ -176,17 +171,10 @@ export const getPost = async <T extends PostContent>(
 
 export const getPostBySlug = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  channelSlug: string,
+  channelId: string,
   postSlug: string
-): Promise<{ postFile: PostFile<T>; channel: ChannelDefinition } | undefined> => {
-  const channel =
-    (await getChannelDefinitionBySlug(dotYouClient, channelSlug)) ??
-    (await getChannelDefinition(dotYouClient, channelSlug));
-  if (!channel) {
-    return;
-  }
-
-  const targetDrive = GetTargetDriveFromChannelId(channel.channelId);
+): Promise<PostFile<T> | undefined> => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     clientUniqueIdAtLeastOne: [toGuidId(postSlug)],
     targetDrive: targetDrive,
@@ -201,22 +189,8 @@ export const getPostBySlug = async <T extends PostContent>(
     }
 
     const dsr = response.searchResults[0];
-    const postFile = await dsrToPostFile<T>(
-      dotYouClient,
-      dsr,
-      targetDrive,
-      response.includeMetadataHeader
-    );
-    if (!postFile) {
-      return undefined;
-    }
-
-    return {
-      postFile: postFile,
-      channel: channel,
-    };
+    return await dsrToPostFile<T>(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
   }
-
   return;
 };
 
@@ -251,9 +225,11 @@ export const savePost = async <T extends PostContent>(
     },
   };
 
-  const existingPostWithThisSlug = (
-    await getPostBySlug(dotYouClient, channelId, file.content.slug ?? file.content.id)
-  )?.postFile;
+  const existingPostWithThisSlug = await getPostBySlug(
+    dotYouClient,
+    channelId,
+    file.content.slug ?? file.content.id
+  );
 
   if (existingPostWithThisSlug && existingPostWithThisSlug?.content.id !== file.content.id) {
     // There is clash with the current slug
