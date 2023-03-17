@@ -7,6 +7,7 @@ export class PhotoConfig {
     alias: toGuidId('standard_photos_drive'),
     type: PhotoConfig.DriveType,
   };
+  static readonly FavoriteTag: string = toGuidId('favorite');
 }
 
 export interface PhotoFile {

@@ -32,10 +32,10 @@ import { createThumbnails } from './Thumbs/ThumbnailProvider';
 export const uploadImage = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  tag: string | undefined | string[],
   acl: AccessControlList,
   imageBytes: Uint8Array,
   uploadMeta?: {
+    tag?: string | undefined | string[];
     uniqueId?: string;
     fileId?: string;
     type?: ImageContentType;
@@ -86,7 +86,9 @@ export const uploadImage = async (
     allowDistribution: uploadMeta?.allowDistribution || false,
     contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
-      tags: tag ? [...(Array.isArray(tag) ? tag : [tag])] : [],
+      tags: uploadMeta?.tag
+        ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
+        : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: 0,

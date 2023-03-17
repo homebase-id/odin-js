@@ -79,6 +79,5 @@ const dsrToPhoto = async (
       size,
       isProbablyEncrypted
     ),
-    // date: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
   };
 };
