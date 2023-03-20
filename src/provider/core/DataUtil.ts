@@ -1,12 +1,10 @@
 import { Guid } from 'guid-typescript';
 import { EncryptedKeyHeader } from './DriveData/DriveTypes';
 import { AccessControlList } from './DriveData/DriveUploadTypes';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const md5 = require('js-md5');
+
+import md5 from 'js-md5';
 
 export const stringToMD5basedGuid = (data: string): Guid => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  //const md5 = require('js-md5');
   const t = md5(data).toString();
   return Guid.parse(
     t.substring(0, 8) +
