@@ -1,6 +1,6 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
-import { CursoredResult } from '../../core/Types';
+import { CursoredResult } from '../../core/helpers/Types';
 
 export interface FollowRequest {
   odinId: string;

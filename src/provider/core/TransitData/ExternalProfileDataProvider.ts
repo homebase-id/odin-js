@@ -1,13 +1,10 @@
-import { AttributeConfig } from '../../core/AttributeData/AttributeConfig';
-import { AttributeFile } from '../../core/AttributeData/AttributeDataTypes';
-import { DotYouClient } from '../../core/DotYouClient';
-import { FileQueryParams } from '../../core/DriveData/DriveTypes';
-import {
-  queryBatchOverTransit,
-  getPayloadOverTransit,
-} from '../../core/TransitData/TransitProvider';
-import { BuiltInProfiles } from '../../profile/ProfileConfig';
-import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProvider';
+import { AttributeConfig } from '../AttributeData/AttributeConfig';
+import { AttributeFile } from '../AttributeData/AttributeDataTypes';
+import { DotYouClient } from '../DotYouClient';
+import { FileQueryParams } from '../DriveData/DriveTypes';
+import { queryBatchOverTransit, getPayloadOverTransit } from './TransitProvider';
+import { BuiltInProfiles } from '../ProfileData/ProfileConfig';
+import { GetTargetDriveFromProfileId } from '../ProfileData/ProfileDefinitionProvider';
 
 export const getProfileAttributesOverTransit = async (
   dotYouClient: DotYouClient,

@@ -25,7 +25,7 @@ import {
   getRandom16ByteArray,
   uploadFile,
 } from '../DriveData/DriveProvider';
-import { getNewId, base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../DataUtil';
+import { getNewId, base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../helpers/DataUtil';
 import { ImageUploadResult, ThumbnailMeta } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 

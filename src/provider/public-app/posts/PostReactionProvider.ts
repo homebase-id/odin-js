@@ -1,4 +1,3 @@
-import { jsonStringify64, stringToUint8Array, getNewId } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   deleteFile,
@@ -24,6 +23,7 @@ import {
   SendContents,
   TransitOptions,
 } from '../../core/DriveData/DriveUploadTypes';
+import { getNewId, jsonStringify64, stringToUint8Array } from '../../core/helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
 import {
   getPayloadOverTransit,
@@ -192,7 +192,7 @@ export const saveComment = async (
     const instructionSet: UploadInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
-        overwriteFileId: undefined, //comment.fileId || undefined,
+        overwriteFileId: comment.fileId || undefined,
         drive: BlogConfig.FeedDrive,
       },
       transitOptions: transitOptions,

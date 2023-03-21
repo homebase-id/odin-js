@@ -1,6 +1,6 @@
 import { AttributeConfig, BuiltInAttributes } from '../../core/AttributeData/AttributeConfig';
 import { TargetDrive, FileQueryParams } from '../../core/DriveData/DriveTypes';
-import { ProfileConfig, BuiltInProfiles } from '../../profile/ProfileConfig';
+import { ProfileConfig, BuiltInProfiles } from '../../core/ProfileData/ProfileConfig';
 import { HomePageConfig, HomePageAttributes } from '../home/HomeTypes';
 
 const homepageDrive: TargetDrive = {

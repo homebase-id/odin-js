@@ -1,18 +1,18 @@
-import { base64ToUint8Array, stringify } from '../../core/DataUtil';
-import { DotYouClient } from '../../core/DotYouClient';
+import { base64ToUint8Array, stringify } from '../helpers/DataUtil';
+import { DotYouClient } from '../DotYouClient';
 import {
   TargetDrive,
   DriveSearchResult,
   ImageContentType,
   ImageSize,
-} from '../../core/DriveData/DriveTypes';
-import { SystemFileType } from '../../core/DriveData/DriveUploadTypes';
-import { ThumbnailMeta } from '../../core/MediaData/MediaTypes';
+} from '../DriveData/DriveTypes';
+import { SystemFileType } from '../DriveData/DriveUploadTypes';
+import { ThumbnailMeta } from '../MediaData/MediaTypes';
 import {
   getFileHeaderOverTransit,
   getThumbBytesOverTransit,
   getPayloadBytesOverTransit,
-} from '../../core/TransitData/TransitProvider';
+} from './TransitProvider';
 
 export const getDecryptedMetadataOverTransit = async (
   dotYouClient: DotYouClient,

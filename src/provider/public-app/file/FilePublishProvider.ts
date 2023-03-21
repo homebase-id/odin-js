@@ -7,8 +7,8 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { getFileHeader } from '../../core/DriveData/DriveProvider';
 import { FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
-import { BuiltInProfiles } from '../../profile/ProfileConfig';
-import { GetTargetDriveFromProfileId } from '../../profile/ProfileDefinitionProvider';
+import { BuiltInProfiles } from '../../core/ProfileData/ProfileConfig';
+import { GetTargetDriveFromProfileId } from '../../core/ProfileData/ProfileDefinitionProvider';
 import {
   getChannelDefinitions,
   getChannelDrive,

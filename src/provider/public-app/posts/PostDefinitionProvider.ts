@@ -23,7 +23,7 @@ import {
   uploadFile,
 } from '../../core/DriveData/DriveProvider';
 import { DotYouClient } from '../../core/DotYouClient';
-import { toGuidId, jsonStringify64, stringToUint8Array } from '../../core/DataUtil';
+import { jsonStringify64, stringToUint8Array, toGuidId } from '../../core/helpers/DataUtil';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
@@ -107,6 +107,11 @@ export const saveChannelDefinition = async (
 
   if (!definition.channelId) {
     definition.channelId = toGuidId(definition.name);
+  }
+
+  if (definition.channelId === BlogConfig.PublicChannel.channelId) {
+    // Always keep the slug for the public channel
+    definition.slug = BlogConfig.PublicChannel.slug;
   }
 
   const encrypt = !(

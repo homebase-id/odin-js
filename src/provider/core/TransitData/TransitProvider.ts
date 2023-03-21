@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../DataUtil';
+import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import {
   decryptKeyHeader,
@@ -20,7 +20,7 @@ import {
   TargetDrive,
 } from '../DriveData/DriveTypes';
 import { SystemFileType } from '../DriveData/DriveUploadTypes';
-import { PagedResult } from '../Types';
+import { PagedResult } from '../helpers/Types';
 
 interface GetFileRequest {
   odinId: string;

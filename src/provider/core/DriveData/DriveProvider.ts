@@ -15,7 +15,7 @@ import {
   ImageContentType,
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
-import { PagedResult, PagingOptions } from '../Types';
+import { PagedResult, PagingOptions } from '../helpers/Types';
 import {
   SystemFileType,
   UploadFileDescriptor,
@@ -24,7 +24,7 @@ import {
   UploadResult,
 } from './DriveUploadTypes';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import { cbcEncrypt, cbcDecrypt } from '../AesEncrypt';
+import { cbcEncrypt, cbcDecrypt } from '../helpers/AesEncrypt';
 import {
   stringify,
   byteArrayToString,
@@ -33,7 +33,7 @@ import {
   uint8ArrayToBase64,
   stringToUint8Array,
   jsonStringify64,
-} from '../DataUtil';
+} from '../helpers/DataUtil';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;

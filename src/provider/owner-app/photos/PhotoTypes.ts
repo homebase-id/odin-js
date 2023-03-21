@@ -1,5 +1,5 @@
-import { toGuidId } from '../../core/DataUtil';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
+import { toGuidId } from '../../core/helpers/DataUtil';
 
 export class PhotoConfig {
   static readonly DriveType: string = toGuidId('photos_drive');

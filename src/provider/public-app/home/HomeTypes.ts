@@ -1,6 +1,6 @@
-import { toGuidId } from '../../core/DataUtil';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
-import { ProfileConfig } from '../../profile/ProfileConfig';
+import { toGuidId } from '../../core/helpers/DataUtil';
+import { ProfileConfig } from '../../core/ProfileData/ProfileConfig';
 
 export class HomePageConfig {
   static readonly DefaultDriveId = toGuidId('homepage_drive');

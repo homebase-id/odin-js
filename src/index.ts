@@ -1,10 +1,10 @@
 // Core helpers
-export * from './provider/core/AesEncrypt';
-export * from './provider/core/DataUtil';
+export * from './provider/core/helpers/AesEncrypt';
+export * from './provider/core/helpers/DataUtil';
+export * from './provider/core/helpers/Types';
 
 // DotYouClient
 export * from './provider/core/DotYouClient';
-export * from './provider/core/Types';
 
 // SecurityData
 export * from './provider/core/SecurityData/SecurityTypes';
@@ -34,45 +34,45 @@ export * from './provider/core/NotificationData/NotificationProvider';
 export * from './provider/core/NotificationData/NotificationTypes';
 
 // Profile
-export * from './provider/profile/ProfileConfig';
-export * from './provider/profile/ProfileTypes';
-export * from './provider/profile/ProfileDefinitionProvider';
+export * from './provider/core/ProfileData/ProfileConfig';
+export * from './provider/core/ProfileData/ProfileTypes';
+export * from './provider/core/ProfileData/ProfileDefinitionProvider';
 
 /// Public
 // Home
-export * from './provider/public/home/HomeTypes';
+export * from './provider/public-app/home/HomeTypes';
 
 // Posts
-export * from './provider/public/posts/PostTypes';
-export * from './provider/public/posts/PostProvider';
-export * from './provider/public/posts/PostDefinitionProvider';
-export * from './provider/public/posts/PostReactionProvider';
-
-// Network
-export * from './provider/public/circleNetwork/CircleNetworkProvider';
-export * from './provider/public/circleNetwork/CircleNetworkRequestProvider';
-export * from './provider/public/circleNetwork/CircleProvider';
-export * from './provider/public/circleNetwork/CircleMembershipProvider';
-export * from './provider/public/circleNetwork/CircleDataTypes';
+export * from './provider/public-app/posts/PostTypes';
+export * from './provider/public-app/posts/PostProvider';
+export * from './provider/public-app/posts/PostDefinitionProvider';
+export * from './provider/public-app/posts/PostReactionProvider';
 
 // File
-export * from './provider/public/file/FileProvider';
-export * from './provider/public/file/FilePublishProvider';
-export * from './provider/public/file/ProfileCardProvider';
+export * from './provider/public-app/file/FileProvider';
+export * from './provider/public-app/file/FilePublishProvider';
+export * from './provider/public-app/file/ProfileCardProvider';
 
 /// Owner
+// Network
+export * from './provider/owner-app/circleNetwork/CircleNetworkProvider';
+export * from './provider/owner-app/circleNetwork/CircleNetworkRequestProvider';
+export * from './provider/owner-app/circleNetwork/CircleProvider';
+export * from './provider/owner-app/circleNetwork/CircleMembershipProvider';
+export * from './provider/owner-app/circleNetwork/CircleDataTypes';
+
 // Media
-export * from './provider/owner/media/ExternalMediaProvider';
+export * from './provider/core/TransitData/ExternalMediaProvider';
 
 // Posts
-export * from './provider/owner/posts/ExternalPostsDataProvider';
+export * from './provider/core/TransitData/ExternalPostsDataProvider';
 
 // Profile
-export * from './provider/owner/profile/ExternalProfileDataProvider';
+export * from './provider/core/TransitData/ExternalProfileDataProvider';
 
 // Follow
-export * from './provider/owner/follow/FollowProvider';
+export * from './provider/owner-app/follow/FollowProvider';
 
-// Photos
-export * from './provider/owner/photos/PhotoTypes';
-export * from './provider/owner/photos/PhotoProvider';
+// Photos (TODO: move to photo-app)
+export * from './provider/owner-app/photos/PhotoTypes';
+export * from './provider/owner-app/photos/PhotoProvider';

@@ -1,4 +1,4 @@
-import { toGuidId } from '../DataUtil';
+import { toGuidId } from '../helpers/DataUtil';
 
 export class AttributeConfig {
   //Indicates that a file holds the profile definition for this drive

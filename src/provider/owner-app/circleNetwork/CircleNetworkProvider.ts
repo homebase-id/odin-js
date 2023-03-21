@@ -1,5 +1,5 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { PagedResult, PagingOptions } from '../../core/Types';
+import { PagingOptions, PagedResult } from '../../core/helpers/Types';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

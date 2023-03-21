@@ -1,4 +1,9 @@
-import { toGuidId, getNewId, jsonStringify64, stringToUint8Array } from '../../core/DataUtil';
+import {
+  toGuidId,
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+} from '../../core/helpers/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   deleteFile,
@@ -22,7 +27,7 @@ import {
   ScheduleOptions,
   SendContents,
 } from '../../core/DriveData/DriveUploadTypes';
-import { CursoredResult, MultiRequestCursoredResult } from '../../core/Types';
+import { CursoredResult, MultiRequestCursoredResult } from '../../core/helpers/Types';
 import { getChannelDefinitions, GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { parseReactionPreview } from './PostReactionProvider';
 import {

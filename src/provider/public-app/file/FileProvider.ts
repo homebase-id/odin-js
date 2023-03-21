@@ -1,6 +1,10 @@
-import { uint8ArrayToBase64, base64ToUint8Array, byteArrayToString } from '../../core/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DriveSearchResult, EmbeddedThumb, FileQueryParams } from '../../core/DriveData/DriveTypes';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  uint8ArrayToBase64,
+} from '../../core/helpers/DataUtil';
 
 export interface ResponseEntry {
   additionalThumbnails?: EmbeddedThumb[];

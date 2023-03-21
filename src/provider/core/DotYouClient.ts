@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { jsonStringify64 } from './DataUtil';
+import { jsonStringify64 } from './helpers/DataUtil';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
 
 export enum ApiType {

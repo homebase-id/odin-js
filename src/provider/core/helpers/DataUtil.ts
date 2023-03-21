@@ -1,8 +1,8 @@
 import { Guid } from 'guid-typescript';
-import { EncryptedKeyHeader } from './DriveData/DriveTypes';
-import { AccessControlList } from './DriveData/DriveUploadTypes';
 
 import md5 from 'js-md5';
+import { EncryptedKeyHeader } from '../DriveData/DriveTypes';
+import { AccessControlList } from '../DriveData/DriveUploadTypes';
 
 export const stringToMD5basedGuid = (data: string): Guid => {
   const t = md5(data).toString();

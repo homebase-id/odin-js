@@ -1,7 +1,8 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { EmbeddedThumb, TargetDrive } from '../../core/DriveData/DriveTypes';
-import { toGuidId } from '../../core/DataUtil';
+
 import { CommentsReactionSummary, EmojiReactionSummary } from './PostReactionProvider';
+import { toGuidId } from '../../core/helpers/DataUtil';
 
 export interface ChannelDefinition {
   channelId: string;

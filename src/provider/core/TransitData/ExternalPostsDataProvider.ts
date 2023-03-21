@@ -1,29 +1,34 @@
-import { DotYouClient, ApiType } from '../../core/DotYouClient';
+import { DotYouClient, ApiType } from '../DotYouClient';
 import {
   queryBatch,
   getPayload,
   decryptKeyHeader,
   decryptJsonContent,
-} from '../../core/DriveData/DriveProvider';
+} from '../DriveData/DriveProvider';
 import {
   EncryptedKeyHeader,
   FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
-} from '../../core/DriveData/DriveTypes';
+} from '../DriveData/DriveTypes';
 import {
   getPayloadOverTransit,
   getDrivesByTypeOverTransit,
   queryBatchOverTransit,
-} from '../../core/TransitData/TransitProvider';
-import { CursoredResult } from '../../core/Types';
+} from './TransitProvider';
+import { CursoredResult } from '../helpers/Types';
 import {
   getChannelDrive,
   GetTargetDriveFromChannelId,
-} from '../../public/posts/PostDefinitionProvider';
-import { getRecentPosts } from '../../public/posts/PostProvider';
-import { parseReactionPreview } from '../../public/posts/PostReactionProvider';
-import { ChannelDefinition, PostContent, PostFile, BlogConfig } from '../../public/posts/PostTypes';
+} from '../../public-app/posts/PostDefinitionProvider';
+import { getRecentPosts } from '../../public-app/posts/PostProvider';
+import { parseReactionPreview } from '../../public-app/posts/PostReactionProvider';
+import {
+  ChannelDefinition,
+  PostContent,
+  PostFile,
+  BlogConfig,
+} from '../../public-app/posts/PostTypes';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 

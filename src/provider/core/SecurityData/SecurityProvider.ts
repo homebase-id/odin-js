@@ -1,4 +1,4 @@
-import { parsePermissions } from '../../public/circleNetwork/CircleProvider';
+import { parsePermissions } from '../../owner-app/circleNetwork/CircleProvider';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { DrivePermissions } from '../DriveData/DriveTypes';
 import { SecurityContex } from './SecurityTypes';
