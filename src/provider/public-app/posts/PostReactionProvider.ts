@@ -86,6 +86,7 @@ export class ReactionConfig {
   static readonly EmojiFileType: number = 805;
 }
 
+/* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
   dotYouClient: DotYouClient,
   comment: ReactionVm
