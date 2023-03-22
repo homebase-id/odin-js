@@ -12,6 +12,7 @@ export interface ProviderOptions {
   api: ApiType;
   sharedSecret?: Uint8Array;
   root?: string;
+  headers?: Record<string, string>;
 }
 
 const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
@@ -64,7 +65,7 @@ export class DotYouClient {
     const client = axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: true,
-      headers: {},
+      headers: this._options.headers || {},
     });
 
     if (overrideEncryption) {
