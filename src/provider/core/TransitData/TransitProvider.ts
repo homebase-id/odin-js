@@ -1,12 +1,7 @@
 import { AxiosRequestConfig } from 'axios';
 import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
-import {
-  decryptKeyHeader,
-  decryptJsonContent,
-  decryptUsingKeyHeader,
-  DEFAULT_QUERY_BATCH_RESULT_OPTION,
-} from '../DriveData/DriveProvider';
+import { DEFAULT_QUERY_BATCH_RESULT_OPTION } from '../DriveData/DriveProvider';
 import {
   DriveDefinition,
   DriveSearchResult,
@@ -21,6 +16,11 @@ import {
 } from '../DriveData/DriveTypes';
 import { SystemFileType } from '../DriveData/DriveUploadTypes';
 import { PagedResult } from '../helpers/Types';
+import {
+  decryptKeyHeader,
+  decryptJsonContent,
+  decryptUsingKeyHeader,
+} from '../DriveData/SecurityHelpers';
 
 interface GetFileRequest {
   odinId: string;

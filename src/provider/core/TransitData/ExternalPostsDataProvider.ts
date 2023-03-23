@@ -1,10 +1,5 @@
 import { DotYouClient, ApiType } from '../DotYouClient';
-import {
-  queryBatch,
-  getPayload,
-  decryptKeyHeader,
-  decryptJsonContent,
-} from '../DriveData/DriveProvider';
+import { queryBatch, getPayload } from '../DriveData/DriveProvider';
 import {
   EncryptedKeyHeader,
   FileMetadata,
@@ -29,6 +24,7 @@ import {
   PostFile,
   BlogConfig,
 } from '../../public-app/posts/PostTypes';
+import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 

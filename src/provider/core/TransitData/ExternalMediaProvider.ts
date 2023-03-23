@@ -63,11 +63,15 @@ export const getDecryptedImageUrlOverTransit = async (
   const meta = await getDecryptedMetadataOverTransit(dotYouClient, odinId, targetDrive, fileId);
   if (!meta.fileMetadata.payloadIsEncrypted && size) {
     // Build get url:
-    return `https://${odinId}/api/youauth/v1/drive/files/thumb?${stringify({
+    return `https://${odinId}/api/youauth/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
       ...targetDrive,
       fileId,
-      width: size.pixelWidth,
-      height: size.pixelHeight,
+      ...(size
+        ? {
+            width: size.pixelWidth,
+            height: size.pixelHeight,
+          }
+        : {}),
       xfst: systemFileType || 'Standard',
     })}`;
   }

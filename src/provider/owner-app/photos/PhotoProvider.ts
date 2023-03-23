@@ -6,7 +6,7 @@ import {
   TargetDrive,
   ThumbSize,
 } from '../../core/DriveData/DriveTypes';
-import { getDecryptedImageUrl } from '../../core/MediaData/MediaProvider';
+import { getDecryptedImageUrl } from '../../core/MediaData/ImageProvider';
 import { PhotoFile } from './PhotoTypes';
 
 export const getPhotoLibrary = async (
