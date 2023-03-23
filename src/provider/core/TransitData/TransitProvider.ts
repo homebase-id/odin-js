@@ -1,11 +1,22 @@
 import { AxiosRequestConfig } from 'axios';
-import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../helpers/DataUtil';
+import {
+  byteArrayToString,
+  splitSharedSecretEncryptedKeyHeader,
+  stringToUint8Array,
+  uint8ArrayToBase64,
+} from '../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
   decryptUsingKeyHeader,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
+  encryptKeyHeader,
+  GenerateKeyHeader,
+  encryptWithKeyheader,
+  EMPTY_KEY_HEADER,
+  encryptWithSharedSecret,
+  toBlob,
 } from '../DriveData/DriveProvider';
 import {
   DriveDefinition,
@@ -18,23 +29,20 @@ import {
   KeyHeader,
   QueryBatchResponse,
   TargetDrive,
+  ThumbnailFile,
 } from '../DriveData/DriveTypes';
-import { SystemFileType } from '../DriveData/DriveUploadTypes';
+import {
+  SystemFileType,
+  UploadFileDescriptor,
+  UploadFileMetadata,
+} from '../DriveData/DriveUploadTypes';
 import { PagedResult } from '../helpers/Types';
-
-interface GetFileRequest {
-  odinId: string;
-  file: {
-    targetDrive: TargetDrive;
-    fileId: string;
-  };
-}
-
-interface TransitQueryBatchRequest {
-  queryParams: FileQueryParams;
-  resultOptionsRequest: GetBatchQueryResultOptions;
-  odinId: string;
-}
+import {
+  TransitQueryBatchRequest,
+  GetFileRequest,
+  TransitInstructionSet,
+  TransitUploadResult,
+} from './TransitTypes';
 
 const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
 
@@ -332,4 +340,122 @@ export const getDrivesByTypeOverTransit = async (
       }),
     };
   });
+};
+
+/// Upload methods
+export const uploadFileOverTransit = async (
+  dotYouClient: DotYouClient,
+  instructions: TransitInstructionSet,
+  metadata: UploadFileMetadata,
+  payload: Uint8Array,
+  thumbnails?: ThumbnailFile[],
+  encrypt = true
+) => {
+  const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
+  return uploadFileOverTransitUsingKeyHeader(
+    dotYouClient,
+    keyHeader,
+    instructions,
+    metadata,
+    payload,
+    thumbnails
+  );
+};
+
+export const uploadFileOverTransitUsingKeyHeader = async (
+  dotYouClient: DotYouClient,
+  keyHeader: KeyHeader | undefined,
+  instructions: TransitInstructionSet,
+  metadata: UploadFileMetadata,
+  payload: Uint8Array,
+  thumbnails?: ThumbnailFile[]
+): Promise<TransitUploadResult> => {
+  const strippedInstructions: TransitInstructionSet = {
+    transferIv: instructions.transferIv,
+    overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
+    remoteTargetDrive: instructions.remoteTargetDrive,
+    schedule: instructions.schedule,
+    recipients: instructions.recipients,
+  };
+
+  const encryptedMetaData = keyHeader
+    ? {
+        ...metadata,
+        appData: {
+          ...metadata.appData,
+          jsonContent: metadata.appData.jsonContent
+            ? uint8ArrayToBase64(
+                await encryptWithKeyheader(
+                  stringToUint8Array(metadata.appData.jsonContent),
+                  keyHeader
+                )
+              )
+            : null,
+        },
+      }
+    : metadata;
+
+  const descriptor: UploadFileDescriptor = {
+    encryptedKeyHeader: await encryptKeyHeader(
+      dotYouClient,
+      keyHeader ?? EMPTY_KEY_HEADER,
+      instructions.transferIv
+    ),
+    fileMetadata: encryptedMetaData,
+  };
+
+  const encryptedDescriptor = await encryptWithSharedSecret(
+    dotYouClient,
+    descriptor,
+    instructions.transferIv
+  );
+  const encryptedPayload = keyHeader ? await encryptWithKeyheader(payload, keyHeader) : payload;
+
+  const data = new FormData();
+  data.append('instructions', toBlob(strippedInstructions));
+  data.append('metaData', new Blob([encryptedDescriptor]));
+
+  if (metadata.appData.contentIsComplete) {
+    data.append('payload', new Blob([]));
+  } else {
+    data.append('payload', new Blob([encryptedPayload]));
+  }
+
+  if (thumbnails) {
+    for (let i = 0; i < thumbnails.length; i++) {
+      const thumb = thumbnails[i];
+      const filename = `${thumb.pixelWidth}x${thumb.pixelHeight}`;
+
+      const thumbnailBytes = keyHeader
+        ? await encryptWithKeyheader(thumb.payload, keyHeader)
+        : thumb.payload;
+      data.append(
+        'thumbnail',
+        new Blob([thumbnailBytes], {
+          type: thumb.contentType,
+        }),
+        filename
+      );
+    }
+  }
+
+  const client = dotYouClient.createAxiosClient(true);
+  const url = '/sender/files/send';
+
+  const config = {
+    headers: {
+      'content-type': 'multipart/form-data',
+      'X-ODIN-FILE-SYSTEM-TYPE': instructions.systemFileType || 'Standard',
+    },
+  };
+
+  return client
+    .post(url, data, config)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.error('[DotYouCore-js]', error);
+      throw error;
+    });
 };

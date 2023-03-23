@@ -51,7 +51,7 @@ interface GetFileRequest {
   fileId: string;
 }
 
-const EMPTY_KEY_HEADER: KeyHeader = {
+export const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
   aesKey: new Uint8Array(Array(16).fill(0)),
 };
@@ -728,7 +728,7 @@ export const uploadFile = async (
 
 /// Upload helpers:
 
-const encryptWithKeyheader = async (
+export const encryptWithKeyheader = async (
   content: Uint8Array,
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
@@ -736,7 +736,7 @@ const encryptWithKeyheader = async (
   return cipher;
 };
 
-const encryptWithSharedSecret = async (
+export const encryptWithSharedSecret = async (
   dotYouClient: DotYouClient,
   o: unknown,
   iv: Uint8Array
@@ -754,7 +754,7 @@ const encryptWithSharedSecret = async (
   return cipher;
 };
 
-const toBlob = (o: unknown): Blob => {
+export const toBlob = (o: unknown): Blob => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
   return new Blob([content]);
@@ -842,7 +842,7 @@ export const encryptKeyHeader = async (
   };
 };
 
-const GenerateKeyHeader = (): KeyHeader => {
+export const GenerateKeyHeader = (): KeyHeader => {
   return {
     iv: getRandom16ByteArray(),
     aesKey: getRandom16ByteArray(),

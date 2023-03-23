@@ -28,9 +28,11 @@ import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider'
 import {
   getPayloadOverTransit,
   queryBatchOverTransit,
+  uploadFileOverTransit,
 } from '../../core/TransitData/TransitProvider';
+import { TransitInstructionSet, TransitUploadResult } from '../../core/TransitData/TransitTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { BlogConfig, RichText } from './PostTypes';
+import { RichText } from './PostTypes';
 
 export interface ReactionContext {
   authorOdinId: string;
@@ -172,7 +174,7 @@ export const saveComment = async (
       encrypt
     );
 
-    return result.file.fileId;
+    return result.globalTransitIdFileIdentifier.globalTransitId;
   } else {
     metadata.referencedFile = {
       targetDrive: targetDrive,
@@ -181,26 +183,16 @@ export const saveComment = async (
     metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Owner };
     metadata.allowDistribution = true;
 
-    const transitOptions: TransitOptions = {
-      useGlobalTransitId: true, // Needed to support having a reference to this file over transit
-      isTransient: true, // File is removed after it's received by all recipients
-      recipients: [comment.postDetails.authorOdinId],
-      schedule: ScheduleOptions.SendNowAwaitResponse,
-      sendContents: SendContents.All,
-      overrideTargetDrive: targetDrive,
-    };
-
-    const instructionSet: UploadInstructionSet = {
+    const instructionSet: TransitInstructionSet = {
       transferIv: getRandom16ByteArray(),
-      storageOptions: {
-        overwriteFileId: comment.fileId || undefined,
-        drive: BlogConfig.FeedDrive,
-      },
-      transitOptions: transitOptions,
+      overwriteGlobalTransitFileId: comment.globalTransitId,
+      remoteTargetDrive: targetDrive,
+      schedule: ScheduleOptions.SendNowAwaitResponse,
+      recipients: [comment.postDetails.authorOdinId],
       systemFileType: 'Comment',
     };
 
-    const result: UploadResult = await uploadFile(
+    const result: TransitUploadResult = await uploadFileOverTransit(
       dotYouClient,
       instructionSet,
       metadata,
@@ -209,7 +201,7 @@ export const saveComment = async (
       encrypt
     );
 
-    return result.file.fileId;
+    return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
   }
 };
 

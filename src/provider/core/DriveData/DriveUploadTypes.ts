@@ -28,7 +28,7 @@ export interface TransitOptions {
   useGlobalTransitId?: boolean | undefined;
   schedule: ScheduleOptions;
   sendContents: SendContents;
-  overrideTargetDrive?: TargetDrive;
+  remoteTargetDrive?: TargetDrive;
 }
 
 export enum SendContents {
