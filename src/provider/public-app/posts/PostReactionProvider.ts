@@ -108,8 +108,6 @@ export const saveComment = async (
     comment.content.hasAttachment = true;
   }
 
-  console.log({ comment });
-
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
