@@ -22,18 +22,18 @@ import {
   getFileHeader,
   getPayloadBytes,
   getThumbBytes,
-  getRandom16ByteArray,
   uploadFile,
 } from '../DriveData/DriveProvider';
 import { getNewId, base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../helpers/DataUtil';
 import { ImageUploadResult, ThumbnailMeta } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
+import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  imageBytes: Uint8Array,
+  imageData: Uint8Array | File,
   uploadMeta?: {
     tag?: string | undefined | string[];
     uniqueId?: string;
@@ -63,7 +63,7 @@ export const uploadImage = async (
   };
 
   const { naturalSize, tinyThumb, additionalThumbnails } = await createThumbnails(
-    imageBytes,
+    imageData instanceof File ? new Uint8Array(await imageData.arrayBuffer()) : imageData,
     uploadMeta?.type
   );
 
@@ -105,12 +105,12 @@ export const uploadImage = async (
     dotYouClient,
     instructionSet,
     metadata,
-    imageBytes,
+    imageData,
     additionalThumbnails,
     encrypt
   );
 
-  return { fileId: result.file.fileId, previewThumbnail };
+  return { fileId: result.file.fileId, previewThumbnail, type: 'image' };
 };
 
 export const removeImage = async (

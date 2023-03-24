@@ -8,7 +8,6 @@ import { DotYouClient } from '../../core/DotYouClient';
 import {
   deleteFile,
   getPayload,
-  getRandom16ByteArray,
   queryBatch,
   queryBatchCollection,
   uploadFile,
@@ -38,6 +37,7 @@ import {
   PostType,
   postTypeToDataType,
 } from './PostTypes';
+import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
 export const getPosts = async <T extends PostContent>(

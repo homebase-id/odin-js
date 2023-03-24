@@ -5,7 +5,6 @@ import {
   queryBatchCollection,
   getPayload,
   ensureDrive,
-  getRandom16ByteArray,
   uploadFile,
   deleteFile,
   queryBatch,
@@ -16,6 +15,7 @@ import {
   UploadFileMetadata,
   SecurityGroupType,
 } from '../DriveData/DriveUploadTypes';
+import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { getNewId, jsonStringify64, stringToUint8Array } from '../helpers/DataUtil';
 import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';

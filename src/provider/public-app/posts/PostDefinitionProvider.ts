@@ -19,11 +19,11 @@ import {
   getPayload,
   queryBatch,
   queryBatchCollection,
-  getRandom16ByteArray,
   uploadFile,
 } from '../../core/DriveData/DriveProvider';
 import { DotYouClient } from '../../core/DotYouClient';
 import { jsonStringify64, stringToUint8Array, toGuidId } from '../../core/helpers/DataUtil';
+import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient

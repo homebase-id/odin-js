@@ -6,8 +6,16 @@ export type ThumbnailMeta = {
   url: string;
 };
 
-export interface ImageUploadResult {
+export interface MediaUploadResult {
   fileId: string;
+}
+
+export interface VideoUploadResult extends MediaUploadResult {
+  type: 'video';
+}
+
+export interface ImageUploadResult extends MediaUploadResult {
+  type: 'image';
   previewThumbnail: EmbeddedThumb;
 }
 

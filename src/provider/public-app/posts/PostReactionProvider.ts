@@ -1,11 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import {
-  deleteFile,
-  getPayload,
-  getRandom16ByteArray,
-  queryBatch,
-  uploadFile,
-} from '../../core/DriveData/DriveProvider';
+import { deleteFile, getPayload, queryBatch, uploadFile } from '../../core/DriveData/DriveProvider';
 import {
   DriveSearchResult,
   FileQueryParams,
@@ -23,9 +17,11 @@ import {
   SendContents,
   TransitOptions,
 } from '../../core/DriveData/DriveUploadTypes';
+import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 import { getNewId, jsonStringify64, stringToUint8Array } from '../../core/helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
 import {
+  deleteFileOverTransit,
   getPayloadOverTransit,
   queryBatchOverTransit,
   uploadFileOverTransit,
@@ -111,6 +107,8 @@ export const saveComment = async (
 
     comment.content.hasAttachment = true;
   }
+
+  console.log({ comment });
 
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
@@ -211,7 +209,11 @@ export const removeComment = async (
   commentFile: ReactionFile
 ) => {
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
-  if (commentFile.fileId)
+
+  if (dotYouClient.getHostname() === context.authorOdinId) {
+    if (!commentFile.fileId) {
+      return;
+    }
     return await deleteFile(
       dotYouClient,
       targetDrive,
@@ -220,6 +222,18 @@ export const removeComment = async (
       undefined,
       'Comment'
     );
+  } else {
+    if (!commentFile.globalTransitId) {
+      return;
+    }
+    return await deleteFileOverTransit(
+      dotYouClient,
+      targetDrive,
+      commentFile.globalTransitId,
+      [context.authorOdinId],
+      'Comment'
+    );
+  }
 };
 
 export const getComments = async (

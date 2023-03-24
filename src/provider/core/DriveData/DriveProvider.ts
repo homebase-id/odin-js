@@ -18,22 +18,29 @@ import { AxiosRequestConfig } from 'axios';
 import { PagedResult, PagingOptions } from '../helpers/Types';
 import {
   SystemFileType,
-  UploadFileDescriptor,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
 } from './DriveUploadTypes';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import { cbcEncrypt, cbcDecrypt } from '../helpers/AesEncrypt';
 import {
   stringify,
   byteArrayToString,
   splitSharedSecretEncryptedKeyHeader,
-  base64ToUint8Array,
-  uint8ArrayToBase64,
-  stringToUint8Array,
-  jsonStringify64,
 } from '../helpers/DataUtil';
+import {
+  encryptMetaData,
+  buildDescriptor,
+  buildFormData,
+  pureUpload,
+  GenerateKeyHeader,
+} from './UploadHelpers';
+import {
+  decryptUsingKeyHeader,
+  decryptKeyHeader,
+  decryptJsonContent,
+  encryptWithKeyheader,
+} from './SecurityHelpers';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -51,14 +58,9 @@ interface GetFileRequest {
   fileId: string;
 }
 
-export const EMPTY_KEY_HEADER: KeyHeader = {
-  iv: new Uint8Array(Array(16).fill(0)),
-  aesKey: new Uint8Array(Array(16).fill(0)),
-};
-
 const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
 
-const assertIfDefined = (key: string, value: unknown) => {
+export const assertIfDefined = (key: string, value: unknown) => {
   if (!value) {
     throw new Error(`${key} undefined`);
   }
@@ -314,7 +316,7 @@ export const getPayloadAsJson = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader: KeyHeader | undefined,
+  keyHeader: KeyHeader | EncryptedKeyHeader | undefined,
   systemFileType?: SystemFileType
 ): Promise<T> => {
   return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader, systemFileType).then(
@@ -345,7 +347,7 @@ export const getPayloadBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader: KeyHeader | undefined,
+  keyHeader: KeyHeader | EncryptedKeyHeader | undefined,
   systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
@@ -367,8 +369,13 @@ export const getPayloadBytes = async (
     .get('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
       if (keyHeader) {
+        const decryptedKeyHeader =
+          'encryptionVersion' in keyHeader
+            ? await decryptKeyHeader(dotYouClient, keyHeader)
+            : keyHeader;
+
         const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
+        return decryptUsingKeyHeader(cipher, decryptedKeyHeader).then((bytes) => {
           return {
             bytes,
             contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
@@ -467,24 +474,6 @@ export const getThumbBytes = async (
       console.error('[DotYouCore-js]', error);
       throw error;
     });
-};
-
-export const decryptJsonContent = async <T>(
-  fileMetaData: FileMetadata,
-  keyheader: KeyHeader | undefined
-): Promise<T> => {
-  if (keyheader) {
-    try {
-      const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
-      const json = byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
-
-      return JSON.parse(json);
-    } catch (err) {
-      console.error('[DotYouCore-js]', 'Json Content Decryption failed. Trying to only parse JSON');
-    }
-  }
-
-  return JSON.parse(fileMetaData.appData.jsonContent);
 };
 
 /// Delete methods:
@@ -617,108 +606,11 @@ export const purgeAllFiles = async (
 };
 
 /// Upload methods:
-
-export const uploadUsingKeyHeader = async (
-  dotYouClient: DotYouClient,
-  keyHeader: KeyHeader | undefined,
-  instructions: UploadInstructionSet,
-  metadata: UploadFileMetadata,
-  payload: Uint8Array,
-  thumbnails?: ThumbnailFile[]
-): Promise<UploadResult> => {
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
-  };
-
-  const encryptedMetaData = keyHeader
-    ? {
-        ...metadata,
-        appData: {
-          ...metadata.appData,
-          jsonContent: metadata.appData.jsonContent
-            ? uint8ArrayToBase64(
-                await encryptWithKeyheader(
-                  stringToUint8Array(metadata.appData.jsonContent),
-                  keyHeader
-                )
-              )
-            : null,
-        },
-      }
-    : metadata;
-
-  const descriptor: UploadFileDescriptor = {
-    encryptedKeyHeader: await encryptKeyHeader(
-      dotYouClient,
-      keyHeader ?? EMPTY_KEY_HEADER,
-      instructions.transferIv
-    ),
-    fileMetadata: encryptedMetaData,
-  };
-
-  const encryptedDescriptor = await encryptWithSharedSecret(
-    dotYouClient,
-    descriptor,
-    instructions.transferIv
-  );
-  const encryptedPayload = keyHeader ? await encryptWithKeyheader(payload, keyHeader) : payload;
-
-  const data = new FormData();
-  data.append('instructions', toBlob(strippedInstructions));
-  data.append('metaData', new Blob([encryptedDescriptor]));
-
-  if (metadata.appData.contentIsComplete) {
-    data.append('payload', new Blob([]));
-  } else {
-    data.append('payload', new Blob([encryptedPayload]));
-  }
-
-  if (thumbnails) {
-    for (let i = 0; i < thumbnails.length; i++) {
-      const thumb = thumbnails[i];
-      const filename = `${thumb.pixelWidth}x${thumb.pixelHeight}`;
-
-      const thumbnailBytes = keyHeader
-        ? await encryptWithKeyheader(thumb.payload, keyHeader)
-        : thumb.payload;
-      data.append(
-        'thumbnail',
-        new Blob([thumbnailBytes], {
-          type: thumb.contentType,
-        }),
-        filename
-      );
-    }
-  }
-
-  const client = dotYouClient.createAxiosClient(true);
-  const url = '/drive/files/upload';
-
-  const config = {
-    headers: {
-      'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': instructions.systemFileType || 'Standard',
-    },
-  };
-
-  return client
-    .post(url, data, config)
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.error('[DotYouCore-js]', error);
-      throw error;
-    });
-};
-
 export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array,
+  payload: Uint8Array | File,
   thumbnails?: ThumbnailFile[],
   encrypt = true
 ): Promise<UploadResult> => {
@@ -726,38 +618,51 @@ export const uploadFile = async (
   return uploadUsingKeyHeader(dotYouClient, keyHeader, instructions, metadata, payload, thumbnails);
 };
 
-/// Upload helpers:
-
-export const encryptWithKeyheader = async (
-  content: Uint8Array,
-  keyHeader: KeyHeader
-): Promise<Uint8Array> => {
-  const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
-  return cipher;
-};
-
-export const encryptWithSharedSecret = async (
+const uploadUsingKeyHeader = async (
   dotYouClient: DotYouClient,
-  o: unknown,
-  iv: Uint8Array
-): Promise<Uint8Array> => {
-  //encrypt metadata with shared secret
-  const ss = dotYouClient.getSharedSecret();
-  const json = jsonStringify64(o);
+  keyHeader: KeyHeader | undefined,
+  instructions: UploadInstructionSet,
+  metadata: UploadFileMetadata,
+  payload: Uint8Array | File,
+  thumbnails?: ThumbnailFile[]
+): Promise<UploadResult> => {
+  // Rebuild instructions without the systemFileType
+  const strippedInstructions: UploadInstructionSet = {
+    storageOptions: instructions.storageOptions,
+    transferIv: instructions.transferIv,
+    transitOptions: instructions.transitOptions,
+  };
 
-  if (!ss) {
-    throw new Error('attempting to decrypt but missing the shared secret');
+  // Build package
+  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
+  const encryptedDescriptor = await buildDescriptor(
+    dotYouClient,
+    keyHeader,
+    instructions,
+    encryptedMetaData
+  );
+
+  const payloadIsFile = payload instanceof File;
+  if (payloadIsFile && keyHeader) {
+    throw new Error('Cannot upload a file with a key header');
   }
 
-  const content = new TextEncoder().encode(json);
-  const cipher = await cbcEncrypt(content, iv, ss);
-  return cipher;
-};
+  const processedPayload = metadata.appData.contentIsComplete
+    ? undefined
+    : !payloadIsFile && keyHeader
+    ? await encryptWithKeyheader(payload, keyHeader)
+    : payload;
 
-export const toBlob = (o: unknown): Blob => {
-  const json = jsonStringify64(o);
-  const content = new TextEncoder().encode(json);
-  return new Blob([content]);
+  const data = await buildFormData(
+    strippedInstructions,
+    encryptedDescriptor,
+    processedPayload,
+    thumbnails,
+    keyHeader
+  );
+
+  // Upload
+  return await pureUpload(dotYouClient, data, instructions.systemFileType);
 };
 
 /// Helper methods:
@@ -783,72 +688,4 @@ export const getPayload = async <T>(
   } else {
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, keyheader, systemFileType);
   }
-};
-
-export const decryptUsingKeyHeader = async (
-  cipher: Uint8Array,
-  keyHeader: KeyHeader
-): Promise<Uint8Array> => {
-  return await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
-};
-
-export const decryptKeyHeader = async (
-  dotYouClient: DotYouClient,
-  encryptedKeyHeader: EncryptedKeyHeader
-): Promise<KeyHeader> => {
-  const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    throw new Error('attempting to decrypt but missing the shared secret');
-  }
-
-  // Check if used params aren't still base64 encoded if so parse to bytearrays
-  let encryptedAesKey = encryptedKeyHeader.encryptedAesKey;
-  if (typeof encryptedKeyHeader.encryptedAesKey === 'string') {
-    encryptedAesKey = base64ToUint8Array(encryptedKeyHeader.encryptedAesKey);
-  }
-
-  let receivedIv = encryptedKeyHeader.iv;
-  if (typeof encryptedKeyHeader.iv === 'string') {
-    receivedIv = base64ToUint8Array(encryptedKeyHeader.iv);
-  }
-
-  const bytes = await cbcDecrypt(encryptedAesKey, receivedIv, ss);
-  const iv = bytes.subarray(0, 16);
-  const aesKey = bytes.subarray(16);
-
-  return {
-    aesKey: aesKey,
-    iv: iv,
-  };
-};
-
-export const encryptKeyHeader = async (
-  dotYouClient: DotYouClient,
-  keyHeader: KeyHeader,
-  transferIv: Uint8Array
-): Promise<EncryptedKeyHeader> => {
-  const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    throw new Error('attempting to encrypt but missing the shared secret');
-  }
-  const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
-  const cipher = await cbcEncrypt(new Uint8Array(combined), transferIv, ss);
-
-  return {
-    iv: transferIv,
-    encryptedAesKey: cipher,
-    encryptionVersion: 1,
-    type: 11,
-  };
-};
-
-export const GenerateKeyHeader = (): KeyHeader => {
-  return {
-    iv: getRandom16ByteArray(),
-    aesKey: getRandom16ByteArray(),
-  };
-};
-
-export const getRandom16ByteArray = (): Uint8Array => {
-  return window.crypto.getRandomValues(new Uint8Array(16));
 };

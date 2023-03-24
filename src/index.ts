@@ -27,7 +27,8 @@ export * from './provider/core/TransitData/InboxProvider';
 // MediaData
 export * from './provider/core/MediaData/MediaTypes';
 export * from './provider/core/MediaData/Thumbs/ImageResizer';
-export * from './provider/core/MediaData/MediaProvider';
+export * from './provider/core/MediaData/ImageProvider';
+export * from './provider/core/MediaData/VideoProvider';
 
 // NotificationData
 export * from './provider/core/NotificationData/NotificationProvider';

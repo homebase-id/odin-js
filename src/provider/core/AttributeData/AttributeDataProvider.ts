@@ -16,14 +16,9 @@ import {
 import { AttributeConfig } from './AttributeConfig';
 import { DotYouClient } from '../DotYouClient';
 import { GetTargetDriveFromProfileId } from '../../core/ProfileData/ProfileDefinitionProvider';
-import {
-  deleteFile,
-  getPayload,
-  queryBatch,
-  getRandom16ByteArray,
-  uploadFile,
-} from '../DriveData/DriveProvider';
+import { deleteFile, getPayload, queryBatch, uploadFile } from '../DriveData/DriveProvider';
 import { getNewId, jsonStringify64, stringToUint8Array } from '../helpers/DataUtil';
+import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
 export const getProfileAttributes = async (

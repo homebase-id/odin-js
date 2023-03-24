@@ -2,7 +2,7 @@ import { BuiltInAttributes } from '../../core/AttributeData/AttributeConfig';
 import { getAttributeVersions } from '../../core/AttributeData/AttributeDataProvider';
 import { DotYouClient } from '../../core/DotYouClient';
 import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
-import { getDecryptedImageData } from '../../core/MediaData/MediaProvider';
+import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../core/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../core/ProfileData/ProfileDefinitionProvider';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
