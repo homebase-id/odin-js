@@ -7,6 +7,19 @@ import {
   ReactionFile,
 } from './PostReactionProvider';
 
+interface ServerReactionsSummary {
+  reactions: { reactionContent: string; count: number }[];
+  total: number;
+}
+
+interface ServerReactionsListWithCursor {
+  reactions: {
+    odinId: string;
+    reactionContent: string;
+  }[];
+  cursor: string;
+}
+
 const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
@@ -53,7 +66,7 @@ export const removeEmojiReaction = async (
 
   const data = {
     odinId: emoji.authorOdinId,
-    reaction: emoji.content.body,
+    reaction: JSON.stringify({ emoji: emoji.content.body }),
     file: {
       targetDrive: GetTargetDriveFromChannelId(emoji.context.channelId),
       fileId: emoji.context.target.fileId,
@@ -79,11 +92,6 @@ export const removeEmojiReaction = async (
       .catch(dotYouClient.handleErrorResponse);
   }
 };
-
-interface ServerReactionsSummary {
-  reactions: { reactionContent: string; count: number }[];
-  total: number;
-}
 
 export const getReactionSummary = async (
   dotYouClient: DotYouClient,
@@ -158,14 +166,6 @@ export const getReactionSummary = async (
   }
 };
 
-interface ServerReactionsListWithCursor {
-  reactions: {
-    odinId: string;
-    reactionContent: string;
-  }[];
-  cursor: string;
-}
-
 export const getReactions = async (
   dotYouClient: DotYouClient,
   context: ReactionContext,
@@ -215,6 +215,46 @@ export const getReactions = async (
           }),
           cursor: response.data.cursor,
         };
+      })
+      .catch(dotYouClient.handleErrorResponse);
+  }
+};
+
+export const getMyReactions = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  context: ReactionContext,
+  pageSize = 15,
+  cursor?: string
+): Promise<string[] | undefined> => {
+  const isLocal = context.authorOdinId === dotYouClient.getHostname();
+  const client = dotYouClient.createAxiosClient();
+
+  const data = {
+    file: {
+      targetDrive: GetTargetDriveFromChannelId(context.channelId),
+      fileId: context.target.fileId,
+      globalTransitId: context.target.globalTransitId,
+    },
+    identity: odinId,
+    cursor: cursor,
+    maxRecords: pageSize,
+  };
+
+  if (isLocal) {
+    const url = emojiRoot + '/listbyidentity';
+    return client
+      .post<string[]>(url, data)
+      .then((response) => {
+        return response.data?.map((emojiString) => JSON.parse(emojiString).emoji);
+      })
+      .catch(dotYouClient.handleErrorResponse);
+  } else {
+    const url = emojiRootTransit + '/listbyidentity';
+    return client
+      .post<string[]>(url, { odinId: context.authorOdinId, request: data })
+      .then((response) => {
+        return response.data?.map((emojiString) => JSON.parse(emojiString).emoji);
       })
       .catch(dotYouClient.handleErrorResponse);
   }
