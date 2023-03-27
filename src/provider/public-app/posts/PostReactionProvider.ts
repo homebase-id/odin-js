@@ -304,182 +304,38 @@ const dsrToComment = async (
   };
 };
 
-const emojiRoot = '/drive/files/reactions';
-export const saveEmojiReaction = async (
-  dotYouClient: DotYouClient,
-  emoji: ReactionVm
-): Promise<string> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/add';
-
-  const data = {
-    odinId: emoji.authorOdinId,
-    reaction: JSON.stringify({ emoji: emoji.content.body }),
-    file: {
-      targetDrive: GetTargetDriveFromChannelId(emoji.context.channelId),
-      fileId: emoji.threadId || emoji.context.target.fileId,
-    },
-  };
-
-  return client
-    .post(url, data)
-    .then((response) => {
-      return { ...response.data, status: response.data?.status?.toLowerCase() };
-    })
-    .catch(dotYouClient.handleErrorResponse);
-
-  // if (dotYouClient.getHostname() === comment.postDetails.authorOdinId) {
-  //   // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
-  // } else {
-  //   // Use transit endpoint for reactions ?
-  // }
-};
-
-export const removeEmojiReaction = async (
-  dotYouClient: DotYouClient,
-  comment: ReactionVm
-): Promise<string> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/delete';
-
-  const data = {
-    odinId: comment.authorOdinId,
-    reaction: comment.content.body,
-    file: {
-      targetDrive: GetTargetDriveFromChannelId(comment.context.channelId),
-      fileId: comment.context.target.fileId,
-    },
-  };
-
-  return client
-    .post(url, data)
-    .then((response) => {
-      return { ...response.data, status: response.data?.status?.toLowerCase() };
-    })
-    .catch(dotYouClient.handleErrorResponse);
-};
-
-interface ServerReactionsSummary {
-  reactions: { reactionContent: string; count: number }[];
-  total: number;
-}
-
-export const getReactionSummary = async (
-  dotYouClient: DotYouClient,
-  context: ReactionContext
-): Promise<EmojiReactionSummary> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/summary';
-
-  const data = {
-    file: {
-      targetDrive: GetTargetDriveFromChannelId(context.channelId),
-      fileId: context.target.fileId,
-    },
-    cursor: undefined,
-    maxRecords: 5,
-  };
-
-  return client
-    .post<ServerReactionsSummary>(url, data)
-    .then((response) => {
-      return {
-        reactions: response.data.reactions
-          .map((reaction) => {
-            try {
-              return {
-                emoji: JSON.parse(reaction.reactionContent).emoji as string,
-                count: reaction.count,
-              };
-            } catch (ex) {
-              console.error('[DotYouCore-js] parse failed for', reaction);
-              return;
-            }
-          })
-          .filter(Boolean) as { emoji: string; count: number }[],
-        totalCount: response.data.total,
-      };
-    })
-    .catch((e) => {
-      dotYouClient.handleErrorResponse(e);
-      return { reactions: [], totalCount: 0 };
-    });
-};
-
-interface ServerReactionsListWithCursor {
+const parseReactions = (
   reactions: {
-    odinId: string;
+    key: string;
+    count: string;
     reactionContent: string;
-  }[];
-  cursor: string;
-}
-
-export const getReactions = async (
-  dotYouClient: DotYouClient,
-  context: ReactionContext,
-  pageSize = 15,
-  cursor?: string
-): Promise<{ reactions: ReactionFile[]; cursor: string } | undefined> => {
-  const client = dotYouClient.createAxiosClient();
-  const url = emojiRoot + '/list';
-
-  const data = {
-    file: {
-      targetDrive: GetTargetDriveFromChannelId(context.channelId),
-      fileId: context.target.fileId,
-    },
-    cursor: cursor,
-    maxRecords: pageSize,
-  };
-
-  return client
-    .post<ServerReactionsListWithCursor>(url, data)
-    .then((response) => {
-      return {
-        reactions: response.data.reactions.map((reaction) => {
+  }[]
+) => {
+  return {
+    reactions: reactions
+      .map((reaction) => {
+        try {
           return {
-            authorOdinId: reaction.odinId,
-            content: { body: JSON.parse(reaction.reactionContent).emoji },
+            emoji: JSON.parse(reaction.reactionContent).emoji as string,
+            count: parseInt(reaction.count),
           };
-        }),
-        cursor: response.data.cursor,
-      };
-    })
-    .catch(dotYouClient.handleErrorResponse);
+        } catch (ex) {
+          console.error('[DotYouCore-js] parse failed for', reaction);
+          return;
+        }
+
+        return;
+      })
+      .filter(Boolean) as { emoji: string; count: number }[],
+    totalCount: reactions.reduce((prevVal, curVal) => {
+      return prevVal + parseInt(curVal.count);
+    }, 0),
+  };
 };
 
 export const parseReactionPreview = (
   reactionPreview: ReactionPreview | undefined
 ): { comments: CommentsReactionSummary; reactions: EmojiReactionSummary } | undefined => {
-  const parseReactions = (
-    reactions: {
-      key: string;
-      count: string;
-      reactionContent: string;
-    }[]
-  ) => {
-    return {
-      reactions: reactions
-        .map((reaction) => {
-          try {
-            return {
-              emoji: JSON.parse(reaction.reactionContent).emoji as string,
-              count: parseInt(reaction.count),
-            };
-          } catch (ex) {
-            console.error('[DotYouCore-js] parse failed for', reaction);
-            return;
-          }
-
-          return;
-        })
-        .filter(Boolean) as { emoji: string; count: number }[],
-      totalCount: reactions.reduce((prevVal, curVal) => {
-        return prevVal + parseInt(curVal.count);
-      }, 0),
-    };
-  };
-
   if (reactionPreview) {
     return {
       comments: {
