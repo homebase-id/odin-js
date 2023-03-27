@@ -35,7 +35,8 @@ import { BlogConfig, RichText } from './PostTypes';
 export interface ReactionContext {
   authorOdinId: string;
   channelId: string;
-  postGlobalTransitId: string;
+  // Target: Post or Comment details
+  target: { fileId: string; globalTransitId: string };
 }
 
 export interface ReactionContent {
@@ -49,7 +50,7 @@ export interface ReactionFile {
 
   fileId?: string;
   id?: string;
-  commentThreadId?: string;
+  threadId?: string;
 
   authorOdinId: string;
   date?: number;
@@ -77,7 +78,7 @@ interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
 }
 
 export interface ReactionVm extends Omit<ReactionFile, 'content'> {
-  postDetails: ReactionContext;
+  context: ReactionContext;
   content: RawReactionContent;
 }
 
@@ -92,7 +93,7 @@ export const saveComment = async (
   comment: ReactionVm
 ): Promise<string> => {
   const encrypt = false;
-  const targetDrive = GetTargetDriveFromChannelId(comment.postDetails.channelId);
+  const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
   let additionalThumbnails: ThumbnailFile[] | undefined;
   if (comment.content.attachment) {
@@ -122,7 +123,7 @@ export const saveComment = async (
     senderOdinId: comment.authorOdinId,
     referencedFile: {
       targetDrive,
-      globalTransitId: comment.commentThreadId || comment.postDetails.postGlobalTransitId,
+      globalTransitId: comment.threadId || comment.context.target.globalTransitId,
     },
     appData: {
       tags: [],
@@ -144,7 +145,7 @@ export const saveComment = async (
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
 
-  if (dotYouClient.getHostname() === comment.postDetails.authorOdinId) {
+  if (dotYouClient.getHostname() === comment.context.authorOdinId) {
     const transitOptions: TransitOptions = {
       useGlobalTransitId: true, // Needed to support having a reference to this file over transit
       recipients: [],
@@ -176,7 +177,7 @@ export const saveComment = async (
   } else {
     metadata.referencedFile = {
       targetDrive: targetDrive,
-      globalTransitId: comment.commentThreadId || comment.postDetails.postGlobalTransitId,
+      globalTransitId: comment.threadId || comment.context.target.globalTransitId,
     };
     metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Owner };
     metadata.allowDistribution = true;
@@ -184,7 +185,7 @@ export const saveComment = async (
     const transitOptions: TransitOptions = {
       useGlobalTransitId: true, // Needed to support having a reference to this file over transit
       isTransient: true, // File is removed after it's received by all recipients
-      recipients: [comment.postDetails.authorOdinId],
+      recipients: [comment.context.authorOdinId],
       schedule: ScheduleOptions.SendNowAwaitResponse,
       sendContents: SendContents.All,
       overrideTargetDrive: targetDrive,
@@ -232,17 +233,15 @@ export const removeComment = async (
 
 export const getComments = async (
   dotYouClient: DotYouClient,
-  odinId: string,
-  channelId: string,
-  postGlobalTransitId: string,
+  context: ReactionContext,
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: ReactionFile[]; cursorState: string }> => {
-  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [ReactionConfig.CommentFileType],
-    groupId: [postGlobalTransitId],
+    groupId: [context.target.globalTransitId],
     systemFileType: 'Comment',
   };
   const ro = {
@@ -252,14 +251,20 @@ export const getComments = async (
   };
 
   const result =
-    odinId === dotYouClient.getHostname()
+    context.authorOdinId === dotYouClient.getHostname()
       ? await queryBatch(dotYouClient, qp, ro)
-      : await queryBatchOverTransit(dotYouClient, odinId, qp, ro);
+      : await queryBatchOverTransit(dotYouClient, context.authorOdinId, qp, ro);
 
   const comments: ReactionFile[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
-        dsrToComment(dotYouClient, odinId, dsr, targetDrive, result.includeMetadataHeader)
+        dsrToComment(
+          dotYouClient,
+          context.authorOdinId,
+          dsr,
+          targetDrive,
+          result.includeMetadataHeader
+        )
       )
     )
   ).filter((attr) => !!attr) as ReactionFile[];
@@ -292,7 +297,7 @@ const dsrToComment = async (
     globalTransitId: dsr.fileMetadata.globalTransitId,
     id: dsr.fileMetadata.appData.uniqueId,
     authorOdinId: dsr.fileMetadata.senderOdinId,
-    commentThreadId: dsr.fileMetadata.appData.groupId,
+    threadId: dsr.fileMetadata.appData.groupId,
     content: { ...contentData },
     date: dsr.fileMetadata.created,
     updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
@@ -302,17 +307,17 @@ const dsrToComment = async (
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
-  comment: ReactionVm
+  emoji: ReactionVm
 ): Promise<string> => {
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/add';
 
   const data = {
-    odinId: comment.authorOdinId,
-    reaction: JSON.stringify({ emoji: comment.content.body }),
+    odinId: emoji.authorOdinId,
+    reaction: JSON.stringify({ emoji: emoji.content.body }),
     file: {
-      targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
-      fileId: comment.commentThreadId || comment.postDetails.postGlobalTransitId,
+      targetDrive: GetTargetDriveFromChannelId(emoji.context.channelId),
+      fileId: emoji.threadId || emoji.context.target.fileId,
     },
   };
 
@@ -341,8 +346,8 @@ export const removeEmojiReaction = async (
     odinId: comment.authorOdinId,
     reaction: comment.content.body,
     file: {
-      targetDrive: GetTargetDriveFromChannelId(comment.postDetails.channelId),
-      fileId: comment.postDetails.postGlobalTransitId,
+      targetDrive: GetTargetDriveFromChannelId(comment.context.channelId),
+      fileId: comment.context.target.fileId,
     },
   };
 
@@ -361,17 +366,15 @@ interface ServerReactionsSummary {
 
 export const getReactionSummary = async (
   dotYouClient: DotYouClient,
-  odinId: string,
-  channelId: string,
-  postGlobalTransitId: string
+  context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/summary';
 
   const data = {
     file: {
-      targetDrive: GetTargetDriveFromChannelId(channelId),
-      fileId: postGlobalTransitId,
+      targetDrive: GetTargetDriveFromChannelId(context.channelId),
+      fileId: context.target.fileId,
     },
     cursor: undefined,
     maxRecords: 5,
@@ -408,24 +411,22 @@ interface ServerReactionsListWithCursor {
     odinId: string;
     reactionContent: string;
   }[];
-  cursor: number;
+  cursor: string;
 }
 
 export const getReactions = async (
   dotYouClient: DotYouClient,
-  odinId: string,
-  channelId: string,
-  postGlobalTransitId: string,
+  context: ReactionContext,
   pageSize = 15,
-  cursor?: number
-): Promise<{ reactions: ReactionFile[]; cursor: number } | undefined> => {
+  cursor?: string
+): Promise<{ reactions: ReactionFile[]; cursor: string } | undefined> => {
   const client = dotYouClient.createAxiosClient();
   const url = emojiRoot + '/list';
 
   const data = {
     file: {
-      targetDrive: GetTargetDriveFromChannelId(channelId),
-      fileId: postGlobalTransitId,
+      targetDrive: GetTargetDriveFromChannelId(context.channelId),
+      fileId: context.target.fileId,
     },
     cursor: cursor,
     maxRecords: pageSize,
