@@ -2,6 +2,7 @@
 export * from './provider/core/helpers/AesEncrypt';
 export * from './provider/core/helpers/DataUtil';
 export * from './provider/core/helpers/Types';
+export { getRandom16ByteArray } from './provider/core/DriveData/UploadHelpers';
 
 // DotYouClient
 export * from './provider/core/DotYouClient';
