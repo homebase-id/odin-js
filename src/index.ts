@@ -48,6 +48,7 @@ export * from './provider/public-app/posts/PostTypes';
 export * from './provider/public-app/posts/PostProvider';
 export * from './provider/public-app/posts/PostDefinitionProvider';
 export * from './provider/public-app/posts/PostReactionProvider';
+export * from './provider/public-app/posts/PostEmojiReactionProvider';
 
 // File
 export * from './provider/public-app/file/FileProvider';

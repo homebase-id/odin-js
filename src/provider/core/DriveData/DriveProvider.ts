@@ -642,14 +642,14 @@ const uploadUsingKeyHeader = async (
     encryptedMetaData
   );
 
-  const payloadIsFile = payload instanceof File;
-  if (payloadIsFile && keyHeader) {
-    throw new Error('Cannot upload a file with a key header');
-  }
+  // const payloadIsFile = payload instanceof File;
+  // if (payloadIsFile && keyHeader) {
+  //   throw new Error('Cannot upload a file with a key header');
+  // }
 
   const processedPayload = metadata.appData.contentIsComplete
     ? undefined
-    : !payloadIsFile && keyHeader
+    : keyHeader
     ? await encryptWithKeyheader(payload, keyHeader)
     : payload;
 

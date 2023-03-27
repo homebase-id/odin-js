@@ -25,9 +25,19 @@ export const encryptKeyHeader = async (
 };
 
 export const encryptWithKeyheader = async (
-  content: Uint8Array,
+  content: Uint8Array | File,
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
+  if (content instanceof File) {
+    throw new Error('Cannot upload a file with a key header');
+    // const encryptedStream = await streamEncryptWithCbc(
+    //   content.stream(),
+    //   keyHeader.aesKey,
+    //   keyHeader.iv
+    // );
+    // new File([encryptedStream], content.name, { type: content.type });
+  }
+
   const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
   return cipher;
 };
