@@ -54,7 +54,7 @@ export const parsePermissions = (permission: unknown) => {
     ? 1
     : lowered === 'write'
     ? 2
-    : lowered === 'readwrite'
+    : lowered === 'readwrite' || lowered === 'read, write'
     ? 3
     : lowered === 'writereactionsandcomments'
     ? 4
