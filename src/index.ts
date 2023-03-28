@@ -65,7 +65,8 @@ export * from './provider/owner-app/circleNetwork/CircleMembershipProvider';
 export * from './provider/owner-app/circleNetwork/CircleDataTypes';
 
 // Media
-export * from './provider/core/TransitData/ExternalMediaProvider';
+export * from './provider/core/TransitData/ExternalImageProvider';
+export * from './provider/core/TransitData/ExternalVideoProvider';
 
 // Posts
 export * from './provider/core/TransitData/ExternalPostsDataProvider';

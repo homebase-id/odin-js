@@ -1,3 +1,5 @@
+import { mergeByteArrays } from './DataUtil';
+
 const importKey = async (key: Uint8Array) => {
   return crypto.subtle.importKey(
     'raw',
@@ -146,19 +148,4 @@ export const streamDecryptWithCbc = async (
   }
 
   return dataStream.pipeThrough(decryptStream());
-};
-
-// https://stackoverflow.com/a/49129872/9014097
-const mergeByteArrays = (chunks: Uint8Array[]) => {
-  let size = 0;
-  chunks.forEach((item) => {
-    size += item.length;
-  });
-  const mergedArray = new Uint8Array(size);
-  let offset = 0;
-  chunks.forEach((item) => {
-    mergedArray.set(item, offset);
-    offset += item.length;
-  });
-  return mergedArray;
 };

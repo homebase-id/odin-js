@@ -147,3 +147,18 @@ export const splitSharedSecretEncryptedKeyHeader = (
 
   return { encryptedAesKey, encryptionVersion: parsedVersion, iv, type: 11 };
 };
+
+// https://stackoverflow.com/a/49129872/9014097
+export const mergeByteArrays = (chunks: Uint8Array[]) => {
+  let size = 0;
+  chunks.forEach((item) => {
+    size += item.length;
+  });
+  const mergedArray = new Uint8Array(size);
+  let offset = 0;
+  chunks.forEach((item) => {
+    mergedArray.set(item, offset);
+    offset += item.length;
+  });
+  return mergedArray;
+};

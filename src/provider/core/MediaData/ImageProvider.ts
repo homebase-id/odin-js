@@ -121,22 +121,13 @@ export const removeImage = async (
   return deleteFile(dotYouClient, targetDrive, imageFileId);
 };
 
-export const getDecryptedMetadata = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  systemFileType?: SystemFileType
-): Promise<DriveSearchResult> => {
-  return await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
-};
-
 export const getDecryptedThumbnailMeta = (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string
 ): Promise<ThumbnailMeta | undefined> => {
   //it seems these will be fine for images but for video and audio we must stream decrypt
-  return getDecryptedMetadata(dotYouClient, targetDrive, fileId).then((header) => {
+  return getFileHeader(dotYouClient, targetDrive, fileId).then((header) => {
     if (!header.fileMetadata.appData.previewThumbnail) {
       return;
     }
@@ -198,7 +189,7 @@ export const getDecryptedImageUrl = async (
 
   // If the contents is probably encrypted, we don't bother fetching the header
   if (!isProbablyEncrypted) {
-    const meta = await getDecryptedMetadata(dotYouClient, targetDrive, fileId, systemFileType);
+    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     if (!meta.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();
     }

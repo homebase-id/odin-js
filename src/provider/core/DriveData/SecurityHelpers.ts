@@ -1,7 +1,8 @@
 import { DotYouClient } from '../DotYouClient';
-import { cbcDecrypt, cbcEncrypt } from '../helpers/AesEncrypt';
+import { cbcDecrypt, cbcEncrypt, streamEncryptWithCbc } from '../helpers/AesEncrypt';
 import { base64ToUint8Array, byteArrayToString, jsonStringify64 } from '../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './DriveTypes';
+import { streamToByteArray } from './UploadHelpers';
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -29,13 +30,13 @@ export const encryptWithKeyheader = async (
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
   if (content instanceof File) {
-    throw new Error('Cannot upload a file with a key header');
-    // const encryptedStream = await streamEncryptWithCbc(
-    //   content.stream(),
-    //   keyHeader.aesKey,
-    //   keyHeader.iv
-    // );
-    // new File([encryptedStream], content.name, { type: content.type });
+    const encryptedStream = await streamEncryptWithCbc(
+      content.stream(),
+      keyHeader.aesKey,
+      keyHeader.iv
+    );
+
+    return streamToByteArray(encryptedStream, content.type);
   }
 
   const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);

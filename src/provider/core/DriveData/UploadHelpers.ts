@@ -1,5 +1,10 @@
 import { DotYouClient } from '../DotYouClient';
-import { uint8ArrayToBase64, stringToUint8Array, jsonStringify64 } from '../helpers/DataUtil';
+import {
+  uint8ArrayToBase64,
+  stringToUint8Array,
+  jsonStringify64,
+  mergeByteArrays,
+} from '../helpers/DataUtil';
 import { TransitInstructionSet } from '../TransitData/TransitTypes';
 import { KeyHeader, ThumbnailFile } from './DriveTypes';
 import { UploadFileMetadata, UploadInstructionSet, SystemFileType } from './DriveUploadTypes';
@@ -14,6 +19,24 @@ const toBlob = (o: unknown): Blob => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
   return new Blob([content]);
+};
+
+export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mimeType: string) => {
+  if (mimeType != null && typeof mimeType !== 'string') {
+    throw new Error('Invalid mimetype, expected string.');
+  }
+
+  const chunks = [];
+  const reader = stream.getReader();
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const { done, value } = await reader.read();
+    if (value) chunks.push(value);
+    if (done) {
+      return mergeByteArrays(chunks);
+    }
+  }
 };
 
 export const encryptMetaData = async (
