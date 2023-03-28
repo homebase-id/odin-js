@@ -16,6 +16,7 @@ import {
   ScheduleOptions,
   SendContents,
   TransitOptions,
+  TransferStatus,
 } from '../../core/DriveData/DriveUploadTypes';
 import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 import { getNewId, jsonStringify64, stringToUint8Array } from '../../core/helpers/DataUtil';
@@ -28,62 +29,16 @@ import {
 } from '../../core/TransitData/TransitProvider';
 import { TransitInstructionSet, TransitUploadResult } from '../../core/TransitData/TransitTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { RichText } from './PostTypes';
-
-export interface ReactionContext {
-  authorOdinId: string;
-  channelId: string;
-  // Target: Post or Comment details
-  target: { fileId: string; globalTransitId: string };
-}
-
-export interface ReactionContent {
-  body: string;
-  bodyAsRichText?: RichText;
-  hasAttachment?: boolean;
-}
-
-export interface ReactionFile {
-  globalTransitId?: string;
-
-  fileId?: string;
-  id?: string;
-  threadId?: string;
-
-  authorOdinId: string;
-  date?: number;
-  updated?: number;
-
-  content: ReactionContent;
-}
-
-export interface CommentReactionPreview extends ReactionFile {
-  reactions: EmojiReactionSummary;
-}
-
-export interface EmojiReactionSummary {
-  reactions: { emoji: string; count: number }[];
-  totalCount: number;
-}
-
-export interface CommentsReactionSummary {
-  comments: CommentReactionPreview[];
-  totalCount: number;
-}
-
-interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
-  attachment?: File;
-}
-
-export interface ReactionVm extends Omit<ReactionFile, 'content'> {
-  context: ReactionContext;
-  content: RawReactionContent;
-}
-
-export class ReactionConfig {
-  static readonly CommentFileType: number = 801;
-  static readonly EmojiFileType: number = 805;
-}
+import {
+  CommentReactionPreview,
+  CommentsReactionSummary,
+  EmojiReactionSummary,
+  RawReactionContent,
+  ReactionConfig,
+  ReactionContext,
+  ReactionFile,
+  ReactionVm,
+} from './PostTypes';
 
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
@@ -91,6 +46,7 @@ export const saveComment = async (
   comment: ReactionVm
 ): Promise<string> => {
   const encrypt = false;
+  const isLocal = comment.context.authorOdinId === dotYouClient.getHostname();
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
   let additionalThumbnails: ThumbnailFile[] | undefined;
@@ -143,7 +99,7 @@ export const saveComment = async (
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
 
-  if (dotYouClient.getHostname() === comment.context.authorOdinId) {
+  if (isLocal) {
     const transitOptions: TransitOptions = {
       useGlobalTransitId: true, // Needed to support having a reference to this file over transit
       recipients: [],
@@ -198,6 +154,17 @@ export const saveComment = async (
       encrypt
     );
 
+    if (
+      [
+        TransferStatus.PendingRetry,
+        TransferStatus.TotalRejectionClientShouldRetry,
+        TransferStatus.FileDoesNotAllowDistribution,
+        TransferStatus.RecipientReturnedAccessDenied,
+      ].includes(result.recipientStatus[comment.context.authorOdinId])
+    ) {
+      throw new Error(result.recipientStatus[comment.context.authorOdinId].toString());
+    }
+
     return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
   }
 };
@@ -207,12 +174,12 @@ export const removeComment = async (
   context: ReactionContext,
   commentFile: ReactionFile
 ) => {
+  const isLocal = context.authorOdinId === dotYouClient.getHostname();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
-  if (dotYouClient.getHostname() === context.authorOdinId) {
-    if (!commentFile.fileId) {
-      return;
-    }
+  if (isLocal) {
+    if (!commentFile.fileId) return;
+
     return await deleteFile(
       dotYouClient,
       targetDrive,
@@ -222,9 +189,8 @@ export const removeComment = async (
       'Comment'
     );
   } else {
-    if (!commentFile.globalTransitId) {
-      return;
-    }
+    if (!commentFile.globalTransitId) return;
+
     return await deleteFileOverTransit(
       dotYouClient,
       targetDrive,
@@ -241,6 +207,7 @@ export const getComments = async (
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: ReactionFile[]; cursorState: string }> => {
+  const isLocal = context.authorOdinId === dotYouClient.getHostname();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -254,10 +221,9 @@ export const getComments = async (
     includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
   };
 
-  const result =
-    context.authorOdinId === dotYouClient.getHostname()
-      ? await queryBatch(dotYouClient, qp, ro)
-      : await queryBatchOverTransit(dotYouClient, context.authorOdinId, qp, ro);
+  const result = isLocal
+    ? await queryBatch(dotYouClient, qp, ro)
+    : await queryBatchOverTransit(dotYouClient, context.authorOdinId, qp, ro);
 
   const comments: ReactionFile[] = (
     await Promise.all(
@@ -283,6 +249,8 @@ const dsrToComment = async (
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<ReactionFile> => {
+  const isLocal = odinId === dotYouClient.getHostname();
+
   const params = [
     targetDrive,
     dsr.fileId,
@@ -291,10 +259,9 @@ const dsrToComment = async (
     includeMetadataHeader,
   ] as const;
 
-  const contentData =
-    odinId === dotYouClient.getHostname()
-      ? await getPayload<RawReactionContent>(dotYouClient, ...params)
-      : await getPayloadOverTransit<RawReactionContent>(dotYouClient, odinId, ...params);
+  const contentData = isLocal
+    ? await getPayload<RawReactionContent>(dotYouClient, ...params)
+    : await getPayloadOverTransit<RawReactionContent>(dotYouClient, odinId, ...params);
 
   return {
     fileId: dsr.fileId,

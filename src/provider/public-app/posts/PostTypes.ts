@@ -1,7 +1,6 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { EmbeddedThumb, TargetDrive } from '../../core/DriveData/DriveTypes';
 
-import { CommentsReactionSummary, EmojiReactionSummary } from './PostReactionProvider';
 import { toGuidId } from '../../core/helpers/DataUtil';
 
 export interface ChannelDefinition {
@@ -123,4 +122,59 @@ export interface Video extends PostContent {
 export interface Tweet extends PostContent {
   type: 'Tweet';
   // linkMeta?: LinkMeta;
+}
+
+export interface ReactionContext {
+  authorOdinId: string;
+  channelId: string;
+  // Target: Post or Comment details
+  target: { fileId: string; globalTransitId: string };
+}
+
+export interface ReactionContent {
+  body: string;
+  bodyAsRichText?: RichText;
+  hasAttachment?: boolean;
+}
+
+export interface ReactionFile {
+  globalTransitId?: string;
+
+  fileId?: string;
+  id?: string;
+  threadId?: string;
+
+  authorOdinId: string;
+  date?: number;
+  updated?: number;
+
+  content: ReactionContent;
+}
+
+export interface CommentReactionPreview extends ReactionFile {
+  reactions: EmojiReactionSummary;
+}
+
+export interface EmojiReactionSummary {
+  reactions: { emoji: string; count: number }[];
+  totalCount: number;
+}
+
+export interface CommentsReactionSummary {
+  comments: CommentReactionPreview[];
+  totalCount: number;
+}
+
+export interface ReactionVm extends Omit<ReactionFile, 'content'> {
+  context: ReactionContext;
+  content: RawReactionContent;
+}
+
+export interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
+  attachment?: File;
+}
+
+export class ReactionConfig {
+  static readonly CommentFileType: number = 801;
+  static readonly EmojiFileType: number = 805;
 }
