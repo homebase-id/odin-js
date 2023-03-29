@@ -69,9 +69,7 @@ export const getChannelDefinitions = async (
         const definition = await getPayload<ChannelDefinition>(
           dotYouClient,
           channelDrive,
-          dsr.fileId,
-          dsr.fileMetadata,
-          dsr.sharedSecretEncryptedKeyHeader,
+          dsr,
           response.includeMetadataHeader
         );
 
@@ -208,9 +206,7 @@ const getChannelDefinitionInternal = async (
       const definition = await getPayload<ChannelDefinition>(
         dotYouClient,
         targetDrive,
-        dsr.fileId,
-        dsr.fileMetadata,
-        dsr.sharedSecretEncryptedKeyHeader,
+        dsr,
         response.includeMetadataHeader
       );
 

@@ -251,13 +251,7 @@ const dsrToComment = async (
 ): Promise<ReactionFile> => {
   const isLocal = odinId === dotYouClient.getHostname();
 
-  const params = [
-    targetDrive,
-    dsr.fileId,
-    dsr.fileMetadata,
-    dsr.sharedSecretEncryptedKeyHeader,
-    includeMetadataHeader,
-  ] as const;
+  const params = [targetDrive, dsr, includeMetadataHeader] as const;
 
   const contentData = isLocal
     ? await getPayload<RawReactionContent>(dotYouClient, ...params)

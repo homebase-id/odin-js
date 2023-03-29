@@ -610,7 +610,7 @@ export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | File,
+  payload: Uint8Array | File | undefined,
   thumbnails?: ThumbnailFile[],
   encrypt = true
 ): Promise<UploadResult> => {
@@ -623,7 +623,7 @@ const uploadUsingKeyHeader = async (
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | File,
+  payload: Uint8Array | File | undefined,
   thumbnails?: ThumbnailFile[]
 ): Promise<UploadResult> => {
   // Rebuild instructions without the systemFileType
@@ -647,11 +647,12 @@ const uploadUsingKeyHeader = async (
   //   throw new Error('Cannot upload a file with a key header');
   // }
 
-  const processedPayload = metadata.appData.contentIsComplete
-    ? undefined
-    : keyHeader
-    ? await encryptWithKeyheader(payload, keyHeader)
-    : payload;
+  const processedPayload =
+    metadata.appData.contentIsComplete || !payload
+      ? undefined
+      : keyHeader
+      ? await encryptWithKeyheader(payload, keyHeader)
+      : payload;
 
   const data = await buildFormData(
     strippedInstructions,
@@ -669,12 +670,16 @@ const uploadUsingKeyHeader = async (
 export const getPayload = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  fileId: string,
-  fileMetadata: FileMetadata,
-  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader,
+  dsr: {
+    fileId: string;
+    fileMetadata: FileMetadata;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+  },
   includesJsonContent: boolean,
   systemFileType?: SystemFileType
 ): Promise<T> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+
   const keyheader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;

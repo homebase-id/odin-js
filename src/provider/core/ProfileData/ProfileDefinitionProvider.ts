@@ -60,9 +60,7 @@ export const getProfileDefinitions = async (
         const definition = await getPayload<ProfileDefinition>(
           dotYouClient,
           profileDrive,
-          dsr.fileId,
-          dsr.fileMetadata,
-          dsr.sharedSecretEncryptedKeyHeader,
+          dsr,
           response.includeMetadataHeader
         );
 
@@ -241,13 +239,11 @@ export const getProfileSections = async (
   if (response.searchResults.length >= 1) {
     const sections = await Promise.all(
       response.searchResults.map(
-        async (result) =>
+        async (dsr) =>
           await getPayload<ProfileSection>(
             dotYouClient,
             targetDrive,
-            result.fileId,
-            result.fileMetadata,
-            result.sharedSecretEncryptedKeyHeader,
+            dsr,
             response.includeMetadataHeader
           )
       )
@@ -294,9 +290,7 @@ const getProfileDefinitionInternal = async (
     const definition = await getPayload<ProfileDefinition>(
       dotYouClient,
       targetDrive,
-      dsr.fileId,
-      dsr.fileMetadata,
-      dsr.sharedSecretEncryptedKeyHeader,
+      dsr,
       response.includeMetadataHeader
     );
 
@@ -334,9 +328,7 @@ const getProfileSectionInternal = async (
     const definition = await getPayload<ProfileSection>(
       dotYouClient,
       targetDrive,
-      dsr.fileId,
-      dsr.fileMetadata,
-      dsr.sharedSecretEncryptedKeyHeader,
+      dsr,
       response.includeMetadataHeader
     );
 

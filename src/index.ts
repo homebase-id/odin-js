@@ -76,7 +76,3 @@ export * from './provider/core/TransitData/ExternalProfileDataProvider';
 
 // Follow
 export * from './provider/owner-app/follow/FollowProvider';
-
-// Photos (TODO: move to photo-app)
-export * from './provider/owner-app/photos/PhotoTypes';
-export * from './provider/owner-app/photos/PhotoProvider';

@@ -296,14 +296,7 @@ const dsrToPostFile = async <T extends PostContent>(
   includeMetadataHeader: boolean
 ): Promise<PostFile<T> | undefined> => {
   try {
-    const content = await getPayload<T>(
-      dotYouClient,
-      targetDrive,
-      dsr.fileId,
-      dsr.fileMetadata,
-      dsr.sharedSecretEncryptedKeyHeader,
-      includeMetadataHeader
-    );
+    const content = await getPayload<T>(dotYouClient, targetDrive, dsr, includeMetadataHeader);
 
     const file: PostFile<T> = {
       fileId: dsr.fileId,

@@ -48,9 +48,7 @@ const getSocialFeedPostPayload = async (
 
   const getPayloadParams = [
     // targetDrive,
-    fileId,
-    fileMetadata,
-    sharedSecretEncryptedKeyHeader,
+    { fileId, fileMetadata, sharedSecretEncryptedKeyHeader },
     includesJsonContent,
   ] as const;
 
@@ -238,9 +236,7 @@ export const getRecentsOverTransit = async (
             dotYouClient,
             odinId,
             targetDrive,
-            dsr.fileId,
-            dsr.fileMetadata,
-            dsr.sharedSecretEncryptedKeyHeader,
+            dsr,
             result.includeMetadataHeader
           ),
           odinId: odinId,
@@ -281,9 +277,7 @@ export const getChannelOverTransit = async (
         dotYouClient,
         odinId,
         targetDrive,
-        dsr.fileId,
-        dsr.fileMetadata,
-        dsr.sharedSecretEncryptedKeyHeader,
+        dsr,
         response.includeMetadataHeader
       );
     }
@@ -326,9 +320,7 @@ export const getPostOverTransit = async (
         dotYouClient,
         odinId,
         targetDrive,
-        dsr.fileId,
-        dsr.fileMetadata,
-        dsr.sharedSecretEncryptedKeyHeader,
+        dsr,
         response.includeMetadataHeader
       ),
       odinId: odinId,

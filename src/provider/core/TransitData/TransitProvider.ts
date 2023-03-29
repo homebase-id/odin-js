@@ -81,11 +81,15 @@ export const getPayloadOverTransit = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
-  fileId: string,
-  fileMetadata: FileMetadata,
-  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader,
+  dsr: {
+    fileId: string;
+    fileMetadata: FileMetadata;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+  },
   includesJsonContent: boolean
 ): Promise<T> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+
   const keyheader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;

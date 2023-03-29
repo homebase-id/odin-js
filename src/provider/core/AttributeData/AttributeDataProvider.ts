@@ -168,9 +168,7 @@ export const dsrToAttributeFile = async (
     const attrPayload = await getPayload<AttributeFile>(
       dotYouClient,
       targetDrive,
-      dsr.fileId,
-      dsr.fileMetadata,
-      dsr.sharedSecretEncryptedKeyHeader,
+      dsr,
       includeMetadataHeader
     );
     return {

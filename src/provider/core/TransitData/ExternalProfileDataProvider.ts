@@ -34,9 +34,7 @@ export const getProfileAttributesOverTransit = async (
           dotYouClient,
           odinId,
           targetDrive,
-          dsr.fileId,
-          dsr.fileMetadata,
-          dsr.sharedSecretEncryptedKeyHeader,
+          dsr,
           result.includeMetadataHeader
         );
 
