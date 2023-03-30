@@ -171,4 +171,34 @@ export const getDecryptedVideo = async (
       console.error('error from fetch promises', err);
       return null;
     });
+
+  // const mediaSource = new MediaSource();
+
+  // mediaSource.addEventListener('sourceopen', async function () {
+  //   // URL.revokeObjectURL(video.src);
+
+  //   const sourceBuffer = mediaSource.addSourceBuffer('video/mp4;codecs="avc1.640015,mp4a.40.2"');
+
+  //   const writable = new WritableStream({
+  //     write(chunk) {
+  //       return new Promise((resolve) => {
+  //         sourceBuffer.appendBuffer(chunk);
+  //         sourceBuffer.addEventListener(
+  //           'updateend',
+  //           () => {
+  //             resolve();
+  //           },
+  //           { once: true }
+  //         );
+  //       });
+  //     },
+  //     close() {
+  //       mediaSource.endOfStream();
+  //     },
+  //   });
+
+  //   if (stream) stream.pipeTo(writable);
+  // });
+
+  // return URL.createObjectURL(mediaSource);
 };
