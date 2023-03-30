@@ -24,3 +24,7 @@ export interface ThumbnailInstruction {
   width: number;
   height: number;
 }
+
+export class MediaConfig {
+  public static readonly MediaFileType = 0;
+}

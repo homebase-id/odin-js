@@ -1,10 +1,4 @@
-import {
-  DriveSearchResult,
-  EmbeddedThumb,
-  ImageContentType,
-  ImageSize,
-  TargetDrive,
-} from '../DriveData/DriveTypes';
+import { EmbeddedThumb, ImageContentType, ImageSize, TargetDrive } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
   SecurityGroupType,
@@ -25,7 +19,7 @@ import {
   uploadFile,
 } from '../DriveData/DriveProvider';
 import { getNewId, base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../helpers/DataUtil';
-import { ImageUploadResult, ThumbnailMeta } from './MediaTypes';
+import { ImageUploadResult, MediaConfig, ThumbnailMeta } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 
@@ -91,7 +85,7 @@ export const uploadImage = async (
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
-      fileType: 0,
+      fileType: MediaConfig.MediaFileType,
       jsonContent: null,
       previewThumbnail: previewThumbnail,
       additionalThumbnails: thumbsizes,
