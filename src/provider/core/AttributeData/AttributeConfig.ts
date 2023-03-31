@@ -23,8 +23,32 @@ export class BuiltInAttributes {
   static readonly LinkedinUsername = toGuidId('linkedin_username');
   static readonly TiktokUsername = toGuidId('tiktok_username');
   static readonly TwitterUsername = toGuidId('twitter_username');
+  static readonly YoutubeUsername = toGuidId('youtube_username');
+  static readonly DiscordUsername = toGuidId('discord_username');
+  static readonly EpicUsername = toGuidId('epic_username');
+  static readonly RiotUsername = toGuidId('riot_username');
+  static readonly SteamUsername = toGuidId('steam_username');
+  static readonly MinecraftUsername = toGuidId('minecraft_username');
   static readonly CreditCard = toGuidId('creditcard');
   static readonly FullBio = toGuidId('full_bio');
   static readonly ShortBio = toGuidId('short_bio');
   static readonly Link = toGuidId('link');
+
+  static readonly AllSocial = [
+    BuiltInAttributes.TwitterUsername,
+    BuiltInAttributes.FacebookUsername,
+    BuiltInAttributes.InstagramUsername,
+    BuiltInAttributes.TiktokUsername,
+    BuiltInAttributes.LinkedinUsername,
+    BuiltInAttributes.OdinIdentity,
+    BuiltInAttributes.YoutubeUsername,
+    BuiltInAttributes.DiscordUsername,
+  ];
+
+  static readonly AllGames = [
+    BuiltInAttributes.EpicUsername,
+    BuiltInAttributes.RiotUsername,
+    BuiltInAttributes.SteamUsername,
+    BuiltInAttributes.MinecraftUsername,
+  ];
 }

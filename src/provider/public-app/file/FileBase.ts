@@ -34,14 +34,7 @@ const personalInfoPhotoQueryParam: FileQueryParams = {
 const SocialQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAtLeastOne: [
-    BuiltInAttributes.TwitterUsername,
-    BuiltInAttributes.FacebookUsername,
-    BuiltInAttributes.InstagramUsername,
-    BuiltInAttributes.TiktokUsername,
-    BuiltInAttributes.LinkedinUsername,
-    BuiltInAttributes.OdinIdentity,
-  ],
+  tagsMatchAtLeastOne: [...BuiltInAttributes.AllSocial, ...BuiltInAttributes.AllGames],
 };
 
 const themeFileQueryParam: FileQueryParams = {
