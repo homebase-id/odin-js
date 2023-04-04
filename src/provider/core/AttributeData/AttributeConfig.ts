@@ -45,6 +45,8 @@ export class BuiltInAttributes {
     BuiltInAttributes.OdinIdentity,
     BuiltInAttributes.YoutubeUsername,
     BuiltInAttributes.DiscordUsername,
+    BuiltInAttributes.GithubUsername,
+    BuiltInAttributes.StackoverflowUsername,
   ];
 
   static readonly AllGames = [
