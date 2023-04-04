@@ -29,6 +29,8 @@ export class BuiltInAttributes {
   static readonly RiotUsername = toGuidId('riot_username');
   static readonly SteamUsername = toGuidId('steam_username');
   static readonly MinecraftUsername = toGuidId('minecraft_username');
+  static readonly GithubUsername = toGuidId('github_username');
+  static readonly StackoverflowUsername = toGuidId('stackoverflow_username');
   static readonly CreditCard = toGuidId('creditcard');
   static readonly FullBio = toGuidId('full_bio');
   static readonly ShortBio = toGuidId('short_bio');
