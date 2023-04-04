@@ -44,22 +44,25 @@ export class BlogConfig {
   };
 }
 
-export type PostType = 'Article' | 'Image' | 'Video' | 'Tweet';
+export type PostType = 'Article' | 'Media' | 'Tweet';
 
 export const postTypeToDataType = (type: PostType): number => {
   switch (type) {
     case 'Tweet':
       return 100;
-    case 'Image':
+    case 'Media':
       return 200;
     case 'Article':
       return 300;
-    case 'Video':
-      return 400;
   }
 
   throw 'Invalid post type';
 };
+
+export interface MediaFile {
+  fileId: string;
+  type: 'video' | 'image';
+}
 
 export interface PostFile<T extends PostContent> {
   fileId?: string;
@@ -85,8 +88,8 @@ export interface PostContent {
   captionAsRichText?: RichText;
   slug: string;
   dateUnixTime: number;
-  primaryImageFileId?: string;
-  type: 'Article' | 'Image' | 'Video' | 'Tweet';
+  primaryMediaFile?: MediaFile;
+  type: 'Article' | 'Media' | 'Tweet';
 }
 
 export interface Article extends PostContent {
@@ -101,14 +104,9 @@ export interface ReadTimeStats {
   minutes: number;
 }
 
-export interface Image extends PostContent {
-  type: 'Image';
-  imageFileIds?: string[];
-}
-
-export interface Video extends PostContent {
-  videoFileId: string;
-  type: 'Video';
+export interface Media extends PostContent {
+  type: 'Media';
+  mediaFiles?: MediaFile[];
 }
 
 // On hold for now, needs a proxy to get the linkMeta externally
