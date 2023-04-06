@@ -23,7 +23,7 @@ export const uploadVideo = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  file: File,
+  file: Uint8Array | File,
   uploadMeta?: {
     tag?: string | undefined | string[];
     uniqueId?: string;
