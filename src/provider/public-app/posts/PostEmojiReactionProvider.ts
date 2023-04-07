@@ -247,7 +247,7 @@ export const getMyReactions = async (
   } else {
     const url = emojiRootTransit + '/listbyidentity';
     return client
-      .post<string[]>(url, { odinId: context.authorOdinId, request: data })
+      .post<string[]>(url, { odinId: context.authorOdinId, ...data })
       .then((response) => {
         return response.data?.map((emojiString) => JSON.parse(emojiString).emoji);
       })

@@ -18,37 +18,43 @@ export const getDecryptedMetadataOverTransit = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  systemFileType?: SystemFileType
 ): Promise<DriveSearchResult> => {
-  return await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId);
+  return await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, systemFileType);
 };
 
 export const getDecryptedThumbnailMetaOverTransit = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  systemFileType?: SystemFileType
 ): Promise<ThumbnailMeta | undefined> => {
   //it seems these will be fine for images but for video and audio we must stream decrypt
-  return getDecryptedMetadataOverTransit(dotYouClient, odinId, targetDrive, fileId).then(
-    (header) => {
-      if (!header.fileMetadata.appData.previewThumbnail) {
-        return;
-      }
-
-      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-      const buffer = base64ToUint8Array(previewThumbnail.content);
-      const url = window.URL.createObjectURL(
-        new Blob([buffer], { type: previewThumbnail.contentType })
-      );
-
-      return {
-        naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-        sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
-        url: url,
-      };
+  return getDecryptedMetadataOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    systemFileType
+  ).then((header) => {
+    if (!header.fileMetadata.appData.previewThumbnail) {
+      return;
     }
-  );
+
+    const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+    const buffer = base64ToUint8Array(previewThumbnail.content);
+    const url = window.URL.createObjectURL(
+      new Blob([buffer], { type: previewThumbnail.contentType })
+    );
+
+    return {
+      naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+      sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
+      url: url,
+    };
+  });
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
@@ -60,7 +66,13 @@ export const getDecryptedImageUrlOverTransit = async (
   size?: ImageSize,
   systemFileType?: SystemFileType
 ): Promise<string> => {
-  const meta = await getDecryptedMetadataOverTransit(dotYouClient, odinId, targetDrive, fileId);
+  const meta = await getDecryptedMetadataOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    systemFileType
+  );
   if (!meta.fileMetadata.payloadIsEncrypted && size) {
     // Build get url:
     return `https://${odinId}/api/youauth/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
