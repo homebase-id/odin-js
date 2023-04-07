@@ -164,14 +164,14 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
           try {
             const targetDrive = GetTargetDriveFromChannelId(blog.content.channelId);
 
-            if (!blog?.content?.primaryImageFileId) {
+            if (!blog?.content?.primaryMediaFile?.fileId) {
               return undefined;
             }
 
             const imageFileHeader = await getFileHeader(
               dotYouClient,
               targetDrive,
-              blog.content.primaryImageFileId
+              blog.content.primaryMediaFile?.fileId
             );
             const uniqueId = imageFileHeader.fileMetadata.appData.uniqueId;
 
@@ -185,7 +185,7 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
             }
 
             return {
-              name: blog.content.primaryImageFileId,
+              name: blog.content.primaryMediaFile?.fileId,
               queryParams: params,
               resultOptions: BASE_RESULT_OPTIONS,
             };

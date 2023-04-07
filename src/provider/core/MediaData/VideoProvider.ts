@@ -16,6 +16,7 @@ import { streamDecryptWithCbc } from '../helpers/AesEncrypt';
 import { getNewId, splitSharedSecretEncryptedKeyHeader, stringify } from '../helpers/DataUtil';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import { VideoUploadResult } from './MediaTypes';
+import { getMediaSourceFromStream } from './Video/VideoHelpers';
 
 export type VideoContentType = 'video/mp4';
 
@@ -81,43 +82,35 @@ export const uploadVideo = async (
   return { fileId: result.file.fileId, type: 'video' };
 };
 
-export const getDecryptedVideo = async (
+const getDirectVideoUrl = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  systemFileType?: SystemFileType
+) => {
+  const ss = dotYouClient.getSharedSecret();
+
+  const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringify({
+    ...targetDrive,
+    fileId,
+    xfst: systemFileType || 'Standard',
+  })}`;
+
+  if (ss) {
+    return await encryptUrl(directUrl, ss);
+  }
+
+  return directUrl;
+};
+
+const getVideoStream = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
   isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
-): Promise<string | null> => {
-  const getDirectUrl = async () => {
-    const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringify({
-      ...targetDrive,
-      fileId,
-      xfst: systemFileType || 'Standard',
-    })}`;
-
-    if (ss) {
-      return await encryptUrl(directUrl, ss);
-    }
-
-    return directUrl;
-  };
-
-  const ss = dotYouClient.getSharedSecret();
-
-  // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss) {
-    return await getDirectUrl();
-  }
-
-  // If the contents is probably encrypted, we don't bother fetching the header
-  if (!isProbablyEncrypted) {
-    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
-    if (!meta.fileMetadata.payloadIsEncrypted) {
-      return await getDirectUrl();
-    }
-  }
-
-  return await fetch(await getDirectUrl())
+): Promise<ReadableStream<Uint8Array> | null> => {
+  return await fetch(await getDirectVideoUrl(dotYouClient, targetDrive, fileId, systemFileType))
     .then((response) => {
       return { body: response.body, headers: response.headers };
     })
@@ -163,7 +156,38 @@ export const getDecryptedVideo = async (
         return decryptedStream;
       }
       return stream?.body || null;
-    })
+    });
+};
+
+export const getDecryptedVideo = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  isProbablyEncrypted?: boolean,
+  systemFileType?: SystemFileType
+): Promise<string | null> => {
+  const ss = dotYouClient.getSharedSecret();
+
+  // If there is no shared secret, we wouldn't even be able to decrypt
+  if (!ss) {
+    return await getDirectVideoUrl(dotYouClient, targetDrive, fileId, systemFileType);
+  }
+
+  // If the contents is probably encrypted, we don't bother fetching the header
+  if (!isProbablyEncrypted) {
+    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+    if (!meta.fileMetadata.payloadIsEncrypted) {
+      return await getDirectVideoUrl(dotYouClient, targetDrive, fileId, systemFileType);
+    }
+  }
+
+  return await getVideoStream(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    isProbablyEncrypted,
+    systemFileType
+  )
     .then((stream) => new Response(stream))
     .then((response) => response.blob())
     .then((blob) => URL.createObjectURL(blob))
@@ -171,34 +195,23 @@ export const getDecryptedVideo = async (
       console.error('error from fetch promises', err);
       return null;
     });
+};
 
-  // const mediaSource = new MediaSource();
+export const getDecryptedVideoMediaSource = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  isProbablyEncrypted?: boolean,
+  systemFileType?: SystemFileType
+) => {
+  const stream = await getVideoStream(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    isProbablyEncrypted,
+    systemFileType
+  );
 
-  // mediaSource.addEventListener('sourceopen', async function () {
-  //   // URL.revokeObjectURL(video.src);
-
-  //   const sourceBuffer = mediaSource.addSourceBuffer('video/mp4;codecs="avc1.640015,mp4a.40.2"');
-
-  //   const writable = new WritableStream({
-  //     write(chunk) {
-  //       return new Promise((resolve) => {
-  //         sourceBuffer.appendBuffer(chunk);
-  //         sourceBuffer.addEventListener(
-  //           'updateend',
-  //           () => {
-  //             resolve();
-  //           },
-  //           { once: true }
-  //         );
-  //       });
-  //     },
-  //     close() {
-  //       mediaSource.endOfStream();
-  //     },
-  //   });
-
-  //   if (stream) stream.pipeTo(writable);
-  // });
-
-  // return URL.createObjectURL(mediaSource);
+  if (!stream) return null;
+  return getMediaSourceFromStream(stream);
 };
