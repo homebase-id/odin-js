@@ -125,6 +125,7 @@ export const getSocialFeed = async (
         previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
         reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
         additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
+        payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
       } as PostFileVm<PostContent>;
     })
   );

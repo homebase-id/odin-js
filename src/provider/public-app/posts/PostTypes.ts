@@ -126,7 +126,7 @@ export interface ReactionContext {
   authorOdinId: string;
   channelId: string;
   // Target: Post or Comment details
-  target: { fileId: string; globalTransitId: string; isEncrypted?: boolean };
+  target: { fileId: string; globalTransitId: string; isEncrypted: boolean };
 }
 
 export interface ReactionContent {
@@ -141,6 +141,8 @@ export interface ReactionFile {
   fileId?: string;
   id?: string;
   threadId?: string;
+
+  payloadIsEncrypted?: boolean;
 
   authorOdinId: string;
   date?: number;

@@ -45,7 +45,7 @@ export const saveComment = async (
   dotYouClient: DotYouClient,
   comment: ReactionVm
 ): Promise<string> => {
-  const encrypt = false;
+  const encrypt = comment.context.target.isEncrypted;
   const isLocal = comment.context.authorOdinId === dotYouClient.getHostname();
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
@@ -266,6 +266,7 @@ const dsrToComment = async (
     content: { ...contentData },
     date: dsr.fileMetadata.created,
     updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
+    payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
   };
 };
 
