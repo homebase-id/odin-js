@@ -315,7 +315,11 @@ export const parseReactionPreview = (
               };
             } catch (ex) {
               console.error('[DotYouCore-js] parse failed for', commentPreview);
-              return;
+              return {
+                authorOdinId: commentPreview.odinId,
+                content: { body: 'PROBABLY ENCRYPTED' },
+                reactions: parseReactions(commentPreview.reactions),
+              };
             }
           })
           .filter(Boolean) as CommentReactionPreview[],

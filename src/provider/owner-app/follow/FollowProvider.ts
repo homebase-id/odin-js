@@ -89,3 +89,18 @@ export const fetchFollowers = async (
     })
     .catch(dotYouClient.handleErrorResponse);
 };
+
+export const fetchFollower = async (
+  dotYouClient: DotYouClient,
+  odinId: string
+): Promise<FollowRequest> => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + `/follower?odinId=${odinId}`;
+
+  return client
+    .get(url)
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};
