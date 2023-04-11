@@ -96,7 +96,9 @@ export const saveComment = async (
       }),
     },
     payloadIsEncrypted: encrypt,
-    accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+    accessControlList: {
+      requiredSecurityGroup: encrypt ? SecurityGroupType.Connected : SecurityGroupType.Anonymous,
+    },
   };
 
   if (isLocal) {
