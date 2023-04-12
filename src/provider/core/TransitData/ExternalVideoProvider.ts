@@ -1,10 +1,10 @@
 import { DotYouClient } from '../DotYouClient';
 import { TargetDrive } from '../DriveData/DriveTypes';
 import { SystemFileType } from '../DriveData/DriveUploadTypes';
-import { decryptKeyHeader } from '../DriveData/SecurityHelpers';
+import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
+import { VideoMetadata } from '../MediaData/MediaTypes';
 import { streamDecryptWithCbc } from '../helpers/AesEncrypt';
 import { splitSharedSecretEncryptedKeyHeader, stringify } from '../helpers/DataUtil';
-import { getMediaSourceFromStream } from '../MediaData/Video/VideoHelpers';
 import { getFileHeaderOverTransit } from './TransitProvider';
 
 const getDirectVideoUrl = async (
@@ -22,7 +22,7 @@ const getDirectVideoUrl = async (
   return directUrl;
 };
 
-const getVideoStream = async (
+export const getDecryptedVideoStreamOverTransit = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -108,7 +108,7 @@ export const getDecryptedVideoOverTransit = async (
     }
   }
 
-  return await getVideoStream(
+  return await getDecryptedVideoStreamOverTransit(
     dotYouClient,
     odinId,
     targetDrive,
@@ -125,23 +125,25 @@ export const getDecryptedVideoOverTransit = async (
     });
 };
 
-export const getDecryptedVideoMediaSourceOverTransit = async (
+export const getDecryptedVideoMetadataOverTransit = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
 ) => {
-  const stream = await getVideoStream(
+  const fileHeader = await getFileHeaderOverTransit(
     dotYouClient,
     odinId,
     targetDrive,
     fileId,
-    isProbablyEncrypted,
     systemFileType
   );
+  const fileMetadata = fileHeader.fileMetadata;
 
-  if (!stream) return null;
-  return getMediaSourceFromStream(stream);
+  const keyheader = fileMetadata.payloadIsEncrypted
+    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+    : undefined;
+
+  return await decryptJsonContent<VideoMetadata>(fileMetadata, keyheader);
 };
