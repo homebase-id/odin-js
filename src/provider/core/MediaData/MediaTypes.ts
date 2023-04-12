@@ -19,6 +19,10 @@ export interface ImageUploadResult extends MediaUploadResult {
   previewThumbnail: EmbeddedThumb;
 }
 
+export interface VideoMetadata {
+  mimeType: string;
+}
+
 export interface ThumbnailInstruction {
   quality: number;
   width: number;

@@ -10,13 +10,17 @@ import {
   UploadResult,
   SystemFileType,
 } from '../DriveData/DriveUploadTypes';
-import { decryptKeyHeader } from '../DriveData/SecurityHelpers';
+import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { streamDecryptWithCbc } from '../helpers/AesEncrypt';
-import { getNewId, splitSharedSecretEncryptedKeyHeader, stringify } from '../helpers/DataUtil';
+import {
+  getNewId,
+  jsonStringify64,
+  splitSharedSecretEncryptedKeyHeader,
+  stringify,
+} from '../helpers/DataUtil';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
-import { VideoUploadResult } from './MediaTypes';
-import { getMediaSourceFromStream } from './Video/VideoHelpers';
+import { VideoMetadata, VideoUploadResult } from './MediaTypes';
 
 export type VideoContentType = 'video/mp4';
 
@@ -25,6 +29,7 @@ export const uploadVideo = async (
   targetDrive: TargetDrive,
   acl: AccessControlList,
   file: Uint8Array | File,
+  fileMetadata?: VideoMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];
     uniqueId?: string;
@@ -63,7 +68,7 @@ export const uploadVideo = async (
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: 0,
-      jsonContent: null,
+      jsonContent: jsonStringify64(fileMetadata),
       userDate: uploadMeta?.userDate,
     },
     payloadIsEncrypted: encrypt,
@@ -103,7 +108,7 @@ const getDirectVideoUrl = async (
   return directUrl;
 };
 
-const getVideoStream = async (
+export const getDecryptedVideoStream = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
@@ -181,7 +186,7 @@ export const getDecryptedVideo = async (
     }
   }
 
-  return await getVideoStream(
+  return await getDecryptedVideoStream(
     dotYouClient,
     targetDrive,
     fileId,
@@ -197,21 +202,18 @@ export const getDecryptedVideo = async (
     });
 };
 
-export const getDecryptedVideoMediaSource = async (
+export const getDecryptedVideoMetadata = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
 ) => {
-  const stream = await getVideoStream(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    isProbablyEncrypted,
-    systemFileType
-  );
+  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  const fileMetadata = fileHeader.fileMetadata;
 
-  if (!stream) return null;
-  return getMediaSourceFromStream(stream);
+  const keyheader = fileMetadata.payloadIsEncrypted
+    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+    : undefined;
+
+  return await decryptJsonContent<VideoMetadata>(fileMetadata, keyheader);
 };
