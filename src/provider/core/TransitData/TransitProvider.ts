@@ -327,7 +327,8 @@ export const getDrivesByTypeOverTransit = async (
   type: string,
   pageNumber: number,
   pageSize: number,
-  odinId: string
+  odinId: string,
+  systemFileType?: SystemFileType
 ): Promise<PagedResult<DriveDefinition>> => {
   const params = {
     driveType: type,
@@ -336,8 +337,14 @@ export const getDrivesByTypeOverTransit = async (
     odinId: odinId,
   };
 
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
   const client = dotYouClient.createAxiosClient();
-  return client.post('transit/query/metadata/type', params).then((response) => {
+  return client.post('transit/query/metadata/type', params, config).then((response) => {
     return {
       ...response.data,
       results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {
