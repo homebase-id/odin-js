@@ -112,6 +112,10 @@ export interface DriveDefinition {
 
 export interface ReactionPreview {
   comments: {
+    created: number;
+    updated: number;
+    fileId: string;
+    isEncrypted: boolean;
     odinId: string;
     jsonContent: string;
     reactions: { key: string; count: string; reactionContent: string }[];

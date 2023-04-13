@@ -312,7 +312,11 @@ export const parseReactionPreview = (
             try {
               return {
                 authorOdinId: commentPreview.odinId,
-                content: JSON.parse(commentPreview.jsonContent),
+                content:
+                  commentPreview.isEncrypted && !commentPreview.jsonContent.length
+                    ? { body: '' }
+                    : JSON.parse(commentPreview.jsonContent),
+                payloadIsEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };
             } catch (ex) {
