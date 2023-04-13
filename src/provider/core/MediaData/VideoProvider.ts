@@ -1,5 +1,5 @@
 import { DotYouClient } from '../DotYouClient';
-import { getFileHeader, uploadFile } from '../DriveData/DriveProvider';
+import { getFileHeader, getPayloadBytes, uploadFile } from '../DriveData/DriveProvider';
 import { TargetDrive } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
@@ -162,6 +162,40 @@ export const getDecryptedVideoStream = async (
       }
       return stream?.body || null;
     });
+};
+
+export const getDecryptedVideoChunk = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  isProbablyEncrypted?: boolean,
+  systemFileType?: SystemFileType,
+  offsetPosition?: number,
+  end?: number
+): Promise<Uint8Array | null> => {
+  if (isProbablyEncrypted) {
+    throw new Error('getDecryptedVideoChunk is not supported for encrypted videos');
+  }
+
+  const bytes = (
+    await getPayloadBytes(
+      dotYouClient,
+      targetDrive,
+      fileId,
+      undefined,
+      systemFileType,
+      offsetPosition,
+      end
+    )
+  )?.bytes;
+
+  // TODO: Slicing should come from the server
+  if (offsetPosition !== undefined && end !== undefined) {
+    return bytes.slice(offsetPosition, end + 1);
+  }
+
+  console.log('all');
+  return bytes;
 };
 
 export const getDecryptedVideo = async (

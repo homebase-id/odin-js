@@ -58,6 +58,11 @@ interface GetFileRequest {
   fileId: string;
 }
 
+interface GetPayloadRequest extends GetFileRequest {
+  offsetPosition?: number;
+  length?: number;
+}
+
 const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
 
 export const assertIfDefined = (key: string, value: unknown) => {
@@ -348,16 +353,22 @@ export const getPayloadBytes = async (
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader: KeyHeader | EncryptedKeyHeader | undefined,
-  systemFileType?: SystemFileType
-): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
+  systemFileType?: SystemFileType,
+  offsetPosition?: number,
+  end?: number
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
   const client = dotYouClient.createAxiosClient();
-  const request: GetFileRequest = {
+  const request: GetPayloadRequest = {
     ...targetDrive,
     fileId,
+    // TODO: offsetPosition and end are not supported by the server yet
+    // offsetPosition: offsetPosition,
+    // end,
   };
+
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
     headers: {

@@ -21,6 +21,8 @@ export interface ImageUploadResult extends MediaUploadResult {
 
 export interface VideoMetadata {
   mimeType: string;
+  fileSize: number;
+  duration: number;
 }
 
 export interface ThumbnailInstruction {
