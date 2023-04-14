@@ -59,7 +59,8 @@ interface GetFileRequest {
 }
 
 interface GetPayloadRequest extends GetFileRequest {
-  offsetPosition?: number;
+  chunkStart?: number;
+  chunkLength?: number;
   length?: number;
 }
 
@@ -354,8 +355,8 @@ export const getPayloadBytes = async (
   fileId: string,
   keyHeader: KeyHeader | EncryptedKeyHeader | undefined,
   systemFileType?: SystemFileType,
-  offsetPosition?: number,
-  end?: number
+  chunkStart?: number,
+  chunkLength?: number
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -364,10 +365,15 @@ export const getPayloadBytes = async (
   const request: GetPayloadRequest = {
     ...targetDrive,
     fileId,
-    // TODO: offsetPosition and end are not supported by the server yet
-    // offsetPosition: offsetPosition,
-    // end,
   };
+
+  if (chunkStart !== undefined) {
+    request.chunkStart = chunkStart;
+  }
+
+  if (chunkLength !== undefined) {
+    request.chunkLength = chunkLength;
+  }
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',

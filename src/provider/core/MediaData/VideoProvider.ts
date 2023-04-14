@@ -170,12 +170,15 @@ export const getDecryptedVideoChunk = async (
   fileId: string,
   isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType,
-  offsetPosition?: number,
-  end?: number
+  chunkStart?: number,
+  chunkEnd?: number
 ): Promise<Uint8Array | null> => {
   if (isProbablyEncrypted) {
     throw new Error('getDecryptedVideoChunk is not supported for encrypted videos');
   }
+
+  const length =
+    chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined;
 
   const bytes = (
     await getPayloadBytes(
@@ -184,17 +187,11 @@ export const getDecryptedVideoChunk = async (
       fileId,
       undefined,
       systemFileType,
-      offsetPosition,
-      end
+      chunkStart,
+      length
     )
   )?.bytes;
 
-  // TODO: Slicing should come from the server
-  if (offsetPosition !== undefined && end !== undefined) {
-    return bytes.slice(offsetPosition, end + 1);
-  }
-
-  console.log('all');
   return bytes;
 };
 
