@@ -66,6 +66,7 @@ export interface MediaFile {
 
 export interface PostFile<T extends PostContent> {
   fileId?: string;
+  versionTag?: string;
   globalTransitId?: string;
   acl?: AccessControlList;
   content: T;
@@ -137,6 +138,8 @@ export interface ReactionContent {
 
 export interface ReactionFile {
   globalTransitId?: string;
+
+  versionTag?: string;
 
   fileId?: string;
   id?: string;

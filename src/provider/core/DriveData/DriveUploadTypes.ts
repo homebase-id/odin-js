@@ -56,6 +56,7 @@ export interface UploadFileMetadata {
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
   referencedFile?: GlobalTransitIdFileIdentifier;
+  versionTag?: string;
 }
 
 export interface AccessControlList {

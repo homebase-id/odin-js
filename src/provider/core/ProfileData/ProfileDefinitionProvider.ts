@@ -101,8 +101,12 @@ export const saveProfileDefinition = async (
   const driveMetadata = 'Drive that stores: ' + definition.name;
   const targetDrive = GetTargetDriveFromProfileId(definition.profileId);
   await ensureDrive(dotYouClient, targetDrive, definition.name, driveMetadata, true);
-  const { fileId } = (await getProfileDefinitionInternal(dotYouClient, definition.profileId)) ?? {
+  const { fileId, versionTag } = (await getProfileDefinitionInternal(
+    dotYouClient,
+    definition.profileId
+  )) ?? {
     fileId: undefined,
+    versionTag: undefined,
   };
 
   const instructionSet: UploadInstructionSet = {
@@ -121,6 +125,7 @@ export const saveProfileDefinition = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
 
   const metadata: UploadFileMetadata = {
+    versionTag: versionTag,
     allowDistribution: false,
     contentType: 'application/json',
     appData: {
@@ -154,9 +159,9 @@ export const saveProfileSection = async (
   }
 
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const { fileId } = (!isCreate
+  const { fileId, versionTag } = (!isCreate
     ? await getProfileSectionInternal(dotYouClient, profileId, profileSection.sectionId)
-    : { fileId: undefined }) ?? {
+    : { fileId: undefined, versionTag: undefined }) ?? {
     fileId: undefined,
   };
 
@@ -177,6 +182,7 @@ export const saveProfileSection = async (
 
   // Note: we tag it with the profile id AND also a tag indicating it is a definition
   const metadata: UploadFileMetadata = {
+    versionTag: versionTag,
     allowDistribution: false,
     contentType: 'application/json',
     appData: {
@@ -269,7 +275,7 @@ export const GetTargetDriveFromProfileId = (profileId: string): TargetDrive => {
 const getProfileDefinitionInternal = async (
   dotYouClient: DotYouClient,
   profileId: string
-): Promise<{ definition: ProfileDefinition; fileId: string } | undefined> => {
+): Promise<{ definition: ProfileDefinition; versionTag: string; fileId: string } | undefined> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
 
   const params: FileQueryParams = {
@@ -296,6 +302,7 @@ const getProfileDefinitionInternal = async (
 
     return {
       fileId: dsr.fileId,
+      versionTag: dsr.fileMetadata.versionTag,
       definition: definition,
     };
   }
@@ -334,6 +341,7 @@ const getProfileSectionInternal = async (
 
     return {
       fileId: dsr.fileId,
+      versionTag: dsr.fileMetadata.versionTag,
       definition: definition,
     };
   }

@@ -23,6 +23,7 @@ export interface VideoMetadata {
   mimeType: string;
   fileSize: number;
   duration: number;
+  segmentMap: { offset: number; samples: number }[];
 }
 
 export interface ThumbnailInstruction {

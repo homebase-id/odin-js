@@ -32,6 +32,7 @@ export const uploadImage = async (
     tag?: string | undefined | string[];
     uniqueId?: string;
     fileId?: string;
+    versionTag?: string;
     type?: ImageContentType;
     transitOptions?: TransitOptions;
     allowDistribution?: boolean;
@@ -77,6 +78,7 @@ export const uploadImage = async (
   });
 
   const metadata: UploadFileMetadata = {
+    versionTag: uploadMeta?.versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
     contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
