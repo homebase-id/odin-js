@@ -104,3 +104,19 @@ export const fetchFollower = async (
     })
     .catch(dotYouClient.handleErrorResponse);
 };
+
+export const fetchFollowDetail = async (
+  dotYouClient: DotYouClient
+): Promise<FollowRequest | null> => {
+  const client = dotYouClient.createAxiosClient();
+
+  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
+  const url = currentRoot + `/followerconfiguration`;
+
+  return client
+    .get(url)
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};
