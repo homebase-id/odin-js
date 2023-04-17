@@ -39,6 +39,10 @@ interface GetFileRequest {
   };
 }
 
+interface GetPayloadRequest extends GetFileRequest {
+  chunk?: { start: number; length?: number };
+}
+
 interface TransitQueryBatchRequest {
   queryParams: FileQueryParams;
   resultOptionsRequest: GetBatchQueryResultOptions;
@@ -150,16 +154,29 @@ export const getPayloadBytesOverTransit = async (
   targetDrive: TargetDrive,
   fileId: string,
   keyHeader?: KeyHeader | undefined,
-  systemFileType?: SystemFileType
-): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
+  systemFileType?: SystemFileType,
+  chunkStart?: number,
+  chunkLength?: number
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType }> => {
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('FileId', fileId);
+
   const client = dotYouClient.createAxiosClient();
-  const request: GetFileRequest = {
+  const request: GetPayloadRequest = {
     odinId: odinId,
     file: {
       targetDrive: targetDrive,
       fileId: fileId,
     },
   };
+
+  if (chunkStart !== undefined) {
+    request.chunk = { ...request.chunk, start: chunkStart };
+
+    if (chunkLength !== undefined) {
+      request.chunk = { ...request.chunk, length: chunkLength };
+    }
+  }
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',

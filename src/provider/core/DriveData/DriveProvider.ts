@@ -61,7 +61,6 @@ interface GetFileRequest {
 interface GetPayloadRequest extends GetFileRequest {
   chunkStart?: number;
   chunkLength?: number;
-  length?: number;
 }
 
 const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
