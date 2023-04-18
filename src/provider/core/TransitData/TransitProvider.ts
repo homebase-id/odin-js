@@ -22,6 +22,7 @@ import {
   decryptJsonContent,
   decryptUsingKeyHeader,
   encryptWithKeyheader,
+  decryptBytesResponse,
 } from '../DriveData/SecurityHelpers';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import {
@@ -186,38 +187,12 @@ export const getPayloadBytesOverTransit = async (
   };
 
   return client
-    .post('/transit/query/payload', request, config)
+    .post<ArrayBuffer>('/transit/query/payload', request, config)
     .then(async (response) => {
-      if (keyHeader) {
-        const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-          return {
-            bytes,
-            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-          };
-        });
-      } else if (
-        response.headers.payloadencrypted === 'True' &&
-        response.headers.sharedsecretencryptedheader64
-      ) {
-        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
-          response.headers.sharedsecretencryptedheader64
-        );
-
-        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
-        const cipher = new Uint8Array(response.data);
-
-        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return {
-          bytes,
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      } else {
-        return {
-          bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      }
+      return {
+        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+      };
     })
     .catch((error) => {
       console.error(error);
@@ -252,38 +227,12 @@ export const getThumbBytesOverTransit = async (
   };
 
   return client
-    .post('/transit/query/thumb', { ...request, width: width, height: height }, config)
+    .post<ArrayBuffer>('/transit/query/thumb', { ...request, width: width, height: height }, config)
     .then(async (response) => {
-      if (keyHeader) {
-        const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-          return {
-            bytes,
-            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-          };
-        });
-      } else if (
-        response.headers.payloadencrypted === 'True' &&
-        response.headers.sharedsecretencryptedheader64
-      ) {
-        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
-          response.headers.sharedsecretencryptedheader64
-        );
-
-        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
-        const cipher = new Uint8Array(response.data);
-
-        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return {
-          bytes,
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      } else {
-        return {
-          bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      }
+      return {
+        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+      };
     })
     .catch((error) => {
       throw error;

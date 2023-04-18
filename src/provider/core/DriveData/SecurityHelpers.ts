@@ -1,6 +1,12 @@
+import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 import { cbcDecrypt, cbcEncrypt, streamEncryptWithCbc } from '../helpers/AesEncrypt';
-import { base64ToUint8Array, byteArrayToString, jsonStringify64 } from '../helpers/DataUtil';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  jsonStringify64,
+  splitSharedSecretEncryptedKeyHeader,
+} from '../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './DriveTypes';
 import { streamToByteArray } from './UploadHelpers';
 
@@ -85,6 +91,35 @@ export const decryptUsingKeyHeader = async (
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
   return await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
+};
+
+export const decryptBytesResponse = async (
+  dotYouClient: DotYouClient,
+  response: AxiosResponse<ArrayBuffer>,
+  keyHeader: KeyHeader | EncryptedKeyHeader | undefined
+): Promise<Uint8Array> => {
+  const responseBa = new Uint8Array(response.data);
+
+  if (keyHeader) {
+    const decryptedKeyHeader =
+      'encryptionVersion' in keyHeader
+        ? await decryptKeyHeader(dotYouClient, keyHeader)
+        : keyHeader;
+
+    return decryptUsingKeyHeader(responseBa, decryptedKeyHeader);
+  } else if (
+    response.headers.payloadencrypted === 'True' &&
+    response.headers.sharedsecretencryptedheader64
+  ) {
+    const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
+      response.headers.sharedsecretencryptedheader64
+    );
+    const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
+
+    return await decryptUsingKeyHeader(responseBa, keyHeader);
+  } else {
+    return responseBa;
+  }
 };
 
 export const decryptKeyHeader = async (

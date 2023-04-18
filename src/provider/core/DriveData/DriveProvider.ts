@@ -23,11 +23,7 @@ import {
   UploadResult,
 } from './DriveUploadTypes';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import {
-  stringify,
-  byteArrayToString,
-  splitSharedSecretEncryptedKeyHeader,
-} from '../helpers/DataUtil';
+import { stringify, byteArrayToString } from '../helpers/DataUtil';
 import {
   encryptMetaData,
   buildDescriptor,
@@ -36,10 +32,10 @@ import {
   GenerateKeyHeader,
 } from './UploadHelpers';
 import {
-  decryptUsingKeyHeader,
   decryptKeyHeader,
   decryptJsonContent,
   encryptWithKeyheader,
+  decryptBytesResponse,
 } from './SecurityHelpers';
 
 interface GetModifiedRequest {
@@ -382,43 +378,12 @@ export const getPayloadBytes = async (
   };
 
   return client
-    .get('/drive/files/payload?' + stringify(request), config)
+    .get<ArrayBuffer>('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
-      if (keyHeader) {
-        const decryptedKeyHeader =
-          'encryptionVersion' in keyHeader
-            ? await decryptKeyHeader(dotYouClient, keyHeader)
-            : keyHeader;
-
-        const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, decryptedKeyHeader).then((bytes) => {
-          return {
-            bytes,
-            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-          };
-        });
-      } else if (
-        response.headers.payloadencrypted === 'True' &&
-        response.headers.sharedsecretencryptedheader64
-      ) {
-        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
-          response.headers.sharedsecretencryptedheader64
-        );
-
-        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
-        const cipher = new Uint8Array(response.data);
-
-        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return {
-          bytes,
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      } else {
-        return {
-          bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      }
+      return {
+        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+      };
     })
     .catch((error) => {
       console.error('[DotYouCore-js]', error);
@@ -453,38 +418,12 @@ export const getThumbBytes = async (
   };
 
   return client
-    .get('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
+    .get<ArrayBuffer>('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
     .then(async (response) => {
-      if (keyHeader) {
-        const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-          return {
-            bytes,
-            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-          };
-        });
-      } else if (
-        response.headers.payloadencrypted === 'True' &&
-        response.headers.sharedsecretencryptedheader64
-      ) {
-        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
-          response.headers.sharedsecretencryptedheader64
-        );
-
-        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
-        const cipher = new Uint8Array(response.data);
-
-        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return {
-          bytes,
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      } else {
-        return {
-          bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      }
+      return {
+        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+      };
     })
     .catch((error) => {
       console.error('[DotYouCore-js]', error);

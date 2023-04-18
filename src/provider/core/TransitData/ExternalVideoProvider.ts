@@ -10,32 +10,25 @@ export const getDecryptedVideoChunkOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  isProbablyEncrypted?: boolean,
-  systemFileType?: SystemFileType,
   chunkStart?: number,
-  chunkEnd?: number
+  chunkEnd?: number,
+  systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  if (isProbablyEncrypted) {
-    throw new Error('getDecryptedVideoChunk is not supported for encrypted videos');
-  }
-
   const length =
     chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined;
 
-  const bytes = (
-    await getPayloadBytesOverTransit(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      fileId,
-      undefined,
-      systemFileType,
-      chunkStart,
-      length
-    )
-  )?.bytes;
+  const payload = await getPayloadBytesOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    undefined,
+    systemFileType,
+    chunkStart,
+    length
+  );
 
-  return bytes;
+  return payload?.bytes;
 };
 
 export const getDecryptedVideoMetadataOverTransit = async (
