@@ -26,7 +26,8 @@ import { ApiType, DotYouClient } from '../DotYouClient';
 import {
   stringify,
   byteArrayToString,
-  splitSharedSecretEncryptedKeyHeader,
+  roundToSmallerMultipleOf16,
+  roundToLargerMultipleOf16,
 } from '../helpers/DataUtil';
 import {
   encryptMetaData,
@@ -36,10 +37,11 @@ import {
   GenerateKeyHeader,
 } from './UploadHelpers';
 import {
-  decryptUsingKeyHeader,
   decryptKeyHeader,
   decryptJsonContent,
   encryptWithKeyheader,
+  decryptBytesResponse,
+  decryptChunkedBytesResponse,
 } from './SecurityHelpers';
 
 interface GetModifiedRequest {
@@ -366,12 +368,14 @@ export const getPayloadBytes = async (
     fileId,
   };
 
+  let startOffset = 0;
   if (chunkStart !== undefined) {
-    request.chunkStart = chunkStart;
-  }
+    request.chunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
+    startOffset = Math.abs(chunkStart - request.chunkStart);
 
-  if (chunkLength !== undefined) {
-    request.chunkLength = chunkLength;
+    if (chunkLength !== undefined) {
+      request.chunkLength = roundToLargerMultipleOf16(chunkLength + startOffset);
+    }
   }
 
   const config: AxiosRequestConfig = {
@@ -382,43 +386,23 @@ export const getPayloadBytes = async (
   };
 
   return client
-    .get('/drive/files/payload?' + stringify(request), config)
+    .get<ArrayBuffer>('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
-      if (keyHeader) {
-        const decryptedKeyHeader =
-          'encryptionVersion' in keyHeader
-            ? await decryptKeyHeader(dotYouClient, keyHeader)
-            : keyHeader;
+      return {
+        bytes:
+          request.chunkStart !== undefined
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  request.chunkStart
+                )
+              ).slice(0, chunkLength)
+            : await decryptBytesResponse(dotYouClient, response, keyHeader),
 
-        const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, decryptedKeyHeader).then((bytes) => {
-          return {
-            bytes,
-            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-          };
-        });
-      } else if (
-        response.headers.payloadencrypted === 'True' &&
-        response.headers.sharedsecretencryptedheader64
-      ) {
-        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
-          response.headers.sharedsecretencryptedheader64
-        );
-
-        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
-        const cipher = new Uint8Array(response.data);
-
-        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return {
-          bytes,
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      } else {
-        return {
-          bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      }
+        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+      };
     })
     .catch((error) => {
       console.error('[DotYouCore-js]', error);
@@ -453,38 +437,12 @@ export const getThumbBytes = async (
   };
 
   return client
-    .get('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
+    .get<ArrayBuffer>('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
     .then(async (response) => {
-      if (keyHeader) {
-        const cipher = new Uint8Array(response.data);
-        return decryptUsingKeyHeader(cipher, keyHeader).then((bytes) => {
-          return {
-            bytes,
-            contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-          };
-        });
-      } else if (
-        response.headers.payloadencrypted === 'True' &&
-        response.headers.sharedsecretencryptedheader64
-      ) {
-        const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
-          response.headers.sharedsecretencryptedheader64
-        );
-
-        const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
-        const cipher = new Uint8Array(response.data);
-
-        const bytes = await decryptUsingKeyHeader(cipher, keyHeader);
-        return {
-          bytes,
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      } else {
-        return {
-          bytes: new Uint8Array(response.data),
-          contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
-        };
-      }
+      return {
+        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+      };
     })
     .catch((error) => {
       console.error('[DotYouCore-js]', error);

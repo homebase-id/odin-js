@@ -1,6 +1,13 @@
+import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 import { cbcDecrypt, cbcEncrypt, streamEncryptWithCbc } from '../helpers/AesEncrypt';
-import { base64ToUint8Array, byteArrayToString, jsonStringify64 } from '../helpers/DataUtil';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  jsonStringify64,
+  mergeByteArrays,
+  splitSharedSecretEncryptedKeyHeader,
+} from '../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './DriveTypes';
 import { streamToByteArray } from './UploadHelpers';
 
@@ -85,6 +92,79 @@ export const decryptUsingKeyHeader = async (
   keyHeader: KeyHeader
 ): Promise<Uint8Array> => {
   return await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
+};
+
+export const decryptBytesResponse = async (
+  dotYouClient: DotYouClient,
+  response: AxiosResponse<ArrayBuffer>,
+  keyHeader: KeyHeader | EncryptedKeyHeader | undefined
+): Promise<Uint8Array> => {
+  const responseBa = new Uint8Array(response.data);
+
+  if (keyHeader) {
+    const decryptedKeyHeader =
+      'encryptionVersion' in keyHeader
+        ? await decryptKeyHeader(dotYouClient, keyHeader)
+        : keyHeader;
+
+    return decryptUsingKeyHeader(responseBa, decryptedKeyHeader);
+  } else if (
+    response.headers.payloadencrypted === 'True' &&
+    response.headers.sharedsecretencryptedheader64
+  ) {
+    const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
+      response.headers.sharedsecretencryptedheader64
+    );
+    const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
+
+    return await decryptUsingKeyHeader(responseBa, keyHeader);
+  } else {
+    return responseBa;
+  }
+};
+
+export const decryptChunkedBytesResponse = async (
+  dotYouClient: DotYouClient,
+  response: AxiosResponse<ArrayBuffer>,
+  startOffset: number,
+  chunkStart: number
+) => {
+  const responseBa = new Uint8Array(response.data);
+
+  if (
+    response.headers.payloadencrypted === 'True' &&
+    response.headers.sharedsecretencryptedheader64
+  ) {
+    const encryptedKeyHeader = splitSharedSecretEncryptedKeyHeader(
+      response.headers.sharedsecretencryptedheader64
+    );
+    const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
+    const key = keyHeader.aesKey;
+    const { iv, cipher } = await (async () => {
+      const padding = new Uint8Array(16).fill(16);
+      const encryptedPadding = (
+        await cbcEncrypt(padding, responseBa.slice(responseBa.length - 16), key)
+      ).slice(0, 16);
+
+      if (chunkStart === 0) {
+        //First block
+        return { iv: keyHeader.iv, cipher: mergeByteArrays([responseBa, encryptedPadding]) };
+      }
+
+      // Center blocks
+      return {
+        iv: responseBa.slice(0, 16),
+        cipher: mergeByteArrays([responseBa.slice(16), encryptedPadding]),
+      };
+    })();
+
+    const decryptedBytes = await cbcDecrypt(cipher, iv, key);
+
+    // Return without full block offset
+    return decryptedBytes.slice(startOffset ? startOffset - 16 : 0);
+  } else {
+    return responseBa.slice(startOffset);
+  }
 };
 
 export const decryptKeyHeader = async (
