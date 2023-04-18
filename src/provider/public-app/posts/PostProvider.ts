@@ -254,6 +254,7 @@ export const savePost = async <T extends PostContent>(
   const isDraft = file.acl?.requiredSecurityGroup === SecurityGroupType.Owner;
 
   const metadata: UploadFileMetadata = {
+    versionTag: file.versionTag,
     allowDistribution: !isDraft,
     contentType: 'application/json',
     appData: {
@@ -300,6 +301,7 @@ const dsrToPostFile = async <T extends PostContent>(
 
     const file: PostFile<T> = {
       fileId: dsr.fileId,
+      versionTag: dsr.fileMetadata.versionTag,
       globalTransitId: dsr.fileMetadata.globalTransitId,
       acl: dsr.serverMetadata?.accessControlList,
       content: content,

@@ -2,6 +2,7 @@ import { AccessControlList, SecurityGroupType } from '../DriveData/DriveUploadTy
 
 export interface AttributeFile extends Attribute {
   fileId?: string;
+  versionTag?: string;
   acl: AccessControlList;
 }
 

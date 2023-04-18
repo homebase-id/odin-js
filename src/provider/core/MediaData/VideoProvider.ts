@@ -27,6 +27,7 @@ export const uploadVideo = async (
     tag?: string | undefined | string[];
     uniqueId?: string;
     fileId?: string;
+    versionTag?: string;
     type?: VideoContentType;
     transitOptions?: TransitOptions;
     allowDistribution?: boolean;
@@ -52,6 +53,7 @@ export const uploadVideo = async (
   };
 
   const metadata: UploadFileMetadata = {
+    versionTag: uploadMeta?.versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
     contentType: uploadMeta?.type ?? 'image/webp',
     appData: {

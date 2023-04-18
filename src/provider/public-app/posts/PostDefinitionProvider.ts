@@ -120,7 +120,10 @@ export const saveChannelDefinition = async (
   const targetDrive = GetTargetDriveFromChannelId(definition.channelId);
   await ensureDrive(dotYouClient, targetDrive, definition.name, channelMetadata, true, true);
 
-  const { fileId } = (await getChannelDefinitionInternal(dotYouClient, definition.channelId)) ?? {
+  const { fileId, versionTag } = (await getChannelDefinitionInternal(
+    dotYouClient,
+    definition.channelId
+  )) ?? {
     fileId: undefined,
   };
 
@@ -144,6 +147,7 @@ export const saveChannelDefinition = async (
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
+    versionTag: versionTag,
     allowDistribution: true,
     contentType: 'application/json',
     appData: {
@@ -184,7 +188,7 @@ export const GetTargetDriveFromChannelId = (channelId: string): TargetDrive => {
 const getChannelDefinitionInternal = async (
   dotYouClient: DotYouClient,
   channelId: string
-): Promise<{ definition: ChannelDefinition; fileId: string } | undefined> => {
+): Promise<{ definition: ChannelDefinition; fileId: string; versionTag: string } | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     targetDrive: targetDrive,
@@ -212,6 +216,7 @@ const getChannelDefinitionInternal = async (
 
       return {
         fileId: dsr.fileId,
+        versionTag: dsr.fileMetadata.versionTag,
         definition: definition,
       };
     }

@@ -72,6 +72,7 @@ export const saveComment = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     // allowDistribution: true, // Disable
+    versionTag: comment.versionTag,
     allowDistribution: false,
     contentType: 'application/json',
     senderOdinId: comment.authorOdinId,
@@ -262,6 +263,7 @@ const dsrToComment = async (
   return {
     fileId: dsr.fileId,
     globalTransitId: dsr.fileMetadata.globalTransitId,
+    versionTag: dsr.fileMetadata.versionTag,
     id: dsr.fileMetadata.appData.uniqueId,
     authorOdinId: dsr.fileMetadata.senderOdinId,
     threadId: dsr.fileMetadata.appData.groupId,

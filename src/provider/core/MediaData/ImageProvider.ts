@@ -32,6 +32,7 @@ export const uploadImage = async (
     tag?: string | undefined | string[];
     uniqueId?: string;
     fileId?: string;
+    versionTag?: string;
     type?: ImageContentType;
     transitOptions?: TransitOptions;
     allowDistribution?: boolean;
@@ -76,7 +77,16 @@ export const uploadImage = async (
     };
   });
 
+  // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
+  let versionTag = uploadMeta?.versionTag;
+  if (!versionTag && uploadMeta?.fileId) {
+    versionTag = await getFileHeader(dotYouClient, targetDrive, uploadMeta.fileId).then(
+      (header) => header.fileMetadata.versionTag
+    );
+  }
+
   const metadata: UploadFileMetadata = {
+    versionTag: versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
     contentType: uploadMeta?.type ?? 'image/webp',
     appData: {

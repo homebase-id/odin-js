@@ -174,6 +174,7 @@ export const dsrToAttributeFile = async (
     return {
       ...attrPayload,
       fileId: attrPayload.fileId ?? dsr.fileId,
+      versionTag: dsr.fileMetadata.versionTag,
       acl: dsr.serverMetadata?.accessControlList,
     };
   } catch (ex) {
@@ -222,6 +223,7 @@ export const saveAttribute = async (
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
+    versionTag: attribute.versionTag,
     allowDistribution: false,
     contentType: 'application/json',
     appData: {

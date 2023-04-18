@@ -46,6 +46,7 @@ export interface FileMetadata {
   originalRecipientList: string[];
   appData: AppFileMetaData;
   reactionPreview?: ReactionPreview;
+  versionTag: string;
 }
 
 export interface ServerMetaData {
