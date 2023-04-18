@@ -3,7 +3,6 @@ import {
   byteArrayToString,
   roundToLargerMultipleOf16,
   roundToSmallerMultipleOf16,
-  splitSharedSecretEncryptedKeyHeader,
 } from '../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { assertIfDefined, DEFAULT_QUERY_BATCH_RESULT_OPTION } from '../DriveData/DriveProvider';
@@ -25,7 +24,6 @@ import { PagedResult } from '../helpers/Types';
 import {
   decryptKeyHeader,
   decryptJsonContent,
-  decryptUsingKeyHeader,
   encryptWithKeyheader,
   decryptBytesResponse,
   decryptChunkedBytesResponse,
