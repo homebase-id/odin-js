@@ -162,3 +162,11 @@ export const mergeByteArrays = (chunks: Uint8Array[]) => {
   });
   return mergedArray;
 };
+
+export const roundToSmallerMultipleOf16 = (x: number) => {
+  return Math.floor(x / 16) * 16;
+};
+
+export const roundToLargerMultipleOf16 = (x: number) => {
+  return Math.ceil(x / 16) * 16;
+};

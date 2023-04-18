@@ -23,7 +23,12 @@ import {
   UploadResult,
 } from './DriveUploadTypes';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import { stringify, byteArrayToString } from '../helpers/DataUtil';
+import {
+  stringify,
+  byteArrayToString,
+  roundToSmallerMultipleOf16,
+  roundToLargerMultipleOf16,
+} from '../helpers/DataUtil';
 import {
   encryptMetaData,
   buildDescriptor,
@@ -36,6 +41,7 @@ import {
   decryptJsonContent,
   encryptWithKeyheader,
   decryptBytesResponse,
+  decryptChunkedBytesResponse,
 } from './SecurityHelpers';
 
 interface GetModifiedRequest {
@@ -362,12 +368,14 @@ export const getPayloadBytes = async (
     fileId,
   };
 
+  let startOffset = 0;
   if (chunkStart !== undefined) {
-    request.chunkStart = chunkStart;
-  }
+    request.chunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
+    startOffset = Math.abs(chunkStart - request.chunkStart);
 
-  if (chunkLength !== undefined) {
-    request.chunkLength = chunkLength;
+    if (chunkLength !== undefined) {
+      request.chunkLength = roundToLargerMultipleOf16(chunkLength + startOffset);
+    }
   }
 
   const config: AxiosRequestConfig = {
@@ -381,7 +389,18 @@ export const getPayloadBytes = async (
     .get<ArrayBuffer>('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        bytes:
+          request.chunkStart !== undefined
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  request.chunkStart
+                )
+              ).slice(0, chunkLength)
+            : await decryptBytesResponse(dotYouClient, response, keyHeader),
+
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })

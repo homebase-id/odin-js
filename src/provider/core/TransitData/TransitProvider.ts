@@ -1,5 +1,10 @@
 import { AxiosRequestConfig } from 'axios';
-import { byteArrayToString, splitSharedSecretEncryptedKeyHeader } from '../helpers/DataUtil';
+import {
+  byteArrayToString,
+  roundToLargerMultipleOf16,
+  roundToSmallerMultipleOf16,
+  splitSharedSecretEncryptedKeyHeader,
+} from '../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { assertIfDefined, DEFAULT_QUERY_BATCH_RESULT_OPTION } from '../DriveData/DriveProvider';
 import {
@@ -23,6 +28,7 @@ import {
   decryptUsingKeyHeader,
   encryptWithKeyheader,
   decryptBytesResponse,
+  decryptChunkedBytesResponse,
 } from '../DriveData/SecurityHelpers';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import {
@@ -171,11 +177,19 @@ export const getPayloadBytesOverTransit = async (
     },
   };
 
+  let startOffset = 0;
   if (chunkStart !== undefined) {
-    request.chunk = { ...request.chunk, start: chunkStart };
+    request.chunk = {
+      ...request.chunk,
+      start: chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16),
+    };
+    startOffset = Math.abs(chunkStart - request.chunk.start);
 
     if (chunkLength !== undefined) {
-      request.chunk = { ...request.chunk, length: chunkLength };
+      request.chunk = {
+        ...request.chunk,
+        length: roundToLargerMultipleOf16(chunkLength + startOffset),
+      };
     }
   }
 
@@ -190,7 +204,17 @@ export const getPayloadBytesOverTransit = async (
     .post<ArrayBuffer>('/transit/query/payload', request, config)
     .then(async (response) => {
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        bytes:
+          request.chunk?.start !== undefined
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  request.chunk.start
+                )
+              ).slice(0, chunkLength)
+            : await decryptBytesResponse(dotYouClient, response, keyHeader),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })
