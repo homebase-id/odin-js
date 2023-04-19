@@ -416,7 +416,7 @@ export const uploadFileOverTransitUsingKeyHeader = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:uploadFileOverTransitUsingKeyHeader]', error);
       throw error;
     });
 };
@@ -452,7 +452,7 @@ export const deleteFileOverTransit = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:deleteFileOverTransit]', error);
       throw error;
     });
 };

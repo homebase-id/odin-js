@@ -122,7 +122,7 @@ export class DotYouClient {
             await decryptData(error.response.data.data, error.response.data.iv, ss)
           );
         } else {
-          console.error('[DotYouCore-js]', error);
+          console.error('[DotYouCore-js:responseInterception]', error);
         }
 
         return Promise.reject(error);

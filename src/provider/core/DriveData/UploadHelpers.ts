@@ -140,7 +140,7 @@ export const pureUpload = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:pureUpload]', error);
       throw error;
     });
 };

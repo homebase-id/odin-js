@@ -169,7 +169,7 @@ export const ensureDrive = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:ensureDrive]', error);
       throw error;
     });
 };
@@ -276,13 +276,14 @@ export const getFileHeader = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  skipCache?: boolean
 ): Promise<DriveSearchResult> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
   const cacheKey = `${targetDrive.alias}-${targetDrive.type}+${fileId}`;
-  if (_internalMetadataCache.has(cacheKey)) {
+  if (_internalMetadataCache.has(cacheKey) && !skipCache) {
     const cacheEntry = await _internalMetadataCache.get(cacheKey);
     if (cacheEntry) return cacheEntry;
   }
@@ -309,7 +310,7 @@ export const getFileHeader = async (
       if (error.response?.status === 404) {
         return undefined;
       } else {
-        console.error('[DotYouCore-js]', error);
+        console.error('[DotYouCore-js:getFileHeader]', error);
         throw error;
       }
     });
@@ -405,7 +406,7 @@ export const getPayloadBytes = async (
       };
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:getPayloadBytes]', error);
       throw error;
     });
 };
@@ -445,7 +446,7 @@ export const getThumbBytes = async (
       };
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:getThumbBytes]', error);
       throw error;
     });
 };
@@ -490,7 +491,7 @@ export const deleteFile = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js]', error);
+      console.error('[DotYouCore-js:deleteFile]', error);
       throw error;
     });
 };
@@ -567,7 +568,7 @@ export const purgeAllFiles = async (
         return false;
       })
       .catch((error) => {
-        console.error('[DotYouCore-js]', error);
+        console.error('[DotYouCore-js:purgeFile]', error);
         throw error;
       });
   };
