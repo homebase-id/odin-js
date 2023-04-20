@@ -18,16 +18,24 @@ import {
   getThumbBytes,
   uploadFile,
 } from '../DriveData/DriveProvider';
-import { getNewId, base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../helpers/DataUtil';
-import { ImageUploadResult, MediaConfig, ThumbnailMeta } from './MediaTypes';
+import {
+  getNewId,
+  base64ToUint8Array,
+  stringify,
+  uint8ArrayToBase64,
+  jsonStringify64,
+} from '../helpers/DataUtil';
+import { ImageMetadata, ImageUploadResult, MediaConfig, ThumbnailMeta } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
+import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
   imageData: Uint8Array | File,
+  fileMetadata?: ImageMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];
     uniqueId?: string;
@@ -96,7 +104,7 @@ export const uploadImage = async (
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: MediaConfig.MediaFileType,
-      jsonContent: null,
+      jsonContent: jsonStringify64(fileMetadata),
       previewThumbnail: previewThumbnail,
       additionalThumbnails: thumbsizes,
       userDate: uploadMeta?.userDate,
@@ -236,4 +244,20 @@ export const getDecryptedImageData = async (
     contentType: data.contentType,
     content: data.bytes,
   };
+};
+
+export const getDecryptedImageMetadata = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  systemFileType?: SystemFileType
+) => {
+  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  const fileMetadata = fileHeader.fileMetadata;
+
+  const keyheader = fileMetadata.payloadIsEncrypted
+    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+    : undefined;
+
+  return await decryptJsonContent<ImageMetadata>(fileMetadata, keyheader);
 };

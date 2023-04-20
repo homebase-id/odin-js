@@ -19,6 +19,20 @@ export interface ImageUploadResult extends MediaUploadResult {
   previewThumbnail: EmbeddedThumb;
 }
 
+export interface ImageMetadata {
+  camera: {
+    make?: string;
+    model?: string;
+    lens?: string;
+  };
+  captureDetails: {
+    exposureTime?: string;
+    fNumber?: string;
+    iso?: number;
+    focalLength?: string;
+  };
+}
+
 export interface VideoMetadata {
   mimeType: string;
   fileSize: number;
