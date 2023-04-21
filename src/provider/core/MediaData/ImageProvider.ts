@@ -25,7 +25,13 @@ import {
   uint8ArrayToBase64,
   jsonStringify64,
 } from '../helpers/DataUtil';
-import { ImageMetadata, ImageUploadResult, MediaConfig, ThumbnailMeta } from './MediaTypes';
+import {
+  ImageMetadata,
+  ImageUploadResult,
+  MediaConfig,
+  MediaUploadMeta,
+  ThumbnailMeta,
+} from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
@@ -36,16 +42,7 @@ export const uploadImage = async (
   acl: AccessControlList,
   imageData: Uint8Array | File,
   fileMetadata?: ImageMetadata,
-  uploadMeta?: {
-    tag?: string | undefined | string[];
-    uniqueId?: string;
-    fileId?: string;
-    versionTag?: string;
-    type?: ImageContentType;
-    transitOptions?: TransitOptions;
-    allowDistribution?: boolean;
-    userDate?: number;
-  }
+  uploadMeta?: MediaUploadMeta
 ): Promise<ImageUploadResult | undefined> => {
   if (!targetDrive) {
     throw 'Missing target drive';
@@ -108,6 +105,7 @@ export const uploadImage = async (
       previewThumbnail: previewThumbnail,
       additionalThumbnails: thumbsizes,
       userDate: uploadMeta?.userDate,
+      archivalStatus: uploadMeta?.archivalStatus,
     },
     payloadIsEncrypted: encrypt,
     accessControlList: acl,
@@ -254,6 +252,10 @@ export const getDecryptedImageMetadata = async (
 ) => {
   const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
   const fileMetadata = fileHeader.fileMetadata;
+
+  if (!fileMetadata.appData.jsonContent) {
+    return null;
+  }
 
   const keyheader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)

@@ -1,10 +1,28 @@
-import { ThumbSize, EmbeddedThumb } from '../DriveData/DriveTypes';
+import {
+  ThumbSize,
+  EmbeddedThumb,
+  ImageContentType,
+  ArchivalStatus,
+} from '../DriveData/DriveTypes';
+import { TransitOptions } from '../DriveData/DriveUploadTypes';
 
 export type ThumbnailMeta = {
   naturalSize: { width: number; height: number };
   sizes?: ThumbSize[];
   url: string;
 };
+
+export interface MediaUploadMeta {
+  tag?: string | undefined | string[];
+  uniqueId?: string;
+  fileId?: string;
+  versionTag?: string;
+  type?: ImageContentType;
+  transitOptions?: TransitOptions;
+  allowDistribution?: boolean;
+  userDate?: number;
+  archivalStatus?: ArchivalStatus;
+}
 
 export interface MediaUploadResult {
   fileId: string;

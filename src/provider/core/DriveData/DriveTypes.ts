@@ -85,6 +85,7 @@ export interface AppFileMetaData {
   jsonContent: string;
   previewThumbnail?: EmbeddedThumb;
   additionalThumbnails?: ThumbSize[];
+  archivalStatus?: ArchivalStatus;
 }
 
 export interface ExternalFileIdentifier {
@@ -148,6 +149,12 @@ export interface QueryParams {
   pageSize: number;
 }
 
+type None = 0;
+type Archived = 1;
+type Removed = 2;
+
+export type ArchivalStatus = None | Archived | Removed;
+
 export interface FileQueryParams {
   targetDrive: TargetDrive;
   fileType?: number[] | undefined;
@@ -160,6 +167,7 @@ export interface FileQueryParams {
   globalTransitId?: string[] | undefined;
   clientUniqueIdAtLeastOne?: string[] | undefined;
   systemFileType?: SystemFileType;
+  archivalStatus?: ArchivalStatus;
 }
 
 export interface GetModifiedResultOptions {

@@ -5,6 +5,7 @@ import {
   ThumbSize,
   EmbeddedThumb,
   GlobalTransitIdFileIdentifier,
+  ArchivalStatus,
 } from './DriveTypes';
 
 export type SystemFileType = 'Standard' | 'Comment';
@@ -83,6 +84,7 @@ export interface UploadAppFileMetaData {
   jsonContent: string | null;
   previewThumbnail?: EmbeddedThumb;
   additionalThumbnails?: ThumbSize[];
+  archivalStatus?: ArchivalStatus;
   alias?: string;
 }
 
