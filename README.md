@@ -8,7 +8,7 @@ Create an `.npmrc` file within your project with the following details:
 
 After which you can run:
 
-`npm install @youfoundation/dotyoucore-js@0.2.133-alpha.2`
+`npm install @youfoundation/dotyoucore-js@0.2.133-alpha.xxx`
 
 Do ensure that you are authenticated via npm itself to [Github packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)
 

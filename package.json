@@ -1,22 +1,25 @@
 {
   "version": "0.2.133-alpha.165",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "sideEffects": false,
-  "scripts": {
-    "build": "NODE_ENV=production rollup -c",
-    "start": "rollup -w -c",
-    "lint": "eslint src/*",
-    "type": "tsc",
-    "test": ""
-  },
   "name": "@youfoundation/dotyoucore-js",
   "author": "YouFoundation",
   "description": "Lib for using the DotYouCore api",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/dotyoucore-js.umd.js",
+  "module": "./dist/dotyoucore-js.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/dotyoucore-js.mjs",
+      "require": "./dist/dotyoucore-js.umd.js"
+    }
+  },
+  "types": "./dist/dotyoucore-js.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc && vite build",
+    "lint": "eslint src/*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/YouFoundation/dotyoucore-js.git"
@@ -24,35 +27,17 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
   },
-  "size-limit": [
-    {
-      "path": "dist/cjs/index.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/esm/index.js",
-      "limit": "10 KB"
-    }
-  ],
   "dependencies": {
-    "guid-typescript": "^1.0.9",
-    "js-md5": "^0.7.3"
+    "guid-typescript": "^1.0.9"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^23.0.3",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-typescript": "^10.0.1",
-    "@types/js-md5": "^0.7.0",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
-    "axios": "^1.2.0",
     "eslint": "^8.38.0",
-    "rollup": "^2.75.7",
-    "rollup-plugin-dts": "^4.2.2",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-terser": "^7.0.2",
     "tslib": "^2.4.0",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "vite": "^4.2.1",
+    "vite-plugin-dts": "^2.3.0"
   },
   "peerDependencies": {
     "axios": "^1.2.0"

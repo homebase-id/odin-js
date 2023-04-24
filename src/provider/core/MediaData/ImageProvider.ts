@@ -3,7 +3,6 @@ import {
   AccessControlList,
   SecurityGroupType,
   SystemFileType,
-  TransitOptions,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
