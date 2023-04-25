@@ -1,46 +1,22 @@
 {
   "version": "0.2.133-alpha.167",
-  "name": "@youfoundation/dotyoucore-js",
+  "name": "@ondin/js-monorepo",
   "author": "YouFoundation",
-  "description": "Lib for using the DotYouCore api",
-  "files": [
-    "dist"
+  "description": "Monorepo for the JS Libs of YouFoundation",
+  "workspaces": [
+    "packages/*"
   ],
-  "main": "./dist/dotyoucore-js.umd.js",
-  "module": "./dist/dotyoucore-js.mjs",
-  "exports": {
-    ".": {
-      "import": "./dist/dotyoucore-js.mjs",
-      "require": "./dist/dotyoucore-js.umd.js"
-    }
-  },
-  "types": "./dist/dotyoucore-js.d.ts",
-  "sideEffects": false,
   "scripts": {
-    "start": "vite build --watch",
-    "build": "tsc && vite build",
-    "lint": "eslint src/*"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/YouFoundation/dotyoucore-js.git"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/youfoundation"
-  },
-  "dependencies": {
-    "guid-typescript": "^1.0.9"
+    "build": "npm run build --w ./packages/lib"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
     "eslint": "^8.38.0",
+    "prettier": "^2.7.1",
     "tslib": "^2.4.0",
     "typescript": "^4.7.4",
     "vite": "^4.2.1",
     "vite-plugin-dts": "^2.3.0"
-  },
-  "peerDependencies": {
-    "axios": "^1.2.0"
   }
 }

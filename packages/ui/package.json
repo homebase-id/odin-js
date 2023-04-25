@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1-alpha.1",
+  "name": "@odin/ui-lib",
+  "author": "YouFoundation",
+  "description": "UI-Lib for using the @odin/js-lib",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/dotyoucore-js.umd.js",
+  "module": "./dist/dotyoucore-js.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/dotyoucore-js.mjs",
+      "require": "./dist/dotyoucore-js.umd.js"
+    }
+  },
+  "types": "./dist/dotyoucore-js.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "start": "vite build --watch",
+    "build": "tsc && vite build",
+    "lint": "eslint src/*"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/youfoundation"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "peerDependencies": {}
+}

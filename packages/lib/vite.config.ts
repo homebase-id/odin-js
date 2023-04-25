@@ -11,8 +11,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'dotyoucore-js',
-      fileName: `dotyoucore-js`,
+      name: 'odin-js',
+      fileName: `odin-js`,
     },
     rollupOptions: {
       external: ['axios'],
@@ -29,7 +29,7 @@ export default defineConfig({
           },
         },
         {
-          name: 'dotyoucore-js-umd',
+          name: 'odin-js-umd',
           format: 'umd',
           inlineDynamicImports: true,
           preserveModules: false,

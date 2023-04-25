@@ -1,0 +1,34 @@
+{
+  "version": "0.0.1-alpha.1",
+  "name": "@odin/js-lib",
+  "author": "YouFoundation",
+  "description": "JS-Lib for using the DotYouCore api",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/odin-js.umd.js",
+  "module": "./dist/odin-js.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/odin-js.mjs",
+      "require": "./dist/odin-js.umd.js"
+    }
+  },
+  "types": "./dist/odin-js.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "start": "vite build --watch",
+    "build": "tsc && vite build",
+    "lint": "eslint src/*"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/youfoundation"
+  },
+  "dependencies": {
+    "guid-typescript": "^1.0.9"
+  },
+  "devDependencies": {},
+  "peerDependencies": {
+    "axios": "^1.2.0"
+  }
+}

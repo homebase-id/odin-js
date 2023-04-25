@@ -1,4 +1,4 @@
-name: Publish Prerelease to Github Packages
+name: Publish js-lib Prerelease to Github Packages
 on:
   workflow_dispatch:
   release:
@@ -7,7 +7,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'src/**'
+      - 'packages/lib/**'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,13 +26,13 @@ jobs:
       - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version prerelease
+          npm version prerelease --w ./packages/lib
 
-      - run: npm ci
+      - run: npm ci --w ./packages/lib
 
-      - run: npm run build
+      - run: npm run build --w ./packages/lib
 
-      - run: npm publish
+      - run: npm publish --w ./packages/lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
