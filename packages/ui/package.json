@@ -28,7 +28,18 @@
     "type": "git",
     "url": "https://github.com/YouFoundation/dotyoucore-js.git"
   },
-  "dependencies": {},
-  "devDependencies": {},
-  "peerDependencies": {}
+  "dependencies": {
+    "@youfoundation/js-lib": "^0.0.1-alpha.6"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^4.19.1",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "autoprefixer": "^10.4.7",
+    "postcss": "^8.4.14",
+    "postcss-import": "^15.1.0",
+    "prettier-plugin-tailwindcss": "^0.1.12"
+  }
 }
