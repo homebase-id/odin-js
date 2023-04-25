@@ -40,3 +40,4 @@ jobs:
 
       # Push the version increment back into the repo
       - run: git push
+        working-directory: ./packages/lib
