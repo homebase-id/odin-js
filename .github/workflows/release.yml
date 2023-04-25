@@ -28,7 +28,7 @@ jobs:
           git config user.email github-actions@github.com
           npm version prerelease --w ./packages/lib
 
-      - run: npm ci --w ./packages/lib
+      - run: npm ci
 
       - run: npm run build --w ./packages/lib
 
