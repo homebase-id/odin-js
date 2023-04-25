@@ -23,10 +23,12 @@ jobs:
           scope: '@octocat'
 
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
-      - run: |
+      - name: Bump version
+        working-directory: ./packages/lib
+        run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version prerelease --w ./packages/lib
+          npm version prerelease
 
       - run: npm ci
 
