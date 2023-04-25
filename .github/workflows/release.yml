@@ -24,11 +24,10 @@ jobs:
 
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
       - name: Bump version
-        working-directory: ./packages/lib
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version prerelease
+          npm version prerelease --w ./packages/lib
 
       - run: npm ci
 
@@ -39,5 +38,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Push the version increment back into the repo
-      - run: git push
-        working-directory: ./packages/lib
+      - name: Bump version updates
+        run: |
+          git commit -am "Bump version"
+          git push
