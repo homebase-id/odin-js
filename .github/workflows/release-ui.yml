@@ -31,7 +31,8 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build --w ./packages/ui
+      # run with -workspaces to have lib built as well, as ui depends on it
+      - run: npm run build -workspaces
 
       - run: npm publish --w ./packages/ui
         env:
