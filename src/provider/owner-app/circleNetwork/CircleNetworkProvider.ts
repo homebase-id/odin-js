@@ -1,5 +1,5 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { PagingOptions, PagedResult } from '../../core/helpers/Types';
+import { PagingOptions, PagedResult, NumberCursoredResult } from '../../core/helpers/Types';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,8 +28,11 @@ export const disconnectFromContact = (
 
 export const getConnections = async (
   dotYouClient: DotYouClient,
-  data: PagingOptions
-): Promise<PagedResult<{ odinId: string } | DotYouProfile>> => {
+  data: {
+    count: number;
+    cursor?: number;
+  }
+): Promise<NumberCursoredResult<{ odinId: string } | DotYouProfile>> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + '/connected?' + stringify(data);
 

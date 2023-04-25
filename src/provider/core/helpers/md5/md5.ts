@@ -1,6 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
+// http://www.myersdaily.org/joseph/javascript/md5.js
+
 function md5cycle(x, k) {
   let a = x[0],
     b = x[1],

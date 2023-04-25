@@ -8,6 +8,11 @@ export interface CursoredResult<T> {
   cursorState: string;
 }
 
+export interface NumberCursoredResult<T> {
+  results: T[];
+  cursor: number;
+}
+
 export interface MultiRequestCursoredResult<T> {
   results: T;
   cursorState: Record<string, string>;
