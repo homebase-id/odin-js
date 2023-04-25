@@ -40,5 +40,5 @@ jobs:
       # Push the version increment back into the repo
       - name: Bump version updates
         run: |
-          git commit -am "Bump version"
+          git commit -am "Bump Lib version"
           git push

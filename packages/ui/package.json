@@ -6,15 +6,16 @@
   "files": [
     "dist"
   ],
-  "main": "./dist/dotyoucore-js.umd.js",
-  "module": "./dist/dotyoucore-js.mjs",
+  "type": "module",
+  "module": "./dist/odin-ui.js",
+  "main": "./dist/odin-ui.umd.cjs",
   "exports": {
     ".": {
-      "import": "./dist/dotyoucore-js.mjs",
-      "require": "./dist/dotyoucore-js.umd.js"
+      "import": "./dist/odin-ui.js",
+      "require": "./dist/odin-ui.umd.cjs"
     }
   },
-  "types": "./dist/dotyoucore-js.d.ts",
+  "types": "./dist/odin-ui.d.ts",
   "sideEffects": false,
   "scripts": {
     "start": "vite build --watch",
@@ -40,6 +41,7 @@
     "autoprefixer": "^10.4.7",
     "postcss": "^8.4.14",
     "postcss-import": "^15.1.0",
-    "prettier-plugin-tailwindcss": "^0.1.12"
+    "prettier-plugin-tailwindcss": "^0.1.12",
+    "tailwindcss": "^3.3.0"
   }
 }

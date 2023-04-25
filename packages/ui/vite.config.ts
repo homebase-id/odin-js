@@ -11,15 +11,16 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'odin-js',
-      fileName: `odin-js`,
+      name: 'odin-ui',
+      fileName: `odin-ui`,
     },
     rollupOptions: {
       external: ['@tanstack/react-query', 'react'],
       output: {
-        format: 'es',
-        inlineDynamicImports: false,
-        preserveModules: true, // otherwise everything is bundled into one file blocking tree shaking of the named exports, but only works for ES modules
+        globals: {
+          react: 'react',
+          '@tanstack/react-query': '@tanstack/react-query',
+        },
       },
     },
   },

@@ -30,7 +30,7 @@ export interface ImageProps {
   onLoad?: () => void;
 }
 
-const Image = ({
+export const OdinImage = ({
   dotYouClient,
   odinId,
   targetDrive,
@@ -210,5 +210,3 @@ const Image = ({
     </figure>
   );
 };
-
-export default Image;
