@@ -17,6 +17,7 @@
   "types": "./dist/dotyoucore-js.d.ts",
   "sideEffects": false,
   "scripts": {
+    "start": "vite build --watch",
     "build": "tsc && vite build",
     "lint": "eslint src/*"
   },

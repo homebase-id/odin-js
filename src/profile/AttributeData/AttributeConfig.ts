@@ -1,0 +1,57 @@
+import { toGuidId } from '../../core/core';
+export class AttributeConfig {
+  //Indicates that a file holds the profile definition for this drive
+  static readonly AttributeFileType: number = 77;
+}
+
+export function sortByPriority(a: { priority: number }, b: { priority: number }) {
+  return a.priority - b.priority;
+}
+
+export class BuiltInAttributes {
+  static readonly Name = toGuidId('name');
+  static readonly Nickname = toGuidId('nickname');
+  static readonly Photo = toGuidId('photo');
+  static readonly Address = toGuidId('location');
+  static readonly Birthday = toGuidId('birthday');
+  static readonly PhoneNumber = toGuidId('phonenumber');
+  static readonly Email = toGuidId('email');
+  static readonly FacebookUsername = toGuidId('facebook_username');
+  static readonly OdinIdentity = toGuidId('dot_you_identity');
+  static readonly InstagramUsername = toGuidId('instagram_username');
+  static readonly LinkedinUsername = toGuidId('linkedin_username');
+  static readonly TiktokUsername = toGuidId('tiktok_username');
+  static readonly TwitterUsername = toGuidId('twitter_username');
+  static readonly YoutubeUsername = toGuidId('youtube_username');
+  static readonly DiscordUsername = toGuidId('discord_username');
+  static readonly EpicUsername = toGuidId('epic_username');
+  static readonly RiotUsername = toGuidId('riot_username');
+  static readonly SteamUsername = toGuidId('steam_username');
+  static readonly MinecraftUsername = toGuidId('minecraft_username');
+  static readonly GithubUsername = toGuidId('github_username');
+  static readonly StackoverflowUsername = toGuidId('stackoverflow_username');
+  static readonly CreditCard = toGuidId('creditcard');
+  static readonly FullBio = toGuidId('full_bio');
+  static readonly ShortBio = toGuidId('short_bio');
+  static readonly Link = toGuidId('link');
+
+  static readonly AllSocial = [
+    BuiltInAttributes.TwitterUsername,
+    BuiltInAttributes.FacebookUsername,
+    BuiltInAttributes.InstagramUsername,
+    BuiltInAttributes.TiktokUsername,
+    BuiltInAttributes.LinkedinUsername,
+    BuiltInAttributes.OdinIdentity,
+    BuiltInAttributes.YoutubeUsername,
+    BuiltInAttributes.DiscordUsername,
+    BuiltInAttributes.GithubUsername,
+    BuiltInAttributes.StackoverflowUsername,
+  ];
+
+  static readonly AllGames = [
+    BuiltInAttributes.EpicUsername,
+    BuiltInAttributes.RiotUsername,
+    BuiltInAttributes.SteamUsername,
+    BuiltInAttributes.MinecraftUsername,
+  ];
+}
