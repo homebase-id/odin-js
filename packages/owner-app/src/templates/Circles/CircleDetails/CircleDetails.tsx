@@ -1,0 +1,331 @@
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { t } from '../../../helpers/i18n/dictionary';
+import useCircle from '../../../hooks/circles/useCircle';
+import Alert from '../../../components/ui/Alerts/Alert/Alert';
+import ErrorNotification from '../../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import ActionButton, { mergeStates } from '../../../components/ui/Buttons/ActionButton';
+import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';
+import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
+import MemberLookupDialog from '../../../components/Dialog/MemberLookupDialog/MemberLookupDialog';
+import Circles from '../../../components/ui/Icons/Circles/Circles';
+import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
+import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
+import ActionGroup from '../../../components/ui/Buttons/ActionGroup';
+import Persons from '../../../components/ui/Icons/Persons/Persons';
+import Trash from '../../../components/ui/Icons/Trash/Trash';
+import Block from '../../../components/ui/Icons/Block/Block';
+import Check from '../../../components/ui/Icons/Check/Check';
+import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
+import CircleAppInteractionDialog from '../../../components/Dialog/CircleAppInteractionDialog/CircleAppInteractionDialog';
+import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+
+const CircleDetails = () => {
+  const { circleKey } = useParams();
+  const decodedCircleKey = decodeURIComponent(circleKey);
+  const {
+    fetch: { data: circle, isLoading: circleLoading },
+    fetchMembers: { data: members, isLoading: membersLoading },
+    provideGrants: { mutateAsync: addMembers, status: addMemberStatus, error: addMembersError },
+    revokeGrants: {
+      mutateAsync: removeMembers,
+      status: removeMemberStatus,
+      error: removeMembersError,
+    },
+    createOrUpdate: { mutate: updateCircle, status: updateCircleStatus, error: updateCircleError },
+    enableCircle: { mutate: enableCircle, error: enableCircleError },
+    disableCircle: { mutate: disableCircle, error: disableCircleError },
+    removeCircle: { mutateAsync: removeCircle, error: removeCircleError },
+  } = useCircle({ circleId: decodedCircleKey });
+
+  const [isOpenEdit, setIsOpenEdit] = useState(false);
+  const [isOpenMemberLookup, setIsOpenMemberLookup] = useState(false);
+  const [isOpenAppInteractionDialog, setIsOpenAppInteractionDialog] = useState(false);
+  const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
+
+  if (circleLoading) {
+    return <LoadingDetailPage />;
+  }
+
+  if (!circle) {
+    return <>No matching circle found</>;
+  }
+
+  return (
+    <>
+      <ErrorNotification error={enableCircleError} />
+      <ErrorNotification error={disableCircleError} />
+      <ErrorNotification error={addMembersError} />
+      <ErrorNotification error={removeMembersError} />
+      <ErrorNotification error={removeCircleError} />
+      <PageMeta
+        icon={Circles}
+        title={`${circle.name}`}
+        actions={
+          <>
+            <ActionButton
+              type="primary"
+              icon="edit"
+              onClick={() => {
+                setIsOpenEdit(true);
+              }}
+            >
+              {t('Edit Circle')}
+            </ActionButton>
+            <ActionGroup
+              type="secondary"
+              size="square"
+              options={[
+                {
+                  onClick: () => {
+                    setIsOpenMemberLookup(true);
+                  },
+                  label: t('Edit Members'),
+                  icon: Persons,
+                },
+                ...(circle.disabled
+                  ? [
+                      {
+                        icon: Trash,
+                        onClick: () => removeCircle({ circleId: circle.id }),
+                        confirmOptions: {
+                          title: `${t('Remove Circle')} ${circle.name}`,
+                          buttonText: t('Remove'),
+                          body: t(
+                            'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
+                          ),
+                        },
+                        label: t('Delete'),
+                      },
+                      {
+                        icon: Check,
+                        onClick: () => {
+                          enableCircle({ circleId: circle.id });
+                        },
+                        label: t('Enable Circle'),
+                      },
+                    ]
+                  : [
+                      {
+                        icon: Block,
+                        onClick: () => disableCircle({ circleId: circle.id }),
+                        confirmOptions: {
+                          title: `${t('Disable Circle')} ${circle.name}`,
+                          buttonText: t('Disable'),
+                          body: `${t('Are you sure you want to disable this circle')}`,
+                        },
+                        label: t('Disable Circle'),
+                      },
+                    ]),
+              ]}
+            >
+              ...
+            </ActionGroup>
+          </>
+        }
+        breadCrumbs={[
+          { href: '/owner/circles', title: 'My Circles' },
+          { title: circle.name ?? '' },
+        ]}
+      />
+      {circle.disabled && (
+        <Alert type="critical" title={t('Circle is disabled')} className="mb-5">
+          {t(
+            'This circle is disabled, all members no longer have the access provided by this cirlce'
+          )}
+        </Alert>
+      )}
+
+      <section>
+        <div className="mr-auto max-w-2xl">{circle.description}</div>
+      </section>
+
+      <SectionTitle
+        title={t('Members')}
+        actions={
+          <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={'edit'} />
+        }
+      />
+      <div className="py-5">
+        {members?.length && !membersLoading ? (
+          <div className="-m-1 flex flex-row flex-wrap">
+            {members.map((member) => (
+              <CircleMemberCard
+                key={member}
+                circleId={decodedCircleKey}
+                odinId={member}
+                className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-row">
+            <p className="my-auto">
+              {t('Mmh, this looks like an emtpy circle... Time to add some connections?')}{' '}
+            </p>
+            <ActionButton
+              onClick={() => setIsOpenMemberLookup(true)}
+              type="secondary"
+              className="ml-2"
+            >
+              {t('Add')}
+            </ActionButton>
+          </div>
+        )}
+      </div>
+
+      <Section
+        title={
+          <>
+            {t('Apps that')} &quot;{circle.name}&quot; {t('can use')}
+            <small className="block text-sm text-slate-500">
+              {t('all contacts added will have this access')}
+            </small>
+          </>
+        }
+        actions={
+          <ActionButton
+            type="mute"
+            onClick={() => setIsOpenAppInteractionDialog(true)}
+            icon={'edit'}
+          />
+        }
+      >
+        <AppInteractionPermissionOverview
+          circleId={circle.id}
+          fallbackMessage={<>{t("This circle doesn't have any access to any apps")}</>}
+        />
+      </Section>
+
+      <Section
+        title={
+          <>
+            {t('Access on the following drives')}
+            <small className="block text-sm text-slate-500">
+              {t('all contacts added will have this access')}
+            </small>
+          </>
+        }
+        actions={
+          <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={'edit'} />
+        }
+      >
+        {circle.driveGrants?.length ? (
+          <div className="-my-6">
+            {circle.driveGrants.map((grant) => {
+              return (
+                <DrivePermissionView
+                  key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                  driveGrant={grant}
+                  className="my-6"
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-row">
+            <p className="my-auto">{t("This circle doesn't have any access")}</p>
+          </div>
+        )}
+      </Section>
+
+      <CircleDialog
+        title={`${t('Edit')}: ${circle.name}`}
+        isOpen={isOpenEdit}
+        confirmText={t('Update Circle')}
+        defaultValue={circle}
+        onCancel={() => {
+          setIsOpenEdit(false);
+        }}
+        onConfirm={() => {
+          setIsOpenEdit(false);
+        }}
+      />
+      <MemberLookupDialog
+        isOpen={isOpenMemberLookup}
+        title={`${t('Add Members to')} ${circle.name}`}
+        defaultMembers={members}
+        onCancel={() => {
+          setIsOpenMemberLookup(false);
+        }}
+        confirmationStatus={mergeStates(addMemberStatus, removeMemberStatus)}
+        onConfirm={async (toProvideMembers, toRevokeMembers) => {
+          await addMembers({ circleId: decodedCircleKey, odinIds: toProvideMembers });
+          await removeMembers({ circleId: decodedCircleKey, odinIds: toRevokeMembers });
+
+          setIsOpenMemberLookup(false);
+        }}
+      />
+      <CircleAppInteractionDialog
+        isOpen={isOpenAppInteractionDialog}
+        title={t('Edit accessible apps')}
+        circleDef={circle}
+        onConfirm={() => setIsOpenAppInteractionDialog(false)}
+        onCancel={() => setIsOpenAppInteractionDialog(false)}
+      />
+      <DrivePermissionSelectorDialog
+        title={`${t('Edit drive access of')} "${circle.name}"`}
+        defaultValue={circle.driveGrants}
+        error={updateCircleError}
+        confirmState={updateCircleStatus}
+        isOpen={isDrivesEditOpen}
+        onCancel={() => setIsDrivesEditOpen(false)}
+        onConfirm={async (newDriveGrants) => {
+          await updateCircle({ ...circle, driveGrants: newDriveGrants });
+          setIsDrivesEditOpen(false);
+        }}
+      />
+    </>
+  );
+};
+
+const CircleMemberCard = ({
+  circleId,
+  odinId,
+  className,
+}: {
+  circleId;
+  odinId: string;
+  className: string;
+}) => {
+  const {
+    mutate: revokeGrants,
+    status: revokeGrantsStatus,
+    error: revokeGrantsError,
+  } = useCircle({}).revokeGrants;
+
+  return (
+    <>
+      <ErrorNotification error={revokeGrantsError} />
+      <ConnectionCard
+        className={`${className ?? ''} relative`}
+        odinId={odinId}
+        href={(odinId && `/owner/connections/${odinId}`) ?? undefined}
+      >
+        <div className="absolute top-2 right-2 z-10 aspect-square rounded-full">
+          <ActionButton
+            type="secondary"
+            onClick={(e) => {
+              e.preventDefault();
+              revokeGrants({ circleId, odinIds: [odinId] });
+              return false;
+            }}
+            confirmOptions={{
+              title: t('Remove member'),
+              body: `${t('Are you sure you want to remove')} ${odinId} ${t('from this circle?')}`,
+              buttonText: t('Remove'),
+            }}
+            state={revokeGrantsStatus}
+            icon="times"
+            className="rounded-full"
+            size="square"
+          />
+        </div>
+      </ConnectionCard>
+    </>
+  );
+};
+
+export default CircleDetails;

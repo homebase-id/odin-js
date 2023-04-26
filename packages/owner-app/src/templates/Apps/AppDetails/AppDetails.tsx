@@ -1,0 +1,485 @@
+import { useNavigate, useParams } from 'react-router-dom';
+import { t } from '../../../helpers/i18n/dictionary';
+import useApp from '../../../hooks/apps/useApp';
+import Alert from '../../../components/ui/Alerts/Alert/Alert';
+import ErrorNotification from '../../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import Grid from '../../../components/ui/Icons/Grid/Grid';
+import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
+import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
+import CirclePermissionView from '../../../components/PermissionViews/CirclePermissionView/CirclePermissionView';
+import useCircles from '../../../hooks/circles/useCircles';
+import { AppClientRegistration } from '../../../provider/app/AppManagementProviderTypes';
+import HardDrive from '../../../components/ui/Icons/HardDrive/HardDrive';
+import { useState } from 'react';
+import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+import PermissionSelectorDialog from '../../../components/Dialog/PermissionSelectorDialog/PermissionSelectorDialog';
+import useAppClients from '../../../hooks/apps/useAppClients';
+import Times from '../../../components/ui/Icons/Times/Times';
+import Refresh from '../../../components/ui/Icons/Refresh/Refresh';
+import CirclePermissionSelectorDialog from '../../../components/Dialog/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
+import useDrives from '../../../hooks/drives/useDrives';
+import { stringGuidsEqual } from '@youfoundation/js-lib';
+
+const AppDetails = () => {
+  const { appKey } = useParams();
+  const decodedAppKey = decodeURIComponent(appKey);
+  const navigate = useNavigate();
+  const {
+    fetch: { data: app, isLoading: appLoading },
+    revokeApp: { mutate: revokeApp, status: revokeAppStatus, error: revokeAppError },
+    allowApp: { mutate: allowApp, status: allowAppStatus, error: allowAppError },
+    removeApp: { mutateAsync: removeApp, status: removeAppStatus, error: removeAppError },
+    updateAuthorizedCircles: {
+      mutate: updateCircles,
+      status: updateCirclesState,
+      error: updateCirclesError,
+    },
+    updatePermissions: {
+      mutate: updatePermissions,
+      status: updatePermissionsState,
+      error: updatePermissionsError,
+    },
+  } = useApp({ appId: decodedAppKey });
+
+  const {
+    fetch: { data: appClients },
+  } = useAppClients({ appId: decodedAppKey });
+
+  const { data: circles } = useCircles().fetch;
+  const { data: drives } = useDrives().fetch;
+
+  const [circleEditState, setCircleEditState] = useState<
+    'circle' | 'permission' | 'drives' | undefined
+  >();
+  const [isPermissionEditOpen, setIsPermissionEditOpen] = useState(false);
+  const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
+
+  if (appLoading) {
+    <>Loading</>;
+  }
+
+  if (!app) {
+    return <>No matching app found</>;
+  }
+
+  return (
+    <>
+      <ErrorNotification error={allowAppError || revokeAppError || removeAppError} />
+      <PageMeta
+        icon={Grid}
+        title={
+          <span>
+            {app.name}
+            {app.corsHostName ? <small className="block text-sm">{app.corsHostName}</small> : null}
+          </span>
+        }
+        breadCrumbs={[{ href: '/owner/apps', title: 'My apps' }, { title: app.name ?? '' }]}
+        actions={
+          <>
+            {app.isRevoked ? (
+              <>
+                <ActionButton
+                  type="primary"
+                  className="my-auto"
+                  onClick={() => allowApp({ appId: decodedAppKey })}
+                  state={allowAppStatus}
+                  icon={Refresh}
+                  confirmOptions={{
+                    title: t('Restore App'),
+                    buttonText: t('Restore'),
+                    body: `${t('Are you sure you want to restore')} ${app.name} ${t(
+                      'and allow access to your identity'
+                    )}`,
+                  }}
+                >
+                  {t('Restore app')}
+                </ActionButton>
+                <ActionButton
+                  type="remove"
+                  className="my-auto"
+                  onClick={async () => {
+                    await removeApp({ appId: decodedAppKey });
+                    navigate('/owner/apps');
+                  }}
+                  state={removeAppStatus}
+                  icon={'trash'}
+                  confirmOptions={{
+                    title: t('Remove App'),
+                    buttonText: t('Remove'),
+                    body: `${t('Are you sure you want to remove')} ${app.name}? ${t(
+                      'It will no longer have access to your identity. The linked drives and data will remain.'
+                    )}`,
+                    trickQuestion: {
+                      question: `${t('Fill in the name of the app')} (${app.name}) ${t(
+                        'to confirm:'
+                      )}`,
+                      answer: app.name,
+                    },
+                  }}
+                >
+                  {t('Remove app')}
+                </ActionButton>
+              </>
+            ) : (
+              <ActionButton
+                type="remove"
+                className="my-auto"
+                onClick={() => revokeApp({ appId: decodedAppKey })}
+                state={revokeAppStatus}
+                icon="times"
+                confirmOptions={{
+                  title: t('Revoke App'),
+                  buttonText: t('Revoke'),
+                  body: `${t('Are you sure you want to revoke')} ${app.name} ${t(
+                    'from all access to your identity'
+                  )}`,
+                }}
+              >
+                {t('Revoke app')}
+              </ActionButton>
+            )}
+          </>
+        }
+      />
+
+      {app.isRevoked && (
+        <Alert type="critical" title={t('App is revoked')} className="mb-5">
+          {t('This app is revoked, it no longer has the access provided')}
+        </Alert>
+      )}
+
+      {appClients ? (
+        <Section title={t('Devices')}>
+          <div className="-my-4">
+            {appClients.map((appClient, index) => (
+              <ClientView
+                appId={app.appId}
+                appClient={appClient}
+                className="my-4"
+                key={`${appClient.accessRegistrationId}_${index}`}
+              />
+            ))}
+          </div>
+        </Section>
+      ) : null}
+
+      <SectionTitle
+        title={
+          <>
+            {t('App permissions:')}
+            <small className="block text-sm text-slate-400">
+              {t('This describes what the app is allowed to access')}
+            </small>
+          </>
+        }
+      />
+      <div className="grid gap-4 sm:grid-flow-col sm:grid-cols-2">
+        {/* {app.grant.permissionSet?.keys ? ( */}
+        <Section
+          title={t('Connections')}
+          actions={
+            <ActionButton type="mute" onClick={() => setIsPermissionEditOpen(true)} icon={'edit'} />
+          }
+        >
+          {app.grant.permissionSet?.keys ? (
+            <div className="-my-4">
+              {app.grant.permissionSet.keys.map((permissionLevel) => {
+                return (
+                  <PermissionView
+                    key={`${permissionLevel}`}
+                    permission={permissionLevel}
+                    className="my-4"
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-row">
+              <p className="my-auto">{t("This app doesn't have any special permissions")}</p>
+            </div>
+          )}
+        </Section>
+
+        <Section
+          title={t('Drives')}
+          actions={
+            <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={'edit'} />
+          }
+        >
+          {app.grant?.driveGrants?.length ? (
+            <div className="-my-4">
+              {app.grant?.driveGrants?.map((grant) => {
+                return (
+                  <DrivePermissionView
+                    key={`${grant?.permissionedDrive?.drive?.alias}-${grant?.permissionedDrive?.drive?.type}`}
+                    driveGrant={grant}
+                    className="my-4"
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-row">
+              <p className="my-auto">{t("This app doesn't have any access")}</p>
+            </div>
+          )}
+        </Section>
+      </div>
+
+      <SectionTitle
+        title={
+          <>
+            {t('Circles')}
+            <small className="block text-sm text-slate-400">
+              {t('This describes what the identities within these circles can access')}
+            </small>
+          </>
+        }
+      />
+
+      <div className="grid gap-4 sm:grid-flow-col sm:grid-cols-3">
+        <Section
+          title={t('Enabled circles for this app')}
+          actions={
+            <ActionButton type="mute" onClick={() => setCircleEditState('circle')} icon={'edit'} />
+          }
+        >
+          {app.authorizedCircles?.length ? (
+            <ul className="-my-4">
+              {app.authorizedCircles.map((circleId) => {
+                return (
+                  <CirclePermissionView
+                    circleDef={circles?.find((circle) => stringGuidsEqual(circle.id, circleId))}
+                    key={circleId}
+                    className="my-4"
+                  />
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="flex flex-row">
+              <p className="my-auto">{t("This app doesn't have any access")}</p>
+            </div>
+          )}
+        </Section>
+        <Section
+          title={t('Drives')}
+          actions={
+            <ActionButton type="mute" onClick={() => setCircleEditState('drives')} icon={'edit'} />
+          }
+        >
+          {app.circleMemberPermissionSetGrantRequest.drives?.length ? (
+            <div className="-my-4">
+              {app.circleMemberPermissionSetGrantRequest.drives.map((grant) => {
+                return (
+                  <DrivePermissionView
+                    key={`${grant?.permissionedDrive?.drive?.alias}-${grant?.permissionedDrive?.drive?.type}`}
+                    driveGrant={grant}
+                    className="my-4"
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-row">
+              <p className="my-auto">{t("This app doesn't have any drive access for circles")}</p>
+            </div>
+          )}
+        </Section>
+        <Section
+          title={t('Permissions')}
+          actions={
+            <ActionButton
+              type="mute"
+              onClick={() => setCircleEditState('permission')}
+              icon={'edit'}
+            />
+          }
+        >
+          {app.circleMemberPermissionSetGrantRequest.permissionSet?.keys?.length ? (
+            <div className="-my-4">
+              {app.circleMemberPermissionSetGrantRequest.permissionSet.keys.map(
+                (permissionLevel) => {
+                  return (
+                    <PermissionView
+                      key={`${permissionLevel}`}
+                      permission={permissionLevel}
+                      className="my-4"
+                    />
+                  );
+                }
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-row">
+              <p className="my-auto">{t("This app doesn't have any special access for circles")}</p>
+            </div>
+          )}
+        </Section>
+      </div>
+
+      <CirclePermissionSelectorDialog
+        title={`${t('Edit circles within')} "${app.name}"`}
+        circleIds={app.authorizedCircles}
+        defaultValue={app.circleMemberPermissionSetGrantRequest}
+        drives={
+          drives?.filter((drive) =>
+            app.grant.driveGrants.some(
+              (grant) =>
+                stringGuidsEqual(
+                  grant.permissionedDrive.drive.alias,
+                  drive.targetDriveInfo.alias
+                ) &&
+                stringGuidsEqual(grant.permissionedDrive.drive.type, drive.targetDriveInfo.type)
+            )
+          ) ?? []
+        }
+        error={updateCirclesError}
+        confirmState={updateCirclesState}
+        isOpen={!!circleEditState}
+        hideCircleSelector={circleEditState !== 'circle'}
+        hidePermissionSelector={circleEditState !== 'permission'}
+        hideDriveSelector={circleEditState !== 'drives'}
+        onCancel={() => setCircleEditState(undefined)}
+        onConfirm={async (newCircleIds, permissionGrant) => {
+          await updateCircles({
+            appId: app.appId,
+            circleIds: newCircleIds,
+            circleMemberPermissionGrant: permissionGrant,
+          });
+          setCircleEditState(undefined);
+        }}
+      />
+      <PermissionSelectorDialog
+        title={`${t('Edit permissions')} "${app.name}"`}
+        defaultValue={app.grant.permissionSet}
+        error={updatePermissionsError}
+        confirmState={updatePermissionsState}
+        isOpen={isPermissionEditOpen}
+        onCancel={() => setIsPermissionEditOpen(false)}
+        onConfirm={async (newPermissionSet) => {
+          await updatePermissions({
+            appId: app.appId,
+            permissionSet: newPermissionSet,
+            drives: app.grant.driveGrants,
+          });
+          setIsPermissionEditOpen(false);
+        }}
+      />
+      <DrivePermissionSelectorDialog
+        title={`${t('Edit drive access by')} "${app.name}"`}
+        defaultValue={app.grant.driveGrants}
+        allowOwnerOnlyDrives={true}
+        error={updatePermissionsError}
+        confirmState={updatePermissionsState}
+        isOpen={isDrivesEditOpen}
+        onCancel={() => setIsDrivesEditOpen(false)}
+        onConfirm={async (newDriveGrants) => {
+          await updatePermissions({
+            appId: app.appId,
+            permissionSet: app.grant.permissionSet,
+            drives: newDriveGrants,
+          });
+          setIsDrivesEditOpen(false);
+        }}
+      />
+    </>
+  );
+};
+
+const ClientView = ({
+  appId,
+  appClient,
+  className,
+}: {
+  appId: string;
+  appClient: AppClientRegistration;
+  className?: string;
+}) => {
+  const {
+    revokeClient: {
+      mutateAsync: revokeClient,
+      status: revokeClientStatus,
+      reset: resetRevokeClient,
+    },
+    allowClient: { mutateAsync: allowClient, status: allowClientStatus, reset: resetAllowClient },
+    removeClient: {
+      mutateAsync: removeClient,
+      status: removeClientStatus,
+      reset: resetRemoveClient,
+    },
+  } = useAppClients({});
+
+  return (
+    <div
+      className={`flex flex-row items-center ${
+        appClient.isRevoked ? 'hover:opactiy-90 opacity-50' : ''
+      } ${className ?? ''}`}
+    >
+      <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6" />
+      <div className="mr-2 flex flex-col">
+        {appClient.friendlyName}
+        <small className="block text-sm">
+          <span className="capitalize">{appClient.accessRegistrationClientType}</span> |{' '}
+          {t('Created')}: {new Date(appClient.created).toLocaleDateString()}
+        </small>
+      </div>
+      {!appClient.isRevoked ? (
+        <ActionButton
+          icon={Times}
+          type="secondary"
+          size="square"
+          className="ml-2"
+          onClick={async () => {
+            resetAllowClient();
+            resetRemoveClient();
+
+            await revokeClient({ appId, registrationId: appClient.accessRegistrationId });
+          }}
+          state={revokeClientStatus}
+        />
+      ) : (
+        <>
+          <ActionButton
+            icon={Refresh}
+            type="primary"
+            size="square"
+            className="ml-2"
+            onClick={async () => {
+              resetRevokeClient();
+              resetRemoveClient();
+
+              await allowClient({ appId, registrationId: appClient.accessRegistrationId });
+            }}
+            state={allowClientStatus}
+          />
+          <ActionButton
+            icon={'trash'}
+            type="remove"
+            size="square"
+            className="ml-2"
+            onClick={async () => {
+              resetRevokeClient();
+              resetAllowClient();
+
+              await removeClient({ appId, registrationId: appClient.accessRegistrationId });
+            }}
+            confirmOptions={{
+              title: `${t('Remove Client')} "${appClient.friendlyName}"`,
+              body: t(
+                'Are you sure you want to remove this client? If you ever want to undo this, you will have to register the client again.'
+              ),
+              buttonText: t('Remove'),
+            }}
+            state={removeClientStatus}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+export default AppDetails;
