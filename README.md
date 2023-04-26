@@ -34,6 +34,6 @@ Build the library:
 `npm run build -workspaces`
 
 In the package.json of the target project add a dependency with a relative path:
-`"@youfoundation/dotyoucore-js": "file:../dotyoucore-js/packages/${lib/ui}"`, and run `npm install` afterwards
+`"@youfoundation/${js-lib/ui-lib}": "file:../dotyoucore-js/packages/${lib/ui}"`, and run `npm install` afterwards
 
 NPM will make a symlink between the target project node_modules folder and the source so any updates later in the library are automatically picked up.

@@ -38,12 +38,13 @@ export interface ImageUploadResult extends MediaUploadResult {
 }
 
 export interface ImageMetadata {
-  camera: {
+  description?: string;
+  camera?: {
     make?: string;
     model?: string;
     lens?: string;
   };
-  captureDetails: {
+  captureDetails?: {
     exposureTime?: string;
     fNumber?: string;
     iso?: number;
