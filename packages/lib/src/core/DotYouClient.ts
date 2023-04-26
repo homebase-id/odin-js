@@ -109,7 +109,7 @@ export class DotYouClient {
         const encryptedPayload = response.data;
 
         if (encryptedPayload && encryptedPayload.data && encryptedPayload.iv && ss) {
-          response.data = await decryptData(response.data.data, response.data.iv, ss);
+          response.data = await decryptData(encryptedPayload.data, encryptedPayload.iv, ss);
           isDebug && console.debug('response', response.config?.url, response);
         }
 
