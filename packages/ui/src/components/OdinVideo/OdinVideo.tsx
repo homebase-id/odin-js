@@ -25,7 +25,7 @@ export interface OdinVideoProps {
 /// based on demo from nickdesaulniers: https://github.com/nickdesaulniers/netfix/blob/gh-pages/demo/bufferWhenNeeded.html
 /// But with introduction of segmentMap and other changes to support seeking
 
-const Video = ({ dotYouClient, odinId, targetDrive, fileId, className }: OdinVideoProps) => {
+export const Video = ({ dotYouClient, odinId, targetDrive, fileId, className }: OdinVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
   const activeObjectUrl = useRef<string>();
@@ -219,5 +219,3 @@ const Video = ({ dotYouClient, odinId, targetDrive, fileId, className }: OdinVid
     />
   );
 };
-
-export default Video;
