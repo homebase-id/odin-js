@@ -1,5 +1,7 @@
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { TargetDrive } from '../DriveData/DriveTypes';
+import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
+import { jsonStringify64 } from '../core';
 import {
   ClientConnectionNotification,
   ClientDeviceNotification,
@@ -13,6 +15,7 @@ import {
 } from './NotificationTypes';
 
 let webSocketClient: WebSocket | undefined;
+let activeSs: Uint8Array;
 let isConnected = false;
 const handlers: ((data: TypedConnectionNotification) => void)[] = [];
 
@@ -23,7 +26,9 @@ interface RawClientNotification {
 
 const isDebug = localStorage.getItem('debug') === '1';
 
-const ParseNotification = (notification: RawClientNotification): TypedConnectionNotification => {
+const ParseRawClientNotification = (
+  notification: RawClientNotification
+): TypedConnectionNotification => {
   const { targetDrive, header, externalFileIdentifier, sender, ...data } = JSON.parse(
     notification.data
   );
@@ -80,9 +85,12 @@ export const Subscribe = async (
   handler: (data: TypedConnectionNotification) => void
 ) => {
   const apiType = dotYouClient.getType();
-  if (apiType !== ApiType.Owner) {
+  const sharedSecret = dotYouClient.getSharedSecret();
+  if (apiType !== ApiType.Owner || !sharedSecret) {
     throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
   }
+
+  activeSs = sharedSecret;
 
   return new Promise<void>((resolve) => {
     handlers.push(handler);
@@ -106,11 +114,11 @@ export const Subscribe = async (
         drives: drives,
       };
 
-      webSocketClient?.send(JSON.stringify(connectionRequest));
+      Notify(connectionRequest);
     };
 
     webSocketClient.onmessage = async (e) => {
-      const notification: RawClientNotification = JSON.parse(e.data);
+      const notification: RawClientNotification = await parseMessage(e);
 
       if (!isConnected) {
         // First message must be acknowledgement of successful handshake
@@ -122,19 +130,32 @@ export const Subscribe = async (
         }
       }
 
-      const parsedNotification = ParseNotification(notification);
+      const parsedNotification = ParseRawClientNotification(notification);
       handlers.map(async (handler) => await handler(parsedNotification));
     };
   });
 };
 
-export const Notify = (command: Command) => {
+export const Notify = async (command: Command | EstablishConnectionRequest) => {
   if (!webSocketClient) {
     throw new Error('No active client to notify');
   }
 
   if (isDebug) console.debug(`[NotificationProvider] Send command (${JSON.stringify(command)})`);
-  webSocketClient.send(JSON.stringify(command));
+
+  const json = jsonStringify64(command);
+  const payload = await encryptData(json, getRandomIv(), activeSs);
+
+  webSocketClient.send(JSON.stringify(payload));
+};
+
+const parseMessage = async (e: MessageEvent): Promise<RawClientNotification> => {
+  const encryptedPayload = JSON.parse(e.data);
+  const decryptedData = await decryptData(encryptedPayload.data, encryptedPayload.iv, activeSs);
+
+  const notification: RawClientNotification = decryptedData;
+
+  return notification;
 };
 
 export const Disconnect = (handler: (data: TypedConnectionNotification) => void) => {
