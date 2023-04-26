@@ -15,7 +15,7 @@ import {
 
 import '../../app/app.css';
 
-export interface ImageProps {
+export interface OdinImageProps {
   dotYouClient: DotYouClient;
   odinId?: string;
   targetDrive: TargetDrive;
@@ -43,7 +43,7 @@ export const OdinImage = ({
   previewThumbnail,
   probablyEncrypted,
   onLoad,
-}: ImageProps) => {
+}: OdinImageProps) => {
   const previewImgRef = useRef<HTMLImageElement>(null);
   const wrapperRef = useRef<HTMLPictureElement>(null);
   const [loadSize, setLoadSize] = useState<ThumbSize | 'full' | undefined>(undefined);
