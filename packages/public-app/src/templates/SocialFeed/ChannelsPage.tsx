@@ -1,0 +1,45 @@
+import { useState } from 'react';
+import { ChannelItem } from '../../components/Dialog/ChannelsDialog/ChannelsDialog';
+import Plus from '../../components/ui/Icons/Plus/Plus';
+import Quote from '../../components/ui/Icons/Quote/Quote';
+import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { t } from '../../helpers/i18n/dictionary';
+import useChannels from '../../hooks/blog/useChannels';
+
+const ChannelsPage = () => {
+  const { data: channels } = useChannels();
+  const [isAddNew, setIsAddNew] = useState(false);
+
+  return (
+    <>
+      <PageMeta title={t('Channels')} icon={Quote} />
+      <section className="pb-10">
+        <div className="px-2 sm:px-10">
+          <div className="-m-2">
+            {channels?.map((chnl) => (
+              <div className="p-2" key={chnl.channelId}>
+                <ChannelItem chnl={chnl} className="bg-background" />
+              </div>
+            ))}
+            {isAddNew ? (
+              <div className="p-2" key={'new'}>
+                <ChannelItem onClose={() => setIsAddNew(false)} className="bg-background" />
+              </div>
+            ) : (
+              <div className="p-2" key={'new'}>
+                <div
+                  onClick={() => setIsAddNew(true)}
+                  className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> {t('Add new')}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+};
+
+export default ChannelsPage;

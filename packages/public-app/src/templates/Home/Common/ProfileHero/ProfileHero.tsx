@@ -1,0 +1,83 @@
+import {
+  BuiltInProfiles,
+  GetTargetDriveFromProfileId,
+  HomePageConfig,
+} from '@youfoundation/js-lib';
+import useSiteData from '../../../../hooks/siteData/useSiteData';
+import Image from '../../../../components/Image/Image';
+import Links from '../../../../components/ui/Layout/Links/Links';
+import Socials from '../../../../components/ui/Layout/Socials/Socials';
+import ConnectLink from '../../../../components/ConnectionActions/ConnectLink/ConnectLink';
+import FollowLink from '../../../../components/ConnectionActions/FollowLink/FollowLink';
+import { OwnerName } from '../../../../components/Post/Common/Blocks/Author/Name';
+
+const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
+  const { owner, home, social } = useSiteData().data ?? {};
+
+  const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
+
+  const showProfileImage = owner?.profileImageId && targetDrive;
+
+  return (
+    <section className="bg-background">
+      <div className="relative h-[27vh] min-h-[330px]">
+        <Image
+          fileId={home?.headerImageFileId}
+          targetDrive={HomePageConfig.HomepageTargetDrive}
+          className="absolute inset-0"
+          fit="cover"
+        />
+        <div className="container absolute bottom-0 left-0 right-0 top-0 mx-auto flex justify-center px-5 md:block">
+          {showProfileImage ? (
+            <div className="absolute bottom-[-4.5rem] h-60 w-60 overflow-hidden rounded-full border-4 border-page-background bg-background md:bottom-[-7.5rem]">
+              <Image
+                fileId={owner?.profileImageId}
+                targetDrive={targetDrive}
+                className="h-full w-full"
+                fit="cover"
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {/* min height of 7.5 rem to ensure sufficient spacing after the hero picture to support the offset of the profile picture*/}
+      <div className="container mx-auto flex min-h-[8.5rem] px-5 xl:h-[8.5rem]">
+        <div className={`my-auto w-full ${showProfileImage ? 'pt-[5rem] md:py-4 md:pl-60' : ''}`}>
+          <div className={`flex flex-col ${showProfileImage ? 'md:pl-10' : ''} lg:flex-row`}>
+            <div className="text-center md:text-left">
+              <h1 className="text-2xl">
+                <OwnerName />
+              </h1>
+              <small className="block text-base">{home?.tagLine}</small>
+            </div>
+
+            <div className="my-3 flex flex-col justify-center md:my-auto md:ml-auto">
+              <div className="hidden md:contents">
+                <Socials
+                  socialHandles={social}
+                  className="mt-4 justify-center sm:mt-0 md:ml-auto md:justify-start"
+                />
+              </div>
+
+              <div
+                className={`flex flex-row ${
+                  !hideLinks ? 'flex-wrap' : ''
+                } -my-1 justify-center md:ml-4 md:mt-3`}
+              >
+                <FollowLink className="my-1 mr-3 flex-grow" />
+                <ConnectLink className="my-1 flex-grow" />
+                {!hideLinks && (
+                  <div className="my-1">
+                    <Links className="ml-1" direction="row" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default ProfileHero;

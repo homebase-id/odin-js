@@ -4,6 +4,8 @@
   "author": "YouFoundation",
   "description": "Monorepo for the JS Libs of YouFoundation",
   "workspaces": [
+    "packages/js-lib",
+    "packages/ui-lib",
     "packages/*"
   ],
   "scripts": {},

@@ -1,0 +1,33 @@
+.fade-overflow {
+  position: relative;
+  overflow: hidden;
+}
+.fade-overflow::after {
+  content: '';
+  text-align: right;
+  position: absolute;
+  top: 2.2rem; /* Show on the second line only */
+  right: 0;
+  width: 40%;
+  height: 1.6em;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 50%);
+}
+.dark .fade-overflow::after {
+  background: linear-gradient(to right, rgba(17, 24, 39, 0), rgba(17, 24, 39, 1) 50%);
+}
+
+.overflow-horizontal-scroll {
+  overflow-x: auto;
+  -ms-overflow-style: none; /* for Internet Explorer, Edge */
+  scrollbar-width: none; /* for Firefox */
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+}
+
+.overflow-horizontal-scroll::-webkit-scrollbar {
+  display: none; /* for Chrome, Safari, and Opera */
+}
+
+.overflow-horizontal-scroll > * {
+  scroll-snap-align: start;
+}

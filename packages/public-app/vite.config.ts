@@ -1,0 +1,48 @@
+import fs from 'fs';
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+const hostConfig = {
+  host: 'dominion.id',
+  port: 3000,
+};
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react(), spaFallbackWithDot()],
+  server: {
+    ...hostConfig,
+    https: {
+      key: fs.readFileSync('./dominion-id.key'),
+      cert: fs.readFileSync('./dominion-id.crt'),
+    },
+    fs: {
+      // Allow serving files from one level up to the project root
+      allow: ['..'],
+    },
+  },
+  preview: { ...hostConfig },
+  base: '/home',
+});
+
+/**
+ * Vite doesn't handle fallback html with dot (.), see https://github.com/vitejs/vite/issues/2415
+ * TODO: Review the PR in Vite
+ * @returns {import('vite').Plugin}
+ */
+function spaFallbackWithDot() {
+  return {
+    name: 'spa-fallback-with-dot',
+    configureServer(server) {
+      return () => {
+        server.middlewares.use(function customSpaFallback(req, res, next) {
+          if (req.url.includes('.') && !req.url.endsWith('.html')) {
+            req.url = '/index.html';
+          }
+          next();
+        });
+      };
+    },
+  };
+}
