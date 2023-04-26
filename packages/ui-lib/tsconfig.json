@@ -6,7 +6,7 @@
   },
   "references": [
     {
-      "path": "../lib"
+      "path": "../js-lib"
     }
   ],
   "exclude": ["./types/**/*", "./dist/**/*"]

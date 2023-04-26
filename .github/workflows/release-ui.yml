@@ -7,7 +7,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'packages/ui/src/**'
+      - 'packages/ui-lib/src/**'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,14 +27,14 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          npm version prerelease --w ./packages/ui
+          npm version prerelease --w ./packages/ui-lib
 
       - run: npm ci
 
       # run with -workspaces to have lib built as well, as ui depends on it
       - run: npm run build -workspaces
 
-      - run: npm publish --w ./packages/ui
+      - run: npm publish --w ./packages/ui-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

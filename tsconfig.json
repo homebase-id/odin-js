@@ -2,10 +2,10 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/lib"
+      "path": "./packages/js-lib"
     },
     {
-      "path": "./packages/ui"
+      "path": "./packages/ui-lib"
     }
   ]
 }
