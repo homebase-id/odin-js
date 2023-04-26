@@ -7,7 +7,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'packages/ui/**'
+      - 'packages/ui/src/**'
 jobs:
   build:
     runs-on: ubuntu-latest

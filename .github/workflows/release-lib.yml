@@ -7,7 +7,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'packages/lib/**'
+      - 'packages/lib/src/**'
 jobs:
   build:
     runs-on: ubuntu-latest
