@@ -1,0 +1,226 @@
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
+import { t } from '../../../helpers/i18n/dictionary';
+import useConnection from '../../../hooks/connections/useConnection';
+import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
+import usePortal from '../../../hooks/portal/usePortal';
+import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import ActionButton from '../../ui/Buttons/ActionButton';
+import YourInfo from '../../Connection/YourInfo/YourInfo';
+import YourSignature from '../../Connection/YourSignature/YourSignature';
+import CircleSelector from '../../Form/CircleSelector';
+import Input from '../../Form/Input';
+import Label from '../../Form/Label';
+import Textarea from '../../Form/Textarea';
+import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import CheckboxToggle from '../../Form/CheckboxToggle';
+import useFollowingInfinite from '../../../hooks/follow/useFollowing';
+
+const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
+
+const OutgoingConnectionDialog = ({
+  title,
+  isOpen,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  confirmText?: string;
+
+  isOpen: boolean;
+
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  const target = usePortal('modal-container');
+  const {
+    mutateAsync: sendConnectionRequest,
+    status: sendConnectionRequestStatus,
+    reset: resetConnectionRequest,
+    error: actionError,
+  } = useConnection({}).sendConnectionRequest;
+  const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
+  const checkReturnTo = useFocusedEditing();
+
+  const [doubleChecked, setDoubleChecked] = useState(false);
+
+  const [connectionTarget, setConnectionTarget] = useState<string>();
+  const [message, setMessage] = useState(DEFAULT_MESSAGE);
+  const [name, setName] = useState<string>(window.location.hostname);
+  const [photoFileId, setPhotoFileId] = useState<string>();
+  const [circleGrants, setCircleGrants] = useState<string[]>([]);
+  const [shouldFollow, setShouldFollow] = useState(true);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  const dialog = (
+    <DialogWrapper
+      title={title}
+      onClose={() => {
+        setDoubleChecked(false);
+        onCancel();
+      }}
+      keepOpenOnBlur={true}
+      size="2xlarge"
+    >
+      <>
+        <ErrorNotification error={actionError || followError} />
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (doubleChecked) {
+              await sendConnectionRequest(
+                {
+                  message: message,
+                  name: name,
+                  photoFileId: photoFileId,
+                  targetOdinId: connectionTarget as string, // Will be defined as otherwise it would have failed validation before
+                  circleIds: circleGrants,
+                },
+                {
+                  onSuccess: () => {
+                    checkReturnTo();
+
+                    resetConnectionRequest();
+                    setConnectionTarget('');
+                    setMessage(DEFAULT_MESSAGE);
+                    setCircleGrants([]);
+                    setDoubleChecked(false);
+
+                    onConfirm();
+                  },
+                }
+              );
+              if (shouldFollow) {
+                await follow({
+                  odinId: connectionTarget as string,
+                  notificationType: 'allNotifications',
+                });
+              }
+            } else {
+              if (e.currentTarget.checkValidity()) {
+                setDoubleChecked(true);
+              }
+            }
+          }}
+        >
+          {!doubleChecked ? (
+            <>
+              <div className="mb-5">
+                <Label htmlFor="dotyouid">{t('Recipient identity')}</Label>
+                <Input
+                  id="dotyouid"
+                  name="dotyouid"
+                  onChange={(e) => {
+                    setConnectionTarget(e.target.value);
+                  }}
+                  defaultValue={connectionTarget}
+                  required
+                />
+              </div>
+              <div className="mb-5">
+                <Label htmlFor="message">{t('Message')}</Label>
+                <Textarea
+                  id="message"
+                  name="message"
+                  defaultValue={message}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                  }}
+                  required
+                />
+              </div>
+              <Label>{t('From')}</Label>
+              <YourSignature
+                onChange={(publicInfo) => {
+                  setName(publicInfo.name);
+                  setPhotoFileId(publicInfo.imageFileId);
+                }}
+              />
+              <div className="-m-2 flex flex-row-reverse py-3">
+                <ActionButton className="m-2" icon={'send'}>
+                  {t('Continue')}
+                </ActionButton>
+                <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-4 pb-4">
+                <h2 className="mb-2 text-lg leading-tight">
+                  {t('Add as member to one or more circles')}
+                  <small className="block text-slate-400 dark:text-slate-600">
+                    {connectionTarget} {t('will be added as member to the selected circles')}
+                  </small>
+                </h2>
+                <CircleSelector
+                  defaultValue={circleGrants}
+                  onChange={(e) => setCircleGrants(e.target.value)}
+                />
+              </div>
+
+              <h2 className="mb-6 text-lg leading-tight">
+                {t('Your contact details')}
+                <small className="block text-slate-400 dark:text-slate-600">
+                  {connectionTarget} {t('will get access to these contact details')}
+                </small>
+              </h2>
+              <YourInfo circleGrants={circleGrants} className="mb-4" />
+
+              <div
+                className="flex cursor-pointer flex-row items-center rounded-lg border bg-white px-4 py-3 dark:border-slate-800 dark:bg-black"
+                onClick={() => setShouldFollow(!shouldFollow)}
+              >
+                <h2 className="mr-auto text-lg leading-tight">
+                  {t('Follow')}
+                  <small className="block text-slate-400 dark:text-slate-600">
+                    {t('View posts from')} &quot;{connectionTarget}&quot; {t('in your feed')}
+                  </small>
+                </h2>
+                <CheckboxToggle
+                  className="pointer-events-none ml-2"
+                  checked={shouldFollow}
+                  readOnly={true}
+                />
+              </div>
+
+              <div className="-m-2 flex flex-row-reverse py-3">
+                <ActionButton className="m-2" state={sendConnectionRequestStatus} icon={'send'}>
+                  {t('Send')}
+                </ActionButton>
+                <ActionButton
+                  className="m-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setDoubleChecked(false);
+                  }}
+                  type={'secondary'}
+                >
+                  {t('Back')}
+                </ActionButton>
+                <ActionButton
+                  className="m-2 sm:mr-auto"
+                  type="secondary"
+                  onClick={() => {
+                    setDoubleChecked(false);
+                    onCancel();
+                  }}
+                >
+                  {t('Cancel')}
+                </ActionButton>
+              </div>
+            </>
+          )}
+        </form>
+      </>
+    </DialogWrapper>
+  );
+
+  return createPortal(dialog, target);
+};
+
+export default OutgoingConnectionDialog;

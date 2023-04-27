@@ -1,4 +1,4 @@
-import { DotYouClient, ApiType } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { queryBatch, getPayload } from '../../core/DriveData/DriveProvider';
 import {
   EncryptedKeyHeader,
@@ -127,13 +127,9 @@ export const getSocialFeed = async (
 
   // TODO: Could optimize by combining both feed and own querybatch into a single querybatchcollection...
   if (ownOption) {
-    const dotYouClientOwner = new DotYouClient({
-      api: ApiType.Owner,
-      sharedSecret: dotYouClient.getSharedSecret(),
-    });
     const ownerDotYou = window.location.hostname;
     const resultOfOwn = await getRecentPosts(
-      dotYouClientOwner,
+      dotYouClient,
       undefined,
       false,
       ownOption.ownCursorState,

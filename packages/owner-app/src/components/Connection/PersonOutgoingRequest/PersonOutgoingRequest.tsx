@@ -1,0 +1,46 @@
+import { t } from '../../../helpers/i18n/dictionary';
+import useConnection from '../../../hooks/connections/useConnection';
+import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import ActionButton from '../../ui/Buttons/ActionButton';
+import DomainHighlighter from '../../ui/DomainHighlighter/DomainHighlighter';
+import PersonCard from '../PersonCard/PersonCard';
+
+const PersonOutgoingRequest = ({
+  recipientOdinId,
+  className,
+}: {
+  recipientOdinId: string;
+  className: string;
+}) => {
+  const {
+    mutate: revokeRequest,
+    status: revokeRequestStatus,
+    error: actionError,
+  } = useConnection({}).revokeConnectionRequest;
+
+  return (
+    <>
+      <ErrorNotification error={actionError} />
+      <PersonCard className={className} odinId={recipientOdinId}>
+        <h2 className="font-thiner mb-6 dark:text-white">
+          <DomainHighlighter>{recipientOdinId}</DomainHighlighter>
+        </h2>
+        <ActionButton
+          type="secondary"
+          className="mb-2 w-full"
+          onClick={(e) => {
+            e.preventDefault();
+            revokeRequest({ targetOdinId: recipientOdinId });
+            return false;
+          }}
+          state={revokeRequestStatus}
+          icon="times"
+        >
+          {t('Cancel')}
+        </ActionButton>
+      </PersonCard>
+    </>
+  );
+};
+
+export default PersonOutgoingRequest;

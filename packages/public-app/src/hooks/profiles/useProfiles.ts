@@ -1,0 +1,98 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  ApiType,
+  DotYouClient,
+  getProfileDefinitions,
+  ProfileDefinition,
+  removeProfileDefinition,
+  saveProfileDefinition,
+} from '@youfoundation/js-lib';
+import { convertTextToSlug } from '../../helpers/common';
+import useAuth from '../auth/useAuth';
+
+export interface ProfileDefinitionVm extends ProfileDefinition {
+  slug: string;
+}
+
+const useProfiles = () => {
+  const queryClient = useQueryClient();
+  const dotYouClient = useAuth().getDotYouClient();
+
+  const fetchAll = async () => {
+    const definitions = (await getProfileDefinitions(dotYouClient))
+      .map((def) => {
+        return {
+          ...def,
+          slug: convertTextToSlug(def.name),
+        } as ProfileDefinitionVm;
+      })
+      ?.sort((profileA, profileB) => profileA.name.localeCompare(profileB.name));
+
+    return definitions;
+  };
+
+  const saveProfile = async (profileDef: ProfileDefinition) => {
+    return await saveProfileDefinition(dotYouClient, profileDef);
+  };
+
+  const removeProfile = async (profileId: string) => {
+    return await removeProfileDefinition(dotYouClient, profileId);
+  };
+
+  return {
+    fetchProfiles: useQuery(['profiles'], () => fetchAll(), {
+      refetchOnWindowFocus: false,
+      retry: false,
+    }),
+    saveProfile: useMutation(saveProfile, {
+      onMutate: async (newProfile) => {
+        await queryClient.cancelQueries(['profiles']);
+
+        const previousProfiles: ProfileDefinitionVm[] | undefined = queryClient.getQueryData([
+          'profiles',
+        ]);
+        const newProfiles = previousProfiles?.map((profile) =>
+          profile.profileId === newProfile.profileId
+            ? ({ ...newProfile, slug: convertTextToSlug(newProfile.name) } as ProfileDefinitionVm)
+            : profile
+        );
+
+        queryClient.setQueryData(['profiles'], newProfiles);
+
+        return { previousProfiles, newProfile };
+      },
+      onError: (err, newProfile, context) => {
+        console.error(err);
+
+        queryClient.setQueryData(['profiles'], context?.previousProfiles);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['profiles']);
+      },
+    }),
+    removeProfile: useMutation(removeProfile, {
+      onMutate: async (profileId) => {
+        await queryClient.cancelQueries(['profiles']);
+
+        const previousProfiles: ProfileDefinitionVm[] | undefined = queryClient.getQueryData([
+          'profiles',
+        ]);
+        const newProfiles = previousProfiles?.filter((profile) => profile.profileId !== profileId);
+
+        queryClient.setQueryData(['profiles'], newProfiles);
+
+        return { previousProfiles };
+      },
+      onError: (err, toRemoveProfileId, context) => {
+        console.error(err);
+
+        queryClient.setQueryData(['profiles'], context?.previousProfiles);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries(['profiles']);
+      },
+    }),
+  };
+};
+
+export default useProfiles;

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <base href="/home/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+    <link rel="manifest" href="/icons/site.webmanifest" />
+    <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5" />
+    <link rel="shortcut icon" href="/icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="/icons/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <meta name="youauth" content="/home/youauth/finalize" />
+    <title>Odin</title>
+    <!-- Open issue on HTML Standard: https://github.com/whatwg/html/issues/7887 -->
+    <!-- Open Bug on Chrome to respect the spec: https://bugs.chromium.org/p/chromium/issues/detail?id=1072144#c18 -->
+    <!--
+      <link rel="preload" href="/cdn/sitedata.json" as="fetch" />
+      <link rel="preload" href="/cdn/blogs.json" as="fetch" />
+    -->
+    <script>
+      fetch('/cdn/sitedata.json', { cache: 'no-store' });
+      fetch('/cdn/blogs.json', { cache: 'no-store' });
+    </script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>
