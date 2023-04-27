@@ -9,7 +9,7 @@
     "serve": "vite preview",
     "lint": "eslint src",
     "type": "tsc",
-    "dotyoucore_build": "rm -rf ../dotyoucore/services/Youverse.Hosting/client/owner-app && VITE_VERSION=$(date +%s) vite build --outDir ../dotyoucore/services/Youverse.Hosting/client/owner-app/"
+    "dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/owner-app && VITE_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/owner-app/"
   },
   "repository": {
     "type": "git",

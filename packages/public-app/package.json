@@ -9,7 +9,7 @@
     "serve": "vite preview",
     "type": "tsc",
     "lint": "eslint src",
-    "dotyoucore_build": "rm -rf ../dotyoucore/services/Youverse.Hosting/client/public-app && VITE_VERSION=$(date +%s) vite build --outDir ../dotyoucore/services/Youverse.Hosting/client/public-app/"
+    "dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/public-app && VITE_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/public-app/"
   },
   "dependencies": {
     "@tanstack/react-query": "^4.19.1",
