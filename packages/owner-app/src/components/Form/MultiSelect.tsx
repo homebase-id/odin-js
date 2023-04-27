@@ -50,7 +50,7 @@ const MultiSelect = (props: MultiSelectProps) => {
     if (!isOpen) {
       // Closing
       onChange({
-        target: { name: props.name, value: selection?.map((selected) => selected.value) },
+        target: { name: props.name || '', value: selection?.map((selected) => selected.value) },
       });
     }
   }, [isOpen]);
@@ -58,7 +58,7 @@ const MultiSelect = (props: MultiSelectProps) => {
   return (
     <div className="relative" ref={wrapperRef}>
       <ul
-        className="relative flex min-h-[2.7rem] select-none flex-row flex-wrap py-[6px] px-[10px]"
+        className="relative flex min-h-[2.7rem] select-none flex-row flex-wrap px-[10px] py-[6px]"
         onClick={(e) => {
           e.preventDefault();
           setIsOpen(!isOpen);
@@ -68,7 +68,7 @@ const MultiSelect = (props: MultiSelectProps) => {
         {selection.map((select) => (
           <li
             key={select.value}
-            className="my-auto mr-1 mb-1 flex cursor-pointer flex-row bg-slate-100 p-1 text-xs hover:bg-slate-200 dark:bg-slate-700
+            className="my-auto mb-1 mr-1 flex cursor-pointer flex-row bg-slate-100 p-1 text-xs hover:bg-slate-200 dark:bg-slate-700
             dark:hover:bg-slate-500"
             onClick={() => doSelect(select)}
           >
@@ -79,7 +79,7 @@ const MultiSelect = (props: MultiSelectProps) => {
         <Arrow className="my-auto ml-auto h-4 w-4 rotate-90" />
       </ul>
       {isOpen && (
-        <ul className="absolute top-full left-0 right-0 z-30 select-none border border-slate-100 bg-white dark:border-slate-700 dark:bg-gray-800">
+        <ul className="absolute left-0 right-0 top-full z-30 select-none border border-slate-100 bg-white dark:border-slate-700 dark:bg-gray-800">
           {availableOptions?.length ? (
             availableOptions.map((option) => (
               <li
@@ -104,7 +104,7 @@ const MultiSelect = (props: MultiSelectProps) => {
           return false;
         }}
         type={props.type ?? 'input'}
-        className={`absolute inset-0 w-full rounded border border-gray-300 bg-transparent py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 ${props.className}`}
+        className={`absolute inset-0 w-full rounded border border-gray-300 bg-transparent px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 ${props.className}`}
       />
     </div>
   );

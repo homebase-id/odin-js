@@ -17,7 +17,7 @@ const HybridLink = (props: HybridLinkProps) => {
       ? (e) => {
           e.preventDefault();
           e.stopPropagation();
-          navigate(props.href);
+          props.href && navigate(props.href);
         }
       : undefined);
 

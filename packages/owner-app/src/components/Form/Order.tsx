@@ -13,7 +13,7 @@ const Order = ({
 }) => {
   const [newElements, setNewElements] = useState<string[]>([...elements]);
 
-  const reorder = (index, dir: -1 | 1) => {
+  const reorder = (index: number, dir: -1 | 1) => {
     const updated = moveElementInArray([...newElements], index, index + dir) as string[];
 
     setNewElements(updated);

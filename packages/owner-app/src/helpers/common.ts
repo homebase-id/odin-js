@@ -16,7 +16,7 @@ export const convertTextToSlug = (text: string) => {
     .toLowerCase();
 };
 
-export const stringify = (obj: unknown) => {
+export const stringify = (obj: Record<string, unknown>) => {
   return Object.keys(obj)
     .map((key) => key + '=' + obj[key])
     .join('&');
@@ -31,7 +31,7 @@ export const makeSlug = (post: PostFile<PostContent>) => {
   return post.content.id || getNewId();
 };
 
-export const ellipsisAtMaxChar = (str: string, maxChar: number) => {
+export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {
   if (!str || !maxChar) {
     return str;
   }

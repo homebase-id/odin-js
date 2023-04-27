@@ -24,7 +24,7 @@ import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermi
 
 const CircleDetails = () => {
   const { circleKey } = useParams();
-  const decodedCircleKey = decodeURIComponent(circleKey);
+  const decodedCircleKey = circleKey ? decodeURIComponent(circleKey) : undefined;
   const {
     fetch: { data: circle, isLoading: circleLoading },
     fetchMembers: { data: members, isLoading: membersLoading },
@@ -49,9 +49,11 @@ const CircleDetails = () => {
     return <LoadingDetailPage />;
   }
 
-  if (!circle) {
-    return <>No matching circle found</>;
+  if (!circle || !circle.id || !decodedCircleKey) {
+    return <>{t('No matching circle found')}</>;
   }
+
+  const circleId = circle.id;
 
   return (
     <>
@@ -89,7 +91,7 @@ const CircleDetails = () => {
                   ? [
                       {
                         icon: Trash,
-                        onClick: () => removeCircle({ circleId: circle.id }),
+                        onClick: () => removeCircle({ circleId }),
                         confirmOptions: {
                           title: `${t('Remove Circle')} ${circle.name}`,
                           buttonText: t('Remove'),
@@ -102,7 +104,7 @@ const CircleDetails = () => {
                       {
                         icon: Check,
                         onClick: () => {
-                          enableCircle({ circleId: circle.id });
+                          enableCircle({ circleId });
                         },
                         label: t('Enable Circle'),
                       },
@@ -110,7 +112,7 @@ const CircleDetails = () => {
                   : [
                       {
                         icon: Block,
-                        onClick: () => disableCircle({ circleId: circle.id }),
+                        onClick: () => disableCircle({ circleId }),
                         confirmOptions: {
                           title: `${t('Disable Circle')} ${circle.name}`,
                           buttonText: t('Disable'),
@@ -246,7 +248,7 @@ const CircleDetails = () => {
       <MemberLookupDialog
         isOpen={isOpenMemberLookup}
         title={`${t('Add Members to')} ${circle.name}`}
-        defaultMembers={members}
+        defaultMembers={members || []}
         onCancel={() => {
           setIsOpenMemberLookup(false);
         }}
@@ -267,7 +269,7 @@ const CircleDetails = () => {
       />
       <DrivePermissionSelectorDialog
         title={`${t('Edit drive access of')} "${circle.name}"`}
-        defaultValue={circle.driveGrants}
+        defaultValue={circle.driveGrants || []}
         error={updateCircleError}
         confirmState={updateCircleStatus}
         isOpen={isDrivesEditOpen}
@@ -286,7 +288,7 @@ const CircleMemberCard = ({
   odinId,
   className,
 }: {
-  circleId;
+  circleId: string;
   odinId: string;
   className: string;
 }) => {
@@ -304,7 +306,7 @@ const CircleMemberCard = ({
         odinId={odinId}
         href={(odinId && `/owner/connections/${odinId}`) ?? undefined}
       >
-        <div className="absolute top-2 right-2 z-10 aspect-square rounded-full">
+        <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
           <ActionButton
             type="secondary"
             onClick={(e) => {

@@ -44,7 +44,8 @@ const ProfileDetails = () => {
   });
 
   const activeSectionKey =
-    decodeURIComponent(sectionKey) || (sections?.length ? sections[0].sectionId : '');
+    (sectionKey && decodeURIComponent(sectionKey)) ||
+    (sections?.length ? sections[0].sectionId : '');
 
   if (profilesLoading) {
     return <LoadingDetailPage />;
@@ -112,7 +113,10 @@ const ProfileDetails = () => {
             ></ActionGroup>
           </>
         }
-        breadCrumbs={[{ href: '/owner/profile', title: 'Social Presence' }, { title: profileKey }]}
+        breadCrumbs={[
+          { href: '/owner/profile', title: 'Social Presence' },
+          ...(profileKey ? [{ title: profileKey }] : []),
+        ]}
       />
 
       <Submenu
@@ -130,7 +134,7 @@ const ProfileDetails = () => {
         isLoading={sectionsLoading}
       />
 
-      {isCreateSection ? (
+      {isCreateSection || !activeSection ? (
         <ProfileSectionCreator
           profileId={profileDef.profileId}
           onCreate={(sectionId) => navigate(`/owner/profile/${profileKey}/${sectionId}`)}

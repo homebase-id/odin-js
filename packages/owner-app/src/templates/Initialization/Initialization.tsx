@@ -70,7 +70,7 @@ const defaultData: WelcomeData = {
 const Initialization = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: isConfigured, refetch: refreshIsConfigured } = useIsConfigured().isConfigured;
-  const defaultPage = parseInt(searchParams.get('page')) || 0;
+  const defaultPage = parseInt(searchParams?.get('page') || '0');
 
   const sessionData = sessionStorage.getItem(storageKey);
   const parsedData = sessionData && JSON.parse(sessionData);

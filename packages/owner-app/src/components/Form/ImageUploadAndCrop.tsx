@@ -9,7 +9,7 @@ import Label from './Label';
 
 interface ImageUploadAndCropProps {
   expectedAspectRatio?: number;
-  onChange: (imageData: { bytes: Uint8Array; type: ImageContentType }) => void;
+  onChange: (imageData: { bytes: Uint8Array; type: ImageContentType } | undefined) => void;
   maxWidth?: number;
   maxHeight?: number;
   defaultValue?: { bytes: Uint8Array; type: ImageContentType };
@@ -43,7 +43,7 @@ const ImageUploadAndCrop = ({
 
     if (expectedAspectRatio && size.width / size.height !== expectedAspectRatio) {
       setIsCropping(true);
-    } else {
+    } else if (rawImageData) {
       onChange(rawImageData);
     }
   };
@@ -80,7 +80,7 @@ const ImageUploadAndCrop = ({
               setRawImageData({ bytes: imageBytes, type: file.type as ImageContentType });
             }
 
-            e.target.value = null;
+            e.target.value = null as unknown as string;
           }
         }}
         name="file-select"
@@ -106,9 +106,11 @@ const ImageUploadAndCrop = ({
               onClick={(e) => {
                 e.preventDefault();
                 setIsCropping(false);
-                setCroppedImageUrl(
-                  URL.createObjectURL(new Blob([defaultValue.bytes], { type: defaultValue.type }))
-                );
+                if (defaultValue) {
+                  setCroppedImageUrl(
+                    URL.createObjectURL(new Blob([defaultValue.bytes], { type: defaultValue.type }))
+                  );
+                }
               }}
               type="primary"
               size="square"

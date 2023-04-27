@@ -26,23 +26,27 @@ const useApp = ({ appId }: { appId?: string }) => {
   };
 
   const registerNewApp = async (appRegRequest: AppRegistrationRequest) => {
-    await Promise.all(
-      appRegRequest.drives?.map(async (driveGrant) => {
-        return await ensureDrive(
-          dotYouClient,
-          driveGrant.permissionedDrive.drive,
-          driveGrant.driveMeta?.name,
-          driveGrant.driveMeta?.description,
-          false
-        );
-      })
-    );
+    if (appRegRequest.drives)
+      await Promise.all(
+        appRegRequest.drives.map(async (driveGrant) => {
+          if (driveGrant.driveMeta)
+            return await ensureDrive(
+              dotYouClient,
+              driveGrant.permissionedDrive.drive,
+              driveGrant.driveMeta.name,
+              driveGrant.driveMeta.description,
+              false
+            );
+        })
+      );
 
     await RegisterApp(dotYouClient, {
       ...appRegRequest,
-      drives: appRegRequest.drives.map((driveGrant) => {
-        return { ...driveGrant, driveMeta: undefined };
-      }),
+      drives: appRegRequest.drives
+        ? appRegRequest.drives.map((driveGrant) => {
+            return { ...driveGrant, driveMeta: undefined };
+          })
+        : [],
     });
   };
 
@@ -83,7 +87,7 @@ const useApp = ({ appId }: { appId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['app', appId], () => fetch({ appId }), {
+    fetch: useQuery(['app', appId], () => fetch({ appId: appId as string }), {
       refetchOnWindowFocus: false,
       retry: false,
       enabled: !!appId,

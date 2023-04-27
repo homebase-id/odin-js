@@ -35,9 +35,16 @@ const ProfileDialog = ({
     error: saveProfileError,
   } = useProfiles().saveProfile;
 
-  const [newProfileDef, setNewProfileDef] = useState<ProfileDefinition>({
-    ...defaultValue,
-  });
+  const [newProfileDef, setNewProfileDef] = useState<ProfileDefinition>(
+    defaultValue
+      ? {
+          ...defaultValue,
+        }
+      : ({
+          name: '',
+          description: '',
+        } as ProfileDefinition)
+  );
 
   if (!isOpen) {
     return null;

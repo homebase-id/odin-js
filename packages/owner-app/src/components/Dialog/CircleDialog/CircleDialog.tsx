@@ -25,7 +25,7 @@ const CircleDialog = ({
   confirmText?: string;
 
   isOpen: boolean;
-  defaultValue?: CircleDefinition;
+  defaultValue: CircleDefinition;
 
   onConfirm: () => void;
   onCancel: () => void;
@@ -37,17 +37,11 @@ const CircleDialog = ({
     error: updateError,
   } = useCircle({}).createOrUpdate;
 
-  const [newCircleDefinition, setNewCircleDefinition] = useState<CircleDefinition>({
-    driveGrants: defaultValue.driveGrants || [],
-    ...defaultValue,
-  });
+  const [newCircleDefinition, setNewCircleDefinition] = useState<CircleDefinition>(defaultValue);
 
   useEffect(() => {
     if (isOpen) {
-      setNewCircleDefinition({
-        driveGrants: defaultValue.driveGrants || [],
-        ...defaultValue,
-      });
+      setNewCircleDefinition(defaultValue);
     }
   }, [isOpen]);
 
@@ -56,10 +50,7 @@ const CircleDialog = ({
   }
 
   const reset = () => {
-    setNewCircleDefinition({
-      driveGrants: defaultValue.driveGrants || [],
-      ...defaultValue,
-    });
+    setNewCircleDefinition(defaultValue);
   };
 
   const dialog = (
@@ -69,7 +60,7 @@ const CircleDialog = ({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-
+            if (!newCircleDefinition) return;
             await createOrUpdate(newCircleDefinition);
             reset();
             onConfirm();
@@ -82,7 +73,7 @@ const CircleDialog = ({
             <Input
               id="name"
               name="circleName"
-              defaultValue={newCircleDefinition.name}
+              defaultValue={newCircleDefinition?.name}
               onChange={(e) => {
                 setNewCircleDefinition({ ...newCircleDefinition, name: e.target.value });
               }}

@@ -82,7 +82,7 @@ const DriveAppAccessDialog = ({
                     driveGrant.permissionedDrive.drive.type === targetDriveInfo.type
                 );
 
-                const isChecked = driveGrant?.permissionedDrive.permission > 0;
+                const isChecked = (driveGrant?.permissionedDrive.permission || 0) > 0;
 
                 return (
                   <div
@@ -95,7 +95,7 @@ const DriveAppAccessDialog = ({
                     <PermissionLevelEditor
                       className="ml-auto"
                       permissionLevels={drivePermissionLevels}
-                      defaultValue={driveGrant?.permissionedDrive.permission}
+                      defaultValue={driveGrant?.permissionedDrive.permission || 0}
                       onChange={(newValue) => {
                         setNewAppPermission([
                           ...newAppPermission.filter((appPerm) => appPerm.appId !== app.appId),

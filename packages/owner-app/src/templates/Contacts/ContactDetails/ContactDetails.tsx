@@ -4,8 +4,8 @@
 
 import ConnectionDetails from '../../Connections/ConnectionDetails/ConnectionDetails';
 
-const ContactDetails = (props) => {
-  return <ConnectionDetails {...props} />;
+const ContactDetails = () => {
+  return <ConnectionDetails />;
 };
 
 // import { useNavigate, useParams } from 'react-router-dom';

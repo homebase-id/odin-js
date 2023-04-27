@@ -316,7 +316,7 @@ const useInit = () => {
   };
 
   const doCleanInit = async (isEmptyInit: boolean) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !firstRunToken) {
       return;
     }
 
@@ -332,7 +332,7 @@ const useInit = () => {
   };
 
   const doInitWithData = async (data: WelcomeData) => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !firstRunToken) {
       return;
     }
 
@@ -365,17 +365,17 @@ const useInit = () => {
       defaultPhotoAttrId
     );
 
-    if (!existingPhotoAttr) {
+    if (!existingPhotoAttr && data.profile.imageData) {
       const mediaFileId = (
         await uploadImage(
           dotYouClient,
           GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
           anonymousAcl,
-          data.profile.imageData?.bytes,
+          data.profile.imageData.bytes,
           undefined,
           { type: data.profile.imageData?.type as ImageContentType }
         )
-      ).fileId;
+      )?.fileId;
 
       const newPhotoAttr: AttributeFile = {
         id: defaultPhotoAttrId,
@@ -504,9 +504,9 @@ const useInit = () => {
 
     if (data.social.twitter) {
       await saveSocial(
-        BuiltInAttributes.TiktokUsername,
-        SocialFields.Tiktok,
-        data.social.tiktok,
+        BuiltInAttributes.TwitterUsername,
+        SocialFields.Twitter,
+        data.social.twitter,
         5000
       );
     }

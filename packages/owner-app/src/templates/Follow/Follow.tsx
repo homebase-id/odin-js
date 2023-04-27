@@ -61,10 +61,10 @@ const Following = () => {
   const {
     fetch: { data: followingPages, isLoading: isFollowingLoading, hasNextPage, fetchNextPage },
   } = useFollowingInfinite({ pageSize: 10 });
-  const following = followingPages?.pages?.flatMap((page) => page.results);
+  const following = followingPages?.pages?.flatMap((page) => page?.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
-    hasNextPage && loadMoreRef,
+    hasNextPage ? loadMoreRef : undefined,
     () => {
       fetchNextPage();
     },
@@ -78,6 +78,7 @@ const Following = () => {
       ) : following?.length ? (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {following.map((odinId) => {
+            if (!odinId) return null;
             return <FollowingIdentity odinId={odinId} key={odinId} />;
           })}
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
@@ -96,10 +97,10 @@ const Followers = () => {
     hasNextPage,
     fetchNextPage,
   } = useFollowerInfinite({ pageSize: 10 });
-  const followers = followersPages?.pages?.flatMap((page) => page.results);
+  const followers = followersPages?.pages?.flatMap((page) => page?.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
-    hasNextPage && loadMoreRef,
+    hasNextPage ? loadMoreRef : undefined,
     () => {
       fetchNextPage();
     },
@@ -113,6 +114,7 @@ const Followers = () => {
       ) : followers?.length ? (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {followers.map((odinId) => {
+            if (!odinId) return null;
             return <FollowIdentity odinId={odinId} key={odinId} />;
           })}
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>

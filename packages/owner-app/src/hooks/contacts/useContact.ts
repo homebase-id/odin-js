@@ -70,14 +70,15 @@ const useContact = ({
     // Get contact data from pending single:
     if (!returnContact) {
       const pendingInfo =
-        (await fetchPendingInfo(dotYouClient, odinId, loadPendingProfilePicture)) ?? undefined;
-      returnContact = pendingInfo ? { ...contactBookContact, ...pendingInfo } : returnContact;
+        (await fetchPendingInfo(dotYouClient, odinId, loadPendingProfilePicture || false)) ??
+        undefined;
+      returnContact = pendingInfo ? { ...pendingInfo } : returnContact;
     }
 
     // Get contact data from public.json
     if (!returnContact) {
-      const publicContact = await fetchDataFromPublic(odinId, loadPendingProfilePicture);
-      returnContact = publicContact ? { ...contactBookContact, ...publicContact } : returnContact;
+      const publicContact = await fetchDataFromPublic(odinId, loadPendingProfilePicture || false);
+      returnContact = publicContact ? { ...publicContact } : returnContact;
     }
 
     if (returnContact) {
@@ -104,7 +105,7 @@ const useContact = ({
       return;
     }
 
-    let newContact: ContactFile;
+    let newContact: ContactFile | undefined;
 
     const connectionInfo = (await fetchConnectionInfo(dotYouClient, contact.odinId)) ?? undefined;
     newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
@@ -118,10 +119,11 @@ const useContact = ({
 
       return;
     } else {
-      const publicContact = await fetchDataFromPublic(odinId, true);
+      const publicContact = await fetchDataFromPublic(contact.odinId, true);
+      if (!publicContact) return;
       newContact = await saveContact(dotYouClient, {
         ...publicContact,
-        odinId: odinId,
+        odinId: contact.odinId,
         versionTag: contact.versionTag,
       });
     }
@@ -132,8 +134,8 @@ const useContact = ({
       ['contact', odinId ?? id, loadPendingProfilePicture],
       () =>
         fetchSingle({
-          odinId: odinId,
-          id: id,
+          odinId: odinId as string, // Defined as otherwise query would not be triggered
+          id: id as string, // Defined as otherwise query would not be triggered
           loadPendingProfilePicture: loadPendingProfilePicture,
         }),
       {
@@ -158,7 +160,7 @@ const useContact = ({
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['contact', odinId ?? id], context.previousContact);
+        queryClient.setQueryData(['contact', odinId ?? id], context?.previousContact);
       },
       onSettled: () => {
         queryClient.invalidateQueries(['contact', odinId]);

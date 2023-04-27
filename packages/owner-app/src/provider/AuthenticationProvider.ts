@@ -87,7 +87,7 @@ export const logout = async (): Promise<boolean> => {
 const prepareAuthPassword = async (
   password: string,
   nonceData: NonceData,
-  firstRunToken: string = null
+  firstRunToken?: string
 ): Promise<AuthenticationReplyNonce> => {
   const interations = 100000;
   const len = 16;
@@ -127,7 +127,7 @@ const prepareAuthPassword = async (
     nonceHashedPassword64: hashNoncePassword64,
     crc: nonceData.crc,
     rsaEncrypted: cipher64,
-    firstRunToken: firstRunToken,
+    firstRunToken: firstRunToken || null,
   };
 };
 
@@ -310,7 +310,7 @@ export interface AuthenticationReplyNonce {
   nonceHashedPassword64: string;
   crc: number;
   rsaEncrypted: string;
-  firstRunToken: string;
+  firstRunToken: string | null;
 }
 
 export interface AuthenticationPayload {

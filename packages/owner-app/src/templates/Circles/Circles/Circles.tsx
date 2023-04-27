@@ -118,7 +118,7 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
       }
       description={circleDef.description}
       isDisabled={circleDef.disabled}
-      href={`/owner/circles/${encodeURIComponent(circleDef.id)}`}
+      href={`/owner/circles/${circleDef.id ? encodeURIComponent(circleDef.id) : ''}`}
     />
   );
 };

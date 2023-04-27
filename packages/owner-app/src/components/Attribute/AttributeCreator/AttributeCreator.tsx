@@ -48,7 +48,7 @@ const AttributeCreator = ({
   };
 
   const options = Object.values(AttributeDefinitions)
-    .filter((def) => !excludedTypes.some((exclude) => exclude === def.type))
+    .filter((def) => !excludedTypes?.some((exclude) => exclude === def.type))
     .map((def) => {
       return {
         value: def.type.toString(),

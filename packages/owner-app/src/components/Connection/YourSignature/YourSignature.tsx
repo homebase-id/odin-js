@@ -45,7 +45,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
     type: BuiltInAttributes.Name,
   }).fetchVersions;
 
-  const filteredNameAttributes = filterAttributes(nameAttributes);
+  const filteredNameAttributes = filterAttributes(nameAttributes || []);
 
   const {
     data: photoAttributes,
@@ -56,7 +56,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
     type: BuiltInAttributes.Photo,
   }).fetchVersions;
 
-  const filteredPhotoAttributes = filterAttributes(photoAttributes);
+  const filteredPhotoAttributes = filterAttributes(photoAttributes || []);
 
   const { data: imageUrl } = useImage(
     filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],

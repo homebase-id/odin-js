@@ -39,7 +39,7 @@ const IdentityIFollowEditDialog = ({
   const [channelSelection, setChannelSelection] = useState<string[]>(
     identityIFollow?.channels
       ? identityIFollow.channels.map((chnl) => chnl.alias)
-      : socialChannels?.map((chnl) => chnl.channelId)
+      : socialChannels?.map((chnl) => chnl.channelId) || []
   );
   useEffect(() => {
     if (identityIFollow && socialChannelsLoaded) {
@@ -47,9 +47,9 @@ const IdentityIFollowEditDialog = ({
       if (identityIFollow.channels) {
         // Selected set of channels
         setChannelSelection(identityIFollow.channels.map((chnl) => chnl.alias));
-      } else {
+      } else if (socialChannels) {
         // All channels
-        setChannelSelection(socialChannels?.map((chnl) => chnl.channelId));
+        setChannelSelection(socialChannels.map((chnl) => chnl.channelId));
       }
     }
   }, [identityIFollowLoaded, socialChannelsLoaded]);

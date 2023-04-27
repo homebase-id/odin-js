@@ -32,7 +32,8 @@ const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProps) => {
   return {
     fetch: useInfiniteQuery(['following'], ({ pageParam }) => fetchBlogData({ pageParam }), {
       getNextPageParam: (lastPage) =>
-        (lastPage?.results?.length >= pageSize && lastPage?.cursorState) ?? undefined,
+        (lastPage?.results && lastPage.results.length >= pageSize && lastPage?.cursorState) ??
+        undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

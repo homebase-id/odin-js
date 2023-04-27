@@ -1,6 +1,6 @@
 import { DotYouClient } from '@youfoundation/js-lib';
 
-export interface uiSettings {
+export interface uiSettings extends Record<string, unknown> {
   automaticallyLoadProfilePicture?: boolean;
 }
 
@@ -37,7 +37,7 @@ export const getSettings = async (dotYouClient: DotYouClient) => {
     const returnObj: uiSettings = {};
 
     Object.keys(settingsObj).forEach((key) => {
-      returnObj[key] = JSON.parse(settingsObj[key]);
+      returnObj[key] = JSON.parse(settingsObj[key] + '');
     });
 
     return returnObj;

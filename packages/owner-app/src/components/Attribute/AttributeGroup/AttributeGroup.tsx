@@ -26,7 +26,10 @@ const AttributeGroup = ({
   const [isActive, setIsActive] = useState(
     attributes.length === 1 || convertTextToSlug(groupTitle) === typeKey
   );
-  const { reorderAttr, reorderAttrGroup } = useAttributeOrderer({ attributes, groupedAttributes });
+  const { reorderAttr, reorderAttrGroup } = useAttributeOrderer({
+    attributes,
+    groupedAttributes: groupedAttributes ? groupedAttributes : [],
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -157,7 +160,7 @@ const AddAnotherButton = ({
       ) as AttributeDefinition,
       profileId: profileId,
       acl: undefined,
-    } as AttributeVm;
+    } as unknown as AttributeVm;
   }, [type, profileId, sectionId, priority]);
 
   if (isActive) {

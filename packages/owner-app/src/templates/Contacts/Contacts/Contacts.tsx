@@ -19,7 +19,7 @@ const Contacts = () => {
   const contacts = contactPages?.pages?.flatMap((page) => page.results);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   useIntersection(
-    hasNextPage && loadMoreRef,
+    hasNextPage ? loadMoreRef : undefined,
     () => {
       fetchNextPage();
     },
@@ -67,10 +67,12 @@ const ContactCard = ({
         <div
           className={`h-full rounded-md border border-gray-200 border-opacity-60 bg-white transition-colors hover:shadow-md dark:border-gray-800 dark:bg-gray-800 hover:dark:shadow-slate-600`}
         >
-          <PendingConnectionImage
-            odinId={contact.odinId}
-            onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
-          />
+          {contact.odinId ? (
+            <PendingConnectionImage
+              odinId={contact.odinId}
+              onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
+            />
+          ) : null}
           <div className="p-2">
             <h2 className="font-thiner mb-6 dark:text-white">
               {contact.name

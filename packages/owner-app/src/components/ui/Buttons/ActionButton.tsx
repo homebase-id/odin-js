@@ -31,7 +31,7 @@ export interface ActionButtonProps {
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
   state?: ActionButtonState;
   isDisabled?: boolean;
-  onClick?: (e) => void;
+  onClick?: React.MouseEventHandler<HTMLElement>;
   title?: string;
   size?: 'large' | 'small' | 'square';
   confirmOptions?: {
@@ -65,6 +65,8 @@ export const mergeStates = (
   if ((stateA === 'success' && stateB === 'idle') || (stateA === 'idle' && stateB === 'success')) {
     return 'success';
   }
+
+  return 'idle';
 };
 
 const ActionButton: FC<ActionButtonProps> = ({
@@ -116,6 +118,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   };
 
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement>>();
 
   const colorClasses =
     (state === 'error'
@@ -159,6 +162,7 @@ const ActionButton: FC<ActionButtonProps> = ({
             ? (e) => {
                 e.preventDefault();
                 setNeedsConfirmation(true);
+                setMouseEvent(e);
                 return false;
               }
             : onClick
@@ -174,9 +178,9 @@ const ActionButton: FC<ActionButtonProps> = ({
           confirmText={confirmOptions.buttonText}
           trickQuestion={confirmOptions.trickQuestion}
           needConfirmation={needsConfirmation}
-          onConfirm={(e) => {
+          onConfirm={() => {
             setNeedsConfirmation(false);
-            onClick(e);
+            onClick && mouseEvent && onClick(mouseEvent);
           }}
           onCancel={() => {
             setNeedsConfirmation(false);

@@ -25,7 +25,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib';
 
 const AppDetails = () => {
   const { appKey } = useParams();
-  const decodedAppKey = decodeURIComponent(appKey);
+  const decodedAppKey = appKey ? decodeURIComponent(appKey) : undefined;
   const navigate = useNavigate();
   const {
     fetch: { data: app, isLoading: appLoading },
@@ -61,8 +61,8 @@ const AppDetails = () => {
     <>Loading</>;
   }
 
-  if (!app) {
-    return <>No matching app found</>;
+  if (!app || !decodedAppKey) {
+    return <>{t('No matching app found')}</>;
   }
 
   return (
@@ -250,12 +250,12 @@ const AppDetails = () => {
           {app.authorizedCircles?.length ? (
             <ul className="-my-4">
               {app.authorizedCircles.map((circleId) => {
+                const circleDef = circles?.find(
+                  (circle) => circle.id && stringGuidsEqual(circle.id, circleId)
+                );
+                if (!circleId || !circleDef) return null;
                 return (
-                  <CirclePermissionView
-                    circleDef={circles?.find((circle) => stringGuidsEqual(circle.id, circleId))}
-                    key={circleId}
-                    className="my-4"
-                  />
+                  <CirclePermissionView circleDef={circleDef} key={circleId} className="my-4" />
                 );
               })}
             </ul>

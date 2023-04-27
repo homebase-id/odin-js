@@ -17,7 +17,7 @@ const PhotoSelector = ({
   fallbackInitials,
 }: {
   defaultValue: string;
-  onChange: (e: { target: { value: string } }) => void;
+  onChange: (e: { target: { value: string | undefined } }) => void;
   id?: string;
   className?: string;
   fallbackInitials?: string;
@@ -48,7 +48,7 @@ const PhotoSelector = ({
           });
         }}
         key={'empty'}
-        value={fallbackInitials}
+        value={fallbackInitials || ''}
         isActive={!defaultValue}
       />
 
@@ -76,7 +76,7 @@ const Option = ({
   isActive,
 }: {
   value: string;
-  onClick?: (value: string) => void;
+  onClick?: (value: string | undefined) => void;
   isActive: boolean;
 }) => {
   const { data: imageUrl } = useImage(

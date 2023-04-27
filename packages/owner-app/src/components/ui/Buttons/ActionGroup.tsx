@@ -56,6 +56,7 @@ const ActionGroup = ({ options, className, ...actionButtonProps }: ActionGroupPr
 
 const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGroupOptionProps) => {
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement> | null>();
 
   return (
     <>
@@ -68,6 +69,7 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
                   e.preventDefault();
                   e.stopPropagation();
                   setNeedsConfirmation(true);
+                  setMouseEvent(e);
                   return false;
                 }
               : onClick
@@ -83,7 +85,7 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
           title={confirmOptions.title}
           confirmText={confirmOptions.buttonText}
           needConfirmation={needsConfirmation}
-          onConfirm={onClick ?? undefined}
+          onConfirm={() => mouseEvent && onClick(mouseEvent)}
           onCancel={(e) => {
             e.stopPropagation();
             setNeedsConfirmation(false);

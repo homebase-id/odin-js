@@ -24,10 +24,14 @@ import Upload from '../../../components/ui/Icons/Upload/Upload';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
-  const splittedDriveKey = driveKey.split('_');
+  const splittedDriveKey = driveKey ? driveKey.split('_') : undefined;
   const {
     fetch: { data: driveDef, isLoading: driveDefLoading },
-  } = useDrive({ targetDrive: { alias: splittedDriveKey[0], type: splittedDriveKey[1] } });
+  } = useDrive({
+    targetDrive: splittedDriveKey
+      ? { alias: splittedDriveKey[0], type: splittedDriveKey[1] }
+      : undefined,
+  });
   const { mutateAsync: exportUnencrypted, status: exportStatus } = useExport().exportUnencrypted;
 
   const { data: circles } = useCircles().fetch;
@@ -125,7 +129,7 @@ const DriveDetails = () => {
         >
           <ul className="-my-4">
             {circlesWithAGrantOnThis.map((circle) => {
-              const matchingGrant = circle.driveGrants.find(
+              const matchingGrant = circle.driveGrants?.find(
                 (grant) =>
                   grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
                   grant.permissionedDrive.drive.type === targetDriveInfo.type
@@ -136,7 +140,7 @@ const DriveDetails = () => {
                   key={circle.id}
                   permissionDetails={
                     getAccessFromPermissionNumber(
-                      matchingGrant?.permissionedDrive?.permission,
+                      matchingGrant?.permissionedDrive?.permission || 0,
                       drivePermissionLevels
                     ).name
                   }
@@ -169,7 +173,7 @@ const DriveDetails = () => {
                   key={app.appId}
                   permissionLevel={
                     getAccessFromPermissionNumber(
-                      matchingGrant?.permissionedDrive.permission,
+                      matchingGrant?.permissionedDrive.permission || 0,
                       drivePermissionLevels
                     ).name
                   }

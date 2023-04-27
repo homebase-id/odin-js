@@ -98,12 +98,12 @@ export const RegisterApp = async (
 export const GetAppRegistration = async (
   dotYouClient: DotYouClient,
   request: GetAppRequest
-): Promise<RedactedAppRegistration> => {
+): Promise<RedactedAppRegistration | undefined> => {
   const client = dotYouClient.createAxiosClient();
   const appreg = await client
     .post<RedactedAppRegistration>('appmanagement/app', request)
     .then((response) => response.data);
-  if (!appreg) return null;
+  if (!appreg) return;
 
   return {
     ...appreg,

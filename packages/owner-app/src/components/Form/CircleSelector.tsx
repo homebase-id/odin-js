@@ -19,7 +19,7 @@ const CircleSelector = ({
   const [selection, setSelection] = useState<string[]>([...(defaultValue ?? [])]);
 
   useEffect(() => {
-    onChange({ target: { name: name, value: [...selection] } });
+    onChange({ target: { name: name || '', value: [...selection] } });
   }, [selection]);
 
   useEffect(() => {
@@ -41,13 +41,18 @@ const CircleSelector = ({
       <div className="-mb-2">
         {circles?.map((circle, index) => {
           const isChecked = selection.some((circleGrant) =>
-            stringGuidsEqual(circleGrant, circle.id)
+            stringGuidsEqual(circleGrant, circle.id || '')
           );
           const clickHandler = () => {
-            if (!selection.some((circleGrant) => stringGuidsEqual(circleGrant, circle.id))) {
-              setSelection([...selection, circle.id]);
+            if (!circle.id) {
+              return;
+            }
+            const circleId = circle.id;
+
+            if (!selection.some((circleGrant) => stringGuidsEqual(circleGrant, circleId))) {
+              setSelection([...selection, circleId]);
             } else {
-              setSelection(selection.filter((circleId) => !stringGuidsEqual(circleId, circle.id)));
+              setSelection(selection.filter((circleId) => !stringGuidsEqual(circleId, circleId)));
             }
           };
 

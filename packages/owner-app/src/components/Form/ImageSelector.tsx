@@ -11,7 +11,7 @@ import ActionButton from '../ui/Buttons/ActionButton';
 
 interface ImageSelectorProps
   extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
-  targetDrive?: TargetDrive;
+  targetDrive: TargetDrive;
   acl: AccessControlList;
   onChange: (event: { target: { name: string; value: string } }) => void;
   expectedAspectRatio?: number;
@@ -40,11 +40,13 @@ const ImageSelector = ({
   const [isEdit, setIsEdit] = useState(false);
 
   const removeData = async () => {
+    if (typeof defaultValue !== 'string') return;
+
     await removeImage({
-      fileId: typeof defaultValue === 'string' ? defaultValue : undefined,
+      fileId: defaultValue,
       targetDrive: targetDrive,
     });
-    onChange({ target: { name: name, value: undefined } });
+    onChange({ target: { name: name || '', value: '' } });
   };
 
   // const sizeClass = 'aspect-square max-w-[20rem]';
@@ -122,7 +124,7 @@ const ImageSelector = ({
         maxHeight={maxHeight}
         maxWidth={maxWidth}
         onConfirm={(uploadResult) => {
-          onChange({ target: { name: name, value: uploadResult.fileId } });
+          onChange({ target: { name: name || '', value: uploadResult?.fileId || '' } });
           setIsEdit(false);
         }}
       />

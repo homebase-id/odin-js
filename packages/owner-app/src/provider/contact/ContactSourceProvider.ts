@@ -33,13 +33,14 @@ export const fetchConnectionInfo = async (
     if (connectionContactData?.originalContactData) {
       return {
         odinId,
-        name: {
-          displayName: connectionContactData.originalContactData.name,
-        },
-        image: await getPhotoDataFromPublic(
-          odinId,
-          connectionContactData.originalContactData.imageId
-        ),
+        name: connectionContactData.originalContactData.name
+          ? {
+              displayName: connectionContactData.originalContactData.name,
+            }
+          : undefined,
+        image: connectionContactData.originalContactData.imageId
+          ? await getPhotoDataFromPublic(odinId, connectionContactData.originalContactData.imageId)
+          : undefined,
         ...contactFromTransit,
         source: 'contact',
       };
@@ -107,9 +108,9 @@ export const queryConnectionPhotoData = async (
   );
 
   return {
-    pixelWidth: imageData.pixelWidth,
-    pixelHeight: imageData.pixelHeight,
-    contentType: imageData.contentType,
+    pixelWidth: imageData.pixelWidth || 100,
+    pixelHeight: imageData.pixelHeight || 100,
+    contentType: imageData.contentType || 'image/jpeg',
     content: uint8ArrayToBase64(new Uint8Array(imageData.content)),
   };
 };
@@ -126,10 +127,13 @@ export const fetchPendingInfo = async (
     if (pendingContactData.senderOdinId === odinId) {
       if (pendingContactData?.contactData) {
         return {
-          name: { displayName: pendingContactData.contactData.name },
-          image: loadPendingProfilePicture
-            ? await getPhotoDataFromPublic(odinId, pendingContactData.contactData.imageId)
+          name: pendingContactData.contactData.name
+            ? { displayName: pendingContactData.contactData.name }
             : undefined,
+          image:
+            loadPendingProfilePicture && pendingContactData.contactData.imageId
+              ? await getPhotoDataFromPublic(odinId, pendingContactData.contactData.imageId)
+              : undefined,
 
           source: 'pending',
         };
@@ -166,7 +170,7 @@ export const fetchDataFromPublic = async (
     };
   }
 
-  const previewThumbnail = photoFile.additionalThumbnails.reduce(
+  const previewThumbnail = photoFile.additionalThumbnails?.reduce(
     (prevVal, curValue) => {
       if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) {
         return curValue;
@@ -178,19 +182,21 @@ export const fetchDataFromPublic = async (
 
   return {
     name:
-      nameAttr.payload.data.givenName || nameAttr.payload.data.surname
+      nameAttr?.payload.data.givenName || nameAttr?.payload.data.surname
         ? {
-            displayName: nameAttr.payload.data[MinimalProfileFields.DisplayName],
-            givenName: nameAttr.payload.data[MinimalProfileFields.GivenNameId],
-            surname: nameAttr.payload.data[MinimalProfileFields.SurnameId],
+            displayName: nameAttr?.payload.data[MinimalProfileFields.DisplayName],
+            givenName: nameAttr?.payload.data[MinimalProfileFields.GivenNameId],
+            surname: nameAttr?.payload.data[MinimalProfileFields.SurnameId],
           }
         : undefined,
-    image: {
-      pixelWidth: previewThumbnail.pixelWidth,
-      pixelHeight: previewThumbnail.pixelHeight,
-      contentType: previewThumbnail.contentType,
-      content: previewThumbnail.content.toString(),
-    },
+    image: previewThumbnail?.content
+      ? {
+          pixelWidth: previewThumbnail.pixelWidth,
+          pixelHeight: previewThumbnail.pixelHeight,
+          contentType: previewThumbnail.contentType || 'image/jpeg',
+          content: previewThumbnail.content.toString(),
+        }
+      : undefined,
     source: 'public',
   };
 };
@@ -201,11 +207,9 @@ export const getPhotoDataFromPublic = async (odinId: string, imageFileId: string
 
   const photoData = rawData?.get(imageFileId)?.[0];
 
-  if (!photoData) {
-    return;
-  }
+  if (!photoData) return;
 
-  const previewThumbnail = photoData.additionalThumbnails.reduce(
+  const previewThumbnail = photoData.additionalThumbnails?.reduce(
     (prevVal, curValue) => {
       if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) {
         return curValue;
@@ -214,11 +218,12 @@ export const getPhotoDataFromPublic = async (odinId: string, imageFileId: string
     },
     { ...photoData.header.fileMetadata.appData.previewThumbnail, pixelWidth: 20, pixelHeight: 20 }
   );
+  if (!previewThumbnail || !previewThumbnail.content) return;
 
   return {
     pixelWidth: previewThumbnail.pixelWidth,
     pixelHeight: previewThumbnail.pixelHeight,
-    contentType: previewThumbnail.contentType,
+    contentType: previewThumbnail.contentType || 'image/jpeg',
     content: previewThumbnail.content.toString(),
   };
 };

@@ -17,7 +17,7 @@ export const AclSummary = ({
   const { data: circles } = useCircles().fetch;
 
   const circlesDetails = acl?.circleIdList?.map(
-    (circleId) => circles?.find((circle) => stringGuidsEqual(circle.id, circleId))?.name
+    (circleId) => circles?.find((circle) => stringGuidsEqual(circle.id || '', circleId))?.name
   );
 
   return (
@@ -28,7 +28,7 @@ export const AclSummary = ({
         ? t('Authenticated')
         : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
         ? acl.circleIdList?.length
-          ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails.join(', '), maxLength)}`
+          ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
           : t('Connections')
         : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Owner.toLowerCase()
         ? t('Owner')
@@ -80,7 +80,7 @@ const AclEditor = ({
           onClose && onClose();
         }}
         onConfirm={(newAcl) => {
-          onChange(newAcl);
+          onChange && onChange(newAcl);
           setIsEditing(false);
           onClose && onClose();
         }}

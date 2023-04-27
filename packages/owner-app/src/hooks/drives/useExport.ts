@@ -16,6 +16,7 @@ import {
   stringToUint8Array,
   jsonStringify64,
   ImageContentType,
+  QueryBatchResponse,
 } from '@youfoundation/js-lib';
 import { UploadInstructionSet } from '@youfoundation/js-lib';
 import { UploadFileMetadata } from '@youfoundation/js-lib';
@@ -26,8 +27,6 @@ import useAuth from '../auth/useAuth';
 const includeMetadataHeader = true;
 const pageSize = 10;
 const maxPages = 10;
-
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export interface importable {
   metadata: {
@@ -51,21 +50,23 @@ export interface importableFile {
 }
 
 export const isImportable = (obj: unknown): obj is importable => {
-  if (typeof obj !== 'object' || !('metadata' in obj) || !('files' in obj)) {
+  if (!obj || typeof obj !== 'object' || !('metadata' in obj) || !('files' in obj)) {
     return false;
   }
 
+  const validatedObj = obj as Record<string, unknown>;
+
   if (
-    !('files' in obj) ||
-    !Array.isArray(obj['files']) ||
-    obj['files'] === null ||
-    obj['files'].length === 0
+    !('files' in validatedObj) ||
+    !Array.isArray(validatedObj['files']) ||
+    validatedObj['files'] === null ||
+    validatedObj['files'].length === 0
   ) {
     return false;
   }
 
   if (
-    obj['files'].some((entry) => {
+    validatedObj['files'].some((entry) => {
       return (
         !('payload' in entry) ||
         !('fileId' in entry) ||
@@ -86,7 +87,7 @@ const useExport = () => {
   const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
-    const queryBatchPart = async (cursorState: string) => {
+    const queryBatchPart = async (cursorState: string | undefined) => {
       return await queryBatch(
         dotYouClient,
         { targetDrive: drive },
@@ -102,7 +103,7 @@ const useExport = () => {
     let cursorState: string | undefined = undefined;
 
     for (let i = 0; i < maxPages; i++) {
-      const response = await queryBatchPart(cursorState);
+      const response: QueryBatchResponse = await queryBatchPart(cursorState);
       searchResults.push(...response.searchResults);
       cursorState = response.cursorState;
 
@@ -133,7 +134,7 @@ const useExport = () => {
       }
     };
 
-    const getFile = async (dsr) => {
+    const getFile = async (dsr: DriveSearchResult) => {
       return {
         fileId: dsr.fileId,
         fileMetadata: {
@@ -154,23 +155,9 @@ const useExport = () => {
       };
     };
 
-    //TODO Remove this debug code
-    let resultsWithPayload: unknown[];
-    if (localStorage.getItem('export-timeout')) {
-      const timeout = parseInt(localStorage.getItem('export-timeout'));
-      console.log('exporting with', timeout);
-      resultsWithPayload = [];
-
-      for (let i = 0; i < searchResults.length; i++) {
-        await delay(timeout);
-
-        resultsWithPayload.push(await getFile(searchResults[i]));
-      }
-    } else {
-      resultsWithPayload = await Promise.all(
-        searchResults.map(async (result) => await getFile(result))
-      );
-    }
+    const resultsWithPayload: unknown[] = await Promise.all(
+      searchResults.map(async (result) => await getFile(result))
+    );
 
     const exportable = {
       metadata: { drive: { ...drive }, date: new Date().toString() },
@@ -202,9 +189,8 @@ const useExport = () => {
       return [{ fileId: 'root', status: false }];
     }
 
-    let targetDrive = drive;
-
-    if (!targetDrive) {
+    let targetDrive: TargetDrive = drive || data.metadata.drive.targetDriveInfo;
+    if (!drive) {
       await ensureDrive(
         dotYouClient,
         data.metadata.drive.targetDriveInfo,
@@ -238,7 +224,7 @@ const useExport = () => {
               base64ToUint8Array(file.payload.toString()),
               undefined,
               {
-                tag: file.fileMetadata.appData.tags,
+                tag: file.fileMetadata.appData.tags || [],
                 fileId: overwriteFileId,
                 versionTag: versionTag,
                 type: file.fileMetadata.contentType as ImageContentType,

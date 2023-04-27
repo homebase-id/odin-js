@@ -17,7 +17,7 @@ interface Notification {
 }
 
 const useNotifications = () => {
-  const { data: pending } = usePendingConnections({ pageSize: 5, pageNumber: 0 }).fetch;
+  const { data: pending } = usePendingConnections({ pageSize: 5, pageNumber: 1 }).fetch;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const queryClient = useQueryClient();
 
@@ -43,7 +43,7 @@ const useNotifications = () => {
         ...pendingNotifications,
       ]);
     }
-  }, [pending]);
+  }, [pending?.results]);
 
   const handler = (wsNotification: TypedConnectionNotification) => {
     const clientNotification = wsNotification as ClientConnectionNotification;

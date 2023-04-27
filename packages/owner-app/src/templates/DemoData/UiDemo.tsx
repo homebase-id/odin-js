@@ -152,13 +152,12 @@ const UiDemo = () => {
     };
 
     const payloadBytes = stringToUint8Array(jsonStringify64(payload));
-    const thumbnails = [];
     const uploadResult = await uploadFile(
       dotYouClient,
       instructionSet,
       fileMetadata,
       payloadBytes,
-      thumbnails,
+      undefined,
       true
     );
     setStatusText(

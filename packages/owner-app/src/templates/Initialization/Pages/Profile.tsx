@@ -19,14 +19,14 @@ const Profile = ({
   onNext: () => void;
 }) => {
   // Get Name/City/Country/Photo/Bio/Status
-  const formRef = useRef<HTMLFormElement>();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const changeHandler = (e: onChangeParams) => {
     const dirtyState = { ...pageData };
     dirtyState[e.target.name] = e.target.value;
 
     onChange(dirtyState);
-    setValidity(formRef.current.checkValidity());
+    setValidity(formRef.current?.checkValidity() || false);
   };
 
   const initials: string = (pageData['givenName']?.[0] ?? '') + (pageData['surname']?.[0] ?? '');
@@ -34,11 +34,11 @@ const Profile = ({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (formRef.current.checkValidity()) {
+        if (formRef.current?.checkValidity()) {
           setValidity(true);
           onNext();
         }
-        formRef.current.reportValidity();
+        formRef.current?.reportValidity();
       }}
       ref={formRef}
     >

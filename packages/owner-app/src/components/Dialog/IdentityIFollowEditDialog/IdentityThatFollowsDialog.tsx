@@ -7,7 +7,7 @@ import Quote from '../../ui/Icons/Quote/Quote';
 import Persons from '../../ui/Icons/Persons/Persons';
 import { stringGuidsEqual } from '@youfoundation/js-lib';
 import useFollower from '../../../hooks/follow/useFollower';
-import useChannels from '../../../hooks/posts/useChannels';
+import useChannels, { ChannelDefinitionVm } from '../../../hooks/posts/useChannels';
 
 const IdentityThatFollowsDialog = ({
   odinId,
@@ -35,11 +35,11 @@ const IdentityThatFollowsDialog = ({
 
   const channels =
     follower.notificationType === 'selectedChannels'
-      ? follower.channels
-          .map((chnlRef) =>
+      ? (follower.channels
+          ?.map((chnlRef) =>
             allChannels?.find((chnl) => stringGuidsEqual(chnl.channelId, chnlRef.alias))
           )
-          .filter(Boolean)
+          .filter(Boolean) as ChannelDefinitionVm[])
       : allChannels;
 
   const dialog = (

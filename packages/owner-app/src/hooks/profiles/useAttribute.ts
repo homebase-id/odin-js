@@ -112,7 +112,7 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
   };
 
   const saveData = async (attribute: AttributeFile) => {
-    let toSaveAttr: AttributeFile = undefined;
+    let toSaveAttr: AttributeFile | undefined;
 
     switch (attribute.type) {
       case BuiltInAttributes.Name:
@@ -157,28 +157,31 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
       onMutate: async (newAttr) => {
         await queryClient.cancelQueries(['attribute', newAttr.profileId, newAttr.id]);
 
-        const newAttrVm: AttributeVm = {
-          ...newAttr,
-          typeDefinition: Object.values(AttributeDefinitions).find((def) => {
-            return def.type.toString() === newAttr.type;
-          }),
-        };
+        let typeDefinition = Object.values(AttributeDefinitions).find((def) => {
+          return def.type.toString() === newAttr.type;
+        });
 
-        if (!newAttrVm.typeDefinition) {
-          if (newAttrVm.type === HomePageAttributes.HomePage) {
-            newAttrVm.typeDefinition = {
+        if (!typeDefinition) {
+          if (newAttr.type === HomePageAttributes.HomePage) {
+            typeDefinition = {
               type: HomePageAttributes.HomePage,
               name: 'Homepage',
               description: '',
             };
-          } else if (newAttrVm.type === HomePageAttributes.Theme) {
-            newAttrVm.typeDefinition = {
+          } else if (newAttr.type === HomePageAttributes.Theme) {
+            typeDefinition = {
               type: HomePageAttributes.Theme,
               name: 'Theme',
               description: '',
             };
           }
+          return;
         }
+
+        const newAttrVm: AttributeVm = {
+          ...newAttr,
+          typeDefinition,
+        };
 
         // Update single attribute
         const singleItemCacheKey = ['attribute', newAttrVm.profileId, newAttrVm.id];
@@ -187,7 +190,8 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(newAttrVm);
-        const previousAttributes: AttributeVm[] = queryClient.getQueryData(listItemCacheKey);
+        const previousAttributes: AttributeVm[] | undefined =
+          queryClient.getQueryData(listItemCacheKey);
 
         // if new attribute can't be found in existing list, then it's a new one, so can't update but need to add
         // Sorting happens here, as it otherwise happens within the provider
@@ -206,13 +210,15 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
 
         // Revert local caches to what they were
         queryClient.setQueryData(
-          ['attribute', newAttr.profileId, context.newAttr.id],
-          context.previousAttr
+          ['attribute', newAttr.profileId, context?.newAttr.id],
+          context?.previousAttr
         );
-        queryClient.setQueryData(getListItemCacheKey(newAttr), context.previousAttributes);
+        queryClient.setQueryData(getListItemCacheKey(newAttr), context?.previousAttributes);
       },
       onSettled: (newAttr, _error, _variables) => {
-        if (newAttr?.id) {
+        if (!newAttr) return;
+
+        if (newAttr.id) {
           queryClient.invalidateQueries(['attribute', newAttr.profileId, newAttr.id]);
         } else {
           queryClient.invalidateQueries(['attribute']);
@@ -239,7 +245,8 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(toRemoveAttr);
-        const previousAttributes: AttributeVm[] = queryClient.getQueryData(listItemCacheKey);
+        const previousAttributes: AttributeVm[] | undefined =
+          queryClient.getQueryData(listItemCacheKey);
         const updatedAttributes = previousAttributes?.filter((attr) => attr.id !== toRemoveAttr.id);
         queryClient.setQueryData(listItemCacheKey, updatedAttributes);
 
@@ -249,7 +256,7 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(getListItemCacheKey(toRemoveAttr), context.previousAttributes);
+        queryClient.setQueryData(getListItemCacheKey(toRemoveAttr), context?.previousAttributes);
       },
       onSettled: (_data, _err, variables) => {
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again

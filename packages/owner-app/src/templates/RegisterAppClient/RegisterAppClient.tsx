@@ -44,16 +44,20 @@ const RegisterClient = () => {
 
   const appId = searchParams.get('appId');
   const name = searchParams.get('n');
-  const origin = searchParams.get('o');
+  const origin = searchParams.get('o') || undefined;
   const publicKey64 = searchParams.get('pk');
   const friendlyName = searchParams.get('fn');
   const returnUrl = searchParams.get('return');
 
-  const permissionSet = permissionParamToPermissionSet(searchParams.get('p'));
-  const driveGrants = drivesParamToDriveGrantRequest(searchParams.get('d'));
+  const p = searchParams.get('p');
+  const permissionSet = p ? permissionParamToPermissionSet(p) : undefined;
+  const d = searchParams.get('d');
+  const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
 
-  const circlePermissionSet = permissionParamToPermissionSet(searchParams.get('cp'));
-  const circleDriveGrants = drivesParamToDriveGrantRequest(searchParams.get('cd'));
+  const cp = searchParams.get('cp');
+  const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
+  const cd = searchParams.get('cd');
+  const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
 
   if (!appId || !name || !publicKey64 || !friendlyName || !returnUrl) {
     console.error(
@@ -201,11 +205,11 @@ const AppRegistration = ({
 }: {
   name: string;
   appId: string;
-  origin: string;
-  permissionSet: PermissionSet;
-  driveGrants: DriveGrantRequest[];
-  circlePermissionSet: PermissionSet;
-  circleDriveGrants: DriveGrantRequest[];
+  origin: string | undefined;
+  permissionSet?: PermissionSet;
+  driveGrants?: DriveGrantRequest[];
+  circlePermissionSet?: PermissionSet;
+  circleDriveGrants?: DriveGrantRequest[];
   registerApp: (data: AppRegistrationRequest) => Promise<void>;
   registerAppState: 'idle' | 'loading' | 'error' | 'success';
   doRegisterClient: () => void;
@@ -276,7 +280,7 @@ const AppRegistration = ({
             {t('By allowing, this app')}, &quot;{name}&quot;{' '}
             {t('will have the following access on your identity')}:
           </p>
-          {permissionSet.keys.length ? (
+          {permissionSet?.keys.length ? (
             <Section>
               <div className="flex flex-col gap-4">
                 {permissionSet.keys.map((permissionLevel) => {

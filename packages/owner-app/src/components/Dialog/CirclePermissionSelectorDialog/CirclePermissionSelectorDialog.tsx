@@ -45,7 +45,7 @@ const CirclePermissionSelectorDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const [newCircleIds, setNewCircleIds] = useState<string[]>();
+  const [newCircleIds, setNewCircleIds] = useState<string[]>([]);
   const [permissionSetGrant, setPermissionSetGrant] = useState<PermissionSetGrantRequest>(
     defaultValue ?? { drives: [], permissionSet: { keys: [] } }
   );
@@ -79,7 +79,7 @@ const CirclePermissionSelectorDialog = ({
               <h2 className="mb-2 text-lg">{t('Have what permissions')}:</h2>
               <PermissionSelector
                 type="app-circles"
-                permissionSet={permissionSetGrant.permissionSet}
+                permissionSet={permissionSetGrant.permissionSet || { keys: [] }}
                 onChange={(newVal) =>
                   setPermissionSetGrant({ ...permissionSetGrant, permissionSet: newVal })
                 }
@@ -93,7 +93,7 @@ const CirclePermissionSelectorDialog = ({
                 onChange={(newVal) =>
                   setPermissionSetGrant({ ...permissionSetGrant, drives: newVal })
                 }
-                driveGrants={permissionSetGrant.drives}
+                driveGrants={permissionSetGrant.drives || []}
                 drives={drives}
               />
             </div>

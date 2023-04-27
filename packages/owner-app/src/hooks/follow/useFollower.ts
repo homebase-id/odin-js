@@ -11,13 +11,13 @@ const useFollower = ({ odinId }: useFollowerProps) => {
   const { getSharedSecret } = useAuth();
   const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
-  const fetchFollowDetails = async ({ odinId }: { odinId?: string }) => {
+  const fetchFollowDetails = async ({ odinId }: { odinId: string }) => {
     const response = await fetchFollower(dotYouClient, odinId);
     return response;
   };
 
   return {
-    fetch: useQuery(['follower', odinId], () => fetchFollowDetails({ odinId }), {
+    fetch: useQuery(['follower', odinId], () => fetchFollowDetails({ odinId: odinId as string }), {
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

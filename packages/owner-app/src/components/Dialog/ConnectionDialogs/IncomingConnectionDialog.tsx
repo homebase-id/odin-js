@@ -53,7 +53,7 @@ const IncomingConnectionDialog = ({
   const [doubleChecked, setDoubleChecked] = useState(false);
 
   const [name, setName] = useState<string>(window.location.hostname);
-  const [photoFileId, setPhotoFileId] = useState<string>(null);
+  const [photoFileId, setPhotoFileId] = useState<string>();
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 
@@ -96,7 +96,7 @@ const IncomingConnectionDialog = ({
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
                   <p>{pendingConnection.message}</p>
-                  <p className="mt-2">-- {pendingConnection.contactData.name}</p>
+                  <p className="mt-2">-- {pendingConnection.contactData?.name}</p>
                 </div>
               </div>
             </div>

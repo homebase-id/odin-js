@@ -83,15 +83,19 @@ const useCircle = ({ circleId }: { circleId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['circle', circleId], () => fetch({ circleId }), {
+    fetch: useQuery(['circle', circleId], () => fetch({ circleId: circleId as string }), {
       refetchOnWindowFocus: false,
       enabled: !!circleId,
     }),
 
-    fetchMembers: useQuery(['cirleMembers', circleId], () => fetchMembersInternal({ circleId }), {
-      refetchOnWindowFocus: false,
-      enabled: !!circleId,
-    }),
+    fetchMembers: useQuery(
+      ['cirleMembers', circleId],
+      () => fetchMembersInternal({ circleId: circleId as string }),
+      {
+        refetchOnWindowFocus: false,
+        enabled: !!circleId,
+      }
+    ),
 
     createOrUpdate: useMutation(createOrUpdate, {
       onMutate: async (newCircle) => {
@@ -102,7 +106,9 @@ const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.setQueryData(['circle', newCircle.id], newCircle);
 
         // Update section attributes
-        const previousCircles: CircleDefinition[] = queryClient.getQueryData(['circles']);
+        const previousCircles: CircleDefinition[] | undefined = queryClient.getQueryData([
+          'circles',
+        ]);
         const newCircles = previousCircles?.map((circle) =>
           circle.id === newCircle.id ? newCircle : circle
         );
@@ -114,8 +120,8 @@ const useCircle = ({ circleId }: { circleId?: string }) => {
         console.error(err);
 
         // Revert local caches to what they were
-        queryClient.setQueryData(['circle', newCircle.id], context.previousCircle);
-        queryClient.setQueryData(['circles'], context.previousCircles);
+        queryClient.setQueryData(['circle', newCircle.id], context?.previousCircle);
+        queryClient.setQueryData(['circles'], context?.previousCircles);
       },
       onSettled: (newCircle) => {
         queryClient.invalidateQueries(['circles']);

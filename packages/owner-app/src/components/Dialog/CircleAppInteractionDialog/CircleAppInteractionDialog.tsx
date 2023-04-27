@@ -61,11 +61,11 @@ const CircleAppInteractionDialog = ({
             try {
               await Promise.all(
                 toGrantApps.map(async (toGrantAppId) => {
-                  const app = apps.find((app) => stringGuidsEqual(app.appId, toGrantAppId));
+                  const app = apps?.find((app) => stringGuidsEqual(app.appId, toGrantAppId));
                   if (app)
                     await updateAuthorizedCircle({
                       appId: toGrantAppId,
-                      circleIds: [...app.authorizedCircles, circleDef.id],
+                      circleIds: [...app.authorizedCircles, circleDef.id || ''],
                       circleMemberPermissionGrant: app.circleMemberPermissionSetGrantRequest,
                     });
                 })
@@ -73,13 +73,13 @@ const CircleAppInteractionDialog = ({
 
               await Promise.all(
                 toRevokeApps.map(async (toGrantAppId) => {
-                  const app = apps.find((app) => stringGuidsEqual(app.appId, toGrantAppId));
+                  const app = apps?.find((app) => stringGuidsEqual(app.appId, toGrantAppId));
                   if (app)
                     await updateAuthorizedCircle({
                       appId: toGrantAppId,
                       circleIds: [
                         ...app.authorizedCircles.filter(
-                          (circleId) => !stringGuidsEqual(circleId, circleDef.id)
+                          (circleId) => !stringGuidsEqual(circleId, circleDef.id || '')
                         ),
                       ],
                       circleMemberPermissionGrant: app.circleMemberPermissionSetGrantRequest,
@@ -107,7 +107,7 @@ const CircleAppInteractionDialog = ({
               ) : null}
               {apps?.map((app, index) => {
                 const hadAccess = app.authorizedCircles.some((authorizedCircle) =>
-                  stringGuidsEqual(authorizedCircle, circleDef?.id)
+                  stringGuidsEqual(authorizedCircle, circleDef?.id || '')
                 );
 
                 const checked =

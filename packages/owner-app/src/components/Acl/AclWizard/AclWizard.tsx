@@ -41,10 +41,11 @@ const AclWizard = ({
           type="primary"
           className="ml-2"
           isDisabled={
-            currentAcl.requiredSecurityGroup.toLowerCase() ===
+            (currentAcl.requiredSecurityGroup.toLowerCase() ===
               SecurityGroupType.Connected.toLowerCase() &&
-            currentAcl.circleIdList &&
-            !currentAcl.circleIdList.length
+              currentAcl.circleIdList &&
+              !currentAcl.circleIdList.length) ||
+            false
           }
           onClick={() => onConfirm(currentAcl)}
         >
@@ -70,7 +71,7 @@ const RequiredSecurityGroupRadioGroup = ({
   const GroupOption = (props: { name: string; description: string; value: AccessControlList }) => {
     const checked =
       props.value.requiredSecurityGroup.toLowerCase() ===
-        defaultAcl.requiredSecurityGroup.toLowerCase() &&
+        defaultAcl?.requiredSecurityGroup.toLowerCase() &&
       Array.isArray(props.value.circleIdList) === Array.isArray(defaultAcl.circleIdList);
 
     return (
@@ -78,7 +79,7 @@ const RequiredSecurityGroupRadioGroup = ({
         className={`flex h-full w-full flex-col justify-start rounded-md px-3 py-2 text-left hover:shadow-md ${
           checked ? 'bg-indigo-500 text-white dark:bg-indigo-500' : 'bg-slate-100 dark:bg-slate-800'
         }`}
-        onClick={() => onChange(props.value)}
+        onClick={() => onChange && onChange(props.value)}
       >
         {props.name}
         <small className={`block text-sm ${checked ? 'text-slate-300' : 'text-slate-500'}`}>

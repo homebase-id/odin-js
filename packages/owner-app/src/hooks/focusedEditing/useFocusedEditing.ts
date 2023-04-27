@@ -4,11 +4,13 @@ const useFocusedEditing = () => {
   const [searchParams] = useSearchParams();
 
   const checkReturnTo = (state?: string) => {
-    if (searchParams.get('ui') !== 'focus' && searchParams.get('ui') !== 'minimal') {
+    let returnUrl = searchParams.get('return');
+    if (
+      (searchParams.get('ui') !== 'focus' && searchParams.get('ui') !== 'minimal') ||
+      !returnUrl
+    ) {
       return;
     }
-
-    let returnUrl = searchParams.get('return');
 
     if (state) {
       if (returnUrl.indexOf('?') !== -1) {

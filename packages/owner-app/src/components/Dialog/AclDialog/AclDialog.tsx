@@ -40,10 +40,11 @@ const AclDialog = ({
     onConfirm(newAcl);
   };
 
-  const updateSecurityGroup = (e) => {
+  const updateSecurityGroup = (e: { target: { name: string; value: string } }) => {
     const dirtyAcl = {
       ...newAcl,
-      requiredSecurityGroup: SecurityGroupType[pascalCase(e.target.value)],
+      requiredSecurityGroup:
+        SecurityGroupType[pascalCase(e.target.value) as keyof typeof SecurityGroupType],
     };
     if (
       dirtyAcl.circleIdList &&
@@ -75,7 +76,7 @@ const AclDialog = ({
           </small>
         </h2>
         <CircleSelector
-          defaultValue={newAcl.circleIdList}
+          defaultValue={newAcl.circleIdList || []}
           onChange={(e) => {
             setNewAcl({
               ...newAcl,

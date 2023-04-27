@@ -27,10 +27,10 @@ const SectionEditor = ({
   } = useProfileSections({});
 
   const handleChange = (e: { target: { value: unknown; name: string } }) => {
-    const newSectionData = { ...sectionData };
+    const newSectionData: Record<string, unknown> = { ...sectionData };
     newSectionData[e.target.name] = e.target.value;
 
-    setSectionData(newSectionData);
+    setSectionData(newSectionData as unknown as ProfileSection);
   };
 
   return (

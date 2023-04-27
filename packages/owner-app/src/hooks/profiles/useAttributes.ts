@@ -55,15 +55,21 @@ const useAttributes = ({ profileId, sectionId }: { profileId?: string; sectionId
     const foundAttributes = await getProfileAttributes(dotYouClient, profileId, sectionId, 100);
 
     return await Promise.all(
-      foundAttributes.map(async (attr) => removeAttribute(dotYouClient, profileId, attr.fileId))
+      foundAttributes.map(
+        async (attr) => attr?.fileId && removeAttribute(dotYouClient, profileId, attr.fileId)
+      )
     );
   };
 
   return {
-    fetch: useQuery(['attributes', profileId, sectionId], () => fetchData(profileId, sectionId), {
-      refetchOnWindowFocus: false,
-      enabled: !!profileId && !!sectionId,
-    }),
+    fetch: useQuery(
+      ['attributes', profileId, sectionId],
+      () => fetchData(profileId as string, sectionId as string),
+      {
+        refetchOnWindowFocus: false,
+        enabled: !!profileId && !!sectionId,
+      }
+    ),
     removeAttributes: useMutation(removeAttributes, {
       onError: (err) => {
         console.error(err);

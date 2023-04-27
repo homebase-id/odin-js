@@ -14,6 +14,10 @@ const YouAuthLogin = () => {
   const { createHomeToken } = useAuth();
 
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
+  if (!returnUrl) {
+    console.error('No returnUrl found');
+    return null;
+  }
   const targetDomain = decodeURIComponent(returnUrl);
   const strippedTarget = targetDomain.replace(new RegExp('^(http|https)://'), '').split('/')[0];
 

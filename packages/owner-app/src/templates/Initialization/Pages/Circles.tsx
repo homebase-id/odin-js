@@ -18,7 +18,7 @@ const Circles = ({
 }) => {
   // Suggest circle creation (Family, Friends, Work)
   // Provide option to set different details for each circle. "How do these circles know you?"
-  const formRef = useRef<HTMLFormElement>();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');

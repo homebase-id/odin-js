@@ -67,14 +67,20 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
     type: BuiltInAttributes.Name,
   }).fetchVersions;
 
-  const filteredNameAttributes = filterAttributesWithCircleGrants(nameAttributes, circleGrants);
+  const filteredNameAttributes = filterAttributesWithCircleGrants(
+    nameAttributes || [],
+    circleGrants || []
+  );
 
   const { data: photoAttributes, isLoading: photoAttributesLoading } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId.toString(),
     type: BuiltInAttributes.Photo,
   }).fetchVersions;
 
-  const filteredPhotoAttributes = filterAttributesWithCircleGrants(photoAttributes, circleGrants);
+  const filteredPhotoAttributes = filterAttributesWithCircleGrants(
+    photoAttributes || [],
+    circleGrants || []
+  );
 
   const { data: imageUrl } = useImage(
     filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],
@@ -86,7 +92,10 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
     type: BuiltInAttributes.PhoneNumber,
   }).fetchVersions;
 
-  const filteredPhoneAttributes = filterAttributesWithCircleGrants(phoneAttributes, circleGrants);
+  const filteredPhoneAttributes = filterAttributesWithCircleGrants(
+    phoneAttributes || [],
+    circleGrants || []
+  );
 
   const { data: locationAttributes, isLoading: locationAttributesLoading } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId.toString(),
@@ -94,8 +103,8 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
   }).fetchVersions;
 
   const filteredLocationAttributes = filterAttributesWithCircleGrants(
-    locationAttributes,
-    circleGrants
+    locationAttributes || [],
+    circleGrants || []
   );
 
   const { data: birtydayAttributes, isLoading: birtydayAttributesLoading } = useAttributeVersions({
@@ -104,8 +113,8 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
   }).fetchVersions;
 
   const filteredBirtydayAttributes = filterAttributesWithCircleGrants(
-    birtydayAttributes,
-    circleGrants
+    birtydayAttributes || [],
+    circleGrants || []
   );
 
   const info: infoObject = {

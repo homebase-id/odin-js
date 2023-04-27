@@ -79,7 +79,7 @@ const DriveCircleAccessDialog = ({
                     driveGrant.permissionedDrive.drive.type === targetDriveInfo.type
                 );
 
-                const isChecked = driveGrant?.permissionedDrive.permission > 0;
+                const isChecked = (driveGrant?.permissionedDrive.permission || 0) > 0;
 
                 return (
                   <div
@@ -97,7 +97,7 @@ const DriveCircleAccessDialog = ({
                     <PermissionLevelEditor
                       className="ml-auto"
                       permissionLevels={drivePermissionLevels}
-                      defaultValue={driveGrant?.permissionedDrive.permission}
+                      defaultValue={driveGrant?.permissionedDrive.permission || 0}
                       onChange={(newValue) => {
                         setNewCircles([
                           ...newCircles.filter((circleToUpdate) => circleToUpdate.id !== circle.id),
@@ -105,12 +105,13 @@ const DriveCircleAccessDialog = ({
                             ...circle,
 
                             driveGrants: [
-                              ...circle.driveGrants.filter(
+                              ...(circle.driveGrants?.filter(
                                 (driveGrant) =>
                                   driveGrant.permissionedDrive.drive.alias !==
                                     targetDriveInfo.alias &&
                                   driveGrant.permissionedDrive.drive.type !== targetDriveInfo.type
                               ),
+                              []),
                               {
                                 permissionedDrive: {
                                   drive: { ...targetDriveInfo },

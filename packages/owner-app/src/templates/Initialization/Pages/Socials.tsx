@@ -19,7 +19,7 @@ const Socials = ({
   onNext: () => void;
 }) => {
   // Request Social Presence (IG, Twitter, Linkedin, Facebook, TikTok, Other Links)
-  const formRef = useRef<HTMLFormElement>();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [otherText, setOtherText] = useState('');
   const [otherTarget, setOtherTarget] = useState('');
@@ -151,40 +151,42 @@ const Socials = ({
         </ActionButton>
       </form>
 
-      <div className="my-10 border-t border-b border-slate-200 py-5 dark:border-slate-700">
+      <div className="my-10 border-b border-t border-slate-200 py-5 dark:border-slate-700">
         <h2 className="mb-5 text-xl">{t('Other Links')}</h2>
         <ul>
-          {pageData.other?.map((link, index) => {
-            return (
-              <li
-                key={index}
-                className="mb-5 flex flex-row rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"
-              >
-                {t('Label')}: {link.text}
-                <span className="ml-3">
-                  {t('Target')}: {link.target}
-                </span>
-                <button
-                  className="my-auto ml-auto p-1 hover:bg-slate-200 dark:hover:bg-slate-700"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const dirtyOther = [...pageData.other];
-                    dirtyOther.splice(index, 1);
+          {Array.isArray(pageData.other)
+            ? pageData.other?.map((link, index) => {
+                return (
+                  <li
+                    key={index}
+                    className="mb-5 flex flex-row rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-700"
+                  >
+                    {t('Label')}: {link.text}
+                    <span className="ml-3">
+                      {t('Target')}: {link.target}
+                    </span>
+                    <button
+                      className="my-auto ml-auto p-1 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const dirtyOther = [...pageData.other];
+                        dirtyOther.splice(index, 1);
 
-                    changeHandler({
-                      target: {
-                        name: 'other',
-                        value: [...dirtyOther],
-                      },
-                    });
-                    return false;
-                  }}
-                >
-                  <Times className="h-4 w-4" />
-                </button>
-              </li>
-            );
-          })}
+                        changeHandler({
+                          target: {
+                            name: 'other',
+                            value: [...dirtyOther],
+                          },
+                        });
+                        return false;
+                      }}
+                    >
+                      <Times className="h-4 w-4" />
+                    </button>
+                  </li>
+                );
+              })
+            : null}
         </ul>
 
         <form

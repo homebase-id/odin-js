@@ -68,7 +68,7 @@ const useAppClients = ({ appId }: { appId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['appClients', appId], () => fetch({ appId }), {
+    fetch: useQuery(['appClients', appId], () => fetch({ appId: appId as string }), {
       refetchOnWindowFocus: false,
       retry: false,
       enabled: !!appId,

@@ -24,6 +24,10 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
   } = useContact(odinId ? { odinId: odinId } : { id: contactId });
 
+  if (!contact) {
+    return null;
+  }
+
   return (
     <>
       <ErrorNotification error={refreshError} />
@@ -31,7 +35,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
         title={t('Details')}
         actions={
           odinId &&
-          contact.id && (
+          contact?.id && (
             <ActionButton
               className="text-base"
               state={refreshState}
@@ -59,7 +63,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             />
           </div>
           <div className="px-4">
-            {contact?.name && (
+            {contact.name && (
               <div className="my-3 flex flex-row">
                 <IconFrame className="mr-2">
                   <Person className="h-4 w-4" />
@@ -111,7 +115,7 @@ export const ContactImage = ({ odinId, contactId, className }: ContactImageProps
     <>
       {contact?.imageUrl || imageUrl ? (
         <figure className={`relative overflow-hidden ${className ?? ''}`}>
-          <img src={contact.imageUrl ?? imageUrl} className="aspect-square w-full object-cover" />
+          <img src={contact?.imageUrl ?? imageUrl} className="aspect-square w-full object-cover" />
         </figure>
       ) : (
         <FallbackImg

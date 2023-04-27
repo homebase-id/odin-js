@@ -9,7 +9,7 @@ interface PagerProps {
 
 const Pager = ({ totalPages, setPage, currentPage, className }: PagerProps) => {
   if (currentPage === 1 && currentPage >= totalPages) {
-    return;
+    return null;
   }
 
   return (

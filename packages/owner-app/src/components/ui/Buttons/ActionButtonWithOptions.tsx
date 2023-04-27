@@ -2,8 +2,9 @@ import { FC, useRef, useState } from 'react';
 import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import ActionButton, { ActionButtonProps } from './ActionButton';
 
-interface ActionButtonWithOptionsProps extends Omit<ActionButtonProps, 'icon'> {
+interface ActionButtonWithOptionsProps extends Omit<Omit<ActionButtonProps, 'icon'>, 'onClick'> {
   options: { value: string; name: string; group?: string }[];
+  onClick: (value: string) => void;
 }
 
 const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
@@ -53,7 +54,7 @@ const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
       />
       {optionGroups?.length ? (
         <ul
-          className={`absolute right-0 bottom-[100%] w-full shadow-md ${
+          className={`absolute bottom-[100%] right-0 w-full shadow-md ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
           } overflow-auto bg-white text-black dark:bg-slate-900 dark:text-white`}
         >
@@ -66,7 +67,7 @@ const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
         </ul>
       ) : options ? (
         <ul
-          className={`absolute right-0 bottom-[100%] w-full ${
+          className={`absolute bottom-[100%] right-0 w-full ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
           } overflow-auto bg-white text-black`}
         >

@@ -43,7 +43,8 @@ const Following = () => {
         );
       } else {
         // All channels
-        setChannelSelection(socialChannels?.map((chnl) => chnl.channelId));
+        if (socialChannels?.length)
+          setChannelSelection(socialChannels.map((chnl) => chnl?.channelId));
       }
     }
   }, [identityIFollowLoaded]);
@@ -55,6 +56,8 @@ const Following = () => {
 
   const { mutateAsync: follow, status: followStatus } = useFollowingInfinite({}).follow;
   const doFollow = async () => {
+    if (!toFollowKey) return null;
+
     const selectChannels = channelSelection?.length !== socialChannels?.length;
 
     await follow({
@@ -70,9 +73,7 @@ const Following = () => {
     navigate(-1);
   };
 
-  if (!toFollowKey) {
-    return null;
-  }
+  if (!toFollowKey) return null;
 
   const alreadyFollowing = !!identityIFollow;
 

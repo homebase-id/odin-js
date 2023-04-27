@@ -16,6 +16,7 @@ import {
   UploadInstructionSet,
   stringToUint8Array,
   jsonStringify64,
+  TypedConnectionNotification,
 } from '@youfoundation/js-lib';
 import { useRef, useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
@@ -35,7 +36,7 @@ const SocketDemo = () => {
   const [statusText, setStatusText] = useState('n/a');
   const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
-  const notificationHandler = useRef((notification) => {
+  const notificationHandler = useRef((notification: TypedConnectionNotification) => {
     console.log({ notification });
 
     if (notification.notificationType === 'transitFileReceived') {
@@ -93,13 +94,12 @@ const SocketDemo = () => {
     };
 
     const payloadBytes = stringToUint8Array(jsonStringify64(payload));
-    const thumbnails = [];
     const uploadResult = await uploadFile(
       dotYouClient,
       instructionSet,
       fileMetadata,
       payloadBytes,
-      thumbnails,
+      undefined,
       true
     );
 

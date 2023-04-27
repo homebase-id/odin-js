@@ -37,9 +37,9 @@ const AttributeEditor = ({
   const [newAttr, setNewAttr] = useState({ ...attribute });
   const [isAclEdit, setIsAclEdit] = useState(false);
   const [isFadeOut, setIsFadeOut] = useState(false);
-  const sectionRef = useRef<HTMLElement>();
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const saveNewData = (dirtyAttr) => {
+  const saveNewData = (dirtyAttr: AttributeVm) => {
     // Each save should above everything that might happen, remove the isNew state;
     saveAttr({ ...dirtyAttr, data: { ...dirtyAttr.data, isNew: undefined } });
     if (onSave) {
@@ -59,7 +59,7 @@ const AttributeEditor = ({
   };
 
   const reorder = async (dir: 1 | -1) => {
-    const newPriority = await reorderAttr(attribute, dir);
+    const newPriority = reorderAttr && (await reorderAttr(attribute, dir));
     if (!newPriority) {
       return;
     }
@@ -76,7 +76,7 @@ const AttributeEditor = ({
           setIsAclEdit(true);
         }
 
-        sectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => {
           setIsFadeOut(true);
         }, 500);

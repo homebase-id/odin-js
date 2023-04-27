@@ -21,7 +21,7 @@ type ActionLinkProps = {
   state?: ActionLinkState;
   title?: string;
   size?: 'large' | 'small' | 'square';
-  onClick?: (e) => void;
+  onClick?: (e: unknown) => void;
 
   download?: string;
   href?: string;
@@ -47,6 +47,8 @@ export const mergeStates = (stateA: ActionLinkState, stateB: ActionLinkState): A
   if ((stateA === 'success' && stateB === 'idle') || (stateA === 'idle' && stateB === 'success')) {
     return 'success';
   }
+
+  return 'idle';
 };
 
 const ActionLink: FC<ActionLinkProps> = ({
@@ -89,9 +91,9 @@ const ActionLink: FC<ActionLinkProps> = ({
       <Arrow {...props} className={`rotate-90 ${props.className}`} />
     ) : icon === 'shield' ? (
       <Shield {...props} fill="currentColor" />
-    ) : (
-      icon && icon(props)
-    );
+    ) : icon ? (
+      icon(props)
+    ) : null;
   };
 
   const colorClasses =

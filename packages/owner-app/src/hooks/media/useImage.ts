@@ -25,7 +25,7 @@ const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
 
   const queryClient = useQueryClient();
 
-  const fetchImageData = async (imageFileId?: string, imageDrive?: TargetDrive) => {
+  const fetchImageData = async (imageFileId: string, imageDrive?: TargetDrive) => {
     try {
       return await getDecryptedImageUrl(dotYouClient, imageDrive ?? defaultDrive, imageFileId);
     } catch (ex) {
@@ -68,7 +68,7 @@ const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   return {
     fetch: useQuery(
       ['image', imageFileId, imageDrive?.alias],
-      () => fetchImageData(imageFileId, imageDrive),
+      () => fetchImageData(imageFileId as string, imageDrive),
       {
         refetchOnMount: false,
         refetchOnWindowFocus: false,

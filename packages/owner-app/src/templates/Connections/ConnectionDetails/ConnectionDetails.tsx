@@ -56,12 +56,12 @@ const ConnectionDetails = () => {
     return <LoadingDetailPage />;
   }
 
-  if (!connectionInfo && !contactData) {
+  if ((!connectionInfo && !contactData) || !odinId) {
     return <>{t('No matching connection found')}</>;
   }
 
   const actions =
-    connectionInfo.status === 'connected' ? (
+    connectionInfo?.status === 'connected' ? (
       <>
         <ActionButton
           type="primary"
@@ -106,7 +106,7 @@ const ConnectionDetails = () => {
           ]}
         />
       </>
-    ) : connectionInfo.status === 'sent' ? (
+    ) : connectionInfo?.status === 'sent' ? (
       <>
         <ActionButton
           type="secondary"
@@ -147,13 +147,13 @@ const ConnectionDetails = () => {
                     : odinId
                 }`}
               </span>
-              <small className="block text-sm">{`(${connectionInfo.status || 'none'})`}</small>
+              <small className="block text-sm">{`(${connectionInfo?.status || 'none'})`}</small>
             </span>
           </>
         }
         actions={
           <>
-            {connectionInfo.status === 'blocked' ? (
+            {connectionInfo?.status === 'blocked' ? (
               <ActionButton
                 type="remove"
                 onClick={() => unblock(odinId)}
@@ -166,7 +166,7 @@ const ConnectionDetails = () => {
               >
                 {t('Unblock')}
               </ActionButton>
-            ) : connectionInfo.status !== 'connected' ? (
+            ) : connectionInfo?.status !== 'connected' ? (
               <ActionButton
                 type="remove"
                 onClick={() => block(odinId)}
@@ -185,20 +185,20 @@ const ConnectionDetails = () => {
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
       />
-      {connectionInfo.status === 'blocked' ? (
+      {connectionInfo?.status === 'blocked' ? (
         <>
           <Alert type="critical">{t('This person is currently blocked')}</Alert>
         </>
       ) : null}
 
-      {connectionInfo.status === 'pending' ? (
+      {connectionInfo?.status === 'pending' ? (
         <>
           <Alert type="info">
             <div className="flex flex-grow flex-col sm:flex-row">
               <div className="mr-1">
-                &quot;<DomainHighlighter>{connectionInfo.senderOdinId}</DomainHighlighter>&quot;{' '}
+                &quot;<DomainHighlighter>{connectionInfo?.senderOdinId}</DomainHighlighter>&quot;{' '}
                 {t('sent you a connection request')}
-                <p className="mt-2 text-sm text-gray-600">{connectionInfo.message}</p>
+                <p className="mt-2 text-sm text-gray-600">{connectionInfo?.message}</p>
               </div>
               <div className="my-auto ml-auto grid grid-flow-col gap-2">
                 <ActionButton
@@ -244,7 +244,7 @@ const ConnectionDetails = () => {
 
       {contactData && <ContactInfo odinId={odinId} />}
 
-      {connectionInfo.status === 'connected' ? (
+      {connectionInfo?.status === 'connected' ? (
         <>
           {/* <Section
             isOpaqueBg={true}

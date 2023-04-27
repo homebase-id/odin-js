@@ -47,7 +47,7 @@ const OutgoingConnectionDialog = ({
   const [connectionTarget, setConnectionTarget] = useState<string>();
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [name, setName] = useState<string>(window.location.hostname);
-  const [photoFileId, setPhotoFileId] = useState<string>(null);
+  const [photoFileId, setPhotoFileId] = useState<string>();
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 
@@ -76,7 +76,7 @@ const OutgoingConnectionDialog = ({
                   message: message,
                   name: name,
                   photoFileId: photoFileId,
-                  targetOdinId: connectionTarget,
+                  targetOdinId: connectionTarget as string, // Will be defined as otherwise it would have failed validation before
                   circleIds: circleGrants,
                 },
                 {
@@ -94,7 +94,10 @@ const OutgoingConnectionDialog = ({
                 }
               );
               if (shouldFollow) {
-                await follow({ odinId: connectionTarget, notificationType: 'allNotifications' });
+                await follow({
+                  odinId: connectionTarget as string,
+                  notificationType: 'allNotifications',
+                });
               }
             } else {
               if (e.currentTarget.checkValidity()) {

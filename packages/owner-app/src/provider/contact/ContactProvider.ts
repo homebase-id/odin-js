@@ -29,7 +29,7 @@ export const saveContact = async (
     contact.fileId = (await getContactByUniqueId(dotYouClient, contact.id))?.fileId;
   }
 
-  if (!contact.fileId) {
+  if (!contact.fileId && contact.odinId) {
     const existingContact = await getContactByUniqueId(dotYouClient, toGuidId(contact.odinId));
 
     contact.id = existingContact?.id ?? getNewId();
@@ -51,7 +51,7 @@ export const saveContact = async (
           type: contact.image.contentType,
         }
       )
-    ).fileId;
+    )?.fileId;
     contact.image = undefined;
   }
 
@@ -69,12 +69,17 @@ export const saveContact = async (
   const payloadJson: string = jsonStringify64(contact as ContactFile);
   const payloadBytes = stringToUint8Array(payloadJson);
 
+  const tags = [];
+  if (contact.id) tags.push(contact.id);
+
+  if (contact.odinId) tags.push(toGuidId(contact.odinId));
+
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     allowDistribution: false,
     contentType: 'application/json',
     appData: {
-      tags: [contact.id, toGuidId(contact.odinId)],
+      tags: tags,
       fileType: ContactConfig.ContactFileType,
       contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
@@ -102,7 +107,7 @@ export const saveContact = async (
 export const getContactByUniqueId = async (
   dotYouClient: DotYouClient,
   uniqueId: string
-): Promise<ContactFile> => {
+): Promise<ContactFile | undefined> => {
   try {
     const response = await queryBatch(dotYouClient, {
       targetDrive: ContactConfig.ContactTargetDrive,
@@ -138,7 +143,7 @@ export const getContactByUniqueId = async (
 export const getContactByTag = async (
   dotYouClient: DotYouClient,
   tag: string
-): Promise<ContactFile> => {
+): Promise<ContactFile | undefined> => {
   const response = await queryBatch(dotYouClient, {
     targetDrive: ContactConfig.ContactTargetDrive,
     tagsMatchAtLeastOne: [tag],

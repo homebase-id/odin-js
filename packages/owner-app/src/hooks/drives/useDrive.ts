@@ -8,7 +8,7 @@ import {
 } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 
-const useDrive = ({ targetDrive }: { targetDrive: TargetDrive }) => {
+const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
   const { getSharedSecret } = useAuth();
   const queryClient = useQueryClient();
   const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
@@ -39,7 +39,7 @@ const useDrive = ({ targetDrive }: { targetDrive: TargetDrive }) => {
   return {
     fetch: useQuery(
       ['drive', `${targetDrive?.alias}_${targetDrive?.type}`],
-      () => fetch(targetDrive),
+      () => fetch(targetDrive as TargetDrive),
       {
         refetchOnWindowFocus: false,
         enabled: !!targetDrive,

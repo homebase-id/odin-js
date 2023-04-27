@@ -60,7 +60,7 @@ const PendingConnectionImage = ({
       ) : contactData?.imageUrl || imageUrl ? (
         <figure className={'relative overflow-hidden'}>
           <img
-            src={contactData.imageUrl ?? imageUrl}
+            src={contactData?.imageUrl ?? imageUrl}
             className="aspect-square w-full object-cover"
           />
         </figure>

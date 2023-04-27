@@ -23,7 +23,7 @@ const CirclePermissionView = ({
   onClick?: () => void;
 }) => {
   const { data: members, isLoading: membersLoading } = useCircle({
-    circleId: !hideMembers && circleDef?.id,
+    circleId: !hideMembers ? circleDef?.id : undefined,
   }).fetchMembers;
 
   if (!circleDef) {
@@ -37,7 +37,7 @@ const CirclePermissionView = ({
       </a>
     ) : (
       <Link
-        to={`/owner/circles/${encodeURIComponent(circleDef.id)}`}
+        to={`/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
         className={`hover:text-slate-700 hover:underline dark:hover:text-slate-400 ${
           className ?? ''
         }`}

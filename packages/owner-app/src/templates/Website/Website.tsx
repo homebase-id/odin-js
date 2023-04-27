@@ -10,8 +10,9 @@ import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import LoadingParagraph from '../../components/ui/Loaders/LoadingParagraph/LoadingParagraph';
 import Section from '../../components/ui/Sections/Section';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
+import { AttributeVm } from '../../hooks/profiles/useAttributes';
 
-const defaultHomeAttribute = {
+const defaultHomeAttribute: AttributeVm = {
   id: toGuidId('default_home_attribute'),
   profileId: HomePageConfig.DefaultDriveId,
   type: HomePageAttributes.HomePage,
@@ -24,9 +25,9 @@ const defaultHomeAttribute = {
     name: 'Homepage',
     description: '',
   },
-};
+} as unknown as AttributeVm;
 
-const defaultThemeAttribute = {
+const defaultThemeAttribute: AttributeVm = {
   id: toGuidId('default_theme_attribute'),
   profileId: HomePageConfig.DefaultDriveId,
   type: HomePageAttributes.Theme,
@@ -39,7 +40,7 @@ const defaultThemeAttribute = {
     name: 'Theme',
     description: '',
   },
-};
+} as unknown as AttributeVm;
 
 const Website = () => {
   const { data: homeData, isLoading: homeIsLoading } = useHomeAttributes().fetchHome;

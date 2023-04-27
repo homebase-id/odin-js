@@ -166,6 +166,7 @@ export const lotrRealm = {
           circleIdList: undefined,
           odinIdList: undefined,
         },
+        priority: 1000,
       },
     ],
     socials: [
@@ -267,6 +268,7 @@ export const lotrRealm = {
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
         },
+        priority: 1000,
       },
     ],
     circles: [
@@ -295,6 +297,7 @@ export const lotrRealm = {
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
         },
+        priority: 1000,
       },
     ],
   },
@@ -311,6 +314,7 @@ export const lotrRealm = {
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
         },
+        priority: 1000,
       },
     ],
   },
@@ -327,6 +331,7 @@ export const lotrRealm = {
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
         },
+        priority: 1000,
       },
     ],
   },
@@ -343,6 +348,7 @@ export const lotrRealm = {
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
         },
+        priority: 1000,
       },
     ],
   },

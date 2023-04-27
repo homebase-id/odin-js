@@ -84,8 +84,10 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
     circleIds: string[];
   }) => {
     await acceptConnectionRequest(dotYouClient, senderOdinId, name, photoFileId, circleIds);
+
     // Save contact
-    await saveContact(dotYouClient, await fetchConnectionInfo(dotYouClient, senderOdinId));
+    const connectionInfo = await fetchConnectionInfo(dotYouClient, senderOdinId);
+    if (connectionInfo) await saveContact(dotYouClient, connectionInfo);
 
     return { senderOdinId };
   };
@@ -102,7 +104,7 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['connectionInfo', odinId], () => fetchSingle({ odinId }), {
+    fetch: useQuery(['connectionInfo', odinId], () => fetchSingle({ odinId: odinId as string }), {
       refetchOnWindowFocus: false,
       enabled: !!odinId,
     }),
@@ -121,7 +123,9 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
       onMutate: async (newRequest) => {
         await queryClient.cancelQueries(['sentRequests']);
 
-        const previousRequests: ConnectionRequest[] = queryClient.getQueryData(['sentRequests']);
+        const previousRequests: ConnectionRequest[] | undefined = queryClient.getQueryData([
+          'sentRequests',
+        ]);
         const newRequests = [
           {
             status: 'sent',
@@ -137,11 +141,11 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['sentRequests'], context.previousRequests);
+        queryClient.setQueryData(['sentRequests'], context?.previousRequests);
       },
       onSettled: (data) => {
         queryClient.invalidateQueries(['sentRequests']);
-        queryClient.invalidateQueries(['connectionInfo', data.targetOdinId]);
+        queryClient.invalidateQueries(['connectionInfo', data?.targetOdinId]);
       },
     }),
     revokeConnectionRequest: useMutation(revokeConnectionRequest, {
@@ -157,7 +161,7 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
       onMutate: async (newRequest) => {
         await queryClient.cancelQueries(['activeConnections']);
 
-        const previousConnections: ConnectionRequest[] = queryClient.getQueryData([
+        const previousConnections: ConnectionRequest[] | undefined = queryClient.getQueryData([
           'activeConnections',
         ]);
         const newConnections = [
@@ -175,7 +179,7 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['activeConnections'], context.previousConnections);
+        queryClient.setQueryData(['activeConnections'], context?.previousConnections);
       },
       onSettled: (data) => {
         queryClient.invalidateQueries(['pendingConnections']);

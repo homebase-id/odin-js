@@ -54,7 +54,7 @@ const DrivePermissionSelectorDialog = ({
         >
           <DrivePermissionSelector
             driveGrants={driveGrants}
-            drives={drives}
+            drives={drives || []}
             onChange={setDriveGrants}
             allowOwnerOnlyDrives={allowOwnerOnlyDrives}
           />

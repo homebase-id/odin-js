@@ -44,14 +44,14 @@ export const Toast = ({
     'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
 
   const onOpen = () => {
-    navigate(href);
+    href && navigate(href);
     onDismiss && onDismiss();
   };
 
   return (
     <div
       className={`relative flex max-w-sm flex-row rounded-md bg-white px-2 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
-        onOpen ? 'cursor-pointer' : ''
+        href ? 'cursor-pointer' : ''
       }`}
       onClick={onOpen}
     >

@@ -50,14 +50,18 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
   };
 
   return {
-    fetchAll: useQuery(['profileSections', profileId], () => fetchSections({ profileId }), {
-      refetchOnWindowFocus: false,
-    }),
+    fetchAll: useQuery(
+      ['profileSections', profileId],
+      () => fetchSections({ profileId: profileId as string }),
+      {
+        refetchOnWindowFocus: false,
+      }
+    ),
     save: useMutation(saveSection, {
       onMutate: async ({ profileId, profileSection: newSection }) => {
         await queryClient.cancelQueries(['profileSections', profileId]);
 
-        const previousSections: ProfileSection[] = queryClient.getQueryData([
+        const previousSections: ProfileSection[] | undefined = queryClient.getQueryData([
           'profileSections',
           profileId,
         ]);
@@ -72,17 +76,17 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['profileSections', newData.profileId], context.previousSections);
+        queryClient.setQueryData(['profileSections', newData.profileId], context?.previousSections);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries(['profileSections', data.profileId]);
+        queryClient.invalidateQueries(['profileSections', data?.profileId]);
       },
     }),
     remove: useMutation(removeSection, {
       onMutate: async ({ profileId, profileSection: toRemoveSection }) => {
         await queryClient.cancelQueries(['profileSections', profileId]);
 
-        const previousSections: ProfileSection[] = queryClient.getQueryData([
+        const previousSections: ProfileSection[] | undefined = queryClient.getQueryData([
           'profileSections',
           profileId,
         ]);
@@ -97,7 +101,7 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
       onError: (err, newData, context) => {
         console.error(err);
 
-        queryClient.setQueryData(['profileSections', newData.profileId], context.previousSections);
+        queryClient.setQueryData(['profileSections', newData.profileId], context?.previousSections);
       },
       onSettled: (data, err, variables) => {
         queryClient.invalidateQueries(['profileSections', variables.profileId]);

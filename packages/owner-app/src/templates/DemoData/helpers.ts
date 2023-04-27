@@ -1,6 +1,6 @@
 import { InfiniteData } from '@tanstack/react-query';
 
-export const getRandomNumber = (max) => {
+export const getRandomNumber = (max: number) => {
   return Math.floor(Math.random() * max);
 };
 
@@ -157,8 +157,12 @@ export const getVersion = () => {
   }
 };
 
-export const attrHasData = (attr) => {
-  return attr?.data && Object.keys(attr.data).length !== 0;
+export const attrHasData = (attr: unknown) => {
+  if (!attr || typeof attr !== 'object' || !('data' in attr)) return false;
+
+  const attrObject = attr as { data: object };
+
+  return attrObject.data && Object.keys(attrObject.data).length !== 0;
 };
 
 // Flattens all pages, sorts descending and slice on the max number expected

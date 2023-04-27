@@ -12,7 +12,7 @@ const SaveStatus = ({
   state: 'error' | 'idle' | 'loading' | 'success';
   error?: unknown;
 }) => {
-  const [lastSave, setLastSave] = useState<Date>(null);
+  const [lastSave, setLastSave] = useState<Date>();
   const [now, setNow] = useState<Date>(new Date());
   useEffect(() => {
     if (state === 'success') {

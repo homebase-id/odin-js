@@ -52,7 +52,7 @@ let character = window.location.hostname;
 character = character === 'frodobaggins.me' ? 'frodo.digital' : character;
 character = character === 'samwisegamgee.me' ? 'samwise.digital' : character;
 
-const realmData = lotrRealm[character];
+const realmData = lotrRealm[character as keyof typeof lotrRealm];
 
 const DemoData = () => {
   const { getSharedSecret } = useAuth();
@@ -100,7 +100,7 @@ const uploadMedia = async (
       tag: tag || imageData.id,
       uniqueId: imageData.id,
     })
-  ).fileId;
+  )?.fileId;
 
   return newFileId;
 };
@@ -217,7 +217,7 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
     save: { mutate: saveSocial },
   } = useAttribute({
     profileId: profileId,
-    attributeId: realmData.socials?.[0].id,
+    attributeId: 'socials' in realmData ? realmData.socials?.[0]?.id : undefined,
   });
 
   const addSocials = async () => {
@@ -294,17 +294,19 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
     type networkDataKey = keyof typeof networkData;
 
     await Promise.all(
-      realmData.socials.map(async (social) => {
-        const networkInfo = networkData[social.network as networkDataKey];
+      'socials' in realmData
+        ? realmData.socials.map(async (social) => {
+            const networkInfo = networkData[social.network as networkDataKey];
 
-        await createSocialAttribute(
-          social.id,
-          networkInfo.attrDef,
-          networkInfo.profileField,
-          social.handle,
-          networkInfo.priority
-        );
-      })
+            await createSocialAttribute(
+              social.id,
+              networkInfo.attrDef,
+              networkInfo.profileField,
+              social.handle,
+              networkInfo.priority
+            );
+          })
+        : []
     );
 
     return true;
@@ -315,7 +317,7 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
     save: { mutate: saveBio },
   } = useAttribute({
     profileId: profileId,
-    attributeId: realmData.bio?.[0].id,
+    attributeId: 'bio' in realmData ? realmData.bio?.[0].id : undefined,
   });
 
   const addBiography = async () => {
@@ -354,9 +356,11 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
     };
 
     await Promise.all(
-      realmData.bio.map(async (bio, index) => {
-        await createBioAttribute(bio.id, bio.title, bio.body, 5000 + index * 1000);
-      })
+      'bio' in realmData
+        ? realmData.bio.map(async (bio, index) => {
+            await createBioAttribute(bio.id, bio.title, bio.body, 5000 + index * 1000);
+          })
+        : []
     );
 
     return true;
@@ -410,7 +414,7 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           bioAttr && isBioFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={bioAttr && isBioFetched}
+        disabled={(bioAttr && isBioFetched) || false}
       >
         Add Bio
       </button>
@@ -430,14 +434,15 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
             : 'bg-orange-500'
         }`}
         disabled={
-          nameAttr?.data &&
-          isNameFetched &&
-          photoAttr?.data &&
-          isPhotoFetched &&
-          socialAttr?.data &&
-          isSocialFetched &&
-          bioAttr &&
-          isBioFetched
+          (nameAttr?.data &&
+            isNameFetched &&
+            photoAttr?.data &&
+            isPhotoFetched &&
+            socialAttr?.data &&
+            isSocialFetched &&
+            bioAttr &&
+            isBioFetched) ||
+          false
         }
       >
         Create Profile All
@@ -447,6 +452,10 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
 };
 
 const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
+  if (!('home' in realmData)) {
+    return null;
+  }
+
   const {
     fetch: { data: rootAttr, isFetched: isRootFetched },
     save: { mutate: saveRoot },
@@ -537,7 +546,7 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           rootAttr && isRootFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={rootAttr && isRootFetched}
+        disabled={(rootAttr && isRootFetched) || false}
       >
         Add Home
       </button>
@@ -546,7 +555,7 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           themeAttr && isThemeFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={themeAttr && isThemeFetched}
+        disabled={(themeAttr && isThemeFetched) || false}
       >
         Add Theme
       </button>
@@ -558,7 +567,7 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
             ? 'pointer-events-none bg-gray-300'
             : 'bg-orange-500'
         }`}
-        disabled={rootAttr && isRootFetched && themeAttr && isThemeFetched}
+        disabled={(rootAttr && isRootFetched && themeAttr && isThemeFetched) || false}
       >
         Create Homepage And Theme
       </button>
@@ -567,6 +576,8 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
 };
 
 const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
+  if (!('blog' in realmData)) return null;
+
   const {
     fetch: { data: channelAttr, isFetched: isChannelFetched },
     save: { mutate: saveChannel },
@@ -649,7 +660,7 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
               tagsMatchAtLeastOne: [randomImageId],
             })
           ).searchResults;
-          const imageFileId = potentialImages?.length && potentialImages[0].fileId;
+          const imageFileId = potentialImages?.length ? potentialImages[0].fileId : undefined;
           const previewThumbnail =
             potentialImages?.length && potentialImages[0].fileMetadata.appData.previewThumbnail;
 
@@ -659,7 +670,7 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
             caption: randomTitle,
             slug: convertTextToSlug(randomTitle),
             dateUnixTime: randomDate.getTime(),
-            primaryMediaFile: { fileId: imageFileId, type: 'image' },
+            primaryMediaFile: imageFileId ? { fileId: imageFileId, type: 'image' } : undefined,
             type: 'Article',
             readingTimeStats: {
               words: 382,
@@ -672,11 +683,13 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
           const blogFile: PostFile<PostContent> = {
             fileId: undefined,
             versionTag: undefined,
-            acl: {
-              ...channel.acl,
-            },
+            acl: channel.acl
+              ? {
+                  ...channel.acl,
+                }
+              : { requiredSecurityGroup: SecurityGroupType.Anonymous },
             content: blogContent,
-            previewThumbnail: previewThumbnail,
+            previewThumbnail: previewThumbnail || undefined,
           };
 
           await saveBlog({ blogFile: blogFile, channelId: channel.channelId });
@@ -699,7 +712,7 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           channelAttr && isChannelFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={channelAttr && isChannelFetched}
+        disabled={(channelAttr && isChannelFetched) || false}
       >
         Create Channels
       </button>
@@ -714,13 +727,15 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
 };
 
 const CirclesAndConnections = () => {
+  if (!('circles' in realmData)) return null;
+
   const { data: circles, isFetched: isCirclesFetched } = useCircles().fetch;
   const { mutateAsync: createCircle } = useCircle({}).createOrUpdate;
 
   const createCircles = async () => {
     await Promise.all(
       realmData.circles.map(async (newCircle) => {
-        if (circles.some((existingCircle) => existingCircle.name === newCircle.name)) {
+        if (circles?.some((existingCircle) => existingCircle.name === newCircle.name)) {
           return;
         }
 
@@ -755,7 +770,7 @@ const CirclesAndConnections = () => {
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
           circles?.length && isCirclesFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={circles?.length && isCirclesFetched}
+        disabled={(circles?.length && isCirclesFetched) || false}
       >
         Add Circles
       </button>

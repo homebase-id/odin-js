@@ -78,7 +78,7 @@ const Drives = () => {
                       stringGuidsEqual(drive.targetDriveInfo.type, type.type)
                     ) ?? []
                   : appDrives
-                ).map((driveDef) => (
+                )?.map((driveDef) => (
                   <CardLink
                     title={driveDef.name}
                     href={`/owner/drives/${driveDef.targetDriveInfo.alias}_${driveDef.targetDriveInfo.type}`}

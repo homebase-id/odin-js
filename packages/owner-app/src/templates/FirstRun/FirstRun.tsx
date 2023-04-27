@@ -32,8 +32,8 @@ const FirstRun = () => {
         return;
       }
 
-      localStorage.setItem(FIRST_RUN_TOKEN_STORAGE_KEY, firstRunToken); // Store FRT to localStorage so it can be used on initialize later
-      await finalizeRegistration(password, firstRunToken);
+      localStorage.setItem(FIRST_RUN_TOKEN_STORAGE_KEY, firstRunToken || ''); // Store FRT to localStorage so it can be used on initialize later
+      await finalizeRegistration(password, firstRunToken || '');
 
       //TODO: need a 'success' screen or something;
       // => No we don't, it should just login ;-)
