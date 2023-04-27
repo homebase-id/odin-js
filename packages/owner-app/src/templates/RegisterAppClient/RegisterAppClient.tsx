@@ -21,6 +21,8 @@ import DomainHighlighter from '../../components/ui/DomainHighlighter/DomainHighl
 import Arrow from '../../components/ui/Icons/Arrow/Arrow';
 import Alert from '../../components/ui/Alerts/Alert/Alert';
 import useDrives from '../../hooks/drives/useDrives';
+import Times from '../../components/ui/Icons/Times/Times';
+import Input from '../../components/Form/Input';
 
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&ui=minimal&return=odin-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&cd=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A2%7D%5D&ui=minimal&return=odin-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
@@ -81,11 +83,11 @@ const RegisterClient = () => {
   const [isCancelled, setIsCancelled] = useState<boolean>(false);
   const [finalUrl, setFinalUrl] = useState<string | null>();
 
-  const doRegisterClient = async () => {
+  const doRegisterClient = async (customFriendlyName?: string) => {
     const clientRegistrationResponse = await registerClient({
       appId: appId,
       clientPublicKey64: publicKey64,
-      clientFriendlyName: friendlyName,
+      clientFriendlyName: customFriendlyName || friendlyName,
     });
 
     console.log('data', clientRegistrationResponse.data);
@@ -404,12 +406,14 @@ const AppClientRegistration = ({
   friendlyName: string;
   name: string;
   appRegistration: RedactedAppRegistration;
-  doRegisterClient: () => void;
+  doRegisterClient: (customFriendlyName?: string) => void;
   registerClientState: 'error' | 'idle' | 'loading' | 'success';
   doCancel: () => void;
   returnHost: string;
 }) => {
   const [isDetails, setIsDetails] = useState(false);
+  const [isEditFriendlyName, setIsEditFriendlyName] = useState(false);
+  const [customFriendlyName, setCustomFriendlyName] = useState<string>();
 
   const dateFormat: Intl.DateTimeFormatOptions = {
     month: 'short',
@@ -481,14 +485,36 @@ const AppClientRegistration = ({
                 </div>
               </Section>
             ) : null}
-            <p className="text-sm">
-              {t('Your current device:')} {friendlyName}
-            </p>
+            <div className={`flex  ${isEditFriendlyName ? 'flex-col' : 'flex-row'}`}>
+              <p className="flex flex-row items-center text-sm">
+                <span>{t('Your current device:')}</span> {!isEditFriendlyName ? friendlyName : ''}
+              </p>
+              <div className="flex flex-row items-center">
+                {isEditFriendlyName ? (
+                  <Input
+                    type="text"
+                    defaultValue={friendlyName}
+                    className="my-2 text-sm"
+                    onChange={(e) => setCustomFriendlyName(e.target.value)}
+                  />
+                ) : null}
+
+                <ActionButton
+                  icon={isEditFriendlyName ? Times : 'edit'}
+                  onClick={() => setIsEditFriendlyName(!isEditFriendlyName)}
+                  type="mute"
+                />
+              </div>
+            </div>
           </>
         ) : null}
       </div>
       <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-        <ActionButton onClick={doRegisterClient} state={registerClientState} icon="send">
+        <ActionButton
+          onClick={() => doRegisterClient(isEditFriendlyName ? customFriendlyName : undefined)}
+          state={registerClientState}
+          icon="send"
+        >
           {t('Login')}
         </ActionButton>
         <ActionButton type="secondary" onClick={() => doCancel()}>

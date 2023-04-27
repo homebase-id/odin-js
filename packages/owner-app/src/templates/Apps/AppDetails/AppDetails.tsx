@@ -154,15 +154,18 @@ const AppDetails = () => {
 
       {appClients ? (
         <Section title={t('Devices')}>
-          <div className="-my-4">
-            {appClients.map((appClient, index) => (
-              <ClientView
-                appId={app.appId}
-                appClient={appClient}
-                className="my-4"
-                key={`${appClient.accessRegistrationId}_${index}`}
-              />
-            ))}
+          <div className="grid grid-flow-row gap-4">
+            {appClients?.length ? (
+              appClients.map((appClient, index) => (
+                <ClientView
+                  appId={app.appId}
+                  appClient={appClient}
+                  key={`${appClient.accessRegistrationId}_${index}`}
+                />
+              ))
+            ) : (
+              <p className="text-slate-400">{t('No devices currently logged in')}</p>
+            )}
           </div>
         </Section>
       ) : null}
