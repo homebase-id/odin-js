@@ -70,6 +70,7 @@ const AppDetails = () => {
       <ErrorNotification error={allowAppError || revokeAppError || removeAppError} />
       <PageMeta
         icon={Grid}
+        browserTitle={app.name}
         title={
           <span>
             {app.name}
@@ -177,14 +178,13 @@ const AppDetails = () => {
         }
       />
       <div className="grid gap-4 sm:grid-flow-col sm:grid-cols-2">
-        {/* {app.grant.permissionSet?.keys ? ( */}
         <Section
-          title={t('Connections')}
+          title={t('Permissions')}
           actions={
             <ActionButton type="mute" onClick={() => setIsPermissionEditOpen(true)} icon={'edit'} />
           }
         >
-          {app.grant.permissionSet?.keys ? (
+          {app.grant.permissionSet?.keys?.length ? (
             <div className="-my-4">
               {app.grant.permissionSet.keys.map((permissionLevel) => {
                 return (
@@ -198,7 +198,9 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto">{t("This app doesn't have any special permissions")}</p>
+              <p className="my-auto text-slate-400">
+                {t("This app doesn't have any special permissions")}
+              </p>
             </div>
           )}
         </Section>
@@ -223,7 +225,7 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto">{t("This app doesn't have any access")}</p>
+              <p className="my-auto text-slate-400">{t("This app doesn't have any access")}</p>
             </div>
           )}
         </Section>
@@ -234,7 +236,9 @@ const AppDetails = () => {
           <>
             {t('Circles')}
             <small className="block text-sm text-slate-400">
-              {t('This describes what the identities within these circles can access')}
+              {t(
+                'This describes what the identities within these circles have unrestricted access to'
+              )}
             </small>
           </>
         }
@@ -261,7 +265,7 @@ const AppDetails = () => {
             </ul>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto">{t("This app doesn't have any access")}</p>
+              <p className="my-auto text-slate-400">{t("This app doesn't have any access")}</p>
             </div>
           )}
         </Section>
@@ -285,7 +289,9 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto">{t("This app doesn't have any drive access for circles")}</p>
+              <p className="my-auto text-slate-400">
+                {t("This app doesn't have any drive access for circles")}
+              </p>
             </div>
           )}
         </Section>
@@ -315,7 +321,9 @@ const AppDetails = () => {
             </div>
           ) : (
             <div className="flex flex-row">
-              <p className="my-auto">{t("This app doesn't have any special access for circles")}</p>
+              <p className="my-auto text-slate-400">
+                {t("This app doesn't have any special access for circles")}
+              </p>
             </div>
           )}
         </Section>

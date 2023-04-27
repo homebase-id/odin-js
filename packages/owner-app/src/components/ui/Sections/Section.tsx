@@ -49,7 +49,9 @@ export const SectionTitle = ({ title, actions }: { title?: ReactNode; actions?: 
     >
       <h3 className="text-2xl dark:text-white">{title}</h3>
       <div className="ml-auto">
-        <div className="grid grid-flow-col gap-2">{actions}</div>
+        <div className="grid grid-flow-col gap-2 opacity-60 transition-opacity hover:opacity-100">
+          {actions}
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,9 @@
     },
     {
       "path": "./packages/ui-lib"
+    },
+    {
+      "path": "./packages/common-app"
     }
   ]
 }

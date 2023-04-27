@@ -5,12 +5,14 @@ import SaveStatus from '../../Buttons/SaveStatus';
 
 const PageMeta = ({
   title,
+  browserTitle,
   actions,
   saveStatus,
   breadCrumbs,
   icon,
 }: {
   title?: ReactNode | string;
+  browserTitle?: string;
   actions?: ReactNode;
   saveStatus?: 'error' | 'idle' | 'loading' | 'success';
   breadCrumbs?: { title: string; href?: string }[];
@@ -18,7 +20,7 @@ const PageMeta = ({
 }) => {
   return (
     <section
-      className="-mx-2 -mt-4 mb-10 border-b border-gray-100 bg-white py-1 px-2 dark:border-gray-800 dark:bg-black sm:-mx-10
+      className="-mx-2 -mt-4 mb-10 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10
     sm:-mt-8 sm:px-10 lg:py-8"
     >
       <div className="-m-1 flex min-h-[3rem] flex-row flex-wrap items-center sm:flex-nowrap">
@@ -49,7 +51,8 @@ const PageMeta = ({
               </h1>
               <Helmet>
                 <title>
-                  {(typeof title !== 'object' && `${title}`) ||
+                  {browserTitle ||
+                    (typeof title !== 'object' && `${title}`) ||
                     window.location.pathname.split('/').pop()}{' '}
                   | Odin
                 </title>
