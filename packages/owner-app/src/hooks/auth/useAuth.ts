@@ -9,6 +9,7 @@ import {
   logout as logoutOwner,
 } from '../../provider/AuthenticationProvider';
 import { uint8ArrayToBase64, base64ToUint8Array, ApiType } from '@youfoundation/js-lib';
+import { OwnerClient } from '@youfoundation/common-app';
 
 const HOME_SHARED_SECRET = 'HSS';
 const HOME_STORAGE_IDENTITY_KEY = 'identity';
@@ -105,6 +106,13 @@ const useAuth = () => {
     return ApiType.Owner;
   };
 
+  const getDotYouClient = () => {
+    return new OwnerClient({
+      sharedSecret: getSharedSecret(),
+      api: getApiType(),
+    });
+  };
+
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
       setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
@@ -128,6 +136,7 @@ const useAuth = () => {
     authenticate,
     createHomeToken,
     setNewPassword,
+    getDotYouClient,
     getApiType,
     finalizeRegistration,
     isMasterPasswordSet,

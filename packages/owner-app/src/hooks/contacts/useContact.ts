@@ -18,8 +18,7 @@ const useContact = ({
   id?: string;
   loadPendingProfilePicture?: boolean;
 }) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
   const fetchSingle = async ({

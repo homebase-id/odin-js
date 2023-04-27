@@ -27,9 +27,8 @@ const useImage = (
   naturalSize?: ImageSize
 ) => {
   const localHost = window.location.hostname;
-  const { getSharedSecret, getApiType } = useAuth();
   const queryClient = useQueryClient();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchImageData = async (
     odinId: string,

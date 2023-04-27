@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { DotYouClient, ApiType, getCircles } from '@youfoundation/js-lib';
+import { getCircles } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 
 const useCircles = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchAll = async () => {
     const circles = await getCircles(dotYouClient);

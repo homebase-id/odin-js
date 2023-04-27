@@ -32,10 +32,9 @@ export const parseChannelTemplate = (templateId: number | undefined) => {
 };
 
 const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
-  const { getSharedSecret } = useAuth();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) {

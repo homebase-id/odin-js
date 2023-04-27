@@ -1,17 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ApiType,
-  DotYouClient,
-  DriveDefinition,
-  getDrivesByType,
-  TargetDrive,
-} from '@youfoundation/js-lib';
+import { DriveDefinition, getDrivesByType, TargetDrive } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 
 const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
-  const { getSharedSecret } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
   const fetch = async (targetDrive: TargetDrive) => {
     // First check all drives cache for a drive

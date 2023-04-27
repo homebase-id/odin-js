@@ -12,8 +12,7 @@ import useAuth from '../auth/useAuth';
 
 const useVideo = (odinId?: string, videoFileId?: string | undefined, videoDrive?: TargetDrive) => {
   const localHost = window.location.hostname;
-  const { getSharedSecret, getApiType } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchVideoData = async (
     odinId: string,

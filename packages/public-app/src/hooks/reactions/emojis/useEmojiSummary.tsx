@@ -14,8 +14,7 @@ const useEmojiSummary = ({
   context: ReactionContext;
   reactionPreview?: EmojiReactionSummary;
 }) => {
-  const { getApiType, getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async (context: ReactionContext): Promise<EmojiReactionSummary> => {
     if (

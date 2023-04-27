@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import {
   BlogConfig,
-  DotYouClient,
   getAttribute,
   getAttributeVersions,
   getChannelDefinition,
@@ -21,7 +20,6 @@ import {
 } from '@youfoundation/js-lib';
 import { HomePageConfig } from '@youfoundation/js-lib';
 import {
-  ApiType,
   BuiltInAttributes,
   AttributeFile,
   BuiltInProfiles,
@@ -43,11 +41,11 @@ const anonymousAcl = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 
 const useInit = () => {
-  const { getSharedSecret, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { mutateAsync: saveAttr } = useAttribute({}).save;
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const initDrives: DriveDefinitionParam[] = [
     {

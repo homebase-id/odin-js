@@ -3,8 +3,8 @@ import { DotYouClient, fetchFollowDetail } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 
 const useFollowDetail = () => {
-  const { getSharedSecret, getApiType, isAuthenticated, isOwner } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const { getDotYouClient, isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = getDotYouClient();
 
   const fetchDetail = async () => {
     if (!isAuthenticated || isOwner) {

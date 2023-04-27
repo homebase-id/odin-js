@@ -6,7 +6,7 @@ import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDe
 import { getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 
-interface ProfileCard {
+export interface ProfileCard {
   name: string;
   image: string;
 }

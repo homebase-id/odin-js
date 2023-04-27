@@ -83,8 +83,7 @@ export const isImportable = (obj: unknown): obj is importable => {
 };
 
 const useExport = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
     const queryBatchPart = async (cursorState: string | undefined) => {

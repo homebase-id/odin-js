@@ -16,10 +16,8 @@ import {
 import useAuth from '../auth/useAuth';
 
 const useCircle = ({ circleId }: { circleId?: string }) => {
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
-
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
   const fetch = async ({ circleId }: { circleId: string }) => {
     if (!circleId) {

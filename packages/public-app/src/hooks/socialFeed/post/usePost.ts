@@ -23,10 +23,9 @@ import useAuth from '../../auth/useAuth';
 import useStaticFiles from '../../staticFiles/useStaticFiles';
 
 const usePost = () => {
-  const { getSharedSecret } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
   const savePost = async ({
     blogFile,

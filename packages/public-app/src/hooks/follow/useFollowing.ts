@@ -16,9 +16,7 @@ type useFollowingInfiniteProps = {
 
 const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProps) => {
   const queryClient = useQueryClient();
-  const { getSharedSecret, getApiType } = useAuth();
-
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchBlogData = async ({ pageParam }: { pageParam?: string }) => {
     try {

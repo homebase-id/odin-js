@@ -5,8 +5,7 @@ import useAuth from '../../auth/useAuth';
 const PAGE_SIZE = 15;
 
 const useEmojiReactions = (context?: ReactionContext) => {
-  const { getApiType, getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({
     context,

@@ -17,9 +17,8 @@ const MINUTE_IN_MS = 60000;
 
 // Process the inbox on startup
 const useInboxProcessor = (isEnabled?: boolean) => {
+  const dotYouClient = useAuth().getDotYouClient();
   const { data: channels, isFetchedAfterMount: channelsFetched } = useChannels();
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
   const fetchData = async () => {
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 5);

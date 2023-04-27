@@ -1,11 +1,5 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  DotYouClient,
-  ApiType,
-  fetchFollowing,
-  FollowRequest,
-  createOrUpdateFollow,
-} from '@youfoundation/js-lib';
+import { fetchFollowing, FollowRequest, createOrUpdateFollow } from '@youfoundation/js-lib';
 
 import useAuth from '../auth/useAuth';
 
@@ -15,9 +9,7 @@ type useFollowingInfiniteProps = {
 
 const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProps) => {
   const queryClient = useQueryClient();
-
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchBlogData = async ({ pageParam }: { pageParam?: string }) => {
     const response = await fetchFollowing(dotYouClient, pageParam);

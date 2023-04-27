@@ -16,8 +16,7 @@ import { UseCommentsVal } from './comments/useComments';
 
 const useReaction = () => {
   const queryClient = useQueryClient();
-  const { getSharedSecret, getApiType } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const saveCommentData = async (commentData: ReactionVm) => {
     return await saveComment(dotYouClient, {

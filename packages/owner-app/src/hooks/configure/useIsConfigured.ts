@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib';
 import { isConfigured } from '../../provider/system/SystemProvider';
 import useAuth from '../auth/useAuth';
 
 const useIsConfigured = () => {
   const { getSharedSecret, isAuthenticated } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
+
   const getIsConfigured = async () => {
     if (!isAuthenticated) {
       return;

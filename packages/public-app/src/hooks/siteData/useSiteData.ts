@@ -39,11 +39,10 @@ type SiteData = {
 };
 
 const useSiteData = () => {
-  const { getSharedSecret, getApiType, isAuthenticated } = useAuth();
+  const { getDotYouClient, isAuthenticated } = useAuth();
+  const dotYouClient = getDotYouClient();
 
   const fetchData: () => Promise<SiteData> = async () => {
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
-
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
     const parseOwnerData = async (nameAndPhotoAttr?: AttributeFile[]) => {

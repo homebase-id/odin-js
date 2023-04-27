@@ -1,11 +1,12 @@
-import { ApiType, base64ToUint8Array, DotYouClient } from '@youfoundation/js-lib';
+import { ApiType, base64ToUint8Array } from '@youfoundation/js-lib';
+import { OwnerClient } from '@youfoundation/common-app';
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (): Promise<boolean> => {
   //Note: the token is in a cookie marked http-only so making
   // the call to the endpoint will automatically include the
   // cookie.  we just need to check the success code
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
   return client.get('/authentication/verifyToken').then((response) => {
     return response.data;
@@ -16,7 +17,7 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   const noncePackage = await getNonce();
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
   const url = '/authentication';
 
@@ -38,7 +39,7 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
   }`;
   const url = `/youauth/create-token-flow?returnUrl=${encodeURIComponent(returnUrl)}`;
 
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
 
   const response = await client.get(url);
@@ -55,7 +56,7 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
 export const authenticateDevice = async (password: string): Promise<string> => {
   return getNonce().then((noncePackage) => {
     return prepareAuthPassword(password, noncePackage).then((reply) => {
-      const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+      const dotYouClient = new OwnerClient({ api: ApiType.Owner });
       const client = dotYouClient.createAxiosClient(true);
 
       return client
@@ -73,7 +74,7 @@ export const authenticateDevice = async (password: string): Promise<string> => {
 };
 
 export const logout = async (): Promise<boolean> => {
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
 
   await client.get('/auth/delete-token', { baseURL: '/api/youauth/v1' });
@@ -132,7 +133,7 @@ const prepareAuthPassword = async (
 };
 
 const getNonce = async (): Promise<NonceData> => {
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
   return client
     .get('/authentication/nonce')
@@ -143,7 +144,7 @@ const getNonce = async (): Promise<NonceData> => {
 };
 
 const getSalts = async (): Promise<NonceData> => {
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
   return client.get('/authentication/getsalts').then((response) => {
     return response.data;
@@ -156,7 +157,7 @@ export const setNewPassword = async (
 ): Promise<boolean> => {
   return getSalts().then((salts) => {
     return prepareAuthPassword(newPassword, salts, firstRunToken).then((reply) => {
-      const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+      const dotYouClient = new OwnerClient({ api: ApiType.Owner });
       return dotYouClient
         .createAxiosClient(true)
         .post('/authentication/passwd', reply)
@@ -171,7 +172,7 @@ export const finalizeRegistration = async (firstRunToken: string) => {
   //i'm sorry @stef for bolting this on here.
   // I'm just working to get provisionig flowing back to front
   // and i'm not certain how you want to slice up things like registration, etc.
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient(true);
   const url = '/config/registration/finalize?frid=' + firstRunToken;
 
@@ -181,7 +182,7 @@ export const finalizeRegistration = async (firstRunToken: string) => {
 };
 
 export const isMasterPasswordSet = async (): Promise<boolean> => {
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
 
   return dotYouClient
     .createAxiosClient(true)

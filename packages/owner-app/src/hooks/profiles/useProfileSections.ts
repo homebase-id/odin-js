@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ApiType,
-  DotYouClient,
   getProfileSections,
   ProfileSection,
   removeProfileSection,
@@ -12,10 +10,8 @@ import useAttributes from './useAttributes';
 
 const useProfileSections = ({ profileId }: { profileId?: string }) => {
   const queryClient = useQueryClient();
-  const { getSharedSecret } = useAuth();
   const { mutateAsync: removeAttributes } = useAttributes({}).removeAttributes;
-
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchSections = async ({ profileId }: { profileId: string }) => {
     if (!profileId) {

@@ -1,11 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ApiType,
-  DotYouClient,
-  fetchIdentityIFollow,
-  Unfollow,
-  UnfollowRequest,
-} from '@youfoundation/js-lib';
+import { fetchIdentityIFollow, Unfollow, UnfollowRequest } from '@youfoundation/js-lib';
 
 import useAuth from '../auth/useAuth';
 
@@ -14,8 +8,7 @@ type useIdentityIFollowProps = {
 };
 
 const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
   const fetchBlogData = async ({ odinId }: { odinId: string }) => {

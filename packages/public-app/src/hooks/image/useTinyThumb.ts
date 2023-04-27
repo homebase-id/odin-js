@@ -11,14 +11,12 @@ import useAuth from '../auth/useAuth';
 
 const useTinyThumb = (odinId?: string, imageFileId?: string, imageDrive?: TargetDrive) => {
   const localHost = window.location.hostname;
-  const { getSharedSecret, getApiType } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchImageData = async (odinId: string, imageFileId?: string, imageDrive?: TargetDrive) => {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive) {
       return;
     }
-
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
 
     if (odinId !== localHost) {
       return await getDecryptedThumbnailMetaOverTransit(

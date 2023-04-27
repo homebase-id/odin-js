@@ -52,10 +52,9 @@ const chatDrive: TargetDrive = {
 };
 
 const UiDemo = () => {
-  const { getSharedSecret } = useAuth();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [statusText, setStatusText] = useState('n/a');
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   function establishNotificationSocket() {
     const identity = window.location.hostname;

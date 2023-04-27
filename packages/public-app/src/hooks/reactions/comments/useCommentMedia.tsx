@@ -16,8 +16,7 @@ const useCommentMedia = ({
   targetDrive?: TargetDrive;
   fileId?: string;
 }) => {
-  const { getApiType, getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({
     odinId,

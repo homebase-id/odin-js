@@ -16,8 +16,7 @@ export interface ProfileDefinitionVm extends ProfileDefinition {
 
 const useProfiles = () => {
   const queryClient = useQueryClient();
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchAll = async () => {
     const definitions = (await getProfileDefinitions(dotYouClient))

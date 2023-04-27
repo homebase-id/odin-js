@@ -17,10 +17,9 @@ type useBlogPostsProps = {
 };
 
 const useBlogPosts = ({ channelId, postType, pageSize = 10 }: useBlogPostsProps) => {
-  const { getSharedSecret, getApiType } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchBlogData = async ({ channelId }: { channelId?: string }) => {
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
     const fileData = await GetFile(dotYouClient, 'blogs.json');
 
     let foundBlogPosts: PostFile<PostContent>[] = [];

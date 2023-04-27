@@ -11,8 +11,7 @@ import useChannels from '../blog/useChannels';
 import useNotificationSubscriber from '../transitProcessor/useNotificationSubscriber';
 
 const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
   const { data: ownChannels, isFetched: channelsFetched } = useChannels();
 
   // Add invalidation of social feed when a new file is added to the feed drive (this enforces that only remote updates trigger a refresh)

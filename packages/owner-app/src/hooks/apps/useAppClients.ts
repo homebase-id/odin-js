@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib';
 import {
   GetAppClients,
   RegisterAppClient,
@@ -12,8 +11,7 @@ import useAuth from '../auth/useAuth';
 
 const useAppClients = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ appId }: { appId: string }) => {
     return (await GetAppClients(dotYouClient)).filter((client) => client.appId === appId);

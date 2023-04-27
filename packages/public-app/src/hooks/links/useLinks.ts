@@ -11,14 +11,13 @@ import {
 import useAuth from '../auth/useAuth';
 
 const useLinks = () => {
-  const { getSharedSecret, getApiType, isAuthenticated } = useAuth();
+  const { isAuthenticated, getDotYouClient } = useAuth();
   const queryClient = useQueryClient();
+  const dotYouClient = getDotYouClient();
 
   const fetchData: () => Promise<
     { text: string; target: string; id: string }[] | undefined
   > = async () => {
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
-
     const fetchStaticData = async () => {
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
       if (fileData.has('link')) {

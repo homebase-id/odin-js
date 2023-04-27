@@ -22,9 +22,8 @@ const useFiles = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
-  const { getSharedSecret } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
 
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
   const fetchFiles = async ({
     targetDrive,
     pageParam,

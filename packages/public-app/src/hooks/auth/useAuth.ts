@@ -1,4 +1,5 @@
 import { ApiType, DotYouClient, base64ToUint8Array } from '@youfoundation/js-lib';
+import { OwnerClient } from '@youfoundation/common-app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useVerifyToken from './useVerifyToken';
@@ -108,10 +109,14 @@ const useAuth = () => {
   };
 
   const getDotYouClient = () => {
-    return new DotYouClient({
-      sharedSecret: getSharedSecret(),
-      api: getApiType(),
-    });
+    const apiType = getApiType();
+    if (apiType === ApiType.Owner)
+      return new OwnerClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+    else
+      return new DotYouClient({
+        api: apiType,
+        sharedSecret: getSharedSecret(),
+      });
   };
 
   useEffect(() => {

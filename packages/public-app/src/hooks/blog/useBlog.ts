@@ -12,13 +12,12 @@ type useBlogProps = {
 };
 
 const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {}) => {
-  const { getSharedSecret, getApiType } = useAuth();
   const { data: channel, isFetched: channelFetched } = useChannel({
     channelSlug,
     channelId,
   }).fetch;
 
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
   const getCachedBlogs = (channelId?: string) => {

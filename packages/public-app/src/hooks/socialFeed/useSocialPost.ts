@@ -9,8 +9,7 @@ interface useSocialPostProps {
 }
 
 const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ odinId, channelId, postId }: useSocialPostProps) => {
     if (!odinId || !channelId || !postId) {

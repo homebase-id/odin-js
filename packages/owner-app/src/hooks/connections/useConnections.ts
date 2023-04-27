@@ -18,8 +18,7 @@ export const usePendingConnections = ({
   pageSize: pendingPageSize,
   pageNumber: pendingPage,
 }: useConnectionsProps) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchPendingConnections = async (
     { pageSize, pageNumber }: PagingOptions = { pageSize: 10, pageNumber: 1 }
@@ -48,8 +47,7 @@ export const useSentConnections = ({
   pageSize: sentPageSize,
   pageNumber: sentPage,
 }: useConnectionsProps) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchSentRequests = async (
     { pageSize, pageNumber }: PagingOptions = { pageSize: 10, pageNumber: 1 }

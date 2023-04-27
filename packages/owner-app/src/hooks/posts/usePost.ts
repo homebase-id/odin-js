@@ -1,9 +1,7 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
-  ApiType,
   deleteFile,
-  DotYouClient,
   ImageUploadResult,
   uploadImage,
   PostFile,
@@ -19,10 +17,9 @@ import useAuth from '../auth/useAuth';
 import useStaticFiles from '../staticFiles/useStaticFiles';
 
 const usePost = () => {
-  const { getSharedSecret } = useAuth();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const savePost = async ({
     blogFile,

@@ -1,7 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import {
-  ApiType,
-  DotYouClient,
   publishProfile,
   publishBlog,
   publishProfileImage,
@@ -11,9 +9,7 @@ import {
 import useAuth from '../auth/useAuth';
 
 const useStaticFiles = () => {
-  const { getSharedSecret } = useAuth();
-
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const publishData = async () => {
     console.debug('[STARTED] Static file publish');

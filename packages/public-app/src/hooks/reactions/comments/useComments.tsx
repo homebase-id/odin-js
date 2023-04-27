@@ -10,8 +10,7 @@ export interface UseCommentsVal {
 }
 
 const useComments = ({ context }: { context: ReactionContext }) => {
-  const { getApiType, getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
 

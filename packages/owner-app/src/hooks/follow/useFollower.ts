@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient, fetchFollower } from '@youfoundation/js-lib';
+import { fetchFollower } from '@youfoundation/js-lib';
 
 import useAuth from '../auth/useAuth';
 
@@ -8,8 +8,7 @@ type useFollowerProps = {
 };
 
 const useFollower = ({ odinId }: useFollowerProps) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchFollowDetails = async ({ odinId }: { odinId: string }) => {
     const response = await fetchFollower(dotYouClient, odinId);

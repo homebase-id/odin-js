@@ -20,8 +20,7 @@ const defaultDrive: TargetDrive = {
 };
 
 const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
 

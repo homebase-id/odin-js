@@ -1,8 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../auth/useAuth';
 import {
-  ApiType,
-  DotYouClient,
   getConnectionInfo,
   disconnectFromContact,
   getPendingRequest,
@@ -21,8 +19,7 @@ import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvide
 const useConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
 
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchSingle = async ({ odinId }: { odinId: string }) => {
     if (!odinId) {

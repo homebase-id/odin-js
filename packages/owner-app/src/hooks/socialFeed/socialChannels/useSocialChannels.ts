@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient, getChannelsOverTransit } from '@youfoundation/js-lib';
+import { getChannelsOverTransit } from '@youfoundation/js-lib';
 import useAuth from '../../auth/useAuth';
 
 interface useSocialChannelsProps {
@@ -7,8 +7,7 @@ interface useSocialChannelsProps {
 }
 
 const useSocialChannels = ({ odinId }: useSocialChannelsProps) => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ odinId }: useSocialChannelsProps) => {
     if (!odinId) {

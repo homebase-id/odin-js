@@ -8,7 +8,7 @@ export enum ApiType {
   YouAuth,
 }
 
-export interface ProviderOptions {
+export interface BaseProviderOptions {
   api: ApiType;
   sharedSecret?: Uint8Array;
   root?: string;
@@ -17,10 +17,10 @@ export interface ProviderOptions {
 
 const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
 
-export class DotYouClient {
-  private _options: ProviderOptions;
+export class BaseDotYouClient {
+  private _options: BaseProviderOptions;
 
-  constructor(options: ProviderOptions) {
+  constructor(options: BaseProviderOptions) {
     this._options = options;
   }
 
@@ -134,5 +134,15 @@ export class DotYouClient {
 
   handleErrorResponse(error: AxiosError): undefined {
     throw error;
+  }
+}
+
+export interface ProviderOptions extends BaseProviderOptions {
+  api: ApiType.App | ApiType.YouAuth;
+}
+
+export class DotYouClient extends BaseDotYouClient {
+  constructor(options: ProviderOptions) {
+    super({ ...options });
   }
 }

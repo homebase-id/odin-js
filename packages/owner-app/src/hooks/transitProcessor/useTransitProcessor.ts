@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
-  ApiType,
   BlogConfig,
-  DotYouClient,
   Notify,
   processInbox,
   TypedConnectionNotification,
@@ -15,9 +13,8 @@ const MINUTE_IN_MS = 60000;
 
 // Process the inbox on startup
 const useInboxProcessor = (isEnabled?: boolean) => {
-  const { getSharedSecret } = useAuth();
   const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelsDrives();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchData = async () => {
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 5);

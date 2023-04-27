@@ -10,8 +10,7 @@ import useAuth from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 
 const useHomeAttributes = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchHome = async () => {
     const foundHomettributes = (

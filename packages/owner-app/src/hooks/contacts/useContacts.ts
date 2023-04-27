@@ -9,8 +9,7 @@ import { parseContact } from './useContact';
 const pageSize = 10;
 
 const useContacts = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async (cursorState: string): Promise<CursoredResult<RawContact[]>> => {
     const data = await await getContacts(dotYouClient, cursorState, pageSize);

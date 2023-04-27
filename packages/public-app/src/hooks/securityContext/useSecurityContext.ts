@@ -7,8 +7,7 @@ import {
 import useAuth from '../auth/useAuth';
 
 const useSecurityContext = (odinId?: string) => {
-  const { getSharedSecret, getApiType } = useAuth();
-  const dotYouClient = new DotYouClient({ sharedSecret: getSharedSecret(), api: getApiType() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async (odinId?: string) => {
     if (!odinId) return await getSecurityContext(dotYouClient);

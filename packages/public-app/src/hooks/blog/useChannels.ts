@@ -21,12 +21,11 @@ export const parseChannelTemplate = (templateId: number | undefined) => {
 };
 
 const useChannels = () => {
-  const { getSharedSecret, getApiType, isAuthenticated, isOwner } = useAuth();
+  const { getDotYouClient, isAuthenticated, isOwner } = useAuth();
+  const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
 
   const fetchChannelData = async () => {
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
-
     const fetchStaticData = async () => {
       const fileData = await GetFile(dotYouClient, 'blogs.json');
       if (fileData) {

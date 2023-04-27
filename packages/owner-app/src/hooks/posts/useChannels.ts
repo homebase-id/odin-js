@@ -1,10 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  ChannelDefinition,
-  ChannelTemplate,
-  DotYouClient,
-  getChannelDefinitions,
-} from '@youfoundation/js-lib';
+import { ChannelDefinition, ChannelTemplate, getChannelDefinitions } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
@@ -19,11 +14,8 @@ export const parseChannelTemplate = (templateId: number | undefined) => {
 };
 
 const useChannels = () => {
-  const { getSharedSecret, getApiType } = useAuth();
-
+  const dotYouClient = useAuth().getDotYouClient();
   const fetchChannelData = async () => {
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
-
     return (await getChannelDefinitions(dotYouClient))?.map((channel) => {
       return {
         ...channel,

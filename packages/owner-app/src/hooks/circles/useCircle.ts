@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  DotYouClient,
-  ApiType,
   getCircle,
   updateCircleDefinition,
   createCircleDefinition,
@@ -19,8 +17,7 @@ import useAuth from '../auth/useAuth';
 const useCircle = ({ circleId }: { circleId?: string }) => {
   const queryClient = useQueryClient();
 
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ circleId }: { circleId: string }) => {
     if (!circleId) {

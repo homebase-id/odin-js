@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib';
 import { GetAppRegistrations } from '../../provider/app/AppManagementProvider';
 import useAuth from '../auth/useAuth';
 
 const useApps = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchRegistered = async () => {
     const apps = await GetAppRegistrations(dotYouClient);

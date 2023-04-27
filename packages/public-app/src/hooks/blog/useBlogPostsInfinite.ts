@@ -28,7 +28,7 @@ const useBlogPostsInfinite = ({
   postType,
   enabled = true,
 }: useBlogPostsInfiniteProps) => {
-  const { getSharedSecret, getApiType } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchBlogData = async ({
     channelId,
@@ -37,8 +37,6 @@ const useBlogPostsInfinite = ({
     channelId?: string;
     pageParam: string | Record<string, string> | undefined;
   }): Promise<useBlogPostsInfiniteReturn> => {
-    const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
-
     const response = channelId
       ? await getPosts(
           dotYouClient,

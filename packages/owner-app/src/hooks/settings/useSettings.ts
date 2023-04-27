@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib';
 import {
   getFlags,
   getSettings,
@@ -10,8 +9,7 @@ import {
 import useAuth from '../auth/useAuth';
 
 const useSettings = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
   const fetchFlags = async () => {

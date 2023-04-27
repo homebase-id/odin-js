@@ -55,8 +55,7 @@ character = character === 'samwisegamgee.me' ? 'samwise.digital' : character;
 const realmData = lotrRealm[character as keyof typeof lotrRealm];
 
 const DemoData = () => {
-  const { getSharedSecret } = useAuth();
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   return (
     <section>

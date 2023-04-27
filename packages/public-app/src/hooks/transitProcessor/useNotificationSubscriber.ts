@@ -14,9 +14,8 @@ const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[]
 ) => {
-  const { getSharedSecret } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
   const isConnected = useRef<boolean>(false);
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
 
   const localHandler = (notification: TypedConnectionNotification) => {
     if (types?.length >= 1 && !types.includes(notification.notificationType)) return;

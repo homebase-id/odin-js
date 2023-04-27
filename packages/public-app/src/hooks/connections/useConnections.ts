@@ -4,10 +4,7 @@ import { DotYouClient, getConnections } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 
 const useConnections = ({ pageSize, cursor }: { pageSize: number; cursor?: number }) => {
-  const { getSharedSecret, getApiType } = useAuth();
-  const sharedSecret = getSharedSecret();
-
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: sharedSecret });
+  const dotYouClient = useAuth().getDotYouClient();
   const fetchConnections = async ({ pageSize, cursor }: { pageSize: number; cursor?: number }) => {
     try {
       return await getConnections(dotYouClient, {

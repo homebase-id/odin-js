@@ -19,10 +19,9 @@ type useChannelsProps = {
 };
 
 const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
-  const { getSharedSecret, getApiType } = useAuth();
+  const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
-  const dotYouClient = new DotYouClient({ api: getApiType(), sharedSecret: getSharedSecret() });
 
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) {

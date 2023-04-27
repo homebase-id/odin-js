@@ -31,10 +31,9 @@ const chatDrive: TargetDrive = {
 };
 
 const SocketDemo = () => {
-  const { getSharedSecret } = useAuth();
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [statusText, setStatusText] = useState('n/a');
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const notificationHandler = useRef((notification: TypedConnectionNotification) => {
     console.log({ notification });

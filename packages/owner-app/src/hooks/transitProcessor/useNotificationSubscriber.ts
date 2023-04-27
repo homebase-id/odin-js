@@ -1,8 +1,6 @@
 import {
-  ApiType,
   BlogConfig,
   Disconnect,
-  DotYouClient,
   NotificationType,
   Subscribe,
   TypedConnectionNotification,
@@ -15,9 +13,8 @@ const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[]
 ) => {
-  const { getSharedSecret } = useAuth();
   const isConnected = useRef<boolean>(false);
-  const dotYouClient = new DotYouClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
+  const dotYouClient = useAuth().getDotYouClient();
 
   const localHandler = (notification: TypedConnectionNotification) => {
     if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
