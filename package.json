@@ -8,7 +8,13 @@
     "packages/ui-lib",
     "packages/*"
   ],
-  "scripts": {},
+  "scripts": {
+    "clean": "rm -rf ./dist/* 2> /dev/null; rm -rf ./build/* 2> /dev/null",
+    "build": "npm install && npm run build -workspaces",
+    "clean-build": "npm run clean; npm run build",
+    "owner-app": "npm install && npm start -w ./packages/owner-app",
+    "public-app": "npm install && npm start -w ./packages/public-app"
+  },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
   },
