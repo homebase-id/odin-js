@@ -17,7 +17,7 @@ import ImageDialog from '../ImageDialog/ImageDialog';
 import { t } from '../../../helpers/i18n/dictionary';
 import Image from '../../Image/Image';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import useImage from '../../../hooks/image/useImage';
 
 export interface TImageElement extends TElement {

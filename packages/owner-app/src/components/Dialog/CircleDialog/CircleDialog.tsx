@@ -4,7 +4,7 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useCircle from '../../../hooks/circles/useCircle';
 import usePortal from '../../../hooks/portal/usePortal';
 import { circlePermissionLevels } from '../../../provider/permission/permissionLevels';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import Input from '../../Form/Input';
 import Label from '../../Form/Label';

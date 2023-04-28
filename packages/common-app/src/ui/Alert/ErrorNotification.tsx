@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { t } from '../../../../helpers/i18n/dictionary';
-import Alert from '../Alert/Alert';
-import { Times } from '@youfoundation/common-app';
+import { Alert } from './Alert';
+import { Times } from '../icons/Times/Times';
+const t = (key: string) => key;
 
 const getKnownErrorMessages = (errorCode: number): string | undefined => {
   if (errorCode) {
@@ -22,6 +22,8 @@ const getKnownErrorMessages = (errorCode: number): string | undefined => {
         return t('CannotDeleteCircleWithMembers');
       case 3005:
         return t('IdentityAlreadyMemberOfCircle');
+      case 3006:
+        return t('NotAConnectedIdentity');
       case 4001:
         return t('CannotAllowAnonymousReadsOnOwnerOnlyDrive');
       case 4002:
@@ -87,7 +89,7 @@ const getKnownErrorMessages = (errorCode: number): string | undefined => {
   return;
 };
 
-const ErrorNotification = ({ error }: { error: unknown }) => {
+export const ErrorNotification = ({ error }: { error: unknown }) => {
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
@@ -124,5 +126,3 @@ const ErrorNotification = ({ error }: { error: unknown }) => {
     </div>
   );
 };
-
-export default ErrorNotification;

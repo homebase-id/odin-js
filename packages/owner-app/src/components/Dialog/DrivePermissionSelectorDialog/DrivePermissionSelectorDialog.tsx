@@ -4,7 +4,7 @@ import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';
 import { DriveGrant } from '@youfoundation/js-lib';

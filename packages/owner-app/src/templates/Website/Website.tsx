@@ -2,7 +2,7 @@ import { HomePageAttributes, HomePageConfig, toGuidId } from '@youfoundation/js-
 import { t } from '../../helpers/i18n/dictionary';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import useStaticFiles from '../../hooks/staticFiles/useStaticFiles';
-import ErrorNotification from '../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { Cloud } from '@youfoundation/common-app';

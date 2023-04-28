@@ -5,8 +5,8 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useDrive from '../../../hooks/drives/useDrive';
 import useExport, { importable, isImportable } from '../../../hooks/drives/useExport';
 import usePortal from '../../../hooks/portal/usePortal';
-import Alert from '../../ui/Alerts/Alert/Alert';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { Alert } from '@youfoundation/common-app';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
 

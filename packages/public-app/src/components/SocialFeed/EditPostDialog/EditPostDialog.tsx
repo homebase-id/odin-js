@@ -12,7 +12,7 @@ import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import usePost from '../../../hooks/socialFeed/post/usePost';
 import Image from '../../Image/Image';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import Button from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';

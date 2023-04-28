@@ -1,6 +1,6 @@
-import { Exclamation, Question } from '@youfoundation/common-app';
 import { ReactNode } from 'react';
-
+import { Exclamation } from '../icons/Exclamation/Exclamation';
+import { Question } from '../icons/Question/Question';
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';
   title?: ReactNode;
@@ -9,7 +9,7 @@ interface AlertProps {
   isCompact?: boolean;
 }
 
-const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
+export const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
   const bgClass =
     type === 'critical'
       ? 'bg-red-50 dark:bg-red-900 border-red-100 dark:border-red-800 dark:text-white'
@@ -23,7 +23,7 @@ const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
         className ?? ''
       }`}
     >
-      <div className={`flex w-full flex-row flex-wrap items-center sm:flex-nowrap`}>
+      <div className={`flex w-full flex-row flex-wrap sm:flex-nowrap`}>
         {type === 'critical' ? (
           <div
             className={`mb-2 flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300 ${
@@ -57,5 +57,3 @@ const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
     </section>
   );
 };
-
-export default Alert;

@@ -6,7 +6,7 @@ import { Exclamation } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import ImageDialog from '../Dialog/ImageDialog/ImageDialog';
-import ErrorNotification from '../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../ui/Buttons/ActionButton';
 
 interface ImageSelectorProps

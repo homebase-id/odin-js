@@ -2,7 +2,7 @@ import { ReactNode, useState } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
 import useConnection from '../../../hooks/connections/useConnection';
 import useSettings from '../../../hooks/settings/useSettings';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';

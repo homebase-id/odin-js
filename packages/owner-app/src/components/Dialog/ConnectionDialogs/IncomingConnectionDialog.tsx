@@ -5,7 +5,7 @@ import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import usePortal from '../../../hooks/portal/usePortal';
 import useSettings from '../../../hooks/settings/useSettings';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PendingConnectionImage from '../../Connection/PendingConnectionImage/PendingConnectionImage';

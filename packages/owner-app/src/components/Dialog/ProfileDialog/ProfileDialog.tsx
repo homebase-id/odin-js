@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import useProfiles from '../../../hooks/profiles/useProfiles';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import Input from '../../Form/Input';
 import Label from '../../Form/Label';

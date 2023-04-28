@@ -8,7 +8,7 @@ import CheckboxToggle from '../../Form/CheckboxToggle';
 import AppPermissionView from '../../PermissionViews/AppPermissionView/AppPermissionView';
 import { CircleDefinition, stringGuidsEqual } from '@youfoundation/js-lib';
 import useApp from '../../../hooks/apps/useApp';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 
 const CircleAppInteractionDialog = ({

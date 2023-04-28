@@ -2,7 +2,7 @@ import { ProfileSection } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import useProfileSections from '../../hooks/profiles/useProfileSections';
-import ErrorNotification from '../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../ui/Buttons/ActionButton';
 import Input from '../Form/Input';
 import Label from '../Form/Label';

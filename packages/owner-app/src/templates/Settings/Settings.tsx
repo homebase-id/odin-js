@@ -1,6 +1,6 @@
 import { t } from '../../helpers/i18n/dictionary';
 import useSettings from '../../hooks/settings/useSettings';
-import ErrorNotification from '../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import Checkbox from '../../components/Form/Checkbox';
 import Label from '../../components/Form/Label';
 import { Cog } from '@youfoundation/common-app';

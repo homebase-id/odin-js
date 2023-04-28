@@ -10,7 +10,7 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { useSearchParams } from 'react-router-dom';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from '../../hooks/configure/useInit';
-import Alert from '../../components/ui/Alerts/Alert/Alert';
+import { Alert } from '@youfoundation/common-app';
 
 const FirstRun = () => {
   const [password, setPassword] = useState('');

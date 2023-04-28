@@ -5,7 +5,7 @@ import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
 import { DialogWrapper } from '@youfoundation/common-app';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { PermissionSetGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
 import PermissionSelector from '../../Form/PermissionSelector';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';

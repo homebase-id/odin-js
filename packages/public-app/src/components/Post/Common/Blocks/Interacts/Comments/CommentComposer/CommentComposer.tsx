@@ -8,7 +8,7 @@ import useReaction from '../../../../../../../hooks/reactions/useReaction';
 import { FileOverview } from '../../../../../../Form/Files/FileOverview';
 import { FileSelector } from '../../../../../../Form/Files/FileSelector';
 import VolatileInput from '../../../../../../Form/VolatileInput';
-import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 
 import { Image } from '@youfoundation/common-app';
 import AuthorImage from '../../../Author/Image';

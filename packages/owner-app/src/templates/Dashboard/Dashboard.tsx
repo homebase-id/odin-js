@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import Alert from '../../components/ui/Alerts/Alert/Alert';
+import { Alert } from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import AppMembershipView from '../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import CirclePermissionView from '../../components/PermissionViews/CirclePermissionView/CirclePermissionView';

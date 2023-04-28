@@ -1,6 +1,6 @@
 import { t } from '../../../helpers/i18n/dictionary';
 import useConnection from '../../../hooks/connections/useConnection';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PersonCard from '../PersonCard/PersonCard';

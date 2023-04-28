@@ -14,8 +14,8 @@ const ContactDetails = () => {
 // import useContact from '../../../../hooks/contacts/useContact';
 // import useImage from '../../../../hooks/media/useImage';
 // import { ContactConfig } from '../../../../provider/contact/ContactTypes';
-// import Alert from '../../../Alerts/Alert/Alert';
-// import ErrorNotification from '../../../Alerts/ErrorNotification/ErrorNotification';
+// import { Alert } from '@youfoundation/common-app';
+// import { ErrorNotification } from '@youfoundation/common-app';
 // import ActionButton from '../../../Buttons/ActionButton';
 // import FallbackImg from '../../../FallbackImg/FallbackImg';
 // import { k } from '@youfoundation/common-app';;

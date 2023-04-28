@@ -5,7 +5,7 @@ import { t } from '../../helpers/i18n/dictionary';
 import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import useInit from '../../hooks/configure/useInit';
 import useIsConfigured from '../../hooks/configure/useIsConfigured';
-import ErrorNotification from '../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { Loader } from '@youfoundation/common-app';
 import fallbackImage from './fallbackImage';
 import Circles from './Pages/Circles';

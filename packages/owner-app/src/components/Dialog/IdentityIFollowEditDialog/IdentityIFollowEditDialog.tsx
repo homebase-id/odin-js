@@ -6,7 +6,7 @@ import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
 import useIdentityIFollow from '../../../hooks/follow/useIdentityIFollow';
 import useSocialChannels from '../../../hooks/socialFeed/socialChannels/useSocialChannels';
-import Alert from '../../ui/Alerts/Alert/Alert';
+import { Alert } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';

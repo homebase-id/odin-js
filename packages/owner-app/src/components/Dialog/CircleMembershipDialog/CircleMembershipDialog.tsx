@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import useCircle from '../../../hooks/circles/useCircle';
 import usePortal from '../../../hooks/portal/usePortal';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
 import { DialogWrapper } from '@youfoundation/common-app';

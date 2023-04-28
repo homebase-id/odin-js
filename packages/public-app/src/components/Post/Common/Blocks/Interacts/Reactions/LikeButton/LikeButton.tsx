@@ -5,7 +5,7 @@ import useLongPress from '../../../../../../../hooks/longPress/useLongPress';
 import { Heart } from '@youfoundation/common-app';
 import ReactionsBar from '../ReactionsBar/ReactionsBar';
 import { ReactionContext } from '@youfoundation/js-lib';
-import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { CanReactDetails } from '../../../../../../../hooks/reactions/useCanReact';
 
 const LikeButton = ({

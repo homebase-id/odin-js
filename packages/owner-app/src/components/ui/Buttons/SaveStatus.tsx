@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
 import { format } from '../../../helpers/timeago';
-import Alert from '../Alerts/Alert/Alert';
+import { Alert } from '@youfoundation/common-app';
 
 const SaveStatus = ({
   className,

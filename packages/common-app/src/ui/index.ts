@@ -1,3 +1,5 @@
+export * from './Alert/Alert';
+export * from './Alert/ErrorNotification';
 export * from './Dialog/DialogWrapper';
 export * from './DomainHighlighter/DomainHighlighter';
 export * from './LoadingParagraph/LoadingParagraph';

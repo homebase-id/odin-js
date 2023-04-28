@@ -26,7 +26,7 @@ import { Times } from '@youfoundation/common-app';
 import useCommentMedia from '../../../../../../../hooks/reactions/comments/useCommentMedia';
 import { ellipsisAtMaxChar } from '../../../../../../../helpers/common';
 import useComments from '../../../../../../../hooks/reactions/comments/useComments';
-import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 
 export interface CommentProps {
   context: ReactionContext;

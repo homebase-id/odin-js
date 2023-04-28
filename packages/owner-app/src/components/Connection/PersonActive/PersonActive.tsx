@@ -1,7 +1,7 @@
 import { DotYouProfile } from '@youfoundation/js-lib';
 import { t } from '../../../helpers/i18n/dictionary';
 import useConnection from '../../../hooks/connections/useConnection';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import ConnectionCard from '../ConnectionCard/ConnectionCard';
 

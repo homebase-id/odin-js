@@ -7,7 +7,7 @@ import useChannel from '../../../../../hooks/blog/useChannel';
 import { ChannelDefinitionVm } from '../../../../../hooks/blog/useChannels';
 import usePost from '../../../../../hooks/socialFeed/post/usePost';
 import EditPostDialog from '../../../../SocialFeed/EditPostDialog/EditPostDialog';
-import ErrorNotification from '../../../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionGroup, { ActionGroupOptionProps } from '../../../../ui/Buttons/ActionGroup';
 import { Pencil } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';

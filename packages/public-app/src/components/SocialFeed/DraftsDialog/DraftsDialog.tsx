@@ -9,7 +9,7 @@ import PostMeta from '../../Post/Common/Blocks/Meta/Meta';
 import { Article as ArticleIcon, DialogWrapper, LoadingParagraph } from '@youfoundation/common-app';
 import FakeAnchor from '../../ui/Buttons/FakeAnchor';
 import { PostContent, PostFile } from '@youfoundation/js-lib';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 
 const DraftsDialog = ({ isOpen, onCancel }: { isOpen: boolean; onCancel: () => void }) => {
   const target = usePortal('modal-container');

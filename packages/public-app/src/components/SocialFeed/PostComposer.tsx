@@ -9,7 +9,7 @@ import { useRef, useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import useChannels from '../../hooks/blog/useChannels';
 import ChannelsDialog from '../Dialog/ChannelsDialog/ChannelsDialog';
-import ErrorNotification from '../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionLink from '../ui/Buttons/ActionLink';
 import Button from '../ui/Buttons/ActionButton';
 import { Article } from '@youfoundation/common-app';
@@ -21,7 +21,7 @@ import { Lock } from '@youfoundation/common-app';
 import { OpenLock } from '@youfoundation/common-app';
 import ReactAccessEditorDialog from '../Dialog/ReactAccessEditorDialog/ReactAccessEditorDialog';
 import VolatileInput from '../Form/VolatileInput';
-import Alert from '../ui/Alerts/Alert/Alert';
+import { Alert } from '@youfoundation/common-app';
 import usePostComposer, { ReactAccess } from '../../hooks/socialFeed/post/usePostComposer';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {

@@ -6,7 +6,7 @@ import useCircle from '../../../hooks/circles/useCircle';
 import useCircles from '../../../hooks/circles/useCircles';
 import usePortal from '../../../hooks/portal/usePortal';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
 import CirclePermissionView from '../../PermissionViews/CirclePermissionView/CirclePermissionView';

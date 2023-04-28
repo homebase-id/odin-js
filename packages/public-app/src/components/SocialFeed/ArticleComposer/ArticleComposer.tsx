@@ -17,7 +17,7 @@ import Button from '../../ui/Buttons/ActionButton';
 import { ErrorBoundary } from '../../ui/Layout/ErrorBoundary/ErrorBoundary';
 import { ChannelSelector } from '../PostComposer';
 import { convertTextToSlug } from '../../../helpers/common';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
 import DraftsDialog from '../DraftsDialog/DraftsDialog';
 import ImageSelector from '../../Form/ImageSelector';

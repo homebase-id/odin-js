@@ -20,7 +20,7 @@ import Submenu from '../../../components/SubMenu/SubMenu';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import Label from '../../../components/Form/Label';
-import ErrorNotification from '../../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionGroup from '../../../components/ui/Buttons/ActionGroup';
 import { Trash } from '@youfoundation/common-app';
 

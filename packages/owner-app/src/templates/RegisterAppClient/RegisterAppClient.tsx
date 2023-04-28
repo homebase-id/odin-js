@@ -12,14 +12,14 @@ import DrivePermissionView from '../../components/PermissionViews/DrivePermissio
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import ErrorNotification from '../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { t } from '../../helpers/i18n/dictionary';
 import CircleSelector from '../../components/Form/CircleSelector';
 import useAppClients from '../../hooks/apps/useAppClients';
 import { PermissionSet } from '@youfoundation/js-lib';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
-import Alert from '../../components/ui/Alerts/Alert/Alert';
+import { Alert } from '@youfoundation/common-app';
 import useDrives from '../../hooks/drives/useDrives';
 import { Times } from '@youfoundation/common-app';
 import Input from '../../components/Form/Input';

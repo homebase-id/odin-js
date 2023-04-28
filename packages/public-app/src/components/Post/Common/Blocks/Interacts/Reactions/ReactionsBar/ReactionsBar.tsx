@@ -4,7 +4,7 @@ import { t } from '../../../../../../../helpers/i18n/dictionary';
 import useAuth from '../../../../../../../hooks/auth/useAuth';
 import useMyEmojiReactions from '../../../../../../../hooks/reactions/emojis/useMyEmojiReactions';
 import useReaction from '../../../../../../../hooks/reactions/useReaction';
-import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import { Plus } from '@youfoundation/common-app';
 import EmojiPicker from '../../EmojiPicker/EmojiPicker';
 import { CanReactDetails } from '../../../../../../../hooks/reactions/useCanReact';

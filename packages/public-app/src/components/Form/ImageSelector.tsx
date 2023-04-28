@@ -5,7 +5,7 @@ import ConfirmDialog from '../Dialog/ConfirmDialog/ConfirmDialog';
 import { Exclamation } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
-import ErrorNotification from '../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ImageDialog from '../RichTextEditor/ImageDialog/ImageDialog';
 import useImage from '../../hooks/image/useImage';
 

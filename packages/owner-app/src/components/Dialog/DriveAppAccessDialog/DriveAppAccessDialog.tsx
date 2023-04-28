@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
-import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
 import { DialogWrapper } from '@youfoundation/common-app';

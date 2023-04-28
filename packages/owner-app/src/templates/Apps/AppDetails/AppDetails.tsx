@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import useApp from '../../../hooks/apps/useApp';
-import Alert from '../../../components/ui/Alerts/Alert/Alert';
-import ErrorNotification from '../../../components/ui/Alerts/ErrorNotification/ErrorNotification';
+import { Alert } from '@youfoundation/common-app';
+import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { Grid } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
