@@ -1,15 +1,16 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
-import { cbcDecrypt, cbcEncrypt, streamEncryptWithCbc } from '../helpers/AesEncrypt';
-import {
-  base64ToUint8Array,
-  byteArrayToString,
-  jsonStringify64,
-  mergeByteArrays,
-  splitSharedSecretEncryptedKeyHeader,
-} from '../helpers/DataUtil';
+
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './DriveTypes';
 import { streamToByteArray } from './UploadHelpers';
+import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
+import {
+  jsonStringify64,
+  base64ToUint8Array,
+  byteArrayToString,
+  splitSharedSecretEncryptedKeyHeader,
+  mergeByteArrays,
+} from '../../helpers/DataUtil';
 
 /// Encryption
 export const encryptKeyHeader = async (

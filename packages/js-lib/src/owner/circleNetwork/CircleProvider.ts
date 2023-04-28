@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getNewId } from '../../core/helpers/DataUtil';
+import { getNewId } from '../../helpers/helpers';
 import { CircleDefinition } from './CircleDataTypes';
 
 //Handles management of Circles

@@ -1,4 +1,4 @@
-import { toGuidId } from '../../core/helpers/DataUtil';
+import { toGuidId } from '../../helpers/helpers';
 
 export class ProfileConfig {
   static readonly ProfileDriveType: string = '597241530e3ef24b28b9a75ec3a5c45c'; //toGuidId('profile_drive_type');

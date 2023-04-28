@@ -52,9 +52,20 @@ export interface ImageMetadata {
   };
 }
 
-export interface VideoMetadata {
+export interface BaseVideoMetadata {
   mimeType: string;
   fileSize: number;
+
+  isSegmented: boolean;
+}
+
+export interface PlainVideoMetadata extends BaseVideoMetadata {
+  isSegmented: false;
+}
+
+export interface SegmentedVideoMetadata extends BaseVideoMetadata {
+  isSegmented: true;
+  codec: string;
   duration: number;
   segmentMap: { offset: number; samples: number }[];
 }

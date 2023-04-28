@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { DotYouClient } from '../../core/DotYouClient';
 import { queryBatch, getPayload } from '../../core/DriveData/DriveProvider';
 import {
   EncryptedKeyHeader,
@@ -11,7 +11,6 @@ import {
   getDrivesByTypeOverTransit,
   queryBatchOverTransit,
 } from './TransitProvider';
-import { CursoredResult } from '../../core/helpers/Types';
 import {
   getChannelDrive,
   GetTargetDriveFromChannelId,
@@ -20,6 +19,7 @@ import { getRecentPosts } from '../../public/posts/PostProvider';
 import { parseReactionPreview } from '../../public/posts/PostReactionProvider';
 import { ChannelDefinition, PostContent, PostFile, BlogConfig } from '../../public/posts/PostTypes';
 import { decryptKeyHeader, decryptJsonContent } from '../../core/DriveData/SecurityHelpers';
+import { CursoredResult } from '../../core/DriveData/DriveQueryTypes';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 

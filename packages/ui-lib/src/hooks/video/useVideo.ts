@@ -5,8 +5,11 @@ import {
   getDecryptedVideoChunkOverTransit,
   getDecryptedVideoMetadata,
   getDecryptedVideoMetadataOverTransit,
+  getDecryptedVideoUrl,
+  getDecryptedVideoUrlOverTransit,
+  PlainVideoMetadata,
+  SegmentedVideoMetadata,
   TargetDrive,
-  VideoMetadata,
 } from '@youfoundation/js-lib';
 
 const useVideo = (
@@ -21,7 +24,7 @@ const useVideo = (
     odinId: string,
     videoFileId: string | undefined,
     videoDrive?: TargetDrive
-  ): Promise<VideoMetadata | null> => {
+  ): Promise<PlainVideoMetadata | SegmentedVideoMetadata | null> => {
     if (videoFileId === undefined || videoFileId === '' || !videoDrive) {
       return null;
     }
@@ -40,9 +43,8 @@ const useVideo = (
       ['video', odinId || localHost, videoDrive?.alias, videoFileId],
       () => fetchVideoData(odinId || localHost, videoFileId, videoDrive),
       {
-        refetchOnMount: true,
-        refetchOnWindowFocus: true,
-        cacheTime: 0,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
         enabled: !!videoFileId && videoFileId !== '',
       }
     ),
@@ -56,6 +58,45 @@ const useVideo = (
         ? getDecryptedVideoChunkOverTransit(dotYouClient, odinId, ...params)
         : getDecryptedVideoChunk(dotYouClient, ...params);
     },
+  };
+};
+
+export const useVideoUrl = (
+  dotYouClient: DotYouClient,
+  odinId?: string,
+  videoFileId?: string | undefined,
+  videoDrive?: TargetDrive
+) => {
+  const localHost = window.location.hostname;
+
+  const fetchVideoData = async (
+    odinId: string,
+    videoFileId: string | undefined,
+    videoDrive?: TargetDrive
+  ): Promise<string | null> => {
+    if (videoFileId === undefined || videoFileId === '' || !videoDrive) {
+      return null;
+    }
+
+    const fetchMetaPromise = async () => {
+      return odinId !== localHost
+        ? await getDecryptedVideoUrlOverTransit(dotYouClient, odinId, videoDrive, videoFileId)
+        : await getDecryptedVideoUrl(dotYouClient, videoDrive, videoFileId);
+    };
+
+    return await fetchMetaPromise();
+  };
+
+  return {
+    fetch: useQuery(
+      ['video-url', odinId || localHost, videoDrive?.alias, videoFileId],
+      () => fetchVideoData(odinId || localHost, videoFileId, videoDrive),
+      {
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        enabled: !!videoFileId && videoFileId !== '',
+      }
+    ),
   };
 };
 

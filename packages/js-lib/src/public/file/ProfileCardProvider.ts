@@ -93,7 +93,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
     if (imageData) {
       await publishProfileImageFile(
         dotYouClient,
-        new Uint8Array(imageData.content),
+        new Uint8Array(imageData.bytes),
         imageData.contentType
       );
     }

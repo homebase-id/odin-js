@@ -31,6 +31,9 @@
   "dependencies": {
     "guid-typescript": "^1.0.9"
   },
+  "optionalDependencies": {
+    "mp4box": "^0.5.2"
+  },
   "devDependencies": {},
   "peerDependencies": {
     "axios": "^1.2.0"

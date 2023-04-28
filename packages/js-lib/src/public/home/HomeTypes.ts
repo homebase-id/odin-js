@@ -1,5 +1,5 @@
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
-import { toGuidId } from '../../core/helpers/DataUtil';
+import { toGuidId } from '../../helpers/helpers';
 import { ProfileConfig } from '../../profile/ProfileData/ProfileConfig';
 
 export class HomePageConfig {

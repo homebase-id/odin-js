@@ -18,13 +18,6 @@ import {
   uploadFile,
 } from '../DriveData/DriveProvider';
 import {
-  getNewId,
-  base64ToUint8Array,
-  stringify,
-  uint8ArrayToBase64,
-  jsonStringify64,
-} from '../helpers/DataUtil';
-import {
   ImageMetadata,
   ImageUploadResult,
   MediaConfig,
@@ -34,6 +27,13 @@ import {
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
+import {
+  uint8ArrayToBase64,
+  getNewId,
+  jsonStringify64,
+  base64ToUint8Array,
+  stringify,
+} from '../../helpers/DataUtil';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,
@@ -207,7 +207,7 @@ export const getDecryptedImageUrl = async (
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   return getDecryptedImageData(dotYouClient, targetDrive, fileId, size, systemFileType).then(
     (data) => {
-      const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
+      const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
       return url;
     }
   );
@@ -223,9 +223,9 @@ export const getDecryptedImageData = async (
   pixelHeight?: number;
   pixelWidth?: number;
   contentType: ImageContentType;
-  content: ArrayBuffer;
+  bytes: ArrayBuffer;
 }> => {
-  const data = await (size
+  return await (size
     ? getThumbBytes(
         dotYouClient,
         targetDrive,
@@ -236,11 +236,6 @@ export const getDecryptedImageData = async (
         systemFileType
       )
     : getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType));
-
-  return {
-    contentType: data.contentType,
-    content: data.bytes,
-  };
 };
 
 export const getDecryptedImageMetadata = async (

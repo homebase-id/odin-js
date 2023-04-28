@@ -1,7 +1,12 @@
-import { DotYouClient, TargetDrive } from '@youfoundation/js-lib';
+import {
+  DotYouClient,
+  PlainVideoMetadata,
+  SegmentedVideoMetadata,
+  TargetDrive,
+} from '@youfoundation/js-lib';
 import { useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
-import useVideo from '../../hooks/video/useVideo';
+import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';
 
 import '../../app/app.css';
 
@@ -22,40 +27,66 @@ export interface OdinVideoProps {
   probablyEncrypted?: boolean;
 }
 
+interface OndinChunkedProps extends OdinVideoProps {
+  videoMetaData: SegmentedVideoMetadata;
+  videoRef: React.RefObject<HTMLVideoElement>;
+}
+
+interface OndinDirectProps extends OdinVideoProps {
+  videoMetaData: PlainVideoMetadata;
+}
+
+export const OdinVideo = (videoProps: OdinVideoProps) => {
+  const { dotYouClient, odinId, targetDrive, fileId, className } = videoProps;
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isInView, setIsInView] = useState(false);
+  useIntersection(videoRef, () => setIsInView(true));
+
+  const {
+    fetchMetadata: { data: videoMetaData },
+  } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, targetDrive);
+
+  return (
+    <video
+      controls
+      data-state="video-placeholder"
+      className={className}
+      ref={videoRef}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {isInView && videoMetaData?.isSegmented ? (
+        <ChunkedSource {...videoProps} videoMetaData={videoMetaData} videoRef={videoRef} />
+      ) : null}
+      {isInView && videoMetaData?.isSegmented === false ? (
+        <DirectSource {...videoProps} videoMetaData={videoMetaData} />
+      ) : null}
+    </video>
+  );
+};
+
 /// based on demo from nickdesaulniers: https://github.com/nickdesaulniers/netfix/blob/gh-pages/demo/bufferWhenNeeded.html
 /// But with introduction of segmentMap and other changes to support seeking
-
-export const OdinVideo = ({
+const ChunkedSource = ({
   dotYouClient,
   odinId,
   targetDrive,
   fileId,
-  className,
-}: OdinVideoProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isInView, setIsInView] = useState(false);
+  videoMetaData,
+  videoRef,
+}: OndinChunkedProps) => {
   const activeObjectUrl = useRef<string>();
-  useIntersection(videoRef, () => {
-    setIsInView(true);
-  });
 
-  const {
-    fetchMetadata: { data: videoMetaData, isFetchedAfterMount },
-    getChunk,
-  } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, targetDrive);
+  const { getChunk } = useVideo(dotYouClient, odinId, fileId, targetDrive);
 
-  const mimeType = videoMetaData?.mimeType;
-  const fileLength = videoMetaData?.fileSize;
-  const metaDuration = videoMetaData?.duration;
-  const segmentMap = videoMetaData?.segmentMap;
+  const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
+  const fileLength = videoMetaData.fileSize;
+  const metaDuration = videoMetaData.isSegmented ? videoMetaData.duration : undefined;
+  const segmentMap = videoMetaData.isSegmented ? videoMetaData.segmentMap : undefined;
 
   const objectUrl = useMemo(() => {
-    if (!mimeType || !fileLength || !metaDuration || !segmentMap || !isFetchedAfterMount)
-      return null;
-
-    if (activeObjectUrl.current) {
-      return activeObjectUrl.current;
-    }
+    if (!codec || !fileLength || !metaDuration || !segmentMap) return null;
+    if (activeObjectUrl.current) return activeObjectUrl.current;
 
     const sortedSegmentMap = segmentMap.sort((a, b) => a.offset - b.offset);
     const segments: Segment[] | undefined = sortedSegmentMap.map((segment, index) => {
@@ -90,7 +121,7 @@ export const OdinVideo = ({
 
     const sourceOpen = async () => {
       URL.revokeObjectURL(objectUrl);
-      sourceBuffer = innerMediaSource.addSourceBuffer(mimeType);
+      sourceBuffer = innerMediaSource.addSourceBuffer(codec);
 
       await fetchMetaAndFirstSegment();
 
@@ -167,6 +198,7 @@ export const OdinVideo = ({
 
     // Not sure what to do with this yet? Works better without the abort on seek..
     const seek = () => {
+      console.log('seeking');
       if (innerMediaSource.readyState === 'open') {
         // sourceBuffer.abort();
       } else {
@@ -208,20 +240,26 @@ export const OdinVideo = ({
     innerMediaSource.addEventListener('sourceopen', sourceOpen);
 
     return objectUrl;
-  }, [isFetchedAfterMount]);
+  }, [codec]);
 
-  if (!('MediaSource' in window) || (mimeType && !MediaSource.isTypeSupported(mimeType))) {
-    console.error(mimeType);
+  if (!('MediaSource' in window) || (codec && !MediaSource.isTypeSupported(codec))) {
+    console.error(codec);
     return <>Unsupported codec</>;
   }
 
-  return (
-    <video
-      controls
-      className={className}
-      src={objectUrl || ''}
-      ref={videoRef}
-      onClick={(e) => e.stopPropagation()}
-    />
-  );
+  return <source src={objectUrl || ''} data-type="MSE" />;
+};
+
+// Plain normal playback of a payload, no MSE, no chunks...
+const DirectSource = ({
+  dotYouClient,
+  odinId,
+  targetDrive,
+  fileId,
+  videoMetaData,
+}: OndinDirectProps) => {
+  const { data: videoUrl } = useVideoUrl(dotYouClient, odinId, fileId, targetDrive).fetch;
+
+  if (!videoUrl) return null;
+  return <source src={videoUrl} type={videoMetaData.mimeType} data-type="direct" />;
 };

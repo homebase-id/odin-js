@@ -67,7 +67,7 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
             dotYouClient,
             targetDrive,
             targetAcl,
-            new Uint8Array(imageData.content),
+            new Uint8Array(imageData.bytes),
             undefined,
             {
               fileId,

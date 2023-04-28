@@ -1,11 +1,11 @@
-import { cbcEncrypt, cbcDecrypt } from './helpers/AesEncrypt';
+import { cbcEncrypt, cbcDecrypt } from '../helpers/AesEncrypt';
 import {
   stringToUint8Array,
   uint8ArrayToBase64,
   jsonStringify64,
   base64ToUint8Array,
   byteArrayToString,
-} from './helpers/DataUtil';
+} from '../helpers/DataUtil';
 
 export interface SharedSecretEncryptedPayload {
   iv: string;

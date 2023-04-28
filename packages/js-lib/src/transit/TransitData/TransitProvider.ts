@@ -1,9 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import {
-  byteArrayToString,
-  roundToLargerMultipleOf16,
-  roundToSmallerMultipleOf16,
-} from '../../core/helpers/DataUtil';
+
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   assertIfDefined,
@@ -23,7 +19,6 @@ import {
   ThumbnailFile,
 } from '../../core/DriveData/DriveTypes';
 import { SystemFileType, UploadFileMetadata } from '../../core/DriveData/DriveUploadTypes';
-import { PagedResult } from '../../core/helpers/Types';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -38,6 +33,12 @@ import {
   buildDescriptor,
   buildFormData,
 } from '../../core/DriveData/UploadHelpers';
+import { PagedResult } from '../../core/core';
+import {
+  byteArrayToString,
+  roundToSmallerMultipleOf16,
+  roundToLargerMultipleOf16,
+} from '../../helpers/DataUtil';
 
 interface GetFileRequest {
   odinId: string;

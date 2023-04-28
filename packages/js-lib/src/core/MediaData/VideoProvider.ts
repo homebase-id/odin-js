@@ -1,3 +1,4 @@
+import { getNewId, jsonStringify64, stringify } from '../../helpers/helpers';
 import { DotYouClient } from '../DotYouClient';
 import { getFileHeader, getPayloadBytes, uploadFile } from '../DriveData/DriveProvider';
 import { TargetDrive } from '../DriveData/DriveTypes';
@@ -12,8 +13,8 @@ import {
 } from '../DriveData/DriveUploadTypes';
 import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
-import { getNewId, jsonStringify64 } from '../helpers/DataUtil';
-import { VideoMetadata, VideoUploadResult } from './MediaTypes';
+import { encryptUrl } from '../InterceptionEncryptionUtil';
+import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
 
 export type VideoContentType = 'video/mp4';
 
@@ -22,7 +23,7 @@ export const uploadVideo = async (
   targetDrive: TargetDrive,
   acl: AccessControlList,
   file: Uint8Array | File,
-  fileMetadata?: VideoMetadata,
+  fileMetadata?: PlainVideoMetadata | SegmentedVideoMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];
     uniqueId?: string;
@@ -119,5 +120,42 @@ export const getDecryptedVideoMetadata = async (
     ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
     : undefined;
 
-  return await decryptJsonContent<VideoMetadata>(fileMetadata, keyheader);
+  return await decryptJsonContent<PlainVideoMetadata | SegmentedVideoMetadata>(
+    fileMetadata,
+    keyheader
+  );
+};
+
+export const getDecryptedVideoUrl = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  systemFileType?: SystemFileType
+): Promise<string> => {
+  const getDirectImageUrl = async () => {
+    const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringify({
+      ...targetDrive,
+      fileId,
+      xfst: systemFileType || 'Standard',
+    })}`;
+
+    if (ss) return await encryptUrl(directUrl, ss);
+
+    return directUrl;
+  };
+
+  const ss = dotYouClient.getSharedSecret();
+
+  // If there is no shared secret, we wouldn't even be able to decrypt
+  if (!ss) {
+    return await getDirectImageUrl();
+  }
+
+  // Direct download of the data and potentially decrypt if response headers indicate encrypted
+  return getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType).then(
+    (data) => {
+      const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+      return url;
+    }
+  );
 };

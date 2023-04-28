@@ -1,6 +1,3 @@
-export * from './helpers/AesEncrypt';
-export * from './helpers/DataUtil';
-export * from './helpers/Types';
 export { getRandom16ByteArray } from './DriveData/UploadHelpers';
 
 // DotYouClient
@@ -14,6 +11,7 @@ export * from './SecurityData/SecurityProvider';
 export * from './DriveData/DriveProvider';
 export * from './DriveData/DriveTypes';
 export * from './DriveData/DriveUploadTypes';
+export * from './DriveData/DriveQueryTypes';
 
 // NotificationData
 export * from './NotificationData/NotificationProvider';

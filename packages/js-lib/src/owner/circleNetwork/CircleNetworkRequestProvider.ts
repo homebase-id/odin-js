@@ -5,8 +5,8 @@
   OdinIdRequest,
 } from './CircleDataTypes';
 import { DotYouClient } from '../../core/DotYouClient';
-import { stringify } from '../../core/helpers/DataUtil';
-import { PagingOptions, PagedResult } from '../../core/helpers/Types';
+import { PagingOptions, PagedResult } from '../../core/core';
+import { stringify } from '../../helpers/helpers';
 
 //Handles making and reading requests to connect with others
 const Root = '/circles/requests';

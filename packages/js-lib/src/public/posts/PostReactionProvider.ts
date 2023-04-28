@@ -19,8 +19,8 @@ import {
   TransferStatus,
 } from '../../core/DriveData/DriveUploadTypes';
 import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
-import { getNewId, jsonStringify64, stringToUint8Array } from '../../core/helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
+import { jsonStringify64, stringToUint8Array, getNewId } from '../../helpers/DataUtil';
 import {
   deleteFileOverTransit,
   getPayloadOverTransit,

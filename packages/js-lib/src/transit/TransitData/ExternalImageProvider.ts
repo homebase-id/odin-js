@@ -1,4 +1,3 @@
-import { base64ToUint8Array, stringify } from '../../core/helpers/DataUtil';
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   TargetDrive,
@@ -8,6 +7,7 @@ import {
 } from '../../core/DriveData/DriveTypes';
 import { SystemFileType } from '../../core/DriveData/DriveUploadTypes';
 import { ThumbnailMeta } from '../../core/MediaData/MediaTypes';
+import { base64ToUint8Array, stringify } from '../../helpers/helpers';
 import {
   getFileHeaderOverTransit,
   getThumbBytesOverTransit,

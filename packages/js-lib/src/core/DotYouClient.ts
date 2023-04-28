@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
-import { jsonStringify64 } from './helpers/DataUtil';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
+import { jsonStringify64 } from '../helpers/helpers';
 
 export enum ApiType {
   Owner,

@@ -16,7 +16,7 @@ import {
   SecurityGroupType,
 } from '../../core/DriveData/DriveUploadTypes';
 import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
-import { getNewId, jsonStringify64, stringToUint8Array } from '../../core/helpers/DataUtil';
+import { getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/helpers';
 import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
 

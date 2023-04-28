@@ -2,7 +2,9 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { TargetDrive } from '../../core/DriveData/DriveTypes';
 import { SystemFileType } from '../../core/DriveData/DriveUploadTypes';
 import { decryptJsonContent, decryptKeyHeader } from '../../core/DriveData/SecurityHelpers';
-import { VideoMetadata } from '../../core/MediaData/MediaTypes';
+import { PlainVideoMetadata, SegmentedVideoMetadata } from '../../core/core';
+import { stringify } from '../../helpers/helpers';
+import { getDecryptedMetadataOverTransit } from './ExternalImageProvider';
 import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './TransitProvider';
 
 export const getDecryptedVideoChunkOverTransit = async (
@@ -51,5 +53,44 @@ export const getDecryptedVideoMetadataOverTransit = async (
     ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
     : undefined;
 
-  return await decryptJsonContent<VideoMetadata>(fileMetadata, keyheader);
+  return await decryptJsonContent<PlainVideoMetadata | SegmentedVideoMetadata>(
+    fileMetadata,
+    keyheader
+  );
+};
+
+export const getDecryptedVideoUrlOverTransit = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  targetDrive: TargetDrive,
+  fileId: string,
+  systemFileType?: SystemFileType
+): Promise<string> => {
+  const meta = await getDecryptedMetadataOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    systemFileType
+  );
+  if (!meta.fileMetadata.payloadIsEncrypted) {
+    return `https://${odinId}/api/youauth/v1/drive/files/payload?${stringify({
+      ...targetDrive,
+      fileId,
+      xfst: systemFileType || 'Standard',
+    })}`;
+  }
+
+  // Direct download of the data and potentially decrypt if response headers indicate encrypted
+  return getPayloadBytesOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    undefined,
+    systemFileType
+  ).then((data) => {
+    const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+    return url;
+  });
 };

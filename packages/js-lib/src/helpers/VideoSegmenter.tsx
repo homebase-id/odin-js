@@ -1,50 +1,67 @@
-import { VideoMetadata, mergeByteArrays } from '@youfoundation/js-lib';
-import { createFile, BoxParser, ISOFile } from 'mp4box';
+import { SegmentedVideoMetadata } from '../core/core';
+import { mergeByteArrays } from './helpers';
 
 type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 
-// mp4box.js isn't typed, mp4File is a complex object with many properties
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const buildInitSegments = (mp4File: any): Uint8Array => {
-  let i;
-  let trak;
-
-  const moov = new BoxParser.moovBox();
-  moov.mvhd = mp4File.moov.mvhd;
-  moov.mvhd.duration = mp4File.initial_duration;
-  moov.boxes.push(moov.mvhd);
-
-  for (i = 0; i < mp4File.fragmentedTracks.length; i++) {
-    trak = mp4File.getTrackById(mp4File.fragmentedTracks[i].id);
-    moov.boxes.push(trak);
-    moov.traks.push(trak);
+const loadMp4box = async () => {
+  try {
+    return await import('mp4box');
+  } catch (ex) {
+    throw new Error('mp4box not found', { cause: ex });
   }
-
-  const initBuffer = ISOFile.writeInitializationSegment(
-    mp4File.ftyp,
-    moov,
-    mp4File.moov.mvex && mp4File.moov.mvex.mehd
-      ? mp4File.moov.mvex.mehd.fragment_duration
-      : mp4File.initial_duration,
-    mp4File.moov.traks[0].samples.length > 0 ? mp4File.moov.traks[0].samples[0].duration : 0
-  );
-  return new Uint8Array(initBuffer);
 };
 
-export const segmentMp4File = (
+export const segmentVideoFile = async (
   file: File
-): Promise<{ bytes: Uint8Array; metadata: VideoMetadata }> => {
-  return new Promise((resolve, reject) => {
-    if (!file) {
-      reject('No file');
+): Promise<{ bytes: Uint8Array; metadata: SegmentedVideoMetadata }> => {
+  if (!file || file.type !== 'video/mp4') {
+    throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
+  }
+
+  const { createFile, BoxParser, ISOFile } = await loadMp4box();
+
+  // mp4box.js isn't typed, mp4File is a complex object with many properties
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buildInitSegments = (mp4File: any): Uint8Array => {
+    let i;
+    let trak;
+
+    const moov = new BoxParser.moovBox();
+    moov.mvhd = mp4File.moov.mvhd;
+    moov.mvhd.duration = mp4File.initial_duration;
+    moov.boxes.push(moov.mvhd);
+
+    for (i = 0; i < mp4File.fragmentedTracks.length; i++) {
+      trak = mp4File.getTrackById(mp4File.fragmentedTracks[i].id);
+      moov.boxes.push(trak);
+      moov.traks.push(trak);
     }
 
+    const initBuffer = ISOFile.writeInitializationSegment(
+      mp4File.ftyp,
+      moov,
+      mp4File.moov.mvex && mp4File.moov.mvex.mehd
+        ? mp4File.moov.mvex.mehd.fragment_duration
+        : mp4File.initial_duration,
+      mp4File.moov.traks[0].samples.length > 0 ? mp4File.moov.traks[0].samples[0].duration : 0
+    );
+    return new Uint8Array(initBuffer);
+  };
+
+  return new Promise((resolve, reject) => {
     const mp4File = createFile(true);
     const segmentedBytes: Uint8Array[] = [];
     let videoTrackId: number;
     let segmentedByteOffset = 0;
     const tracksToRead: boolean[] = [];
-    const metadata: VideoMetadata = { mimeType: '', fileSize: 0, duration: 0, segmentMap: [] };
+    const metadata: SegmentedVideoMetadata = {
+      isSegmented: true,
+      mimeType: '',
+      codec: '',
+      fileSize: 0,
+      duration: 0,
+      segmentMap: [],
+    };
 
     mp4File.onError = function (e: unknown) {
       console.error(e);
@@ -60,11 +77,11 @@ export const segmentMp4File = (
       timescale: number;
       brands: string[];
     }) {
-      metadata.mimeType = info.mime;
+      metadata.codec = info.mime;
       const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
       videoTrackId = avTracks.find((trck) => trck.type === 'video')?.id || 1;
       if (avTracks?.length > 1) {
-        metadata.mimeType = `video/mp4; codecs="${avTracks
+        metadata.codec = `video/mp4; codecs="${avTracks
           .map((trck) => trck.codec)
           .join(',')}"; profiles="${info.brands.join(',')}'}"`;
       }

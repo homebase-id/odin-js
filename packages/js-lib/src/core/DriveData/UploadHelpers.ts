@@ -1,14 +1,15 @@
 import { DotYouClient } from '../DotYouClient';
-import {
-  uint8ArrayToBase64,
-  stringToUint8Array,
-  jsonStringify64,
-  mergeByteArrays,
-} from '../helpers/DataUtil';
+
 import { TransitInstructionSet } from '../../transit/TransitData/TransitTypes';
 import { KeyHeader, ThumbnailFile } from './DriveTypes';
 import { UploadFileMetadata, UploadInstructionSet, SystemFileType } from './DriveUploadTypes';
 import { encryptWithKeyheader, encryptWithSharedSecret, encryptKeyHeader } from './SecurityHelpers';
+import {
+  jsonStringify64,
+  mergeByteArrays,
+  uint8ArrayToBase64,
+  stringToUint8Array,
+} from '../../helpers/DataUtil';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),

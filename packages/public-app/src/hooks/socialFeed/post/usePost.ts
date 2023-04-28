@@ -1,9 +1,7 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
-  ApiType,
   deleteFile,
-  DotYouClient,
   ImageUploadResult,
   uploadImage,
   PostFile,
@@ -61,9 +59,22 @@ const usePost = () => {
     const imageUploadResults = await Promise.all(
       files.map(async (file) => {
         if (file.type === 'video/mp4') {
-          // Process video codec
-          const { segmentMp4File } = await import('../../../helpers/video/videoSegmenter');
-          const { bytes: processedBytes, metadata } = await segmentMp4File(file);
+          // if video is tiny enough (less than 10MB), don't segment just upload
+          if (file.size < 10000000)
+            return await uploadVideo(
+              dotYouClient,
+              targetDrive,
+              acl,
+              file,
+              { isSegmented: false, mimeType: file.type, fileSize: file.size },
+              {
+                type: file.type as VideoContentType,
+              }
+            );
+
+          // Segment video file
+          const segmentVideoFile = (await import('@youfoundation/js-lib')).segmentVideoFile;
+          const { bytes: processedBytes, metadata } = await segmentVideoFile(file);
 
           return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
             type: file.type as VideoContentType,

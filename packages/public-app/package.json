@@ -30,7 +30,6 @@
     "axios": "^1.2.0",
     "emoji-picker-element": "^1.15.1",
     "lodash-es": "^4.17.21",
-    "mp4box": "^0.5.2",
     "react": "^18.2.0",
     "react-cropper": "^2.1.8",
     "react-dom": "^18.2.0",

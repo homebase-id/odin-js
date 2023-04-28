@@ -6,17 +6,15 @@ import {
   DriveSearchResult,
   TargetDrive,
   getPayload,
-  getNewId,
   SecurityGroupType,
   UploadInstructionSet,
   getRandom16ByteArray,
-  jsonStringify64,
-  stringToUint8Array,
   UploadFileMetadata,
   UploadResult,
   uploadFile,
   deleteFile,
 } from '../../core/core';
+import { getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/helpers';
 import { GetTargetDriveFromProfileId } from '../profile';
 import { AttributeConfig } from './AttributeConfig';
 import { AttributeFile, Attribute } from './AttributeDataTypes';

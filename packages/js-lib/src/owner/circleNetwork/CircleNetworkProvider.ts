@@ -1,5 +1,9 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { PagingOptions, PagedResult, NumberCursoredResult } from '../../core/helpers/Types';
+import {
+  NumberCursoredResult,
+  PagedResult,
+  PagingOptions,
+} from '../../core/DriveData/DriveQueryTypes';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

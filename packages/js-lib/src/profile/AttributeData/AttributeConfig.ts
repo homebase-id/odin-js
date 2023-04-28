@@ -1,4 +1,5 @@
-import { toGuidId } from '../../core/core';
+import { toGuidId } from '../../helpers/helpers';
+
 export class AttributeConfig {
   //Indicates that a file holds the profile definition for this drive
   static readonly AttributeFileType: number = 77;
