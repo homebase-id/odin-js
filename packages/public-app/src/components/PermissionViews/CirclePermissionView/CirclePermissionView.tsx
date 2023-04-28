@@ -1,8 +1,8 @@
 import { CircleDefinition } from '@youfoundation/js-lib';
 import { t } from '../../../helpers/i18n/dictionary';
 import useCircle from '../../../hooks/circles/useCircle';
-import Circles from '../../ui/Icons/Circles/Circles';
-import LoadingParagraph from '../../ui/LoadingParagraph/LoadingParagraph';
+import { Circles } from '@youfoundation/common-app';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const CirclePermissionView = ({
   circleDef,

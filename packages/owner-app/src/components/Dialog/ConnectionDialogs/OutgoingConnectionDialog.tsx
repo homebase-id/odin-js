@@ -12,7 +12,7 @@ import CircleSelector from '../../Form/CircleSelector';
 import Input from '../../Form/Input';
 import Label from '../../Form/Label';
 import Textarea from '../../Form/Textarea';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import useFollowingInfinite from '../../../hooks/follow/useFollowing';
 

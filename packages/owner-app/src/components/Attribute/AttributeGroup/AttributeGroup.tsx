@@ -9,8 +9,7 @@ import {
 } from '../../../hooks/profiles/AttributeDefinitions';
 import useAttributeOrderer, { attributeGroup } from '../../../hooks/profiles/useAttributeOrderer';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import Collapse from '../../ui/Icons/Colapse/Collapse';
-import Plus from '../../ui/Icons/Plus/Plus';
+import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 
 const AttributeGroup = ({

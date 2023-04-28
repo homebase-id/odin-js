@@ -12,7 +12,6 @@ import RichTextRenderer from '../../../components/RichTextRenderer/RichTextRende
 import RelatedBlogs from '../../../components/Post/Common/RelatedArticles/RelatedArticles';
 import { Helmet } from 'react-helmet-async';
 import { t } from '../../../helpers/i18n/dictionary';
-import LoadingParagraph from '../../../components/ui/LoadingParagraph/LoadingParagraph';
 import PostMeta from '../../../components/Post/Common/Blocks/Meta/Meta';
 import ImageGallery from '../../../components/Post/Common/Blocks/MediaGallery/MediaGallery';
 import { PostInteracts } from '../../../components/Post/Common/Blocks/Interacts/Interacts';
@@ -21,6 +20,7 @@ import AuthorImage from '../../../components/Post/Common/Blocks/Author/Image';
 import AuthorName from '../../../components/Post/Common/Blocks/Author/Name';
 import Image from '../../../components/Image/Image';
 import Video from '../../../components/Video/Video';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const PostDetail = () => {
   const { channelKey, postKey } = useParams();

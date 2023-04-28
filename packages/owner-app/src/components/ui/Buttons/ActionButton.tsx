@@ -1,15 +1,18 @@
 import { FC, ReactNode, useState } from 'react';
 import ConfirmDialog, { TrickQuestion } from '../../Dialog/ConfirmDialog/ConfirmDialog';
-import Arrow from '../Icons/Arrow/Arrow';
-import Check from '../Icons/Check/Check';
-import Exclamation from '../Icons/Exclamation/Exclamation';
-import Loader from '../Icons/Loader/Loader';
-import Pencil from '../Icons/Pencil/Pencil';
-import Plus from '../Icons/Plus/Plus';
-import Save from '../Icons/Save/Save';
-import Shield from '../Icons/Shield/Shield';
-import Times from '../Icons/Times/Times';
-import Trash from '../Icons/Trash/Trash';
+import {
+  Arrow,
+  Check,
+  Exclamation,
+  IconProps,
+  Loader,
+  Pencil,
+  Plus,
+  Save,
+  Shield,
+  Times,
+  Trash,
+} from '@youfoundation/common-app';
 
 export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
 

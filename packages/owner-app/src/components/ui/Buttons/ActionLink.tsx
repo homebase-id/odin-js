@@ -1,15 +1,17 @@
 import { FC, ReactNode } from 'react';
-
-import Arrow from '../Icons/Arrow/Arrow';
-import Check from '../Icons/Check/Check';
-import Exclamation from '../Icons/Exclamation/Exclamation';
-import Loader from '../Icons/Loader/Loader';
-import Pencil from '../Icons/Pencil/Pencil';
-import Plus from '../Icons/Plus/Plus';
-import Save from '../Icons/Save/Save';
-import Shield from '../Icons/Shield/Shield';
-import Trash from '../Icons/Trash/Trash';
 import HybridLink from './HybridLink';
+import {
+  IconProps,
+  Loader,
+  Check,
+  Exclamation,
+  Save,
+  Arrow,
+  Plus,
+  Trash,
+  Pencil,
+  Shield,
+} from '@youfoundation/common-app';
 
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 

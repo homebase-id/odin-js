@@ -1,8 +1,8 @@
 import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
-import Heart from '../../../components/ui/Icons/Heart/Heart';
+import { Heart } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
-import LoadingParagraph from '../../../components/ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import { t } from '../../../helpers/i18n/dictionary';
 import useAttributes from '../../../hooks/profiles/useAttributes';
 

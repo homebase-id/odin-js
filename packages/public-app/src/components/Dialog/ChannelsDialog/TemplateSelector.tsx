@@ -1,7 +1,7 @@
 import { ChannelTemplate } from '@youfoundation/js-lib';
 import { FC } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
-import { List, Masonry, Grid } from '../../ui/Icons/Templates/Templates';
+import { TemplateList, TemplateMasonry, TemplateGrid, IconProps } from '@youfoundation/common-app';
 
 const TemplateSelector = ({
   name,
@@ -21,7 +21,7 @@ const TemplateSelector = ({
     <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
       <Template
         name={name}
-        icon={List}
+        icon={TemplateList}
         label={t('List')}
         value={ChannelTemplate.ClassicBlog}
         onChange={onChange}
@@ -29,7 +29,7 @@ const TemplateSelector = ({
       />
       <Template
         name={name}
-        icon={Grid}
+        icon={TemplateGrid}
         label={t('Grid')}
         value={ChannelTemplate.LargeCards}
         onChange={onChange}
@@ -37,7 +37,7 @@ const TemplateSelector = ({
       />
       <Template
         name={name}
-        icon={Masonry}
+        icon={TemplateMasonry}
         label={t('Masonry')}
         value={ChannelTemplate.MasonryLayout}
         onChange={onChange}

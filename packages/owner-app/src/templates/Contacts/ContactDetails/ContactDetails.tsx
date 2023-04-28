@@ -18,12 +18,12 @@ const ContactDetails = () => {
 // import ErrorNotification from '../../../Alerts/ErrorNotification/ErrorNotification';
 // import ActionButton from '../../../Buttons/ActionButton';
 // import FallbackImg from '../../../FallbackImg/FallbackImg';
-// import AddressBook from '../../../Icons/AddressBook/AddressBook';
-// import Cake from '../../../Icons/Cake/Cake';
-// import House from '../../../Icons/House/House';
-// import IconFrame from '../../../Icons/IconFrame/IconFrame';
-// import Person from '../../../Icons/Person/Person';
-// import Phone from '../../../Icons/Phone/Phone';
+// import { k } from '@youfoundation/common-app';;
+// import { e } from '@youfoundation/common-app';;
+// import { e } from '@youfoundation/common-app';;
+// import { e } from '@youfoundation/common-app';;
+// import { n } from '@youfoundation/common-app';;
+// import { e } from '@youfoundation/common-app';;
 // import PageMeta from '../../../Layout/PageMeta/PageMeta';
 // import Section from '../../../Sections/Section';
 // import { ConnectionPermissionViewer } from '../../Connections/ConnectionDetails/ConnectionDetails';

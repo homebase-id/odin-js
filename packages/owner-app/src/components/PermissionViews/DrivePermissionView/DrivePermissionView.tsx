@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import useDrive from '../../../hooks/drives/useDrive';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
-import Arrow from '../../ui/Icons/Arrow/Arrow';
-import HardDrive from '../../ui/Icons/HardDrive/HardDrive';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { Arrow } from '@youfoundation/common-app';
+import { HardDrive } from '@youfoundation/common-app';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import { getAccessFromPermissionNumber } from '../../../templates/DemoData/helpers';
 
 const DrivePermissionView = ({

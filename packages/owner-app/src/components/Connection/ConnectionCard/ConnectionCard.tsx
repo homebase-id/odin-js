@@ -1,5 +1,5 @@
 import useContact from '../../../hooks/contacts/useContact';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 
 const ConnectionCard = (props: PersonCardProps) => {

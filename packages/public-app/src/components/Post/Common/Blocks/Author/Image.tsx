@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { useIntersection } from '../../../../../hooks/intersection/useIntersection';
 import useSiteData from '../../../../../hooks/siteData/useSiteData';
 import Image from '../../../../Image/Image';
-import Person from '../../../../ui/Icons/Person/Person';
+import { Person } from '@youfoundation/common-app';
 
 interface ImageProps {
   className?: string;

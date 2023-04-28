@@ -3,13 +3,13 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 import useIdentityIFollow from '../../../hooks/follow/useIdentityIFollow';
 import useSocialChannels from '../../../hooks/socialFeed/socialChannels/useSocialChannels';
 import Alert from '../../ui/Alerts/Alert/Alert';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import Quote from '../../ui/Icons/Quote/Quote';
-import Persons from '../../ui/Icons/Persons/Persons';
+import { Quote } from '@youfoundation/common-app';
+import { Persons } from '@youfoundation/common-app';
 import useFollowingInfinite from '../../../hooks/follow/useFollowing';
 import { BlogConfig } from '@youfoundation/js-lib';
 

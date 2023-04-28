@@ -3,8 +3,8 @@ import { useState, useMemo } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import ImageCropper from '../Dialog/ImageDialog/ImageCropper';
 import ActionButton from '../ui/Buttons/ActionButton';
-import Crop from '../ui/Icons/Crop/Crop';
-import Trash from '../ui/Icons/Trash/Trash';
+import { Crop } from '@youfoundation/common-app';
+import { Trash } from '@youfoundation/common-app';
 import Label from './Label';
 
 interface ImageUploadAndCropProps {

@@ -9,10 +9,10 @@ import usePost from '../../../../../hooks/socialFeed/post/usePost';
 import EditPostDialog from '../../../../SocialFeed/EditPostDialog/EditPostDialog';
 import ErrorNotification from '../../../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionGroup, { ActionGroupOptionProps } from '../../../../ui/Buttons/ActionGroup';
-import Pencil from '../../../../ui/Icons/Pencil/Pencil';
-import Times from '../../../../ui/Icons/Times/Times';
-import Trash from '../../../../ui/Icons/Trash/Trash';
-import UserX from '../../../../ui/Icons/UserX/UserX';
+import { Pencil } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app';
+import { Trash } from '@youfoundation/common-app';
+import { UserX } from '@youfoundation/common-app';
 
 const PostMeta = ({
   odinId,

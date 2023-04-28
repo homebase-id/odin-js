@@ -4,13 +4,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Label from '../../../../components/Form/Label';
 import Select from '../../../../components/Form/Select';
 import PostTeaser from '../../../../components/Post/Common/Card/PostTeaser';
-import LoadingParagraph from '../../../../components/ui/LoadingParagraph/LoadingParagraph';
 import { flattenInfinteData } from '../../../../helpers/common';
 import { t } from '../../../../helpers/i18n/dictionary';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import useBlogPostsInfinite from '../../../../hooks/blog/useBlogPostsInfinite';
 import useChannels from '../../../../hooks/blog/useChannels';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 12;
 

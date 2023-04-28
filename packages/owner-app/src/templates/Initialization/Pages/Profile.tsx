@@ -3,7 +3,7 @@ import ImageUploadAndCrop from '../../../components/Form/ImageUploadAndCrop';
 import Input from '../../../components/Form/Input';
 import Label from '../../../components/Form/Label';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
-import Person from '../../../components/ui/Icons/Person/Person';
+import { Person } from '@youfoundation/common-app';
 import { t } from '../../../helpers/i18n/dictionary';
 import { onChangeParams, pageData } from '../Initialization';
 

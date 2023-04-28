@@ -6,7 +6,7 @@ import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import useInit from '../../hooks/configure/useInit';
 import useIsConfigured from '../../hooks/configure/useIsConfigured';
 import ErrorNotification from '../../components/ui/Alerts/ErrorNotification/ErrorNotification';
-import Loader from '../../components/ui/Icons/Loader/Loader';
+import { Loader } from '@youfoundation/common-app';
 import fallbackImage from './fallbackImage';
 import Circles from './Pages/Circles';
 import Profile from './Pages/Profile';

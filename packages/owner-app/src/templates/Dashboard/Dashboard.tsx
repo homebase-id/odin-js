@@ -11,7 +11,7 @@ import useApps from '../../hooks/apps/useApps';
 import useCircles from '../../hooks/circles/useCircles';
 import Image from '../../components/Image/Image';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
-import Cog from '../../components/ui/Icons/Cog/Cog';
+import { Cog } from '@youfoundation/common-app';
 import {
   HomePageConfig,
   HomePageAttributes,

@@ -1,7 +1,6 @@
 import { ReactNode, useRef, useState } from 'react';
-import useOutsideTrigger from '../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import Check from '../ui/Icons/Check/Check';
-import Triangle from '../ui/Icons/Triangle/Triangle';
+import { Check, useOutsideTrigger } from '@youfoundation/common-app';
+import { Triangle } from '@youfoundation/common-app';
 
 const PermissionLevelEditor = ({
   className,

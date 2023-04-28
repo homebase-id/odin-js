@@ -3,9 +3,9 @@ import { getVersion } from '../../../../helpers/common';
 import { t } from '../../../../helpers/i18n/dictionary';
 import useSiteData from '../../../../hooks/siteData/useSiteData';
 import { OwnerName } from '../../../Post/Common/Blocks/Author/Name';
-import Logo from '../../Icons/Logo/Logo';
 
 import Socials from '../Socials/Socials';
+import { Logo } from '@youfoundation/common-app';
 
 interface FooterProps {
   className: string;

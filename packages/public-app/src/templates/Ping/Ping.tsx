@@ -1,6 +1,6 @@
 import { DriveGrant } from '@youfoundation/js-lib';
-import HardDrive from '../../components/ui/Icons/HardDrive/HardDrive';
-import Persons from '../../components/ui/Icons/Persons/Persons';
+import { HardDrive } from '@youfoundation/common-app';
+import { Persons } from '@youfoundation/common-app';
 import { t } from '../../helpers/i18n/dictionary';
 import useSecurityContext from '../../hooks/securityContext/useSecurityContext';
 

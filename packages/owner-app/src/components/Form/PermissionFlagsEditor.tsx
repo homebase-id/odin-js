@@ -1,7 +1,6 @@
 import { ReactNode, useRef, useState } from 'react';
-import useOutsideTrigger from '../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import Check from '../ui/Icons/Check/Check';
-import Triangle from '../ui/Icons/Triangle/Triangle';
+import { Check, useOutsideTrigger } from '@youfoundation/common-app';
+import { Triangle } from '@youfoundation/common-app';
 
 const PermissionFlagsEditor = ({
   className,
@@ -38,12 +37,12 @@ const PermissionFlagsEditor = ({
         onClick={() => setIsOpen(!isOpen)}
         ref={wrapperRef}
       >
-        <div className="flex min-w-[6rem] flex-row py-1 px-2">
+        <div className="flex min-w-[6rem] flex-row px-2 py-1">
           <span className="my-auto mr-2 select-none">{currentValue}</span>{' '}
           <Triangle className="my-auto ml-auto h-2 w-2 rotate-90" />
         </div>
         <ul
-          className={`absolute top-[100%] right-0 overflow-hidden bg-white dark:bg-slate-800 ${
+          className={`absolute right-0 top-[100%] overflow-hidden bg-white dark:bg-slate-800 ${
             isOpen
               ? 'z-10 max-h-[30rem] border border-slate-100 py-3 shadow-2xl dark:border-slate-700'
               : 'max-h-0'
@@ -86,7 +85,7 @@ const Option = ({
 }) => {
   return (
     <li
-      className={`flex min-w-[16rem] cursor-pointer select-none flex-row py-1 px-4 hover:bg-slate-100 dark:hover:bg-slate-700 ${className}`}
+      className={`flex min-w-[16rem] cursor-pointer select-none flex-row px-4 py-1 hover:bg-slate-100 dark:hover:bg-slate-700 ${className}`}
       onClick={onChange}
     >
       <Check

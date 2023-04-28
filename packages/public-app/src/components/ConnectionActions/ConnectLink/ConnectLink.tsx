@@ -3,7 +3,7 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useAuth from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import ActionLink from '../../ui/Buttons/ActionLink';
-import Persons from '../../ui/Icons/Persons/Persons';
+import { Persons } from '@youfoundation/common-app';
 
 const ConnectLink = ({ className }: { className: string }) => {
   const { isOwner, getIdentity } = useAuth();

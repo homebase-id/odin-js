@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useAuth from '../../../../../../../hooks/auth/useAuth';
 import useReaction from '../../../../../../../hooks/reactions/useReaction';
 import useLongPress from '../../../../../../../hooks/longPress/useLongPress';
-import Heart from '../../../../../../ui/Icons/Heart/Heart';
+import { Heart } from '@youfoundation/common-app';
 import ReactionsBar from '../ReactionsBar/ReactionsBar';
 import { ReactionContext } from '@youfoundation/js-lib';
 import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';

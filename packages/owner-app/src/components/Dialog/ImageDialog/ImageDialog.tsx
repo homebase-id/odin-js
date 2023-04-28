@@ -12,7 +12,7 @@ import usePortal from '../../../hooks/portal/usePortal';
 import ImageUploadAndCrop from '../../Form/ImageUploadAndCrop';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const ImageDialog = ({
   title,

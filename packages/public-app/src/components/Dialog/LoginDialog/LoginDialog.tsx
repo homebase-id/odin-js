@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import usePortal from '../../../hooks/portal/usePortal';
 import { LoginBox } from '../../Auth/ProfileNav/ProfileNav';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const LoginDialog = ({
   title,

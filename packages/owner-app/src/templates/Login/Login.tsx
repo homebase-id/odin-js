@@ -5,10 +5,10 @@ import useAuth from '../../hooks/auth/useAuth';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import Input from '../../components/Form/Input';
 import Label from '../../components/Form/Label';
-import Loader from '../../components/ui/Icons/Loader/Loader';
+import { Loader } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
-import DomainHighlighter from '../../components/ui/DomainHighlighter/DomainHighlighter';
+import { DomainHighlighter } from '@youfoundation/common-app';
 
 const Login = () => {
   const [password, setPassword] = useState('a');

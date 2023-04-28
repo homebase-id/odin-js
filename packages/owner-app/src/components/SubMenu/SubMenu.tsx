@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Select from '../Form/Select';
-import LoadingParagraph from '../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 interface SubmenuProps {
   className?: string;
@@ -35,7 +35,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
               className={({ isActive }) =>
                 `${
                   item.className && item.className?.indexOf('flex-grow') !== -1 ? '' : 'flex-grow'
-                } cursor-pointer border-b-2 py-2 px-1 text-lg ${
+                } cursor-pointer border-b-2 px-1 py-2 text-lg ${
                   isActive || (activeFallback && index === 0)
                     ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
                     : 'border-gray-300 transition-colors duration-300 hover:border-indigo-400 dark:border-gray-800 hover:dark:border-indigo-600'

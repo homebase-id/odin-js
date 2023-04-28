@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChannelItem } from '../../components/Dialog/ChannelsDialog/ChannelsDialog';
-import Plus from '../../components/ui/Icons/Plus/Plus';
-import Quote from '../../components/ui/Icons/Quote/Quote';
+import { Plus } from '@youfoundation/common-app';
+import { Quote } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { t } from '../../helpers/i18n/dictionary';
 import useChannels from '../../hooks/blog/useChannels';

@@ -7,7 +7,7 @@ import Input from '../../components/Form/Input';
 import Label from '../../components/Form/Label';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
-import DomainHighlighter from '../../components/ui/DomainHighlighter/DomainHighlighter';
+import { DomainHighlighter } from '@youfoundation/common-app';
 import { useSearchParams } from 'react-router-dom';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from '../../hooks/configure/useInit';
 import Alert from '../../components/ui/Alerts/Alert/Alert';

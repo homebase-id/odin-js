@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { t } from '../../../../helpers/i18n/dictionary';
 import useConnections from '../../../../hooks/connections/useConnections';
 import ConnectionTeaser from '../../../../templates/Home/Common/Connections/ConnectionTeaser';
-import LoadingParagraph from '../../../ui/LoadingParagraph/LoadingParagraph';
-import Pager from '../../../ui/Pager/Pager';
+import { LoadingParagraph, Pager } from '@youfoundation/common-app';
 
 const ConnectionsView = ({ className }: { className?: string }) => {
   const [activePage, setActivePage] = useState(1);

@@ -1,7 +1,7 @@
+import { LoadingParagraph } from '@youfoundation/common-app';
 import { t } from '../../../../helpers/i18n/dictionary';
 import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
 import ConnectionTeaser from '../../../../templates/Home/Common/Connections/ConnectionTeaser';
-import LoadingParagraph from '../../../ui/LoadingParagraph/LoadingParagraph';
 
 const FollowingView = ({ className }: { className?: string }) => {
   const {

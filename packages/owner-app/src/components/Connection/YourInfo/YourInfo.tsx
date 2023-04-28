@@ -16,12 +16,8 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import Cake from '../../ui/Icons/Cake/Cake';
-import House from '../../ui/Icons/House/House';
-import IconFrame from '../../ui/Icons/IconFrame/IconFrame';
-import Phone from '../../ui/Icons/Phone/Phone';
+import { LoadingParagraph, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
 import InfoBox from '../../ui/InfoBox/InfoBox';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
 
 interface infoObject {
   name: string;

@@ -6,10 +6,10 @@ import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
 import Select from '../../Form/Select';
-import Lock from '../../ui/Icons/Lock/Lock';
-import OpenLock from '../../ui/Icons/OpenLock/OpenLock';
+import { Lock } from '@youfoundation/common-app';
+import { OpenLock } from '@youfoundation/common-app';
 import { pascalCase } from '../../../templates/DemoData/helpers';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const AclDialog = ({
   title,

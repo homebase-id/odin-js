@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import Triangle from '../../ui/Icons/Triangle/Triangle';
+import { Triangle } from '@youfoundation/common-app';
 
 export const FileOverview = ({
   files,

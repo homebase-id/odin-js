@@ -1,7 +1,5 @@
+import { Exclamation, Question } from '@youfoundation/common-app';
 import { ReactNode } from 'react';
-import Exclamation from '../../Icons/Exclamation/Exclamation';
-import Question from '../../Icons/Question/Question';
-
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';
   title?: ReactNode;
@@ -24,7 +22,7 @@ const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
         {type === 'critical' ? (
           <div
             className={`mb-2 flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300 ${
-              isCompact ? 'mb-2 mr-2' : 'sm:my-auto sm:mx-0 sm:h-10 sm:w-10'
+              isCompact ? 'mb-2 mr-2' : 'sm:mx-0 sm:my-auto sm:h-10 sm:w-10'
             }`}
           >
             <Exclamation />
@@ -32,7 +30,7 @@ const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
         ) : type === 'warning' ? (
           <div
             className={`mb-2 flex h-8 w-8 flex-shrink-0 text-orange-400 ${
-              isCompact ? 'mb-2 mr-2' : 'sm:my-auto sm:mx-0 sm:h-10 sm:w-10'
+              isCompact ? 'mb-2 mr-2' : 'sm:mx-0 sm:my-auto sm:h-10 sm:w-10'
             }`}
           >
             <Exclamation />
@@ -40,14 +38,14 @@ const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
         ) : (
           <div
             className={`mb-2 flex h-8 w-8 flex-shrink-0 text-blue-400 ${
-              isCompact ? 'mb-2 mr-2' : 'sm:my-auto sm:mx-0 sm:h-10 sm:w-10'
+              isCompact ? 'mb-2 mr-2' : 'sm:mx-0 sm:my-auto sm:h-10 sm:w-10'
             }`}
           >
             <Question />
           </div>
         )}
         <div className={`ml-5 flex-grow ${isCompact ? 'contents' : 'contents sm:block'}`}>
-          {title && <p className="ml-3 mb-2 text-2xl sm:ml-0">{title}</p>}
+          {title && <p className="mb-2 ml-3 text-2xl sm:ml-0">{title}</p>}
           {children}
         </div>
       </div>

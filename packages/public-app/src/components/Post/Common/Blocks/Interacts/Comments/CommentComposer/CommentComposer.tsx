@@ -10,7 +10,7 @@ import { FileSelector } from '../../../../../../Form/Files/FileSelector';
 import VolatileInput from '../../../../../../Form/VolatileInput';
 import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';
 
-import Image from '../../../../../../ui/Icons/RichTextEditorIcons/Image/Image';
+import { Image } from '@youfoundation/common-app';
 import AuthorImage from '../../../Author/Image';
 import EmojiSelector from '../../EmojiPicker/EmojiSelector';
 

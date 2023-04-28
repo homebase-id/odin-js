@@ -6,7 +6,7 @@ import usePortal from '../../../hooks/portal/usePortal';
 import Label from '../../Form/Label';
 import Select from '../../Form/Select';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const ReactAccessEditorDialog = ({
   title,

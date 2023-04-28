@@ -10,7 +10,7 @@ import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotificati
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
 import CirclePermissionView from '../../PermissionViews/CirclePermissionView/CirclePermissionView';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const DriveCircleAccessDialog = ({
   title,

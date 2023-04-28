@@ -12,9 +12,8 @@ import Input from '../../Form/Input';
 import Label from '../../Form/Label';
 import Textarea from '../../Form/Textarea';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
-import Plus from '../../ui/Icons/Plus/Plus';
-import Quote from '../../ui/Icons/Quote/Quote';
+import { DialogWrapper, Plus } from '@youfoundation/common-app';
+import { Quote } from '@youfoundation/common-app';
 import TemplateSelector from './TemplateSelector';
 
 const ChannelsDialog = ({

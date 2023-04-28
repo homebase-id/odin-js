@@ -4,31 +4,34 @@ import useAuth from '../../../../hooks/auth/useAuth';
 
 import { getVersion } from '../../../../templates/DemoData/helpers';
 
-import Circles from '../../Icons/Circles/Circles';
-import Cog from '../../Icons/Cog/Cog';
-import Grid from '../../Icons/Grid/Grid';
-import HardDrive from '../../Icons/HardDrive/HardDrive';
-import Heart from '../../Icons/Heart/Heart';
-import Person from '../../Icons/Person/Person';
-import Quote from '../../Icons/Quote/Quote';
-import Scissors from '../../Icons/Scissors/Scissors';
 import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
-import Bars from '../../Icons/Bars/Bars';
 import { t } from '../../../../helpers/i18n/dictionary';
-import Times from '../../Icons/Times/Times';
 import useDarkMode from '../../../../hooks/useDarkMode';
-import useOutsideTrigger from '../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import Feed from '../../Icons/Feed/Feed';
 import OwnerImage from '../../../OwnerImage/OwnerImage';
-import Article from '../../Icons/Article/Article';
-import Ellipsis from '../../Icons/Ellipsis/Ellipsis';
-import { ArrowDown } from '../../Icons/Arrow/Arrow';
 import useProfiles from '../../../../hooks/profiles/useProfiles';
-import AddressBook from '../../Icons/AddressBook/AddressBook';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
-import Wallet from '../../Icons/Wallet/Wallet';
-import Bell from '../../Icons/Bell/Bell';
 import useNotifications from '../../../../hooks/notifications/useNotifications';
+import {
+  Bars,
+  Times,
+  Feed,
+  Article,
+  Quote,
+  AddressBook,
+  Circles,
+  useOutsideTrigger,
+  Ellipsis,
+  Person,
+  Cog,
+  Scissors,
+  HardDrive,
+  Grid,
+  Wallet,
+  IconProps,
+  Heart,
+  ArrowDown,
+  Bell,
+} from '@youfoundation/common-app';
 
 const STORAGE_KEY = 'isOpen';
 

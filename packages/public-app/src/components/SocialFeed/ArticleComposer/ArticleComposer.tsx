@@ -18,7 +18,7 @@ import { ErrorBoundary } from '../../ui/Layout/ErrorBoundary/ErrorBoundary';
 import { ChannelSelector } from '../PostComposer';
 import { convertTextToSlug } from '../../../helpers/common';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
-import Arrow from '../../ui/Icons/Arrow/Arrow';
+import { Arrow } from '@youfoundation/common-app';
 import DraftsDialog from '../DraftsDialog/DraftsDialog';
 import ImageSelector from '../../Form/ImageSelector';
 import { debounce } from 'lodash-es';

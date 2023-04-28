@@ -5,12 +5,7 @@ import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import Cake from '../../ui/Icons/Cake/Cake';
-import House from '../../ui/Icons/House/House';
-import IconFrame from '../../ui/Icons/IconFrame/IconFrame';
-import Person from '../../ui/Icons/Person/Person';
-import Phone from '../../ui/Icons/Phone/Phone';
-import Refresh from '../../ui/Icons/Refresh/Refresh';
+import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 
 interface ContactInfoProps {

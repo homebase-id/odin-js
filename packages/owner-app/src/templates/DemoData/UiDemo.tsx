@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import ActionButton from '../../components/ui/Buttons/ActionButton';
-import DomainHighlighter from '../../components/ui/DomainHighlighter/DomainHighlighter';
+import { DomainHighlighter } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import CollapsableSection from '../../components/ui/Sections/CollapsableSection';
 import {

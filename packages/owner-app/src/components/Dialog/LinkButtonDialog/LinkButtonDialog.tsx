@@ -5,7 +5,7 @@ import usePortal from '../../../hooks/portal/usePortal';
 import Label from '../../Form/Label';
 import Input from '../../Form/Input';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 export interface LinkButtonProps {
   linkText: string;

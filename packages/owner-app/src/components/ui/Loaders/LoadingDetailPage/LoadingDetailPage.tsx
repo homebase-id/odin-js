@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import LoadingParagraph from '../LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const LoadingDetailPage = ({ children }: { children?: ReactNode }) => {
   return (

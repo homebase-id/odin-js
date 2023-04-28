@@ -3,8 +3,7 @@ import { createPortal } from 'react-dom';
 import { t } from '../../helpers/i18n/dictionary';
 import usePortal from '../../hooks/portal/usePortal';
 import ActionButton from '../ui/Buttons/ActionButton';
-import DialogWrapper from '../ui/Dialog/DialogWrapper';
-import Triangle from '../ui/Icons/Triangle/Triangle';
+import { DialogWrapper, Triangle } from '@youfoundation/common-app';
 import CheckboxToggle from './CheckboxToggle';
 import Label from './Label';
 
@@ -103,7 +102,7 @@ const ColorThemeSelector = ({
           className="relative cursor-pointer rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <div className="flex min-w-[6rem] flex-row py-1 px-2">
+          <div className="flex min-w-[6rem] flex-row px-2 py-1">
             <span className="my-auto mr-2 select-none">{(defaultValue || options[0]).name}</span>{' '}
             <Triangle className="my-auto ml-auto h-2 w-2 rotate-90" />
           </div>

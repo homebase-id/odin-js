@@ -15,7 +15,7 @@ import Image from '../../Image/Image';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import Button from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const EditPostDialog = ({
   postFile: incomingPostFile,

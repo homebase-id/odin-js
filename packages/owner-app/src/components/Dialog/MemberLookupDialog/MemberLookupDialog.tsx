@@ -5,8 +5,7 @@ import useActiveConnections from '../../../hooks/connections/useActiveConnection
 import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import ConnectionCard from '../../Connection/ConnectionCard/ConnectionCard';
-import Pager from '../../ui/Pager/Pager';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper, Pager } from '@youfoundation/common-app';
 
 const MemberLookupDialog = ({
   title,

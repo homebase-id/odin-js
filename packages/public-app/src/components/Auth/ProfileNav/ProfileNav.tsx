@@ -3,11 +3,10 @@ import { MouseEventHandler } from 'react';
 import { useState } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
 import useAuth from '../../../hooks/auth/useAuth';
-import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import { IS_DARK_CLASSNAME } from '../../../hooks/darkMode/useDarkMode';
 import { ConnectionImage, OwnerImage } from '../../Post/Common/Blocks/Author/Image';
-import Person from '../../ui/Icons/Person/Person';
-import Times from '../../ui/Icons/Times/Times';
+import { Person, useOutsideTrigger } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app';
 
 const CENTRALIZED_LOGIN_BOX = !!import.meta.env.VITE_VERSION;
 

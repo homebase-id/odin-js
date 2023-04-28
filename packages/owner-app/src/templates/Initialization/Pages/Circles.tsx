@@ -1,4 +1,4 @@
-import Times from '../../../components/ui/Icons/Times/Times';
+import { Times } from '@youfoundation/common-app';
 import { useRef, useState, useEffect } from 'react';
 import Input from '../../../components/Form/Input';
 import Label from '../../../components/Form/Label';

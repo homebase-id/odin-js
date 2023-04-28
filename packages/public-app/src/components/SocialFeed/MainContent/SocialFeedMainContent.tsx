@@ -5,7 +5,7 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { flattenInfinteData } from '../../../helpers/common';
 import { t } from '../../../helpers/i18n/dictionary';
 import useSocialFeed from '../../../hooks/socialFeed/useSocialFeed';
-import LoadingParagraph from '../../ui/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
 import PostTeaserCard from '../PostTeaserCard';
 

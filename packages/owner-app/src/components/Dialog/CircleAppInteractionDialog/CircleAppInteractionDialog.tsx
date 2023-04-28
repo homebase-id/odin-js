@@ -4,12 +4,12 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useApps from '../../../hooks/apps/useApps';
 import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import AppPermissionView from '../../PermissionViews/AppPermissionView/AppPermissionView';
 import { CircleDefinition, stringGuidsEqual } from '@youfoundation/js-lib';
 import useApp from '../../../hooks/apps/useApp';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const CircleAppInteractionDialog = ({
   title,

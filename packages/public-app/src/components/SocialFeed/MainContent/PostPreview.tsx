@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useBlog from '../../../hooks/blog/useBlog';
-import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import useSocialChannel from '../../../hooks/socialFeed/useSocialChannel';
 import useSocialPost from '../../../hooks/socialFeed/useSocialPost';
 import { PostDetailCard } from '../../../templates/Posts/Detail/PostDetail';
 import { PostImageDetailCard } from '../../../templates/Posts/Detail/PostImageDetail';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import { ArrowLeft } from '../../ui/Icons/Arrow/Arrow';
+import { ArrowLeft, useOutsideTrigger } from '@youfoundation/common-app';
 
 const PostPreview = ({
   identityKey,

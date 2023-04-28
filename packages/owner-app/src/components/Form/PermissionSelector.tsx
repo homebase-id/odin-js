@@ -3,7 +3,7 @@ import {
   appPermissionLevels,
   circlePermissionLevels,
 } from '../../provider/permission/permissionLevels';
-import Persons from '../ui/Icons/Persons/Persons';
+import { Persons } from '@youfoundation/common-app';
 import CheckboxToggle from './CheckboxToggle';
 
 const PermissionSelector = ({

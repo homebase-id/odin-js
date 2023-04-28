@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { t } from '../../../../helpers/i18n/dictionary';
-import Times from '../../Icons/Times/Times';
 import Alert from '../Alert/Alert';
+import { Times } from '@youfoundation/common-app';
 
 const getKnownErrorMessages = (errorCode: number): string | undefined => {
   if (errorCode) {
@@ -111,7 +111,7 @@ const ErrorNotification = ({ error }: { error: unknown }) => {
     >
       <Alert
         type={knownErrorMessage ? 'warning' : 'critical'}
-        className="mx-auto mt-10 mb-auto cursor-pointer"
+        className="mx-auto mb-auto mt-10 cursor-pointer"
       >
         <div className="flex flex-row">
           {knownErrorMessage ??

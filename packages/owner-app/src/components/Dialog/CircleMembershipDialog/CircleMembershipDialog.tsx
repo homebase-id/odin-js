@@ -6,7 +6,7 @@ import usePortal from '../../../hooks/portal/usePortal';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 import { CircleGrant, stringGuidsEqual } from '@youfoundation/js-lib';
 
 const CircleMembershipDialog = ({

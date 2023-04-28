@@ -14,7 +14,7 @@ import AuthorImage from '../../../components/Post/Common/Blocks/Author/Image';
 import AuthorName from '../../../components/Post/Common/Blocks/Author/Name';
 import { PostInteracts } from '../../../components/Post/Common/Blocks/Interacts/Interacts';
 import Image from '../../../components/Image/Image';
-import Loader from '../../../components/ui/Icons/Loader/Loader';
+import { Loader } from '@youfoundation/common-app';
 import Video from '../../../components/Video/Video';
 
 const PostImageDetail = () => {

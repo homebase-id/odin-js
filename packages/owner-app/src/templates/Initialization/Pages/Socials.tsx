@@ -5,7 +5,7 @@ import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import InfoBox from '../../../components/ui/InfoBox/InfoBox';
 import { t } from '../../../helpers/i18n/dictionary';
 import { onChangeParams, pageData } from '../Initialization';
-import Times from '../../../components/ui/Icons/Times/Times';
+import { Times } from '@youfoundation/common-app';
 
 const Socials = ({
   pageData,

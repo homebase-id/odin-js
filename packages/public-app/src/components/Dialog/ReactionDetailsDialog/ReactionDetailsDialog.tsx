@@ -9,7 +9,7 @@ import useEmojiSummary from '../../../hooks/reactions/emojis/useEmojiSummary';
 import AuthorImage from '../../Post/Common/Blocks/Author/Image';
 import AuthorName from '../../Post/Common/Blocks/Author/Name';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const ReactionDetailsDialog = ({
   context,

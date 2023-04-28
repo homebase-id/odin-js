@@ -4,8 +4,8 @@ import { ellipsisAtMaxChar } from '../../../helpers/common';
 import { t } from '../../../helpers/i18n/dictionary';
 import useCircles from '../../../hooks/circles/useCircles';
 import AclDialog from '../../Dialog/AclDialog/AclDialog';
-import Lock from '../../ui/Icons/Lock/Lock';
-import OpenLock from '../../ui/Icons/OpenLock/OpenLock';
+import { Lock } from '@youfoundation/common-app';
+import { OpenLock } from '@youfoundation/common-app';
 
 export const AclSummary = ({
   acl,

@@ -9,7 +9,7 @@ import ActionButton from '../../ui/Buttons/ActionButton';
 import Input from '../../Form/Input';
 import Label from '../../Form/Label';
 import Textarea from '../../Form/Textarea';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const ProfileDialog = ({
   title,

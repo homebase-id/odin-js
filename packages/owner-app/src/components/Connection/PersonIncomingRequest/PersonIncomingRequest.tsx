@@ -4,7 +4,7 @@ import useConnection from '../../../hooks/connections/useConnection';
 import useSettings from '../../../hooks/settings/useSettings';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DomainHighlighter from '../../ui/DomainHighlighter/DomainHighlighter';
+import { DomainHighlighter } from '@youfoundation/common-app';
 import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import PersonCard from '../PersonCard/PersonCard';
 import { ConnectionRequest } from '@youfoundation/js-lib';

@@ -3,10 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { t } from '../../helpers/i18n/dictionary';
 import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
-import DomainHighlighter from '../../components/ui/DomainHighlighter/DomainHighlighter';
+import { DomainHighlighter } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useCallback, useEffect } from 'react';
-import Loader from '../../components/ui/Icons/Loader/Loader';
+import { Loader } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
 
 const YouAuthLogin = () => {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { t } from '../../../../helpers/i18n/dictionary';
 import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
 
-import Arrow from '../../../../components/ui/Icons/Arrow/Arrow';
+import { Arrow } from '@youfoundation/common-app';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 
 interface ChannelTeaserProps {

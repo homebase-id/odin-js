@@ -9,9 +9,7 @@ import { AclIcon, AclSummary } from '../../Acl/AclEditor/AclEditor';
 import AttributeFields from '../AttributeFields/AttributeFields';
 import AclWizard from '../../Acl/AclWizard/AclWizard';
 import ActionGroup from '../../ui/Buttons/ActionGroup';
-import Shield from '../../ui/Icons/Shield/Shield';
-import { ArrowDown, ArrowUp } from '../../ui/Icons/Arrow/Arrow';
-import Trash from '../../ui/Icons/Trash/Trash';
+import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 
 const AttributeEditor = ({
   attribute,

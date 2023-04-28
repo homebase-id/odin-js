@@ -1,6 +1,6 @@
 import { FC, useRef, useState } from 'react';
-import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import ActionButton, { ActionButtonProps } from './ActionButton';
+import { useOutsideTrigger } from '@youfoundation/common-app';
 
 interface ActionButtonWithOptionsProps extends Omit<ActionButtonProps, 'icon'> {
   options: {

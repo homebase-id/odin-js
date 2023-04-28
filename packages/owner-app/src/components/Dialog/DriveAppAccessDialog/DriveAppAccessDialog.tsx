@@ -7,7 +7,7 @@ import { drivePermissionLevels } from '../../../provider/permission/permissionLe
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 import useApp from '../../../hooks/apps/useApp';
 import useApps from '../../../hooks/apps/useApps';
 import { PermissionUpdateRequest } from '../../../provider/app/AppManagementProviderTypes';

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import useDrive from '../../../hooks/drives/useDrive';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
-import HardDrive from '../../../components/ui/Icons/HardDrive/HardDrive';
+import { HardDrive } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -19,8 +19,8 @@ import { getAccessFromPermissionNumber } from '../../DemoData/helpers';
 import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
 import FileBrowser from '../../../components/FileBrowser/FileBrowser';
-import Download from '../../../components/ui/Icons/Download/Download';
-import Upload from '../../../components/ui/Icons/Upload/Upload';
+import { Download } from '@youfoundation/common-app';
+import { Upload } from '@youfoundation/common-app';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();

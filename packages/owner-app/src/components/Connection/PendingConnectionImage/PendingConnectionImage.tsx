@@ -3,8 +3,7 @@ import useContact from '../../../hooks/contacts/useContact';
 import useImage from '../../../hooks/media/useImage';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import Eye from '../../ui/Icons/Eye/Eye';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { Eye, LoadingParagraph } from '@youfoundation/common-app';
 
 const PendingConnectionImage = ({
   odinId,

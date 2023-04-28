@@ -1,7 +1,6 @@
 import { useState, useRef, lazy, Suspense } from 'react';
-import useOutsideTrigger from '../../../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import ActionButton from '../../../../../ui/Buttons/ActionButton';
-import Lol from '../../../../../ui/Icons/Lol/Lol';
+import { Lol, useOutsideTrigger } from '@youfoundation/common-app';
 const EmojiPicker = lazy(() => import('./EmojiPicker'));
 
 const EmojiSelector = ({

@@ -1,5 +1,5 @@
+import { Arrow } from '@youfoundation/common-app';
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import Arrow from '../Icons/Arrow/Arrow';
 
 const CollapsableSection = ({
   isOpenByDefault = true,
@@ -41,7 +41,7 @@ const CollapsableSection = ({
         onClick={() => setIsOpen(!isOpen)}
       >
         <h3 className="pr-6 text-2xl dark:text-white">{title}</h3>
-        <button className="absolute top-0 right-0 bottom-0">
+        <button className="absolute bottom-0 right-0 top-0">
           <Arrow
             className={`h-4 w-4 transition-transform duration-300 ${
               isOpen ? 'rotate-90' : '-rotate-90'

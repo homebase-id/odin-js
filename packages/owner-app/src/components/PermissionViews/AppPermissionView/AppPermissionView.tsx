@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import { RedactedAppRegistration } from '../../../provider/app/AppManagementProviderTypes';
-import Grid from '../../ui/Icons/Grid/Grid';
+import { Grid } from '@youfoundation/common-app';
 
 const AppMembershipView = ({
   appDef,

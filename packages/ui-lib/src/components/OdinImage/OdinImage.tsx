@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import useImage from '../../hooks/image/useImage';
 import useTinyThumb from '../../hooks/image/useTinyThumb';
 import Loader from '../ui/Icons/Loader/Loader';
-import LoadingParagraph from '../ui/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import {
   TargetDrive,

@@ -1,7 +1,7 @@
 import { DriveDefinition, DriveGrant } from '@youfoundation/js-lib';
 import { t } from '../../helpers/i18n/dictionary';
 import { drivePermissionLevels } from '../../provider/permission/permissionLevels';
-import HardDrive from '../ui/Icons/HardDrive/HardDrive';
+import { HardDrive } from '@youfoundation/common-app';
 import Label from './Label';
 import PermissionLevelEditor from './PermissionLevelEditor';
 

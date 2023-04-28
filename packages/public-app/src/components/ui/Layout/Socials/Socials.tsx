@@ -1,9 +1,4 @@
-import Facebook from '../../Icons/Facebook/Facebook';
-import Twitter from '../../Icons/Twitter/Twitter';
-import Instagram from '../../Icons/Instagram/Instagram';
-import Linkedin from '../../Icons/Linkedin/Linkedin';
-import Tiktok from '../../Icons/Tiktok/Tiktok';
-import Person from '../../Icons/Person/Person';
+import { Tiktok, Instagram, Facebook, Twitter, Linkedin, Person } from '@youfoundation/common-app';
 
 const Socials = ({
   socialHandles,

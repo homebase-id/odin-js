@@ -11,16 +11,14 @@ import {
 import { useEffect, useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import useFiles from '../../hooks/files/useFiles';
-import { default as FileIcon } from '../ui/Icons/File/File';
-import Pager from '../ui/Pager/Pager';
 import Section from '../ui/Sections/Section';
 import Image from '../Image/Image';
 import { AclIcon, AclSummary } from '../Acl/AclEditor/AclEditor';
 import { ContactConfig } from '../../provider/contact/ContactTypes';
-import Clipboard from '../ui/Icons/Clipboard/Clipboard';
+import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import ActionButton from '../ui/Buttons/ActionButton';
 import ActionLink from '../ui/Buttons/ActionLink';
-import Download from '../ui/Icons/Download/Download';
+import { Download } from '@youfoundation/common-app';
 
 const dateFormat: Intl.DateTimeFormatOptions = {
   month: 'short',

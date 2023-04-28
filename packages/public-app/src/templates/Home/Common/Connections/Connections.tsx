@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import Pager from '../../../../components/ui/Pager/Pager';
 import { t } from '../../../../helpers/i18n/dictionary';
 import useConnections from '../../../../hooks/connections/useConnections';
 import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
 import ConnectionTeaser from './ConnectionTeaser';
+import { Pager } from '@youfoundation/common-app';
 
 const Connections = ({ className }: { className?: string }) => {
   return (

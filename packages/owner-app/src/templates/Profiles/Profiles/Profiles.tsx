@@ -3,9 +3,9 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useProfiles from '../../../hooks/profiles/useProfiles';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
-import Heart from '../../../components/ui/Icons/Heart/Heart';
+import { Heart } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
-import LoadingParagraph from '../../../components/ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
 

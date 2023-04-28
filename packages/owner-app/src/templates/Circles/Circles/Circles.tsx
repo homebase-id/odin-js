@@ -6,14 +6,14 @@ import {
 import { useState } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
 import useCircles from '../../../hooks/circles/useCircles';
-import CirclesIcon from '../../../components/ui/Icons/Circles/Circles';
+import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
-import LoadingParagraph from '../../../components/ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import useCircle from '../../../hooks/circles/useCircle';
-import Ellipsis from '../../../components/ui/Icons/Ellipsis/Ellipsis';
+import { Ellipsis } from '@youfoundation/common-app';
 
 const Circles = () => {
   const {

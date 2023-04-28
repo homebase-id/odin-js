@@ -1,8 +1,13 @@
 import { HomePageTheme } from '@youfoundation/js-lib';
 import { FC } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
-import Block from '../ui/Icons/Block/Block';
-import { HorizontalPosts, VerticalPosts, CoverPage } from '../ui/Icons/Theme/Theme';
+import {
+  Block,
+  HorizontalPosts,
+  VerticalPosts,
+  CoverPage,
+  IconProps,
+} from '@youfoundation/common-app';
 
 const ThemeSelector = ({
   name,

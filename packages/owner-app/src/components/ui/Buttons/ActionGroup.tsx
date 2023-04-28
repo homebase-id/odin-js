@@ -1,8 +1,8 @@
 import { FC, useRef, useState } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
-import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import ConfirmDialog from '../../Dialog/ConfirmDialog/ConfirmDialog';
 import ActionButton, { ActionButtonProps } from './ActionButton';
+import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
 
 export interface ActionGroupOptionProps {
   icon?: FC<IconProps>;

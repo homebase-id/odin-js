@@ -6,7 +6,7 @@ import { useIntersection } from '../../../hooks/intersection/useIntersection';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ContactFile, RawContact } from '../../../provider/contact/ContactTypes';
 import PendingConnectionImage from '../../../components/Connection/PendingConnectionImage/PendingConnectionImage';
-import AddressBook from '../../../components/ui/Icons/AddressBook/AddressBook';
+import { AddressBook } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 
 const Contacts = () => {

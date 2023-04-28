@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import ArticleComposer from '../../components/SocialFeed/ArticleComposer/ArticleComposer';
-import Article from '../../components/ui/Icons/Article/Article';
+import { Article } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { t } from '../../helpers/i18n/dictionary';
 import useBlog from '../../hooks/blog/useBlog';

@@ -20,9 +20,9 @@ import {
 import RichTextRenderer from '../../../../../../RichTextRenderer/RichTextRenderer';
 import AuthorName from '../../../Author/Name';
 import ActionGroup from '../../../../../../ui/Buttons/ActionGroup';
-import Ellipsis from '../../../../../../ui/Icons/Ellipsis/Ellipsis';
-import Pencil from '../../../../../../ui/Icons/Pencil/Pencil';
-import Times from '../../../../../../ui/Icons/Times/Times';
+import { Ellipsis } from '@youfoundation/common-app';
+import { Pencil } from '@youfoundation/common-app';
+import { Times } from '@youfoundation/common-app';
 import useCommentMedia from '../../../../../../../hooks/reactions/comments/useCommentMedia';
 import { ellipsisAtMaxChar } from '../../../../../../../helpers/common';
 import useComments from '../../../../../../../hooks/reactions/comments/useComments';

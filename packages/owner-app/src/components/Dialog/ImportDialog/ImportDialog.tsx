@@ -8,7 +8,7 @@ import usePortal from '../../../hooks/portal/usePortal';
 import Alert from '../../ui/Alerts/Alert/Alert';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 
 const ImportDialog = ({
   title,

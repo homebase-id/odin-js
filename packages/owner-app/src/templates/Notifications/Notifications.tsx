@@ -1,7 +1,7 @@
 import { Toast } from '../../components/Toaster/Toaster';
 import { t } from '../../helpers/i18n/dictionary';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
-import Bell from '../../components/ui/Icons/Bell/Bell';
+import { Bell } from '@youfoundation/common-app';
 import useNotifications from '../../hooks/notifications/useNotifications';
 
 const Notifications = () => {

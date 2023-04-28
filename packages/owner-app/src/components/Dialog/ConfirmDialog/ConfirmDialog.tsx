@@ -4,7 +4,7 @@ import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import Input from '../../Form/Input';
 import Label from '../../Form/Label';
-import Exclamation from '../../ui/Icons/Exclamation/Exclamation';
+import { Exclamation } from '@youfoundation/common-app';
 
 const ConfirmDialog = ({
   title,

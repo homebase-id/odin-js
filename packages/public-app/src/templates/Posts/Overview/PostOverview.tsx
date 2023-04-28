@@ -11,9 +11,9 @@ import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOv
 import { useIntersection } from '../../../hooks/intersection/useIntersection';
 import useChannel from '../../../hooks/blog/useChannel';
 import { flattenInfinteData } from '../../../helpers/common';
-import LoadingParagraph from '../../../components/ui/LoadingParagraph/LoadingParagraph';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 10;
 const PostOverview = () => {

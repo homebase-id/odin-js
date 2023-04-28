@@ -3,7 +3,7 @@ import useSettings from '../../hooks/settings/useSettings';
 import ErrorNotification from '../../components/ui/Alerts/ErrorNotification/ErrorNotification';
 import Checkbox from '../../components/Form/Checkbox';
 import Label from '../../components/Form/Label';
-import Cog from '../../components/ui/Icons/Cog/Cog';
+import { Cog } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import Section from '../../components/ui/Sections/Section';
 

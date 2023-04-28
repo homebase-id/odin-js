@@ -2,9 +2,9 @@ import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundatio
 import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import ConfirmDialog from '../Dialog/ConfirmDialog/ConfirmDialog';
-import Exclamation from '../ui/Icons/Exclamation/Exclamation';
-import Pencil from '../ui/Icons/Pencil/Pencil';
-import Trash from '../ui/Icons/Trash/Trash';
+import { Exclamation } from '@youfoundation/common-app';
+import { Pencil } from '@youfoundation/common-app';
+import { Trash } from '@youfoundation/common-app';
 import ErrorNotification from '../ui/Alerts/ErrorNotification/ErrorNotification';
 import ImageDialog from '../RichTextEditor/ImageDialog/ImageDialog';
 import useImage from '../../hooks/image/useImage';

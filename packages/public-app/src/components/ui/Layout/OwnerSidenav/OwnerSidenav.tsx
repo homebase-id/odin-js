@@ -2,32 +2,35 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../../../hooks/auth/useAuth';
 
-import Circles from '../../Icons/Circles/Circles';
-import Cog from '../../Icons/Cog/Cog';
-import Grid from '../../Icons/Grid/Grid';
-import HardDrive from '../../Icons/HardDrive/HardDrive';
-import Heart from '../../Icons/Heart/Heart';
-import Person from '../../Icons/Person/Person';
-import Quote from '../../Icons/Quote/Quote';
-import Scissors from '../../Icons/Scissors/Scissors';
 import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
 import { getVersion } from '../../../../helpers/common';
-import Bars from '../../Icons/Bars/Bars';
 import { t } from '../../../../helpers/i18n/dictionary';
-import useOutsideTrigger from '../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import useDarkMode from '../../../../hooks/darkMode/useDarkMode';
-import Times from '../../Icons/Times/Times';
-import Feed from '../../Icons/Feed/Feed';
 import { OwnerImage } from '../../../Post/Common/Blocks/Author/Image';
-import Article from '../../Icons/Article/Article';
-import Ellipsis from '../../Icons/Ellipsis/Ellipsis';
 import useProfiles from '../../../../hooks/profiles/useProfiles';
-import { ArrowDown } from '../../Icons/Arrow/Arrow';
-import AddressBook from '../../Icons/AddressBook/AddressBook';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
-import Wallet from '../../Icons/Wallet/Wallet';
-import Bell from '../../Icons/Bell/Bell';
 import useNotifications from '../../../../hooks/notifications/useNotifcations';
+import {
+  Bars,
+  Times,
+  Feed,
+  Article,
+  Quote,
+  AddressBook,
+  Circles,
+  useOutsideTrigger,
+  Ellipsis,
+  Person,
+  Cog,
+  Scissors,
+  HardDrive,
+  Grid,
+  Wallet,
+  IconProps,
+  Heart,
+  ArrowDown,
+  Bell,
+} from '@youfoundation/common-app';
 
 const STORAGE_KEY = 'isOpen';
 

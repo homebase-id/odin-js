@@ -5,9 +5,9 @@ import useAuth from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import ActionLink from '../../ui/Buttons/ActionLink';
-import Feed from '../../ui/Icons/Feed/Feed';
+import { Feed } from '@youfoundation/common-app';
 import useFollowDetail from '../../../hooks/follow/useFollowDetail';
-import Check from '../../ui/Icons/Check/Check';
+import { Check } from '@youfoundation/common-app';
 
 const FollowLink = ({
   className,

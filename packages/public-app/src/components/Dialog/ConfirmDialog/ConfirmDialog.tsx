@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
-import Exclamation from '../../ui/Icons/Exclamation/Exclamation';
+import { Exclamation } from '@youfoundation/common-app';
 
 const ConfirmDialog = ({
   title,
@@ -38,12 +38,12 @@ const ConfirmDialog = ({
               return false;
             }}
           >
-            <div className="bg-white px-4 pt-5 pb-4 text-gray-900 dark:bg-black dark:text-slate-50 sm:p-6 sm:pb-4">
+            <div className="bg-white px-4 pb-4 pt-5 text-gray-900 dark:bg-black dark:text-slate-50 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-red-400 sm:mx-0 sm:h-10 sm:w-10">
                   <Exclamation />
                 </div>
-                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                   <h3 className="text-lg font-medium leading-6" id="modal-title">
                     {title}
                   </h3>
@@ -61,7 +61,7 @@ const ConfirmDialog = ({
               </button>
               <button
                 type="button"
-                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-800 dark:bg-slate-700 dark:text-white sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-800 dark:bg-slate-700 dark:text-white sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
                 onClick={onCancel}
               >
                 {t('Cancel')}

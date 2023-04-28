@@ -10,7 +10,7 @@ import Input from '../../Form/Input';
 import Label from '../../Form/Label';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
 import Textarea from '../../Form/Textarea';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 import { CircleDefinition } from '@youfoundation/js-lib';
 
 const CircleDialog = ({

@@ -31,14 +31,18 @@ import { ListToolbarButton } from '@udecode/plate-ui-list';
 import { LinkToolbarButton } from '@udecode/plate-ui-link';
 
 import { RichText, TargetDrive } from '@youfoundation/js-lib';
-import Quote from '../ui/Icons/RichTextEditorIcons/Quote/Quote';
-import Heading from '../ui/Icons/RichTextEditorIcons/Heading/Heading';
-import Code from '../ui/Icons/RichTextEditorIcons/Code/Code';
-import OrderedList from '../ui/Icons/RichTextEditorIcons/OrderedList/OrderedList';
-import UnorderedList from '../ui/Icons/RichTextEditorIcons/UnorderedList/UnorderedList';
-import Bold from '../ui/Icons/RichTextEditorIcons/Bold/Bold';
-import Italic from '../ui/Icons/RichTextEditorIcons/Italic/Italic';
-import Underline from '../ui/Icons/RichTextEditorIcons/Underline/Underline';
+import {
+  RichTextQuote,
+  Heading,
+  Code,
+  OrderedList,
+  UnorderedList,
+  Bold,
+  Italic,
+  Underline,
+  Link,
+  LinkButton,
+} from '@youfoundation/common-app';
 import {
   AnchorElement,
   Blockquote,
@@ -53,17 +57,15 @@ import {
   UnderlineMark,
   UnorderedListBlock,
 } from './ElementRenderers';
-import Image from '../ui/Icons/RichTextEditorIcons/Image/Image';
+import { Image } from '@youfoundation/common-app';
 import { createImagePlugin, ELEMENT_IMAGE, ImageToolbarButton } from './ImagePlugin/ImagePlugin';
 
-import ExternalLink from '../ui/Icons/ExternalLink/ExternalLink';
 import {
   createLinkPlugin as createLinkButtonPlugin,
   ELEMENT_LINK as ELEMENT_LINK_BLOCK,
   LinkToolbarButton as LinkButtonToolbarButton,
 } from './LinkPlugin';
 import { linkPlugin } from './LinkPluginOptions';
-import Link from '../ui/Icons/Link/Link';
 import { ReactNode } from 'react';
 
 const NewRichTextEditor = ({
@@ -167,7 +169,10 @@ const NewRichTextEditor = ({
           />
         </div>
         <div className="flex flex-row md:mr-3">
-          <BlockToolbarButton type={getPluginType(editor, ELEMENT_BLOCKQUOTE)} icon={<Quote />} />
+          <BlockToolbarButton
+            type={getPluginType(editor, ELEMENT_BLOCKQUOTE)}
+            icon={<RichTextQuote />}
+          />
           <BlockToolbarButton type={getPluginType(editor, ELEMENT_CODE_BLOCK)} icon={<Code />} />
         </div>
         <div className="flex flex-row md:mr-3">
@@ -179,7 +184,7 @@ const NewRichTextEditor = ({
         </div>
         <div className="flex flex-row md:mr-3">
           <ImageToolbarButton targetDrive={mediaDrive} icon={<Image />} key={'image-component'} />
-          <LinkButtonToolbarButton icon={<ExternalLink />} key={'link-component'} />
+          <LinkButtonToolbarButton icon={<LinkButton />} key={'link-component'} />
         </div>
       </>
     );

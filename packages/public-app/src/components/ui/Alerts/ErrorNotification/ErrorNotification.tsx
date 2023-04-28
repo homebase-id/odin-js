@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { t } from '../../../../helpers/i18n/dictionary';
-import Times from '../../Icons/Times/Times';
 import Alert from '../Alert/Alert';
+import { Times } from '@youfoundation/common-app';
 
 const getKnownErrorMessages = (errorCode: number): string | undefined => {
   if (errorCode) {

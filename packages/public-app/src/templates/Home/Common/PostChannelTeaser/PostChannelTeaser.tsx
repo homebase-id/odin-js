@@ -3,7 +3,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
-import Arrow from '../../../../components/ui/Icons/Arrow/Arrow';
+import { Arrow } from '@youfoundation/common-app';
 import Image from '../../../../components/Image/Image';
 import { t } from '../../../../helpers/i18n/dictionary';
 import ActionLink from '../../../../components/ui/Buttons/ActionLink';

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import ActionButton from '../ui/Buttons/ActionButton';
-import Times from '../ui/Icons/Times/Times';
+import { Times } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import useNotifications from '../../hooks/notifications/useNotifcations';
 

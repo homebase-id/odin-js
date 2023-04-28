@@ -3,9 +3,9 @@ import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import useCircle from '../../../hooks/circles/useCircle';
-import Arrow from '../../ui/Icons/Arrow/Arrow';
-import Circles from '../../ui/Icons/Circles/Circles';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { Arrow } from '@youfoundation/common-app';
+import { Circles } from '@youfoundation/common-app';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const CirclePermissionView = ({
   circleDef,

@@ -1,12 +1,15 @@
+import {
+  IconProps,
+  Save,
+  Arrow,
+  Plus,
+  Trash,
+  Pencil,
+  Shield,
+  Check,
+  Times,
+} from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
-import Arrow from '../Icons/Arrow/Arrow';
-import Check from '../Icons/Check/Check';
-import Pencil from '../Icons/Pencil/Pencil';
-import Plus from '../Icons/Plus/Plus';
-import Save from '../Icons/Save/Save';
-import Shield from '../Icons/Shield/Shield';
-import Times from '../Icons/Times/Times';
-import Trash from '../Icons/Trash/Trash';
 
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 

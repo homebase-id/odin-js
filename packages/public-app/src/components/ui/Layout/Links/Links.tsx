@@ -2,22 +2,25 @@ import { FC, ReactNode, useEffect, useState } from 'react';
 import { t } from '../../../../helpers/i18n/dictionary';
 import useLinks from '../../../../hooks/links/useLinks';
 import useSiteData from '../../../../hooks/siteData/useSiteData';
-import { default as ClipboardIcon } from '../../Icons/Clipboard/Clipboard';
-import Discord from '../../Icons/Discord/Discord';
-import EpicGames from '../../Icons/EpicGames/EpicGames';
-import Facebook from '../../Icons/Facebook/Facebook';
-import Github from '../../Icons/Github/Github';
-import Globe from '../../Icons/Globe/Globe';
-import Instagram from '../../Icons/Instagram/Instagram';
-import Linkedin from '../../Icons/Linkedin/Linkedin';
-import Minecraft from '../../Icons/Minecraft/Minecraft';
-import Person from '../../Icons/Person/Person';
-import RiotGames from '../../Icons/RiotGames/RiotGames';
-import Stackoverflow from '../../Icons/Stackoverflow/Stackoverflow';
-import Steam from '../../Icons/Steam/Steam';
-import Tiktok from '../../Icons/Tiktok/Tiktok';
-import Twitter from '../../Icons/Twitter/Twitter';
-import Youtube from '../../Icons/Youtube/Youtube';
+import {
+  Clipboard as ClipboardIcon,
+  Discord,
+  EpicGames,
+  Facebook,
+  Github,
+  Globe,
+  IconProps,
+  Instagram,
+  Linkedin,
+  Minecraft,
+  Person,
+  RiotGames,
+  Stackoverflow,
+  Steam,
+  Tiktok,
+  Twitter,
+  Youtube,
+} from '@youfoundation/common-app';
 
 const getIcon = (type: string): React.FC<IconProps> => {
   switch (type) {
@@ -98,7 +101,7 @@ const Links = ({
                   icon={getIcon(social.type)}
                   link={link}
                   style={style}
-                  className={direction === 'col' ? 'py-3 px-4' : 'py-2 px-3'}
+                  className={direction === 'col' ? 'px-4 py-3' : 'px-3 py-2'}
                   copyText={link ? undefined : social.username}
                 >
                   {link ? (
@@ -120,7 +123,7 @@ const Links = ({
           link={link.target}
           icon={Globe}
           style={style}
-          className={direction === 'col' ? 'py-3 px-4' : 'py-2 px-3'}
+          className={direction === 'col' ? 'px-4 py-3' : 'px-3 py-2'}
         >
           {link.text}
         </BetterLink>

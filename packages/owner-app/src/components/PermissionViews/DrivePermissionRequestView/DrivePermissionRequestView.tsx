@@ -2,9 +2,9 @@ import { t } from '../../../helpers/i18n/dictionary';
 import useDrive from '../../../hooks/drives/useDrive';
 import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
-import HardDrive from '../../ui/Icons/HardDrive/HardDrive';
+import { HardDrive } from '@youfoundation/common-app';
 import { getAccessFromPermissionNumber } from '../../../templates/DemoData/helpers';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 const DrivePermissionRequestView = ({
   driveGrant,

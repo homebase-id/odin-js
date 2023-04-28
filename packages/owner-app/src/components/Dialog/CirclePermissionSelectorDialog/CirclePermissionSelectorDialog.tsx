@@ -4,7 +4,7 @@ import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
-import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { DialogWrapper } from '@youfoundation/common-app';
 import ErrorNotification from '../../ui/Alerts/ErrorNotification/ErrorNotification';
 import { PermissionSetGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
 import PermissionSelector from '../../Form/PermissionSelector';

@@ -1,6 +1,5 @@
+import { Exclamation, Question } from '@youfoundation/common-app';
 import { ReactNode } from 'react';
-import Exclamation from '../../Icons/Exclamation/Exclamation';
-import Question from '../../Icons/Question/Question';
 
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';

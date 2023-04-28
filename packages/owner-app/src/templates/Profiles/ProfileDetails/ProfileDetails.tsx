@@ -9,21 +9,20 @@ import AttributeCreator from '../../../components/Attribute/AttributeCreator/Att
 import Section from '../../../components/ui/Sections/Section';
 import Input from '../../../components/Form/Input';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
-import Add from '../../../components/ui/Icons/Plus/Plus';
 import { t } from '../../../helpers/i18n/dictionary';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
-import Heart from '../../../components/ui/Icons/Heart/Heart';
+import { Heart, Plus } from '@youfoundation/common-app';
 import SectionEditor from '../../../components/SectionEditor/SectionEditor';
 import useProfileSections from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
-import LoadingParagraph from '../../../components/ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import Label from '../../../components/Form/Label';
 import ErrorNotification from '../../../components/ui/Alerts/ErrorNotification/ErrorNotification';
 import ActionGroup from '../../../components/ui/Buttons/ActionGroup';
-import Trash from '../../../components/ui/Icons/Trash/Trash';
+import { Trash } from '@youfoundation/common-app';
 
 const ProfileDetails = () => {
   const {
@@ -124,7 +123,7 @@ const ProfileDetails = () => {
         items={[
           ...tabItems,
           {
-            title: <Add className="h-5 w-5" />,
+            title: <Plus className="h-5 w-5" />,
             text: `-- ${t('Create new section')} --`,
             key: 'new',
             path: `/owner/profile/${profileKey}/new`,

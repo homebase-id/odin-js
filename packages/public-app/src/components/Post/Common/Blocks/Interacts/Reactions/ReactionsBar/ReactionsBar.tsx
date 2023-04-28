@@ -5,7 +5,7 @@ import useAuth from '../../../../../../../hooks/auth/useAuth';
 import useMyEmojiReactions from '../../../../../../../hooks/reactions/emojis/useMyEmojiReactions';
 import useReaction from '../../../../../../../hooks/reactions/useReaction';
 import ErrorNotification from '../../../../../../ui/Alerts/ErrorNotification/ErrorNotification';
-import Plus from '../../../../../../ui/Icons/Plus/Plus';
+import { Plus } from '@youfoundation/common-app';
 import EmojiPicker from '../../EmojiPicker/EmojiPicker';
 import { CanReactDetails } from '../../../../../../../hooks/reactions/useCanReact';
 

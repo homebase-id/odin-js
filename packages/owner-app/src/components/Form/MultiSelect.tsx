@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
-import useOutsideTrigger from '../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import Arrow from '../ui/Icons/Arrow/Arrow';
-import Times from '../ui/Icons/Times/Times';
+import { useOutsideTrigger, Times, Arrow } from '@youfoundation/common-app';
 
 interface SelectElement {
   value: string;

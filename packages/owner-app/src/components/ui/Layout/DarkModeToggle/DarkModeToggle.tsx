@@ -1,9 +1,8 @@
 import { FC } from 'react';
 import useDarkMode from '../../../../hooks/useDarkMode';
-import Moon from '../../Icons/Moon/Moon';
-import Sun from '../../Icons/Sun/Sun';
 
 import './darkModeToggle.css';
+import { Moon, Sun } from '@youfoundation/common-app';
 
 interface DarkModeToggleProps {
   className?: string;

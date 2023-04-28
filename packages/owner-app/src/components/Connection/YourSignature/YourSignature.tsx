@@ -11,7 +11,7 @@ import { getInitialsOfNameAttribute } from '../../../helpers/common';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import LoadingParagraph from '../../ui/Loaders/LoadingParagraph/LoadingParagraph';
+import { LoadingParagraph } from '@youfoundation/common-app';
 
 interface infoObject {
   name: string;

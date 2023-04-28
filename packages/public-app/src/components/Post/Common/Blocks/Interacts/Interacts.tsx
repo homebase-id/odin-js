@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { t } from '../../../../../helpers/i18n/dictionary';
-import Bubble from '../../../../ui/Icons/Bubble/Bubble';
+import { Bubble } from '@youfoundation/common-app';
 import LikeButton from './Reactions/LikeButton/LikeButton';
 import Comment, { CommentTeaser } from './Comments/Comment/Comment';
 import {
