@@ -32,7 +32,7 @@ jobs:
       - run: npm ci
 
       # run with -workspaces to have lib built as well, as ui depends on it
-      - run: npm run build -workspaces
+      - run: npm run build -w ./packages/js-lib -w ./packages/ui-lib
 
       - run: npm publish --w ./packages/ui-lib
         env:
