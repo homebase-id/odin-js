@@ -9,7 +9,7 @@ on:
     paths:
       - 'packages/js-lib/src/**'
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo

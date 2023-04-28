@@ -1,4 +1,4 @@
-name: Publish js-ui Prerelease to Github Packages
+name: Publish ui-lib Prerelease to Github Packages
 on:
   workflow_dispatch:
   release:
@@ -9,7 +9,7 @@ on:
     paths:
       - 'packages/ui-lib/src/**'
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
