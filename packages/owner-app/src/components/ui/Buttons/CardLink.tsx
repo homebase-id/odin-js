@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import HybridLink from './HybridLink';
 
 const CardLink = ({
@@ -8,6 +8,7 @@ const CardLink = ({
   title,
   description,
   children,
+  icon,
 }: {
   className?: string;
   isDisabled?: boolean;
@@ -15,6 +16,7 @@ const CardLink = ({
   title?: string | ReactNode;
   description?: string;
   children?: ReactNode;
+  icon?: FC<IconProps>;
 }) => {
   return (
     <HybridLink
@@ -23,11 +25,16 @@ const CardLink = ({
         className ?? ''
       } ${isDisabled ? 'opacity-50' : ''}`}
     >
-      <h2 className="bg-slate-100 p-4 text-xl dark:bg-slate-900 dark:text-slate-200">{title}</h2>
-      <div className="flex flex-grow flex-col p-4">
-        <p>{description}</p>
-        {children}
+      <div className="flex flex-row items-center bg-slate-100 p-4 dark:bg-slate-900 dark:text-slate-200">
+        <h2 className="text-xl">{title}</h2>
+        {icon && icon({ className: 'w-4 h-4 ml-auto' })}
       </div>
+      {description || children ? (
+        <div className="flex flex-grow flex-col p-4">
+          <p>{description}</p>
+          {children}
+        </div>
+      ) : null}
     </HybridLink>
   );
 };
