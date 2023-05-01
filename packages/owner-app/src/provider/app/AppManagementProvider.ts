@@ -109,7 +109,7 @@ export const GetAppRegistration = async (
     ...appreg,
     grant: {
       ...appreg.grant,
-      driveGrants: appreg.grant.driveGrants.map((driveGrant) => {
+      driveGrants: appreg.grant.driveGrants?.map((driveGrant) => {
         return {
           permissionedDrive: {
             drive: driveGrant.permissionedDrive.drive,
@@ -122,7 +122,7 @@ export const GetAppRegistration = async (
     },
     circleMemberPermissionSetGrantRequest: {
       ...appreg.circleMemberPermissionSetGrantRequest,
-      drives: appreg.circleMemberPermissionSetGrantRequest.drives.map((driveGrant) => {
+      drives: appreg.circleMemberPermissionSetGrantRequest?.drives?.map((driveGrant) => {
         return {
           permissionedDrive: {
             drive: driveGrant.permissionedDrive.drive,
@@ -147,7 +147,7 @@ export const GetAppRegistrations = async (
       ...appreg,
       grant: {
         ...appreg.grant,
-        driveGrants: appreg.grant.driveGrants.map((driveGrant) => {
+        driveGrants: appreg.grant.driveGrants?.map((driveGrant) => {
           return {
             permissionedDrive: {
               drive: driveGrant.permissionedDrive.drive,
@@ -160,7 +160,7 @@ export const GetAppRegistrations = async (
       },
       circleMemberPermissionSetGrantRequest: {
         ...appreg.circleMemberPermissionSetGrantRequest,
-        drives: appreg.circleMemberPermissionSetGrantRequest.drives.map((driveGrant) => {
+        drives: appreg.circleMemberPermissionSetGrantRequest.drives?.map((driveGrant) => {
           return {
             permissionedDrive: {
               drive: driveGrant.permissionedDrive.drive,
