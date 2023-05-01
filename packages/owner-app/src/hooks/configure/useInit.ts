@@ -314,7 +314,7 @@ const useInit = () => {
   };
 
   const doCleanInit = async (isEmptyInit: boolean) => {
-    if (!isAuthenticated || !firstRunToken) {
+    if (!isAuthenticated) {
       return;
     }
 
@@ -330,7 +330,7 @@ const useInit = () => {
   };
 
   const doInitWithData = async (data: WelcomeData) => {
-    if (!isAuthenticated || !firstRunToken) {
+    if (!isAuthenticated) {
       return;
     }
 
