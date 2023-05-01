@@ -47,12 +47,14 @@ const CircleSelector = ({
             if (!circle.id) {
               return;
             }
-            const circleId = circle.id;
+            const clickedCircleId = circle.id;
 
-            if (!selection.some((circleGrant) => stringGuidsEqual(circleGrant, circleId))) {
-              setSelection([...selection, circleId]);
+            if (!selection.some((circleGrant) => stringGuidsEqual(circleGrant, clickedCircleId))) {
+              setSelection([...selection, clickedCircleId]);
             } else {
-              setSelection(selection.filter((circleId) => !stringGuidsEqual(circleId, circleId)));
+              setSelection(
+                selection.filter((circleId) => !stringGuidsEqual(circleId, clickedCircleId))
+              );
             }
           };
 
