@@ -14,7 +14,7 @@ const root = '/config/system';
 
 export const initialize = async (
   dotYouClient: DotYouClient,
-  firstRunToken: string,
+  firstRunToken: string | null,
   drives?: DriveDefinitionParam[],
   circles?: CircleDefinition[]
 ) => {
