@@ -13,7 +13,8 @@
     ".": {
       "import": "./dist/common-app.js",
       "require": "./dist/common-app.umd.cjs"
-    }
+    },
+    "./dist/style.css": "./dist/style.css"
   },
   "types": "./dist/common-app.d.ts",
   "sideEffects": false,

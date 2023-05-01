@@ -54,6 +54,7 @@ const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const UiDemo = lazy(() => import('../templates/DemoData/UiDemo'));
 const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
+import '@youfoundation/common-app/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';

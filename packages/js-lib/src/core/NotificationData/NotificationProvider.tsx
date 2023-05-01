@@ -130,6 +130,8 @@ export const Subscribe = async (
         }
       }
 
+      if (isDebug) console.debug(notification);
+
       const parsedNotification = ParseRawClientNotification(notification);
       handlers.map(async (handler) => await handler(parsedNotification));
     };

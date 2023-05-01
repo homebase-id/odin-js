@@ -131,7 +131,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
 
   return (
     <div className={`relative border border-slate-100 dark:border-slate-800 ${className ?? ''}`}>
-      <div className="-mr-6 flex flex-row ">
+      <div className="flex flex-row ">
         <div className="aspect-square w-1/4 max-w-[10rem]">
           {photoAttributesLoading ? (
             <LoadingParagraph className={`aspect-square`} />
