@@ -35,6 +35,7 @@ import {
   encryptWithKeyheader,
   decryptBytesResponse,
   decryptChunkedBytesResponse,
+  encryptWithSharedSecret,
 } from './SecurityHelpers';
 import {
   byteArrayToString,
@@ -660,11 +661,17 @@ export const uploadHeader = async (
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
-  const encryptedDescriptor = await buildDescriptor(
+  const strippedMetaData: UploadFileMetadata = {
+    ...encryptedMetaData,
+    appData: { ...encryptedMetaData.appData, additionalThumbnails: undefined },
+  };
+
+  const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
-    keyHeader,
-    instructions,
-    encryptedMetaData
+    {
+      fileMetadata: strippedMetaData,
+    },
+    instructions.transferIv
   );
 
   const data = await buildFormData(
@@ -672,7 +679,7 @@ export const uploadHeader = async (
     encryptedDescriptor,
     undefined,
     undefined,
-    keyHeader
+    undefined
   );
 
   // Upload
