@@ -52,19 +52,20 @@ const useNotifications = () => {
       queryClient.invalidateQueries(['pendingConnections']);
     }
 
+    const otherId =
+      clientNotification.notificationType === 'connectionRequestReceived'
+        ? clientNotification.sender
+        : clientNotification.recipient;
+
     const notification: Notification = {
       title:
         clientNotification.notificationType === 'connectionRequestReceived'
           ? t('New connection request')
           : t('Your connection request was accepted'),
-      body: (
-        <>
-          <DomainHighlighter>{clientNotification.sender}</DomainHighlighter>
-        </>
-      ),
-      imgSrc: `https://${clientNotification.sender}/pub/image`,
+      body: <DomainHighlighter>{otherId}</DomainHighlighter>,
+      imgSrc: `https://${otherId}/pub/image`,
       live: true,
-      href: `/owner/connections/${clientNotification.sender}`,
+      href: `/owner/connections/${otherId}`,
       type:
         clientNotification.notificationType === 'connectionRequestReceived' ? 'pending' : undefined,
     };

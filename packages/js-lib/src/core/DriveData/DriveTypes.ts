@@ -167,7 +167,7 @@ export interface FileQueryParams {
   globalTransitId?: string[] | undefined;
   clientUniqueIdAtLeastOne?: string[] | undefined;
   systemFileType?: SystemFileType;
-  archivalStatus?: ArchivalStatus;
+  archivalStatus?: ArchivalStatus[];
 }
 
 export interface GetModifiedResultOptions {
@@ -185,6 +185,8 @@ export interface GetBatchQueryResultOptions {
   cursorState?: string | undefined;
   maxRecords: number;
   includeMetadataHeader?: boolean;
+  sorting?: 'fileId' | 'userDate'; // default is 'fileId'
+  ordering?: 'default' | 'newestFirst' | 'oldestFirst'; // default is 'default'
 }
 
 export interface QueryModifiedResponse {

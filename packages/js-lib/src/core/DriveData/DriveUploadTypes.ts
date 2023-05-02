@@ -21,6 +21,7 @@ export interface StorageOptions {
   drive: TargetDrive;
   overwriteFileId?: string | null;
   expiresTimestamp?: number | null;
+  storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
 export interface TransitOptions {

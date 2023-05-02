@@ -39,6 +39,7 @@ export interface ClientDeviceNotification extends ClientNotification {
 export interface ClientConnectionNotification extends ClientNotification {
   notificationType: 'connectionRequestReceived' | 'connectionRequestAccepted';
   sender: string;
+  recipient: string;
 }
 
 export interface ClientUnknownNotification extends ClientNotification {
