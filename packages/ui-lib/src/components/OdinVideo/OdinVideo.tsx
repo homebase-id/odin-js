@@ -31,10 +31,11 @@ export interface OdinVideoProps {
 interface OndinChunkedProps extends OdinVideoProps {
   videoMetaData: SegmentedVideoMetadata;
   videoRef: React.RefObject<HTMLVideoElement>;
+  onFatalError?: () => void;
 }
 
 interface OndinDirectProps extends OdinVideoProps {
-  videoMetaData: PlainVideoMetadata;
+  videoMetaData: PlainVideoMetadata | SegmentedVideoMetadata;
 }
 
 export const OdinVideo = (videoProps: OdinVideoProps) => {
@@ -42,6 +43,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const [shouldFallback, setShouldFallback] = useState(false);
   useIntersection(videoRef, () => setIsInView(true));
 
   const {
@@ -54,12 +56,18 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-state="video-placeholder"
       className={className}
       ref={videoRef}
+      key={shouldFallback ? 'fallback' : 'video'} // Get a new video element when we fallback to direct source
       onClick={(e) => e.stopPropagation()}
     >
-      {isInView && videoMetaData?.isSegmented ? (
-        <ChunkedSource {...videoProps} videoMetaData={videoMetaData} videoRef={videoRef} />
+      {isInView && videoMetaData?.isSegmented && !shouldFallback ? (
+        <ChunkedSource
+          {...videoProps}
+          videoMetaData={videoMetaData}
+          videoRef={videoRef}
+          onFatalError={() => setShouldFallback(true)}
+        />
       ) : null}
-      {isInView && videoMetaData?.isSegmented === false ? (
+      {isInView && videoMetaData && (videoMetaData.isSegmented === false || shouldFallback) ? (
         <DirectSource {...videoProps} videoMetaData={videoMetaData} />
       ) : null}
     </video>
@@ -75,6 +83,7 @@ const ChunkedSource = ({
   fileId,
   videoMetaData,
   videoRef,
+  onFatalError,
 }: OndinChunkedProps) => {
   const activeObjectUrl = useRef<string>();
 
@@ -163,7 +172,14 @@ const ChunkedSource = ({
           { once: true }
         );
       } else {
-        sourceBuffer.appendBuffer(chunk.buffer);
+        try {
+          sourceBuffer.appendBuffer(chunk.buffer);
+        } catch (e: any) {
+          if (e.name === 'QuotaExceededError') {
+            console.error('appendBuffer error', e);
+            onFatalError && onFatalError();
+          }
+        }
       }
     };
 
