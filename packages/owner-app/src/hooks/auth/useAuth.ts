@@ -8,12 +8,13 @@ import {
   setNewPassword as setNewOwnerPassword,
   logout as logoutOwner,
 } from '../../provider/AuthenticationProvider';
-import { uint8ArrayToBase64, base64ToUint8Array, ApiType } from '@youfoundation/js-lib';
-import { OwnerClient } from '@youfoundation/common-app';
-
-const HOME_SHARED_SECRET = 'HSS';
-const HOME_STORAGE_IDENTITY_KEY = 'identity';
-const SHARED_SECRET = 'SS';
+import { uint8ArrayToBase64 } from '@youfoundation/js-lib';
+import {
+  HOME_SHARED_SECRET,
+  OWNER_SHARED_SECRET,
+  STORAGE_IDENTITY_KEY,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 
 export const LOGIN_PATH = '/owner/login';
 export const FIRSTRUN_PATH = '/owner/firstrun';
@@ -23,11 +24,13 @@ export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
 const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(SHARED_SECRET);
+  const raw = window.localStorage.getItem(OWNER_SHARED_SECRET);
   return !!raw;
 };
 
 const useAuth = () => {
+  const { getDotYouClient, getApiType, getSharedSecret } = useDotYouClient();
+
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret() ? 'unknown' : 'anonymous');
@@ -42,7 +45,7 @@ const useAuth = () => {
       return false;
     }
 
-    window.localStorage.setItem(SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
+    window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     setAuthenticationState('authenticated');
 
     doRedirectToReturn();
@@ -76,18 +79,11 @@ const useAuth = () => {
     await logoutOwner();
     setAuthenticationState('anonymous');
 
-    window.localStorage.removeItem(SHARED_SECRET);
+    window.localStorage.removeItem(OWNER_SHARED_SECRET);
     window.localStorage.removeItem(HOME_SHARED_SECRET);
-    window.localStorage.removeItem(HOME_STORAGE_IDENTITY_KEY);
+    window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
 
     window.location.href = LOGIN_PATH;
-  };
-
-  const getSharedSecret = () => {
-    const raw = window.localStorage.getItem(SHARED_SECRET);
-    if (raw) {
-      return base64ToUint8Array(raw);
-    }
   };
 
   /// Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute
@@ -100,17 +96,6 @@ const useAuth = () => {
         window.location.href = HOME_PATH;
       }
     }
-  };
-
-  const getApiType = () => {
-    return ApiType.Owner;
-  };
-
-  const getDotYouClient = () => {
-    return new OwnerClient({
-      sharedSecret: getSharedSecret(),
-      api: getApiType(),
-    });
   };
 
   useEffect(() => {

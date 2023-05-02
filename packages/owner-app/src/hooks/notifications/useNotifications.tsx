@@ -1,7 +1,7 @@
 import { ClientConnectionNotification, TypedConnectionNotification } from '@youfoundation/js-lib';
 import { ReactNode, useEffect, useState } from 'react';
 
-import useNotificationSubscriber from '../transitProcessor/useNotificationSubscriber';
+import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { usePendingConnections } from '../connections/useConnections';
 import { t } from '../../helpers/i18n/dictionary';
 import { DomainHighlighter } from '@youfoundation/common-app';

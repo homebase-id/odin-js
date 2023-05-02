@@ -1,5 +1,3 @@
-import { ApiType, DotYouClient, base64ToUint8Array } from '@youfoundation/js-lib';
-import { OwnerClient } from '@youfoundation/common-app';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useVerifyToken from './useVerifyToken';
@@ -8,10 +6,12 @@ import {
   authenticate as authenticateYouAuth,
 } from '../../provider/AuthenticationProvider';
 import { logout as logoutOwner } from '../../provider/OwnerAuthenticationProvider';
-
-const HOME_SHARED_SECRET = 'HSS';
-const OWNER_SHARED_SECRET = 'SS';
-const STORAGE_IDENTITY_KEY = 'identity';
+import {
+  HOME_SHARED_SECRET,
+  OWNER_SHARED_SECRET,
+  STORAGE_IDENTITY_KEY,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 
 const _isOwner = localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host;
 
@@ -21,6 +21,7 @@ const hasSharedSecret = () => {
 };
 
 const useAuth = () => {
+  const { getDotYouClient, getApiType, getSharedSecret } = useDotYouClient();
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret() ? 'unknown' : 'anonymous');
@@ -88,35 +89,6 @@ const useAuth = () => {
 
   const getIdentity = () => {
     return localStorage.getItem(STORAGE_IDENTITY_KEY);
-  };
-
-  const getSharedSecret = () => {
-    const raw =
-      getApiType() === ApiType.YouAuth
-        ? window.localStorage.getItem(HOME_SHARED_SECRET)
-        : window.localStorage.getItem(OWNER_SHARED_SECRET);
-    if (raw) {
-      return base64ToUint8Array(raw);
-    }
-  };
-
-  const getApiType = () => {
-    if (_isOwner) {
-      return ApiType.Owner;
-    }
-
-    return ApiType.YouAuth;
-  };
-
-  const getDotYouClient = () => {
-    const apiType = getApiType();
-    if (apiType === ApiType.Owner)
-      return new OwnerClient({ api: ApiType.Owner, sharedSecret: getSharedSecret() });
-    else
-      return new DotYouClient({
-        api: apiType,
-        sharedSecret: getSharedSecret(),
-      });
   };
 
   useEffect(() => {

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { BlogConfig, getDrivesByType } from '@youfoundation/js-lib';
-import useAuth from '../auth/useAuth';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
-const useChannelDrives = () => {
-  const { isAuthenticated, getDotYouClient } = useAuth();
+export const useChannelDrives = (isEnabled: boolean) => {
+  const { getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
 
   const fetchChannelData = async () => {
@@ -16,8 +16,6 @@ const useChannelDrives = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
-    enabled: isAuthenticated,
+    enabled: isEnabled,
   });
 };
-
-export default useChannelDrives;

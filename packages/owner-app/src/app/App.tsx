@@ -61,7 +61,7 @@ import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';
 import useIsConfigured from '../hooks/configure/useIsConfigured';
 import { INIT_PATH } from '../templates/Initialization/Initialization';
 import { ErrorBoundary } from '../components/ui/Layout/ErrorBoundary/ErrorBoundary';
-import useTransitProcessor from '../hooks/transitProcessor/useTransitProcessor';
+import { useTransitProcessor } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 

@@ -1,14 +1,8 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ApiType,
-  BlogConfig,
-  DotYouClient,
-  getSocialFeed,
-  TypedConnectionNotification,
-} from '@youfoundation/js-lib';
+import { BlogConfig, getSocialFeed, TypedConnectionNotification } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 import useChannels from '../blog/useChannels';
-import useNotificationSubscriber from '../transitProcessor/useNotificationSubscriber';
+import { useNotificationSubscriber } from '@youfoundation/common-app';
 
 const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useAuth().getDotYouClient();

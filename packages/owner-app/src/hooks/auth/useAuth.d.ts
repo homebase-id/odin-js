@@ -1,0 +1,20 @@
+import { ApiType } from '@youfoundation/js-lib';
+import { OwnerClient } from '@youfoundation/common-app';
+export declare const LOGIN_PATH = "/owner/login";
+export declare const FIRSTRUN_PATH = "/owner/firstrun";
+export declare const LOGIN_YOUAUTH_PATH = "/owner/login/youauth";
+export declare const RETURN_URL_PARAM = "returnUrl";
+export declare const HOME_PATH = "/owner";
+declare const useAuth: () => {
+    authenticate: (password: string) => Promise<boolean>;
+    createHomeToken: (returnUrl: string) => Promise<boolean>;
+    setNewPassword: (newPassword: string, firstRunToken: string) => Promise<boolean>;
+    getDotYouClient: () => OwnerClient;
+    getApiType: () => ApiType;
+    finalizeRegistration: (newPassword: string, firstRunToken: string) => Promise<void>;
+    isMasterPasswordSet: () => Promise<boolean>;
+    logout: () => Promise<void>;
+    getSharedSecret: () => Uint8Array | undefined;
+    isAuthenticated: boolean;
+};
+export default useAuth;

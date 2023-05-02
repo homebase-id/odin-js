@@ -5,16 +5,18 @@ import {
   processInbox,
   TypedConnectionNotification,
 } from '@youfoundation/js-lib';
-import useAuth from '../auth/useAuth';
-import useChannelsDrives from './useChannelDrives';
-import useNotificationSubscriber from './useNotificationSubscriber';
+import { useDotYouClient } from '../auth/useDotYouClient';
+import { useChannelDrives } from './useChannelDrives';
+import { useNotificationSubscriber } from './useNotificationSubscriber';
 
 const MINUTE_IN_MS = 60000;
 
 // Process the inbox on startup
 const useInboxProcessor = (isEnabled?: boolean) => {
-  const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelsDrives();
-  const dotYouClient = useAuth().getDotYouClient();
+  const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelDrives(
+    isEnabled || false
+  );
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchData = async () => {
     await processInbox(dotYouClient, BlogConfig.FeedDrive, 5);
@@ -29,6 +31,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 
     return true;
   };
+
   return useQuery(['processInbox'], fetchData, {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -37,7 +40,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
   });
 };
 
-const useTransitProcessor = (isEnabled = true) => {
+export const useTransitProcessor = (isEnabled = true) => {
   useInboxProcessor(isEnabled);
 
   const handler = (notification: TypedConnectionNotification) => {
@@ -60,5 +63,3 @@ const useTransitProcessor = (isEnabled = true) => {
 
   return;
 };
-
-export default useTransitProcessor;

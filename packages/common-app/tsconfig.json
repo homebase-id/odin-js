@@ -9,5 +9,6 @@
       "path": "../js-lib"
     }
   ],
+  "include": ["src"],
   "exclude": ["./types/**/*", "./dist/**/*"]
 }

@@ -8,11 +8,13 @@ const useIsConfigured = () => {
 
   const getIsConfigured = async () => {
     if (!isAuthenticated) {
+      console.log('getIsConfigured: Not authenticated');
       return;
     }
 
     const sharedSecret = getSharedSecret();
     if (!sharedSecret) {
+      console.log('getIsConfigured: No shared secret');
       return;
     }
     return await isConfigured(dotYouClient);

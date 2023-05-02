@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import Toaster from '../components/Toaster/Toaster';
 import useAuth from '../hooks/auth/useAuth';
-import useTransitProcessor from '../hooks/transitProcessor/useTransitProcessor';
+import { useTransitProcessor } from '@youfoundation/common-app';
 
 const RootRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isOwner } = useAuth();

@@ -1,4 +1,5 @@
 import {
+  ApiType,
   BlogConfig,
   Disconnect,
   NotificationType,
@@ -6,15 +7,15 @@ import {
   TypedConnectionNotification,
 } from '@youfoundation/js-lib';
 import { useRef, useEffect } from 'react';
-import useAuth from '../auth/useAuth';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
-const useNotificationSubscriber = (
+export const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[]
 ) => {
   const isConnected = useRef<boolean>(false);
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const localHandler = (notification: TypedConnectionNotification) => {
     if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
@@ -22,6 +23,8 @@ const useNotificationSubscriber = (
   };
 
   useEffect(() => {
+    if (dotYouClient.getType() !== ApiType.Owner || !dotYouClient.getSharedSecret()) return;
+
     if (!isConnected.current) {
       isConnected.current = true;
       Subscribe(dotYouClient, [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive], localHandler);
@@ -41,5 +44,3 @@ const useNotificationSubscriber = (
 
   return;
 };
-
-export default useNotificationSubscriber;
