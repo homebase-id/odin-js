@@ -641,6 +641,44 @@ const uploadUsingKeyHeader = async (
   return await pureUpload(dotYouClient, data, instructions.systemFileType);
 };
 
+export const uploadHeader = async (
+  dotYouClient: DotYouClient,
+  encryptedKeyHeader: EncryptedKeyHeader | undefined,
+  instructions: UploadInstructionSet,
+  metadata: UploadFileMetadata
+): Promise<UploadResult> => {
+  const keyHeader = encryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : undefined;
+
+  // Rebuild instructions without the systemFileType
+  const strippedInstructions: UploadInstructionSet = {
+    storageOptions: instructions.storageOptions,
+    transferIv: instructions.transferIv,
+    transitOptions: instructions.transitOptions,
+  };
+
+  // Build package
+  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
+  const encryptedDescriptor = await buildDescriptor(
+    dotYouClient,
+    keyHeader,
+    instructions,
+    encryptedMetaData
+  );
+
+  const data = await buildFormData(
+    strippedInstructions,
+    encryptedDescriptor,
+    undefined,
+    undefined,
+    keyHeader
+  );
+
+  // Upload
+  return await pureUpload(dotYouClient, data, instructions.systemFileType);
+};
+
 /// Helper methods:
 export const getPayload = async <T>(
   dotYouClient: DotYouClient,
