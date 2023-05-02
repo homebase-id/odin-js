@@ -88,7 +88,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
   const fileType = file.fileMetadata.appData.fileType;
   const contentType = file.fileMetadata.contentType;
   const isImage = ['image/webp', 'image/jpeg'].includes(contentType);
-  const contentTypeExtensio = contentType.split('/')[1];
+  const contentTypeExtension = contentType.split('/')[1];
 
   const fetchFile = useFiles({ targetDrive }).fetchFile;
   const [downloadUrl, setDownloadUrl] = useState<string>();
@@ -97,7 +97,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
   return (
     <div className="relative flex flex-col rounded-lg bg-slate-100 p-5 dark:bg-slate-900">
       <span className="absolute right-2 top-2 z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800">
-        {contentTypeExtensio}
+        {contentTypeExtension}
       </span>
       {downloadUrl ? (
         <ActionLink

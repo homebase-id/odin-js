@@ -53,6 +53,7 @@ export interface ImageMetadata {
 }
 
 export interface BaseVideoMetadata {
+  description?: string;
   mimeType: string;
   fileSize: number;
 

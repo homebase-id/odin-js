@@ -25,6 +25,7 @@ export interface OdinVideoProps {
   fileId?: string;
   className?: string;
   probablyEncrypted?: boolean;
+  hideControls?: boolean;
 }
 
 interface OndinChunkedProps extends OdinVideoProps {
@@ -49,7 +50,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
 
   return (
     <video
-      controls
+      controls={!videoProps.hideControls}
       data-state="video-placeholder"
       className={className}
       ref={videoRef}
@@ -172,7 +173,7 @@ const ChunkedSource = ({
       const currentSegment = getCurrentSegment();
 
       if (!currentSegment.requested) {
-        console.log('current segment not requested, user did seek?');
+        console.debug('current segment not requested, user did seek?');
         fetchRange(currentSegment.start, currentSegment.end);
         currentSegment.requested = true;
         return;
@@ -187,7 +188,7 @@ const ChunkedSource = ({
       const currentSample = getCurrentSample();
       const nextSegment = getNextSegment(currentSegment);
       if (currentSample > currentSegment.samples * 0.6 && !nextSegment.requested) {
-        console.log(`time to fetch next chunk ${videoRef.current?.currentTime}s`);
+        console.debug(`time to fetch next chunk ${videoRef.current?.currentTime}s`);
         const nextSegment = segments[currentSegment.sequence + 1];
 
         fetchRange(nextSegment.start, nextSegment.end);
@@ -198,12 +199,12 @@ const ChunkedSource = ({
 
     // Not sure what to do with this yet? Works better without the abort on seek..
     const seek = () => {
-      console.log('seeking');
+      console.debug('seeking');
       if (innerMediaSource.readyState === 'open') {
         // sourceBuffer.abort();
       } else {
-        console.log('seek but not open?');
-        console.log(innerMediaSource.readyState);
+        console.debug('seek but not open?');
+        console.debug(innerMediaSource.readyState);
       }
     };
 
