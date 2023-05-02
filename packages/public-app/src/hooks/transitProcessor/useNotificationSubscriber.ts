@@ -31,7 +31,11 @@ const useNotificationSubscriber = (
     return () => {
       if (isConnected.current) {
         isConnected.current = false;
-        Disconnect(localHandler);
+        try {
+          Disconnect(localHandler);
+        } catch (e) {
+          console.error(e);
+        }
       }
     };
   }, []);
