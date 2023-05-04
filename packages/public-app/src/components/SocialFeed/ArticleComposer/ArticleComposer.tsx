@@ -74,7 +74,7 @@ const ArticleComposer = ({
   );
 
   useEffect(() => {
-    if (externalPostFile && !postFile.fileId) {
+    if (externalPostFile && (!postFile.fileId || savePostStatus === 'success')) {
       setPostFile({
         ...externalPostFile,
         content: {

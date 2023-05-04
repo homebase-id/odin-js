@@ -54,8 +54,6 @@ const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {}) => {
 
   return useQuery(['blog', blogSlug, channelSlug || channelId], () => fetchBlog({ blogSlug }), {
     refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: Infinity,
     enabled: channelFetched && !!blogSlug,
   });
 };
