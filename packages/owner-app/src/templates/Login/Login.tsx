@@ -72,7 +72,7 @@ const Login = () => {
             <div className="">
               <form onSubmit={doLogin}>
                 <h1 className="mb-5 text-4xl dark:text-white">
-                  YouAuth | Login
+                  Odin | Login
                   <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
                     <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                   </small>
