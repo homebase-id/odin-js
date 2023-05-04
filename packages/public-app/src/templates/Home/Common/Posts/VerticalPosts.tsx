@@ -40,6 +40,8 @@ const ChannelSidebar = ({
   setChannelId: (channelId: string | undefined) => void;
 }) => {
   const { data: channels } = useChannels();
+  if (!channels?.length || channels.length === 1) return null;
+
   return (
     <div className={className}>
       <div className="hidden grid-flow-row gap-4 lg:grid">
