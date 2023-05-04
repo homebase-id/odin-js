@@ -1,6 +1,7 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   deleteFile,
+  getFileHeader,
   getPayload,
   queryBatch,
   queryBatchCollection,
@@ -211,11 +212,12 @@ export const savePost = async <T extends PostContent>(
     file.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
   );
 
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: file?.fileId ?? '',
-      drive: GetTargetDriveFromChannelId(channelId),
+      drive: targetDrive,
     },
     transitOptions: {
       useGlobalTransitId: true,
@@ -248,8 +250,17 @@ export const savePost = async <T extends PostContent>(
 
   const isDraft = file.acl?.requiredSecurityGroup === SecurityGroupType.Owner;
 
+  // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
+  let versionTag = file?.versionTag;
+  if (!versionTag && file?.fileId) {
+    console.log('Fetching versionTag for file');
+    versionTag = await getFileHeader(dotYouClient, targetDrive, file.fileId, undefined, true).then(
+      (header) => header.fileMetadata.versionTag
+    );
+  }
+
   const metadata: UploadFileMetadata = {
-    versionTag: file.versionTag,
+    versionTag: versionTag,
     allowDistribution: !isDraft,
     contentType: 'application/json',
     appData: {

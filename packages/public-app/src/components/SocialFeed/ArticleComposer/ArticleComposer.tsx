@@ -74,7 +74,7 @@ const ArticleComposer = ({
   );
 
   useEffect(() => {
-    if (externalPostFile) {
+    if (externalPostFile && !postFile.fileId) {
       setPostFile({
         ...externalPostFile,
         content: {
@@ -117,6 +117,7 @@ const ArticleComposer = ({
     // Build postFile
     const toPostFile: PostFile<Article> = {
       ...dirtyPostFile,
+      versionTag: undefined, // VersionTag is set undefined so we always reset it to the latest
       content: {
         ...dirtyPostFile.content,
         dateUnixTime: new Date().getTime(), // Set current date as userDate of the post

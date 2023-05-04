@@ -1,5 +1,5 @@
 import Cropper from 'react-cropper';
-import 'cropperjs/dist/cropper.css';
+import './cropper.css';
 import { useEffect, useRef, useState } from 'react';
 import { t } from '../../../helpers/i18n/dictionary';
 import Label from '../../Form/Label';
