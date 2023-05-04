@@ -22,6 +22,7 @@ import {
   ImageUploadResult,
   MediaConfig,
   MediaUploadMeta,
+  ThumbnailInstruction,
   ThumbnailMeta,
 } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
@@ -41,7 +42,8 @@ export const uploadImage = async (
   acl: AccessControlList,
   imageData: Uint8Array | File,
   fileMetadata?: ImageMetadata,
-  uploadMeta?: MediaUploadMeta
+  uploadMeta?: MediaUploadMeta,
+  thumbsToGenerate?: ThumbnailInstruction[]
 ): Promise<ImageUploadResult | undefined> => {
   if (!targetDrive) {
     throw 'Missing target drive';
@@ -63,7 +65,8 @@ export const uploadImage = async (
 
   const { naturalSize, tinyThumb, additionalThumbnails } = await createThumbnails(
     imageData instanceof File ? new Uint8Array(await imageData.arrayBuffer()) : imageData,
-    uploadMeta?.type
+    uploadMeta?.type,
+    thumbsToGenerate
   );
 
   const previewThumbnail: EmbeddedThumb = {
@@ -73,7 +76,7 @@ export const uploadImage = async (
     content: uint8ArrayToBase64(tinyThumb.payload),
   };
 
-  const thumbsizes = additionalThumbnails.map((thumb) => {
+  const additionalThumbs = additionalThumbnails.map((thumb) => {
     return {
       pixelHeight: thumb.pixelHeight,
       pixelWidth: thumb.pixelWidth,
@@ -102,7 +105,7 @@ export const uploadImage = async (
       fileType: MediaConfig.MediaFileType,
       jsonContent: jsonStringify64(fileMetadata),
       previewThumbnail: previewThumbnail,
-      additionalThumbnails: thumbsizes,
+      additionalThumbnails: additionalThumbs,
       userDate: uploadMeta?.userDate,
       archivalStatus: uploadMeta?.archivalStatus,
     },
