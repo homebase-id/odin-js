@@ -137,7 +137,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
                 <ActionLink
                   icon={Download}
                   href={downloadPayloadUrl}
-                  download={`${file.fileId}.${contentTypeExtensio}`}
+                  download={`${file.fileId}.${contentTypeExtension}`}
                   size="square"
                   type="primary"
                 />
