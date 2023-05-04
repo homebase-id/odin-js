@@ -253,7 +253,6 @@ export const savePost = async <T extends PostContent>(
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
   let versionTag = file?.versionTag;
   if (!versionTag && file?.fileId) {
-    console.log('Fetching versionTag for file');
     versionTag = await getFileHeader(dotYouClient, targetDrive, file.fileId, undefined, true).then(
       (header) => header.fileMetadata.versionTag
     );
