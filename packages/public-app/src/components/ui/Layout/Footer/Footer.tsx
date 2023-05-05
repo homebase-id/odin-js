@@ -18,7 +18,7 @@ const Footer: FC<FooterProps> = ({ className }) => {
     <footer className={`body-font bg-background ${className}`}>
       <div className="container mx-auto flex flex-col items-center px-5 py-8 sm:flex-row">
         <a className="title-font flex h-10 items-center justify-center font-medium md:justify-start">
-          <Logo className="h-10 w-10" />
+          <Logo className="h-12 w-12" />
           <span className="ml-3 text-xl">
             <OwnerName />
             <small className="block text-xs font-normal">
