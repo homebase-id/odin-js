@@ -1,0 +1,30 @@
+name: Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'packages/public-app/src/**'
+      - 'packages/owner-app/src/**'
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@octocat'
+
+      - run: npm ci
+
+      - run: npm run build-libs
+
+      - run: npm run build --w ./packages/public-app
+
+      - run: npm run build --w ./packages/owner-app
