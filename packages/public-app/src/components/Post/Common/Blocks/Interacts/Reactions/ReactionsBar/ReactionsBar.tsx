@@ -14,11 +14,13 @@ const ReactionsBar = ({
   isActive,
   context,
   canReactDetails,
+  onClose,
 }: {
   className: string;
   isActive: boolean;
   context: ReactionContext;
   canReactDetails: CanReactDetails;
+  onClose: () => void;
 }) => {
   const [isHover, setIsHover] = useState(false);
   const [isCustomOpen, setIsCustomOpen] = useState(false);
@@ -36,6 +38,11 @@ const ReactionsBar = ({
       content: { body: body },
       context,
     });
+    if (onClose) {
+      onClose();
+      setIsCustomOpen(false);
+      setIsHover(false);
+    }
   };
   const doUnlike = (body: string) => {
     removeEmoji({
@@ -43,6 +50,11 @@ const ReactionsBar = ({
       content: { body: body },
       context,
     });
+    if (onClose) {
+      onClose();
+      setIsCustomOpen(false);
+      setIsHover(false);
+    }
   };
 
   useEffect(() => {

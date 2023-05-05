@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAuth from '../../../../../../../hooks/auth/useAuth';
 import useReaction from '../../../../../../../hooks/reactions/useReaction';
-import useLongPress from '../../../../../../../hooks/longPress/useLongPress';
-import { Heart } from '@youfoundation/common-app';
+import { Heart, useOutsideTrigger } from '@youfoundation/common-app';
 import ReactionsBar from '../ReactionsBar/ReactionsBar';
 import { ReactionContext } from '@youfoundation/js-lib';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -17,10 +16,14 @@ const LikeButton = ({
   onIntentToReact?: () => void;
   canReactDetails: CanReactDetails;
 }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
 
   const { getIdentity } = useAuth();
   const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
+
+  const isDesktop = document.documentElement.clientWidth >= 1024;
+  useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
   const doLike = () => {
     // To build
@@ -33,20 +36,17 @@ const LikeButton = ({
     });
   };
 
-  const longPressEvent = useLongPress(() => setIsReact(true), doLike);
-
   useEffect(() => {
-    if (isReact && onIntentToReact) {
-      onIntentToReact();
-    }
+    if (isReact && onIntentToReact) onIntentToReact();
   }, [isReact]);
 
   return (
     <>
       <div
-        className={`relative ${
+        className={`relative select-none ${
           canReactDetails && canReactDetails !== 'ALLOWED' ? 'cursor-not-allowed' : ''
         } `}
+        ref={wrapperRef}
       >
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
@@ -59,13 +59,17 @@ const LikeButton = ({
             isActive={isReact}
             context={context}
             canReactDetails={canReactDetails}
+            onClose={() => setIsReact(false)}
           />
         </div>
         <button
           className={`hover:text-black dark:hover:text-white ${
             isReact ? 'text-black dark:text-white' : ''
           }`}
-          {...longPressEvent}
+          onClick={() => {
+            if (isDesktop) doLike();
+            else setIsReact(!isReact);
+          }}
           onMouseLeave={() => setIsReact(false)}
           onMouseEnter={() => setIsReact(true)}
         >

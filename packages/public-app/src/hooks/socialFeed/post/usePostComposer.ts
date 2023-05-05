@@ -33,8 +33,6 @@ const usePostComposer = () => {
       return;
     }
 
-    setPostState('processing');
-
     const shouldSecureAttachments =
       channel.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
       channel.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
@@ -43,6 +41,8 @@ const usePostComposer = () => {
       // Process files, if any
       let uploadResults: (ImageUploadResult | VideoUploadResult)[] | undefined = undefined;
       if (files?.length && channel?.acl) {
+        setPostState('processing');
+
         uploadResults = await saveFiles({
           acl:
             explicitlyPublicFiles && shouldSecureAttachments

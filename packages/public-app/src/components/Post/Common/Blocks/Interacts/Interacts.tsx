@@ -56,10 +56,6 @@ export const PostInteracts = ({
   });
   const canReactDetails = data?.canReact ? 'ALLOWED' : data?.details;
 
-  if (canReactDetails) {
-    console.log({ canReactDetails });
-  }
-
   return (
     <div className={`${className ?? ''}`}>
       <div
