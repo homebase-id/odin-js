@@ -1,4 +1,4 @@
-name: Build
+name: CI Build
 on:
   workflow_dispatch:
   push:
@@ -8,7 +8,7 @@ on:
       - 'packages/public-app/src/**'
       - 'packages/owner-app/src/**'
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo

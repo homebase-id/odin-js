@@ -349,6 +349,7 @@ const CommenLikeButton = ({
             isActive={isReact}
             context={threadContext}
             canReactDetails="ALLOWED"
+            onClose={() => setIsReact(false)}
           />
         </div>
         <button
