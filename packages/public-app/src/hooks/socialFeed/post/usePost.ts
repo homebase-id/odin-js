@@ -90,7 +90,7 @@ const usePost = () => {
               type: file.type as ImageContentType,
             },
             [
-              { quality: 100, width: 400, height: 400 },
+              { quality: 100, width: 600, height: 600 },
               { quality: 100, width: 1600, height: 1600 },
             ]
           );
