@@ -30,6 +30,7 @@ const ActionGroup = ({ options, className, children, ...actionButtonProps }: Act
     <div className={`relative ${className ?? ''}`} ref={wrapperRef}>
       <ActionButton
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
