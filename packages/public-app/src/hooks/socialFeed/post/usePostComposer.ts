@@ -17,7 +17,9 @@ import usePost from './usePost';
 export type ReactAccess = SecurityGroupType.Owner | SecurityGroupType.Connected | undefined;
 
 const usePostComposer = () => {
-  const [postState, setPostState] = useState<'processing' | 'uploading' | 'error' | undefined>();
+  const [postState, setPostState] = useState<
+    'processing' | 'uploading' | 'encrypting' | 'error' | undefined
+  >();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
   const { mutateAsync: saveFiles, error: saveFilesError } = usePost().saveFiles;
 
@@ -25,8 +27,7 @@ const usePostComposer = () => {
     caption: string | undefined,
     channel: ChannelDefinition,
     files: File[] | undefined,
-    reactAccess: ReactAccess,
-    explicitlyPublicFiles: boolean
+    reactAccess: ReactAccess
   ) => {
     if (!files && !caption) {
       console.log('fast fail');
@@ -42,12 +43,12 @@ const usePostComposer = () => {
       let uploadResults: (ImageUploadResult | VideoUploadResult)[] | undefined = undefined;
       if (files?.length && channel?.acl) {
         setPostState('processing');
+        if (shouldSecureAttachments) setPostState('encrypting');
 
         uploadResults = await saveFiles({
-          acl:
-            explicitlyPublicFiles && shouldSecureAttachments
-              ? { requiredSecurityGroup: SecurityGroupType.Anonymous }
-              : channel.acl,
+          acl: shouldSecureAttachments
+            ? { requiredSecurityGroup: SecurityGroupType.Anonymous }
+            : channel.acl,
           channelId: channel.channelId,
           files,
         });

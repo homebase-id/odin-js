@@ -16,12 +16,9 @@ import { Article } from '@youfoundation/common-app';
 import { FileOverview } from '../Form/Files/FileOverview';
 import { FileSelector } from '../Form/Files/FileSelector';
 import { getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers/pasteHelper';
-import ActionButton from '../ui/Buttons/ActionButton';
 import { Lock } from '@youfoundation/common-app';
-import { OpenLock } from '@youfoundation/common-app';
 import ReactAccessEditorDialog from '../Dialog/ReactAccessEditorDialog/ReactAccessEditorDialog';
 import VolatileInput from '../Form/VolatileInput';
-import { Alert } from '@youfoundation/common-app';
 import usePostComposer, { ReactAccess } from '../../hooks/socialFeed/post/usePostComposer';
 import ActionGroup from '../ui/Buttons/ActionGroup';
 
@@ -34,13 +31,12 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
   const [files, setFiles] = useState<File[]>();
-  const [isPublicFiles, setIsPublicFiles] = useState<boolean>(false);
 
   const [reactAccess, setReactAccess] = useState<ReactAccess>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
   const doPost = async () => {
-    await savePost(caption, channel, files, reactAccess, isPublicFiles);
+    await savePost(caption, channel, files, reactAccess);
 
     // Reset UI:
     resetUi();
@@ -92,23 +88,11 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />
-        <AttachmentAlerts
-          files={files}
-          acl={channel.acl}
-          setIsPublic={setIsPublicFiles}
-          isPublic={isPublicFiles}
-        />
-
         {postState ? (
           <div className="flex flex-row-reverse">
-            {postState === 'processing' ? (
+            {['processing', 'encrypting', 'uploading'].includes(postState) ? (
               <span className="animate-pulse text-sm text-foreground text-opacity-40">
-                {t('Processing')}
-              </span>
-            ) : null}
-            {postState === 'uploading' ? (
-              <span className="animate-pulse text-sm text-foreground text-opacity-40">
-                {t('Uploading')}
+                {t(postState)}
               </span>
             ) : null}
             {postState === 'error' ? t('Error') : ''}
@@ -242,67 +226,5 @@ export const ChannelSelector = React.forwardRef(
     );
   }
 );
-
-const KILOBYTE = 1024;
-const MEGABYTE = KILOBYTE * 1024;
-
-const AttachmentAlerts = ({
-  files,
-  acl,
-  isPublic,
-  setIsPublic,
-}: {
-  files?: File[];
-  acl?: AccessControlList;
-  isPublic: boolean;
-  setIsPublic: (isPublic: boolean) => void;
-}) => {
-  const shouldSecureAttachments =
-    acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
-    acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
-
-  if (!shouldSecureAttachments) return null;
-
-  const isTooLargeAttachments = files?.some((file) => file.size > MEGABYTE * 50);
-
-  if (!isTooLargeAttachments) return null;
-
-  if (isPublic)
-    return (
-      <Alert type="info" isCompact={true} className="my-2 text-sm">
-        {t('the attachments will be publicly available, even if the post is not')}{' '}
-        <ActionButton
-          type="secondary"
-          onClick={(e) => {
-            e.preventDefault();
-            setIsPublic(false);
-          }}
-          className="ml-2"
-          size="small"
-        >
-          {t('Cancel')}
-        </ActionButton>
-      </Alert>
-    );
-
-  return (
-    <Alert type="warning" isCompact={true} className="my-2 text-sm">
-      {t(
-        'The attachments are rather large, make the files publicly available for an optimal viewing experience '
-      )}{' '}
-      <ActionButton
-        type="secondary"
-        onClick={(e) => {
-          e.preventDefault();
-          setIsPublic(true);
-        }}
-        className="ml-2"
-        size="small"
-      >
-        {t('Update')}
-      </ActionButton>
-    </Alert>
-  );
-};
 
 export default PostComposer;
