@@ -82,20 +82,19 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                   ) : (
                     ellipsisAtMaxChar((post as Article).abstract, 140)
                   )}
-                  {!isExpanded ? (
-                    <>
-                      {' '}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsExpanded(true);
-                        }}
-                        className="text-button hover:underline"
-                      >
-                        {t('More')}...
-                      </button>
-                    </>
-                  ) : null}
+
+                  <>
+                    {' '}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                      }}
+                      className="text-button hover:underline"
+                    >
+                      {isExpanded ? t('Less') : <>{t('More')}...</>}
+                    </button>
+                  </>
                 </div>
               </>
             ) : (
