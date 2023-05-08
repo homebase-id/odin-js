@@ -1,5 +1,5 @@
 import { LoadingParagraph } from '@youfoundation/common-app';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useFollowerInfinite from '../../../../hooks/follow/useFollowers';
 import ConnectionTeaser from '../../../../templates/Home/Common/Connections/ConnectionTeaser';
 

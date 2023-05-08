@@ -1,6 +1,6 @@
 import { stringGuidsEqual } from '@youfoundation/js-lib';
 import { useEffect, useState } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircles from '../../hooks/circles/useCircles';
 import CirclePermissionView from '../PermissionViews/CirclePermissionView/CirclePermissionView';
 import CheckboxToggle from './CheckboxToggle';

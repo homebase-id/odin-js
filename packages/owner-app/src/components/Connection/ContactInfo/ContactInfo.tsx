@@ -1,4 +1,4 @@
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useContact from '../../../hooks/contacts/useContact';
 import useImage from '../../../hooks/media/useImage';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';

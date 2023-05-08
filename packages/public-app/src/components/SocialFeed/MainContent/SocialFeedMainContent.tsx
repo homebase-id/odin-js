@@ -3,7 +3,7 @@ import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { flattenInfinteData } from '../../../helpers/common';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useSocialFeed from '../../../hooks/socialFeed/useSocialFeed';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';

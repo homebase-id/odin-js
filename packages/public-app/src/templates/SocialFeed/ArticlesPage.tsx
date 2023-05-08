@@ -5,7 +5,7 @@ import ActionLink from '../../components/ui/Buttons/ActionLink';
 import { Article, LoadingParagraph } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { flattenInfinteData } from '../../helpers/common';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useBlogPostsInfinite from '../../hooks/blog/useBlogPostsInfinite';
 import useChannels from '../../hooks/blog/useChannels';
 import useDrafts from '../../hooks/socialFeed/drafts/useDrafts';

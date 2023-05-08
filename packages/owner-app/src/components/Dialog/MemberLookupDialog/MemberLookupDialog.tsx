@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useActiveConnections from '../../../hooks/connections/useActiveConnections';
-import usePortal from '../../../hooks/portal/usePortal';
+import { usePortal } from '@youfoundation/common-app';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import ConnectionCard from '../../Connection/ConnectionCard/ConnectionCard';
 import { DialogWrapper, Pager } from '@youfoundation/common-app';

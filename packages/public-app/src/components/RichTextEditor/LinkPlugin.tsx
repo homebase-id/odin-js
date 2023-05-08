@@ -11,7 +11,7 @@ import {
 } from '@udecode/plate-core';
 import { ToolbarButton, ToolbarButtonProps } from '@udecode/plate-ui-toolbar';
 import { useState } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '../../helpers/common';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { ReactEditor } from 'slate-react';

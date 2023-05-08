@@ -1,7 +1,7 @@
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { t } from '../../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../../../../../hooks/auth/useAuth';
 import useChannel from '../../../../../hooks/blog/useChannel';
 import { ChannelDefinitionVm } from '../../../../../hooks/blog/useChannels';

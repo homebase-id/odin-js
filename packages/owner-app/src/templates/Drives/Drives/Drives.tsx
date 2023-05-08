@@ -1,6 +1,6 @@
 import { BlogConfig, ProfileConfig, stringGuidsEqual } from '@youfoundation/js-lib';
 import React, { useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';

@@ -1,7 +1,7 @@
 import { CircleDefinition } from '@youfoundation/js-lib';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircle from '../../../hooks/circles/useCircle';
 import { Arrow } from '@youfoundation/common-app';
 import { Circles } from '@youfoundation/common-app';

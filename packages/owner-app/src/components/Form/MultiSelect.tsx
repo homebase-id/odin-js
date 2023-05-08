@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { useOutsideTrigger, Times, Arrow } from '@youfoundation/common-app';
 
 interface SelectElement {

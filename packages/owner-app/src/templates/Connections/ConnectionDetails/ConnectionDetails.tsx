@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircles from '../../../hooks/circles/useCircles';
 import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';

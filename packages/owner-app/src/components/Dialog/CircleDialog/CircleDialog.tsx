@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircle from '../../../hooks/circles/useCircle';
-import usePortal from '../../../hooks/portal/usePortal';
+import { usePortal } from '@youfoundation/common-app';
 import { circlePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import Input from '../../Form/Input';
-import Label from '../../Form/Label';
+import { Input } from '@youfoundation/common-app';
+import { Label } from '@youfoundation/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
 import Textarea from '../../Form/Textarea';
 import { DialogWrapper } from '@youfoundation/common-app';

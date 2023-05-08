@@ -1,6 +1,6 @@
 import { FC, useRef, useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
-import ConfirmDialog from '../../Dialog/ConfirmDialog/ConfirmDialog';
+import { t } from '@youfoundation/common-app';
+import { ConfirmDialog } from '@youfoundation/common-app';
 import ActionButton, { ActionButtonProps } from './ActionButton';
 import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
 
@@ -20,7 +20,7 @@ export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   options: ActionGroupOptionProps[];
 }
 
-const ActionGroup = ({ options, className, ...actionButtonProps }: ActionGroupProps) => {
+const ActionGroup = ({ options, className, children, ...actionButtonProps }: ActionGroupProps) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
 
@@ -34,10 +34,15 @@ const ActionGroup = ({ options, className, ...actionButtonProps }: ActionGroupPr
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        // className="w-full sm:w-auto"
         {...actionButtonProps}
       >
-        ...<span className="sr-only ml-1">{t('More')}</span>
+        {children ? (
+          children
+        ) : (
+          <>
+            ...<span className="sr-only ml-1">{t('More')}</span>
+          </>
+        )}
       </ActionButton>
       <div
         className={`absolute right-0 top-[100%] z-10 w-[12rem] ${

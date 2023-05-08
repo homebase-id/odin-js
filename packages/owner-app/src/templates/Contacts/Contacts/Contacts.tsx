@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useContacts from '../../../hooks/contacts/useContacts';
 import { useIntersection } from '../../../hooks/intersection/useIntersection';
 import useSettings from '../../../hooks/settings/useSettings';

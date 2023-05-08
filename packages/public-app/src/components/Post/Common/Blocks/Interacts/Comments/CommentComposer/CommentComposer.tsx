@@ -1,6 +1,6 @@
 import { ReactionContext } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t } from '../../../../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { getImagesFromPasteEvent } from '../../../../../../../helpers/pasteHelper';
 import useAuth from '../../../../../../../hooks/auth/useAuth';
 import { CanReactDetails } from '../../../../../../../hooks/reactions/useCanReact';

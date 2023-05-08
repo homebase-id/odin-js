@@ -1,4 +1,4 @@
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
 import useTheme from '../theme/useTheme';
 

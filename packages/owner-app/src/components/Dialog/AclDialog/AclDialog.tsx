@@ -1,8 +1,8 @@
 import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
-import usePortal from '../../../hooks/portal/usePortal';
+import { t } from '@youfoundation/common-app';
+import { usePortal } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
 import Select from '../../Form/Select';

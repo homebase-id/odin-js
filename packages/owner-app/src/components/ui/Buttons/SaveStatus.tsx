@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { format } from '../../../helpers/timeago';
 import { Alert } from '@youfoundation/common-app';
 

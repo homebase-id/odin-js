@@ -1,5 +1,5 @@
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 
 const Welcome = ({
   onNext,

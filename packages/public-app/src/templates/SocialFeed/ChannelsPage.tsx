@@ -3,7 +3,7 @@ import { ChannelItem } from '../../components/Dialog/ChannelsDialog/ChannelsDial
 import { Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useChannels from '../../hooks/blog/useChannels';
 
 const ChannelsPage = () => {

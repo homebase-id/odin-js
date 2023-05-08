@@ -5,7 +5,7 @@ import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
 import { Arrow } from '@youfoundation/common-app';
 import Image from '../../../../components/Image/Image';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import ActionLink from '../../../../components/ui/Buttons/ActionLink';
 
 import './PostChannelTeaser.css';

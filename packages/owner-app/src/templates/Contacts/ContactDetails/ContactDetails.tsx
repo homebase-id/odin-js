@@ -9,7 +9,7 @@ const ContactDetails = () => {
 };
 
 // import { useNavigate, useParams } from 'react-router-dom';
-// import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 // import useConnection from '../../../../hooks/connections/useConnection';
 // import useContact from '../../../../hooks/contacts/useContact';
 // import useImage from '../../../../hooks/media/useImage';

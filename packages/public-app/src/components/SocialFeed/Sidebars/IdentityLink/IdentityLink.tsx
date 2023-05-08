@@ -4,7 +4,7 @@ import {
   BuiltInProfiles,
 } from '@youfoundation/js-lib';
 import { Link } from 'react-router-dom';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useSiteData from '../../../../hooks/siteData/useSiteData';
 import { OwnerName } from '../../../Post/Common/Blocks/Author/Name';
 import Image from '../../../Image/Image';

@@ -1,13 +1,13 @@
 import { ProfileDefinition } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
-import usePortal from '../../../hooks/portal/usePortal';
+import { t } from '@youfoundation/common-app';
+import { usePortal } from '@youfoundation/common-app';
 import useProfiles from '../../../hooks/profiles/useProfiles';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import Input from '../../Form/Input';
-import Label from '../../Form/Label';
+import { Input } from '@youfoundation/common-app';
+import { Label } from '@youfoundation/common-app';
 import Textarea from '../../Form/Textarea';
 import { DialogWrapper } from '@youfoundation/common-app';
 

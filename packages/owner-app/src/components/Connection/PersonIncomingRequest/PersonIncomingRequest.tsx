@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';

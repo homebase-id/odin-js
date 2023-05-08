@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useConnections from '../../../../hooks/connections/useConnections';
 import ConnectionTeaser from '../../../../templates/Home/Common/Connections/ConnectionTeaser';
 import { LoadingParagraph, Pager } from '@youfoundation/common-app';

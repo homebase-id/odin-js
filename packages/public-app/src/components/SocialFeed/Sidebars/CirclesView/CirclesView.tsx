@@ -1,4 +1,4 @@
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircles from '../../../../hooks/circles/useCircles';
 import CirclePermissionView from '../../../PermissionViews/CirclePermissionView/CirclePermissionView';
 import { LoadingParagraph } from '@youfoundation/common-app';

@@ -11,7 +11,7 @@ import useBlog from '../../../hooks/blog/useBlog';
 import RichTextRenderer from '../../../components/RichTextRenderer/RichTextRenderer';
 import RelatedBlogs from '../../../components/Post/Common/RelatedArticles/RelatedArticles';
 import { Helmet } from 'react-helmet-async';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import PostMeta from '../../../components/Post/Common/Blocks/Meta/Meta';
 import ImageGallery from '../../../components/Post/Common/Blocks/MediaGallery/MediaGallery';
 import { PostInteracts } from '../../../components/Post/Common/Blocks/Interacts/Interacts';

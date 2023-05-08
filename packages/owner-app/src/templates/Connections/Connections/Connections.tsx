@@ -2,7 +2,7 @@ import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useEffect, useState } from 'react';

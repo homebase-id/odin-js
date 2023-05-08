@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
 
 import { Arrow } from '@youfoundation/common-app';

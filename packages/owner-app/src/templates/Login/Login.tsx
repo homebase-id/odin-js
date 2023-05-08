@@ -1,10 +1,10 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../../hooks/auth/useAuth';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
-import Input from '../../components/Form/Input';
-import Label from '../../components/Form/Label';
+import { Input } from '@youfoundation/common-app';
+import { Label } from '@youfoundation/common-app';
 import { Loader } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';

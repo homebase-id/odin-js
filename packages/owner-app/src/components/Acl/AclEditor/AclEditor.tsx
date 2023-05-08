@@ -1,7 +1,7 @@
 import { AccessControlList, SecurityGroupType, stringGuidsEqual } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { ellipsisAtMaxChar } from '../../../helpers/common';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircles from '../../../hooks/circles/useCircles';
 import AclDialog from '../../Dialog/AclDialog/AclDialog';
 import { Lock, OpenLock } from '@youfoundation/common-app';

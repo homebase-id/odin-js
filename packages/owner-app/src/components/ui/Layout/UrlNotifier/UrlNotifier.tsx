@@ -1,4 +1,4 @@
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { Arrow, Shield } from '@youfoundation/common-app';
 
 const UrlNotifier = () => {

@@ -1,11 +1,10 @@
 import { fromBlob, ImageContentType } from '@youfoundation/js-lib';
 import { useState, useMemo } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
+import { t, Label } from '@youfoundation/common-app';
 import ImageCropper from '../Dialog/ImageDialog/ImageCropper';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { Crop } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
-import Label from './Label';
 
 interface ImageUploadAndCropProps {
   expectedAspectRatio?: number;

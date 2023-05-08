@@ -1,4 +1,4 @@
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';

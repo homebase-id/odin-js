@@ -1,5 +1,5 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useLinks from '../../../../hooks/links/useLinks';
 import useSiteData from '../../../../hooks/siteData/useSiteData';
 import {

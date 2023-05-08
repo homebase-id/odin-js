@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { HardDrive } from '@youfoundation/common-app';

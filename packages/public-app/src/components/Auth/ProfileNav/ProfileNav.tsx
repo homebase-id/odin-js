@@ -1,7 +1,7 @@
 import { FormEventHandler, useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import { IS_DARK_CLASSNAME } from '../../../hooks/darkMode/useDarkMode';
 import { ConnectionImage, OwnerImage } from '../../Post/Common/Blocks/Author/Image';

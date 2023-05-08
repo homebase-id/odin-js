@@ -1,11 +1,11 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent, PostFile } from '@youfoundation/js-lib';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import Label from '../../../../components/Form/Label';
+import { Label } from '@youfoundation/common-app';
 import Select from '../../../../components/Form/Select';
 import PostTeaser from '../../../../components/Post/Common/Card/PostTeaser';
 import { flattenInfinteData } from '../../../../helpers/common';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import useBlogPostsInfinite from '../../../../hooks/blog/useBlogPostsInfinite';
 import useChannels from '../../../../hooks/blog/useChannels';

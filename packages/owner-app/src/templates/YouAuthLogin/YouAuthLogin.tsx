@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';

@@ -8,7 +8,6 @@
   ],
   "type": "module",
   "module": "./dist/common-app.js",
-  "main": "./dist/common-app.umd.cjs",
   "exports": {
     ".": {
       "import": "./dist/common-app.js",

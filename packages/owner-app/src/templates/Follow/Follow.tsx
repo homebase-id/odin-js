@@ -8,7 +8,7 @@ import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
 import useContact from '../../hooks/contacts/useContact';
 import useFollowerInfinite from '../../hooks/follow/useFollowers';

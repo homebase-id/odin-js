@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAttribute from '../../../hooks/profiles/useAttribute';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import ActionButton from '../../ui/Buttons/ActionButton';

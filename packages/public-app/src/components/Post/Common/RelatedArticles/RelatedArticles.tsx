@@ -1,5 +1,5 @@
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
 import PostTeaser from '../Card/PostTeaser';

@@ -1,5 +1,5 @@
 import { Toast } from '../../components/Toaster/Toaster';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { Bell } from '@youfoundation/common-app';
 import useNotifications from '../../hooks/notifications/useNotifications';

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(

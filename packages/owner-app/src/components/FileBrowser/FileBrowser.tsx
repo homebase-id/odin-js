@@ -9,7 +9,7 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib';
 import { useEffect, useState } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useFiles from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import Image from '../Image/Image';

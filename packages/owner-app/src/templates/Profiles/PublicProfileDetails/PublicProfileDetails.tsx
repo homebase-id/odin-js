@@ -3,7 +3,7 @@ import AttributeGroup from '../../../components/Attribute/AttributeGroup/Attribu
 import { Heart } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import { LoadingParagraph } from '@youfoundation/common-app';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAttributes from '../../../hooks/profiles/useAttributes';
 
 const PublicProfileDetails = () => {

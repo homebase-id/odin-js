@@ -1,5 +1,5 @@
 import { CircleDefinition } from '@youfoundation/js-lib';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircle from '../../../hooks/circles/useCircle';
 import { Circles } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';

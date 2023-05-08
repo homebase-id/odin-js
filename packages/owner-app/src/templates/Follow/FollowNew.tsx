@@ -7,7 +7,7 @@ import { Alert } from '@youfoundation/common-app';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useFollowingInfinite from '../../hooks/follow/useFollowing';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
 import useSocialChannels from '../../hooks/socialFeed/socialChannels/useSocialChannels';

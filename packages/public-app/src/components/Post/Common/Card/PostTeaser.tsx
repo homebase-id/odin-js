@@ -1,6 +1,6 @@
 import { Article, getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib';
 import { FC, useState } from 'react';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useChannel from '../../../../hooks/blog/useChannel';
 import { ellipsisAtMaxChar } from '../../../../helpers/common';
 import FakeAnchor from '../../../ui/Buttons/FakeAnchor';

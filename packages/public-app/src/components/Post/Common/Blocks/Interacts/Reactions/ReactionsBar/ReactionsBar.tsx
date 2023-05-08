@@ -1,6 +1,6 @@
 import { ReactionContext } from '@youfoundation/js-lib';
 import { Suspense, useEffect, useState } from 'react';
-import { t } from '../../../../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../../../../../../../hooks/auth/useAuth';
 import useMyEmojiReactions from '../../../../../../../hooks/reactions/emojis/useMyEmojiReactions';
 import useReaction from '../../../../../../../hooks/reactions/useReaction';

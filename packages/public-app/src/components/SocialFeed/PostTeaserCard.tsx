@@ -7,7 +7,7 @@ import FakeAnchor from '../ui/Buttons/FakeAnchor';
 import AuthorImage from '../Post/Common/Blocks/Author/Image';
 import AuthorName from '../Post/Common/Blocks/Author/Name';
 import { ellipsisAtMaxChar } from '../../helpers/common';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 
 import RichTextRenderer from '../RichTextRenderer/RichTextRenderer';
 import { PostMedia } from '../Post/Common/Blocks/Media/Media';

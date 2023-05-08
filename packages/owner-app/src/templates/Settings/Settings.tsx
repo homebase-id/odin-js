@@ -1,8 +1,8 @@
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useSettings from '../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import Checkbox from '../../components/Form/Checkbox';
-import Label from '../../components/Form/Label';
+import { Label } from '@youfoundation/common-app';
 import { Cog } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import Section from '../../components/ui/Sections/Section';

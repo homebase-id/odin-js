@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ellipsisAtMaxChar } from '../../../../helpers/common';
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 
 const Breadcrumbs = ({
   levels,

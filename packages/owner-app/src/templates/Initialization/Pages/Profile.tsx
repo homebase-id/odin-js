@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import ImageUploadAndCrop from '../../../components/Form/ImageUploadAndCrop';
-import Input from '../../../components/Form/Input';
-import Label from '../../../components/Form/Label';
+import { Input } from '@youfoundation/common-app';
+import { Label } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { Person } from '@youfoundation/common-app';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { onChangeParams, pageData } from '../Initialization';
 
 const Profile = ({

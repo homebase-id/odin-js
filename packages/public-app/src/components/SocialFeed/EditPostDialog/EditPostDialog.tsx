@@ -8,8 +8,8 @@ import {
 } from '@youfoundation/js-lib';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
-import usePortal from '../../../hooks/portal/usePortal';
+import { t } from '@youfoundation/common-app';
+import { usePortal } from '@youfoundation/common-app';
 import usePost from '../../../hooks/socialFeed/post/usePost';
 import Image from '../../Image/Image';
 import { ErrorNotification } from '@youfoundation/common-app';

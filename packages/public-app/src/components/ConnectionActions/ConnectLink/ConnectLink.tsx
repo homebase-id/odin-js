@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import ActionLink from '../../ui/Buttons/ActionLink';

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
-import usePortal from '../../../hooks/portal/usePortal';
-import Label from '../../Form/Label';
-import Input from '../../Form/Input';
+import { t } from '@youfoundation/common-app';
+import { usePortal } from '@youfoundation/common-app';
+import { Label } from '@youfoundation/common-app';
+import { Input } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
 

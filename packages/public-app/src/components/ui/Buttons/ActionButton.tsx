@@ -1,5 +1,5 @@
 import { FC, ReactNode, useState } from 'react';
-import ConfirmDialog from '../../Dialog/ConfirmDialog/ConfirmDialog';
+import { ConfirmDialog } from '@youfoundation/common-app';
 import {
   IconProps,
   Loader,
@@ -99,6 +99,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   };
 
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [mouseEvent, setMouseEvent] = useState<React.MouseEvent<HTMLElement>>();
 
   const colorClasses =
     (state === 'error'
@@ -146,6 +147,7 @@ const ActionButton: FC<ActionButtonProps> = ({
             ? (e) => {
                 e.preventDefault();
                 setNeedsConfirmation(true);
+                setMouseEvent(e);
                 return false;
               }
             : onClick
@@ -160,7 +162,10 @@ const ActionButton: FC<ActionButtonProps> = ({
           title={confirmOptions.title}
           confirmText={confirmOptions.buttonText}
           needConfirmation={needsConfirmation}
-          onConfirm={onClick}
+          onConfirm={() => {
+            setNeedsConfirmation(false);
+            onClick && mouseEvent && onClick(mouseEvent);
+          }}
           onCancel={() => setNeedsConfirmation(false)}
         >
           <p className="text-sm">{confirmOptions.body}</p>

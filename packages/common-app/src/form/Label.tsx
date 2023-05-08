@@ -1,4 +1,4 @@
-const Label = (
+export const Label = (
   props: React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>
 ) => {
   return (
@@ -7,5 +7,3 @@ const Label = (
     </label>
   );
 };
-
-export default Label;

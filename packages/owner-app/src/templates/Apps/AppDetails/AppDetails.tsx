@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useApp from '../../../hooks/apps/useApp';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';

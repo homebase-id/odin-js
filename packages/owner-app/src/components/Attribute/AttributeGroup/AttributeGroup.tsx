@@ -2,7 +2,7 @@ import { getNewId } from '@youfoundation/js-lib';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { convertTextToSlug } from '../../../helpers/common';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import {
   AttributeDefinition,
   AttributeDefinitions,

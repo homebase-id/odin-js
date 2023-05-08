@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ellipsisAtMaxChar } from '../../../helpers/common';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';

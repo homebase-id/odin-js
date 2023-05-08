@@ -1,4 +1,4 @@
-import { t } from '../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useChannels from '../../../../hooks/blog/useChannels';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
 

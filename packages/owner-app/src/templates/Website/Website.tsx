@@ -1,5 +1,5 @@
 import { HomePageAttributes, HomePageConfig, toGuidId } from '@youfoundation/js-lib';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import useStaticFiles from '../../hooks/staticFiles/useStaticFiles';
 import { ErrorNotification } from '@youfoundation/common-app';

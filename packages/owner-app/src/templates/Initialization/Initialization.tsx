@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import useInit from '../../hooks/configure/useInit';
 import useIsConfigured from '../../hooks/configure/useIsConfigured';

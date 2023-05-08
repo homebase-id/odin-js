@@ -1,4 +1,4 @@
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';

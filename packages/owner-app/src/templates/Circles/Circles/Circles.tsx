@@ -4,7 +4,7 @@ import {
   GetTargetDriveFromProfileId,
 } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircles from '../../../hooks/circles/useCircles';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';

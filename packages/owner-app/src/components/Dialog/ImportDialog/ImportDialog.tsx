@@ -1,10 +1,10 @@
 import { byteArrayToString, TargetDrive } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 import useExport, { importable, isImportable } from '../../../hooks/drives/useExport';
-import usePortal from '../../../hooks/portal/usePortal';
+import { usePortal } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';

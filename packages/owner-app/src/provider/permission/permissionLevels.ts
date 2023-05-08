@@ -1,4 +1,4 @@
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 
 export const drivePermissionLevels = [
   { name: t('None'), value: 0 },

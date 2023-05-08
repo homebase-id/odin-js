@@ -31,7 +31,7 @@ function addRootElement(rootElem: Element) {
  * @param {String} id The id of the target container, e.g 'modal' or 'spotlight'
  * @returns {HTMLElement} The DOM node to use as the Portal target.
  */
-function usePortal(id: string) {
+export function usePortal(id: string) {
   const rootElemRef = useRef<Element | null>(null);
 
   useEffect(
@@ -82,5 +82,3 @@ function usePortal(id: string) {
 
   return getRootElem();
 }
-
-export default usePortal;

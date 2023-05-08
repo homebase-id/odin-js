@@ -1,6 +1,6 @@
 import { format } from '../../../../../../../helpers/timeago';
 import { useState } from 'react';
-import { t } from '../../../../../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import AuthorImage from '../../../Author/Image';
 import ReactionsBar from '../../Reactions/ReactionsBar/ReactionsBar';
 import CommentComposer, { CommentEditor } from '../CommentComposer/CommentComposer';

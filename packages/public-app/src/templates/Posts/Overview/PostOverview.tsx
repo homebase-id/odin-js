@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib';
 import { useRef } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useBlogPostsInfinite from '../../../hooks/blog/useBlogPostsInfinite';
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';

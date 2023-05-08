@@ -1,4 +1,4 @@
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';

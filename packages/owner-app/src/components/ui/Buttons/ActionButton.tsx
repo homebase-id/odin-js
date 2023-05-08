@@ -1,5 +1,5 @@
 import { FC, ReactNode, useState } from 'react';
-import ConfirmDialog, { TrickQuestion } from '../../Dialog/ConfirmDialog/ConfirmDialog';
+import { ConfirmDialog, TrickQuestion } from '@youfoundation/common-app';
 import {
   Arrow,
   Check,

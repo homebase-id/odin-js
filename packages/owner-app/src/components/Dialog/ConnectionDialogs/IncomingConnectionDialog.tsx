@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
-import usePortal from '../../../hooks/portal/usePortal';
+import { usePortal } from '@youfoundation/common-app';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';

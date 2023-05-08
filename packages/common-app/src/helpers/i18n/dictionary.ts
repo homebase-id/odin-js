@@ -8,10 +8,15 @@ const enLocale = [
   ['blog', 'Blog'],
   ['me', 'Me'],
   ['loading', 'Loading'],
-  ['related blogs', 'Related blogs'],
+  ['section-empty-attributes', "You don't have any attributes in this section"],
+  ['no-data-found', 'No data found'],
   ['masonrylayout', 'Masonry'],
   ['largecards', 'Grid'],
   ['classicblog', 'List'],
+  ['coverpage', 'Cover Page'],
+  ['socialclassic', 'Social Vertical Posts'],
+  ['contentproducer', 'Social Horizontal Posts'],
+  ['related blogs', 'Related blogs'],
 ] as const;
 
 const internalDict: Map<string, string> = new Map(enLocale);

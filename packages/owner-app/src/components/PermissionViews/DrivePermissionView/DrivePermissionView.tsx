@@ -1,6 +1,6 @@
 import { DriveDefinition, DriveGrant } from '@youfoundation/js-lib';
 import { Link } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { Arrow } from '@youfoundation/common-app';

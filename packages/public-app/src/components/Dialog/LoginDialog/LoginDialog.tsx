@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import usePortal from '../../../hooks/portal/usePortal';
+import { usePortal } from '@youfoundation/common-app';
 import { LoginBox } from '../../Auth/ProfileNav/ProfileNav';
 import { DialogWrapper } from '@youfoundation/common-app';
 

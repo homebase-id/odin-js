@@ -11,7 +11,7 @@ import {
   RichText,
 } from '@youfoundation/js-lib';
 import { useEffect, useMemo, useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import usePost from '../../../hooks/socialFeed/post/usePost';
 import Button from '../../ui/Buttons/ActionButton';
 import { ErrorBoundary } from '../../ui/Layout/ErrorBoundary/ErrorBoundary';
@@ -25,7 +25,7 @@ import { debounce } from 'lodash-es';
 import { useNavigate } from 'react-router-dom';
 import NewRichTextEditor from '../../RichTextEditor/RichTextEditor';
 import Select from '../../Form/Select';
-import Label from '../../Form/Label';
+import { Label } from '@youfoundation/common-app';
 import { getReadingTime } from '../../../helpers/richTextHelper';
 
 export const EMPTY_POST: Article = {

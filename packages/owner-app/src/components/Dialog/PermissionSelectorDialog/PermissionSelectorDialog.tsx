@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
-import usePortal from '../../../hooks/portal/usePortal';
+import { t } from '@youfoundation/common-app';
+import { usePortal } from '@youfoundation/common-app';
 import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';

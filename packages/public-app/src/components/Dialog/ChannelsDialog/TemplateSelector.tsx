@@ -1,6 +1,6 @@
 import { ChannelTemplate } from '@youfoundation/js-lib';
 import { FC } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { TemplateList, TemplateMasonry, TemplateGrid, IconProps } from '@youfoundation/common-app';
 
 const TemplateSelector = ({

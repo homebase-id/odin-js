@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useChannels, { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
-import usePortal from '../../../hooks/portal/usePortal';
+import { usePortal } from '@youfoundation/common-app';
 import useDrafts from '../../../hooks/socialFeed/drafts/useDrafts';
 import ActionLink from '../../ui/Buttons/ActionLink';
 import ActionButton from '../../ui/Buttons/ActionButton';

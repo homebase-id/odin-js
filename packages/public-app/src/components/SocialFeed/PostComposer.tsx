@@ -6,7 +6,7 @@ import {
 } from '@youfoundation/js-lib';
 import React, { Ref } from 'react';
 import { useRef, useState } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useChannels from '../../hooks/blog/useChannels';
 import ChannelsDialog from '../Dialog/ChannelsDialog/ChannelsDialog';
 import { ErrorNotification } from '@youfoundation/common-app';

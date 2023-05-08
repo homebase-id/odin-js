@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useCircle from '../../../hooks/circles/useCircle';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';

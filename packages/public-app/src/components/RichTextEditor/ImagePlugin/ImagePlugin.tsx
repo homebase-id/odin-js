@@ -14,7 +14,7 @@ import { ToolbarButton, ToolbarButtonProps } from '@udecode/plate-ui-toolbar';
 import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import ImageDialog from '../ImageDialog/ImageDialog';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import Image from '../../Image/Image';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { ErrorNotification } from '@youfoundation/common-app';

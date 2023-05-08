@@ -1,7 +1,7 @@
 import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t } from '../../helpers/i18n/dictionary';
-import ConfirmDialog from '../Dialog/ConfirmDialog/ConfirmDialog';
+import { t } from '@youfoundation/common-app';
+import { ConfirmDialog } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';

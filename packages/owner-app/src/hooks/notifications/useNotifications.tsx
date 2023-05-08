@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from 'react';
 
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { usePendingConnections } from '../connections/useConnections';
-import { t } from '../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 import useProfiles from '../../../hooks/profiles/useProfiles';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';

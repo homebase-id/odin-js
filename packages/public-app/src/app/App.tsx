@@ -19,7 +19,7 @@ import useAuth from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
 import useSiteData from '../hooks/siteData/useSiteData';
-import { t } from '../helpers/i18n/dictionary';
+import { t } from '@youfoundation/common-app';
 
 const RootRoute = lazy(() => import('./RootRoute'));
 

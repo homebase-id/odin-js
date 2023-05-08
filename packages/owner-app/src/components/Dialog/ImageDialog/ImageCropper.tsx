@@ -1,8 +1,8 @@
 import Cropper from 'react-cropper';
 import './cropper.css';
 import { useEffect, useRef, useState } from 'react';
-import { t } from '../../../helpers/i18n/dictionary';
-import Label from '../../Form/Label';
+import { t } from '@youfoundation/common-app';
+import { Label } from '@youfoundation/common-app';
 import { ImageContentType } from '@youfoundation/js-lib';
 
 interface ImageCropperProps {
