@@ -6,7 +6,7 @@ import {
 } from '@youfoundation/js-lib';
 import React, { Ref } from 'react';
 import { useRef, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { Globe, t } from '@youfoundation/common-app';
 import useChannels from '../../hooks/blog/useChannels';
 import ChannelsDialog from '../Dialog/ChannelsDialog/ChannelsDialog';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -23,6 +23,7 @@ import ReactAccessEditorDialog from '../Dialog/ReactAccessEditorDialog/ReactAcce
 import VolatileInput from '../Form/VolatileInput';
 import { Alert } from '@youfoundation/common-app';
 import usePostComposer, { ReactAccess } from '../../hooks/socialFeed/post/usePostComposer';
+import ActionGroup from '../ui/Buttons/ActionGroup';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -134,22 +135,16 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           >
             <Article className="h-4 w-4" />
           </ActionLink>
-          <ActionButton
+          <ActionGroup
+            options={[
+              {
+                label: t('Who can react'),
+                icon: reactAccess && reactAccess === SecurityGroupType.Owner ? Lock : Globe,
+                onClick: () => setIsReactAccessEditorOpen(true),
+              },
+            ]}
             type="mute"
-            className={`m-2 ml-0 cursor-pointer`}
-            size="small"
-            title="Who can react"
-            onClick={(e) => {
-              e.preventDefault();
-              setIsReactAccessEditorOpen(true);
-            }}
-          >
-            {reactAccess && reactAccess === SecurityGroupType.Owner ? (
-              <Lock className="h-4 w-4" />
-            ) : (
-              <OpenLock className="h-4 w-4" />
-            )}
-          </ActionButton>
+          />
           <ChannelSelector
             className="m-2 ml-auto"
             defaultValue={BlogConfig.PublicChannel.channelId}
