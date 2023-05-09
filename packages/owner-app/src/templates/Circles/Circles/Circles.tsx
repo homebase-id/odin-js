@@ -92,7 +92,7 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
     <CardLink
       key={circleDef.id}
       title={
-        <span className="flex flex-row items-center">
+        <span className="flex w-full flex-row items-center">
           <span>{circleDef.name}</span>
           {members?.length ? (
             <>
