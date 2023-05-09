@@ -15,6 +15,7 @@ import {
   uploadVideo,
   VideoContentType,
   VideoUploadResult,
+  ThumbnailFile,
 } from '@youfoundation/js-lib';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import useAuth from '../../auth/useAuth';
@@ -23,7 +24,13 @@ import useStaticFiles from '../../staticFiles/useStaticFiles';
 export interface FileLike {
   name: string;
   bytes: Uint8Array;
-  type: 'image/jpeg' | 'image/png';
+  size: number;
+  type: 'image/jpeg' | 'image/png' | 'video/mp4';
+}
+
+export interface AttachmentFile {
+  file: File | FileLike;
+  thumbnail?: ThumbnailFile;
 }
 
 const usePost = () => {
@@ -56,7 +63,7 @@ const usePost = () => {
     acl,
     channelId,
   }: {
-    files: (File | FileLike)[];
+    files: AttachmentFile[];
     acl: AccessControlList;
     channelId: string;
   }): Promise<(ImageUploadResult | VideoUploadResult)[]> => {
@@ -64,36 +71,37 @@ const usePost = () => {
 
     const imageUploadResults = await Promise.all(
       files.map(async (file) => {
-        if (file.type === 'video/mp4') {
+        if (file.file.type === 'video/mp4') {
           // if video is tiny enough (less than 10MB), don't segment just upload
-          if (file.size < 10000000)
+          if (file.file.size < 10000000 || 'bytes' in file.file)
             return await uploadVideo(
               dotYouClient,
               targetDrive,
               acl,
-              file,
-              { isSegmented: false, mimeType: file.type, fileSize: file.size },
+              'bytes' in file.file ? file.file.bytes : file.file,
+              { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
               {
-                type: file.type as VideoContentType,
+                type: file.file.type as VideoContentType,
+                thumb: 'thumbnail' in file ? file.thumbnail : undefined,
               }
             );
 
           // Segment video file
           const segmentVideoFile = (await import('@youfoundation/js-lib')).segmentVideoFile;
-          const { bytes: processedBytes, metadata } = await segmentVideoFile(file);
+          const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
 
           return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
-            type: file.type as VideoContentType,
+            type: file.file.type as VideoContentType,
           });
         } else {
           return await uploadImage(
             dotYouClient,
             targetDrive,
             acl,
-            'bytes' in file ? file.bytes : file,
+            'bytes' in file.file ? file.file.bytes : file.file,
             undefined,
             {
-              type: file.type as ImageContentType,
+              type: file.file.type as ImageContentType,
             },
             [
               { quality: 100, width: 600, height: 600 },

@@ -12,7 +12,7 @@ import {
 } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { makeGrid } from '../../../helpers/imageMerger';
-import usePost, { FileLike } from './usePost';
+import usePost, { AttachmentFile, FileLike } from './usePost';
 
 export type ReactAccess = SecurityGroupType.Owner | SecurityGroupType.Connected | undefined;
 
@@ -26,7 +26,7 @@ const usePostComposer = () => {
   const savePost = async (
     caption: string | undefined,
     channel: ChannelDefinition,
-    files: (File | FileLike)[] | undefined,
+    files: AttachmentFile[] | undefined,
     reactAccess: ReactAccess
   ) => {
     if (!files && !caption) {

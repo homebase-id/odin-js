@@ -2,6 +2,7 @@ import {
   BlogConfig,
   ChannelDefinition,
   SecurityGroupType,
+  ThumbnailFile,
   base64ToUint8Array,
 } from '@youfoundation/js-lib';
 import React, { Ref, useEffect } from 'react';
@@ -21,7 +22,7 @@ import ReactAccessEditorDialog from '../Dialog/ReactAccessEditorDialog/ReactAcce
 import VolatileInput from '../Form/VolatileInput';
 import usePostComposer, { ReactAccess } from '../../hooks/socialFeed/post/usePostComposer';
 import ActionGroup from '../ui/Buttons/ActionGroup';
-import { FileLike } from '../../hooks/socialFeed/post/usePost';
+import { AttachmentFile, FileLike } from '../../hooks/socialFeed/post/usePost';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -31,7 +32,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
-  const [files, setFiles] = useState<(File | FileLike)[]>();
+  const [files, setFiles] = useState<AttachmentFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
@@ -69,10 +70,14 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
         const base64 = (e.data.dataUrl as string).split(',').pop();
         if (!base64) return;
 
-        const file: FileLike = {
-          name: e.data.note,
-          type: e.data.type,
-          bytes: base64ToUint8Array(base64),
+        const bytes = base64ToUint8Array(base64);
+        const file: AttachmentFile = {
+          file: {
+            name: e.data.note,
+            type: e.data.type,
+            bytes: bytes,
+            size: bytes.length,
+          },
         };
 
         setFiles([...(files ?? []), file]);
@@ -103,7 +108,9 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             onChange={(newCaption) => setCaption(newCaption)}
             placeholder={t("What's up?")}
             onPaste={(e) => {
-              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)];
+              const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
+                (file) => ({ file })
+              );
 
               if (mediaFiles.length) {
                 setFiles([...(files ?? []), ...mediaFiles]);
@@ -135,7 +142,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             title="Attach a file"
           >
             <FileSelector
-              onChange={(files) => setFiles(files)}
+              onChange={(files) => setFiles(files.map((file) => ({ file })))}
               accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
             />
           </div>

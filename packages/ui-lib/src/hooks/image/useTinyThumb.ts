@@ -42,11 +42,11 @@ const useTinyThumb = (
       };
     }
 
-    return await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId);
+    return (await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId)) || null;
   };
 
   return useQuery(
-    ['tinyThumb', odinId || localHost, imageFileId, imageDrive],
+    ['tinyThumb', odinId || localHost, imageFileId, imageDrive?.alias],
     () => fetchImageData(odinId || localHost, imageFileId, imageDrive),
     {
       refetchOnMount: true,
