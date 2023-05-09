@@ -20,6 +20,12 @@ import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import useAuth from '../../auth/useAuth';
 import useStaticFiles from '../../staticFiles/useStaticFiles';
 
+export interface FileLike {
+  name: string;
+  bytes: Uint8Array;
+  type: 'image/jpeg' | 'image/png';
+}
+
 const usePost = () => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
@@ -50,7 +56,7 @@ const usePost = () => {
     acl,
     channelId,
   }: {
-    files: File[];
+    files: (File | FileLike)[];
     acl: AccessControlList;
     channelId: string;
   }): Promise<(ImageUploadResult | VideoUploadResult)[]> => {
@@ -84,7 +90,7 @@ const usePost = () => {
             dotYouClient,
             targetDrive,
             acl,
-            file,
+            'bytes' in file ? file.bytes : file,
             undefined,
             {
               type: file.type as ImageContentType,

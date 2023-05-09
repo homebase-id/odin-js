@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { Triangle } from '@youfoundation/common-app';
+import { FileLike } from '../../../hooks/socialFeed/post/usePost';
 
 export const FileOverview = ({
   files,
   setFiles,
   className,
 }: {
-  files?: File[];
-  setFiles: (files: File[]) => void;
+  files?: (File | FileLike)[];
+  setFiles: (files: (File | FileLike)[]) => void;
   className?: string;
 }) => {
   if (!files || !files.length) {
@@ -39,7 +40,10 @@ export const FileOverview = ({
         );
       }
 
-      const url = URL.createObjectURL(currFile);
+      const url =
+        'bytes' in currFile
+          ? window.URL.createObjectURL(new Blob([currFile.bytes], { type: currFile.type }))
+          : URL.createObjectURL(currFile);
       return (
         <div key={url} className="relative w-1/4 p-[2px] lg:w-1/3">
           <img

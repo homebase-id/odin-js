@@ -1,10 +1,10 @@
 import {
-  AccessControlList,
   BlogConfig,
   ChannelDefinition,
   SecurityGroupType,
+  base64ToUint8Array,
 } from '@youfoundation/js-lib';
-import React, { Ref } from 'react';
+import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import { Globe, t } from '@youfoundation/common-app';
 import useChannels from '../../hooks/blog/useChannels';
@@ -21,6 +21,7 @@ import ReactAccessEditorDialog from '../Dialog/ReactAccessEditorDialog/ReactAcce
 import VolatileInput from '../Form/VolatileInput';
 import usePostComposer, { ReactAccess } from '../../hooks/socialFeed/post/usePostComposer';
 import ActionGroup from '../ui/Buttons/ActionGroup';
+import { FileLike } from '../../hooks/socialFeed/post/usePost';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -30,7 +31,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
-  const [files, setFiles] = useState<File[]>();
+  const [files, setFiles] = useState<(File | FileLike)[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
@@ -53,6 +54,35 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
 
     if (selectRef.current) selectRef.current.value = BlogConfig.PublicChannel.channelId;
   };
+
+  useEffect(() => {
+    const messageListener = (e: MessageEvent) => {
+      if (e?.data?.source?.startsWith('react-devtools-')) return;
+
+      console.log('incoming message', e);
+
+      if (
+        e.data.action === 'odin-upload' &&
+        'dataUrl' in e.data &&
+        typeof e.data.dataUrl === 'string'
+      ) {
+        const base64 = (e.data.dataUrl as string).split(',').pop();
+        if (!base64) return;
+
+        const file: FileLike = {
+          name: e.data.note,
+          type: e.data.type,
+          bytes: base64ToUint8Array(base64),
+        };
+
+        setFiles([...(files ?? []), file]);
+      }
+    };
+
+    window.addEventListener('message', messageListener);
+
+    return () => window.removeEventListener('message', messageListener);
+  }, []);
 
   return (
     <div
