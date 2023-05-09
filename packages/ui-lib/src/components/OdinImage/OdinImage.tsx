@@ -28,6 +28,7 @@ export interface OdinImageProps {
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
   onLoad?: () => void;
+  avoidPayload?: boolean;
 }
 
 export const OdinImage = ({
@@ -43,6 +44,7 @@ export const OdinImage = ({
   previewThumbnail,
   probablyEncrypted,
   onLoad,
+  avoidPayload,
 }: OdinImageProps) => {
   const previewImgRef = useRef<HTMLImageElement>(null);
   const wrapperRef = useRef<HTMLPictureElement>(null);
@@ -90,7 +92,11 @@ export const OdinImage = ({
     odinId,
     loadSize !== undefined ? fileId : undefined,
     targetDrive,
-    loadSize !== 'full' ? loadSize : undefined,
+    loadSize !== 'full'
+      ? loadSize
+      : avoidPayload
+      ? { pixelHeight: 200, pixelWidth: 200 }
+      : undefined,
     probablyEncrypted,
     naturalSize
   );

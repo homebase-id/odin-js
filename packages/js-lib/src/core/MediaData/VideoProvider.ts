@@ -1,7 +1,7 @@
-import { getNewId, jsonStringify64, stringify } from '../../helpers/helpers';
+import { getNewId, jsonStringify64, stringify, uint8ArrayToBase64 } from '../../helpers/helpers';
 import { DotYouClient } from '../DotYouClient';
 import { getFileHeader, getPayloadBytes, uploadFile } from '../DriveData/DriveProvider';
-import { TargetDrive } from '../DriveData/DriveTypes';
+import { EmbeddedThumb, TargetDrive, ThumbnailFile } from '../DriveData/DriveTypes';
 import {
   AccessControlList,
   TransitOptions,
@@ -15,6 +15,7 @@ import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpe
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
+import { createThumbnails } from './Thumbs/ThumbnailProvider';
 
 export type VideoContentType = 'video/mp4';
 
@@ -33,6 +34,7 @@ export const uploadVideo = async (
     transitOptions?: TransitOptions;
     allowDistribution?: boolean;
     userDate?: number;
+    thumb?: ThumbnailFile;
   }
 ): Promise<VideoUploadResult | undefined> => {
   if (!targetDrive) {
@@ -53,6 +55,30 @@ export const uploadVideo = async (
     transitOptions: uploadMeta?.transitOptions || null,
   };
 
+  const { naturalSize, tinyThumb, additionalThumbnails } = uploadMeta?.thumb
+    ? await createThumbnails(uploadMeta.thumb.payload, uploadMeta.thumb.contentType, [
+        { quality: 100, width: 250, height: 250 },
+      ])
+    : { naturalSize: undefined, tinyThumb: undefined, additionalThumbnails: undefined };
+
+  const previewThumbnail: EmbeddedThumb | undefined =
+    naturalSize && tinyThumb
+      ? {
+          pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
+          pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
+          contentType: tinyThumb.contentType,
+          content: uint8ArrayToBase64(tinyThumb.payload),
+        }
+      : undefined;
+
+  const additionalThumbs = additionalThumbnails?.map((thumb) => {
+    return {
+      pixelHeight: thumb.pixelHeight,
+      pixelWidth: thumb.pixelWidth,
+      contentType: thumb.contentType,
+    };
+  });
+
   const metadata: UploadFileMetadata = {
     versionTag: uploadMeta?.versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
@@ -66,6 +92,8 @@ export const uploadVideo = async (
       fileType: 0,
       jsonContent: jsonStringify64(fileMetadata),
       userDate: uploadMeta?.userDate,
+      previewThumbnail,
+      additionalThumbnails: additionalThumbs,
     },
     payloadIsEncrypted: encrypt,
     accessControlList: acl,
@@ -76,7 +104,7 @@ export const uploadVideo = async (
     instructionSet,
     metadata,
     file,
-    undefined,
+    additionalThumbnails,
     encrypt
   );
 
