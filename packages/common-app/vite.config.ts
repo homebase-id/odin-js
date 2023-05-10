@@ -19,8 +19,8 @@ export default defineConfig({
       output: [
         {
           format: 'es',
-          inlineDynamicImports: false,
-          preserveModules: true, // otherwise everything is bundled into one file blocking tree shaking of the named exports, but only works for ES modules
+          // inlineDynamicImports: false,
+          // preserveModules: true, // otherwise everything is bundled into one file blocking tree shaking of the named exports, but only works for ES modules
           globals: {
             react: 'react',
             '@tanstack/react-query': '@tanstack/react-query',
