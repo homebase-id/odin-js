@@ -1,7 +1,7 @@
 import { ReactNode, useRef } from 'react';
 
 import { useOutsideTrigger } from '../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import { Times } from '../icons/Times/Times';
+import { Times } from '../../ui';
 
 export const DialogWrapper = ({
   children,

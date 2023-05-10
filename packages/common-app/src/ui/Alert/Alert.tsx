@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
-import { Exclamation } from '../icons/Exclamation/Exclamation';
-import { Question } from '../icons/Question/Question';
+import { Question, Exclamation } from '../../ui';
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';
   title?: ReactNode;

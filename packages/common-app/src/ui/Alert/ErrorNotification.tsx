@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert } from './Alert';
-import { Times } from '../icons/Times/Times';
+import { Times } from '../../ui';
 const t = (key: string) => key;
 
 const getKnownErrorMessages = (errorCode: number): string | undefined => {

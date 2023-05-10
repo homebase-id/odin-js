@@ -2,7 +2,7 @@ import { ReactNode, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { usePortal } from '../../hooks/portal/usePortal';
-import { Exclamation } from '../../ui/icons/Exclamation/Exclamation';
+import { Exclamation } from '../../ui';
 import { t } from '../../helpers/i18n/dictionary';
 import { Input } from '../../form/Input';
 import { Label } from '../../form/Label';
