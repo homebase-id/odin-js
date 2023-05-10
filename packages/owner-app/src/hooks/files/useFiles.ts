@@ -41,20 +41,16 @@ const useFiles = ({
 
   const fetchFile = async (result: DriveSearchResult, payloadOnly?: boolean) => {
     if (result.fileMetadata.contentType !== 'application/json' && payloadOnly) {
+      const payload = await getPayloadBytes(
+        dotYouClient,
+        targetDrive,
+        result.fileId,
+        result.sharedSecretEncryptedKeyHeader
+      );
+      if (!payload) return null;
+
       return window.URL.createObjectURL(
-        new Blob(
-          [
-            (
-              await getPayloadBytes(
-                dotYouClient,
-                targetDrive,
-                result.fileId,
-                result.sharedSecretEncryptedKeyHeader
-              )
-            ).bytes,
-          ],
-          { type: `${result.fileMetadata.contentType};charset=utf-8` }
-        )
+        new Blob([payload.bytes], { type: `${result.fileMetadata.contentType};charset=utf-8` })
       );
     }
 

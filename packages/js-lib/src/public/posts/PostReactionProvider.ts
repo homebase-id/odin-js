@@ -251,7 +251,7 @@ const dsrToComment = async (
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<ReactionFile> => {
+): Promise<ReactionFile | null> => {
   const isLocal = odinId === dotYouClient.getHostname();
 
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
@@ -259,6 +259,8 @@ const dsrToComment = async (
   const contentData = isLocal
     ? await getPayload<RawReactionContent>(dotYouClient, ...params)
     : await getPayloadOverTransit<RawReactionContent>(dotYouClient, odinId, ...params);
+
+  if (!contentData) return null;
 
   return {
     fileId: dsr.fileId,

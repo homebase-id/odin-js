@@ -132,7 +132,7 @@ export const getDecryptedVideoChunk = async (
     length
   );
 
-  return payload.bytes;
+  return payload?.bytes || null;
 };
 
 export const getDecryptedVideoMetadata = async (
@@ -182,6 +182,7 @@ export const getDecryptedVideoUrl = async (
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   return getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType).then(
     (data) => {
+      if (!data) return '';
       const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
       return url;
     }

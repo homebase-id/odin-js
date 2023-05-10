@@ -100,7 +100,7 @@ export const getPayloadOverTransit = async <T>(
     sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   },
   includesJsonContent: boolean
-): Promise<T> => {
+): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
 
   const keyheader = fileMetadata.payloadIsEncrypted
@@ -127,7 +127,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
   fileId: string,
   keyHeader: KeyHeader | undefined,
   systemFileType?: SystemFileType
-): Promise<T> => {
+): Promise<T | null> => {
   return getPayloadBytesOverTransit(
     dotYouClient,
     odinId,
@@ -136,6 +136,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
     keyHeader,
     systemFileType
   ).then((data) => {
+    if (!data) return null;
     const json = byteArrayToString(new Uint8Array(data.bytes));
     try {
       const o = JSON.parse(json);
@@ -166,7 +167,7 @@ export const getPayloadBytesOverTransit = async (
   systemFileType?: SystemFileType,
   chunkStart?: number,
   chunkLength?: number
-): Promise<{ bytes: Uint8Array; contentType: ImageContentType }> => {
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -222,7 +223,7 @@ export const getPayloadBytesOverTransit = async (
     })
     .catch((error) => {
       console.error(error);
-      throw error;
+      return null;
     });
 };
 

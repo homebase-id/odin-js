@@ -112,7 +112,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
         <ActionButton
           icon={Download}
           onClick={async () => {
-            setDownloadUrl(await fetchFile(file));
+            setDownloadUrl((await fetchFile(file)) || '');
           }}
           size="square"
           type="secondary"
@@ -130,7 +130,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
             <div
               className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 p-2 opacity-0 hover:opacity-100"
               onClick={async () => {
-                if (!downloadPayloadUrl) setDownloadPayloadUrl(await fetchFile(file, true));
+                if (!downloadPayloadUrl) setDownloadPayloadUrl((await fetchFile(file, true)) || '');
               }}
             >
               {downloadPayloadUrl ? (
@@ -144,7 +144,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
               ) : (
                 <ActionButton
                   icon={Download}
-                  onClick={async () => setDownloadPayloadUrl(await fetchFile(file, true))}
+                  onClick={async () => setDownloadPayloadUrl((await fetchFile(file, true)) || '')}
                   size="square"
                   type="mute"
                 />

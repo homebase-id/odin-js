@@ -97,6 +97,7 @@ export const getDecryptedImageUrlOverTransit = async (
     size,
     systemFileType
   ).then((data) => {
+    if (!data) return '';
     const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
     return url;
   });
@@ -114,7 +115,7 @@ export const getDecryptedImageDataOverTransit = async (
   pixelWidth?: number;
   contentType: ImageContentType;
   content: ArrayBuffer;
-}> => {
+} | null> => {
   const data = await (size
     ? getThumbBytesOverTransit(
         dotYouClient,
@@ -134,6 +135,8 @@ export const getDecryptedImageDataOverTransit = async (
         undefined,
         systemFileType
       ));
+
+  if (!data) return null;
 
   return {
     contentType: data.contentType,

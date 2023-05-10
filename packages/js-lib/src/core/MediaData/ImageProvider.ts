@@ -210,6 +210,7 @@ export const getDecryptedImageUrl = async (
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   return getDecryptedImageData(dotYouClient, targetDrive, fileId, size, systemFileType).then(
     (data) => {
+      if (!data) return '';
       const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
       return url;
     }
@@ -227,7 +228,7 @@ export const getDecryptedImageData = async (
   pixelWidth?: number;
   contentType: ImageContentType;
   bytes: ArrayBuffer;
-}> => {
+} | null> => {
   return await (size
     ? getThumbBytes(
         dotYouClient,

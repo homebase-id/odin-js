@@ -243,17 +243,19 @@ export const getProfileSections = async (
 
   const response = await queryBatch(dotYouClient, params);
   if (response.searchResults.length >= 1) {
-    const sections = await Promise.all(
-      response.searchResults.map(
-        async (dsr) =>
-          await getPayload<ProfileSection>(
-            dotYouClient,
-            targetDrive,
-            dsr,
-            response.includeMetadataHeader
-          )
+    const sections = (
+      await Promise.all(
+        response.searchResults.map(
+          async (dsr) =>
+            await getPayload<ProfileSection>(
+              dotYouClient,
+              targetDrive,
+              dsr,
+              response.includeMetadataHeader
+            )
+        )
       )
-    );
+    ).filter((section) => !!section) as ProfileSection[];
     sections.sort((a, b) => {
       return a.priority - b.priority;
     });
@@ -299,6 +301,8 @@ const getProfileDefinitionInternal = async (
       dsr,
       response.includeMetadataHeader
     );
+
+    if (!definition) return undefined;
 
     return {
       fileId: dsr.fileId,

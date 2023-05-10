@@ -304,6 +304,8 @@ const dsrToPostFile = async <T extends PostContent>(
   try {
     const content = await getPayload<T>(dotYouClient, targetDrive, dsr, includeMetadataHeader);
 
+    if (!content) return undefined;
+
     const file: PostFile<T> = {
       fileId: dsr.fileId,
       versionTag: dsr.fileMetadata.versionTag,

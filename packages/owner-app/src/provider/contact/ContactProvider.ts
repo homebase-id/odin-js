@@ -123,12 +123,13 @@ export const getContactByUniqueId = async (
     }
 
     const dsr: DriveSearchResult = response.searchResults[0];
-    const contact: ContactFile = await getPayload<ContactFile>(
+    const contact: ContactFile | null = await getPayload<ContactFile>(
       dotYouClient,
       ContactConfig.ContactTargetDrive,
       dsr,
       response.includeMetadataHeader
     );
+    if (!contact) return;
 
     // Set fileId for future replace
     contact.fileId = dsr.fileId;
@@ -158,12 +159,13 @@ export const getContactByTag = async (
   }
 
   const dsr: DriveSearchResult = response.searchResults[0];
-  const contact: ContactFile = await getPayload<ContactFile>(
+  const contact: ContactFile | null = await getPayload<ContactFile>(
     dotYouClient,
     ContactConfig.ContactTargetDrive,
     dsr,
     response.includeMetadataHeader
   );
+  if (!contact) return;
 
   // Set fileId for future replace
   contact.fileId = dsr.fileId;
@@ -191,23 +193,27 @@ export const getContacts = async (
   }
 
   return {
-    results: await Promise.all(
-      response.searchResults.map(async (result) => {
-        const dsr: DriveSearchResult = result;
-        const contact: ContactFile = await getPayload<ContactFile>(
-          dotYouClient,
-          ContactConfig.ContactTargetDrive,
-          dsr,
-          response.includeMetadataHeader
-        );
+    results: (
+      await Promise.all(
+        response.searchResults.map(async (result) => {
+          const dsr: DriveSearchResult = result;
+          const contact: ContactFile | null = await getPayload<ContactFile>(
+            dotYouClient,
+            ContactConfig.ContactTargetDrive,
+            dsr,
+            response.includeMetadataHeader
+          );
 
-        // Set fileId for future replace
-        contact.fileId = dsr.fileId;
-        contact.versionTag = dsr.fileMetadata.versionTag;
+          if (!contact) return;
 
-        return contact;
-      })
-    ),
+          // Set fileId for future replace
+          contact.fileId = dsr.fileId;
+          contact.versionTag = dsr.fileMetadata.versionTag;
+
+          return contact;
+        })
+      )
+    ).filter(Boolean) as ContactFile[],
     cursorState: response.cursorState,
   };
 };

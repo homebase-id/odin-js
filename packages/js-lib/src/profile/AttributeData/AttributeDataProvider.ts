@@ -170,6 +170,7 @@ export const dsrToAttributeFile = async (
       dsr,
       includeMetadataHeader
     );
+    if (!attrPayload) return undefined;
     return {
       ...attrPayload,
       fileId: attrPayload.fileId ?? dsr.fileId,

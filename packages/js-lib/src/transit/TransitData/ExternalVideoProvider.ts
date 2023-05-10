@@ -30,7 +30,7 @@ export const getDecryptedVideoChunkOverTransit = async (
     length
   );
 
-  return payload?.bytes;
+  return payload?.bytes || null;
 };
 
 export const getDecryptedVideoMetadataOverTransit = async (
@@ -90,6 +90,7 @@ export const getDecryptedVideoUrlOverTransit = async (
     undefined,
     systemFileType
   ).then((data) => {
+    if (!data) return '';
     const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
     return url;
   });

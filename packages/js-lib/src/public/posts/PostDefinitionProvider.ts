@@ -214,6 +214,8 @@ const getChannelDefinitionInternal = async (
         response.includeMetadataHeader
       );
 
+      if (!definition) return undefined;
+
       return {
         fileId: dsr.fileId,
         versionTag: dsr.fileMetadata.versionTag,

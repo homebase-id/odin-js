@@ -83,11 +83,11 @@ export const queryConnectionAttributes = async (
       phone: { number: phone?.data?.[PhoneFields.PhoneNumber] },
       birthday: { date: birthday?.data?.[BirthdayFields.Date] },
       image: photo
-        ? await queryConnectionPhotoData(
+        ? (await queryConnectionPhotoData(
             dotYouClient,
             odinId,
             photo.data[MinimalProfileFields.ProfileImageId]
-          )
+          )) || undefined
         : undefined,
     };
   } catch (ex) {
@@ -106,6 +106,8 @@ export const queryConnectionPhotoData = async (
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
     profileImageId
   );
+
+  if (!imageData) return null;
 
   return {
     pixelWidth: imageData.pixelWidth || 100,

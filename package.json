@@ -9,9 +9,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm install && npm run build -workspaces",
+    "build": "npm install && npm run build -workspaces --if-present",
     "clean-build": "npm run clean; npm run build",
-    "build-libs": "npm run build -w ./packages/js-lib -w ./packages/ui-lib -w ./packages/common-app",
+    "build-libs": "npm run build -w ./packages/js-lib -w ./packages/ui-lib",
     "owner-app": "npm install && npm start -w ./packages/owner-app",
     "public-app": "npm install && npm start -w ./packages/public-app"
   },

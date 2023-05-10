@@ -123,13 +123,15 @@ const useExport = () => {
         return await getPayload(dotYouClient, targetDrive, dsr, includeMetadataHeader);
       } else {
         return (
-          await getPayloadBytes(
-            dotYouClient,
-            targetDrive,
-            dsr.fileId,
-            dsr.sharedSecretEncryptedKeyHeader
-          )
-        ).bytes;
+          (
+            await getPayloadBytes(
+              dotYouClient,
+              targetDrive,
+              dsr.fileId,
+              dsr.sharedSecretEncryptedKeyHeader
+            )
+          )?.bytes || null
+        );
       }
     };
 

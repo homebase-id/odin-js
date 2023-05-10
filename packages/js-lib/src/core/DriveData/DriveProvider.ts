@@ -327,9 +327,10 @@ export const getPayloadAsJson = async <T>(
   fileId: string,
   keyHeader: KeyHeader | EncryptedKeyHeader | undefined,
   systemFileType?: SystemFileType
-): Promise<T> => {
+): Promise<T | null> => {
   return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader, systemFileType).then(
     (data) => {
+      if (!data) return null;
       const json = byteArrayToString(new Uint8Array(data.bytes));
       try {
         const o = JSON.parse(json);
@@ -360,7 +361,7 @@ export const getPayloadBytes = async (
   systemFileType?: SystemFileType,
   chunkStart?: number,
   chunkLength?: number
-): Promise<{ bytes: Uint8Array; contentType: ImageContentType }> => {
+): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -408,7 +409,7 @@ export const getPayloadBytes = async (
     })
     .catch((error) => {
       console.error('[DotYouCore-js:getPayloadBytes]', error);
-      throw error;
+      return null;
     });
 };
 
@@ -697,7 +698,7 @@ export const getPayload = async <T>(
   },
   includesJsonContent: boolean,
   systemFileType?: SystemFileType
-): Promise<T> => {
+): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
 
   const keyheader = fileMetadata.payloadIsEncrypted

@@ -29,13 +29,15 @@ export const getProfileAttributesOverTransit = async (
   return (
     await Promise.all(
       searchResults.map(async (dsr) => {
-        const attrPayLoad: AttributeFile = await getPayloadOverTransit<AttributeFile>(
+        const attrPayLoad: AttributeFile | null = await getPayloadOverTransit<AttributeFile>(
           dotYouClient,
           odinId,
           targetDrive,
           dsr,
           result.includeMetadataHeader
         );
+
+        if (!attrPayLoad) return undefined;
 
         return {
           ...attrPayLoad,
@@ -44,5 +46,5 @@ export const getProfileAttributesOverTransit = async (
         };
       })
     )
-  ).filter((item) => !!item);
+  ).filter((item) => !!item) as AttributeFile[];
 };

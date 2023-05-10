@@ -265,12 +265,14 @@ export const getChannelOverTransit = async (
   try {
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      return await getPayloadOverTransit<ChannelDefinition>(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        dsr,
-        response.includeMetadataHeader
+      return (
+        (await getPayloadOverTransit<ChannelDefinition>(
+          dotYouClient,
+          odinId,
+          targetDrive,
+          dsr,
+          response.includeMetadataHeader
+        )) || undefined
       );
     }
   } catch (ex) {

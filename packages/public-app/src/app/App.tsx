@@ -12,7 +12,6 @@ import Layout from '../components/ui/Layout/Layout';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import '@youfoundation/common-app/dist/style.css';
 import './App.css';
 import { ErrorBoundary } from '../components/ui/Layout/ErrorBoundary/ErrorBoundary';
 import useAuth from '../hooks/auth/useAuth';
