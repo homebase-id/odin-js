@@ -4,7 +4,6 @@ import {
   RedactedAppRegistration,
 } from '../../provider/app/AppManagementProviderTypes';
 import useApp from '../../hooks/apps/useApp';
-import ActionButton, { mergeStates } from '../../components/ui/Buttons/ActionButton';
 import Section from '../../components/ui/Sections/Section';
 
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
@@ -12,7 +11,7 @@ import DrivePermissionView from '../../components/PermissionViews/DrivePermissio
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ErrorNotification } from '@youfoundation/common-app';
+import { ActionButton, ErrorNotification, mergeStates } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import CircleSelector from '../../components/Form/CircleSelector';
 import useAppClients from '../../hooks/apps/useAppClients';
