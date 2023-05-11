@@ -1,5 +1,5 @@
 import { FC, ReactNode, useState } from 'react';
-import { ConfirmDialog } from '@youfoundation/common-app';
+import { ConfirmDialog, TrickQuestion } from '@youfoundation/common-app';
 import {
   IconProps,
   Loader,
@@ -43,6 +43,7 @@ export interface ActionButtonProps {
     title: string;
     buttonText: string;
     body: string;
+    trickQuestion?: TrickQuestion;
   };
 }
 
@@ -188,6 +189,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
         <ConfirmDialog
           title={confirmOptions.title}
           confirmText={confirmOptions.buttonText}
+          trickQuestion={confirmOptions.trickQuestion}
           needConfirmation={needsConfirmation}
           onConfirm={() => {
             setNeedsConfirmation(false);

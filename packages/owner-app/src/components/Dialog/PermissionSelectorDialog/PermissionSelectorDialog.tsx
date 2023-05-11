@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ActionButtonState,
+  DialogWrapper,
+  t,
+  usePortal,
+  ErrorNotification,
+} from '@youfoundation/common-app';
 import PermissionSelector from '../../Form/PermissionSelector';
 import { PermissionSet } from '@youfoundation/js-lib';
 

@@ -1,11 +1,10 @@
 import { DriveDefinition } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonState, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton, { ActionButtonState } from '../../ui/Buttons/ActionButton';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
 import { DialogWrapper } from '@youfoundation/common-app';
 import useApp from '../../../hooks/apps/useApp';
