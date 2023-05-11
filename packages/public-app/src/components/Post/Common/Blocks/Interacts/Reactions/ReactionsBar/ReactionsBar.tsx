@@ -1,6 +1,6 @@
 import { ReactionContext } from '@youfoundation/js-lib';
 import { Suspense, useEffect, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { t, useErrors } from '@youfoundation/common-app';
 import useAuth from '../../../../../../../hooks/auth/useAuth';
 import useMyEmojiReactions from '../../../../../../../hooks/reactions/emojis/useMyEmojiReactions';
 import useReaction from '../../../../../../../hooks/reactions/useReaction';
@@ -24,20 +24,22 @@ const ReactionsBar = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const [isCustomOpen, setIsCustomOpen] = useState(false);
+  const addError = useErrors().add;
 
   const { getIdentity } = useAuth();
   const {
-    saveEmoji: { mutateAsync: postEmoji, error: postEmojiError },
-    removeEmoji: { mutateAsync: removeEmoji, error: removeEmojiError },
+    saveEmoji: { mutate: postEmoji, error: postEmojiError },
+    removeEmoji: { mutate: removeEmoji, error: removeEmojiError },
   } = useReaction();
 
   const { data: myEmojis } = useMyEmojiReactions(isActive || isHover ? context : undefined).fetch;
-  const doLike = (body: string) => {
+  const doLike = async (body: string) => {
     postEmoji({
       authorOdinId: getIdentity() || '',
       content: { body: body },
       context,
     });
+
     if (onClose) {
       onClose();
       setIsCustomOpen(false);
@@ -50,6 +52,7 @@ const ReactionsBar = ({
       content: { body: body },
       context,
     });
+
     if (onClose) {
       onClose();
       setIsCustomOpen(false);
@@ -62,6 +65,12 @@ const ReactionsBar = ({
       setIsCustomOpen(false);
     }
   }, [isHover]);
+
+  useEffect(() => {
+    if (postEmojiError || removeEmojiError) {
+      addError(postEmojiError || removeEmojiError);
+    }
+  }, [postEmojiError || removeEmojiError]);
 
   if (!isActive && !isHover) {
     return null;
@@ -133,7 +142,7 @@ const ReactionsBar = ({
           </div>
         ) : null}
       </div>
-      <ErrorNotification error={postEmojiError || removeEmojiError} />
+      {/* <ErrorNotification error={postEmojiError || removeEmojiError} /> */}
     </>
   );
 };

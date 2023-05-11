@@ -3,14 +3,23 @@ import ActionButton from '../ui/Buttons/ActionButton';
 import { Times } from '@youfoundation/common-app';
 import useNotifications from '../../hooks/notifications/useNotifications';
 import { useNavigate } from 'react-router-dom';
+import { useErrors } from '@youfoundation/common-app';
 
 const Toaster = () => {
   const { notifications, dismiss } = useNotifications();
+  const {
+    fetch: { data: errors },
+    dismiss: dismissError,
+  } = useErrors();
 
   const liveNotifications = notifications.filter((notification) => notification.live);
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
+      {errors?.map((error, index) => (
+        <Toast title={error.message} key={index} onDismiss={() => dismissError(error)} />
+      ))}
+
       {liveNotifications.slice(0, 5).map((notification, index) => (
         <Toast {...notification} key={index} onDismiss={() => dismiss(notification)} />
       ))}

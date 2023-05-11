@@ -1,6 +1,5 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  DotYouClient,
   EmojiReactionSummary,
   ReactionContext,
   ReactionFile,
@@ -204,7 +203,10 @@ const useReaction = () => {
         // Upate my emojis
         const existingMyEmojis = queryClient.getQueryData<string[]>(['my-emojis', ...cacheKey]);
         const newMyEmojis = existingMyEmojis
-          ? [...existingMyEmojis, toSaveEmoji.content.body]
+          ? [
+              ...existingMyEmojis.filter((existing) => existing !== toSaveEmoji.content.body),
+              toSaveEmoji.content.body,
+            ]
           : [toSaveEmoji.content.body];
         queryClient.setQueryData(['my-emojis', ...cacheKey], newMyEmojis);
       },

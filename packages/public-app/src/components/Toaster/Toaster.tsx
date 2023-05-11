@@ -1,18 +1,37 @@
 import { ReactNode } from 'react';
 import ActionButton from '../ui/Buttons/ActionButton';
-import { Times } from '@youfoundation/common-app';
+import { Exclamation, Times, t } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import useNotifications from '../../hooks/notifications/useNotifcations';
+import { useErrors } from '@youfoundation/common-app';
 
 const Toaster = () => {
   const { notifications, dismiss } = useNotifications();
+  const {
+    fetch: { data: errors },
+    dismiss: dismissError,
+  } = useErrors();
 
   const liveNotifications = notifications.filter((notification) => notification.live);
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
+      {errors?.map((error, index) => (
+        <Toast
+          title={t('Something went wrong')}
+          body={error.message}
+          key={index}
+          onDismiss={() => dismissError(error)}
+          type={error.type}
+        />
+      ))}
       {liveNotifications.slice(0, 5).map((notification, index) => (
-        <Toast {...notification} key={index} onDismiss={() => dismiss(notification)} />
+        <Toast
+          {...notification}
+          type={undefined}
+          key={index}
+          onDismiss={() => dismiss(notification)}
+        />
       ))}
       {liveNotifications.length > 5 ? (
         <div className="flex justify-center">
@@ -31,12 +50,14 @@ export const Toast = ({
   imgSrc,
   onDismiss,
   href,
+  type,
 }: {
   title: string;
   body?: string | ReactNode;
   imgSrc?: string;
   onDismiss?: () => void;
   href?: string;
+  type?: 'critical' | 'warning';
 }) => {
   const navigate = useNavigate();
 
@@ -57,9 +78,20 @@ export const Toast = ({
       }`}
       onClick={onOpen}
     >
-      <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
-        {imgSrc ? <img src={imgSrc} className="h-full w-full object-cover" /> : null}
-      </div>
+      {imgSrc ? (
+        <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+          <img src={imgSrc} className="h-full w-full object-cover" />
+        </div>
+      ) : type === 'critical' ? (
+        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-red-400 dark:text-red-300`}>
+          <Exclamation />
+        </div>
+      ) : type === 'warning' ? (
+        <div className={`m-auto flex h-8 w-8 flex-shrink-0 text-orange-400`}>
+          <Exclamation />
+        </div>
+      ) : null}
+
       <div className="flex-grow-1 pl-3">
         <p
           className={`max-h-12 w-full overflow-hidden text-ellipsis pr-8 font-medium ${fadeAfter} after:right-8`}
