@@ -1,21 +1,18 @@
 import { FC, useRef, useState } from 'react';
-import ActionButton, { ActionButtonProps } from './ActionButton';
-import { useOutsideTrigger } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonProps, useOutsideTrigger } from '@youfoundation/common-app';
 
-interface ActionButtonWithOptionsProps extends Omit<ActionButtonProps, 'icon'> {
-  options: {
-    name: string;
-    group?: string;
-    onClick?: React.MouseEventHandler<HTMLElement>;
-  }[];
+interface ActionButtonWithOptionsProps extends Omit<Omit<ActionButtonProps, 'icon'>, 'onClick'> {
+  options: { value: string; name: string; group?: string }[];
+  onClick: (value: string) => void;
 }
 
-const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
+export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
   options,
+  onClick,
   className,
   ...actionButtonProps
 }) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef(null);
   useOutsideTrigger(options ? wrapperRef : undefined, () => setIsOpen(false));
 
   const [isOpen, setIsOpen] = useState(false);
@@ -34,18 +31,12 @@ const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
     return { name: group, options: options.filter((option) => option.group === group) };
   });
 
-  const renderOptions = (
-    options: {
-      name: string;
-      group?: string;
-      onClick?: React.MouseEventHandler<HTMLElement>;
-    }[]
-  ) => {
+  const renderOptions = (options: { value: string; name: string; group?: string }[]) => {
     return options.map((option) => (
       <li
-        onClick={option.onClick}
-        className="cursor-pointer px-2 py-1 hover:bg-slate-100 hover:bg-opacity-10 dark:hover:bg-slate-800 dark:hover:bg-opacity-10"
-        key={option.name}
+        onClick={() => onClick(option.value)}
+        className="cursor-pointer px-2 py-2 leading-tight hover:bg-slate-200 dark:hover:bg-slate-700"
+        key={option.value}
       >
         {option.name}
       </li>
@@ -62,22 +53,22 @@ const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
       />
       {optionGroups?.length ? (
         <ul
-          className={`absolute right-0 top-[100%] w-60 shadow-md ${
+          className={`absolute bottom-[100%] right-0 w-full shadow-md ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
-          } overflow-auto bg-button text-button-text`}
+          } overflow-auto bg-white text-black dark:bg-slate-900 dark:text-white`}
         >
           {optionGroups.map((group) => (
             <li className="px-2 py-1" key={group.name}>
-              <p className="font-bold">{group.name}</p>
+              <p className="font-bold text-slate-400 dark:text-slate-500">{group.name}</p>
               <ul>{renderOptions(group.options)}</ul>
             </li>
           ))}
         </ul>
       ) : options ? (
         <ul
-          className={`absolute right-0 top-[100%] w-60 rounded-lg shadow-md ${
+          className={`absolute bottom-[100%] right-0 w-full ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
-          } overflow-auto bg-button text-button-text`}
+          } overflow-auto bg-white text-black`}
         >
           {renderOptions(options)}
         </ul>
@@ -85,5 +76,3 @@ const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
     </div>
   );
 };
-
-export default ActionButtonWithOptions;

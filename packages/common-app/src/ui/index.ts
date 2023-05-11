@@ -5,6 +5,11 @@ export * from './DomainHighlighter/DomainHighlighter';
 export * from './LoadingParagraph/LoadingParagraph';
 export * from './Pager/Pager';
 
+export * from './Buttons/ActionButton';
+export * from './Buttons/ActionButtonWithOptions';
+export * from './Buttons/ActionGroup';
+export * from './Buttons/ActionLink';
+
 export * from './Icons/Types';
 export * from './Icons/AddressBook';
 export * from './Icons/Bubble';
