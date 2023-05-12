@@ -1,17 +1,8 @@
 import { ApiType, base64ToUint8Array } from '@youfoundation/js-lib';
-import { OwnerClient } from '@youfoundation/common-app';
+import { OwnerClient, logoutOwner, hasValidOwnerToken } from '@youfoundation/common-app';
 
 //checks if the authentication token (stored in a cookie) is valid
-export const hasValidToken = async (): Promise<boolean> => {
-  //Note: the token is in a cookie marked http-only so making
-  // the call to the endpoint will automatically include the
-  // cookie.  we just need to check the success code
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
-  return client.get('/authentication/verifyToken').then((response) => {
-    return response.data;
-  });
-};
+export const hasValidToken = hasValidOwnerToken;
 
 export const authenticate = async (password: string): Promise<AuthenticationResponse | null> => {
   const noncePackage = await getNonce();
@@ -73,17 +64,7 @@ export const authenticateDevice = async (password: string): Promise<string> => {
   });
 };
 
-export const logout = async (): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
-
-  await client.get('/auth/delete-token', { baseURL: '/api/youauth/v1' });
-
-  //withCredentials lets us set the cookies return from the /admin/authentication endpoint
-  return client.get('/authentication/logout', { withCredentials: true }).then((response) => {
-    return response.data;
-  });
-};
+export const logout = logoutOwner;
 
 const prepareAuthPassword = async (
   password: string,

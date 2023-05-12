@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient, getPendingRequests } from '@youfoundation/js-lib';
+import { getPendingRequests } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 
 const usePendingConnections = (

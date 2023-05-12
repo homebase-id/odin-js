@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { hasValidToken as hasValidOwnerToken } from '../../provider/OwnerAuthenticationProvider';
+import { hasValidOwnerToken } from '@youfoundation/common-app';
 
 import { hasValidToken as hasValidYouAuthToken } from '../../provider/AuthenticationProvider';
 

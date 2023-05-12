@@ -5,7 +5,7 @@ import {
   logout as logoutYouauth,
   authenticate as authenticateYouAuth,
 } from '../../provider/AuthenticationProvider';
-import { logout as logoutOwner } from '../../provider/OwnerAuthenticationProvider';
+import { logoutOwner } from '@youfoundation/common-app';
 import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,

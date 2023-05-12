@@ -6,3 +6,4 @@ export * from './form';
 export * from './helpers';
 export * from './hooks';
 export * from './ui';
+export * from './provider';

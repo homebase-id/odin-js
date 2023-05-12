@@ -1,11 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  ApiType,
-  DotYouClient,
-  PagingOptions,
-  getPendingRequests,
-  getSentRequests,
-} from '@youfoundation/js-lib';
+import { PagingOptions, getPendingRequests, getSentRequests } from '@youfoundation/js-lib';
 
 import useAuth from '../auth/useAuth';
 
