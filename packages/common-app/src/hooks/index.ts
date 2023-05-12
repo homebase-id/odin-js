@@ -6,3 +6,4 @@ export * from './errors/useErrors';
 export * from './portal/usePortal';
 export * from './darkMode/useDarkMode';
 export * from './connections/useConnections';
+export * from './profiles/useProfiles';

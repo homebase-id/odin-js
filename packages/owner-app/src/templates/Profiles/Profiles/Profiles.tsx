@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
-import useProfiles from '../../../hooks/profiles/useProfiles';
+import { useProfiles } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart } from '@youfoundation/common-app';

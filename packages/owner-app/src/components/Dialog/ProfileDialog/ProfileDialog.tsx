@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import useProfiles from '../../../hooks/profiles/useProfiles';
+import { useProfiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { Input } from '@youfoundation/common-app';

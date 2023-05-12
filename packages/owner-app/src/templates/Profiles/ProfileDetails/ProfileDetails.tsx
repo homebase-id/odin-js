@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import useAttributes from '../../../hooks/profiles/useAttributes';
-import useProfiles from '../../../hooks/profiles/useProfiles';
+import { useProfiles } from '@youfoundation/common-app';
 
 import AttributeCreator from '../../../components/Attribute/AttributeCreator/AttributeCreator';
 import Section from '../../../components/ui/Sections/Section';

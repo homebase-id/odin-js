@@ -1,22 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ApiType,
-  DotYouClient,
   getProfileDefinitions,
   ProfileDefinition,
   removeProfileDefinition,
   saveProfileDefinition,
 } from '@youfoundation/js-lib';
-import { convertTextToSlug } from '@youfoundation/common-app';
-import useAuth from '../auth/useAuth';
+import { convertTextToSlug, useDotYouClient } from '@youfoundation/common-app';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;
 }
 
-const useProfiles = () => {
+export const useProfiles = () => {
   const queryClient = useQueryClient();
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchAll = async () => {
     const definitions = (await getProfileDefinitions(dotYouClient))
@@ -94,5 +91,3 @@ const useProfiles = () => {
     }),
   };
 };
-
-export default useProfiles;
