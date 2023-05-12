@@ -10,7 +10,7 @@ import ListPostOverview from '../../../components/Post/Overview/ListPostOverview
 import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOverview/MasonryPostOverview';
 import { useIntersection } from '../../../hooks/intersection/useIntersection';
 import useChannel from '../../../hooks/blog/useChannel';
-import { flattenInfinteData } from '../../../helpers/common';
+import { flattenInfinteData } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingParagraph } from '@youfoundation/common-app';

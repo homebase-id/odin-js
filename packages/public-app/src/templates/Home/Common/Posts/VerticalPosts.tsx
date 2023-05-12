@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Label } from '@youfoundation/common-app';
 import Select from '../../../../components/Form/Select';
 import PostTeaser from '../../../../components/Post/Common/Card/PostTeaser';
-import { flattenInfinteData } from '../../../../helpers/common';
+import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import useBlogPostsInfinite from '../../../../hooks/blog/useBlogPostsInfinite';

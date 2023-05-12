@@ -44,7 +44,7 @@ import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import usePost from '../../hooks/posts/usePost';
 import useCircles from '../../hooks/circles/useCircles';
 import useCircle from '../../hooks/circles/useCircle';
-import { convertTextToSlug } from '../../helpers/common';
+import { convertTextToSlug } from '@youfoundation/common-app';
 
 let character = window.location.hostname;
 

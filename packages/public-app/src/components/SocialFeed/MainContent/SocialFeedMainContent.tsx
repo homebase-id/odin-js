@@ -2,7 +2,7 @@ import { PostFileVm, PostContent } from '@youfoundation/js-lib';
 import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
-import { flattenInfinteData } from '../../../helpers/common';
+import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useSocialFeed from '../../../hooks/socialFeed/useSocialFeed';
 import { LoadingParagraph } from '@youfoundation/common-app';

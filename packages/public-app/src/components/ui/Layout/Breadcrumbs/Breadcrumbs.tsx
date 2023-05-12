@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ellipsisAtMaxChar } from '../../../../helpers/common';
+import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const Breadcrumbs = ({

@@ -11,7 +11,7 @@ import {
   stringGuidsEqual,
 } from '@youfoundation/js-lib';
 import { useEffect } from 'react';
-import { getInitialsOfNameAttribute } from '../../../helpers/common';
+import { getInitialsOfNameAttribute } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';

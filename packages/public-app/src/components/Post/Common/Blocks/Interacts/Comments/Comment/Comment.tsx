@@ -24,7 +24,7 @@ import { Ellipsis } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import useCommentMedia from '../../../../../../../hooks/reactions/comments/useCommentMedia';
-import { ellipsisAtMaxChar } from '../../../../../../../helpers/common';
+import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import useComments from '../../../../../../../hooks/reactions/comments/useComments';
 import { ErrorNotification } from '@youfoundation/common-app';
 

@@ -10,6 +10,8 @@ export * from './Buttons/ActionButtonWithOptions';
 export * from './Buttons/ActionGroup';
 export * from './Buttons/ActionLink';
 
+export * from './DarkModeToggle/DarkModeToggle';
+
 export * from './Icons/Types';
 export * from './Icons/AddressBook';
 export * from './Icons/Bubble';

@@ -6,7 +6,7 @@ import PostMeta from '../Post/Common/Blocks/Meta/Meta';
 import FakeAnchor from '../ui/Buttons/FakeAnchor';
 import AuthorImage from '../Post/Common/Blocks/Author/Image';
 import AuthorName from '../Post/Common/Blocks/Author/Name';
-import { ellipsisAtMaxChar } from '../../helpers/common';
+import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 import RichTextRenderer from '../RichTextRenderer/RichTextRenderer';

@@ -21,7 +21,7 @@ import {
   aclEqual,
   getFileHeader,
 } from '@youfoundation/js-lib';
-import { getDisplayNameOfNameAttribute } from '../../helpers/common';
+import { getDisplayNameOfNameAttribute } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
 import useStaticFiles from '../staticFiles/useStaticFiles';
 import { AttributeDefinitions } from './AttributeDefinitions';

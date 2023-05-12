@@ -6,7 +6,7 @@ import { usePortal } from '@youfoundation/common-app';
 import Select from '../../Form/Select';
 import { DialogWrapper, Lock } from '@youfoundation/common-app';
 import { OpenLock } from '@youfoundation/common-app';
-import { pascalCase } from '../../../helpers/common';
+import { pascalCase } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import CircleSelector from '../../Form/CircleSelector';
 

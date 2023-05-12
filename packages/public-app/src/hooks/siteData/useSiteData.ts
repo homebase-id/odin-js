@@ -16,7 +16,7 @@ import {
   GetTargetDriveFromProfileId,
   queryBatchCollection,
 } from '@youfoundation/js-lib';
-import { getHighestPrioAttributesFromMultiTypes } from '../../helpers/common';
+import { getHighestPrioAttributesFromMultiTypes } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
 
 type socialInfo = { type: string; username: string };

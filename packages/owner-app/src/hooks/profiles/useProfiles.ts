@@ -7,7 +7,7 @@ import {
   removeProfileDefinition,
   saveProfileDefinition,
 } from '@youfoundation/js-lib';
-import { convertTextToSlug } from '../../helpers/common';
+import { convertTextToSlug } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {

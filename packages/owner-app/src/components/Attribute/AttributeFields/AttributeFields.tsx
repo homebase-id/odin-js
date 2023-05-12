@@ -25,7 +25,7 @@ import Order from '../../Form/Order';
 import Select from '../../Form/Select';
 import Textarea from '../../Form/Textarea';
 import { AsYouType } from 'libphonenumber-js';
-import { generateDisplayLocation, generateDisplayName } from '../../../helpers/common';
+import { generateDisplayLocation, generateDisplayName } from '@youfoundation/common-app';
 import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import ThemeSelector from '../../Form/ThemeSelector';
 

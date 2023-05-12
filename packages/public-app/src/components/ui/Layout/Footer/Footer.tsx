@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { getVersion } from '../../../../helpers/common';
+import { getVersion } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useSiteData from '../../../../hooks/siteData/useSiteData';
 import { OwnerName } from '../../../Post/Common/Blocks/Author/Name';

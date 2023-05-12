@@ -1,7 +1,7 @@
 import { getNewId } from '@youfoundation/js-lib';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { convertTextToSlug } from '../../../helpers/common';
+import { convertTextToSlug } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import {
   AttributeDefinition,

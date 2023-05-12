@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ellipsisAtMaxChar } from '../../../helpers/common';
+import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';

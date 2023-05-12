@@ -1,6 +1,6 @@
 import { AccessControlList, SecurityGroupType, stringGuidsEqual } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { ellipsisAtMaxChar } from '../../../helpers/common';
+import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useCircles from '../../../hooks/circles/useCircles';
 import AclDialog from '../../Dialog/AclDialog/AclDialog';

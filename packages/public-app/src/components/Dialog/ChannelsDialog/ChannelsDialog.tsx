@@ -1,7 +1,7 @@
 import { ChannelTemplate, SecurityGroupType } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { convertTextToSlug } from '../../../helpers/common';
+import { convertTextToSlug } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useChannel from '../../../hooks/blog/useChannel';
 import useChannels, { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';

@@ -4,8 +4,7 @@ import useAuth from '../../../../hooks/auth/useAuth';
 
 import { getVersion } from '../../../../templates/DemoData/helpers';
 
-import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
-import { t } from '@youfoundation/common-app/src';
+import { MiniDarkModeToggle, t } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import OwnerImage from '../../../OwnerImage/OwnerImage';
 import useProfiles from '../../../../hooks/profiles/useProfiles';

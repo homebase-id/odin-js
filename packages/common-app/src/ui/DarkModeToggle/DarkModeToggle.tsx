@@ -1,8 +1,7 @@
 import { FC } from 'react';
-import { useDarkMode } from '@youfoundation/common-app';
 
 import './darkModeToggle.css';
-import { Moon, Sun } from '@youfoundation/common-app';
+import { useDarkMode, Sun, Moon } from '../../..';
 
 interface DarkModeToggleProps {
   className?: string;
@@ -23,5 +22,3 @@ export const MiniDarkModeToggle: FC<DarkModeToggleProps> = ({ className }) => {
     </span>
   );
 };
-
-export default DarkModeToggle;
