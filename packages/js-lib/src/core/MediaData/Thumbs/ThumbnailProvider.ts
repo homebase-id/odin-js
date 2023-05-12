@@ -41,6 +41,15 @@ export const createThumbnails = async (
     return [...currArray, thumbSize];
   }, [] as ThumbnailInstruction[]);
 
+  if (applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length) {
+    // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
+    applicableThumbSizes.push({
+      quality: 100,
+      width: naturalSize.pixelWidth,
+      height: naturalSize.pixelHeight,
+    });
+  }
+
   // Create additionalThumbnails
   const additionalThumbnails: ThumbnailFile[] = [
     tinyThumb,
