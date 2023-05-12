@@ -1,12 +1,15 @@
-import useChannels from '../../../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
+import useAuth from '../../../../hooks/auth/useAuth';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 
 const Channels = ({ className }: { className?: string }) => {
-  const { data: channels } = useChannels();
+  const { isOwner, isAuthenticated } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
+
   return channels?.length ? (
     <div className={className}>
       <div className="-mx-2 flex max-w-6xl flex-col lg:flex-row xl:-mx-4">
-        <div className="py-2 px-2 lg:w-2/3 xl:px-4">
+        <div className="px-2 py-2 lg:w-2/3 xl:px-4">
           <div className="-m-2 flex flex-row flex-wrap">
             {channels.map((channel) => {
               return (

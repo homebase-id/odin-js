@@ -4,10 +4,12 @@ import { Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { t } from '@youfoundation/common-app';
-import useChannels from '../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
+import useAuth from '../../hooks/auth/useAuth';
 
 const ChannelsPage = () => {
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const [isAddNew, setIsAddNew] = useState(false);
 
   return (

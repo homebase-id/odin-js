@@ -2,7 +2,7 @@ import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
-import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
+import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
 import Image from '../../../../components/Image/Image';
 import { t } from '@youfoundation/common-app';

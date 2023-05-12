@@ -8,9 +8,10 @@ import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
 import useBlogPostsInfinite from '../../../../hooks/blog/useBlogPostsInfinite';
-import useChannels from '../../../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingParagraph } from '@youfoundation/common-app';
+import useAuth from '../../../../hooks/auth/useAuth';
 
 const PAGE_SIZE = 12;
 
@@ -39,7 +40,8 @@ const ChannelSidebar = ({
   channelId?: string;
   setChannelId: (channelId: string | undefined) => void;
 }) => {
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
   if (!channels?.length || channels.length === 1) return null;
 
   return (

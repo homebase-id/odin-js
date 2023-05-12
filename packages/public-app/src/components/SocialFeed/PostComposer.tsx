@@ -8,7 +8,7 @@ import {
 import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import { Globe, t } from '@youfoundation/common-app';
-import useChannels from '../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 import ChannelsDialog from '../Dialog/ChannelsDialog/ChannelsDialog';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionLink from '../ui/Buttons/ActionLink';
@@ -23,6 +23,7 @@ import VolatileInput from '../Form/VolatileInput';
 import usePostComposer, { ReactAccess } from '../../hooks/socialFeed/post/usePostComposer';
 import ActionGroup from '../ui/Buttons/ActionGroup';
 import { AttachmentFile, FileLike } from '../../hooks/socialFeed/post/usePost';
+import useAuth from '../../hooks/auth/useAuth';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -217,7 +218,8 @@ export const ChannelSelector = React.forwardRef(
     },
     ref: Ref<HTMLSelectElement>
   ) => {
-    const { data: channels, isLoading } = useChannels();
+    const { isAuthenticated, isOwner } = useAuth();
+    const { data: channels, isLoading } = useChannels({ isAuthenticated, isOwner });
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
 
     if (isLoading || !channels) {

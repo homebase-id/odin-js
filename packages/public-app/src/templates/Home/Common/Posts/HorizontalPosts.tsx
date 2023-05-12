@@ -1,9 +1,11 @@
 import { t } from '@youfoundation/common-app';
-import useChannels from '../../../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
+import useAuth from '../../../../hooks/auth/useAuth';
 
 const HorizontalPosts = () => {
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   if (!channels?.length) {
     return null;

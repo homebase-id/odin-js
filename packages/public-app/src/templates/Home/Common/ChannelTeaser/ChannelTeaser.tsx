@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
-import { ChannelDefinitionVm } from '../../../../hooks/blog/useChannels';
+import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
 import { Arrow } from '@youfoundation/common-app';
 import useBlogPosts from '../../../../hooks/blog/useBlogPosts';

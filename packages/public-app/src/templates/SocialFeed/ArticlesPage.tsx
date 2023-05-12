@@ -7,8 +7,9 @@ import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useBlogPostsInfinite from '../../hooks/blog/useBlogPostsInfinite';
-import useChannels from '../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 import useDrafts from '../../hooks/socialFeed/drafts/useDrafts';
+import useAuth from '../../hooks/auth/useAuth';
 
 const ArticlesPage = () => {
   return (
@@ -23,7 +24,8 @@ const ArticlesPage = () => {
 
 const DraftsView = () => {
   const { data: drafts, isLoading: draftsLoading } = useDrafts().fetch;
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   return (
     <section className="pb-10">
@@ -76,7 +78,8 @@ const DraftsView = () => {
 
 const PAGE_SIZE = 10;
 const PublishedArticlesView = () => {
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   const {
     data: articleData,

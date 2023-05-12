@@ -1,12 +1,16 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig, getSocialFeed, TypedConnectionNotification } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
-import useChannels from '../blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 
 const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useAuth().getDotYouClient();
-  const { data: ownChannels, isFetched: channelsFetched } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: ownChannels, isFetched: channelsFetched } = useChannels({
+    isAuthenticated,
+    isOwner,
+  });
 
   // Add invalidation of social feed when a new file is added to the feed drive (this enforces that only remote updates trigger a refresh)
   const queryClient = useQueryClient();

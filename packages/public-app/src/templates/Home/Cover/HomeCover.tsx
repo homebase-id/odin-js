@@ -2,17 +2,19 @@ import ChannelTeaser from '../Common/ChannelTeaser/ChannelTeaser';
 import useSiteData from '../../../hooks/siteData/useSiteData';
 import { BuiltInProfiles, ProfileConfig } from '@youfoundation/js-lib';
 import Image from '../../../components/Image/Image';
-import useChannels from '../../../hooks/blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 import Links from '../../../components/ui/Layout/Links/Links';
 import ConnectionTeaser from '../Common/Connections/ConnectionTeaser';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
 import { OwnerName } from '../../../components/Post/Common/Blocks/Author/Name';
 import { useActiveConnections } from '@youfoundation/common-app';
+import useAuth from '../../../hooks/auth/useAuth';
 
 const HomeCover = (props: { leadText?: string; templateSettings: unknown }) => {
   const { owner, home } = useSiteData().data ?? {};
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const { data: connections } = useActiveConnections({ pageSize: 10 }).fetch;
 
   if (!owner) {

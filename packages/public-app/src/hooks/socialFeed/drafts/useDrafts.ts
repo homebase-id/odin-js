@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DotYouClient, getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib';
+import { getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib';
 import useAuth from '../../auth/useAuth';
-import useChannels from '../../blog/useChannels';
+import { useChannels } from '@youfoundation/common-app';
 
 const useDrafts = () => {
   const queryClient = useQueryClient();
 
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async () => {

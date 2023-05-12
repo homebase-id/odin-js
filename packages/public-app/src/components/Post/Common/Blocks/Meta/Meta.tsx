@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
 import useAuth from '../../../../../hooks/auth/useAuth';
 import { useChannel } from '@youfoundation/common-app';
-import { ChannelDefinitionVm } from '../../../../../hooks/blog/useChannels';
+import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import usePost from '../../../../../hooks/socialFeed/post/usePost';
 import EditPostDialog from '../../../../SocialFeed/EditPostDialog/EditPostDialog';
 import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoundation/common-app';

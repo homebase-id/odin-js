@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
-import { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
+import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import ActionLink from '../../ui/Buttons/ActionLink';
 import { Feed } from '@youfoundation/common-app';

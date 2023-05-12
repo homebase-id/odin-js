@@ -1,10 +1,9 @@
 import { ChannelTemplate, SecurityGroupType } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { convertTextToSlug } from '@youfoundation/common-app';
+import { ChannelDefinitionVm, convertTextToSlug, useChannels } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannel } from '@youfoundation/common-app';
-import useChannels, { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
 import { usePortal } from '@youfoundation/common-app';
 import { AclIcon, AclSummary } from '../../Acl/AclEditor/AclEditor';
 import AclWizard from '../../Acl/AclWizard/AclWizard';
@@ -15,6 +14,7 @@ import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import TemplateSelector from './TemplateSelector';
+import useAuth from '../../../hooks/auth/useAuth';
 
 const ChannelsDialog = ({
   isOpen,
@@ -26,7 +26,8 @@ const ChannelsDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const { data: channels } = useChannels();
+  const { isAuthenticated, isOwner } = useAuth();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const [isAddNew, setIsAddNew] = useState(false);
 
   if (!isOpen) {

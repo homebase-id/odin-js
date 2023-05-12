@@ -1,6 +1,5 @@
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
-import useChannels, { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
+import { ChannelDefinitionVm, t, useChannels } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import useDrafts from '../../../hooks/socialFeed/drafts/useDrafts';
 import ActionLink from '../../ui/Buttons/ActionLink';
@@ -10,13 +9,15 @@ import { Article as ArticleIcon, DialogWrapper, LoadingParagraph } from '@youfou
 import FakeAnchor from '../../ui/Buttons/FakeAnchor';
 import { PostContent, PostFile } from '@youfoundation/js-lib';
 import { ErrorNotification } from '@youfoundation/common-app';
+import useAuth from '../../../hooks/auth/useAuth';
 
 const DraftsDialog = ({ isOpen, onCancel }: { isOpen: boolean; onCancel: () => void }) => {
   const target = usePortal('modal-container');
   const {
     fetch: { data: drafts, isLoading: draftsLoading },
   } = useDrafts();
-  const { data: channels } = useChannels();
+  const { isOwner, isAuthenticated } = useAuth();
+  const { data: channels } = useChannels({ isOwner, isAuthenticated });
 
   if (!isOpen) {
     return null;
