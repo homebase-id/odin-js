@@ -2,8 +2,12 @@ import { ClientConnectionNotification, TypedConnectionNotification } from '@youf
 import { ReactNode, useEffect, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import usePendingConnections from '../connections/usePendingConnections';
-import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
+import {
+  DomainHighlighter,
+  t,
+  useNotificationSubscriber,
+  usePendingConnections,
+} from '@youfoundation/common-app';
 
 interface Notification {
   title: string;
@@ -15,7 +19,7 @@ interface Notification {
 }
 
 const useNotifications = () => {
-  const { data: pending } = usePendingConnections().fetchPending;
+  const { data: pending } = usePendingConnections({ pageSize: 5, pageNumber: 1 }).fetch;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const queryClient = useQueryClient();
 

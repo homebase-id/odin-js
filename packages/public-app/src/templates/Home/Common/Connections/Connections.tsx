@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { t } from '@youfoundation/common-app';
-import useConnections from '../../../../hooks/connections/useConnections';
+import { t, useActiveConnections } from '@youfoundation/common-app';
 import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
 import ConnectionTeaser from './ConnectionTeaser';
 import { Pager } from '@youfoundation/common-app';
@@ -22,7 +21,7 @@ const ConnectionSection = ({ className }: { className?: string }) => {
     hasNextPage: hasNextPageOnServer,
     fetchNextPage,
     isFetchedAfterMount,
-  } = useConnections({
+  } = useActiveConnections({
     pageSize: 10,
   }).fetch;
 

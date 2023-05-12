@@ -1,8 +1,12 @@
 import { ClientConnectionNotification, TypedConnectionNotification } from '@youfoundation/js-lib';
 import { ReactNode, useEffect, useState } from 'react';
 
-import { usePendingConnections } from '../connections/useConnections';
-import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
+import {
+  DomainHighlighter,
+  t,
+  useNotificationSubscriber,
+  usePendingConnections,
+} from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface Notification {

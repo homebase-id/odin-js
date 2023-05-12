@@ -2,19 +2,15 @@ import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
-import { t } from '@youfoundation/common-app';
+import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useEffect, useState } from 'react';
 import { Pager, Persons } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import useActiveConnections from '../../../hooks/connections/useActiveConnections';
 import { DotYouProfile } from '@youfoundation/js-lib';
-import {
-  usePendingConnections,
-  useSentConnections,
-} from '../../../hooks/connections/useConnections';
+import { useActiveConnections } from '@youfoundation/common-app';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
@@ -192,8 +188,8 @@ const ActiveConnectionSection = ({
     hasNextPage: activeHasNextPageOnServer,
     fetchNextPage: fetchNextActivePage,
   } = useActiveConnections({
-    active: { pageSize: 5 },
-  }).fetchActive;
+    pageSize: 5,
+  }).fetch;
 
   useEffect(() => {
     if (!activeConnectionsFetchedAfterMount) {

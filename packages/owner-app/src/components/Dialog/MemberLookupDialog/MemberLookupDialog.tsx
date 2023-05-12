@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, ActionButton, ActionButtonState } from '@youfoundation/common-app';
-import useActiveConnections from '../../../hooks/connections/useActiveConnections';
+import {
+  t,
+  ActionButton,
+  ActionButtonState,
+  useActiveConnections,
+} from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import ConnectionCard from '../../Connection/ConnectionCard/ConnectionCard';
 import { DialogWrapper, Pager } from '@youfoundation/common-app';
@@ -36,8 +40,8 @@ const MemberLookupDialog = ({
     hasNextPage: membersHasNextPageOnServer,
     fetchNextPage: fetchNextMembersPage,
   } = useActiveConnections({
-    active: { pageSize: 12 },
-  }).fetchActive;
+    pageSize: 12,
+  }).fetch;
 
   useEffect(() => {
     if (!membersFetchedAfterMount) {

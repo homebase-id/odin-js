@@ -5,15 +5,15 @@ import Image from '../../../components/Image/Image';
 import useChannels from '../../../hooks/blog/useChannels';
 import Links from '../../../components/ui/Layout/Links/Links';
 import ConnectionTeaser from '../Common/Connections/ConnectionTeaser';
-import useConnections from '../../../hooks/connections/useConnections';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
 import { OwnerName } from '../../../components/Post/Common/Blocks/Author/Name';
+import { useActiveConnections } from '@youfoundation/common-app';
 
 const HomeCover = (props: { leadText?: string; templateSettings: unknown }) => {
   const { owner, home } = useSiteData().data ?? {};
   const { data: channels } = useChannels();
-  const { data: connections } = useConnections({ pageSize: 10 }).fetch;
+  const { data: connections } = useActiveConnections({ pageSize: 10 }).fetch;
 
   if (!owner) {
     return <></>;

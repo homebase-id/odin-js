@@ -5,3 +5,4 @@ export * from './transitProcessor/useTransitProcessor';
 export * from './errors/useErrors';
 export * from './portal/usePortal';
 export * from './darkMode/useDarkMode';
+export * from './connections/useConnections';
