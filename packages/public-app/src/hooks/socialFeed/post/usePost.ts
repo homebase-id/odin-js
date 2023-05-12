@@ -19,7 +19,7 @@ import {
 } from '@youfoundation/js-lib';
 import { getRichTextFromString } from '../../../helpers/richTextHelper';
 import useAuth from '../../auth/useAuth';
-import useStaticFiles from '../../staticFiles/useStaticFiles';
+import { useStaticFiles } from '@youfoundation/common-app';
 
 export interface FileLike {
   name: string;

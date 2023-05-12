@@ -1,7 +1,7 @@
 import { HomePageAttributes, HomePageConfig, toGuidId } from '@youfoundation/js-lib';
 import { t } from '@youfoundation/common-app';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
-import useStaticFiles from '../../hooks/staticFiles/useStaticFiles';
+import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
 import ActionButton from '../../components/ui/Buttons/ActionButton';

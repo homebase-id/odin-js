@@ -5,11 +5,10 @@ import {
   publishProfileImage,
   publishProfileCard,
 } from '@youfoundation/js-lib';
+import { useDotYouClient } from '../../..';
 
-import useAuth from '../auth/useAuth';
-
-const useStaticFiles = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+export const useStaticFiles = () => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const publishData = async () => {
     console.debug('[STARTED] Static file publish');
@@ -44,5 +43,3 @@ const useStaticFiles = () => {
     }),
   };
 };
-
-export default useStaticFiles;

@@ -39,7 +39,7 @@ import {
 } from './helpers';
 import { lotrRealm } from './DemoLotr';
 import useAttribute from '../../hooks/profiles/useAttribute';
-import useChannel from '../../hooks/posts/useChannel';
+import { useChannel } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import usePost from '../../hooks/posts/usePost';
 import useCircles from '../../hooks/circles/useCircles';

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
 import useAuth from '../../../../../hooks/auth/useAuth';
-import useChannel from '../../../../../hooks/blog/useChannel';
+import { useChannel } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '../../../../../hooks/blog/useChannels';
 import usePost from '../../../../../hooks/socialFeed/post/usePost';
 import EditPostDialog from '../../../../SocialFeed/EditPostDialog/EditPostDialog';

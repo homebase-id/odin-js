@@ -14,7 +14,7 @@ import {
   ImageContentType,
 } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
-import useStaticFiles from '../staticFiles/useStaticFiles';
+import { useStaticFiles } from '@youfoundation/common-app';
 
 const usePost = () => {
   const queryClient = useQueryClient();

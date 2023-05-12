@@ -1,13 +1,12 @@
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
+import { usePortal, useChannels, ChannelDefinitionVm } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { stringGuidsEqual } from '@youfoundation/js-lib';
 import useFollower from '../../../hooks/follow/useFollower';
-import useChannels, { ChannelDefinitionVm } from '../../../hooks/posts/useChannels';
 
 const IdentityThatFollowsDialog = ({
   odinId,
@@ -27,7 +26,7 @@ const IdentityThatFollowsDialog = ({
   const { data: follower } = useFollower({
     odinId,
   }).fetch;
-  const { data: allChannels } = useChannels();
+  const { data: allChannels } = useChannels({ isAuthenticated: true, isOwner: true });
 
   if (!isOpen || !follower) {
     return null;

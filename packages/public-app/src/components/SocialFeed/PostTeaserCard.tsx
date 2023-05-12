@@ -1,6 +1,6 @@
 import { PostContent, Article, PostFile, getChannelDrive } from '@youfoundation/js-lib';
 import { FC, useState } from 'react';
-import useChannel from '../../hooks/blog/useChannel';
+import { useChannel } from '@youfoundation/common-app';
 import useSocialChannel from '../../hooks/socialFeed/useSocialChannel';
 import PostMeta from '../Post/Common/Blocks/Meta/Meta';
 import FakeAnchor from '../ui/Buttons/FakeAnchor';

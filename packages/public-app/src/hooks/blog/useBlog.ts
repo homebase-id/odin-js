@@ -3,7 +3,7 @@ import { DotYouClient, getPost, getPostBySlug, PostContent, PostFile } from '@yo
 
 import useAuth from '../auth/useAuth';
 import { useBlogPostsInfiniteReturn } from './useBlogPostsInfinite';
-import useChannel from './useChannel';
+import { useChannel } from '@youfoundation/common-app';
 
 type useBlogProps = {
   channelId?: string;

@@ -1,44 +1,39 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ApiType,
   BlogConfig,
   ChannelDefinition,
-  ChannelTemplate,
-  DotYouClient,
   getChannelDefinition,
   getChannelDefinitionBySlug,
   GetFile,
   removeChannelDefinition,
   saveChannelDefinition,
 } from '@youfoundation/js-lib';
-import useAuth from '../auth/useAuth';
-import useStaticFiles from '../staticFiles/useStaticFiles';
+
+import { useStaticFiles } from '@youfoundation/common-app';
+import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
+import { useDotYouClient } from '../../../..';
 
 type useChannelsProps = {
   channelSlug?: string;
   channelId?: string;
 };
 
-export interface ChannelDefinitionVm extends ChannelDefinition {
-  template: ChannelTemplate;
-}
-
-export const parseChannelTemplate = (templateId: number | undefined) => {
-  return parseInt(templateId + '') === ChannelTemplate.LargeCards
-    ? ChannelTemplate.LargeCards
-    : parseInt(templateId + '') === ChannelTemplate.MasonryLayout
-    ? ChannelTemplate.MasonryLayout
-    : ChannelTemplate.ClassicBlog;
-};
-
-const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
+export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
-  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) {
       return null;
+    }
+
+    const cachedChannels = queryClient.getQueryData<ChannelDefinitionVm[]>(['channels']);
+    if (cachedChannels) {
+      const foundChannel = cachedChannels.find(
+        (chnl) => chnl.channelId === channelId || chnl.slug === channelSlug
+      );
+      if (foundChannel) return foundChannel;
     }
 
     let channel: ChannelDefinition | undefined = undefined;
@@ -74,7 +69,7 @@ const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         template: parseChannelTemplate(channel?.templateId),
       } as ChannelDefinitionVm;
     }
-    return null;
+    return;
   };
 
   const saveData = async (channelDef: ChannelDefinition) => {
@@ -167,5 +162,3 @@ const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     }),
   };
 };
-
-export default useChannel;

@@ -8,3 +8,5 @@ export * from './darkMode/useDarkMode';
 export * from './connections/useConnections';
 export * from './profiles/useProfiles';
 export * from './notifications/useNotifications';
+export * from './posts';
+export * from './staticFiles/useStaticFiles';

@@ -1,7 +1,7 @@
 import { Article, getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib';
 import { FC, useState } from 'react';
 import { t } from '@youfoundation/common-app';
-import useChannel from '../../../../hooks/blog/useChannel';
+import { useChannel } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import FakeAnchor from '../../../ui/Buttons/FakeAnchor';
 import PostMeta from '../Blocks/Meta/Meta';

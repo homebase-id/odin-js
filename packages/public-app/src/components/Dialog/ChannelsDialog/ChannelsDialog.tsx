@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { convertTextToSlug } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useChannel from '../../../hooks/blog/useChannel';
+import { useChannel } from '@youfoundation/common-app';
 import useChannels, { ChannelDefinitionVm } from '../../../hooks/blog/useChannels';
 import { usePortal } from '@youfoundation/common-app';
 import { AclIcon, AclSummary } from '../../Acl/AclEditor/AclEditor';

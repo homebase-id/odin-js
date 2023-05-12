@@ -23,7 +23,7 @@ import {
 } from '@youfoundation/js-lib';
 import { getDisplayNameOfNameAttribute } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
-import useStaticFiles from '../staticFiles/useStaticFiles';
+import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
 
