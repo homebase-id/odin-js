@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import useDarkMode from '../../../hooks/useDarkMode';
+import { useDarkMode } from '@youfoundation/common-app';
 import Toaster from '../../Toaster/Toaster';
 import Sidenav from './Sidenav/Sidenav';
 
@@ -29,7 +29,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     <div className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
       <Sidenav />
       <div className={`flex min-h-screen w-full flex-col`}>
-        <div className="min-h-full py-4 px-2 sm:py-8 sm:px-10">{children}</div>
+        <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
       </div>
       <Toaster />
     </div>
@@ -40,7 +40,7 @@ export const MinimalLayout: FC<LayoutProps> = ({ children, noShadedBg, noPadding
   useDarkMode();
   return (
     <div className={`relative min-h-screen ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
-      <div className={`${noPadding ? '' : 'py-4 px-5 sm:py-8 sm:px-10'}`}>{children}</div>
+      <div className={`${noPadding ? '' : 'px-5 py-4 sm:px-10 sm:py-8'}`}>{children}</div>
     </div>
   );
 };

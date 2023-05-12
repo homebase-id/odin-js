@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import useDarkMode from '../../../../hooks/darkMode/useDarkMode';
+import { useDarkMode } from '@youfoundation/common-app';
 
 import './darkModeToggle.css';
 import { Moon, Sun } from '@youfoundation/common-app';

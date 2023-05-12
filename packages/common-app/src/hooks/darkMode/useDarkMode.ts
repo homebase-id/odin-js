@@ -1,7 +1,7 @@
 const LOCALSTORAGE_KEY = 'prefersDark';
-const IS_DARK_CLASSNAME = 'dark';
+export const IS_DARK_CLASSNAME = 'dark';
 
-const useDarkMode = () => {
+export const useDarkMode = () => {
   const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const localPreference = localStorage.getItem(LOCALSTORAGE_KEY);
 
@@ -29,5 +29,3 @@ const useDarkMode = () => {
     isDarkMode: finalChoice,
   };
 };
-
-export default useDarkMode;

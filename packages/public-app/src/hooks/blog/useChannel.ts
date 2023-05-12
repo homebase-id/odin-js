@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BlogConfig,
   ChannelDefinition,
-  DotYouClient,
   getChannelDefinition,
   getChannelDefinitionBySlug,
   GetFile,

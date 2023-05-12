@@ -81,6 +81,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Route>
 
+          {/* Owner only paths: */}
           <Route
             path="feed"
             element={

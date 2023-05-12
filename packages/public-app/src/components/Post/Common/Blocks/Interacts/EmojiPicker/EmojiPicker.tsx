@@ -1,6 +1,6 @@
+import { IS_DARK_CLASSNAME } from '@youfoundation/common-app';
 import 'emoji-picker-element';
 import React, { useEffect } from 'react';
-import { IS_DARK_CLASSNAME } from '../../../../../../hooks/darkMode/useDarkMode';
 
 interface EmojiPickerElement extends HTMLElement {
   skinToneEmoji: string;

@@ -6,7 +6,7 @@ import { getVersion } from '../../../../templates/DemoData/helpers';
 
 import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
 import { t } from '@youfoundation/common-app/src';
-import useDarkMode from '../../../../hooks/useDarkMode';
+import { useDarkMode } from '@youfoundation/common-app';
 import OwnerImage from '../../../OwnerImage/OwnerImage';
 import useProfiles from '../../../../hooks/profiles/useProfiles';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
