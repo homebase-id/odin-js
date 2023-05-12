@@ -1,8 +1,7 @@
-import { Toast } from '../../components/Toaster/Toaster';
-import { t } from '@youfoundation/common-app';
+import { t, Toast } from '@youfoundation/common-app';
 import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { Bell } from '@youfoundation/common-app';
-import useNotifications from '../../hooks/notifications/useNotifications';
+import { useNotifications } from '@youfoundation/common-app';
 
 const Notifications = () => {
   const { notifications: notificationList } = useNotifications();
@@ -13,7 +12,7 @@ const Notifications = () => {
       {notificationList?.length ? (
         <div className="flex flex-col gap-3 px-2">
           {notificationList.map((notification, index) => (
-            <Toast {...notification} key={index} />
+            <Toast {...notification} key={index} type={undefined} />
           ))}
         </div>
       ) : (

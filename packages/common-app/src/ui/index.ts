@@ -1,5 +1,6 @@
 export * from './Alert/Alert';
 export * from './Alert/ErrorNotification';
+export * from './Alert/Toaster';
 export * from './Dialog/DialogWrapper';
 export * from './DomainHighlighter/DomainHighlighter';
 export * from './LoadingParagraph/LoadingParagraph';

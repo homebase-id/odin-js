@@ -9,7 +9,7 @@ import { useDarkMode } from '@youfoundation/common-app';
 import OwnerImage from '../../../OwnerImage/OwnerImage';
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
-import useNotifications from '../../../../hooks/notifications/useNotifications';
+import { useNotifications } from '@youfoundation/common-app';
 import {
   Bars,
   Times,

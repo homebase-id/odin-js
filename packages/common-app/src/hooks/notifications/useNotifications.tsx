@@ -1,13 +1,13 @@
 import { ClientConnectionNotification, TypedConnectionNotification } from '@youfoundation/js-lib';
 import { ReactNode, useEffect, useState } from 'react';
 
-import { useQueryClient } from '@tanstack/react-query';
 import {
   DomainHighlighter,
   t,
   useNotificationSubscriber,
   usePendingConnections,
 } from '@youfoundation/common-app';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Notification {
   title: string;
@@ -18,7 +18,7 @@ interface Notification {
   type?: 'pending';
 }
 
-const useNotifications = () => {
+export const useNotifications = () => {
   const { data: pending } = usePendingConnections({ pageSize: 5, pageNumber: 1 }).fetch;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const queryClient = useQueryClient();
@@ -45,7 +45,7 @@ const useNotifications = () => {
         ...pendingNotifications,
       ]);
     }
-  }, [pending]);
+  }, [pending?.results]);
 
   const handler = (wsNotification: TypedConnectionNotification) => {
     const clientNotification = wsNotification as ClientConnectionNotification;
@@ -97,5 +97,3 @@ const useNotifications = () => {
 
   return { notifications, dismiss };
 };
-
-export default useNotifications;

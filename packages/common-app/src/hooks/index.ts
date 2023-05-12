@@ -7,3 +7,4 @@ export * from './portal/usePortal';
 export * from './darkMode/useDarkMode';
 export * from './connections/useConnections';
 export * from './profiles/useProfiles';
+export * from './notifications/useNotifications';

@@ -2,12 +2,11 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../../../hooks/auth/useAuth';
 
-import { getVersion } from '@youfoundation/common-app';
+import { getVersion, useNotifications } from '@youfoundation/common-app';
 import { MiniDarkModeToggle, useDarkMode } from '@youfoundation/common-app';
 import { OwnerImage } from '../../../Post/Common/Blocks/Author/Image';
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
-import useNotifications from '../../../../hooks/notifications/useNotifcations';
 import {
   t,
   Bars,

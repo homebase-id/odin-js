@@ -1,11 +1,9 @@
 import { ReactNode } from 'react';
-import ActionButton from '../ui/Buttons/ActionButton';
-import { Exclamation, Times, t } from '@youfoundation/common-app';
+import { ActionButton, Exclamation, Times, t, useNotifications } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import useNotifications from '../../hooks/notifications/useNotifcations';
 import { useErrors } from '@youfoundation/common-app';
 
-const Toaster = () => {
+export const Toaster = () => {
   const { notifications, dismiss } = useNotifications();
   const {
     fetch: { data: errors },
@@ -118,5 +116,3 @@ export const Toast = ({
     </div>
   );
 };
-
-export default Toaster;
