@@ -12,6 +12,7 @@ module.exports = {
 
         'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
         background: 'rgb(var(--color-background) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
       },
     },
   },

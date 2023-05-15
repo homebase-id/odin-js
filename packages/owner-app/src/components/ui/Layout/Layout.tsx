@@ -14,10 +14,12 @@ const SharedStyleTag = () => (
     {`:root {
     --color-page-background: 246 248 250;
     --color-background: 255 255 255;
+    --color-foreground: 11 11 11;
   }`}
     {`html.dark {
     --color-page-background: 17 24 39;
     --color-background: 0 0 0;
+    --color-foreground: 250 250 250;
   }`}
     {`html.dark { background-color: rgba(var(--color-page-background)); }`}
   </style>
