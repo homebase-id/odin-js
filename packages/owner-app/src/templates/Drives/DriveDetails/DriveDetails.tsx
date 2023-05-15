@@ -4,7 +4,7 @@ import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { HardDrive } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useExport from '../../../hooks/drives/useExport';

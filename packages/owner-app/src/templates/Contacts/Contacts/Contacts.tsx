@@ -7,7 +7,7 @@ import useSettings from '../../../hooks/settings/useSettings';
 import { ContactFile, RawContact } from '../../../provider/contact/ContactTypes';
 import PendingConnectionImage from '../../../components/Connection/PendingConnectionImage/PendingConnectionImage';
 import { AddressBook } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 
 const Contacts = () => {
   const {

@@ -1,7 +1,7 @@
 import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import { Heart } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useAttributes from '../../../hooks/profiles/useAttributes';

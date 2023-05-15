@@ -1,4 +1,4 @@
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';

@@ -9,7 +9,7 @@ import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { useCircle } from '@youfoundation/common-app';

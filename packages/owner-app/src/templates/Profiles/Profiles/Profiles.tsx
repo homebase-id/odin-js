@@ -4,7 +4,7 @@ import { useProfiles } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { BuiltInProfiles } from '@youfoundation/js-lib';

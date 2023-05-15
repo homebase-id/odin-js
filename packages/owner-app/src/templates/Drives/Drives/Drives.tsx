@@ -5,7 +5,7 @@ import useDrives from '../../../hooks/drives/useDrives';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';
 import { HardDrive } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';

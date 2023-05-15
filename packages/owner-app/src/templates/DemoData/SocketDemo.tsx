@@ -1,5 +1,5 @@
 import ActionButton from '../../components/ui/Buttons/ActionButton';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import {
   ApiType,
   Disconnect,

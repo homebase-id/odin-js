@@ -4,7 +4,7 @@ import PersonIncomingRequest from '../../components/Connection/PersonIncomingReq
 import AppMembershipView from '../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import InfoBox from '../../components/ui/InfoBox/InfoBox';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { t } from '@youfoundation/common-app';
 import useApps from '../../hooks/apps/useApps';

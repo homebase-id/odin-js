@@ -8,7 +8,7 @@ import ConnectionCard from '../../../components/Connection/ConnectionCard/Connec
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
 import MemberLookupDialog from '../../../components/Dialog/MemberLookupDialog/MemberLookupDialog';
 import { Circles } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';

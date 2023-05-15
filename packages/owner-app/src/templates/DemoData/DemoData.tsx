@@ -40,7 +40,7 @@ import {
 import { lotrRealm } from './DemoLotr';
 import useAttribute from '../../hooks/profiles/useAttribute';
 import { useChannel } from '@youfoundation/common-app';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import usePost from '../../hooks/posts/usePost';
 import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';

@@ -1,9 +1,9 @@
 import { FC, ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import SaveStatus from '../../Buttons/SaveStatus';
+import { SaveStatus } from '../Buttons/SaveStatus';
 
-const PageMeta = ({
+export const PageMeta = ({
   title,
   browserTitle,
   actions,
@@ -70,5 +70,3 @@ const PageMeta = ({
     </section>
   );
 };
-
-export default PageMeta;

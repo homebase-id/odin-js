@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChannelItem } from '../../components/Dialog/ChannelsDialog/ChannelsDialog';
 import { Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import useAuth from '../../hooks/auth/useAuth';

@@ -3,7 +3,7 @@ import { DraftItem } from '../../components/SocialFeed/DraftsDialog/DraftsDialog
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
 import { Article, LoadingParagraph } from '@youfoundation/common-app';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useBlogPostsInfinite from '../../hooks/blog/useBlogPostsInfinite';

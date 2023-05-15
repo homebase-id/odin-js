@@ -5,7 +5,7 @@ import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { Grid } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';

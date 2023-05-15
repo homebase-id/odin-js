@@ -10,7 +10,7 @@ import Section from '../../../components/ui/Sections/Section';
 import { Input } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { t } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart, Plus } from '@youfoundation/common-app';

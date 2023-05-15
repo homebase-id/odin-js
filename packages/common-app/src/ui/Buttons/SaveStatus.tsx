@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { t } from '@youfoundation/common-app';
-import { format } from '../../../helpers/timeago';
-import { Alert } from '@youfoundation/common-app';
 
-const SaveStatus = ({
+import { Alert } from '@youfoundation/common-app';
+import { format } from '../../helpers/timeago';
+
+export const SaveStatus = ({
   className,
   state,
   error,
@@ -47,7 +48,9 @@ const SaveStatus = ({
     return null;
   }
 
-  return <p className={`${className} text-sm`}>Last saved {format(lastSave)}</p>;
+  return (
+    <p className={`${className} text-sm`}>
+      {t('Last saved')} {format(lastSave)}
+    </p>
+  );
 };
-
-export default SaveStatus;

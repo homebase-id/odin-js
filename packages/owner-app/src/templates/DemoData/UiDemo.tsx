@@ -2,7 +2,7 @@
 
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 import CollapsableSection from '../../components/ui/Sections/CollapsableSection';
 import {
   ApiType,

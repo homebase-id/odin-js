@@ -24,7 +24,7 @@ import { t } from '@youfoundation/common-app';
 // import { e } from '@youfoundation/common-app';;
 // import { n } from '@youfoundation/common-app';;
 // import { e } from '@youfoundation/common-app';;
-// import PageMeta from '../../../Layout/PageMeta/PageMeta';
+import { PageMeta } from '@youfoundation/common-app';
 // import Section from '../../../Sections/Section';
 // import { ConnectionPermissionViewer } from '../../Connections/ConnectionDetails/ConnectionDetails';
 
