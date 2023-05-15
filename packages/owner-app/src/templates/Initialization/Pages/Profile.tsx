@@ -1,11 +1,11 @@
 import { useRef } from 'react';
-import ImageUploadAndCrop from '../../../components/Form/ImageUploadAndCrop';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { Person } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { onChangeParams, pageData } from '../Initialization';
+import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
 
 const Profile = ({
   pageData,

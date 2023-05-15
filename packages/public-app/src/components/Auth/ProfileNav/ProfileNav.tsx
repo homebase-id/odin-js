@@ -1,9 +1,8 @@
 import { FormEventHandler, useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
-import { IS_DARK_CLASSNAME, t } from '@youfoundation/common-app';
+import { ConnectionImage, IS_DARK_CLASSNAME, OwnerImage, t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
-import { ConnectionImage, OwnerImage } from '../../Post/Common/Blocks/Author/Image';
 import { Person, useOutsideTrigger } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 

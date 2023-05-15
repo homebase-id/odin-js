@@ -1,9 +1,9 @@
 import { Helmet } from 'react-helmet-async';
 import { HomePageTheme } from '@youfoundation/js-lib';
-import useSiteData from '../../hooks/siteData/useSiteData';
 import HomeClassic from './Classic/HomeClassic';
 import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';
+import { useSiteData } from '@youfoundation/common-app';
 
 const Home = ({ tab }: { tab?: string }) => {
   const { home, owner } = useSiteData().data ?? {};

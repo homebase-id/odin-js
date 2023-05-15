@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Textarea, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
@@ -11,7 +11,6 @@ import YourSignature from '../../Connection/YourSignature/YourSignature';
 import { CircleSelector } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import Textarea from '../../Form/Textarea';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import useFollowingInfinite from '../../../hooks/follow/useFollowing';

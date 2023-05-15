@@ -1,8 +1,7 @@
 import { DriveGrant } from '@youfoundation/js-lib';
-import { HardDrive } from '@youfoundation/common-app';
+import { HardDrive, useSecurityContext } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useSecurityContext from '../../hooks/securityContext/useSecurityContext';
 
 const drivePermissionLevels = [
   { name: t('None'), value: 0 },

@@ -1,7 +1,7 @@
 import { TargetDrive } from '@youfoundation/js-lib';
 import { useRef, useState } from 'react';
-import { useIntersection } from '../../hooks/intersection/useIntersection';
 import useImage from '../../hooks/media/useImage';
+import { useIntersection } from '@youfoundation/common-app';
 
 interface ImageProps {
   targetDrive: TargetDrive;

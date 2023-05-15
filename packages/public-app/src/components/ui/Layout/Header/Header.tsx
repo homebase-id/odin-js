@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom';
 import ProfileNav from '../../../Auth/ProfileNav/ProfileNav';
-import useSiteData from '../../../../hooks/siteData/useSiteData';
+
+import { AuthorImage, DarkModeToggle, OwnerName, useSiteData } from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
-import AuthorImage from '../../../Post/Common/Blocks/Author/Image';
-import { OwnerName } from '../../../Post/Common/Blocks/Author/Name';
-import { DarkModeToggle } from '@youfoundation/common-app';
 
 const Header = () => {
   const { isOwner } = useAuth();

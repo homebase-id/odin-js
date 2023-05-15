@@ -1,8 +1,7 @@
 import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { t, useIntersection } from '@youfoundation/common-app';
 import useContacts from '../../../hooks/contacts/useContacts';
-import { useIntersection } from '../../../hooks/intersection/useIntersection';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ContactFile, RawContact } from '../../../provider/contact/ContactTypes';
 import PendingConnectionImage from '../../../components/Connection/PendingConnectionImage/PendingConnectionImage';

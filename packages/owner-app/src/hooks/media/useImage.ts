@@ -1,9 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
-  ApiType,
   BlogConfig,
-  DotYouClient,
   getDecryptedImageUrl,
   HomePageConfig,
   ImageContentType,

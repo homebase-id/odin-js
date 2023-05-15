@@ -6,9 +6,7 @@ import { usePortal } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import { Input } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
-import Textarea from '../../Form/Textarea';
+import { Input, Label, Textarea } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 
 const ProfileDialog = ({

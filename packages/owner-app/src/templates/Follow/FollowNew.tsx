@@ -3,14 +3,13 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import CheckboxToggle from '../../components/Form/CheckboxToggle';
-import { Alert } from '@youfoundation/common-app';
+import { Alert, useSocialChannels } from '@youfoundation/common-app';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useFollowingInfinite from '../../hooks/follow/useFollowing';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
-import useSocialChannels from '../../hooks/socialFeed/socialChannels/useSocialChannels';
 
 const Following = () => {
   const { toFollowKey } = useParams();

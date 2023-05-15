@@ -3,13 +3,11 @@ import {
   GetTargetDriveFromProfileId,
   HomePageConfig,
 } from '@youfoundation/js-lib';
-import useSiteData from '../../../../hooks/siteData/useSiteData';
-import Image from '../../../../components/Image/Image';
 import Links from '../../../../components/ui/Layout/Links/Links';
 import Socials from '../../../../components/ui/Layout/Socials/Socials';
 import ConnectLink from '../../../../components/ConnectionActions/ConnectLink/ConnectLink';
 import FollowLink from '../../../../components/ConnectionActions/FollowLink/FollowLink';
-import { OwnerName } from '../../../../components/Post/Common/Blocks/Author/Name';
+import { OwnerName, Image, useSiteData } from '@youfoundation/common-app';
 
 const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
   const { owner, home, social } = useSiteData().data ?? {};

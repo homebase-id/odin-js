@@ -54,6 +54,11 @@ const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const UiDemo = lazy(() => import('../templates/DemoData/UiDemo'));
 const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
+const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
+const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
+const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
+const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
+
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';
@@ -163,6 +168,41 @@ function App() {
             <Route path="demo-data" element={<DemoData />}></Route>
             <Route path="ui-demo" element={<UiDemo />}></Route>
             <Route path="socket-demo" element={<SocketDemo />}></Route>
+
+            {/* Feed: */}
+            <Route path="feed">
+              <Route
+                index={true}
+                element={
+                  <>
+                    {/* <Header /> */}
+                    <SocialFeed />
+                  </>
+                }
+              />
+              <Route
+                path="preview/:identityKey/:channelKey/:postKey"
+                element={
+                  <>
+                    {/* <Header /> */}
+                    <SocialFeed />
+                  </>
+                }
+              />
+              <Route
+                path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
+                element={
+                  <>
+                    {/* <Header /> */}
+                    <SocialFeed />
+                  </>
+                }
+              />
+              <Route path="new" element={<ArticleComposerPage />} />
+              <Route path="articles" element={<ArticlesPage />} />
+              <Route path="channels" element={<ChannelsPage />} />
+              <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
+            </Route>
           </Route>
 
           <Route

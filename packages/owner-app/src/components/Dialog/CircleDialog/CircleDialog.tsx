@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Textarea, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { circlePermissionLevels } from '../../../provider/permission/permissionLevels';
@@ -9,7 +9,7 @@ import ActionButton from '../../ui/Buttons/ActionButton';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
-import Textarea from '../../Form/Textarea';
+
 import { DialogWrapper } from '@youfoundation/common-app';
 import { CircleDefinition } from '@youfoundation/js-lib';
 

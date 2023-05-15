@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import useBiography from '../../../../hooks/biography/useBiography';
-import useSiteData from '../../../../hooks/siteData/useSiteData';
+import { useSiteData } from '@youfoundation/common-app';
 
 const About = ({ className }: { className?: string }) => {
   const { home } = useSiteData().data ?? {};
@@ -9,7 +9,7 @@ const About = ({ className }: { className?: string }) => {
   return (
     <div className={className ?? ''}>
       <div className="-mx-2 flex max-w-6xl flex-col lg:flex-row xl:-mx-4">
-        <div className="py-2 px-2 lg:w-2/3 xl:px-4">
+        <div className="px-2 py-2 lg:w-2/3 xl:px-4">
           {home?.leadText && <p className="pb-10">{home.leadText}</p>}
           {bioData ? (
             <div className="-my-5">

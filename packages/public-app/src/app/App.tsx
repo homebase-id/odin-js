@@ -17,8 +17,8 @@ import { ErrorBoundary } from '../components/ui/Layout/ErrorBoundary/ErrorBounda
 import useAuth from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
-import useSiteData from '../hooks/siteData/useSiteData';
-import { t } from '@youfoundation/common-app';
+
+import { t, useSiteData } from '@youfoundation/common-app';
 
 const RootRoute = lazy(() => import('./RootRoute'));
 
@@ -30,10 +30,6 @@ const PostImageDetail = lazy(() => import('../templates/Posts/Detail/PostImageDe
 const LinksPage = lazy(() => import('../templates/LinksPage/LinksPage'));
 const YouAuthFinalizer = lazy(() => import('../templates/YouAuthFinalizer/YouAuthFinalizer'));
 
-const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
-const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
-const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
-const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
 const Ping = lazy(() => import('../templates/Ping/Ping'));
 
 const queryClient = new QueryClient();
@@ -79,48 +75,6 @@ function App() {
             <Route path="linked" element={<LinksPage />} />
             <Route path="ping" element={<Ping />} />
             <Route path="*" element={<NotFound />} />
-          </Route>
-
-          {/* Owner only paths: */}
-          <Route
-            path="feed"
-            element={
-              <RootRoute>
-                <Outlet />
-              </RootRoute>
-            }
-          >
-            <Route
-              index={true}
-              element={
-                <>
-                  <Header />
-                  <SocialFeed />
-                </>
-              }
-            />
-            <Route
-              path="preview/:identityKey/:channelKey/:postKey"
-              element={
-                <>
-                  <Header />
-                  <SocialFeed />
-                </>
-              }
-            />
-            <Route
-              path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
-              element={
-                <>
-                  <Header />
-                  <SocialFeed />
-                </>
-              }
-            />
-            <Route path="new" element={<ArticleComposerPage />} />
-            <Route path="articles" element={<ArticlesPage />} />
-            <Route path="channels" element={<ChannelsPage />} />
-            <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
           </Route>
         </Route>
       </>
