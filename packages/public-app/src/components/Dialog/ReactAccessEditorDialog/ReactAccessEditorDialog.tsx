@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import Select from '../../Form/Select';
+import { Select } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper } from '@youfoundation/common-app';
 

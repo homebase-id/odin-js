@@ -22,7 +22,7 @@ import ImageSelector from '../../Form/ImageSelector';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import Order from '../../Form/Order';
-import Select from '../../Form/Select';
+import { Select } from '@youfoundation/common-app';
 import Textarea from '../../Form/Textarea';
 import { AsYouType } from 'libphonenumber-js';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/common-app';

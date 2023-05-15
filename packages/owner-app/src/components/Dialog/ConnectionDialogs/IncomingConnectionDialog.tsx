@@ -10,7 +10,7 @@ import ActionButton from '../../ui/Buttons/ActionButton';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PendingConnectionImage from '../../Connection/PendingConnectionImage/PendingConnectionImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
-import CircleSelector from '../../Form/CircleSelector';
+import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import useFollowingInfinite from '../../../hooks/follow/useFollowing';
 import CheckboxToggle from '../../Form/CheckboxToggle';

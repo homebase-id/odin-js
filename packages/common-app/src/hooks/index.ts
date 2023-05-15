@@ -10,3 +10,5 @@ export * from './profiles/useProfiles';
 export * from './notifications/useNotifications';
 export * from './posts';
 export * from './staticFiles/useStaticFiles';
+export * from './circles/useCircle';
+export * from './circles/useCircles';

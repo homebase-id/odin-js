@@ -5,14 +5,14 @@ import {
 } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
-import useCircles from '../../../hooks/circles/useCircles';
+import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import useCircle from '../../../hooks/circles/useCircle';
+import { useCircle } from '@youfoundation/common-app';
 import { Ellipsis } from '@youfoundation/common-app';
 
 const Circles = () => {

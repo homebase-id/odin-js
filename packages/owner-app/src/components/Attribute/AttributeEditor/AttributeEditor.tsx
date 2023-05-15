@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { AclIcon, AclSummary, AclWizard, t } from '@youfoundation/common-app';
 import useAttribute from '../../../hooks/profiles/useAttribute';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import SaveStatus from '../../ui/Buttons/SaveStatus';
 import Section from '../../ui/Sections/Section';
-import { AclIcon, AclSummary } from '../../Acl/AclEditor/AclEditor';
 import AttributeFields from '../AttributeFields/AttributeFields';
-import AclWizard from '../../Acl/AclWizard/AclWizard';
 import ActionGroup from '../../ui/Buttons/ActionGroup';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 

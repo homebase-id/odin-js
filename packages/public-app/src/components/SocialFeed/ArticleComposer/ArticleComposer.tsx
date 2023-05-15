@@ -24,7 +24,7 @@ import ImageSelector from '../../Form/ImageSelector';
 import { debounce } from 'lodash-es';
 import { useNavigate } from 'react-router-dom';
 import NewRichTextEditor from '../../RichTextEditor/RichTextEditor';
-import Select from '../../Form/Select';
+import { Select } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { getReadingTime } from '../../../helpers/richTextHelper';
 

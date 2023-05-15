@@ -1,11 +1,10 @@
 import { stringGuidsEqual } from '@youfoundation/js-lib';
 import { useEffect, useState } from 'react';
-import { t } from '@youfoundation/common-app';
-import useCircles from '../../hooks/circles/useCircles';
-import CirclePermissionView from '../PermissionViews/CirclePermissionView/CirclePermissionView';
-import CheckboxToggle from './CheckboxToggle';
+import { CheckboxToggle, t } from '@youfoundation/common-app';
+import { useCircles } from '@youfoundation/common-app';
+import { CirclePermissionView } from '../permissions/CirclePermissionView/CirclePermissionView';
 
-const CircleSelector = ({
+export const CircleSelector = ({
   defaultValue,
   onChange,
   name,

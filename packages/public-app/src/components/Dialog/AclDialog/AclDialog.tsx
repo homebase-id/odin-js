@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import Select from '../../Form/Select';
+import { Select } from '@youfoundation/common-app';
 import { DialogWrapper, Lock } from '@youfoundation/common-app';
 import { OpenLock } from '@youfoundation/common-app';
 import { pascalCase } from '@youfoundation/common-app';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import CircleSelector from '../../Form/CircleSelector';
+import { CircleSelector } from '@youfoundation/common-app';
 
 const AclDialog = ({
   title,

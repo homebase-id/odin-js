@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
-import useCircle from '../../../hooks/circles/useCircle';
+import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
 import ConnectionCard from '../../../components/Connection/ConnectionCard/ConnectionCard';

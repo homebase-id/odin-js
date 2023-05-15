@@ -9,11 +9,10 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib';
 import { useEffect, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { AclIcon, AclSummary, t } from '@youfoundation/common-app';
 import useFiles from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import Image from '../Image/Image';
-import { AclIcon, AclSummary } from '../Acl/AclEditor/AclEditor';
 import { ContactConfig } from '../../provider/contact/ContactTypes';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import ActionButton from '../ui/Buttons/ActionButton';

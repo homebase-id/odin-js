@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import Select from '../Form/Select';
+import { Select } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 
 interface SubmenuProps {

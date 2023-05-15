@@ -1,6 +1,6 @@
 import { t } from '@youfoundation/common-app';
-import useCircles from '../../../../hooks/circles/useCircles';
-import CirclePermissionView from '../../../PermissionViews/CirclePermissionView/CirclePermissionView';
+import { useCircles } from '@youfoundation/common-app';
+import { CirclePermissionView } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 
 const CirclesView = ({ className }: { className?: string }) => {

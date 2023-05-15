@@ -1,13 +1,12 @@
 import { CircleDefinition } from '@youfoundation/js-lib';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
-import useCircle from '../../../hooks/circles/useCircle';
+import { t, useCircle } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
 import { Circles } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 
-const CirclePermissionView = ({
+export const CirclePermissionView = ({
   circleDef,
   permissionDetails,
   className,
@@ -80,5 +79,3 @@ const CirclePermissionView = ({
     </LinkWrapper>
   );
 };
-
-export default CirclePermissionView;

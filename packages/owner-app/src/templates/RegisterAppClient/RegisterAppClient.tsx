@@ -13,7 +13,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ActionButton, ErrorNotification, mergeStates } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import CircleSelector from '../../components/Form/CircleSelector';
+import { CircleSelector } from '@youfoundation/common-app';
 import useAppClients from '../../hooks/apps/useAppClients';
 import { PermissionSet } from '@youfoundation/js-lib';
 import { DomainHighlighter } from '@youfoundation/common-app';

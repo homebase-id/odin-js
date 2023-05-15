@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  DotYouClient,
-  ApiType,
   CircleDefinition,
   disableCircle,
   enableCircle,
@@ -13,10 +11,10 @@ import {
   addMemberToCircle,
   removeMemberFromCircle,
 } from '@youfoundation/js-lib';
-import useAuth from '../auth/useAuth';
+import { useDotYouClient } from '../../..';
 
-const useCircle = ({ circleId }: { circleId?: string }) => {
-  const dotYouClient = useAuth().getDotYouClient();
+export const useCircle = ({ circleId }: { circleId?: string }) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
   const fetch = async ({ circleId }: { circleId: string }) => {
@@ -212,5 +210,3 @@ const useCircle = ({ circleId }: { circleId?: string }) => {
     }),
   };
 };
-
-export default useCircle;

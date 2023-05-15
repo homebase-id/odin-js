@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { t } from '@youfoundation/common-app';
 import { TemplateList, TemplateMasonry, TemplateGrid, IconProps } from '@youfoundation/common-app';
 
-const TemplateSelector = ({
+const ChannelTemplateSelector = ({
   name,
   defaultValue,
   onChange,
@@ -88,4 +88,4 @@ const Template = ({
   );
 };
 
-export default TemplateSelector;
+export default ChannelTemplateSelector;

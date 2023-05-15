@@ -1,17 +1,14 @@
 import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { ActionButton, CircleSelector, Select, pascalCase, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
-import CircleSelector from '../../Form/CircleSelector';
-import Select from '../../Form/Select';
+
 import { Lock } from '@youfoundation/common-app';
 import { OpenLock } from '@youfoundation/common-app';
-import { pascalCase } from '../../../templates/DemoData/helpers';
 import { DialogWrapper } from '@youfoundation/common-app';
 
-const AclDialog = ({
+export const AclDialog = ({
   title,
   confirmText,
   isOpen,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ActionButton, ActionButtonState, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import CircleSelector from '../../Form/CircleSelector';
+import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { PermissionSetGrantRequest } from '../../../provider/app/AppManagementProviderTypes';

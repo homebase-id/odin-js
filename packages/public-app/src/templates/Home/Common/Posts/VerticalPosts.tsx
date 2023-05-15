@@ -2,7 +2,7 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent, PostFile } from '@youfoundation/js-lib';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Label } from '@youfoundation/common-app';
-import Select from '../../../../components/Form/Select';
+import { Select } from '@youfoundation/common-app';
 import PostTeaser from '../../../../components/Post/Common/Card/PostTeaser';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';

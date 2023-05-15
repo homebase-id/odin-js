@@ -2,10 +2,9 @@ import { AccessControlList, SecurityGroupType, stringGuidsEqual } from '@youfoun
 import { useState } from 'react';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useCircles from '../../../hooks/circles/useCircles';
-import AclDialog from '../../Dialog/AclDialog/AclDialog';
-import { Lock } from '@youfoundation/common-app';
-import { OpenLock } from '@youfoundation/common-app';
+import { Lock, OpenLock } from '@youfoundation/common-app';
+import { useCircles } from '@youfoundation/common-app';
+import AclDialog from '../AclDialog/AclDialog';
 
 export const AclSummary = ({
   acl,
@@ -17,7 +16,7 @@ export const AclSummary = ({
   const { data: circles } = useCircles().fetch;
 
   const circlesDetails = acl?.circleIdList?.map(
-    (circleId) => circles?.find((circle) => stringGuidsEqual(circle.id ?? '', circleId))?.name
+    (circleId) => circles?.find((circle) => stringGuidsEqual(circle.id || '', circleId))?.name
   );
 
   return (
@@ -28,7 +27,7 @@ export const AclSummary = ({
         ? t('Authenticated')
         : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
         ? acl.circleIdList?.length
-          ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', ') ?? '', maxLength)}`
+          ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
           : t('Connections')
         : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Owner.toLowerCase()
         ? t('Owner')
@@ -47,7 +46,7 @@ export const AclIcon = ({ acl, className }: { acl: AccessControlList; className:
   );
 };
 
-const AclEditor = ({
+export const AclEditor = ({
   acl,
   onChange,
   isEdit,
@@ -88,5 +87,3 @@ const AclEditor = ({
     </>
   );
 };
-
-export default AclEditor;

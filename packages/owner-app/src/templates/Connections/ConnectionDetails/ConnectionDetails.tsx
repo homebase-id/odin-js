@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
-import useCircles from '../../../hooks/circles/useCircles';
+import { useCircles } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
@@ -16,7 +16,7 @@ import { Persons } from '@youfoundation/common-app';
 import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { LoadingParagraph } from '@youfoundation/common-app';
-import CirclePermissionView from '../../../components/PermissionViews/CirclePermissionView/CirclePermissionView';
+import { CirclePermissionView } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
 import ActionGroup from '../../../components/ui/Buttons/ActionGroup';

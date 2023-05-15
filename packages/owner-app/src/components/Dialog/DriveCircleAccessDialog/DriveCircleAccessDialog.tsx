@@ -2,12 +2,12 @@ import { CircleDefinition, DriveDefinition } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t, ActionButton, ActionButtonState, usePortal } from '@youfoundation/common-app';
-import useCircle from '../../../hooks/circles/useCircle';
-import useCircles from '../../../hooks/circles/useCircles';
+import { useCircle } from '@youfoundation/common-app';
+import { useCircles } from '@youfoundation/common-app';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
-import CirclePermissionView from '../../PermissionViews/CirclePermissionView/CirclePermissionView';
+import { CirclePermissionView } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 
 const DriveCircleAccessDialog = ({

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCircles } from '@youfoundation/js-lib';
-import useAuth from '../auth/useAuth';
+import { useDotYouClient } from '../../..';
 
-const useCircles = () => {
-  const dotYouClient = useAuth().getDotYouClient();
+export const useCircles = () => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchAll = async () => {
     const circles = await getCircles(dotYouClient);
@@ -16,5 +16,3 @@ const useCircles = () => {
     }),
   };
 };
-
-export default useCircles;

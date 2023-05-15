@@ -1,10 +1,8 @@
 import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
-import CircleSelector from '../../Form/CircleSelector';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton, CircleSelector, t } from '@youfoundation/common-app';
 
-const AclWizard = ({
+export const AclWizard = ({
   acl,
   onConfirm,
   onCancel,
@@ -131,5 +129,3 @@ const RequiredSecurityGroupRadioGroup = ({
     </>
   );
 };
-
-export default AclWizard;

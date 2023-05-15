@@ -1,19 +1,24 @@
 import { ChannelTemplate, SecurityGroupType } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChannelDefinitionVm, convertTextToSlug, useChannels } from '@youfoundation/common-app';
+import {
+  AclIcon,
+  AclSummary,
+  AclWizard,
+  ChannelDefinitionVm,
+  convertTextToSlug,
+  useChannels,
+} from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannel } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import { AclIcon, AclSummary } from '../../Acl/AclEditor/AclEditor';
-import AclWizard from '../../Acl/AclWizard/AclWizard';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import Textarea from '../../Form/Textarea';
 import ActionButton from '../../ui/Buttons/ActionButton';
 import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
-import TemplateSelector from './TemplateSelector';
+import TemplateSelector from './ChannelTemplateSelector';
 import useAuth from '../../../hooks/auth/useAuth';
 
 const ChannelsDialog = ({
