@@ -589,10 +589,19 @@ export const uploadFile = async (
   metadata: UploadFileMetadata,
   payload: Uint8Array | File | undefined,
   thumbnails?: ThumbnailFile[],
-  encrypt = true
+  encrypt = true,
+  onVersionConflict?: () => void
 ): Promise<UploadResult> => {
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  return uploadUsingKeyHeader(dotYouClient, keyHeader, instructions, metadata, payload, thumbnails);
+  return uploadUsingKeyHeader(
+    dotYouClient,
+    keyHeader,
+    instructions,
+    metadata,
+    payload,
+    thumbnails,
+    onVersionConflict
+  );
 };
 
 const uploadUsingKeyHeader = async (
@@ -601,7 +610,8 @@ const uploadUsingKeyHeader = async (
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
   payload: Uint8Array | File | undefined,
-  thumbnails?: ThumbnailFile[]
+  thumbnails?: ThumbnailFile[],
+  onVersionConflict?: () => void
 ): Promise<UploadResult> => {
   // Rebuild instructions without the systemFileType
   const strippedInstructions: UploadInstructionSet = {
@@ -640,7 +650,7 @@ const uploadUsingKeyHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType);
+  return await pureUpload(dotYouClient, data, instructions.systemFileType, onVersionConflict);
 };
 
 export const uploadHeader = async (

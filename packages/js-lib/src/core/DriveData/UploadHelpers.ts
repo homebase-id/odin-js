@@ -123,7 +123,8 @@ export const buildFormData = async (
 export const pureUpload = async (
   dotYouClient: DotYouClient,
   data: FormData,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => void
 ) => {
   const client = dotYouClient.createAxiosClient(true);
   const url = '/drive/files/upload';
@@ -141,6 +142,11 @@ export const pureUpload = async (
       return response.data;
     })
     .catch((error) => {
+      if (error.response.data.errorCode === 4160 && onVersionConflict) {
+        onVersionConflict();
+        return;
+      }
+
       console.error('[DotYouCore-js:pureUpload]', error);
       throw error;
     });
