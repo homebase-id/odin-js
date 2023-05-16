@@ -123,6 +123,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
             postFile={postFile}
             allowExpand={!!allowExpand}
             className="px-4"
+            showSummary={true}
           />
         </div>
       </FakeAnchor>

@@ -221,7 +221,7 @@ const CommentTeaserList = ({
       </div>
       {reactionPreview?.totalCount > 3 || allEncrypted ? (
         <button onClick={onExpand} className="text-primary text-sm font-bold text-opacity-80">
-          {`${!allEncrypted ? t('View all') : t('Decrypt all')} ${reactionPreview.totalCount} ${
+          {`${!allEncrypted ? t('View') : t('Decrypt')} ${reactionPreview.totalCount} ${
             reactionPreview.totalCount > 1 ? t('comments') : t('comment')
           }`}
         </button>
