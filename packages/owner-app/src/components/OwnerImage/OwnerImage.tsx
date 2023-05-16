@@ -5,8 +5,7 @@ import {
   MinimalProfileFields,
 } from '@youfoundation/js-lib';
 import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
-import Image from '../Image/Image';
-
+import { Image } from '@youfoundation/common-app';
 interface OwnerImageProps {
   className?: string;
   size?: 'sm' | 'md' | 'custom';

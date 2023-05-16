@@ -7,9 +7,7 @@ import InfoBox from '../../components/ui/InfoBox/InfoBox';
 import Section from '../../components/ui/Sections/Section';
 import { t } from '@youfoundation/common-app';
 import useApps from '../../hooks/apps/useApps';
-import { useCircles } from '@youfoundation/common-app';
-import Image from '../../components/Image/Image';
-import { ActionButton } from '@youfoundation/common-app';
+import { useCircles, Image, ActionButton } from '@youfoundation/common-app';
 import { Cog } from '@youfoundation/common-app';
 import {
   HomePageConfig,

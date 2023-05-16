@@ -67,7 +67,7 @@ export * from './Icons/Check';
 export * from './Icons/Crop';
 export * from './Icons/ExternalLink';
 export * from './Icons/Globe';
-export * from './Icons/Image';
+export * from './Icons/ImageIcon';
 export * from './Icons/Lol';
 export * from './Icons/Phone';
 export * from './Icons/Sad';
