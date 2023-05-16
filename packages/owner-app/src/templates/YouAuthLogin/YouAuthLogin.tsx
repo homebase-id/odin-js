@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
 import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
-import ActionButton from '../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useCallback, useEffect } from 'react';

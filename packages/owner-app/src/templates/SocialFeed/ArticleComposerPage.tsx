@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { Article, useBlog } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import ArticleComposer from '../../components/SocialFeed/ArticleComposer/ArticleComposer';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
@@ -19,7 +19,7 @@ const ArticleComposerPage = () => {
         title={t('Articles')}
         icon={Article}
         breadCrumbs={[
-          { title: t('Articles'), href: '/home/feed/articles' },
+          { title: t('Articles'), href: '/owner/feed/articles' },
           { title: postData?.activeBlog?.content?.caption || t('New article') },
         ]}
       />

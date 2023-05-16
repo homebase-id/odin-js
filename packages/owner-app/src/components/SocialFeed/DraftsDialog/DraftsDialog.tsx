@@ -69,9 +69,7 @@ const DraftsDialog = ({ isOpen, onCancel }: { isOpen: boolean; onCancel: () => v
       <div className="-m-2 flex flex-row-reverse py-3">
         <ActionLink
           className="m-2 cursor-pointer"
-          onClick={() => {
-            window.location.href = '/home/feed/new';
-          }}
+          onClick={() => (window.location.href = '/owner/feed/new')}
           icon="plus"
         >
           {t('New Draft')}
@@ -111,7 +109,7 @@ export const DraftItem = ({
         key={draft.fileId}
       >
         <FakeAnchor
-          href={`/home/feed/edit/${channel?.slug ?? 'public-posts'}/${draft.content.id}`}
+          href={`/owner/feed/edit/${channel?.slug ?? 'public-posts'}/${draft.content.id}`}
           onNavigate={onNavigate}
         >
           <div className="flex flex-col">

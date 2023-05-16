@@ -1,2 +1,2 @@
-export * from './richTextEditor/RichTextEditor';
-export * from './richTextRenderer/RichTextRenderer';
+export * from './editor/RichTextEditor';
+export * from './renderer/RichTextRenderer';

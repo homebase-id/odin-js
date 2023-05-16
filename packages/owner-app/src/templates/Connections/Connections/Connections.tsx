@@ -1,5 +1,4 @@
-import { PageMeta } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
@@ -11,6 +10,7 @@ import { LoadingParagraph } from '@youfoundation/common-app';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
 import { DotYouProfile } from '@youfoundation/js-lib';
 import { useActiveConnections } from '@youfoundation/common-app';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);

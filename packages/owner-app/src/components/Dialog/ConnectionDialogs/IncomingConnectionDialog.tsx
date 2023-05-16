@@ -6,7 +6,7 @@ import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PendingConnectionImage from '../../Connection/PendingConnectionImage/PendingConnectionImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';

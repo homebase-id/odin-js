@@ -1,16 +1,16 @@
 export * from './Blocks/Author/Image';
 export * from './Blocks/Author/Name';
 
-export * from './Blocks/Interacts/Comments/Comment/Comment';
-export * from './Blocks/Interacts/Comments/CommentComposer/CommentComposer';
+export * from './Blocks/Interacts/Comments/Comment';
+export * from './Blocks/Interacts/Comments/CommentComposer';
 
 export * from './Blocks/Interacts/EmojiPicker/EmojiPicker';
 export * from './Blocks/Interacts/EmojiPicker/EmojiSelector';
 
 export * from './ReactAccessEditorDialog/ReactAccessEditorDialog';
 
-export * from './Blocks/Interacts/Reactions/LikeButton/LikeButton';
-export * from './Blocks/Interacts/Reactions/ReactionsBar/ReactionsBar';
+export * from './Blocks/Interacts/Reactions/LikeButton';
+export * from './Blocks/Interacts/Reactions/ReactionsBar';
 
 export * from './Blocks/Interacts/PostInteracts';
 

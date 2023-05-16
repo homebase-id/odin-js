@@ -1,16 +1,14 @@
 import { HomePageAttributes, HomePageConfig, toGuidId } from '@youfoundation/js-lib';
-import { t } from '@youfoundation/common-app';
+import { ActionButton, ActionLink, t } from '@youfoundation/common-app';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
-import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { Cloud } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
-import ActionLink from '../../components/ui/Buttons/ActionLink';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const defaultHomeAttribute: AttributeVm = {
   id: toGuidId('default_home_attribute'),

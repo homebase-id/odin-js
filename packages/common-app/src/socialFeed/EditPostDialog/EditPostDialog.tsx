@@ -1,15 +1,8 @@
-import {
-  PostContent,
-  PostFile,
-  TargetDrive,
-  getChannelDrive,
-  Media,
-  MediaFile,
-} from '@youfoundation/js-lib';
-import { useEffect, useMemo, useState } from 'react';
+import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, t } from '@youfoundation/common-app';
-import { usePortal, Image } from '@youfoundation/common-app';
+import { ActionButton, ExistingFileOverview, t } from '@youfoundation/common-app';
+import { usePortal } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -144,54 +137,4 @@ export const EditPostDialog = ({
   );
 
   return createPortal(dialog, target);
-};
-
-const ExistingFileOverview = ({
-  mediaFiles,
-  toRemoveFileIds,
-  targetDrive,
-  setToRemoveFileIds,
-  className,
-}: {
-  mediaFiles?: MediaFile[];
-  toRemoveFileIds: string[];
-  targetDrive: TargetDrive;
-  setToRemoveFileIds: (mediaFileIds: string[]) => void;
-  className?: string;
-}) => {
-  if (!mediaFiles) {
-    return null;
-  }
-
-  const renderedFiles = useMemo(() => {
-    return mediaFiles
-      .filter((file) => !toRemoveFileIds.some((toRemoveFileId) => toRemoveFileId === file.fileId))
-      .map((image) => {
-        return (
-          <div key={image.fileId} className="relative w-1/2 p-[2px] md:w-1/3">
-            <Image
-              fileId={image.fileId}
-              targetDrive={targetDrive}
-              className="aspect-square h-auto w-full"
-              fit="cover"
-            />
-            <ActionButton
-              className="absolute bottom-3 right-3"
-              icon="trash"
-              type="remove"
-              size="square"
-              onClick={(e) => {
-                e.preventDefault();
-                setToRemoveFileIds([...toRemoveFileIds, image.fileId]);
-                return false;
-              }}
-            />
-          </div>
-        );
-      });
-  }, [mediaFiles, toRemoveFileIds]);
-
-  return (
-    <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>
-  );
 };

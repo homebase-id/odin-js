@@ -1,7 +1,7 @@
+import { SaveStatus } from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { SaveStatus } from '../Buttons/SaveStatus';
 
 export const PageMeta = ({
   title,

@@ -6,6 +6,7 @@ import {
   CanReactDetails,
   CommentComposer,
   CommentEditor,
+  EmojiSummary,
   ReactionsBar,
   RichTextRenderer,
   t,
@@ -30,8 +31,7 @@ import { Pencil } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import { format } from '../../../../../helpers/timeago';
-import { EmojiSummary } from '../../PostInteracts';
+import { format } from '../../../../helpers/timeago';
 
 export interface CommentProps {
   context: ReactionContext;

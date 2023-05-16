@@ -61,7 +61,7 @@ const useAuth = () => {
 
       if (window.location.host === loggedOnIdentity) {
         // If owner ignore returnUrl and redirect to feed always;
-        window.location.href = '/home/feed';
+        window.location.href = '/owner/feed';
       } else {
         window.location.href = decodedReturnUrl;
       }

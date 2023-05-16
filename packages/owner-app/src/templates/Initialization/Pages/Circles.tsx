@@ -2,7 +2,7 @@ import { Times } from '@youfoundation/common-app';
 import { useRef, useState, useEffect } from 'react';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const Circles = ({

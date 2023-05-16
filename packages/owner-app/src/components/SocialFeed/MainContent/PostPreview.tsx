@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import {
   ArrowLeft,
   PostDetailCard,
@@ -44,10 +44,7 @@ const PostPreview = ({
   const localPost = localBlogData?.activeBlog;
 
   const navigate = useNavigate();
-  const doClose = () => {
-    navigate('/home/feed', { preventScrollReset: true });
-  };
-
+  const doClose = () => navigate('/owner/feed', { preventScrollReset: true });
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {

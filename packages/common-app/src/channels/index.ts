@@ -1,2 +1,2 @@
-export * from './ChannelsDialog/ChannelsDialog';
-export * from './ChannelsDialog/ChannelTemplateSelector';
+export * from './ChannelsDialog';
+export * from './ChannelTemplateSelector';

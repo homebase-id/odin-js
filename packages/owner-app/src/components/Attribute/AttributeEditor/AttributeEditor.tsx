@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { AclIcon, AclSummary, AclWizard, SaveStatus, t } from '@youfoundation/common-app';
 import useAttribute from '../../../hooks/profiles/useAttribute';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 
 import Section from '../../ui/Sections/Section';
 import AttributeFields from '../AttributeFields/AttributeFields';
-import ActionGroup from '../../ui/Buttons/ActionGroup';
+import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 
 const AttributeEditor = ({

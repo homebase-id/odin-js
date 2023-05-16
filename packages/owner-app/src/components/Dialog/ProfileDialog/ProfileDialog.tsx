@@ -5,7 +5,7 @@ import { t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Input, Label, Textarea } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 

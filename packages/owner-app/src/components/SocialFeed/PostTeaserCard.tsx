@@ -33,7 +33,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
   const channel = externalChannel || internalChannel;
 
-  const postPath = `/home/feed/preview/${odinId}/${channel?.channelId}/${post.id}`;
+  const postPath = `/owner/feed/preview/${odinId}/${channel?.channelId}/${post.id}`;
   const clickable = post.type === 'Article';
 
   return (
@@ -55,7 +55,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             />
           </div>
           <div className="flex flex-grow flex-col px-4 py-3">
-            <div className="text-foreground mb-1 flex flex-col text-opacity-60 md:flex-row md:flex-wrap md:items-center">
+            <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
               <h2>
                 <AuthorName odinId={odinId} />
               </h2>
@@ -71,7 +71,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 <h1 className={`text-foreground text-opacity-80 ${isExpanded ? 'text-2xl' : ''}`}>
                   {post.caption}
                 </h1>
-                <div className="text-foreground leading-relaxed text-opacity-70">
+                <div className="leading-relaxed text-foreground text-opacity-70">
                   {isExpanded ? (
                     <div className="rich-text-content mb-5 leading-relaxed">
                       <RichTextRenderer

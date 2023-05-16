@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Person } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { onChangeParams, pageData } from '../Initialization';

@@ -4,8 +4,8 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import Checkbox from '../../components/Form/Checkbox';
 import { Label } from '@youfoundation/common-app';
 import { Cog } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const Settings = () => {
   const {

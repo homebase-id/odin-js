@@ -7,13 +7,13 @@ import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
-import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { useCircle } from '@youfoundation/common-app';
 import { Ellipsis } from '@youfoundation/common-app';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const Circles = () => {
   const {
@@ -28,11 +28,9 @@ const Circles = () => {
         icon={CirclesIcon}
         title={t('My Circles')}
         actions={
-          <>
-            <ActionButton icon="plus" onClick={() => setIsOpenCreate(true)}>
-              {t('Add Circle')}
-            </ActionButton>
-          </>
+          <ActionButton icon="plus" onClick={() => setIsOpenCreate(true)}>
+            {t('Add Circle')}
+          </ActionButton>
         }
       />
 

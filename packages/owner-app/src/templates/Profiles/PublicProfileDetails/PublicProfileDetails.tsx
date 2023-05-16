@@ -1,10 +1,10 @@
 import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import { Heart } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useAttributes from '../../../hooks/profiles/useAttributes';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const PublicProfileDetails = () => {
   const { data: attributes, isLoading } = useAttributes({

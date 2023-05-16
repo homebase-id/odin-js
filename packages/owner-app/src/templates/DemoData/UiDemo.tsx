@@ -1,12 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import ActionButton from '../../components/ui/Buttons/ActionButton';
-import { DomainHighlighter } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
+import { ActionButton, DomainHighlighter } from '@youfoundation/common-app';
+
 import CollapsableSection from '../../components/ui/Sections/CollapsableSection';
 import {
-  ApiType,
-  DotYouClient,
   getRandom16ByteArray,
   jsonStringify64,
   ScheduleOptions,
@@ -20,6 +17,7 @@ import {
 } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 interface EstablishConnectionRequest {
   //List of drives for which I want notifications

@@ -2,7 +2,7 @@ import { DotYouProfile } from '@youfoundation/js-lib';
 import { t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import ConnectionCard from '../ConnectionCard/ConnectionCard';
 
 const PersonActive = ({

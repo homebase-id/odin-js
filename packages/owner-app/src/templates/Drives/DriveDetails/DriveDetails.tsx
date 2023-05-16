@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { ActionButton, ActionLink, t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+
 import { HardDrive } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
+
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useExport from '../../../hooks/drives/useExport';
-import ActionLink from '../../../components/ui/Buttons/ActionLink';
 import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { CirclePermissionView } from '@youfoundation/common-app';
@@ -21,6 +20,7 @@ import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialo
 import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
 import { Upload } from '@youfoundation/common-app';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();

@@ -1,7 +1,7 @@
 import { t, Toast } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { useNotifications } from '@youfoundation/common-app';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const Notifications = () => {
   const { notifications: notificationList } = useNotifications();

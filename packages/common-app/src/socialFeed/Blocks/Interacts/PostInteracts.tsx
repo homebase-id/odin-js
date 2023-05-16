@@ -16,9 +16,9 @@ import {
   useEmojiSummary,
 } from '../../../..';
 
-import { CommentTeaser } from './Comments/Comment/Comment';
-import { CommentComposer } from './Comments/CommentComposer/CommentComposer';
-import { LikeButton } from './Reactions/LikeButton/LikeButton';
+import { CommentTeaser } from './Comments/Comment';
+import { CommentComposer } from './Comments/CommentComposer';
+import { LikeButton } from './Reactions/LikeButton';
 
 import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';

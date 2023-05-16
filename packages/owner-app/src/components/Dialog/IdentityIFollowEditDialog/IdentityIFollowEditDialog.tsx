@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t, useSocialChannels } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import useIdentityIFollow from '../../../hooks/follow/useIdentityIFollow';
 

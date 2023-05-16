@@ -7,6 +7,7 @@ import {
 import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
+  ActionButton,
   AttachmentFile,
   ChannelsDialog,
   FileOverview,
@@ -23,13 +24,12 @@ import {
 import { useChannels } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionLink from '../ui/Buttons/ActionLink';
-import Button from '../ui/Buttons/ActionButton';
+import { ActionLink } from '@youfoundation/common-app';
 import { Article } from '@youfoundation/common-app';
 
 import { Lock } from '@youfoundation/common-app';
 
-import ActionGroup from '../ui/Buttons/ActionGroup';
+import { ActionGroup } from '@youfoundation/common-app';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -135,7 +135,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
         {postState ? (
           <div className="flex flex-row-reverse">
             {['processing', 'encrypting', 'uploading'].includes(postState) ? (
-              <span className="text-foreground animate-pulse text-sm text-opacity-40">
+              <span className="animate-pulse text-sm text-foreground text-opacity-40">
                 {t(postState)}
               </span>
             ) : null}
@@ -158,7 +158,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             type="mute"
             className={`m-2 mx-0 cursor-pointer`}
             size="small"
-            href="/home/feed/new"
+            href="/owner/feed/new"
             title="Convert into an article"
           >
             <Article className="h-4 w-4" />
@@ -179,7 +179,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             onChange={(channel) => channel && setChannel(channel)}
             ref={selectRef}
           />
-          <Button
+          <ActionButton
             className={`m-2 w-full md:w-auto ${
               caption?.length || files?.length
                 ? ''
@@ -192,7 +192,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             icon={'send'}
           >
             {t('Post')}
-          </Button>
+          </ActionButton>
         </div>
       </form>
       {error ? <ErrorNotification error={error} /> : null}

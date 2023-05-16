@@ -1,19 +1,18 @@
 import { PostContent, PostFile } from '@youfoundation/js-lib';
-
-import ActionButton from '../../components/ui/Buttons/ActionButton';
-import ActionLink from '../../components/ui/Buttons/ActionLink';
 import {
+  ActionButton,
+  ActionLink,
   Article,
   LoadingParagraph,
   useBlogPostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 import { useChannels } from '@youfoundation/common-app';
 import { DraftItem } from '../../components/SocialFeed/DraftsDialog/DraftsDialog';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const ArticlesPage = () => {
   return (
@@ -66,9 +65,7 @@ const DraftsView = () => {
         <div className="-m-2 flex flex-row-reverse py-3">
           <ActionLink
             className="m-2 cursor-pointer"
-            onClick={() => {
-              window.location.href = '/home/feed/new';
-            }}
+            onClick={() => (window.location.href = '/owner/feed/new')}
             icon="plus"
           >
             {t('New Draft')}

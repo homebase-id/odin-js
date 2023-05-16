@@ -13,7 +13,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { RichTextEditor, getReadingTime, t } from '@youfoundation/common-app';
 
-import Button from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { ErrorBoundary } from '../../ui/Layout/ErrorBoundary/ErrorBoundary';
 import { ChannelSelector } from '../PostComposer';
 import { convertTextToSlug } from '@youfoundation/common-app';
@@ -145,7 +145,7 @@ const ArticleComposer = ({
       window.history.replaceState(
         null,
         toPostFile.content.caption,
-        `/home/feed/edit/${targetChannel.slug}/${toPostFile.content.id}`
+        `/owner/feed/edit/${targetChannel.slug}/${toPostFile.content.id}`
       );
     }
 
@@ -188,7 +188,7 @@ const ArticleComposer = ({
 
   const PostButton = ({ className }: { className?: string }) => {
     return (
-      <Button
+      <ActionButton
         className={`m-2 md:w-auto ${
           isFullyEmpty(postFile) || !postFile.content.caption || !postFile.content.caption.length
             ? 'pointer-events-none opacity-20 grayscale'
@@ -204,7 +204,7 @@ const ArticleComposer = ({
         }}
       >
         {t('Post')}
-      </Button>
+      </ActionButton>
     );
   };
 
@@ -217,14 +217,14 @@ const ArticleComposer = ({
           return false;
         }}
       >
-        <div className="bg-background mb-5 flex flex-row flex-wrap items-center md:flex-nowrap">
+        <div className="mb-5 flex flex-row flex-wrap items-center bg-background md:flex-nowrap">
           {postFile.fileId && !isAlreadyPublished ? (
-            <Button
+            <ActionButton
               type="remove"
               icon={'trash'}
               onClick={() => {
                 doRemovePost();
-                navigate('/home/feed/articles');
+                navigate('/owner/feed/articles');
               }}
               confirmOptions={{
                 title: t('Discard draft'),
@@ -257,7 +257,7 @@ const ArticleComposer = ({
           <PostButton />
         </div>
 
-        <div className="bg-background mb-5 border-gray-200 border-opacity-60 p-2 dark:border-gray-800 md:rounded-lg md:border md:p-4">
+        <div className="mb-5 border-gray-200 border-opacity-60 bg-background p-2 dark:border-gray-800 md:rounded-lg md:border md:p-4">
           <InnerFieldEditors
             key={postFile.content.id}
             postFile={postFile}

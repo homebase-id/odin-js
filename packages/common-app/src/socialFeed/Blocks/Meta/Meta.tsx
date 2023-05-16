@@ -137,7 +137,7 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
             onClick: (e) => {
               e.stopPropagation();
               if (postFile.content.type === 'Article') {
-                navigate(`/home/feed/edit/${channel?.slug}/${postFile.content.id}`);
+                navigate(`/owner/feed/edit/${channel?.slug}/${postFile.content.id}`);
               } else {
                 setIsEditOpen(true);
               }

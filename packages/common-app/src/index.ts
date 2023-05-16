@@ -1,5 +1,3 @@
-import './app/app.css';
-
 export * from './core';
 export * from './dialogs';
 export * from './form';

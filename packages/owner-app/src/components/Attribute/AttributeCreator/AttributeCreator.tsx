@@ -6,7 +6,7 @@ import {
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import ActionButtonWithOptions from '../../ui/Buttons/ActionButtonWithOptions';
+import { ActionButtonWithOptions } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 
 const AttributeCreator = ({

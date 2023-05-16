@@ -1,9 +1,5 @@
-import ActionButton from '../../components/ui/Buttons/ActionButton';
-import { PageMeta } from '@youfoundation/common-app';
 import {
-  ApiType,
   Disconnect,
-  DotYouClient,
   Notify,
   getRandom16ByteArray,
   ScheduleOptions,
@@ -21,6 +17,8 @@ import {
 import { useRef, useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
 import Section from '../../components/ui/Sections/Section';
+import { ActionButton } from '@youfoundation/common-app';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const sender = window.location.hostname;
 const recipient = sender === 'frodo.digital' ? 'samwise.digital' : 'frodo.digital';

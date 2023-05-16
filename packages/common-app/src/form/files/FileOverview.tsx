@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { ActionButton, AttachmentFile, Triangle } from '@youfoundation/common-app';
+import { ActionButton, AttachmentFile, Triangle, Image } from '@youfoundation/common-app';
 
-import { ImageContentType } from '@youfoundation/js-lib';
+import { ImageContentType, MediaFile, TargetDrive } from '@youfoundation/js-lib';
 
 export const FileOverview = ({
   files,
@@ -104,6 +104,56 @@ export const FileOverview = ({
       );
     });
   }, [files]);
+
+  return (
+    <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>
+  );
+};
+
+export const ExistingFileOverview = ({
+  mediaFiles,
+  toRemoveFileIds,
+  targetDrive,
+  setToRemoveFileIds,
+  className,
+}: {
+  mediaFiles?: MediaFile[];
+  toRemoveFileIds: string[];
+  targetDrive: TargetDrive;
+  setToRemoveFileIds: (mediaFileIds: string[]) => void;
+  className?: string;
+}) => {
+  if (!mediaFiles) {
+    return null;
+  }
+
+  const renderedFiles = useMemo(() => {
+    return mediaFiles
+      .filter((file) => !toRemoveFileIds.some((toRemoveFileId) => toRemoveFileId === file.fileId))
+      .map((image) => {
+        return (
+          <div key={image.fileId} className="relative w-1/2 p-[2px] md:w-1/3">
+            <Image
+              fileId={image.fileId}
+              targetDrive={targetDrive}
+              className="aspect-square h-auto w-full"
+              fit="cover"
+            />
+            <ActionButton
+              className="absolute bottom-3 right-3"
+              icon="trash"
+              type="remove"
+              size="square"
+              onClick={(e) => {
+                e.preventDefault();
+                setToRemoveFileIds([...toRemoveFileIds, image.fileId]);
+                return false;
+              }}
+            />
+          </div>
+        );
+      });
+  }, [mediaFiles, toRemoveFileIds]);
 
   return (
     <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>

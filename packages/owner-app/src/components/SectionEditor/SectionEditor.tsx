@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
 import useProfileSections from '../../hooks/profiles/useProfileSections';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import Section from '../ui/Sections/Section';

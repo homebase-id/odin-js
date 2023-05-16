@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { ChannelItem, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const ChannelsPage = () => {
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
@@ -28,7 +28,7 @@ const ChannelsPage = () => {
               <div className="p-2" key={'new'}>
                 <div
                   onClick={() => setIsAddNew(true)}
-                  className="bg-background flex cursor-pointer flex-row items-center rounded-md border border-slate-100 px-4 py-4 dark:border-slate-800"
+                  className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
                 >
                   <Plus className="mr-2 h-4 w-4" /> {t('Add new')}
                 </div>

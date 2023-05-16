@@ -3,9 +3,8 @@ import { t } from '@youfoundation/common-app';
 import useApp from '../../../hooks/apps/useApp';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Grid } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -22,6 +21,7 @@ import { Refresh } from '@youfoundation/common-app';
 import CirclePermissionSelectorDialog from '../../../components/Dialog/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import useDrives from '../../../hooks/drives/useDrives';
 import { stringGuidsEqual } from '@youfoundation/js-lib';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const AppDetails = () => {
   const { appKey } = useParams();

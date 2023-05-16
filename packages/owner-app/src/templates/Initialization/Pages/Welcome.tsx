@@ -1,4 +1,4 @@
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const Welcome = ({

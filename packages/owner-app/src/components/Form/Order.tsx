@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ActionButton from '../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { moveElementInArray } from '../../templates/DemoData/helpers';
 
 const Order = ({

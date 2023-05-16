@@ -7,25 +7,25 @@ import useContact from '../../../hooks/contacts/useContact';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
 import CircleMembershipDialog from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
 import IncomingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import { Persons } from '@youfoundation/common-app';
-import { PageMeta } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
-import ActionGroup from '../../../components/ui/Buttons/ActionGroup';
+import { ActionGroup } from '@youfoundation/common-app';
 import { House } from '@youfoundation/common-app';
 import { Block } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import useApps from '../../../hooks/apps/useApps';
 import { AccessGrant, ConnectionInfo, DriveGrant, stringGuidsEqual } from '@youfoundation/js-lib';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const ConnectionDetails = () => {
   const { odinId } = useParams();
