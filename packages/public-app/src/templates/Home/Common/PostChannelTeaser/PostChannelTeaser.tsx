@@ -6,7 +6,7 @@ import { ChannelDefinitionVm, useBlogPosts } from '@youfoundation/common-app';
 import { Arrow, Image, Video } from '@youfoundation/common-app';
 
 import { t } from '@youfoundation/common-app';
-import ActionLink from '../../../../components/ui/Buttons/ActionLink';
+import { ActionLink } from '@youfoundation/common-app';
 
 import './PostChannelTeaser.css';
 

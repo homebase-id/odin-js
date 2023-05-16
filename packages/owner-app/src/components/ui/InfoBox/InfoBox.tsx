@@ -1,6 +1,5 @@
 import { ReactNode, useState } from 'react';
-import InfoDialog from '../../Dialog/InfoDialog/InfoDialog';
-import { Question } from '@youfoundation/common-app';
+import { InfoDialog, Question } from '@youfoundation/common-app';
 
 const InfoBox = ({
   title,
@@ -27,6 +26,7 @@ const InfoBox = ({
       <InfoDialog
         isOpen={isOpen}
         onCancel={() => setIsOpen(false)}
+        onConfirm={() => setIsOpen(false)}
         title={title}
         children={children}
       />

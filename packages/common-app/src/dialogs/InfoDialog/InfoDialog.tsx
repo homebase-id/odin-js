@@ -1,11 +1,8 @@
 import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
-import { DialogWrapper, Question } from '@youfoundation/common-app';
+import { t, usePortal, DialogWrapper, Question, ActionButton } from '@youfoundation/common-app';
 
-const InfoDialog = ({
+export const InfoDialog = ({
   title,
   children,
   confirmText,
@@ -51,5 +48,3 @@ const InfoDialog = ({
 
   return createPortal(dialog, target);
 };
-
-export default InfoDialog;

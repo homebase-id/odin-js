@@ -151,7 +151,7 @@ const LocalLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
           {t('login')}
         </button>
       </form>
-      <p className="my-3 text-center">or</p>
+      <p className="my-3 text-center">{t('or')}</p>
       <button
         onClick={doRegister}
         className="block w-full rounded border-0 bg-button px-4 py-2 text-white hover:bg-indigo-600 focus:outline-none "

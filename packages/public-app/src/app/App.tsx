@@ -20,8 +20,6 @@ import Footer from '../components/ui/Layout/Footer/Footer';
 
 import { t, useSiteData } from '@youfoundation/common-app';
 
-const RootRoute = lazy(() => import('./RootRoute'));
-
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const Home = lazy(() => import('../templates/Home/Home'));
 const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview'));
