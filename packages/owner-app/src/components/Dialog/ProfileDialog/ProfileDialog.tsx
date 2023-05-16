@@ -1,7 +1,7 @@
 import { ProfileDefinition } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -88,7 +88,7 @@ const ProfileDialog = ({
           </div>
 
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" state={saveProfileDefinitionStatus} icon={'send'}>
+            <ActionButton className="m-2" state={saveProfileDefinitionStatus} icon={Arrow}>
               {confirmText || t('Add Profile')}
             </ActionButton>
             <ActionButton className="m-2" type="secondary" onClick={onCancel}>

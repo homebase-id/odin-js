@@ -1,7 +1,7 @@
 import { DriveDefinition } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ActionButtonState, t } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -125,7 +125,7 @@ const DriveAppAccessDialog = ({
             </div>
           ) : null}
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" icon={'send'} state={saveState}>
+            <ActionButton className="m-2" icon={Arrow} state={saveState}>
               {confirmText || t('Save')}
             </ActionButton>
             <ActionButton className="m-2" type="secondary" onClick={onCancel}>

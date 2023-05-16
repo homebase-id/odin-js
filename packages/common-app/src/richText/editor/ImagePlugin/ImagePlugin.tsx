@@ -13,7 +13,7 @@ import { ReactEditor } from 'slate-react';
 import { ToolbarButton, ToolbarButtonProps } from '@udecode/plate-ui-toolbar';
 import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t, useImage } from '@youfoundation/common-app';
+import { Pencil, Trash, t, useImage } from '@youfoundation/common-app';
 import { Image } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -110,14 +110,14 @@ export const ImageElementBlock = <V extends Value = Value>(
             <ActionButton
               onClick={() => setIsActive(true)}
               type="secondary"
-              icon="edit"
+              icon={Pencil}
               size="square"
               className="absolute right-3 top-3 z-10 rounded-md bg-white"
             />
             <ActionButton
               onClick={doRemove}
               type="remove"
-              icon="trash"
+              icon={Trash}
               size="square"
               className="absolute bottom-3 right-3 z-10 rounded-md"
             />

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { Input } from '@youfoundation/common-app';
+import { Arrow, Input, Plus } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import InfoBox from '../../../components/ui/InfoBox/InfoBox';
@@ -146,7 +146,7 @@ const Socials = ({
             />
           </div>
         </div>
-        <ActionButton icon="send" className="hidden">
+        <ActionButton icon={Arrow} className="hidden">
           {t('Next')}
         </ActionButton>
       </form>
@@ -221,7 +221,7 @@ const Socials = ({
               />
             </div>
             <div className="flex px-2">
-              <ActionButton type="secondary" icon="plus" className="mt-auto h-[2.6rem]">
+              <ActionButton type="secondary" icon={Plus} className="mt-auto h-[2.6rem]">
                 {t('Add')}
               </ActionButton>
             </div>
@@ -231,7 +231,7 @@ const Socials = ({
 
       <div className="mt-10 flex flex-row-reverse">
         <ActionButton
-          icon="send"
+          icon={Arrow}
           onClick={() => {
             setValidity(true);
             onNext();

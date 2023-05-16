@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { usePortal, ActionButton, ActionButtonState, t } from '@youfoundation/common-app';
+import { usePortal, ActionButton, ActionButtonState, t, Arrow } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import AppPermissionView from '../../PermissionViews/AppPermissionView/AppPermissionView';
@@ -158,7 +158,7 @@ const CircleAppInteractionDialog = ({
           </div>
 
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" state={updateState} icon={'send'}>
+            <ActionButton className="m-2" state={updateState} icon={Arrow}>
               {confirmText || t('Update')}
             </ActionButton>
             <ActionButton

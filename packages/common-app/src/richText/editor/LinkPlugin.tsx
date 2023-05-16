@@ -11,7 +11,7 @@ import {
 } from '@udecode/plate-core';
 import { ToolbarButton, ToolbarButtonProps } from '@udecode/plate-ui-toolbar';
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { Trash, t } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { ReactEditor } from 'slate-react';
@@ -103,7 +103,7 @@ export const LinkElementBlock = <V extends Value = Value>(
         <ActionButton
           onClick={() => removeNodes(editor, { at: path })}
           type="remove"
-          icon="trash"
+          icon={Trash}
           size="square"
           className="rounded-l-none rounded-r-md"
         />

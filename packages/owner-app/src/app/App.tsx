@@ -51,7 +51,6 @@ const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDe
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
-const UiDemo = lazy(() => import('../templates/DemoData/UiDemo'));
 const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
 const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
@@ -166,7 +165,6 @@ function App() {
             <Route path="settings" element={<Settings />}></Route>
 
             <Route path="demo-data" element={<DemoData />}></Route>
-            <Route path="ui-demo" element={<UiDemo />}></Route>
             <Route path="socket-demo" element={<SocketDemo />}></Route>
 
             {/* Feed: */}

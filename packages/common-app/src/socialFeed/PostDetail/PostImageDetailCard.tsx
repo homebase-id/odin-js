@@ -15,6 +15,9 @@ import {
   PostMeta,
   PostInteracts,
   Image,
+  Times,
+  ArrowLeft,
+  Arrow,
 } from '../../..';
 
 export const PostImageDetailCard = ({
@@ -128,14 +131,14 @@ export const PostImageDetailCard = ({
               )}
             </div>
             <ActionButton
-              icon="times"
+              icon={Times}
               onClick={doClose}
               className="fixed left-2 top-2 rounded-full p-3 lg:absolute"
               size="square"
             />
             {currIndex !== 0 ? (
               <ActionButton
-                icon="left"
+                icon={ArrowLeft}
                 onClick={() => doSlide(-1)}
                 className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
                 size="square"
@@ -143,7 +146,7 @@ export const PostImageDetailCard = ({
             ) : null}
             {mediaFileIds && currIndex !== mediaFileIds.length - 1 ? (
               <ActionButton
-                icon="right"
+                icon={Arrow}
                 onClick={() => doSlide(1)}
                 className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
                 size="square"

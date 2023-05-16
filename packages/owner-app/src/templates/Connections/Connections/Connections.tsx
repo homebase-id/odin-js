@@ -1,4 +1,4 @@
-import { ActionButton } from '@youfoundation/common-app';
+import { ActionButton, Plus } from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
@@ -27,7 +27,7 @@ const Connections = () => {
           title={'Contacts'}
           actions={
             <>
-              <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={'plus'}>
+              <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={Plus}>
                 {t('Send Request')}
               </ActionButton>
             </>

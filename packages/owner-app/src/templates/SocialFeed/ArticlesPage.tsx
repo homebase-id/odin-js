@@ -4,6 +4,7 @@ import {
   ActionLink,
   Article,
   LoadingParagraph,
+  Plus,
   useBlogPostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
@@ -66,7 +67,7 @@ const DraftsView = () => {
           <ActionLink
             className="m-2 cursor-pointer"
             onClick={() => (window.location.href = '/owner/feed/new')}
-            icon="plus"
+            icon={Plus}
           >
             {t('New Draft')}
           </ActionLink>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Textarea, t } from '@youfoundation/common-app';
+import { Arrow, Textarea, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
@@ -139,7 +139,7 @@ const OutgoingConnectionDialog = ({
                 }}
               />
               <div className="-m-2 flex flex-row-reverse py-3">
-                <ActionButton className="m-2" icon={'send'}>
+                <ActionButton className="m-2" icon={Arrow}>
                   {t('Continue')}
                 </ActionButton>
                 <ActionButton className="m-2" type="secondary" onClick={onCancel}>
@@ -188,7 +188,7 @@ const OutgoingConnectionDialog = ({
               </div>
 
               <div className="-m-2 flex flex-row-reverse py-3">
-                <ActionButton className="m-2" state={sendConnectionRequestStatus} icon={'send'}>
+                <ActionButton className="m-2" state={sendConnectionRequestStatus} icon={Arrow}>
                   {t('Send')}
                 </ActionButton>
                 <ActionButton

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Input } from '@youfoundation/common-app';
+import { Arrow, Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Person } from '@youfoundation/common-app';
@@ -126,7 +126,7 @@ const Profile = ({
         </div>
       </div>
       <div className="mt-auto flex flex-row-reverse">
-        <ActionButton icon="send">{t('Next')}</ActionButton>
+        <ActionButton icon={Arrow}>{t('Next')}</ActionButton>
       </div>
     </form>
   );

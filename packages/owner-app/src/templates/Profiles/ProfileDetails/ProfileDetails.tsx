@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import useAttributes from '../../../hooks/profiles/useAttributes';
-import { ActionButton, ActionGroup, useProfiles } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, Pencil, useProfiles } from '@youfoundation/common-app';
 
 import AttributeCreator from '../../../components/Attribute/AttributeCreator/AttributeCreator';
 import Section from '../../../components/ui/Sections/Section';
@@ -84,7 +84,7 @@ const ProfileDetails = () => {
         title={profileDef.name}
         actions={
           <>
-            <ActionButton onClick={() => setIsOpenEdit(true)} icon="edit">
+            <ActionButton onClick={() => setIsOpenEdit(true)} icon={Pencil}>
               {t('Edit Profile')}
             </ActionButton>
             <ActionGroup

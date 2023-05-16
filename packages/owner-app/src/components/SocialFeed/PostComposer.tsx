@@ -8,6 +8,7 @@ import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
   ActionButton,
+  Arrow,
   AttachmentFile,
   ChannelsDialog,
   FileOverview,
@@ -189,7 +190,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
                 ? 'pointer-events-none animate-pulse'
                 : ''
             }`}
-            icon={'send'}
+            icon={Arrow}
           >
             {t('Post')}
           </ActionButton>

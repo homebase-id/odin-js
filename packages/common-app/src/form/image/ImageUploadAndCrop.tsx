@@ -1,6 +1,6 @@
 import { fromBlob, ImageContentType } from '@youfoundation/js-lib';
 import { useState, useMemo } from 'react';
-import { t, Label, ActionButton } from '@youfoundation/common-app';
+import { t, Label, ActionButton, Save } from '@youfoundation/common-app';
 import { Crop, ImageCropper, Trash } from '@youfoundation/common-app';
 
 interface ImageUploadAndCropProps {
@@ -98,7 +98,7 @@ const ImageUploadAndCrop = ({
               }}
             />
             <ActionButton
-              icon={'save'}
+              icon={Save}
               onClick={(e) => {
                 e.preventDefault();
                 setIsCropping(false);

@@ -11,7 +11,7 @@ import DrivePermissionView from '../../components/PermissionViews/DrivePermissio
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, ErrorNotification, mergeStates } from '@youfoundation/common-app';
+import { ActionButton, ErrorNotification, Pencil, mergeStates } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
 import useAppClients from '../../hooks/apps/useAppClients';
@@ -361,7 +361,7 @@ const AppRegistration = ({
 
       {needsCircleSelection && !circleSelection ? (
         <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-          <ActionButton onClick={() => setCircleSelection(true)} type="primary" icon="send">
+          <ActionButton onClick={() => setCircleSelection(true)} type="primary" icon={Arrow}>
             {t('Next')}
           </ActionButton>
           <ActionButton type="secondary" onClick={() => doCancel()}>
@@ -374,7 +374,7 @@ const AppRegistration = ({
             onClick={doRegisterApp}
             type="primary"
             state={mergeStates(registerAppState, registerClientState)}
-            icon="send"
+            icon={Arrow}
           >
             {t('Allow')}
           </ActionButton>
@@ -499,7 +499,7 @@ const AppClientRegistration = ({
                 ) : null}
 
                 <ActionButton
-                  icon={isEditFriendlyName ? Times : 'edit'}
+                  icon={isEditFriendlyName ? Times : Pencil}
                   onClick={() => setIsEditFriendlyName(!isEditFriendlyName)}
                   type="mute"
                 />
@@ -512,7 +512,7 @@ const AppClientRegistration = ({
         <ActionButton
           onClick={() => doRegisterClient(isEditFriendlyName ? customFriendlyName : undefined)}
           state={registerClientState}
-          icon="send"
+          icon={Arrow}
         >
           {t('Login')}
         </ActionButton>

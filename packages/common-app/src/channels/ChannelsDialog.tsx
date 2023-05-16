@@ -7,7 +7,9 @@ import {
   AclWizard,
   ActionButton,
   ChannelDefinitionVm,
+  Pencil,
   Textarea,
+  Trash,
   convertTextToSlug,
   useChannels,
 } from '@youfoundation/common-app';
@@ -220,7 +222,7 @@ export const ChannelItem = ({
                       className="m-2 mr-auto"
                       state={removeStatus}
                       type="remove"
-                      icon="trash"
+                      icon={Trash}
                       onClick={async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
@@ -249,7 +251,7 @@ export const ChannelItem = ({
             {chnl?.name} <small className="text-xs">({<AclSummary acl={newAcl} />})</small>
             <small className="text-md block">{chnl.description}</small>
           </h2>
-          <ActionButton icon="edit" size="square" className="ml-auto" type="mute"></ActionButton>
+          <ActionButton icon={Pencil} size="square" className="ml-auto" type="mute"></ActionButton>
         </div>
       )}
     </div>

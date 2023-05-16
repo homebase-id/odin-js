@@ -1,6 +1,6 @@
 import { ProfileSection } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { Trash, t } from '@youfoundation/common-app';
 import useProfileSections from '../../hooks/profiles/useProfileSections';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -74,7 +74,7 @@ const SectionEditor = ({
             </ActionButton>
             <ActionButton
               type="remove"
-              icon={'trash'}
+              icon={Trash}
               className="m-2 mr-auto"
               state={removeSectionState}
               onClick={() => removeSection({ profileId, profileSection: section })}

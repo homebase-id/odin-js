@@ -11,7 +11,7 @@ import {
   RichText,
 } from '@youfoundation/js-lib';
 import { useEffect, useMemo, useState } from 'react';
-import { RichTextEditor, getReadingTime, t } from '@youfoundation/common-app';
+import { RichTextEditor, Trash, getReadingTime, t } from '@youfoundation/common-app';
 
 import { ActionButton } from '@youfoundation/common-app';
 import { ErrorBoundary } from '../../ui/Layout/ErrorBoundary/ErrorBoundary';
@@ -194,7 +194,7 @@ const ArticleComposer = ({
             ? 'pointer-events-none opacity-20 grayscale'
             : ''
         } ${className ?? ''}`}
-        icon={'send'}
+        icon={Arrow}
         state={savePostStatus}
         onClick={() => doSave(postFile, true)}
         confirmOptions={{
@@ -221,7 +221,7 @@ const ArticleComposer = ({
           {postFile.fileId && !isAlreadyPublished ? (
             <ActionButton
               type="remove"
-              icon={'trash'}
+              icon={Trash}
               onClick={() => {
                 doRemovePost();
                 navigate('/owner/feed/articles');

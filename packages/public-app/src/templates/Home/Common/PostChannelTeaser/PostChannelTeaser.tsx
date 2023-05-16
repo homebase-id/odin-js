@@ -82,7 +82,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
         <ActionLink
           href={`/home/posts/${channel.slug ? channel.slug + '/' : ''}`}
           className="ml-auto"
-          icon="send"
+          icon={Arrow}
           type="mute"
         >
           {t('See all')}

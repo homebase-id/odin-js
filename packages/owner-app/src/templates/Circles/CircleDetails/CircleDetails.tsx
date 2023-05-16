@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { Pencil, Times, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
@@ -68,7 +68,7 @@ const CircleDetails = () => {
           <>
             <ActionButton
               type="primary"
-              icon="edit"
+              icon={Pencil}
               onClick={() => {
                 setIsOpenEdit(true);
               }}
@@ -146,7 +146,7 @@ const CircleDetails = () => {
       <SectionTitle
         title={t('Members')}
         actions={
-          <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={'edit'} />
+          <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={Pencil} />
         }
       />
       <div className="py-5">
@@ -190,7 +190,7 @@ const CircleDetails = () => {
           <ActionButton
             type="mute"
             onClick={() => setIsOpenAppInteractionDialog(true)}
-            icon={'edit'}
+            icon={Pencil}
           />
         }
       >
@@ -210,7 +210,7 @@ const CircleDetails = () => {
           </>
         }
         actions={
-          <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={'edit'} />
+          <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={Pencil} />
         }
       >
         {circle.driveGrants?.length ? (
@@ -319,7 +319,7 @@ const CircleMemberCard = ({
               buttonText: t('Remove'),
             }}
             state={revokeGrantsStatus}
-            icon="times"
+            icon={Times}
             className="rounded-full"
             size="square"
           />

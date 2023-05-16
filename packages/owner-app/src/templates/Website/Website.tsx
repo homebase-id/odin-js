@@ -1,5 +1,5 @@
 import { HomePageAttributes, HomePageConfig, toGuidId } from '@youfoundation/js-lib';
-import { ActionButton, ActionLink, t } from '@youfoundation/common-app';
+import { ActionButton, ActionLink, Save, t } from '@youfoundation/common-app';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -108,7 +108,7 @@ const PublishOptions = () => {
           <ActionButton
             onClick={() => publishFile()}
             state={publishStatus}
-            icon="save"
+            icon={Save}
             className="ml-auto"
           >
             {t('Publish static file')}

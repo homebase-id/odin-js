@@ -1,38 +1,13 @@
 import { FC, ReactNode, useState } from 'react';
 import { ConfirmDialog, TrickQuestion } from '@youfoundation/common-app';
-import {
-  IconProps,
-  Loader,
-  Check,
-  Exclamation,
-  Save,
-  Arrow,
-  Plus,
-  Trash,
-  Pencil,
-  Shield,
-  Times,
-} from '@youfoundation/common-app';
+import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app';
 
 export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
 
 export interface ActionButtonProps {
   children?: ReactNode;
   className?: string;
-  icon?:
-    | 'save'
-    | 'send'
-    | 'plus'
-    | 'trash'
-    | 'edit'
-    | 'left'
-    | 'right'
-    | 'up'
-    | 'down'
-    | 'shield'
-    | 'check'
-    | 'times'
-    | FC<IconProps>;
+  icon?: FC<IconProps>;
   type?: 'primary' | 'secondary' | 'remove' | 'mute';
   state?: ActionButtonState;
   isDisabled?: boolean;
@@ -97,33 +72,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
       return <Exclamation {...props} />;
     }
 
-    return icon === 'save' ? (
-      <Save {...props} />
-    ) : icon === 'send' ? (
-      <Arrow {...props} />
-    ) : icon === 'plus' ? (
-      <Plus {...props} />
-    ) : icon === 'trash' ? (
-      <Trash {...props} />
-    ) : icon === 'edit' ? (
-      <Pencil {...props} />
-    ) : icon === 'left' ? (
-      <Arrow {...props} className={`-rotate-180 ${props.className}`} />
-    ) : icon === 'right' ? (
-      <Arrow {...props} className={` ${props.className}`} />
-    ) : icon === 'up' ? (
-      <Arrow {...props} className={`-rotate-90 ${props.className}`} />
-    ) : icon === 'shield' ? (
-      <Shield {...props} fill="currentColor" />
-    ) : icon === 'down' ? (
-      <Arrow {...props} className={`rotate-90 ${props.className}`} />
-    ) : icon === 'check' ? (
-      <Check {...props} className={`${props.className}`} />
-    ) : icon === 'times' ? (
-      <Times {...props} className={`${props.className}`} />
-    ) : icon ? (
-      icon(props)
-    ) : null;
+    return icon ? icon(props) : null;
   };
 
   const [needsConfirmation, setNeedsConfirmation] = useState(false);

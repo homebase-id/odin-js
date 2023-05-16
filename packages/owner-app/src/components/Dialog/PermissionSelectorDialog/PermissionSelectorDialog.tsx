@@ -7,6 +7,7 @@ import {
   t,
   usePortal,
   ErrorNotification,
+  Arrow,
 } from '@youfoundation/common-app';
 import PermissionSelector from '../../Form/PermissionSelector';
 import { PermissionSet } from '@youfoundation/js-lib';
@@ -58,7 +59,7 @@ const PermissionSelectorDialog = ({
           />
 
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" icon={'send'} state={confirmState}>
+            <ActionButton className="m-2" icon={Arrow} state={confirmState}>
               {t('Save')}
             </ActionButton>
             <ActionButton className="m-2" type="secondary" onClick={onCancel}>

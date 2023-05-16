@@ -1,5 +1,10 @@
 import { FC, useRef, useState } from 'react';
-import { ActionButton, ActionButtonProps, useOutsideTrigger } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ActionButtonProps,
+  ArrowDown,
+  useOutsideTrigger,
+} from '@youfoundation/common-app';
 
 interface ActionButtonWithOptionsProps extends Omit<Omit<ActionButtonProps, 'icon'>, 'onClick'> {
   options: { value: string; name: string; group?: string }[];
@@ -49,7 +54,7 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
         {...actionButtonProps}
         className="w-full sm:w-full"
         onClick={() => setIsOpen(!isOpen)}
-        icon="down"
+        icon={ArrowDown}
       />
       {optionGroups?.length ? (
         <ul

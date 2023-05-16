@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActionButton, AttachmentFile, Triangle, Image } from '@youfoundation/common-app';
+import { ActionButton, AttachmentFile, Triangle, Image, Trash } from '@youfoundation/common-app';
 
 import { ImageContentType, MediaFile, TargetDrive } from '@youfoundation/js-lib';
 
@@ -73,7 +73,7 @@ export const FileOverview = ({
             </div>
             <ActionButton
               className="absolute bottom-3 right-3"
-              icon="trash"
+              icon={Trash}
               type="remove"
               size="square"
               onClick={() =>
@@ -93,7 +93,7 @@ export const FileOverview = ({
           />
           <ActionButton
             className="absolute bottom-3 right-3"
-            icon="trash"
+            icon={Trash}
             type="remove"
             size="square"
             onClick={() =>
@@ -141,7 +141,7 @@ export const ExistingFileOverview = ({
             />
             <ActionButton
               className="absolute bottom-3 right-3"
-              icon="trash"
+              icon={Trash}
               type="remove"
               size="square"
               onClick={(e) => {

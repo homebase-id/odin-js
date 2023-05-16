@@ -5,6 +5,7 @@ import {
   ActionButton,
   ActionButtonState,
   useActiveConnections,
+  Arrow,
 } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import ConnectionCard from '../../Connection/ConnectionCard/ConnectionCard';
@@ -135,7 +136,7 @@ const MemberLookupDialog = ({
         <div className="-m-2 flex flex-row-reverse py-3">
           <ActionButton
             className="m-2"
-            icon={'send'}
+            icon={Arrow}
             state={confirmationStatus}
             onClick={() => {
               onConfirm(toProvideMembers, toRevokeMembers);

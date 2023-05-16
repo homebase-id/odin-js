@@ -1,7 +1,7 @@
 import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ExistingFileOverview, t } from '@youfoundation/common-app';
+import { ActionButton, ExistingFileOverview, Save, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -114,7 +114,7 @@ export const EditPostDialog = ({
               className={`m-2 ${
                 postFile.content.caption?.length ? '' : 'pointer-events-none opacity-20 grayscale'
               }`}
-              icon={'send'}
+              icon={Save}
               state={savePostStatus}
             >
               {t('Save')}

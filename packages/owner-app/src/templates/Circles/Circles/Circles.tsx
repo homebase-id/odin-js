@@ -4,7 +4,7 @@ import {
   GetTargetDriveFromProfileId,
 } from '@youfoundation/js-lib';
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { Plus, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -28,7 +28,7 @@ const Circles = () => {
         icon={CirclesIcon}
         title={t('My Circles')}
         actions={
-          <ActionButton icon="plus" onClick={() => setIsOpenCreate(true)}>
+          <ActionButton icon={Plus} onClick={() => setIsOpenCreate(true)}>
             {t('Add Circle')}
           </ActionButton>
         }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, ActionLink, t } from '@youfoundation/common-app';
+import { ActionButton, ActionLink, Pencil, t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 
 import { HardDrive } from '@youfoundation/common-app';
@@ -124,7 +124,7 @@ const DriveDetails = () => {
         <Section
           title={t('Circles with access:')}
           actions={
-            <ActionButton type="mute" onClick={() => setIsCircleSelectorOpen(true)} icon={'edit'} />
+            <ActionButton type="mute" onClick={() => setIsCircleSelectorOpen(true)} icon={Pencil} />
           }
         >
           <ul className="-my-4">
@@ -156,7 +156,7 @@ const DriveDetails = () => {
         <Section
           title={t('Apps with access:')}
           actions={
-            <ActionButton type="mute" onClick={() => setIsAppSelectorOpen(true)} icon={'edit'} />
+            <ActionButton type="mute" onClick={() => setIsAppSelectorOpen(true)} icon={Pencil} />
           }
         >
           <ul className="-my-4">

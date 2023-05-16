@@ -12,6 +12,8 @@ import {
   FakeAnchor,
   PostMeta,
   Quote,
+  Plus,
+  Trash,
 } from '@youfoundation/common-app';
 import { PostFile, PostContent } from '@youfoundation/js-lib';
 import { createPortal } from 'react-dom';
@@ -70,7 +72,7 @@ const DraftsDialog = ({ isOpen, onCancel }: { isOpen: boolean; onCancel: () => v
         <ActionLink
           className="m-2 cursor-pointer"
           onClick={() => (window.location.href = '/owner/feed/new')}
-          icon="plus"
+          icon={Plus}
         >
           {t('New Draft')}
         </ActionLink>
@@ -130,7 +132,7 @@ export const DraftItem = ({
               {draft.fileId ? (
                 <div onClick={(e) => e.stopPropagation()} className="m-1 flex-shrink-0">
                   <ActionButton
-                    icon="trash"
+                    icon={Trash}
                     type="remove"
                     confirmOptions={{
                       title: `${t('Remove')} "${draft.content.caption.substring(0, 50) ?? ''}"`,

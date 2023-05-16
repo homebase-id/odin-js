@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { Check, Pencil, Times, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';
@@ -68,7 +68,7 @@ const ConnectionDetails = () => {
           onClick={() => {
             setIsEditPermissionActive(true);
           }}
-          icon="edit"
+          icon={Pencil}
         >
           {t('Edit Access')}
         </ActionButton>
@@ -206,7 +206,7 @@ const ConnectionDetails = () => {
                   onClick={() => {
                     setIsAcceptDialogOpen(true);
                   }}
-                  icon="check"
+                  icon={Check}
                 >
                   {t('View request')}...
                 </ActionButton>
@@ -220,7 +220,7 @@ const ConnectionDetails = () => {
                     checkReturnTo('Ignored');
                   }}
                   state={ignoreRequestStatus}
-                  icon="times"
+                  icon={Times}
                 >
                   {t('Ignore request')}
                 </ActionButton>
@@ -352,7 +352,7 @@ export const ConnectionPermissionViewer = ({
       {grantedCircles?.length || circlesLoading ? (
         <Section
           title={t('Member of the following circles')}
-          actions={<ActionButton onClick={openEditCircleMembership} type="mute" icon="edit" />}
+          actions={<ActionButton onClick={openEditCircleMembership} type="mute" icon={Pencil} />}
         >
           {circlesLoading ? (
             <>

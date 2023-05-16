@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
@@ -101,7 +101,7 @@ const IncomingConnectionDialog = ({
               </div>
             </div>
             <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
-              <ActionButton className="m-2" icon={'send'} onClick={() => setDoubleChecked(true)}>
+              <ActionButton className="m-2" icon={Arrow} onClick={() => setDoubleChecked(true)}>
                 {t('Continue')}
               </ActionButton>
               <ActionButton
@@ -190,7 +190,7 @@ const IncomingConnectionDialog = ({
               </div>
 
               <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
-                <ActionButton className="m-2" icon={'send'} state={acceptPendingStatus}>
+                <ActionButton className="m-2" icon={Arrow} state={acceptPendingStatus}>
                   {confirmText ?? t('Accept')}
                 </ActionButton>
                 <ActionButton

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActionButton, t } from '@youfoundation/common-app';
+import { ActionButton, Plus, t } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart } from '@youfoundation/common-app';
@@ -20,7 +20,7 @@ const Profiles = () => {
           title={t('Social Presence')}
           actions={
             <>
-              <ActionButton icon="plus" onClick={() => setIsOpenCreate(true)}>
+              <ActionButton icon={Plus} onClick={() => setIsOpenCreate(true)}>
                 {t('Add Profile')}
               </ActionButton>
             </>
