@@ -3,14 +3,13 @@ import {
   HomePageConfig,
   BuiltInProfiles,
 } from '@youfoundation/js-lib';
-import { Link } from 'react-router-dom';
 import { OwnerName, t, useSiteData, Image } from '@youfoundation/common-app';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();
 
   return (
-    <Link to={`/home`} className={`block ${className ?? ''}`}>
+    <a href={`/home`} className={`block ${className ?? ''}`}>
       <div className="relative">
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
@@ -34,7 +33,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
           <small className="block text-sm text-slate-400">{t('View your online identity')}</small>
         </p>
       </div>
-    </Link>
+    </a>
   );
 };
 

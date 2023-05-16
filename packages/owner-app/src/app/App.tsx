@@ -58,6 +58,7 @@ const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
 const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
 const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
 
+import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';

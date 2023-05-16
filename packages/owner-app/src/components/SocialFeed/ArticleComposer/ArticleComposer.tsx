@@ -139,7 +139,7 @@ const ArticleComposer = ({
     });
 
     if (isPublish) {
-      navigate(`/home/posts/${targetChannel.slug}/${toPostFile.content.slug}`);
+      window.location.href = `/home/posts/${targetChannel.slug}/${toPostFile.content.slug}`;
     } else {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(

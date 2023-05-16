@@ -135,6 +135,7 @@ export const PostImageDetailCard = ({
               onClick={doClose}
               className="fixed left-2 top-2 rounded-full p-3 lg:absolute"
               size="square"
+              type="secondary"
             />
             {currIndex !== 0 ? (
               <ActionButton
@@ -142,6 +143,7 @@ export const PostImageDetailCard = ({
                 onClick={() => doSlide(-1)}
                 className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
                 size="square"
+                type="secondary"
               />
             ) : null}
             {mediaFileIds && currIndex !== mediaFileIds.length - 1 ? (
@@ -150,6 +152,7 @@ export const PostImageDetailCard = ({
                 onClick={() => doSlide(1)}
                 className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
                 size="square"
+                type="secondary"
               />
             ) : null}
           </div>

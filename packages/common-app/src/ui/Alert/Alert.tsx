@@ -18,9 +18,7 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
 
   return (
     <section
-      className={`bg-red rounded-lg border ${isCompact ? 'p-2' : 'p-5'} ${bgClass} ${
-        className ?? ''
-      }`}
+      className={`rounded-lg border ${isCompact ? 'p-2' : 'p-5'} ${bgClass} ${className ?? ''}`}
     >
       <div className={`flex w-full flex-row flex-wrap sm:flex-nowrap`}>
         {type === 'critical' ? (
