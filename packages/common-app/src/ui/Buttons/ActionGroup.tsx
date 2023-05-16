@@ -70,7 +70,7 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
 
   return (
     <>
-      <li className="cursor-pointer bg-white text-base hover:bg-slate-200 dark:bg-black dark:text-white dark:hover:bg-slate-700">
+      <li className="text-foreground cursor-pointer bg-white text-base hover:bg-slate-200 dark:hover:bg-slate-700">
         <a
           href={href}
           onClick={
