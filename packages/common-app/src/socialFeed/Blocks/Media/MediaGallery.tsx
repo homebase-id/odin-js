@@ -6,7 +6,7 @@ import {
 } from '@youfoundation/js-lib';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Video, Image, useIntersection } from '@youfoundation/common-app';
+import { Video, Image, useIntersection, useDarkMode } from '@youfoundation/common-app';
 
 interface MediaGalleryProps {
   odinId?: string;
@@ -121,6 +121,7 @@ const MediaGalleryLoading = ({
   tinyThumbUrl: string;
   totalCount: number;
 }) => {
+  const { isDarkMode } = useDarkMode();
   const singleRow = totalCount === 2;
 
   return (
@@ -130,8 +131,14 @@ const MediaGalleryLoading = ({
         className="absolute inset-0"
         style={{
           backgroundSize: '52% 52%',
-          backgroundImage: `linear-gradient(to right, white 4px, transparent 1px)${
-            !singleRow ? ', linear-gradient(to bottom, white 4px, transparent 1px)' : ''
+          backgroundImage: `linear-gradient(to right, ${
+            isDarkMode ? 'black' : 'white'
+          } 4px, transparent 1px)${
+            !singleRow
+              ? `, linear-gradient(to bottom, ${
+                  isDarkMode ? 'black' : 'white'
+                } 4px, transparent 1px)`
+              : ''
           }`,
           backgroundPositionX: '-5%',
           backgroundPositionY: '-5%',

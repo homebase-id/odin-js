@@ -140,7 +140,9 @@ export const EmojiSummary = ({
   return reactionSummary && reactionSummary.totalCount > 0 ? (
     <>
       <span
-        className={`hover:text-button flex cursor-pointer flex-row items-center ${className ?? ''}`}
+        className={`hover:text-primary flex cursor-pointer flex-row items-center ${
+          className ?? ''
+        }`}
         onClick={() => setIsShowDetails(true)}
       >
         {reactionSummary.totalCount}
@@ -186,7 +188,7 @@ export const CommentSummary = ({
         }}
         className={`${
           onToggle
-            ? 'text-button hover:text-button cursor-pointer text-opacity-80 hover:underline'
+            ? 'text-primary hover:text-primary cursor-pointer text-opacity-80 hover:underline'
             : 'pointer-events-none'
         }`}
       >
@@ -218,7 +220,7 @@ const CommentTeaserList = ({
         ))}
       </div>
       {reactionPreview?.totalCount > 3 || allEncrypted ? (
-        <button onClick={onExpand} className="text-button text-sm font-bold text-opacity-80">
+        <button onClick={onExpand} className="text-primary text-sm font-bold text-opacity-80">
           {`${!allEncrypted ? t('View all') : t('Decrypt all')} ${reactionPreview.totalCount} ${
             reactionPreview.totalCount > 1 ? t('comments') : t('comment')
           }`}

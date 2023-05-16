@@ -82,7 +82,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
                             setIsExpanded(true);
                           }
                         }}
-                        className="text-button hover:underline"
+                        className="text-primary hover:underline"
                       >
                         {t('More')}...
                       </button>
@@ -109,7 +109,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
                         e.stopPropagation();
                         setIsExpanded(true);
                       }}
-                      className="text-button hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {t('More')}...
                     </button>

@@ -309,7 +309,10 @@ const CommentMeta = ({
         className="after:content[''] text-xs after:my-auto after:ml-1 after:block after:h-3 after:border-l after:pl-1 dark:after:border-slate-600"
       />
       {canReact ? (
-        <button className="text-button ml-1 mr-2 text-opacity-80 hover:underline" onClick={onReply}>
+        <button
+          className="text-primary ml-1 mr-2 text-opacity-80 hover:underline"
+          onClick={onReply}
+        >
           {t('Reply')}
         </button>
       ) : null}
@@ -363,7 +366,7 @@ const CommenLikeButton = ({
           />
         </div>
         <button
-          className="text-button ml-1 mr-1 text-opacity-80 hover:underline"
+          className="text-primary ml-1 mr-1 text-opacity-80 hover:underline"
           {...longPressEvent}
           onMouseEnter={() => setIsReact(true)}
           onMouseLeave={() => setIsReact(false)}

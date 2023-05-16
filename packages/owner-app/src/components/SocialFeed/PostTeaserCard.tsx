@@ -91,7 +91,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                         e.stopPropagation();
                         setIsExpanded(!isExpanded);
                       }}
-                      className="text-button hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {isExpanded ? t('Less') : <>{t('More')}...</>}
                     </button>
@@ -118,7 +118,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                         e.stopPropagation();
                         setIsExpanded(true);
                       }}
-                      className="text-button hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {t('More')}...
                     </button>

@@ -52,7 +52,7 @@ export const VolatileInput = ({
 
     const richTextData = getRichTextFromString(textContents);
     const innerHtml = richTextData?.map((part) =>
-      part.type === 'a' ? `<span class="text-button">${part?.url}</span>` : part.text
+      part.type === 'a' ? `<span class="text-primary">${part?.url}</span>` : part.text
     );
 
     if (!innerHtml || !divRef.current) return;

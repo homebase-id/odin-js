@@ -146,7 +146,7 @@ export const AnchorElement = <V extends Value = Value, N extends EElement<V> = E
   const { attributes, children, nodeProps } = props;
 
   return (
-    <span {...attributes} {...nodeProps} className="text-button">
+    <span {...attributes} {...nodeProps} className="text-primary">
       {children}
     </span>
   );
