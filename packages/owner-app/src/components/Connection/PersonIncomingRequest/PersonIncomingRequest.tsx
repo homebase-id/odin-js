@@ -1,9 +1,9 @@
 import { ReactNode, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { Check, Times, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import PersonCard from '../PersonCard/PersonCard';
@@ -47,7 +47,7 @@ const PersonIncomingRequest = ({
             setIsAcceptDialogOpen(true);
             return false;
           }}
-          icon="check"
+          icon={Check}
         >
           {t('Confirm request')}...
         </ActionButton>
@@ -66,7 +66,7 @@ const PersonIncomingRequest = ({
             buttonText: t('Ignore'),
           }}
           state={ignoreRequestStatus}
-          icon="times"
+          icon={Times}
         >
           {t('Ignore request')}
         </ActionButton>

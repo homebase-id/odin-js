@@ -1,8 +1,8 @@
 import { DotYouProfile } from '@youfoundation/js-lib';
-import { t } from '@youfoundation/common-app';
+import { Times, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import ConnectionCard from '../ConnectionCard/ConnectionCard';
 
 const PersonActive = ({
@@ -43,7 +43,7 @@ const PersonActive = ({
                 'from your connections. They will lose all existing access.'
               )}`,
             }}
-            icon="times"
+            icon={Times}
             size="square"
           />
         </div>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { t, useActiveConnections } from '@youfoundation/common-app';
 import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
-import ConnectionTeaser from './ConnectionTeaser';
-import { Pager } from '@youfoundation/common-app';
+
+import { Pager, ConnectionTeaser } from '@youfoundation/common-app';
 
 const Connections = ({ className }: { className?: string }) => {
   return (

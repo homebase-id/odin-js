@@ -1,8 +1,8 @@
-import { Times } from '@youfoundation/common-app';
+import { Arrow, Plus, Times } from '@youfoundation/common-app';
 import { useRef, useState, useEffect } from 'react';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const Circles = ({
@@ -92,7 +92,7 @@ const Circles = ({
               value={description}
             />
           </div>
-          <ActionButton type="secondary" icon="plus">
+          <ActionButton type="secondary" icon={Plus}>
             {t('Add')}
           </ActionButton>
         </div>
@@ -103,7 +103,7 @@ const Circles = ({
             setValidity(true);
             onNext();
           }}
-          icon="send"
+          icon={Arrow}
         >
           {t('Next')}
         </ActionButton>

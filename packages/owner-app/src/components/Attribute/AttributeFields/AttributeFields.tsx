@@ -16,18 +16,17 @@ import {
 } from '@youfoundation/js-lib';
 import { debounce } from 'lodash-es';
 import { useMemo, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { Textarea, t } from '@youfoundation/common-app';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import ImageSelector from '../../Form/ImageSelector';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import Order from '../../Form/Order';
 import { Select } from '@youfoundation/common-app';
-import Textarea from '../../Form/Textarea';
 import { AsYouType } from 'libphonenumber-js';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/common-app';
 import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import ThemeSelector from '../../Form/ThemeSelector';
+import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
 
 const AttributeFields = ({
   attribute,

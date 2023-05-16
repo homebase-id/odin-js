@@ -28,6 +28,10 @@ export const useDotYouClient = () => {
     }
   };
 
+  const getIdentity = () => {
+    return _app === 'owner' ? window.location.host : localStorage.getItem(STORAGE_IDENTITY_KEY);
+  };
+
   const getDotYouClient = () => {
     const apiType = getApiType();
 
@@ -44,5 +48,7 @@ export const useDotYouClient = () => {
     getApiType,
     getSharedSecret,
     getDotYouClient,
+    isOwner: _isOwner,
+    getIdentity,
   };
 };

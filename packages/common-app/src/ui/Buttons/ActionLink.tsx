@@ -20,20 +20,7 @@ type ActionLinkProps = {
   title?: string;
   size?: 'large' | 'small' | 'square';
   onClick?: (e: unknown) => void;
-  icon?:
-    | 'save'
-    | 'send'
-    | 'plus'
-    | 'trash'
-    | 'edit'
-    | 'left'
-    | 'right'
-    | 'up'
-    | 'down'
-    | 'shield'
-    | 'check'
-    | 'times'
-    | FC<IconProps>;
+  icon?: FC<IconProps>;
   download?: string;
   href?: string;
 };
@@ -50,33 +37,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
   href,
 }) => {
   const Icon = (props: { className: string }) => {
-    return icon === 'save' ? (
-      <Save {...props} />
-    ) : icon === 'send' ? (
-      <Arrow {...props} />
-    ) : icon === 'plus' ? (
-      <Plus {...props} />
-    ) : icon === 'trash' ? (
-      <Trash {...props} />
-    ) : icon === 'edit' ? (
-      <Pencil {...props} />
-    ) : icon === 'left' ? (
-      <Arrow {...props} className={`-rotate-180 ${props.className}`} />
-    ) : icon === 'right' ? (
-      <Arrow {...props} className={` ${props.className}`} />
-    ) : icon === 'up' ? (
-      <Arrow {...props} className={`-rotate-90 ${props.className}`} />
-    ) : icon === 'shield' ? (
-      <Shield {...props} fill="currentColor" />
-    ) : icon === 'down' ? (
-      <Arrow {...props} className={`rotate-90 ${props.className}`} />
-    ) : icon === 'check' ? (
-      <Check {...props} className={`${props.className}`} />
-    ) : icon === 'times' ? (
-      <Times {...props} className={`${props.className}`} />
-    ) : icon ? (
-      icon(props)
-    ) : null;
+    return icon ? icon(props) : null;
   };
 
   const colorClasses =

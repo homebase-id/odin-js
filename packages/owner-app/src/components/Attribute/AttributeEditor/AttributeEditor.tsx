@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { AclIcon, AclSummary, AclWizard, t } from '@youfoundation/common-app';
+import { AclIcon, AclSummary, AclWizard, SaveStatus, Times, t } from '@youfoundation/common-app';
 import useAttribute from '../../../hooks/profiles/useAttribute';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import ActionButton from '../../ui/Buttons/ActionButton';
-import SaveStatus from '../../ui/Buttons/SaveStatus';
+import { ActionButton } from '@youfoundation/common-app';
+
 import Section from '../../ui/Sections/Section';
 import AttributeFields from '../AttributeFields/AttributeFields';
-import ActionGroup from '../../ui/Buttons/ActionGroup';
+import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 
 const AttributeEditor = ({
@@ -122,14 +122,14 @@ const AttributeEditor = ({
               </>
             )}
             <ActionButton
-              icon={isAclEdit ? 'times' : Shield}
+              icon={isAclEdit ? Times : Shield}
               className="hidden sm:flex"
               type="secondary"
               onClick={() => setIsAclEdit(!isAclEdit)}
             />
             <ActionButton
               type="remove"
-              icon="trash"
+              icon={Trash}
               className={`${!attribute.fileId ? 'pointer-events-none' : ''}`}
               confirmOptions={{
                 title: t('Remove Attribute'),

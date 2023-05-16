@@ -1,8 +1,6 @@
 import { FC } from 'react';
-import { getVersion } from '@youfoundation/common-app';
+import { OwnerName, getVersion, useSiteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useSiteData from '../../../../hooks/siteData/useSiteData';
-import { OwnerName } from '../../../Post/Common/Blocks/Author/Name';
 
 import Socials from '../Socials/Socials';
 import { Logo } from '@youfoundation/common-app';

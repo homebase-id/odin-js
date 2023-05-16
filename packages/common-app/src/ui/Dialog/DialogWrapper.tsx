@@ -9,7 +9,7 @@ export const DialogWrapper = ({
   onClose,
   keepOpenOnBlur,
   size = 'large',
-  isSidePanel = false,
+  isSidePanel = true,
   isPaddingLess = false,
 }: {
   children: ReactNode;

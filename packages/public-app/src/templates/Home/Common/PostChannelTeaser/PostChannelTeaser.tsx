@@ -1,15 +1,14 @@
 import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
-import { ChannelDefinitionVm } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app';
-import Image from '../../../../components/Image/Image';
+
+import { ChannelDefinitionVm, useBlogPosts } from '@youfoundation/common-app';
+import { Arrow, Image, Video } from '@youfoundation/common-app';
+
 import { t } from '@youfoundation/common-app';
-import ActionLink from '../../../../components/ui/Buttons/ActionLink';
+import { ActionLink } from '@youfoundation/common-app';
 
 import './PostChannelTeaser.css';
-import Video from '../../../../components/Video/Video';
 
 interface PostChannelTeaserProps {
   className?: string;
@@ -83,7 +82,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
         <ActionLink
           href={`/home/posts/${channel.slug ? channel.slug + '/' : ''}`}
           className="ml-auto"
-          icon="send"
+          icon={Arrow}
           type="mute"
         >
           {t('See all')}

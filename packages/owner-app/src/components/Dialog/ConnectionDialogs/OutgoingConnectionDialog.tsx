@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Arrow, Textarea, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import YourSignature from '../../Connection/YourSignature/YourSignature';
 import { CircleSelector } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import Textarea from '../../Form/Textarea';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import useFollowingInfinite from '../../../hooks/follow/useFollowing';
@@ -140,7 +139,7 @@ const OutgoingConnectionDialog = ({
                 }}
               />
               <div className="-m-2 flex flex-row-reverse py-3">
-                <ActionButton className="m-2" icon={'send'}>
+                <ActionButton className="m-2" icon={Arrow}>
                   {t('Continue')}
                 </ActionButton>
                 <ActionButton className="m-2" type="secondary" onClick={onCancel}>
@@ -189,7 +188,7 @@ const OutgoingConnectionDialog = ({
               </div>
 
               <div className="-m-2 flex flex-row-reverse py-3">
-                <ActionButton className="m-2" state={sendConnectionRequestStatus} icon={'send'}>
+                <ActionButton className="m-2" state={sendConnectionRequestStatus} icon={Arrow}>
                   {t('Send')}
                 </ActionButton>
                 <ActionButton

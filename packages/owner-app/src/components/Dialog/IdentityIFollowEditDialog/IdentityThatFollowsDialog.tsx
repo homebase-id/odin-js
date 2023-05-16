@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
 import { usePortal, useChannels, ChannelDefinitionVm } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';

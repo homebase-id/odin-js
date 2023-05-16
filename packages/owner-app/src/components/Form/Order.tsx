@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ActionButton from '../ui/Buttons/ActionButton';
+import { ActionButton, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 import { moveElementInArray } from '../../templates/DemoData/helpers';
 
 const Order = ({
@@ -29,13 +29,13 @@ const Order = ({
         >
           <ActionButton
             className="m-0 px-1"
-            icon="up"
+            icon={ArrowUp}
             type="mute"
             onClick={() => reorder(index, -1)}
           />
           <ActionButton
             className="mr-1 px-1"
-            icon="down"
+            icon={ArrowDown}
             type="mute"
             onClick={() => reorder(index, 1)}
           />{' '}

@@ -2,9 +2,9 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../../../hooks/auth/useAuth';
 
-import { getVersion, useNotifications } from '@youfoundation/common-app';
+import { OwnerImage, getVersion, useNotifications } from '@youfoundation/common-app';
 import { MiniDarkModeToggle, useDarkMode } from '@youfoundation/common-app';
-import { OwnerImage } from '../../../Post/Common/Blocks/Author/Image';
+
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
 import {
@@ -85,7 +85,7 @@ const Sidenav = () => {
             </div>
             <div className="py-3">
               <IdentityNavItem />
-              <NavItem icon={Feed} label={'Feed'} to={'/home/feed'} end={true} />
+              <ExternalNavItem icon={Feed} label={'Feed'} href={'/owner/feed'} />
               <NotificationBell />
             </div>
 
@@ -94,8 +94,8 @@ const Sidenav = () => {
             </div>
 
             <div className="py-3">
-              <NavItem icon={Article} label={'Articles'} to={'/home/feed/articles'} />
-              <NavItem icon={Quote} label={'Channels'} to={'/home/feed/channels'} />
+              <ExternalNavItem icon={Article} label={'Articles'} href={'/owner/feed/articles'} />
+              <ExternalNavItem icon={Quote} label={'Channels'} href={'/owner/feed/channels'} />
             </div>
 
             <div className="py-3">

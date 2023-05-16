@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { Pencil, Times, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
@@ -8,11 +8,10 @@ import ConnectionCard from '../../../components/Connection/ConnectionCard/Connec
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
 import MemberLookupDialog from '../../../components/Dialog/MemberLookupDialog/MemberLookupDialog';
 import { Circles } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
-import ActionGroup from '../../../components/ui/Buttons/ActionGroup';
+import { ActionGroup } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { Block } from '@youfoundation/common-app';
@@ -20,6 +19,7 @@ import { Check } from '@youfoundation/common-app';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
 import CircleAppInteractionDialog from '../../../components/Dialog/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const CircleDetails = () => {
   const { circleKey } = useParams();
@@ -68,7 +68,7 @@ const CircleDetails = () => {
           <>
             <ActionButton
               type="primary"
-              icon="edit"
+              icon={Pencil}
               onClick={() => {
                 setIsOpenEdit(true);
               }}
@@ -146,7 +146,7 @@ const CircleDetails = () => {
       <SectionTitle
         title={t('Members')}
         actions={
-          <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={'edit'} />
+          <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={Pencil} />
         }
       />
       <div className="py-5">
@@ -190,7 +190,7 @@ const CircleDetails = () => {
           <ActionButton
             type="mute"
             onClick={() => setIsOpenAppInteractionDialog(true)}
-            icon={'edit'}
+            icon={Pencil}
           />
         }
       >
@@ -210,7 +210,7 @@ const CircleDetails = () => {
           </>
         }
         actions={
-          <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={'edit'} />
+          <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={Pencil} />
         }
       >
         {circle.driveGrants?.length ? (
@@ -319,7 +319,7 @@ const CircleMemberCard = ({
               buttonText: t('Remove'),
             }}
             state={revokeGrantsStatus}
-            icon="times"
+            icon={Times}
             className="rounded-full"
             size="square"
           />

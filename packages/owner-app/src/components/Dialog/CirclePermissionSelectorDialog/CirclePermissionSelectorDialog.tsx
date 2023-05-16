@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ActionButtonState, t } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -99,7 +99,7 @@ const CirclePermissionSelectorDialog = ({
           )}
 
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" icon={'send'} state={confirmState}>
+            <ActionButton className="m-2" icon={Arrow} state={confirmState}>
               {t('Save')}
             </ActionButton>
             <ActionButton className="m-2" type="secondary" onClick={onCancel}>

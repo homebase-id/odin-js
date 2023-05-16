@@ -3,14 +3,12 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import useAttributes from '../../../hooks/profiles/useAttributes';
-import { useProfiles } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, Pencil, useProfiles } from '@youfoundation/common-app';
 
 import AttributeCreator from '../../../components/Attribute/AttributeCreator/AttributeCreator';
 import Section from '../../../components/ui/Sections/Section';
 import { Input } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import { t } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart, Plus } from '@youfoundation/common-app';
@@ -21,8 +19,8 @@ import { LoadingParagraph } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionGroup from '../../../components/ui/Buttons/ActionGroup';
 import { Trash } from '@youfoundation/common-app';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const ProfileDetails = () => {
   const {
@@ -86,7 +84,7 @@ const ProfileDetails = () => {
         title={profileDef.name}
         actions={
           <>
-            <ActionButton onClick={() => setIsOpenEdit(true)} icon="edit">
+            <ActionButton onClick={() => setIsOpenEdit(true)} icon={Pencil}>
               {t('Edit Profile')}
             </ActionButton>
             <ActionGroup

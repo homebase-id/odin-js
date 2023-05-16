@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { ActionButton, Plus, t } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const Profiles = () => {
   const { data: profiles, isLoading } = useProfiles().fetchProfiles;
@@ -21,7 +20,7 @@ const Profiles = () => {
           title={t('Social Presence')}
           actions={
             <>
-              <ActionButton icon="plus" onClick={() => setIsOpenCreate(true)}>
+              <ActionButton icon={Plus} onClick={() => setIsOpenCreate(true)}>
                 {t('Add Profile')}
               </ActionButton>
             </>

@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Arrow, Textarea, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { circlePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
-import Textarea from '../../Form/Textarea';
+
 import { DialogWrapper } from '@youfoundation/common-app';
 import { CircleDefinition } from '@youfoundation/js-lib';
 
@@ -114,7 +114,7 @@ const CircleDialog = ({
           </div>
 
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" state={createOrUpdateStatus} icon={'send'}>
+            <ActionButton className="m-2" state={createOrUpdateStatus} icon={Arrow}>
               {confirmText || t('Add Circle')}
             </ActionButton>
             <ActionButton

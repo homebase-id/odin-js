@@ -1,12 +1,13 @@
 import { t } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
+
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { stringGuidsEqual } from '@youfoundation/js-lib';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { Arrow } from '@youfoundation/common-app';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const Apps = () => {
   const { data: registeredApps, isLoading: loadingRegisteredApps } = useApps().fetchRegistered;

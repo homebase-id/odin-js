@@ -1,22 +1,19 @@
 import { ReactNode, useRef, useState } from 'react';
 import { Link, useMatch } from 'react-router-dom';
 import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
-import ActionGroup from '../../components/ui/Buttons/ActionGroup';
-import ActionLink from '../../components/ui/Buttons/ActionLink';
-import { Block } from '@youfoundation/common-app';
+import { ActionGroup, ActionLink, Block, useIntersection } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import { t } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
 import useContact from '../../hooks/contacts/useContact';
 import useFollowerInfinite from '../../hooks/follow/useFollowers';
 import useFollowingInfinite from '../../hooks/follow/useFollowing';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
-import { useIntersection } from '../../hooks/intersection/useIntersection';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const Follow = () => {
   // const followingMatch = useMatch({ path: 'owner/follow/following' });

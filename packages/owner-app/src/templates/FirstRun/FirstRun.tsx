@@ -1,8 +1,8 @@
 import { FormEventHandler, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import useAuth from '../../hooks/auth/useAuth';
-import ActionButton from '../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
@@ -121,7 +121,7 @@ const FirstRun = () => {
                   <ActionButton
                     className="mt-10 w-full"
                     type="primary"
-                    icon="send"
+                    icon={Arrow}
                     state={state}
                     size="large"
                   >

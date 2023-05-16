@@ -9,14 +9,13 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib';
 import { useEffect, useState } from 'react';
-import { AclIcon, AclSummary, t } from '@youfoundation/common-app';
+import { AclIcon, AclSummary, ActionLink, t } from '@youfoundation/common-app';
 import useFiles from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import Image from '../Image/Image';
 import { ContactConfig } from '../../provider/contact/ContactTypes';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
-import ActionButton from '../ui/Buttons/ActionButton';
-import ActionLink from '../ui/Buttons/ActionLink';
+import { ActionButton } from '@youfoundation/common-app';
 import { Download } from '@youfoundation/common-app';
 
 const dateFormat: Intl.DateTimeFormatOptions = {

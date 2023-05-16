@@ -4,13 +4,12 @@ import PersonIncomingRequest from '../../components/Connection/PersonIncomingReq
 import AppMembershipView from '../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import InfoBox from '../../components/ui/InfoBox/InfoBox';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import Section from '../../components/ui/Sections/Section';
 import { t } from '@youfoundation/common-app';
 import useApps from '../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
 import Image from '../../components/Image/Image';
-import ActionButton from '../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Cog } from '@youfoundation/common-app';
 import {
   HomePageConfig,
@@ -22,6 +21,7 @@ import {
   MinimalProfileFields,
 } from '@youfoundation/js-lib';
 import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const About = {
   drives: (

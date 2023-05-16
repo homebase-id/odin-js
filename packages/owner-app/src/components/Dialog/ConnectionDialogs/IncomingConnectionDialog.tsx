@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PendingConnectionImage from '../../Connection/PendingConnectionImage/PendingConnectionImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
@@ -101,7 +101,7 @@ const IncomingConnectionDialog = ({
               </div>
             </div>
             <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
-              <ActionButton className="m-2" icon={'send'} onClick={() => setDoubleChecked(true)}>
+              <ActionButton className="m-2" icon={Arrow} onClick={() => setDoubleChecked(true)}>
                 {t('Continue')}
               </ActionButton>
               <ActionButton
@@ -190,7 +190,7 @@ const IncomingConnectionDialog = ({
               </div>
 
               <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
-                <ActionButton className="m-2" icon={'send'} state={acceptPendingStatus}>
+                <ActionButton className="m-2" icon={Arrow} state={acceptPendingStatus}>
                   {confirmText ?? t('Accept')}
                 </ActionButton>
                 <ActionButton

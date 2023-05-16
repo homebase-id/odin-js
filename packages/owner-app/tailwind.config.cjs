@@ -9,6 +9,10 @@ module.exports = {
         'primary-contrast': '#fff',
         secondary: '#f1f5f9',
         'secondary-contrast': '#000',
+
+        'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
       },
     },
   },

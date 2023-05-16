@@ -40,11 +40,11 @@ import {
 import { lotrRealm } from './DemoLotr';
 import useAttribute from '../../hooks/profiles/useAttribute';
 import { useChannel } from '@youfoundation/common-app';
-import PageMeta from '../../components/ui/Layout/PageMeta/PageMeta';
 import usePost from '../../hooks/posts/usePost';
 import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { convertTextToSlug } from '@youfoundation/common-app';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 let character = window.location.hostname;
 

@@ -1,11 +1,11 @@
 import { useRef } from 'react';
-import ImageUploadAndCrop from '../../../components/Form/ImageUploadAndCrop';
-import { Input } from '@youfoundation/common-app';
+import { Arrow, Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Person } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { onChangeParams, pageData } from '../Initialization';
+import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
 
 const Profile = ({
   pageData,
@@ -126,7 +126,7 @@ const Profile = ({
         </div>
       </div>
       <div className="mt-auto flex flex-row-reverse">
-        <ActionButton icon="send">{t('Next')}</ActionButton>
+        <ActionButton icon={Arrow}>{t('Next')}</ActionButton>
       </div>
     </form>
   );

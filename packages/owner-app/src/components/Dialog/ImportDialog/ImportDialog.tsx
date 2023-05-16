@@ -7,7 +7,7 @@ import useExport, { importable, isImportable } from '../../../hooks/drives/useEx
 import { usePortal } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 
 const ImportDialog = ({

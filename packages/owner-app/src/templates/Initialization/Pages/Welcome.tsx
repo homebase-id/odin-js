@@ -1,4 +1,4 @@
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton, Arrow, Shield, Trash } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const Welcome = ({
@@ -25,15 +25,15 @@ const Welcome = ({
         internet.
       </p>
       <div className="mt-5 flex flex-row-reverse">
-        <ActionButton onClick={onNext} icon="send">
+        <ActionButton onClick={onNext} icon={Arrow}>
           {t('Next')}
         </ActionButton>
-        <ActionButton onClick={onSkip} icon="shield" className="mr-auto">
+        <ActionButton onClick={onSkip} icon={Shield} className="mr-auto">
           {t('Skip')}
         </ActionButton>
         <ActionButton
           onClick={onReset}
-          icon="trash"
+          icon={Trash}
           type="secondary"
           className="mr-2"
           title="Restart"

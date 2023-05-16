@@ -3,14 +3,13 @@ import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib';
 import { useRef } from 'react';
-import { t } from '@youfoundation/common-app';
-import useBlogPostsInfinite from '../../../hooks/blog/useBlogPostsInfinite';
+import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
+
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
 import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOverview/MasonryPostOverview';
-import { useIntersection } from '../../../hooks/intersection/useIntersection';
 import { useChannel } from '@youfoundation/common-app';
-import { flattenInfinteData } from '@youfoundation/common-app';
+import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingParagraph } from '@youfoundation/common-app';

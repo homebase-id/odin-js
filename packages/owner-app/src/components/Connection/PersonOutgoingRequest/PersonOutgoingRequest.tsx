@@ -1,7 +1,7 @@
-import { t } from '@youfoundation/common-app';
+import { Times, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PersonCard from '../PersonCard/PersonCard';
 
@@ -34,7 +34,7 @@ const PersonOutgoingRequest = ({
             return false;
           }}
           state={revokeRequestStatus}
-          icon="times"
+          icon={Times}
         >
           {t('Cancel')}
         </ActionButton>

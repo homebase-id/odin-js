@@ -1,11 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { Pencil, Trash, t } from '@youfoundation/common-app';
 import useApp from '../../../hooks/apps/useApp';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import ActionButton from '../../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { Grid } from '@youfoundation/common-app';
-import PageMeta from '../../../components/ui/Layout/PageMeta/PageMeta';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../../components/PermissionViews/PermissionView/PermissionView';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -22,6 +21,7 @@ import { Refresh } from '@youfoundation/common-app';
 import CirclePermissionSelectorDialog from '../../../components/Dialog/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import useDrives from '../../../hooks/drives/useDrives';
 import { stringGuidsEqual } from '@youfoundation/js-lib';
+import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const AppDetails = () => {
   const { appKey } = useParams();
@@ -106,7 +106,7 @@ const AppDetails = () => {
                     navigate('/owner/apps');
                   }}
                   state={removeAppStatus}
-                  icon={'trash'}
+                  icon={Trash}
                   confirmOptions={{
                     title: t('Remove App'),
                     buttonText: t('Remove'),
@@ -130,7 +130,7 @@ const AppDetails = () => {
                 className="my-auto"
                 onClick={() => revokeApp({ appId: decodedAppKey })}
                 state={revokeAppStatus}
-                icon="times"
+                icon={Times}
                 confirmOptions={{
                   title: t('Revoke App'),
                   buttonText: t('Revoke'),
@@ -184,7 +184,7 @@ const AppDetails = () => {
         <Section
           title={t('Permissions')}
           actions={
-            <ActionButton type="mute" onClick={() => setIsPermissionEditOpen(true)} icon={'edit'} />
+            <ActionButton type="mute" onClick={() => setIsPermissionEditOpen(true)} icon={Pencil} />
           }
         >
           {app.grant.permissionSet?.keys?.length ? (
@@ -211,7 +211,7 @@ const AppDetails = () => {
         <Section
           title={t('Drives')}
           actions={
-            <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={'edit'} />
+            <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={Pencil} />
           }
         >
           {app.grant?.driveGrants?.length ? (
@@ -251,7 +251,7 @@ const AppDetails = () => {
         <Section
           title={t('Enabled circles for this app')}
           actions={
-            <ActionButton type="mute" onClick={() => setCircleEditState('circle')} icon={'edit'} />
+            <ActionButton type="mute" onClick={() => setCircleEditState('circle')} icon={Pencil} />
           }
         >
           {app.authorizedCircles?.length ? (
@@ -275,7 +275,7 @@ const AppDetails = () => {
         <Section
           title={t('Drives')}
           actions={
-            <ActionButton type="mute" onClick={() => setCircleEditState('drives')} icon={'edit'} />
+            <ActionButton type="mute" onClick={() => setCircleEditState('drives')} icon={Pencil} />
           }
         >
           {app.circleMemberPermissionSetGrantRequest.drives?.length ? (
@@ -304,7 +304,7 @@ const AppDetails = () => {
             <ActionButton
               type="mute"
               onClick={() => setCircleEditState('permission')}
-              icon={'edit'}
+              icon={Pencil}
             />
           }
         >
@@ -468,7 +468,7 @@ const ClientView = ({
             state={allowClientStatus}
           />
           <ActionButton
-            icon={'trash'}
+            icon={Trash}
             type="remove"
             size="square"
             className="ml-2"

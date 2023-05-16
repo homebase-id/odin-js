@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t } from '@youfoundation/common-app';
+import { t, useSocialChannels } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import ActionButton from '../../ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import useIdentityIFollow from '../../../hooks/follow/useIdentityIFollow';
-import useSocialChannels from '../../../hooks/socialFeed/socialChannels/useSocialChannels';
+
 import { Alert } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import { Quote } from '@youfoundation/common-app';

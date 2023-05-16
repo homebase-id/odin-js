@@ -85,7 +85,7 @@ const Sidenav = () => {
             </div>
             <div className="py-3">
               <IdentityNavItem />
-              <ExternalNavItem icon={Feed} label={'Feed'} href={'/home/feed'} />
+              <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
               <NotificationBell />
               {/* <NavItem icon={Grid} label={'Dashboard'} to={'/owner'} end={true} /> */}
             </div>
@@ -95,8 +95,8 @@ const Sidenav = () => {
             </div>
 
             <div className="py-3">
-              <ExternalNavItem icon={Article} label={'Articles'} href="/home/feed/articles" />
-              <ExternalNavItem icon={Quote} label={'Channels'} href="/home/feed/channels" />
+              <NavItem icon={Article} label={'Articles'} to="/owner/feed/articles" />
+              <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
             </div>
 
             <div className="py-3">

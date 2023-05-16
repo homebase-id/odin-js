@@ -1,7 +1,7 @@
 import { CircleDefinition, DriveDefinition } from '@youfoundation/js-lib';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, ActionButton, ActionButtonState, usePortal } from '@youfoundation/common-app';
+import { t, ActionButton, ActionButtonState, usePortal, Arrow } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
@@ -127,7 +127,7 @@ const DriveCircleAccessDialog = ({
             </div>
           ) : null}
           <div className="-m-2 flex flex-row-reverse py-3">
-            <ActionButton className="m-2" icon={'send'} state={saveState}>
+            <ActionButton className="m-2" icon={Arrow} state={saveState}>
               {confirmText || t('Save')}
             </ActionButton>
             <ActionButton className="m-2" type="secondary" onClick={onCancel}>

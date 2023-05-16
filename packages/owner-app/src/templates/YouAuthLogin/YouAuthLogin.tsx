@@ -1,8 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
-import ActionButton from '../../components/ui/Buttons/ActionButton';
+import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useCallback, useEffect } from 'react';
@@ -93,7 +93,7 @@ const YouAuthLogin = () => {
                   onClick={doRegisterSite}
                   type="primary"
                   className="ml-2 w-1/2 sm:w-auto"
-                  icon="send"
+                  icon={Arrow}
                 >
                   {t('Login')}
                 </ActionButton>

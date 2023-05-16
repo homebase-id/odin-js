@@ -1,17 +1,15 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent, PostFile } from '@youfoundation/js-lib';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Label } from '@youfoundation/common-app';
+import { Label, useBlogPosts, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
-import PostTeaser from '../../../../components/Post/Common/Card/PostTeaser';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useBlogPosts from '../../../../hooks/blog/useBlogPosts';
-import useBlogPostsInfinite from '../../../../hooks/blog/useBlogPostsInfinite';
 import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
+import PostTeaser from '@youfoundation/common-app/src/socialFeed/Card/PostTeaser';
 
 const PAGE_SIZE = 12;
 

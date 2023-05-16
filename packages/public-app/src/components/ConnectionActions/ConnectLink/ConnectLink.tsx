@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { ActionLink, t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
-import ActionLink from '../../ui/Buttons/ActionLink';
 import { Persons } from '@youfoundation/common-app';
 
 const ConnectLink = ({ className }: { className: string }) => {

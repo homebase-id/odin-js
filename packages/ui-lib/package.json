@@ -13,6 +13,10 @@
     ".": {
       "import": "./dist/odin-ui.js",
       "require": "./dist/odin-ui.umd.cjs"
+    },
+    "./dist/style.css": {
+      "import": "./dist/style.css",
+      "require": "./dist/style.css"
     }
   },
   "types": "./dist/odin-ui.d.ts",

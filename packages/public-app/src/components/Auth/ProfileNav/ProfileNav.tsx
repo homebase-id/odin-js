@@ -1,9 +1,8 @@
 import { FormEventHandler, useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
-import { IS_DARK_CLASSNAME, t } from '@youfoundation/common-app';
+import { ConnectionImage, IS_DARK_CLASSNAME, OwnerImage, t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
-import { ConnectionImage, OwnerImage } from '../../Post/Common/Blocks/Author/Image';
 import { Person, useOutsideTrigger } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 
@@ -152,7 +151,7 @@ const LocalLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
           {t('login')}
         </button>
       </form>
-      <p className="my-3 text-center">or</p>
+      <p className="my-3 text-center">{t('or')}</p>
       <button
         onClick={doRegister}
         className="block w-full rounded border-0 bg-button px-4 py-2 text-white hover:bg-indigo-600 focus:outline-none "
