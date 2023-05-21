@@ -1,3 +1,4 @@
+import en_short from './lang/en_short';
 /**
  * Created by hustcc on 18/5/20.
  * Contract: i@hust.cc
@@ -25,5 +26,8 @@ export const register = (locale: string, func: LocaleFunc) => {
  * @returns {*}
  */
 export const getLocale = (locale: string): LocaleFunc => {
-  return Locales[locale] || Locales['en_US'];
+  // return Locales[locale] || Locales['en_US'];
+
+  //TODO: Extend when we support more locales
+  return en_short;
 };
