@@ -13,8 +13,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { RichTextEditor, Trash, getReadingTime, t } from '@youfoundation/common-app';
 
-import { ActionButton } from '@youfoundation/common-app';
-import { ErrorBoundary } from '../../ui/Layout/ErrorBoundary/ErrorBoundary';
+import { ActionButton, ErrorBoundary } from '@youfoundation/common-app';
 import { ChannelSelector } from '../PostComposer';
 import { convertTextToSlug } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
