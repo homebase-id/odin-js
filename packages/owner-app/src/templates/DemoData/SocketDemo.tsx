@@ -21,7 +21,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const sender = window.location.hostname;
-const recipient = sender === 'frodo.digital' ? 'samwise.digital' : 'frodo.digital';
+const recipient = sender === 'frodo.dotyou.cloud' ? 'sam.dotyou.cloud' : 'frodo.dotyou.cloud';
 
 const chatDrive: TargetDrive = {
   alias: '9ff813aff2d61e2f9b9db189e72d1a11',
@@ -68,7 +68,7 @@ const SocketDemo = () => {
       transitOptions: {
         recipients: [recipient],
         schedule: ScheduleOptions.SendNowAwaitResponse,
-        useGlobalTransitId: false,
+        useGlobalTransitId: true,
         sendContents: SendContents.HeaderOnly,
       },
     };
@@ -78,6 +78,7 @@ const SocketDemo = () => {
 
     const fileMetadata: UploadFileMetadata = {
       allowDistribution: true,
+      
       appData: {
         tags: [],
         fileType: 844,

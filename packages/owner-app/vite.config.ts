@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const hostConfig = {
-  host: 'dominion.id',
+  host: 'dev.dotyou.cloud',
   port: 3001,
 };
 
@@ -14,8 +14,8 @@ export default defineConfig({
   server: {
     ...hostConfig,
     https: {
-      key: fs.readFileSync('./dominion-id.key'),
-      cert: fs.readFileSync('./dominion-id.crt'),
+      key: fs.readFileSync('./dev-dotyou-cloud.key'),
+      cert: fs.readFileSync('./dev-dotyou-cloud.crt'),
     },
     fs: {
       // Allow serving files from one level up to the project root
