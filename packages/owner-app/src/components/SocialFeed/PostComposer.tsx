@@ -25,12 +25,12 @@ import {
 import { useChannels } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
-import { ActionLink } from '@youfoundation/common-app';
 import { Article } from '@youfoundation/common-app';
 
 import { Lock } from '@youfoundation/common-app';
 
 import { ActionGroup } from '@youfoundation/common-app';
+import { Link } from 'react-router-dom';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -144,9 +144,9 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           </div>
         ) : null}
 
-        <div className="-m-2 mt-3 flex flex-row flex-wrap items-center md:flex-nowrap">
+        <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
           <div
-            className="m-2 mr-0 text-xl font-extralight leading-4 text-opacity-50"
+            className="mr-0 text-xl font-extralight leading-4 text-opacity-50"
             title="Attach a file"
           >
             <FileSelector
@@ -155,15 +155,14 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             />
           </div>
 
-          <ActionLink
+          <Link
             type="mute"
-            className={`m-2 mx-0 cursor-pointer`}
-            size="small"
-            href="/owner/feed/new"
+            className={`px-2 py-1`}
+            to="/owner/feed/new"
             title="Convert into an article"
           >
             <Article className="h-4 w-4" />
-          </ActionLink>
+          </Link>
           <ActionGroup
             options={[
               {
@@ -175,13 +174,13 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             type="mute"
           />
           <ChannelSelector
-            className="m-2 ml-auto"
+            className="ml-auto max-w-[35%] flex-shrink"
             defaultValue={BlogConfig.PublicChannel.channelId}
             onChange={(channel) => channel && setChannel(channel)}
             ref={selectRef}
           />
           <ActionButton
-            className={`m-2 w-full md:w-auto ${
+            className={`w-full md:w-auto ${
               caption?.length || files?.length
                 ? ''
                 : 'pointer-events-none hidden opacity-20 grayscale md:flex'
