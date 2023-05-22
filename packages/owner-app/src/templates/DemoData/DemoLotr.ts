@@ -5,13 +5,10 @@ import {
   samProfilePictures,
   merryProfilePictures,
   pippinProfilePictures,
-  gimliProfilePictures,
-  legolasProfilePictures,
-  aragornProfilePictures,
 } from './DemoImages';
 
 export const lotrRealm = {
-  'frodo.digital': {
+  'frodo.dotyou.cloud': {
     name: {
       id: toGuidId('default_name_attribute'),
       first: 'Frodo',
@@ -151,7 +148,7 @@ export const lotrRealm = {
       },
     ],
   },
-  'samwise.digital': {
+  'sam.dotyou.cloud': {
     name: {
       id: toGuidId('default_name_attribute'),
       first: 'Samwise',
@@ -255,7 +252,7 @@ export const lotrRealm = {
       },
     ],
   },
-  'merry.youfoundation.id': {
+  'merry.dotyou.cloud': {
     name: {
       id: toGuidId('default_name_attribute'),
       first: 'Merry',
@@ -284,7 +281,7 @@ export const lotrRealm = {
       },
     ],
   },
-  'pippin.youfoundation.id': {
+  'pippin.dotyou.cloud': {
     name: {
       id: toGuidId('default_name_attribute'),
       first: 'Pippin',
@@ -294,57 +291,6 @@ export const lotrRealm = {
       {
         id: toGuidId('default_photo_attribute'),
         image: pippinProfilePictures[0],
-        acl: {
-          requiredSecurityGroup: SecurityGroupType.Anonymous,
-        },
-        priority: 1000,
-      },
-    ],
-  },
-  'gimli.youfoundation.id': {
-    name: {
-      id: toGuidId('default_name_attribute'),
-      first: 'Gimli',
-      last: 'Son of Glóin',
-    },
-    photo: [
-      {
-        id: toGuidId('default_photo_attribute'),
-        image: gimliProfilePictures[0],
-        acl: {
-          requiredSecurityGroup: SecurityGroupType.Anonymous,
-        },
-        priority: 1000,
-      },
-    ],
-  },
-  'legolas.youfoundation.id': {
-    name: {
-      id: toGuidId('default_name_attribute'),
-      first: 'Legolas',
-      last: 'Son of Thranduil',
-    },
-    photo: [
-      {
-        id: toGuidId('default_photo_attribute'),
-        image: legolasProfilePictures[0],
-        acl: {
-          requiredSecurityGroup: SecurityGroupType.Anonymous,
-        },
-        priority: 1000,
-      },
-    ],
-  },
-  'aragorn.youfoundation.id': {
-    name: {
-      id: toGuidId('default_name_attribute'),
-      first: 'Aragorn',
-      last: 'Son of Arathorn',
-    },
-    photo: [
-      {
-        id: toGuidId('default_photo_attribute'),
-        image: aragornProfilePictures[0],
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
         },

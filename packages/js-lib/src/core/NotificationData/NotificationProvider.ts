@@ -130,7 +130,7 @@ export const Subscribe = async (
         }
       }
 
-      if (isDebug) console.debug(notification);
+      if (isDebug) console.debug(`[NotificationProvider] `, notification);
 
       const parsedNotification = ParseRawClientNotification(notification);
       handlers.map(async (handler) => await handler(parsedNotification));
@@ -152,8 +152,12 @@ export const Notify = async (command: Command | EstablishConnectionRequest) => {
 };
 
 const parseMessage = async (e: MessageEvent): Promise<RawClientNotification> => {
-  const encryptedPayload = JSON.parse(e.data);
-  const decryptedData = await decryptData(encryptedPayload.data, encryptedPayload.iv, activeSs);
+  const metaPayload = JSON.parse(e.data);
+  const encryptedPayload = JSON.parse(metaPayload.payload);
+
+  const decryptedData = metaPayload.isEncrypted
+    ? await decryptData(encryptedPayload.data, encryptedPayload.iv, activeSs)
+    : encryptedPayload;
 
   const notification: RawClientNotification = decryptedData;
 

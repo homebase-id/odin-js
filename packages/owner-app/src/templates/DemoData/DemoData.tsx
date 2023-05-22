@@ -49,8 +49,8 @@ import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 let character = window.location.hostname;
 
 // Replace demo hosts to locals for the lotrRealm
-character = character === 'frodobaggins.me' ? 'frodo.digital' : character;
-character = character === 'samwisegamgee.me' ? 'samwise.digital' : character;
+character = character === 'frodobaggins.me' ? 'frodo.dotyou.cloud' : character;
+character = character === 'samwisegamgee.me' ? 'sam.dotyou.cloud' : character;
 
 const realmData = lotrRealm[character as keyof typeof lotrRealm];
 
