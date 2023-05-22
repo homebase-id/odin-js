@@ -2,7 +2,12 @@ import { DotYouClient } from '../DotYouClient';
 
 import { TransitInstructionSet } from '../../transit/TransitData/TransitTypes';
 import { KeyHeader, ThumbnailFile } from './DriveTypes';
-import { UploadFileMetadata, UploadInstructionSet, SystemFileType } from './DriveUploadTypes';
+import {
+  UploadFileMetadata,
+  UploadInstructionSet,
+  SystemFileType,
+  AppendInstructionSet,
+} from './DriveUploadTypes';
 import { encryptWithKeyheader, encryptWithSharedSecret, encryptKeyHeader } from './SecurityHelpers';
 import {
   jsonStringify64,
@@ -83,15 +88,15 @@ export const buildDescriptor = async (
 };
 
 export const buildFormData = async (
-  instructionSet: UploadInstructionSet | TransitInstructionSet,
-  encryptedDescriptor: Uint8Array,
+  instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
+  encryptedDescriptor: Uint8Array | undefined,
   payload: Uint8Array | File | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined
 ) => {
   const data = new FormData();
   data.append('instructions', toBlob(instructionSet));
-  data.append('metaData', new Blob([encryptedDescriptor]));
+  if (encryptedDescriptor) data.append('metaData', new Blob([encryptedDescriptor]));
 
   if (!payload) {
     data.append('payload', new Blob([]));
@@ -128,6 +133,38 @@ export const pureUpload = async (
 ) => {
   const client = dotYouClient.createAxiosClient(true);
   const url = '/drive/files/upload';
+
+  const config = {
+    headers: {
+      'content-type': 'multipart/form-data',
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
+  return client
+    .post(url, data, config)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      if (error.response.data.errorCode === 4160 && onVersionConflict) {
+        onVersionConflict();
+        return;
+      }
+
+      console.error('[DotYouCore-js:pureUpload]', error);
+      throw error;
+    });
+};
+
+export const pureAppend = async (
+  dotYouClient: DotYouClient,
+  data: FormData,
+  systemFileType?: SystemFileType,
+  onVersionConflict?: () => void
+) => {
+  const client = dotYouClient.createAxiosClient(true);
+  const url = '/drive/files/attachments/upload';
 
   const config = {
     headers: {

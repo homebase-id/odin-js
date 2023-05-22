@@ -16,6 +16,7 @@ import {
 } from './DriveTypes';
 import { AxiosRequestConfig } from 'axios';
 import {
+  AppendInstructionSet,
   SystemFileType,
   UploadFileMetadata,
   UploadInstructionSet,
@@ -28,6 +29,7 @@ import {
   buildFormData,
   pureUpload,
   GenerateKeyHeader,
+  pureAppend,
 } from './UploadHelpers';
 import {
   decryptKeyHeader,
@@ -498,6 +500,85 @@ export const deleteFile = async (
     });
 };
 
+export const deleteThumbnail = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  width: number,
+  height: number,
+  systemFileType?: SystemFileType
+) => {
+  const client = dotYouClient.createAxiosClient();
+
+  const request = {
+    file: {
+      targetDrive: targetDrive,
+      fileId: fileId,
+    },
+    width,
+    height,
+  };
+
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
+  client
+    .post('/attachments/deletethumbnail', request, config)
+    .then((response) => {
+      if (response.status === 200) {
+        return true;
+      }
+
+      return false;
+    })
+    .catch((error) => {
+      console.error('[DotYouCore-js:deleteFile]', error);
+      throw error;
+    });
+};
+
+export const deletePayload = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  width: number,
+  height: number,
+  systemFileType?: SystemFileType
+) => {
+  const client = dotYouClient.createAxiosClient();
+
+  const request = {
+    key: '', // TODO: Add key (reference to a key for multiple payloads in a single file)
+    file: {
+      targetDrive: targetDrive,
+      fileId: fileId,
+    },
+  };
+
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  };
+
+  client
+    .post('/attachments/deletepayload', request, config)
+    .then((response) => {
+      if (response.status === 200) {
+        return true;
+      }
+
+      return false;
+    })
+    .catch((error) => {
+      console.error('[DotYouCore-js:deleteFile]', error);
+      throw error;
+    });
+};
+
 // This is a temporary method, and should only be used as long as there is no way to fully remove all files on a drive in one go
 export const purgeAllFiles = async (
   dotYouClient: DotYouClient,
@@ -695,6 +776,36 @@ export const uploadHeader = async (
 
   // Upload
   return await pureUpload(dotYouClient, data, instructions.systemFileType);
+};
+
+export const appendDataToFile = async (
+  dotYouClient: DotYouClient,
+  instructions: AppendInstructionSet,
+  payload: Uint8Array | File | undefined,
+  thumbnails: ThumbnailFile[] | undefined,
+  keyHeader: KeyHeader,
+  onVersionConflict?: () => void
+) => {
+  const strippedInstructions: AppendInstructionSet = {
+    targetFile: instructions.targetFile,
+    thumbnails: instructions.thumbnails,
+  };
+
+  const processedPayload = !payload
+    ? undefined
+    : keyHeader
+    ? await encryptWithKeyheader(payload, keyHeader)
+    : payload;
+
+  const data = await buildFormData(
+    strippedInstructions,
+    undefined,
+    processedPayload,
+    thumbnails,
+    keyHeader
+  );
+
+  return await pureAppend(dotYouClient, data, instructions.systemFileType, onVersionConflict);
 };
 
 /// Helper methods:

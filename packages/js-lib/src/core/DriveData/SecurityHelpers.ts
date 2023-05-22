@@ -61,7 +61,7 @@ export const encryptWithSharedSecret = async (
   const json = jsonStringify64(o);
 
   if (!ss) {
-    throw new Error('attempting to decrypt but missing the shared secret');
+    throw new Error('attempting to encrypt but missing the shared secret');
   }
 
   const content = new TextEncoder().encode(json);

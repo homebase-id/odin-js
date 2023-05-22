@@ -17,6 +17,15 @@ export interface UploadInstructionSet {
   systemFileType?: SystemFileType;
 }
 
+export interface AppendInstructionSet {
+  targetFile: {
+    fileId: string;
+    targetDrive: TargetDrive;
+  };
+  thumbnails?: ThumbSize[];
+  systemFileType?: SystemFileType;
+}
+
 export interface StorageOptions {
   drive: TargetDrive;
   overwriteFileId?: string | null;
