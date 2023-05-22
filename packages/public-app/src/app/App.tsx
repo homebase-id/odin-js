@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
-import { ErrorBoundary } from '../components/ui/Layout/ErrorBoundary/ErrorBoundary';
+import { ErrorBoundary } from '@youfoundation/common-app';
 import useAuth from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';

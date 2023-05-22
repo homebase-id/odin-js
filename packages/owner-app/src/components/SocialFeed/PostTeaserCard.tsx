@@ -12,6 +12,7 @@ import {
   useSocialChannel,
   ellipsisAtMaxChar,
   t,
+  ErrorBoundary,
 } from '@youfoundation/common-app';
 
 interface PostTeaserCardProps {
@@ -38,106 +39,108 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
   return (
     <div className={`w-full rounded-lg ${className ?? ''}`}>
-      <FakeAnchor
-        href={clickable ? postPath : undefined}
-        target="__blank"
-        rel="nofollow noreferrer"
-        preventScrollReset={true}
-        className={`relative flex h-full flex-col rounded-lg border-gray-200 border-opacity-60 transition-colors ${
-          clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
-        } dark:border-gray-800 lg:border`}
-      >
-        <div className="flex flex-row">
-          <div className="flex-shrink-0 py-4 pl-4">
-            <AuthorImage
-              odinId={odinId}
-              className="h-[3rem] w-[3rem] rounded-full sm:h-[5rem] sm:w-[5rem]"
-            />
-          </div>
-          <div className="flex flex-grow flex-col px-4 py-3">
-            <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
-              <h2>
-                <AuthorName odinId={odinId} />
-              </h2>
-              <span className="hidden px-2 leading-4 md:block">·</span>
-              {channel && post ? (
-                <PostMeta postFile={postFile} channel={channel} odinId={odinId} />
-              ) : null}
+      <ErrorBoundary>
+        <FakeAnchor
+          href={clickable ? postPath : undefined}
+          target="__blank"
+          rel="nofollow noreferrer"
+          preventScrollReset={true}
+          className={`relative flex h-full flex-col rounded-lg border-gray-200 border-opacity-60 transition-colors ${
+            clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
+          } dark:border-gray-800 lg:border`}
+        >
+          <div className="flex flex-row">
+            <div className="flex-shrink-0 py-4 pl-4">
+              <AuthorImage
+                odinId={odinId}
+                className="h-[3rem] w-[3rem] rounded-full sm:h-[5rem] sm:w-[5rem]"
+              />
             </div>
+            <div className="flex flex-grow flex-col px-4 py-3">
+              <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
+                <h2>
+                  <AuthorName odinId={odinId} />
+                </h2>
+                <span className="hidden px-2 leading-4 md:block">·</span>
+                {channel && post ? (
+                  <PostMeta postFile={postFile} channel={channel} odinId={odinId} />
+                ) : null}
+              </div>
 
-            {/* Type specific content */}
-            {post.type === 'Article' ? (
-              <>
-                <h1 className={`text-foreground text-opacity-80 ${isExpanded ? 'text-2xl' : ''}`}>
-                  {post.caption}
-                </h1>
-                <div className="leading-relaxed text-foreground text-opacity-70">
-                  {isExpanded ? (
-                    <div className="rich-text-content mb-5 leading-relaxed">
+              {/* Type specific content */}
+              {post.type === 'Article' ? (
+                <>
+                  <h1 className={`text-foreground text-opacity-80 ${isExpanded ? 'text-2xl' : ''}`}>
+                    {post.caption}
+                  </h1>
+                  <div className="leading-relaxed text-foreground text-opacity-70">
+                    {isExpanded ? (
+                      <div className="rich-text-content mb-5 leading-relaxed">
+                        <RichTextRenderer
+                          body={(post as Article)?.body}
+                          imageDrive={getChannelDrive(post.channelId)}
+                          odinId={odinId}
+                        />
+                      </div>
+                    ) : (
+                      ellipsisAtMaxChar((post as Article).abstract, 140)
+                    )}
+
+                    <>
+                      {' '}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsExpanded(!isExpanded);
+                        }}
+                        className="text-primary hover:underline"
+                      >
+                        {isExpanded ? t('Less') : <>{t('More')}...</>}
+                      </button>
+                    </>
+                  </div>
+                </>
+              ) : (
+                <h1 className="text-foreground text-opacity-70">
+                  {isExpanded || post.caption.length <= 140 ? (
+                    post.captionAsRichText ? (
                       <RichTextRenderer
-                        body={(post as Article)?.body}
-                        imageDrive={getChannelDrive(post.channelId)}
+                        body={post.captionAsRichText}
                         odinId={odinId}
+                        options={{ linksAlwaysBlank: true }}
                       />
-                    </div>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{post.caption}</span>
+                    )
                   ) : (
-                    ellipsisAtMaxChar((post as Article).abstract, 140)
+                    <>
+                      {ellipsisAtMaxChar(post.caption, 140)}{' '}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsExpanded(true);
+                        }}
+                        className="text-primary hover:underline"
+                      >
+                        {t('More')}...
+                      </button>
+                    </>
                   )}
-
-                  <>
-                    {' '}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsExpanded(!isExpanded);
-                      }}
-                      className="text-primary hover:underline"
-                    >
-                      {isExpanded ? t('Less') : <>{t('More')}...</>}
-                    </button>
-                  </>
-                </div>
-              </>
-            ) : (
-              <h1 className="text-foreground text-opacity-70">
-                {isExpanded || post.caption.length <= 140 ? (
-                  post.captionAsRichText ? (
-                    <RichTextRenderer
-                      body={post.captionAsRichText}
-                      odinId={odinId}
-                      options={{ linksAlwaysBlank: true }}
-                    />
-                  ) : (
-                    <span className="whitespace-pre-wrap">{post.caption}</span>
-                  )
-                ) : (
-                  <>
-                    {ellipsisAtMaxChar(post.caption, 140)}{' '}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsExpanded(true);
-                      }}
-                      className="text-primary hover:underline"
-                    >
-                      {t('More')}...
-                    </button>
-                  </>
-                )}
-              </h1>
-            )}
+                </h1>
+              )}
+            </div>
           </div>
-        </div>
-        <PostMedia odinId={odinId} postFile={postFile} postPath={postPath} showFallback={false} />
-        <PostInteracts
-          authorOdinId={odinId || window.location.hostname}
-          postFile={postFile}
-          className="px-4"
-          showSummary={showSummary}
-          isAuthenticated={true}
-          isOwner={true}
-        />
-      </FakeAnchor>
+          <PostMedia odinId={odinId} postFile={postFile} postPath={postPath} showFallback={false} />
+          <PostInteracts
+            authorOdinId={odinId || window.location.hostname}
+            postFile={postFile}
+            className="px-4"
+            showSummary={showSummary}
+            isAuthenticated={true}
+            isOwner={true}
+          />
+        </FakeAnchor>
+      </ErrorBoundary>
     </div>
   );
 };
