@@ -52,7 +52,7 @@ export const GetProfileCard = async (
         .then((response) => {
           return {
             ...response.data,
-            image: `https://${dotYouClient.getIdentity()}/pub/image`,
+            image: `https://api.${dotYouClient.getIdentity()}/pub/image`,
           };
         });
     };
