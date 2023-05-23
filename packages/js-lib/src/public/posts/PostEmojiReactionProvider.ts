@@ -21,7 +21,7 @@ export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
   emoji: ReactionVm
 ): Promise<string> => {
-  const isLocal = emoji.context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = emoji.context.authorOdinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -56,7 +56,7 @@ export const removeEmojiReaction = async (
   dotYouClient: DotYouClient,
   emoji: ReactionVm
 ): Promise<string> => {
-  const isLocal = emoji.context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = emoji.context.authorOdinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -92,7 +92,7 @@ export const getReactionSummary = async (
   dotYouClient: DotYouClient,
   context: ReactionContext
 ): Promise<EmojiReactionSummary> => {
-  const isLocal = context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
 
   const client = dotYouClient.createAxiosClient();
 
@@ -167,7 +167,7 @@ export const getReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<{ reactions: ReactionFile[]; cursor: string } | undefined> => {
-  const isLocal = context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
@@ -222,7 +222,7 @@ export const getMyReactions = async (
   pageSize = 15,
   cursor?: string
 ): Promise<string[] | undefined> => {
-  const isLocal = context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {

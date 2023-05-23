@@ -11,7 +11,7 @@ export enum ApiType {
 export interface BaseProviderOptions {
   api: ApiType;
   sharedSecret?: Uint8Array;
-  root?: string;
+  identity?: string;
   headers?: Record<string, string>;
 }
 
@@ -32,17 +32,18 @@ export class BaseDotYouClient {
     return this._options.api;
   }
 
-  getHostname(): string {
-    return this._options.root ?? window.location.hostname;
+  getIdentity(): string {
+    return this._options.identity ?? window.location.hostname;
   }
 
   getRoot(): string {
-    return `https://${this.getHostname()}`;
+    // return `https://api.${this.getIdentity()}`;
+    return `https://${this.getIdentity()}`;
   }
 
   //Returns the endpoint for the identity
   getEndpoint(): string {
-    let endpoint = '';
+    let endpoint = ``;
     switch (this._options?.api) {
       case ApiType.Owner:
         endpoint = '/api/owner/v1';

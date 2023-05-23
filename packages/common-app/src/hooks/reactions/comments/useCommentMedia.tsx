@@ -30,7 +30,7 @@ export const useCommentMedia = ({
       return '';
     }
 
-    const isLocal = odinId === dotYouClient.getHostname();
+    const isLocal = odinId === dotYouClient.getIdentity();
 
     return (await isLocal)
       ? getDecryptedImageUrl(

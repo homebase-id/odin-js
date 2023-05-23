@@ -46,7 +46,7 @@ export const saveComment = async (
   comment: ReactionVm
 ): Promise<string> => {
   const encrypt = comment.context.target.isEncrypted;
-  const isLocal = comment.context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = comment.context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
   let additionalThumbnails: ThumbnailFile[] | undefined;
@@ -177,7 +177,7 @@ export const removeComment = async (
   context: ReactionContext,
   commentFile: ReactionFile
 ) => {
-  const isLocal = context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   if (isLocal) {
@@ -210,7 +210,7 @@ export const getComments = async (
   pageSize = 25,
   cursorState?: string
 ): Promise<{ comments: ReactionFile[]; cursorState: string }> => {
-  const isLocal = context.authorOdinId === dotYouClient.getHostname();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -252,7 +252,7 @@ const dsrToComment = async (
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<ReactionFile | null> => {
-  const isLocal = odinId === dotYouClient.getHostname();
+  const isLocal = odinId === dotYouClient.getIdentity();
 
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ApiType, DotYouClient, GetProfileCard } from '@youfoundation/js-lib';
 
 export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
-  const dotYouClient = new DotYouClient({ api: ApiType.YouAuth, root: odinId });
+  const dotYouClient = new DotYouClient({ api: ApiType.YouAuth, identity: odinId });
 
   const fetchSingle = async ({ odinId }: { odinId?: string }) => {
     if (!odinId) {
