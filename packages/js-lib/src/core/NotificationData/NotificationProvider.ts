@@ -29,7 +29,7 @@ const isDebug = localStorage.getItem('debug') === '1';
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, ...data } = JSON.parse(
+  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = JSON.parse(
     notification.data
   );
 
@@ -58,6 +58,7 @@ const ParseRawClientNotification = (
     return {
       notificationType: notification.notificationType,
       sender: sender,
+      recipient: recipient,
       data: data,
     } as ClientConnectionNotification;
   }

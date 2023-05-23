@@ -16,6 +16,7 @@ interface Notification {
   live?: boolean;
   href?: string;
   type?: 'pending';
+  key: string;
 }
 
 export const useNotifications = () => {
@@ -27,6 +28,7 @@ export const useNotifications = () => {
     if (pending?.results.length) {
       const pendingNotifications: Notification[] = pending?.results.map((connection) => {
         return {
+          key: `incoming-${connection.senderOdinId}`,
           title: t('Incoming connection request'),
           body: (
             <>
@@ -37,6 +39,10 @@ export const useNotifications = () => {
           imgSrc: `https://${connection.senderOdinId}/pub/image`,
           href: `/owner/connections/${connection.senderOdinId}`,
           type: 'pending',
+          live: notifications.some(
+            (notification) =>
+              notification.live && notification.key === `incoming-${connection.senderOdinId}`
+          ),
         };
       });
 
@@ -60,17 +66,20 @@ export const useNotifications = () => {
         queryClient.invalidateQueries(['sentRequests']);
       }
 
+      console.log(clientNotification);
+
       const otherId =
         clientNotification.notificationType === 'connectionRequestReceived'
           ? clientNotification.sender
           : clientNotification.recipient;
 
       const notification: Notification = {
+        key: `incoming-${otherId}`,
         title:
           clientNotification.notificationType === 'connectionRequestReceived'
             ? t('New connection request')
             : t('Your connection request was accepted'),
-        body: <DomainHighlighter>{otherId}</DomainHighlighter>,
+        body: otherId ? <DomainHighlighter>{otherId}</DomainHighlighter> : undefined,
         imgSrc: `https://${otherId}/pub/image`,
         live: true,
         href: `/owner/connections/${otherId}`,
