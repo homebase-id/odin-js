@@ -134,7 +134,10 @@ export const EmojiSummary = ({
   className?: string;
   reactionPreview?: EmojiReactionSummary;
 }) => {
-  const { data: reactionSummary } = useEmojiSummary({ context, reactionPreview }).fetch;
+  const { data: reactionSummary } = useEmojiSummary({
+    context,
+    reactionPreview: reactionPreview || { reactions: [], totalCount: 0 },
+  }).fetch;
   const [isShowDetails, setIsShowDetails] = useState(false);
 
   return reactionSummary && reactionSummary.totalCount > 0 ? (
