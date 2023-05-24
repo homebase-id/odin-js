@@ -10,14 +10,17 @@ The apps are setup indepentently, and can use the first party common app library
 
 ### Local development
 
-Before you can use the actual apps, you need to install and build the depencies:
-`npm install && npm run build-libs`
+Before you can use the actual apps, you need to install and build the depencies:  
+  
+```npm install && npm run build-libs```
 
-After that you can build the apps
-`npm run build -w ./packages/{public/owner}-app`
+After that you can build the apps  
+  
+```npm run build -w ./packages/{public/owner}-app```
 
-or run them locally
-`npm run start -w ./packages/{public/owner}-app`
+or run them locally  
+  
+```npm run start -w ./packages/{public/owner}-app```
 
 ## Libraries
 
@@ -37,20 +40,5 @@ Do ensure that you are authenticated via npm itself to [Github packages](https:/
 
 ### Js Lib & UI Lib
 
-#### Js Lib
-
-A library that is able to communicate with the DotYouCore api on the 3 main endpoints: youauth / apps / owner
-
-#### UI Lib
-
-A library that holds common components which handle the complexity of having no server side knowledge of any contents.
-
-## Local development
-
-Build the library:
-`npm run build -workspaces`
-
-In the package.json of the target project add a dependency with a relative path:
-`"@youfoundation/${js-lib/ui-lib}": "file:../dotyoucore-js/packages/${lib/ui}"`, and run `npm install` afterwards
-
-NPM will make a symlink between the target project node_modules folder and the source so any updates later in the library are automatically picked up.
+Js Lib: a library that is able to communicate with the DotYouCore api on the 3 main endpoints: youauth / apps / owner
+UI Lib: a library that holds common components which handle the complexity of having no server side knowledge of any contents.
