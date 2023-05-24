@@ -49,6 +49,11 @@ export interface ImageMetadata {
     fNumber?: string;
     iso?: number;
     focalLength?: string;
+    geolocation?: {
+      latitude: number;
+      longitude: number;
+      altitude?: number;
+    };
   };
 }
 
