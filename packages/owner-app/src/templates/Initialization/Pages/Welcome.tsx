@@ -13,17 +13,15 @@ const Welcome = ({
   // Welcome and info about what will be doing
   return (
     <>
-      <p className="mb-4">This is it, this is your new home on the internet.</p>
-      <p className="mb-4">
-        From here on out you will be known as{' '}
-        <span className="font-semibold">{window.location.hostname}</span>. This is your identity,
-        and it will be the start of your uniqueness.
-      </p>
-      <p className="mb-4">
-        First, to find the right people it&apos;s important that the world has a way of finding you.
-        In a couple of steps we will setup your identity, and get you going on this new era of the
-        internet.
-      </p>
+     <p className="mb-4">Welcome to your new ODIN identity.</p>
+     <p className="mb-4">
+         You will be recognized as{' '}
+         <span className="font-semibold">{window.location.hostname}</span>.
+         This will both be your personal homepage and your unique identity.
+     </p>
+     <p className="mb-4">
+        Let's walk through a few steps to get you set up.
+     </p>
       <div className="mt-5 flex flex-row-reverse">
         <ActionButton onClick={onNext} icon={Arrow}>
           {t('Next')}

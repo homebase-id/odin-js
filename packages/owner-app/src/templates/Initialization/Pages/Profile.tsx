@@ -43,10 +43,11 @@ const Profile = ({
       ref={formRef}
     >
       <p className="flex flex-col">
-        How do you want to be known publicly on the internet?
+        Begin your journey by sharing a bit about yourself.
         <small className="text-sm text-slate-500">
-          This information will be publicly available, so don&apos;t enter any information you would
-          want to keep to yourself
+        A little information can help friends recognize and connect with you on ODIN.
+        This information will be publicly available so don&apos;t add anything you would
+        consider private. And remember, here you're in control of your personal data. 
         </small>
       </p>
 
