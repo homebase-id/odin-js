@@ -87,7 +87,7 @@ export const Subscribe = async (
 ) => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
-  if (apiType !== ApiType.Owner || !sharedSecret) {
+  if ((apiType !== ApiType.Owner && apiType !== ApiType.App) || !sharedSecret) {
     throw new Error(`NotificationProvider is not supported for ApiType: ${apiType}`);
   }
 
@@ -103,7 +103,7 @@ export const Subscribe = async (
       return;
     }
 
-    const url = `wss://${window.location.hostname}/api/${
+    const url = `wss://${dotYouClient.getIdentity()}/api/${
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;
 
