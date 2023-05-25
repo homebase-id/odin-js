@@ -225,7 +225,7 @@ const Initialization = () => {
   return (
     <>
       <Helmet>
-        <title>Initialization | Odin</title>
+        <title>Setup | Odin</title>
       </Helmet>
 
       <div className="min-h-screen">
