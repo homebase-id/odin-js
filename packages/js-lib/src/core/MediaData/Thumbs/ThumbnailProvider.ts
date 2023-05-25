@@ -1,4 +1,4 @@
-import { ImageContentType, ImageSize, ThumbnailFile } from '../../DriveData/DriveTypes';
+import { ImageContentType, ImageSize, ThumbnailFile } from '../../core';
 import { ThumbnailInstruction } from '../MediaTypes';
 import { fromBlob } from './ImageResizer';
 

@@ -1,10 +1,5 @@
-import {
-  ThumbSize,
-  EmbeddedThumb,
-  ImageContentType,
-  ArchivalStatus,
-} from '../DriveData/DriveTypes';
 import { TransitOptions } from '../DriveData/DriveUploadTypes';
+import { ThumbSize, ImageContentType, ArchivalStatus, EmbeddedThumb } from '../core';
 
 export type ThumbnailMeta = {
   naturalSize: { width: number; height: number };

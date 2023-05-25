@@ -1,44 +1,42 @@
 import { AxiosRequestConfig } from 'axios';
-
 import { DotYouClient } from '../../core/DotYouClient';
-import {
-  assertIfDefined,
-  DEFAULT_QUERY_BATCH_RESULT_OPTION,
-} from '../../core/DriveData/DriveProvider';
-import {
-  DriveDefinition,
-  DriveSearchResult,
-  EncryptedKeyHeader,
-  FileMetadata,
-  FileQueryParams,
-  GetBatchQueryResultOptions,
-  ImageContentType,
-  KeyHeader,
-  QueryBatchResponse,
-  TargetDrive,
-  ThumbnailFile,
-} from '../../core/DriveData/DriveTypes';
-import { SystemFileType, UploadFileMetadata } from '../../core/DriveData/DriveUploadTypes';
 import {
   decryptKeyHeader,
   decryptJsonContent,
-  encryptWithKeyheader,
-  decryptBytesResponse,
   decryptChunkedBytesResponse,
+  decryptBytesResponse,
+  encryptWithKeyheader,
 } from '../../core/DriveData/SecurityHelpers';
-import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import {
   GenerateKeyHeader,
   encryptMetaData,
   buildDescriptor,
   buildFormData,
 } from '../../core/DriveData/UploadHelpers';
-import { PagedResult } from '../../core/core';
+import {
+  TargetDrive,
+  FileQueryParams,
+  GetBatchQueryResultOptions,
+  DriveSearchResult,
+  QueryBatchResponse,
+  DEFAULT_QUERY_BATCH_RESULT_OPTION,
+  FileMetadata,
+  EncryptedKeyHeader,
+  KeyHeader,
+  SystemFileType,
+  ImageContentType,
+  PagedResult,
+  DriveDefinition,
+  UploadFileMetadata,
+  ThumbnailFile,
+} from '../../core/core';
 import {
   byteArrayToString,
+  assertIfDefined,
   roundToSmallerMultipleOf16,
   roundToLargerMultipleOf16,
 } from '../../helpers/DataUtil';
+import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 
 interface GetFileRequest {
   odinId: string;

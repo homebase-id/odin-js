@@ -1,7 +1,7 @@
 import { jsonStringify64 } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import { TargetDrive } from '../DriveData/DriveTypes';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
+import { TargetDrive } from '../core';
 import {
   ClientConnectionNotification,
   ClientDeviceNotification,

@@ -1,5 +1,5 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
-import { EmbeddedThumb, TargetDrive } from '../../core/DriveData/DriveTypes';
+import { TargetDrive, EmbeddedThumb } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
 export interface ChannelDefinition {

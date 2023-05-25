@@ -1,5 +1,4 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getFileHeader } from '../../core/DriveData/DriveProvider';
 import { FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
@@ -15,6 +14,7 @@ import { HomePageConfig, HomePageAttributes, HomePageFields } from '../home/Home
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile, QueryParamsSection } from './FileProvider';
 import { getAttributes, getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
+import { getFileHeader } from '../../core/DriveData/DriveFileProvider';
 
 export const publishProfile = async (dotYouClient: DotYouClient) => {
   const sections = [...DEFAULT_SECTIONS];

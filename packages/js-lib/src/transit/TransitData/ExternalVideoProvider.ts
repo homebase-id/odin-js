@@ -1,8 +1,11 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { TargetDrive } from '../../core/DriveData/DriveTypes';
-import { SystemFileType } from '../../core/DriveData/DriveUploadTypes';
 import { decryptJsonContent, decryptKeyHeader } from '../../core/DriveData/SecurityHelpers';
-import { PlainVideoMetadata, SegmentedVideoMetadata } from '../../core/core';
+import {
+  PlainVideoMetadata,
+  SegmentedVideoMetadata,
+  SystemFileType,
+  TargetDrive,
+} from '../../core/core';
 import { stringify } from '../../helpers/helpers';
 import { getDecryptedMetadataOverTransit } from './ExternalImageProvider';
 import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './TransitProvider';

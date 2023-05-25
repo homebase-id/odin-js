@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { TargetDrive } from '../../core/DriveData/DriveTypes';
+import { TargetDrive } from '../../core/core';
 
 export const processInbox = async (
   dotYouClient: DotYouClient,

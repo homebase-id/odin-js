@@ -1,14 +1,13 @@
 import {
-  ExternalFileIdentifier,
-  EncryptedKeyHeader,
   TargetDrive,
   ThumbSize,
-  EmbeddedThumb,
   GlobalTransitIdFileIdentifier,
+  EmbeddedThumb,
   ArchivalStatus,
-} from './DriveTypes';
-
-export type SystemFileType = 'Standard' | 'Comment';
+  ExternalFileIdentifier,
+  SystemFileType,
+} from './DriveFileTypes';
+import { EncryptedKeyHeader } from './DriveTypes';
 
 export interface UploadInstructionSet {
   transferIv: Uint8Array;

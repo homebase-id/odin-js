@@ -1,29 +1,25 @@
-import {
-  FileQueryParams,
-  GetBatchQueryResultOptions,
-  TargetDrive,
-} from '../../core/DriveData/DriveTypes';
-import { BlogConfig, ChannelDefinition } from './PostTypes';
-import {
-  ScheduleOptions,
-  SecurityGroupType,
-  SendContents,
-  UploadFileMetadata,
-  UploadInstructionSet,
-  UploadResult,
-} from '../../core/DriveData/DriveUploadTypes';
-import {
-  deleteFile,
-  ensureDrive,
-  getDrivesByType,
-  getPayload,
-  queryBatch,
-  queryBatchCollection,
-  uploadFile,
-} from '../../core/DriveData/DriveProvider';
 import { DotYouClient } from '../../core/DotYouClient';
 import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+import {
+  getDrivesByType,
+  FileQueryParams,
+  GetBatchQueryResultOptions,
+  queryBatchCollection,
+  getPayload,
+  UploadResult,
+  SecurityGroupType,
+  ensureDrive,
+  UploadInstructionSet,
+  ScheduleOptions,
+  SendContents,
+  UploadFileMetadata,
+  uploadFile,
+  deleteFile,
+  TargetDrive,
+  queryBatch,
+} from '../../core/core';
 import { jsonStringify64, stringToUint8Array, toGuidId } from '../../helpers/helpers';
+import { ChannelDefinition, BlogConfig } from './PostTypes';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient

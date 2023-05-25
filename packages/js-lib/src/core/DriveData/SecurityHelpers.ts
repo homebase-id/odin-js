@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './DriveTypes';
+import { EncryptedKeyHeader, KeyHeader } from './DriveTypes';
 import { streamToByteArray } from './UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
@@ -11,6 +11,7 @@ import {
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
 } from '../../helpers/DataUtil';
+import { FileMetadata } from './DriveFileTypes';
 
 /// Encryption
 export const encryptKeyHeader = async (

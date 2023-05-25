@@ -3,6 +3,10 @@ import { Guid } from 'guid-typescript';
 import md5 from './md5/md5';
 import { AccessControlList, EncryptedKeyHeader } from '../core/core';
 
+export const assertIfDefined = (key: string, value: unknown) => {
+  if (!value) throw new Error(`${key} undefined`);
+};
+
 export const stringToMD5basedGuid = (data: string): Guid => {
   const t = md5(data).toString();
   return Guid.parse(
