@@ -257,12 +257,12 @@ const useInit = () => {
 
   const homeInit = async () => {
     const defaultHomeAttribute: AttributeVm = {
-      id: toGuidId('default_home_attribute'),
+      id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId,
       type: HomePageAttributes.HomePage,
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable,
-      data: {},
+      data: { isProtected: true },
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
       typeDefinition: {
         type: HomePageAttributes.HomePage,
@@ -272,12 +272,12 @@ const useInit = () => {
     };
 
     const defaultThemeAttribute: AttributeVm = {
-      id: toGuidId('default_theme_attribute'),
+      id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId,
       type: HomePageAttributes.Theme,
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable,
-      data: { themeId: HomePageTheme.SocialClassic + '' },
+      data: { themeId: HomePageTheme.SocialClassic + '', isProtected: true },
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
       typeDefinition: {
         type: HomePageAttributes.Theme,
