@@ -89,7 +89,7 @@ const Theme = ({
       />
       <label
         htmlFor={value + ''}
-        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-slate-100 bg-slate-100 p-2 peer-checked:border-indigo-500 dark:border-slate-900 dark:bg-slate-900"
+        className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-slate-100 bg-slate-100 p-2 peer-checked:border-indigo-500 peer-checked:bg-white dark:border-slate-900 dark:bg-slate-900 peer-checked:dark:bg-black"
       >
         <div className="flex flex-grow flex-col justify-center">
           {icon({
