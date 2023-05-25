@@ -3,9 +3,9 @@ import useContact from '../../../hooks/contacts/useContact';
 import useImage from '../../../hooks/media/useImage';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import { Eye, LoadingParagraph } from '@youfoundation/common-app';
+import { Eye, Image, LoadingParagraph } from '@youfoundation/common-app';
 
-const PendingConnectionImage = ({
+const ContactImage = ({
   odinId,
   onlyLoadAfterClick,
 }: {
@@ -16,7 +16,7 @@ const PendingConnectionImage = ({
 
   const { data: contactData, isLoading } = useContact({
     odinId: odinId,
-    loadPendingProfilePicture: onlyLoadAfterClick ? loadImage : true,
+    loadPicture: onlyLoadAfterClick ? loadImage : true,
   }).fetch;
 
   const shouldOnlyLoadAfterClick =
@@ -24,14 +24,14 @@ const PendingConnectionImage = ({
       ? onlyLoadAfterClick
       : false;
 
-  const { data: imageUrl } = useImage(
-    shouldOnlyLoadAfterClick
-      ? loadImage
-        ? contactData?.imageFileId || undefined
-        : undefined
-      : contactData?.imageFileId,
-    ContactConfig.ContactTargetDrive
-  ).fetch;
+  // const { data: imageUrl } = useImage(
+  //   shouldOnlyLoadAfterClick
+  //     ? loadImage
+  //       ? contactData?.imageFileId || undefined
+  //       : undefined
+  //     : contactData?.imageFileId,
+  //   ContactConfig.ContactTargetDrive
+  // ).fetch;
 
   const nameData = contactData?.name;
   const getInitials = () => {
@@ -56,13 +56,13 @@ const PendingConnectionImage = ({
     <div className="relative aspect-square">
       {isLoading ? (
         <LoadingParagraph className={`aspect-square`} />
-      ) : contactData?.imageUrl || imageUrl ? (
-        <figure className={'relative overflow-hidden'}>
-          <img
-            src={contactData?.imageUrl ?? imageUrl}
-            className="aspect-square w-full object-cover"
-          />
-        </figure>
+      ) : (shouldOnlyLoadAfterClick && loadImage) || !shouldOnlyLoadAfterClick ? (
+        <Image
+          fileId={contactData?.imageFileId}
+          targetDrive={ContactConfig.ContactTargetDrive}
+          fit="cover"
+          className="h-full w-full"
+        />
       ) : (
         <>
           <FallbackImg initials={getInitials()} />
@@ -87,4 +87,4 @@ const PendingConnectionImage = ({
   );
 };
 
-export default PendingConnectionImage;
+export default ContactImage;

@@ -4,7 +4,7 @@ import { t, useIntersection } from '@youfoundation/common-app';
 import useContacts from '../../../hooks/contacts/useContacts';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ContactFile, RawContact } from '../../../provider/contact/ContactTypes';
-import PendingConnectionImage from '../../../components/Connection/PendingConnectionImage/PendingConnectionImage';
+import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
 import { AddressBook } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
@@ -67,7 +67,7 @@ const ContactCard = ({
           className={`h-full rounded-md border border-gray-200 border-opacity-60 bg-white transition-colors hover:shadow-md dark:border-gray-800 dark:bg-gray-800 hover:dark:shadow-slate-600`}
         >
           {contact.odinId ? (
-            <PendingConnectionImage
+            <ContactImage
               odinId={contact.odinId}
               onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
             />

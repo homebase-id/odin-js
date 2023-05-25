@@ -34,6 +34,7 @@ export const usePendingConnections = ({
       () => fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
       {
         refetchOnWindowFocus: false,
+        refetchOnMount: false,
         keepPreviousData: true,
         onError: (err) => console.error(err),
         enabled: !!pendingPage,

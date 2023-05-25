@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiType, base64ToUint8Array, DotYouClient, toGuidId } from '@youfoundation/js-lib';
+import { base64ToUint8Array, toGuidId } from '@youfoundation/js-lib';
 import { getContactByUniqueId, saveContact } from '../../provider/contact/ContactProvider';
 import {
   fetchConnectionInfo,
@@ -12,11 +12,11 @@ import useAuth from '../auth/useAuth';
 const useContact = ({
   odinId,
   id,
-  loadPendingProfilePicture,
+  loadPicture,
 }: {
   odinId?: string;
   id?: string;
-  loadPendingProfilePicture?: boolean;
+  loadPicture?: boolean;
 }) => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
@@ -24,11 +24,11 @@ const useContact = ({
   const fetchSingle = async ({
     odinId,
     id,
-    loadPendingProfilePicture,
+    loadPicture,
   }: {
     odinId: string;
     id: string;
-    loadPendingProfilePicture?: boolean;
+    loadPicture?: boolean;
   }): Promise<ContactVm | undefined> => {
     if (!odinId) {
       if (!id) {
@@ -69,20 +69,19 @@ const useContact = ({
     // Get contact data from pending single:
     if (!returnContact) {
       const pendingInfo =
-        (await fetchPendingInfo(dotYouClient, odinId, loadPendingProfilePicture || false)) ??
-        undefined;
+        (await fetchPendingInfo(dotYouClient, odinId, loadPicture || false)) ?? undefined;
       returnContact = pendingInfo ? { ...pendingInfo } : returnContact;
     }
 
     // Get contact data from public.json
     if (!returnContact) {
-      const publicContact = await fetchDataFromPublic(odinId, loadPendingProfilePicture || false);
+      const publicContact = await fetchDataFromPublic(odinId, loadPicture || false);
       returnContact = publicContact ? { ...publicContact } : returnContact;
     }
 
     if (returnContact) {
       // Don't save contacts if we weren't allowed to fetch images
-      if (loadPendingProfilePicture) {
+      if (loadPicture) {
         // => And automatically push into the Contact
         const savedReturnedContact = await saveContact(dotYouClient, {
           ...returnContact,
@@ -130,12 +129,12 @@ const useContact = ({
 
   return {
     fetch: useQuery(
-      ['contact', odinId ?? id, loadPendingProfilePicture],
+      ['contact', odinId ?? id, loadPicture],
       () =>
         fetchSingle({
           odinId: odinId as string, // Defined as otherwise query would not be triggered
           id: id as string, // Defined as otherwise query would not be triggered
-          loadPendingProfilePicture: loadPendingProfilePicture,
+          loadPicture: loadPicture,
         }),
       {
         refetchOnWindowFocus: false,

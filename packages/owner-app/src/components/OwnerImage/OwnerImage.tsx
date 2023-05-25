@@ -25,7 +25,8 @@ export const OwnerImage = ({ className, size }: OwnerImageProps) => {
       targetDrive={targetDrive}
       className={`${
         size === 'sm' ? 'h-[3rem] w-[3rem]' : size === 'md' ? 'h-[5rem] w-[5rem]' : ''
-      } rounded-full object-cover ${className ?? ''}`}
+      } rounded-full ${className ?? ''}`}
+      fit="cover"
     />
   );
 };

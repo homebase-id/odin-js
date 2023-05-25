@@ -8,7 +8,7 @@ import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
-import PendingConnectionImage from '../../Connection/PendingConnectionImage/PendingConnectionImage';
+import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -89,7 +89,7 @@ const IncomingConnectionDialog = ({
               </h2>
               <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
                 <div className="w-full p-4 md:w-2/5">
-                  <PendingConnectionImage
+                  <ContactImage
                     odinId={senderOdinId}
                     onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
                   />

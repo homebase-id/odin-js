@@ -120,7 +120,7 @@ export const queryConnectionPhotoData = async (
 export const fetchPendingInfo = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  loadPendingProfilePicture: boolean
+  loadPicture: boolean
 ): Promise<RawContact | undefined> => {
   try {
     const pendingContactData = await getPendingRequest(dotYouClient, odinId);
@@ -133,7 +133,7 @@ export const fetchPendingInfo = async (
             ? { displayName: pendingContactData.contactData.name }
             : undefined,
           image:
-            loadPendingProfilePicture && pendingContactData.contactData.imageId
+            loadPicture && pendingContactData.contactData.imageId
               ? await getPhotoDataFromPublic(odinId, pendingContactData.contactData.imageId)
               : undefined,
 
@@ -148,7 +148,7 @@ export const fetchPendingInfo = async (
 
 export const fetchDataFromPublic = async (
   odinId: string,
-  loadPendingProfilePicture: boolean
+  loadPicture: boolean
 ): Promise<RawContact | undefined> => {
   const client = new DotYouClient({ api: ApiType.YouAuth, identity: odinId });
   const rawData = await GetFile(client, 'public.json');
@@ -157,7 +157,7 @@ export const fetchDataFromPublic = async (
   const photoRefAttr = rawData?.get('photo')?.[0];
   const photoFile = rawData?.get(photoRefAttr?.payload?.data?.profileImageId)?.[0] ?? undefined;
 
-  if (!photoFile || !loadPendingProfilePicture) {
+  if (!photoFile || !loadPicture) {
     return {
       name:
         nameAttr?.payload?.data.givenName || nameAttr?.payload?.data.surname

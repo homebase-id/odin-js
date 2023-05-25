@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import PendingConnectionImage from '../PendingConnectionImage/PendingConnectionImage';
+import ContactImage from '../ContactImage/ContactImage';
 
 export interface PersonCardProps {
   odinId: string;
@@ -34,7 +34,7 @@ const PersonCard = ({
         ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}
       >
-        <PendingConnectionImage odinId={odinId} onlyLoadAfterClick={onlyLoadAfterClick} />
+        <ContactImage odinId={odinId} onlyLoadAfterClick={onlyLoadAfterClick} />
         <div className="p-2">{children}</div>
       </div>
     </a>
