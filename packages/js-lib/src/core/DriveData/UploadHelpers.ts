@@ -127,7 +127,7 @@ export const pureUpload = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void
 ) => {
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/drive/files/upload';
 
   const config = {
@@ -159,13 +159,15 @@ export const pureAppend = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void
 ) => {
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({
+    overrideEncryption: true,
+    headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
+  });
   const url = '/drive/files/attachments/upload';
 
   const config = {
     headers: {
       'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     },
   };
 

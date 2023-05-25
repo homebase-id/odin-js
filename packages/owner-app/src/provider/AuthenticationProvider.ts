@@ -9,7 +9,7 @@ export const authenticate = async (password: string): Promise<AuthenticationResp
   const reply = await prepareAuthPassword(password, noncePackage);
 
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/authentication';
 
   const response = await client.post(url, reply);
@@ -31,7 +31,7 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
   const url = `/youauth/create-token-flow?returnUrl=${encodeURIComponent(returnUrl)}`;
 
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
   const response = await client.get(url);
   if (response.status === 200) {
@@ -48,7 +48,7 @@ export const authenticateDevice = async (password: string): Promise<string> => {
   return getNonce().then((noncePackage) => {
     return prepareAuthPassword(password, noncePackage).then((reply) => {
       const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-      const client = dotYouClient.createAxiosClient(true);
+      const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
       return client
         .post('/authentication/device', reply, { withCredentials: true })
@@ -115,7 +115,7 @@ const prepareAuthPassword = async (
 
 const getNonce = async (): Promise<NonceData> => {
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client
     .get('/authentication/nonce')
     .then((response) => {
@@ -126,7 +126,7 @@ const getNonce = async (): Promise<NonceData> => {
 
 const getSalts = async (): Promise<NonceData> => {
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client.get('/authentication/getsalts').then((response) => {
     return response.data;
   });
@@ -140,7 +140,7 @@ export const setNewPassword = async (
     return prepareAuthPassword(newPassword, salts, firstRunToken).then((reply) => {
       const dotYouClient = new OwnerClient({ api: ApiType.Owner });
       return dotYouClient
-        .createAxiosClient(true)
+        .createAxiosClient({ overrideEncryption: true })
         .post('/authentication/passwd', reply)
         .then((response) => {
           return response.status === 200;
@@ -154,7 +154,7 @@ export const finalizeRegistration = async (firstRunToken: string) => {
   // I'm just working to get provisionig flowing back to front
   // and i'm not certain how you want to slice up things like registration, etc.
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/config/registration/finalize?frid=' + firstRunToken;
 
   return await client.get(url).then((response) => {
@@ -166,7 +166,7 @@ export const isMasterPasswordSet = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
 
   return dotYouClient
-    .createAxiosClient(true)
+    .createAxiosClient({ overrideEncryption: true })
     .post('/authentication/ispasswordset')
     .then((response) => {
       return response.data == true;

@@ -48,21 +48,19 @@ export const getFileHeader = async (
     if (cacheEntry) return cacheEntry;
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
 
   const request: GetFileRequest = {
     ...targetDrive,
     fileId,
   };
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  };
-
   const promise = client
-    .get('/drive/files/header?' + stringify(request), config)
+    .get('/drive/files/header?' + stringify(request))
     .then((response) => {
       return response.data;
     })
@@ -124,7 +122,11 @@ export const getPayloadBytes = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
   const request: GetPayloadRequest = {
     ...targetDrive,
     fileId,
@@ -142,9 +144,6 @@ export const getPayloadBytes = async (
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
   };
 
   return client
@@ -186,16 +185,17 @@ export const getThumbBytes = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
   const request: GetFileRequest = {
     ...targetDrive,
     fileId,
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
   };
 
   return client
@@ -225,7 +225,11 @@ export const deleteFile = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
 
   const request = {
     file: {
@@ -236,14 +240,8 @@ export const deleteFile = async (
     recipients: recipients,
   };
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  };
-
   return client
-    .post('/drive/files/delete', request, config)
+    .post('/drive/files/delete', request)
     .then((response) => {
       if (response.status === 200) {
         return true;
@@ -265,7 +263,11 @@ export const deleteThumbnail = async (
   height: number,
   systemFileType?: SystemFileType
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
 
   const request = {
     file: {
@@ -276,14 +278,8 @@ export const deleteThumbnail = async (
     height,
   };
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  };
-
   client
-    .post('/attachments/deletethumbnail', request, config)
+    .post('/attachments/deletethumbnail', request)
     .then((response) => {
       if (response.status === 200) {
         return true;
@@ -305,7 +301,11 @@ export const deletePayload = async (
   height: number,
   systemFileType?: SystemFileType
 ) => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
 
   const request = {
     key: '', // TODO: Add key (reference to a key for multiple payloads in a single file)
@@ -315,21 +315,9 @@ export const deletePayload = async (
     },
   };
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  };
-
   client
-    .post('/attachments/deletepayload', request, config)
-    .then((response) => {
-      if (response.status === 200) {
-        return true;
-      }
-
-      return false;
-    })
+    .post('/attachments/deletepayload', request)
+    .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[DotYouCore-js:deleteFile]', error);
       throw error;

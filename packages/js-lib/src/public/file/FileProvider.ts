@@ -93,7 +93,7 @@ export const GetFile = async (
       return (await _internalFileCache.get(`${dotYouClient.getRoot()}+${fileName}`)) ?? new Map();
     }
 
-    const httpClient = dotYouClient.createAxiosClient(true);
+    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
     const fetchResponseMap = async (fileName: string) => {
       const response = await httpClient({

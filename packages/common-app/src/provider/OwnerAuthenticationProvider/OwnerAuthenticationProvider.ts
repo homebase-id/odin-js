@@ -8,7 +8,7 @@ export const hasValidOwnerToken = async (): Promise<boolean> => {
   // the call to the endpoint will automatically include the
   // cookie.  we just need to check the success code
 
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client.get('/authentication/verifyToken').then((response) => {
     return response.data;
   });
@@ -16,7 +16,7 @@ export const hasValidOwnerToken = async (): Promise<boolean> => {
 
 export const logoutOwner = async (): Promise<boolean> => {
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
   await client.get('/auth/delete-token', { baseURL: '/api/youauth/v1' });
 

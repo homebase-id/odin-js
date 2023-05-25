@@ -169,7 +169,11 @@ export const getPayloadBytesOverTransit = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
   const request: GetPayloadRequest = {
     odinId: odinId,
     file: {
@@ -196,9 +200,6 @@ export const getPayloadBytesOverTransit = async (
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
   };
 
   return client
@@ -235,7 +236,11 @@ export const getThumbBytesOverTransit = async (
   height: number,
   systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
   const request: GetFileRequest = {
     odinId: odinId,
     file: {
@@ -246,9 +251,6 @@ export const getThumbBytesOverTransit = async (
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
   };
 
   return client
@@ -279,7 +281,11 @@ export const getFileHeaderOverTransit = async (
     }
   }
 
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
 
   const request: GetFileRequest = {
     odinId: odinId,
@@ -289,14 +295,8 @@ export const getFileHeaderOverTransit = async (
     },
   };
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  };
-
   const promise = client
-    .post('/transit/query/header', request, config)
+    .post('/transit/query/header', request)
     .then((response) => {
       return response.data as DriveSearchResult;
     })
@@ -328,14 +328,13 @@ export const getDrivesByTypeOverTransit = async (
     odinId: odinId,
   };
 
-  const config = {
+  const client = dotYouClient.createAxiosClient({
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     },
-  };
+  });
 
-  const client = dotYouClient.createAxiosClient();
-  return client.post('transit/query/metadata/type', params, config).then((response) => {
+  return client.post('transit/query/metadata/type', params).then((response) => {
     return {
       ...response.data,
       results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {
@@ -403,7 +402,7 @@ export const uploadFileOverTransitUsingKeyHeader = async (
     keyHeader
   );
 
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = 'transit/sender/files/send';
 
   const config = {

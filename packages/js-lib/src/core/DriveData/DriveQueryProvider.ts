@@ -90,7 +90,11 @@ export const queryBatchCollection = async (
   }[],
   systemFileType?: SystemFileType
 ): Promise<QueryBatchCollectionResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
 
   const updatedQueries = queries.map((query) => {
     const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
@@ -100,20 +104,10 @@ export const queryBatchCollection = async (
     };
   });
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  };
-
   return client
-    .post<QueryBatchCollectionResponse>(
-      '/drive/query/batchcollection',
-      {
-        queries: updatedQueries,
-      },
-      config
-    )
+    .post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
+      queries: updatedQueries,
+    })
     .then((response) => {
       return {
         ...response.data,
