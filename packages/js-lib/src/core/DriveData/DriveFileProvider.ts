@@ -28,23 +28,21 @@ interface GetPayloadRequest extends GetFileRequest {
   chunkLength?: number;
 }
 
-const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
 
 /// Get methods:
-
 export const getFileHeader = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  systemFileType?: SystemFileType,
-  skipCache?: boolean
+  systemFileType?: SystemFileType
 ): Promise<DriveSearchResult> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
   const cacheKey = `${targetDrive.alias}-${targetDrive.type}+${fileId}`;
-  if (_internalMetadataCache.has(cacheKey) && !skipCache) {
-    const cacheEntry = await _internalMetadataCache.get(cacheKey);
+  if (_internalMetadataPromiseCache.has(cacheKey)) {
+    const cacheEntry = await _internalMetadataPromiseCache.get(cacheKey);
     if (cacheEntry) return cacheEntry;
   }
 
@@ -62,6 +60,7 @@ export const getFileHeader = async (
   const promise = client
     .get('/drive/files/header?' + stringify(request))
     .then((response) => {
+      _internalMetadataPromiseCache.delete(cacheKey);
       return response.data;
     })
     .catch((error) => {
@@ -73,7 +72,7 @@ export const getFileHeader = async (
       }
     });
 
-  _internalMetadataCache.set(cacheKey, promise);
+  _internalMetadataPromiseCache.set(cacheKey, promise);
 
   return promise;
 };
