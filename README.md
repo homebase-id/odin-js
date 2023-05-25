@@ -1,14 +1,32 @@
 # dotyoucore-js
 
-## Js Lib
+[![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
 
-A library that is able to communicate with the DotYouCore api on the 3 main endpoints: youauth / apps / owner
+This repo contains the various apps and libraries that are maintaned by Odin. The libraries can be easily consumed by other app developers that want to work with a Odin Identity backend.
 
-## UI Lib
+## Apps
 
-A library that holds common components which handle the complexity of having no server side knowledge of any contents.
+The apps are setup indepentently, and can use the first party common app library as well as the public libraries (JS & UI Lib)
 
-## Usage:
+### Local development
+
+Before you can use the actual apps, you need to install and build the depencies:  
+  
+```npm install && npm run build-libs```
+
+After that you can build the apps  
+  
+```npm run build -w ./packages/{public/owner}-app```
+
+or run them locally  
+  
+```npm run start -w ./packages/{public/owner}-app```
+
+## Libraries
+
+The libraries expect a `DotYouClient`. The `DotYouClient` holds the authentication parameters for the specific request.
+
+## Usage
 
 Create an `.npmrc` file within your project with the following details:
 
@@ -20,20 +38,7 @@ After which you can run:
 
 Do ensure that you are authenticated via npm itself to [Github packages](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)
 
-## Getting started | Js Lib
+### Js Lib & UI Lib
 
-Every api function expects a `DotYouClient`. The `DotYouClient` holds the authentication parameters for the specific request.
-
-## Getting started | Ui Lib
-
-Every components expects a `DotYouClient`. The `DotYouClient` holds the authentication parameters for the specific request.
-
-## Local development:
-
-Build the library:
-`npm run build -workspaces`
-
-In the package.json of the target project add a dependency with a relative path:
-`"@youfoundation/${js-lib/ui-lib}": "file:../dotyoucore-js/packages/${lib/ui}"`, and run `npm install` afterwards
-
-NPM will make a symlink between the target project node_modules folder and the source so any updates later in the library are automatically picked up.
+Js Lib: a library that is able to communicate with the DotYouCore api on the 3 main endpoints: youauth / apps / owner
+UI Lib: a library that holds common components which handle the complexity of having no server side knowledge of any contents.
