@@ -82,7 +82,7 @@ export const getNewId = () => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const stringify = (obj: any) => {
   return Object.keys(obj)
-    .map((key) => key + '=' + obj[key])
+    .map((key) => key + '=' + encodeURIComponent(obj[key]))
     .join('&');
 };
 
@@ -172,4 +172,29 @@ export const roundToSmallerMultipleOf16 = (x: number) => {
 
 export const roundToLargerMultipleOf16 = (x: number) => {
   return Math.ceil(x / 16) * 16;
+};
+
+export const stringifyToQueryParams = (obj: Record<string, unknown>) => {
+  const params: string[] = [];
+  const paramsObj = { ...obj };
+
+  const keys = Object.keys(obj);
+  keys.forEach((key) => {
+    if (obj[key] === null || obj[key] === undefined) {
+      delete paramsObj[key];
+    } else if (Array.isArray(obj[key])) {
+      const arr = obj[key] as unknown[];
+      arr.forEach((element: unknown) => {
+        params.push(`${key}=${encodeURIComponent(element + '')}`);
+      });
+
+      delete paramsObj[key];
+    } else if (typeof obj[key] === 'object') {
+      const subObj = obj[key] as Record<string, unknown>;
+      params.push(stringify(subObj));
+      delete paramsObj[key];
+    }
+  });
+
+  return `${stringify(paramsObj)}&${params.join('&')}`;
 };

@@ -26,21 +26,21 @@ export const encryptData = async (data: string, iv: Uint8Array, ss: Uint8Array) 
   return payload;
 };
 
-export const getIvFromQueryString = async (querystring: string) => {
-  const fileId = new URLSearchParams(querystring).get('fileId');
-  const hashedFileId = fileId
-    ? await crypto.subtle.digest('SHA-1', stringToUint8Array(fileId))
+export const buildIvFromQueryString = async (querystring: string) => {
+  const searchParams = new URLSearchParams(querystring);
+
+  const uniqueQueryKey =
+    searchParams.get('fileId') || (searchParams.has('alias') ? querystring : undefined);
+
+  const hashedQueryKey = uniqueQueryKey
+    ? await crypto.subtle.digest('SHA-1', stringToUint8Array(uniqueQueryKey))
     : undefined;
 
-  if (!hashedFileId) {
-    return undefined;
-  }
+  if (!hashedQueryKey) return undefined;
 
-  const returnBytes = new Uint8Array(hashedFileId.slice(0, 16));
+  const returnBytes = new Uint8Array(hashedQueryKey.slice(0, 16));
 
-  if (returnBytes?.length !== 16) {
-    return undefined;
-  }
+  if (returnBytes?.length !== 16) return undefined;
 
   return returnBytes;
 };
@@ -49,7 +49,7 @@ export const encryptUrl = async (url: string, ss: Uint8Array) => {
   const parts = (url ?? '').split('?');
   const querystring = parts.length == 2 ? parts[1] : '';
 
-  const dedicatedIv = await getIvFromQueryString(querystring);
+  const dedicatedIv = await buildIvFromQueryString(querystring);
 
   const encryptedPayload: SharedSecretEncryptedPayload = await encryptData(
     querystring,

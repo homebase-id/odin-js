@@ -8,6 +8,7 @@ import {
   QueryBatchCollectionResponse,
 } from './DriveTypes';
 import { SystemFileType } from './DriveFileTypes';
+import { stringifyToQueryParams } from '../../helpers/DataUtil';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -65,20 +66,27 @@ export const queryBatch = async (
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
 
+  const queryParams = stringifyToQueryParams({
+    ...request.queryParams,
+    ...request.resultOptionsRequest,
+  });
+
   const config = {
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
     },
   };
 
-  return client.post<QueryBatchResponse>('/drive/query/batch', request, config).then((response) => {
-    const responseData = response.data;
-    return {
-      ...response.data,
-      // Remove deleted files
-      searchResults: responseData.searchResults.filter((dsr) => dsr.fileState === 'active'),
-    };
-  });
+  return client
+    .get<QueryBatchResponse>('/drive/query/batch?' + queryParams, config)
+    .then((response) => {
+      const responseData = response.data;
+      return {
+        ...response.data,
+        // Remove deleted files
+        searchResults: responseData.searchResults.filter((dsr) => dsr.fileState === 'active'),
+      };
+    });
 };
 
 export const queryBatchCollection = async (
