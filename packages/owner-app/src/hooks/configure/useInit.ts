@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BlogConfig,
   getAttribute,
@@ -31,7 +31,7 @@ import {
   SocialFields,
   CircleDefinition,
 } from '@youfoundation/js-lib';
-import { WelcomeData } from '../../templates/Initialization/Initialization';
+import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
 import useAuth from '../auth/useAuth';
 import useAttribute from '../profiles/useAttribute';
@@ -45,6 +45,7 @@ const useInit = () => {
   const { mutateAsync: saveAttr } = useAttribute({}).save;
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
+  const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
   const initDrives: DriveDefinitionParam[] = [
@@ -292,12 +293,8 @@ const useInit = () => {
       [HomePageAttributes.HomePage],
       1
     );
-    console.log({ homeDef });
 
-    if (!homeDef?.length) {
-      await saveAttribute(dotYouClient, defaultHomeAttribute);
-      console.log('saved', defaultHomeAttribute);
-    }
+    if (!homeDef?.length) await saveAttribute(dotYouClient, defaultHomeAttribute);
 
     const themeDef = await getAttributes(
       dotYouClient,
@@ -305,18 +302,12 @@ const useInit = () => {
       [HomePageAttributes.Theme],
       1
     );
-    console.log({ themeDef });
 
-    if (!themeDef?.length) {
-      await saveAttribute(dotYouClient, defaultThemeAttribute);
-      console.log('saved', defaultThemeAttribute);
-    }
+    if (!themeDef?.length) await saveAttribute(dotYouClient, defaultThemeAttribute);
   };
 
   const doCleanInit = async (isEmptyInit: boolean) => {
-    if (!isAuthenticated) {
-      return;
-    }
+    if (!isAuthenticated) return;
 
     // Initialize
     await initialize(dotYouClient, firstRunToken, initDrives);
@@ -330,9 +321,7 @@ const useInit = () => {
   };
 
   const doInitWithData = async (data: WelcomeData) => {
-    if (!isAuthenticated) {
-      return;
-    }
+    if (!isAuthenticated) return;
 
     const initCircles: CircleDefinition[] = data?.circles?.map((circle) => {
       return {
@@ -545,10 +534,18 @@ const useInit = () => {
       onError: (ex) => {
         console.error(ex);
       },
+      retry: 0,
+      onSettled: () => {
+        queryClient.invalidateQueries(['initialized']);
+      },
     }),
     initWithData: useMutation(doInitWithData, {
       onError: (ex) => {
         console.error(ex);
+      },
+      retry: 0,
+      onSettled: () => {
+        queryClient.invalidateQueries(['initialized']);
       },
     }),
   };

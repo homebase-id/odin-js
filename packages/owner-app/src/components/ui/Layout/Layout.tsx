@@ -62,6 +62,7 @@ export const MinimalLayout: FC<LayoutProps> = ({ children, noShadedBg, noPadding
       <div className={`relative min-h-screen ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         <div className={`${noPadding ? '' : 'px-5 py-4 sm:px-10 sm:py-8'}`}>{children}</div>
       </div>
+      <Toaster />
     </>
   );
 };
@@ -74,6 +75,7 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       <div className={`relative min-h-screen ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         {children}
       </div>
+      <Toaster />
     </>
   );
 };

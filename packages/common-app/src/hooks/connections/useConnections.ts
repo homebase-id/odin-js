@@ -22,10 +22,12 @@ export const usePendingConnections = ({
   const fetchPendingConnections = async (
     { pageSize, pageNumber }: PagingOptions = { pageSize: 10, pageNumber: 1 }
   ) => {
-    return await await getPendingRequests(dotYouClient, {
-      pageNumber: pageNumber,
-      pageSize: pageSize,
-    });
+    return (
+      (await getPendingRequests(dotYouClient, {
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      })) || null
+    );
   };
 
   return {

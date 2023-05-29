@@ -4,7 +4,7 @@ import { Label } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Person } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import { onChangeParams, pageData } from '../Initialization';
+import { onChangeParams, pageData } from '../Setup';
 import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
 
 const Profile = ({
@@ -45,9 +45,9 @@ const Profile = ({
       <p className="flex flex-col">
         Begin your journey by sharing a bit about yourself.
         <small className="text-sm text-slate-500">
-        A little information can help friends recognize and connect with you on ODIN.
-        This information will be publicly available so don&apos;t add anything you would
-        consider private. And remember, here you're in control of your personal data. 
+          A little information can help friends recognize and connect with you on ODIN. This
+          information will be publicly available so don&apos;t add anything you would consider
+          private. And remember, here you're in control of your personal data.
         </small>
       </p>
 

@@ -4,7 +4,7 @@ import { Label } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import InfoBox from '../../../components/ui/InfoBox/InfoBox';
 import { t } from '@youfoundation/common-app';
-import { onChangeParams, pageData } from '../Initialization';
+import { onChangeParams, pageData } from '../Setup';
 import { Times } from '@youfoundation/common-app';
 
 const Socials = ({

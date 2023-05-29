@@ -15,7 +15,7 @@ import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
-const Initialization = lazy(() => import('../templates/Initialization/Initialization'));
+const Setup = lazy(() => import('../templates/Setup/Setup'));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterAppClient = lazy(() => import('../templates/RegisterAppClient/RegisterAppClient'));
@@ -63,7 +63,7 @@ import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';
 import useIsConfigured from '../hooks/configure/useIsConfigured';
-import { INIT_PATH } from '../templates/Initialization/Initialization';
+import { SETUP_PATH } from '../templates/Setup/Setup';
 import { useTransitProcessor, ErrorBoundary } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
@@ -131,7 +131,7 @@ function App() {
               </Layout>
             }
           >
-            <Route path="initialization" element={<Initialization />} />
+            <Route path="setup" element={<Setup />} />
 
             <Route index={true} element={<Home />} />
 
@@ -256,11 +256,11 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (isAuthenticated && !isConfigured && isFetched && window.location.pathname !== INIT_PATH) {
+  if (isAuthenticated && !isConfigured && isFetched && window.location.pathname !== SETUP_PATH) {
     console.debug('[NOT CONFIGURED]: Redirect to configure');
     return (
       <Navigate
-        to={`${INIT_PATH}?ui=none&returnUrl=${encodeURIComponent(
+        to={`${SETUP_PATH}?ui=none&returnUrl=${encodeURIComponent(
           window.location.pathname + window.location.search
         )}`}
       />

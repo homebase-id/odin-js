@@ -26,11 +26,18 @@ export const createThumbnails = async (
   tinyThumb: ThumbnailFile;
   additionalThumbnails: ThumbnailFile[];
 }> => {
+  if (contentType === svgType) {
+    const vectorThumb = createVectorThumbnail(imageBytes);
+
+    return {
+      tinyThumb: vectorThumb.thumb,
+      naturalSize: vectorThumb.naturalSize,
+      additionalThumbnails: [],
+    };
+  }
+
   // Create a thumbnail that fits scaled into a 20 x 20 canvas
-  const { naturalSize, thumb: tinyThumb } =
-    contentType === svgType
-      ? createVectorThumbnail(imageBytes)
-      : await createImageThumbnail(imageBytes, tinyThumbSize);
+  const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(imageBytes, tinyThumbSize);
 
   const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
     if (tinyThumb.contentType === svgType) return currArray;
