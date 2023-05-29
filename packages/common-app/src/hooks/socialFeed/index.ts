@@ -5,3 +5,4 @@ export * from './useSocialChannel';
 export * from './useSocialChannels';
 export * from './useSocialFeed';
 export * from './useSocialPost';
+export * from './article/useArticleComposer';

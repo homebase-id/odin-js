@@ -92,7 +92,7 @@ const PublishedArticlesView = () => {
   });
 
   const flattenedPosts = flattenInfinteData<PostFile<PostContent>>(articleData, PAGE_SIZE);
-  console.log(flattenedPosts);
+
   return (
     <section className="pb-10">
       <div className="px-2 sm:px-10">

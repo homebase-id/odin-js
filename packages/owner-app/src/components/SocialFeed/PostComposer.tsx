@@ -217,10 +217,14 @@ export const ChannelSelector = React.forwardRef(
       className,
       defaultValue,
       onChange,
+      disabled,
+      excludeMore,
     }: {
       className?: string;
       defaultValue?: string;
       onChange: (channel: ChannelDefinition | undefined) => void;
+      disabled?: boolean;
+      excludeMore?: boolean;
     },
     ref: Ref<HTMLSelectElement>
   ) => {
@@ -243,7 +247,9 @@ export const ChannelSelector = React.forwardRef(
     return (
       <>
         <select
-          className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${className ?? ''}`}
+          className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${
+            disabled ? 'pointer-events-none opacity-50' : ''
+          } ${className ?? ''}`}
           defaultValue={defaultValue}
           key={'loaded-select'}
           onChange={(e) => {
@@ -255,15 +261,18 @@ export const ChannelSelector = React.forwardRef(
             }
           }}
           ref={ref}
+          disabled={disabled}
         >
           {channels.map((channel) => (
             <option value={channel.channelId} key={channel.channelId}>
               {channel.name}
             </option>
           ))}
-          <option value={'more'} key={'more'}>
-            {t('More')}...
-          </option>
+          {!excludeMore ? (
+            <option value={'more'} key={'more'}>
+              {t('More')}...
+            </option>
+          ) : null}
         </select>
         <ChannelsDialog isOpen={isChnlMgmtOpen} onCancel={() => setIsChnlMgmtOpen(false)} />
       </>

@@ -54,7 +54,7 @@ export const ActionGroup = ({
           isOpen ? 'max-h-[15rem] border' : 'max-h-0'
         } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
       >
-        <ul className={`block `}>
+        <ul className={`block`}>
           {options.map((option) => {
             return <ActionOption {...option} key={option.label} />;
           })}
@@ -70,7 +70,7 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
 
   return (
     <>
-      <li className="text-foreground cursor-pointer bg-white text-base hover:bg-slate-200 dark:hover:bg-slate-700">
+      <li className="text-foreground bg-background cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-700">
         <a
           href={href}
           onClick={
