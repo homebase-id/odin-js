@@ -140,9 +140,8 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
   };
 
   const doRemovePost = async () => {
-    if (!postFile.fileId) {
-      return;
-    }
+    if (!postFile.fileId) return;
+
     await removePost({
       fileId: postFile.fileId,
       channelId: postFile.content.channelId,

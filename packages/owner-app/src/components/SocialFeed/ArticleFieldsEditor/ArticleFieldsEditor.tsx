@@ -52,7 +52,9 @@ export const InnerFieldEditors = ({
         <div className="mb-5 border-gray-200 border-opacity-60 bg-background p-2 pb-0 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4 md:pb-0">
           <div className="mb-2 flex flex-row items-center justify-between gap-2 md:mb-4">
             <div className="w-full">
-              {isEditTeaser ? <Label className="mb-1">{t('Title')}</Label> : null}
+              {isEditTeaser ? (
+                <Label className="mb-1 text-gray-700 dark:text-gray-300">{t('Title')}</Label>
+              ) : null}
               <input
                 id="caption"
                 name="caption"
@@ -64,7 +66,11 @@ export const InnerFieldEditors = ({
             </div>
             <ActionButton
               className="shrink-0"
-              onClick={() => setIsEditTeaser(!isEditTeaser)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsEditTeaser(!isEditTeaser);
+              }}
               type="secondary"
             >
               {isEditTeaser ? t('Collapse') : t('Expand')}{' '}
@@ -79,7 +85,7 @@ export const InnerFieldEditors = ({
           {isEditTeaser ? (
             <div className="border-t pt-4 md:mt-4">
               <div className="m-1">
-                <Label className="mb-1">{t('Summary')}</Label>
+                <Label className="mb-1 text-gray-700 dark:text-gray-300">{t('Summary')}</Label>
                 <Textarea
                   id="abstract"
                   name="abstract"
@@ -90,7 +96,7 @@ export const InnerFieldEditors = ({
                 />
               </div>
               <div className="m-1 mt-4">
-                <Label className="mb-1">{t('Hero')}</Label>
+                <Label className="mb-1 text-gray-700 dark:text-gray-300">{t('Hero')}</Label>
                 <ImageSelector
                   id="post_image"
                   name="primaryImageFileId"

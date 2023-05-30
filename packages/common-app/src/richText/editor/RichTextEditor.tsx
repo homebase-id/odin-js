@@ -7,6 +7,8 @@ import {
   usePlateEditorRef,
   createPlugins,
   createDeserializeHtmlPlugin,
+  PlateEditor,
+  Value,
 } from '@udecode/plate-core';
 import { createBasicElementsPlugin } from '@udecode/plate-basic-elements';
 import {
@@ -58,7 +60,6 @@ import {
   UnderlineMark,
   UnorderedListBlock,
 } from './ElementRenderers';
-import { Image } from '@youfoundation/common-app';
 import { createImagePlugin, ELEMENT_IMAGE, ImageToolbarButton } from './ImagePlugin/ImagePlugin';
 
 import {
@@ -67,7 +68,7 @@ import {
   LinkToolbarButton as LinkButtonToolbarButton,
 } from './LinkPlugin';
 import { linkPlugin } from './LinkPluginOptions';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 export const RichTextEditor = ({
   defaultValue,
@@ -195,6 +196,17 @@ export const RichTextEditor = ({
     );
   };
 
+  const [innerEditor, setInnerEditor] = useState<PlateEditor<Value>>();
+  const EditorExposer = () => {
+    const editor = usePlateEditorRef(useEventPlateId());
+
+    useEffect(() => {
+      setInnerEditor(editor);
+    }, [editor]);
+
+    return null;
+  };
+
   return (
     <>
       {/* Very dirty way of overruling default styling that are applied to the RTE */}
@@ -214,13 +226,18 @@ export const RichTextEditor = ({
           initialValue={defaultValue}
           plugins={plugins}
           onChange={(newValue) => {
-            onChange({ target: { name: name, value: newValue } });
+            const isActualChange = innerEditor?.operations.some(
+              (op) => 'set_selection' !== op.type
+            );
+
+            if (isActualChange) onChange({ target: { name: name, value: newValue } });
           }}
         >
           <Toolbar>
             <BasicElementToolbarButtons />
           </Toolbar>
           <Plate editableProps={editableProps} />
+          <EditorExposer />
         </PlateProvider>
       </section>
     </>

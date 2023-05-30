@@ -19,7 +19,7 @@ export interface ActionButtonProps {
     buttonText: string;
     body: string;
     trickQuestion?: TrickQuestion;
-    type: 'critical' | 'info';
+    type?: 'critical' | 'info';
   };
 }
 
