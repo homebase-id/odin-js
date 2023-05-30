@@ -34,10 +34,10 @@ const Apps = () => {
                     href={`/owner/apps/${encodeURIComponent(app.appId)}`}
                     isDisabled={app.isRevoked}
                     title={
-                      <>
+                      <div className="flex flex-col">
                         {`${app.isRevoked ? t('Revoked') : ''} ${app.name}`}{' '}
                         <small className="block text-sm">{app.corsHostName}</small>
-                      </>
+                      </div>
                     }
                     description={`${t('Added on')}: ${new Date(app.created).toLocaleDateString()}`}
                     key={app.appId}
