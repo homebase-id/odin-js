@@ -22,7 +22,7 @@ export const EMPTY_POST: Article = {
 };
 
 const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; postKey?: string }) => {
-  const { data: serverData, isLoading: postDataLoading } = useBlog({
+  const { data: serverData } = useBlog({
     channelSlug: channelKey,
     channelId: channelKey,
     blogSlug: postKey,
@@ -86,13 +86,14 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
 
   const doSave = async (
     dirtyPostFile: PostFile<Article> = postFile,
-    isPublish = false,
+    action: 'save' | 'publish' | 'draft' = 'save',
     explicitTargetChannel?: ChannelDefinition
   ) => {
     // Check if fully empty and if so don't save
-    if (isValidPost(dirtyPostFile)) {
-      return;
-    }
+    if (isValidPost(dirtyPostFile)) return;
+
+    const isPublish = action === 'publish';
+    const isUnpublish = action === 'draft';
 
     const targetChannel = explicitTargetChannel || channel;
 
@@ -109,7 +110,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
         readingTimeStats: getReadingTime(dirtyPostFile.content.body),
       },
       acl:
-        targetChannel.acl && (isPublish || isPublished)
+        targetChannel.acl && (isPublish || isPublished) && !isUnpublish
           ? { ...targetChannel.acl }
           : { requiredSecurityGroup: SecurityGroupType.Owner },
     };
@@ -120,7 +121,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
       channelId: targetChannel.channelId,
     });
 
-    // TODO: Move to component as it has page context
+    // TODO: Move to component as it has page context?
     if (isPublish) {
       window.location.href = `/home/posts/${targetChannel.slug}/${toPostFile.content.slug}`;
     } else {

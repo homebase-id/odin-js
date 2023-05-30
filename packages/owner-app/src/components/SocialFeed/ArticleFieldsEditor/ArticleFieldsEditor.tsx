@@ -25,10 +25,12 @@ export const InnerFieldEditors = ({
   postFile,
   channel,
   onChange,
+  disabled,
 }: {
   postFile: PostFile<Article>;
   channel: ChannelDefinition;
   onChange: (e: { target: { name: string; value: string | ImageUploadResult | RichText } }) => void;
+  disabled?: boolean;
 }) => {
   const debouncedChange = useMemo(() => debounce(onChange, 1500), [onChange]);
 
@@ -62,6 +64,7 @@ export const InnerFieldEditors = ({
                 onChange={debouncedChange}
                 placeholder={t('Title')}
                 className={`w-full resize-none rounded-md bg-transparent px-2 py-1 text-lg`}
+                disabled={disabled}
               />
             </div>
             <ActionButton
@@ -93,6 +96,7 @@ export const InnerFieldEditors = ({
                   onChange={debouncedChange}
                   placeholder={t('Summary')}
                   className={`resize-none`}
+                  disabled={disabled}
                 />
               </div>
               <div className="m-1 mt-4">
@@ -115,6 +119,7 @@ export const InnerFieldEditors = ({
                     !postFile.content.primaryMediaFile ? 'aspect-[16/9] md:aspect-[5/1]' : ''
                   }  w-full object-cover`}
                   label={t('No primary image selected')}
+                  disabled={disabled}
                 />
               </div>
             </div>
@@ -131,6 +136,7 @@ export const InnerFieldEditors = ({
               name="body"
               onChange={debouncedChange}
               className="min-h-[50vh]"
+              disabled={disabled}
             />
           </ErrorBoundary>
         </div>

@@ -77,6 +77,7 @@ export const RichTextEditor = ({
   name,
   onChange,
   className,
+  disabled,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue: any[];
@@ -85,6 +86,7 @@ export const RichTextEditor = ({
   name: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
+  disabled?: boolean;
 }) => {
   const editableProps: TEditableProps = {
     placeholder: placeholder,
@@ -232,6 +234,9 @@ export const RichTextEditor = ({
 
             if (isActualChange) onChange({ target: { name: name, value: newValue } });
           }}
+          readOnly={disabled}
+          // Switch keys to reset the editor when going to enabled
+          key={disabled ? 'disabled' : undefined}
         >
           <Toolbar>
             <BasicElementToolbarButtons />

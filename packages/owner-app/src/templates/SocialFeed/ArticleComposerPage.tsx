@@ -1,12 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ActionButton,
+  ActionGroup,
   Arrow,
   Article as ArticleIcon,
+  ConfirmDialog,
   DialogWrapper,
   ErrorNotification,
   Label,
-  Question,
   SaveStatus,
   Select,
   Trash,
@@ -32,6 +33,7 @@ const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
+  const [isConfirmUnpublish, setIsConfirmUnpublish] = useState(false);
 
   const {
     // Actions
@@ -61,6 +63,26 @@ const ArticleComposerPage = () => {
   });
 
   const PostButton = ({ className }: { className?: string }) => {
+    if (isPublished)
+      return (
+        <ActionButton
+          className={`m-2 md:w-auto ${className ?? ''}`}
+          state={saveStatus !== 'success' ? saveStatus : undefined}
+          onClick={() => doSave(postFile, 'draft')}
+          confirmOptions={{
+            title: t('Post'),
+            body: t(
+              'Are you sure you want to unpublish this post, it will no longer be publicly available?'
+            ),
+            buttonText: t('Convert to draft'),
+            type: 'info',
+          }}
+          type="secondary"
+        >
+          {t('Convert to draft')}
+        </ActionButton>
+      );
+
     return (
       <ActionButton
         className={`m-2 md:w-auto ${
@@ -70,7 +92,7 @@ const ArticleComposerPage = () => {
         } ${className ?? ''}`}
         icon={Arrow}
         state={saveStatus !== 'success' ? saveStatus : undefined}
-        onClick={() => doSave(postFile, true)}
+        onClick={() => doSave(postFile, 'publish')}
         confirmOptions={{
           title: t('Post'),
           body: t('Are you sure you want to publish this post?'),
@@ -88,16 +110,17 @@ const ArticleComposerPage = () => {
       <PageMeta
         title={
           <div className="flex-col">
-            {t('New article')}
+            {postFile?.content?.caption || t('New article')}
             <small className="text-sm text-gray-400">
               <SaveStatus state={saveStatus} className="text-sm" />
             </small>
           </div>
         }
+        browserTitle={postFile?.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
           { title: t('Articles'), href: '/owner/feed/articles' },
-          { title: postFile?.content?.caption || t('New article') },
+          { title: t('New article') },
         ]}
         actions={
           <>
@@ -122,13 +145,33 @@ const ArticleComposerPage = () => {
                 className="m-2"
               />
             ) : null}
-            <ActionButton
-              onClick={() => setIsOptionsDialogOpen(!isOptionsDialogOpen)}
+            <ActionGroup
               type="mute"
               size="square"
+              options={[
+                {
+                  label: t('Options'),
+                  onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
+                },
+                {
+                  label: t('Remove'),
+                  onClick: () => {
+                    doRemovePost();
+                    navigate('/owner/feed/articles');
+                  },
+                  icon: Trash,
+                  confirmOptions: {
+                    title: t('Remove'),
+                    body: `${t('Are you sure you want to remove')} "${
+                      postFile?.content?.caption || t('New article')
+                    }"`,
+                    buttonText: t('Remove'),
+                  },
+                },
+              ]}
             >
               ...
-            </ActionButton>
+            </ActionGroup>
             <PostButton />
           </>
         }
@@ -141,12 +184,9 @@ const ArticleComposerPage = () => {
               doSave();
               return false;
             }}
+            className={isPublished ? 'opacity-90 grayscale' : ''}
+            onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
-            <div className="mb-5 flex flex-row flex-wrap items-center bg-background md:flex-nowrap">
-              <></>
-            </div>
-
-            {/* <div className="mb-5 border-gray-200 border-opacity-60 bg-background p-2 dark:border-gray-800 md:rounded-lg md:border md:p-4"> */}
             <InnerFieldEditors
               key={postFile.content.id}
               postFile={postFile}
@@ -166,23 +206,17 @@ const ArticleComposerPage = () => {
                   dirtyPostFile.previewThumbnail = uploadResult.previewThumbnail;
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.content.body = e.target.value as RichText;
-                } else if (e.target.name === 'reactAccess') {
-                  const newReactAccess = e.target.value as SecurityGroupType;
-                  dirtyPostFile.content.reactAccess =
-                    newReactAccess === SecurityGroupType.Owner
-                      ? SecurityGroupType.Owner
-                      : undefined;
                 }
 
                 setPostFile(dirtyPostFile);
                 doSave(dirtyPostFile);
               }}
+              disabled={isPublished}
             />
 
             <div className="mb-5 flex md:hidden">
               <PostButton className="w-full justify-center" />
             </div>
-            {/* </div> */}
           </form>
           <ErrorNotification error={error} />
         </div>
@@ -209,6 +243,23 @@ const ArticleComposerPage = () => {
             else if (channel) setChannel(channel);
           }
         }}
+      />
+      <ConfirmDialog
+        title={t('Published')}
+        needConfirmation={isConfirmUnpublish}
+        onConfirm={() => {
+          doSave(postFile, 'draft');
+          setIsConfirmUnpublish(false);
+        }}
+        confirmText="Convert to draft"
+        onCancel={() => setIsConfirmUnpublish(false)}
+        children={
+          <p>
+            {t(
+              'This post is currently published, if you wish to edit you need to convert it back to draft'
+            )}
+          </p>
+        }
       />
     </>
   );
@@ -264,6 +315,11 @@ const OptionsDialog = ({
         </div>
         <div className="mt-4 px-2 pt-4">
           <Label>{t('Channel')}</Label>
+          {isPublished ? (
+            <p className="text-sm text-gray-400">
+              {t('After a publish, the post can no longer be moved between channels')}
+            </p>
+          ) : null}
           <ChannelSelector
             className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
             defaultValue={postFile.content?.channelId}

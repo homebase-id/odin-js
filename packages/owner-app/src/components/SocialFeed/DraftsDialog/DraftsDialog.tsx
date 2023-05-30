@@ -138,7 +138,7 @@ export const DraftItem = ({
                       title: `${t('Remove')} "${draft.content.caption.substring(0, 50) ?? ''}"`,
                       buttonText: 'Permanently remove',
                       body: t(
-                        'Are you sure you want to remove this draft? This action cannot be undone.'
+                        'Are you sure you want to remove this post? This action cannot be undone.'
                       ),
                     }}
                     onClick={(e) => {
