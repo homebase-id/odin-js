@@ -292,7 +292,9 @@ const AttributeFields = ({
               id="headerImage"
               name={HomePageFields.HeaderImageId}
               defaultValue={attribute.data?.[HomePageFields.HeaderImageId] ?? ''}
-              onChange={debouncedChange}
+              onChange={(e) =>
+                onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+              }
               acl={attribute.acl}
               targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
               sizeClass={`${
