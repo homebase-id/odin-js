@@ -49,6 +49,11 @@ export const queryModified = async (
     resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   };
 
+  const queryParams = stringifyToQueryParams({
+    ...request.queryParams,
+    ...request.resultOptions,
+  });
+
   const config = {
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
@@ -56,7 +61,7 @@ export const queryModified = async (
   };
 
   return client
-    .post<QueryModifiedResponse>('/drive/query/modified', request, config)
+    .get<QueryModifiedResponse>('/drive/query/modified?' + queryParams, config)
     .then((response) => {
       return response.data;
     });
