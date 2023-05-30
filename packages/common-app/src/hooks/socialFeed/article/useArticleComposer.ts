@@ -164,7 +164,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
     await doRemovePost();
     resetRemovePostStatus();
 
-    doSave(dataToMove, false, newChannelDefinition);
+    doSave(dataToMove, 'save', newChannelDefinition);
   };
 
   return {
