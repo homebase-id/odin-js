@@ -1,16 +1,22 @@
 import { FormEventHandler, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Arrow, t } from '@youfoundation/common-app';
+
 import useAuth from '../../hooks/auth/useAuth';
-import { ActionButton } from '@youfoundation/common-app';
-import { Input } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
+
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
-import { DomainHighlighter } from '@youfoundation/common-app';
+
 import { useSearchParams } from 'react-router-dom';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from '../../hooks/configure/useInit';
-import { Alert } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Alert,
+  Arrow,
+  DomainHighlighter,
+  Input,
+  Label,
+  t,
+} from '@youfoundation/common-app';
 
 const FirstRun = () => {
   const [password, setPassword] = useState('');
@@ -26,17 +32,9 @@ const FirstRun = () => {
     e.preventDefault();
     setState('loading');
     try {
-      if (password !== retypePassword) {
-        window.alert('Passwords do not match; TODO: make this nicer');
-        setState('error');
-        return;
-      }
-
       localStorage.setItem(FIRST_RUN_TOKEN_STORAGE_KEY, firstRunToken || ''); // Store FRT to localStorage so it can be used on initialize later
-      await finalizeRegistration(password, firstRunToken || '');
 
-      //TODO: need a 'success' screen or something;
-      // => No we don't, it should just login ;-)
+      await finalizeRegistration(password, firstRunToken || '');
       await authenticate(password);
 
       setState('success');

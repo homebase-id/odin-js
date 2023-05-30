@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { hasValidToken } from '../../provider/AuthenticationProvider';
+import { hasValidToken } from '../../provider/auth/AuthenticationProvider';
 
 const MINUTE_IN_MS = 60000;
 

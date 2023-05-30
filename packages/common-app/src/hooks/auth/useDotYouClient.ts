@@ -11,15 +11,17 @@ export const useDotYouClient = () => {
   const _isOwner =
     _app === 'owner' || localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host;
 
+  const getApiType = () => {
+    if (_isOwner) return ApiType.Owner;
+    return ApiType.YouAuth;
+  };
+
   const getRawSharedSecret = () =>
     _isOwner
       ? window.localStorage.getItem(OWNER_SHARED_SECRET)
       : window.localStorage.getItem(HOME_SHARED_SECRET);
 
-  const getApiType = () => {
-    if (_isOwner) return ApiType.Owner;
-    return ApiType.YouAuth;
-  };
+  const hasSharedSecret = !!getRawSharedSecret();
 
   const getSharedSecret = () => {
     const raw = getRawSharedSecret();
@@ -46,6 +48,7 @@ export const useDotYouClient = () => {
 
   return {
     getApiType,
+    hasSharedSecret,
     getSharedSecret,
     getDotYouClient,
     isOwner: _isOwner,
