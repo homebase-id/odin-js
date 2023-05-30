@@ -39,32 +39,38 @@ export const queryModified = async (
   params: FileQueryParams,
   ro?: GetModifiedResultOptions
 ): Promise<QueryModifiedResponse> => {
-  const client = dotYouClient.createAxiosClient();
-
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
+
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
+    },
+  });
 
   const request: GetModifiedRequest = {
     queryParams: params,
     resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   };
 
-  const queryParams = stringifyToQueryParams({
-    ...request.queryParams,
-    ...request.resultOptions,
-  });
-
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
-  };
-
-  return client
-    .get<QueryModifiedResponse>('/drive/query/modified?' + queryParams, config)
-    .then((response) => {
-      return response.data;
+  const requestPromise = (() => {
+    const queryParams = stringifyToQueryParams({
+      ...request.queryParams,
+      ...request.resultOptions,
     });
+
+    const getUrl = '/drive/query/modified?' + queryParams;
+    // Max Url is 1800 so we keep room for encryption overhead
+    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
+      return client.post<QueryModifiedResponse>('/drive/query/modified', request);
+    } else {
+      return client.get<QueryModifiedResponse>(getUrl);
+    }
+  })();
+
+  return requestPromise.then((response) => {
+    return response.data;
+  });
 };
 
 export const queryBatch = async (
@@ -72,37 +78,43 @@ export const queryBatch = async (
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
 ): Promise<QueryBatchResponse> => {
-  const client = dotYouClient.createAxiosClient();
-
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
+
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
+    },
+  });
 
   const request: GetBatchRequest = {
     queryParams: strippedQueryParams,
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
 
-  const queryParams = stringifyToQueryParams({
-    ...request.queryParams,
-    ...request.resultOptionsRequest,
-  });
-
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
-  };
-
-  return client
-    .get<QueryBatchResponse>('/drive/query/batch?' + queryParams, config)
-    .then((response) => {
-      const responseData = response.data;
-      return {
-        ...response.data,
-        // Remove deleted files
-        searchResults: responseData.searchResults.filter((dsr) => dsr.fileState === 'active'),
-      };
+  const requestPromise = (() => {
+    const queryParams = stringifyToQueryParams({
+      ...request.queryParams,
+      ...request.resultOptionsRequest,
     });
+
+    const getUrl = '/drive/query/batch?' + queryParams;
+    // Max Url is 1800 so we keep room for encryption overhead
+    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
+      return client.post<QueryBatchResponse>('/drive/query/batch', request);
+    } else {
+      return client.get<QueryBatchResponse>(getUrl);
+    }
+  })();
+
+  return requestPromise.then((response) => {
+    const responseData = response.data;
+    return {
+      ...response.data,
+      // Remove deleted files
+      searchResults: responseData.searchResults.filter((dsr) => dsr.fileState === 'active'),
+    };
+  });
 };
 
 export const queryBatchCollection = async (
