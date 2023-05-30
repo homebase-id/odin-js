@@ -22,9 +22,7 @@ const ConnectionsView = ({ className }: { className?: string }) => {
   }).fetch;
 
   useEffect(() => {
-    if (!isFetchedAfterMount) {
-      return;
-    }
+    if (!isFetchedAfterMount) return;
 
     if (connections?.pages[activePage - 1]) {
       // already have that
@@ -35,9 +33,8 @@ const ConnectionsView = ({ className }: { className?: string }) => {
 
   const hasNextPage = connections?.pages[activePage] || hasNextPageOnServer;
 
-  if (connectionsFetched && !connections?.pages.length) {
+  if (connectionsFetched && (!connections?.pages.length || !connections.pages[0]?.results.length))
     return null;
-  }
 
   return (
     <div className={`block overflow-hidden px-4 py-3 ${className ?? ''}`}>
