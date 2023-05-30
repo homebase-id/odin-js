@@ -41,14 +41,25 @@ export const queryModified = async (
 ): Promise<QueryModifiedResponse> => {
   const client = dotYouClient.createAxiosClient();
 
+  const strippedQueryParams = { ...params };
+  delete strippedQueryParams.systemFileType;
+
   const request: GetModifiedRequest = {
     queryParams: params,
     resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   };
 
-  return client.post<QueryModifiedResponse>('/drive/query/modified', request).then((response) => {
-    return response.data;
-  });
+  const config = {
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
+    },
+  };
+
+  return client
+    .post<QueryModifiedResponse>('/drive/query/modified', request, config)
+    .then((response) => {
+      return response.data;
+    });
 };
 
 export const queryBatch = async (
