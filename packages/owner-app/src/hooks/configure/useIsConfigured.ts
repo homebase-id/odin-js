@@ -22,7 +22,11 @@ const useIsConfigured = () => {
     }
 
     // Only check isConfigured once per app version
-    if (localStorage.getItem(LOCAL_STORAGE_KEY) === import.meta.env.VITE_VERSION) return true;
+    if (
+      localStorage.getItem(LOCAL_STORAGE_KEY) === import.meta.env.VITE_VERSION &&
+      import.meta.env.PROD
+    )
+      return true;
     const result = await isConfigured(dotYouClient);
     if (result) localStorage.setItem(LOCAL_STORAGE_KEY, import.meta.env.VITE_VERSION);
 
