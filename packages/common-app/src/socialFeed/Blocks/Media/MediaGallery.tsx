@@ -75,7 +75,10 @@ export const MediaGallery = ({
           className={`${tinyThumbUrl ? 'absolute inset-0' : ''} -m-[2px] flex flex-row flex-wrap`}
         >
           {slicedFiles.map((file, index) => (
-            <div className="w-1/2 p-[2px]" key={file.fileId}>
+            <div
+              className={`${slicedFiles.length === 3 && index === 2 ? 'w-full' : 'w-1/2'} p-[2px]`}
+              key={file.fileId}
+            >
               <div
                 className={`relative ${
                   files.length === 2 ? 'aspect-[1/2]' : 'aspect-square'
