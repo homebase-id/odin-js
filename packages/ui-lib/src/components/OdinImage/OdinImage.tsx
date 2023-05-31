@@ -29,6 +29,7 @@ export interface OdinImageProps {
   probablyEncrypted?: boolean;
   onLoad?: () => void;
   avoidPayload?: boolean;
+  explicitSize?: ThumbSize | 'full';
 }
 
 export const OdinImage = ({
@@ -45,6 +46,7 @@ export const OdinImage = ({
   probablyEncrypted,
   onLoad,
   avoidPayload,
+  explicitSize,
 }: OdinImageProps) => {
   const previewImgRef = useRef<HTMLImageElement>(null);
   const wrapperRef = useRef<HTMLPictureElement>(null);
@@ -119,6 +121,11 @@ export const OdinImage = ({
     // If no element or nothing to create a size that has the aspect ratio, don't bother and load full...
     if (!previewImgRef.current || (!tinyThumb?.sizes?.length && !skipTiny)) {
       setLoadSize('full');
+      return;
+    }
+
+    if (explicitSize) {
+      setLoadSize(explicitSize);
       return;
     }
 
