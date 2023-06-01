@@ -45,7 +45,7 @@ type None = 0;
 type Archived = 1;
 type Removed = 2;
 
-export type ArchivalStatus = None | Archived | Removed;
+export type ArchivalStatus = None | Archived | Removed | number;
 
 export interface AppFileMetaData {
   fileType: number;
