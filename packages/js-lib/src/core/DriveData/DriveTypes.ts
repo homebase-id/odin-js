@@ -107,6 +107,7 @@ export interface QueryModifiedResponse {
 
 export interface QueryBatchResponse {
   cursorState: string;
+  queryTime: number;
   includeMetadataHeader: boolean;
   searchResults: DriveSearchResult[];
 }

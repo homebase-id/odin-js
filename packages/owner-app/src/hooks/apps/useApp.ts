@@ -21,7 +21,7 @@ const useApp = ({ appId }: { appId?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ appId }: { appId: string }) => {
-    return await GetAppRegistration(dotYouClient, { appId: appId });
+    return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;
   };
 
   const registerNewApp = async (appRegRequest: AppRegistrationRequest) => {
