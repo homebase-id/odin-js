@@ -107,6 +107,12 @@ const PostPreview = ({
             className="mb-5 lg:my-10"
             isOwner={false} // PostPreview only used for non owner posts
             isAuthenticated={true}
+            onNavigate={(path: string) =>
+              navigate(path, {
+                state: { referrer: window.location.pathname },
+                preventScrollReset: true,
+              })
+            }
           />
         </div>
       )}

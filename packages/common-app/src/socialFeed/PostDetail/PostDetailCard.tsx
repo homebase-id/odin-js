@@ -27,6 +27,7 @@ export const PostDetailCard = ({
   className,
   isAuthenticated,
   isOwner,
+  onNavigate,
 }: {
   odinId?: string;
   channel?: ChannelDefinition;
@@ -35,6 +36,7 @@ export const PostDetailCard = ({
   className?: string;
   isAuthenticated: boolean;
   isOwner: boolean;
+  onNavigate?: (path: string) => void;
 }) => {
   const post = postFile?.content;
   const mediaFiles = (post as Media)?.mediaFiles;
@@ -109,6 +111,14 @@ export const PostDetailCard = ({
             postUrl={window.location.pathname}
             odinId={odinId}
             probablyEncrypted={postFile?.payloadIsEncrypted}
+            onClick={
+              onNavigate
+                ? (e, index) => {
+                    e.stopPropagation();
+                    onNavigate(`${window.location.pathname}/${index}`);
+                  }
+                : undefined
+            }
           />
         ) : (
           <div className="relative mb-5 sm:w-full">

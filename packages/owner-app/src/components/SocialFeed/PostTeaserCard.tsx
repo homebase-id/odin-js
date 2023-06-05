@@ -1,11 +1,16 @@
-import { PostContent, Article, PostFile, getChannelDrive } from '@youfoundation/js-lib';
+import {
+  PostContent,
+  Article,
+  PostFile,
+  getChannelDrive,
+  ReactionContext,
+} from '@youfoundation/js-lib';
 import { FC, useState } from 'react';
 import {
   AuthorImage,
   AuthorName,
   FakeAnchor,
   PostInteracts,
-  PostMedia,
   PostMeta,
   RichTextRenderer,
   useChannel,
@@ -14,6 +19,8 @@ import {
   t,
   ErrorBoundary,
 } from '@youfoundation/common-app';
+import { useNavigate } from 'react-router-dom';
+import DoubleClickHeartForMedia from './DoubleClickHeartForMedia';
 
 interface PostTeaserCardProps {
   className?: string;
@@ -25,6 +32,8 @@ interface PostTeaserCardProps {
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
   const { content: post } = postFile;
   const isExternal = !odinId || odinId !== window.location.hostname;
+  const navigate = useNavigate();
+
   const [isExpanded, setIsExpanded] = useState(false);
   const { data: externalChannel } = useSocialChannel({
     odinId: isExternal ? odinId : undefined,
@@ -35,7 +44,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const channel = externalChannel || internalChannel;
 
   const postPath = `/owner/feed/preview/${odinId}/${channel?.channelId}/${post.id}`;
-  const clickable = post.type === 'Article';
+  const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
+  const isDesktop = document.documentElement.clientWidth >= 1024;
 
   return (
     <div className={`w-full rounded-lg ${className ?? ''}`}>
@@ -130,7 +140,22 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
               )}
             </div>
           </div>
-          <PostMedia odinId={odinId} postFile={postFile} postPath={postPath} showFallback={false} />
+          <DoubleClickHeartForMedia
+            odinId={odinId}
+            postFile={postFile}
+            postPath={postPath}
+            onClick={(e, index) => {
+              e.stopPropagation();
+
+              // Only navigate to the article if we're on desktop
+              if (post.type !== 'Article') {
+                navigate(`${postPath}/${index}`);
+                return;
+              }
+
+              if (isDesktop) navigate(postPath);
+            }}
+          />
           <PostInteracts
             authorOdinId={odinId || window.location.hostname}
             postFile={postFile}

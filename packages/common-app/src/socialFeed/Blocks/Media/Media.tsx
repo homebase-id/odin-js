@@ -7,12 +7,16 @@ export const PostMedia = ({
   postPath,
   showFallback,
   forceAspectRatio,
+  onClick,
+  className,
 }: {
   odinId?: string;
   postFile: PostFile<PostContent>;
   postPath: string;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
+  className?: string;
 }) => {
   const { content: post, previewThumbnail } = postFile;
   const mediaFileIds = (post as Media).mediaFiles;
@@ -36,10 +40,11 @@ export const PostMedia = ({
         odinId={odinId}
         channelId={post.channelId}
         files={mediaFileIds}
-        className="mb-4"
+        className={`mb-4 ${className || ''}`}
         postUrl={postPath}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
+        onClick={onClick}
       />
     );
   }
@@ -48,14 +53,12 @@ export const PostMedia = ({
       <PrimaryMedia
         post={post}
         odinId={odinId}
-        className={`
-              w-full
-            ${forceAspectRatio ? 'md:aspect-square ' : ''}
-            `}
+        className={`w-full ${forceAspectRatio ? 'md:aspect-square ' : ''} ${className || ''}`}
         postUrl={postPath}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
         fit="cover"
+        onClick={onClick ? (e) => onClick(e, 0) : undefined}
       />
     </div>
   );
