@@ -1,7 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
-  ApiType,
-  DotYouClient,
   DriveSearchResult,
   getPayload,
   getPayloadBytes,
