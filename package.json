@@ -13,6 +13,7 @@
     "clean-build": "npm run clean; npm run build",
     "build-libs": "npm run build -w ./packages/js-lib -w ./packages/ui-lib",
     "owner-app": "npm install && npm start -w ./packages/owner-app",
+    "feed-app": "npm install && npm start -w ./packages/feed-app",
     "public-app": "npm install && npm start -w ./packages/public-app"
   },
   "publishConfig": {
