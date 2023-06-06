@@ -6,36 +6,35 @@ export default defineConfig({
   plugins: [
     dts({
       insertTypesEntry: true,
+      entryRoot: './src',
     }),
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'odin-js',
-      fileName: `odin-js`,
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        core: path.resolve(__dirname, 'src/core/core.ts'),
+        helpers: path.resolve(__dirname, 'src/helpers/helpers.tsx'),
+        owner: path.resolve(__dirname, 'src/owner/owner.ts'),
+        profile: path.resolve(__dirname, 'src/profile/profile.ts'),
+        public: path.resolve(__dirname, 'src/public/public.ts'),
+        transit: path.resolve(__dirname, 'src/transit/transit.ts'),
+
+        auth: path.resolve(__dirname, 'src/auth/auth.ts'),
+      },
+      // formats: ['es', 'cjs'], // Output formats are inferred automatically when building with outputs
     },
     rollupOptions: {
       external: ['axios'],
       output: [
         {
           format: 'es',
-          inlineDynamicImports: false,
-          preserveModules: true, // otherwise everything is bundled into one file blocking tree shaking of the named exports, but only works for ES modules
-
-          // Provide global variables to use in the UMD build
-          // for externalized deps
           globals: {
             axios: 'axios',
           },
         },
         {
-          name: 'odin-js-umd',
-          format: 'umd',
-          inlineDynamicImports: true,
-          preserveModules: false,
-
-          // Provide global variables to use in the UMD build
-          // for externalized deps
+          format: 'cjs',
           globals: {
             axios: 'axios',
           },

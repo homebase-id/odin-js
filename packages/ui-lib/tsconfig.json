@@ -4,10 +4,5 @@
     "outDir": "dist",
     "jsx": "react-jsx"
   },
-  "references": [
-    {
-      "path": "../js-lib"
-    }
-  ],
   "exclude": ["./types/**/*", "./dist/**/*"]
 }

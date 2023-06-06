@@ -7,10 +7,10 @@ import {
   TargetDrive,
   EmbeddedThumb,
   ThumbSize,
-  base64ToUint8Array,
   ImageSize,
   DotYouClient,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
 import '../../app/app.css';
 import LoadingParagraph from '../ui/LoadingParagraph/LoadingParagraph';

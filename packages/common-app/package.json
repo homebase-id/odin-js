@@ -6,7 +6,8 @@
   "files": [
     "src"
   ],
-  "module": "./index.js",
+  "module": "./index.ts",
+  "types": "./index.ts",
   "sideEffects": false,
   "scripts": {
     "lint": "eslint src/*"
