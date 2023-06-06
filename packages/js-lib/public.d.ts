@@ -1,1 +1,1 @@
-export * from './dist/public/public.d.ts';
+export * from './dist/public/public';

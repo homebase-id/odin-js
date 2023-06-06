@@ -51,7 +51,7 @@
       "require": "./dist/transit.js"
     }
   },
-  "types": "./index.d.ts",
+  "types": "index.d.ts",
   "sideEffects": false,
   "scripts": {
     "start": "vite build --watch",

@@ -1,1 +1,1 @@
-export * from './dist/helpers/helpers.d.ts';
+export * from './dist/helpers/helpers';

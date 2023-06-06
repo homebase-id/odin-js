@@ -1,1 +1,1 @@
-export * from './dist/core/core.d.ts';
+export * from './dist/core/core';

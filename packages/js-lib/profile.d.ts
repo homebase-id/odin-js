@@ -1,1 +1,1 @@
-export * from './dist/profile/profile.d.ts';
+export * from './dist/profile/profile';

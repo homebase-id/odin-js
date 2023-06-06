@@ -1,1 +1,1 @@
-export * from './dist/transit/transit.d.ts';
+export * from './dist/transit/transit';
