@@ -103,6 +103,7 @@ export interface UploadResult {
   file: ExternalFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferStatus };
+  newVersionTag: string;
 }
 
 export enum TransferStatus {
