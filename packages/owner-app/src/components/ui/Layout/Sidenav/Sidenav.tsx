@@ -2,9 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import useAuth from '../../../../hooks/auth/useAuth';
 
-import { getVersion } from '../../../../templates/DemoData/helpers';
-
-import { MiniDarkModeToggle, t } from '@youfoundation/common-app';
+import { MiniDarkModeToggle, getVersion, t } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import OwnerImage from '../../../OwnerImage/OwnerImage';
 import { useProfiles } from '@youfoundation/common-app';
