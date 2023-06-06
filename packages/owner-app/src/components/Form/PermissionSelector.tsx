@@ -12,7 +12,7 @@ const PermissionSelector = ({
   onChange,
 }: {
   type: 'app' | 'circle' | 'app-circles';
-  permissionSet: PermissionSet;
+  permissionSet: PermissionSet | undefined;
   onChange: (val: PermissionSet) => void;
 }) => {
   const levels =
@@ -29,14 +29,15 @@ const PermissionSelector = ({
           {levels
             .filter((level) => level.value > 1)
             .map((permissionLevel) => {
-              const isChecked = permissionSet.keys.some((key) => key === permissionLevel.value);
+              const isChecked =
+                permissionSet && permissionSet.keys?.some((key) => key === permissionLevel.value);
               const clickHandler = () => {
                 if (isChecked) {
                   onChange({
                     keys: [...permissionSet.keys.filter((key) => key !== permissionLevel.value)],
                   });
                 } else {
-                  onChange({ keys: [...permissionSet.keys, permissionLevel.value] });
+                  onChange({ keys: [...(permissionSet?.keys || []), permissionLevel.value] });
                 }
               };
 
