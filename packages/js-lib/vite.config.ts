@@ -19,8 +19,10 @@ export default defineConfig({
         profile: path.resolve(__dirname, 'src/profile/profile.ts'),
         public: path.resolve(__dirname, 'src/public/public.ts'),
         transit: path.resolve(__dirname, 'src/transit/transit.ts'),
+
+        auth: path.resolve(__dirname, 'src/auth/auth.ts'),
       },
-      formats: ['es', 'cjs'],
+      // formats: ['es', 'cjs'], // Output formats are inferred automatically when building with outputs
     },
     rollupOptions: {
       external: ['axios'],

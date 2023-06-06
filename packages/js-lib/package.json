@@ -49,6 +49,10 @@
     "./transit": {
       "import": "./dist/transit.mjs",
       "require": "./dist/transit.js"
+    },
+    "./auth": {
+      "import": "./dist/auth.mjs",
+      "require": "./dist/auth.js"
     }
   },
   "types": "index.d.ts",
