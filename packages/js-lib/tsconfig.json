@@ -1,4 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
-  "exclude": ["./types/**/*", "./dist/**/*"]
+  "exclude": ["./types/**/*", "./dist/**/*"],
+  "compilerOptions": {
+    "outDir": "dist"
+  }
 }
