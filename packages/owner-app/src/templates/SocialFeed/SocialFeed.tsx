@@ -42,7 +42,7 @@ const Feed = () => {
       </Helmet>
       {identityKey && channelKey && postKey ? (
         <div
-          className={`bg-page-background fixed inset-0 z-50 overflow-auto bg-opacity-90 backdrop-blur-sm`}
+          className={`fixed inset-0 z-50 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm`}
         >
           <Suspense>
             <PostPreview
@@ -54,14 +54,14 @@ const Feed = () => {
           </Suspense>
         </div>
       ) : null}
-      <section className="bg-page-background flex-grow">
+      <section className="flex-grow bg-page-background pt-12 md:pt-0">
         <div className="container mx-auto max-w-3xl gap-5 py-3 sm:py-10 lg:grid lg:max-w-6xl lg:grid-cols-4 lg:px-5">
           <div className="hidden lg:block">
             {isDesktop ? (
               <div className="sticky top-4">
                 <Suspense>
-                  <IdentityLink className="bg-background mb-3 overflow-hidden rounded-md border border-gray-200 border-opacity-60 shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
-                  <FollowersView className="bg-background rounded-md border border-gray-200 border-opacity-60 shadow-sm dark:border-gray-800" />
+                  <IdentityLink className="mb-3 overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
+                  <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                 </Suspense>
               </div>
             ) : null}
@@ -73,9 +73,9 @@ const Feed = () => {
             {isDesktop ? (
               <div className="sticky top-4">
                 <Suspense>
-                  <ConnectionsView className="bg-background mb-3 rounded-md border border-gray-200 border-opacity-60 shadow-sm dark:border-gray-800" />
-                  <CirclesView className="bg-background mb-3 rounded-md border border-gray-200 border-opacity-60 shadow-sm dark:border-gray-800" />
-                  <FollowingView className="bg-background rounded-md border border-gray-200 border-opacity-60 shadow-sm dark:border-gray-800" />
+                  <ConnectionsView className="mb-3 rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                  <CirclesView className="mb-3 rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                  <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                 </Suspense>
               </div>
             ) : null}
