@@ -21,3 +21,4 @@ export * from './connections/useExternalOdinId';
 export * from './reactions';
 export * from './securityContext/useSecurityContext';
 export * from './longPress/useLongPress';
+export * from './doubleClick/useDoubleTap';

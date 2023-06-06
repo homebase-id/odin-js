@@ -3,10 +3,10 @@ import {
   useDotYouClient,
   PostMedia,
   ErrorNotification,
+  useDoubleTap,
 } from '@youfoundation/common-app';
 import { PostFile, PostContent, ReactionContext } from '@youfoundation/js-lib';
 import { useRef } from 'react';
-import { useDoubleTap } from '../../hooks/doubleClick/useDoubTap';
 
 const DoubleClickHeartForMedia = ({
   odinId,
