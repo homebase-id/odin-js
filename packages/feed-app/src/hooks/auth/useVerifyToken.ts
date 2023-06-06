@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   APP_SHARED_SECRET,
   hasValidToken as hasValidYouAuthToken,
-} from '../../provider/AuthenticationProvider';
+} from '@youfoundation/js-lib/auth';
 
 const MINUTE_IN_MS = 60000;
 

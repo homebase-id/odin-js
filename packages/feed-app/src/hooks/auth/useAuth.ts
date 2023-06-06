@@ -1,4 +1,5 @@
-import { ApiType, base64ToUint8Array, DotYouClient } from '@youfoundation/js-lib';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useVerifyToken from './useVerifyToken';
@@ -10,8 +11,20 @@ import {
   APP_SHARED_SECRET,
   getRegistrationParams,
   preAuth as preauthApps,
-} from '../../provider/AuthenticationProvider';
-import { retrieveIdentity } from '../../provider/IdentityProvider';
+  retrieveIdentity,
+} from '@youfoundation/js-lib/auth';
+
+export const drives = [
+  {
+    a: '4db49422ebad02e99ab96e9c477d1e08',
+    t: 'a3227ffba87608beeb24fee9b70d92a6',
+    n: 'Feed',
+    d: '',
+    p: 3,
+  },
+];
+export const appName = 'Odin - Feed';
+export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
 
 const hasSharedSecret = () => {
   const raw = window.localStorage.getItem(APP_SHARED_SECRET);
@@ -28,7 +41,7 @@ const useAuth = () => {
   const authenticate = (identity: string, returnUrl: string): void => {
     const strippedIdentity = identity.replace(new RegExp('^(http|https)://'), '').split('/')[0];
 
-    authenticateYouAuth(strippedIdentity, returnUrl);
+    authenticateYouAuth(strippedIdentity, returnUrl, appName, appId, drives);
   };
 
   const finalizeAuthentication = async (
@@ -102,7 +115,8 @@ const useAuth = () => {
   }, [hasValidToken]);
 
   return {
-    getRegistrationParams,
+    getRegistrationParams: (returnUrl: string) =>
+      getRegistrationParams(returnUrl, appName, appId, drives),
     authenticate,
     finalizeAuthentication,
     logout,

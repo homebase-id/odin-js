@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import useAuth from '../../../hooks/auth/useAuth';
-import { IS_DARK_CLASSNAME } from '../../../hooks/useDarkMode';
-import LoadingParagraph from '../../ui/Layout/Loaders/LoadingParagraph/LoadingParagraph';
+import { IS_DARK_CLASSNAME, LoadingParagraph } from '@youfoundation/common-app';
 
 export const LoginBox = () => {
   const [params, setParams] = useState<string | null>(null);

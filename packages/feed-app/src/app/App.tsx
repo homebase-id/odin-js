@@ -14,6 +14,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
+const About = lazy(() => import('../templates/About/About'));
+const Auth = lazy(() => import('../templates/Auth/Auth'));
+const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
+
 const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
 
 import '@youfoundation/ui-lib/dist/style.css';
@@ -32,7 +36,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path="/feed"
+          path=""
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>
@@ -41,9 +45,9 @@ function App() {
             </ErrorBoundary>
           }
         >
-          {/* <Route path="about" element={<About />}></Route>
+          <Route path="about" element={<About />}></Route>
           <Route path="auth" element={<Auth />}></Route>
-          <Route path="auth/finalize" element={<FinalizeAuth />}></Route> */}
+          <Route path="auth/finalize" element={<FinalizeAuth />}></Route>
 
           {/* Feed: */}
           <Route
@@ -110,7 +114,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
       return <></>;
     }
 
-    return <Navigate to={`/feed/about`} />;
+    return <Navigate to={`/about`} />;
   }
 
   return <>{children}</>;

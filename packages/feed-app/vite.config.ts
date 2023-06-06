@@ -23,7 +23,7 @@ export default defineConfig({
     },
   },
   preview: { ...hostConfig },
-  base: '/feed',
+  // base: '/feed',
   build: {
     rollupOptions: {
       onwarn(warning, warn) {

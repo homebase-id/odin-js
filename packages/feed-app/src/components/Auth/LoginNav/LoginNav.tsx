@@ -1,11 +1,10 @@
 import { useState, useRef } from 'react';
-import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import Person from '../../ui/Icons/Person/Person';
-import Times from '../../ui/Icons/Times/Times';
+
 import { LoginBox } from '../LoginBox/LoginBox';
 import useAuth from '../../../hooks/auth/useAuth';
 import IdentityImage from '../IdentityImage/IdentityImage';
 import { t } from '../../../helpers/i18n/dictionary';
+import { useOutsideTrigger, Times, Person } from '@youfoundation/common-app';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
