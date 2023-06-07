@@ -4,7 +4,7 @@ import {
   ProfileDefinition,
   removeProfileDefinition,
   saveProfileDefinition,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { convertTextToSlug, useDotYouClient } from '@youfoundation/common-app';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {

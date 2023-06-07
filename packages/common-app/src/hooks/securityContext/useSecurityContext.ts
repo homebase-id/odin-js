@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getSecurityContext, getSecurityContextOverTransit } from '@youfoundation/js-lib';
+import { getSecurityContext, getSecurityContextOverTransit } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../../..';
 
 export const useSecurityContext = (odinId?: string) => {

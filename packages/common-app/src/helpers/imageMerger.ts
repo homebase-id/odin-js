@@ -1,4 +1,5 @@
-import { base64ToUint8Array, EmbeddedThumb, uint8ArrayToBase64 } from '@youfoundation/js-lib';
+import { base64ToUint8Array, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 
 const GRID_PIXEL_SIZE = 40;
 const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;

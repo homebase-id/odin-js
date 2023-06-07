@@ -1,11 +1,11 @@
 import {
   DotYouClient,
   TargetDrive,
-  assertIfDefined,
   QueryBatchResponse,
   queryBatch,
   DriveSearchResult,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
+import { assertIfDefined } from '@youfoundation/js-lib/helpers';
 
 // This is a temporary method, and should only be used as long as there is no way to fully remove all files on a drive in one go
 export const purgeAllFiles = async (

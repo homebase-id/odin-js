@@ -1,4 +1,4 @@
-import { PostFileVm, PostContent } from '@youfoundation/js-lib';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
@@ -8,6 +8,7 @@ import { LoadingParagraph } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
 import PostTeaserCard from '../PostTeaserCard';
 import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
+import { PostFileVm } from '@youfoundation/js-lib/transit';
 
 const PAGE_SIZE = 10; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 

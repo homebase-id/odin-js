@@ -4,14 +4,14 @@ import {
   MinimalProfileFields,
   GetTargetDriveFromProfileId,
   AttributeFile,
-  SecurityGroupType,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { useEffect } from 'react';
 import { getInitialsOfNameAttribute } from '@youfoundation/common-app';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
 import { LoadingParagraph } from '@youfoundation/common-app';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 interface infoObject {
   name: string;

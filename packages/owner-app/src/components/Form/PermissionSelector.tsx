@@ -1,4 +1,4 @@
-import { PermissionSet } from '@youfoundation/js-lib';
+import { PermissionSet } from '@youfoundation/js-lib/core';
 import {
   appPermissionLevels,
   circlePermissionLevels,

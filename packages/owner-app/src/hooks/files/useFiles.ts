@@ -3,12 +3,12 @@ import {
   DriveSearchResult,
   getPayload,
   getPayloadBytes,
-  jsonStringify64,
   queryBatch,
   SystemFileType,
   TargetDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import useAuth from '../auth/useAuth';
+import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
 const includeMetadataHeader = true;
 const pageSize = 15;

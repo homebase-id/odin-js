@@ -1,8 +1,4 @@
-import {
-  BuiltInProfiles,
-  CircleDefinition,
-  GetTargetDriveFromProfileId,
-} from '@youfoundation/js-lib';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
 import { Plus, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
@@ -14,6 +10,7 @@ import CardLink from '../../../components/ui/Buttons/CardLink';
 import { useCircle } from '@youfoundation/common-app';
 import { Ellipsis } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 
 const Circles = () => {
   const {

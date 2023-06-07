@@ -8,4 +8,3 @@ import * as transit from './transit';
 import * as auth from './auth';
 
 export { core, helpers, owner, profile, public, transit, auth };
-export * from './dist/index';

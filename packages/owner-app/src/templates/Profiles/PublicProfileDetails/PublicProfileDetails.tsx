@@ -1,4 +1,4 @@
-import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib';
+import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import { Heart } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';

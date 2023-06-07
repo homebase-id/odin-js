@@ -1,4 +1,4 @@
-import { BlogConfig } from '@youfoundation/js-lib';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';

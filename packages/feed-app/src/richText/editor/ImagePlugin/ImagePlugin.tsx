@@ -11,7 +11,7 @@ import {
 } from '@udecode/plate-core';
 import { ReactEditor } from 'slate-react';
 import { ToolbarButton, ToolbarButtonProps } from '@udecode/plate-ui-toolbar';
-import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib';
+import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { Pencil, Trash, t, useImage } from '@youfoundation/common-app';
 import { Image } from '@youfoundation/common-app';

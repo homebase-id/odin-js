@@ -1,4 +1,4 @@
-import { CircleDefinition } from '@youfoundation/js-lib';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { t, useCircle } from '@youfoundation/common-app';

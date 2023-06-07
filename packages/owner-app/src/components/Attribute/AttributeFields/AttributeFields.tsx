@@ -1,19 +1,21 @@
 import {
-  BuiltInAttributes,
-  BirthdayFields,
-  CredictCardFields,
-  EmailFields,
-  GetTargetDriveFromProfileId,
   HomePageAttributes,
   HomePageConfig,
   HomePageFields,
   HomePageTheme,
+} from '@youfoundation/js-lib/public';
+import {
+  BirthdayFields,
+  BuiltInAttributes,
+  CredictCardFields,
+  EmailFields,
+  GetTargetDriveFromProfileId,
   LinkFields,
   LocationFields,
   MinimalProfileFields,
   NicknameFields,
   PhoneFields,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { debounce } from 'lodash-es';
 import { useMemo, useState } from 'react';
 import { Textarea, t } from '@youfoundation/common-app';

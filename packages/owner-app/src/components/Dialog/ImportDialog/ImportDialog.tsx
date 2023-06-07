@@ -1,4 +1,5 @@
-import { byteArrayToString, TargetDrive } from '@youfoundation/js-lib';
+import { TargetDrive } from '@youfoundation/js-lib/core';
+import { byteArrayToString } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';

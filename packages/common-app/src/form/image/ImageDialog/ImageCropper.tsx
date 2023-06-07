@@ -3,7 +3,7 @@ import './cropper.css';
 import { useEffect, useRef, useState } from 'react';
 import { t } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import { ImageContentType } from '@youfoundation/js-lib';
+import { ImageContentType } from '@youfoundation/js-lib/core';
 
 interface ImageCropperProps {
   imageUrl: string;

@@ -1,4 +1,4 @@
-import { stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect, useState } from 'react';
 import { CheckboxToggle, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';

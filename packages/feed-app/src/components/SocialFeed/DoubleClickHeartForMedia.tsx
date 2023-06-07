@@ -5,7 +5,7 @@ import {
   ErrorNotification,
   useDoubleTap,
 } from '@youfoundation/common-app';
-import { PostFile, PostContent, ReactionContext } from '@youfoundation/js-lib';
+import { PostFile, PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 
 const DoubleClickHeartForMedia = ({

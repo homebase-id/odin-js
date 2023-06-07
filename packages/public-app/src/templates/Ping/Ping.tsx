@@ -1,4 +1,4 @@
-import { DriveGrant } from '@youfoundation/js-lib';
+import { DriveGrant } from '@youfoundation/js-lib/network';
 import { HardDrive, useSecurityContext } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';

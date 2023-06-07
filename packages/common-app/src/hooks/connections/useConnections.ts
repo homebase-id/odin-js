@@ -1,10 +1,6 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import {
-  PagingOptions,
-  getConnections,
-  getPendingRequests,
-  getSentRequests,
-} from '@youfoundation/js-lib';
+import { PagingOptions } from '@youfoundation/js-lib/core';
+import { getConnections, getPendingRequests, getSentRequests } from '@youfoundation/js-lib/network';
 
 import { useDotYouClient } from '../auth/useDotYouClient';
 

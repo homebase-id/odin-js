@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib';
+import { getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 
 export const useDrafts = () => {

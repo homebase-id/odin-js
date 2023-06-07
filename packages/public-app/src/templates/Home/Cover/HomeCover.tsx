@@ -1,5 +1,5 @@
 import ChannelTeaser from '../Common/ChannelTeaser/ChannelTeaser';
-import { BuiltInProfiles, ProfileConfig } from '@youfoundation/js-lib';
+import { BuiltInProfiles, ProfileConfig } from '@youfoundation/js-lib/profile';
 import {
   ConnectionTeaser,
   OwnerName,

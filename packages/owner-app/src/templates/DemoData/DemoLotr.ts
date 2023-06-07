@@ -1,4 +1,4 @@
-import { SecurityGroupType, toGuidId } from '@youfoundation/js-lib';
+import { toGuidId } from '@youfoundation/js-lib/helpers';
 import {
   headerImages,
   frodoProfilePictures,
@@ -6,6 +6,7 @@ import {
   merryProfilePictures,
   pippinProfilePictures,
 } from './DemoImages';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const lotrRealm = {
   'frodo.dotyou.cloud': {

@@ -1,41 +1,39 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  BlogConfig,
-  getAttribute,
-  getAttributeVersions,
-  getChannelDefinition,
-  getNewId,
-  getProfileDefinition,
-  ProfileDefinition,
-  saveAttribute,
-  saveChannelDefinition,
-  saveProfileDefinition,
-  saveProfileSection,
-  toGuidId,
-  uploadImage,
-  ImageContentType,
-  HomePageAttributes,
-  getAttributes,
-  HomePageTheme,
-} from '@youfoundation/js-lib';
-import { HomePageConfig } from '@youfoundation/js-lib';
-import {
-  BuiltInAttributes,
-  AttributeFile,
-  BuiltInProfiles,
-  GetTargetDriveFromProfileId,
-  LinkFields,
-  LocationFields,
-  MinimalProfileFields,
-  SecurityGroupType,
-  SocialFields,
-  CircleDefinition,
-} from '@youfoundation/js-lib';
+
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
 import useAuth from '../auth/useAuth';
 import useAttribute from '../profiles/useAttribute';
 import { AttributeVm } from '../profiles/useAttributes';
+import {
+  BlogConfig,
+  HomePageAttributes,
+  HomePageConfig,
+  HomePageTheme,
+  getChannelDefinition,
+  saveChannelDefinition,
+} from '@youfoundation/js-lib/public';
+import {
+  getAttribute,
+  BuiltInProfiles,
+  AttributeFile,
+  BuiltInAttributes,
+  saveAttribute,
+  ProfileDefinition,
+  getProfileDefinition,
+  saveProfileDefinition,
+  saveProfileSection,
+  getAttributes,
+  GetTargetDriveFromProfileId,
+  MinimalProfileFields,
+  LocationFields,
+  getAttributeVersions,
+  SocialFields,
+  LinkFields,
+} from '@youfoundation/js-lib/profile';
+import { ImageContentType, SecurityGroupType, uploadImage } from '@youfoundation/js-lib/core';
+import { getNewId, toGuidId } from '@youfoundation/js-lib/helpers';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 
 const anonymousAcl = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';

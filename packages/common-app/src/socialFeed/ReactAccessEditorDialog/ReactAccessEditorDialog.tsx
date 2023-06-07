@@ -1,4 +1,4 @@
-import { SecurityGroupType } from '@youfoundation/js-lib';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';

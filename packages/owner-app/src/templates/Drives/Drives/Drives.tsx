@@ -1,4 +1,4 @@
-import { BlogConfig, ProfileConfig, stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import React, { useState } from 'react';
 import { ActionButton, t } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
@@ -10,6 +10,8 @@ import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { ProfileConfig } from '@youfoundation/js-lib/profile';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const Drives = () => {
   const {

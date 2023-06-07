@@ -1,4 +1,4 @@
-import { BuiltInAttributes, getNewId, SecurityGroupType } from '@youfoundation/js-lib';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
 import {
@@ -8,6 +8,8 @@ import {
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { ActionButtonWithOptions } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
+import { getNewId } from '@youfoundation/js-lib/helpers';
+import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
 
 const AttributeCreator = ({
   profileId,

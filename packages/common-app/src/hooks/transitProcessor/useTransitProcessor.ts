@@ -1,13 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  BlogConfig,
-  Notify,
-  processInbox,
-  TypedConnectionNotification,
-} from '@youfoundation/js-lib';
+import { Notify, TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { useChannelDrives } from './useChannelDrives';
 import { useNotificationSubscriber } from './useNotificationSubscriber';
+import { processInbox } from '@youfoundation/js-lib/transit';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const MINUTE_IN_MS = 60000;
 

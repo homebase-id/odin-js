@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getChannelsOverTransit } from '@youfoundation/js-lib';
+import { getChannelsOverTransit } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../..';
 
 interface useSocialChannelsProps {

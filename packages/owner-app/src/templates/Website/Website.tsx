@@ -1,4 +1,4 @@
-import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib';
+import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 import { ActionButton, ActionLink, Save, t } from '@youfoundation/common-app';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';

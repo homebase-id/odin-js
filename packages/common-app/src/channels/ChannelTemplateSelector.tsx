@@ -1,4 +1,4 @@
-import { ChannelTemplate } from '@youfoundation/js-lib';
+import { ChannelTemplate } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import { t } from '@youfoundation/common-app';
 import { TemplateList, TemplateMasonry, TemplateGrid, IconProps } from '@youfoundation/common-app';

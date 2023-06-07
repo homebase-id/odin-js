@@ -1,4 +1,4 @@
-import { toGuidId } from '@youfoundation/js-lib';
+import { toGuidId } from '@youfoundation/js-lib/helpers';
 
 export interface AttributeDefinition {
   type: string;

@@ -7,7 +7,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import PersonCard from '../PersonCard/PersonCard';
-import { ConnectionRequest } from '@youfoundation/js-lib';
+import { ConnectionRequest } from '@youfoundation/js-lib/network';
 
 const PersonIncomingRequest = ({
   senderOdinId,

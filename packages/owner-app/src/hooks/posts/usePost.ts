@@ -4,15 +4,17 @@ import {
   deleteFile,
   ImageUploadResult,
   uploadImage,
-  PostFile,
-  PostContent,
   MultiRequestCursoredResult,
+  ImageContentType,
+} from '@youfoundation/js-lib/core';
+import {
   getChannelDrive,
   removePost,
   savePost as savePostFile,
-  PostFileVm,
-  ImageContentType,
-} from '@youfoundation/js-lib';
+  PostFile,
+  PostContent,
+} from '@youfoundation/js-lib/public';
+import { PostFileVm } from '@youfoundation/js-lib/transit';
 import useAuth from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 

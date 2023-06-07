@@ -1,4 +1,4 @@
-import { DriveDefinition, DriveGrant } from '@youfoundation/js-lib';
+import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { Link } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
@@ -7,6 +7,7 @@ import { Arrow } from '@youfoundation/common-app';
 import { HardDrive } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import { getAccessFromPermissionNumber } from '../../../templates/DemoData/helpers';
+import { DriveGrant } from '@youfoundation/js-lib/network';
 
 const DrivePermissionView = ({
   driveGrant,

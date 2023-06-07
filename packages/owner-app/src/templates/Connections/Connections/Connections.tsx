@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Pager, Persons } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@youfoundation/js-lib';
+import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useActiveConnections } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 

@@ -24,8 +24,9 @@ import { Block } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import useApps from '../../../hooks/apps/useApps';
-import { AccessGrant, ConnectionInfo, DriveGrant, stringGuidsEqual } from '@youfoundation/js-lib';
+import { AccessGrant, ConnectionInfo, DriveGrant } from '@youfoundation/js-lib/network';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const ConnectionDetails = () => {
   const { odinId } = useParams();

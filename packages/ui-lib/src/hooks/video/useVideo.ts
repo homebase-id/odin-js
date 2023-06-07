@@ -2,15 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import {
   DotYouClient,
   getDecryptedVideoChunk,
-  getDecryptedVideoChunkOverTransit,
   getDecryptedVideoMetadata,
-  getDecryptedVideoMetadataOverTransit,
   getDecryptedVideoUrl,
-  getDecryptedVideoUrlOverTransit,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
   TargetDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
+import {
+  getDecryptedVideoChunkOverTransit,
+  getDecryptedVideoMetadataOverTransit,
+  getDecryptedVideoUrlOverTransit,
+} from '@youfoundation/js-lib/transit';
 
 const useVideo = (
   dotYouClient: DotYouClient,

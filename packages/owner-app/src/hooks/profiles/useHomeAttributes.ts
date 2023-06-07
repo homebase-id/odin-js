@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAttributes, HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib';
+import { getAttributes } from '@youfoundation/js-lib/profile';
+import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 import useAuth from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 

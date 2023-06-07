@@ -1,4 +1,4 @@
-import { DriveDefinition } from '@youfoundation/js-lib';
+import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCircles } from '@youfoundation/js-lib';
+import { getCircles } from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../../..';
 
 export const useCircles = () => {

@@ -1,18 +1,17 @@
 import {
   ChannelDefinition,
   PostFile,
-  SecurityGroupType,
   Article,
   getChannelDrive,
-  ImageUploadResult,
   RichText,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
 import { t, ErrorBoundary, Label, ActionButton, Arrow, Textarea } from '@youfoundation/common-app';
 import { debounce } from 'lodash-es';
 
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
 import { RichTextEditor } from '../../../richText/editor/RichTextEditor';
+import { ImageUploadResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const InnerFieldEditors = ({
   postFile,

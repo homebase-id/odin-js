@@ -1,4 +1,5 @@
-import { EmbeddedThumb, getChannelDrive, PostContent } from '@youfoundation/js-lib';
+import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video } from '@youfoundation/common-app';
 
 export const PrimaryMedia = ({

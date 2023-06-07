@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { MiniDarkModeToggle, getVersion, t } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
-import { BuiltInProfiles } from '@youfoundation/js-lib';
+import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { useNotifications, OwnerImage } from '@youfoundation/common-app';
 import {
   Bars,

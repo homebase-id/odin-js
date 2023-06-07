@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ensureDrive } from '@youfoundation/js-lib';
+import { ensureDrive } from '@youfoundation/js-lib/core';
 import {
   AllowApp,
   GetAppRegistration,

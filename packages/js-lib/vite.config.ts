@@ -12,10 +12,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: path.resolve(__dirname, 'src/index.ts'),
         core: path.resolve(__dirname, 'src/core/core.ts'),
         helpers: path.resolve(__dirname, 'src/helpers/helpers.tsx'),
-        owner: path.resolve(__dirname, 'src/owner/owner.ts'),
+        network: path.resolve(__dirname, 'src/network/network.ts'),
         profile: path.resolve(__dirname, 'src/profile/profile.ts'),
         public: path.resolve(__dirname, 'src/public/public.ts'),
         transit: path.resolve(__dirname, 'src/transit/transit.ts'),

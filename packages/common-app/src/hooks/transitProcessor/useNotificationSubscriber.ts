@@ -1,13 +1,13 @@
 import {
   ApiType,
-  BlogConfig,
   Disconnect,
   NotificationType,
   Subscribe,
   TypedConnectionNotification,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import { useRef, useEffect } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
 export const useNotificationSubscriber = (

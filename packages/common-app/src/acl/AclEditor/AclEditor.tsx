@@ -1,4 +1,5 @@
-import { AccessControlList, SecurityGroupType, stringGuidsEqual } from '@youfoundation/js-lib';
+import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';

@@ -1,4 +1,4 @@
-import { fromBlob, ImageContentType } from '@youfoundation/js-lib';
+import { fromBlob, ImageContentType } from '@youfoundation/js-lib/core';
 import { useState, useMemo } from 'react';
 import { t, Label, ActionButton, Save } from '@youfoundation/common-app';
 import { Crop, ImageCropper, Trash } from '@youfoundation/common-app';

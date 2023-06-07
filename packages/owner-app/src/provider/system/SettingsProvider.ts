@@ -1,4 +1,4 @@
-import { DotYouClient } from '@youfoundation/js-lib';
+import { DotYouClient } from '@youfoundation/js-lib/core';
 
 export interface uiSettings extends Record<string, unknown> {
   automaticallyLoadProfilePicture?: boolean;

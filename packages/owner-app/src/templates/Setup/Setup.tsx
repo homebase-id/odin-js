@@ -10,7 +10,7 @@ import Circles from './Pages/Circles';
 import Profile from './Pages/Profile';
 import Socials from './Pages/Socials';
 import Welcome from './Pages/Welcome';
-import { base64ToUint8Array, jsonStringify64 } from '@youfoundation/js-lib';
+import { base64ToUint8Array, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import Section from '../../components/ui/Sections/Section';
 import Pager from './SetupPager';
 import FinalPage from './Pages/FinalPage';

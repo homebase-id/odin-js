@@ -2,14 +2,16 @@ import {
   ImageUploadResult,
   VideoUploadResult,
   SecurityGroupType,
+} from '@youfoundation/js-lib/core';
+import {
   MediaFile,
-  getNewId,
   Tweet,
   Media,
   PostFile,
   ChannelDefinition,
   BlogConfig,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import usePost, { AttachmentFile } from './usePost';
 import { makeGrid } from '../../../..';

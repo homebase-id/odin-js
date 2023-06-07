@@ -1,3 +1,4 @@
+import { parsePermissions } from '@youfoundation/js-lib/network';
 import {
   AppClientRegistrationRequest,
   AppClientRegistrationResponse,
@@ -8,7 +9,7 @@ import {
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
 } from './AppManagementProviderTypes';
-import { DotYouClient, DrivePermissions, parsePermissions } from '@youfoundation/js-lib';
+import { DotYouClient, DrivePermissions } from '@youfoundation/js-lib/core';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
 export const RegisterAppClient = async (

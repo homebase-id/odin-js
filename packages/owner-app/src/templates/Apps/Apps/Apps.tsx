@@ -4,7 +4,7 @@ import { Grid } from '@youfoundation/common-app';
 
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { Arrow } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';

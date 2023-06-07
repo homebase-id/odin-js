@@ -1,11 +1,8 @@
-import {
-  base64ToUint8Array,
-  EmbeddedThumb,
-  getChannelDrive,
-  MediaFile,
-} from '@youfoundation/js-lib';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef } from 'react';
 import { Video, Image, useIntersection, useDarkMode } from '@youfoundation/common-app';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
 
 interface MediaGalleryProps {
   odinId?: string;

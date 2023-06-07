@@ -32,7 +32,8 @@ import { BlockToolbarButton, MarkToolbarButton } from '@udecode/plate-ui-toolbar
 import { ListToolbarButton } from '@udecode/plate-ui-list';
 import { LinkToolbarButton } from '@udecode/plate-ui-link';
 
-import { RichText, TargetDrive } from '@youfoundation/js-lib';
+import { TargetDrive } from '@youfoundation/js-lib/core';
+import { RichText } from '@youfoundation/js-lib/public';
 import {
   RichTextQuote,
   Heading,

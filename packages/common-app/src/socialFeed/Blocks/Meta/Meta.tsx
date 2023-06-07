@@ -1,4 +1,4 @@
-import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib';
+import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t, useDotYouClient } from '@youfoundation/common-app';

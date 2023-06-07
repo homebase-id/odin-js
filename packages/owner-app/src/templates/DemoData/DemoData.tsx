@@ -1,33 +1,13 @@
 import useAuth from '../../hooks/auth/useAuth';
 import {
-  ApiType,
-  BuiltInAttributes,
-  AttributeFile,
-  Article,
-  BuiltInProfiles,
-  ChannelDefinition,
-  HomePageAttributes,
-  HomePageConfig,
-  HomePageFields,
-  MinimalProfileFields,
   SecurityGroupType,
-  SocialFields,
   TargetDrive,
   DrivePermissions,
-  ProfileConfig,
   AccessControlList,
-  PostContent,
-  PostFile,
   DotYouClient,
   queryBatch,
   uploadImage,
-  getAttribute,
-  getChannelDefinition,
-  getChannelDefinitions,
-  GetTargetDriveFromChannelId,
-  GetTargetDriveFromProfileId,
-  getNewId,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
 import {
   attrHasData,
@@ -46,6 +26,29 @@ import { useCircle } from '@youfoundation/common-app';
 import { convertTextToSlug } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
+import {
+  AttributeFile,
+  BuiltInAttributes,
+  BuiltInProfiles,
+  GetTargetDriveFromProfileId,
+  MinimalProfileFields,
+  ProfileConfig,
+  SocialFields,
+  getAttribute,
+} from '@youfoundation/js-lib/profile';
+import {
+  HomePageConfig,
+  HomePageAttributes,
+  HomePageFields,
+  getChannelDefinition,
+  ChannelDefinition,
+  getChannelDefinitions,
+  GetTargetDriveFromChannelId,
+  Article,
+  PostFile,
+  PostContent,
+} from '@youfoundation/js-lib/public';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
 let character = window.location.hostname;
 

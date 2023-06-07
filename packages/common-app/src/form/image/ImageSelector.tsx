@@ -1,4 +1,4 @@
-import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundation/js-lib';
+import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { ActionButton, t, useImage } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';

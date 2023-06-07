@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMyReactions, ReactionContext } from '@youfoundation/js-lib';
+import { getMyReactions, ReactionContext } from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../../..';
 
 const PAGE_SIZE = 10;

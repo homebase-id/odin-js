@@ -7,9 +7,9 @@ import {
   BirthdayFields,
   PhoneFields,
   LocationFields,
-  SecurityGroupType,
-  stringGuidsEqual,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
 import { getInitialsOfNameAttribute } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';

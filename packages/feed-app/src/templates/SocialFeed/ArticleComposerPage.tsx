@@ -16,14 +16,8 @@ import {
 import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import {
-  SecurityGroupType,
-  ImageUploadResult,
-  RichText,
-  Article,
-  ChannelDefinition,
-  PostFile,
-} from '@youfoundation/js-lib';
+import { SecurityGroupType, ImageUploadResult } from '@youfoundation/js-lib/core';
+import { RichText, Article, ChannelDefinition, PostFile } from '@youfoundation/js-lib/public';
 import useArticleComposer from '@youfoundation/common-app/src/hooks/socialFeed/article/useArticleComposer';
 import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';

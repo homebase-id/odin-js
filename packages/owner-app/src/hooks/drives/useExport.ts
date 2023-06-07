@@ -10,16 +10,19 @@ import {
   getRandom16ByteArray,
   uploadFile,
   uploadImage,
-  base64ToUint8Array,
-  stringToUint8Array,
-  jsonStringify64,
   ImageContentType,
   QueryBatchResponse,
-} from '@youfoundation/js-lib';
-import { UploadInstructionSet } from '@youfoundation/js-lib';
-import { UploadFileMetadata } from '@youfoundation/js-lib';
-import { AppFileMetaData } from '@youfoundation/js-lib';
-import { DriveSearchResult, TargetDrive } from '@youfoundation/js-lib';
+  AppFileMetaData,
+  TargetDrive,
+  DriveSearchResult,
+  UploadFileMetadata,
+  UploadInstructionSet,
+} from '@youfoundation/js-lib/core';
+import {
+  base64ToUint8Array,
+  jsonStringify64,
+  stringToUint8Array,
+} from '@youfoundation/js-lib/helpers';
 import useAuth from '../auth/useAuth';
 import { purgeAllFiles } from '../../provider/drives/DrivePurgeProvider';
 

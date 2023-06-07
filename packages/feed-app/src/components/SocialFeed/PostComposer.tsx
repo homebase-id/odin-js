@@ -1,9 +1,4 @@
-import {
-  BlogConfig,
-  ChannelDefinition,
-  SecurityGroupType,
-  base64ToUint8Array,
-} from '@youfoundation/js-lib';
+import { BlogConfig, ChannelDefinition } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
@@ -31,6 +26,8 @@ import { Lock } from '@youfoundation/common-app';
 
 import { ActionGroup } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input

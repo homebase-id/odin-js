@@ -1,4 +1,4 @@
-import { getNewId, ProfileSection } from '@youfoundation/js-lib';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -21,6 +21,7 @@ import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { ProfileSection } from '@youfoundation/js-lib/profile';
 
 const ProfileDetails = () => {
   const {

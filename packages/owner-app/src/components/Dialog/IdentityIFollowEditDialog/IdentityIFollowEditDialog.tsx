@@ -10,7 +10,7 @@ import { Alert } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
-import { BlogConfig } from '@youfoundation/js-lib';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const IdentityIFollowEditDialog = ({
   odinId,

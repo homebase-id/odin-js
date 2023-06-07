@@ -8,7 +8,7 @@ import {
   setNewPassword as setNewOwnerPassword,
   logout as logoutOwner,
 } from '../../provider/auth/AuthenticationProvider';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib';
+import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,

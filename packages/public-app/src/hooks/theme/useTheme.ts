@@ -1,5 +1,5 @@
 import { useSiteData } from '@youfoundation/common-app';
-import { HomePageTheme } from '@youfoundation/js-lib';
+import { HomePageTheme } from '@youfoundation/js-lib/public';
 
 interface TemplateSettings {
   themeId: HomePageTheme;

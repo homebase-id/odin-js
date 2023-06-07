@@ -6,7 +6,7 @@ import { DialogWrapper } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';
-import { DriveGrant } from '@youfoundation/js-lib';
+import { DriveGrant } from '@youfoundation/js-lib/network';
 
 const DrivePermissionSelectorDialog = ({
   title,

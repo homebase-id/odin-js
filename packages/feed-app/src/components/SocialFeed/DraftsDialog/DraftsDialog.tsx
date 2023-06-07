@@ -15,7 +15,7 @@ import {
   Plus,
   Trash,
 } from '@youfoundation/common-app';
-import { PostFile, PostContent } from '@youfoundation/js-lib';
+import { PostFile, PostContent } from '@youfoundation/js-lib/public';
 import { createPortal } from 'react-dom';
 
 const DraftsDialog = ({ isOpen, onCancel }: { isOpen: boolean; onCancel: () => void }) => {

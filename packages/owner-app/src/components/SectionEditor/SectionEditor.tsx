@@ -1,4 +1,4 @@
-import { ProfileSection } from '@youfoundation/js-lib';
+import { ProfileSection } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
 import { Trash, t } from '@youfoundation/common-app';
 import useProfileSections from '../../hooks/profiles/useProfileSections';

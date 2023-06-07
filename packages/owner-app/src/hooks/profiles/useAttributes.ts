@@ -1,11 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ApiType,
   AttributeFile,
-  DotYouClient,
   getProfileAttributes,
   removeAttribute,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import useAuth from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
 

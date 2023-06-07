@@ -1,6 +1,7 @@
-import { ApiType, base64ToUint8Array } from '@youfoundation/js-lib';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { OwnerClient, logoutOwner, hasValidOwnerToken } from '@youfoundation/common-app';
 import { NonceData, prepareAuthPassword } from './AuthenticationHelper';
+import { ApiType } from '@youfoundation/js-lib/core';
 
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;

@@ -4,7 +4,7 @@ import {
   ProfileSection,
   removeProfileSection,
   saveProfileSection,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import useAuth from '../auth/useAuth';
 import useAttributes from './useAttributes';
 

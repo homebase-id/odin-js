@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'react-router-dom';
-import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib';
+import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
 

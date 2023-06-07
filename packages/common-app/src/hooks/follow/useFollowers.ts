@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { fetchFollowers } from '@youfoundation/js-lib';
+import { fetchFollowers } from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 type useFollowerInfiniteProps = {

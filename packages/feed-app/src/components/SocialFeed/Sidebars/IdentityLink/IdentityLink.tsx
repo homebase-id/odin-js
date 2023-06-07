@@ -1,9 +1,6 @@
-import {
-  GetTargetDriveFromProfileId,
-  HomePageConfig,
-  BuiltInProfiles,
-} from '@youfoundation/js-lib';
+import { HomePageConfig } from '@youfoundation/js-lib/public';
 import { OwnerName, t, useSiteData, Image } from '@youfoundation/common-app';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();

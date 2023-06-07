@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib';
+import { ReactionContext } from '@youfoundation/js-lib/public';
 import { Suspense, useEffect, useState } from 'react';
 import {
   CanReactDetails,

@@ -1,11 +1,6 @@
-import {
-  PostFile,
-  Article,
-  getNewId,
-  ChannelDefinition,
-  BlogConfig,
-  SecurityGroupType,
-} from '@youfoundation/js-lib';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { getNewId } from '@youfoundation/js-lib/helpers';
+import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { convertTextToSlug, getReadingTime, useBlog } from '../../../..';
 import usePost from '../post/usePost';

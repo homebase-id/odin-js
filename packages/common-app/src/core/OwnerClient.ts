@@ -1,4 +1,4 @@
-import { BaseProviderOptions, ApiType, BaseDotYouClient } from '@youfoundation/js-lib';
+import { BaseProviderOptions, ApiType, BaseDotYouClient } from '@youfoundation/js-lib/core';
 
 export interface OwnerProviderOptions extends Omit<BaseProviderOptions, 'api'> {
   api?: ApiType;

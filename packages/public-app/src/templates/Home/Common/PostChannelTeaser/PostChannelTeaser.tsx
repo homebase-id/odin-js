@@ -1,4 +1,4 @@
-import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib';
+import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 

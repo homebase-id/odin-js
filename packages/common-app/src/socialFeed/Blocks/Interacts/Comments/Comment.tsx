@@ -23,8 +23,7 @@ import {
   ReactionContent,
   ReactionContext,
   ReactionFile,
-  TargetDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 
 import { Ellipsis } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
@@ -32,6 +31,7 @@ import { Times } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { format } from '../../../../helpers/timeago';
+import { TargetDrive } from '@youfoundation/js-lib/core';
 
 export interface CommentProps {
   context: ReactionContext;

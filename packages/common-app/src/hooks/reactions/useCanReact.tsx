@@ -1,9 +1,7 @@
-import {
-  BlogConfig,
-  DrivePermissions,
-  SecurityGroupType,
-  stringGuidsEqual,
-} from '@youfoundation/js-lib';
+import { BlogConfig } from '@youfoundation/js-lib/public';
+import { DrivePermissions, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+
 import useSocialPost from '../socialFeed/useSocialPost';
 import { useQuery } from '@tanstack/react-query';
 import useSecurityContext from '../securityContext/useSecurityContext';

@@ -8,7 +8,7 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import { PermissionSetGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
 import PermissionSelector from '../../Form/PermissionSelector';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';
-import { DriveDefinition } from '@youfoundation/js-lib';
+import { DriveDefinition } from '@youfoundation/js-lib/core';
 
 const CirclePermissionSelectorDialog = ({
   title,

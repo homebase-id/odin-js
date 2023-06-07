@@ -1,4 +1,5 @@
-import { ApiType, DotYouClient, base64ToUint8Array } from '@youfoundation/js-lib';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { OwnerClient } from '../../core';
 import { APP_AUTH_TOKEN, APP_SHARED_SECRET, retrieveIdentity } from '@youfoundation/js-lib/auth';
 

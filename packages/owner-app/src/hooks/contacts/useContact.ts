@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { base64ToUint8Array, toGuidId } from '@youfoundation/js-lib';
+import { base64ToUint8Array, toGuidId } from '@youfoundation/js-lib/helpers';
 import { getContactByUniqueId, saveContact } from '../../provider/contact/ContactProvider';
 import {
   fetchConnectionInfo,

@@ -10,15 +10,14 @@ import {
   uploadFile,
   UploadFileMetadata,
   UploadInstructionSet,
-  stringToUint8Array,
-  jsonStringify64,
   TypedConnectionNotification,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import { useRef, useState } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
 import Section from '../../components/ui/Sections/Section';
 import { ActionButton } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { jsonStringify64, stringToUint8Array } from '@youfoundation/js-lib/helpers';
 
 const sender = window.location.hostname;
 const recipient = sender === 'frodo.dotyou.cloud' ? 'sam.dotyou.cloud' : 'frodo.dotyou.cloud';
@@ -78,7 +77,7 @@ const SocketDemo = () => {
 
     const fileMetadata: UploadFileMetadata = {
       allowDistribution: true,
-      
+
       appData: {
         tags: [],
         fileType: 844,

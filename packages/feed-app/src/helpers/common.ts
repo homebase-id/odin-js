@@ -1,11 +1,5 @@
-import {
-  AttributeFile,
-  getNewId,
-  LocationFields,
-  MinimalProfileFields,
-  PostContent,
-  PostFile,
-} from '@youfoundation/js-lib';
+import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
 export const convertTextToSlug = (text: string) => {
   return text

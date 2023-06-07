@@ -4,7 +4,7 @@ import {
   ReactionContext,
   EmojiReactionSummary,
   CommentsReactionSummary,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import {
   Bubble,

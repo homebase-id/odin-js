@@ -5,7 +5,7 @@ import {
   Media,
   Article,
   getChannelDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import {
   LoadingParagraph,
   AuthorImage,

@@ -1,4 +1,4 @@
-import { PostContent, Media, PostFile } from '@youfoundation/js-lib';
+import { PostContent, Media, PostFile } from '@youfoundation/js-lib/public';
 import { MediaGallery, PrimaryMedia } from '@youfoundation/common-app';
 
 export const PostMedia = ({

@@ -1,4 +1,7 @@
-import { ClientConnectionNotification, TypedConnectionNotification } from '@youfoundation/js-lib';
+import {
+  ClientConnectionNotification,
+  TypedConnectionNotification,
+} from '@youfoundation/js-lib/core';
 import { ReactNode, useEffect, useState } from 'react';
 
 import {

@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { ApiType, CursoredResult, DotYouClient } from '@youfoundation/js-lib';
+import { CursoredResult } from '@youfoundation/js-lib/core';
 import { getContacts } from '../../provider/contact/ContactProvider';
 
 import { RawContact } from '../../provider/contact/ContactTypes';

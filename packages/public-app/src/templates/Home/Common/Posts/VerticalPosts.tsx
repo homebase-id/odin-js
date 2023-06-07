@@ -1,5 +1,5 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
-import { PostContent, PostFile } from '@youfoundation/js-lib';
+import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Label, useBlogPosts, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';

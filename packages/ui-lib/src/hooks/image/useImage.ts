@@ -4,14 +4,14 @@ import {
   ImageSize,
   TargetDrive,
   DotYouClient,
-  getDecryptedImageUrlOverTransit,
   getDecryptedImageUrl,
   SecurityGroupType,
   ImageContentType,
   AccessControlList,
   uploadImage,
   removeImage,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
+import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
 
 interface ImageData {
   url: string;

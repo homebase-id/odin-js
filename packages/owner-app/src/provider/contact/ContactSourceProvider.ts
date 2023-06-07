@@ -6,17 +6,17 @@ import {
   BirthdayFields,
   GetTargetDriveFromProfileId,
   BuiltInProfiles,
-  ApiType,
-  DotYouClient,
-  GetFile,
-  getConnectionInfo,
-  getPendingRequest,
-  getDecryptedImageDataOverTransit,
-  getProfileAttributesOverTransit,
-  uint8ArrayToBase64,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 
 import { RawContact } from './ContactTypes';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { getConnectionInfo, getPendingRequest } from '@youfoundation/js-lib/network';
+import {
+  getProfileAttributesOverTransit,
+  getDecryptedImageDataOverTransit,
+} from '@youfoundation/js-lib/transit';
+import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import { GetFile } from '@youfoundation/js-lib/public';
 
 //Handles fetching and parsing of Contact Source data
 

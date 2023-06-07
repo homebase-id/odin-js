@@ -8,7 +8,8 @@ import {
   removeEmojiReaction,
   saveComment,
   saveEmojiReaction,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
+
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 import { useDotYouClient } from '../../..';

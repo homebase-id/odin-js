@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { getComments, ReactionContext, ReactionFile } from '@youfoundation/js-lib';
+import { getComments, ReactionContext, ReactionFile } from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../../..';
 
 const PAGE_SIZE = 30;

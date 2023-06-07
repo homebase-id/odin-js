@@ -13,7 +13,7 @@ import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import { ConnectionRequest } from '@youfoundation/js-lib';
+import { ConnectionRequest } from '@youfoundation/js-lib/network';
 
 const IncomingConnectionDialog = ({
   confirmText,

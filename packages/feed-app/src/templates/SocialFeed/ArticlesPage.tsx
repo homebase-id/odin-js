@@ -1,4 +1,4 @@
-import { PostContent, PostFile } from '@youfoundation/js-lib';
+import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 import {
   ActionButton,
   ActionLink,

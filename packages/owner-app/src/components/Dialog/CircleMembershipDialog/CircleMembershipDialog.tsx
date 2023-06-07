@@ -7,7 +7,8 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import { CircleGrant, stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { CircleGrant } from '@youfoundation/js-lib/network';
 
 const CircleMembershipDialog = ({
   title,

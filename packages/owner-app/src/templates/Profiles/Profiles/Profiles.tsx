@@ -5,7 +5,7 @@ import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialo
 import { Heart } from '@youfoundation/common-app';
 import { LoadingParagraph } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { BuiltInProfiles } from '@youfoundation/js-lib';
+import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const Profiles = () => {

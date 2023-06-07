@@ -1,4 +1,4 @@
-import { TargetDrive, ThumbSize } from '@youfoundation/js-lib';
+import { TargetDrive, ThumbSize } from '@youfoundation/js-lib/core';
 
 export class ContactConfig {
   static readonly ContactFileType: number = 100;

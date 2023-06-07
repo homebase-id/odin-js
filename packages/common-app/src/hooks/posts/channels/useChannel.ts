@@ -7,7 +7,7 @@ import {
   GetFile,
   removeChannelDefinition,
   saveChannelDefinition,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';

@@ -1,4 +1,4 @@
-import { Article, getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib';
+import { Article, getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { FC, useState } from 'react';
 import {
   ErrorBoundary,

@@ -1,12 +1,7 @@
 import { InfiniteData } from '@tanstack/react-query';
-import {
-  AttributeFile,
-  getNewId,
-  LocationFields,
-  MinimalProfileFields,
-  PostContent,
-  PostFile,
-} from '@youfoundation/js-lib';
+import { PostFile, PostContent } from '@youfoundation/js-lib/public';
+import { getNewId } from '@youfoundation/js-lib/helpers';
+import { AttributeFile, LocationFields, MinimalProfileFields } from '@youfoundation/js-lib/profile';
 
 export const convertTextToSlug = (text: string) => {
   return text

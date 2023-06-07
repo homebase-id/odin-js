@@ -1,4 +1,4 @@
-import { ApiType } from '@youfoundation/js-lib';
+import { ApiType } from '@youfoundation/js-lib/core';
 import { OwnerClient } from '../../core/OwnerClient';
 
 //checks if the authentication token (stored in a cookie) is valid

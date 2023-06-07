@@ -1,4 +1,4 @@
-import { PostContent, Article, PostFile, getChannelDrive } from '@youfoundation/js-lib';
+import { PostContent, Article, PostFile, getChannelDrive } from '@youfoundation/js-lib/public';
 import { FC, useState } from 'react';
 import {
   AuthorImage,

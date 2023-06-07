@@ -1,8 +1,9 @@
-import { DriveDefinition, DriveGrant } from '@youfoundation/js-lib';
+import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { t, Label } from '@youfoundation/common-app';
 import { drivePermissionLevels } from '../../provider/permission/permissionLevels';
 import { HardDrive } from '@youfoundation/common-app';
 import PermissionLevelEditor from './PermissionLevelEditor';
+import { DriveGrant } from '@youfoundation/js-lib/network';
 
 const DrivePermissionSelector = ({
   drives,

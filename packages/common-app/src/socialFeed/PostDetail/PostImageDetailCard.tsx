@@ -4,7 +4,7 @@ import {
   PostContent,
   Media,
   getChannelDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import {
   Loader,

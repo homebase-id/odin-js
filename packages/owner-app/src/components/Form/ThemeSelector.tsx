@@ -1,4 +1,4 @@
-import { HomePageTheme } from '@youfoundation/js-lib';
+import { HomePageTheme } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import { t } from '@youfoundation/common-app';
 import {
