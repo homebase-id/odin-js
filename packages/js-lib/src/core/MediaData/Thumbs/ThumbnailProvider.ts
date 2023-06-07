@@ -48,7 +48,10 @@ export const createThumbnails = async (
     return [...currArray, thumbSize];
   }, [] as ThumbnailInstruction[]);
 
-  if (applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length) {
+  if (
+    applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
+    !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth)
+  ) {
     // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
     applicableThumbSizes.push({
       quality: 100,
