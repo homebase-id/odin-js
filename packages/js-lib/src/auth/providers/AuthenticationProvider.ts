@@ -12,6 +12,8 @@ const getSharedSecret = () => {
   if (raw) return base64ToUint8Array(raw);
 };
 
+const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
+
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (): Promise<boolean> => {
   const dotYouClient = new DotYouClient({
@@ -25,7 +27,7 @@ export const hasValidToken = async (): Promise<boolean> => {
     .get('/auth/verifytoken', {
       validateStatus: () => true,
       headers: {
-        BX0900: localStorage.getItem(APP_AUTH_TOKEN),
+        BX0900: getAppAuthToken(),
       },
     })
     .catch((error) => {
@@ -118,7 +120,7 @@ export const logout = async () => {
     .post('/auth/logout', undefined, {
       validateStatus: () => true,
       headers: {
-        BX0900: localStorage.getItem(APP_AUTH_TOKEN),
+        BX0900: getAppAuthToken(),
       },
     })
     .catch((error) => {
@@ -142,7 +144,7 @@ export const preAuth = async () => {
     .post('/notify/preauth', undefined, {
       validateStatus: () => true,
       headers: {
-        BX0900: localStorage.getItem(APP_AUTH_TOKEN),
+        BX0900: getAppAuthToken(),
       },
     })
     .catch((error) => {

@@ -19,6 +19,9 @@ const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
 const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
+const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
+const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
+const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -66,10 +69,10 @@ function App() {
               path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
               element={<SocialFeed />}
             />
-            {/* <Route path="new" element={<ArticleComposerPage />} /> */}
-            {/* <Route path="articles" element={<ArticlesPage />} /> */}
-            {/* <Route path="channels" element={<ChannelsPage />} /> */}
-            {/* <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} /> */}
+            <Route path="new" element={<ArticleComposerPage />} />
+            <Route path="articles" element={<ArticlesPage />} />
+            <Route path="channels" element={<ChannelsPage />} />
+            <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
           </Route>
 
           <Route

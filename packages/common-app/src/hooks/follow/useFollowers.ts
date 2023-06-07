@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { ApiType, fetchFollowers } from '@youfoundation/js-lib';
-import useAuth from '../auth/useAuth';
+import { fetchFollowers } from '@youfoundation/js-lib';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 type useFollowerInfiniteProps = {
   pageSize?: number;
 };
 
-const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps) => {
-  const dotYouClient = useAuth().getDotYouClient();
+export const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchBlogData = async ({ pageParam }: { pageParam?: string }) => {
     const response = await fetchFollowers(dotYouClient, pageParam);
@@ -23,5 +23,3 @@ const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps) => {
     staleTime: Infinity,
   });
 };
-
-export default useFollowerInfinite;

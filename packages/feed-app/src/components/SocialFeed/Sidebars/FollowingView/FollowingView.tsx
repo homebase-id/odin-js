@@ -1,6 +1,9 @@
-import { ConnectionTeaser, LoadingParagraph } from '@youfoundation/common-app';
+import {
+  ConnectionTeaser,
+  LoadingParagraph,
+  useFollowingInfinite,
+} from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
 
 const FollowingView = ({ className }: { className?: string }) => {
   const {

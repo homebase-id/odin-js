@@ -5,7 +5,7 @@ import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
-const ChannelsPage = () => {
+export const ChannelsPage = () => {
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
   const [isAddNew, setIsAddNew] = useState(false);
 

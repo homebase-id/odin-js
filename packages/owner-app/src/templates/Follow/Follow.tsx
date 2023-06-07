@@ -1,15 +1,20 @@
 import { ReactNode, useRef, useState } from 'react';
 import { Link, useMatch } from 'react-router-dom';
 import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
-import { ActionGroup, ActionLink, Block, useIntersection } from '@youfoundation/common-app';
+import {
+  ActionGroup,
+  ActionLink,
+  Block,
+  useIntersection,
+  useFollowerInfinite,
+  useFollowingInfinite,
+} from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
 import useContact from '../../hooks/contacts/useContact';
-import useFollowerInfinite from '../../hooks/follow/useFollowers';
-import useFollowingInfinite from '../../hooks/follow/useFollowing';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';

@@ -43,9 +43,6 @@ const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
 const FollowNew = lazy(() => import('../templates/Follow/FollowNew'));
 
-// const Contacts = lazy(() => import('../../templates/Contacts/Contacts/Contacts'));
-// const ContactDetails = lazy(() => import('../../templates/Contacts/ContactDetails/ContactDetails'));
-
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
@@ -53,10 +50,18 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
-const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
-const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
-const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
-const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
+const SocialFeed = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.Feed }))
+);
+const ArticlesPage = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticlesPage }))
+);
+const ChannelsPage = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ChannelsPage }))
+);
+const ArticleComposerPage = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticleComposerPage }))
+);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -157,9 +162,6 @@ function App() {
             <Route path="follow/followers" element={<Following />}></Route>
             <Route path="follow/following" element={<Following />}></Route>
 
-            {/* <Route path="contacts" element={<Contacts />}></Route>
-                  <Route path="contacts/:odinId" element={<ContactDetails />}></Route> */}
-
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
             <Route path="settings" element={<Settings />}></Route>
@@ -169,32 +171,11 @@ function App() {
 
             {/* Feed: */}
             <Route path="feed">
-              <Route
-                index={true}
-                element={
-                  <>
-                    {/* <Header /> */}
-                    <SocialFeed />
-                  </>
-                }
-              />
-              <Route
-                path="preview/:identityKey/:channelKey/:postKey"
-                element={
-                  <>
-                    {/* <Header /> */}
-                    <SocialFeed />
-                  </>
-                }
-              />
+              <Route index={true} element={<SocialFeed />} />
+              <Route path="preview/:identityKey/:channelKey/:postKey" element={<SocialFeed />} />
               <Route
                 path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
-                element={
-                  <>
-                    {/* <Header /> */}
-                    <SocialFeed />
-                  </>
-                }
+                element={<SocialFeed />}
               />
               <Route path="new" element={<ArticleComposerPage />} />
               <Route path="articles" element={<ArticlesPage />} />

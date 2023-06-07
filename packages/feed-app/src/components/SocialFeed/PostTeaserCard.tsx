@@ -1,10 +1,4 @@
-import {
-  PostContent,
-  Article,
-  PostFile,
-  getChannelDrive,
-  ReactionContext,
-} from '@youfoundation/js-lib';
+import { PostContent, Article, PostFile, getChannelDrive } from '@youfoundation/js-lib';
 import { FC, useState } from 'react';
 import {
   AuthorImage,
@@ -43,7 +37,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
   const channel = externalChannel || internalChannel;
 
-  const postPath = `/owner/feed/preview/${odinId}/${channel?.channelId}/${post.id}`;
+  const postPath = `preview/${odinId}/${channel?.channelId}/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
   const isDesktop = document.documentElement.clientWidth >= 1024;
 
@@ -149,11 +143,11 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
               // Only navigate to the article if we're on desktop
               if (post.type !== 'Article') {
-                navigate(`${postPath}/${index}`);
+                navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
                 return;
               }
 
-              if (isDesktop) navigate(postPath);
+              if (isDesktop) navigate(postPath, { state: { referrer: window.location.pathname } });
             }}
           />
           <PostInteracts

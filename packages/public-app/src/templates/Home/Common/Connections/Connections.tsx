@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { t, useActiveConnections } from '@youfoundation/common-app';
-import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
+import { t, useActiveConnections, useFollowingInfinite } from '@youfoundation/common-app';
 
 import { Pager, ConnectionTeaser } from '@youfoundation/common-app';
 

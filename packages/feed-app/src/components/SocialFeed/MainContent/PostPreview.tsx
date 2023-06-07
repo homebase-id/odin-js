@@ -43,8 +43,12 @@ const PostPreview = ({
   const localChannel = localBlogData?.activeChannel;
   const localPost = localBlogData?.activeBlog;
 
+  const location = useLocation();
+  const state = location.state as Record<string, unknown> | undefined;
+
   const navigate = useNavigate();
-  const doClose = () => navigate('/owner/feed', { preventScrollReset: true });
+  const doClose = () => navigate(state?.referrer || -1, { preventScrollReset: true }); //, { preventScrollReset: true });
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -63,9 +67,6 @@ const PostPreview = ({
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => doClose());
-
-  const location = useLocation();
-  const state = location.state as Record<string, unknown> | undefined;
 
   const paths = window.location.pathname.split('/');
   paths.pop();

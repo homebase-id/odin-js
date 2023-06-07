@@ -2,7 +2,11 @@
   "name": "@youfoundation/feed-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/home",
+  "files": [
+    "src"
+  ],
+  "module": "./index.ts",
+  "types": "./index.ts",
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",

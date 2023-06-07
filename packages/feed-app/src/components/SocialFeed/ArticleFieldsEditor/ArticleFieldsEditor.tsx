@@ -8,18 +8,11 @@ import {
   RichText,
 } from '@youfoundation/js-lib';
 import { useMemo, useState } from 'react';
-import {
-  RichTextEditor,
-  t,
-  ErrorBoundary,
-  Label,
-  ActionButton,
-  Arrow,
-  Textarea,
-} from '@youfoundation/common-app';
+import { t, ErrorBoundary, Label, ActionButton, Arrow, Textarea } from '@youfoundation/common-app';
 import { debounce } from 'lodash-es';
 
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
+import { RichTextEditor } from '../../../richText/editor/RichTextEditor';
 
 export const InnerFieldEditors = ({
   postFile,

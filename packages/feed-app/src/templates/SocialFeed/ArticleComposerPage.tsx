@@ -29,7 +29,7 @@ import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const ArticleComposerPage = () => {
+export const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);

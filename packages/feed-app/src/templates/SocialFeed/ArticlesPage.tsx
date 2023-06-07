@@ -15,7 +15,7 @@ import { useChannels } from '@youfoundation/common-app';
 import { DraftItem } from '../../components/SocialFeed/DraftsDialog/DraftsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
-const ArticlesPage = () => {
+export const ArticlesPage = () => {
   return (
     <>
       <PageMeta title={t('Articles')} icon={Article} />
