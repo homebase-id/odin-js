@@ -22,3 +22,5 @@ export * from './reactions';
 export * from './securityContext/useSecurityContext';
 export * from './longPress/useLongPress';
 export * from './doubleClick/useDoubleTap';
+export * from './follow/useFollowers';
+export * from './follow/useFollowing';

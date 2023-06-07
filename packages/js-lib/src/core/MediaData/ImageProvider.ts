@@ -8,7 +8,7 @@ import {
   base64ToUint8Array,
   stringify,
 } from '../../helpers/DataUtil';
-import { DotYouClient } from '../DotYouClient';
+import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import {
   TargetDrive,
@@ -200,7 +200,7 @@ export const getDecryptedImageUrl = async (
   }
 
   // If the contents is probably encrypted, we don't bother fetching the header
-  if (!isProbablyEncrypted) {
+  if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     if (!meta.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();
