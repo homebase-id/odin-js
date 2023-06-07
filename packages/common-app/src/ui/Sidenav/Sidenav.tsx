@@ -1,13 +1,11 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import useAuth from '../../../../hooks/auth/useAuth';
 
 import { MiniDarkModeToggle, getVersion, t } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
-import OwnerImage from '../../../OwnerImage/OwnerImage';
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib';
-import { useNotifications } from '@youfoundation/common-app';
+import { useNotifications, OwnerImage } from '@youfoundation/common-app';
 import {
   Bars,
   Times,
@@ -40,7 +38,7 @@ const iconClassName = `${iconSize} flex-shrink-0`;
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-indigo-200 text-black dark:bg-indigo-800 dark:text-white';
 
-const Sidenav = () => {
+export const Sidenav = ({ logout }: { logout: () => void }) => {
   const isDesktop = document.documentElement.clientWidth >= 1024;
   const storedState = localStorage.getItem(STORAGE_KEY);
   const overruledOpen = storedState ? storedState === '1' : undefined;
@@ -102,7 +100,7 @@ const Sidenav = () => {
               <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
             </div>
 
-            <MoreItems isOpen={isOpen || isHoverOpen} />
+            <MoreItems isOpen={isOpen || isHoverOpen} logout={logout} />
 
             <div>
               <p className={`${navItemClassName} opacity-40`}>
@@ -120,11 +118,10 @@ const Sidenav = () => {
   );
 };
 
-const MoreItems = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
+const MoreItems = ({ isOpen: isNavOpen, logout }: { isOpen: boolean; logout: () => void }) => {
   const wrapperRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
-  const { logout } = useAuth();
   const { toggleDarkMode, isDarkMode } = useDarkMode();
 
   useEffect(() => {
@@ -191,20 +188,25 @@ const NavItem = ({
   unread?: boolean;
   end?: boolean;
 }) => {
+  const { pathname } = window.location;
+  const isExternal = pathname.split('/')[1] !== to.split('/')[1];
+
+  if (isExternal) {
+    return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;
+  }
+
   return (
-    <>
-      <NavLink
-        className={({ isActive }) =>
-          `${navItemClassName} ${isActive && navItemActiveClassname} relative`
-        }
-        to={to}
-        end={end}
-      >
-        {icon && icon({ className: iconClassName })}
-        {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500" /> : null}
-        <span className={`my-auto ml-3 overflow-hidden`}>{label}</span>
-      </NavLink>
-    </>
+    <NavLink
+      className={({ isActive }) =>
+        `${navItemClassName} ${isActive && navItemActiveClassname} relative`
+      }
+      to={to}
+      end={end}
+    >
+      {icon && icon({ className: iconClassName })}
+      {unread ? <span className="absolute h-2 w-2 rounded-full bg-red-500" /> : null}
+      <span className={`my-auto ml-3 overflow-hidden`}>{label}</span>
+    </NavLink>
   );
 };
 
@@ -215,7 +217,7 @@ const ExternalNavItem = ({
 
   unread,
 }: {
-  icon: FC<IconProps>;
+  icon?: FC<IconProps>;
   href: string;
   label: string;
 
@@ -307,5 +309,3 @@ const NotificationBell = () => {
     />
   );
 };
-
-export default Sidenav;

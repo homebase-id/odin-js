@@ -15,6 +15,7 @@ export * from './Buttons/SaveStatus';
 export * from './Buttons/FakeAnchor';
 
 export * from './DarkModeToggle/DarkModeToggle';
+export * from './Sidenav/Sidenav';
 
 export * from './Icons/Types';
 export * from './Icons/AddressBook';

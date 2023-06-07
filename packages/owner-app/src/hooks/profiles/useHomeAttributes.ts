@@ -1,11 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  ApiType,
-  DotYouClient,
-  getAttributes,
-  HomePageAttributes,
-  HomePageConfig,
-} from '@youfoundation/js-lib';
+import { getAttributes, HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib';
 import useAuth from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 
