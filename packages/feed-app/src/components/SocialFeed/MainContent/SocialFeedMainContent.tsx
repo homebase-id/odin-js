@@ -94,13 +94,22 @@ const SocialFeedMainContent = () => {
                 {items.map((virtualRow) => {
                   const isLoaderRow = virtualRow.index > flattenedPosts.length - 1;
                   if (isLoaderRow) {
-                    return hasMorePosts || isFetchingNextPage ? (
-                      <div className="mt-5 animate-pulse" key={'loading'}>
-                        {t('Loading...')}
-                      </div>
-                    ) : (
-                      <div className="mt-5 italic opacity-50" key={'no-more'}>
-                        {t('No more posts')}
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        data-index={virtualRow.index}
+                        ref={virtualizer.measureElement}
+                        className="pt-5"
+                      >
+                        {hasMorePosts || isFetchingNextPage ? (
+                          <div className="animate-pulse" key={'loading'}>
+                            {t('Loading...')}
+                          </div>
+                        ) : (
+                          <div className="italic opacity-50" key={'no-more'}>
+                            {t('No more posts')}
+                          </div>
+                        )}
                       </div>
                     );
                   }
@@ -111,12 +120,13 @@ const SocialFeedMainContent = () => {
                       key={virtualRow.key}
                       data-index={virtualRow.index}
                       ref={virtualizer.measureElement}
+                      className="py-3"
                     >
                       <PostTeaserCard
                         key={post.fileId || post.content.id}
                         postFile={post}
                         odinId={post.odinId}
-                        className={`my-3 ${
+                        className={`${
                           !post.fileId
                             ? 'overflow-hidden bg-slate-100 dark:bg-slate-600'
                             : 'bg-background shadow-sm'

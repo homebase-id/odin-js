@@ -141,7 +141,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
             }}
           >
             <div
-              className="absolute left-0 top-0 grid w-full grid-flow-row gap-4"
+              className="absolute left-0 top-0 grid w-full grid-flow-row"
               style={{
                 transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
               }}
@@ -149,13 +149,22 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
               {items.map((virtualRow) => {
                 const isLoaderRow = virtualRow.index > combinedPosts.length - 1;
                 if (isLoaderRow) {
-                  return hasMorePosts || isFetchingNextPage || isStatic ? (
-                    <div className="mt-5 animate-pulse" key={'loading'}>
-                      {t('Loading...')}
-                    </div>
-                  ) : (
-                    <div className="mt-5 italic opacity-50" key={'no-more'}>
-                      {t('No more posts')}
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      data-index={virtualRow.index}
+                      ref={virtualizer.measureElement}
+                      className="pt-5"
+                    >
+                      {hasMorePosts || isFetchingNextPage ? (
+                        <div className="animate-pulse" key={'loading'}>
+                          {t('Loading...')}
+                        </div>
+                      ) : (
+                        <div className="italic opacity-50" key={'no-more'}>
+                          {t('No more posts')}
+                        </div>
+                      )}
                     </div>
                   );
                 }
@@ -166,6 +175,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
                     key={virtualRow.key}
                     data-index={virtualRow.index}
                     ref={virtualizer.measureElement}
+                    className="py-2 first:pt-0 last:pb-0"
                   >
                     <PostTeaser
                       key={postFile.fileId}
