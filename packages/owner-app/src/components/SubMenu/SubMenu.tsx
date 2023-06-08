@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Select } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 
 interface SubmenuProps {
   className?: string;
@@ -15,7 +15,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
   const forceMobileView = items?.length >= 6;
 
   if (isLoading === true) {
-    return <LoadingParagraph className="h-10" />;
+    return <LoadingBlock className="h-10" />;
   }
 
   // True when no items match the current location; Forces a fallback to an active state on the first item

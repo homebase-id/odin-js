@@ -1,8 +1,4 @@
-import {
-  ConnectionTeaser,
-  LoadingParagraph,
-  useFollowingInfinite,
-} from '@youfoundation/common-app';
+import { ConnectionTeaser, LoadingBlock, useFollowingInfinite } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const FollowingView = ({ className }: { className?: string }) => {
@@ -29,9 +25,9 @@ const FollowingView = ({ className }: { className?: string }) => {
       </div>
       {isFollowingLoading ? (
         <>
-          <LoadingParagraph className="my-1 h-12 w-full" />
-          <LoadingParagraph className="my-1 h-12 w-full" />
-          <LoadingParagraph className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
         </>
       ) : null}
       {followingFetched && followingList

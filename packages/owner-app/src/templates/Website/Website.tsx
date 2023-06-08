@@ -5,7 +5,7 @@ import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
 import { Cloud } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -61,7 +61,7 @@ const Website = () => {
       />
       {homeIsLoading ? (
         <div className="-m-5 pt-5">
-          <LoadingParagraph className="m-5 h-20" />
+          <LoadingBlock className="m-5 h-20" />
         </div>
       ) : (
         <AttributeGroup
@@ -71,7 +71,7 @@ const Website = () => {
       )}
       {themeIsLoading ? (
         <div className="-m-5 pt-5">
-          <LoadingParagraph className="m-5 h-20" />
+          <LoadingBlock className="m-5 h-20" />
         </div>
       ) : (
         <AttributeGroup

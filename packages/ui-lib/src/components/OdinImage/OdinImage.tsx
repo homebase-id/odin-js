@@ -13,7 +13,7 @@ import {
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
 import '../../app/app.css';
-import LoadingParagraph from '../ui/LoadingParagraph/LoadingParagraph';
+import LoadingBlock from '../ui/LoadingBlock/LoadingBlock';
 
 export interface OdinImageProps {
   dotYouClient: DotYouClient;
@@ -173,7 +173,7 @@ export const OdinImage = ({
       ref={wrapperRef}
     >
       {isLoadingTiny ? (
-        <LoadingParagraph className="aspect-square h-full w-full" />
+        <LoadingBlock className="aspect-square h-full w-full" />
       ) : (
         <>
           <img

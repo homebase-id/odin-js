@@ -3,7 +3,7 @@ import {
   ActionButton,
   ActionLink,
   Article,
-  LoadingParagraph,
+  LoadingBlock,
   Plus,
   useBlogPostsInfinite,
   useDrafts,
@@ -36,9 +36,9 @@ const DraftsView = () => {
         <h2 className="mb-5 text-xl">{t('Drafts')}</h2>
         {draftsLoading ? (
           <>
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
           </>
         ) : null}
         {!drafts && !draftsLoading ? <>{t('No drafts found')}</> : null}
@@ -99,9 +99,9 @@ const PublishedArticlesView = () => {
         <h2 className="mb-5 text-xl">{t('Published articles')}</h2>
         {articlesLoading ? (
           <>
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
           </>
         ) : null}
         {!articleData && !articlesLoading ? <>{t('No articles found')}</> : null}

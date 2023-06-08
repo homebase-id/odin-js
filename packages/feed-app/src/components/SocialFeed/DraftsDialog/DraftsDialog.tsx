@@ -4,7 +4,7 @@ import {
   useChannels,
   DialogWrapper,
   t,
-  LoadingParagraph,
+  LoadingBlock,
   ActionLink,
   ActionButton,
   ChannelDefinitionVm,
@@ -42,9 +42,9 @@ const DraftsDialog = ({ isOpen, onCancel }: { isOpen: boolean; onCancel: () => v
     >
       {draftsLoading ? (
         <>
-          <LoadingParagraph className="my-2 h-4" />
-          <LoadingParagraph className="my-2 h-4" />
-          <LoadingParagraph className="my-2 h-4" />
+          <LoadingBlock className="my-2 h-4" />
+          <LoadingBlock className="my-2 h-4" />
+          <LoadingBlock className="my-2 h-4" />
         </>
       ) : null}
       {!drafts && !draftsLoading ? <>{t('No drafts found')}</> : null}

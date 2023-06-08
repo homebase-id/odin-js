@@ -7,7 +7,7 @@ import {
   getChannelDrive,
 } from '@youfoundation/js-lib/public';
 import {
-  LoadingParagraph,
+  LoadingBlock,
   AuthorImage,
   AuthorName,
   t,
@@ -50,7 +50,7 @@ export const PostDetailCard = ({
       <div className="mb-5 flex w-full flex-col">
         <div className="flex flex-row flex-wrap items-center pb-2 text-gray-500">
           {!post ? (
-            <LoadingParagraph className="mb-2 h-8 w-full max-w-xs" />
+            <LoadingBlock className="mb-2 h-8 w-full max-w-xs" />
           ) : (
             <>
               {showAuthorDetail ? (
@@ -81,7 +81,7 @@ export const PostDetailCard = ({
           )}
         </div>
         {!post ? (
-          <LoadingParagraph className="h-8 w-full max-w-xs" />
+          <LoadingBlock className="h-8 w-full max-w-xs" />
         ) : (
           <h1
             className={`title-font mb-4 ${
@@ -153,11 +153,11 @@ export const PostDetailCard = ({
 
       {!post ? (
         <>
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
         </>
       ) : (
         post.type === 'Article' && (

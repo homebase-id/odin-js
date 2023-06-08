@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { t, useCircle } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
 import { Circles } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 
 export const CirclePermissionView = ({
   circleDef,
@@ -65,7 +65,7 @@ export const CirclePermissionView = ({
         </p>
         {!hideMembers ? (
           membersLoading ? (
-            <LoadingParagraph className="mt-1 h-4 w-full" />
+            <LoadingBlock className="mt-1 h-4 w-full" />
           ) : (
             <small className="block">
               {members

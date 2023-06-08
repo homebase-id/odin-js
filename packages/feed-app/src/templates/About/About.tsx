@@ -1,5 +1,4 @@
 import { NoLayout } from '../../components/ui/Layout/Layout';
-import { t } from '../../helpers/i18n/dictionary';
 
 // import image1 from '../../assets/anton-mishin-061zw2DC-ZI-unsplash.webp';
 // import image2 from '../../assets/duy-pham-Cecb0_8Hx-o-unsplash.webp';
@@ -10,7 +9,7 @@ import { t } from '../../helpers/i18n/dictionary';
 
 import LoginNav from '../../components/Auth/LoginNav/LoginNav';
 
-import { ActionLink, Logo } from '@youfoundation/common-app';
+import { ActionLink, Logo, t } from '@youfoundation/common-app';
 
 const About = () => {
   return (

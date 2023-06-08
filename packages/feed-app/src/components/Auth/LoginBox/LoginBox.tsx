@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useAuth from '../../../hooks/auth/useAuth';
-import { IS_DARK_CLASSNAME, LoadingParagraph } from '@youfoundation/common-app';
+import { IS_DARK_CLASSNAME, LoadingBlock } from '@youfoundation/common-app';
 
 export const LoginBox = () => {
   const [params, setParams] = useState<string | null>(null);
@@ -15,7 +15,7 @@ export const LoginBox = () => {
   if (!params)
     return (
       <>
-        <LoadingParagraph className="h-[16rem] w-full " />
+        <LoadingBlock className="h-[16rem] w-full " />
       </>
     );
 

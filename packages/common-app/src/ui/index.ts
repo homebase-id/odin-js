@@ -4,7 +4,7 @@ export * from './Alert/Toaster';
 export * from './Dialog/DialogWrapper';
 export * from './DomainHighlighter/DomainHighlighter';
 export * from './ErrorBoundary/ErrorBoundary';
-export * from './LoadingParagraph/LoadingParagraph';
+export * from './LoadingBlock/LoadingBlock';
 export * from './Pager/Pager';
 
 export * from './Buttons/ActionButton';

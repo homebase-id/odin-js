@@ -14,7 +14,7 @@ import CircleMembershipDialog from '../../../components/Dialog/CircleMembershipD
 import IncomingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import { Persons } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
@@ -357,9 +357,9 @@ export const ConnectionPermissionViewer = ({
         >
           {circlesLoading ? (
             <>
-              <LoadingParagraph className="mb-4 h-4 max-w-xs" />
-              <LoadingParagraph className="mb-4 h-4 max-w-xs" />
-              <LoadingParagraph className="mb-4 h-4 max-w-xs" />
+              <LoadingBlock className="mb-4 h-4 max-w-xs" />
+              <LoadingBlock className="mb-4 h-4 max-w-xs" />
+              <LoadingBlock className="mb-4 h-4 max-w-xs" />
             </>
           ) : (
             <>

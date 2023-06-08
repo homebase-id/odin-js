@@ -1,4 +1,4 @@
-import { ConnectionTeaser, LoadingParagraph, useFollowerInfinite } from '@youfoundation/common-app';
+import { ConnectionTeaser, LoadingBlock, useFollowerInfinite } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const FollowersView = ({ className }: { className?: string }) => {
@@ -25,9 +25,9 @@ const FollowersView = ({ className }: { className?: string }) => {
       </div>
       {isFollowersLoading ? (
         <>
-          <LoadingParagraph className="my-1 h-12 w-full" />
-          <LoadingParagraph className="my-1 h-12 w-full" />
-          <LoadingParagraph className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
         </>
       ) : null}
       {followersFetched && followersList

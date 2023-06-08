@@ -15,7 +15,7 @@ import { Heart, Plus } from '@youfoundation/common-app';
 import SectionEditor from '../../../components/SectionEditor/SectionEditor';
 import useProfileSections from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -245,10 +245,10 @@ const ProfileSectionEditor = ({
   if (!attributes || isLoading || isParentLoading) {
     return (
       <div className="-m-5 pt-5">
-        <LoadingParagraph className="m-5 h-20" />
-        <LoadingParagraph className="m-5 h-20" />
-        <LoadingParagraph className="m-5 h-20" />
-        <LoadingParagraph className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
       </div>
     );
   }

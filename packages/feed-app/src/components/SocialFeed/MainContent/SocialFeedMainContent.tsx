@@ -4,7 +4,7 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
 import PostTeaserCard from '../PostTeaserCard';
 import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
@@ -73,9 +73,9 @@ const SocialFeedMainContent = () => {
       <PostComposer className="bg-background shadow-sm" />
       {postsLoading ? (
         <div className="-mx-4">
-          <LoadingParagraph className="m-4 h-10" />
-          <LoadingParagraph className="m-4 h-10" />
-          <LoadingParagraph className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
         </div>
       ) : flattenedPosts?.length ? (
         <>

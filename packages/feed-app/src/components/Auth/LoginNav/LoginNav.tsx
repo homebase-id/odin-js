@@ -2,8 +2,7 @@ import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
 import useAuth from '../../../hooks/auth/useAuth';
-import { t } from '../../../helpers/i18n/dictionary';
-import { useOutsideTrigger, Times, Person, ConnectionImage } from '@youfoundation/common-app';
+import { useOutsideTrigger, Times, Person, ConnectionImage, t } from '@youfoundation/common-app';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
