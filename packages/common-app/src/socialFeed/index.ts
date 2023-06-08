@@ -26,3 +26,6 @@ export * from './RelatedArticles/RelatedArticles';
 
 export * from './PostDetail/PostDetailCard';
 export * from './PostDetail/PostImageDetailCard';
+
+export * from './PostListItem/PostTeaser';
+export * from './PostListItem/PostTextListItem';

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib/public';
+import { Article, getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 
 export const useDrafts = () => {
@@ -15,7 +15,14 @@ export const useDrafts = () => {
 
     const drafts = await Promise.all(
       channels.map(async (channel) => {
-        return await getPosts(dotYouClient, channel.channelId, undefined, 'only', undefined, 10);
+        return await getPosts<Article>(
+          dotYouClient,
+          channel.channelId,
+          undefined,
+          'only',
+          undefined,
+          10
+        );
       })
     );
 
@@ -33,7 +40,7 @@ export const useDrafts = () => {
         await queryClient.cancelQueries(['drafts']);
 
         // Updates
-        const previousDrafts: PostFile<PostContent>[] | undefined = queryClient.getQueryData([
+        const previousDrafts: PostFile<Article>[] | undefined = queryClient.getQueryData([
           'drafts',
         ]);
         const updatedDrafts = previousDrafts?.filter(

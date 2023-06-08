@@ -12,7 +12,6 @@ import { useChannel } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { PostMedia } from '../Blocks/Media/Media';
-import useAuth from '../../../../owner-app/src/hooks/auth/useAuth';
 
 interface PostTeaserProps {
   className?: string;
@@ -23,7 +22,7 @@ interface PostTeaserProps {
   allowExpand?: boolean;
 }
 
-const PostTeaser: FC<PostTeaserProps> = ({
+export const PostTeaser: FC<PostTeaserProps> = ({
   className,
   postFile,
   hideImageWhenNone,
@@ -142,5 +141,3 @@ const PostTeaser: FC<PostTeaserProps> = ({
     </div>
   );
 };
-
-export default PostTeaser;

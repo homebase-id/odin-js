@@ -9,7 +9,7 @@ import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingBlock } from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
-import PostTeaser from '@youfoundation/common-app/src/socialFeed/Card/PostTeaser';
+import { PostTeaser } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 12;
 
