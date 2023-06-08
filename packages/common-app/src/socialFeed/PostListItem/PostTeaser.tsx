@@ -6,11 +6,13 @@ import {
   PostInteracts,
   RichTextRenderer,
   t,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 import { useChannel } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
-import { PostMedia } from '../Blocks/Media/Media';
+import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
+import { useNavigate } from 'react-router-dom';
 
 interface PostTeaserProps {
   className?: string;
@@ -21,7 +23,7 @@ interface PostTeaserProps {
   allowExpand?: boolean;
 }
 
-const PostTeaser: FC<PostTeaserProps> = ({
+export const PostTeaser: FC<PostTeaserProps> = ({
   className,
   postFile,
   hideImageWhenNone,
@@ -31,7 +33,9 @@ const PostTeaser: FC<PostTeaserProps> = ({
 }) => {
   const { content: post } = postFile;
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
-
+  const { isOwner } = useDotYouClient();
+  const navigate = useNavigate();
+  const isDesktop = document.documentElement.clientWidth >= 1024;
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
@@ -48,13 +52,26 @@ const PostTeaser: FC<PostTeaserProps> = ({
           <div
             className={`relative h-full rounded-lg border border-gray-200 border-opacity-60 transition-colors ${'hover:shadow-md hover:dark:shadow-slate-600'} bg-background dark:border-gray-800`}
           >
-            <PostMedia
+            <DoubleClickHeartForMedia
               postFile={postFile}
               postPath={postPath}
               showFallback={!hideImageWhenNone}
               forceAspectRatio={forceAspectRatio}
-            />
+              onClick={(e, index) => {
+                e.stopPropagation();
 
+                // Only navigate to the article if we're on desktop
+                if (post.type !== 'Article') {
+                  navigate(`${postPath}/${index}`, {
+                    state: { referrer: window.location.pathname },
+                  });
+                  return;
+                }
+
+                if (isDesktop)
+                  navigate(postPath, { state: { referrer: window.location.pathname } });
+              }}
+            />
             <div className="px-4 pb-4">
               <div className="text-foreground flex flex-row text-opacity-40">
                 {channel && post ? (
@@ -131,6 +148,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
               allowExpand={!!allowExpand}
               className="px-4"
               showSummary={true}
+              isOwner={isOwner}
             />
           </div>
         </FakeAnchor>
@@ -138,5 +156,3 @@ const PostTeaser: FC<PostTeaserProps> = ({
     </div>
   );
 };
-
-export default PostTeaser;

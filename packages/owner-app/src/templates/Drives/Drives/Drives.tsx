@@ -4,7 +4,7 @@ import { ActionButton, t } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
 import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';
 import { HardDrive } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
@@ -65,9 +65,9 @@ const Drives = () => {
       <section className="-my-4">
         {isDrivesLoading ? (
           <>
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
           </>
         ) : (
           driveTypeDefinitions?.map((type) => (

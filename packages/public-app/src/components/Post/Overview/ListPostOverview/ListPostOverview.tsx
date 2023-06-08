@@ -1,4 +1,4 @@
-import PostTeaser from '@youfoundation/common-app/src/socialFeed/Card/PostTeaser';
+import { PostTeaser } from '@youfoundation/common-app';
 import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 
 const ListPostOverview = ({

@@ -14,7 +14,7 @@ import CircleMembershipDialog from '../../../components/Dialog/CircleMembershipD
 import IncomingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import { Persons } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
@@ -128,6 +128,8 @@ const ConnectionDetails = () => {
 
   const activeConnection = connectionInfo as ConnectionInfo;
 
+  console.log(activeConnection?.created);
+
   return (
     <>
       <ErrorNotification error={disconnectError} />
@@ -185,6 +187,12 @@ const ConnectionDetails = () => {
           </>
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
+        browserTitle={
+          connectionInfo?.status === 'connected' && contactData?.name
+            ? contactData.name.displayName ??
+              `${contactData.name.givenName} ${contactData.name.surname}`
+            : odinId
+        }
       />
       {connectionInfo?.status === 'blocked' ? (
         <>
@@ -194,7 +202,7 @@ const ConnectionDetails = () => {
 
       {connectionInfo?.status === 'pending' ? (
         <>
-          <Alert type="info">
+          <Alert type="info" className="bg-background">
             <div className="flex flex-grow flex-col sm:flex-row">
               <div className="mr-1">
                 &quot;<DomainHighlighter>{connectionInfo?.senderOdinId}</DomainHighlighter>&quot;{' '}
@@ -357,9 +365,9 @@ export const ConnectionPermissionViewer = ({
         >
           {circlesLoading ? (
             <>
-              <LoadingParagraph className="mb-4 h-4 max-w-xs" />
-              <LoadingParagraph className="mb-4 h-4 max-w-xs" />
-              <LoadingParagraph className="mb-4 h-4 max-w-xs" />
+              <LoadingBlock className="mb-4 h-4 max-w-xs" />
+              <LoadingBlock className="mb-4 h-4 max-w-xs" />
+              <LoadingBlock className="mb-4 h-4 max-w-xs" />
             </>
           ) : (
             <>

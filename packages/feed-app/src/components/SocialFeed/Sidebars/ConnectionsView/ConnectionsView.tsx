@@ -3,7 +3,7 @@ import {
   ConnectionTeaser,
   t,
   useActiveConnections,
-  LoadingParagraph,
+  LoadingBlock,
   Pager,
 } from '@youfoundation/common-app';
 
@@ -49,9 +49,9 @@ const ConnectionsView = ({ className }: { className?: string }) => {
       </div>
       {isConnectionsLoading ? (
         <>
-          <LoadingParagraph className="my-1 h-12 w-full" />
-          <LoadingParagraph className="my-1 h-12 w-full" />
-          <LoadingParagraph className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
+          <LoadingBlock className="my-1 h-12 w-full" />
         </>
       ) : null}
       {connectionsFetched &&

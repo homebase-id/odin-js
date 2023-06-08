@@ -1,9 +1,8 @@
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { t } from '../../helpers/i18n/dictionary';
 import useAuth from '../../hooks/auth/useAuth';
 import Layout from '../../components/ui/Layout/Layout';
-import { DialogWrapper, Alert } from '@youfoundation/common-app';
+import { DialogWrapper, Alert, t } from '@youfoundation/common-app';
 import { LoginBox } from '../../components/Auth/LoginBox/LoginBox';
 
 const Auth = () => {

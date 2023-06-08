@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import useContact from '../../../hooks/contacts/useContact';
-import useImage from '../../../hooks/media/useImage';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import { Eye, Image, LoadingParagraph } from '@youfoundation/common-app';
+import { Eye, Image, LoadingBlock } from '@youfoundation/common-app';
 
 const ContactImage = ({
   odinId,
@@ -55,7 +54,7 @@ const ContactImage = ({
   return (
     <div className="relative aspect-square">
       {isLoading ? (
-        <LoadingParagraph className={`aspect-square`} />
+        <LoadingBlock className={`aspect-square`} />
       ) : (shouldOnlyLoadAfterClick && loadImage) || !shouldOnlyLoadAfterClick ? (
         <Image
           fileId={contactData?.imageFileId}

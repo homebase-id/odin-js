@@ -1,5 +1,5 @@
 import useContact from '../../../hooks/contacts/useContact';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 
 const ConnectionCard = (props: PersonCardProps) => {
@@ -12,7 +12,7 @@ const ConnectionCard = (props: PersonCardProps) => {
     : props.odinId;
 
   if (isLoading) {
-    return <LoadingParagraph className={`aspect-[3/5] ${props.className}`} />;
+    return <LoadingBlock className={`aspect-[3/5] ${props.className}`} />;
   }
 
   return (

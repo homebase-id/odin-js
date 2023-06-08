@@ -6,17 +6,22 @@ import {
   useDoubleTap,
 } from '@youfoundation/common-app';
 import { PostFile, PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+import React from 'react';
 import { useRef } from 'react';
 
-const DoubleClickHeartForMedia = ({
+export const DoubleClickHeartForMedia = ({
   odinId,
   postFile,
   postPath,
+  showFallback,
+  forceAspectRatio,
   onClick,
 }: {
   odinId?: string;
   postFile: PostFile<PostContent>;
   postPath: string;
+  showFallback?: boolean;
+  forceAspectRatio?: boolean;
   onClick: (e: React.MouseEvent, index: number) => void;
 }) => {
   const wrapperRef = useRef<HTMLSpanElement>(null);
@@ -56,7 +61,8 @@ const DoubleClickHeartForMedia = ({
           odinId={odinId}
           postFile={postFile}
           postPath={postPath}
-          showFallback={false}
+          showFallback={showFallback}
+          forceAspectRatio={forceAspectRatio}
           className="cursor-pointer"
           {...bind}
         />
@@ -65,5 +71,3 @@ const DoubleClickHeartForMedia = ({
     </span>
   );
 };
-
-export default DoubleClickHeartForMedia;

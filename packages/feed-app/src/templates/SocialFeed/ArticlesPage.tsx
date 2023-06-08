@@ -1,10 +1,13 @@
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { InfiniteData } from '@tanstack/react-query';
+import { Article, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import {
   ActionButton,
   ActionLink,
-  Article,
-  LoadingParagraph,
+  Article as ArticleIcon,
+  LoadingBlock,
   Plus,
+  PostTextListItem,
+  SubtleMessage,
   useBlogPostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
@@ -12,13 +15,12 @@ import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 import { useChannels } from '@youfoundation/common-app';
-import { DraftItem } from '../../components/SocialFeed/DraftsDialog/DraftsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 export const ArticlesPage = () => {
   return (
     <>
-      <PageMeta title={t('Articles')} icon={Article} />
+      <PageMeta title={t('Articles')} icon={ArticleIcon} />
 
       <DraftsView />
       <PublishedArticlesView />
@@ -36,31 +38,28 @@ const DraftsView = () => {
         <h2 className="mb-5 text-xl">{t('Drafts')}</h2>
         {draftsLoading ? (
           <>
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
           </>
         ) : null}
-        {!drafts && !draftsLoading ? <>{t('No drafts found')}</> : null}
+        {(!drafts || !drafts.length) && !draftsLoading ? (
+          <SubtleMessage>{t('No drafts found')}</SubtleMessage>
+        ) : null}
         {drafts ? (
           <div className="-m-3">
-            {!drafts?.length ? (
-              <p className="m-3">{t('No drafts found')}</p>
-            ) : (
-              drafts.map((draft, index) => {
-                const channel = channels?.find(
-                  (chnl) => chnl.channelId === draft.content.channelId
-                );
-                return (
-                  <DraftItem
-                    draft={draft}
-                    channel={channel}
-                    key={draft.fileId ?? index}
-                    className="bg-background"
-                  />
-                );
-              })
-            )}
+            {drafts.map((draft, index) => {
+              const channel = channels?.find((chnl) => chnl.channelId === draft.content.channelId);
+              return (
+                <PostTextListItem
+                  draft={draft}
+                  channel={channel}
+                  key={draft.fileId ?? index}
+                  className="bg-background"
+                  linkRoot="/owner/feed/edit"
+                />
+              );
+            })}
           </div>
         ) : null}
         <div className="-m-2 flex flex-row-reverse py-3">
@@ -91,7 +90,13 @@ const PublishedArticlesView = () => {
     pageSize: PAGE_SIZE,
   });
 
-  const flattenedPosts = flattenInfinteData<PostFile<PostContent>>(articleData, PAGE_SIZE);
+  const flattenedPosts = flattenInfinteData<PostFile<Article>>(
+    articleData as InfiniteData<{
+      results: PostFile<Article>[];
+      cursorState: unknown;
+    }>,
+    PAGE_SIZE
+  );
 
   return (
     <section className="pb-10">
@@ -99,9 +104,9 @@ const PublishedArticlesView = () => {
         <h2 className="mb-5 text-xl">{t('Published articles')}</h2>
         {articlesLoading ? (
           <>
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
-            <LoadingParagraph className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
+            <LoadingBlock className="my-2 h-4" />
           </>
         ) : null}
         {!articleData && !articlesLoading ? <>{t('No articles found')}</> : null}
@@ -115,11 +120,12 @@ const PublishedArticlesView = () => {
                   (chnl) => chnl.channelId === draft.content.channelId
                 );
                 return (
-                  <DraftItem
+                  <PostTextListItem
                     draft={draft}
                     channel={channel}
                     key={draft.fileId ?? index}
                     className="bg-background"
+                    linkRoot="/home/posts"
                   />
                 );
               })

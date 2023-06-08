@@ -25,7 +25,6 @@ const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
-import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useAuth from '../hooks/auth/useAuth';
 
 const AUTH_PATH = '/auth';
@@ -79,7 +78,7 @@ function App() {
             path="*"
             element={
               <MinimalLayout>
-                <Suspense fallback={<LoadingDetailPage />}>
+                <Suspense fallback={<></>}>
                   <NotFound />
                 </Suspense>
               </MinimalLayout>

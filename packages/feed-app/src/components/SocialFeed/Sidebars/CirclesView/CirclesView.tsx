@@ -1,7 +1,7 @@
 import { t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { CirclePermissionView } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 
 const CirclesView = ({ className }: { className?: string }) => {
   const {
@@ -18,9 +18,9 @@ const CirclesView = ({ className }: { className?: string }) => {
       <ul className="text-foreground">
         {isCirclesLoading ? (
           <>
-            <LoadingParagraph className="my-1 h-12 w-full" />
-            <LoadingParagraph className="my-1 h-12 w-full" />
-            <LoadingParagraph className="my-1 h-12 w-full" />
+            <LoadingBlock className="my-1 h-12 w-full" />
+            <LoadingBlock className="my-1 h-12 w-full" />
+            <LoadingBlock className="my-1 h-12 w-full" />
           </>
         ) : null}
         {circles

@@ -4,7 +4,7 @@ import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTy
 import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { HardDrive } from '@youfoundation/common-app';
 import { getAccessFromPermissionNumber } from '../../../templates/DemoData/helpers';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 
 const DrivePermissionRequestView = ({
   driveGrant,
@@ -29,7 +29,7 @@ const DrivePermissionRequestView = ({
     >
       <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6" />
       {driveLoading ? (
-        <LoadingParagraph className="h-10 flex-grow" />
+        <LoadingBlock className="h-10 flex-grow" />
       ) : (
         <div className="flex flex-col">
           <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>

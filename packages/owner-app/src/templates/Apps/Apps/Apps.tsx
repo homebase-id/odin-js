@@ -2,7 +2,7 @@ import { t } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -21,9 +21,9 @@ const Apps = () => {
       <div className="mt-8">
         {loadingRegisteredApps ? (
           <>
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
           </>
         ) : (
           <>

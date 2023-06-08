@@ -7,9 +7,9 @@ import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
-import PostTeaser from '@youfoundation/common-app/src/socialFeed/Card/PostTeaser';
+import { PostTeaser } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 12;
 
@@ -128,9 +128,9 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     <div className={className}>
       {!staticPostsLoaded && !combinePosts ? (
         <div className="-mx-4">
-          <LoadingParagraph className="m-4 h-10" />
-          <LoadingParagraph className="m-4 h-10" />
-          <LoadingParagraph className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
         </div>
       ) : combinedPosts?.length ? (
         <div ref={parentRef}>
