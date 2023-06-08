@@ -2,9 +2,8 @@ import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
 import useAuth from '../../../hooks/auth/useAuth';
-import IdentityImage from '../IdentityImage/IdentityImage';
 import { t } from '../../../helpers/i18n/dictionary';
-import { useOutsideTrigger, Times, Person } from '@youfoundation/common-app';
+import { useOutsideTrigger, Times, Person, ConnectionImage } from '@youfoundation/common-app';
 
 const LoginNav = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +31,7 @@ const LoginNav = () => {
           onClick={() => setIsOpen(!isOpen)}
         >
           {isAuthenticated && identity ? (
-            <IdentityImage odinId={identity} className="h-8 w-8 rounded-full" size="custom" />
+            <ConnectionImage odinId={identity} className="h-8 w-8 rounded-full" size="custom" />
           ) : (
             <Person className="h-4 w-4" />
           )}
