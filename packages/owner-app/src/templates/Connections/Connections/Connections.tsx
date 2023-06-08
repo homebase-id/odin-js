@@ -1,8 +1,8 @@
-import { ActionButton, Plus } from '@youfoundation/common-app';
+import { ActionButton, Plus, SubtleMessage } from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
-import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
+import { SectionTitle } from '../../../components/ui/Sections/Section';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useEffect, useState } from 'react';
 import { Pager, Persons } from '@youfoundation/common-app';
@@ -35,27 +35,21 @@ const Connections = () => {
         />
 
         {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
-          <div className="flex">
-            <Section isBorderLess={true}>
-              <div className="flex flex-row">
-                <p className="my-auto italic text-gray-400">
-                  {t('Mmh, this looks empty... Time to add some connections?')}{' '}
-                </p>
-                <ActionButton
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsSentConnectionOpen(true);
+          <SubtleMessage className="flex flex-row items-center">
+            <span>{t('Mmh, this looks empty... Time to add some connections?')}</span>
+            <ActionButton
+              onClick={(e) => {
+                e.preventDefault();
+                setIsSentConnectionOpen(true);
 
-                    return false;
-                  }}
-                  type="secondary"
-                  className="ml-2"
-                >
-                  {t('Add')}
-                </ActionButton>
-              </div>
-            </Section>
-          </div>
+                return false;
+              }}
+              type="secondary"
+              className="ml-2"
+            >
+              {t('Add')}
+            </ActionButton>
+          </SubtleMessage>
         ) : null}
 
         <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />

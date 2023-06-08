@@ -64,3 +64,14 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
     </section>
   );
 };
+
+export const SubtleMessage = (
+  props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>
+) => {
+  return (
+    <p
+      {...props}
+      className={`bg-background rounded-lg px-3 py-3 italic text-gray-400 ${props.className || ''}`}
+    />
+  );
+};

@@ -1,6 +1,6 @@
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
-import { Plus, t } from '@youfoundation/common-app';
+import { Plus, SubtleMessage, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -45,7 +45,7 @@ const Circles = () => {
                 <CircleCardLink key={circleDef.id} circleDef={circleDef} />
               ))
             ) : (
-              <>{t('No circles found')}</>
+              <SubtleMessage>{t('No circles found')}</SubtleMessage>
             )}
           </div>
         )}

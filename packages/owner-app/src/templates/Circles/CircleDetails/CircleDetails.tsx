@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Pencil, Times, t } from '@youfoundation/common-app';
+import { Pencil, SubtleMessage, Times, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
@@ -162,18 +162,16 @@ const CircleDetails = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-row">
-            <p className="my-auto italic text-gray-400">
-              {t('Mmh, this looks empty... Time to add some connections?')}{' '}
-            </p>
+          <SubtleMessage className="flex flex-row items-center">
+            <span>{t('Mmh, this looks empty... Time to add some connections?')}</span>
             <ActionButton
               onClick={() => setIsOpenMemberLookup(true)}
-              type="primary"
+              type="secondary"
               className="ml-2"
             >
               {t('Add')}
             </ActionButton>
-          </div>
+          </SubtleMessage>
         )}
       </div>
 
