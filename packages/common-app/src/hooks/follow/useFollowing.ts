@@ -36,7 +36,7 @@ export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProp
         getNextPageParam: (lastPage) =>
           (lastPage?.results?.length &&
             lastPage?.results?.length >= pageSize &&
-            lastPage?.cursorState) ??
+            lastPage?.cursorState) ||
           undefined,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

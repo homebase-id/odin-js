@@ -6,11 +6,13 @@ import {
   PostInteracts,
   RichTextRenderer,
   t,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 import { useChannel } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { PostMedia } from '../Blocks/Media/Media';
+import useAuth from '../../../../owner-app/src/hooks/auth/useAuth';
 
 interface PostTeaserProps {
   className?: string;
@@ -31,6 +33,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
 }) => {
   const { content: post } = postFile;
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
+  const { isOwner } = useDotYouClient();
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -131,6 +134,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
               allowExpand={!!allowExpand}
               className="px-4"
               showSummary={true}
+              isOwner={isOwner}
             />
           </div>
         </FakeAnchor>
