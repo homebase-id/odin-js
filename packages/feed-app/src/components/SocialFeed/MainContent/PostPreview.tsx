@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ActionButton } from '@youfoundation/common-app';
+import { ActionButton, useDotYouClient } from '@youfoundation/common-app';
 import {
   ArrowLeft,
   PostDetailCard,
@@ -23,6 +23,7 @@ const PostPreview = ({
   postKey: string;
   attachmentKey?: string;
 }) => {
+  const { isOwner } = useDotYouClient();
   const isLocal = identityKey === window.location.hostname;
 
   const { data: externalChannel } = useSocialChannel({
@@ -79,7 +80,7 @@ const PostPreview = ({
           odinId={identityKey}
           channel={externalChannel || localChannel}
           postFile={externalPost || localPost}
-          isOwner={false} // PostPreview only used for non owner posts
+          isOwner={isOwner}
           isAuthenticated={true}
           attachmentKey={attachmentKey}
           onClose={() => navigate(state?.referrer || -1, { preventScrollReset: true })}
@@ -106,7 +107,7 @@ const PostPreview = ({
             postFile={externalPost || localPost}
             showAuthorDetail={true}
             className="mb-5 lg:my-10"
-            isOwner={false} // PostPreview only used for non owner posts
+            isOwner={isOwner}
             isAuthenticated={true}
             onNavigate={(path: string) =>
               navigate(path, {
