@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import useContact from '../../../hooks/contacts/useContact';
-import useImage from '../../../hooks/media/useImage';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
 import { Eye, Image, LoadingParagraph } from '@youfoundation/common-app';
