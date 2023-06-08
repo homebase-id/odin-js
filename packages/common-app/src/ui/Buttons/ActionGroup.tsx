@@ -56,7 +56,16 @@ export const ActionGroup = ({
       >
         <ul className={`block`}>
           {options.map((option) => {
-            return <ActionOption {...option} key={option.label} />;
+            return (
+              <ActionOption
+                {...option}
+                onClick={(e) => {
+                  setIsOpen(false);
+                  option.onClick && option.onClick(e);
+                }}
+                key={option.label}
+              />
+            );
           })}
         </ul>
       </div>
