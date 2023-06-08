@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
-import { t, useActiveConnections, useFollowingInfinite } from '@youfoundation/common-app';
+import {
+  SubtleMessage,
+  t,
+  useActiveConnections,
+  useFollowingInfinite,
+} from '@youfoundation/common-app';
 
 import { Pager, ConnectionTeaser } from '@youfoundation/common-app';
 
@@ -39,7 +44,7 @@ const ConnectionSection = ({ className }: { className?: string }) => {
   const hasNextPage = connections?.pages[activePage] || hasNextPageOnServer;
 
   if (connectionsFetched && (!connections?.pages.length || !connections.pages[0].results.length)) {
-    return <p className="italic text-gray-400">{t('No connections')}</p>;
+    return <SubtleMessage>{t('No connections')}</SubtleMessage>;
   }
 
   return (

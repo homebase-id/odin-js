@@ -71,7 +71,9 @@ export const SubtleMessage = (
   return (
     <p
       {...props}
-      className={`bg-background rounded-lg px-3 py-3 italic text-gray-400 ${props.className || ''}`}
+      className={`bg-background max-w-2xl rounded-lg px-3 py-3 italic text-gray-400 ${
+        props.className || ''
+      }`}
     />
   );
 };

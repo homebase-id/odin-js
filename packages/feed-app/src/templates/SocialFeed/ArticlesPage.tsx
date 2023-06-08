@@ -7,6 +7,7 @@ import {
   LoadingBlock,
   Plus,
   PostTextListItem,
+  SubtleMessage,
   useBlogPostsInfinite,
   useDrafts,
 } from '@youfoundation/common-app';
@@ -43,7 +44,7 @@ const DraftsView = () => {
           </>
         ) : null}
         {(!drafts || !drafts.length) && !draftsLoading ? (
-          <p className="italic text-gray-400">{t('No drafts found')}</p>
+          <SubtleMessage>{t('No drafts found')}</SubtleMessage>
         ) : null}
         {drafts ? (
           <div className="-m-3">

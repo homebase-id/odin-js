@@ -8,6 +8,7 @@ import {
   useIntersection,
   useFollowerInfinite,
   useFollowingInfinite,
+  SubtleMessage,
 } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
@@ -86,7 +87,7 @@ const Following = () => {
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
-        <p className="italic text-gray-400">{t("You're not following anyone")}</p>
+        <SubtleMessage>{t("You're not following anyone")}</SubtleMessage>
       )}
     </>
   );
@@ -122,7 +123,7 @@ const Followers = () => {
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
-        <p className="italic text-gray-400">{t("You don't have any followers")}</p>
+        <SubtleMessage>{t("You don't have any followers")}</SubtleMessage>
       )}
     </>
   );
