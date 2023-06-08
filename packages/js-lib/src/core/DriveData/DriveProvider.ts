@@ -28,9 +28,8 @@ export const getDrivesByType = async (
   };
 
   if (dotYouClient.getType() === ApiType.Owner) {
-    // Post needed
     const client = dotYouClient.createAxiosClient();
-    return client.post('drive/mgmt/type', params).then((response) => {
+    return client.get('drive/mgmt/type?' + stringify(params)).then((response) => {
       return response.data;
     });
   } else {
