@@ -17,6 +17,7 @@ export * from './Blocks/Interacts/PostInteracts';
 export * from './Blocks/Media/Media';
 export * from './Blocks/Media/MediaGallery';
 export * from './Blocks/Media/PrimaryMedia';
+export * from './Blocks/Media/DoubleClickHeartForMedia';
 
 export * from './Blocks/Meta/Meta';
 

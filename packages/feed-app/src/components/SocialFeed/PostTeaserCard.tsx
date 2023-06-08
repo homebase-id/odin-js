@@ -14,8 +14,7 @@ import {
   ErrorBoundary,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import DoubleClickHeartForMedia from './DoubleClickHeartForMedia';
-
+import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 interface PostTeaserCardProps {
   className?: string;
   postFile: PostFile<PostContent>;
