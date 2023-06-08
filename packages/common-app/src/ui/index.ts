@@ -13,6 +13,7 @@ export * from './Buttons/ActionGroup';
 export * from './Buttons/ActionLink';
 export * from './Buttons/SaveStatus';
 export * from './Buttons/FakeAnchor';
+export * from './Buttons/HybridLink';
 
 export * from './DarkModeToggle/DarkModeToggle';
 export * from './Sidenav/Sidenav';
