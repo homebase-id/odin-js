@@ -86,7 +86,7 @@ const Following = () => {
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
-        <>{t("You're not following anyone")}</>
+        <p className="italic text-gray-400">{t("You're not following anyone")}</p>
       )}
     </>
   );
@@ -122,7 +122,7 @@ const Followers = () => {
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
-        <>{t("You don't have any followers")}</>
+        <p className="italic text-gray-400">{t("You don't have any followers")}</p>
       )}
     </>
   );

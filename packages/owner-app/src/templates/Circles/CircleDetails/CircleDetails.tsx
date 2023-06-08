@@ -163,12 +163,12 @@ const CircleDetails = () => {
           </div>
         ) : (
           <div className="flex flex-row">
-            <p className="my-auto">
-              {t('Mmh, this looks like an emtpy circle... Time to add some connections?')}{' '}
+            <p className="my-auto italic text-gray-400">
+              {t('Mmh, this looks empty... Time to add some connections?')}{' '}
             </p>
             <ActionButton
               onClick={() => setIsOpenMemberLookup(true)}
-              type="secondary"
+              type="primary"
               className="ml-2"
             >
               {t('Add')}

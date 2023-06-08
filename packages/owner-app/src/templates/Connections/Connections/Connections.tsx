@@ -36,7 +36,7 @@ const Connections = () => {
 
         {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
           <div className="flex flex-row">
-            <p className="my-auto">
+            <p className="my-auto italic text-gray-400">
               {t('Mmh, this looks empty... Time to add some connections?')}{' '}
             </p>
             <ActionButton
@@ -46,7 +46,7 @@ const Connections = () => {
 
                 return false;
               }}
-              type="secondary"
+              type="primary"
               className="ml-2"
             >
               {t('Add')}
