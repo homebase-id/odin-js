@@ -11,14 +11,24 @@ interface AlertProps {
 export const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
   const bgClass =
     type === 'critical'
-      ? 'bg-red-50 dark:bg-red-900 border-red-100 dark:border-red-800 dark:text-white'
+      ? 'bg-red-50 dark:bg-red-900 dark:text-white'
       : type === 'warning'
-      ? 'bg-orange-50 border-orange-100'
-      : 'bg-slate-100 dark:bg-slate-700 dark:border-slate-900';
+      ? 'bg-orange-50'
+      : 'bg-slate-100 dark:bg-slate-700';
+
+  const borderClass =
+    type === 'critical'
+      ? 'border-red-100 dark:border-red-800 dark:text-white'
+      : type === 'warning'
+      ? 'border-orange-100'
+      : 'dark:border-slate-900';
 
   return (
     <section
-      className={`rounded-lg border ${isCompact ? 'p-2' : 'p-5'} ${bgClass} ${className ?? ''}`}
+      className={`rounded-lg border ${isCompact ? 'p-2' : 'p-5'}
+      ${!className?.includes('bg-') ? bgClass : ''}
+      ${!className?.includes('boder-') ? borderClass : ''}
+       ${className ?? ''}`}
     >
       <div className={`flex w-full flex-row flex-wrap sm:flex-nowrap`}>
         {type === 'critical' ? (

@@ -128,6 +128,8 @@ const ConnectionDetails = () => {
 
   const activeConnection = connectionInfo as ConnectionInfo;
 
+  console.log(activeConnection?.created);
+
   return (
     <>
       <ErrorNotification error={disconnectError} />
@@ -185,6 +187,12 @@ const ConnectionDetails = () => {
           </>
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
+        browserTitle={
+          connectionInfo?.status === 'connected' && contactData?.name
+            ? contactData.name.displayName ??
+              `${contactData.name.givenName} ${contactData.name.surname}`
+            : odinId
+        }
       />
       {connectionInfo?.status === 'blocked' ? (
         <>
@@ -194,7 +202,7 @@ const ConnectionDetails = () => {
 
       {connectionInfo?.status === 'pending' ? (
         <>
-          <Alert type="info">
+          <Alert type="info" className="bg-background">
             <div className="flex flex-grow flex-col sm:flex-row">
               <div className="mr-1">
                 &quot;<DomainHighlighter>{connectionInfo?.senderOdinId}</DomainHighlighter>&quot;{' '}
