@@ -17,7 +17,8 @@
     "public.d.ts",
     "transit.js",
     "transit.d.ts",
-    "index.d.ts"
+    "auth.js",
+    "auth.d.ts"
   ],
   "main": "./dist/core.js",
   "module": "./dist/core.mjs",
