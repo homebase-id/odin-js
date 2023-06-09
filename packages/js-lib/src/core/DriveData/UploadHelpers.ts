@@ -86,7 +86,7 @@ export const buildDescriptor = async (
 export const buildFormData = async (
   instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
-  payload: Uint8Array | File | undefined,
+  payload: Uint8Array | Blob | File | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined
 ) => {
@@ -97,7 +97,10 @@ export const buildFormData = async (
   if (!payload) {
     data.append('payload', new Blob([]));
   } else {
-    data.append('payload', payload instanceof File ? payload : new Blob([payload]));
+    data.append(
+      'payload',
+      payload instanceof File || payload instanceof Blob ? payload : new Blob([payload])
+    );
   }
 
   if (thumbnails) {

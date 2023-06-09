@@ -27,7 +27,7 @@ export const uploadVideo = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  file: Uint8Array | File,
+  file: Uint8Array | Blob | File,
   fileMetadata?: PlainVideoMetadata | SegmentedVideoMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];
