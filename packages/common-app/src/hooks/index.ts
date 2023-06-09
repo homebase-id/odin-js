@@ -16,6 +16,7 @@ export * from './socialFeed';
 export * from './image/useImage';
 export * from './blog';
 export * from './intersection/useIntersection';
+export * from './intersection/useMostSpace';
 export * from './siteData/useSiteData';
 export * from './connections/useExternalOdinId';
 export * from './reactions';

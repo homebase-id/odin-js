@@ -16,13 +16,16 @@ export const FakeAnchor = ({
   ...props
 }: FakeAnchorProps) => {
   const navigate = useNavigate();
+  const { pathname } = window.location;
+  const isExternal = pathname.split('/')[1] !== (href || '/').split('/')[1];
+
   return (
     <span
       {...props}
       className={`${className ?? ''} ${href ? 'cursor-pointer' : ''}`}
       onClick={() => {
         if (href) {
-          if (!href.startsWith('http')) {
+          if (!href.startsWith('http') && !isExternal) {
             navigate(href, { preventScrollReset: preventScrollReset });
             onNavigate && onNavigate();
           } else {

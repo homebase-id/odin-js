@@ -16,7 +16,8 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     channelId,
   }).fetch;
 
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getDotYouClient, isOwner } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
 
   const getCachedBlogs = (channelId?: string) => {
@@ -54,5 +55,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
   return useQuery(['blog', blogSlug, channelSlug || channelId], () => fetchBlog({ blogSlug }), {
     refetchOnMount: false,
     enabled: channelFetched && !!blogSlug,
+    cacheTime: 10 * 60 * 1000,
+    staleTime: isOwner ? 0 : 10 * 60 * 1000,
   });
 };

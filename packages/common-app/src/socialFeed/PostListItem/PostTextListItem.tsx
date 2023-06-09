@@ -1,7 +1,7 @@
 import { PostFile, Article } from '@youfoundation/js-lib/public';
 import { ellipsisAtMaxChar } from '../../helpers';
 import { ChannelDefinitionVm } from '../../hooks';
-import { HybridLink } from '../../ui';
+import { FakeAnchor } from '../../ui';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostMeta } from '../Blocks/Meta/Meta';
 
@@ -24,7 +24,7 @@ export const PostTextListItem = ({
         } p-3 hover:shadow-md hover:dark:shadow-slate-600`}
         key={draft.fileId}
       >
-        <HybridLink href={`${linkRoot}/${channel?.slug ?? 'public-posts'}/${draft.content.id}`}>
+        <FakeAnchor href={`${linkRoot}/${channel?.slug ?? 'public-posts'}/${draft.content.id}`}>
           <div className="flex flex-col">
             <div className="flex flex-grow flex-col px-4 py-3">
               <div className="text-foreground mb-1 flex flex-col text-opacity-60 md:flex-row md:flex-wrap md:items-center">
@@ -42,7 +42,7 @@ export const PostTextListItem = ({
               </div>
             </div>
           </div>
-        </HybridLink>
+        </FakeAnchor>
       </div>
     </>
   );

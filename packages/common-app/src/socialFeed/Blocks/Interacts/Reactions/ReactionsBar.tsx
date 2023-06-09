@@ -1,11 +1,12 @@
 import { ReactionContext } from '@youfoundation/js-lib/public';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import {
   CanReactDetails,
   EmojiPicker,
   t,
   useDotYouClient,
   useErrors,
+  useMostSpace,
   useMyEmojiReactions,
   useReaction,
 } from '@youfoundation/common-app';
@@ -26,6 +27,9 @@ export const ReactionsBar = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const [isCustomOpen, setIsCustomOpen] = useState(false);
+  const wrapperRef = useRef<HTMLButtonElement>(null);
+  const { verticalSpace } = useMostSpace(wrapperRef);
+
   const addError = useErrors().add;
 
   const { getIdentity } = useDotYouClient();
@@ -63,9 +67,7 @@ export const ReactionsBar = ({
   };
 
   useEffect(() => {
-    if (!isHover) {
-      setIsCustomOpen(false);
-    }
+    if (!isHover) setIsCustomOpen(false);
   }, [isHover]);
 
   useEffect(() => {
@@ -126,11 +128,16 @@ export const ReactionsBar = ({
           className="scale-100 rounded-full p-1 text-center hover:bg-slate-300 hover:dark:bg-slate-700"
           title={t('Others')}
           onClick={() => setIsCustomOpen(true)}
+          ref={wrapperRef}
         >
           <Plus className="h-6 w-6 " />
         </button>
         {isCustomOpen ? (
-          <div className="absolute bottom-0 left-0 overflow-hidden rounded-lg">
+          <div
+            className={`absolute z-20 ${
+              verticalSpace === 'top' ? 'bottom-0' : 'top-0'
+            } left-0 overflow-hidden rounded-lg`}
+          >
             <Suspense>
               <EmojiPicker
                 onInput={(emojiDetail) => {
