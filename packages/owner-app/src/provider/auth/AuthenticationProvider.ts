@@ -43,10 +43,18 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
   const response = await client.get(url);
+  if (response.status === 301 || response.status === 302) {
+    // Redirect happened from the server;
+    return true;
+  }
+
   if (response.status === 200 && response.data.redirectUrl) {
+    // Redirect is passed to the client 🤷
     window.location.href = response.data.redirectUrl;
     return true;
   }
+
+  // Something went wrong
   return false;
 };
 
