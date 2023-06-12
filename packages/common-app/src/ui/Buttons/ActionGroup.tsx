@@ -107,7 +107,11 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
           title={confirmOptions.title}
           confirmText={confirmOptions.buttonText}
           needConfirmation={needsConfirmation}
-          onConfirm={() => mouseEvent && onClick(mouseEvent)}
+          onConfirm={() => {
+            if (!mouseEvent) return;
+            setNeedsConfirmation(false);
+            onClick(mouseEvent);
+          }}
           onCancel={(e) => {
             e.stopPropagation();
             setNeedsConfirmation(false);
