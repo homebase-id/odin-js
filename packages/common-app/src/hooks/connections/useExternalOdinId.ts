@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiType, DotYouClient, GetProfileCard } from '@youfoundation/js-lib';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { GetProfileCard } from '@youfoundation/js-lib/public';
 
 export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = new DotYouClient({ api: ApiType.YouAuth, identity: odinId });

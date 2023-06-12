@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getPostOverTransit } from '@youfoundation/js-lib';
+import { getPostOverTransit } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../..';
 
 interface useSocialPostProps {

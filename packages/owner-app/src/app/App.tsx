@@ -15,7 +15,7 @@ import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
-const Initialization = lazy(() => import('../templates/Initialization/Initialization'));
+const Setup = lazy(() => import('../templates/Setup/Setup'));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterAppClient = lazy(() => import('../templates/RegisterAppClient/RegisterAppClient'));
@@ -43,9 +43,6 @@ const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
 const FollowNew = lazy(() => import('../templates/Follow/FollowNew'));
 
-// const Contacts = lazy(() => import('../../templates/Contacts/Contacts/Contacts'));
-// const ContactDetails = lazy(() => import('../../templates/Contacts/ContactDetails/ContactDetails'));
-
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
 const Settings = lazy(() => import('../templates/Settings/Settings'));
@@ -53,17 +50,25 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
-const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
-const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
-const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
-const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
+const SocialFeed = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.Feed }))
+);
+const ArticlesPage = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticlesPage }))
+);
+const ChannelsPage = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ChannelsPage }))
+);
+const ArticleComposerPage = lazy(() =>
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticleComposerPage }))
+);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';
 import useIsConfigured from '../hooks/configure/useIsConfigured';
-import { INIT_PATH } from '../templates/Initialization/Initialization';
+import { SETUP_PATH } from '../templates/Setup/Setup';
 import { useTransitProcessor, ErrorBoundary } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
@@ -131,7 +136,7 @@ function App() {
               </Layout>
             }
           >
-            <Route path="initialization" element={<Initialization />} />
+            <Route path="setup" element={<Setup />} />
 
             <Route index={true} element={<Home />} />
 
@@ -157,9 +162,6 @@ function App() {
             <Route path="follow/followers" element={<Following />}></Route>
             <Route path="follow/following" element={<Following />}></Route>
 
-            {/* <Route path="contacts" element={<Contacts />}></Route>
-                  <Route path="contacts/:odinId" element={<ContactDetails />}></Route> */}
-
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
             <Route path="settings" element={<Settings />}></Route>
@@ -169,32 +171,11 @@ function App() {
 
             {/* Feed: */}
             <Route path="feed">
-              <Route
-                index={true}
-                element={
-                  <>
-                    {/* <Header /> */}
-                    <SocialFeed />
-                  </>
-                }
-              />
-              <Route
-                path="preview/:identityKey/:channelKey/:postKey"
-                element={
-                  <>
-                    {/* <Header /> */}
-                    <SocialFeed />
-                  </>
-                }
-              />
+              <Route index={true} element={<SocialFeed />} />
+              <Route path="preview/:identityKey/:channelKey/:postKey" element={<SocialFeed />} />
               <Route
                 path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
-                element={
-                  <>
-                    {/* <Header /> */}
-                    <SocialFeed />
-                  </>
-                }
+                element={<SocialFeed />}
               />
               <Route path="new" element={<ArticleComposerPage />} />
               <Route path="articles" element={<ArticlesPage />} />
@@ -256,11 +237,11 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (isAuthenticated && !isConfigured && isFetched && window.location.pathname !== INIT_PATH) {
+  if (isAuthenticated && !isConfigured && isFetched && window.location.pathname !== SETUP_PATH) {
     console.debug('[NOT CONFIGURED]: Redirect to configure');
     return (
       <Navigate
-        to={`${INIT_PATH}?ui=none&returnUrl=${encodeURIComponent(
+        to={`${SETUP_PATH}?ui=none&returnUrl=${encodeURIComponent(
           window.location.pathname + window.location.search
         )}`}
       />

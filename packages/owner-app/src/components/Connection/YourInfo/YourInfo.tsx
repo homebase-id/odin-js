@@ -7,16 +7,16 @@ import {
   BirthdayFields,
   PhoneFields,
   LocationFields,
-  SecurityGroupType,
-  stringGuidsEqual,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
 import { getInitialsOfNameAttribute } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import { LoadingParagraph, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
+import { LoadingBlock, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
 import InfoBox from '../../ui/InfoBox/InfoBox';
 
 interface infoObject {
@@ -134,7 +134,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
       <div className="flex flex-row ">
         <div className="aspect-square w-1/4 max-w-[10rem]">
           {photoAttributesLoading ? (
-            <LoadingParagraph className={`aspect-square`} />
+            <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
               initials={info.initials}
@@ -146,12 +146,12 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
         </div>
         <div className="flex-grow px-6 py-4">
           {nameAttributesLoading ? (
-            <LoadingParagraph className="h-6 w-full max-w-xs" />
+            <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
             <h2 className="mb-4 text-lg">{info.name ?? window.location.host}</h2>
           )}
           {phoneAttributesLoading ? (
-            <LoadingParagraph className="h-6 w-full max-w-xs" />
+            <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
             <div className="my-1 flex flex-row">
               <IconFrame className="mr-2">
@@ -165,7 +165,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
             </div>
           )}
           {locationAttributesLoading ? (
-            <LoadingParagraph className="h-6 w-full max-w-xs" />
+            <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
             <div className="my-1 flex flex-row">
               <IconFrame className="mr-2">
@@ -183,7 +183,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
             </div>
           )}
           {birtydayAttributesLoading ? (
-            <LoadingParagraph className="h-6 w-full max-w-xs" />
+            <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
             <div className="my-1 flex flex-row">
               <IconFrame className="mr-2">

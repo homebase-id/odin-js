@@ -3,7 +3,9 @@ import useTheme from '../../../hooks/theme/useTheme';
 import useAuth from '../../../hooks/auth/useAuth';
 import { ScrollRestoration } from 'react-router-dom';
 
-const OwnerSidenav = lazy(() => import('./OwnerSidenav/OwnerSidenav'));
+const Sidenav = lazy(() =>
+  import('@youfoundation/common-app').then((commonApp) => ({ default: commonApp.Sidenav }))
+);
 
 interface LayoutProps {
   children?: ReactNode;
@@ -11,7 +13,7 @@ interface LayoutProps {
 
 const Layout: FC<LayoutProps> = ({ children }) => {
   const { colors } = useTheme();
-  const { isOwner } = useAuth();
+  const { isOwner, logout } = useAuth();
 
   return (
     <>
@@ -32,7 +34,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
       <div className="relative flex flex-row bg-page-background text-foreground">
         {isOwner ? (
           <Suspense fallback={<></>}>
-            <OwnerSidenav />
+            <Sidenav logout={logout} />
           </Suspense>
         ) : null}
         <div className={`flex min-h-screen w-auto flex-grow flex-col`}>{children}</div>

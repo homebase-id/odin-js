@@ -1,19 +1,21 @@
 import {
-  BuiltInAttributes,
-  BirthdayFields,
-  CredictCardFields,
-  EmailFields,
-  GetTargetDriveFromProfileId,
   HomePageAttributes,
   HomePageConfig,
   HomePageFields,
   HomePageTheme,
+} from '@youfoundation/js-lib/public';
+import {
+  BirthdayFields,
+  BuiltInAttributes,
+  CredictCardFields,
+  EmailFields,
+  GetTargetDriveFromProfileId,
   LinkFields,
   LocationFields,
   MinimalProfileFields,
   NicknameFields,
   PhoneFields,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { debounce } from 'lodash-es';
 import { useMemo, useState } from 'react';
 import { Textarea, t } from '@youfoundation/common-app';
@@ -292,7 +294,9 @@ const AttributeFields = ({
               id="headerImage"
               name={HomePageFields.HeaderImageId}
               defaultValue={attribute.data?.[HomePageFields.HeaderImageId] ?? ''}
-              onChange={debouncedChange}
+              onChange={(e) =>
+                onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+              }
               acl={attribute.acl}
               targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
               sizeClass={`${

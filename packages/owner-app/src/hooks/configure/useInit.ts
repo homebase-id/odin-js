@@ -1,41 +1,39 @@
-import { useMutation } from '@tanstack/react-query';
-import {
-  BlogConfig,
-  getAttribute,
-  getAttributeVersions,
-  getChannelDefinition,
-  getNewId,
-  getProfileDefinition,
-  ProfileDefinition,
-  saveAttribute,
-  saveChannelDefinition,
-  saveProfileDefinition,
-  saveProfileSection,
-  toGuidId,
-  uploadImage,
-  ImageContentType,
-  HomePageAttributes,
-  getAttributes,
-  HomePageTheme,
-} from '@youfoundation/js-lib';
-import { HomePageConfig } from '@youfoundation/js-lib';
-import {
-  BuiltInAttributes,
-  AttributeFile,
-  BuiltInProfiles,
-  GetTargetDriveFromProfileId,
-  LinkFields,
-  LocationFields,
-  MinimalProfileFields,
-  SecurityGroupType,
-  SocialFields,
-  CircleDefinition,
-} from '@youfoundation/js-lib';
-import { WelcomeData } from '../../templates/Initialization/Initialization';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
 import useAuth from '../auth/useAuth';
 import useAttribute from '../profiles/useAttribute';
 import { AttributeVm } from '../profiles/useAttributes';
+import {
+  BlogConfig,
+  HomePageAttributes,
+  HomePageConfig,
+  HomePageTheme,
+  getChannelDefinition,
+  saveChannelDefinition,
+} from '@youfoundation/js-lib/public';
+import {
+  getAttribute,
+  BuiltInProfiles,
+  AttributeFile,
+  BuiltInAttributes,
+  saveAttribute,
+  ProfileDefinition,
+  getProfileDefinition,
+  saveProfileDefinition,
+  saveProfileSection,
+  getAttributes,
+  GetTargetDriveFromProfileId,
+  MinimalProfileFields,
+  LocationFields,
+  getAttributeVersions,
+  SocialFields,
+  LinkFields,
+} from '@youfoundation/js-lib/profile';
+import { ImageContentType, SecurityGroupType, uploadImage } from '@youfoundation/js-lib/core';
+import { getNewId, toGuidId } from '@youfoundation/js-lib/helpers';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 
 const anonymousAcl = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
@@ -45,6 +43,7 @@ const useInit = () => {
   const { mutateAsync: saveAttr } = useAttribute({}).save;
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
+  const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
   const initDrives: DriveDefinitionParam[] = [
@@ -257,12 +256,12 @@ const useInit = () => {
 
   const homeInit = async () => {
     const defaultHomeAttribute: AttributeVm = {
-      id: toGuidId('default_home_attribute'),
+      id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId,
       type: HomePageAttributes.HomePage,
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable,
-      data: {},
+      data: { isProtected: true },
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
       typeDefinition: {
         type: HomePageAttributes.HomePage,
@@ -272,12 +271,12 @@ const useInit = () => {
     };
 
     const defaultThemeAttribute: AttributeVm = {
-      id: toGuidId('default_theme_attribute'),
+      id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId,
       type: HomePageAttributes.Theme,
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable,
-      data: { themeId: HomePageTheme.SocialClassic + '' },
+      data: { themeId: HomePageTheme.SocialClassic + '', isProtected: true },
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
       typeDefinition: {
         type: HomePageAttributes.Theme,
@@ -292,12 +291,8 @@ const useInit = () => {
       [HomePageAttributes.HomePage],
       1
     );
-    console.log({ homeDef });
 
-    if (!homeDef?.length) {
-      await saveAttribute(dotYouClient, defaultHomeAttribute);
-      console.log('saved', defaultHomeAttribute);
-    }
+    if (!homeDef?.length) await saveAttribute(dotYouClient, defaultHomeAttribute);
 
     const themeDef = await getAttributes(
       dotYouClient,
@@ -305,18 +300,12 @@ const useInit = () => {
       [HomePageAttributes.Theme],
       1
     );
-    console.log({ themeDef });
 
-    if (!themeDef?.length) {
-      await saveAttribute(dotYouClient, defaultThemeAttribute);
-      console.log('saved', defaultThemeAttribute);
-    }
+    if (!themeDef?.length) await saveAttribute(dotYouClient, defaultThemeAttribute);
   };
 
   const doCleanInit = async (isEmptyInit: boolean) => {
-    if (!isAuthenticated) {
-      return;
-    }
+    if (!isAuthenticated) return;
 
     // Initialize
     await initialize(dotYouClient, firstRunToken, initDrives);
@@ -330,9 +319,7 @@ const useInit = () => {
   };
 
   const doInitWithData = async (data: WelcomeData) => {
-    if (!isAuthenticated) {
-      return;
-    }
+    if (!isAuthenticated) return;
 
     const initCircles: CircleDefinition[] = data?.circles?.map((circle) => {
       return {
@@ -545,10 +532,18 @@ const useInit = () => {
       onError: (ex) => {
         console.error(ex);
       },
+      retry: 0,
+      onSettled: () => {
+        queryClient.invalidateQueries(['initialized']);
+      },
     }),
     initWithData: useMutation(doInitWithData, {
       onError: (ex) => {
         console.error(ex);
+      },
+      retry: 0,
+      onSettled: () => {
+        queryClient.invalidateQueries(['initialized']);
       },
     }),
   };

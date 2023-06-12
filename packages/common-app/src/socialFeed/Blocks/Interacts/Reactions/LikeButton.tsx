@@ -9,7 +9,7 @@ import {
   useReaction,
 } from '@youfoundation/common-app';
 
-import { ReactionContext } from '@youfoundation/js-lib';
+import { ReactionContext } from '@youfoundation/js-lib/public';
 import { ErrorNotification } from '@youfoundation/common-app';
 
 export const LikeButton = ({

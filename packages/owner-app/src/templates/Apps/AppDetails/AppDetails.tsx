@@ -20,7 +20,7 @@ import { Times } from '@youfoundation/common-app';
 import { Refresh } from '@youfoundation/common-app';
 import CirclePermissionSelectorDialog from '../../../components/Dialog/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
 import useDrives from '../../../hooks/drives/useDrives';
-import { stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const AppDetails = () => {

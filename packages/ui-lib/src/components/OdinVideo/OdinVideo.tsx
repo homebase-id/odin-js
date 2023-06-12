@@ -3,7 +3,7 @@ import {
   PlainVideoMetadata,
   SegmentedVideoMetadata,
   TargetDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import { useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';

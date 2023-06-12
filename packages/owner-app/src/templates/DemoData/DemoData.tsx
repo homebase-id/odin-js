@@ -1,33 +1,13 @@
 import useAuth from '../../hooks/auth/useAuth';
 import {
-  ApiType,
-  BuiltInAttributes,
-  AttributeFile,
-  Article,
-  BuiltInProfiles,
-  ChannelDefinition,
-  HomePageAttributes,
-  HomePageConfig,
-  HomePageFields,
-  MinimalProfileFields,
   SecurityGroupType,
-  SocialFields,
   TargetDrive,
   DrivePermissions,
-  ProfileConfig,
   AccessControlList,
-  PostContent,
-  PostFile,
   DotYouClient,
   queryBatch,
   uploadImage,
-  getAttribute,
-  getChannelDefinition,
-  getChannelDefinitions,
-  GetTargetDriveFromChannelId,
-  GetTargetDriveFromProfileId,
-  getNewId,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
 import {
   attrHasData,
@@ -45,6 +25,30 @@ import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { convertTextToSlug } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
+import {
+  AttributeFile,
+  BuiltInAttributes,
+  BuiltInProfiles,
+  GetTargetDriveFromProfileId,
+  MinimalProfileFields,
+  ProfileConfig,
+  SocialFields,
+  getAttribute,
+} from '@youfoundation/js-lib/profile';
+import {
+  HomePageConfig,
+  HomePageAttributes,
+  HomePageFields,
+  getChannelDefinition,
+  ChannelDefinition,
+  getChannelDefinitions,
+  GetTargetDriveFromChannelId,
+  Article,
+  PostFile,
+  PostContent,
+} from '@youfoundation/js-lib/public';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
 let character = window.location.hostname;
 
@@ -455,8 +459,8 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
     return null;
   }
 
+  const { data: homeData } = useHomeAttributes().fetchHome;
   const {
-    fetch: { data: rootAttr, isFetched: isRootFetched },
     save: { mutate: saveRoot },
   } = useAttribute({
     attributeId: realmData.home?.id,
@@ -464,11 +468,10 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
   });
 
   const addHome = async () => {
-    if (rootAttr) {
+    if (homeData?.length) {
       return;
     }
 
-    const homeId = realmData.home.id;
     const securityGroup = SecurityGroupType.Anonymous;
 
     // Create media
@@ -482,7 +485,7 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
     const newRootAttr: AttributeFile = {
       fileId: undefined,
       versionTag: undefined,
-      id: homeId,
+      id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId.toString(),
       type: HomePageAttributes.HomePage.toString(),
       priority: 1000,
@@ -500,8 +503,8 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
     return true;
   };
 
+  const { data: themeData } = useHomeAttributes().fetchTheme;
   const {
-    fetch: { data: themeAttr, isFetched: isThemeFetched },
     save: { mutate: saveTheme },
   } = useAttribute({
     attributeId: realmData.theme?.id,
@@ -509,18 +512,17 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
   });
 
   const addTheme = async () => {
-    if (themeAttr) {
+    if (themeData?.length) {
       return;
     }
 
-    const themeId = realmData.theme.id;
     const securityGroup = SecurityGroupType.Anonymous;
 
     // Create attribute
     const anonymousHomeAttribute: AttributeFile = {
       fileId: undefined,
       versionTag: undefined,
-      id: themeId,
+      id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId.toString(),
       type: HomePageAttributes.Theme.toString(),
       priority: 2000,
@@ -543,18 +545,18 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
       <button
         onClick={addHome}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          rootAttr && isRootFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
+          homeData?.length ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={(rootAttr && isRootFetched) || false}
+        disabled={!!homeData?.length || false}
       >
         Add Home
       </button>
       <button
         onClick={addTheme}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          themeAttr && isThemeFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
+          themeData?.length ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={(themeAttr && isThemeFetched) || false}
+        disabled={!!themeData?.length || false}
       >
         Add Theme
       </button>
@@ -562,11 +564,11 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
       <button
         onClick={createHomeAndTheme}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-orange-600 focus:outline-none ${
-          rootAttr && isRootFetched && themeAttr && isThemeFetched
+          !!themeData?.length || !!homeData?.length
             ? 'pointer-events-none bg-gray-300'
             : 'bg-orange-500'
         }`}
-        disabled={(rootAttr && isRootFetched && themeAttr && isThemeFetched) || false}
+        disabled={!!themeData?.length || !!homeData?.length || false}
       >
         Create Homepage And Theme
       </button>

@@ -1,4 +1,4 @@
-import { ImageContentType, ImageSize, ThumbnailFile } from '../../DriveData/DriveTypes';
+import { ImageContentType, ImageSize, ThumbnailFile } from '../../core';
 import { ThumbnailInstruction } from '../MediaTypes';
 import { fromBlob } from './ImageResizer';
 
@@ -26,11 +26,18 @@ export const createThumbnails = async (
   tinyThumb: ThumbnailFile;
   additionalThumbnails: ThumbnailFile[];
 }> => {
+  if (contentType === svgType) {
+    const vectorThumb = createVectorThumbnail(imageBytes);
+
+    return {
+      tinyThumb: vectorThumb.thumb,
+      naturalSize: vectorThumb.naturalSize,
+      additionalThumbnails: [],
+    };
+  }
+
   // Create a thumbnail that fits scaled into a 20 x 20 canvas
-  const { naturalSize, thumb: tinyThumb } =
-    contentType === svgType
-      ? createVectorThumbnail(imageBytes)
-      : await createImageThumbnail(imageBytes, tinyThumbSize);
+  const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(imageBytes, tinyThumbSize);
 
   const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
     if (tinyThumb.contentType === svgType) return currArray;
@@ -41,7 +48,10 @@ export const createThumbnails = async (
     return [...currArray, thumbSize];
   }, [] as ThumbnailInstruction[]);
 
-  if (applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length) {
+  if (
+    applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
+    !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth)
+  ) {
     // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
     applicableThumbSizes.push({
       quality: 100,

@@ -127,19 +127,21 @@ const AttributeEditor = ({
               type="secondary"
               onClick={() => setIsAclEdit(!isAclEdit)}
             />
-            <ActionButton
-              type="remove"
-              icon={Trash}
-              className={`${!attribute.fileId ? 'pointer-events-none' : ''}`}
-              confirmOptions={{
-                title: t('Remove Attribute'),
-                buttonText: t('Permanently remove'),
-                body: `${t('Are you sure you want to remove your')} ${
-                  attribute.typeDefinition.name
-                } ${t('attribute. This action cannot be undone.')}`,
-              }}
-              onClick={() => removeAttr(attribute)}
-            />
+            {!attribute.data.isProtected ? (
+              <ActionButton
+                type="remove"
+                icon={Trash}
+                className={`${!attribute.fileId ? 'pointer-events-none' : ''}`}
+                confirmOptions={{
+                  title: t('Remove Attribute'),
+                  buttonText: t('Permanently remove'),
+                  body: `${t('Are you sure you want to remove your')} ${
+                    attribute.typeDefinition.name
+                  } ${t('attribute. This action cannot be undone.')}`,
+                }}
+                onClick={() => removeAttr(attribute)}
+              />
+            ) : null}
           </div>
           {saveStatus === 'error' && !isNewAttribute ? (
             <ActionButton state={saveStatus} type="primary" onClick={() => saveNewData(newAttr)}>

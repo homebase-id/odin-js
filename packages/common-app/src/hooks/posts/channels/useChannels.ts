@@ -5,7 +5,7 @@ import {
   ChannelTemplate,
   getChannelDefinitions,
   GetFile,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 
 import { useDotYouClient } from '../../../..';
 export interface ChannelDefinitionVm extends ChannelDefinition {

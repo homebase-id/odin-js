@@ -1,7 +1,7 @@
-import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib';
+import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import AttributeGroup from '../../../components/Attribute/AttributeGroup/AttributeGroup';
 import { Heart } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useAttributes from '../../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -20,8 +20,8 @@ const PublicProfileDetails = () => {
       <PageMeta icon={Heart} title={t('Public Profile')} />
       {isLoading ? (
         <>
-          <LoadingParagraph className="m-5 h-20" />
-          <LoadingParagraph className="m-5 h-20" />
+          <LoadingBlock className="m-5 h-20" />
+          <LoadingBlock className="m-5 h-20" />
         </>
       ) : (
         <>

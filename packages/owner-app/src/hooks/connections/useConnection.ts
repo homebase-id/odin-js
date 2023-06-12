@@ -12,7 +12,7 @@ import {
   blockOdinId,
   unblockOdinId,
   ConnectionRequest,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/network';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 

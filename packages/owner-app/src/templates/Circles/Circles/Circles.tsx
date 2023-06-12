@@ -1,19 +1,16 @@
-import {
-  BuiltInProfiles,
-  CircleDefinition,
-  GetTargetDriveFromProfileId,
-} from '@youfoundation/js-lib';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
-import { Plus, t } from '@youfoundation/common-app';
+import { Plus, SubtleMessage, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { Circles as CirclesIcon } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import CircleDialog from '../../../components/Dialog/CircleDialog/CircleDialog';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { useCircle } from '@youfoundation/common-app';
 import { Ellipsis } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 
 const Circles = () => {
   const {
@@ -37,9 +34,9 @@ const Circles = () => {
       <section className="">
         {isCirclesLoading ? (
           <>
-            <LoadingParagraph className="mb-4 h-10" />
-            <LoadingParagraph className="mb-4 h-10" />
-            <LoadingParagraph className="mb-4 h-10" />
+            <LoadingBlock className="mb-4 h-10" />
+            <LoadingBlock className="mb-4 h-10" />
+            <LoadingBlock className="mb-4 h-10" />
           </>
         ) : (
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -48,7 +45,7 @@ const Circles = () => {
                 <CircleCardLink key={circleDef.id} circleDef={circleDef} />
               ))
             ) : (
-              <>{t('No circles found')}</>
+              <SubtleMessage>{t('No circles found')}</SubtleMessage>
             )}
           </div>
         )}

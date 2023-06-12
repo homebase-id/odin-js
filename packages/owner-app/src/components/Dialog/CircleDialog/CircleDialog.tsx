@@ -11,7 +11,7 @@ import { Label } from '@youfoundation/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
 
 import { DialogWrapper } from '@youfoundation/common-app';
-import { CircleDefinition } from '@youfoundation/js-lib';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 
 const CircleDialog = ({
   title,

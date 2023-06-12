@@ -7,7 +7,7 @@ import {
   GetFile,
   removeChannelDefinition,
   saveChannelDefinition,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
@@ -69,7 +69,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         template: parseChannelTemplate(channel?.templateId),
       } as ChannelDefinitionVm;
     }
-    return;
+    return null;
   };
 
   const saveData = async (channelDef: ChannelDefinition) => {

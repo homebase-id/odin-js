@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { DriveDefinition, getDrivesByType, TargetDrive } from '@youfoundation/js-lib';
+import { DriveDefinition, getDrivesByType, TargetDrive } from '@youfoundation/js-lib/core';
 import useAuth from '../auth/useAuth';
 
 const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {

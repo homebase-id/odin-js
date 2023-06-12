@@ -6,7 +6,8 @@
   "files": [
     "src"
   ],
-  "module": "./index.js",
+  "module": "./index.ts",
+  "types": "./index.ts",
   "sideEffects": false,
   "scripts": {
     "lint": "eslint src/*"
@@ -16,10 +17,10 @@
     "url": "https://github.com/YouFoundation/dotyoucore-js.git"
   },
   "dependencies": {
-    "@youfoundation/js-lib": "^0.0.1-alpha.6"
+    "@youfoundation/js-lib": "^0.0.1-alpha.36"
   },
   "peerDependencies": {
-    "@tanstack/react-query": "^4.19.1",
+    "@tanstack/react-query": "^4.28.0",
     "react": "^18.2.0"
   },
   "devDependencies": {

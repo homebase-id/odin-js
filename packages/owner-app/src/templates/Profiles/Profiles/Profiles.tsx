@@ -3,9 +3,9 @@ import { ActionButton, Plus, t } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { BuiltInProfiles } from '@youfoundation/js-lib';
+import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
 const Profiles = () => {
@@ -28,8 +28,8 @@ const Profiles = () => {
         />
         {isLoading ? (
           <div className="-m-2 flex">
-            <LoadingParagraph className="m-2 h-10 w-1/4" />
-            <LoadingParagraph className="m-2 h-10 w-1/4" />
+            <LoadingBlock className="m-2 h-10 w-1/4" />
+            <LoadingBlock className="m-2 h-10 w-1/4" />
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

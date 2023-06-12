@@ -41,7 +41,7 @@ export const GetProfileCard = async (
       return await _internalFileCache.get(dotYouClient.getRoot());
     }
 
-    const httpClient = dotYouClient.createAxiosClient(true);
+    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
     const fetchProfileCard = async () => {
       return await httpClient

@@ -1,4 +1,4 @@
-import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundation/js-lib';
+import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { ActionButton, t, useImage } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';
@@ -21,6 +21,8 @@ interface ImageSelectorProps
 
   sizeClass?: string;
   label?: string;
+
+  disabled?: boolean;
 }
 
 const ImageSelector = ({
@@ -34,6 +36,7 @@ const ImageSelector = ({
   maxWidth,
   sizeClass: externalSizeClass,
   label,
+  disabled,
 }: ImageSelectorProps) => {
   const {
     fetch: { data: imageData, isLoading },
@@ -72,6 +75,7 @@ const ImageSelector = ({
                 setIsEdit(true);
                 return false;
               }}
+              isDisabled={disabled}
             >
               <Pencil className="h-4 w-4 " />
             </ActionButton>
@@ -87,6 +91,7 @@ const ImageSelector = ({
                 buttonText: t('Permanently remove'),
               }}
               onClick={removeData}
+              isDisabled={disabled}
             >
               <Trash className="h-4 w-4 " />
             </ActionButton>
@@ -117,7 +122,7 @@ const ImageSelector = ({
 
       <ImageDialog
         acl={acl}
-        isOpen={isEdit}
+        isOpen={isEdit && !disabled}
         targetDrive={targetDrive}
         title={t('Upload image')}
         confirmText={t('Add')}

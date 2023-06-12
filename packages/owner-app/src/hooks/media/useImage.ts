@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
-  BlogConfig,
   getDecryptedImageUrl,
-  HomePageConfig,
   ImageContentType,
   removeImage,
   SecurityGroupType,
   TargetDrive,
   uploadImage,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import useAuth from '../auth/useAuth';
+import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 
 const defaultDrive: TargetDrive = {
   alias: HomePageConfig.BlogMainContentDriveId.toString(),

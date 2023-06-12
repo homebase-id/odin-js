@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { t, useSocialChannels } from '@youfoundation/common-app';
+import { t, useFollowingInfinite, useSocialChannels } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -10,8 +10,7 @@ import { Alert } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
-import useFollowingInfinite from '../../../hooks/follow/useFollowing';
-import { BlogConfig } from '@youfoundation/js-lib';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const IdentityIFollowEditDialog = ({
   odinId,

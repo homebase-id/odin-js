@@ -1,9 +1,9 @@
-import { DotYouProfile } from '@youfoundation/js-lib';
 import { Times, t } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import ConnectionCard from '../ConnectionCard/ConnectionCard';
+import { DotYouProfile } from '@youfoundation/js-lib/network';
 
 const PersonActive = ({
   dotYouProfile,

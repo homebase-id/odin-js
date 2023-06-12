@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
-import { t, useActiveConnections } from '@youfoundation/common-app';
-import useFollowingInfinite from '../../../../hooks/follow/useFollowing';
+import {
+  SubtleMessage,
+  t,
+  useActiveConnections,
+  useFollowingInfinite,
+} from '@youfoundation/common-app';
 
 import { Pager, ConnectionTeaser } from '@youfoundation/common-app';
 
@@ -39,8 +43,8 @@ const ConnectionSection = ({ className }: { className?: string }) => {
 
   const hasNextPage = connections?.pages[activePage] || hasNextPageOnServer;
 
-  if (connectionsFetched && !connections?.pages.length) {
-    return null;
+  if (connectionsFetched && (!connections?.pages.length || !connections.pages[0].results.length)) {
+    return <SubtleMessage>{t('No connections')}</SubtleMessage>;
   }
 
   return (
@@ -72,13 +76,13 @@ const ConnectionSection = ({ className }: { className?: string }) => {
 const FollowingSection = ({ className }: { className?: string }) => {
   const {
     data: identitiesIFollow,
+    isFetched: identitiesFetched,
     hasNextPage: hasNextPageOnServer,
     fetchNextPage,
     isFetchedAfterMount,
   } = useFollowingInfinite({
     pageSize: 15,
   }).fetch;
-  // const totalPages = connections?.totalPages;
 
   const flattenedIdentities = identitiesIFollow?.pages.flatMap((page) => page?.results);
 
@@ -97,6 +101,13 @@ const FollowingSection = ({ className }: { className?: string }) => {
   }, [currentPage, isFetchedAfterMount]);
 
   const hasNextPage = identitiesIFollow?.pages[currentPage] || hasNextPageOnServer;
+
+  if (
+    identitiesFetched &&
+    (!identitiesIFollow?.pages.length || !identitiesIFollow.pages[0].results.length)
+  ) {
+    return null;
+  }
 
   return (
     <div className={className ?? ''}>

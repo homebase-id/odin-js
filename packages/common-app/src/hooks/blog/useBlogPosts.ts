@@ -6,7 +6,7 @@ import {
   PostContent,
   PostFile,
   PostType,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../..';
 
 type useBlogPostsProps = {

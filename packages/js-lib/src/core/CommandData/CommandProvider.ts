@@ -1,5 +1,5 @@
 import { DotYouClient } from '../DotYouClient';
-import { TargetDrive } from '../DriveData/DriveTypes';
+import { TargetDrive } from '../core';
 import { Command, ReceivedCommand } from './CommandTypes';
 
 export const sendCommand = (

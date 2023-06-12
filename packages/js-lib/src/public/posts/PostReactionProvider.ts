@@ -1,25 +1,26 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { deleteFile, getPayload, queryBatch, uploadFile } from '../../core/DriveData/DriveProvider';
-import {
-  DriveSearchResult,
-  FileQueryParams,
-  ImageContentType,
-  ReactionPreview,
-  TargetDrive,
-  ThumbnailFile,
-} from '../../core/DriveData/DriveTypes';
-import {
-  UploadInstructionSet,
-  UploadFileMetadata,
-  SecurityGroupType,
-  UploadResult,
-  ScheduleOptions,
-  SendContents,
-  TransitOptions,
-  TransferStatus,
-} from '../../core/DriveData/DriveUploadTypes';
 import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
+import {
+  ThumbnailFile,
+  ImageContentType,
+  UploadFileMetadata,
+  SecurityGroupType,
+  TransitOptions,
+  ScheduleOptions,
+  SendContents,
+  UploadInstructionSet,
+  UploadResult,
+  uploadFile,
+  TransferStatus,
+  deleteFile,
+  FileQueryParams,
+  queryBatch,
+  DriveSearchResult,
+  TargetDrive,
+  getPayload,
+  ReactionPreview,
+} from '../../core/core';
 import { jsonStringify64, stringToUint8Array, getNewId } from '../../helpers/DataUtil';
 import {
   deleteFileOverTransit,

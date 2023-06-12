@@ -1,23 +1,25 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  AccessControlList,
-  deleteFile,
-  ImageUploadResult,
-  uploadImage,
   PostFile,
   PostContent,
-  MultiRequestCursoredResult,
   getChannelDrive,
   removePost,
   savePost as savePostFile,
-  PostFileVm,
+} from '@youfoundation/js-lib/public';
+import { getRichTextFromString, useDotYouClient, useStaticFiles } from '@youfoundation/common-app';
+import {
+  AccessControlList,
   ImageContentType,
-  uploadVideo,
+  ImageUploadResult,
+  MultiRequestCursoredResult,
+  ThumbnailFile,
   VideoContentType,
   VideoUploadResult,
-  ThumbnailFile,
-} from '@youfoundation/js-lib';
-import { getRichTextFromString, useDotYouClient, useStaticFiles } from '@youfoundation/common-app';
+  deleteFile,
+  uploadImage,
+  uploadVideo,
+} from '@youfoundation/js-lib/core';
+import { PostFileVm } from '@youfoundation/js-lib/transit';
 
 export interface FileLike {
   name: string;
@@ -85,7 +87,7 @@ const usePost = () => {
             );
 
           // Segment video file
-          const segmentVideoFile = (await import('@youfoundation/js-lib')).segmentVideoFile;
+          const segmentVideoFile = (await import('@youfoundation/js-lib/helpers')).segmentVideoFile;
           const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
 
           return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
@@ -103,7 +105,7 @@ const usePost = () => {
             },
             [
               { quality: 75, width: 600, height: 600 },
-              { quality: 75, width: 1600, height: 1600 },
+              { quality: 99, width: 1600, height: 1600 },
             ]
           );
         }

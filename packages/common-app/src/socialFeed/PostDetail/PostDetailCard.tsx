@@ -5,9 +5,9 @@ import {
   Media,
   Article,
   getChannelDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import {
-  LoadingParagraph,
+  LoadingBlock,
   AuthorImage,
   AuthorName,
   t,
@@ -27,6 +27,7 @@ export const PostDetailCard = ({
   className,
   isAuthenticated,
   isOwner,
+  onNavigate,
 }: {
   odinId?: string;
   channel?: ChannelDefinition;
@@ -35,6 +36,7 @@ export const PostDetailCard = ({
   className?: string;
   isAuthenticated: boolean;
   isOwner: boolean;
+  onNavigate?: (path: string) => void;
 }) => {
   const post = postFile?.content;
   const mediaFiles = (post as Media)?.mediaFiles;
@@ -48,7 +50,7 @@ export const PostDetailCard = ({
       <div className="mb-5 flex w-full flex-col">
         <div className="flex flex-row flex-wrap items-center pb-2 text-gray-500">
           {!post ? (
-            <LoadingParagraph className="mb-2 h-8 w-full max-w-xs" />
+            <LoadingBlock className="mb-2 h-8 w-full max-w-xs" />
           ) : (
             <>
               {showAuthorDetail ? (
@@ -79,7 +81,7 @@ export const PostDetailCard = ({
           )}
         </div>
         {!post ? (
-          <LoadingParagraph className="h-8 w-full max-w-xs" />
+          <LoadingBlock className="h-8 w-full max-w-xs" />
         ) : (
           <h1
             className={`title-font mb-4 ${
@@ -109,6 +111,14 @@ export const PostDetailCard = ({
             postUrl={window.location.pathname}
             odinId={odinId}
             probablyEncrypted={postFile?.payloadIsEncrypted}
+            onClick={
+              onNavigate
+                ? (e, index) => {
+                    e.stopPropagation();
+                    onNavigate(`${window.location.pathname}/${index}`);
+                  }
+                : undefined
+            }
           />
         ) : (
           <div className="relative mb-5 sm:w-full">
@@ -143,11 +153,11 @@ export const PostDetailCard = ({
 
       {!post ? (
         <>
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
-          <LoadingParagraph className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
+          <LoadingBlock className="mb-2 h-4 w-full" />
         </>
       ) : (
         post.type === 'Article' && (

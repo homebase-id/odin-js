@@ -1,26 +1,3 @@
-import { DotYouClient } from '../../core/DotYouClient';
-import {
-  deleteFile,
-  getFileHeader,
-  getPayload,
-  queryBatch,
-  queryBatchCollection,
-  uploadFile,
-} from '../../core/DriveData/DriveProvider';
-import {
-  DriveSearchResult,
-  FileQueryParams,
-  GetBatchQueryResultOptions,
-  TargetDrive,
-} from '../../core/DriveData/DriveTypes';
-import {
-  SecurityGroupType,
-  UploadInstructionSet,
-  UploadFileMetadata,
-  UploadResult,
-  ScheduleOptions,
-  SendContents,
-} from '../../core/DriveData/DriveUploadTypes';
 import { getChannelDefinitions, GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { parseReactionPreview } from './PostReactionProvider';
 import {
@@ -32,7 +9,27 @@ import {
   postTypeToDataType,
 } from './PostTypes';
 import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
-import { CursoredResult, MultiRequestCursoredResult } from '../../core/core';
+import {
+  CursoredResult,
+  deleteFile,
+  DotYouClient,
+  DriveSearchResult,
+  FileQueryParams,
+  GetBatchQueryResultOptions,
+  getFileHeader,
+  getPayload,
+  MultiRequestCursoredResult,
+  queryBatch,
+  queryBatchCollection,
+  ScheduleOptions,
+  SecurityGroupType,
+  SendContents,
+  TargetDrive,
+  uploadFile,
+  UploadFileMetadata,
+  UploadInstructionSet,
+  UploadResult,
+} from '../../core/core';
 import { toGuidId, getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/DataUtil';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
@@ -253,7 +250,7 @@ export const savePost = async <T extends PostContent>(
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
   let versionTag = file?.versionTag;
   if (!versionTag && file?.fileId) {
-    versionTag = await getFileHeader(dotYouClient, targetDrive, file.fileId, undefined, true).then(
+    versionTag = await getFileHeader(dotYouClient, targetDrive, file.fileId).then(
       (header) => header.fileMetadata.versionTag
     );
   }

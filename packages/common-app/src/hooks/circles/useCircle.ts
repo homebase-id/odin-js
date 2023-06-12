@@ -10,7 +10,7 @@ import {
   createCircleDefinition,
   addMemberToCircle,
   removeMemberFromCircle,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../../..';
 
 export const useCircle = ({ circleId }: { circleId?: string }) => {

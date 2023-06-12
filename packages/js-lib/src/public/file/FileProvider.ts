@@ -1,5 +1,6 @@
+import { EmbeddedThumb } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
-import { DriveSearchResult, EmbeddedThumb, FileQueryParams } from '../../core/DriveData/DriveTypes';
+import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { base64ToUint8Array, byteArrayToString, uint8ArrayToBase64 } from '../../helpers/helpers';
 
 export interface ResponseEntry {
@@ -92,7 +93,7 @@ export const GetFile = async (
       return (await _internalFileCache.get(`${dotYouClient.getRoot()}+${fileName}`)) ?? new Map();
     }
 
-    const httpClient = dotYouClient.createAxiosClient(true);
+    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
 
     const fetchResponseMap = async (fileName: string) => {
       const response = await httpClient({

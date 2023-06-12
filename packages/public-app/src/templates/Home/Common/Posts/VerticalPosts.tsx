@@ -1,5 +1,5 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
-import { PostContent, PostFile } from '@youfoundation/js-lib';
+import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Label, useBlogPosts, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
@@ -7,9 +7,9 @@ import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
-import PostTeaser from '@youfoundation/common-app/src/socialFeed/Card/PostTeaser';
+import { PostTeaser } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 12;
 
@@ -128,9 +128,9 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     <div className={className}>
       {!staticPostsLoaded && !combinePosts ? (
         <div className="-mx-4">
-          <LoadingParagraph className="m-4 h-10" />
-          <LoadingParagraph className="m-4 h-10" />
-          <LoadingParagraph className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
+          <LoadingBlock className="m-4 h-10" />
         </div>
       ) : combinedPosts?.length ? (
         <div ref={parentRef}>
@@ -141,7 +141,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
             }}
           >
             <div
-              className="absolute left-0 top-0 grid w-full grid-flow-row gap-4"
+              className="absolute left-0 top-0 grid w-full grid-flow-row"
               style={{
                 transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
               }}
@@ -149,13 +149,22 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
               {items.map((virtualRow) => {
                 const isLoaderRow = virtualRow.index > combinedPosts.length - 1;
                 if (isLoaderRow) {
-                  return hasMorePosts || isFetchingNextPage || isStatic ? (
-                    <div className="mt-5 animate-pulse" key={'loading'}>
-                      {t('Loading...')}
-                    </div>
-                  ) : (
-                    <div className="mt-5 italic opacity-50" key={'no-more'}>
-                      {t('No more posts')}
+                  return (
+                    <div
+                      key={virtualRow.key}
+                      data-index={virtualRow.index}
+                      ref={virtualizer.measureElement}
+                      className="pt-5"
+                    >
+                      {hasMorePosts || isFetchingNextPage ? (
+                        <div className="animate-pulse" key={'loading'}>
+                          {t('Loading...')}
+                        </div>
+                      ) : (
+                        <div className="italic opacity-50" key={'no-more'}>
+                          {t('No more posts')}
+                        </div>
+                      )}
                     </div>
                   );
                 }
@@ -166,6 +175,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
                     key={virtualRow.key}
                     data-index={virtualRow.index}
                     ref={virtualizer.measureElement}
+                    className="py-2 first:pt-0 last:pb-0"
                   >
                     <PostTeaser
                       key={postFile.fileId}

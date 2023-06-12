@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { DotYouClient, fetchFollowDetail } from '@youfoundation/js-lib';
+import { fetchFollowDetail } from '@youfoundation/js-lib/network';
 import useAuth from '../auth/useAuth';
 
 const useFollowDetail = () => {

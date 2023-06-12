@@ -1,4 +1,4 @@
-import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib';
+import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ActionButton, ExistingFileOverview, Save, t } from '@youfoundation/common-app';

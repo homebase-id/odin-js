@@ -4,7 +4,7 @@ export * from './Alert/Toaster';
 export * from './Dialog/DialogWrapper';
 export * from './DomainHighlighter/DomainHighlighter';
 export * from './ErrorBoundary/ErrorBoundary';
-export * from './LoadingParagraph/LoadingParagraph';
+export * from './LoadingBlock/LoadingBlock';
 export * from './Pager/Pager';
 
 export * from './Buttons/ActionButton';
@@ -13,8 +13,10 @@ export * from './Buttons/ActionGroup';
 export * from './Buttons/ActionLink';
 export * from './Buttons/SaveStatus';
 export * from './Buttons/FakeAnchor';
+export * from './Buttons/HybridLink';
 
 export * from './DarkModeToggle/DarkModeToggle';
+export * from './Sidenav/Sidenav';
 
 export * from './Icons/Types';
 export * from './Icons/AddressBook';

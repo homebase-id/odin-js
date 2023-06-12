@@ -1,4 +1,4 @@
-import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib';
+import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t, useDotYouClient } from '@youfoundation/common-app';
@@ -137,7 +137,9 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
             onClick: (e) => {
               e.stopPropagation();
               if (postFile.content.type === 'Article') {
-                navigate(`/owner/feed/edit/${channel?.slug}/${postFile.content.id}`);
+                const targetUrl = `/owner/feed/edit/${channel?.slug}/${postFile.content.id}`;
+                if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
+                else window.location.href = targetUrl;
               } else {
                 setIsEditOpen(true);
               }

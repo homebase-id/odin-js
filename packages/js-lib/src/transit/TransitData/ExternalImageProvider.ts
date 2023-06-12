@@ -1,13 +1,13 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import {
   TargetDrive,
+  SystemFileType,
   DriveSearchResult,
-  ImageContentType,
+  ThumbnailMeta,
   ImageSize,
-} from '../../core/DriveData/DriveTypes';
-import { SystemFileType } from '../../core/DriveData/DriveUploadTypes';
-import { ThumbnailMeta } from '../../core/MediaData/MediaTypes';
-import { base64ToUint8Array, stringify } from '../../helpers/helpers';
+  ImageContentType,
+} from '../../core/core';
+import { base64ToUint8Array, stringify } from '../../helpers/DataUtil';
 import {
   getFileHeaderOverTransit,
   getThumbBytesOverTransit,

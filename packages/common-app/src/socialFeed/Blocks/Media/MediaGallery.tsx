@@ -1,12 +1,8 @@
-import {
-  base64ToUint8Array,
-  EmbeddedThumb,
-  getChannelDrive,
-  MediaFile,
-} from '@youfoundation/js-lib';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Video, Image, useIntersection, useDarkMode } from '@youfoundation/common-app';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
 
 interface MediaGalleryProps {
   odinId?: string;
@@ -17,6 +13,7 @@ interface MediaGalleryProps {
   postUrl: string;
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
 }
 
 const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) => {
@@ -30,32 +27,16 @@ export const MediaGallery = ({
   channelId,
   className,
   maxVisible = 4,
-  postUrl,
+
   previewThumbnail,
   probablyEncrypted,
+  onClick,
 }: MediaGalleryProps) => {
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
-  const navigate = useNavigate();
-
-  const doNavigate = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
-    e.stopPropagation();
-
-    const targetUrl = `${postUrl}/${index}`;
-    if (targetUrl.startsWith('http')) {
-      window.location.href = targetUrl;
-    } else {
-      navigate(targetUrl, {
-        state: { referrer: window.location.pathname },
-        preventScrollReset: true,
-      });
-    }
-
-    return false;
-  };
 
   useIntersection(containerRef, () => {
     setIsInView(true);
@@ -75,12 +56,15 @@ export const MediaGallery = ({
           className={`${tinyThumbUrl ? 'absolute inset-0' : ''} -m-[2px] flex flex-row flex-wrap`}
         >
           {slicedFiles.map((file, index) => (
-            <div className="w-1/2 p-[2px]" key={file.fileId}>
+            <div
+              className={`${slicedFiles.length === 3 && index === 2 ? 'w-full' : 'w-1/2'} p-[2px]`}
+              key={file.fileId}
+            >
               <div
                 className={`relative ${
                   files.length === 2 ? 'aspect-[1/2]' : 'aspect-square'
                 } h-auto w-full cursor-pointer`}
-                onClick={(e) => doNavigate(e, index)}
+                onClick={onClick ? (e) => onClick(e, index) : undefined}
               >
                 {file.type === 'image' ? (
                   <Image

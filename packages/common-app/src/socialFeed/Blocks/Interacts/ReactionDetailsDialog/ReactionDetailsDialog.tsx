@@ -1,4 +1,4 @@
-import { ReactionContext, ReactionFile } from '@youfoundation/js-lib';
+import { ReactionContext, ReactionFile } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {

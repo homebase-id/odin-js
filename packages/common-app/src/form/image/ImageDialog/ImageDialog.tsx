@@ -3,7 +3,7 @@ import {
   ImageContentType,
   ImageUploadResult,
   TargetDrive,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ActionButton, t, useImage, usePortal } from '@youfoundation/common-app';

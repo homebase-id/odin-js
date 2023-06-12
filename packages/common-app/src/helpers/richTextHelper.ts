@@ -1,4 +1,4 @@
-import { ReadTimeStats, RichText } from '@youfoundation/js-lib';
+import { ReadTimeStats, RichText } from '@youfoundation/js-lib/public';
 
 const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
 

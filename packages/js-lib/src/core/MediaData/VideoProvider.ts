@@ -1,19 +1,23 @@
-import { getNewId, jsonStringify64, stringify, uint8ArrayToBase64 } from '../../helpers/helpers';
+import { uint8ArrayToBase64, getNewId, jsonStringify64, stringify } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
-import { getFileHeader, getPayloadBytes, uploadFile } from '../DriveData/DriveProvider';
-import { EmbeddedThumb, TargetDrive, ThumbnailFile } from '../DriveData/DriveTypes';
-import {
-  AccessControlList,
-  TransitOptions,
-  SecurityGroupType,
-  UploadInstructionSet,
-  UploadFileMetadata,
-  UploadResult,
-  SystemFileType,
-} from '../DriveData/DriveUploadTypes';
 import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
+import {
+  TargetDrive,
+  AccessControlList,
+  TransitOptions,
+  ThumbnailFile,
+  SecurityGroupType,
+  UploadInstructionSet,
+  EmbeddedThumb,
+  UploadFileMetadata,
+  UploadResult,
+  uploadFile,
+  SystemFileType,
+  getPayloadBytes,
+  getFileHeader,
+} from '../core';
 import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 
@@ -23,7 +27,7 @@ export const uploadVideo = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  file: Uint8Array | File,
+  file: Uint8Array | Blob | File,
   fileMetadata?: PlainVideoMetadata | SegmentedVideoMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];

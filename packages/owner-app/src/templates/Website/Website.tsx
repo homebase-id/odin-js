@@ -1,22 +1,21 @@
-import { HomePageAttributes, HomePageConfig, toGuidId } from '@youfoundation/js-lib';
+import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 import { ActionButton, ActionLink, Save, t } from '@youfoundation/common-app';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import AttributeGroup from '../../components/Attribute/AttributeGroup/AttributeGroup';
 import { Cloud } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 const defaultHomeAttribute: AttributeVm = {
-  id: toGuidId('default_home_attribute'),
   profileId: HomePageConfig.DefaultDriveId,
   type: HomePageAttributes.HomePage,
   priority: 1000,
   sectionId: HomePageConfig.AttributeSectionNotApplicable,
-  data: { isNew: true },
+  data: { isNew: true, isProtected: true },
   acl: undefined,
   typeDefinition: {
     type: HomePageAttributes.HomePage,
@@ -26,12 +25,11 @@ const defaultHomeAttribute: AttributeVm = {
 } as unknown as AttributeVm;
 
 const defaultThemeAttribute: AttributeVm = {
-  id: toGuidId('default_theme_attribute'),
   profileId: HomePageConfig.DefaultDriveId,
   type: HomePageAttributes.Theme,
   priority: 1000,
   sectionId: HomePageConfig.AttributeSectionNotApplicable,
-  data: { isNew: true },
+  data: { isNew: true, isProtected: true },
   acl: undefined,
   typeDefinition: {
     type: HomePageAttributes.Theme,
@@ -63,7 +61,7 @@ const Website = () => {
       />
       {homeIsLoading ? (
         <div className="-m-5 pt-5">
-          <LoadingParagraph className="m-5 h-20" />
+          <LoadingBlock className="m-5 h-20" />
         </div>
       ) : (
         <AttributeGroup
@@ -73,7 +71,7 @@ const Website = () => {
       )}
       {themeIsLoading ? (
         <div className="-m-5 pt-5">
-          <LoadingParagraph className="m-5 h-20" />
+          <LoadingBlock className="m-5 h-20" />
         </div>
       ) : (
         <AttributeGroup

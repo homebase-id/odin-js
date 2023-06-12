@@ -1,28 +1,30 @@
 import { useMutation } from '@tanstack/react-query';
 import {
   AccessControlList,
-  DotYouClient,
   DriveDefinition,
   ensureDrive,
   getFileHeader,
   getPayload,
   getPayloadBytes,
-  purgeAllFiles,
   queryBatch,
   getRandom16ByteArray,
   uploadFile,
   uploadImage,
-  base64ToUint8Array,
-  stringToUint8Array,
-  jsonStringify64,
   ImageContentType,
   QueryBatchResponse,
-} from '@youfoundation/js-lib';
-import { UploadInstructionSet } from '@youfoundation/js-lib';
-import { UploadFileMetadata } from '@youfoundation/js-lib';
-import { AppFileMetaData } from '@youfoundation/js-lib';
-import { ApiType, DriveSearchResult, TargetDrive } from '@youfoundation/js-lib';
+  AppFileMetaData,
+  TargetDrive,
+  DriveSearchResult,
+  UploadFileMetadata,
+  UploadInstructionSet,
+} from '@youfoundation/js-lib/core';
+import {
+  base64ToUint8Array,
+  jsonStringify64,
+  stringToUint8Array,
+} from '@youfoundation/js-lib/helpers';
 import useAuth from '../auth/useAuth';
+import { purgeAllFiles } from '../../provider/drives/DrivePurgeProvider';
 
 const includeMetadataHeader = true;
 const pageSize = 10;
@@ -174,6 +176,7 @@ const useExport = () => {
   };
 
   const clearAllFilesOnDrive = async (drive: TargetDrive) => {
+    // TODO: Fix, as this doesn't work anymore, purging works, but unqiueIds will keep conflicting with new uploads...
     return await purgeAllFiles(dotYouClient, drive);
   };
 

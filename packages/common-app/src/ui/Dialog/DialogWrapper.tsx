@@ -28,8 +28,10 @@ export const DialogWrapper = ({
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div
-          className={`flex min-h-full ${
-            isSidePanel ? 'justify-end' : 'items-end justify-center sm:items-center'
+          className={`min-h-full ${
+            isSidePanel
+              ? 'flex items-end justify-end sm:items-stretch'
+              : 'flex items-end justify-center sm:items-center'
           } p-4 text-center sm:p-0`}
         >
           <div

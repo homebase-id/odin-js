@@ -1,4 +1,4 @@
-import { DriveGrant } from '../../owner/circleNetwork/CircleDataTypes';
+import { DriveGrant } from '../../network/circleNetwork/CircleDataTypes';
 import { PermissionSet } from '../DriveData/DriveTypes';
 
 export interface SecurityCaller {

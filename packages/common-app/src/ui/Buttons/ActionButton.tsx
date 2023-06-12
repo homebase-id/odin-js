@@ -19,6 +19,7 @@ export interface ActionButtonProps {
     buttonText: string;
     body: string;
     trickQuestion?: TrickQuestion;
+    type?: 'critical' | 'info';
   };
 }
 
@@ -92,7 +93,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
-      ? `min-w-[6rem] ${className?.indexOf('w-full') ? '' : 'w-full sm:w-auto'}`
+      ? `${className?.indexOf('w-full') ? '' : 'w-full sm:w-auto'}`
       : '';
 
   const sizeClasses =
@@ -139,6 +140,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
           title={confirmOptions.title}
           confirmText={confirmOptions.buttonText}
           trickQuestion={confirmOptions.trickQuestion}
+          type={confirmOptions.type}
           needConfirmation={needsConfirmation}
           onConfirm={() => {
             setNeedsConfirmation(false);

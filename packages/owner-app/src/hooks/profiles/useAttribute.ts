@@ -1,31 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  AccessControlList,
-  ApiType,
   Attribute,
   BuiltInAttributes,
   AttributeFile,
-  HomePageAttributes,
-  HomePageConfig,
-  HomePageFields,
   MinimalProfileFields,
-  SecurityGroupType,
-  TargetDrive,
-  DotYouClient,
-  getDecryptedImageData,
-  uploadImage,
   GetTargetDriveFromProfileId,
   getAttribute,
   saveAttribute,
   removeAttribute,
-  aclEqual,
-  getFileHeader,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { getDisplayNameOfNameAttribute } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
+import {
+  AccessControlList,
+  SecurityGroupType,
+  TargetDrive,
+  getDecryptedImageData,
+  getFileHeader,
+  uploadImage,
+} from '@youfoundation/js-lib/core';
+import { HomePageAttributes, HomePageConfig, HomePageFields } from '@youfoundation/js-lib/public';
+import { aclEqual } from '@youfoundation/js-lib/helpers';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
   return [

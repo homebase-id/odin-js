@@ -1,6 +1,6 @@
 import { useState, useRef, lazy, Suspense } from 'react';
 
-import { ActionButton, Lol, useOutsideTrigger } from '@youfoundation/common-app';
+import { ActionButton, Lol, useMostSpace, useOutsideTrigger } from '@youfoundation/common-app';
 const EmojiPicker = lazy(() =>
   import('./EmojiPicker').then((mod) => ({ default: mod.EmojiPicker }))
 );
@@ -16,6 +16,7 @@ export const EmojiSelector = ({
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
+  const { verticalSpace } = useMostSpace(wrapperRef);
 
   return (
     <div className={`relative ${className ?? ''}`}>
@@ -26,16 +27,21 @@ export const EmojiSelector = ({
         onClick={() => setIsOpen(!isOpen)}
         icon={Lol}
       />
-      {isOpen ? (
-        <div className="absolute bottom-[100%] right-[-2.7rem] sm:right-0" ref={wrapperRef}>
+      <div
+        className={`absolute ${
+          verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
+        } right-[-2.7rem] z-20 sm:right-0`}
+        ref={wrapperRef}
+      >
+        {isOpen ? (
           <Suspense>
             <EmojiPicker
               onInput={(emojiDetail) => onInput(emojiDetail.unicode)}
               key={'emoji-picker'}
             />
           </Suspense>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 };

@@ -1,21 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
+import { getHighestPrioAttributesFromMultiTypes, useDotYouClient } from '@youfoundation/common-app';
 import {
   BuiltInAttributes,
   BuiltInProfiles,
-  HomePageAttributes,
   Attribute,
+  AttributeConfig,
+  AttributeFile,
+  dsrToAttributeFile,
+  GetTargetDriveFromProfileId,
+} from '@youfoundation/js-lib/profile';
+import {
+  GetFile,
+  HomePageAttributes,
+  HomePageConfig,
   HomePageFields,
   HomePageThemeFields,
   ResponseEntry,
-  HomePageConfig,
-  AttributeConfig,
-  AttributeFile,
-  GetFile,
-  dsrToAttributeFile,
-  GetTargetDriveFromProfileId,
-  queryBatchCollection,
-} from '@youfoundation/js-lib';
-import { getHighestPrioAttributesFromMultiTypes, useDotYouClient } from '@youfoundation/common-app';
+} from '@youfoundation/js-lib/public';
+import { queryBatchCollection } from '@youfoundation/js-lib/core';
 
 type socialInfo = { type: string; username: string };
 

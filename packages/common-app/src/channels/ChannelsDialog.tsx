@@ -1,4 +1,4 @@
-import { ChannelTemplate, SecurityGroupType } from '@youfoundation/js-lib';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -21,6 +21,7 @@ import { Label } from '@youfoundation/common-app';
 import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import TemplateSelector from './ChannelTemplateSelector';
+import { ChannelTemplate } from '@youfoundation/js-lib/public';
 
 export const ChannelsDialog = ({
   isOpen,

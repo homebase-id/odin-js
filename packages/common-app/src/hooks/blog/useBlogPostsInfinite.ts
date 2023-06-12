@@ -1,5 +1,11 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getPosts, getRecentPosts, PostContent, PostFile, PostType } from '@youfoundation/js-lib';
+import {
+  getPosts,
+  getRecentPosts,
+  PostContent,
+  PostFile,
+  PostType,
+} from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../..';
 
 type useBlogPostsInfiniteProps = {

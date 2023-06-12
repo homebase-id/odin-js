@@ -1,5 +1,5 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CommentsReactionSummary } from '@youfoundation/js-lib';
+import { CommentsReactionSummary } from '@youfoundation/js-lib/public';
 import { UseCommentsVal } from './useComments';
 
 export const useCommentSummary = ({

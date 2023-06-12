@@ -1,21 +1,20 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 import {
   getDrivesByType,
+  FileQueryParams,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
   queryBatchCollection,
   getPayload,
   ensureDrive,
-  uploadFile,
-  deleteFile,
-  queryBatch,
-} from '../../core/DriveData/DriveProvider';
-import { FileQueryParams, TargetDrive } from '../../core/DriveData/DriveTypes';
-import {
   UploadInstructionSet,
   UploadFileMetadata,
   SecurityGroupType,
-} from '../../core/DriveData/DriveUploadTypes';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+  uploadFile,
+  deleteFile,
+  queryBatch,
+  TargetDrive,
+} from '../../core/core';
 import { getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/helpers';
 import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';

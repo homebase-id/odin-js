@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { PostDetailCard, RelatedArticles, t, useBlog } from '@youfoundation/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
@@ -6,6 +6,7 @@ import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import useAuth from '../../../hooks/auth/useAuth';
 
 const PostDetail = () => {
+  const navigate = useNavigate();
   const { channelKey, postKey } = useParams();
   const { data: postData, isLoading: postDataLoading } = useBlog(
     channelKey && postKey
@@ -50,6 +51,7 @@ const PostDetail = () => {
             postFile={postData?.activeBlog}
             isOwner={isOwner}
             isAuthenticated={isAuthenticated}
+            onNavigate={(path: string) => navigate(path)}
           />
         </div>
       </section>

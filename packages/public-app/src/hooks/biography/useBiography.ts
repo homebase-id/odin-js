@@ -4,11 +4,10 @@ import {
   BuiltInProfiles,
   MinimalProfileFields,
   Attribute,
-  DotYouClient,
-  GetFile,
   getAttributeVersions,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import useAuth from '../auth/useAuth';
+import { GetFile } from '@youfoundation/js-lib/public';
 
 const useBiography = () => {
   const { isAuthenticated, getDotYouClient } = useAuth();

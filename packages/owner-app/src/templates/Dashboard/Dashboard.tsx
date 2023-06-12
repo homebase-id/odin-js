@@ -1,25 +1,29 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Alert, usePendingConnections } from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import AppMembershipView from '../../components/PermissionViews/AppPermissionView/AppPermissionView';
-import { CirclePermissionView } from '@youfoundation/common-app';
 import InfoBox from '../../components/ui/InfoBox/InfoBox';
 import Section from '../../components/ui/Sections/Section';
-import { t } from '@youfoundation/common-app';
 import useApps from '../../hooks/apps/useApps';
-import { useCircles, Image, ActionButton } from '@youfoundation/common-app';
-import { Cog } from '@youfoundation/common-app';
-import {
-  HomePageConfig,
-  HomePageAttributes,
-  BuiltInProfiles,
-  BuiltInAttributes,
-  GetTargetDriveFromProfileId,
-  HomePageFields,
-  MinimalProfileFields,
-} from '@youfoundation/js-lib';
+import { HomePageConfig, HomePageAttributes, HomePageFields } from '@youfoundation/js-lib/public';
 import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import {
+  usePendingConnections,
+  useCircles,
+  t,
+  ActionButton,
+  Cog,
+  Alert,
+  CirclePermissionView,
+  AuthorImage,
+  Image,
+} from '@youfoundation/common-app';
+import {
+  BuiltInAttributes,
+  BuiltInProfiles,
+  GetTargetDriveFromProfileId,
+  MinimalProfileFields,
+} from '@youfoundation/js-lib/profile';
 
 const About = {
   drives: (
@@ -167,11 +171,6 @@ const HomePageTeaser = () => {
     type: HomePageAttributes.HomePage,
   }).fetchVersions;
 
-  const { data: photoAttr } = useAttributeVersions({
-    profileId: BuiltInProfiles.StandardProfileId,
-    type: BuiltInAttributes.Photo,
-  }).fetchVersions;
-
   const { data: nameAttr } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId,
     type: BuiltInAttributes.Name,
@@ -186,14 +185,14 @@ const HomePageTeaser = () => {
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
           fileId={homeAttr?.[0]?.data[HomePageFields.HeaderImageId]}
-          className="absolute left-0 right-0 top-0 h-[5rem] w-full object-cover"
+          className="absolute left-0 right-0 top-0 h-[5rem] w-full "
+          fit="cover"
         />
 
         <div className="relative z-10 mx-auto max-w-[18rem] pt-[1.5rem]">
           <div className="flex h-full px-5">
-            <Image
-              targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-              fileId={photoAttr?.[0]?.data?.[MinimalProfileFields.ProfileImageId]}
+            <AuthorImage
+              size="custom"
               className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-neutral-200 object-cover"
             />
           </div>

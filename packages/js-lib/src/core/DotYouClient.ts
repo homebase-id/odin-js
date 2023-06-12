@@ -17,6 +17,11 @@ export interface BaseProviderOptions {
 
 const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
 
+interface createAxiosClientOptions {
+  overrideEncryption?: boolean;
+  headers?: Record<string, string>;
+}
+
 export class BaseDotYouClient {
   private _options: BaseProviderOptions;
 
@@ -62,17 +67,16 @@ export class BaseDotYouClient {
   }
 
   //Gets an Axios client configured with token info
-  createAxiosClient(overrideEncryption?: boolean) {
+  createAxiosClient(options?: createAxiosClientOptions) {
     const client = axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: true,
-      headers: this._options.headers || {},
+      headers: { ...this._options.headers, ...options?.headers },
     });
 
-    if (overrideEncryption) {
-      return client;
-    }
+    if (options?.overrideEncryption) return client;
 
+    // Encryption/Decryption on requests and responses
     const ss = this.getSharedSecret();
     const isDebug = localStorage.getItem('debug') === '1';
 

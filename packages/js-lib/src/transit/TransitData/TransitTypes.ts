@@ -1,21 +1,6 @@
-import {
-  FileQueryParams,
-  GetBatchQueryResultOptions,
-  TargetDrive,
-} from '../../core/DriveData/DriveTypes';
-import {
-  ScheduleOptions,
-  SystemFileType,
-  TransferStatus,
-} from '../../core/DriveData/DriveUploadTypes';
-
-export interface GetFileRequest {
-  odinId: string;
-  file: {
-    targetDrive: TargetDrive;
-    fileId: string;
-  };
-}
+import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/DriveTypes';
+import { ScheduleOptions, TransferStatus } from '../../core/DriveData/DriveUploadTypes';
+import { TargetDrive, SystemFileType } from '../../core/core';
 
 export interface TransitQueryBatchRequest {
   queryParams: FileQueryParams;

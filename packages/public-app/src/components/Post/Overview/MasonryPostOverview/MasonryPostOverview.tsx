@@ -1,5 +1,5 @@
-import PostTeaser from '@youfoundation/common-app/src/socialFeed/Card/PostTeaser';
-import { PostContent, PostFile } from '@youfoundation/js-lib';
+import { PostTeaser } from '@youfoundation/common-app';
+import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useCallback, useEffect, useState } from 'react';
 
 const MasonryPostOverview = ({ blogPosts }: { blogPosts: PostFile<PostContent>[] }) => {

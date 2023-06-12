@@ -4,11 +4,11 @@ import useVerifyToken from './useVerifyToken';
 import {
   authenticate as authenticateOwner,
   createHomeToken as createHomeTokenOwner,
-  isMasterPasswordSet as isMasterPasswordSetOwner,
+  isPasswordSet as isPasswordSetOwner,
   setNewPassword as setNewOwnerPassword,
   logout as logoutOwner,
-} from '../../provider/AuthenticationProvider';
-import { uint8ArrayToBase64 } from '@youfoundation/js-lib';
+} from '../../provider/auth/AuthenticationProvider';
+import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
@@ -23,17 +23,12 @@ export const LOGIN_YOUAUTH_PATH = '/owner/login/youauth';
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
-const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(OWNER_SHARED_SECRET);
-  return !!raw;
-};
-
 const useAuth = () => {
-  const { getDotYouClient, getApiType, getSharedSecret } = useDotYouClient();
+  const { getDotYouClient, getApiType, getSharedSecret, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret() ? 'unknown' : 'anonymous');
+  >(hasSharedSecret ? 'unknown' : 'anonymous');
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken();
 
   const [searchParams] = useSearchParams();
@@ -57,22 +52,11 @@ const useAuth = () => {
     return setNewOwnerPassword(newPassword, firstRunToken);
   };
 
-  const isMasterPasswordSet = async (): Promise<boolean> => {
-    return isMasterPasswordSetOwner();
-  };
-
   const finalizeRegistration = async (
     newPassword: string,
     firstRunToken: string
   ): Promise<void> => {
-    // return setNewPassword(newPassword, firstRunToken).then(() => {
-    //   // return finalizeRegistration(firstRunToken);
-    // });
     await setNewPassword(newPassword, firstRunToken);
-  };
-
-  const createHomeToken = async (returnUrl: string): Promise<boolean> => {
-    return createHomeTokenOwner(returnUrl);
   };
 
   const logout = async () => {
@@ -102,7 +86,7 @@ const useAuth = () => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
       setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
 
-      if (hasValidToken && hasSharedSecret()) {
+      if (hasValidToken && hasSharedSecret) {
         // When authenticated check if on Login Pages and if so redirects to return or Home
         doRedirectToReturn();
       } else if (
@@ -119,12 +103,12 @@ const useAuth = () => {
 
   return {
     authenticate,
-    createHomeToken,
+    createHomeToken: createHomeTokenOwner,
     setNewPassword,
     getDotYouClient,
     getApiType,
     finalizeRegistration,
-    isMasterPasswordSet,
+    isPasswordSet: isPasswordSetOwner,
     logout,
     getSharedSecret,
     isAuthenticated: authenticationState !== 'anonymous',

@@ -1,4 +1,4 @@
-import { TargetDrive } from '@youfoundation/js-lib';
+import { TargetDrive } from '@youfoundation/js-lib/core';
 import React, { ReactNode } from 'react';
 import { ActionLink, Image } from '@youfoundation/common-app';
 

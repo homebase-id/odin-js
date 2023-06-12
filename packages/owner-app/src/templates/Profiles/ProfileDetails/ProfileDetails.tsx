@@ -1,4 +1,4 @@
-import { getNewId, ProfileSection } from '@youfoundation/js-lib';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -15,12 +15,13 @@ import { Heart, Plus } from '@youfoundation/common-app';
 import SectionEditor from '../../../components/SectionEditor/SectionEditor';
 import useProfileSections from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { ProfileSection } from '@youfoundation/js-lib/profile';
 
 const ProfileDetails = () => {
   const {
@@ -244,10 +245,10 @@ const ProfileSectionEditor = ({
   if (!attributes || isLoading || isParentLoading) {
     return (
       <div className="-m-5 pt-5">
-        <LoadingParagraph className="m-5 h-20" />
-        <LoadingParagraph className="m-5 h-20" />
-        <LoadingParagraph className="m-5 h-20" />
-        <LoadingParagraph className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
+        <LoadingBlock className="m-5 h-20" />
       </div>
     );
   }

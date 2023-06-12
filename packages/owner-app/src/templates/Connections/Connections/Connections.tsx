@@ -1,4 +1,4 @@
-import { ActionButton, Plus } from '@youfoundation/common-app';
+import { ActionButton, Plus, SubtleMessage } from '@youfoundation/common-app';
 import PersonIncomingRequest from '../../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import PersonOutgoingRequest from '../../../components/Connection/PersonOutgoingRequest/PersonOutgoingRequest';
 import { t, usePendingConnections, useSentConnections } from '@youfoundation/common-app';
@@ -6,9 +6,9 @@ import { SectionTitle } from '../../../components/ui/Sections/Section';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useEffect, useState } from 'react';
 import { Pager, Persons } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import PersonActive from '../../../components/Connection/PersonActive/PersonActive';
-import { DotYouProfile } from '@youfoundation/js-lib';
+import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useActiveConnections } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 
@@ -35,10 +35,8 @@ const Connections = () => {
         />
 
         {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
-          <div className="flex flex-row">
-            <p className="my-auto">
-              {t('Mmh, this looks empty... Time to add some connections?')}{' '}
-            </p>
+          <SubtleMessage className="flex flex-row items-center">
+            <span>{t('Mmh, this looks empty... Time to add some connections?')}</span>
             <ActionButton
               onClick={(e) => {
                 e.preventDefault();
@@ -51,7 +49,7 @@ const Connections = () => {
             >
               {t('Add')}
             </ActionButton>
-          </div>
+          </SubtleMessage>
         ) : null}
 
         <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
@@ -105,8 +103,8 @@ const PendingConnectionSection = ({
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
         {pendingConnectionsLoading && (
           <>
-            <LoadingParagraph className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-            <LoadingParagraph className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
           </>
         )}
 
@@ -157,8 +155,8 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
         {sentRequestsLoading && (
           <>
-            <LoadingParagraph className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-            <LoadingParagraph className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
           </>
         )}
 
@@ -230,8 +228,8 @@ const ActiveConnectionSection = ({
           <div className="-m-1 mt-5 flex flex-row flex-wrap">
             {activeConnectionsLoading && (
               <>
-                <LoadingParagraph className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-                <LoadingParagraph className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
               </>
             )}
 

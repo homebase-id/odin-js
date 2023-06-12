@@ -4,14 +4,14 @@ import {
   ProfileDefinition,
   removeProfileDefinition,
   saveProfileDefinition,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { convertTextToSlug, useDotYouClient } from '@youfoundation/common-app';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;
 }
 
-export const useProfiles = () => {
+export const useProfiles = (disabled?: boolean) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
@@ -37,9 +37,12 @@ export const useProfiles = () => {
   };
 
   return {
-    fetchProfiles: useQuery(['profiles'], () => fetchAll(), {
+    fetchProfiles: useQuery(['profiles'], fetchAll, {
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
       retry: false,
+      staleTime: 60000,
+      enabled: !disabled,
     }),
     saveProfile: useMutation(saveProfile, {
       onMutate: async (newProfile) => {

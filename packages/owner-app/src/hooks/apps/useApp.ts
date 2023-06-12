@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ensureDrive } from '@youfoundation/js-lib';
+import { ensureDrive } from '@youfoundation/js-lib/core';
 import {
   AllowApp,
   GetAppRegistration,
@@ -21,7 +21,7 @@ const useApp = ({ appId }: { appId?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ appId }: { appId: string }) => {
-    return await GetAppRegistration(dotYouClient, { appId: appId });
+    return (await GetAppRegistration(dotYouClient, { appId: appId })) || null;
   };
 
   const registerNewApp = async (appRegRequest: AppRegistrationRequest) => {

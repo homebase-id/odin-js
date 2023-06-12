@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { BlogConfig, getDrivesByType } from '@youfoundation/js-lib';
+import { BlogConfig } from '@youfoundation/js-lib/public';
+import { getDrivesByType } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useChannelDrives = (isEnabled: boolean) => {

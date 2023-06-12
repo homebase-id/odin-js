@@ -1,14 +1,13 @@
-import { BlogConfig } from '@youfoundation/js-lib';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import CheckboxToggle from '../../components/Form/CheckboxToggle';
-import { Alert, useSocialChannels } from '@youfoundation/common-app';
+import { Alert, useFollowingInfinite, useSocialChannels } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useFollowingInfinite from '../../hooks/follow/useFollowing';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
 
 const Following = () => {

@@ -1,15 +1,16 @@
-import { EmbeddedThumb, getChannelDrive, PostContent } from '@youfoundation/js-lib';
+import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video } from '@youfoundation/common-app';
-import { useNavigate } from 'react-router-dom';
 
 export const PrimaryMedia = ({
   odinId,
   post,
   className,
   fit,
-  postUrl,
+  // postUrl,
   previewThumbnail,
   probablyEncrypted,
+  onClick,
 }: {
   odinId?: string;
   post: PostContent;
@@ -18,28 +19,14 @@ export const PrimaryMedia = ({
   postUrl: string;
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
-  const navigate = useNavigate();
-  // Don't navigate when it's an article, as the image is likely a teaser
-  const clickable = post.type !== 'Article';
-  const isDesktop = document.documentElement.clientWidth >= 1024;
-
   const doNavigate = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-    const targetUrl = `${postUrl}/${0}`;
-    if (targetUrl.startsWith('http')) {
-      window.location.href = targetUrl;
-    } else {
-      navigate(targetUrl);
-    }
-    return false;
+    onClick && onClick(e);
   };
 
   return (
-    <div
-      onClick={clickable && isDesktop ? doNavigate : undefined}
-      className={clickable && isDesktop ? 'cursor-pointer' : ''}
-    >
+    <div onClick={doNavigate}>
       {post.primaryMediaFile?.type === 'image' ? (
         <Image
           odinId={odinId}

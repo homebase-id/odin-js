@@ -15,7 +15,7 @@ import { ActionButton, ErrorNotification, Pencil, mergeStates } from '@youfounda
 import { t } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
 import useAppClients from '../../hooks/apps/useAppClients';
-import { PermissionSet } from '@youfoundation/js-lib';
+import { PermissionSet } from '@youfoundation/js-lib/core';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';

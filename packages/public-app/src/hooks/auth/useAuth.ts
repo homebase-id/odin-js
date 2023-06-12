@@ -13,21 +13,16 @@ import {
   useDotYouClient,
 } from '@youfoundation/common-app';
 
-const _isOwner = localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host;
-
-const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(_isOwner ? OWNER_SHARED_SECRET : HOME_SHARED_SECRET);
-  return !!raw;
-};
-
 const useAuth = () => {
-  const { getDotYouClient, getApiType, getSharedSecret } = useDotYouClient();
+  const { getDotYouClient, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
+    useDotYouClient();
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret() ? 'unknown' : 'anonymous');
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(_isOwner);
+  >(hasSharedSecret ? 'unknown' : 'anonymous');
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(isOwner);
   const navigate = useNavigate();
 
+  // Only used for Local Login Box
   const authenticate = (identity: string, returnUrl: string): void => {
     const strippedIdentity = identity.replace(new RegExp('^(http|https)://'), '').split('/')[0];
 
@@ -74,7 +69,7 @@ const useAuth = () => {
   const logout = async (): Promise<void> => {
     await logoutYouauth();
 
-    if (_isOwner) {
+    if (isOwner) {
       await logoutOwner();
     }
 
@@ -117,7 +112,7 @@ const useAuth = () => {
     finalizeAuthentication,
     logout,
     getIdentity,
-    isOwner: _isOwner,
+    isOwner,
     getApiType,
     getSharedSecret,
     getDotYouClient,

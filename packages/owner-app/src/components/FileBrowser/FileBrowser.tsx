@@ -1,13 +1,4 @@
-import {
-  AttributeConfig,
-  BlogConfig,
-  DriveSearchResult,
-  HomePageConfig,
-  ProfileConfig,
-  ReactionConfig,
-  SystemFileType,
-  TargetDrive,
-} from '@youfoundation/js-lib';
+import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useEffect, useState } from 'react';
 import { AclIcon, AclSummary, ActionLink, t } from '@youfoundation/common-app';
 import useFiles from '../../hooks/files/useFiles';
@@ -16,6 +7,8 @@ import { ContactConfig } from '../../provider/contact/ContactTypes';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
+import { DriveSearchResult, SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+import { BlogConfig, HomePageConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 
 const dateFormat: Intl.DateTimeFormatOptions = {
   month: 'short',

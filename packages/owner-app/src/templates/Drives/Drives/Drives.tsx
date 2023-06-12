@@ -1,15 +1,17 @@
-import { BlogConfig, ProfileConfig, stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import React, { useState } from 'react';
 import { ActionButton, t } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
 import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';
 import { HardDrive } from '@youfoundation/common-app';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { ProfileConfig } from '@youfoundation/js-lib/profile';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const Drives = () => {
   const {
@@ -63,9 +65,9 @@ const Drives = () => {
       <section className="-my-4">
         {isDrivesLoading ? (
           <>
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
           </>
         ) : (
           driveTypeDefinitions?.map((type) => (

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { ActionButton, AttachmentFile, Triangle, Image, Trash } from '@youfoundation/common-app';
 
-import { ImageContentType, MediaFile, TargetDrive } from '@youfoundation/js-lib';
+import { ImageContentType, TargetDrive } from '@youfoundation/js-lib/core';
+import { MediaFile } from '@youfoundation/js-lib/public';
 
 export const FileOverview = ({
   files,

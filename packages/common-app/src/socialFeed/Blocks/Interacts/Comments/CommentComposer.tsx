@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib';
+import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import {
   AuthorImage,

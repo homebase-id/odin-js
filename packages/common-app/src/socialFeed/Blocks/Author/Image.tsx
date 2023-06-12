@@ -1,4 +1,4 @@
-import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib';
+import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { useState, useRef } from 'react';
 import { Image, useIntersection } from '@youfoundation/common-app';
 import { useSiteData } from '@youfoundation/common-app';

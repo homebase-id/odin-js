@@ -1,10 +1,6 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import {
-  PagingOptions,
-  getConnections,
-  getPendingRequests,
-  getSentRequests,
-} from '@youfoundation/js-lib';
+import { PagingOptions } from '@youfoundation/js-lib/core';
+import { getConnections, getPendingRequests, getSentRequests } from '@youfoundation/js-lib/network';
 
 import { useDotYouClient } from '../auth/useDotYouClient';
 
@@ -22,10 +18,12 @@ export const usePendingConnections = ({
   const fetchPendingConnections = async (
     { pageSize, pageNumber }: PagingOptions = { pageSize: 10, pageNumber: 1 }
   ) => {
-    return await await getPendingRequests(dotYouClient, {
-      pageNumber: pageNumber,
-      pageSize: pageSize,
-    });
+    return (
+      (await getPendingRequests(dotYouClient, {
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+      })) || null
+    );
   };
 
   return {
@@ -34,6 +32,7 @@ export const usePendingConnections = ({
       () => fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
       {
         refetchOnWindowFocus: false,
+        refetchOnMount: false,
         keepPreviousData: true,
         onError: (err) => console.error(err),
         enabled: !!pendingPage,

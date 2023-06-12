@@ -11,12 +11,14 @@ import {
   getPayload,
   queryBatch,
   getRandom16ByteArray,
+} from '@youfoundation/js-lib/core';
+import {
   base64ToUint8Array,
   getNewId,
   stringToUint8Array,
   toGuidId,
   jsonStringify64,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/helpers';
 
 import { ContactConfig, ContactFile, RawContact } from './ContactTypes';
 

@@ -4,11 +4,10 @@ import {
   BuiltInProfiles,
   Attribute,
   LinkFields,
-  DotYouClient,
-  GetFile,
   getAttributeVersions,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import useAuth from '../auth/useAuth';
+import { GetFile } from '@youfoundation/js-lib/public';
 
 const useLinks = () => {
   const { isAuthenticated, getDotYouClient } = useAuth();

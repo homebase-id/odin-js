@@ -4,14 +4,14 @@ import {
   MinimalProfileFields,
   GetTargetDriveFromProfileId,
   AttributeFile,
-  SecurityGroupType,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/profile';
 import { useEffect } from 'react';
 import { getInitialsOfNameAttribute } from '@youfoundation/common-app';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 interface infoObject {
   name: string;
@@ -80,7 +80,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
       <div className="-mr-3 flex flex-row ">
         <div className="aspect-square w-1/4 max-w-[3rem]">
           {photoAttributesLoading ? (
-            <LoadingParagraph className={`aspect-square`} />
+            <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
               initials={info.initials}
@@ -92,7 +92,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
         </div>
         <div className="my-auto flex-grow px-3">
           {nameAttributesLoading ? (
-            <LoadingParagraph className="h-6 w-full max-w-xs" />
+            <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
             <h2 className="text-lg leading-tight">
               {info.name}

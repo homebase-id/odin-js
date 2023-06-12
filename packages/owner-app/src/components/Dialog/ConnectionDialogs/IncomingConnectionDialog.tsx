@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, t } from '@youfoundation/common-app';
+import { Arrow, t, useFollowingInfinite } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
@@ -8,13 +8,12 @@ import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
-import PendingConnectionImage from '../../Connection/PendingConnectionImage/PendingConnectionImage';
+import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import useFollowingInfinite from '../../../hooks/follow/useFollowing';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import { ConnectionRequest } from '@youfoundation/js-lib';
+import { ConnectionRequest } from '@youfoundation/js-lib/network';
 
 const IncomingConnectionDialog = ({
   confirmText,
@@ -89,7 +88,7 @@ const IncomingConnectionDialog = ({
               </h2>
               <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
                 <div className="w-full p-4 md:w-2/5">
-                  <PendingConnectionImage
+                  <ContactImage
                     odinId={senderOdinId}
                     onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
                   />

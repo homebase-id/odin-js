@@ -94,7 +94,7 @@ const MemberLookupDialog = ({
           />
         </div>
 
-        <div className="-mx-1 flex flex-row">
+        <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {!membersLoading ? (
             !members?.pages?.[activePage - 1]?.results?.length ? (
               <>{t('No connections found')}</>
@@ -109,7 +109,7 @@ const MemberLookupDialog = ({
                   <ConnectionCard
                     key={member.odinId}
                     odinId={member.odinId}
-                    className={`relative w-1/2 cursor-pointer p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6`}
+                    className={`relative cursor-pointer`}
                     isChecked={checked}
                     onClick={() => {
                       const isInDefault = defaultMembers.some(
@@ -139,7 +139,9 @@ const MemberLookupDialog = ({
             icon={Arrow}
             state={confirmationStatus}
             onClick={() => {
-              onConfirm(toProvideMembers, toRevokeMembers);
+              onConfirm([...toProvideMembers], [...toRevokeMembers]);
+              setToProviderMembers([]);
+              setToRevokeMembers([]);
             }}
           >
             {confirmText || t('Update Circle')}

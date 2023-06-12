@@ -1,4 +1,4 @@
-import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib';
+import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { ActionButton, CircleSelector, t } from '@youfoundation/common-app';
 

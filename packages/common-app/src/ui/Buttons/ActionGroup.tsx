@@ -1,5 +1,5 @@
 import { FC, useRef, useState } from 'react';
-import { ActionButton, ActionButtonProps, t } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonProps, t, useMostSpace } from '@youfoundation/common-app';
 import { ConfirmDialog } from '@youfoundation/common-app';
 
 import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
@@ -28,6 +28,7 @@ export const ActionGroup = ({
 }: ActionGroupProps) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
+  const { verticalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -50,13 +51,24 @@ export const ActionGroup = ({
         )}
       </ActionButton>
       <div
-        className={`absolute right-0 top-[100%] z-10 w-[12rem] ${
+        className={`absolute right-0 ${
+          verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
+        } z-10 w-[12rem] ${
           isOpen ? 'max-h-[15rem] border' : 'max-h-0'
         } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
       >
-        <ul className={`block `}>
+        <ul className={`block`}>
           {options.map((option) => {
-            return <ActionOption {...option} key={option.label} />;
+            return (
+              <ActionOption
+                {...option}
+                onClick={(e) => {
+                  setIsOpen(false);
+                  option.onClick && option.onClick(e);
+                }}
+                key={option.label}
+              />
+            );
           })}
         </ul>
       </div>
@@ -70,7 +82,7 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
 
   return (
     <>
-      <li className="text-foreground cursor-pointer bg-white text-base hover:bg-slate-200 dark:hover:bg-slate-700">
+      <li className="text-foreground bg-background cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-700">
         <a
           href={href}
           onClick={
@@ -95,7 +107,11 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
           title={confirmOptions.title}
           confirmText={confirmOptions.buttonText}
           needConfirmation={needsConfirmation}
-          onConfirm={() => mouseEvent && onClick(mouseEvent)}
+          onConfirm={() => {
+            if (!mouseEvent) return;
+            setNeedsConfirmation(false);
+            onClick(mouseEvent);
+          }}
           onCancel={(e) => {
             e.stopPropagation();
             setNeedsConfirmation(false);

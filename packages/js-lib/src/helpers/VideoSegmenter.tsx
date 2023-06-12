@@ -12,7 +12,7 @@ const loadMp4box = async () => {
 };
 
 export const segmentVideoFile = async (
-  file: File
+  file: File | Blob
 ): Promise<{ bytes: Uint8Array; metadata: SegmentedVideoMetadata }> => {
   if (!file || file.type !== 'video/mp4') {
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');

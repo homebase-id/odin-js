@@ -1,13 +1,8 @@
 import { DotYouClient } from '../DotYouClient';
 
 import { TransitInstructionSet } from '../../transit/TransitData/TransitTypes';
-import { KeyHeader, ThumbnailFile } from './DriveTypes';
-import {
-  UploadFileMetadata,
-  UploadInstructionSet,
-  SystemFileType,
-  AppendInstructionSet,
-} from './DriveUploadTypes';
+import { KeyHeader } from './DriveTypes';
+import { UploadFileMetadata, UploadInstructionSet, AppendInstructionSet } from './DriveUploadTypes';
 import { encryptWithKeyheader, encryptWithSharedSecret, encryptKeyHeader } from './SecurityHelpers';
 import {
   jsonStringify64,
@@ -15,6 +10,7 @@ import {
   uint8ArrayToBase64,
   stringToUint8Array,
 } from '../../helpers/DataUtil';
+import { ThumbnailFile, SystemFileType } from './DriveFileTypes';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -90,7 +86,7 @@ export const buildDescriptor = async (
 export const buildFormData = async (
   instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
-  payload: Uint8Array | File | undefined,
+  payload: Uint8Array | Blob | File | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined
 ) => {
@@ -101,7 +97,10 @@ export const buildFormData = async (
   if (!payload) {
     data.append('payload', new Blob([]));
   } else {
-    data.append('payload', payload instanceof File ? payload : new Blob([payload]));
+    data.append(
+      'payload',
+      payload instanceof File || payload instanceof Blob ? payload : new Blob([payload])
+    );
   }
 
   if (thumbnails) {
@@ -131,7 +130,7 @@ export const pureUpload = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void
 ) => {
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/drive/files/upload';
 
   const config = {
@@ -163,13 +162,15 @@ export const pureAppend = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void
 ) => {
-  const client = dotYouClient.createAxiosClient(true);
+  const client = dotYouClient.createAxiosClient({
+    overrideEncryption: true,
+    headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
+  });
   const url = '/drive/files/attachments/upload';
 
   const config = {
     headers: {
       'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     },
   };
 

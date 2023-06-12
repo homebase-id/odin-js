@@ -7,13 +7,13 @@ import {
   TargetDrive,
   EmbeddedThumb,
   ThumbSize,
-  base64ToUint8Array,
   ImageSize,
   DotYouClient,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/core';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
 import '../../app/app.css';
-import LoadingParagraph from '../ui/LoadingParagraph/LoadingParagraph';
+import LoadingBlock from '../ui/LoadingBlock/LoadingBlock';
 
 export interface OdinImageProps {
   dotYouClient: DotYouClient;
@@ -29,6 +29,7 @@ export interface OdinImageProps {
   probablyEncrypted?: boolean;
   onLoad?: () => void;
   avoidPayload?: boolean;
+  explicitSize?: ThumbSize | 'full';
 }
 
 export const OdinImage = ({
@@ -45,6 +46,7 @@ export const OdinImage = ({
   probablyEncrypted,
   onLoad,
   avoidPayload,
+  explicitSize,
 }: OdinImageProps) => {
   const previewImgRef = useRef<HTMLImageElement>(null);
   const wrapperRef = useRef<HTMLPictureElement>(null);
@@ -122,6 +124,11 @@ export const OdinImage = ({
       return;
     }
 
+    if (explicitSize) {
+      setLoadSize(explicitSize);
+      return;
+    }
+
     const targetWidth = previewImgRef.current?.clientWidth;
     const targetHeight = previewImgRef.current?.clientHeight;
 
@@ -166,7 +173,7 @@ export const OdinImage = ({
       ref={wrapperRef}
     >
       {isLoadingTiny ? (
-        <LoadingParagraph className="aspect-square h-full w-full" />
+        <LoadingBlock className="aspect-square h-full w-full" />
       ) : (
         <>
           <img

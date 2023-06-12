@@ -3,6 +3,7 @@ import {
   ActionButton,
   ActionButtonProps,
   ArrowDown,
+  useMostSpace,
   useOutsideTrigger,
 } from '@youfoundation/common-app';
 
@@ -19,6 +20,7 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
 }) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(options ? wrapperRef : undefined, () => setIsOpen(false));
+  const { verticalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -58,7 +60,9 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
       />
       {optionGroups?.length ? (
         <ul
-          className={`absolute bottom-[100%] right-0 w-full shadow-md ${
+          className={`absolute ${
+            verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
+          } right-0 w-full shadow-md ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
           } overflow-auto bg-white text-black dark:bg-slate-900 dark:text-white`}
         >
@@ -71,7 +75,9 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
         </ul>
       ) : options ? (
         <ul
-          className={`absolute bottom-[100%] right-0 w-full ${
+          className={`absolute ${
+            verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
+          } right-0 w-full ${
             isOpen ? 'max-h-[15rem]' : 'max-h-0'
           } overflow-auto bg-white text-black`}
         >

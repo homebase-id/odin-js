@@ -1,4 +1,4 @@
-import { ProfileDefinition } from '@youfoundation/js-lib';
+import { ProfileDefinition } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Arrow, t } from '@youfoundation/common-app';

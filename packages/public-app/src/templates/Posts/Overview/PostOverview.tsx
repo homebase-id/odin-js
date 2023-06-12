@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'react-router-dom';
-import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib';
+import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
 
@@ -12,7 +12,7 @@ import { useChannel } from '@youfoundation/common-app';
 import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 
 const PAGE_SIZE = 10;
 const PostOverview = () => {
@@ -83,9 +83,9 @@ const PostOverview = () => {
           </div>
           {isLoading ? (
             <>
-              <LoadingParagraph className="my-2 h-24 w-full bg-background" />
-              <LoadingParagraph className="my-2 h-24 w-full bg-background" />
-              <LoadingParagraph className="my-2 h-24 w-full bg-background" />
+              <LoadingBlock className="my-2 h-24 w-full bg-background" />
+              <LoadingBlock className="my-2 h-24 w-full bg-background" />
+              <LoadingBlock className="my-2 h-24 w-full bg-background" />
             </>
           ) : blogPosts?.length && (!channelKey || activeChannel) ? (
             <ListComponent blogPosts={blogPosts} />

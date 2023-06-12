@@ -10,7 +10,7 @@ import {
   Arrow,
 } from '@youfoundation/common-app';
 import PermissionSelector from '../../Form/PermissionSelector';
-import { PermissionSet } from '@youfoundation/js-lib';
+import { PermissionSet } from '@youfoundation/js-lib/core';
 
 const PermissionSelectorDialog = ({
   title,

@@ -2,9 +2,9 @@ import { t } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
-import { LoadingParagraph } from '@youfoundation/common-app';
+import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
-import { stringGuidsEqual } from '@youfoundation/js-lib';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { Arrow } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -21,9 +21,9 @@ const Apps = () => {
       <div className="mt-8">
         {loadingRegisteredApps ? (
           <>
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
-            <LoadingParagraph className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
           </>
         ) : (
           <>
@@ -34,10 +34,10 @@ const Apps = () => {
                     href={`/owner/apps/${encodeURIComponent(app.appId)}`}
                     isDisabled={app.isRevoked}
                     title={
-                      <>
+                      <div className="flex flex-col">
                         {`${app.isRevoked ? t('Revoked') : ''} ${app.name}`}{' '}
                         <small className="block text-sm">{app.corsHostName}</small>
-                      </>
+                      </div>
                     }
                     description={`${t('Added on')}: ${new Date(app.created).toLocaleDateString()}`}
                     key={app.appId}

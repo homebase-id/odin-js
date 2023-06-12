@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { HomePageTheme } from '@youfoundation/js-lib';
+import { HomePageTheme } from '@youfoundation/js-lib/public';
 import HomeClassic from './Classic/HomeClassic';
 import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';

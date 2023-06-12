@@ -1,15 +1,6 @@
-import {
-  IconProps,
-  Save,
-  Arrow,
-  Plus,
-  Trash,
-  Pencil,
-  Shield,
-  Check,
-  Times,
-} from '@youfoundation/common-app';
+import { IconProps } from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
+import { HybridLink } from './HybridLink';
 
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 
@@ -64,7 +55,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
       : 'px-3 py-2';
 
   return (
-    <a
+    <HybridLink
       className={`relative flex flex-row items-center rounded-md text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${className}`}
       download={download}
       href={href}
@@ -73,6 +64,6 @@ export const ActionLink: FC<ActionLinkProps> = ({
     >
       {children}
       <Icon className={`my-auto ${children ? 'ml-2' : ''} h-4 w-4`} />
-    </a>
+    </HybridLink>
   );
 };

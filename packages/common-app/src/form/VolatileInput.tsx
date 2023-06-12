@@ -1,6 +1,5 @@
-import { debounce } from 'lodash-es';
-import { useEffect, useMemo, useRef } from 'react';
-import { getRichTextFromString } from '../..';
+import { useEffect, useRef } from 'react';
+import { getRichTextFromString, useDebounce } from '../..';
 import {
   getAbsoluteOffsetToParent,
   getRelativeOffset,
@@ -95,12 +94,14 @@ export const VolatileInput = ({
     }
   }, [defaultValue]);
 
+  // We want values to be saved directly, while the link styling is better with a debounce
   const onInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     if (onChange) onChange((e.target as HTMLElement).innerText);
-    if (!linksArePlain) wrapLinks();
+    if (!linksArePlain) debouncedLinkStyle();
   };
 
-  const debouncedOnInput = useMemo(() => debounce(onInput, 200), [onInput]);
+  const doLinkStyle = () => wrapLinks();
+  const debouncedLinkStyle = useDebounce(doLinkStyle, { timeoutMillis: 500 });
 
   return (
     <div
@@ -114,7 +115,7 @@ export const VolatileInput = ({
         }
       }}
       onPaste={onPasteHandler}
-      onInput={debouncedOnInput}
+      onInput={onInput}
       ref={divRef}
       style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
     ></div>

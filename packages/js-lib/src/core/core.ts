@@ -10,8 +10,15 @@ export * from './SecurityData/SecurityProvider';
 // DriveData
 export * from './DriveData/DriveProvider';
 export * from './DriveData/DriveTypes';
-export * from './DriveData/DriveUploadTypes';
+
+export * from './DriveData/DriveFileProvider';
+export * from './DriveData/DriveFileTypes';
+
+export * from './DriveData/DriveQueryProvider';
 export * from './DriveData/DriveQueryTypes';
+
+export * from './DriveData/DriveUploadProvider';
+export * from './DriveData/DriveUploadTypes';
 
 // NotificationData
 export * from './NotificationData/NotificationProvider';

@@ -1,20 +1,58 @@
 {
-  "version": "0.0.1-alpha.26",
+  "version": "0.0.1-alpha.44",
   "name": "@youfoundation/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
   "files": [
-    "dist"
+    "dist",
+    "core.js",
+    "core.d.ts",
+    "helpers.js",
+    "helpers.d.ts",
+    "network.js",
+    "network.d.ts",
+    "profile.js",
+    "profile.d.ts",
+    "public.js",
+    "public.d.ts",
+    "transit.js",
+    "transit.d.ts",
+    "auth.js",
+    "auth.d.ts"
   ],
-  "main": "./dist/odin-js.umd.js",
-  "module": "./dist/odin-js.mjs",
+  "main": "./dist/core.js",
+  "module": "./dist/core.mjs",
   "exports": {
-    ".": {
-      "import": "./dist/odin-js.mjs",
-      "require": "./dist/odin-js.umd.js"
+    "./core": {
+      "import": "./dist/core.mjs",
+      "require": "./dist/core.js"
+    },
+    "./helpers": {
+      "import": "./dist/helpers.mjs",
+      "require": "./dist/helpers.js"
+    },
+    "./network": {
+      "import": "./dist/network.mjs",
+      "require": "./dist/network.js"
+    },
+    "./profile": {
+      "import": "./dist/profile.mjs",
+      "require": "./dist/profile.js"
+    },
+    "./public": {
+      "import": "./dist/public.mjs",
+      "require": "./dist/public.js"
+    },
+    "./transit": {
+      "import": "./dist/transit.mjs",
+      "require": "./dist/transit.js"
+    },
+    "./auth": {
+      "import": "./dist/auth.mjs",
+      "require": "./dist/auth.js"
     }
   },
-  "types": "./dist/odin-js.d.ts",
+  "types": "index.d.ts",
   "sideEffects": false,
   "scripts": {
     "start": "vite build --watch",

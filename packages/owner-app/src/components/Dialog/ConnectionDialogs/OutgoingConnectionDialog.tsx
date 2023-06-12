@@ -8,12 +8,11 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import YourSignature from '../../Connection/YourSignature/YourSignature';
-import { CircleSelector } from '@youfoundation/common-app';
+import { CircleSelector, useFollowingInfinite } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import useFollowingInfinite from '../../../hooks/follow/useFollowing';
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 

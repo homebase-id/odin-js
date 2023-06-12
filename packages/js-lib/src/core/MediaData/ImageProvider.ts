@@ -1,30 +1,3 @@
-import { EmbeddedThumb, ImageContentType, ImageSize, TargetDrive } from '../DriveData/DriveTypes';
-import {
-  AccessControlList,
-  SecurityGroupType,
-  SystemFileType,
-  UploadFileMetadata,
-  UploadInstructionSet,
-  UploadResult,
-} from '../DriveData/DriveUploadTypes';
-
-import { encryptUrl } from '../InterceptionEncryptionUtil';
-import { DotYouClient } from '../DotYouClient';
-import {
-  deleteFile,
-  getFileHeader,
-  getPayloadBytes,
-  getThumbBytes,
-  uploadFile,
-} from '../DriveData/DriveProvider';
-import {
-  ImageMetadata,
-  ImageUploadResult,
-  MediaConfig,
-  MediaUploadMeta,
-  ThumbnailInstruction,
-  ThumbnailMeta,
-} from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
@@ -35,6 +8,33 @@ import {
   base64ToUint8Array,
   stringify,
 } from '../../helpers/DataUtil';
+import { ApiType, DotYouClient } from '../DotYouClient';
+import { encryptUrl } from '../InterceptionEncryptionUtil';
+import {
+  TargetDrive,
+  AccessControlList,
+  SecurityGroupType,
+  UploadInstructionSet,
+  EmbeddedThumb,
+  getFileHeader,
+  UploadFileMetadata,
+  UploadResult,
+  uploadFile,
+  deleteFile,
+  ImageSize,
+  SystemFileType,
+  ImageContentType,
+  getThumbBytes,
+  getPayloadBytes,
+} from '../core';
+import {
+  ImageMetadata,
+  MediaUploadMeta,
+  ThumbnailInstruction,
+  ImageUploadResult,
+  MediaConfig,
+  ThumbnailMeta,
+} from './MediaTypes';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,
@@ -200,7 +200,7 @@ export const getDecryptedImageUrl = async (
   }
 
   // If the contents is probably encrypted, we don't bother fetching the header
-  if (!isProbablyEncrypted) {
+  if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     if (!meta.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();

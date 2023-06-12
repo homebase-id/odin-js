@@ -5,13 +5,26 @@ import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Loader } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
+import { useMutation } from '@tanstack/react-query';
+
+const useYouAuthLogin = () => {
+  const { createHomeToken } = useAuth();
+
+  return {
+    homeToken: useMutation(createHomeToken, {
+      onError: (err) => {
+        console.error(err);
+      },
+    }),
+  };
+};
 
 const YouAuthLogin = () => {
   const [searchParams] = useSearchParams();
-  const { createHomeToken } = useAuth();
+  const { mutate: createHomeToken, isIdle: isWaitingToCreateToken } = useYouAuthLogin().homeToken;
 
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   if (!returnUrl) {
@@ -25,21 +38,13 @@ const YouAuthLogin = () => {
   const { data: connectionInfo, isFetching: isFetchingConnectionInfo } = useConnection({
     odinId: !isOwner ? strippedTarget : undefined,
   }).fetch;
+
   const isConnected = connectionInfo?.status === 'connected';
-
-  const cancel = () => {
-    window.location.href = returnUrl;
-  };
-
-  const doRegisterSite = useCallback(() => {
-    createHomeToken(targetDomain);
-  }, []);
+  const doCancel = () => (window.location.href = returnUrl);
 
   useEffect(() => {
-    if (isOwner || isConnected) {
-      doRegisterSite();
-    }
-  }, [isOwner, isConnected, doRegisterSite]);
+    if ((isOwner || isConnected) && isWaitingToCreateToken) createHomeToken(targetDomain);
+  }, [isOwner, isConnected]);
 
   if (isFetchingConnectionInfo || isOwner || isConnected) {
     return (
@@ -48,7 +53,6 @@ const YouAuthLogin = () => {
           <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
             <div className="my-auto flex flex-col">
               <Loader className="mx-auto mb-10 h-20 w-20" />
-              <div className="text-center">{t('Configuring...')}</div>
             </div>
           </div>
         </div>
@@ -90,14 +94,14 @@ const YouAuthLogin = () => {
               </div>
               <div className="mt-10 flex flex-row-reverse">
                 <ActionButton
-                  onClick={doRegisterSite}
+                  onClick={() => createHomeToken(targetDomain)}
                   type="primary"
                   className="ml-2 w-1/2 sm:w-auto"
                   icon={Arrow}
                 >
                   {t('Login')}
                 </ActionButton>
-                <ActionButton type="secondary" onClick={cancel} className="w-1/2 sm:w-auto">
+                <ActionButton type="secondary" onClick={doCancel} className="w-1/2 sm:w-auto">
                   {t('Cancel')}
                 </ActionButton>
               </div>

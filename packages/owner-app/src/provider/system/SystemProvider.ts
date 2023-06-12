@@ -1,9 +1,5 @@
-import {
-  CircleDefinition,
-  DotYouClient,
-  DriveDefinition,
-  TargetDrive,
-} from '@youfoundation/js-lib';
+import { DotYouClient, DriveDefinition, TargetDrive } from '@youfoundation/js-lib/core';
+import { CircleDefinition } from '@youfoundation/js-lib/network';
 
 export interface DriveDefinitionParam extends Omit<DriveDefinition, 'targetDriveInfo'> {
   targetDrive: TargetDrive;
@@ -22,9 +18,13 @@ export const initialize = async (
   const url = root + '/initialize?';
   const data = { firstRunToken: firstRunToken, drives: drives ?? [], circles: circles ?? [] };
 
-  return client.post<boolean>(url, data).then((response) => {
-    return response.data;
-  });
+  return client
+    .post<boolean>(url, data, {
+      timeout: 120 * 1000, // 120s
+    })
+    .then((response) => {
+      return response.data;
+    });
 };
 
 export const isConfigured = async (dotYouClient: DotYouClient) => {

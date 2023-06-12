@@ -1,9 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  TargetDrive,
-  getDecryptedImageUrl,
-  getDecryptedImageUrlOverTransit,
-} from '@youfoundation/js-lib';
+import { TargetDrive, getDecryptedImageUrl } from '@youfoundation/js-lib/core';
+import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../../..';
 
 export const useCommentMedia = ({

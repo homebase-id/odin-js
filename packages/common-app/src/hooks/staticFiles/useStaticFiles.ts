@@ -4,7 +4,7 @@ import {
   publishBlog,
   publishProfileImage,
   publishProfileCard,
-} from '@youfoundation/js-lib';
+} from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../..';
 
 export const useStaticFiles = () => {

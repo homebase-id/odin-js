@@ -1,7 +1,7 @@
-import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib';
+import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { t, useBlogPosts } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
-import PostTeaser from '../Card/PostTeaser';
+import { PostTeaser } from '../PostListItem/PostTeaser';
 
 export const RelatedArticles = ({
   blog,
