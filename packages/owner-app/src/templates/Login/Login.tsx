@@ -77,22 +77,6 @@ const Login = () => {
                     <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                   </small>
                 </h1>
-
-                <div className="mb-4">
-                  <Label htmlFor="odin-id" className="text-sm leading-7  dark:text-gray-400">
-                    Odin id
-                  </Label>
-
-                  <Input
-                    type="text"
-                    name="odin-id"
-                    id="odin-id"
-                    required
-                    defaultValue={window.location.hostname}
-                    disabled={true}
-                    readOnly={true}
-                  />
-                </div>
                 <div className="mb-4">
                   <Label htmlFor="password" className="text-sm leading-7  dark:text-gray-400">
                     Password
