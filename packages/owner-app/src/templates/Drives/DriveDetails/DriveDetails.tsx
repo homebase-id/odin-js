@@ -69,6 +69,14 @@ const DriveDetails = () => {
     )
   );
 
+  const doDownload = (url: string) => {
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = url.substring(url.lastIndexOf('/') + 1);
+    link.click();
+  };
+
   return (
     <>
       <PageMeta
@@ -76,26 +84,14 @@ const DriveDetails = () => {
         title={`${driveDef.name}`}
         actions={
           <>
-            {downloadUrl ? (
-              <ActionLink
-                className="animate-pulse"
-                href={downloadUrl}
-                download={`${driveDef.name}.json`}
-                onClick={() => setDownloadUrl(undefined)}
-                type="primary"
-              >
-                {t('Click to Download')}
-              </ActionLink>
-            ) : (
-              <ActionButton
-                onClick={async () => setDownloadUrl(await exportUnencrypted(driveDef))}
-                state={exportStatus}
-                type="secondary"
-                icon={Download}
-              >
-                {t('Export')}
-              </ActionButton>
-            )}
+            <ActionButton
+              onClick={async () => doDownload(await exportUnencrypted(driveDef))}
+              state={exportStatus}
+              type="secondary"
+              icon={Download}
+            >
+              {t('Export')}
+            </ActionButton>
             <ActionButton
               onClick={async () => setIsImportOpen(true)}
               type="secondary"
