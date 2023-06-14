@@ -70,7 +70,7 @@ const SocialFeedMainContent = () => {
 
   return (
     <>
-      <PostComposer className="bg-background shadow-sm" />
+      <PostComposer className="mb-3 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border" />
       {postsLoading ? (
         <div className="-mx-4">
           <LoadingBlock className="m-4 h-10" />

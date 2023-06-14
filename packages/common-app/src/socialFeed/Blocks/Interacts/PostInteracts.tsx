@@ -14,6 +14,7 @@ import {
   useCommentSummary,
   useComments,
   useEmojiSummary,
+  Repost,
 } from '../../../..';
 
 import { CommentTeaser } from './Comments/Comment';
@@ -22,6 +23,8 @@ import { LikeButton } from './Reactions/LikeButton';
 
 import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
+import { RepostDialog } from './RepostDialog/RepostDialog';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostInteracts = ({
   authorOdinId,
@@ -87,6 +90,7 @@ export const PostInteracts = ({
           className="ml-2"
         />
         <div className="ml-auto flex flex-row items-center font-semibold">
+          <RepostButton postFile={postFile} />
           <button
             className={`inline-flex items-center hover:text-black dark:hover:text-white ${
               !toggleable ? 'pointer-events-none' : ''
@@ -122,6 +126,31 @@ export const PostInteracts = ({
         />
       ) : null}
     </div>
+  );
+};
+
+export const RepostButton = ({ postFile }: { postFile: PostFile<PostContent> }) => {
+  const [isRepostDialogOpen, setIsReposeDialogOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        className={`inline-flex items-center hover:text-black dark:hover:text-white`}
+        onClick={(e) => {
+          e.preventDefault();
+          setIsReposeDialogOpen(!isRepostDialogOpen);
+        }}
+      >
+        <Repost className="mr-1 inline-block h-5 w-5" />
+      </button>
+      {isRepostDialogOpen ? (
+        <RepostDialog
+          postFile={postFile}
+          isOpen={isRepostDialogOpen}
+          onClose={() => setIsReposeDialogOpen(false)}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -178,7 +207,6 @@ export const CommentSummary = ({
   reactionPreview?: CommentsReactionSummary;
 }) => {
   const { data: totalCount } = useCommentSummary({ ...context, reactionPreview }).fetch;
-
   return totalCount ? (
     <>
       <span className="block px-2">·</span>

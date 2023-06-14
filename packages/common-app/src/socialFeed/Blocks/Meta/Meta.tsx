@@ -18,15 +18,13 @@ export const PostMeta = ({
   className,
   size = 'text-xs',
   excludeContextMenu,
-  excludeChannel,
 }: {
   odinId?: string;
   postFile: PostFile<PostContent>;
-  channel: ChannelDefinitionVm | ChannelDefinition;
+  channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
-  excludeChannel?: boolean;
 }) => {
   const { isOwner } = useDotYouClient();
   const now = new Date();
@@ -47,7 +45,7 @@ export const PostMeta = ({
       }`}
     >
       <span>{date.toLocaleDateString(undefined, format)}</span>
-      {!excludeChannel ? (
+      {channel ? (
         <a
           className="text-primary ml-1 border-l pl-1 hover:underline dark:border-slate-500"
           href={`${odinId ? `https://${odinId}` : ''}/home/posts/${channel.slug}`}

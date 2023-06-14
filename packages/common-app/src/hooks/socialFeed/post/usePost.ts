@@ -166,6 +166,22 @@ const usePost = () => {
         if (!variables.blogFile.isDraft) {
           publishStaticFiles();
         }
+
+        // Update versionTag of post in social feeds cache
+        const previousFeed:
+          | InfiniteData<MultiRequestCursoredResult<PostFileVm<PostContent>[]>>
+          | undefined = queryClient.getQueryData(['social-feeds']);
+
+        if (previousFeed) {
+          const newFeed = { ...previousFeed };
+          newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
+            post.content.id === variables.blogFile.content.id
+              ? { ...post, versionTag: _data.newVersionTag }
+              : post
+          );
+
+          queryClient.setQueryData(['social-feeds'], newFeed);
+        }
       },
       onMutate: async (newPost) => {
         await queryClient.cancelQueries(['social-feeds']);

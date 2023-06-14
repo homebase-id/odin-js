@@ -19,6 +19,8 @@ export * from './Blocks/Media/MediaGallery';
 export * from './Blocks/Media/PrimaryMedia';
 export * from './Blocks/Media/DoubleClickHeartForMedia';
 
+export * from './Blocks/Body/Body';
+
 export * from './Blocks/Meta/Meta';
 
 export * from './EditPostDialog/EditPostDialog';

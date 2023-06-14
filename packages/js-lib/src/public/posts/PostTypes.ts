@@ -83,13 +83,17 @@ export type RichText = Record<string, unknown>[];
 export interface PostContent {
   id: string;
   channelId: string;
+  authorOdinId: string;
   reactAccess?: SecurityGroupType.Owner | SecurityGroupType.Connected;
+
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
   dateUnixTime: number;
   primaryMediaFile?: MediaFile;
   type: 'Article' | 'Media' | 'Tweet';
+
+  embeddedPost?: Omit<PostContent, 'embeddedPost'>;
 }
 
 export interface Article extends PostContent {

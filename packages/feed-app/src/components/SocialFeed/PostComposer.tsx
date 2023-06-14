@@ -1,14 +1,19 @@
-import { BlogConfig, ChannelDefinition } from '@youfoundation/js-lib/public';
-import React, { Ref, useEffect } from 'react';
+import { BlogConfig, ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import React, { ReactNode, Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
   ActionButton,
   Arrow,
   AttachmentFile,
+  AuthorImage,
+  AuthorName,
   ChannelsDialog,
   FileOverview,
   FileSelector,
   Globe,
+  PostBody,
+  PostMedia,
+  PostMeta,
   ReactAccess,
   ReactAccessEditorDialog,
   VolatileInput,
@@ -29,7 +34,15 @@ import { Link } from 'react-router-dom';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
-const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
+const PostComposer = ({
+  onPost,
+  embeddedPostFile,
+  className,
+}: {
+  onPost?: () => void;
+  embeddedPostFile?: PostFile<PostContent>;
+  className?: string;
+}) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, error } = usePostComposer();
@@ -43,7 +56,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
   const doPost = async () => {
-    await savePost(caption, channel, files, reactAccess);
+    await savePost(caption, files, embeddedPostFile, channel, reactAccess);
 
     // Reset UI:
     resetUi();
@@ -95,11 +108,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
   }, []);
 
   return (
-    <div
-      className={`mb-3 w-full rounded-md border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
-        className ?? ''
-      }`}
-    >
+    <div className={`${className ?? ''}`}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -111,7 +120,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           <VolatileInput
             defaultValue={caption}
             onChange={(newCaption) => setCaption(newCaption)}
-            placeholder={t("What's up?")}
+            placeholder={embeddedPostFile ? t('Add a comment?') : t("What's up?")}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
                 (file) => ({ file })
@@ -130,6 +139,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />
+        {embeddedPostFile ? <EmbeddedPost postFile={embeddedPostFile} /> : null}
         {postState ? (
           <div className="flex flex-row-reverse">
             {['processing', 'encrypting', 'uploading'].includes(postState) ? (
@@ -152,24 +162,29 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
             />
           </div>
 
-          <Link
-            type="mute"
-            className={`px-2 py-1`}
-            to="/owner/feed/new"
-            title="Convert into an article"
-          >
-            <Article className="h-4 w-4" />
-          </Link>
-          <ActionGroup
-            options={[
-              {
-                label: t('Who can react'),
-                icon: reactAccess && reactAccess === SecurityGroupType.Owner ? Lock : Globe,
-                onClick: () => setIsReactAccessEditorOpen(true),
-              },
-            ]}
-            type="mute"
-          />
+          {!embeddedPostFile ? (
+            <>
+              <Link
+                type="mute"
+                className={`px-2 py-1`}
+                to="/owner/feed/new"
+                title="Convert into an article"
+              >
+                <Article className="h-4 w-4" />
+              </Link>
+
+              <ActionGroup
+                options={[
+                  {
+                    label: t('Who can react'),
+                    icon: reactAccess && reactAccess === SecurityGroupType.Owner ? Lock : Globe,
+                    onClick: () => setIsReactAccessEditorOpen(true),
+                  },
+                ]}
+                type="mute"
+              />
+            </>
+          ) : null}
           <ChannelSelector
             className="ml-auto max-w-[35%] flex-shrink"
             defaultValue={BlogConfig.PublicChannel.channelId}
@@ -178,7 +193,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           />
           <ActionButton
             className={`w-full md:w-auto ${
-              caption?.length || files?.length
+              caption?.length || files?.length || !!embeddedPostFile
                 ? ''
                 : 'pointer-events-none hidden opacity-20 grayscale md:flex'
             } ${
@@ -276,5 +291,44 @@ export const ChannelSelector = React.forwardRef(
     );
   }
 );
+
+export const EmbeddedPost = ({
+  postFile,
+  className,
+}: {
+  postFile: PostFile<PostContent>;
+  className?: string;
+}) => {
+  return (
+    <div className="pointer-events-none my-5 overflow-hidden rounded-lg border">
+      <div className="p-1">
+        <div className="flex flex-row">
+          <div className="flex-shrink-0 py-4 pl-4">
+            <AuthorImage
+              odinId={postFile.content.authorOdinId}
+              className="h-[3rem] w-[3rem] rounded-full sm:h-[5rem] sm:w-[5rem]"
+            />
+          </div>
+          <div className="flex flex-grow flex-col px-4 py-3">
+            <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
+              <h2>
+                <AuthorName odinId={postFile.content.authorOdinId} />
+              </h2>
+              <span className="hidden px-2 leading-4 md:block">·</span>
+              <PostMeta
+                postFile={postFile}
+                odinId={postFile.content.authorOdinId}
+                excludeContextMenu={true}
+              />
+            </div>
+
+            <PostBody post={postFile.content} odinId={postFile.content.authorOdinId} />
+          </div>
+        </div>
+      </div>
+      <PostMedia postFile={postFile} odinId={postFile.content.authorOdinId} postPath="" />
+    </div>
+  );
+};
 
 export default PostComposer;

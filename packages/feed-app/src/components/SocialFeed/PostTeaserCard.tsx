@@ -6,12 +6,10 @@ import {
   FakeAnchor,
   PostInteracts,
   PostMeta,
-  RichTextRenderer,
   useChannel,
   useSocialChannel,
-  ellipsisAtMaxChar,
-  t,
   ErrorBoundary,
+  PostBody,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
@@ -27,7 +25,6 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const isExternal = !odinId || odinId !== window.location.hostname;
   const navigate = useNavigate();
 
-  const [isExpanded, setIsExpanded] = useState(false);
   const { data: externalChannel } = useSocialChannel({
     odinId: isExternal ? odinId : undefined,
     channelId: post.channelId,
@@ -70,67 +67,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 ) : null}
               </div>
 
-              {/* Type specific content */}
-              {post.type === 'Article' ? (
-                <>
-                  <h1 className={`text-foreground text-opacity-80 ${isExpanded ? 'text-2xl' : ''}`}>
-                    {post.caption}
-                  </h1>
-                  <div className="leading-relaxed text-foreground text-opacity-70">
-                    {isExpanded ? (
-                      <div className="rich-text-content mb-5 leading-relaxed">
-                        <RichTextRenderer
-                          body={(post as Article)?.body}
-                          imageDrive={getChannelDrive(post.channelId)}
-                          odinId={odinId}
-                        />
-                      </div>
-                    ) : (
-                      ellipsisAtMaxChar((post as Article).abstract, 140)
-                    )}
-
-                    <>
-                      {' '}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsExpanded(!isExpanded);
-                        }}
-                        className="text-primary hover:underline"
-                      >
-                        {isExpanded ? t('Less') : <>{t('More')}...</>}
-                      </button>
-                    </>
-                  </div>
-                </>
-              ) : (
-                <h1 className="text-foreground text-opacity-70">
-                  {isExpanded || post.caption.length <= 140 ? (
-                    post.captionAsRichText ? (
-                      <RichTextRenderer
-                        body={post.captionAsRichText}
-                        odinId={odinId}
-                        options={{ linksAlwaysBlank: true }}
-                      />
-                    ) : (
-                      <span className="whitespace-pre-wrap">{post.caption}</span>
-                    )
-                  ) : (
-                    <>
-                      {ellipsisAtMaxChar(post.caption, 140)}{' '}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsExpanded(true);
-                        }}
-                        className="text-primary hover:underline"
-                      >
-                        {t('More')}...
-                      </button>
-                    </>
-                  )}
-                </h1>
-              )}
+              <PostBody post={post} odinId={odinId} />
             </div>
           </div>
           <DoubleClickHeartForMedia
@@ -148,6 +85,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
               if (isDesktop) navigate(postPath, { state: { referrer: window.location.pathname } });
             }}
+            className="mb-4"
           />
           <PostInteracts
             authorOdinId={odinId || window.location.hostname}

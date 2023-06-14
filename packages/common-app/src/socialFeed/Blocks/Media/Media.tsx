@@ -1,5 +1,6 @@
-import { PostContent, Media, PostFile } from '@youfoundation/js-lib/public';
+import { PostContent, Media } from '@youfoundation/js-lib/public';
 import { MediaGallery, PrimaryMedia } from '@youfoundation/common-app';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 
 export const PostMedia = ({
   odinId,
@@ -11,7 +12,11 @@ export const PostMedia = ({
   className,
 }: {
   odinId?: string;
-  postFile: PostFile<PostContent>;
+  postFile: {
+    content: PostContent;
+    previewThumbnail?: EmbeddedThumb;
+    payloadIsEncrypted?: boolean;
+  };
   postPath: string;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
@@ -25,13 +30,15 @@ export const PostMedia = ({
     if (showFallback) {
       return (
         <div
-          className={`relative mb-4 aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600`}
+          className={`${
+            className || ''
+          } relative aspect-square overflow-hidden bg-slate-50 text-slate-200 dark:bg-slate-700 dark:text-slate-600`}
         >
           <p className="absolute inset-0 p-2 text-9xl">{post.caption}</p>
         </div>
       );
     }
-    return <div className="mb-4"></div>;
+    return <div className={`${className || ''}`}></div>;
   }
 
   if (mediaFileIds && mediaFileIds.length > 1) {
@@ -40,7 +47,7 @@ export const PostMedia = ({
         odinId={odinId}
         channelId={post.channelId}
         files={mediaFileIds}
-        className={`mb-4 ${className || ''}`}
+        className={`${className || ''}`}
         postUrl={postPath}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
@@ -49,11 +56,11 @@ export const PostMedia = ({
     );
   }
   return (
-    <div className={`relative mb-4`}>
+    <div className={`relative ${className || ''}`}>
       <PrimaryMedia
         post={post}
         odinId={odinId}
-        className={`w-full ${forceAspectRatio ? 'md:aspect-square ' : ''} ${className || ''}`}
+        className={`w-full ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         postUrl={postPath}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
