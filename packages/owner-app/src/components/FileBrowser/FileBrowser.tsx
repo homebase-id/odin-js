@@ -81,34 +81,31 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
   const contentTypeExtension = contentType.split('/')[1];
 
   const fetchFile = useFiles({ targetDrive }).fetchFile;
-  const [downloadUrl, setDownloadUrl] = useState<string>();
-  const [downloadPayloadUrl, setDownloadPayloadUrl] = useState<string>();
+
+  const doDownload = (url: string) => {
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = url.substring(url.lastIndexOf('/') + 1);
+    link.click();
+  };
 
   return (
     <div className="relative flex flex-col rounded-lg bg-slate-100 p-5 dark:bg-slate-900">
       <span className="absolute right-2 top-2 z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800">
         {contentTypeExtension}
       </span>
-      {downloadUrl ? (
-        <ActionLink
-          icon={Download}
-          href={downloadUrl}
-          download={`${file.fileId}.json`}
-          size="square"
-          type="primary"
-          className="absolute left-2 top-2"
-        />
-      ) : (
-        <ActionButton
-          icon={Download}
-          onClick={async () => {
-            setDownloadUrl((await fetchFile(file)) || '');
-          }}
-          size="square"
-          type="secondary"
-          className="absolute left-2 top-2"
-        />
-      )}
+
+      <ActionButton
+        icon={Download}
+        onClick={async () => {
+          doDownload((await fetchFile(file)) || '');
+        }}
+        size="square"
+        type="secondary"
+        className="absolute left-2 top-2"
+      />
+
       <div className="px-4 py-2 lg:px-5">
         {isImage ? (
           <div className="relative">
@@ -119,26 +116,14 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
             />
             <div
               className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 p-2 opacity-0 hover:opacity-100"
-              onClick={async () => {
-                if (!downloadPayloadUrl) setDownloadPayloadUrl((await fetchFile(file, true)) || '');
-              }}
+              onClick={async () => doDownload((await fetchFile(file, true)) || '')}
             >
-              {downloadPayloadUrl ? (
-                <ActionLink
-                  icon={Download}
-                  href={downloadPayloadUrl}
-                  download={`${file.fileId}.${contentTypeExtension}`}
-                  size="square"
-                  type="primary"
-                />
-              ) : (
-                <ActionButton
-                  icon={Download}
-                  onClick={async () => setDownloadPayloadUrl((await fetchFile(file, true)) || '')}
-                  size="square"
-                  type="mute"
-                />
-              )}
+              <ActionButton
+                icon={Download}
+                onClick={async () => doDownload((await fetchFile(file, true)) || '')}
+                size="square"
+                type="mute"
+              />
             </div>
           </div>
         ) : (

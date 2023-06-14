@@ -43,7 +43,7 @@ const useFiles = ({
         dotYouClient,
         targetDrive,
         result.fileId,
-        result.sharedSecretEncryptedKeyHeader
+        result.fileMetadata.payloadIsEncrypted ? result.sharedSecretEncryptedKeyHeader : undefined
       );
       if (!payload) return null;
 

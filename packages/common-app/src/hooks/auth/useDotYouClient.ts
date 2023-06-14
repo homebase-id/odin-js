@@ -15,7 +15,9 @@ export const useDotYouClient = () => {
     : 'apps';
 
   const _isOwner =
-    _app === 'owner' || localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host;
+    _app === 'owner' ||
+    localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host ||
+    !!localStorage.getItem(OWNER_SHARED_SECRET);
 
   const getApiType = () => {
     if (_app === 'apps') return ApiType.App;

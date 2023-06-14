@@ -16,6 +16,7 @@ import {
 const useAuth = () => {
   const { getDotYouClient, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
     useDotYouClient();
+
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret ? 'unknown' : 'anonymous');
@@ -53,13 +54,8 @@ const useAuth = () => {
 
     if (loggedOnIdentity) {
       localStorage.setItem(STORAGE_IDENTITY_KEY, loggedOnIdentity);
+      window.location.href = decodedReturnUrl;
 
-      if (window.location.host === loggedOnIdentity) {
-        // If owner ignore returnUrl and redirect to feed always;
-        window.location.href = '/owner/feed';
-      } else {
-        window.location.href = decodedReturnUrl;
-      }
       return;
     }
 
@@ -67,10 +63,10 @@ const useAuth = () => {
   };
 
   const logout = async (): Promise<void> => {
-    await logoutYouauth();
-
     if (isOwner) {
       await logoutOwner();
+    } else {
+      await logoutYouauth();
     }
 
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
@@ -97,6 +93,8 @@ const useAuth = () => {
           window.localStorage.getItem(HOME_SHARED_SECRET) ||
           window.localStorage.getItem(STORAGE_IDENTITY_KEY)
         ) {
+          console.log('kicked identity');
+
           // Auth state was presumed logged in, but not allowed.. Will attempt reload page? (Browsers may ignore, as it's not a reload on user request)
           window.localStorage.removeItem(HOME_SHARED_SECRET);
           window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
