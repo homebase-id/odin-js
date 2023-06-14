@@ -114,7 +114,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
     };
 
     // Save and process result
-    const savedFileId = await savePost({
+    const uploadResult = await savePost({
       blogFile: toPostFile,
       channelId: targetChannel.channelId,
     });
@@ -131,9 +131,9 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
       );
     }
 
-    if (savedFileId && !dirtyPostFile.fileId) {
+    if (uploadResult && !dirtyPostFile.fileId) {
       setPostFile((oldPostFile) => {
-        return { ...oldPostFile, fileId: savedFileId };
+        return { ...oldPostFile, fileId: uploadResult.file.fileId };
       });
     }
   };
