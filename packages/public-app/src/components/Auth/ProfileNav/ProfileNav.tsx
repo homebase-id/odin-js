@@ -41,12 +41,10 @@ const ProfileNav = () => {
           className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700`}
           onClick={() => setIsOpen(!isOpen)}
         >
-          {isAuthenticated && identity ? (
-            isOwner ? (
-              <OwnerImage className="h-8 w-8 rounded-full" size="custom" />
-            ) : (
-              <ConnectionImage odinId={identity} className="h-8 w-8 rounded-full" size="custom" />
-            )
+          {isAuthenticated && isOwner ? (
+            <OwnerImage className="h-8 w-8 rounded-full" size="custom" />
+          ) : isAuthenticated && identity ? (
+            <ConnectionImage odinId={identity} className="h-8 w-8 rounded-full" size="custom" />
           ) : (
             <Person className="h-4 w-4" />
           )}

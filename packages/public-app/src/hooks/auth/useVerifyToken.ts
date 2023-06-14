@@ -1,28 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
-import { hasValidOwnerToken } from '@youfoundation/common-app';
+import {
+  HOME_SHARED_SECRET,
+  OWNER_SHARED_SECRET,
+  hasValidOwnerToken,
+} from '@youfoundation/common-app';
 
 import { hasValidToken as hasValidYouAuthToken } from '../../provider/AuthenticationProvider';
 
-const SHARED_SECRET = 'HSS';
 const MINUTE_IN_MS = 60000;
 
-const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(SHARED_SECRET);
-  return !!raw;
+const hasSharedSecret = (isOwner?: boolean) => {
+  if (isOwner) {
+    return !!window.localStorage.getItem(OWNER_SHARED_SECRET);
+  } else {
+    return !!window.localStorage.getItem(HOME_SHARED_SECRET);
+  }
 };
 
 const useVerifyToken = (isOwner?: boolean) => {
   const fetchData = async () => {
-    if (!hasSharedSecret()) {
-      return false;
-    }
-    if (isOwner) {
-      // const client = createOwnerAuthenticationProvider();
-      return await hasValidOwnerToken();
-    } else {
-      // const client = createAuthenticationProvider();
-      return await hasValidYouAuthToken();
-    }
+    if (!hasSharedSecret(isOwner)) return false;
+
+    if (isOwner) return await hasValidOwnerToken();
+    else return await hasValidYouAuthToken();
   };
   return useQuery(['verifyToken'], fetchData, {
     refetchOnMount: false,

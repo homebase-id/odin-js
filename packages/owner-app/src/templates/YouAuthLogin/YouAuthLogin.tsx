@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { Arrow, t } from '@youfoundation/common-app';
 import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
@@ -35,18 +35,20 @@ const YouAuthLogin = () => {
   const strippedTarget = targetDomain.replace(new RegExp('^(http|https)://'), '').split('/')[0];
 
   const isOwner = strippedTarget === window.location.host;
+  if (isOwner) return <Navigate to={'/owner/feed'} />;
+
   const { data: connectionInfo, isFetching: isFetchingConnectionInfo } = useConnection({
-    odinId: !isOwner ? strippedTarget : undefined,
+    odinId: strippedTarget,
   }).fetch;
 
   const isConnected = connectionInfo?.status === 'connected';
   const doCancel = () => (window.location.href = returnUrl);
 
   useEffect(() => {
-    if ((isOwner || isConnected) && isWaitingToCreateToken) createHomeToken(targetDomain);
-  }, [isOwner, isConnected]);
+    if (isConnected && isWaitingToCreateToken) createHomeToken(targetDomain);
+  }, [isConnected]);
 
-  if (isFetchingConnectionInfo || isOwner || isConnected) {
+  if (isFetchingConnectionInfo || isConnected) {
     return (
       <MinimalLayout noShadedBg={true}>
         <div className="h-screen">
