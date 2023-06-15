@@ -23,8 +23,9 @@ export const FakeAnchor = ({
     <span
       {...props}
       className={`${className ?? ''} ${href ? 'cursor-pointer' : ''}`}
-      onClick={() => {
+      onClick={(e) => {
         if (href) {
+          e.stopPropagation();
           if (!href.startsWith('http') && !isExternal) {
             navigate(href, { preventScrollReset: preventScrollReset });
             onNavigate && onNavigate();
