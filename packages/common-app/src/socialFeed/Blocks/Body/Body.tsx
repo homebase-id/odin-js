@@ -104,10 +104,10 @@ export const EmbeddedPostLink = ({
   return (
     <a
       href={content?.permalink}
-      className={`text-button hover:underline ${className || ''}`}
+      className={`text-button break- block hover:underline ${className || ''}`}
       onClick={(e) => e.stopPropagation()}
     >
-      {content.permalink}
+      {t('Post from ')} {content?.authorOdinId}
     </a>
   );
 };
