@@ -10,7 +10,7 @@ import {
   PostFile,
   ChannelDefinition,
   BlogConfig,
-  PostContent,
+  EmbeddedPost,
 } from '@youfoundation/js-lib/public';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
@@ -30,7 +30,7 @@ export const usePostComposer = () => {
   const savePost = async (
     caption: string | undefined,
     files: AttachmentFile[] | undefined,
-    embeddedPost: PostFile<PostContent> | undefined,
+    embeddedPost: EmbeddedPost | undefined,
     channel: ChannelDefinition,
     reactAccess: ReactAccess
   ) => {
@@ -80,7 +80,7 @@ export const usePostComposer = () => {
           primaryMediaFile: mediaFiles?.[0] ?? undefined,
           reactAccess: reactAccess,
 
-          embeddedPost: embeddedPost?.content,
+          embeddedPost: embeddedPost,
         },
 
         acl: channel.acl ? { ...channel.acl } : { requiredSecurityGroup: SecurityGroupType.Owner },

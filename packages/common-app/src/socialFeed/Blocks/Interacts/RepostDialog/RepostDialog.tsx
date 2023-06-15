@@ -4,14 +4,14 @@ import { t } from '../../../../helpers';
 import { usePortal } from '../../../../hooks';
 import { DialogWrapper } from '../../../../ui';
 import PostComposer from '@youfoundation/feed-app/src/components/SocialFeed/PostComposer';
-import { PostFile, PostContent } from '@youfoundation/js-lib/public';
+import { EmbeddedPost } from '@youfoundation/js-lib/public';
 
 export const RepostDialog = ({
-  postFile,
+  embeddedPost,
   isOpen,
   onClose,
 }: {
-  postFile: PostFile<PostContent>;
+  embeddedPost: EmbeddedPost;
   isOpen: boolean;
   onClose: () => void;
 }) => {
@@ -22,7 +22,7 @@ export const RepostDialog = ({
   }
   const dialog = (
     <DialogWrapper title={t('Repost')} onClose={onClose} isSidePanel={false} size="large">
-      <PostComposer embeddedPostFile={postFile} />
+      <PostComposer embeddedPost={embeddedPost} />
     </DialogWrapper>
   );
 

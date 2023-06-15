@@ -206,6 +206,11 @@ export const savePost = async <T extends PostContent>(
 
   if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
 
+  // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
+  if (file.content.embeddedPost) {
+    delete (file.content.embeddedPost as any)['embeddedPost'];
+  }
+
   const encrypt = !(
     file.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     file.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated

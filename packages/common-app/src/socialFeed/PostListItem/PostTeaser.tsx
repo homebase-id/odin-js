@@ -69,14 +69,14 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                   navigate(postPath, { state: { referrer: window.location.pathname } });
               }}
             />
-            <div className="px-4 pb-4">
+            <div className="p-4">
               <div className="text-foreground flex flex-row text-opacity-40">
                 {channel && post ? (
                   <PostMeta postFile={postFile} channel={showChannel ? channel : undefined} />
                 ) : null}
               </div>
 
-              <PostBody post={post} />
+              <PostBody post={post} hideEmbeddedPost={true} />
             </div>
             <PostInteracts
               authorOdinId={window.location.hostname}

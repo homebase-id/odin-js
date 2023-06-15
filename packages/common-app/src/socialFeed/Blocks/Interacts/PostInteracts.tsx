@@ -24,7 +24,6 @@ import { LikeButton } from './Reactions/LikeButton';
 import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostInteracts = ({
   authorOdinId,
@@ -71,6 +70,10 @@ export const PostInteracts = ({
   });
   const canReactDetails = data?.canReact ? 'ALLOWED' : data?.details;
 
+  const permalink = `https://${authorOdinId}/home/posts/${postFile.content.channelId}/${
+    postFile.content.slug ?? postFile.content.id
+  }`;
+
   return (
     <div className={`${className ?? ''}`}>
       <div
@@ -90,7 +93,7 @@ export const PostInteracts = ({
           className="ml-2"
         />
         <div className="ml-auto flex flex-row items-center font-semibold">
-          <RepostButton postFile={postFile} />
+          <RepostButton postFile={postFile} permalink={permalink} />
           <button
             className={`inline-flex items-center hover:text-black dark:hover:text-white ${
               !toggleable ? 'pointer-events-none' : ''
@@ -129,7 +132,13 @@ export const PostInteracts = ({
   );
 };
 
-export const RepostButton = ({ postFile }: { postFile: PostFile<PostContent> }) => {
+export const RepostButton = ({
+  postFile,
+  permalink,
+}: {
+  postFile: PostFile<PostContent>;
+  permalink: string;
+}) => {
   const [isRepostDialogOpen, setIsReposeDialogOpen] = useState(false);
 
   return (
@@ -145,7 +154,7 @@ export const RepostButton = ({ postFile }: { postFile: PostFile<PostContent> }) 
       </button>
       {isRepostDialogOpen ? (
         <RepostDialog
-          postFile={postFile}
+          embeddedPost={{ ...postFile.content, permalink }}
           isOpen={isRepostDialogOpen}
           onClose={() => setIsReposeDialogOpen(false)}
         />

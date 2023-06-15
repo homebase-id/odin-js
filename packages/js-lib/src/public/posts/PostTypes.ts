@@ -80,6 +80,10 @@ export interface PostFile<T extends PostContent> {
 
 export type RichText = Record<string, unknown>[];
 
+export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
+  permalink: string;
+}
+
 export interface PostContent {
   id: string;
   channelId: string;
@@ -93,7 +97,7 @@ export interface PostContent {
   primaryMediaFile?: MediaFile;
   type: 'Article' | 'Media' | 'Tweet';
 
-  embeddedPost?: Omit<PostContent, 'embeddedPost'>;
+  embeddedPost?: EmbeddedPost;
 }
 
 export interface Article extends PostContent {

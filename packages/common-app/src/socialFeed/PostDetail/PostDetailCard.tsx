@@ -17,6 +17,7 @@ import {
   PostInteracts,
   Image,
   MediaGallery,
+  EmbeddedPostContent,
 } from '../../..';
 
 export const PostDetailCard = ({
@@ -149,6 +150,10 @@ export const PostDetailCard = ({
         <p className="mb-5 text-base leading-relaxed text-gray-500">
           {(post as Article)?.abstract}
         </p>
+      ) : null}
+
+      {post?.embeddedPost ? (
+        <EmbeddedPostContent content={post.embeddedPost} className="my-5" />
       ) : null}
 
       {!post ? (

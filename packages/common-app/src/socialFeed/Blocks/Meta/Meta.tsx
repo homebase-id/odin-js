@@ -11,24 +11,38 @@ import { Trash } from '@youfoundation/common-app';
 import { UserX, EditPostDialog } from '@youfoundation/common-app';
 import usePost from '../../../hooks/socialFeed/post/usePost';
 
-export const PostMeta = ({
-  odinId,
-  postFile,
-  channel,
-  className,
-  size = 'text-xs',
-  excludeContextMenu,
-}: {
+interface PostMetaWithPostFileProps {
   odinId?: string;
   postFile: PostFile<PostContent>;
+  postContent?: PostContent;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
-}) => {
+}
+
+interface PostMetaWithPostContentProps {
+  odinId?: string;
+  postFile?: PostFile<PostContent>;
+  postContent: PostContent;
+  channel?: ChannelDefinitionVm | ChannelDefinition;
+  className?: string;
+  size?: 'text-xs' | 'text-sm';
+  excludeContextMenu?: boolean;
+}
+
+export const PostMeta = ({
+  odinId,
+  postFile,
+  postContent,
+  channel,
+  className,
+  size = 'text-xs',
+  excludeContextMenu,
+}: PostMetaWithPostFileProps | PostMetaWithPostContentProps) => {
   const { isOwner } = useDotYouClient();
   const now = new Date();
-  const date = new Date(postFile.content.dateUnixTime);
+  const date = new Date(postFile?.content.dateUnixTime || postContent?.dateUnixTime || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   const format: Intl.DateTimeFormatOptions = {
     month: 'short',
@@ -56,7 +70,8 @@ export const PostMeta = ({
       ) : null}
 
       {/* There is only a odinId when on the feed and displaying external data */}
-      {excludeContextMenu ? null : isOwner && (!odinId || odinId === window.location.hostname) ? (
+      {excludeContextMenu || !postFile ? null : isOwner &&
+        (!odinId || odinId === window.location.hostname) ? (
         <OwnerActions postFile={postFile} />
       ) : odinId ? (
         <ExternalActions postFile={postFile} odinId={odinId} />

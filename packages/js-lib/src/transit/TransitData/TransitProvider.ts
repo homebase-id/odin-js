@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -56,7 +56,17 @@ interface TransitQueryBatchRequest {
   odinId: string;
 }
 
-const _internalMetadataCache = new Map<string, Promise<DriveSearchResult>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
+
+const assertIfDotYouClientIsOwner = (dotYouClient: DotYouClient) => {
+  if (dotYouClient.getType() !== ApiType.Owner) {
+    throw new Error(
+      `This method is not available for ${
+        dotYouClient.getType() === ApiType.App ? 'app' : 'youauth'
+      } clients`
+    );
+  }
+};
 
 export const queryBatchOverTransit = async (
   dotYouClient: DotYouClient,
@@ -64,6 +74,7 @@ export const queryBatchOverTransit = async (
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
 ): Promise<QueryBatchResponse> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const client = dotYouClient.createAxiosClient();
 
   const strippedQueryParams = { ...params };
@@ -99,6 +110,7 @@ export const getPayloadOverTransit = async <T>(
   },
   includesJsonContent: boolean
 ): Promise<T | null> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
 
   const keyheader = fileMetadata.payloadIsEncrypted
@@ -126,6 +138,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
   keyHeader: KeyHeader | undefined,
   systemFileType?: SystemFileType
 ): Promise<T | null> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   return getPayloadBytesOverTransit(
     dotYouClient,
     odinId,
@@ -166,6 +179,7 @@ export const getPayloadBytesOverTransit = async (
   chunkStart?: number,
   chunkLength?: number
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -236,6 +250,7 @@ export const getThumbBytesOverTransit = async (
   height: number,
   systemFileType?: SystemFileType
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const client = dotYouClient.createAxiosClient({
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
@@ -273,12 +288,11 @@ export const getFileHeaderOverTransit = async (
   fileId: string,
   systemFileType?: SystemFileType
 ): Promise<DriveSearchResult> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}`;
-  if (_internalMetadataCache.has(cacheKey)) {
-    const cacheData = await _internalMetadataCache.get(cacheKey);
-    if (cacheData) {
-      return cacheData;
-    }
+  if (_internalMetadataPromiseCache.has(cacheKey)) {
+    const cacheData = await _internalMetadataPromiseCache.get(cacheKey);
+    if (cacheData) return cacheData;
   }
 
   const client = dotYouClient.createAxiosClient({
@@ -298,15 +312,15 @@ export const getFileHeaderOverTransit = async (
   const promise = client
     .post('/transit/query/header', request)
     .then((response) => {
+      _internalMetadataPromiseCache.delete(cacheKey);
       return response.data as DriveSearchResult;
     })
     .catch((error) => {
-      //TODO: Handle this - the file was not uploaded
       console.error(error);
       throw error;
     });
 
-  _internalMetadataCache.set(cacheKey, promise);
+  _internalMetadataPromiseCache.set(cacheKey, promise);
 
   return promise;
 };
@@ -321,6 +335,7 @@ export const getDrivesByTypeOverTransit = async (
   odinId: string,
   systemFileType?: SystemFileType
 ): Promise<PagedResult<DriveDefinition>> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const params = {
     driveType: type,
     pageNumber: pageNumber,
@@ -353,6 +368,7 @@ export const uploadFileOverTransit = async (
   thumbnails?: ThumbnailFile[],
   encrypt = true
 ) => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadFileOverTransitUsingKeyHeader(
     dotYouClient,
@@ -372,6 +388,7 @@ export const uploadFileOverTransitUsingKeyHeader = async (
   payload: Uint8Array,
   thumbnails?: ThumbnailFile[]
 ): Promise<TransitUploadResult> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const strippedInstructions: TransitInstructionSet = {
     transferIv: instructions.transferIv,
     overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
@@ -430,6 +447,7 @@ export const deleteFileOverTransit = async (
   recipients?: string[],
   systemFileType?: SystemFileType
 ): Promise<boolean | void> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
 

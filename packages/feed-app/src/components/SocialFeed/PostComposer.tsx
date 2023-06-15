@@ -1,19 +1,15 @@
-import { BlogConfig, ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
-import React, { ReactNode, Ref, useEffect } from 'react';
+import { BlogConfig, ChannelDefinition, EmbeddedPost } from '@youfoundation/js-lib/public';
+import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
   ActionButton,
   Arrow,
   AttachmentFile,
-  AuthorImage,
-  AuthorName,
   ChannelsDialog,
+  EmbeddedPostContent,
   FileOverview,
   FileSelector,
   Globe,
-  PostBody,
-  PostMedia,
-  PostMeta,
   ReactAccess,
   ReactAccessEditorDialog,
   VolatileInput,
@@ -36,11 +32,11 @@ import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PostComposer = ({
   onPost,
-  embeddedPostFile,
+  embeddedPost,
   className,
 }: {
   onPost?: () => void;
-  embeddedPostFile?: PostFile<PostContent>;
+  embeddedPost?: EmbeddedPost;
   className?: string;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -56,7 +52,7 @@ const PostComposer = ({
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
   const doPost = async () => {
-    await savePost(caption, files, embeddedPostFile, channel, reactAccess);
+    await savePost(caption, files, embeddedPost, channel, reactAccess);
 
     // Reset UI:
     resetUi();
@@ -75,6 +71,11 @@ const PostComposer = ({
   };
 
   useEffect(() => {
+    // We don't accept images (from the clipboard) when we're in embedded mode
+    if (embeddedPost) {
+      return;
+    }
+
     const messageListener = (e: MessageEvent) => {
       if (e?.data?.source?.startsWith('react-devtools-')) return;
 
@@ -120,13 +121,13 @@ const PostComposer = ({
           <VolatileInput
             defaultValue={caption}
             onChange={(newCaption) => setCaption(newCaption)}
-            placeholder={embeddedPostFile ? t('Add a comment?') : t("What's up?")}
+            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
                 (file) => ({ file })
               );
 
-              if (mediaFiles.length) {
+              if (mediaFiles.length && !embeddedPost) {
                 setFiles([...(files ?? []), ...mediaFiles]);
                 e.preventDefault();
               }
@@ -139,7 +140,9 @@ const PostComposer = ({
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />
-        {embeddedPostFile ? <EmbeddedPost postFile={embeddedPostFile} /> : null}
+        {embeddedPost ? (
+          <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
+        ) : null}
         {postState ? (
           <div className="flex flex-row-reverse">
             {['processing', 'encrypting', 'uploading'].includes(postState) ? (
@@ -152,18 +155,18 @@ const PostComposer = ({
         ) : null}
 
         <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
-          <div
-            className="mr-0 text-xl font-extralight leading-4 text-opacity-50"
-            title="Attach a file"
-          >
-            <FileSelector
-              onChange={(files) => setFiles(files.map((file) => ({ file })))}
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
-            />
-          </div>
-
-          {!embeddedPostFile ? (
+          {!embeddedPost ? (
             <>
+              <div
+                className="mr-0 text-xl font-extralight leading-4 text-opacity-50"
+                title="Attach a file"
+              >
+                <FileSelector
+                  onChange={(files) => setFiles(files.map((file) => ({ file })))}
+                  accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
+                />
+              </div>
+
               <Link
                 type="mute"
                 className={`px-2 py-1`}
@@ -193,7 +196,7 @@ const PostComposer = ({
           />
           <ActionButton
             className={`w-full md:w-auto ${
-              caption?.length || files?.length || !!embeddedPostFile
+              caption?.length || files?.length || !!embeddedPost
                 ? ''
                 : 'pointer-events-none hidden opacity-20 grayscale md:flex'
             } ${
@@ -291,44 +294,5 @@ export const ChannelSelector = React.forwardRef(
     );
   }
 );
-
-export const EmbeddedPost = ({
-  postFile,
-  className,
-}: {
-  postFile: PostFile<PostContent>;
-  className?: string;
-}) => {
-  return (
-    <div className="pointer-events-none my-5 overflow-hidden rounded-lg border">
-      <div className="p-1">
-        <div className="flex flex-row">
-          <div className="flex-shrink-0 py-4 pl-4">
-            <AuthorImage
-              odinId={postFile.content.authorOdinId}
-              className="h-[3rem] w-[3rem] rounded-full sm:h-[5rem] sm:w-[5rem]"
-            />
-          </div>
-          <div className="flex flex-grow flex-col px-4 py-3">
-            <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
-              <h2>
-                <AuthorName odinId={postFile.content.authorOdinId} />
-              </h2>
-              <span className="hidden px-2 leading-4 md:block">·</span>
-              <PostMeta
-                postFile={postFile}
-                odinId={postFile.content.authorOdinId}
-                excludeContextMenu={true}
-              />
-            </div>
-
-            <PostBody post={postFile.content} odinId={postFile.content.authorOdinId} />
-          </div>
-        </div>
-      </div>
-      <PostMedia postFile={postFile} odinId={postFile.content.authorOdinId} postPath="" />
-    </div>
-  );
-};
 
 export default PostComposer;

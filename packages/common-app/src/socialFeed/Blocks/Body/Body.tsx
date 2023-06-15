@@ -1,12 +1,22 @@
-import { Article, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
+import { Article, EmbeddedPost, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
 import { AuthorImage } from '../Author/Image';
 import { AuthorName } from '../Author/Name';
 import { PostMedia } from '../Media/Media';
+import { PostMeta } from '../Meta/Meta';
+import { useSocialChannel, useChannel } from '../../../hooks';
 
-export const PostBody = ({ post, odinId }: { post: PostContent; odinId?: string }) => {
+export const PostBody = ({
+  post,
+  odinId,
+  hideEmbeddedPost,
+}: {
+  post: PostContent;
+  odinId?: string;
+  hideEmbeddedPost?: boolean;
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -73,8 +83,32 @@ export const PostBody = ({ post, odinId }: { post: PostContent; odinId?: string 
         </h1>
       )}
 
-      {post.embeddedPost ? <EmbeddedPostContent content={post.embeddedPost} /> : null}
+      {post.embeddedPost ? (
+        hideEmbeddedPost ? (
+          <EmbeddedPostLink content={post.embeddedPost} className="mt-3" />
+        ) : (
+          <EmbeddedPostContent content={post.embeddedPost} className="mt-3" />
+        )
+      ) : null}
     </>
+  );
+};
+
+export const EmbeddedPostLink = ({
+  content,
+  className,
+}: {
+  content: EmbeddedPost;
+  className?: string;
+}) => {
+  return (
+    <a
+      href={content?.permalink}
+      className={`text-button hover:underline ${className || ''}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {content.permalink}
+    </a>
   );
 };
 
@@ -82,28 +116,49 @@ export const EmbeddedPostContent = ({
   content,
   className,
 }: {
-  content: PostContent;
+  content: EmbeddedPost;
   className?: string;
 }) => {
+  const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
+
+  const { data: externalChannel } = useSocialChannel({
+    odinId: isExternal ? content.authorOdinId : undefined,
+    channelId: content.channelId,
+  }).fetch;
+  const { data: internalChannel } = useChannel({ channelId: content.channelId }).fetch;
+
+  const channel = externalChannel || internalChannel;
+
+  if (!channel) {
+    // many things will be broken if we don't have a channel;
+    // Perhaps we just show the permalink then?
+  }
+
   return (
-    <div className="pointer-events-none my-5 overflow-hidden rounded-lg border">
+    <div className={`overflow-hidden rounded-lg border ${className ?? ''}`}>
       <div className="p-1">
         <div className="flex flex-row">
-          <div className="flex flex-grow flex-col px-4 py-3">
-            <div className="text-foreground mb-1 flex flex-col text-opacity-60 md:flex-row md:flex-wrap md:items-center">
-              <AuthorImage odinId={content.authorOdinId} className="mr-2 h-7 w-7 rounded-full" />
-              <h2>
-                <AuthorName odinId={content.authorOdinId} />
-              </h2>
-              {/* <span className="hidden px-2 leading-4 md:block">·</span> */}
-              {/* <PostMeta
-                postFile={postFile}
-                odinId={content.authorOdinId}
-                excludeContextMenu={true}
-              /> */}
+          <div className="flex flex-grow flex-col px-2 py-2">
+            <div className="text-foreground mb-1 flex flex-row gap-2 text-opacity-60">
+              <AuthorImage odinId={content.authorOdinId} className="h-7 w-7 rounded-full" />
+              <div className="flex flex-col md:flex-row md:items-center lg:flex-col lg:items-start xl:flex-row xl:items-center">
+                <h2>
+                  <AuthorName odinId={content.authorOdinId} />
+                </h2>
+                <span className="hidden px-2 leading-4 md:block lg:hidden xl:block">·</span>
+                <PostMeta
+                  postContent={content}
+                  odinId={content.authorOdinId}
+                  excludeContextMenu={true}
+                  channel={channel || undefined}
+                />
+              </div>
             </div>
 
-            <PostBody post={content} odinId={content.authorOdinId} />
+            <PostBody
+              post={{ ...content, embeddedPost: undefined }}
+              odinId={content.authorOdinId}
+            />
           </div>
         </div>
       </div>

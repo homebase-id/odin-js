@@ -12,6 +12,7 @@ import {
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 type useChannelsProps = {
   channelSlug?: string;
@@ -31,7 +32,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     const cachedChannels = queryClient.getQueryData<ChannelDefinitionVm[]>(['channels']);
     if (cachedChannels) {
       const foundChannel = cachedChannels.find(
-        (chnl) => chnl.channelId === channelId || chnl.slug === channelSlug
+        (chnl) => stringGuidsEqual(chnl.channelId, channelId) || chnl.slug === channelSlug
       );
       if (foundChannel) return foundChannel;
     }
@@ -56,11 +57,9 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     }
 
     if (!channel) {
-      channel = channelSlug
-        ? await getChannelDefinitionBySlug(dotYouClient, channelSlug)
-        : channelId
-        ? await getChannelDefinition(dotYouClient, channelId)
-        : undefined;
+      channel =
+        (channelSlug ? await getChannelDefinitionBySlug(dotYouClient, channelSlug) : undefined) ||
+        (channelId ? await getChannelDefinition(dotYouClient, channelId) : undefined);
     }
 
     if (channel) {

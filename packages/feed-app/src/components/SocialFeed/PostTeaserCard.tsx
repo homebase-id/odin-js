@@ -49,14 +49,14 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             clickable ? 'hover:shadow-md hover:dark:shadow-slate-600' : ''
           } dark:border-gray-800 lg:border`}
         >
-          <div className="flex flex-row">
-            <div className="flex-shrink-0 py-4 pl-4">
+          <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
+            <div className="flex-shrink-0 py-1">
               <AuthorImage
                 odinId={odinId}
-                className="h-[3rem] w-[3rem] rounded-full sm:h-[5rem] sm:w-[5rem]"
+                className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[5rem] md:w-[5rem]"
               />
             </div>
-            <div className="flex flex-grow flex-col px-4 py-3">
+            <div className="flex flex-grow flex-col">
               <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
                   <AuthorName odinId={odinId} />
@@ -78,12 +78,10 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
               e.stopPropagation();
 
               // Only navigate to the article if we're on desktop
-              if (post.type !== 'Article') {
+              if (post.type !== 'Article')
                 navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
-                return;
-              }
-
-              if (isDesktop) navigate(postPath, { state: { referrer: window.location.pathname } });
+              else if (isDesktop)
+                navigate(postPath, { state: { referrer: window.location.pathname } });
             }}
             className="mb-4"
           />

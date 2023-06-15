@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { TargetDrive, DotYouClient, getDecryptedThumbnailMeta } from '@youfoundation/js-lib/core';
+import {
+  TargetDrive,
+  DotYouClient,
+  getDecryptedThumbnailMeta,
+  ApiType,
+} from '@youfoundation/js-lib/core';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { GetFileEntryFromCache } from '@youfoundation/js-lib/public';
 import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
@@ -16,7 +21,7 @@ const useTinyThumb = (
   const fetchImageData = async (odinId: string, imageFileId?: string, imageDrive?: TargetDrive) => {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
 
-    if (odinId !== localHost)
+    if (odinId !== localHost && dotYouClient.getType() === ApiType.Owner)
       return await getDecryptedThumbnailMetaOverTransit(
         dotYouClient,
         odinId,
@@ -49,6 +54,9 @@ const useTinyThumb = (
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '',
+      onError: (error) => {
+        console.error(error);
+      },
     }
   );
 };
