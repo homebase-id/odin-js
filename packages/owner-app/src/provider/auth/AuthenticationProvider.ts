@@ -39,27 +39,10 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
   }`;
   const url = `/youauth/create-token-flow?returnUrl=${encodeURIComponent(returnUrl)}`;
 
-  // const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-  // const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
-
-  // it's chain of redirects from the server, we don't need to trigger with a xhr request
+  // it's a chain of redirects from the server, we don't need to trigger with a xhr request
   window.location.href = `https://api.${window.location.host}/api/owner/v1${url}`;
 
   return true;
-  // const response = await client.get(url);
-  // if (response.status === 301 || response.status === 302) {
-  //   // Redirect happened from the server;
-  //   return true;
-  // }
-
-  // if (response.status === 200 && response.data.redirectUrl) {
-  //   // Redirect is passed to the client 🤷
-  //   window.location.href = response.data.redirectUrl;
-  //   return true;
-  // }
-
-  // // Something went wrong
-  // return false;
 };
 
 export const setNewPassword = async (
