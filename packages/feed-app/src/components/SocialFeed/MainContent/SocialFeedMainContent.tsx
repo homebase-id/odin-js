@@ -70,7 +70,7 @@ const SocialFeedMainContent = () => {
 
   return (
     <>
-      <PostComposer className="bg-background shadow-sm" />
+      <PostComposer className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border" />
       {postsLoading ? (
         <div className="-mx-4">
           <LoadingBlock className="m-4 h-10" />
@@ -121,7 +121,7 @@ const SocialFeedMainContent = () => {
                       key={virtualRow.key}
                       data-index={virtualRow.index}
                       ref={virtualizer.measureElement}
-                      className="py-3"
+                      className="py-2"
                     >
                       <PostTeaserCard
                         key={post.fileId || post.content.id}

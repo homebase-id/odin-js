@@ -1,5 +1,11 @@
 import { FC, useRef, useState } from 'react';
-import { ActionButton, ActionButtonProps, t, useMostSpace } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ActionButtonProps,
+  HorizontalPosts,
+  t,
+  useMostSpace,
+} from '@youfoundation/common-app';
 import { ConfirmDialog } from '@youfoundation/common-app';
 
 import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
@@ -28,7 +34,7 @@ export const ActionGroup = ({
 }: ActionGroupProps) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
-  const { verticalSpace } = useMostSpace(wrapperRef);
+  const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,7 +57,7 @@ export const ActionGroup = ({
         )}
       </ActionButton>
       <div
-        className={`absolute right-0 ${
+        className={`absolute ${horizontalSpace === 'left' ? 'right-0' : 'left-0'} ${
           verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
         } z-10 w-[12rem] ${
           isOpen ? 'max-h-[15rem] border' : 'max-h-0'

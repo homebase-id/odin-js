@@ -7,7 +7,7 @@ import {
   TargetDrive,
 } from '../../core/core';
 import { stringify } from '../../helpers/helpers';
-import { getDecryptedMetadataOverTransit } from './ExternalImageProvider';
+
 import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './TransitProvider';
 
 export const getDecryptedVideoChunkOverTransit = async (
@@ -69,7 +69,7 @@ export const getDecryptedVideoUrlOverTransit = async (
   fileId: string,
   systemFileType?: SystemFileType
 ): Promise<string> => {
-  const meta = await getDecryptedMetadataOverTransit(
+  const meta = await getFileHeaderOverTransit(
     dotYouClient,
     odinId,
     targetDrive,

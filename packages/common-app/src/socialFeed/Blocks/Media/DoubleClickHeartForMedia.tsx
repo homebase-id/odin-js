@@ -16,6 +16,7 @@ export const DoubleClickHeartForMedia = ({
   showFallback,
   forceAspectRatio,
   onClick,
+  className,
 }: {
   odinId?: string;
   postFile: PostFile<PostContent>;
@@ -23,6 +24,7 @@ export const DoubleClickHeartForMedia = ({
   showFallback?: boolean;
   forceAspectRatio?: boolean;
   onClick: (e: React.MouseEvent, index: number) => void;
+  className?: string;
 }) => {
   const wrapperRef = useRef<HTMLSpanElement>(null);
   const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
@@ -63,7 +65,7 @@ export const DoubleClickHeartForMedia = ({
           postPath={postPath}
           showFallback={showFallback}
           forceAspectRatio={forceAspectRatio}
-          className="cursor-pointer"
+          className={`cursor-pointer ${className || ''}`}
           {...bind}
         />
         <ErrorNotification error={postEmojiError} />

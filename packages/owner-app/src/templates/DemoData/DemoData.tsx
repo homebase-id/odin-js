@@ -667,6 +667,7 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
 
           const blogContent: Article = {
             id: getNewId(),
+            authorOdinId: character,
             channelId: channel.channelId,
             caption: randomTitle,
             slug: convertTextToSlug(randomTitle),

@@ -2,7 +2,6 @@ import { DotYouClient } from '../../core/DotYouClient';
 import {
   TargetDrive,
   SystemFileType,
-  DriveSearchResult,
   ThumbnailMeta,
   ImageSize,
   ImageContentType,
@@ -14,16 +13,6 @@ import {
   getPayloadBytesOverTransit,
 } from './TransitProvider';
 
-export const getDecryptedMetadataOverTransit = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  targetDrive: TargetDrive,
-  fileId: string,
-  systemFileType?: SystemFileType
-): Promise<DriveSearchResult> => {
-  return await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, systemFileType);
-};
-
 export const getDecryptedThumbnailMetaOverTransit = async (
   dotYouClient: DotYouClient,
   odinId: string,
@@ -32,29 +21,25 @@ export const getDecryptedThumbnailMetaOverTransit = async (
   systemFileType?: SystemFileType
 ): Promise<ThumbnailMeta | undefined> => {
   //it seems these will be fine for images but for video and audio we must stream decrypt
-  return getDecryptedMetadataOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    systemFileType
-  ).then((header) => {
-    if (!header.fileMetadata.appData.previewThumbnail) {
-      return;
+  return getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, systemFileType).then(
+    (header) => {
+      if (!header.fileMetadata.appData.previewThumbnail) {
+        return;
+      }
+
+      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+      const buffer = base64ToUint8Array(previewThumbnail.content);
+      const url = window.URL.createObjectURL(
+        new Blob([buffer], { type: previewThumbnail.contentType })
+      );
+
+      return {
+        naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+        sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
+        url: url,
+      };
     }
-
-    const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-    const buffer = base64ToUint8Array(previewThumbnail.content);
-    const url = window.URL.createObjectURL(
-      new Blob([buffer], { type: previewThumbnail.contentType })
-    );
-
-    return {
-      naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
-      url: url,
-    };
-  });
+  );
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
@@ -66,7 +51,7 @@ export const getDecryptedImageUrlOverTransit = async (
   size?: ImageSize,
   systemFileType?: SystemFileType
 ): Promise<string> => {
-  const meta = await getDecryptedMetadataOverTransit(
+  const meta = await getFileHeaderOverTransit(
     dotYouClient,
     odinId,
     targetDrive,

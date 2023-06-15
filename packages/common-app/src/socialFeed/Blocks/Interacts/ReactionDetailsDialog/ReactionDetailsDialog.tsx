@@ -59,7 +59,7 @@ export const ReactionDetailsDialog = ({
             <li className="" key={reaction.emoji}>
               <ActionButton
                 type="mute"
-                className={`border-b-button rounded-none hover:border-b-2 ${
+                className={`border-b-primary rounded-none hover:border-b-2 ${
                   activeEmoji === reaction.emoji || (!activeEmoji && index === 0)
                     ? 'border-b-2'
                     : ''

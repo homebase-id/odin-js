@@ -2,11 +2,12 @@ import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import { convertTextToSlug, getReadingTime, useBlog } from '../../../..';
+import { convertTextToSlug, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import usePost from '../post/usePost';
 
 export const EMPTY_POST: Article = {
   id: '',
+  authorOdinId: '',
   channelId: BlogConfig.PublicChannel.channelId,
   slug: '',
   dateUnixTime: 0,
@@ -17,6 +18,7 @@ export const EMPTY_POST: Article = {
 };
 
 const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; postKey?: string }) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: serverData } = useBlog({
     channelSlug: channelKey,
     channelId: channelKey,
@@ -37,6 +39,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
     ...serverData?.activeBlog,
     content: {
       ...EMPTY_POST,
+      authorOdinId: dotYouClient.getIdentity(),
       id: getNewId(),
       ...serverData?.activeBlog?.content,
       type: 'Article',
@@ -111,7 +114,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
     };
 
     // Save and process result
-    const savedFileId = await savePost({
+    const uploadResult = await savePost({
       blogFile: toPostFile,
       channelId: targetChannel.channelId,
     });
@@ -128,9 +131,9 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
       );
     }
 
-    if (savedFileId && !dirtyPostFile.fileId) {
+    if (uploadResult && !dirtyPostFile.fileId) {
       setPostFile((oldPostFile) => {
-        return { ...oldPostFile, fileId: savedFileId };
+        return { ...oldPostFile, fileId: uploadResult.file.fileId };
       });
     }
   };

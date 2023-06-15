@@ -1,4 +1,4 @@
-import { BlogConfig, ChannelDefinition } from '@youfoundation/js-lib/public';
+import { BlogConfig, ChannelDefinition, EmbeddedPost } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
@@ -6,6 +6,7 @@ import {
   Arrow,
   AttachmentFile,
   ChannelsDialog,
+  EmbeddedPostContent,
   FileOverview,
   FileSelector,
   Globe,
@@ -29,7 +30,15 @@ import { Link } from 'react-router-dom';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
-const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: string }) => {
+const PostComposer = ({
+  onPost,
+  embeddedPost,
+  className,
+}: {
+  onPost?: () => void;
+  embeddedPost?: EmbeddedPost;
+  className?: string;
+}) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, error } = usePostComposer();
@@ -43,7 +52,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
   const doPost = async () => {
-    await savePost(caption, channel, files, reactAccess);
+    await savePost(caption, files, embeddedPost, channel, reactAccess);
 
     // Reset UI:
     resetUi();
@@ -62,6 +71,11 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
   };
 
   useEffect(() => {
+    // We don't accept images (from the clipboard) when we're in embedded mode
+    if (embeddedPost) {
+      return;
+    }
+
     const messageListener = (e: MessageEvent) => {
       if (e?.data?.source?.startsWith('react-devtools-')) return;
 
@@ -95,11 +109,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
   }, []);
 
   return (
-    <div
-      className={`mb-3 w-full rounded-md border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
-        className ?? ''
-      }`}
-    >
+    <div className={`${className ?? ''}`}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -111,13 +121,13 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           <VolatileInput
             defaultValue={caption}
             onChange={(newCaption) => setCaption(newCaption)}
-            placeholder={t("What's up?")}
+            placeholder={embeddedPost ? t('Add a comment?') : t("What's up?")}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e), ...getVideosFromPasteEvent(e)].map(
                 (file) => ({ file })
               );
 
-              if (mediaFiles.length) {
+              if (mediaFiles.length && !embeddedPost) {
                 setFiles([...(files ?? []), ...mediaFiles]);
                 e.preventDefault();
               }
@@ -130,6 +140,9 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />
+        {embeddedPost ? (
+          <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
+        ) : null}
         {postState ? (
           <div className="flex flex-row-reverse">
             {['processing', 'encrypting', 'uploading'].includes(postState) ? (
@@ -142,34 +155,39 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
         ) : null}
 
         <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
-          <div
-            className="mr-0 text-xl font-extralight leading-4 text-opacity-50"
-            title="Attach a file"
-          >
-            <FileSelector
-              onChange={(files) => setFiles(files.map((file) => ({ file })))}
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
-            />
-          </div>
+          {!embeddedPost ? (
+            <>
+              <div
+                className="mr-0 text-xl font-extralight leading-4 text-opacity-50"
+                title="Attach a file"
+              >
+                <FileSelector
+                  onChange={(files) => setFiles(files.map((file) => ({ file })))}
+                  accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
+                />
+              </div>
 
-          <Link
-            type="mute"
-            className={`px-2 py-1`}
-            to="/owner/feed/new"
-            title="Convert into an article"
-          >
-            <Article className="h-4 w-4" />
-          </Link>
-          <ActionGroup
-            options={[
-              {
-                label: t('Who can react'),
-                icon: reactAccess && reactAccess === SecurityGroupType.Owner ? Lock : Globe,
-                onClick: () => setIsReactAccessEditorOpen(true),
-              },
-            ]}
-            type="mute"
-          />
+              <Link
+                type="mute"
+                className={`px-2 py-1`}
+                to="/owner/feed/new"
+                title="Convert into an article"
+              >
+                <Article className="h-4 w-4" />
+              </Link>
+
+              <ActionGroup
+                options={[
+                  {
+                    label: t('Who can react'),
+                    icon: reactAccess && reactAccess === SecurityGroupType.Owner ? Lock : Globe,
+                    onClick: () => setIsReactAccessEditorOpen(true),
+                  },
+                ]}
+                type="mute"
+              />
+            </>
+          ) : null}
           <ChannelSelector
             className="ml-auto max-w-[35%] flex-shrink"
             defaultValue={BlogConfig.PublicChannel.channelId}
@@ -178,7 +196,7 @@ const PostComposer = ({ onPost, className }: { onPost?: () => void; className?: 
           />
           <ActionButton
             className={`w-full md:w-auto ${
-              caption?.length || files?.length
+              caption?.length || files?.length || !!embeddedPost
                 ? ''
                 : 'pointer-events-none hidden opacity-20 grayscale md:flex'
             } ${

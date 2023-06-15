@@ -196,12 +196,19 @@ export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: PostFile<T>,
   channelId: string
-): Promise<string> => {
+): Promise<UploadResult> => {
   if (!file.content.id) {
     file.content.id = file.content.slug ? toGuidId(file.content.slug) : getNewId();
   } else if (!file.fileId) {
     // Check if content.id exists and with which fileId
     file.fileId = (await getPost(dotYouClient, channelId, file.content.id))?.fileId ?? undefined;
+  }
+
+  if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
+
+  // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
+  if (file.content.embeddedPost) {
+    delete (file.content.embeddedPost as any)['embeddedPost'];
   }
 
   const encrypt = !(
@@ -282,7 +289,7 @@ export const savePost = async <T extends PostContent>(
     encrypt
   );
 
-  return result.file.fileId;
+  return result;
 };
 
 export const removePost = async (dotYouClient: DotYouClient, fileId: string, channelId: string) => {

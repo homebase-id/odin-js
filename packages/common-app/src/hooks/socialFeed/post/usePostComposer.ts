@@ -10,11 +10,12 @@ import {
   PostFile,
   ChannelDefinition,
   BlogConfig,
+  EmbeddedPost,
 } from '@youfoundation/js-lib/public';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import usePost, { AttachmentFile } from './usePost';
-import { makeGrid } from '../../../..';
+import { makeGrid, useDotYouClient } from '../../../..';
 
 export type ReactAccess = SecurityGroupType.Owner | SecurityGroupType.Connected | undefined;
 
@@ -22,16 +23,18 @@ export const usePostComposer = () => {
   const [postState, setPostState] = useState<
     'processing' | 'uploading' | 'encrypting' | 'error' | undefined
   >();
+  const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
   const { mutateAsync: saveFiles, error: saveFilesError } = usePost().saveFiles;
 
   const savePost = async (
     caption: string | undefined,
-    channel: ChannelDefinition,
     files: AttachmentFile[] | undefined,
+    embeddedPost: EmbeddedPost | undefined,
+    channel: ChannelDefinition,
     reactAccess: ReactAccess
   ) => {
-    if (!files && !caption) {
+    if (!files && !caption && !embeddedPost) {
       console.log('fast fail');
       return;
     }
@@ -62,10 +65,11 @@ export const usePostComposer = () => {
 
       setPostState('uploading');
 
-      // Upload posts
+      // Upload post
       const postId = getNewId();
       const postFile: PostFile<Tweet | Media> = {
         content: {
+          authorOdinId: dotYouClient.getIdentity(),
           type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
           mediaFiles: mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined,
           caption: caption?.trim() || '',
@@ -75,6 +79,8 @@ export const usePostComposer = () => {
           channelId: channel.channelId || BlogConfig.PublicChannel.channelId,
           primaryMediaFile: mediaFiles?.[0] ?? undefined,
           reactAccess: reactAccess,
+
+          embeddedPost: embeddedPost,
         },
 
         acl: channel.acl ? { ...channel.acl } : { requiredSecurityGroup: SecurityGroupType.Owner },

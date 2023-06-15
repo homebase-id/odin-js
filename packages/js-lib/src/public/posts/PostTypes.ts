@@ -80,16 +80,24 @@ export interface PostFile<T extends PostContent> {
 
 export type RichText = Record<string, unknown>[];
 
+export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
+  permalink: string;
+}
+
 export interface PostContent {
   id: string;
   channelId: string;
+  authorOdinId: string;
   reactAccess?: SecurityGroupType.Owner | SecurityGroupType.Connected;
+
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
   dateUnixTime: number;
   primaryMediaFile?: MediaFile;
   type: 'Article' | 'Media' | 'Tweet';
+
+  embeddedPost?: EmbeddedPost;
 }
 
 export interface Article extends PostContent {

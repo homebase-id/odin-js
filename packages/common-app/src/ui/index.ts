@@ -24,6 +24,7 @@ export * from './Icons/Bubble';
 export * from './Icons/Cloud';
 export * from './Icons/Ellipsis';
 export * from './Icons/Feed';
+export * from './Icons/Repost';
 export * from './Icons/Heart';
 export * from './Icons/Linkedin';
 export * from './Icons/OpenLock';

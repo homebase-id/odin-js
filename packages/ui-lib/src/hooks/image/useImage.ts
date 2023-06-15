@@ -122,6 +122,9 @@ const useImage = (
         refetchOnWindowFocus: false,
         staleTime: Infinity,
         enabled: !!imageFileId && imageFileId !== '',
+        onError: (error) => {
+          console.error(error);
+        },
       }
     ),
     getFromCache: (odinId: string | undefined, imageFileId: string, imageDrive: TargetDrive) => {

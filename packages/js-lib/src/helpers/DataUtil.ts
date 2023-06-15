@@ -92,7 +92,9 @@ export const toGuidId = (input: string): string => {
 };
 
 /// Compares two Guids that are string formatted; It compares the guids after removing all dashes and converting to lowercase
-export const stringGuidsEqual = (a: string, b: string): boolean => {
+export const stringGuidsEqual = (a?: string, b?: string): boolean => {
+  if (!a || !b) return false;
+
   return a.toLowerCase().replace(/-/g, '') === b.toLowerCase().replace(/-/g, '');
 };
 
