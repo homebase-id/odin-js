@@ -73,7 +73,7 @@ const YouAuthLogin = () => {
             <div className="max-w-[35rem] dark:text-white">
               <div className="mb-5 flex flex-col sm:flex-row sm:items-center">
                 <img
-                  src={`https://${strippedTarget}/pub/image`}
+                  src={`https://api.${strippedTarget}/pub/image`}
                   className="w-24 rounded-full sm:mr-4"
                 />
 

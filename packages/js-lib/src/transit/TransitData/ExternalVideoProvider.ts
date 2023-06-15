@@ -77,7 +77,7 @@ export const getDecryptedVideoUrlOverTransit = async (
     systemFileType
   );
   if (!meta.fileMetadata.payloadIsEncrypted) {
-    return `https://${odinId}/api/youauth/v1/drive/files/payload?${stringify({
+    return `https://api.${odinId}/api/youauth/v1/drive/files/payload?${stringify({
       ...targetDrive,
       fileId,
       xfst: systemFileType || 'Standard',

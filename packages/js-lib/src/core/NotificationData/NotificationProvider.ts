@@ -103,7 +103,7 @@ export const Subscribe = async (
       return;
     }
 
-    const url = `wss://${dotYouClient.getIdentity()}/api/${
+    const url = `wss://api.${dotYouClient.getIdentity()}/api/${
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;
 

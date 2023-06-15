@@ -42,8 +42,7 @@ export class BaseDotYouClient {
   }
 
   getRoot(): string {
-    // return `https://api.${this.getIdentity()}`;
-    return `https://${this.getIdentity()}`;
+    return `https://api.${this.getIdentity()}`;
   }
 
   //Returns the endpoint for the identity
