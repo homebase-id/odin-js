@@ -200,3 +200,24 @@ export const stringifyToQueryParams = (obj: Record<string, unknown>) => {
 
   return `${stringify(paramsObj)}&${params.join('&')}`;
 };
+
+export const stringifyArrayToQueryParams = (arr: Record<string, unknown>[]) => {
+  // Update object keys to include array index (and flatten sub objects) eg. { a: { b: 1 }, c: 2 } => { '[0].b': 1, '[1].c': 2 }
+  arr.forEach((obj, index) => {
+    Object.keys(obj).forEach((key) => {
+      if (typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+        const subObj = obj[key] as Record<string, unknown>;
+        Object.keys(subObj).forEach((subKey) => {
+          obj[`[${index}].${subKey}`] = subObj[subKey];
+        });
+        delete obj[key];
+        return;
+      }
+
+      obj[`[${index}].${key}`] = obj[key];
+      delete obj[key];
+    });
+  });
+
+  return arr.map((obj) => stringifyToQueryParams(obj)).join('&');
+};

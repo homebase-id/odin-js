@@ -8,7 +8,7 @@ import {
   QueryBatchCollectionResponse,
 } from './DriveTypes';
 import { SystemFileType } from './DriveFileTypes';
-import { stringifyToQueryParams } from '../../helpers/DataUtil';
+import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../helpers/DataUtil';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -140,20 +140,32 @@ export const queryBatchCollection = async (
     };
   });
 
-  return client
-    .post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
-      queries: updatedQueries,
-    })
-    .then((response) => {
-      return {
-        ...response.data,
-        // Remove deleted files
-        results: response.data.results.map((result) => {
-          return {
-            ...result,
-            searchResults: result.searchResults.filter((dsr) => dsr.fileState === 'active'),
-          };
-        }),
-      };
-    });
+  const requestPromise = (() => {
+    const queryParams = stringifyArrayToQueryParams([
+      ...updatedQueries.map((q) => ({ name: q.name, ...q.queryParams, ...q.resultOptionsRequest })),
+    ]);
+
+    const getUrl = '/drive/query/batchcollection?' + queryParams;
+    // Max Url is 1800 so we keep room for encryption overhead
+    if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
+      return client.post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
+        queries: updatedQueries,
+      });
+    } else {
+      return client.get<QueryBatchCollectionResponse>(getUrl);
+    }
+  })();
+
+  return requestPromise.then((response) => {
+    return {
+      ...response.data,
+      // Remove deleted files
+      results: response.data.results.map((result) => {
+        return {
+          ...result,
+          searchResults: result.searchResults.filter((dsr) => dsr.fileState === 'active'),
+        };
+      }),
+    };
+  });
 };
