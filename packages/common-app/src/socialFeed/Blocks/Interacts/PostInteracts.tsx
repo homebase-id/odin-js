@@ -93,7 +93,7 @@ export const PostInteracts = ({
           className="ml-2"
         />
         <div className="ml-auto flex flex-row items-center font-semibold">
-          <RepostButton postFile={postFile} permalink={permalink} />
+          {isOwner ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
           <button
             className={`inline-flex items-center hover:text-black dark:hover:text-white ${
               !toggleable ? 'pointer-events-none' : ''

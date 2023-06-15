@@ -1,5 +1,5 @@
 import { Article, EmbeddedPost, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
 import { AuthorImage } from '../Author/Image';
@@ -7,15 +7,16 @@ import { AuthorName } from '../Author/Name';
 import { PostMedia } from '../Media/Media';
 import { PostMeta } from '../Meta/Meta';
 import { useSocialChannel, useChannel } from '../../../hooks';
+import { FakeAnchor } from '../../../ui';
 
 export const PostBody = ({
   post,
   odinId,
-  hideEmbeddedPost,
+  hideEmbeddedPostMedia,
 }: {
   post: PostContent;
   odinId?: string;
-  hideEmbeddedPost?: boolean;
+  hideEmbeddedPostMedia?: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -84,85 +85,82 @@ export const PostBody = ({
       )}
 
       {post.embeddedPost ? (
-        hideEmbeddedPost ? (
-          <EmbeddedPostLink content={post.embeddedPost} className="mt-3" />
-        ) : (
-          <EmbeddedPostContent content={post.embeddedPost} className="mt-3" />
-        )
+        <EmbeddedPostContent
+          content={post.embeddedPost}
+          hideMedia={hideEmbeddedPostMedia}
+          className="mt-3"
+        />
       ) : null}
     </>
-  );
-};
-
-export const EmbeddedPostLink = ({
-  content,
-  className,
-}: {
-  content: EmbeddedPost;
-  className?: string;
-}) => {
-  return (
-    <a
-      href={content?.permalink}
-      className={`text-button break- block hover:underline ${className || ''}`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {t('Post from ')} {content?.authorOdinId}
-    </a>
   );
 };
 
 export const EmbeddedPostContent = ({
   content,
   className,
+  hideMedia,
 }: {
   content: EmbeddedPost;
   className?: string;
+  hideMedia?: boolean;
 }) => {
+  const [shouldHideMedia, setShouldHideMedia] = useState(hideMedia);
   const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
 
-  const { data: externalChannel } = useSocialChannel({
+  const { data: externalChannel, status: externalChannelStatus } = useSocialChannel({
     odinId: isExternal ? content.authorOdinId : undefined,
     channelId: content.channelId,
   }).fetch;
-  const { data: internalChannel } = useChannel({ channelId: content.channelId }).fetch;
+  const { data: internalChannel, status: internalChannelStatus } = useChannel({
+    channelId: content.channelId,
+  }).fetch;
 
   const channel = externalChannel || internalChannel;
 
-  if (!channel) {
-    // many things will be broken if we don't have a channel;
-    // Perhaps we just show the permalink then?
-  }
+  // Hide media if we can't get channel info, when there's no channel we can't get the media either
+  useEffect(() => {
+    if (externalChannelStatus !== 'loading' && internalChannelStatus !== 'loading' && !channel)
+      setShouldHideMedia(true);
+  }, [externalChannel, internalChannel, externalChannelStatus, internalChannelStatus]);
 
   return (
     <div className={`overflow-hidden rounded-lg border ${className ?? ''}`}>
-      <div className="p-1">
-        <div className="flex flex-row">
-          <div className="flex flex-grow flex-col px-2 py-2">
-            <div className="text-foreground mb-1 flex flex-row gap-2 text-opacity-60">
-              <AuthorImage odinId={content.authorOdinId} className="h-7 w-7 rounded-full" />
-              <div className="flex flex-col md:flex-row md:items-center lg:flex-col lg:items-start xl:flex-row xl:items-center">
-                <h2>
-                  <AuthorName odinId={content.authorOdinId} />
-                </h2>
-                <span className="hidden px-2 leading-4 md:block lg:hidden xl:block">·</span>
-                <PostMeta
-                  postContent={content}
-                  odinId={content.authorOdinId}
-                  excludeContextMenu={true}
-                  channel={channel || undefined}
-                />
+      <FakeAnchor href={content.permalink} onClick={(e) => e.stopPropagation()}>
+        <div className="p-1">
+          <div className="flex flex-row">
+            <div className="flex flex-grow flex-col px-2 py-2">
+              <div className="text-foreground mb-1 flex flex-row gap-2 text-opacity-60">
+                <AuthorImage odinId={content.authorOdinId} className="h-7 w-7 rounded-full" />
+                <div className="flex flex-col md:flex-row md:items-center lg:flex-col lg:items-start xl:flex-row xl:items-center">
+                  <h2>
+                    <AuthorName odinId={content.authorOdinId} />
+                  </h2>
+                  <span className="hidden px-2 leading-4 md:block lg:hidden xl:block">·</span>
+                  <PostMeta
+                    postContent={content}
+                    odinId={content.authorOdinId}
+                    excludeContextMenu={true}
+                    channel={channel || undefined}
+                  />
+                </div>
               </div>
-            </div>
 
-            <PostBody
-              post={{ ...content, embeddedPost: undefined }}
-              odinId={content.authorOdinId}
-            />
+              <PostBody
+                post={{ ...content, embeddedPost: undefined }}
+                odinId={content.authorOdinId}
+              />
+
+              {shouldHideMedia && content.primaryMediaFile ? (
+                <p className="mt-2 text-slate-400 hover:underline">{t('See media')}</p>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
-      <PostMedia postFile={{ content }} odinId={content.authorOdinId} postPath="" />
+
+        {!shouldHideMedia ? (
+          <PostMedia postFile={{ content }} odinId={content.authorOdinId} postPath="" />
+        ) : null}
+      </FakeAnchor>
     </div>
   );
 };

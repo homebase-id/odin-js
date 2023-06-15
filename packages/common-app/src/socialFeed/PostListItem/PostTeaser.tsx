@@ -76,7 +76,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 ) : null}
               </div>
 
-              <PostBody post={post} hideEmbeddedPost={true} />
+              <PostBody post={post} hideEmbeddedPostMedia={true} />
             </div>
             <PostInteracts
               authorOdinId={window.location.hostname}
