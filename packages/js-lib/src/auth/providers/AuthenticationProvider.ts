@@ -95,9 +95,8 @@ export const finalizeAuthentication = async (
   if (identity) saveIdentity(identity);
 
   const decryptedData = await decryptWithKey(registrationData);
-  if (!decryptedData) {
-    throw new Error('Failed to decrypt data');
-  }
+  if (!decryptedData) throw new Error('Failed to decrypt data');
+
   const { authToken, sharedSecret } = splitDataString(decryptedData);
 
   // Store authToken and sharedSecret
