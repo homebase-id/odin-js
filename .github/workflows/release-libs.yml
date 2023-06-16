@@ -54,13 +54,12 @@ jobs:
         run: npm run build --w ./packages/js-lib
 
       - name: Publish JS Lib
-        run: npm publish --w ./packages/js-lib
         if: steps.filter.outputs.jslib == 'true'
+        run: npm publish --w ./packages/js-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build UI Lib
-        if: steps.filter.outputs.uilib == 'true'
         run: npm run build --w ./packages/ui-lib
 
       - name: Publish UI Lib
@@ -70,7 +69,9 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Push the version increment back into the repo
+      # Only if there are changes to the lib(s) as the workflow has a workflow_dispatch trigger
       - name: Commit version updates
+        if: steps.filter.outputs.jslib == 'true' || steps.filter.outputs.uilib == 'true'
         run: |
           git commit -am "Bump lib version(s)"
           git push
