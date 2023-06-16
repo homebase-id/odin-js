@@ -123,9 +123,15 @@ export const EmbeddedPostContent = ({
       setShouldHideMedia(true);
   }, [externalChannel, internalChannel, externalChannelStatus, internalChannelStatus]);
 
+  // When on the feed use the preview link
+  const previewLink =
+    window.location.pathname === '/owner/feed'
+      ? `preview/${content.authorOdinId}/${channel?.channelId}/${content.id}`
+      : undefined;
+
   return (
     <div className={`overflow-hidden rounded-lg border ${className ?? ''}`}>
-      <FakeAnchor href={content.permalink} onClick={(e) => e.stopPropagation()}>
+      <FakeAnchor href={previewLink || content.permalink} onClick={(e) => e.stopPropagation()}>
         <div className="p-1">
           <div className="flex flex-row">
             <div className="flex flex-grow flex-col px-2 py-2">

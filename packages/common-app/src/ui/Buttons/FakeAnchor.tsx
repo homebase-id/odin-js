@@ -17,7 +17,9 @@ export const FakeAnchor = ({
 }: FakeAnchorProps) => {
   const navigate = useNavigate();
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== (href || '/').split('/')[1];
+  // Relative URLs are always considered internal
+  const isExternal =
+    href?.startsWith('/') && pathname.split('/')[1] !== (href || '/').split('/')[1];
 
   return (
     <span
