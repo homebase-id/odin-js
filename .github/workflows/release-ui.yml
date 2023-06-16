@@ -1,13 +1,13 @@
 name: Publish ui-lib Prerelease to Github Packages
 on:
   workflow_dispatch:
-  release:
-    types: [published]
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'packages/ui-lib/src/**'
+  # release:
+  #   types: [published]
+  # push:
+  #   branches:
+  #     - 'main'
+  #   paths:
+  #     - 'packages/ui-lib/src/**'
 jobs:
   publish:
     runs-on: ubuntu-latest

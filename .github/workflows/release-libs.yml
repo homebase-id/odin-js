@@ -1,0 +1,76 @@
+name: Publish libs Prerelease to Github Packages
+on:
+  workflow_dispatch:
+  # release:
+  #   types: [published]
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'packages/js-lib/src/**'
+      - 'packages/ui-lib/src/**'
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            jslib:
+              - 'packages/js-lib/src/**'
+            uilib:
+              - 'packages/ui-lib/src/**'
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@octocat'
+
+      # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
+      - name: Bump js-lib version
+        if: steps.filter.outputs.jslib == 'true'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version prerelease --w ./packages/js-lib
+
+      # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
+      - name: Bump ui-lib version
+        if: steps.filter.outputs.uilib == 'true'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          npm version prerelease --w ./packages/ui-lib
+
+      - run: npm ci
+
+      - name: Build JS Lib
+        run: npm run build --w ./packages/js-lib
+
+      - name: Publish JS Lib
+        run: npm publish --w ./packages/js-lib
+        if: steps.filter.outputs.jslib == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build UI Lib
+        if: steps.filter.outputs.uilib == 'true'
+        run: npm run build --w ./packages/ui-lib
+
+      - name: Publish UI Lib
+        if: steps.filter.outputs.uilib == 'true'
+        run: npm publish --w ./packages/ui-lib
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Push the version increment back into the repo
+      - name: Commit version updates
+        run: |
+          git commit -am "Bump lib version(s)"
+          git push

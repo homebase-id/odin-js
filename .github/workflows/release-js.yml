@@ -1,13 +1,13 @@
 name: Publish js-lib Prerelease to Github Packages
 on:
   workflow_dispatch:
-  release:
-    types: [published]
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'packages/js-lib/src/**'
+  # release:
+  #   types: [published]
+  # push:
+  #   branches:
+  #     - 'main'
+  #   paths:
+  #     - 'packages/js-lib/src/**'
 jobs:
   publish:
     runs-on: ubuntu-latest
