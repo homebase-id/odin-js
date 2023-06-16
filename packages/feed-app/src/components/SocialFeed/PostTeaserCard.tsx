@@ -13,6 +13,7 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 interface PostTeaserCardProps {
   className?: string;
   postFile: PostFile<PostContent>;
@@ -91,6 +92,10 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             showSummary={showSummary}
             isAuthenticated={true}
             isOwner={true}
+            isPublic={
+              channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+              channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+            }
           />
         </FakeAnchor>
       </ErrorBoundary>

@@ -11,6 +11,7 @@ import { useChannel } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 interface PostTeaserProps {
   className?: string;
@@ -84,6 +85,10 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               className="px-4"
               showSummary={true}
               isOwner={isOwner}
+              isPublic={
+                channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+                channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+              }
             />
           </div>
         </FakeAnchor>

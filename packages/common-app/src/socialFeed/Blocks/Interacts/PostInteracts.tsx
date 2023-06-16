@@ -32,6 +32,7 @@ export const PostInteracts = ({
 
   isAuthenticated,
   isOwner,
+  isPublic,
   defaultExpanded,
   allowExpand = true,
   showSummary = false,
@@ -42,6 +43,7 @@ export const PostInteracts = ({
 
   isAuthenticated?: boolean;
   isOwner?: boolean;
+  isPublic?: boolean;
   defaultExpanded?: boolean;
   allowExpand?: boolean;
   showSummary?: boolean;
@@ -94,8 +96,8 @@ export const PostInteracts = ({
           className="ml-2"
         />
         <div className="ml-auto flex flex-row items-center gap-2 font-semibold">
-          <ShareButton permalink={permalink} />
-          {isOwner ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
+          {isPublic ? <ShareButton permalink={permalink} /> : null}
+          {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
           <button
             className={`inline-flex items-center hover:text-black dark:hover:text-white ${
               !toggleable ? 'pointer-events-none' : ''
