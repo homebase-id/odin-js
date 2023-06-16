@@ -109,7 +109,6 @@ export const PostDetailCard = ({
             files={mediaFiles}
             className="my-4"
             maxVisible={4}
-            postUrl={window.location.pathname}
             odinId={odinId}
             probablyEncrypted={postFile?.payloadIsEncrypted}
             onClick={

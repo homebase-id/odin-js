@@ -51,7 +51,6 @@ export const PostTeaser: FC<PostTeaserProps> = ({
           >
             <DoubleClickHeartForMedia
               postFile={postFile}
-              postPath={postPath}
               showFallback={!hideImageWhenNone}
               forceAspectRatio={forceAspectRatio}
               onClick={(e, index) => {

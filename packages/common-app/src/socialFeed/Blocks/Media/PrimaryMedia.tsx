@@ -7,7 +7,6 @@ export const PrimaryMedia = ({
   post,
   className,
   fit,
-  // postUrl,
   previewThumbnail,
   probablyEncrypted,
   onClick,
@@ -16,7 +15,6 @@ export const PrimaryMedia = ({
   post: PostContent;
   className?: string;
   fit?: 'cover' | 'contain';
-  postUrl: string;
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;

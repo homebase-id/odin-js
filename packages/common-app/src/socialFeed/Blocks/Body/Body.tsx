@@ -1,4 +1,5 @@
 import { Article, EmbeddedPost, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
@@ -104,6 +105,9 @@ export const EmbeddedPostContent = ({
   className?: string;
   hideMedia?: boolean;
 }) => {
+  const navigate = useNavigate();
+  const isDesktop = document.documentElement.clientWidth >= 1024;
+
   const [shouldHideMedia, setShouldHideMedia] = useState(hideMedia);
   const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
 
@@ -124,14 +128,14 @@ export const EmbeddedPostContent = ({
   }, [externalChannel, internalChannel, externalChannelStatus, internalChannelStatus]);
 
   // When on the feed use the preview link
-  const previewLink =
+  const postPath =
     window.location.pathname === '/owner/feed'
       ? `preview/${content.authorOdinId}/${channel?.channelId}/${content.id}`
-      : undefined;
+      : content.permalink;
 
   return (
     <div className={`overflow-hidden rounded-lg border ${className ?? ''}`}>
-      <FakeAnchor href={previewLink || content.permalink} onClick={(e) => e.stopPropagation()}>
+      <FakeAnchor href={postPath} onClick={(e) => e.stopPropagation()}>
         <div className="p-1">
           <div className="flex flex-row">
             <div className="flex flex-grow flex-col px-2 py-2">
@@ -164,7 +168,19 @@ export const EmbeddedPostContent = ({
         </div>
 
         {!shouldHideMedia ? (
-          <PostMedia postFile={{ content }} odinId={content.authorOdinId} postPath="" />
+          <PostMedia
+            postFile={{ content }}
+            odinId={content.authorOdinId}
+            onClick={(e, index) => {
+              e.stopPropagation();
+
+              // Only navigate to the article if we're on desktop
+              if (content.type !== 'Article')
+                navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
+              else if (isDesktop)
+                navigate(postPath, { state: { referrer: window.location.pathname } });
+            }}
+          />
         ) : null}
       </FakeAnchor>
     </div>

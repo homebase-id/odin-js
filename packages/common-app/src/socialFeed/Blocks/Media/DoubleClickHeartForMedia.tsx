@@ -12,7 +12,6 @@ import { useRef } from 'react';
 export const DoubleClickHeartForMedia = ({
   odinId,
   postFile,
-  postPath,
   showFallback,
   forceAspectRatio,
   onClick,
@@ -20,7 +19,6 @@ export const DoubleClickHeartForMedia = ({
 }: {
   odinId?: string;
   postFile: PostFile<PostContent>;
-  postPath: string;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
   onClick: (e: React.MouseEvent, index: number) => void;
@@ -62,7 +60,6 @@ export const DoubleClickHeartForMedia = ({
         <PostMedia
           odinId={odinId}
           postFile={postFile}
-          postPath={postPath}
           showFallback={showFallback}
           forceAspectRatio={forceAspectRatio}
           className={`cursor-pointer ${className || ''}`}

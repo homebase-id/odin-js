@@ -10,7 +10,6 @@ interface MediaGalleryProps {
   channelId: string;
   className?: string;
   maxVisible?: number;
-  postUrl: string;
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;

@@ -5,7 +5,6 @@ import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 export const PostMedia = ({
   odinId,
   postFile,
-  postPath,
   showFallback,
   forceAspectRatio,
   onClick,
@@ -17,7 +16,6 @@ export const PostMedia = ({
     previewThumbnail?: EmbeddedThumb;
     payloadIsEncrypted?: boolean;
   };
-  postPath: string;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
@@ -48,7 +46,6 @@ export const PostMedia = ({
         channelId={post.channelId}
         files={mediaFileIds}
         className={`${className || ''}`}
-        postUrl={postPath}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
         onClick={onClick}
@@ -61,7 +58,6 @@ export const PostMedia = ({
         post={post}
         odinId={odinId}
         className={`w-full ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
-        postUrl={postPath}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
         fit="cover"

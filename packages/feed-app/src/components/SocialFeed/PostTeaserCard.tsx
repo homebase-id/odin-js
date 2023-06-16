@@ -1,5 +1,5 @@
-import { PostContent, Article, PostFile, getChannelDrive } from '@youfoundation/js-lib/public';
-import { FC, useState } from 'react';
+import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { FC } from 'react';
 import {
   AuthorImage,
   AuthorName,
@@ -73,7 +73,6 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
           <DoubleClickHeartForMedia
             odinId={odinId}
             postFile={postFile}
-            postPath={postPath}
             onClick={(e, index) => {
               e.stopPropagation();
 
