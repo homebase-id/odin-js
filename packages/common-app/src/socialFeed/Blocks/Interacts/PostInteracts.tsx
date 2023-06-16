@@ -15,6 +15,7 @@ import {
   useComments,
   useEmojiSummary,
   Repost,
+  Share,
 } from '../../../..';
 
 import { CommentTeaser } from './Comments/Comment';
@@ -92,7 +93,8 @@ export const PostInteracts = ({
           reactionPreview={postFile.reactionPreview?.reactions}
           className="ml-2"
         />
-        <div className="ml-auto flex flex-row items-center font-semibold">
+        <div className="ml-auto flex flex-row items-center gap-2 font-semibold">
+          <ShareButton permalink={permalink} />
           {isOwner ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
           <button
             className={`inline-flex items-center hover:text-black dark:hover:text-white ${
@@ -103,7 +105,7 @@ export const PostInteracts = ({
               if (toggleable) setIsExpanded(!isExpanded);
             }}
           >
-            <Bubble className="mr-1 inline-block h-6 w-6" />
+            <Bubble className="inline-block h-6 w-6" />
           </button>
           <CommentSummary
             context={reactionContext}
@@ -132,6 +134,23 @@ export const PostInteracts = ({
   );
 };
 
+export const ShareButton = ({ permalink }: { permalink: string }) => {
+  if (!navigator.share) return null;
+
+  return (
+    <button
+      className="inline-flex items-center hover:text-black dark:hover:text-white"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigator.share({ url: permalink });
+      }}
+    >
+      <Share className="inline-block h-6 w-6" />
+    </button>
+  );
+};
+
 export const RepostButton = ({
   postFile,
   permalink,
@@ -150,7 +169,7 @@ export const RepostButton = ({
           setIsReposeDialogOpen(!isRepostDialogOpen);
         }}
       >
-        <Repost className="mr-1 inline-block h-5 w-5" />
+        <Repost className="inline-block h-5 w-5" />
       </button>
       {isRepostDialogOpen ? (
         <RepostDialog
@@ -218,7 +237,7 @@ export const CommentSummary = ({
   const { data: totalCount } = useCommentSummary({ ...context, reactionPreview }).fetch;
   return totalCount ? (
     <>
-      <span className="block px-2">·</span>
+      <span className="block">·</span>
       <button
         onClick={(e) => {
           if (onToggle) {
