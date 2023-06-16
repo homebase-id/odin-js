@@ -37,6 +37,7 @@ const PersonActive = ({
             }}
             state={disconnectStatus}
             confirmOptions={{
+              type: 'critical',
               title: `${t('Remove')} ${dotYouProfile.odinId}`,
               buttonText: t('Remove'),
               body: `${t('Are you sure you want to remove')} ${dotYouProfile.odinId} ${t(

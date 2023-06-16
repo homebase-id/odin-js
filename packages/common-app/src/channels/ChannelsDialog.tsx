@@ -231,6 +231,7 @@ export const ChannelItem = ({
                         return false;
                       }}
                       confirmOptions={{
+                        type: 'info',
                         title: t('Remove channel'),
                         body: t(
                           'Are you sure you want to remove this channel, this action cannot be undone. All posts published on this channel will also be unpublished.'

@@ -37,6 +37,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
               onClick={() => refresh({ contact })}
               icon={Refresh}
               confirmOptions={{
+                type: 'info',
                 title: t('Refresh data'),
                 buttonText: t('Refresh'),
                 body: t(

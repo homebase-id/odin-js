@@ -2,7 +2,7 @@ import { FC, useRef, useState } from 'react';
 import {
   ActionButton,
   ActionButtonProps,
-  HorizontalPosts,
+  ConfirmDialogProps,
   t,
   useMostSpace,
 } from '@youfoundation/common-app';
@@ -15,11 +15,7 @@ export interface ActionGroupOptionProps {
   label: string;
   onClick?: React.MouseEventHandler<HTMLElement>;
   href?: string;
-  confirmOptions?: {
-    title: string;
-    buttonText: string;
-    body: string;
-  };
+  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
 }
 
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
@@ -108,24 +104,19 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
           <span className={''}>{label}</span>
         </a>
       </li>
-      {confirmOptions && onClick && (
+      {confirmOptions && onClick && needsConfirmation ? (
         <ConfirmDialog
-          title={confirmOptions.title}
-          confirmText={confirmOptions.buttonText}
-          needConfirmation={needsConfirmation}
+          {...confirmOptions}
           onConfirm={() => {
             if (!mouseEvent) return;
             setNeedsConfirmation(false);
             onClick(mouseEvent);
           }}
           onCancel={(e) => {
-            e.stopPropagation();
             setNeedsConfirmation(false);
           }}
-        >
-          <p className="text-sm">{confirmOptions.body}</p>
-        </ConfirmDialog>
-      )}
+        />
+      ) : null}
     </>
   );
 };

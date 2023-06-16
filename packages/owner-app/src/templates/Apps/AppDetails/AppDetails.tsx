@@ -89,6 +89,7 @@ const AppDetails = () => {
                   state={allowAppStatus}
                   icon={Refresh}
                   confirmOptions={{
+                    type: 'info',
                     title: t('Restore App'),
                     buttonText: t('Restore'),
                     body: `${t('Are you sure you want to restore')} ${app.name} ${t(
@@ -108,6 +109,7 @@ const AppDetails = () => {
                   state={removeAppStatus}
                   icon={Trash}
                   confirmOptions={{
+                    type: 'critical',
                     title: t('Remove App'),
                     buttonText: t('Remove'),
                     body: `${t('Are you sure you want to remove')} ${app.name}? ${t(
@@ -132,6 +134,7 @@ const AppDetails = () => {
                 state={revokeAppStatus}
                 icon={Times}
                 confirmOptions={{
+                  type: 'warning',
                   title: t('Revoke App'),
                   buttonText: t('Revoke'),
                   body: `${t('Are you sure you want to revoke')} ${app.name} ${t(
@@ -479,6 +482,7 @@ const ClientView = ({
               await removeClient({ appId, registrationId: appClient.accessRegistrationId });
             }}
             confirmOptions={{
+              type: 'warning',
               title: `${t('Remove Client')} "${appClient.friendlyName}"`,
               body: t(
                 'Are you sure you want to remove this client? If you ever want to undo this, you will have to register the client again.'

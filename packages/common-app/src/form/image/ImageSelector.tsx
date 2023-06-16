@@ -84,6 +84,7 @@ const ImageSelector = ({
               size="square"
               type="remove"
               confirmOptions={{
+                type: 'critical',
                 title: t('Remove Current Image'),
                 body: t(
                   'Are you sure you want to remove the current file? This action cannot be undone.'

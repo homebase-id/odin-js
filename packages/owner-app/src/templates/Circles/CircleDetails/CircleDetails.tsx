@@ -312,6 +312,7 @@ const CircleMemberCard = ({
               return false;
             }}
             confirmOptions={{
+              type: 'info',
               title: t('Remove member'),
               body: `${t('Are you sure you want to remove')} ${odinId} ${t('from this circle?')}`,
               buttonText: t('Remove'),

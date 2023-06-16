@@ -79,6 +79,7 @@ const SectionEditor = ({
               state={removeSectionState}
               onClick={() => removeSection({ profileId, profileSection: section })}
               confirmOptions={{
+                type: 'critical',
                 title: t('Remove Section'),
                 body: t(
                   'Are you sure you want to remove this section, this action cannot be undone. All attributes within this section will also be removed.'

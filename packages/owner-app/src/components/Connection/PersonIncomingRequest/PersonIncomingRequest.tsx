@@ -61,6 +61,7 @@ const PersonIncomingRequest = ({
             return false;
           }}
           confirmOptions={{
+            type: 'info',
             title: t('Ignore request'),
             body: `${t('Are you sure you want to ignore the request from')} ${senderOdinId}`,
             buttonText: t('Ignore'),

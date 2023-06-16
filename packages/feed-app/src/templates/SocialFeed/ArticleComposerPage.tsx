@@ -238,23 +238,20 @@ export const ArticleComposerPage = () => {
           }
         }}
       />
-      <ConfirmDialog
-        title={t('Published')}
-        needConfirmation={isConfirmUnpublish}
-        onConfirm={() => {
-          doSave(postFile, 'draft');
-          setIsConfirmUnpublish(false);
-        }}
-        confirmText="Convert to draft"
-        onCancel={() => setIsConfirmUnpublish(false)}
-        children={
-          <p>
-            {t(
-              'This post is currently published, if you wish to edit you need to convert it back to draft'
-            )}
-          </p>
-        }
-      />
+      {isConfirmUnpublish ? (
+        <ConfirmDialog
+          title={t('Published')}
+          onConfirm={() => {
+            doSave(postFile, 'draft');
+            setIsConfirmUnpublish(false);
+          }}
+          buttonText={t('Convert to draft')}
+          onCancel={() => setIsConfirmUnpublish(false)}
+          body={t(
+            'This post is currently published, if you wish to edit you need to convert it back to draft'
+          )}
+        />
+      ) : null}
     </>
   );
 };

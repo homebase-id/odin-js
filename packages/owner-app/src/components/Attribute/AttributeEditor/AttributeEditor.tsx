@@ -133,6 +133,7 @@ const AttributeEditor = ({
                 icon={Trash}
                 className={`${!attribute.fileId ? 'pointer-events-none' : ''}`}
                 confirmOptions={{
+                  type: 'critical',
                   title: t('Remove Attribute'),
                   buttonText: t('Permanently remove'),
                   body: `${t('Are you sure you want to remove your')} ${

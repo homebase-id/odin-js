@@ -162,6 +162,7 @@ const ConnectionDetails = () => {
                 onClick={() => unblock(odinId)}
                 state={unblockStatus}
                 confirmOptions={{
+                  type: 'info',
                   title: `${t('Unblock')} ${odinId}`,
                   buttonText: t('Unblock'),
                   body: `${t('Are you sure you want to unblock')} ${odinId}`,
@@ -175,6 +176,7 @@ const ConnectionDetails = () => {
                 onClick={() => block(odinId)}
                 state={blockStatus}
                 confirmOptions={{
+                  type: 'warning',
                   title: `${t('Block')} ${odinId}`,
                   buttonText: t('Block'),
                   body: `${t('Are you sure you want to block')} ${odinId}`,

@@ -1,5 +1,5 @@
 import { FC, ReactNode, useState } from 'react';
-import { ConfirmDialog, TrickQuestion } from '@youfoundation/common-app';
+import { ConfirmDialog, ConfirmDialogProps } from '@youfoundation/common-app';
 import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app';
 
 export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
@@ -14,13 +14,7 @@ export interface ActionButtonProps {
   onClick?: React.MouseEventHandler<HTMLElement>;
   title?: string;
   size?: 'large' | 'small' | 'square' | 'none';
-  confirmOptions?: {
-    title: string;
-    buttonText: string;
-    body: string;
-    trickQuestion?: TrickQuestion;
-    type?: 'critical' | 'info';
-  };
+  confirmOptions?: Omit<ConfirmDialogProps, 'onConfirm' | 'onCancel'>;
 }
 
 export const mergeStates = (
@@ -135,22 +129,16 @@ export const ActionButton: FC<ActionButtonProps> = ({
         {children}
         <Icon className={`my-auto ${children ? 'ml-2' : ''} h-4 w-4`} />
       </button>
-      {confirmOptions && onClick && (
+      {confirmOptions && onClick && needsConfirmation ? (
         <ConfirmDialog
-          title={confirmOptions.title}
-          confirmText={confirmOptions.buttonText}
-          trickQuestion={confirmOptions.trickQuestion}
-          type={confirmOptions.type}
-          needConfirmation={needsConfirmation}
+          {...confirmOptions}
           onConfirm={() => {
             setNeedsConfirmation(false);
             onClick && mouseEvent && onClick(mouseEvent);
           }}
           onCancel={() => setNeedsConfirmation(false)}
-        >
-          <p className="text-sm">{confirmOptions.body}</p>
-        </ConfirmDialog>
-      )}
+        />
+      ) : null}
     </>
   );
 };
