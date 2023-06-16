@@ -52,7 +52,8 @@ const useTinyThumb = (
     {
       refetchOnMount: true,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 1000 * 60 * 10, // 10min
+      cacheTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '',
       onError: (error) => {
         console.error(error);
