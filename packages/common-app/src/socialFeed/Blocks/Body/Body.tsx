@@ -9,6 +9,7 @@ import { PostMedia } from '../Media/Media';
 import { PostMeta } from '../Meta/Meta';
 import { useSocialChannel, useChannel } from '../../../hooks';
 import { FakeAnchor } from '../../../ui';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostBody = ({
   post,
@@ -133,6 +134,10 @@ export const EmbeddedPostContent = ({
       ? `preview/${content.authorOdinId}/${channel?.channelId}/${content.id}`
       : content.permalink;
 
+  const isChannelPublic =
+    channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated ||
+    channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous;
+
   return (
     <div className={`overflow-hidden rounded-lg border ${className ?? ''}`}>
       <FakeAnchor href={postPath} onClick={(e) => e.stopPropagation()}>
@@ -169,7 +174,7 @@ export const EmbeddedPostContent = ({
 
         {!shouldHideMedia ? (
           <PostMedia
-            postFile={{ content }}
+            postFile={{ content, payloadIsEncrypted: isChannelPublic }}
             odinId={content.authorOdinId}
             onClick={(e, index) => {
               e.stopPropagation();
