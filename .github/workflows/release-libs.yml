@@ -1,6 +1,5 @@
 name: Publish libs Prerelease to Github Packages
 on:
-  workflow_dispatch:
   # release:
   #   types: [published]
   push:
@@ -69,9 +68,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Push the version increment back into the repo
-      # Only if there are changes to the lib(s) as the workflow has a workflow_dispatch trigger
       - name: Commit version updates
-        if: steps.filter.outputs.jslib == 'true' || steps.filter.outputs.uilib == 'true'
         run: |
           git commit -am "Bump lib version(s)"
           git push
