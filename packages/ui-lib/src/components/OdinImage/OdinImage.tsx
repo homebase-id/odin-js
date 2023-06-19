@@ -199,6 +199,8 @@ export const OdinImage = ({
           <img
             src={imageData?.url}
             alt={alt}
+            // Setting the aspect ratio sets the figure element to be the same size as the image while the image is still loading
+            style={{ aspectRatio: `${width ?? 1}/${height ?? 1}` }}
             className={`${imgClassNames} transition-opacity duration-300 ${
               isFinal ? 'relative opacity-100' : 'opacity-0'
             }`}
