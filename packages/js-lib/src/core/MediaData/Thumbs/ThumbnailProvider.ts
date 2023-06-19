@@ -111,7 +111,7 @@ const createImageThumbnail = async (
             pixelWidth: resizedData.size.width,
             pixelHeight: resizedData.size.height,
             payload: contentByteArray,
-            contentType: `image/${format}`,
+            contentType: `image/${instruction.type || format}`,
           },
         };
       });

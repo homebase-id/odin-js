@@ -75,6 +75,7 @@ export interface ThumbnailInstruction {
   quality: number;
   width: number;
   height: number;
+  type?: 'webp' | 'png' | 'bmp' | 'jpeg' | 'gif';
 }
 
 export class MediaConfig {
