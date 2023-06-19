@@ -40,7 +40,8 @@ export const useEmojiSummary = ({
       {
         refetchOnMount: false,
         refetchOnWindowFocus: false,
-        staleTime: 3600,
+        staleTime: 1000 * 30, // 30 seconds
+        cacheTime: Infinity,
         onError: (er) => {
           console.log(er);
         },

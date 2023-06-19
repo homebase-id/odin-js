@@ -25,26 +25,35 @@ export const ReactionDetailsDialog = ({
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const { data: reactionDetails, hasNextPage, fetchNextPage } = useEmojiReactions(context).fetch;
+  const {
+    data: reactionDetails,
+    hasNextPage,
+    fetchNextPage,
+    isFetchedAfterMount: reactionsDetailsLoaded,
+  } = useEmojiReactions(context).fetch;
   const { data: reactionSummary, isFetchedAfterMount: reactionSummaryLoaded } = useEmojiSummary({
     context,
   }).fetch;
 
   const [activeEmoji, setActiveEmoji] = useState<string>();
 
+  const flattenedReactions = reactionDetails?.pages
+    .flatMap((page) => page?.reactions)
+    .filter(Boolean) as ReactionFile[];
+
+  const filteredEmojis = reactionSummary?.reactions?.filter((reaction) =>
+    flattenedReactions?.some((reactionFile) => reactionFile.content.body === reaction.emoji)
+  );
+
   useEffect(() => {
-    if (reactionSummary?.reactions?.length && !activeEmoji) {
-      setActiveEmoji(reactionSummary?.reactions?.[0].emoji);
+    if (filteredEmojis?.length && !activeEmoji) {
+      setActiveEmoji(filteredEmojis?.[0].emoji);
     }
-  }, [reactionSummaryLoaded]);
+  }, [reactionSummaryLoaded, reactionsDetailsLoaded]);
 
   if (!isOpen) {
     return null;
   }
-
-  const flattenedReactions = reactionDetails?.pages
-    .flatMap((page) => page?.reactions)
-    .filter(Boolean) as ReactionFile[];
 
   const dialog = (
     <DialogWrapper
@@ -54,7 +63,7 @@ export const ReactionDetailsDialog = ({
       isPaddingLess={true}
     >
       <ul className="flex flex-row bg-slate-100 px-4 dark:bg-slate-700 sm:px-8">
-        {reactionSummary?.reactions?.map((reaction, index) => {
+        {filteredEmojis?.map((reaction, index) => {
           return (
             <li className="" key={reaction.emoji}>
               <ActionButton
