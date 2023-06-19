@@ -99,10 +99,24 @@ const uploadMedia = async (
 
   // Image uploads
   const newFileId = (
-    await uploadImage(client, targetDrive, acl, new Uint8Array(imageArrayBuffer), undefined, {
-      tag: tag || imageData.id,
-      uniqueId: imageData.id,
-    })
+    await uploadImage(
+      client,
+      targetDrive,
+      acl,
+      new Uint8Array(imageArrayBuffer),
+      undefined,
+      {
+        tag: tag || imageData.id,
+        uniqueId: imageData.id,
+      },
+      [
+        // Lots of thumbs as each picture in the DemoData is multi purpose
+        { quality: 85, width: 250, height: 250 },
+        { quality: 85, width: 600, height: 600 },
+        { quality: 75, width: 1600, height: 1600 },
+        { quality: 75, width: 2600, height: 2600 },
+      ]
+    )
   )?.fileId;
 
   return newFileId;

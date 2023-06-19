@@ -108,6 +108,7 @@ export const PostInteracts = ({
             }}
           >
             <Bubble className="inline-block h-6 w-6" />
+            <span className="sr-only">{t('Toggle comments')}</span>
           </button>
           <CommentSummary
             context={reactionContext}
@@ -149,6 +150,7 @@ export const ShareButton = ({ permalink }: { permalink: string }) => {
       }}
     >
       <Share className="inline-block h-6 w-6" />
+      <span className="sr-only">{t('Share')}</span>
     </button>
   );
 };
@@ -172,6 +174,7 @@ export const RepostButton = ({
         }}
       >
         <Repost className="inline-block h-5 w-5" />
+        <span className="sr-only">{t('Repost')}</span>
       </button>
       {isRepostDialogOpen ? (
         <RepostDialog

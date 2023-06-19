@@ -7,6 +7,7 @@ import {
   removeImage,
   SecurityGroupType,
   TargetDrive,
+  ThumbnailInstruction,
   uploadImage,
 } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
@@ -74,6 +75,7 @@ export const useImage = (
     acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
     fileId = undefined,
     versionTag = undefined,
+    thumbInstructions,
   }: {
     bytes: Uint8Array;
     type: ImageContentType;
@@ -81,12 +83,21 @@ export const useImage = (
     acl?: AccessControlList;
     fileId?: string;
     versionTag?: string;
+    thumbInstructions?: ThumbnailInstruction[];
   }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
-      fileId,
-      versionTag,
-      type,
-    });
+    return await uploadImage(
+      dotYouClient,
+      targetDrive,
+      acl,
+      bytes,
+      undefined,
+      {
+        fileId,
+        versionTag,
+        type,
+      },
+      thumbInstructions
+    );
   };
 
   const removeImageFile = async ({

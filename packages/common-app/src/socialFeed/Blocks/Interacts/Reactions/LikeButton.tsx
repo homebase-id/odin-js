@@ -4,6 +4,7 @@ import {
   CanReactDetails,
   Heart,
   ReactionsBar,
+  t,
   useDotYouClient,
   useOutsideTrigger,
   useReaction,
@@ -77,6 +78,7 @@ export const LikeButton = ({
           onMouseEnter={() => setIsReact(true)}
         >
           <Heart className="mr-1 inline-block h-6 w-6" />
+          <span className="sr-only">{t('Like')}</span>
         </button>
       </div>
       <ErrorNotification error={postEmojiError} />

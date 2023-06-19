@@ -3,6 +3,7 @@ import {
   ImageContentType,
   ImageUploadResult,
   TargetDrive,
+  ThumbnailInstruction,
 } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -20,6 +21,7 @@ export const ImageDialog = ({
   isOpen,
   acl,
   targetDrive,
+  thumbInstructions,
   onConfirm,
   onCancel,
 }: {
@@ -33,6 +35,8 @@ export const ImageDialog = ({
 
   acl: AccessControlList;
   targetDrive: TargetDrive;
+
+  thumbInstructions?: ThumbnailInstruction[];
 
   onConfirm: (uploadResult?: ImageUploadResult) => void;
   onCancel: () => void;
@@ -57,7 +61,8 @@ export const ImageDialog = ({
         type: imageData.type,
         fileId: undefined,
         versionTag: undefined,
-        targetDrive: targetDrive,
+        targetDrive,
+        thumbInstructions,
       },
       {
         onSuccess: (uploadResult) => {

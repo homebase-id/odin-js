@@ -29,6 +29,18 @@ import { generateDisplayLocation, generateDisplayName } from '@youfoundation/com
 import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import ThemeSelector from '../../Form/ThemeSelector';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
+import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
+
+const profileInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 250, height: 250 },
+  { quality: 75, width: 600, height: 600 },
+];
+
+const headerInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 600, height: 600 },
+  { quality: 75, width: 1600, height: 1600 },
+  { quality: 75, width: 2600, height: 2600 },
+];
 
 const AttributeFields = ({
   attribute,
@@ -119,6 +131,7 @@ const AttributeFields = ({
             expectedAspectRatio={1}
             maxHeight={500}
             maxWidth={500}
+            thumbInstructions={profileInstructionThumbSizes}
           />
         </div>
       );
@@ -304,6 +317,7 @@ const AttributeFields = ({
                   ? 'aspect-[16/9] md:aspect-[5/1]'
                   : ''
               }  w-full object-cover`}
+              thumbInstructions={headerInstructionThumbSizes}
             />
           </div>
           <div className="mb-5">

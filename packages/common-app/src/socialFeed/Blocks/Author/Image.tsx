@@ -1,6 +1,6 @@
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { useState, useRef } from 'react';
-import { Image, useIntersection } from '@youfoundation/common-app';
+import { Image, t, useIntersection } from '@youfoundation/common-app';
 import { useSiteData } from '@youfoundation/common-app';
 
 import { Person } from '@youfoundation/common-app';
@@ -47,6 +47,7 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
           : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
+      alt={t('Your profile picture')}
     />
   );
 };
@@ -73,6 +74,7 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
               ? 'h-[5rem] w-[5rem]'
               : ''
           } rounded-full ${className ?? ''}`}
+          alt={`${t('The profile picture of')} ${odinId}`}
         />
       ) : (
         <div ref={wrapperRef}>

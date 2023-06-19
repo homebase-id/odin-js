@@ -1,4 +1,9 @@
-import { AccessControlList, ImageUploadResult, TargetDrive } from '@youfoundation/js-lib/core';
+import {
+  AccessControlList,
+  ImageUploadResult,
+  TargetDrive,
+  ThumbnailInstruction,
+} from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { ActionButton, t, useImage } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';
@@ -11,6 +16,7 @@ interface ImageSelectorProps
     React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     'onChange'
   > {
+  thumbInstructions?: ThumbnailInstruction[];
   targetDrive: TargetDrive;
   acl: AccessControlList;
   onChange: (event: { target: { name: string; value: ImageUploadResult | undefined } }) => void;
@@ -35,6 +41,7 @@ const ImageSelector = ({
   maxHeight,
   maxWidth,
   sizeClass: externalSizeClass,
+  thumbInstructions,
   label,
   disabled,
 }: ImageSelectorProps) => {
@@ -131,6 +138,7 @@ const ImageSelector = ({
         expectedAspectRatio={expectedAspectRatio}
         maxHeight={maxHeight}
         maxWidth={maxWidth}
+        thumbInstructions={thumbInstructions}
         onConfirm={(uploadResult) => {
           onChange({ target: { name: name || '', value: uploadResult } });
           setIsEdit(false);

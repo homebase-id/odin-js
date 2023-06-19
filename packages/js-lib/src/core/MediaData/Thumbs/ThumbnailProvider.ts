@@ -4,9 +4,8 @@ import { fromBlob } from './ImageResizer';
 
 export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 250, height: 250 },
-  { quality: 75, width: 500, height: 500 },
-  { quality: 75, width: 1000, height: 1000 },
-  { quality: 100, width: 2000, height: 2000 },
+  { quality: 75, width: 600, height: 600 },
+  { quality: 75, width: 1600, height: 1600 },
 ];
 
 const tinyThumbSize: ThumbnailInstruction = {
