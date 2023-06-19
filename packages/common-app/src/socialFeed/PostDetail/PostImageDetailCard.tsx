@@ -102,9 +102,9 @@ export const PostImageDetailCard = ({
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="flex h-full min-h-screen flex-col lg:flex-row">
           <div
-            className={`relative flex h-full max-h-screen w-screen flex-grow overflow-hidden lg:flex-grow-0`}
+            className={`relative flex h-full max-h-screen flex-grow overflow-hidden lg:flex-grow-0`}
           >
-            <div className="flex h-full w-full lg:w-[calc(100vw-25rem)] lg:p-5">
+            <div className="my-auto flex h-full w-full lg:w-[calc(100vw-25rem)] lg:p-5">
               {!post ? (
                 <Loader className="m-auto h-10 w-10 text-white" />
               ) : currentMediaFile?.type !== 'video' ? (
@@ -157,7 +157,7 @@ export const PostImageDetailCard = ({
             ) : null}
           </div>
 
-          <div className="bg-background flex-shrink-0 md:block lg:w-[25rem]">
+          <div className="bg-background flex-shrink-0 flex-grow md:block lg:w-[25rem]">
             <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
               <AuthorImage odinId={odinId} size="sm" />
               <div className="flex max-w-lg flex-grow flex-col">
