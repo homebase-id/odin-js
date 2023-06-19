@@ -33,10 +33,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const { data: internalChannel } = useChannel({ channelId: post.channelId }).fetch;
 
   const channel = externalChannel || internalChannel;
-
   const postPath = `preview/${odinId}/${channel?.channelId}/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
-  const isDesktop = document.documentElement.clientWidth >= 1024;
 
   return (
     <div className={`w-full rounded-lg ${className ?? ''}`}>
@@ -54,7 +52,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             <div className="flex-shrink-0 py-1">
               <AuthorImage
                 odinId={odinId}
-                className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[5rem] md:w-[5rem]"
+                className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
               />
             </div>
             <div className="flex flex-grow flex-col">
@@ -74,14 +72,11 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
           <DoubleClickHeartForMedia
             odinId={odinId}
             postFile={postFile}
+            // Clicks don't propogate to the parent container because of the Double Tap listener
             onClick={(e, index) => {
-              e.stopPropagation();
-
-              // Only navigate to the article if we're on desktop
               if (post.type !== 'Article')
                 navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
-              else if (isDesktop)
-                navigate(postPath, { state: { referrer: window.location.pathname } });
+              else navigate(postPath, { state: { referrer: window.location.pathname } });
             }}
             className="mb-4"
           />

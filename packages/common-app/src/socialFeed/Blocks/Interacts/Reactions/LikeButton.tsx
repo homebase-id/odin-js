@@ -30,8 +30,7 @@ export const LikeButton = ({
   const isDesktop = document.documentElement.clientWidth >= 1024;
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
-  const doLike = () => {
-    // To build
+  const doLike = () =>
     postEmoji({
       authorOdinId: getIdentity() || '',
       content: {
@@ -39,7 +38,6 @@ export const LikeButton = ({
       },
       context,
     });
-  };
 
   useEffect(() => {
     if (isReact && onIntentToReact) onIntentToReact();

@@ -21,12 +21,12 @@ export const PageMeta = ({
   return (
     <section
       className="-mx-2 -mt-4 mb-10 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10
-    sm:-mt-8 sm:px-10 lg:py-8"
+    sm:-mt-8 sm:px-10 xl:py-8"
     >
       <div className="-m-1 flex min-h-[3rem] flex-row flex-wrap items-center sm:flex-nowrap">
         <div className="flex-col p-1">
           {breadCrumbs && (
-            <ul className="mb-2 hidden flex-row lg:flex">
+            <ul className="mb-2 hidden flex-row xl:flex">
               {breadCrumbs.map((crumb, index) => {
                 return (
                   <li key={index} className="mr-2">
@@ -45,7 +45,7 @@ export const PageMeta = ({
           )}
           {title && (
             <>
-              <h1 className="flex flex-row pl-12 text-2xl dark:text-white sm:pl-4 lg:pl-0 lg:text-4xl">
+              <h1 className="flex flex-row pl-12 text-2xl dark:text-white sm:pl-4 xl:pl-0 xl:text-4xl">
                 {icon && icon({ className: 'h-8 w-8 my-auto mr-4 flex-shrink-0 hidden sm:block' })}{' '}
                 {title}
               </h1>

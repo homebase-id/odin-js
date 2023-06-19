@@ -85,7 +85,7 @@ export const ConfirmDialog = ({
               <button
                 type="button"
                 className={`${!isValid ? 'pointer-events-none opacity-40' : ''} ${
-                  type !== 'critical'
+                  type === 'info' || type === 'warning'
                     ? 'hover:bg-indigo-70 bg-indigo-600 focus:ring-indigo-500'
                     : 'hover:bg-red-70 bg-red-600 focus:ring-red-500'
                 } inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm`}

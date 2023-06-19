@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActionGroup,
   AuthorImage,
@@ -13,7 +13,7 @@ import {
   useCommentMedia,
   useComments,
   useDotYouClient,
-  useLongPress,
+  useOutsideTrigger,
   useReaction,
 } from '@youfoundation/common-app';
 
@@ -113,7 +113,6 @@ export const Comment = ({
         </div>
         {threadContext.target.fileId && threadContext.target.globalTransitId ? (
           <CommentMeta
-            context={context}
             canReact={canReactDetails === 'ALLOWED'}
             threadContext={threadContext as ReactionContext}
             created={commentData.date}
@@ -280,14 +279,12 @@ const CommentMedia = ({
 };
 
 const CommentMeta = ({
-  context,
   canReact,
   threadContext,
   created,
   updated,
   onReply,
 }: {
-  context: ReactionContext;
   canReact: boolean;
   threadContext: ReactionContext;
   created?: number;
@@ -300,7 +297,7 @@ const CommentMeta = ({
     <div className="text-foreground relative ml-[2.25rem] flex flex-row items-center px-2 pt-[2px] text-sm text-opacity-20 dark:text-opacity-30">
       {canReact ? (
         <>
-          <CommenLikeButton context={context} threadContext={threadContext} />
+          <CommenLikeButton threadContext={threadContext} />
           <span className="block px-1">·</span>
         </>
       ) : null}
@@ -326,31 +323,26 @@ const CommentMeta = ({
   );
 };
 
-const CommenLikeButton = ({
-  // context,
-  threadContext,
-}: {
-  context: ReactionContext;
-  threadContext: ReactionContext;
-}) => {
+const CommenLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
-  const { getIdentity } = useDotYouClient();
 
+  const { getIdentity } = useDotYouClient();
   const { mutateAsync: postReaction, error: postReactionError } = useReaction().saveEmoji;
 
-  const doLike = () => {
+  const isDesktop = document.documentElement.clientWidth >= 1024;
+  useOutsideTrigger(wrapperRef, () => setIsReact(false));
+
+  const doLike = () =>
     postReaction({
       authorOdinId: getIdentity() || '',
       content: { body: '❤️' },
       context: threadContext,
     });
-  };
-
-  const longPressEvent = useLongPress(() => setIsReact(true), doLike);
 
   return (
     <>
-      <div className="relative">
+      <div className="relative" ref={wrapperRef}>
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
           className={`${isReact ? 'absolute' : 'contents'} -left-1 -top-10 bottom-[100%] w-[10rem]`}
@@ -367,7 +359,10 @@ const CommenLikeButton = ({
         </div>
         <button
           className="text-primary ml-1 mr-1 text-opacity-80 hover:underline"
-          {...longPressEvent}
+          onClick={() => {
+            if (isDesktop) doLike();
+            else setIsReact(!isReact);
+          }}
           onMouseEnter={() => setIsReact(true)}
           onMouseLeave={() => setIsReact(false)}
         >

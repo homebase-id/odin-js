@@ -107,7 +107,6 @@ export const EmbeddedPostContent = ({
   hideMedia?: boolean;
 }) => {
   const navigate = useNavigate();
-  const isDesktop = document.documentElement.clientWidth >= 1024;
 
   const [shouldHideMedia, setShouldHideMedia] = useState(hideMedia);
   const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
@@ -182,8 +181,7 @@ export const EmbeddedPostContent = ({
               // Only navigate to the article if we're on desktop
               if (content.type !== 'Article')
                 navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
-              else if (isDesktop)
-                navigate(postPath, { state: { referrer: window.location.pathname } });
+              else navigate(postPath, { state: { referrer: window.location.pathname } });
             }}
           />
         ) : null}

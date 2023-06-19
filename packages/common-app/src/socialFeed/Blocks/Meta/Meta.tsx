@@ -164,7 +164,9 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
                   icon: Trash,
                   label: 'Remove post',
                   confirmOptions: {
-                    title: `${t('Remove')} "${postFile.content.caption.substring(0, 50) ?? ''}"`,
+                    title: `${t('Remove')} "${
+                      postFile.content.caption.substring(0, 50) || t('Untitled')
+                    }"`,
                     buttonText: 'Permanently remove',
                     body: t(
                       'Are you sure you want to remove this post? This action cannot be undone.'

@@ -55,30 +55,32 @@ export const Feed = () => {
         </div>
       ) : null}
       <section className="flex-grow bg-page-background pt-12 md:pt-0">
-        <div className="container mx-auto max-w-3xl gap-4 py-3 sm:py-10 lg:grid lg:max-w-6xl lg:grid-cols-4 lg:px-5">
-          <div className="hidden lg:block">
-            {isDesktop ? (
-              <div className="sticky top-4">
-                <Suspense>
-                  <IdentityLink className="mb-4 overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
-                  <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                </Suspense>
-              </div>
-            ) : null}
-          </div>
-          <div className={`lg:col-span-2`}>
+        <div className="container mx-auto gap-4 py-3 sm:py-10 lg:grid lg:max-w-7xl lg:grid-cols-4">
+          <div className={`md:col-span-3 xl:order-2 xl:col-span-2`}>
             <SocialFeedMainContent />
           </div>
-          <div className="hidden lg:block">
-            {isDesktop ? (
-              <div className="sticky top-4">
-                <Suspense>
-                  <ConnectionsView className="mb-4 rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                  <CirclesView className="mb-4 rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                  <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                </Suspense>
-              </div>
-            ) : null}
+          <div className="hidden flex-col gap-4 lg:flex xl:contents">
+            <div className="order-1 hidden lg:block ">
+              {isDesktop ? (
+                <div className="sticky top-4 flex flex-col gap-4">
+                  <Suspense>
+                    <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
+                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                  </Suspense>
+                </div>
+              ) : null}
+            </div>
+            <div className="order-3 hidden lg:block">
+              {isDesktop ? (
+                <div className="sticky top-4 flex flex-col gap-4">
+                  <Suspense>
+                    <ConnectionsView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <CirclesView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                  </Suspense>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>

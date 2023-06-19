@@ -34,7 +34,6 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
   const { isOwner } = useDotYouClient();
   const navigate = useNavigate();
-  const isDesktop = document.documentElement.clientWidth >= 1024;
 
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
   //   If there is any media linked and not an article, we load the blogImageDetailPage
@@ -62,11 +61,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                   navigate(`${postPath}/${index}`, {
                     state: { referrer: window.location.pathname },
                   });
-                  return;
-                }
-
-                if (isDesktop)
-                  navigate(postPath, { state: { referrer: window.location.pathname } });
+                } else navigate(postPath, { state: { referrer: window.location.pathname } });
               }}
             />
             <div className="p-4">

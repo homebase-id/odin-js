@@ -39,7 +39,7 @@ const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-indigo-200 text-black dark:bg-indigo-800 dark:text-white';
 
 export const Sidenav = ({ logout }: { logout: () => void }) => {
-  const isDesktop = document.documentElement.clientWidth >= 1024;
+  const isDesktop = document.documentElement.clientWidth >= 1280;
   const storedState = localStorage.getItem(STORAGE_KEY);
   const overruledOpen = storedState ? storedState === '1' : undefined;
   const [isOpen, setIsOpen] = useState(overruledOpen ?? false);
@@ -52,16 +52,16 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
   return (
     <>
       <button
-        className={`absolute left-0 top-0 z-10 p-4 lg:hidden ${sidebarBg}`}
+        className={`absolute left-0 top-0 z-10 p-4 xl:hidden ${sidebarBg}`}
         onClick={() => setIsOpen(true)}
       >
         <Bars className={`h-4 w-4`} />
       </button>
       <aside
-        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-40 h-screen flex-shrink-0 transition-transform duration-300 lg:sticky lg:transition-all ${
+        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-40 h-screen max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:transition-all ${
           isOpen
-            ? 'translate-x-0 lg:min-w-[18rem]'
-            : 'w-full translate-x-[-100%] lg:w-[4.3rem] lg:min-w-0 lg:translate-x-0'
+            ? 'translate-x-0 xl:min-w-[18rem]'
+            : 'w-full translate-x-[-100%] xl:w-[4.3rem] xl:min-w-0 xl:translate-x-0'
         }`}
         onClick={() => !isDesktop && isOpen && setIsOpen(false)}
         onMouseEnter={() => setIsHoverOpen(true)}
@@ -70,8 +70,8 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
         {/* Extra surrounding div to keep contents sticky as you scroll within the aside */}
         <div
           className={`${
-            isOpen ? 'overflow-y-auto lg:overflow-visible' : 'hover:sticky hover:w-[18rem]'
-          } static top-0 h-full w-full transition-all lg:sticky lg:h-auto lg:whitespace-nowrap ${sidebarBg}`}
+            isOpen ? 'overflow-y-auto xl:overflow-visible' : 'hover:sticky hover:w-[18rem]'
+          } static top-0 h-full w-full transition-all xl:sticky xl:h-auto xl:whitespace-nowrap ${sidebarBg}`}
         >
           <div className="flex h-screen flex-col overflow-auto px-3 pb-5 pt-3">
             <div>

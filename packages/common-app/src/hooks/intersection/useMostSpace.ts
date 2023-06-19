@@ -6,8 +6,15 @@ export const useMostSpace = (el?: React.RefObject<HTMLElement>) => {
     horizontalSpace: 'left' | 'right';
   }>({ verticalSpace: 'top', horizontalSpace: 'left' });
 
-  useEffect(() => {
+  const doIt = () => {
     if (el?.current) setSpace(findSpaceDirection(el.current));
+  };
+
+  useEffect(() => {
+    doIt();
+
+    window.addEventListener('scroll', doIt);
+    return () => window.removeEventListener('scroll', doIt);
   }, [el?.current]);
 
   const findSpaceDirection = (el: HTMLElement) => {
