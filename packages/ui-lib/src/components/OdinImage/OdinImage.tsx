@@ -3,13 +3,7 @@ import useImage from '../../hooks/image/useImage';
 import useTinyThumb from '../../hooks/image/useTinyThumb';
 import Loader from '../ui/Icons/Loader/Loader';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
-import {
-  TargetDrive,
-  EmbeddedThumb,
-  ThumbSize,
-  ImageSize,
-  DotYouClient,
-} from '@youfoundation/js-lib/core';
+import { TargetDrive, EmbeddedThumb, ImageSize, DotYouClient } from '@youfoundation/js-lib/core';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
 import '../../app/app.css';
@@ -29,7 +23,7 @@ export interface OdinImageProps {
   probablyEncrypted?: boolean;
   onLoad?: () => void;
   avoidPayload?: boolean;
-  explicitSize?: ThumbSize | 'full';
+  explicitSize?: ImageSize | 'full';
 }
 
 export const OdinImage = ({
@@ -50,7 +44,7 @@ export const OdinImage = ({
 }: OdinImageProps) => {
   const previewImgRef = useRef<HTMLImageElement>(null);
   const wrapperRef = useRef<HTMLPictureElement>(null);
-  const [loadSize, setLoadSize] = useState<ThumbSize | 'full' | undefined>(undefined);
+  const [loadSize, setLoadSize] = useState<ImageSize | 'full' | undefined>(undefined);
 
   const [isTinyLoaded, setIsTinyLoaded] = useState(false);
   const [isFinal, setIsFinal] = useState(false);
