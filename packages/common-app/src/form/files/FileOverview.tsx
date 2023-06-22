@@ -137,7 +137,7 @@ export const ExistingFileOverview = ({
             <Image
               fileId={image.fileId}
               targetDrive={targetDrive}
-              className="aspect-square h-auto w-full"
+              className="aspect-square h-full w-full"
               fit="cover"
             />
             <ActionButton

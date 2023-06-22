@@ -60,7 +60,6 @@ export const PostMedia = ({
         className={`w-full ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
-        fit="cover"
         onClick={onClick ? (e) => onClick(e, 0) : undefined}
       />
     </div>

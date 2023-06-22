@@ -112,7 +112,8 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
             <Image
               targetDrive={targetDrive}
               fileId={file.fileId}
-              className="aspect-square w-full object-contain"
+              fit="contain"
+              className="aspect-square h-full w-full"
             />
             <div
               className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 p-2 opacity-0 hover:opacity-100"
