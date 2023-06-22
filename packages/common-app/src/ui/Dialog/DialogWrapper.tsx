@@ -48,7 +48,7 @@ export const DialogWrapper = ({
                 : 'sm:max-w-4xl'
             }`}
           >
-            <div className="bg-white dark:bg-black dark:text-slate-50">
+            <div className="flex h-full flex-col bg-white dark:bg-black dark:text-slate-50">
               {title || onClose ? (
                 <div className="flex flex-row bg-slate-100 px-4 py-4 dark:bg-slate-700 sm:px-8">
                   {title ? (
@@ -67,7 +67,7 @@ export const DialogWrapper = ({
                 </div>
               ) : null}
               <div
-                className={`max-h-[calc(100vh-112px)] overflow-y-auto ${
+                className={`max-h-[calc(100vh-112px)] flex-grow overflow-y-auto ${
                   isPaddingLess ? '' : 'px-4 py-8 sm:px-8'
                 } sm:max-h-[calc(100vh-10rem)] `}
               >

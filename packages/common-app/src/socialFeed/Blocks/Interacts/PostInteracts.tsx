@@ -284,7 +284,13 @@ const CommentTeaserList = ({
         ))}
       </div>
       {reactionPreview?.totalCount > 3 || allEncrypted ? (
-        <button onClick={onExpand} className="text-primary text-sm font-bold text-opacity-80">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onExpand();
+          }}
+          className="text-primary text-sm font-bold text-opacity-80 hover:underline"
+        >
           {`${!allEncrypted ? t('View') : t('Decrypt')} ${reactionPreview.totalCount} ${
             reactionPreview.totalCount > 1 ? t('comments') : t('comment')
           }`}
