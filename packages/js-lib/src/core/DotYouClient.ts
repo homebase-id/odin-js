@@ -77,7 +77,7 @@ export class BaseDotYouClient {
 
     // Encryption/Decryption on requests and responses
     const ss = this.getSharedSecret();
-    const isDebug = localStorage.getItem('debug') === '1';
+    const isDebug = localStorage && localStorage.getItem('debug') === '1';
 
     client.interceptors.request.use(
       async function (request) {
