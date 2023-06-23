@@ -17,14 +17,14 @@ const createPair = async () => {
 };
 
 const saveKey = async (keyPair: CryptoKeyPair) => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
   await window.crypto.subtle
     .exportKey('pkcs8', keyPair.privateKey)
     .then((e) => localStorage.setItem(STORAGE_KEY, uint8ArrayToBase64(new Uint8Array(e))));
 };
 
 const retrieveKey = async () => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
   const key = base64ToUint8Array(localStorage.getItem(STORAGE_KEY) || '');
   return await window.crypto.subtle
     .importKey(
