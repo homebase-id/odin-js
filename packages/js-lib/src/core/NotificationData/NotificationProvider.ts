@@ -24,7 +24,7 @@ interface RawClientNotification {
   data: string;
 }
 
-const isDebug = localStorage.getItem('debug') === '1';
+const isDebug = typeof window !== 'undefined' && localStorage.getItem('debug') === '1';
 
 const ParseRawClientNotification = (
   notification: RawClientNotification

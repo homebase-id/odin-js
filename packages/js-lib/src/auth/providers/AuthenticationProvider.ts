@@ -8,11 +8,13 @@ export const APP_SHARED_SECRET = 'APSS';
 export const APP_AUTH_TOKEN = 'BX0900';
 
 const getSharedSecret = () => {
+  if (typeof window === 'undefined') return;
   const raw = window.localStorage.getItem(APP_SHARED_SECRET);
   if (raw) return base64ToUint8Array(raw);
 };
 
-const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
+const getAppAuthToken = () =>
+  typeof window !== 'undefined' && window.localStorage.getItem(APP_AUTH_TOKEN);
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (): Promise<boolean> => {
@@ -100,8 +102,10 @@ export const finalizeAuthentication = async (
   const { authToken, sharedSecret } = splitDataString(decryptedData);
 
   // Store authToken and sharedSecret
-  window.localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
-  window.localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
+    window.localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
+  }
 
   // Remove key
   throwAwayTheKey();
@@ -127,8 +131,10 @@ export const logout = async () => {
       return { status: 400, data: false };
     });
 
-  window.localStorage.removeItem(APP_SHARED_SECRET);
-  window.localStorage.removeItem(APP_AUTH_TOKEN);
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(APP_SHARED_SECRET);
+    window.localStorage.removeItem(APP_AUTH_TOKEN);
+  }
 };
 
 export const preAuth = async () => {
