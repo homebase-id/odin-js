@@ -78,19 +78,11 @@ export const decryptJsonContent = async <T>(
   if (keyheader) {
     try {
       const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
-      console.log({ cipher, keyheader });
-
-      const decrypted = await decryptUsingKeyHeader(cipher, keyheader);
-      console.log({ decrypted });
       const json = byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
 
       return JSON.parse(json);
     } catch (err) {
-      console.error(
-        '[DotYouCore-js]',
-        'Json Content Decryption failed. Trying to only parse JSON',
-        err
-      );
+      console.error('[DotYouCore-js]', 'Json Content Decryption failed. Trying to only parse JSON');
     }
   }
 
