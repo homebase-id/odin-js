@@ -94,7 +94,7 @@ export const getDecryptedVideoUrlOverTransit = async (
     systemFileType
   ).then((data) => {
     if (!data) return '';
-    const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+    const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
     return url;
   });
 };

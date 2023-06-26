@@ -15,7 +15,7 @@ export interface BaseProviderOptions {
   headers?: Record<string, string>;
 }
 
-const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
+const getRandomIv = () => crypto.getRandomValues(new Uint8Array(16));
 
 interface createAxiosClientOptions {
   overrideEncryption?: boolean;

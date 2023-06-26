@@ -146,9 +146,7 @@ export const getDecryptedThumbnailMeta = (
 
     const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
     const buffer = base64ToUint8Array(previewThumbnail.content);
-    const url = window.URL.createObjectURL(
-      new Blob([buffer], { type: previewThumbnail.contentType })
-    );
+    const url = URL.createObjectURL(new Blob([buffer], { type: previewThumbnail.contentType }));
 
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
@@ -211,7 +209,7 @@ export const getDecryptedImageUrl = async (
   return getDecryptedImageData(dotYouClient, targetDrive, fileId, size, systemFileType).then(
     (data) => {
       if (!data) return '';
-      const url = window.URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+      const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
       return url;
     }
   );

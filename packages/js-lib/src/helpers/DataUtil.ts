@@ -28,7 +28,7 @@ export const stringToUint8Array = (str: string): Uint8Array => {
 };
 
 export const base64ToUint8Array = (base64: string): Uint8Array => {
-  const binary_string = window.atob(base64);
+  const binary_string = atob(base64); // TODO: Deprecated for Node.js
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -45,7 +45,7 @@ export const uint8ArrayToBase64 = (buffer: Uint8Array) => {
   for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  return window.btoa(binary);
+  return btoa(binary); // TODO: Deprecated for Node.js
 };
 
 ///creates a JSON string from an object; uses base64 for byte arrays

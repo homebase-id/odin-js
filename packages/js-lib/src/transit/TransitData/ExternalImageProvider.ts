@@ -29,9 +29,7 @@ export const getDecryptedThumbnailMetaOverTransit = async (
 
       const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
       const buffer = base64ToUint8Array(previewThumbnail.content);
-      const url = window.URL.createObjectURL(
-        new Blob([buffer], { type: previewThumbnail.contentType })
-      );
+      const url = URL.createObjectURL(new Blob([buffer], { type: previewThumbnail.contentType }));
 
       return {
         naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
@@ -85,7 +83,7 @@ export const getDecryptedImageUrlOverTransit = async (
     systemFileType
   ).then((data) => {
     if (!data) return '';
-    const url = window.URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
+    const url = URL.createObjectURL(new Blob([data.content], { type: data.contentType }));
     return url;
   });
 };

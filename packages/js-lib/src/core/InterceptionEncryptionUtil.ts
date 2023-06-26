@@ -12,7 +12,7 @@ export interface SharedSecretEncryptedPayload {
   data: string;
 }
 
-export const getRandomIv = () => window.crypto.getRandomValues(new Uint8Array(16));
+export const getRandomIv = () => crypto.getRandomValues(new Uint8Array(16));
 
 export const encryptData = async (data: string, iv: Uint8Array, ss: Uint8Array) => {
   const bytes = stringToUint8Array(data);
@@ -32,9 +32,10 @@ export const buildIvFromQueryString = async (querystring: string) => {
   const uniqueQueryKey =
     searchParams.get('fileId') || (searchParams.has('alias') ? querystring : undefined);
 
-  const hashedQueryKey = uniqueQueryKey
-    ? await crypto.subtle.digest('SHA-1', stringToUint8Array(uniqueQueryKey))
-    : undefined;
+  const hashedQueryKey =
+    uniqueQueryKey && typeof crypto.subtle.digest !== 'undefined'
+      ? await crypto.subtle.digest('SHA-1', stringToUint8Array(uniqueQueryKey))
+      : undefined;
 
   if (!hashedQueryKey) return undefined;
 

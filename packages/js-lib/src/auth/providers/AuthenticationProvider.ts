@@ -103,8 +103,8 @@ export const finalizeAuthentication = async (
 
   // Store authToken and sharedSecret
   if (typeof localStorage !== 'undefined') {
-    window.localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
-    window.localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
+    localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
+    localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
   }
 
   // Remove key
@@ -132,8 +132,8 @@ export const logout = async () => {
     });
 
   if (typeof localStorage !== 'undefined') {
-    window.localStorage.removeItem(APP_SHARED_SECRET);
-    window.localStorage.removeItem(APP_AUTH_TOKEN);
+    localStorage.removeItem(APP_SHARED_SECRET);
+    localStorage.removeItem(APP_AUTH_TOKEN);
   }
 };
 

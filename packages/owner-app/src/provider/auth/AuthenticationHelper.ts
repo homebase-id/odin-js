@@ -30,8 +30,8 @@ export const prepareAuthPassword = async (
   const base64Key = rsaPemStrip(nonceData.publicPem);
   const key = await rsaImportKey(base64Key);
 
-  const secret = window.crypto.getRandomValues(new Uint8Array(16));
-  const secret64 = window.btoa(String.fromCharCode.apply(null, Array.from(secret)));
+  const secret = crypto.getRandomValues(new Uint8Array(16));
+  const secret64 = btoa(String.fromCharCode.apply(null, Array.from(secret)));
 
   const payload: AuthenticationPayload = {
     hpwd64: hashedPassword64,
@@ -42,7 +42,7 @@ export const prepareAuthPassword = async (
   const encryptable = JSON.stringify(payload);
   const cipher = await rsaOaepEncrypt(key, encryptable);
 
-  const cipher64 = window.btoa(String.fromCharCode.apply(null, Array.from(cipher)));
+  const cipher64 = btoa(String.fromCharCode.apply(null, Array.from(cipher)));
   return {
     nonce64: nonceData.nonce64,
     nonceHashedPassword64: hashNoncePassword64,
@@ -69,10 +69,10 @@ const pbkdf2 = async (
 ): Promise<Uint8Array> => {
   const password = new TextEncoder().encode(strPassword);
 
-  const ik = await window.crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, [
+  const ik = await crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, [
     'deriveBits',
   ]);
-  const dk = await window.crypto.subtle.deriveBits(
+  const dk = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
       hash: hash,
@@ -126,7 +126,7 @@ const rsaImportKey = async (key64: string): Promise<CryptoKey> => {
   // convert from a binary string to an ArrayBuffer
   const binaryDer = str2ab(binaryDerString);
 
-  return window.crypto.subtle.importKey(
+  return crypto.subtle.importKey(
     'spki',
     binaryDer,
     {
@@ -143,7 +143,7 @@ const rsaImportKey = async (key64: string): Promise<CryptoKey> => {
 };
 
 const rsaOaepEncrypt = async (publicKey: CryptoKey, str: string) => {
-  return window.crypto.subtle
+  return crypto.subtle
     .encrypt(
       {
         name: 'RSA-OAEP',

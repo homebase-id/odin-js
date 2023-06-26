@@ -24,21 +24,21 @@ export default defineConfig({
       // formats: ['es', 'cjs'], // Output formats are inferred automatically when building with outputs
     },
     rollupOptions: {
-      external: ['axios'],
-      output: [
-        {
-          format: 'es',
-          globals: {
-            axios: 'axios',
-          },
-        },
-        {
-          format: 'cjs',
-          globals: {
-            axios: 'axios',
-          },
-        },
-      ],
+      // external: ['axios'],
+      // output: [
+      //   {
+      //     format: 'es',
+      //     globals: {
+      //       axios: 'axios',
+      //     },
+      //   },
+      //   {
+      //     format: 'cjs',
+      //     globals: {
+      //       axios: 'axios',
+      //     },
+      //   },
+      // ],
     },
   },
 });
