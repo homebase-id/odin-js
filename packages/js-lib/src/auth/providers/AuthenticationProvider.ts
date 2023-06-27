@@ -81,7 +81,7 @@ export const finalizeAuthentication = async (
   v: string,
   identity: string | null,
   privateKey: CryptoKey
-): Promise<void> => {
+): Promise<{ authToken: Uint8Array; sharedSecret: Uint8Array }> => {
   if (v !== '1') {
     throw new Error('Failed to decrypt data, version unsupported');
   }
@@ -98,6 +98,8 @@ export const finalizeAuthentication = async (
     localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
     localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
   }
+
+  return { authToken, sharedSecret };
 };
 
 export const logout = async () => {
