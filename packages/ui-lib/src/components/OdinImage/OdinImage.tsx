@@ -55,11 +55,7 @@ export const OdinImage = ({
 
   const embeddedThumbUrl = useMemo(() => {
     if (!previewThumbnail) return;
-    return window.URL.createObjectURL(
-      new Blob([base64ToUint8Array(previewThumbnail.content)], {
-        type: previewThumbnail.contentType,
-      })
-    );
+    return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
   }, [previewThumbnail]);
 
   const { getFromCache } = useImage(dotYouClient);
