@@ -2,7 +2,7 @@ import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
 import { retrieveIdentity, saveIdentity } from './IdentityProvider';
-import { decryptWithKey, newPair, throwAwayTheKey } from './KeyProvider';
+import { decryptWithKey } from './KeyProvider';
 
 export const APP_SHARED_SECRET = 'APSS';
 export const APP_AUTH_TOKEN = 'BX0900';
@@ -43,35 +43,26 @@ export const getRegistrationParams = async (
   returnUrl: string,
   appName: string,
   appId: string,
-  drives: { a: string; t: string; n: string; d: string; p: number }[]
+  drives: { a: string; t: string; n: string; d: string; p: number }[],
+  publicKey: CryptoKey,
+  host?: string
 ) => {
-  const pk = await newPair();
+  const rawPk = await crypto.subtle.exportKey('spki', publicKey);
+  const pk = uint8ArrayToBase64(new Uint8Array(rawPk));
 
-  const drivesParam = encodeURIComponent(JSON.stringify(drives));
-  const finalizeUrl = `${window.location.origin}/auth/finalize?returnUrl=${encodeURIComponent(
-    returnUrl
-  )}&`;
   const clientFriendly = `${getBrowser()} | ${getOperatingSystem()}`;
-  return `n=${appName}&o=${window.location.host}&appId=${appId}&fn=${encodeURIComponent(
-    clientFriendly
-  )}&return=${encodeURIComponent(finalizeUrl)}&d=${drivesParam}&pk=${encodeURIComponent(pk)}`;
-};
 
-export const authenticate = async (
-  identity: string,
-  returnUrl: string,
-  appName: string,
-  appId: string,
-  drives: { a: string; t: string; n: string; d: string; p: number }[]
-): Promise<void> => {
-  saveIdentity(identity);
-  const redirectUrl = `https://${identity}/owner/appreg?${await getRegistrationParams(
-    returnUrl,
-    appName,
-    appId,
-    drives
-  )}`;
-  window.location.href = redirectUrl;
+  const paramsArray = [
+    `n=${appName}`,
+    `appId=${appId}`,
+    `fn=${encodeURIComponent(clientFriendly)}`,
+    `d=${encodeURIComponent(JSON.stringify(drives))}`,
+    `pk=${encodeURIComponent(pk)}`,
+    `return=${encodeURIComponent(`${returnUrl}&`)}`, // TODO: need a better way for this => // Needs to have trailing '&' to have a proper query string; As the returnUrl already contains the start of the query string
+  ];
+
+  if (host) paramsArray.push(`o=${host}`);
+  return paramsArray.join('&');
 };
 
 const splitDataString = (byteArray: Uint8Array) => {
@@ -88,7 +79,8 @@ const splitDataString = (byteArray: Uint8Array) => {
 export const finalizeAuthentication = async (
   registrationData: string,
   v: string,
-  identity: string | null
+  identity: string | null,
+  privateKey: CryptoKey
 ): Promise<void> => {
   if (v !== '1') {
     throw new Error('Failed to decrypt data, version unsupported');
@@ -96,7 +88,7 @@ export const finalizeAuthentication = async (
 
   if (identity) saveIdentity(identity);
 
-  const decryptedData = await decryptWithKey(registrationData);
+  const decryptedData = await decryptWithKey(registrationData, privateKey);
   if (!decryptedData) throw new Error('Failed to decrypt data');
 
   const { authToken, sharedSecret } = splitDataString(decryptedData);
@@ -106,9 +98,6 @@ export const finalizeAuthentication = async (
     localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
     localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
   }
-
-  // Remove key
-  throwAwayTheKey();
 };
 
 export const logout = async () => {

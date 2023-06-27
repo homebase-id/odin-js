@@ -1,7 +1,7 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 
 const STORAGE_KEY = 'pk';
-const createPair = async () => {
+export const createPair = async () => {
   const pair = await crypto.subtle.generateKey(
     {
       name: 'RSA-OAEP',
@@ -16,14 +16,33 @@ const createPair = async () => {
   return pair;
 };
 
-const saveKey = async (keyPair: CryptoKeyPair) => {
+export const decryptWithKey = async (encrypted: string, key: CryptoKey) => {
+  if (!key) {
+    console.error('no key found');
+    return '';
+  }
+
+  return await crypto.subtle
+    .decrypt({ name: 'RSA-OAEP' }, key, base64ToUint8Array(encrypted))
+    .then((decrypted) => {
+      return new Uint8Array(decrypted);
+      // console.log('decrypted', new Uint8Array(decrypted));
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};
+
+// Saves private key of a pair
+export const saveKey = async (keyPair: CryptoKeyPair) => {
   if (typeof crypto === 'undefined' || typeof localStorage === 'undefined') return null;
   await crypto.subtle
     .exportKey('pkcs8', keyPair.privateKey)
     .then((e) => localStorage.setItem(STORAGE_KEY, uint8ArrayToBase64(new Uint8Array(e))));
 };
 
-const retrieveKey = async () => {
+// Retrieves private key of a pair
+export const retrieveKey = async () => {
   if (typeof crypto === 'undefined' || typeof localStorage === 'undefined') return null;
   const key = base64ToUint8Array(localStorage.getItem(STORAGE_KEY) || '');
   return await crypto.subtle
@@ -47,36 +66,7 @@ const retrieveKey = async () => {
     });
 };
 
-export const newPair = async () => {
-  const pair = await createPair();
-  saveKey(pair);
-
-  const rawPk = await crypto.subtle.exportKey('spki', pair.publicKey);
-  const pk = uint8ArrayToBase64(new Uint8Array(rawPk));
-
-  return pk;
-};
-
-// TODO: Clear primary key after use
-export const decryptWithKey = async (encrypted: string) => {
-  const key = await retrieveKey();
-
-  if (!key) {
-    console.error('no key found');
-    return '';
-  }
-
-  return await crypto.subtle
-    .decrypt({ name: 'RSA-OAEP' }, key, base64ToUint8Array(encrypted))
-    .then((decrypted) => {
-      return new Uint8Array(decrypted);
-      // console.log('decrypted', new Uint8Array(decrypted));
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-};
-
+// Clears private key from storage
 export const throwAwayTheKey = () => {
   if (typeof window !== 'undefined') localStorage.removeItem(STORAGE_KEY);
 };
