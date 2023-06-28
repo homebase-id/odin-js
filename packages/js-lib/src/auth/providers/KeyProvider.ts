@@ -68,5 +68,5 @@ export const retrieveKey = async () => {
 
 // Clears private key from storage
 export const throwAwayTheKey = () => {
-  if (typeof window !== 'undefined') localStorage.removeItem(STORAGE_KEY);
+  if (typeof localStorage !== 'undefined') localStorage.removeItem(STORAGE_KEY);
 };

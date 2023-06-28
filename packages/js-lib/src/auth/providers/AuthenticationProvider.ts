@@ -17,20 +17,12 @@ const getAppAuthToken = () =>
   typeof localStorage !== 'undefined' && localStorage.getItem(APP_AUTH_TOKEN);
 
 //checks if the authentication token (stored in a cookie) is valid
-export const hasValidToken = async (): Promise<boolean> => {
-  const dotYouClient = new DotYouClient({
-    api: ApiType.App,
-    identity: retrieveIdentity(),
-    sharedSecret: getSharedSecret(),
-  });
+export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient();
 
   const response = await client
     .get('/auth/verifytoken', {
       validateStatus: () => true,
-      headers: {
-        BX0900: getAppAuthToken(),
-      },
     })
     .catch((error) => {
       console.error({ error });
@@ -103,20 +95,12 @@ export const finalizeAuthentication = async (
   return { authToken, sharedSecret };
 };
 
-export const logout = async () => {
-  const dotYouClient = new DotYouClient({
-    api: ApiType.App,
-    identity: retrieveIdentity(),
-    sharedSecret: getSharedSecret(),
-  });
+export const logout = async (dotYouClient: DotYouClient) => {
   const client = dotYouClient.createAxiosClient();
 
   await client
     .post('/auth/logout', undefined, {
       validateStatus: () => true,
-      headers: {
-        BX0900: getAppAuthToken(),
-      },
     })
     .catch((error) => {
       console.error({ error });

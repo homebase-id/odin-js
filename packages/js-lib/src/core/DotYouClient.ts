@@ -38,7 +38,10 @@ export class BaseDotYouClient {
   }
 
   getIdentity(): string {
-    return this._options.identity ?? window.location.hostname;
+    return (
+      this._options.identity ||
+      (typeof window.location !== 'undefined' ? window.location.hostname : '')
+    );
   }
 
   getRoot(): string {
