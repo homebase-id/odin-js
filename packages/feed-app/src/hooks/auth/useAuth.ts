@@ -38,14 +38,7 @@ const useAuth = () => {
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret() ? 'unknown' : 'anonymous');
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken();
   const navigate = useNavigate();
-
-  const authenticate = (identity: string, returnUrl: string): void => {
-    const strippedIdentity = identity.replace(new RegExp('^(http|https)://'), '').split('/')[0];
-
-    authenticateYouAuth(strippedIdentity, returnUrl, appName, appId, drives);
-  };
 
   const finalizeAuthentication = async (
     registrationData: string | null,
@@ -76,7 +69,7 @@ const useAuth = () => {
   };
 
   const logout = async (): Promise<void> => {
-    await logoutYouauth();
+    await logoutYouauth(getDotYouClient());
 
     setAuthenticationState('anonymous');
 
@@ -109,6 +102,8 @@ const useAuth = () => {
       headers: headers,
     });
   };
+
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
@@ -144,7 +139,6 @@ const useAuth = () => {
         window.location.host
       );
     },
-    authenticate,
     finalizeAuthentication,
     logout,
     preauth,
