@@ -117,7 +117,7 @@ export const Comment = ({
             threadContext={threadContext as ReactionContext}
             created={commentData.date}
             updated={commentData.updated}
-            onReply={() => (onReply ? onReply() : setIsReply(!isReply))}
+            onReply={isThread ? undefined : () => (onReply ? onReply() : setIsReply(!isReply))}
           />
         ) : null}
       </div>
@@ -289,7 +289,7 @@ const CommentMeta = ({
   threadContext: ReactionContext;
   created?: number;
   updated?: number;
-  onReply: () => void;
+  onReply?: () => void;
 }) => {
   const isEdited = updated && updated !== 0 && updated !== created;
 
@@ -305,7 +305,7 @@ const CommentMeta = ({
         context={threadContext}
         className="after:content[''] text-xs after:my-auto after:ml-1 after:block after:h-3 after:border-l after:pl-1 dark:after:border-slate-600"
       />
-      {canReact ? (
+      {canReact && onReply ? (
         <button
           className="text-primary ml-1 mr-2 text-opacity-80 hover:underline"
           onClick={onReply}
@@ -333,12 +333,18 @@ const CommenLikeButton = ({ threadContext }: { threadContext: ReactionContext })
   const isDesktop = document.documentElement.clientWidth >= 1024;
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
-  const doLike = () =>
+  const doLike = () => {
+    console.log({
+      authorOdinId: getIdentity() || '',
+      content: { body: '❤️' },
+      context: threadContext,
+    });
     postReaction({
       authorOdinId: getIdentity() || '',
       content: { body: '❤️' },
       context: threadContext,
     });
+  };
 
   return (
     <>
@@ -392,13 +398,13 @@ const CommentThread = ({
   } = useComments({
     context,
   }).fetch;
-  const flattenedComments = comments?.pages.flatMap((page) => page.comments);
+  const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
 
   return (
     <>
       {hasNextPage ? (
         <a
-          className="text-foreground text-sm font-semibold text-opacity-20 hover:underline dark:text-opacity-30"
+          className="text-primary cursor-pointer pl-4 text-sm font-semibold text-opacity-80 hover:underline"
           onClick={() => fetchNextPage()}
         >
           {t('View older')}

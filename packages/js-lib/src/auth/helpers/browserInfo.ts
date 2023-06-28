@@ -1,6 +1,8 @@
 export const getOperatingSystem = (userAgentVal?: string) => {
   const userAgent = userAgentVal || navigator.userAgent;
 
+  if (!userAgent) return 'Unknown';
+
   const os: { name?: string; version?: string } = {
     name: undefined,
     version: undefined,
@@ -175,6 +177,7 @@ export const getOperatingSystem = (userAgentVal?: string) => {
 
 export const getBrowser = (userAgentVal?: string) => {
   const userAgent = userAgentVal || navigator.userAgent;
+  if (!userAgent) return 'Unknown';
 
   if (userAgent.indexOf('Trident') >= 0 || userAgent.indexOf('MSIE') >= 0) {
     if (userAgent.indexOf('Mobile') >= 0) {

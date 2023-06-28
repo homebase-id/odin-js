@@ -198,7 +198,7 @@ export const EmojiSummary = ({
 }) => {
   const { data: reactionSummary } = useEmojiSummary({
     context,
-    reactionPreview: reactionPreview || { reactions: [], totalCount: 0 },
+    reactionPreview: reactionPreview,
   }).fetch;
   const [isShowDetails, setIsShowDetails] = useState(false);
 
@@ -314,7 +314,7 @@ const CommentList = ({
     <>
       {hasNextPage ? (
         <a
-          className="text-foreground text-sm font-semibold text-opacity-20 hover:underline dark:text-opacity-30"
+          className="text-primary cursor-pointer text-sm font-semibold text-opacity-80 hover:underline"
           onClick={() => fetchNextPage()}
         >
           {t('View older')}

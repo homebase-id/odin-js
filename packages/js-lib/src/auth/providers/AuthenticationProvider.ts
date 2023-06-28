@@ -45,12 +45,13 @@ export const getRegistrationParams = async (
   appId: string,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
   publicKey: CryptoKey,
-  host?: string
+  host?: string,
+  clientFriendlyName?: string
 ) => {
   const rawPk = await crypto.subtle.exportKey('spki', publicKey);
   const pk = uint8ArrayToBase64(new Uint8Array(rawPk));
 
-  const clientFriendly = `${getBrowser()} | ${getOperatingSystem()}`;
+  const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem()}`;
 
   const paramsArray = [
     `n=${appName}`,

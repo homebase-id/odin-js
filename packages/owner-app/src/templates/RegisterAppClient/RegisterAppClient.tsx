@@ -46,7 +46,7 @@ const RegisterClient = () => {
   const appId = searchParams.get('appId');
   const name = searchParams.get('n');
   const origin = searchParams.get('o') || undefined;
-  const publicKey64 = searchParams.get('pk');
+  const publicKey64 = searchParams.get('pk')?.replaceAll(' ', '+'); // There's this stupid thing browsers do, by replacing a + with a space; So we need to undo that; Is solved as well when the params are encoded with endcodeURIComponent
   const friendlyName = searchParams.get('fn');
   const returnUrl = searchParams.get('return');
 
@@ -107,8 +107,10 @@ const RegisterClient = () => {
     return <div>Loading...</div>;
   }
 
-  const returnOrigin = new URL(returnUrl).origin;
-  const returnHost = returnOrigin.split('://')[1] || returnOrigin;
+  const returnOrigin = returnUrl.startsWith('http')
+    ? new URL(returnUrl).origin
+    : `app://${decodeURIComponent(returnUrl)}`;
+  const returnHost = returnOrigin?.split('://')[1] || returnOrigin;
 
   return (
     <>
@@ -408,7 +410,7 @@ const AppClientRegistration = ({
   doRegisterClient: (customFriendlyName?: string) => void;
   registerClientState: 'error' | 'idle' | 'loading' | 'success';
   doCancel: () => void;
-  returnHost: string;
+  returnHost?: string;
 }) => {
   const [isDetails, setIsDetails] = useState(false);
   const [isEditFriendlyName, setIsEditFriendlyName] = useState(false);
@@ -426,7 +428,7 @@ const AppClientRegistration = ({
         {t('App login')}:
         <small className="block">
           {name}{' '}
-          {appRegistration.corsHostName ? (
+          {appRegistration.corsHostName && returnHost ? (
             <>
               (<DomainHighlighter>{returnHost}</DomainHighlighter>)
             </>
