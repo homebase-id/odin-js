@@ -21,4 +21,5 @@ export const appPermissionLevels = [
   { name: t('Read Circle Members'), value: 50 },
   { name: t('Read Who I Follow'), value: 80 },
   { name: t('Read My Followers'), value: 130 },
+  { name: t('Read data from other identities on my behalf'), value: 210 },
 ];
