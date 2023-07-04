@@ -25,6 +25,9 @@ export const createThumbnails = async (
   tinyThumb: ThumbnailFile;
   additionalThumbnails: ThumbnailFile[];
 }> => {
+  if (typeof document === 'undefined')
+    throw new Error('Thumbnails can only be created in a browser environment');
+
   if (contentType === svgType) {
     const vectorThumb = createVectorThumbnail(imageBytes);
 
