@@ -64,7 +64,7 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
     <>
       {odinId && isInView ? (
         <img
-          src={`https://api.${odinId}/pub/image`}
+          src={`https://${odinId}/pub/image`}
           className={`${
             size === 'xs'
               ? 'h-[2rem] w-[2rem]'

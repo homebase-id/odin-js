@@ -58,9 +58,7 @@ export const getDecryptedImageUrlOverTransit = async (
   );
   if (!meta.fileMetadata.payloadIsEncrypted && size) {
     // Build get url:
-    return `https://api.${odinId}/api/youauth/v1/drive/files/${
-      size ? 'thumb' : 'payload'
-    }?${stringify({
+    return `https://${odinId}/api/youauth/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
       ...targetDrive,
       fileId,
       ...(size

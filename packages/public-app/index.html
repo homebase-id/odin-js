@@ -24,7 +24,7 @@
       <link rel="preload" href="/cdn/blogs.json" as="fetch" />
     -->
     <script>
-      const apiDomain = `https://api.${window.location.hostname}`;
+      const apiDomain = `https://${window.location.hostname}`;
       fetch(`${apiDomain}/cdn/sitedata.json`, { cache: 'no-cache' });
       fetch(`${apiDomain}/cdn/blogs.json`, { cache: 'no-cache' });
     </script>
