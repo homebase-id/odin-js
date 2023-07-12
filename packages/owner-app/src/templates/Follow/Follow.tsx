@@ -258,7 +258,7 @@ const IdentityTeaser = ({
       <div className="flex h-full items-center">
         <a href={`https://${odinId}/home`}>
           <img
-            src={`https://api.${odinId}/pub/image`}
+            src={`https://${odinId}/pub/image`}
             className={`${imageSizeClass} flex-shrink-0 rounded-full bg-gray-100 object-cover object-center`}
           />
         </a>

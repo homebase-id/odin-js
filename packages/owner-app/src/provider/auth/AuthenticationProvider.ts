@@ -40,7 +40,7 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
   const url = `/youauth/create-token-flow?returnUrl=${encodeURIComponent(returnUrl)}`;
 
   // it's a chain of redirects from the server, we don't need to trigger with a xhr request
-  window.location.href = `https://api.${window.location.host}/api/owner/v1${url}`;
+  window.location.href = `https://${window.location.host}/api/owner/v1${url}`;
 
   return true;
 };

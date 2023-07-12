@@ -39,7 +39,7 @@ export const useNotifications = () => {
               <DomainHighlighter>{connection.senderOdinId}</DomainHighlighter>
             </>
           ),
-          imgSrc: `https://api.${connection.senderOdinId}/pub/image`,
+          imgSrc: `https://${connection.senderOdinId}/pub/image`,
           href: `/owner/connections/${connection.senderOdinId}`,
           type: 'pending',
           live: notifications.some(
@@ -83,7 +83,7 @@ export const useNotifications = () => {
             ? t('New connection request')
             : t('Your connection request was accepted'),
         body: otherId ? <DomainHighlighter>{otherId}</DomainHighlighter> : undefined,
-        imgSrc: `https://api.${otherId}/pub/image`,
+        imgSrc: `https://${otherId}/pub/image`,
         live: true,
         href: `/owner/connections/${otherId}`,
         type:
