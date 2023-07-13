@@ -45,18 +45,43 @@ export const createHomeToken = async (returnUrl: string): Promise<boolean> => {
   return true;
 };
 
-export const setNewPassword = async (
+export const setFirstPassword = async (
   newPassword: string,
   firstRunToken: string
 ): Promise<boolean> => {
   return getSalts().then((salts) => {
-    return prepareAuthPassword(newPassword, salts, firstRunToken).then((reply) => {
+    return prepareAuthPassword(newPassword, salts).then((reply) => {
       const dotYouClient = new OwnerClient({ api: ApiType.Owner });
       return dotYouClient
         .createAxiosClient({ overrideEncryption: true })
-        .post('/authentication/passwd', reply)
+        .post('/authentication/passwd', { ...reply, firstRunToken })
         .then((response) => {
           return response.status === 200;
+        })
+        .catch((error) => {
+          console.error(error);
+          return false;
+        });
+    });
+  });
+};
+
+export const setNewPassword = async (
+  newPassword: string,
+  recoveryKey: string
+): Promise<boolean> => {
+  return getSalts().then((salts) => {
+    return prepareAuthPassword(newPassword, salts).then((reply) => {
+      const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+      return dotYouClient
+        .createAxiosClient({ overrideEncryption: true })
+        .post('/authentication/resetpasswd', { passwordReply: reply, recoveryKey64: recoveryKey })
+        .then((response) => {
+          return response.status === 200;
+        })
+        .catch((error) => {
+          console.error(error);
+          return false;
         });
     });
   });

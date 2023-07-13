@@ -5,7 +5,7 @@ import { LoadingBlock } from '@youfoundation/common-app';
 
 interface SubmenuProps {
   className?: string;
-  items: { title: ReactNode; text?: string; key: string; path: string; className?: string }[];
+  items: { title: ReactNode; text?: string; key?: string; path: string; className?: string }[];
   isLoading?: boolean;
 }
 
@@ -24,25 +24,23 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
   return (
     <>
       <div
-        className={`hidden flex-col flex-wrap ${!forceMobileView ? 'sm:flex' : ''} sm:flex-row ${
-          className ?? ''
-        }`}
+        className={`hidden flex-col flex-wrap gap-1 ${
+          !forceMobileView ? 'sm:flex' : ''
+        } justify-start sm:flex-row ${className ?? ''}`}
       >
         {items.map((item, index) => {
           return (
             // Only NavLink Supports isActive styling https://reactrouter.com/docs/en/v6/components/nav-link
             <NavLink
               className={({ isActive }) =>
-                `${
-                  item.className && item.className?.indexOf('flex-grow') !== -1 ? '' : 'flex-grow'
-                } cursor-pointer border-b-2 px-1 py-2 text-lg ${
+                `${item.className} cursor-pointer border-b-2 px-3 py-2 text-lg ${
                   isActive || (activeFallback && index === 0)
-                    ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
-                    : 'border-gray-300 transition-colors duration-300 hover:border-indigo-400 dark:border-gray-800 hover:dark:border-indigo-600'
+                    ? 'border-indigo-500'
+                    : 'border-transparent transition-colors duration-300 hover:border-indigo-400 dark:border-gray-800 hover:dark:border-indigo-600'
                 } ${item.className ?? ''}`
               }
               to={item.path}
-              key={item.key}
+              key={item.key || item.path}
               end
             >
               {item.title}
@@ -57,7 +55,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
       >
         {items.map((item) => {
           return (
-            <option key={item.key} value={item.path}>
+            <option key={item.key || item.path} value={item.path}>
               {item.text || item.title}
             </option>
           );

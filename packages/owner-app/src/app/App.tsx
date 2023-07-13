@@ -165,6 +165,7 @@ function App() {
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>
             <Route path="settings" element={<Settings />}></Route>
+            <Route path="settings/:sectionId" element={<Settings />}></Route>
 
             <Route path="demo-data" element={<DemoData />}></Route>
             <Route path="socket-demo" element={<SocketDemo />}></Route>

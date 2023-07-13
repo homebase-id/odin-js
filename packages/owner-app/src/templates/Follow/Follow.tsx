@@ -1,9 +1,8 @@
 import { ReactNode, useRef, useState } from 'react';
-import { Link, useMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import {
   ActionGroup,
-  ActionLink,
   Block,
   useIntersection,
   useFollowerInfinite,
@@ -20,40 +19,27 @@ import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import Submenu from '../../components/SubMenu/SubMenu';
 
 const Follow = () => {
-  // const followingMatch = useMatch({ path: 'owner/follow/following' });
   const followersMatch = useMatch({ path: 'owner/follow/followers' });
 
   return (
     <>
       <PageMeta icon={Persons} title={'Following & Followers'} />
-      <ul className="-mt-6 mb-6 flex flex-row">
-        <li>
-          <ActionLink
-            type="mute"
-            className={`rounded-none border-b-indigo-500 hover:border-b-2 ${
-              !followersMatch ? 'border-b-2' : ''
-            }`}
-            href="/owner/follow/following"
-          >
-            {t('People that I follow')}
-          </ActionLink>
-          <Link to="/owner/follow/following" className=""></Link>
-        </li>
-        <li>
-          <ActionLink
-            type="mute"
-            className={`rounded-none border-b-indigo-500 hover:border-b-2 ${
-              followersMatch ? 'border-b-2' : ''
-            }`}
-            href="/owner/follow/followers"
-          >
-            {t('People that follow me')}
-          </ActionLink>
-          <Link to="/owner/follow/followers" className=""></Link>
-        </li>
-      </ul>
+      <Submenu
+        items={[
+          {
+            title: `People that I follow`,
+            path: `/owner/follow/following`,
+          },
+          {
+            title: `People that follow me`,
+            path: `/owner/follow/followers`,
+          },
+        ]}
+        className="-mt-6 mb-6"
+      />
 
       {followersMatch ? <Followers /> : <Following />}
     </>

@@ -7,8 +7,7 @@ export interface NonceData {
 }
 export const prepareAuthPassword = async (
   password: string,
-  nonceData: NonceData,
-  firstRunToken?: string
+  nonceData: NonceData
 ): Promise<AuthenticationReplyNonce> => {
   const interations = 100000;
   const len = 16;
@@ -48,7 +47,6 @@ export const prepareAuthPassword = async (
     nonceHashedPassword64: hashNoncePassword64,
     crc: nonceData.crc,
     rsaEncrypted: cipher64,
-    firstRunToken: firstRunToken || null,
   };
 };
 
@@ -163,7 +161,6 @@ interface AuthenticationReplyNonce {
   nonceHashedPassword64: string;
   crc: number;
   rsaEncrypted: string;
-  firstRunToken: string | null;
 }
 
 interface AuthenticationPayload {

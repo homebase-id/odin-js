@@ -14,7 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState('a');
   const [passwordState, setPasswordState] = useState<'unknown' | 'pending' | 'ready'>('unknown');
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
-  const { authenticate, setNewPassword, isPasswordSet } = useAuth();
+  const { authenticate, setFirstPassword, isPasswordSet } = useAuth();
 
   const doLogin: FormEventHandler = async (e) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ const Login = () => {
           setPasswordState('pending');
 
           console.debug('forcing demo password');
-          await setNewPassword('a', '');
+          await setFirstPassword('a', '');
         }
 
         setPasswordState('ready');

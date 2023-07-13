@@ -118,7 +118,6 @@ const ProfileDetails = () => {
       />
 
       <Submenu
-        className="mt-5"
         items={[
           ...tabItems,
           {
@@ -126,10 +125,11 @@ const ProfileDetails = () => {
             text: `-- ${t('Create new section')} --`,
             key: 'new',
             path: `/owner/profile/${profileKey}/new`,
-            className: 'flex-grow-0',
+            className: 'ml-auto bg-indigo-100 flex items-center rounded-lg',
           },
         ]}
         isLoading={sectionsLoading}
+        className="-mt-6 mb-4"
       />
 
       {isCreateSection || !activeSection ? (

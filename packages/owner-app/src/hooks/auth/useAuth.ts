@@ -5,6 +5,7 @@ import {
   authenticate as authenticateOwner,
   createHomeToken as createHomeTokenOwner,
   isPasswordSet as isPasswordSetOwner,
+  setFirstPassword as setFirstOwnerPassword,
   setNewPassword as setNewOwnerPassword,
   logout as logoutOwner,
 } from '../../provider/auth/AuthenticationProvider';
@@ -48,15 +49,11 @@ const useAuth = () => {
     return true;
   };
 
-  const setNewPassword = async (newPassword: string, firstRunToken: string): Promise<boolean> => {
-    return setNewOwnerPassword(newPassword, firstRunToken);
-  };
-
   const finalizeRegistration = async (
     newPassword: string,
     firstRunToken: string
   ): Promise<void> => {
-    await setNewPassword(newPassword, firstRunToken);
+    await setFirstOwnerPassword(newPassword, firstRunToken);
   };
 
   const logout = async () => {
@@ -104,7 +101,8 @@ const useAuth = () => {
   return {
     authenticate,
     createHomeToken: createHomeTokenOwner,
-    setNewPassword,
+    setFirstPassword: setFirstOwnerPassword,
+    setNewPassword: setNewOwnerPassword,
     getDotYouClient,
     getApiType,
     finalizeRegistration,

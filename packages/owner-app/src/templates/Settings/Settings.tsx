@@ -1,4 +1,4 @@
-import { t } from '@youfoundation/common-app';
+import { ActionButton, Alert, Input, t } from '@youfoundation/common-app';
 import useSettings from '../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import Checkbox from '../../components/Form/Checkbox';
@@ -6,20 +6,49 @@ import { Label } from '@youfoundation/common-app';
 import { Cog } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import Submenu from '../../components/SubMenu/SubMenu';
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import useAuth from '../../hooks/auth/useAuth';
 
 const Settings = () => {
+  const { sectionId } = useParams();
+  return (
+    <>
+      <PageMeta icon={Cog} title={`${t('Settings')}`} />
+      <Submenu
+        items={[
+          {
+            title: `Privacy`,
+            path: `/owner/settings/privacy`,
+          },
+          {
+            title: `Ui`,
+            path: `/owner/settings/ui`,
+          },
+          {
+            title: `Security`,
+            path: `/owner/settings/security`,
+          },
+        ]}
+        className="-mt-6 mb-4"
+      />
+      {(sectionId === 'privacy' || !sectionId) && <PrivacySettings />}
+      {sectionId === 'ui' && <UiSettings />}
+      {sectionId === 'security' && <SecuritySettings />}
+    </>
+  );
+};
+
+const PrivacySettings = () => {
   const {
     fetchFlags: { data: systemSettings, isLoading: systemSettingsLoading },
     updateFlag: { mutate: updateFlag, error: updateFlagError },
-    fetchUiSettings: { data: uiSettings, isLoading: uiSettingsLoading },
-    updateUiSetting: { mutate: updateUiSetting, error: updateUiSettingError },
   } = useSettings();
 
   return (
     <>
       <ErrorNotification error={updateFlagError} />
-      <ErrorNotification error={updateUiSettingError} />
-      <PageMeta icon={Cog} title={`${t('Settings')}`} />
       {systemSettings && !systemSettingsLoading && (
         <>
           <Section
@@ -162,6 +191,20 @@ const Settings = () => {
           </Section>
         </>
       )}
+    </>
+  );
+};
+
+const UiSettings = () => {
+  const {
+    fetchUiSettings: { data: uiSettings, isLoading: uiSettingsLoading },
+    updateUiSetting: { mutate: updateUiSetting, error: updateUiSettingError },
+  } = useSettings();
+
+  return (
+    <>
+      <ErrorNotification error={updateUiSettingError} />
+
       {uiSettings && !uiSettingsLoading && (
         <Section title={t('Ui Settings')}>
           <div className="mb-5 flex flex-row">
@@ -187,6 +230,106 @@ const Settings = () => {
           </div>
         </Section>
       )}
+    </>
+  );
+};
+
+const SecuritySettings = () => {
+  const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
+
+  const [recoveryKey, setRecoveryKey] = useState('');
+  const [password, setPassword] = useState('');
+  const [retypePassword, setRetypePassword] = useState('');
+
+  const { setNewPassword } = useAuth();
+
+  const passwordIsValid = password === retypePassword && password !== '';
+
+  const doSetNewPassword = async () => {
+    setState('loading');
+
+    if (await setNewPassword(password, recoveryKey)) {
+      setState('success');
+    } else {
+      setState('error');
+    }
+  };
+
+  return (
+    <>
+      <Section title={t('Change password')}>
+        {state === 'success' ? (
+          <p className="my-2">{t('Your password has been changed successfully')}</p>
+        ) : state === 'error' ? (
+          <>
+            <Alert type="warning" isCompact={true}>
+              {t('Failed to set a new password, check your recovery key and try again')}
+            </Alert>
+            <div className="mt-5 flex flex-row-reverse">
+              <ActionButton onClick={() => setState('idle')}>{t('Try again')}</ActionButton>
+            </div>
+          </>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              doSetNewPassword();
+            }}
+          >
+            <div className="mb-2">
+              <p className="max-w-md text-slate-400">
+                {t('To change your password you need your recovery key.')}{' '}
+                {t('You have gotten your recovery key when you first signed up')}
+              </p>
+            </div>
+            <div className="mb-2">
+              <Label>{t('Your recovery key')}</Label>
+              <Input
+                required
+                name="recoveryKey"
+                id="recoveryKey"
+                type="password"
+                onChange={(e) => setRecoveryKey(e.target.value)}
+                defaultValue={recoveryKey}
+              />
+            </div>
+            <hr className="mb-5 mt-7" />
+            <div className="mb-2">
+              <Label>{t('New password')}</Label>
+              <Input
+                required
+                name="password"
+                id="password"
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                defaultValue={password}
+              />
+            </div>
+            <div className="mb-2">
+              <Label htmlFor="retypepassword" className="text-sm leading-7  dark:text-gray-400">
+                {t('Retype Password')}
+              </Label>
+              <Input
+                required
+                type="password"
+                name="retypePassword"
+                id="retypePassword"
+                onChange={(e) => setRetypePassword(e.target.value)}
+                defaultValue={retypePassword}
+              />
+              {password !== retypePassword && retypePassword !== '' ? (
+                <p className="py-2 text-red-800 dark:text-red-200">{t("Passwords don't match")}</p>
+              ) : null}
+            </div>
+            <div className="mt-5 flex flex-row-reverse">
+              <ActionButton state={state} isDisabled={!passwordIsValid}>
+                {t('Change password')}
+              </ActionButton>
+            </div>
+          </form>
+        )}
+      </Section>
     </>
   );
 };
