@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
-import { jsonStringify64 } from '../helpers/helpers';
+import { isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
 
 export enum ApiType {
   Owner,
@@ -72,7 +72,7 @@ export class BaseDotYouClient {
   createAxiosClient(options?: createAxiosClientOptions) {
     const client = axios.create({
       baseURL: this.getEndpoint(),
-      withCredentials: true,
+      withCredentials: isLocalStorageAvailable(),
       headers: { ...this._options.headers, ...options?.headers },
     });
 
@@ -80,8 +80,7 @@ export class BaseDotYouClient {
 
     // Encryption/Decryption on requests and responses
     const ss = this.getSharedSecret();
-    const isDebug =
-      typeof localStorage !== 'undefined' ? localStorage.getItem('debug') === '1' : false;
+    const isDebug = isLocalStorageAvailable() ? localStorage.getItem('debug') === '1' : false;
 
     client.interceptors.request.use(
       async function (request) {

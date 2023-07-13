@@ -1,3 +1,4 @@
+import { isLocalStorageAvailable } from '../../helpers/BrowserUtil';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 
 const STORAGE_KEY = 'pk';
@@ -35,7 +36,7 @@ export const decryptWithKey = async (encrypted: string, key: CryptoKey) => {
 
 // Saves private key of a pair
 export const saveKey = async (keyPair: CryptoKeyPair) => {
-  if (typeof crypto === 'undefined' || typeof localStorage === 'undefined') return null;
+  if (typeof crypto === 'undefined' || !isLocalStorageAvailable()) return null;
   await crypto.subtle
     .exportKey('pkcs8', keyPair.privateKey)
     .then((e) => localStorage.setItem(STORAGE_KEY, uint8ArrayToBase64(new Uint8Array(e))));
@@ -43,7 +44,7 @@ export const saveKey = async (keyPair: CryptoKeyPair) => {
 
 // Retrieves private key of a pair
 export const retrieveKey = async () => {
-  if (typeof crypto === 'undefined' || typeof localStorage === 'undefined') return null;
+  if (typeof crypto === 'undefined' || !isLocalStorageAvailable()) return null;
   const key = base64ToUint8Array(localStorage.getItem(STORAGE_KEY) || '');
   return await crypto.subtle
     .importKey(
@@ -68,5 +69,5 @@ export const retrieveKey = async () => {
 
 // Clears private key from storage
 export const throwAwayTheKey = () => {
-  if (typeof localStorage !== 'undefined') localStorage.removeItem(STORAGE_KEY);
+  if (isLocalStorageAvailable()) localStorage.removeItem(STORAGE_KEY);
 };

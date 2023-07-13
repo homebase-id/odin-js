@@ -1,5 +1,5 @@
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, isLocalStorageAvailable } from '@youfoundation/js-lib/helpers';
 import { OwnerClient } from '../../core';
 import { APP_AUTH_TOKEN, APP_SHARED_SECRET, retrieveIdentity } from '@youfoundation/js-lib/auth';
 
@@ -16,8 +16,9 @@ export const useDotYouClient = () => {
 
   const _isOwner =
     _app === 'owner' ||
-    localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host ||
-    !!localStorage.getItem(OWNER_SHARED_SECRET);
+    (isLocalStorageAvailable() &&
+      localStorage.getItem(STORAGE_IDENTITY_KEY) === window.location.host) ||
+    (isLocalStorageAvailable() && !!localStorage.getItem(OWNER_SHARED_SECRET));
 
   const getApiType = () => {
     if (_app === 'apps') return ApiType.App;
@@ -27,11 +28,13 @@ export const useDotYouClient = () => {
   };
 
   const getRawSharedSecret = () =>
-    _app !== 'apps'
-      ? _isOwner
-        ? window.localStorage.getItem(OWNER_SHARED_SECRET)
-        : window.localStorage.getItem(HOME_SHARED_SECRET)
-      : window.localStorage.getItem(APP_SHARED_SECRET);
+    isLocalStorageAvailable()
+      ? _app !== 'apps'
+        ? _isOwner
+          ? window.localStorage.getItem(OWNER_SHARED_SECRET)
+          : window.localStorage.getItem(HOME_SHARED_SECRET)
+        : window.localStorage.getItem(APP_SHARED_SECRET)
+      : undefined;
 
   const hasSharedSecret = !!getRawSharedSecret();
 
@@ -45,6 +48,9 @@ export const useDotYouClient = () => {
   };
 
   const getDotYouClient = () => {
+    // When running in an iframe, use the public YouAuth Api;
+    if (window.self !== window.top) return new DotYouClient({ api: ApiType.YouAuth });
+
     const apiType = getApiType();
 
     if (apiType === ApiType.Owner)
