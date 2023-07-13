@@ -8,7 +8,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import Layout from '../components/ui/Layout/Layout';
+import Layout, { NoLayout } from '../components/ui/Layout/Layout';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -27,6 +27,7 @@ const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview
 const PostDetail = lazy(() => import('../templates/Posts/Detail/PostDetail'));
 const PostImageDetail = lazy(() => import('../templates/Posts/Detail/PostImageDetail'));
 const LinksPage = lazy(() => import('../templates/LinksPage/LinksPage'));
+const PreviewPage = lazy(() => import('../templates/PreviewPage/PreviewPage'));
 const YouAuthFinalizer = lazy(() => import('../templates/YouAuthFinalizer/YouAuthFinalizer'));
 
 const Ping = lazy(() => import('../templates/Ping/Ping'));
@@ -72,10 +73,19 @@ function App() {
             <Route path="posts/:channelKey/:postKey/:attachmentKey" element={<PostImageDetail />} />
 
             <Route path="linked" element={<LinksPage />} />
+
             <Route path="ping" element={<Ping />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Route>
+        <Route
+          path="/home/preview"
+          element={
+            <NoLayout>
+              <PreviewPage />
+            </NoLayout>
+          }
+        />
       </>
     )
   );

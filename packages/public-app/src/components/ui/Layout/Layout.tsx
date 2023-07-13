@@ -12,9 +12,25 @@ interface LayoutProps {
 }
 
 const Layout: FC<LayoutProps> = ({ children }) => {
-  const { colors } = useTheme();
   const { isOwner, logout } = useAuth();
 
+  return (
+    <NoLayout>
+      <ScrollRestoration />
+      <div className="relative flex flex-row bg-page-background text-foreground">
+        {isOwner ? (
+          <Suspense fallback={<></>}>
+            <Sidenav logout={logout} />
+          </Suspense>
+        ) : null}
+        <div className={`flex min-h-screen w-auto flex-grow flex-col`}>{children}</div>
+      </div>
+    </NoLayout>
+  );
+};
+
+export const NoLayout: FC<LayoutProps> = ({ children }) => {
+  const { colors } = useTheme();
   return (
     <>
       <style type="text/css">
@@ -30,15 +46,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
           }`}
         {`html.dark { background-color: rgba(var(--color-page-background)); }`}
       </style>
-      <ScrollRestoration />
-      <div className="relative flex flex-row bg-page-background text-foreground">
-        {isOwner ? (
-          <Suspense fallback={<></>}>
-            <Sidenav logout={logout} />
-          </Suspense>
-        ) : null}
-        <div className={`flex min-h-screen w-auto flex-grow flex-col`}>{children}</div>
-      </div>
+      {children}
     </>
   );
 };
