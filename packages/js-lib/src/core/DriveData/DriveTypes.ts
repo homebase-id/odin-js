@@ -72,6 +72,7 @@ export interface FileQueryParams {
   targetDrive: TargetDrive;
   fileType?: number[] | undefined;
   dataType?: number[] | undefined;
+  // fileState?: number[] | undefined;
   sender?: string[] | undefined;
   groupId?: string[] | undefined;
   userDate?: TimeRange;

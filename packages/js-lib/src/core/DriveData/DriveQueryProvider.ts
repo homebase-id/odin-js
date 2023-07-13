@@ -78,6 +78,7 @@ export const queryBatch = async (
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
 ): Promise<QueryBatchResponse> => {
+  // const strippedQueryParams = { ...params, fileState: [1] };
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
 
