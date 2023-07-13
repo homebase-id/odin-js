@@ -1,6 +1,6 @@
 import { Loader, t } from '@youfoundation/common-app';
 
-const FinalPage = () => {
+const LoadingPage = () => {
   return (
     <div className="my-auto flex flex-col">
       <Loader className="mx-auto mb-10 h-20 w-20" />
@@ -9,4 +9,4 @@ const FinalPage = () => {
   );
 };
 
-export default FinalPage;
+export default LoadingPage;

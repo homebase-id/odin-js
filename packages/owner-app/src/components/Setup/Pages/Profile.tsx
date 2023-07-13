@@ -4,8 +4,9 @@ import { Label } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Person } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import { onChangeParams, pageData } from '../Setup';
+import { onChangeParams } from '../../../templates/Setup/Setup';
 import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
+import { PageData } from '../SetupWizard';
 
 const Profile = ({
   pageData,
@@ -13,8 +14,8 @@ const Profile = ({
   setValidity,
   onNext,
 }: {
-  pageData: pageData;
-  onChange: (page: pageData) => void;
+  pageData: PageData;
+  onChange: (page: PageData) => void;
   setValidity: (isValid: boolean) => void;
   onNext: () => void;
 }) => {

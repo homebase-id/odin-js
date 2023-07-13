@@ -11,7 +11,7 @@ import useAuth from '../auth/useAuth';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
 const includeMetadataHeader = true;
-const pageSize = 15;
+const pageSize = 300;
 
 const useFiles = ({
   targetDrive,

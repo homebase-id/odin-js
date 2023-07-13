@@ -65,6 +65,8 @@ const useInit = () => {
     },
   ];
 
+  // TODO: Move to a setup provider
+
   const profileDataInit = async () => {
     // Personal Info Section:
     const defaultNameAttrId = toGuidId('default_name_attribute');
@@ -304,7 +306,7 @@ const useInit = () => {
     if (!themeDef?.length) await saveAttribute(dotYouClient, defaultThemeAttribute);
   };
 
-  const doCleanInit = async (isEmptyInit: boolean) => {
+  const doCleanInit = async (isEmptyInit?: boolean) => {
     if (!isAuthenticated) return;
 
     // Initialize

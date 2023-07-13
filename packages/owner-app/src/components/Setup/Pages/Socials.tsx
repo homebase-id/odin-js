@@ -2,10 +2,11 @@ import { useRef, useState, useEffect } from 'react';
 import { Arrow, Input, Plus } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
-import InfoBox from '../../../components/ui/InfoBox/InfoBox';
+import InfoBox from '../../ui/InfoBox/InfoBox';
 import { t } from '@youfoundation/common-app';
-import { onChangeParams, pageData } from '../Setup';
+import { onChangeParams } from '../../../templates/Setup/Setup';
 import { Times } from '@youfoundation/common-app';
+import { PageData } from '../SetupWizard';
 
 const Socials = ({
   pageData,
@@ -13,8 +14,8 @@ const Socials = ({
   setValidity,
   onNext,
 }: {
-  pageData: pageData;
-  onChange: (page: pageData) => void;
+  pageData: PageData;
+  onChange: (page: PageData) => void;
   setValidity: (isValid: boolean) => void;
   onNext: () => void;
 }) => {
