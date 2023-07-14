@@ -78,8 +78,7 @@ export const queryBatch = async (
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
 ): Promise<QueryBatchResponse> => {
-  // const strippedQueryParams = { ...params, fileState: [1] };
-  const strippedQueryParams = { ...params };
+  const strippedQueryParams: FileQueryParams = { ...params, fileState: params.fileState || [1] };
   delete strippedQueryParams.systemFileType;
 
   const client = dotYouClient.createAxiosClient({
@@ -108,14 +107,7 @@ export const queryBatch = async (
     }
   })();
 
-  return requestPromise.then((response) => {
-    const responseData = response.data;
-    return {
-      ...response.data,
-      // Remove deleted files
-      searchResults: responseData.searchResults.filter((dsr) => dsr.fileState === 'active'),
-    };
-  });
+  return requestPromise.then((response) => response.data);
 };
 
 export const queryBatchCollection = async (
@@ -137,6 +129,7 @@ export const queryBatchCollection = async (
     const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
     return {
       ...query,
+      queryParams: { ...query.queryParams, fileState: query.queryParams.fileState || [1] },
       resultOptionsRequest: ro,
     };
   });
@@ -157,16 +150,5 @@ export const queryBatchCollection = async (
     }
   })();
 
-  return requestPromise.then((response) => {
-    return {
-      ...response.data,
-      // Remove deleted files
-      results: response.data.results.map((result) => {
-        return {
-          ...result,
-          searchResults: result.searchResults.filter((dsr) => dsr.fileState === 'active'),
-        };
-      }),
-    };
-  });
+  return requestPromise.then((response) => response.data);
 };
