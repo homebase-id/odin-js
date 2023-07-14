@@ -16,5 +16,5 @@ export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
   //     return response.data;
   //   });
 
-  return { key: '123456789101112131415161718192021222324' };
+  return { key: 'BGQfeBBJG9JMVTa6UhEaHg7KgG' };
 };

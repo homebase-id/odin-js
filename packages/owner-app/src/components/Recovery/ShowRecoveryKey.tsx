@@ -1,4 +1,4 @@
-import { ActionButton, CloseEye, Eye, Label, t } from '@youfoundation/common-app';
+import { ActionButton, CloseEye, Eye, Label, t, Clipboard } from '@youfoundation/common-app';
 import useRecoveryKey from '../../hooks/recovery/useRecoveryKey';
 import { useEffect, useState } from 'react';
 
@@ -20,7 +20,7 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
         To prevent this, we have created a recovery key. This key can be used to reset your password
         and get access to your data again. Please write down this key and store it in a safe place.
       </p>
-      <div className="my-5 select-none">
+      <div className="my-5">
         <Label>{t('Your recovery key')}</Label>
         <ClickToReveal textToShow={splittedKey} />
         <p className="mt-2 text-sm text-slate-400">
@@ -50,28 +50,52 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
 
 const ClickToReveal = ({ textToShow }: { textToShow?: string }) => {
   const [show, setShow] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
   const redactedText = textToShow?.replace(/[^ ]/g, '•');
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShow(false);
-    }, 1000 * 20);
-
+    const timeout = setTimeout(() => setShow(false), 1000 * 30);
     return () => clearTimeout(timeout);
   }, [show]);
 
+  const doCopy = () => {
+    textToShow && navigator.clipboard.writeText(textToShow);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 1500);
+  };
+
+  const buttonStyle =
+    'flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12';
+
   return (
-    <div className="relative">
-      <div className="pointer-events-none w-full select-none rounded border border-gray-300 bg-white px-3 py-1 pl-12 text-base leading-8 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-        <span className="block">{show ? textToShow : redactedText}</span>
+    <>
+      <div className="relative flex flex-col items-center rounded border border-gray-300 dark:border-gray-700 md:flex-row">
+        <div className="flex w-full flex-row justify-around border-b dark:border-gray-700 md:contents">
+          <button className={`${buttonStyle} md:border-r`} onClick={() => setShow(!show)}>
+            {show ? <CloseEye className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+          </button>
+          <button className={`${buttonStyle} opacity-50 md:order-3 md:border-l`} onClick={doCopy}>
+            <Clipboard className="h-6 w-6" />
+          </button>
+        </div>
+
+        <div
+          className={`w-full bg-white px-3 py-2 text-center text-3xl leading-8 tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-100 md:text-left ${
+            !show ? 'pointer-events-none select-none' : ''
+          }`}
+        >
+          {show ? textToShow : redactedText}
+        </div>
+
+        {showCopied && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="rounded-lg bg-slate-800 px-2 py-1 text-sm text-white">
+              {t('Copied to clipboard')}
+            </span>
+          </div>
+        )}
       </div>
-      <div
-        className="absolute bottom-0 left-0 top-0 cursor-pointer border-r p-2"
-        onClick={() => setShow(!show)}
-      >
-        {show ? <CloseEye className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
-      </div>
-    </div>
+    </>
   );
 };
 
