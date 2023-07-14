@@ -4,7 +4,6 @@ import useTinyThumb from '../../hooks/image/useTinyThumb';
 import Loader from '../ui/Icons/Loader/Loader';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import { TargetDrive, EmbeddedThumb, ImageSize, DotYouClient } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
 import '../../app/app.css';
 import LoadingBlock from '../ui/LoadingBlock/LoadingBlock';

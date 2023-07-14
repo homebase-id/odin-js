@@ -109,10 +109,6 @@ export const segmentVideoFile = async (
       sampleNum: number,
       is_last: boolean
     ) {
-      console.debug(
-        `Recieved ${is_last ? ' last' : ''} segment on track ${id} with sample up to ${sampleNum}`
-      );
-
       if (id === videoTrackId) {
         metadata.segmentMap.push({ offset: segmentedByteOffset, samples: sampleNum });
       }

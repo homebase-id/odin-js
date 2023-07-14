@@ -4,7 +4,7 @@ import {
   SegmentedVideoMetadata,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';
 
@@ -25,6 +25,7 @@ export interface OdinVideoProps {
   fileId?: string;
   className?: string;
   probablyEncrypted?: boolean;
+  skipChunkedPlayback?: boolean;
   hideControls?: boolean;
 }
 
@@ -43,9 +44,12 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
-  const [shouldFallback, setShouldFallback] = useState(false);
+  const [shouldFallback, setShouldFallback] = useState(!!videoProps.skipChunkedPlayback);
   useIntersection(videoRef, () => setIsInView(true));
 
+  useEffect(() => {
+    setShouldFallback(!!videoProps.skipChunkedPlayback);
+  }, [videoProps.skipChunkedPlayback]);
   const {
     fetchMetadata: { data: videoMetaData },
   } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, targetDrive);
@@ -139,6 +143,17 @@ const ChunkedSource = ({
       videoRef.current?.addEventListener('seeking', seek);
       videoRef?.current?.addEventListener('error', (e) => {
         console.error(e);
+      });
+      // In case we start playing and the readyState isn't good enough...
+      videoRef.current?.addEventListener('play', async (e) => {
+        if (!videoRef.current) return;
+        console.debug('readyState', videoRef.current?.readyState);
+
+        if (videoRef.current.readyState < 3) {
+          const nextSegement = segments.find((s) => s.requested === false) || segments[0];
+          await fetchRange(nextSegement.start, nextSegement.end);
+          nextSegement.requested = true;
+        }
       });
     };
 
