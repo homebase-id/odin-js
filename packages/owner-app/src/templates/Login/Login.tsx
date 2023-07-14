@@ -9,6 +9,7 @@ import { Loader } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { DomainHighlighter } from '@youfoundation/common-app';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [password, setPassword] = useState('a');
@@ -82,7 +83,8 @@ const Login = () => {
                     Password
                   </Label>
                   <Input
-                    type="text"
+                    type="password"
+                    autoComplete="current-password"
                     name="password"
                     id="password"
                     required
@@ -99,6 +101,12 @@ const Login = () => {
                 >
                   {t('login')}
                 </ActionButton>
+                <Link
+                  to="/owner/account-recovery"
+                  className="mt-5 block text-center text-slate-400 hover:underline dark:text-slate-800"
+                >
+                  {t('Forgot your password?')}
+                </Link>
               </form>
             </div>
           </div>

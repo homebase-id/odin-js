@@ -20,6 +20,7 @@ const Setup = lazy(() => import('../templates/Setup/Setup'));
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterAppClient = lazy(() => import('../templates/RegisterAppClient/RegisterAppClient'));
 const Login = lazy(() => import('../templates/Login/Login'));
+const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
 
 const Notifications = lazy(() => import('../templates/Notifications/Notifications'));
@@ -66,7 +67,7 @@ const ArticleComposerPage = lazy(() =>
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import useAuth, { FIRSTRUN_PATH, LOGIN_PATH } from '../hooks/auth/useAuth';
+import useAuth, { FIRSTRUN_PATH, LOGIN_PATH, RECOVERY_PATH } from '../hooks/auth/useAuth';
 import useIsConfigured from '../hooks/configure/useIsConfigured';
 import { SETUP_PATH } from '../templates/Setup/Setup';
 import { useTransitProcessor, ErrorBoundary } from '@youfoundation/common-app';
@@ -78,7 +79,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path="/owner/firstrun"
+          path={FIRSTRUN_PATH}
           element={
             <Suspense fallback={<LoadingDetailPage />}>
               <ErrorBoundary>
@@ -88,11 +89,21 @@ function App() {
           }
         />
         <Route
-          path="/owner/login"
+          path={LOGIN_PATH}
           element={
             <Suspense fallback={<LoadingDetailPage />}>
               <ErrorBoundary>
                 <Login />
+              </ErrorBoundary>
+            </Suspense>
+          }
+        />
+        <Route
+          path={RECOVERY_PATH}
+          element={
+            <Suspense fallback={<LoadingDetailPage />}>
+              <ErrorBoundary>
+                <AccountRecovery />
               </ErrorBoundary>
             </Suspense>
           }
@@ -218,7 +229,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
   useTransitProcessor(!!isConfigured);
 
   if (!isAuthenticated) {
-    if (window.location.pathname === FIRSTRUN_PATH) {
+    if (window.location.pathname === FIRSTRUN_PATH || window.location.pathname === RECOVERY_PATH) {
       return <>{children}</>;
     }
 

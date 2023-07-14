@@ -19,6 +19,7 @@ import {
 
 export const LOGIN_PATH = '/owner/login';
 export const FIRSTRUN_PATH = '/owner/firstrun';
+export const RECOVERY_PATH = '/owner/account-recovery';
 export const LOGIN_YOUAUTH_PATH = '/owner/login/youauth';
 
 export const RETURN_URL_PARAM = 'returnUrl';
@@ -88,7 +89,8 @@ const useAuth = () => {
         doRedirectToReturn();
       } else if (
         window.location.pathname !== LOGIN_PATH &&
-        window.location.pathname !== FIRSTRUN_PATH
+        window.location.pathname !== FIRSTRUN_PATH &&
+        window.location.pathname !== RECOVERY_PATH
       ) {
         // When not authenticated and not on either of the Login Pages on the Owner app => redirect to regular login
         window.location.href = `${LOGIN_PATH}?returnUrl=${encodeURIComponent(
