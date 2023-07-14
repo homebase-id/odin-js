@@ -87,10 +87,10 @@ export const encryptRecoveryKey = async (recoveryKey: string, publicKey: PublicK
   const combined = [...Array.from(iv), ...Array.from(keyHeader)];
   return {
     rsaEncryptedKeyHeader: uint8ArrayToBase64(
-      await cbcEncrypt(stringToUint8Array(recoveryKey), iv, keyHeader)
+      await rsaOaepEncrypt(cryptoKey, new Uint8Array(combined))
     ),
     keyHeaderEncryptedData: uint8ArrayToBase64(
-      await rsaOaepEncrypt(cryptoKey, new Uint8Array(combined))
+      await cbcEncrypt(stringToUint8Array(recoveryKey), iv, keyHeader)
     ),
     crc32: publicKey.crc32,
   };
