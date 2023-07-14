@@ -248,7 +248,7 @@ const SecuritySettings = () => {
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await setNewPassword(password, recoveryKey)) {
+    if (await setNewPassword(password, recoveryKey.replace(/ /g, ''))) {
       setState('success');
     } else {
       setState('error');
@@ -292,6 +292,7 @@ const SecuritySettings = () => {
                 type="password"
                 onChange={(e) => setRecoveryKey(e.target.value)}
                 defaultValue={recoveryKey}
+                autoComplete="off"
               />
             </div>
             <hr className="mb-5 mt-7" />
@@ -304,6 +305,7 @@ const SecuritySettings = () => {
                 type="password"
                 onChange={(e) => setPassword(e.target.value)}
                 defaultValue={password}
+                autoComplete="new-password"
               />
             </div>
             <div className="mb-2">
@@ -317,6 +319,7 @@ const SecuritySettings = () => {
                 id="retypePassword"
                 onChange={(e) => setRetypePassword(e.target.value)}
                 defaultValue={retypePassword}
+                autoComplete="new-password"
               />
               {password !== retypePassword && retypePassword !== '' ? (
                 <p className="py-2 text-red-800 dark:text-red-200">{t("Passwords don't match")}</p>

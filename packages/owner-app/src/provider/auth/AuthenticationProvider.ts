@@ -1,7 +1,12 @@
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { OwnerClient, logoutOwner, hasValidOwnerToken } from '@youfoundation/common-app';
-import { NonceData, prepareAuthPassword } from './AuthenticationHelper';
-import { ApiType } from '@youfoundation/js-lib/core';
+import {
+  NonceData,
+  PublicKeyData,
+  encryptRecoveryKey,
+  prepareAuthPassword,
+} from './AuthenticationHelper';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
 interface AuthenticationResponse {
   sharedSecret: Uint8Array;
@@ -49,42 +54,45 @@ export const setFirstPassword = async (
   newPassword: string,
   firstRunToken: string
 ): Promise<boolean> => {
-  return getSalts().then((salts) => {
-    return prepareAuthPassword(newPassword, salts).then((reply) => {
-      const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-      return dotYouClient
-        .createAxiosClient({ overrideEncryption: true })
-        .post('/authentication/passwd', { ...reply, firstRunToken })
-        .then((response) => {
-          return response.status === 200;
-        })
-        .catch((error) => {
-          console.error(error);
-          return false;
-        });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+
+  const salts = await getSalts(dotYouClient);
+  const reply = await prepareAuthPassword(newPassword, salts);
+
+  return dotYouClient
+    .createAxiosClient({ overrideEncryption: true })
+    .post('/authentication/passwd', { ...reply, firstRunToken })
+    .then((response) => {
+      return response.status === 200;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
     });
-  });
 };
 
 export const setNewPassword = async (
   newPassword: string,
   recoveryKey: string
 ): Promise<boolean> => {
-  return getSalts().then((salts) => {
-    return prepareAuthPassword(newPassword, salts).then((reply) => {
-      const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-      return dotYouClient
-        .createAxiosClient({ overrideEncryption: true })
-        .post('/authentication/resetpasswd', { passwordReply: reply, recoveryKey64: recoveryKey })
-        .then((response) => {
-          return response.status === 200;
-        })
-        .catch((error) => {
-          console.error(error);
-          return false;
-        });
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+
+  const salts = await getSalts(dotYouClient);
+  const passwordReply = await prepareAuthPassword(newPassword, salts);
+
+  const publicKey = await getPulicKey(dotYouClient);
+  const encryptedRecoveryKey = await encryptRecoveryKey(recoveryKey, publicKey);
+
+  return dotYouClient
+    .createAxiosClient({ overrideEncryption: true })
+    .post('/authentication/resetpasswd', { passwordReply, encryptedRecoveryKey })
+    .then((response) => {
+      return response.status === 200;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
     });
-  });
 };
 
 export const finalizeRegistration = async (firstRunToken: string) => {
@@ -120,10 +128,16 @@ const getNonce = async (): Promise<NonceData> => {
     .catch(dotYouClient.handleErrorResponse);
 };
 
-const getSalts = async (): Promise<NonceData> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+const getSalts = async (dotYouClient: DotYouClient): Promise<NonceData> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client.get('/authentication/getsalts').then((response) => {
+    return response.data;
+  });
+};
+
+const getPulicKey = async (dotYouClient: DotYouClient): Promise<PublicKeyData> => {
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  return client.get<PublicKeyData>('/authentication/publickey').then((response) => {
     return response.data;
   });
 };

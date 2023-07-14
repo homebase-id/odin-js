@@ -1,3 +1,11 @@
+import { getRandom16ByteArray } from '@youfoundation/js-lib/core';
+import {
+  base64ToUint8Array,
+  cbcEncrypt,
+  stringToUint8Array,
+  uint8ArrayToBase64,
+} from '@youfoundation/js-lib/helpers';
+
 export interface NonceData {
   saltPassword64: string;
   saltKek64: string;
@@ -5,6 +13,27 @@ export interface NonceData {
   publicPem: string;
   crc: number;
 }
+
+export interface PublicKeyData {
+  publicKey: string;
+  crc32: number;
+  expiration: number;
+}
+
+interface AuthenticationReplyNonce {
+  nonce64: string;
+  nonceHashedPassword64: string;
+  crc: number;
+  rsaEncrypted: string;
+}
+
+interface AuthenticationPayload {
+  hpwd64: string;
+  kek64: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  secret: any;
+}
+
 export const prepareAuthPassword = async (
   password: string,
   nonceData: NonceData
@@ -39,7 +68,7 @@ export const prepareAuthPassword = async (
   };
 
   const encryptable = JSON.stringify(payload);
-  const cipher = await rsaOaepEncrypt(key, encryptable);
+  const cipher = await rsaOaepEncrypt(key, stringToUint8Array(encryptable));
 
   const cipher64 = btoa(String.fromCharCode.apply(null, Array.from(cipher)));
   return {
@@ -47,6 +76,23 @@ export const prepareAuthPassword = async (
     nonceHashedPassword64: hashNoncePassword64,
     crc: nonceData.crc,
     rsaEncrypted: cipher64,
+  };
+};
+
+export const encryptRecoveryKey = async (recoveryKey: string, publicKey: PublicKeyData) => {
+  const cryptoKey = await rsaImportKey(publicKey.publicKey);
+  const keyHeader = getRandom16ByteArray();
+  const iv = getRandom16ByteArray();
+
+  const combined = [...Array.from(iv), ...Array.from(keyHeader)];
+  return {
+    rsaEncryptedKeyHeader: uint8ArrayToBase64(
+      await cbcEncrypt(stringToUint8Array(recoveryKey), iv, keyHeader)
+    ),
+    keyHeaderEncryptedData: uint8ArrayToBase64(
+      await rsaOaepEncrypt(cryptoKey, new Uint8Array(combined))
+    ),
+    crc32: publicKey.crc32,
   };
 };
 
@@ -65,11 +111,13 @@ const pbkdf2 = async (
   iterations: number,
   len: number
 ): Promise<Uint8Array> => {
-  const password = new TextEncoder().encode(strPassword);
-
-  const ik = await crypto.subtle.importKey('raw', password, { name: 'PBKDF2' }, false, [
-    'deriveBits',
-  ]);
+  const ik = await crypto.subtle.importKey(
+    'raw',
+    stringToUint8Array(strPassword),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits']
+  );
   const dk = await crypto.subtle.deriveBits(
     {
       name: 'PBKDF2',
@@ -105,24 +153,9 @@ const rsaPemStrip = (pem: string) => {
   return s.replace('\n', '');
 };
 
-// from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
-const str2ab = (str: string): ArrayBuffer => {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-
-  return buf;
-};
-
 // key is base64 encoded
 const rsaImportKey = async (key64: string): Promise<CryptoKey> => {
-  // base64 decode the string to get the binary data
-  const binaryDerString = window.atob(key64);
-  // convert from a binary string to an ArrayBuffer
-  const binaryDer = str2ab(binaryDerString);
+  const binaryDer = base64ToUint8Array(key64);
 
   return crypto.subtle.importKey(
     'spki',
@@ -140,7 +173,7 @@ const rsaImportKey = async (key64: string): Promise<CryptoKey> => {
   // return key;
 };
 
-const rsaOaepEncrypt = async (publicKey: CryptoKey, str: string) => {
+const rsaOaepEncrypt = async (publicKey: CryptoKey, bytes: Uint8Array) => {
   return crypto.subtle
     .encrypt(
       {
@@ -148,24 +181,10 @@ const rsaOaepEncrypt = async (publicKey: CryptoKey, str: string) => {
         //label: Uint8Array([...]) //optional
       },
       publicKey, //from generateKey or importKey above
-      str2ab(str) //ArrayBuffer of data you want to encrypt
+      bytes //stringToUint8Array(str) //ArrayBuffer of data you want to encrypt
     )
     .then((encrypted) => {
       // console.log("RSA Encrypted = ", encrypted);
       return new Uint8Array(encrypted);
     });
 };
-
-interface AuthenticationReplyNonce {
-  nonce64: string;
-  nonceHashedPassword64: string;
-  crc: number;
-  rsaEncrypted: string;
-}
-
-interface AuthenticationPayload {
-  hpwd64: string;
-  kek64: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  secret: any;
-}

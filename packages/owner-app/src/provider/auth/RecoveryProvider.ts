@@ -11,10 +11,13 @@ export interface RecoveryKeyResponse {
 export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
 
-  //   return await axiosClient.get<RecoveryKeyResponse>(`/security/recovery-key`).then((response) => {
-  //     console.log(response.data);
-  //     return response.data;
-  //   });
-
-  return { key: 'BGQfeBBJG9JMVTa6UhEaHg7KgG' };
+  return await axiosClient
+    .get<RecoveryKeyResponse>(`/security/recovery-key`)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+      return { key: 'BGQfeBBJG9JMVTa6UhEaHg7KgG' };
+    });
 };
