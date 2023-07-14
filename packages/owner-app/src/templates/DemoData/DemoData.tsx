@@ -664,9 +664,6 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
           const randomTitle = `${getFunName()} tales`;
           const randomAbstract = getRandomAbstract();
           const randomImageId = rando(imageIds);
-          const randomDate = new Date();
-          // Make random date of somewhere in the last 30 days
-          randomDate.setDate(-getRandomNumber(30));
 
           // Look for an image file with the image id
           const potentialImages = (
@@ -685,7 +682,7 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
             channelId: channel.channelId,
             caption: randomTitle,
             slug: convertTextToSlug(randomTitle),
-            dateUnixTime: randomDate.getTime(),
+            dateUnixTime: new Date().getTime(),
             primaryMediaFile: imageFileId ? { fileId: imageFileId, type: 'image' } : undefined,
             type: 'Article',
             readingTimeStats: {
