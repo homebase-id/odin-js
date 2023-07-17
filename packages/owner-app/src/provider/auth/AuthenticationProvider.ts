@@ -85,7 +85,7 @@ export const setNewPassword = async (
 
   return dotYouClient
     .createAxiosClient({ overrideEncryption: true })
-    .post('/authentication/resetpasswd', { passwordReply, encryptedRecoveryKey })
+    .post('/authentication/resetpasswdrk', { passwordReply, encryptedRecoveryKey })
     .then((response) => {
       return response.status === 200;
     })
