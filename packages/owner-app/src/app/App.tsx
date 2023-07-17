@@ -15,6 +15,7 @@ import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
+const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup'));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
@@ -118,6 +119,7 @@ function App() {
           }
         >
           <Route path="login/youauth" element={<YouAuthLogin />} />
+          <Route path="youauth/authorize" element={<YouAuthConsent />} />
 
           <Route
             path=""
