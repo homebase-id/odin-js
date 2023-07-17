@@ -18,10 +18,11 @@ export const logout = logoutOwner;
 
 // Authenticate the owner
 export const authenticate = async (password: string): Promise<AuthenticationResponse | null> => {
-  const noncePackage = await getNonce();
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+
+  const noncePackage = await getNonce(dotYouClient);
   const reply = await prepareAuthPassword(password, noncePackage);
 
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/authentication';
 
@@ -71,10 +72,7 @@ export const setFirstPassword = async (
     });
 };
 
-export const setNewPassword = async (
-  newPassword: string,
-  recoveryKey: string
-): Promise<boolean> => {
+export const resetPassword = async (newPassword: string, recoveryKey: string): Promise<boolean> => {
   const dotYouClient = new OwnerClient({ api: ApiType.Owner });
 
   const salts = await getSalts(dotYouClient);
@@ -86,6 +84,30 @@ export const setNewPassword = async (
   return dotYouClient
     .createAxiosClient({ overrideEncryption: true })
     .post('/authentication/resetpasswdrk', { passwordReply, encryptedRecoveryKey })
+    .then((response) => {
+      return response.status === 200;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
+};
+
+export const changePassword = async (
+  oldPassword: string,
+  newPassword: string
+): Promise<boolean> => {
+  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+
+  const noncePackage = await getNonce(dotYouClient);
+  const currentAuthenticationPasswordReply = await prepareAuthPassword(oldPassword, noncePackage);
+
+  const salts = await getSalts(dotYouClient);
+  const newPasswordReply = await prepareAuthPassword(newPassword, salts);
+
+  return dotYouClient
+    .createAxiosClient({ overrideEncryption: false })
+    .post('/security/resetpasswd', { currentAuthenticationPasswordReply, newPasswordReply })
     .then((response) => {
       return response.status === 200;
     })
@@ -117,8 +139,7 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-const getNonce = async (): Promise<NonceData> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
+const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client
     .get('/authentication/nonce')

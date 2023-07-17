@@ -6,7 +6,8 @@ import {
   createHomeToken as createHomeTokenOwner,
   isPasswordSet as isPasswordSetOwner,
   setFirstPassword as setFirstOwnerPassword,
-  setNewPassword as setNewOwnerPassword,
+  resetPassword as resetOwnerPassword,
+  changePassword as setNewOwnerPassword,
   logout as logoutOwner,
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
@@ -104,7 +105,8 @@ const useAuth = () => {
     authenticate,
     createHomeToken: createHomeTokenOwner,
     setFirstPassword: setFirstOwnerPassword,
-    setNewPassword: setNewOwnerPassword,
+    resetPassword: resetOwnerPassword,
+    changePassword: setNewOwnerPassword,
     getDotYouClient,
     getApiType,
     finalizeRegistration,

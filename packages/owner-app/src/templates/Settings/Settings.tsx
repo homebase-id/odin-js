@@ -237,18 +237,18 @@ const UiSettings = () => {
 const SecuritySettings = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
 
-  const [recoveryKey, setRecoveryKey] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { setNewPassword } = useAuth();
+  const { changePassword } = useAuth();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await setNewPassword(password, recoveryKey.replace(/ /g, ''))) {
+    if (await changePassword(oldPassword, password)) {
       setState('success');
     } else {
       setState('error');
@@ -263,7 +263,7 @@ const SecuritySettings = () => {
         ) : state === 'error' ? (
           <>
             <Alert type="warning" isCompact={true}>
-              {t('Failed to set a new password, check your recovery key and try again')}
+              {t('Failed to set a new password, check your old password and try again')}
             </Alert>
             <div className="mt-5 flex flex-row-reverse">
               <ActionButton onClick={() => setState('idle')}>{t('Try again')}</ActionButton>
@@ -278,21 +278,15 @@ const SecuritySettings = () => {
             }}
           >
             <div className="mb-2">
-              <p className="max-w-md text-slate-400">
-                {t('To change your password you need your recovery key.')}{' '}
-                {t('You have gotten your recovery key when you first signed up')}
-              </p>
-            </div>
-            <div className="mb-2">
-              <Label>{t('Your recovery key')}</Label>
+              <Label>{t('Your current password')}</Label>
               <Input
                 required
-                name="recoveryKey"
-                id="recoveryKey"
+                name="oldPassword"
+                id="oldPassword"
                 type="password"
-                onChange={(e) => setRecoveryKey(e.target.value)}
-                defaultValue={recoveryKey}
-                autoComplete="off"
+                onChange={(e) => setOldPassword(e.target.value)}
+                defaultValue={oldPassword}
+                autoComplete="current-password"
               />
             </div>
             <hr className="mb-5 mt-7" />
@@ -310,7 +304,7 @@ const SecuritySettings = () => {
             </div>
             <div className="mb-2">
               <Label htmlFor="retypepassword" className="text-sm leading-7  dark:text-gray-400">
-                {t('Retype Password')}
+                {t('Retype your new password')}
               </Label>
               <Input
                 required

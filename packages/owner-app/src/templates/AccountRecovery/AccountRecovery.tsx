@@ -15,14 +15,14 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { setNewPassword } = useAuth();
+  const { resetPassword } = useAuth();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await setNewPassword(password, recoveryKey.replace(/ /g, ''))) {
+    if (await resetPassword(password, recoveryKey.replace(/ /g, ''))) {
       setState('success');
     } else {
       setState('error');
