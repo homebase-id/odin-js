@@ -94,11 +94,10 @@ export const resetPassword = async (newPassword: string, recoveryKey: string): P
 };
 
 export const changePassword = async (
+  dotYouClient: DotYouClient,
   oldPassword: string,
   newPassword: string
 ): Promise<boolean> => {
-  const dotYouClient = new OwnerClient({ api: ApiType.Owner });
-
   const noncePackage = await getNonce(dotYouClient);
   const currentAuthenticationPasswordReply = await prepareAuthPassword(oldPassword, noncePackage);
 

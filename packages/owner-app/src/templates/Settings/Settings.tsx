@@ -241,14 +241,14 @@ const SecuritySettings = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { changePassword } = useAuth();
+  const { changePassword, getDotYouClient} = useAuth();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await changePassword(oldPassword, password)) {
+    if (await changePassword(getDotYouClient(), oldPassword, password)) {
       setState('success');
     } else {
       setState('error');
