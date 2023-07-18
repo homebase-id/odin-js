@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
   const { data: recoveryKey } = useRecoveryKey().fetchKey;
 
-  // Split key in 4 character parts
-  const splittedKey = recoveryKey?.key.match(/.{1,4}/g)?.join(' ');
+  // Split key in 4 character parts //.match(/.{1,4}/g)?.join(' ');
+  const splittedKey = recoveryKey?.key;
 
   return (
     <>
