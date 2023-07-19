@@ -28,7 +28,7 @@ interface GetPayloadRequest extends GetFileRequest {
   chunkLength?: number;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
 
 /// Get methods:
 export const getFileHeader = async (
@@ -36,7 +36,7 @@ export const getFileHeader = async (
   targetDrive: TargetDrive,
   fileId: string,
   systemFileType?: SystemFileType
-): Promise<DriveSearchResult> => {
+): Promise<DriveSearchResult | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -57,19 +57,16 @@ export const getFileHeader = async (
     fileId,
   };
 
-  const promise = client
+  const promise: Promise<DriveSearchResult | null> = client
     .get('/drive/files/header?' + stringify(request))
     .then((response) => {
       _internalMetadataPromiseCache.delete(cacheKey);
       return response.data;
     })
     .catch((error) => {
-      if (error.response?.status === 404) {
-        return undefined;
-      } else {
-        console.error('[DotYouCore-js:getFileHeader]', error);
-        throw error;
-      }
+      if (error.response?.status === 404) return null;
+      console.error('[DotYouCore-js:getFileHeader]', error);
+      throw error;
     });
 
   _internalMetadataPromiseCache.set(cacheKey, promise);
@@ -165,6 +162,7 @@ export const getPayloadBytes = async (
       };
     })
     .catch((error) => {
+      if (error.response?.status === 404) return null;
       console.error('[DotYouCore-js:getPayloadBytes]', error);
       return null;
     });
@@ -347,6 +345,7 @@ export const getPayload = async <T>(
   } else if (fileMetadata.appData.contentIsComplete) {
     // When contentIsComplete but !includesJsonContent the query before was done without including the jsonContent; So we just get and parse
     const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+    if (!fileHeader) return null;
     return await decryptJsonContent<T>(fileHeader.fileMetadata, keyheader);
   } else {
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, keyheader, systemFileType);
