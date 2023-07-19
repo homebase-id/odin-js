@@ -93,7 +93,7 @@ const DemoData = () => {
           <DemoDataProfile client={dotYouClient} realmData={realmData} />
           <CirclesAndConnections realmData={realmData} />
           <DemoDataHomeAndTheme client={dotYouClient} realmData={realmData} />
-          <DemoDataBlog client={dotYouClient} realmData={realmData} />
+          <DemoDataBlog client={dotYouClient} realmData={realmData} character={character} />
         </div>
       )}
     </section>
@@ -621,7 +621,15 @@ const DemoDataHomeAndTheme = ({
   );
 };
 
-const DemoDataBlog = ({ client, realmData }: { client: DotYouClient; realmData: RealmData }) => {
+const DemoDataBlog = ({
+  client,
+  realmData,
+  character,
+}: {
+  client: DotYouClient;
+  realmData: RealmData;
+  character: keyof typeof lotrRealm;
+}) => {
   if (!('blog' in realmData)) return null;
 
   const {
