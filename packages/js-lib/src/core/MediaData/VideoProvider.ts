@@ -146,6 +146,7 @@ export const getDecryptedVideoMetadata = async (
   systemFileType?: SystemFileType
 ) => {
   const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  if (!fileHeader) return undefined;
   const fileMetadata = fileHeader.fileMetadata;
 
   const keyheader = fileMetadata.payloadIsEncrypted

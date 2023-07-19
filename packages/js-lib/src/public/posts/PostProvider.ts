@@ -258,7 +258,7 @@ export const savePost = async <T extends PostContent>(
   let versionTag = file?.versionTag;
   if (!versionTag && file?.fileId) {
     versionTag = await getFileHeader(dotYouClient, targetDrive, file.fileId).then(
-      (header) => header.fileMetadata.versionTag
+      (header) => header?.fileMetadata.versionTag
     );
   }
 

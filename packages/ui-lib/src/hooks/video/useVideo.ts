@@ -37,7 +37,7 @@ const useVideo = (
         : await getDecryptedVideoMetadata(dotYouClient, videoDrive, videoFileId);
     };
 
-    return await fetchMetaPromise();
+    return (await fetchMetaPromise()) || null;
   };
 
   return {

@@ -38,7 +38,7 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
         homeTargetDrive,
         homeFileId.toString()
       );
-      const uniqueId = imageFileHeader.fileMetadata.appData.uniqueId;
+      const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
 
       const headerImageQueryParam: FileQueryParams = {
         targetDrive: homeTargetDrive,
@@ -88,7 +88,7 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
         profileTargetDrive,
         profilePhotoFileId
       );
-      const uniqueId = imageFileHeader.fileMetadata.appData.uniqueId;
+      const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
 
       const profilePhotoQueryParams: FileQueryParams = {
         targetDrive: profileTargetDrive,
@@ -169,7 +169,7 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
               targetDrive,
               blog.content.primaryMediaFile?.fileId
             );
-            const uniqueId = imageFileHeader.fileMetadata.appData.uniqueId;
+            const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
 
             const params: FileQueryParams = {
               targetDrive: targetDrive,

@@ -88,7 +88,7 @@ export const uploadImage = async (
   let versionTag = uploadMeta?.versionTag;
   if (!versionTag && uploadMeta?.fileId) {
     versionTag = await getFileHeader(dotYouClient, targetDrive, uploadMeta.fileId).then(
-      (header) => header.fileMetadata.versionTag
+      (header) => header?.fileMetadata.versionTag
     );
   }
 
@@ -140,7 +140,7 @@ export const getDecryptedThumbnailMeta = (
 ): Promise<ThumbnailMeta | undefined> => {
   //it seems these will be fine for images but for video and audio we must stream decrypt
   return getFileHeader(dotYouClient, targetDrive, fileId).then((header) => {
-    if (!header.fileMetadata.appData.previewThumbnail) {
+    if (!header || !header.fileMetadata.appData.previewThumbnail) {
       return;
     }
 
@@ -200,7 +200,7 @@ export const getDecryptedImageUrl = async (
   // If the contents is probably encrypted, we don't bother fetching the header
   if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
-    if (!meta.fileMetadata.payloadIsEncrypted) {
+    if (!meta?.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();
     }
   }
@@ -257,6 +257,7 @@ export const getDecryptedImageMetadata = async (
   systemFileType?: SystemFileType
 ) => {
   const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  if (!fileHeader) return null;
   const fileMetadata = fileHeader.fileMetadata;
 
   if (!fileMetadata.appData.jsonContent) {
