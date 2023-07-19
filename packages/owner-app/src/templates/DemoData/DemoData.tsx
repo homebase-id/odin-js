@@ -9,17 +9,10 @@ import {
   uploadImage,
 } from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
-import {
-  attrHasData,
-  base64ToArrayBuffer,
-  getFunName,
-  getRandomAbstract,
-  getRandomNumber,
-  rando,
-} from './helpers';
+import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
 import { lotrRealm } from './DemoLotr';
 import useAttribute from '../../hooks/profiles/useAttribute';
-import { useChannel } from '@youfoundation/common-app';
+import { Select, useChannel } from '@youfoundation/common-app';
 import usePost from '../../hooks/posts/usePost';
 import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
@@ -49,28 +42,60 @@ import {
   PostContent,
 } from '@youfoundation/js-lib/public';
 import { getNewId } from '@youfoundation/js-lib/helpers';
+import { useState } from 'react';
 
-let character = window.location.hostname;
+type RealmName = keyof typeof lotrRealm | undefined;
+type RealmData = (typeof lotrRealm)[keyof typeof lotrRealm];
+
+let initalChar: RealmName;
+const domain = window.location.hostname;
 
 // Replace demo hosts to locals for the lotrRealm
-character = character === 'frodobaggins.me' ? 'frodo.dotyou.cloud' : character;
-character = character === 'samwisegamgee.me' ? 'sam.dotyou.cloud' : character;
+initalChar = ['frodobaggins.me', 'frodo.digital', 'frodo.dotyou.cloud'].includes(domain)
+  ? 'frodo.dotyou.cloud'
+  : initalChar;
 
-const realmData = lotrRealm[character as keyof typeof lotrRealm];
+initalChar = ['samwise.digital', 'samwisegamgee.me', 'sam.dotyou.cloud'].includes(domain)
+  ? 'sam.dotyou.cloud'
+  : initalChar;
+
+initalChar = ['merry.dotyou.cloud'].includes(domain) ? 'merry.dotyou.cloud' : initalChar;
+initalChar = ['pippin.dotyou.cloud'].includes(domain) ? 'pippin.dotyou.cloud' : initalChar;
 
 const DemoData = () => {
   const dotYouClient = useAuth().getDotYouClient();
+  const [character, setCharacter] = useState<RealmName>(initalChar);
+
+  const realmData: RealmData = lotrRealm[character as keyof typeof lotrRealm];
 
   return (
     <section>
-      <PageMeta title={<>Demo Data Generator: {character}</>} />
+      <PageMeta
+        title={
+          <span className="flex w-full flex-col gap-4">
+            Demo Data Generator:{' '}
+            <Select
+              onChange={(e) => setCharacter(e.target.value as RealmName)}
+              defaultValue={character}
+            >
+              <option>-- Select a character --</option>
+              <option value={'frodo.dotyou.cloud'}>frodo.dotyou.cloud</option>
+              <option value={'sam.dotyou.cloud'}>sam.dotyou.cloud</option>
+              <option value={'merry.dotyou.cloud'}>merry.dotyou.cloud</option>
+              <option value={'pippin.dotyou.cloud'}>pippin.dotyou.cloud</option>
+            </Select>
+          </span>
+        }
+      />
 
-      <div className="my-5">
-        <DemoDataProfile client={dotYouClient} />
-        <CirclesAndConnections />
-        <DemoDataHomeAndTheme client={dotYouClient} />
-        <DemoDataBlog client={dotYouClient} />
-      </div>
+      {!character || !realmData ? null : (
+        <div className="my-5">
+          <DemoDataProfile client={dotYouClient} realmData={realmData} />
+          <CirclesAndConnections realmData={realmData} />
+          <DemoDataHomeAndTheme client={dotYouClient} realmData={realmData} />
+          <DemoDataBlog client={dotYouClient} realmData={realmData} />
+        </div>
+      )}
     </section>
   );
 };
@@ -122,7 +147,7 @@ const uploadMedia = async (
   return newFileId;
 };
 
-const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
+const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmData: RealmData }) => {
   const profileId = BuiltInProfiles.StandardProfileId.toString();
 
   const {
@@ -468,7 +493,13 @@ const DemoDataProfile = ({ client }: { client: DotYouClient }) => {
   );
 };
 
-const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
+const DemoDataHomeAndTheme = ({
+  client,
+  realmData,
+}: {
+  client: DotYouClient;
+  realmData: RealmData;
+}) => {
   if (!('home' in realmData)) {
     return null;
   }
@@ -590,7 +621,7 @@ const DemoDataHomeAndTheme = ({ client }: { client: DotYouClient }) => {
   );
 };
 
-const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
+const DemoDataBlog = ({ client, realmData }: { client: DotYouClient; realmData: RealmData }) => {
   if (!('blog' in realmData)) return null;
 
   const {
@@ -739,7 +770,7 @@ const DemoDataBlog = ({ client }: { client: DotYouClient }) => {
   );
 };
 
-const CirclesAndConnections = () => {
+const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
   if (!('circles' in realmData)) return null;
 
   const { data: circles, isFetched: isCirclesFetched } = useCircles().fetch;
