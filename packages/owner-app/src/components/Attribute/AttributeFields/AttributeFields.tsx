@@ -125,7 +125,9 @@ const AttributeFields = ({
             id="profileImageId"
             name={MinimalProfileFields.ProfileImageId}
             defaultValue={attribute.data?.[MinimalProfileFields.ProfileImageId] ?? ''}
-            onChange={debouncedChange}
+            onChange={(e) =>
+              onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+            }
             acl={attribute.acl}
             targetDrive={GetTargetDriveFromProfileId(attribute.profileId)}
             expectedAspectRatio={1}

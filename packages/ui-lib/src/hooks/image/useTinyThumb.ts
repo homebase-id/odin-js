@@ -37,6 +37,7 @@ const useTinyThumb = (
       const url = window.URL.createObjectURL(new Blob([buffer]));
 
       return {
+        contentType: previewThumbnail.contentType,
         naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
         sizes: thumbFromStaticFile[0].header.fileMetadata.appData.additionalThumbnails ?? [],
         url,

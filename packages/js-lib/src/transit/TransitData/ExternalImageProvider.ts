@@ -35,6 +35,7 @@ export const getDecryptedThumbnailMetaOverTransit = async (
         naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
         sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
         url: url,
+        contentType: previewThumbnail.contentType,
       };
     }
   );
@@ -101,8 +102,9 @@ export const getDecryptedImageDataOverTransit = async (
   contentType: ImageContentType;
   content: ArrayBuffer;
 } | null> => {
-  const data = await (size
-    ? getThumbBytesOverTransit(
+  if (size) {
+    try {
+      const thumbData = await getThumbBytesOverTransit(
         dotYouClient,
         odinId,
         targetDrive,
@@ -111,20 +113,30 @@ export const getDecryptedImageDataOverTransit = async (
         size.pixelWidth,
         size.pixelHeight,
         systemFileType
-      )
-    : getPayloadBytesOverTransit(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        fileId,
-        undefined,
-        systemFileType
-      ));
+      );
+      if (thumbData)
+        return {
+          contentType: thumbData.contentType,
+          content: thumbData.bytes,
+        };
+    } catch (ex) {
+      // Failed to get thumb data, try to get payload data
+    }
+  }
 
-  if (!data) return null;
+  const payloadData = await getPayloadBytesOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    undefined,
+    systemFileType
+  );
+
+  if (!payloadData) return null;
 
   return {
-    contentType: data.contentType,
-    content: data.bytes,
+    contentType: payloadData.contentType,
+    content: payloadData.bytes,
   };
 };

@@ -230,8 +230,9 @@ export const getDecryptedImageData = async (
   contentType: ImageContentType;
   bytes: ArrayBuffer;
 } | null> => {
-  return await (size
-    ? getThumbBytes(
+  if (size) {
+    try {
+      const thumbBytes = await getThumbBytes(
         dotYouClient,
         targetDrive,
         fileId,
@@ -239,8 +240,14 @@ export const getDecryptedImageData = async (
         size.pixelWidth,
         size.pixelHeight,
         systemFileType
-      )
-    : getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType));
+      );
+      if (thumbBytes) return thumbBytes;
+    } catch (ex) {
+      // Failed to get thumb data, try to get payload data
+    }
+  }
+
+  return await getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType);
 };
 
 export const getDecryptedImageMetadata = async (

@@ -53,6 +53,10 @@ const useImage = (
       };
     });
 
+    // Check if we have entry without size (as that would be payload)
+    const payload = cachedEntriesWithSize.find((entry) => !entry.size);
+    if (payload) return payload;
+
     if (!size) return cachedEntriesWithSize.find((entry) => !entry.size);
 
     return cachedEntriesWithSize

@@ -124,12 +124,11 @@ export class BaseDotYouClient {
       },
       async function (error) {
         if (error?.response?.data?.data && ss) {
+          // Try and get a more detailed error message
           console.error(
             '[DotYouCore-js]',
             await decryptData(error.response.data.data, error.response.data.iv, ss)
           );
-        } else {
-          console.error('[DotYouCore-js:responseInterception]', error);
         }
 
         return Promise.reject(error);

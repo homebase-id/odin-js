@@ -178,7 +178,7 @@ export const getThumbBytes = async (
   width: number,
   height: number,
   systemFileType?: SystemFileType
-): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType }> => {
+): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Width', width);
@@ -206,8 +206,9 @@ export const getThumbBytes = async (
       };
     })
     .catch((error) => {
+      if (error.response?.status === 404) return null;
       console.error('[DotYouCore-js:getThumbBytes]', error);
-      throw error;
+      return null;
     });
 };
 

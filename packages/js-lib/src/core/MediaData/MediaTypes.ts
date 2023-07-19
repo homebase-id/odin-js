@@ -5,6 +5,7 @@ export type ThumbnailMeta = {
   naturalSize: { width: number; height: number };
   sizes?: ThumbSize[];
   url: string;
+  contentType?: ImageContentType;
 };
 
 export interface MediaUploadMeta {
