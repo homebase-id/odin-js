@@ -169,11 +169,10 @@ const useContact = ({
 };
 
 export const parseContact = (contact: RawContact): ContactVm => {
-  let imageUrl;
-  if (contact.image && !contact.imageFileId) {
-    const buffer = base64ToUint8Array(contact.image.content);
-    imageUrl = window.URL.createObjectURL(new Blob([buffer], { type: contact.image.contentType }));
-  }
+  const imageUrl =
+    contact.image && !contact.imageFileId
+      ? `data:${contact.image.contentType};base64,${contact.image.content}`
+      : undefined;
 
   const { id, name, location, phone, birthday, imageFileId, odinId, source } = contact;
 

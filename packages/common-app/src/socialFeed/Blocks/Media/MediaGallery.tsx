@@ -1,5 +1,5 @@
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Video, Image, useIntersection, useDarkMode } from '@youfoundation/common-app';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
@@ -15,10 +15,8 @@ interface MediaGalleryProps {
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
 }
 
-const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) => {
-  const buffer = base64ToUint8Array(previewThumbnail.content);
-  return window.URL.createObjectURL(new Blob([buffer], { type: previewThumbnail.contentType }));
-};
+const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
+  `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
 
 export const MediaGallery = ({
   odinId,
@@ -41,7 +39,10 @@ export const MediaGallery = ({
     setIsInView(true);
   });
 
-  const tinyThumbUrl = previewThumbnail ? getEmbeddedThumbUrl(previewThumbnail) : undefined;
+  const tinyThumbUrl = useMemo(
+    () => (previewThumbnail ? getEmbeddedThumbUrl(previewThumbnail) : undefined),
+    [previewThumbnail]
+  );
   const targetDrive = getChannelDrive(channelId);
 
   return (

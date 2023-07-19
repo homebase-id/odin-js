@@ -158,7 +158,7 @@ export const getDecryptedThumbnailMeta = (
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
 /**
- * @param isProbablyEncrypted {boolean} Hints wether or not we can expect the image to be encrypted, when true no direct url is returned instead the contents are fetched and decrypted depending on their metadata; This allows to skip a probably unneeded header call, but does require an createObjectUrl
+ * @param isProbablyEncrypted {boolean} Hints wether or not we can expect the image to be encrypted, when true no direct url is returned instead the contents are fetched and decrypted depending on their metadata; This allows to skip a probably unneeded header call
  */
 export const getDecryptedImageUrl = async (
   dotYouClient: DotYouClient,

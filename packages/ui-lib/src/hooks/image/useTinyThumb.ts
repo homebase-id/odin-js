@@ -6,7 +6,6 @@ import {
   getDecryptedThumbnailMeta,
   ApiType,
 } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { GetFileEntryFromCache } from '@youfoundation/js-lib/public';
 import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
 
@@ -33,8 +32,7 @@ const useTinyThumb = (
     const thumbFromStaticFile = await GetFileEntryFromCache(imageFileId);
     if (thumbFromStaticFile?.[0]?.header.fileMetadata.appData.previewThumbnail) {
       const previewThumbnail = thumbFromStaticFile[0].header.fileMetadata.appData.previewThumbnail;
-      const buffer = base64ToUint8Array(previewThumbnail.content);
-      const url = window.URL.createObjectURL(new Blob([buffer]));
+      const url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
 
       return {
         contentType: previewThumbnail.contentType,
