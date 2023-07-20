@@ -84,7 +84,7 @@ export const Subscribe = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
   handler: (data: TypedConnectionNotification) => void,
-  args: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
