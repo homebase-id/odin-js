@@ -83,7 +83,8 @@ const ParseRawClientNotification = (
 export const Subscribe = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
-  handler: (data: TypedConnectionNotification) => void
+  handler: (data: TypedConnectionNotification) => void,
+  args: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
   const apiType = dotYouClient.getType();
   const sharedSecret = dotYouClient.getSharedSecret();
@@ -107,7 +108,9 @@ export const Subscribe = async (
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;
 
-    webSocketClient = webSocketClient || new WebSocket(url);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    webSocketClient = webSocketClient || new WebSocket(url, undefined, args);
     if (isDebug) console.debug(`[NotificationProvider] Client connected`);
 
     webSocketClient.onopen = () => {
@@ -135,6 +138,14 @@ export const Subscribe = async (
 
       const parsedNotification = ParseRawClientNotification(notification);
       handlers.map(async (handler) => await handler(parsedNotification));
+    };
+
+    webSocketClient.onerror = (e) => {
+      console.error('[NotificationProvider]', e);
+    };
+
+    webSocketClient.onclose = (e) => {
+      if (isDebug) console.debug('[NotificationProvider] Connection closed');
     };
   });
 };
