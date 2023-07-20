@@ -94,7 +94,7 @@ export const uploadVideo = async (
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: 0,
-      jsonContent: jsonStringify64(fileMetadata),
+      jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
       userDate: uploadMeta?.userDate,
       previewThumbnail,
       additionalThumbnails: additionalThumbs,

@@ -103,7 +103,7 @@ export const uploadImage = async (
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       contentIsComplete: false,
       fileType: MediaConfig.MediaFileType,
-      jsonContent: jsonStringify64(fileMetadata),
+      jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
       previewThumbnail: previewThumbnail,
       additionalThumbnails: additionalThumbs,
       userDate: uploadMeta?.userDate,
