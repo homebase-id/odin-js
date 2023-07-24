@@ -44,11 +44,13 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
-  const [shouldFallback, setShouldFallback] = useState(!!videoProps.skipChunkedPlayback);
+  const [shouldFallback, setShouldFallback] = useState(
+    !!videoProps.skipChunkedPlayback || !('MediaSource' in window)
+  );
   useIntersection(videoRef, () => setIsInView(true));
 
   useEffect(() => {
-    setShouldFallback(!!videoProps.skipChunkedPlayback);
+    setShouldFallback(!!videoProps.skipChunkedPlayback || !('MediaSource' in window));
   }, [videoProps.skipChunkedPlayback]);
   const {
     fetchMetadata: { data: videoMetaData },
