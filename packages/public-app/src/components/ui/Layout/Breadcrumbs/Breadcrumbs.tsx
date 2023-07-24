@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ellipsisAtMaxChar } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const Breadcrumbs = ({
@@ -16,7 +16,7 @@ const Breadcrumbs = ({
   return (
     <ul className={`mb-2 hidden flex-row lg:flex ${className ?? ''}`}>
       <li className="mr-2">
-        <Link to={'/home'}>
+        <Link to={HOME_ROOT_PATH}>
           <span className="hover:underline">{t('Home')}</span>
           <span className="ml-2">{'>'}</span>
         </Link>

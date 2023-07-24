@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, Pencil, Times, t } from '@youfoundation/common-app';
+import { Check, HOME_ROOT_PATH, Pencil, Times, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';
@@ -80,7 +80,7 @@ const ConnectionDetails = () => {
             {
               icon: House,
               label: t('Open homepage'),
-              href: `https://${odinId}/home`,
+              href: `https://${odinId}`,
             },
             {
               icon: Trash,

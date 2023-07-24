@@ -2,7 +2,7 @@ import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib/pu
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ChannelDefinitionVm, useBlogPosts } from '@youfoundation/common-app';
+import { ChannelDefinitionVm, HOME_ROOT_PATH, useBlogPosts } from '@youfoundation/common-app';
 import { Arrow, Image, Video } from '@youfoundation/common-app';
 
 import { t } from '@youfoundation/common-app';
@@ -80,7 +80,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
       <div className="mb-5 flex flex-row flex-wrap items-center">
         <h2 className="text-2xl">{title}</h2>
         <ActionLink
-          href={`/home/posts/${channel.slug ? channel.slug + '/' : ''}`}
+          href={`${HOME_ROOT_PATH}posts/${channel.slug ? channel.slug + '/' : ''}`}
           className="ml-auto"
           icon={Arrow}
           type="mute"
@@ -99,7 +99,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
               <PostTeaser
                 className="w-1/2 sm:w-1/3 md:w-1/4 xl:w-1/6"
                 postFile={postFile}
-                linkRoot={`/home/posts/${channel.slug ? channel.slug + '/' : ''}`}
+                linkRoot={`${HOME_ROOT_PATH}posts/${channel.slug ? channel.slug + '/' : ''}`}
                 key={postFile?.fileId}
               />
             );

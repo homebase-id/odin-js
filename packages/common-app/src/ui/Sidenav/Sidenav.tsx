@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-import { MiniDarkModeToggle, getVersion, t } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, MiniDarkModeToggle, getVersion, t } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
@@ -234,7 +234,7 @@ const ExternalNavItem = ({
 
 const IdentityNavItem = () => {
   return (
-    <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={'/home'}>
+    <a className={`relative flex py-2 pl-[0.2rem] pr-1`} href={HOME_ROOT_PATH}>
       <OwnerImage className={`h-9 w-9 flex-shrink-0 rounded-full`} size="custom" />
       <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
         {' '}

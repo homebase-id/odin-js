@@ -1,12 +1,12 @@
 import { HomePageConfig } from '@youfoundation/js-lib/public';
-import { OwnerName, t, useSiteData, Image } from '@youfoundation/common-app';
+import { OwnerName, t, useSiteData, Image, HOME_ROOT_PATH } from '@youfoundation/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();
 
   return (
-    <a href={`/home`} className={`block ${className ?? ''}`}>
+    <a href={HOME_ROOT_PATH} className={`block ${className ?? ''}`}>
       <div className="relative">
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}

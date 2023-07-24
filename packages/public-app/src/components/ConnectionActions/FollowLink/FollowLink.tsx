@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActionLink, ellipsisAtMaxChar } from '@youfoundation/common-app';
+import { ActionLink, HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
@@ -55,7 +55,7 @@ const FollowLink = ({
         title={t('Login')}
         isOpen={isLoginOpen}
         onCancel={() => setIsLoginOpen(false)}
-        returnPath={`/home/action?targetPath=${
+        returnPath={`${HOME_ROOT_PATH}action?targetPath=${
           `/owner/follow/${window.location.hostname}` +
           (channel ? `?chnl=${channel.channelId}` : '')
         }`}
