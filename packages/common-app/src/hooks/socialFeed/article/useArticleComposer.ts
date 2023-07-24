@@ -2,7 +2,13 @@ import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import { convertTextToSlug, getReadingTime, useBlog, useDotYouClient } from '../../../..';
+import {
+  HOME_ROOT_PATH,
+  convertTextToSlug,
+  getReadingTime,
+  useBlog,
+  useDotYouClient,
+} from '../../../..';
 import usePost from '../post/usePost';
 
 export const EMPTY_POST: Article = {
@@ -121,7 +127,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
 
     // TODO: Move to component as it has page context?
     if (isPublish) {
-      window.location.href = `/home/posts/${targetChannel.slug}/${toPostFile.content.slug}`;
+      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.slug}/${toPostFile.content.slug}`;
     } else {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(

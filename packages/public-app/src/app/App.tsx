@@ -14,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
-import { ErrorBoundary } from '@youfoundation/common-app';
+import { ErrorBoundary, HOME_ROOT_PATH, PREVIEW_ROOT } from '@youfoundation/common-app';
 import useAuth from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
@@ -39,7 +39,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path="/home"
+          path={HOME_ROOT_PATH}
           element={
             <Layout>
               <ErrorBoundary>
@@ -79,7 +79,7 @@ function App() {
           </Route>
         </Route>
         <Route
-          path="/home/preview"
+          path={PREVIEW_ROOT}
           element={
             <NoLayout>
               <PreviewPage />

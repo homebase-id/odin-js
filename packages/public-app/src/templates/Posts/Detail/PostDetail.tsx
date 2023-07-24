@@ -1,6 +1,12 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { PostDetailCard, RelatedArticles, t, useBlog } from '@youfoundation/common-app';
+import {
+  HOME_ROOT_PATH,
+  PostDetailCard,
+  RelatedArticles,
+  t,
+  useBlog,
+} from '@youfoundation/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
 import useAuth from '../../../hooks/auth/useAuth';
@@ -41,8 +47,8 @@ const PostDetail = () => {
         <div className="mx-auto mb-10 max-w-3xl sm:px-5 lg:w-2/3">
           <Breadcrumbs
             levels={[
-              { title: t('Posts') ?? '', href: `/home/posts` },
-              { title: channel?.name ?? '', href: `/home/posts/${channel?.slug}` },
+              { title: t('Posts') ?? '', href: `${HOME_ROOT_PATH}posts` },
+              { title: channel?.name ?? '', href: `${HOME_ROOT_PATH}posts/${channel?.slug}` },
               { title: post?.caption ?? '' },
             ]}
             className="text-sm"

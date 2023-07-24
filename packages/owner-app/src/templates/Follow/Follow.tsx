@@ -242,7 +242,7 @@ const IdentityTeaser = ({
       }  rounded-lg border border-gray-200 p-4 hover:shadow-md dark:border-gray-700 hover:dark:shadow-slate-600`}
     >
       <div className="flex h-full items-center">
-        <a href={`https://${odinId}/home`}>
+        <a href={`https://${odinId}`}>
           <img
             src={`https://${odinId}/pub/image`}
             className={`${imageSizeClass} flex-shrink-0 rounded-full bg-gray-100 object-cover object-center`}

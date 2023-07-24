@@ -3,6 +3,7 @@ import { FC } from 'react';
 import {
   ErrorBoundary,
   FakeAnchor,
+  HOME_ROOT_PATH,
   PostBody,
   PostInteracts,
   useDotYouClient,
@@ -37,7 +38,9 @@ export const PostTeaser: FC<PostTeaserProps> = ({
 
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
   //   If there is any media linked and not an article, we load the blogImageDetailPage
-  const postPath = `/home/posts/${channel ? channel.slug : 'public-posts'}/${post.slug ?? post.id}`;
+  const postPath = `${HOME_ROOT_PATH}posts/${channel ? channel.slug : 'public-posts'}/${
+    post.slug ?? post.id
+  }`;
   const imagePath = `${postPath}${
     post.type !== 'Article' && post.primaryMediaFile?.fileId ? '/0' : ''
   }`;

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useBlogPosts } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, t, useBlogPosts } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
 import { Arrow } from '@youfoundation/common-app';
@@ -16,7 +16,7 @@ const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
     pageSize: 1,
   });
 
-  const targetHref = `/home/posts/${channel.slug ?? '#'}`;
+  const targetHref = `${HOME_ROOT_PATH}posts/${channel.slug ?? '#'}`;
 
   if (blogPostsFetched && !blogPosts?.length) {
     return null;

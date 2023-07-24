@@ -4,6 +4,7 @@ import {
   ActionButton,
   ActionLink,
   Article as ArticleIcon,
+  HOME_ROOT_PATH,
   LoadingBlock,
   Plus,
   PostTextListItem,
@@ -125,7 +126,7 @@ const PublishedArticlesView = () => {
                     channel={channel}
                     key={draft.fileId ?? index}
                     className="bg-background"
-                    linkRoot="/home/posts"
+                    linkRoot={`${HOME_ROOT_PATH}posts`}
                   />
                 );
               })

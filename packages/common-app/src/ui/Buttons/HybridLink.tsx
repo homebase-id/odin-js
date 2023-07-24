@@ -11,7 +11,12 @@ interface HybridLinkProps
 
 export const HybridLink = (props: HybridLinkProps) => {
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== (props.href || '/').split('/')[1];
+  const firstPathPart = pathname.split('/')[1];
+  const firstHrefPart = (props.href || '/').split('/')[1];
+  // If both are "owner", or neither is "owner", it's internal, otherwise external
+  const isExternal =
+    (firstPathPart === 'owner' && firstHrefPart === 'owner') ||
+    (firstPathPart !== 'owner' && firstHrefPart !== 'owner');
 
   if (isExternal) return <a {...props}>{props.children}</a>;
   else {

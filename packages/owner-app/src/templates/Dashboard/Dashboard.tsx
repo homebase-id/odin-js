@@ -178,7 +178,7 @@ const HomePageTeaser = () => {
 
   return (
     <a
-      href={`https://${window.location.hostname}/home`}
+      href={`https://${window.location.hostname}`}
       className="block h-full hover:shadow-md hover:dark:shadow-slate-600"
     >
       <div className="relative">

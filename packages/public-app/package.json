@@ -2,9 +2,9 @@
   "name": "@youfoundation/public-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/home",
+  "homepage": "/",
   "scripts": {
-    "start": "vite",
+    "start": "vite --debug",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",

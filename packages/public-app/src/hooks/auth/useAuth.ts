@@ -5,7 +5,7 @@ import {
   logout as logoutYouauth,
   authenticate as authenticateYouAuth,
 } from '../../provider/AuthenticationProvider';
-import { logoutOwner } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, logoutOwner } from '@youfoundation/common-app';
 import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
@@ -75,7 +75,7 @@ const useAuth = () => {
 
     setAuthenticationState('anonymous');
 
-    navigate('/home');
+    navigate(HOME_ROOT_PATH);
   };
 
   const getIdentity = () => {

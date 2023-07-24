@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom';
 import ProfileNav from '../../../Auth/ProfileNav/ProfileNav';
 
-import { AuthorImage, DarkModeToggle, OwnerName, useSiteData } from '@youfoundation/common-app';
+import {
+  AuthorImage,
+  DarkModeToggle,
+  HOME_ROOT_PATH,
+  OwnerName,
+  useSiteData,
+} from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
 
 const Header = () => {
@@ -15,7 +21,7 @@ const Header = () => {
           isOwner ? 'pl-16 lg:pl-5' : ''
         }`}
       >
-        <Link className="title-font flex items-center font-medium" to={'/home'}>
+        <Link className="title-font flex items-center font-medium" to={HOME_ROOT_PATH}>
           {owner?.profileImageId ? (
             <AuthorImage className="h-8 w-8 rounded-full lg:h-[3rem] lg:w-[3rem]" />
           ) : null}
