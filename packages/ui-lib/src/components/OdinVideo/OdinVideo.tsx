@@ -27,6 +27,7 @@ export interface OdinVideoProps {
   probablyEncrypted?: boolean;
   skipChunkedPlayback?: boolean;
   hideControls?: boolean;
+  autoPlay?: boolean;
 }
 
 interface OndinChunkedProps extends OdinVideoProps {
@@ -64,6 +65,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       ref={videoRef}
       key={shouldFallback ? 'fallback' : 'video'} // Get a new video element when we fallback to direct source
       onClick={(e) => e.stopPropagation()}
+      autoPlay={videoProps.autoPlay}
     >
       {isInView && videoMetaData?.isSegmented && !shouldFallback ? (
         <ChunkedSource
