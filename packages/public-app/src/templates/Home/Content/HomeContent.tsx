@@ -8,6 +8,7 @@ import HorizontalPosts from '../Common/Posts/HorizontalPosts';
 import Channels from '../Common/Posts/Channels';
 import Connections from '../Common/Connections/Connections';
 import useTabs from '../../../hooks/tabs/useTabs';
+import { HOME_ROOT_PATH } from '@youfoundation/common-app';
 
 const HomeContent = (props: { leadText?: string; templateSettings: unknown; tab?: string }) => {
   const { tabs, isTabs } = useTabs();
@@ -32,7 +33,9 @@ const HomeContent = (props: { leadText?: string; templateSettings: unknown; tab?
             <div className="max-w-[100vw] sm:max-w-none">
               <div className="container mx-auto overflow-auto px-5 py-4">
                 <NavPills
-                  onChange={(newTab) => navigate(`/home/${newTab}`, { preventScrollReset: true })}
+                  onChange={(newTab) =>
+                    navigate(`${HOME_ROOT_PATH}${newTab}`, { preventScrollReset: true })
+                  }
                   items={tabs.map((tab) => {
                     return { ...tab, isActive: tab.key === activeTab };
                   })}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActionLink, t } from '@youfoundation/common-app';
+import { ActionLink, HOME_ROOT_PATH, t } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Persons } from '@youfoundation/common-app';
@@ -32,7 +32,7 @@ const ConnectLink = ({ className }: { className: string }) => {
         isOpen={isLogin}
         onCancel={() => setIsLogin(false)}
         title={t('Login required')}
-        returnPath={`/home/action?targetPath=${`/owner/connections/${window.location.host}`}`}
+        returnPath={`${HOME_ROOT_PATH}action?targetPath=${`/owner/connections/${window.location.host}`}`}
       >
         {t('You need to login before you can connect')}
       </LoginDialog>

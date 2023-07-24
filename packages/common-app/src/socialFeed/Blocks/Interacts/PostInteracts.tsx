@@ -16,6 +16,7 @@ import {
   useEmojiSummary,
   Repost,
   Share,
+  HOME_ROOT_PATH,
 } from '../../../..';
 
 import { CommentTeaser } from './Comments/Comment';
@@ -73,7 +74,7 @@ export const PostInteracts = ({
   });
   const canReactDetails = data?.canReact ? 'ALLOWED' : data?.details;
 
-  const permalink = `https://${authorOdinId}/home/posts/${postFile.content.channelId}/${
+  const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postFile.content.channelId}/${
     postFile.content.slug ?? postFile.content.id
   }`;
 

@@ -1,7 +1,7 @@
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { t, useDotYouClient } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, t, useDotYouClient } from '@youfoundation/common-app';
 import { useChannel } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoundation/common-app';
@@ -62,7 +62,7 @@ export const PostMeta = ({
       {channel ? (
         <a
           className="text-primary ml-1 border-l pl-1 hover:underline dark:border-slate-500"
-          href={`${odinId ? `https://${odinId}` : ''}/home/posts/${channel.slug}`}
+          href={`${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}`}
           onClick={(e) => e.stopPropagation()}
         >
           {channel?.name ? `${channel?.name}` : ''}

@@ -49,7 +49,7 @@ const Website = () => {
         title={t('Homepage')}
         actions={
           <>
-            <ActionLink href={`https://${window.location.hostname}/home`} icon={Cloud}>
+            <ActionLink href={`https://${window.location.hostname}`} icon={Cloud}>
               {t('Open website')}
             </ActionLink>
           </>

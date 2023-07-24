@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <base href="/home/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
@@ -15,7 +14,7 @@
     <meta name="msapplication-config" content="/icons/browserconfig.xml" />
     <meta name="theme-color" content="#ffffff" />
 
-    <meta name="youauth" content="/home/youauth/finalize" />
+    <meta name="youauth" content="/youauth/finalize" />
     <title>Odin</title>
     <!-- Open issue on HTML Standard: https://github.com/whatwg/html/issues/7887 -->
     <!-- Open Bug on Chrome to respect the spec: https://bugs.chromium.org/p/chromium/issues/detail?id=1072144#c18 -->
@@ -25,7 +24,7 @@
     -->
     <script>
       (function () {
-        if (window.location.pathname === '/home/preview') return;
+        if (window.location.pathname === '/preview') return;
         const apiDomain = `https://${window.location.hostname}`;
         fetch(`${apiDomain}/cdn/sitedata.json`, { cache: 'no-cache' });
         fetch(`${apiDomain}/cdn/blogs.json`, { cache: 'no-cache' });
