@@ -28,6 +28,8 @@ export interface OdinVideoProps {
   skipChunkedPlayback?: boolean;
   hideControls?: boolean;
   autoPlay?: boolean;
+  poster?: string;
+  directFileSizeLimit?: number;
 }
 
 interface OndinChunkedProps extends OdinVideoProps {
@@ -66,6 +68,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       key={shouldFallback ? 'fallback' : 'video'} // Get a new video element when we fallback to direct source
       onClick={(e) => e.stopPropagation()}
       autoPlay={videoProps.autoPlay}
+      poster={videoProps.poster}
     >
       {isInView && videoMetaData?.isSegmented && !shouldFallback ? (
         <ChunkedSource
@@ -293,8 +296,15 @@ const DirectSource = ({
   targetDrive,
   fileId,
   videoMetaData,
+  directFileSizeLimit,
 }: OndinDirectProps) => {
-  const { data: videoUrl } = useVideoUrl(dotYouClient, odinId, fileId, targetDrive).fetch;
+  const { data: videoUrl } = useVideoUrl(
+    dotYouClient,
+    odinId,
+    fileId,
+    targetDrive,
+    directFileSizeLimit
+  ).fetch;
 
   if (!videoUrl) return null;
   return <source src={videoUrl} type={videoMetaData.mimeType} data-type="direct" />;

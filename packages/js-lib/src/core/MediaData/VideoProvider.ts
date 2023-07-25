@@ -163,7 +163,8 @@ export const getDecryptedVideoUrl = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  fileSizeLimit?: number
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringify({
@@ -185,11 +186,18 @@ export const getDecryptedVideoUrl = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType).then(
-    (data) => {
-      if (!data) return '';
-      const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
-      return url;
-    }
-  );
+  // We limit download to 10MB to avoid memory issues
+  return getPayloadBytes(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    undefined,
+    systemFileType,
+    0,
+    fileSizeLimit
+  ).then((data) => {
+    if (!data) return '';
+    const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+    return url;
+  });
 };

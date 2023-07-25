@@ -67,7 +67,8 @@ export const useVideoUrl = (
   dotYouClient: DotYouClient,
   odinId?: string,
   videoFileId?: string | undefined,
-  videoDrive?: TargetDrive
+  videoDrive?: TargetDrive,
+  fileSizeLimit?: number
 ) => {
   const localHost = window.location.hostname;
 
@@ -82,8 +83,21 @@ export const useVideoUrl = (
 
     const fetchMetaPromise = async () => {
       return odinId !== localHost
-        ? await getDecryptedVideoUrlOverTransit(dotYouClient, odinId, videoDrive, videoFileId)
-        : await getDecryptedVideoUrl(dotYouClient, videoDrive, videoFileId);
+        ? await getDecryptedVideoUrlOverTransit(
+            dotYouClient,
+            odinId,
+            videoDrive,
+            videoFileId,
+            undefined,
+            fileSizeLimit
+          )
+        : await getDecryptedVideoUrl(
+            dotYouClient,
+            videoDrive,
+            videoFileId,
+            undefined,
+            fileSizeLimit
+          );
     };
 
     return await fetchMetaPromise();

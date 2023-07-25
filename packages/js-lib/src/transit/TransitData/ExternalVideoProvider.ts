@@ -67,7 +67,8 @@ export const getDecryptedVideoUrlOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  fileSizeLimit?: number
 ): Promise<string> => {
   const meta = await getFileHeaderOverTransit(
     dotYouClient,
@@ -91,7 +92,9 @@ export const getDecryptedVideoUrlOverTransit = async (
     targetDrive,
     fileId,
     undefined,
-    systemFileType
+    systemFileType,
+    0,
+    fileSizeLimit
   ).then((data) => {
     if (!data) return '';
     const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
