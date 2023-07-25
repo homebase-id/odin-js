@@ -16,7 +16,8 @@ export const HybridLink = (props: HybridLinkProps) => {
   // If both are "owner", or neither is "owner", it's internal, otherwise external
   const isExternal =
     (firstPathPart === 'owner' && firstHrefPart === 'owner') ||
-    (firstPathPart !== 'owner' && firstHrefPart !== 'owner');
+    (firstPathPart !== 'owner' && firstHrefPart !== 'owner') ||
+    props.href?.startsWith('http');
 
   if (isExternal) return <a {...props}>{props.children}</a>;
   else {
