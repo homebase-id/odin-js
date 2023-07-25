@@ -93,7 +93,7 @@ export const getDecryptedVideoUrlOverTransit = async (
     fileId,
     undefined,
     systemFileType,
-    0,
+    fileSizeLimit ? 0 : undefined,
     fileSizeLimit
   ).then((data) => {
     if (!data) return '';

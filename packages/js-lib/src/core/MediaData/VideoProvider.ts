@@ -185,6 +185,11 @@ export const getDecryptedVideoUrl = async (
     return await getDirectImageUrl();
   }
 
+  const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  if (!meta?.fileMetadata.payloadIsEncrypted) {
+    return await getDirectImageUrl();
+  }
+
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   // We limit download to 10MB to avoid memory issues
   return getPayloadBytes(
@@ -193,7 +198,7 @@ export const getDecryptedVideoUrl = async (
     fileId,
     undefined,
     systemFileType,
-    0,
+    fileSizeLimit ? 0 : undefined,
     fileSizeLimit
   ).then((data) => {
     if (!data) return '';
