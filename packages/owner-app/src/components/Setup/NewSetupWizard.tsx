@@ -69,8 +69,10 @@ const SetupWizard = ({
     }
 
     // Set fallback name:
-    if (!data.profile.givenName && !data.profile.surname)
-      dataToUse.profile.givenName = window.location.hostname.split('.')[0];
+    if (!data.profile.givenName && !data.profile.surname) {
+      const fallbackName = window.location.hostname.split('.')[0];
+      dataToUse.profile.givenName = fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
+    }
 
     doInitWithData(dataToUse);
   };
