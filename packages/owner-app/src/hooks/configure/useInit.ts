@@ -47,10 +47,10 @@ const useInit = () => {
     // Initialize
     await initialize(dotYouClient, firstRunToken, initDrives);
 
-    // Setup Base Definitions
+    // Ensure Config
     await SetupProfileDefinition(dotYouClient);
     await SetupBlog(dotYouClient);
-    // await SetupHome(dotYouClient); // Better done by DemoData; TODO: Make demoData compatible with existing attributes
+    await SetupHome(dotYouClient);
   };
 
   const doInitWithData = async (data: WelcomeData) => {
@@ -75,7 +75,7 @@ const useInit = () => {
     await SetupBlog(dotYouClient);
     await SetupHome(dotYouClient);
 
-    // Setup Default Identity with data
+    // Setup (default) Data
     await SetupDefaultIdentity(dotYouClient, data);
   };
 

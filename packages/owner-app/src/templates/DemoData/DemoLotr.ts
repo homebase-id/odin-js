@@ -107,10 +107,6 @@ export const lotrRealm = {
       lead: `Frodo Baggins, son of Drogo Baggins, was a hobbit of the Shire in the late Third Age. He is commonly considered Tolkien's most renowned character for his leading role in the Quest of the Ring, in which he bore the One Ring to Mount Doom, where it was destroyed. He was a Ring-bearer, best friend to his gardener, Samwise Gamgee, and one of three hobbits who sailed from Middle-earth to the Uttermost West at the end of the Third Age.`,
       headerImage: headerImages[0],
     },
-    theme: {
-      id: '7e9393d4-48b0-4061-8954-a72215ec8357',
-      themeData: { themeId: '222', tabs: 'true' },
-    },
     blog: {
       channels: [
         {
@@ -216,10 +212,6 @@ export const lotrRealm = {
       tagLine: 'Adventurer',
       lead: `Sam was the youngest son of Hamfast and Bell Gamgee, and had many brothers and sisters. A gardener by trade, Sam seemed to be a simple Hobbit of plain speech. However, his love for Elves, his gift for poetry, and his belief that the world contained greater wonders than most hobbits were aware of (all nurtured by his tutor Bilbo Baggins) set him apart from the beginning. It was Sam who first introduced (in J.R.R. Tolkien's novels) the theme of the Elves sailing from Middle-earth, a subtle foreshadowing of Bilbo and Frodo's final journey across the sea from the Grey Havens. He lived with his father, Hamfast Gamgee, known commonly as "The Gaffer", on Bagshot Row in the Shire, close to Bag End. He had five siblings: Hamson, Halfred, Daisy, May, and Marigold.`,
       headerImage: headerImages[0],
-    },
-    theme: {
-      id: '7e9393d4-48b0-4061-8954-a72215ec8357',
-      themeData: { themeId: '222', tabs: 'true' },
     },
     blog: {
       channels: [

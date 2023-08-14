@@ -504,6 +504,9 @@ const DemoDataHomeAndTheme = ({
   }
 
   const { data: homeData } = useHomeAttributes().fetchHome;
+  const hasHomeData =
+    homeData?.length && homeData[0].data[HomePageFields.TagLineId] === realmData.home.tagLine;
+
   const {
     save: { mutate: saveRoot },
   } = useAttribute({
@@ -512,11 +515,7 @@ const DemoDataHomeAndTheme = ({
   });
 
   const addHome = async () => {
-    if (homeData?.length) {
-      return;
-    }
-
-    const securityGroup = SecurityGroupType.Anonymous;
+    if (hasHomeData) return;
 
     // Create media
     const mediaFileId = await uploadMedia(
@@ -526,7 +525,7 @@ const DemoDataHomeAndTheme = ({
     );
 
     // Create attribute
-    const newRootAttr: AttributeFile = {
+    const newRootAttr: AttributeFile = homeData?.[0] || {
       fileId: undefined,
       versionTag: undefined,
       id: getNewId(),
@@ -535,7 +534,7 @@ const DemoDataHomeAndTheme = ({
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable.toString(),
       data: {},
-      acl: { requiredSecurityGroup: securityGroup },
+      acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     };
 
     newRootAttr.data[HomePageFields.HeaderImageId] = mediaFileId?.toString();
@@ -547,74 +546,17 @@ const DemoDataHomeAndTheme = ({
     return true;
   };
 
-  const { data: themeData } = useHomeAttributes().fetchTheme;
-  const {
-    save: { mutate: saveTheme },
-  } = useAttribute({
-    attributeId: realmData.theme?.id,
-    profileId: HomePageConfig.DefaultDriveId,
-  });
-
-  const addTheme = async () => {
-    if (themeData?.length) {
-      return;
-    }
-
-    const securityGroup = SecurityGroupType.Anonymous;
-
-    // Create attribute
-    const anonymousHomeAttribute: AttributeFile = {
-      fileId: undefined,
-      versionTag: undefined,
-      id: getNewId(),
-      profileId: HomePageConfig.DefaultDriveId.toString(),
-      type: HomePageAttributes.Theme.toString(),
-      priority: 2000,
-      sectionId: HomePageConfig.AttributeSectionNotApplicable.toString(),
-      data: realmData.theme.themeData ?? {},
-      acl: { requiredSecurityGroup: securityGroup },
-    };
-
-    saveTheme(anonymousHomeAttribute);
-  };
-
-  const createHomeAndTheme = async () => {
-    await addHome();
-    await addTheme();
-  };
-
   return (
     <div className="mb-5">
-      <h1>Home and theme:</h1>
+      <h1>Home:</h1>
       <button
         onClick={addHome}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          homeData?.length ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
+          hasHomeData ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={!!homeData?.length || false}
+        disabled={!!hasHomeData}
       >
         Add Home
-      </button>
-      <button
-        onClick={addTheme}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          themeData?.length ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
-        }`}
-        disabled={!!themeData?.length || false}
-      >
-        Add Theme
-      </button>
-
-      <button
-        onClick={createHomeAndTheme}
-        className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-orange-600 focus:outline-none ${
-          !!themeData?.length || !!homeData?.length
-            ? 'pointer-events-none bg-gray-300'
-            : 'bg-orange-500'
-        }`}
-        disabled={!!themeData?.length || !!homeData?.length || false}
-      >
-        Create Homepage And Theme
       </button>
     </div>
   );
@@ -757,7 +699,7 @@ const DemoDataBlog = ({
 
   return (
     <div className="mb-5">
-      <h1>Home and theme:</h1>
+      <h1>Blog:</h1>
       <button
         onClick={addChannels}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
