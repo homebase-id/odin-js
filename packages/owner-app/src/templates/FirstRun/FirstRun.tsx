@@ -57,7 +57,7 @@ const FirstRun = () => {
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <form onSubmit={doNext}>
               <h1 className="mb-5 text-4xl dark:text-white">
-                YouAuth | Setup
+                Odin | Setup
                 <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
@@ -68,20 +68,6 @@ const FirstRun = () => {
                 </>
               ) : (
                 <>
-                  <div className="mb-4">
-                    <Label htmlFor="odin-id" className="text-sm leading-7  dark:text-gray-400">
-                      {t('Odin id')}
-                    </Label>
-                    <Input
-                      type="text"
-                      name="odin-id"
-                      id="odin-id"
-                      required
-                      defaultValue={window.location.hostname}
-                      disabled={true}
-                      readOnly={true}
-                    />
-                  </div>
                   <div className="mb-4">
                     <Label htmlFor="password" className="text-sm leading-7  dark:text-gray-400">
                       {t('Password')}
