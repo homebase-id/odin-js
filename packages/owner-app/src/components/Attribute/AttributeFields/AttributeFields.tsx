@@ -26,11 +26,12 @@ import { Label } from '@youfoundation/common-app';
 import Order from '../../Form/Order';
 import { Select } from '@youfoundation/common-app';
 import { AsYouType } from 'libphonenumber-js';
-import { generateDisplayLocation, generateDisplayName } from '@youfoundation/common-app';
+
 import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import ThemeSelector from '../../Form/ThemeSelector';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
 import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
 
 const profileInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 85, width: 250, height: 250 },

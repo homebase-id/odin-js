@@ -9,9 +9,8 @@ import {
   LocationFields,
 } from '@youfoundation/js-lib/profile';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
-import { getInitialsOfNameAttribute } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';

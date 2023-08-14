@@ -8,6 +8,7 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import SetupWizard from '../../components/Setup/SetupWizard';
 import ShowRecoveryKey from '../../components/Recovery/ShowRecoveryKey';
+import { ProfileSetupData, SocialSetupData } from '../../provider/setup/SetupProvider';
 
 export interface onChangeParams {
   target: {
@@ -17,25 +18,8 @@ export interface onChangeParams {
 }
 
 export interface WelcomeData {
-  profile: {
-    givenName: string;
-    surname: string;
-    city?: string;
-    country?: string;
-    imageData?: {
-      bytes: Uint8Array;
-      type: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml';
-    };
-  };
-  social: {
-    odinId?: string;
-    instagram?: string;
-    twitter?: string;
-    tiktok?: string;
-    facebook?: string;
-    linkedin?: string;
-    other: { text: string; target: string }[];
-  };
+  profile: ProfileSetupData;
+  social: SocialSetupData;
   circles: { name: string; description: string }[];
 }
 
@@ -89,7 +73,7 @@ const Setup = () => {
           ) : (
             <Section>
               <ErrorNotification error={initError || initWithDataError} />
-              <SetupWizard doInitWithData={doInitWithData} doInit={() => doInit(false)} />
+              <SetupWizard doInitWithData={doInitWithData} doInit={doInit} />
             </Section>
           )}
         </div>

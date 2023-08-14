@@ -1,29 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Attribute,
-  BuiltInAttributes,
   AttributeFile,
-  MinimalProfileFields,
-  GetTargetDriveFromProfileId,
   getAttribute,
   saveAttribute,
   removeAttribute,
 } from '@youfoundation/js-lib/profile';
-import { getDisplayNameOfNameAttribute } from '@youfoundation/common-app';
 import useAuth from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
-import {
-  AccessControlList,
-  SecurityGroupType,
-  TargetDrive,
-  getDecryptedImageData,
-  getFileHeader,
-  uploadImage,
-} from '@youfoundation/js-lib/core';
-import { HomePageAttributes, HomePageConfig, HomePageFields } from '@youfoundation/js-lib/public';
-import { aclEqual } from '@youfoundation/js-lib/helpers';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
   return [
@@ -41,63 +29,6 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
 
-  // Helpers:
-  const nameAttributeProcessing = (nameAttr: AttributeFile): AttributeFile => {
-    const newData = { ...nameAttr.data };
-    newData[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
-
-    return { ...nameAttr, data: newData };
-  };
-
-  const confirmDependencyAcl = async (
-    targetAcl: AccessControlList,
-    targetDrive: TargetDrive,
-    fileId: string
-  ) => {
-    if (fileId) {
-      const imageFileMeta = await getFileHeader(dotYouClient, targetDrive, fileId);
-
-      if (imageFileMeta && !aclEqual(targetAcl, imageFileMeta.serverMetadata.accessControlList)) {
-        // Not what it should be, going to reupload it in full
-        const imageData = await getDecryptedImageData(dotYouClient, targetDrive, fileId);
-        if (imageData) {
-          await uploadImage(
-            dotYouClient,
-            targetDrive,
-            targetAcl,
-            new Uint8Array(imageData.bytes),
-            undefined,
-            {
-              fileId,
-              versionTag: imageFileMeta.fileMetadata.versionTag,
-              type: imageData.contentType,
-            }
-          );
-        }
-      }
-    }
-  };
-
-  const photoAttributeProcessing = async (attr: AttributeFile): Promise<AttributeFile> => {
-    const imageFieldKey = MinimalProfileFields.ProfileImageId;
-    const imageFileId = attr.data[imageFieldKey];
-    const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
-
-    await confirmDependencyAcl(attr.acl, targetDrive, imageFileId);
-
-    return attr;
-  };
-
-  const homePageAttributeProcessing = async (attr: AttributeFile): Promise<AttributeFile> => {
-    const imageFieldKey = HomePageFields.HeaderImageId;
-    const imageFileId = attr.data[imageFieldKey];
-    const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
-
-    await confirmDependencyAcl(attr.acl, targetDrive, imageFileId);
-
-    return attr;
-  };
-
   // Externals
   const fetchData = async (profileId?: string, attributeId?: string) => {
     if (!profileId || !attributeId) {
@@ -109,26 +40,9 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
   };
 
   const saveData = async (attribute: AttributeFile) => {
-    let toSaveAttr: AttributeFile | undefined;
-
-    switch (attribute.type) {
-      case BuiltInAttributes.Name:
-        toSaveAttr = nameAttributeProcessing(attribute);
-        break;
-      case BuiltInAttributes.Photo:
-        toSaveAttr = await photoAttributeProcessing(attribute);
-        break;
-      case HomePageAttributes.HomePage:
-        toSaveAttr = await homePageAttributeProcessing(attribute);
-        break;
-      default:
-        toSaveAttr = attribute;
-        break;
-    }
-
     // Don't edit original attribute as it will be used for caching decisions in onSettled
     return await saveAttribute(dotYouClient, {
-      ...toSaveAttr,
+      ...attribute,
       acl: attribute.acl ?? { requiredSecurityGroup: SecurityGroupType.Owner },
     });
   };

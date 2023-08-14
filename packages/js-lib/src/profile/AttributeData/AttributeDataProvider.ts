@@ -13,10 +13,21 @@ import {
   UploadResult,
   uploadFile,
   deleteFile,
+  AccessControlList,
+  getDecryptedImageData,
+  getFileHeader,
+  uploadImage,
 } from '../../core/core';
-import { getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/helpers';
-import { GetTargetDriveFromProfileId } from '../profile';
-import { AttributeConfig } from './AttributeConfig';
+import {
+  aclEqual,
+  getDisplayNameOfNameAttribute,
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+} from '../../helpers/helpers';
+import { HomePageAttributes, HomePageFields } from '../../public/public';
+import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
+import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { AttributeFile, Attribute } from './AttributeDataTypes';
 
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
@@ -183,38 +194,121 @@ export const dsrToAttributeFile = async (
   }
 };
 
+// Attribute Processors:
+// Helpers:
+const nameAttributeProcessing = (nameAttr: AttributeFile): AttributeFile => {
+  const newData = { ...nameAttr.data };
+  newData[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
+
+  return { ...nameAttr, data: newData };
+};
+
+const confirmDependencyAcl = async (
+  dotYouClient: DotYouClient,
+  targetAcl: AccessControlList,
+  targetDrive: TargetDrive,
+  fileId: string
+) => {
+  if (fileId) {
+    const imageFileMeta = await getFileHeader(dotYouClient, targetDrive, fileId);
+
+    if (imageFileMeta && !aclEqual(targetAcl, imageFileMeta.serverMetadata.accessControlList)) {
+      // Not what it should be, going to reupload it in full
+      const imageData = await getDecryptedImageData(dotYouClient, targetDrive, fileId);
+      if (imageData) {
+        await uploadImage(
+          dotYouClient,
+          targetDrive,
+          targetAcl,
+          new Uint8Array(imageData.bytes),
+          undefined,
+          {
+            fileId,
+            versionTag: imageFileMeta.fileMetadata.versionTag,
+            type: imageData.contentType,
+          }
+        );
+      }
+    }
+  }
+};
+
+const photoAttributeProcessing = async (
+  dotYouClient: DotYouClient,
+  attr: AttributeFile
+): Promise<AttributeFile> => {
+  const imageFieldKey = MinimalProfileFields.ProfileImageId;
+  const imageFileId = attr.data[imageFieldKey];
+  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+
+  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+
+  return attr;
+};
+
+const homePageAttributeProcessing = async (
+  dotYouClient: DotYouClient,
+  attr: AttributeFile
+): Promise<AttributeFile> => {
+  const imageFieldKey = HomePageFields.HeaderImageId;
+  const imageFileId = attr.data[imageFieldKey];
+  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+
+  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+
+  return attr;
+};
+
+const processAttribute = async (dotYouClient: DotYouClient, attribute: AttributeFile) => {
+  switch (attribute.type) {
+    case BuiltInAttributes.Name:
+      return nameAttributeProcessing(attribute);
+
+    case BuiltInAttributes.Photo:
+      return await photoAttributeProcessing(dotYouClient, attribute);
+
+    case HomePageAttributes.HomePage:
+      return await homePageAttributeProcessing(dotYouClient, attribute);
+
+    default:
+      return attribute;
+  }
+};
+
 export const saveAttribute = async (
   dotYouClient: DotYouClient,
-  attribute: AttributeFile
+  toSaveAttribute: AttributeFile
 ): Promise<AttributeFile> => {
+  // Process Attribute
+  const attr = await processAttribute(dotYouClient, toSaveAttribute);
+
   // If a new attribute
-  if (!attribute.id) {
-    attribute.id = getNewId();
-  } else if (!attribute.fileId) {
-    attribute.fileId =
-      (await getAttribute(dotYouClient, attribute.profileId, attribute.id))?.fileId ?? undefined;
+  if (!attr.id) {
+    attr.id = getNewId();
+  } else if (!attr.fileId) {
+    attr.fileId = (await getAttribute(dotYouClient, attr.profileId, attr.id))?.fileId ?? undefined;
   }
 
   const encrypt = !(
-    attribute.acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    attribute.acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+    attr.acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    attr.acl.requiredSecurityGroup === SecurityGroupType.Authenticated
   );
 
-  if (!attribute.id || !attribute.profileId || !attribute.type || !attribute.sectionId) {
+  if (!attr.id || !attr.profileId || !attr.type || !attr.sectionId) {
     throw 'Attribute is missing id, profileId, sectionId, or type';
   }
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: attribute?.fileId ?? '',
-      drive: GetTargetDriveFromProfileId(attribute.profileId),
+      overwriteFileId: attr?.fileId ?? '',
+      drive: GetTargetDriveFromProfileId(attr.profileId),
     },
     transitOptions: null,
   };
 
   const payloadJson: string = jsonStringify64({
-    ...attribute,
+    ...attr,
     acl: undefined,
     fileId: undefined,
   } as Attribute);
@@ -223,19 +317,19 @@ export const saveAttribute = async (
   // Set max of 3kb for jsonContent so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
-    versionTag: attribute.versionTag,
+    versionTag: attr.versionTag,
     allowDistribution: false,
     contentType: 'application/json',
     appData: {
-      uniqueId: attribute.id,
-      tags: [attribute.type, attribute.sectionId, attribute.profileId, attribute.id],
-      groupId: attribute.sectionId,
+      uniqueId: attr.id,
+      tags: [attr.type, attr.sectionId, attr.profileId, attr.id],
+      groupId: attr.sectionId,
       fileType: AttributeConfig.AttributeFileType,
       contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
     },
     payloadIsEncrypted: encrypt,
-    accessControlList: attribute.acl,
+    accessControlList: attr.acl,
   };
 
   const result: UploadResult = await uploadFile(
@@ -248,8 +342,8 @@ export const saveAttribute = async (
   );
 
   //update server-side info
-  attribute.fileId = result.file.fileId;
-  return attribute;
+  attr.fileId = result.file.fileId;
+  return attr;
 };
 
 export const removeAttribute = async (

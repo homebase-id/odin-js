@@ -16,7 +16,6 @@ import { Select, useChannel } from '@youfoundation/common-app';
 import usePost from '../../hooks/posts/usePost';
 import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
-import { convertTextToSlug } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
 import {
@@ -41,7 +40,7 @@ import {
   PostFile,
   PostContent,
 } from '@youfoundation/js-lib/public';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { convertTextToSlug, getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 
 type RealmName = keyof typeof lotrRealm | undefined;

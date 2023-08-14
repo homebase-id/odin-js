@@ -1,14 +1,8 @@
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { convertTextToSlug, getNewId } from '@youfoundation/js-lib/helpers';
 import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import {
-  HOME_ROOT_PATH,
-  convertTextToSlug,
-  getReadingTime,
-  useBlog,
-  useDotYouClient,
-} from '../../../..';
+import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import usePost from '../post/usePost';
 
 export const EMPTY_POST: Article = {

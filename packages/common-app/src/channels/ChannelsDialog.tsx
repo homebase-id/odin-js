@@ -10,7 +10,6 @@ import {
   Pencil,
   Textarea,
   Trash,
-  convertTextToSlug,
   useChannels,
 } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
@@ -22,6 +21,7 @@ import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import TemplateSelector from './ChannelTemplateSelector';
 import { ChannelTemplate } from '@youfoundation/js-lib/public';
+import { convertTextToSlug } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsDialog = ({
   isOpen,

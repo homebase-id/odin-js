@@ -5,7 +5,8 @@ import {
   removeProfileDefinition,
   saveProfileDefinition,
 } from '@youfoundation/js-lib/profile';
-import { convertTextToSlug, useDotYouClient } from '@youfoundation/common-app';
+import { useDotYouClient } from '@youfoundation/common-app';
+import { convertTextToSlug } from '@youfoundation/js-lib/helpers';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;
