@@ -95,11 +95,13 @@ const SetupWizard = ({
 
       // Set default image:
       if (!data.profile.imageData || !data.profile.imageData.bytes) {
+        const initials =
+          (data.profile['givenName']?.[0] ?? '') + (data.profile['surname']?.[0] ?? '');
+        const odinIdInitials = window.location.hostname.split('.')[0].substring(0, 2);
+
         dataToUse.profile.imageData = {
           bytes: base64ToUint8Array(
-            fallbackImage(
-              (data.profile['givenName']?.[0] ?? '') + (data.profile['surname']?.[0] ?? '')
-            )
+            fallbackImage(initials?.length >= 2 ? initials : odinIdInitials)
           ),
           type: 'image/svg+xml',
         };
