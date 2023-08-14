@@ -35,6 +35,7 @@ export interface ImageUploadResult extends MediaUploadResult {
 
 export interface ImageMetadata {
   description?: string;
+  originalFileName?: string;
   camera?: {
     make?: string;
     model?: string;

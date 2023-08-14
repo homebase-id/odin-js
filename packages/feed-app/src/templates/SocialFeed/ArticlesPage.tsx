@@ -1,5 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { Article, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { Article, PostFile } from '@youfoundation/js-lib/public';
 import {
   ActionButton,
   ActionLink,
@@ -114,7 +114,7 @@ const PublishedArticlesView = () => {
         {articleData ? (
           <div className="-m-3">
             {!flattenedPosts.length ? (
-              <p className="m-3">{t('No articles found')}</p>
+              <SubtleMessage className="m-3">{t('No articles found')}</SubtleMessage>
             ) : (
               flattenedPosts.map((draft, index) => {
                 const channel = channels?.find(
