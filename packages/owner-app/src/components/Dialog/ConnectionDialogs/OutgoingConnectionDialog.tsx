@@ -18,15 +18,14 @@ const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 
 const OutgoingConnectionDialog = ({
   title,
+  targetOdinId,
   isOpen,
   onConfirm,
   onCancel,
 }: {
   title: string;
-  confirmText?: string;
-
+  targetOdinId?: string;
   isOpen: boolean;
-
   onConfirm: () => void;
   onCancel: () => void;
 }) => {
@@ -42,7 +41,9 @@ const OutgoingConnectionDialog = ({
 
   const [doubleChecked, setDoubleChecked] = useState(false);
 
-  const [connectionTarget, setConnectionTarget] = useState<string>();
+  const [connectionTarget, setConnectionTarget] = useState<string | undefined>(
+    targetOdinId || undefined
+  );
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [name, setName] = useState<string>(window.location.hostname);
   const [photoFileId, setPhotoFileId] = useState<string>();
@@ -115,6 +116,8 @@ const OutgoingConnectionDialog = ({
                     setConnectionTarget(e.target.value);
                   }}
                   defaultValue={connectionTarget}
+                  readOnly={!!targetOdinId}
+                  disabled={!!targetOdinId}
                   required
                 />
               </div>

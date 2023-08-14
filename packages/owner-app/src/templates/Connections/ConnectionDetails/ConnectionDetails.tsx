@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, HOME_ROOT_PATH, Pencil, Times, t } from '@youfoundation/common-app';
+import { ActionGroupOptionProps, Check, Pencil, Times, t } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';
@@ -27,6 +27,7 @@ import useApps from '../../../hooks/apps/useApps';
 import { AccessGrant, ConnectionInfo, DriveGrant } from '@youfoundation/js-lib/network';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 
 const ConnectionDetails = () => {
   const { odinId } = useParams();
@@ -42,26 +43,22 @@ const ConnectionDetails = () => {
       status: revokeRequestStatus,
       error: revokeError,
     },
-    block: { mutate: block, status: blockStatus, error: blockError },
+    block: { mutate: block, error: blockError },
     unblock: { mutate: unblock, status: unblockStatus, error: unblockError },
   } = useConnection({ odinId: odinId });
 
   const checkReturnTo = useFocusedEditing();
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
   const [isEditPermissionActive, setIsEditPermissionActive] = useState(false);
+  const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
 
   // Contact data:
   const { data: contactData } = useContact({ odinId: odinId }).fetch;
 
-  if (connectionInfoLoading) {
-    return <LoadingDetailPage />;
-  }
+  if (connectionInfoLoading) return <LoadingDetailPage />;
+  if ((!connectionInfo && !contactData) || !odinId) return <>{t('No matching connection found')}</>;
 
-  if ((!connectionInfo && !contactData) || !odinId) {
-    return <>{t('No matching connection found')}</>;
-  }
-
-  const actions =
+  const mainAction =
     connectionInfo?.status === 'connected' ? (
       <>
         <ActionButton
@@ -73,44 +70,11 @@ const ConnectionDetails = () => {
         >
           {t('Edit Access')}
         </ActionButton>
-        <ActionGroup
-          type="secondary"
-          size="square"
-          options={[
-            {
-              icon: House,
-              label: t('Open homepage'),
-              href: `https://${odinId}`,
-            },
-            {
-              icon: Trash,
-              label: t('Remove'),
-              onClick: () => disconnect({ connectionOdinId: odinId }),
-              confirmOptions: {
-                title: `${t('Remove')} ${odinId}`,
-                buttonText: t('Remove'),
-                body: `${t('Are you sure you want to remove')} ${odinId} ${t(
-                  'from your connections. They will lose all existing access.'
-                )}`,
-              },
-            },
-            {
-              icon: Block,
-              label: t('Block'),
-              onClick: () => block(odinId),
-              confirmOptions: {
-                title: `${t('Block')} ${odinId}`,
-                buttonText: t('Block'),
-                body: `${t('Are you sure you want to block')} ${odinId}`,
-              },
-            },
-          ]}
-        />
       </>
     ) : connectionInfo?.status === 'sent' ? (
       <>
         <ActionButton
-          type="secondary"
+          type="remove"
           onClick={() => {
             revokeRequest(
               { targetOdinId: connectionInfo.senderOdinId },
@@ -122,13 +86,65 @@ const ConnectionDetails = () => {
           {t('Revoke')}
         </ActionButton>
       </>
-    ) : (
-      <></>
-    );
+    ) : connectionInfo?.status === 'blocked' ? (
+      <ActionButton
+        type="remove"
+        onClick={() => unblock(odinId)}
+        state={unblockStatus}
+        confirmOptions={{
+          type: 'info',
+          title: `${t('Unblock')} ${odinId}`,
+          buttonText: t('Unblock'),
+          body: `${t('Are you sure you want to unblock')} ${odinId}`,
+        }}
+      >
+        {t('Unblock')}
+      </ActionButton>
+    ) : connectionInfo?.status !== 'pending' ? (
+      <>
+        <ActionButton type="primary" onClick={() => setIsSentConnectionOpen(true)}>
+          {t('Connect')}
+        </ActionButton>
+      </>
+    ) : null;
+
+  const actionGroupOptions: ActionGroupOptionProps[] = [
+    {
+      icon: House,
+      label: t('Open homepage'),
+      href: `https://${odinId}`,
+    },
+  ];
+
+  if (connectionInfo?.status === 'connected') {
+    actionGroupOptions.push({
+      icon: Trash,
+      label: t('Remove'),
+      onClick: () => disconnect({ connectionOdinId: odinId }),
+      confirmOptions: {
+        title: `${t('Remove')} ${odinId}`,
+        buttonText: t('Remove'),
+        body: `${t('Are you sure you want to remove')} ${odinId} ${t(
+          'from your connections. They will lose all existing access.'
+        )}`,
+      },
+    });
+  }
+
+  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
+    actionGroupOptions.push({
+      icon: Block,
+      label: t('Block'),
+      onClick: () => block(odinId),
+      confirmOptions: {
+        title: `${t('Block')} ${odinId}`,
+        buttonText: t('Block'),
+        body: `${t('Are you sure you want to block')} ${odinId}`,
+      },
+    });
+  }
 
   const activeConnection = connectionInfo as ConnectionInfo;
-
-  console.log(activeConnection?.created);
 
   return (
     <>
@@ -156,36 +172,8 @@ const ConnectionDetails = () => {
         }
         actions={
           <>
-            {connectionInfo?.status === 'blocked' ? (
-              <ActionButton
-                type="remove"
-                onClick={() => unblock(odinId)}
-                state={unblockStatus}
-                confirmOptions={{
-                  type: 'info',
-                  title: `${t('Unblock')} ${odinId}`,
-                  buttonText: t('Unblock'),
-                  body: `${t('Are you sure you want to unblock')} ${odinId}`,
-                }}
-              >
-                {t('Unblock')}
-              </ActionButton>
-            ) : connectionInfo?.status !== 'connected' ? (
-              <ActionButton
-                type="remove"
-                onClick={() => block(odinId)}
-                state={blockStatus}
-                confirmOptions={{
-                  type: 'warning',
-                  title: `${t('Block')} ${odinId}`,
-                  buttonText: t('Block'),
-                  body: `${t('Are you sure you want to block')} ${odinId}`,
-                }}
-              >
-                {t('Block')}
-              </ActionButton>
-            ) : null}
-            {actions}
+            {mainAction}
+            <ActionGroup options={actionGroupOptions} type="secondary" size="square" />
           </>
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
@@ -257,12 +245,6 @@ const ConnectionDetails = () => {
 
       {connectionInfo?.status === 'connected' ? (
         <>
-          {/* <Section
-            isOpaqueBg={true}
-            title={`${t('Posts of')} ${contactData?.name?.givenName} ${contactData?.name?.surname}`}
-          >
-            <SocialFeed odinId={odinId} />
-          </Section> */}
           <ConnectionPermissionViewer
             accessGrant={activeConnection.accessGrant}
             openEditCircleMembership={() => setIsEditPermissionActive(true)}
@@ -286,6 +268,14 @@ const ConnectionDetails = () => {
           </section>
         </>
       ) : null}
+
+      <OutgoingConnectionDialog
+        title={t('Send connection request')}
+        isOpen={isSentConnectionOpen}
+        targetOdinId={odinId}
+        onConfirm={() => setIsSentConnectionOpen(false)}
+        onCancel={() => setIsSentConnectionOpen(false)}
+      />
     </>
   );
 };
