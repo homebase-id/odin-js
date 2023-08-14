@@ -28,6 +28,7 @@ export interface WelcomeData {
     };
   };
   social: {
+    odinId?: string;
     instagram?: string;
     twitter?: string;
     tiktok?: string;

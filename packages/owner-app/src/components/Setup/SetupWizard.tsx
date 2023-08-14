@@ -23,7 +23,10 @@ const defaultData: WelcomeData = {
     country: '',
     imageData: undefined,
   },
-  social: { other: [] },
+  social: {
+    odinId: window.location.hostname,
+    other: [],
+  },
   circles: [
     { name: 'Friends', description: 'Your friends' },
     { name: 'Family', description: 'Your family' },
@@ -93,7 +96,7 @@ const SetupWizard = ({
     if (page === pages.length) {
       const dataToUse = { ...data };
 
-      // Set default image:
+      // Set fallback image:
       if (!data.profile.imageData || !data.profile.imageData.bytes) {
         const initials =
           (data.profile['givenName']?.[0] ?? '') + (data.profile['surname']?.[0] ?? '');
@@ -106,6 +109,10 @@ const SetupWizard = ({
           type: 'image/svg+xml',
         };
       }
+
+      // Set fallback name:
+      if (!data.profile.givenName && !data.profile.surname)
+        dataToUse.profile.givenName = window.location.hostname.split('.')[0];
 
       doInitWithData(dataToUse);
     }

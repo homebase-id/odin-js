@@ -15,6 +15,7 @@ import {
   MinimalProfileFields,
   NicknameFields,
   PhoneFields,
+  SocialFields,
 } from '@youfoundation/js-lib/profile';
 import { debounce } from 'lodash-es';
 import { useMemo, useState } from 'react';
@@ -168,16 +169,14 @@ const AttributeFields = ({
       );
       break;
     case BuiltInAttributes.OdinIdentity:
-      // eslint-disable-next-line no-case-declarations
-      const objectKey = attribute.typeDefinition.name.replaceAll(' ', '').toLowerCase();
       return (
         <>
           <div className="mb-5">
             <Label htmlFor="handle">{attribute.typeDefinition.name}</Label>
             <Input
               id="handle"
-              name={objectKey}
-              defaultValue={attribute.data?.[objectKey] ?? ''}
+              name={SocialFields.Odin}
+              defaultValue={attribute.data?.[SocialFields.Odin] ?? ''}
               onChange={debouncedChange}
             />
           </div>

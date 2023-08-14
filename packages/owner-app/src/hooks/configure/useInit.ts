@@ -462,6 +462,10 @@ const useInit = () => {
       return true;
     };
 
+    if (data.social.odinId) {
+      await saveSocial(BuiltInAttributes.OdinIdentity, SocialFields.Odin, data.social.odinId, 1000);
+    }
+
     if (data.social.facebook) {
       await saveSocial(
         BuiltInAttributes.FacebookUsername,
