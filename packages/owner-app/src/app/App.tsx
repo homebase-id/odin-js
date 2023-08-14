@@ -254,7 +254,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
     console.debug('[NOT CONFIGURED]: Redirect to configure');
     return (
       <Navigate
-        to={`${SETUP_PATH}?ui=none&returnUrl=${encodeURIComponent(
+        to={`${SETUP_PATH}?returnUrl=${encodeURIComponent(
           window.location.pathname + window.location.search
         )}`}
       />
