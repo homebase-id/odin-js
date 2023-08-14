@@ -10,7 +10,6 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
 
   return (
     <>
-      <h1 className="mb-5 text-2xl">Recovery Key</h1>
       <p className="mb-5 text-slate-800">
         Before we continue setting up your identity it{"'"}s important that you can recover access
         to your identity. As your data is encrypted with your password, you can only get access to
@@ -29,7 +28,7 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
           )}
         </p>
       </div>
-      <div className="flex flex-row-reverse">
+      <div className="mt-5 flex flex-row justify-center">
         <ActionButton
           confirmOptions={{
             title: t('Have you stored your recovery key?'),

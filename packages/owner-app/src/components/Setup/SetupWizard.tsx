@@ -6,7 +6,7 @@ import Profile from './Pages/Profile';
 import Socials from './Pages/Socials';
 import Welcome from './Pages/Welcome';
 import { WelcomeData } from '../../templates/Setup/Setup';
-import fallbackImage from '../../templates/Setup/fallbackImage';
+import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
 import Pager from './SetupPager';
 import Circles from './Pages/Circles';
 
@@ -104,7 +104,7 @@ const SetupWizard = ({
 
         dataToUse.profile.imageData = {
           bytes: base64ToUint8Array(
-            fallbackImage(initials?.length >= 2 ? initials : odinIdInitials)
+            fallbackProfileImage(initials?.length >= 2 ? initials : odinIdInitials)
           ),
           type: 'image/svg+xml',
         };

@@ -4,11 +4,11 @@ import { useSearchParams } from 'react-router-dom';
 import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import useInit from '../../hooks/configure/useInit';
 import useIsConfigured from '../../hooks/configure/useIsConfigured';
-import { ErrorNotification } from '@youfoundation/common-app';
-import Section from '../../components/ui/Sections/Section';
-import SetupWizard from '../../components/Setup/SetupWizard';
+import { DomainHighlighter, ErrorNotification } from '@youfoundation/common-app';
 import ShowRecoveryKey from '../../components/Recovery/ShowRecoveryKey';
 import { ProfileSetupData, SocialSetupData } from '../../provider/setup/SetupProvider';
+import NewSetupWizard from '../../components/Setup/NewSetupWizard';
+import { MinimalLayout } from '../../components/ui/Layout/Layout';
 
 export interface onChangeParams {
   target: {
@@ -63,21 +63,27 @@ const Setup = () => {
       <Helmet>
         <title>Setup | Odin</title>
       </Helmet>
+      <MinimalLayout noShadedBg={true}>
+        <div className="min-h-screen">
+          <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col p-5">
+            <h1 className="mb-5 text-4xl dark:text-white">
+              Odin | Setup
+              <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
+              </small>
+            </h1>
 
-      <div className="min-h-screen">
-        <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col p-5">
-          {!hasRecoveryKey ? (
-            <Section>
+            {!hasRecoveryKey ? (
               <ShowRecoveryKey onConfirm={() => setHasRecoveryKey(true)} />
-            </Section>
-          ) : (
-            <Section>
-              <ErrorNotification error={initError || initWithDataError} />
-              <SetupWizard doInitWithData={doInitWithData} doInit={doInit} />
-            </Section>
-          )}
+            ) : (
+              <>
+                <ErrorNotification error={initError || initWithDataError} />
+                <NewSetupWizard doInitWithData={doInitWithData} doInit={doInit} />
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      </MinimalLayout>
     </>
   );
 };

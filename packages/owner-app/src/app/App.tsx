@@ -114,12 +114,15 @@ function App() {
           path="/owner"
           element={
             <RootRoute>
-              <Outlet />
+              <Suspense>
+                <Outlet />
+              </Suspense>
             </RootRoute>
           }
         >
           <Route path="login/youauth" element={<YouAuthLogin />} />
           <Route path="youauth/authorize" element={<YouAuthConsent />} />
+          <Route path="setup" element={<Setup />} />
 
           <Route
             path=""
@@ -149,8 +152,6 @@ function App() {
               </Layout>
             }
           >
-            <Route path="setup" element={<Setup />} />
-
             <Route index={true} element={<Home />} />
 
             <Route path="notifications" element={<Notifications />}></Route>

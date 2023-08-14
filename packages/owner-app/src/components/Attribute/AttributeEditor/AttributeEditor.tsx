@@ -25,7 +25,7 @@ const AttributeEditor = ({
   onSave?: () => void;
 }) => {
   const [isNewAttribute, setIsNewAttribute] = useState(false);
-
+  console.log({ attribute });
   const {
     save: { mutate: saveAttr, status: saveStatus, error: saveError },
     remove: { mutate: removeAttr },

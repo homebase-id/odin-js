@@ -12,7 +12,7 @@ import {
   getChannelDefinition,
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
-import { getNewId, toGuidId } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, getNewId, toGuidId } from '@youfoundation/js-lib/helpers';
 import {
   ProfileDefinition,
   BuiltInProfiles,
@@ -32,6 +32,7 @@ import {
   getAttributeVersions,
 } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
+import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   const initialStandardProfile: ProfileDefinition = {
@@ -85,13 +86,30 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
+  const headerImageFileId = (
+    await uploadImage(
+      dotYouClient,
+      HomePageConfig.HomepageTargetDrive,
+      ANONYMOUS_ACL,
+      base64ToUint8Array(fallbackHeaderImage()),
+      undefined,
+      { type: 'image/svg+xml' }
+    )
+  )?.fileId;
+
   const defaultHomeAttribute: AttributeVm = {
     id: getNewId(),
     profileId: HomePageConfig.DefaultDriveId,
     type: HomePageAttributes.HomePage,
     priority: 1000,
     sectionId: HomePageConfig.AttributeSectionNotApplicable,
-    data: { isProtected: true },
+    data: {
+      headerImageId: headerImageFileId,
+      leadText:
+        'Born in a serene town that instilled values of compassion and integrity, embodies the essence of a true global citizen.',
+      tagLine: 'New Identity Owner',
+      isProtected: true,
+    },
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     typeDefinition: {
       type: HomePageAttributes.HomePage,
@@ -149,7 +167,7 @@ export interface ProfileSetupData {
   country?: string;
   imageData?: {
     bytes: Uint8Array;
-    type: 'image/png' | 'image/jpeg' | 'image/tiff' | 'image/webp' | 'image/svg+xml';
+    type: ImageContentType;
   };
 }
 
@@ -212,7 +230,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       id: defaultNameAttrId,
       profileId: BuiltInProfiles.StandardProfileId,
       type: BuiltInAttributes.Name,
-      priority: 1000,
+      priority: 2000,
       sectionId: BuiltInProfiles.PersonalInfoSectionId,
       data: {},
       acl: ANONYMOUS_ACL,
@@ -240,7 +258,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
         id: defaultLocationAttrId,
         profileId: BuiltInProfiles.StandardProfileId,
         type: BuiltInAttributes.Address,
-        priority: 1000,
+        priority: 3000,
         sectionId: BuiltInProfiles.PersonalInfoSectionId,
         data: {},
         acl: ANONYMOUS_ACL,
