@@ -154,8 +154,6 @@ export const OdinImage = ({
       : 'h-auto max-h-[inherit] w-full'
   } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
 
-  if (!fileId) return null;
-
   return (
     <figure
       className={`${className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${
@@ -164,7 +162,7 @@ export const OdinImage = ({
       ref={wrapperRef}
       data-fileid={fileId}
     >
-      {isLoadingTiny ? (
+      {!fileId ? null : isLoadingTiny ? (
         <LoadingBlock className="aspect-square h-full w-full" />
       ) : (
         <>
