@@ -1,37 +1,26 @@
-import { useRef, useState } from 'react';
+import { lazy, useState } from 'react';
 import {
-  ActionGroup,
   AuthorImage,
   AuthorName,
   CanReactDetails,
-  CommentComposer,
-  CommentEditor,
-  EmojiSummary,
-  ReactionsBar,
-  RichTextRenderer,
   t,
-  useCommentMedia,
-  useComments,
-  useDotYouClient,
-  useOutsideTrigger,
   useReaction,
 } from '@youfoundation/common-app';
 
 import {
   CommentReactionPreview,
-  GetTargetDriveFromChannelId,
-  ReactionContent,
   ReactionContext,
   ReactionFile,
 } from '@youfoundation/js-lib/public';
 
-import { Ellipsis } from '@youfoundation/common-app';
-import { Pencil } from '@youfoundation/common-app';
-import { Times } from '@youfoundation/common-app';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
-import { format } from '../../../../helpers/timeago';
-import { TargetDrive } from '@youfoundation/js-lib/core';
+
+const CommentHead = lazy(() => import('./Parts/CommentHead'));
+const CommentBody = lazy(() => import('./Parts/CommentBody'));
+const CommentMeta = lazy(() => import('./Parts/CommentMeta'));
+const CommentThread = lazy(() =>
+  import('./Parts/CommentThread').then((m) => ({ default: m.CommentThread }))
+);
 
 export interface CommentProps {
   context: ReactionContext;
@@ -160,277 +149,6 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
           </div>
         </div>
       </div>
-    </>
-  );
-};
-
-const CommentHead = ({
-  authorOdinId,
-  setIsEdit,
-  // commentBody,
-  onRemove,
-}: {
-  authorOdinId: string;
-  setIsEdit?: (isEdit: boolean) => void;
-  commentBody: string;
-  onRemove?: () => void;
-}) => {
-  const { isOwner } = useDotYouClient();
-
-  return (
-    <div className="flex flex-row">
-      <AuthorName odinId={authorOdinId} />
-      {isOwner && setIsEdit && onRemove ? (
-        <ActionGroup
-          options={[
-            { label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil },
-            {
-              label: t('Remove'),
-              onClick: onRemove,
-              icon: Times,
-              // TODO find better fix:
-              // Confirmoptions shows a new dialog, which might appear on top of the PostPreview dialog
-              // confirmOptions: {
-              //   title: t('Remove comment'),
-              //   body: `${t('Are you sure you want to remove your comment')}: "${commentBody}"`,
-              //   buttonText: t('Remove'),
-              // },
-            },
-          ]}
-          type="mute"
-          size="small"
-          icon={Ellipsis}
-        >
-          {' '}
-        </ActionGroup>
-      ) : null}
-    </div>
-  );
-};
-
-const CommentBody = ({
-  context,
-  commentFileId,
-  content,
-  isEdit,
-  onUpdate,
-}: {
-  context?: ReactionContext;
-  commentFileId?: string;
-  content: ReactionContent;
-  isEdit?: boolean;
-  onUpdate?: (commentBody: string, attachment?: File) => void;
-}) => {
-  const { body, bodyAsRichText } = content;
-  const sourceTargetDrive = context && GetTargetDriveFromChannelId(context.channelId);
-
-  return (
-    <>
-      {isEdit && onUpdate ? (
-        <CommentEditor defaultBody={body} doPost={onUpdate} />
-      ) : (
-        <>
-          {bodyAsRichText ? (
-            <RichTextRenderer body={bodyAsRichText} />
-          ) : (
-            <p className="whitespace-pre-wrap">{body}</p>
-          )}
-          {content.hasAttachment && context ? (
-            <CommentMedia
-              postAuthorOdinId={context.authorOdinId}
-              targetDrive={sourceTargetDrive}
-              fileId={commentFileId}
-            />
-          ) : null}
-        </>
-      )}
-    </>
-  );
-};
-
-const CommentMedia = ({
-  postAuthorOdinId,
-  targetDrive,
-  fileId,
-}: {
-  postAuthorOdinId?: string;
-  targetDrive?: TargetDrive;
-  fileId?: string;
-}) => {
-  // console.log({ odinId: postAuthorOdinId, targetDrive, fileId });
-  const { data: imageUrl } = useCommentMedia({
-    odinId: postAuthorOdinId,
-    targetDrive,
-    fileId,
-  }).fetch;
-
-  if (!imageUrl?.length)
-    return (
-      <div className="text-foreground my-1 flex h-10 animate-pulse flex-row items-center justify-center bg-white text-sm text-opacity-50">
-        {t('loading')}
-      </div>
-    );
-
-  return (
-    <>
-      <img src={imageUrl} className="my-1" />
-    </>
-  );
-};
-
-const CommentMeta = ({
-  canReact,
-  threadContext,
-  created,
-  updated,
-  onReply,
-}: {
-  canReact: boolean;
-  threadContext: ReactionContext;
-  created?: number;
-  updated?: number;
-  onReply?: () => void;
-}) => {
-  const isEdited = updated && updated !== 0 && updated !== created;
-
-  return (
-    <div className="text-foreground relative ml-[2.25rem] flex flex-row items-center px-2 pt-[2px] text-sm text-opacity-20 dark:text-opacity-30">
-      {canReact ? (
-        <>
-          <CommenLikeButton threadContext={threadContext} />
-          <span className="block px-1">·</span>
-        </>
-      ) : null}
-      <EmojiSummary
-        context={threadContext}
-        className="after:content[''] text-xs after:my-auto after:ml-1 after:block after:h-3 after:border-l after:pl-1 dark:after:border-slate-600"
-      />
-      {canReact && onReply ? (
-        <button
-          className="text-primary ml-1 mr-2 text-opacity-80 hover:underline"
-          onClick={onReply}
-        >
-          {t('Reply')}
-        </button>
-      ) : null}
-      {created ? (
-        <p className="mr-2">
-          {format(new Date(isEdited ? updated : created))}
-          {isEdited ? <> - {t('Edited')}</> : null}
-        </p>
-      ) : null}
-    </div>
-  );
-};
-
-const CommenLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [isReact, setIsReact] = useState(false);
-
-  const { getIdentity } = useDotYouClient();
-  const { mutateAsync: postReaction, error: postReactionError } = useReaction().saveEmoji;
-
-  const isDesktop = document.documentElement.clientWidth >= 1024;
-  useOutsideTrigger(wrapperRef, () => setIsReact(false));
-
-  const doLike = () => {
-    console.log({
-      authorOdinId: getIdentity() || '',
-      content: { body: '❤️' },
-      context: threadContext,
-    });
-    postReaction({
-      authorOdinId: getIdentity() || '',
-      content: { body: '❤️' },
-      context: threadContext,
-    });
-  };
-
-  return (
-    <>
-      <div className="relative" ref={wrapperRef}>
-        {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
-        <div
-          className={`${isReact ? 'absolute' : 'contents'} -left-1 -top-10 bottom-[100%] w-[10rem]`}
-          onMouseLeave={() => setIsReact(false)}
-          onMouseEnter={() => setIsReact(true)}
-        >
-          <ReactionsBar
-            className="absolute left-0 top-0"
-            isActive={isReact}
-            context={threadContext}
-            canReactDetails="ALLOWED"
-            onClose={() => setIsReact(false)}
-          />
-        </div>
-        <button
-          className="text-primary ml-1 mr-1 text-opacity-80 hover:underline"
-          onClick={() => {
-            if (isDesktop) doLike();
-            else setIsReact(!isReact);
-          }}
-          onMouseEnter={() => setIsReact(true)}
-          onMouseLeave={() => setIsReact(false)}
-        >
-          {t('Like')}
-        </button>
-      </div>
-      <ErrorNotification error={postReactionError} />
-    </>
-  );
-};
-
-const CommentThread = ({
-  context,
-  canReactDetails,
-  isReply,
-  setIsReply,
-}: {
-  context: ReactionContext;
-  canReactDetails: CanReactDetails;
-  isReply: boolean;
-  setIsReply: (isReply: boolean) => void;
-}) => {
-  const {
-    data: comments,
-    hasNextPage,
-    fetchNextPage,
-  } = useComments({
-    context,
-  }).fetch;
-  const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
-
-  return (
-    <>
-      {hasNextPage ? (
-        <a
-          className="text-primary cursor-pointer pl-4 text-sm font-semibold text-opacity-80 hover:underline"
-          onClick={() => fetchNextPage()}
-        >
-          {t('View older')}
-        </a>
-      ) : null}
-      {context.target.globalTransitId &&
-        flattenedComments?.map((comment, index) => {
-          return (
-            <Comment
-              context={context}
-              commentData={comment}
-              canReactDetails={canReactDetails}
-              key={comment.id || index}
-              onReply={() => setIsReply(!isReply)}
-              isThread={true}
-            />
-          );
-        })}
-      {isReply ? (
-        <CommentComposer
-          context={context}
-          replyThreadId={context.target.globalTransitId}
-          canReactDetails={canReactDetails}
-          onPost={() => setIsReply(false)}
-        />
-      ) : null}
     </>
   );
 };

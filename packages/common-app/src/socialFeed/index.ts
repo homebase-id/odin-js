@@ -2,6 +2,7 @@ export * from './Blocks/Author/Image';
 export * from './Blocks/Author/Name';
 
 export * from './Blocks/Interacts/Comments/Comment';
+export * from './Blocks/Interacts/Comments/Parts/CommentThread';
 export * from './Blocks/Interacts/Comments/CommentComposer';
 
 export * from './Blocks/Interacts/EmojiPicker/EmojiPicker';
@@ -20,6 +21,7 @@ export * from './Blocks/Media/PrimaryMedia';
 export * from './Blocks/Media/DoubleClickHeartForMedia';
 
 export * from './Blocks/Body/Body';
+export * from './Blocks/Body/EmbeddedPostContent';
 
 export * from './Blocks/Meta/Meta';
 
