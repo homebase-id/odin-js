@@ -51,44 +51,45 @@ const ProfileNav = () => {
           <span className="sr-only">{isAuthenticated ? t('You are logged in') : t('Login')}</span>
         </button>
       )}
-      {isOpen ? (
-        <div
-          className="fixed left-0 right-0 top-[4rem] z-10 sm:absolute sm:left-auto sm:top-[3.5rem]"
-          ref={wrapperRef}
-        >
-          <div className="min-w-[20rem] bg-slate-100 p-8 pt-6 shadow-md dark:bg-slate-700">
-            {!isAuthenticated ? (
-              <LoginBox />
-            ) : (
-              <>
-                <p className="mb-4">
-                  {isOwner ? (
-                    <>{t('Logged in as the owner')}</>
-                  ) : (
-                    <>
-                      {t('Logged in with: ')}{' '}
-                      <a
-                        href={`https://${identity ?? ''}`}
-                        className="underline"
-                        target={'_blank'}
-                        rel="noopener noreferrer"
-                      >
-                        {identity}
-                      </a>
-                    </>
-                  )}
-                </p>
-                <button
-                  onClick={doLogout}
-                  className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none "
-                >
-                  {t('logout')}
-                </button>
-              </>
-            )}
-          </div>
+      <div
+        className={`fixed left-0 right-0 top-[3rem] z-10 sm:left-auto sm:top-[3.5rem] ${
+          isOpen ? 'sm:absolute' : 'hidden'
+        }`}
+        ref={wrapperRef}
+      >
+        <div className="min-w-[20rem] bg-slate-100 p-8 pt-6 shadow-md dark:bg-slate-700">
+          <span className={isAuthenticated ? 'hidden' : ''}>
+            <LoginBox />
+          </span>
+          {isAuthenticated ? (
+            <>
+              <p className="mb-4">
+                {isOwner ? (
+                  <>{t('Logged in as the owner')}</>
+                ) : (
+                  <>
+                    {t('Logged in with: ')}{' '}
+                    <a
+                      href={`https://${identity ?? ''}`}
+                      className="underline"
+                      target={'_blank'}
+                      rel="noopener noreferrer"
+                    >
+                      {identity}
+                    </a>
+                  </>
+                )}
+              </p>
+              <button
+                onClick={doLogout}
+                className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none "
+              >
+                {t('logout')}
+              </button>
+            </>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 };
@@ -110,6 +111,7 @@ const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
         returnUrl ? `&returnUrl=${returnUrl}` : ''
       }`}
       className="h-[16rem] w-full"
+      // loading="lazy"
     ></iframe>
   );
 };
