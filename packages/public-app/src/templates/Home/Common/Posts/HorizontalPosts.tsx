@@ -1,4 +1,4 @@
-import { t } from '@youfoundation/common-app';
+import { SubtleMessage, t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
 import useAuth from '../../../../hooks/auth/useAuth';
@@ -20,9 +20,7 @@ const HorizontalPosts = () => {
             title={channel.name}
             channel={channel}
             fallback={
-              index === 0 ? (
-                <p className="text-slate-400">{t('Nothing has been posted yet')}</p>
-              ) : null
+              index === 0 ? <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage> : null
             }
           />
         );

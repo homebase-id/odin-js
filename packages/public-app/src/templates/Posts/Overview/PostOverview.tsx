@@ -90,7 +90,7 @@ const PostOverview = () => {
           ) : blogPosts?.length && (!channelKey || activeChannel) ? (
             <ListComponent blogPosts={blogPosts} />
           ) : (
-            <p className="text-slate-400">{t('Nothing has been posted yet')}</p>
+            <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
           )}
 
           <div ref={loadMoreRef} className="h-1 w-full"></div>

@@ -1,7 +1,12 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Label, useBlogPosts, useBlogPostsInfinite } from '@youfoundation/common-app';
+import {
+  Label,
+  SubtleMessage,
+  useBlogPosts,
+  useBlogPostsInfinite,
+} from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
@@ -191,9 +196,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
           </div>
         </div>
       ) : (
-        <>
-          <p className="text-slate-400">{t('Nothing has been posted yet')}</p>
-        </>
+        <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
       )}
     </div>
   );
