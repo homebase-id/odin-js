@@ -1,15 +1,17 @@
+import { Suspense, lazy } from 'react';
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { HOME_ROOT_PATH, t, useDotYouClient } from '@youfoundation/common-app';
-import { useChannel } from '@youfoundation/common-app';
-import { ChannelDefinitionVm } from '@youfoundation/common-app';
-import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoundation/common-app';
-import { Pencil } from '@youfoundation/common-app';
-import { Times } from '@youfoundation/common-app';
-import { Trash } from '@youfoundation/common-app';
-import { UserX, EditPostDialog } from '@youfoundation/common-app';
-import usePost from '../../../hooks/socialFeed/post/usePost';
+
+import {
+  ChannelDefinitionVm,
+  HOME_ROOT_PATH,
+  t,
+  useChannel,
+  useDotYouClient,
+  ActionGroup,
+  Times,
+  UserX,
+} from '@youfoundation/common-app';
+const OwnerActions = lazy(() => import('./OwnerActions'));
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -72,7 +74,9 @@ export const PostMeta = ({
       {/* There is only a odinId when on the feed and displaying external data */}
       {excludeContextMenu || !postFile ? null : isOwner &&
         (!odinId || odinId === window.location.hostname) ? (
-        <OwnerActions postFile={postFile} />
+        <Suspense>
+          <OwnerActions postFile={postFile} />
+        </Suspense>
       ) : odinId ? (
         <ExternalActions postFile={postFile} odinId={odinId} />
       ) : null}
@@ -125,77 +129,6 @@ const ExternalActions = ({
             },
           },
         ]}
-      />
-    </div>
-  );
-};
-
-const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const { mutateAsync: removePost, error: removePostError } = usePost().remove;
-  const { data: channel } = useChannel({ channelId: postFile.content.channelId }).fetch;
-
-  const navigate = useNavigate();
-  return (
-    <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
-      <ErrorNotification error={removePostError} />
-      <ActionGroup
-        className=""
-        type="mute"
-        size="small"
-        options={[
-          {
-            icon: Pencil,
-            label: t(postFile.content.type === 'Article' ? 'Edit Article' : 'Edit post'),
-            onClick: (e) => {
-              e.stopPropagation();
-              if (postFile.content.type === 'Article') {
-                const targetUrl = `/owner/feed/edit/${channel?.slug}/${postFile.content.id}`;
-                if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
-                else window.location.href = targetUrl;
-              } else {
-                setIsEditOpen(true);
-              }
-            },
-          },
-          ...(postFile.fileId
-            ? ([
-                {
-                  icon: Trash,
-                  label: 'Remove post',
-                  confirmOptions: {
-                    title: `${t('Remove')} "${
-                      postFile.content.caption.substring(0, 50) || t('Untitled')
-                    }"`,
-                    buttonText: 'Permanently remove',
-                    body: t(
-                      'Are you sure you want to remove this post? This action cannot be undone.'
-                    ),
-                  },
-                  onClick: async (e) => {
-                    e.stopPropagation();
-                    await removePost({
-                      channelId: postFile.content.channelId,
-                      fileId: postFile.fileId ?? '',
-                      slug: postFile.content.slug,
-                    });
-
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 200);
-
-                    return false;
-                  },
-                },
-              ] as ActionGroupOptionProps[])
-            : []),
-        ]}
-      />
-      <EditPostDialog
-        postFile={postFile}
-        isOpen={isEditOpen}
-        onConfirm={() => setIsEditOpen(false)}
-        onCancel={() => setIsEditOpen(false)}
       />
     </div>
   );
