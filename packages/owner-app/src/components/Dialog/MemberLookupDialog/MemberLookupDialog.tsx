@@ -97,7 +97,7 @@ const MemberLookupDialog = ({
         <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {!membersLoading ? (
             !members?.pages?.[activePage - 1]?.results?.length ? (
-              <>{t('No connections found')}</>
+              <p className="py-2 text-slate-400">{t('No connections found')}</p>
             ) : (
               members?.pages?.[activePage - 1].results?.map((member) => {
                 const checked =

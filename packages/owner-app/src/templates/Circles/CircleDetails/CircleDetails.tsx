@@ -163,7 +163,7 @@ const CircleDetails = () => {
           </div>
         ) : (
           <SubtleMessage className="flex flex-row items-center">
-            <span>{t('Mmh, this looks empty... Time to add some connections?')}</span>
+            <span>{t('Ready to add some connections?')}</span>
             <ActionButton
               onClick={() => setIsOpenMemberLookup(true)}
               type="secondary"
@@ -244,7 +244,7 @@ const CircleDetails = () => {
       />
       <MemberLookupDialog
         isOpen={isOpenMemberLookup}
-        title={`${t('Add Members to')} ${circle.name}`}
+        title={`${t('Add Members to')} "${circle.name}"`}
         defaultMembers={members || []}
         onCancel={() => {
           setIsOpenMemberLookup(false);

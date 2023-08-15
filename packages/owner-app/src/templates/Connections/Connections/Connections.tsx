@@ -36,7 +36,7 @@ const Connections = () => {
 
         {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
           <SubtleMessage className="flex flex-row items-center">
-            <span>{t('Mmh, this looks empty... Time to add some connections?')}</span>
+            <span>{t('Ready to add some connections?')}</span>
             <ActionButton
               onClick={(e) => {
                 e.preventDefault();
