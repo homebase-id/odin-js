@@ -9,6 +9,7 @@ import ShowRecoveryKey from '../../components/Recovery/ShowRecoveryKey';
 import { ProfileSetupData, SocialSetupData } from '../../provider/setup/SetupProvider';
 import NewSetupWizard from '../../components/Setup/NewSetupWizard';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
+import LoadingPage from '../../components/Setup/Pages/LoadingPage';
 
 export interface onChangeParams {
   target: {
@@ -66,21 +67,29 @@ const Setup = () => {
       <MinimalLayout noShadedBg={true}>
         <div className="min-h-screen">
           <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col p-5">
-            <h1 className="mb-5 text-4xl dark:text-white">
-              Odin | Setup
-              <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
-                <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
-              </small>
-            </h1>
-
-            {!hasRecoveryKey ? (
-              <ShowRecoveryKey onConfirm={() => setHasRecoveryKey(true)} />
+            {initStatus === 'loading' ||
+            initStatus === 'success' ||
+            initWithDataStatus === 'loading' ||
+            initWithDataStatus === 'success' ? (
+              <LoadingPage />
             ) : (
               <>
-                <ErrorNotification error={initError || initWithDataError} />
-                <NewSetupWizard doInitWithData={doInitWithData} doInit={doInit} />
+                <h1 className="mb-5 text-4xl dark:text-white">
+                  Odin | Setup
+                  <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
+                    <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
+                  </small>
+                </h1>
+
+                {!hasRecoveryKey ? (
+                  <ShowRecoveryKey onConfirm={() => setHasRecoveryKey(true)} />
+                ) : (
+                  <NewSetupWizard doInitWithData={doInitWithData} doInit={doInit} />
+                )}
               </>
             )}
+
+            <ErrorNotification error={initError || initWithDataError} />
           </div>
         </div>
       </MinimalLayout>

@@ -1,6 +1,5 @@
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
-import LoadingPage from './Pages/LoadingPage';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
 import { ActionButton, Arrow, Input, Label, Person, Shield, t } from '@youfoundation/common-app';
@@ -34,8 +33,6 @@ const SetupWizard = ({
   doInit: () => void;
   doInitWithData: (data: WelcomeData) => void;
 }) => {
-  const [loading, setLoading] = useState(false);
-
   const [data, setData] = useState(defaultData);
 
   const changeHandler = (e: { target: { name: string; value: any } }) => {
@@ -51,22 +48,18 @@ const SetupWizard = ({
       : window.location.hostname.split('.')[0].substring(0, 2);
 
   const doSkip = async () => {
-    setLoading(true);
     doInit();
   };
 
   const doSetup = async () => {
-    setLoading(true);
-
     const dataToUse = { ...data };
 
     // Set fallback image:
-    if (!data.profile.imageData || !data.profile.imageData.bytes) {
+    if (!data.profile.imageData || !data.profile.imageData.bytes)
       dataToUse.profile.imageData = {
         bytes: base64ToUint8Array(fallbackProfileImage(initials)),
         type: 'image/svg+xml',
       };
-    }
 
     // Set fallback name:
     if (!data.profile.givenName && !data.profile.surname) {
@@ -76,8 +69,6 @@ const SetupWizard = ({
 
     doInitWithData(dataToUse);
   };
-
-  if (loading) return <LoadingPage />;
 
   return (
     <>

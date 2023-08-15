@@ -49,7 +49,7 @@ export const SaveStatus = ({
   }
 
   return (
-    <p className={`${className} text-sm`}>
+    <p className={`${className} text-sm text-slate-400`}>
       {t('Last saved')} {format(lastSave)}
     </p>
   );
