@@ -2,7 +2,7 @@ import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
-import { ActionButton, Arrow, Input, Label, Person, Shield, t } from '@youfoundation/common-app';
+import { ActionButton, Arrow, Input, Label, Person, t } from '@youfoundation/common-app';
 import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
 
 const defaultData: WelcomeData = {
@@ -26,13 +26,7 @@ const defaultData: WelcomeData = {
   ],
 };
 
-const SetupWizard = ({
-  doInit,
-  doInitWithData,
-}: {
-  doInit: () => void;
-  doInitWithData: (data: WelcomeData) => void;
-}) => {
+const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) => void }) => {
   const [data, setData] = useState(defaultData);
 
   const changeHandler = (e: { target: { name: string; value: any } }) => {
@@ -46,10 +40,6 @@ const SetupWizard = ({
     data.profile['givenName']?.[0] || data.profile['surname']?.[0]
       ? (data.profile['givenName']?.[0] ?? '') + (data.profile['surname']?.[0] ?? '')
       : window.location.hostname.split('.')[0].substring(0, 2);
-
-  const doSkip = async () => {
-    doInit();
-  };
 
   const doSetup = async () => {
     const dataToUse = { ...data };
@@ -149,32 +139,8 @@ const SetupWizard = ({
             />
           </div>
         </div>
-
-        <div className="-mx-2 flex-row sm:flex">
-          <div className="mb-5 px-2 sm:w-1/2">
-            <Label htmlFor="city">{t('City')}</Label>
-            <Input
-              id="city"
-              name="city"
-              onChange={changeHandler}
-              defaultValue={data.profile['city']}
-            />
-          </div>
-          <div className="mb-5 px-2 sm:w-1/2">
-            <Label htmlFor="country">{t('Country')}</Label>
-            <Input
-              id="country"
-              name="country"
-              onChange={changeHandler}
-              defaultValue={data.profile['country']}
-            />
-          </div>
-        </div>
         <div className="mt-auto flex flex-row-reverse gap-2">
           <ActionButton icon={Arrow}>{t('Next')}</ActionButton>
-          <ActionButton onClick={doSkip} icon={Shield} className="mr-auto" type="secondary">
-            {t('Skip')}
-          </ActionButton>
         </div>
       </form>
     </>

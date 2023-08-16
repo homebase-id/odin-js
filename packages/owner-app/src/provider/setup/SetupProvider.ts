@@ -207,7 +207,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       id: defaultPhotoAttrId,
       profileId: BuiltInProfiles.StandardProfileId,
       type: BuiltInAttributes.Photo,
-      priority: 1000,
+      priority: 9000, // a High Prio, so new ones get a better one
       sectionId: BuiltInProfiles.PersonalInfoSectionId,
       data: {},
       acl: ANONYMOUS_ACL,

@@ -17,7 +17,7 @@ export const lotrRealm = {
     },
     photo: [
       {
-        id: toGuidId('default_photo_attribute'),
+        id: toGuidId('demo_photo_attribute'),
         image: frodoProfilePictures[0],
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
@@ -153,7 +153,7 @@ export const lotrRealm = {
     },
     photo: [
       {
-        id: toGuidId('default_photo_attribute'),
+        id: toGuidId('demo_photo_attribute'),
         image: samProfilePictures[0],
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
@@ -253,7 +253,7 @@ export const lotrRealm = {
     },
     photo: [
       {
-        id: toGuidId('default_photo_attribute'),
+        id: toGuidId('demo_photo_attribute'),
         image: merryProfilePictures[0],
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,
@@ -282,7 +282,7 @@ export const lotrRealm = {
     },
     photo: [
       {
-        id: toGuidId('default_photo_attribute'),
+        id: toGuidId('demo_photo_attribute'),
         image: pippinProfilePictures[0],
         acl: {
           requiredSecurityGroup: SecurityGroupType.Anonymous,

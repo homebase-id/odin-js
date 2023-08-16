@@ -84,7 +84,7 @@ const Setup = () => {
                 {!hasRecoveryKey ? (
                   <ShowRecoveryKey onConfirm={() => setHasRecoveryKey(true)} />
                 ) : (
-                  <NewSetupWizard doInitWithData={doInitWithData} doInit={doInit} />
+                  <NewSetupWizard doInitWithData={doInitWithData} />
                 )}
               </>
             )}

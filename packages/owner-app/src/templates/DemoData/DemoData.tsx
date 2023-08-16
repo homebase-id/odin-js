@@ -157,8 +157,11 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
     attributeId: realmData.name.id,
   });
 
+  const isNameSet =
+    attrHasData(nameAttr) && nameAttr?.data[MinimalProfileFields.SurnameId] === realmData.name.last;
+
   const addName = async () => {
-    if (attrHasData(nameAttr)) {
+    if (isNameSet) {
       return;
     }
 
@@ -420,11 +423,9 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       <button
         onClick={addName}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          attrHasData(nameAttr) && isNameFetched
-            ? 'pointer-events-none bg-gray-300'
-            : 'bg-green-500'
+          isNameSet ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={attrHasData(nameAttr) && isNameFetched}
+        disabled={isNameSet}
       >
         Add Name
       </button>
@@ -724,6 +725,11 @@ const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
 
   const { data: circles, isFetched: isCirclesFetched } = useCircles().fetch;
   const { mutateAsync: createCircle } = useCircle({}).createOrUpdate;
+  const hasDemoCircles =
+    isCirclesFetched &&
+    circles?.some((existingCircle) =>
+      realmData.circles.some((newCircle) => newCircle.name === existingCircle.name)
+    );
 
   const createCircles = async () => {
     await Promise.all(
@@ -761,9 +767,9 @@ const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
       <button
         onClick={createCircles}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          circles?.length && isCirclesFetched ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
+          hasDemoCircles ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={(circles?.length && isCirclesFetched) || false}
+        disabled={hasDemoCircles || false}
       >
         Add Circles
       </button>
