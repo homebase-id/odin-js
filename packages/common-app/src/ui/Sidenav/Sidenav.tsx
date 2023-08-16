@@ -255,7 +255,7 @@ const IdentityNavItem = () => {
 
 const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: profiles, isFetching } = useProfiles(!isNavOpen).fetchProfiles;
+  const { data: profiles, isFetching } = useProfiles().fetchProfiles;
 
   useEffect(() => {
     if (!isNavOpen && isOpen) {
