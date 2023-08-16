@@ -1,7 +1,15 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-import { HOME_ROOT_PATH, MiniDarkModeToggle, getVersion, t } from '@youfoundation/common-app';
+import {
+  Cloud,
+  HOME_ROOT_PATH,
+  MiniDarkModeToggle,
+  Persons,
+  ellipsisAtMaxChar,
+  getVersion,
+  t,
+} from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
@@ -60,7 +68,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
       <aside
         className={`body-font fixed bottom-0 left-0 right-0 top-0 z-40 h-screen max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:transition-all ${
           isOpen
-            ? 'translate-x-0 xl:min-w-[18rem]'
+            ? 'translate-x-0 xl:min-w-[20rem]'
             : 'w-full translate-x-[-100%] xl:w-[4.3rem] xl:min-w-0 xl:translate-x-0'
         }`}
         onClick={() => !isDesktop && isOpen && setIsOpen(false)}
@@ -70,20 +78,19 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
         {/* Extra surrounding div to keep contents sticky as you scroll within the aside */}
         <div
           className={`${
-            isOpen ? 'overflow-y-auto xl:overflow-visible' : 'hover:sticky hover:w-[18rem]'
+            isOpen ? 'overflow-y-auto xl:overflow-visible' : 'hover:sticky hover:w-[20rem]'
           } static top-0 h-full w-full transition-all xl:sticky xl:h-auto xl:whitespace-nowrap ${sidebarBg}`}
         >
           <div className="flex h-screen flex-col overflow-auto px-3 pb-5 pt-3">
-            <div>
+            <div className="flex flex-row items-center justify-between overflow-hidden">
+              <IdentityNavItem />
               <button className={navItemClassName} onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? <Times className={iconClassName} /> : <Bars className={iconClassName} />}
               </button>
             </div>
-            <div className="py-3">
-              <IdentityNavItem />
-              <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
+
+            <div className="pb-3">
               <NotificationBell />
-              {/* <NavItem icon={Grid} label={'Dashboard'} to={'/owner'} end={true} /> */}
             </div>
 
             <div className="py-3">
@@ -91,12 +98,14 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             </div>
 
             <div className="py-3">
+              <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
               <NavItem icon={Article} label={'Articles'} to="/owner/feed/articles" />
               <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
             </div>
 
             <div className="py-3">
               <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
+              <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
               <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
             </div>
 
@@ -238,7 +247,7 @@ const IdentityNavItem = () => {
       <OwnerImage className={`h-9 w-9 flex-shrink-0 rounded-full`} size="custom" />
       <span className={`my-auto ml-3 overflow-hidden text-lg font-medium`}>
         {' '}
-        {window.location.hostname}
+        {ellipsisAtMaxChar(window.location.hostname, 20)}
       </span>
     </a>
   );
@@ -246,7 +255,7 @@ const IdentityNavItem = () => {
 
 const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: profiles } = useProfiles(!isNavOpen).fetchProfiles;
+  const { data: profiles, isFetching } = useProfiles(!isNavOpen).fetchProfiles;
 
   useEffect(() => {
     if (!isNavOpen && isOpen) {
@@ -254,6 +263,17 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
     }
   }, [isNavOpen]);
 
+  // If no extra profiles we just show the defaults at the first level
+  if (isFetching || profiles?.length == 2) {
+    return (
+      <>
+        <NavItem label={'Profile Settings'} icon={Person} to={'/owner/profile/standard-info'} />
+        <NavItem label={'Home Settings'} icon={Cloud} to={'/owner/profile/homepage'} />
+      </>
+    );
+  }
+
+  // If there are extra profiles we show everything on the second level
   return (
     <>
       <NavLink
@@ -280,7 +300,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
         <div className="ml-1 pl-1">
           {/* <NavItem label={'Overview'} to={'/owner/profile'} end={true} /> */}
           {profiles
-            ?.filter((profile) => profile.profileId !== BuiltInProfiles.WalletId)
+            ?.filter((profile) => ![BuiltInProfiles.WalletId].includes(profile.profileId))
             ?.slice(0, 5)
             ?.map((profile) => (
               <NavItem
@@ -289,8 +309,7 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
                 key={profile.slug}
               />
             ))}
-          <NavItem label={'Homepage'} to={'/owner/profile/homepage'} />
-          <NavItem label={'Following & Followers'} to={'/owner/follow'} />
+          <NavItem label={'Home Settings'} to={'/owner/profile/homepage'} />
         </div>
       ) : null}
     </>

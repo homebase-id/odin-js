@@ -46,7 +46,7 @@ const Website = () => {
     <section>
       <PageMeta
         icon={Cloud}
-        title={t('Homepage')}
+        title={t('Home settings')}
         actions={
           <>
             <ActionLink href={`https://${window.location.hostname}`} icon={Cloud}>
@@ -56,7 +56,7 @@ const Website = () => {
         }
         breadCrumbs={[
           { href: '/owner/profile', title: 'Social Presence' },
-          { title: t('Homepage') },
+          { title: t('Home settings') },
         ]}
       />
       {homeIsLoading ? (
