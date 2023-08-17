@@ -1,3 +1,4 @@
+import { uint8ArrayToBase64 } from '../../../helpers/DataUtil';
 import { ImageContentType, ImageSize, ThumbnailFile } from '../../core';
 import { ThumbnailInstruction } from '../MediaTypes';
 import { fromBlob } from './ImageResizer';
@@ -29,7 +30,7 @@ export const createThumbnails = async (
     throw new Error('Thumbnails can only be created in a browser environment');
 
   if (contentType === svgType) {
-    const vectorThumb = createVectorThumbnail(imageBytes);
+    const vectorThumb = await createVectorThumbnail(imageBytes);
 
     return {
       tinyThumb: vectorThumb.thumb,
@@ -75,20 +76,39 @@ export const createThumbnails = async (
   return { naturalSize, tinyThumb, additionalThumbnails };
 };
 
-const createVectorThumbnail = (
+const createVectorThumbnail = async (
   imageBytes: Uint8Array
-): { naturalSize: ImageSize; thumb: ThumbnailFile } => {
+): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
+  const fallbackNaturalSize: ImageSize = {
+    pixelWidth: 50,
+    pixelHeight: 50,
+  };
+  const thumb: ThumbnailFile = {
+    pixelWidth: 50,
+    pixelHeight: 50,
+    payload: imageBytes,
+    contentType: `image/svg+xml`,
+  };
+
+  const imageSizePromise: Promise<ImageSize | null> = new Promise((resolve) => {
+    try {
+      const inMemoryImage = new Image();
+      inMemoryImage.onload = () =>
+        resolve({ pixelWidth: inMemoryImage.width, pixelHeight: inMemoryImage.height });
+      inMemoryImage.onerror = () => resolve(null);
+
+      inMemoryImage.src = `data:image/svg+xml;base64,${uint8ArrayToBase64(imageBytes)}`;
+    } catch (e) {
+      resolve(null);
+    }
+  });
+
+  const naturalSize = await imageSizePromise;
+  console.log({ naturalSize });
+
   return {
-    naturalSize: {
-      pixelWidth: 50,
-      pixelHeight: 50,
-    },
-    thumb: {
-      pixelWidth: 50,
-      pixelHeight: 50,
-      payload: imageBytes,
-      contentType: `image/svg+xml`,
-    },
+    naturalSize: naturalSize || fallbackNaturalSize,
+    thumb,
   };
 };
 
