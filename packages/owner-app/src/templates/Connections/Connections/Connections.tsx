@@ -46,6 +46,7 @@ const Connections = () => {
               }}
               type="secondary"
               className="ml-2"
+              icon={Plus}
             >
               {t('Add')}
             </ActionButton>

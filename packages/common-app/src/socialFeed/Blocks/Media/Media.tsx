@@ -52,6 +52,7 @@ export const PostMedia = ({
       />
     );
   }
+
   return (
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia

@@ -140,7 +140,7 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
           </div>
         </div>
         <div className="mt-auto flex flex-row-reverse gap-2">
-          <ActionButton icon={Arrow}>{t('Next')}</ActionButton>
+          <ActionButton icon={Arrow}>{t('Setup')}</ActionButton>
         </div>
       </form>
     </>

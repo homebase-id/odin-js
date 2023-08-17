@@ -429,8 +429,8 @@ const NameAttributeEditor = ({
 
   return (
     <>
-      <div className="-mx-2 flex flex-row">
-        <div className="mb-5 w-2/5 px-2">
+      <div className="-mx-2 flex flex-col sm:flex-row">
+        <div className="mb-5 px-2 sm:w-2/5">
           <Label htmlFor="givenName">{t('First name')}</Label>
           <Input
             id="givenName"
@@ -440,7 +440,7 @@ const NameAttributeEditor = ({
           />
         </div>
         {showMore ? (
-          <div className="mb-5 w-2/5 px-2">
+          <div className="mb-5 px-2 sm:w-2/5">
             <Label htmlFor="additionalName">{t('Additional Names')}</Label>
             <Input
               id="additionalName"
@@ -450,7 +450,7 @@ const NameAttributeEditor = ({
             />
           </div>
         ) : null}
-        <div className="mb-5 w-3/5 px-2">
+        <div className="mb-5 px-2 sm:w-3/5">
           <Label htmlFor="surname">{t('Surname')}</Label>
           <Input
             id="surname"
@@ -461,7 +461,7 @@ const NameAttributeEditor = ({
         </div>
       </div>
       {showMore ? (
-        <div className="mb-5">
+        <div className="mb-5 mt-5 border-t pt-5">
           <Label htmlFor="displayName">{t('Display name')}</Label>
           <Input
             id="displayName"

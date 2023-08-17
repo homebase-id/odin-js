@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Pencil, SubtleMessage, Times, t } from '@youfoundation/common-app';
+import { Pencil, Plus, SubtleMessage, Times, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
@@ -168,6 +168,7 @@ const CircleDetails = () => {
               onClick={() => setIsOpenMemberLookup(true)}
               type="secondary"
               className="ml-2"
+              icon={Plus}
             >
               {t('Add')}
             </ActionButton>

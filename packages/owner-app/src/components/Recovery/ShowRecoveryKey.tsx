@@ -80,7 +80,7 @@ const ClickToReveal = ({ textToShow }: { textToShow?: string }) => {
 
         <div
           className={`w-full bg-white px-3 py-2 text-center text-[1.6rem] leading-8 tracking-wider text-gray-700 dark:bg-gray-800 dark:text-gray-100 md:text-left ${
-            !show ? 'pointer-events-none select-none' : ''
+            show ? '' : 'pointer-events-none select-none break-words'
           }`}
         >
           {show ? textToShow : redactedText}

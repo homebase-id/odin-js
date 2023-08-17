@@ -31,7 +31,7 @@ export const HybridLink = (props: HybridLinkProps) => {
       });
 
     return (
-      <a {...props} onClick={onClickHandler}>
+      <a {...props} onClick={onClickHandler} className={`${props.className || ''} cursor-pointer`}>
         {props.children}
       </a>
     );

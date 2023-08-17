@@ -27,11 +27,10 @@ export interface WelcomeData {
 export const SETUP_PATH = '/owner/setup';
 
 const Setup = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: isConfigured, refetch: refreshIsConfigured } = useIsConfigured().isConfigured;
 
   const {
-    init: { mutateAsync: doInit, status: initStatus, error: initError },
     initWithData: {
       mutateAsync: doInitWithData,
       status: initWithDataStatus,
@@ -41,8 +40,8 @@ const Setup = () => {
 
   // Refresh when init is done
   useEffect(() => {
-    if (initStatus === 'success' || initWithDataStatus === 'success') refreshIsConfigured();
-  }, [initStatus, initWithDataStatus]);
+    if (initWithDataStatus === 'success') refreshIsConfigured();
+  }, [initWithDataStatus]);
 
   const redirectToReturn = () => {
     const returnUrl = searchParams.get(RETURN_URL_PARAM);
@@ -57,7 +56,14 @@ const Setup = () => {
     if (isConfigured) redirectToReturn();
   }, [isConfigured]);
 
-  const [hasRecoveryKey, setHasRecoveryKey] = useState(false);
+  const [hasRecoveryKey, setHasRecoveryKey] = useState(searchParams.has('recovery'));
+
+  useEffect(() => {
+    if (hasRecoveryKey) {
+      searchParams.set('recovery', 'true');
+      setSearchParams(searchParams);
+    }
+  }, [hasRecoveryKey]);
 
   return (
     <>
@@ -67,10 +73,7 @@ const Setup = () => {
       <MinimalLayout noShadedBg={true}>
         <div className="min-h-screen">
           <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col p-5">
-            {initStatus === 'loading' ||
-            initStatus === 'success' ||
-            initWithDataStatus === 'loading' ||
-            initWithDataStatus === 'success' ? (
+            {initWithDataStatus === 'loading' || initWithDataStatus === 'success' ? (
               <LoadingPage />
             ) : (
               <>
@@ -89,7 +92,7 @@ const Setup = () => {
               </>
             )}
 
-            <ErrorNotification error={initError || initWithDataError} />
+            <ErrorNotification error={initWithDataError} />
           </div>
         </div>
       </MinimalLayout>

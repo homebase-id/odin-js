@@ -21,7 +21,15 @@ import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 export const ArticlesPage = () => {
   return (
     <>
-      <PageMeta title={t('Articles')} icon={ArticleIcon} />
+      <PageMeta
+        title={t('Articles')}
+        icon={ArticleIcon}
+        actions={
+          <ActionLink onClick={() => (window.location.href = '/owner/feed/new')} icon={Plus}>
+            {t('New Article')}
+          </ActionLink>
+        }
+      />
 
       <DraftsView />
       <PublishedArticlesView />
@@ -63,15 +71,6 @@ const DraftsView = () => {
             })}
           </div>
         ) : null}
-        <div className="-m-2 flex flex-row-reverse py-3">
-          <ActionLink
-            className="m-2 cursor-pointer"
-            onClick={() => (window.location.href = '/owner/feed/new')}
-            icon={Plus}
-          >
-            {t('New Draft')}
-          </ActionLink>
-        </div>
       </div>
     </section>
   );

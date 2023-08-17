@@ -5,7 +5,7 @@ import {
   EmojiReactionSummary,
   CommentsReactionSummary,
 } from '@youfoundation/js-lib/public';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import {
   Bubble,
   t,
@@ -126,7 +126,9 @@ export const PostInteracts = ({
           onClick={(e) => e.stopPropagation()}
         >
           <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20" />
-          <CommentList context={reactionContext} canReactDetails={canReactDetails} />
+          <Suspense fallback={null}>
+            <CommentList context={reactionContext} canReactDetails={canReactDetails} />
+          </Suspense>
         </div>
       ) : showSummary ? (
         <CommentTeaserList
@@ -279,6 +281,7 @@ const CommentTeaserList = ({
   return (
     <div className="mb-5">
       <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20"></hr>
+
       <div className="flex cursor-pointer flex-col gap-[0.2rem]" onClick={() => onExpand()}>
         {reactionPreview.comments.slice(0, 3).map((comment, index) => (
           <CommentTeaser commentData={comment} key={index} />
