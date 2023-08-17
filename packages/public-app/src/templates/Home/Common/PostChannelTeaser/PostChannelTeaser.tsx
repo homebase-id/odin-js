@@ -26,6 +26,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const [index, setIndex] = useState(0);
   const [disableAutomaticIndexCalculcation, setDisableAutomaticIndexCalculation] = useState(false);
   const [maxIndex, setMaxIndex] = useState(1);
+  const [clientWidth, setClientWidth] = useState<number>();
   const scrollContainer = useRef<HTMLDivElement>(null);
 
   const { data: blogPosts, isFetched: blogsFetched } = useBlogPosts({
@@ -63,6 +64,15 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   }, [disableAutomaticIndexCalculcation]);
 
   useEffect(() => {
+    const handleResize = () => setClientWidth(document.documentElement.clientWidth);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  });
+
+  useEffect(() => {
     // calculate index on load to ensure that there was no scroll state enforced by the browser
     calculateIndex();
   }, []);
@@ -74,8 +84,15 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const dirtyScreenW = 'mx-[calc((100vw-100%)/-2)] w-[100vw] px-[calc((100vw-100%)/2)]';
   return (
     <section
-      className={`body-font mb-10 w-full overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background py-6 dark:border-gray-800 sm:mx-0 sm:w-auto
+      className={`body-font mb-10 overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background py-6 dark:border-gray-800 sm:mx-0 sm:w-auto
       sm:max-w-none sm:px-5 lg:border ${dirtyScreenW} ${className ?? ''}`}
+      style={{
+        width: `${clientWidth}px`,
+        marginLeft: `calc((${clientWidth}px - 100%) / -2)`,
+        marginRight: `calc((${clientWidth}px - 100%) / -2)`,
+        paddingLeft: `calc((${clientWidth}px - 100%) / 2)`,
+        paddingRight: `calc((${clientWidth}px - 100%) / 2)`,
+      }}
     >
       <div className="mb-5 flex flex-row flex-wrap items-center">
         <h2 className="text-2xl">{title}</h2>
@@ -142,7 +159,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
   linkRoot,
 }) => {
   return (
-    <div className={`mb-0 h-full w-full flex-shrink-0 flex-grow-0 p-1 ${className}`}>
+    <div className={`mb-0 h-full flex-shrink-0 flex-grow-0 p-1 ${className}`}>
       <Link to={linkRoot + (blog.slug ?? '#')} className="flex flex-col">
         <div className="aspect-video overflow-hidden transition-transform duration-300 hover:scale-110">
           {blog.primaryMediaFile ? (
