@@ -193,11 +193,13 @@ const ConnectionDetails = () => {
       {connectionInfo?.status === 'pending' ? (
         <>
           <Alert type="info" className="bg-background">
-            <div className="flex flex-grow flex-col sm:flex-row">
+            <div className="flex flex-grow flex-col gap-2 sm:flex-row">
               <div className="mr-1">
-                &quot;<DomainHighlighter>{connectionInfo?.senderOdinId}</DomainHighlighter>&quot;{' '}
-                {t('sent you a connection request')}
-                <p className="mt-2 text-sm text-gray-600">{connectionInfo?.message}</p>
+                <p>
+                  &quot;<DomainHighlighter>{connectionInfo?.senderOdinId}</DomainHighlighter>&quot;{' '}
+                  {t('sent you a connection request')}:
+                </p>
+                <p className="text-sm text-gray-600">{connectionInfo?.message}</p>
               </div>
               <div className="my-auto ml-auto grid grid-flow-col gap-2">
                 <ActionButton

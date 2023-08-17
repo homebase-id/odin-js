@@ -12,6 +12,7 @@ import {
   SetupHome,
   SetupProfileDefinition,
 } from '../../provider/setup/SetupProvider';
+import { useStaticFiles } from '@youfoundation/common-app';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 
@@ -21,6 +22,8 @@ const useInit = () => {
 
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
+
+  const { mutateAsync: publishStaticFiles } = useStaticFiles().publish;
 
   const initDrives: DriveDefinitionParam[] = [
     {
@@ -77,6 +80,10 @@ const useInit = () => {
 
     // Setup (default) Data
     await SetupDefaultIdentity(dotYouClient, data);
+
+    // Do a first publish of the static files
+    // This is normally a side effect from the useAttribute hook.. TODO: Move to providers instead of the hook
+    await publishStaticFiles();
   };
 
   return {

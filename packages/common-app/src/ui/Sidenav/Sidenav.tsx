@@ -50,11 +50,12 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
   const isDesktop = document.documentElement.clientWidth >= 1280;
   const storedState = localStorage.getItem(STORAGE_KEY);
   const overruledOpen = storedState ? storedState === '1' : undefined;
-  const [isOpen, setIsOpen] = useState(overruledOpen ?? false);
+  const [isOpen, setIsOpen] = useState(isDesktop ? overruledOpen : false);
   const [isHoverOpen, setIsHoverOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, isOpen ? '1' : '0');
+    // Only persist open/closed state on desktop
+    if (isDesktop) localStorage.setItem(STORAGE_KEY, isOpen ? '1' : '0');
   }, [isOpen]);
 
   return (

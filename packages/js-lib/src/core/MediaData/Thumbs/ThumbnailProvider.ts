@@ -104,7 +104,6 @@ const createVectorThumbnail = async (
   });
 
   const naturalSize = await imageSizePromise;
-  console.log({ naturalSize });
 
   return {
     naturalSize: naturalSize || fallbackNaturalSize,
