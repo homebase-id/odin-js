@@ -22,7 +22,10 @@ const FollowingView = lazy(
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
-export const Feed = () => {
+import { Feed } from '@youfoundation/common-app';
+import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+
+export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
 
   useEffect(() => {
@@ -40,6 +43,7 @@ export const Feed = () => {
       <Helmet>
         <title>{t('Feed')} | Odin</title>
       </Helmet>
+      <PageMeta title={t('Feed')} icon={Feed} />
       {identityKey && channelKey && postKey ? (
         <div
           className={`fixed inset-0 z-50 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm`}
@@ -54,8 +58,8 @@ export const Feed = () => {
           </Suspense>
         </div>
       ) : null}
-      <section className="flex-grow bg-page-background pt-12 md:pt-0">
-        <div className="container mx-auto gap-4 py-3 sm:py-10 lg:grid lg:max-w-7xl lg:grid-cols-4">
+      <section className="flex-grow bg-page-background md:pt-0">
+        <div className="container mx-auto gap-4 pb-3 sm:pb-10 lg:grid lg:max-w-7xl lg:grid-cols-4">
           <div className={`md:col-span-3 xl:order-2 xl:col-span-2`}>
             <SocialFeedMainContent />
           </div>
@@ -88,4 +92,4 @@ export const Feed = () => {
   );
 };
 
-export default Feed;
+export default SocialFeed;

@@ -49,7 +49,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
         })}
       </div>
       <Select
-        className={`${!forceMobileView ? 'sm:hidden' : ''} py-4`}
+        className={`${!forceMobileView ? 'sm:hidden' : ''} py-4  ${className ?? ''}`}
         onChange={(e) => navigate(e.target.value)}
         value={window.location.pathname}
       >

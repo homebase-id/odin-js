@@ -53,7 +53,7 @@ const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
 const SocialFeed = lazy(() =>
-  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.Feed }))
+  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.SocialFeed }))
 );
 const ArticlesPage = lazy(() =>
   import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticlesPage }))
@@ -71,7 +71,7 @@ import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/Loadin
 import useAuth, { FIRSTRUN_PATH, LOGIN_PATH, RECOVERY_PATH } from '../hooks/auth/useAuth';
 import useIsConfigured from '../hooks/configure/useIsConfigured';
 import { SETUP_PATH } from '../templates/Setup/Setup';
-import { useTransitProcessor, ErrorBoundary } from '@youfoundation/common-app';
+import { useTransitProcessor, ErrorBoundary, t } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 

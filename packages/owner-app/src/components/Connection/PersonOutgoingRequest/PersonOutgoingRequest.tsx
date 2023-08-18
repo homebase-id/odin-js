@@ -21,7 +21,11 @@ const PersonOutgoingRequest = ({
   return (
     <>
       <ErrorNotification error={actionError} />
-      <PersonCard className={className} odinId={recipientOdinId}>
+      <PersonCard
+        className={className}
+        odinId={recipientOdinId}
+        href={(recipientOdinId && `/owner/connections/${recipientOdinId}`) ?? undefined}
+      >
         <h2 className="font-thiner mb-6 dark:text-white">
           <DomainHighlighter>{recipientOdinId}</DomainHighlighter>
         </h2>
