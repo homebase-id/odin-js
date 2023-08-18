@@ -91,11 +91,11 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
           <span>{circleDef.name}</span>
           {members?.length ? (
             <>
-              <div className="ml-auto mt-auto flex shrink-0 flex-row pt-2">
+              <div className="ml-auto mt-auto flex shrink-0 flex-row">
                 {members?.slice(0, 5)?.map((member) => (
                   <img
                     src={`https://${member}/pub/image`}
-                    className="-mr-2 h-8 w-8 rounded-full last:mr-0"
+                    className="-mr-2 h-7 w-7 rounded-full border last:mr-0"
                     key={member}
                   />
                 ))}

@@ -249,16 +249,20 @@ const IdentityTeaser = ({
           />
         </a>
         <div className="flex-grow ">
-          <h2
-            className={`title-font font-medium ${
-              size === 'sm' ? 'text-sm' : ''
-            } text-foreground text-opacity-60`}
-          >
-            {contactData?.name?.displayName ?? odinId}
-          </h2>
-          <p className={`${size === 'sm' ? 'text-xs' : 'text-sm'} text-foreground text-opacity-40`}>
-            {odinId}
-          </p>
+          <a href={`https://${odinId}`}>
+            <h2
+              className={`title-font font-medium ${
+                size === 'sm' ? 'text-sm' : ''
+              }  text-opacity-60`}
+            >
+              {contactData?.name?.displayName ?? odinId}
+            </h2>
+            <p
+              className={`${size === 'sm' ? 'text-xs' : 'text-sm'} text-foreground text-opacity-40`}
+            >
+              {odinId}
+            </p>
+          </a>
         </div>
         {children}
       </div>

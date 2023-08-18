@@ -1,5 +1,12 @@
 import { useMemo } from 'react';
-import { ActionButton, AttachmentFile, Triangle, Image, Trash } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  AttachmentFile,
+  Triangle,
+  Image,
+  Trash,
+  Video,
+} from '@youfoundation/common-app';
 
 import { ImageContentType, TargetDrive } from '@youfoundation/js-lib/core';
 import { MediaFile } from '@youfoundation/js-lib/public';
@@ -134,12 +141,21 @@ export const ExistingFileOverview = ({
       .map((image) => {
         return (
           <div key={image.fileId} className="relative w-1/2 p-[2px] md:w-1/3">
-            <Image
-              fileId={image.fileId}
-              targetDrive={targetDrive}
-              className="aspect-square h-full w-full"
-              fit="cover"
-            />
+            {image.type === 'video' ? (
+              <Video
+                fileId={image.fileId}
+                targetDrive={targetDrive}
+                className="aspect-square h-full w-full"
+                directFileSizeLimit={10 * 1024}
+              />
+            ) : (
+              <Image
+                fileId={image.fileId}
+                targetDrive={targetDrive}
+                className="aspect-square h-full w-full"
+                fit="cover"
+              />
+            )}
             <ActionButton
               className="absolute bottom-3 right-3"
               icon={Trash}

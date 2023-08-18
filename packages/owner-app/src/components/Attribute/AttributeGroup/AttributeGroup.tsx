@@ -41,7 +41,10 @@ const AttributeGroup = ({
         navigate(
           `/owner/profile/${profileKey}/${
             sectionKey ?? attributes[0].sectionId
-          }/${convertTextToSlug(groupTitle)}`
+          }/${convertTextToSlug(groupTitle)}`,
+          {
+            replace: true,
+          }
         );
       }
       setIsActive(true);
@@ -49,9 +52,11 @@ const AttributeGroup = ({
   };
 
   const close = () => {
-    if (profileKey) {
-      navigate(`/owner/profile/${profileKey}/${sectionKey ?? attributes[0].sectionId}`);
-    }
+    if (profileKey)
+      navigate(`/owner/profile/${profileKey}/${sectionKey ?? attributes[0].sectionId}`, {
+        replace: true,
+      });
+
     setIsActive(false);
   };
 
