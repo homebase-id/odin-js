@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "npm install && npm run build -workspaces --if-present",
+    "test": "npm run test -workspaces --if-present",
     "clean-build": "npm run clean; npm run build",
     "build-libs": "npm run build -w ./packages/js-lib -w ./packages/ui-lib",
     "owner-app": "npm install && npm start -w ./packages/owner-app",

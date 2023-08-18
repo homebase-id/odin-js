@@ -28,3 +28,5 @@ jobs:
       - run: npm run build --w ./packages/public-app
 
       - run: npm run build --w ./packages/owner-app
+
+      - run: npm run test

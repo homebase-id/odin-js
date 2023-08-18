@@ -57,6 +57,7 @@
   "scripts": {
     "start": "vite build --watch",
     "build": "tsc && vite build",
+    "test": "vitest",
     "lint": "eslint src/*"
   },
   "publishConfig": {
@@ -72,7 +73,9 @@
   "optionalDependencies": {
     "mp4box": "^0.5.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "vitest": "^0.34.2"
+  },
   "peerDependencies": {
     "axios": "^1.2.0"
   }

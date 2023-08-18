@@ -7,21 +7,6 @@ export const assertIfDefined = (key: string, value: unknown) => {
   if (!value) throw new Error(`${key} undefined`);
 };
 
-export const stringToMD5basedGuid = (data: string): Guid => {
-  const t = md5(data).toString();
-  return Guid.parse(
-    t.substring(0, 8) +
-      '-' +
-      t.substring(8, 12) +
-      '-' +
-      t.substring(12, 16) +
-      '-' +
-      t.substring(16, 20) +
-      '-' +
-      t.substring(20, 32)
-  );
-};
-
 // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
 export const stringToUint8Array = (str: string): Uint8Array => {
   return new TextEncoder().encode(str);
@@ -198,7 +183,7 @@ export const stringifyToQueryParams = (obj: Record<string, unknown>) => {
     }
   });
 
-  return `${stringify(paramsObj)}&${params.join('&')}`;
+  return [stringify(paramsObj), ...(params?.length ? [params.join('&')] : [])].join('&');
 };
 
 export const stringifyArrayToQueryParams = (arr: Record<string, unknown>[]) => {

@@ -33,6 +33,8 @@ jobs:
 
       - run: npm run build --w ./packages/js-lib
 
+      - run: npm run test --w ./packages/js-lib
+
       - run: npm publish --w ./packages/js-lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
