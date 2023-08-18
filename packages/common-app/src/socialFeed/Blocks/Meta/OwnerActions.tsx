@@ -41,7 +41,7 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
             ? ([
                 {
                   icon: Trash,
-                  label: 'Remove post',
+                  label: t(postFile.content.type === 'Article' ? 'Remove Article' : 'Remove post'),
                   confirmOptions: {
                     title: `${t('Remove')} "${
                       postFile.content.caption.substring(0, 50) || t('Untitled')

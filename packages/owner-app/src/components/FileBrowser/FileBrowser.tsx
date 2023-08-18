@@ -1,6 +1,6 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useEffect, useState } from 'react';
-import { AclIcon, AclSummary, ActionLink, t } from '@youfoundation/common-app';
+import { AclIcon, AclSummary, t } from '@youfoundation/common-app';
 import useFiles from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import { ContactConfig } from '../../provider/contact/ContactTypes';
