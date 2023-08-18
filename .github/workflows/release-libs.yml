@@ -52,6 +52,9 @@ jobs:
       - name: Build JS Lib
         run: npm run build --w ./packages/js-lib
 
+      - name: Test JS Lib
+        run: npm run test -w ./packages/js-lib
+
       - name: Publish JS Lib
         if: steps.filter.outputs.jslib == 'true'
         run: npm publish --w ./packages/js-lib
