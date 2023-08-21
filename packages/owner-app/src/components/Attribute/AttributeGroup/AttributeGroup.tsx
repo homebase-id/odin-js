@@ -1,4 +1,4 @@
-import { convertTextToSlug, getNewId } from '@youfoundation/js-lib/helpers';
+import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
@@ -22,7 +22,7 @@ const AttributeGroup = ({
 }) => {
   const { profileKey, sectionKey, typeKey } = useParams();
   const [isActive, setIsActive] = useState(
-    attributes.length === 1 || convertTextToSlug(groupTitle) === typeKey
+    attributes.length === 1 || slugify(groupTitle) === typeKey
   );
   const { reorderAttr, reorderAttrGroup } = useAttributeOrderer({
     attributes,
@@ -31,7 +31,7 @@ const AttributeGroup = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (convertTextToSlug(groupTitle) === typeKey) setIsActive(true);
+    if (slugify(groupTitle) === typeKey) setIsActive(true);
     else setIsActive(false);
   }, [typeKey]);
 
@@ -39,9 +39,9 @@ const AttributeGroup = ({
     if (!isActive) {
       if (profileKey) {
         navigate(
-          `/owner/profile/${profileKey}/${
-            sectionKey ?? attributes[0].sectionId
-          }/${convertTextToSlug(groupTitle)}`,
+          `/owner/profile/${profileKey}/${sectionKey ?? attributes[0].sectionId}/${slugify(
+            groupTitle
+          )}`,
           {
             replace: true,
           }

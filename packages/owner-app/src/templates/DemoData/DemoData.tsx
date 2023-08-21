@@ -40,7 +40,7 @@ import {
   PostFile,
   PostContent,
 } from '@youfoundation/js-lib/public';
-import { convertTextToSlug, getNewId } from '@youfoundation/js-lib/helpers';
+import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 
 type RealmName = keyof typeof lotrRealm | undefined;
@@ -600,7 +600,7 @@ const DemoDataBlog = ({
       const newChannel: ChannelDefinition = {
         channelId: channelId,
         name: name,
-        slug: convertTextToSlug(name),
+        slug: slugify(name),
         description: description,
         templateId: undefined,
         acl: { requiredSecurityGroup: SecurityGroupType.Connected },
@@ -662,7 +662,7 @@ const DemoDataBlog = ({
             authorOdinId: character,
             channelId: channel.channelId,
             caption: randomTitle,
-            slug: convertTextToSlug(randomTitle),
+            slug: slugify(randomTitle),
             dateUnixTime: new Date().getTime(),
             primaryMediaFile: imageFileId ? { fileId: imageFileId, type: 'image' } : undefined,
             type: 'Article',

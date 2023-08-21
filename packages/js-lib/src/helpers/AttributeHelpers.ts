@@ -2,7 +2,7 @@ import { AttributeFile, LocationFields, MinimalProfileFields } from '../profile/
 import { PostContent, PostFile } from '../public/public';
 import { getNewId } from './DataUtil';
 
-export const convertTextToSlug = (text: string) => {
+export const slugify = (text: string) => {
   return text
     .replaceAll(/[^a-z0-9 ]/gi, '')
     .trim()
@@ -14,7 +14,7 @@ export const convertTextToSlug = (text: string) => {
 /// Makes a slug of a Post; When it's an article it's a readable slug, otherwise it's the content id or a new id
 export const makeSlug = (post: PostFile<PostContent>) => {
   if (post.content.type === 'Article' && post.content.caption) {
-    return convertTextToSlug(post.content.caption);
+    return slugify(post.content.caption);
   }
 
   return post.content.id || getNewId();

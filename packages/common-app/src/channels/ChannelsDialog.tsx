@@ -21,7 +21,7 @@ import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import TemplateSelector from './ChannelTemplateSelector';
 import { ChannelTemplate } from '@youfoundation/js-lib/public';
-import { convertTextToSlug } from '@youfoundation/js-lib/helpers';
+import { slugify } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsDialog = ({
   isOpen,
@@ -181,7 +181,7 @@ export const ChannelItem = ({
                     defaultValue={chnl?.name}
                     onChange={(e) => {
                       setNewName(e.target.value);
-                      setNewSlug(convertTextToSlug(e.target.value));
+                      setNewSlug(slugify(e.target.value));
                     }}
                   />
                 </div>

@@ -6,7 +6,7 @@ import {
   saveProfileDefinition,
 } from '@youfoundation/js-lib/profile';
 import { useDotYouClient } from '@youfoundation/common-app';
-import { convertTextToSlug } from '@youfoundation/js-lib/helpers';
+import { slugify } from '@youfoundation/js-lib/helpers';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;
@@ -21,7 +21,7 @@ export const useProfiles = (disabled?: boolean) => {
       .map((def) => {
         return {
           ...def,
-          slug: convertTextToSlug(def.name),
+          slug: slugify(def.name),
         } as ProfileDefinitionVm;
       })
       ?.sort((profileA, profileB) => profileA.name.localeCompare(profileB.name));
@@ -54,7 +54,7 @@ export const useProfiles = (disabled?: boolean) => {
         ]);
         const newProfiles = previousProfiles?.map((profile) =>
           profile.profileId === newProfile.profileId
-            ? ({ ...newProfile, slug: convertTextToSlug(newProfile.name) } as ProfileDefinitionVm)
+            ? ({ ...newProfile, slug: slugify(newProfile.name) } as ProfileDefinitionVm)
             : profile
         );
 

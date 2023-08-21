@@ -1,5 +1,5 @@
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
-import { convertTextToSlug, getNewId } from '@youfoundation/js-lib/helpers';
+import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
@@ -103,7 +103,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
         ...dirtyPostFile.content,
         dateUnixTime: new Date().getTime(), // Set current date as userDate of the post
         id: dirtyPostFile.content.id ?? getNewId(), // Generate new id if there is none
-        slug: convertTextToSlug(dirtyPostFile.content.caption), // Reset slug to match caption each time
+        slug: slugify(dirtyPostFile.content.caption), // Reset slug to match caption each time
         channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed
         readingTimeStats: getReadingTime(dirtyPostFile.content.body),
       },
