@@ -7,7 +7,8 @@ import {
   getInitialsOfNameAttribute,
   slugify,
 } from './AttributeHelpers';
-import { AttributeFile, LocationFields, MinimalProfileFields } from '../../profile';
+import { LocationFields, MinimalProfileFields } from '../profile/ProfileData/ProfileConfig';
+import { AttributeFile } from '../profile/AttributeData/AttributeDataTypes';
 
 test('Slugify', () => {
   expect(slugify('test')).toEqual('test');
