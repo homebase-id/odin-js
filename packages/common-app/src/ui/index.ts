@@ -84,6 +84,7 @@ export * from './Icons/Save';
 export * from './Icons/Scissors';
 export * from './Icons/Share';
 export * from './Icons/Shield';
+export * from './Icons/Shop';
 export * from './Icons/Stackoverflow';
 export * from './Icons/Steam';
 export * from './Icons/Sun';
