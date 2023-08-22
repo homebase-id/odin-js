@@ -12,4 +12,4 @@ export * from './richText';
 export * from './media/Image';
 export * from './media/Video';
 export * from './socialFeed';
-export * from './connections';
+export * from './identity';

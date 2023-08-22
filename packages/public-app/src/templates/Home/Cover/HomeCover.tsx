@@ -1,7 +1,7 @@
 import ChannelTeaser from '../Common/ChannelTeaser/ChannelTeaser';
 import { BuiltInProfiles, ProfileConfig } from '@youfoundation/js-lib/profile';
 import {
-  ConnectionTeaser,
+  IdentityTeaser,
   OwnerName,
   Image,
   useChannels,
@@ -72,7 +72,7 @@ const HomeCover = (props: { leadText?: string; templateSettings: unknown }) => {
               <div className="-m-3 flex flex-wrap">
                 {connections.pages[0]?.results?.map((item, index) => {
                   return (
-                    <ConnectionTeaser
+                    <IdentityTeaser
                       key={index}
                       odinId={item?.odinId}
                       className="p-2 md:w-1/2 lg:w-1/3"

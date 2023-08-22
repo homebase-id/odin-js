@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMatch } from 'react-router-dom';
 import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import {
@@ -8,13 +8,13 @@ import {
   useFollowerInfinite,
   useFollowingInfinite,
   SubtleMessage,
+  IdentityTeaser,
 } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
-import useContact from '../../hooks/contacts/useContact';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
@@ -218,55 +218,6 @@ const FollowingIdentity = ({ odinId }: { odinId: string }) => {
         />
       ) : null}
     </>
-  );
-};
-
-const IdentityTeaser = ({
-  odinId,
-  className,
-  size,
-  children,
-}: {
-  odinId: string;
-  className?: string;
-  size?: 'md' | 'sm';
-  children?: ReactNode;
-}) => {
-  const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const { data: contactData } = useContact({ odinId: odinId }).fetch;
-
-  return (
-    <div
-      className={`bg-white dark:bg-black ${
-        className ?? ''
-      }  rounded-lg border border-gray-200 p-4 hover:shadow-md dark:border-gray-700 hover:dark:shadow-slate-600`}
-    >
-      <div className="flex h-full items-center">
-        <a href={`https://${odinId}`}>
-          <img
-            src={`https://${odinId}/pub/image`}
-            className={`${imageSizeClass} flex-shrink-0 rounded-full bg-gray-100 object-cover object-center`}
-          />
-        </a>
-        <div className="flex-grow ">
-          <a href={`https://${odinId}`}>
-            <h2
-              className={`title-font font-medium ${
-                size === 'sm' ? 'text-sm' : ''
-              }  text-opacity-60`}
-            >
-              {contactData?.name?.displayName ?? odinId}
-            </h2>
-            <p
-              className={`${size === 'sm' ? 'text-xs' : 'text-sm'} text-foreground text-opacity-40`}
-            >
-              {odinId}
-            </p>
-          </a>
-        </div>
-        {children}
-      </div>
-    </div>
   );
 };
 

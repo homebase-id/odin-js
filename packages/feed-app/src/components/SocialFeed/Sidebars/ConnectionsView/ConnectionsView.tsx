@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-  ConnectionTeaser,
+  IdentityTeaser,
   t,
   useActiveConnections,
   LoadingBlock,
@@ -59,7 +59,7 @@ const ConnectionsView = ({ className }: { className?: string }) => {
       connections.pages[activePage - 1]?.results.length
         ? connections.pages[activePage - 1].results.map((item, index) => {
             return (
-              <ConnectionTeaser
+              <IdentityTeaser
                 key={index}
                 odinId={item?.odinId}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800"

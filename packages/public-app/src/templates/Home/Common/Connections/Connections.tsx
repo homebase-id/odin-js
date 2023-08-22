@@ -6,7 +6,7 @@ import {
   useFollowingInfinite,
 } from '@youfoundation/common-app';
 
-import { Pager, ConnectionTeaser } from '@youfoundation/common-app';
+import { Pager, IdentityTeaser } from '@youfoundation/common-app';
 
 const Connections = ({ className }: { className?: string }) => {
   return (
@@ -64,7 +64,7 @@ const ConnectionSection = ({ className }: { className?: string }) => {
         connections?.pages[activePage - 1]?.results?.length ? (
           <div className="grid grid-cols-3 gap-3">
             {connections?.pages[activePage - 1].results.map((item, index) => (
-              <ConnectionTeaser key={index} odinId={item?.odinId} className="p-2" />
+              <IdentityTeaser key={index} odinId={item?.odinId} className="p-2" />
             ))}
           </div>
         ) : null}
@@ -127,7 +127,7 @@ const FollowingSection = ({ className }: { className?: string }) => {
               if (!item) {
                 return null;
               }
-              return <ConnectionTeaser key={index} odinId={item} className="p-2" />;
+              return <IdentityTeaser key={index} odinId={item} className="p-2" />;
             })}
           </div>
         ) : null}

@@ -1,4 +1,4 @@
-import { ConnectionTeaser, LoadingBlock, useFollowerInfinite } from '@youfoundation/common-app';
+import { IdentityTeaser, LoadingBlock, useFollowerInfinite } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 const FollowersView = ({ className }: { className?: string }) => {
@@ -33,7 +33,7 @@ const FollowersView = ({ className }: { className?: string }) => {
       {followersFetched && followersList
         ? followersList.map((odinId, index) => {
             return (
-              <ConnectionTeaser
+              <IdentityTeaser
                 key={index}
                 odinId={odinId}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
