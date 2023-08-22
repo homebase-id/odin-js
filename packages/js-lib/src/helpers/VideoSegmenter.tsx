@@ -70,7 +70,14 @@ export const segmentVideoFile = async (
 
     mp4File.onReady = function (info: {
       isFragmented: boolean;
-      tracks: { id: number; nb_samples: number; type: string; codec: string }[];
+      tracks: {
+        id: number;
+        nb_samples: number;
+        type: string;
+        codec: string;
+        movie_duration: number;
+        movie_timescale: number;
+      }[];
       mime: string;
       initial_duration?: number;
       duration: number;
@@ -93,8 +100,11 @@ export const segmentVideoFile = async (
 
       for (let i = 0; i < info.tracks.length; i++) {
         const track = info.tracks[i];
+        const nbrSamples = Math.round(
+          (track.nb_samples / (track.movie_duration / track.movie_timescale)) * 30
+        );
         mp4File.setSegmentOptions(track.id, null, {
-          nb_samples: info.tracks[i].nb_samples / (metadata.duration / 10),
+          nbSamples: nbrSamples,
         });
       }
 
