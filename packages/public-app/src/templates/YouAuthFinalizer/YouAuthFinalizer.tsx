@@ -1,11 +1,23 @@
+import { useEffect } from 'react';
 import useAuth from '../../hooks/auth/useAuth';
 
 const YouAuthFinalizer = () => {
-  const { finalizeAuthentication } = useAuth();
+  const { finalizeAuthorization } = useAuth();
 
-  const xqs = new URLSearchParams(window.location.search);
-  console.log('finalize auth with', xqs.get('ss64'), xqs.get('returnUrl'));
-  finalizeAuthentication(xqs.get('ss64'), xqs.get('returnUrl'));
+  const urlParams = new URLSearchParams(window.location.search);
+
+  const code = urlParams.get('code');
+  const state = urlParams.get('state');
+  const publicKey = urlParams.get('public_key');
+  const salt = urlParams.get('salt');
+
+  if (!code || !state || !publicKey || !salt) {
+    return <>ERROR!</>;
+  }
+  // console.log('finalize auth with', xqs.get('ss64'), xqs.get('returnUrl'));
+  useEffect(() => {
+    finalizeAuthorization(code, state, publicKey, salt);
+  }, []);
 
   return <></>;
 };

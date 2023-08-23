@@ -1,7 +1,7 @@
 import useContact from '../../../hooks/contacts/useContact';
 import { LoadingBlock } from '@youfoundation/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
-// import DomainCard from '../DomainCard/DomainCard';
+import DomainCard from '../DomainCard/DomainCard';
 
 const ConnectionCard = (props: PersonCardProps) => {
   const { data: contactData, isLoading } = useContact({
@@ -32,7 +32,7 @@ const ConnectionCard = (props: PersonCardProps) => {
         </h2>
         {props.children}
       </PersonCard>
-      {/* <DomainCard {...props}>
+      <DomainCard {...props}>
         <h2 className="font-thiner mb-6 flex flex-col dark:text-white">
           <span>{fullName ?? props.odinId}</span>
           {fullName ? (
@@ -44,7 +44,7 @@ const ConnectionCard = (props: PersonCardProps) => {
           )}
         </h2>
         {props.children}
-      </DomainCard> */}
+      </DomainCard>
     </>
   );
 };

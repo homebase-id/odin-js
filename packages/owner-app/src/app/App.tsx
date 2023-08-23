@@ -120,8 +120,9 @@ function App() {
             </RootRoute>
           }
         >
+          {/* TODO: Remove */}
           <Route path="login/youauth" element={<YouAuthLogin />} />
-          <Route path="youauth/authorize" element={<YouAuthConsent />} />
+          <Route path="youauth/consent" element={<YouAuthConsent />} />
 
           <Route path="setup" element={<Setup />} />
 

@@ -11,6 +11,8 @@ import useConnection from '../../hooks/connections/useConnection';
 import useYouAuth from '../../hooks/auth/useYouAuth';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 
+// OLD implementation
+// TODO: Remove
 const YouAuthLogin = () => {
   const [searchParams] = useSearchParams();
   const { mutate: createHomeToken, isIdle: isWaitingToCreateToken } = useYouAuth().homeToken;

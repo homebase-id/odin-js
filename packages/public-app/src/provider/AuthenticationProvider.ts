@@ -8,12 +8,13 @@ export const hasValidToken = async (): Promise<boolean> => {
   return response.status === 200 && response.data === true;
 };
 
-export const authenticate = (identity: string, returnUrl: string): void => {
-  const redirectUrl = `https://${identity}/owner/login/youauth?returnUrl=${encodeURIComponent(
-    returnUrl
-  )}`;
-  window.location.href = redirectUrl;
-};
+// TODO: Remove; Covered by central login box
+// export const authenticate = (identity: string, returnUrl: string): void => {
+//   const redirectUrl = `https://${identity}/owner/login/youauth?returnUrl=${encodeURIComponent(
+//     returnUrl
+//   )}`;
+//   window.location.href = redirectUrl;
+// };
 
 export const logout = async (): Promise<void> => {
   const dotYouClient = new DotYouClient({ api: ApiType.YouAuth });

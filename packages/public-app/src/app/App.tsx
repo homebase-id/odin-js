@@ -51,7 +51,7 @@ function App() {
           }
         >
           <Route path="action" element={<ActionRedirect />} />
-          <Route path="youauth/finalize" element={<YouAuthFinalizer />} />
+          <Route path="authorization-code-callback" element={<YouAuthFinalizer />} />
           <Route
             path=""
             element={
