@@ -1,51 +1,42 @@
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { Arrow, t } from '@youfoundation/common-app';
-import useAuth, { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
+import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useEffect } from 'react';
 import { Loader } from '@youfoundation/common-app';
 import useConnection from '../../hooks/connections/useConnection';
-import { useMutation } from '@tanstack/react-query';
-
-const useYouAuthLogin = () => {
-  const { createHomeToken } = useAuth();
-
-  return {
-    homeToken: useMutation(createHomeToken, {
-      onError: (err) => {
-        console.error(err);
-      },
-    }),
-  };
-};
+import useYouAuth from '../../hooks/auth/useYouAuth';
+import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 
 const YouAuthLogin = () => {
   const [searchParams] = useSearchParams();
-  const { mutate: createHomeToken, isIdle: isWaitingToCreateToken } = useYouAuthLogin().homeToken;
+  const { mutate: createHomeToken, isIdle: isWaitingToCreateToken } = useYouAuth().homeToken;
 
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
   if (!returnUrl) {
-    console.error('No returnUrl found');
+    console.error(
+      'No returnUrl found, we cannot redirect back to the targer domain... => Aborting youauth'
+    );
     return null;
   }
-  const targetDomain = decodeURIComponent(returnUrl);
-  const strippedTarget = targetDomain.replace(new RegExp('^(http|https)://'), '').split('/')[0];
+  const targetReturnUrl = decodeURIComponent(returnUrl);
+  const targetDomain = getDomainFromUrl(targetReturnUrl) || '';
 
-  const isOwner = strippedTarget === window.location.host;
+  const isOwner = targetDomain === window.location.host;
   if (isOwner) return <Navigate to={'/owner/feed'} />;
 
   const { data: connectionInfo, isFetching: isFetchingConnectionInfo } = useConnection({
-    odinId: strippedTarget,
+    odinId: targetDomain,
   }).fetch;
 
   const isConnected = connectionInfo?.status === 'connected';
   const doCancel = () => (window.location.href = returnUrl);
 
   useEffect(() => {
-    if (isConnected && isWaitingToCreateToken) createHomeToken(targetDomain);
+    if (isConnected && isWaitingToCreateToken) createHomeToken(targetReturnUrl);
   }, [isConnected]);
 
   if (isFetchingConnectionInfo || isConnected) {
@@ -73,15 +64,15 @@ const YouAuthLogin = () => {
             <div className="max-w-[35rem] dark:text-white">
               <div className="mb-5 flex flex-col sm:flex-row sm:items-center">
                 <img
-                  src={`https://${strippedTarget}/pub/image`}
+                  src={`https://${targetDomain}/pub/image`}
                   className="w-24 rounded-full sm:mr-4"
                 />
 
                 <h1 className="text-4xl ">
-                  {t('Login to')} &quot;<DomainHighlighter>{strippedTarget}</DomainHighlighter>
+                  {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
                   &quot;
                   <small className="block text-sm dark:text-white dark:text-opacity-80">
-                    &quot;<DomainHighlighter>{strippedTarget}</DomainHighlighter>&quot;{' '}
+                    &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
                     {t('is requesting to verify your identity.')}
                   </small>
                 </h1>
@@ -90,7 +81,7 @@ const YouAuthLogin = () => {
               <div className="dark:text-white dark:text-opacity-80">
                 <p className="mt-2">
                   {t('By logging in you allow')} &quot;
-                  <DomainHighlighter>{strippedTarget}</DomainHighlighter>&quot;{' '}
+                  <DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
                   {t('to verify your identity and personalise your experience')}
                 </p>
               </div>

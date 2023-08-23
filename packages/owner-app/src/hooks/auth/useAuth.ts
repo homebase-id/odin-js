@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import useVerifyToken from './useVerifyToken';
 import {
   authenticate as authenticateOwner,
-  createHomeToken as createHomeTokenOwner,
   isPasswordSet as isPasswordSetOwner,
   setFirstPassword as setFirstOwnerPassword,
   resetPassword as resetOwnerPassword,
@@ -21,7 +20,6 @@ import {
 export const LOGIN_PATH = '/owner/login';
 export const FIRSTRUN_PATH = '/owner/firstrun';
 export const RECOVERY_PATH = '/owner/account-recovery';
-export const LOGIN_YOUAUTH_PATH = '/owner/login/youauth';
 
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
@@ -103,7 +101,6 @@ const useAuth = () => {
 
   return {
     authenticate,
-    createHomeToken: createHomeTokenOwner,
     setFirstPassword: setFirstOwnerPassword,
     resetPassword: resetOwnerPassword,
     changePassword: setNewOwnerPassword,

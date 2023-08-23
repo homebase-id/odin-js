@@ -37,7 +37,8 @@ const DomainCard = ({
       >
         <div className="relative">
           <ContactImage odinId={odinId} onlyLoadAfterClick={onlyLoadAfterClick} />
-          <Shop className="absolute left-2 top-2 h-10 w-10 rounded-full border border-indigo-200 bg-indigo-100 p-2" />
+          <div className="absolute left-0 top-0 h-0 w-0 border-b-[7rem] border-l-[7rem] border-b-transparent border-l-indigo-200" />
+          <Shop className="absolute left-4 top-4 h-8 w-8" />
         </div>
         <div className="p-2">{children}</div>
       </div>
