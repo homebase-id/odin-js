@@ -30,7 +30,7 @@ const CircleDetails = () => {
     fetch: { data: circle, isLoading: circleLoading },
     fetchMembers: { data: members, isLoading: membersLoading },
     provideGrants: { mutateAsync: addMembers, status: addMemberStatus, error: addMembersError },
-    revokeGrants: {
+    revokeIdentityGrants: {
       mutateAsync: removeMembers,
       status: removeMemberStatus,
       error: removeMembersError,
@@ -296,33 +296,44 @@ const CircleMemberCard = ({
     mutate: revokeGrants,
     status: revokeGrantsStatus,
     error: revokeGrantsError,
-  } = useCircle({}).revokeGrants;
+  } = useCircle({}).revokeIdentityGrants;
+
+  const {
+    mutate: revokeDomainGrants,
+    status: revokeDomainGrantsStatus,
+    error: revokeDomainGrantsError,
+  } = useCircle({}).revokeDomainGrants;
 
   if (member.domainType === 'youauth') {
-    <DomainCard domain={member.domain} className={`${className ?? ''} relative`}>
-      <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
-        <ActionButton
-          type="secondary"
-          onClick={(e) => {
-            e.preventDefault();
-            revokeGrants({ circleId, odinIds: [member.domain] });
-            return false;
-          }}
-          confirmOptions={{
-            type: 'info',
-            title: t('Remove member'),
-            body: `${t('Are you sure you want to remove')} ${member.domain} ${t(
-              'from this circle?'
-            )}`,
-            buttonText: t('Remove'),
-          }}
-          state={revokeGrantsStatus}
-          icon={Times}
-          className="rounded-full"
-          size="square"
-        />
-      </div>
-    </DomainCard>;
+    return (
+      <>
+        <ErrorNotification error={revokeDomainGrantsError} />
+        <DomainCard domain={member.domain} className={`${className ?? ''} relative`}>
+          <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
+            <ActionButton
+              type="secondary"
+              onClick={(e) => {
+                e.preventDefault();
+                revokeDomainGrants({ circleId, domains: [member.domain] });
+                return false;
+              }}
+              confirmOptions={{
+                type: 'info',
+                title: t('Remove member'),
+                body: `${t('Are you sure you want to remove')} ${member.domain} ${t(
+                  'from this circle?'
+                )}`,
+                buttonText: t('Remove'),
+              }}
+              state={revokeDomainGrantsStatus}
+              icon={Times}
+              className="rounded-full"
+              size="square"
+            />
+          </div>
+        </DomainCard>
+      </>
+    );
   }
 
   const odinId = member.domain;

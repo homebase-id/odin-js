@@ -10,6 +10,7 @@ import {
   createCircleDefinition,
   addMemberToCircle,
   removeMemberFromCircle,
+  removeDomainFromCircle,
 } from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../../..';
 
@@ -56,7 +57,27 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
     );
   };
 
-  const revokeGrants = async ({ circleId, odinIds }: { circleId: string; odinIds: string[] }) => {
+  const revokeDomainGrants = async ({
+    circleId,
+    domains,
+  }: {
+    circleId: string;
+    domains: string[];
+  }) => {
+    return await Promise.all(
+      domains.map(
+        async (domain) => await removeDomainFromCircle(dotYouClient, { circleId: circleId, domain })
+      )
+    );
+  };
+
+  const revokeIdentityGrants = async ({
+    circleId,
+    odinIds,
+  }: {
+    circleId: string;
+    odinIds: string[];
+  }) => {
     return await Promise.all(
       odinIds.map(
         async (odinId) =>
@@ -159,7 +180,23 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       },
     }),
 
-    revokeGrants: useMutation(revokeGrants, {
+    revokeDomainGrants: useMutation(revokeDomainGrants, {
+      onSuccess: async (data, param) => {
+        queryClient.invalidateQueries(['circles']);
+        queryClient.invalidateQueries(['circle', circleId]);
+        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        await Promise.all(
+          param.domains.map(async (domain) => {
+            return await queryClient.invalidateQueries(['domainInfo', domain]);
+          })
+        );
+      },
+      onError: (ex) => {
+        console.error(ex);
+      },
+    }),
+
+    revokeIdentityGrants: useMutation(revokeIdentityGrants, {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
