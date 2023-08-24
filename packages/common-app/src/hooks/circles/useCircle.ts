@@ -10,6 +10,7 @@ import {
   createCircleDefinition,
   addMemberToCircle,
   removeMemberFromCircle,
+  addDomainToCircle,
   removeDomainFromCircle,
 } from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../../..';
@@ -92,6 +93,14 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
 
   const revokeGrant = async ({ circleId, odinId }: { circleId: string; odinId: string }) => {
     return await removeMemberFromCircle(dotYouClient, { circleId: circleId, odinId: odinId });
+  };
+
+  const provideDomainGrant = async ({ circleId, domain }: { circleId: string; domain: string }) => {
+    return await addDomainToCircle(dotYouClient, { circleId: circleId, domain: domain });
+  };
+
+  const revokeDomainGrant = async ({ circleId, domain }: { circleId: string; domain: string }) => {
+    return await removeDomainFromCircle(dotYouClient, { circleId: circleId, domain: domain });
   };
 
   const removeCircleInternal = async ({ circleId }: { circleId: string }) => {
@@ -230,6 +239,30 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.invalidateQueries(['circle', circleId]);
         queryClient.invalidateQueries(['cirleMembers', circleId]);
         queryClient.invalidateQueries(['connectionInfo', param.odinId]);
+      },
+      onError: (ex) => {
+        console.error(ex);
+      },
+    }),
+
+    provideDomainGrant: useMutation(provideDomainGrant, {
+      onSuccess: async (data, param) => {
+        queryClient.invalidateQueries(['circles']);
+        queryClient.invalidateQueries(['circle', circleId]);
+        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['domainInfo', param.domain]);
+      },
+      onError: (ex) => {
+        console.error(ex);
+      },
+    }),
+
+    revokeDomainGrant: useMutation(revokeDomainGrant, {
+      onSuccess: async (data, param) => {
+        queryClient.invalidateQueries(['circles']);
+        queryClient.invalidateQueries(['circle', circleId]);
+        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['domainInfo', param.domain]);
       },
       onError: (ex) => {
         console.error(ex);

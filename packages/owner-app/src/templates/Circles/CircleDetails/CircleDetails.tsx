@@ -304,7 +304,7 @@ const CircleMemberCard = ({
     error: revokeDomainGrantsError,
   } = useCircle({}).revokeDomainGrants;
 
-  if (member.domainType === 'youauth') {
+  if (member.domainType === 'youAuth') {
     return (
       <>
         <ErrorNotification error={revokeDomainGrantsError} />

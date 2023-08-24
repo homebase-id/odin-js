@@ -16,3 +16,18 @@ export const removeDomainFromCircle = async (
     })
     .catch(dotYouClient.handleErrorResponse);
 };
+
+export const addDomainToCircle = async (
+  dotYouClient: DotYouClient,
+  membershipGrant: { domain: string; circleId: string }
+) => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/circles/add';
+
+  return client
+    .post(url, membershipGrant)
+    .then((response) => {
+      return response.data;
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};

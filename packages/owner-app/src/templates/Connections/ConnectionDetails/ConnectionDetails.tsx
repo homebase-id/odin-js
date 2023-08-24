@@ -10,7 +10,7 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
-import CircleMembershipDialog from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
+import { CircleMembershipDialog } from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
 import IncomingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import { Persons } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';

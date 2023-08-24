@@ -37,6 +37,7 @@ const ConnectionDetails = lazy(
   () => import('../templates/Connections/ConnectionDetails/ConnectionDetails')
 );
 const Domains = lazy(() => import('../templates/Connections/Domains/Domains'));
+const DomainDetails = lazy(() => import('../templates/Connections/DomainDetails/DomainDetails'));
 
 const Circles = lazy(() => import('../templates/Circles/Circles/Circles'));
 const CircleDetails = lazy(() => import('../templates/Circles/CircleDetails/CircleDetails'));
@@ -172,6 +173,7 @@ function App() {
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
             <Route path="domains" element={<Domains />}></Route>
+            <Route path="domains/:domain" element={<DomainDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
             <Route path="apps" element={<Apps />}></Route>

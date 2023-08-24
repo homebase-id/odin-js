@@ -37,7 +37,7 @@ export const removeMemberFromCircle = async (
 
 export interface Membership {
   circleGrant: CircleGrant;
-  domainType: 'identity' | 'youauth';
+  domainType: 'identity' | 'youAuth';
   domain: string;
 }
 

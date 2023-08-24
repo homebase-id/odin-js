@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, t } from '@youfoundation/common-app';
+import { ActionButtonState, Arrow, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -10,37 +10,144 @@ import { DialogWrapper } from '@youfoundation/common-app';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CircleGrant } from '@youfoundation/js-lib/network';
 
-const CircleMembershipDialog = ({
-  title,
-  isOpen,
+interface InnerCircleSelectionDialogProps {
+  title: string;
+  isOpen: boolean;
 
-  currentCircleGrants,
+  currentCircleGrantIds: string[];
+  error: unknown;
+
+  onConfirm: (newGrantIds: string[]) => void;
+  onCancel: () => void;
+}
+
+export const CircleMembershipDialog = ({
   odinId,
 
+  title,
+  isOpen,
+  currentCircleGrants,
   onConfirm,
   onCancel,
 }: {
+  odinId: string;
+
   title: string;
   isOpen: boolean;
 
   currentCircleGrants: CircleGrant[];
-  odinId: string;
-
   onConfirm: () => void;
   onCancel: () => void;
 }) => {
-  const target = usePortal('modal-container');
-
   const {
     provideGrant: { mutateAsync: provideGrant, error: errorProviderGrant },
     revokeGrant: { mutateAsync: revokeGrant, error: errorRevokeGrant },
   } = useCircle({});
+
   const currentCircleGrantIds = currentCircleGrants.map((grant) => grant.circleId);
+
+  return (
+    <InnerCircleSelectionDialog
+      title={title}
+      isOpen={isOpen}
+      error={errorProviderGrant || errorRevokeGrant}
+      onCancel={onCancel}
+      currentCircleGrantIds={currentCircleGrantIds}
+      onConfirm={async (newGrantIds) => {
+        const toProvideGrants = newGrantIds.filter(
+          (newGrant) =>
+            !currentCircleGrantIds.some((grantId) => stringGuidsEqual(newGrant, grantId))
+        );
+        const toRevokeGrants = currentCircleGrantIds.filter(
+          (oldGrant) => !newGrantIds.some((newGrant) => stringGuidsEqual(oldGrant, newGrant))
+        );
+
+        for (const circleToProvide of toProvideGrants) {
+          await provideGrant({ circleId: circleToProvide, odinId: odinId });
+        }
+
+        for (const circleToRevoke of toRevokeGrants) {
+          await revokeGrant({ circleId: circleToRevoke, odinId: odinId });
+        }
+
+        onConfirm();
+      }}
+    />
+  );
+};
+
+export const CircleDomainMembershipDialog = ({
+  domain,
+
+  title,
+  isOpen,
+  currentCircleGrants,
+  onConfirm,
+  onCancel,
+}: {
+  domain: string;
+
+  title: string;
+  isOpen: boolean;
+
+  currentCircleGrants: CircleGrant[];
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  const {
+    provideDomainGrant: { mutateAsync: provideGrant, error: errorProviderGrant },
+    revokeDomainGrant: { mutateAsync: revokeGrant, error: errorRevokeGrant },
+  } = useCircle({});
+
+  const currentCircleGrantIds = currentCircleGrants.map((grant) => grant.circleId);
+
+  return (
+    <InnerCircleSelectionDialog
+      title={title}
+      isOpen={isOpen}
+      error={errorProviderGrant || errorRevokeGrant}
+      onCancel={onCancel}
+      currentCircleGrantIds={currentCircleGrantIds}
+      onConfirm={async (newGrantIds) => {
+        const toProvideGrants = newGrantIds.filter(
+          (newGrant) =>
+            !currentCircleGrantIds.some((grantId) => stringGuidsEqual(newGrant, grantId))
+        );
+        const toRevokeGrants = currentCircleGrantIds.filter(
+          (oldGrant) => !newGrantIds.some((newGrant) => stringGuidsEqual(oldGrant, newGrant))
+        );
+
+        for (const circleToProvide of toProvideGrants) {
+          await provideGrant({ circleId: circleToProvide, domain: domain });
+        }
+
+        for (const circleToRevoke of toRevokeGrants) {
+          await revokeGrant({ circleId: circleToRevoke, domain: domain });
+        }
+
+        onConfirm();
+      }}
+    />
+  );
+};
+
+const InnerCircleSelectionDialog = ({
+  title,
+  isOpen,
+
+  currentCircleGrantIds,
+  error,
+
+  onConfirm,
+  onCancel,
+}: InnerCircleSelectionDialogProps) => {
+  const target = usePortal('modal-container');
+
   const [newGrantIds, setNewGrantIds] = useState(currentCircleGrantIds);
 
   useEffect(() => {
-    setNewGrantIds(currentCircleGrants.map((grant) => grant.circleId));
-  }, [currentCircleGrants]);
+    setNewGrantIds(currentCircleGrantIds);
+  }, [currentCircleGrantIds]);
 
   if (!isOpen) {
     return null;
@@ -49,29 +156,11 @@ const CircleMembershipDialog = ({
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel}>
       <>
-        <ErrorNotification error={errorProviderGrant} />
-        <ErrorNotification error={errorRevokeGrant} />
+        <ErrorNotification error={error} />
         <form
           onSubmit={async (e) => {
             e.preventDefault();
-
-            const toProvideGrants = newGrantIds.filter(
-              (newGrant) =>
-                !currentCircleGrantIds.some((grantId) => stringGuidsEqual(newGrant, grantId))
-            );
-            const toRevokeGrants = currentCircleGrantIds.filter(
-              (oldGrant) => !newGrantIds.some((newGrant) => stringGuidsEqual(oldGrant, newGrant))
-            );
-
-            for (const circleToProvide of toProvideGrants) {
-              await provideGrant({ circleId: circleToProvide, odinId: odinId });
-            }
-
-            for (const circleToRevoke of toRevokeGrants) {
-              await revokeGrant({ circleId: circleToRevoke, odinId: odinId });
-            }
-
-            onConfirm();
+            onConfirm(newGrantIds);
           }}
         >
           <h2 className="mb-2 text-lg">{t('Member of')}:</h2>
@@ -95,5 +184,3 @@ const CircleMembershipDialog = ({
 
   return createPortal(dialog, target);
 };
-
-export default CircleMembershipDialog;

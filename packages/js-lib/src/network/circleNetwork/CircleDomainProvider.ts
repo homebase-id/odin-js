@@ -33,3 +33,21 @@ export const getDomains = async (
     return { results: response.data, cursor: 1 };
   });
 };
+
+export const getDomainInfo = async (dotYouClient: DotYouClient, domain: string) => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/domain';
+
+  return client.post<DomainMembership>(url, { domain }).then((response) => {
+    return response.data;
+  });
+};
+
+export const disconnectFromDomain = async (dotYouClient: DotYouClient, domain: string) => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + '/deleteDomain';
+
+  return client.post(url, { domain }).then((response) => {
+    return response.data;
+  });
+};

@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '../auth/useDotYouClient';
+import { useDotYouClient } from '@youfoundation/common-app/src/hooks/auth/useDotYouClient';
 import { getDomains } from '@youfoundation/js-lib/network';
 
 interface useActiveDomainsProps {

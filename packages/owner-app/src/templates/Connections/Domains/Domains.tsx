@@ -1,5 +1,6 @@
 import {
   ActionButton,
+  ErrorNotification,
   Globe,
   LoadingBlock,
   Pager,
@@ -13,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
 import { DomainMembership } from '@youfoundation/js-lib/dist';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
+import useDomain from '../../../hooks/connections/useDomain';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);
@@ -88,19 +90,19 @@ const Domains = () => {
 };
 
 const DomainActive = ({ domain, className }: { domain: DomainMembership; className: string }) => {
-  // const {
-  //     mutate: disconnect,
-  //     status: disconnectStatus,
-  //     error: actionError,
-  //   } = useConnection({}).disconnect;
+  const {
+    mutate: disconnect,
+    status: disconnectStatus,
+    error: actionError,
+  } = useDomain({}).disconnect;
 
   return (
     <>
-      {/* <ErrorNotification error={actionError} /> */}
+      <ErrorNotification error={actionError} />
       <DomainCard
         className={`${className ?? ''} relative`}
         domain={domain.domain}
-        // href={(dotYouProfile.odinId && `/owner/connections/${dotYouProfile.odinId}`) ?? undefined}
+        href={(domain.domain && `/owner/domains/${domain.domain}`) ?? undefined}
       >
         <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
           <ActionButton
@@ -108,9 +110,9 @@ const DomainActive = ({ domain, className }: { domain: DomainMembership; classNa
             className="rounded-full"
             onClick={(e) => {
               e.preventDefault();
-              //   disconnect({ connectionOdinId: dotYouProfile.odinId });
+              disconnect({ domain: domain.domain });
             }}
-            // state={disconnectStatus}
+            state={disconnectStatus}
             confirmOptions={{
               type: 'critical',
               title: `${t('Remove')} ${domain.domain}`,
