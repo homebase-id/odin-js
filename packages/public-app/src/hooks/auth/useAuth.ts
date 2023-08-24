@@ -56,6 +56,7 @@ const useAuth = () => {
   };
 
   const finalizeAuthorization = async (
+    identity: string,
     code: string,
     state: string,
     publicKey: string,
@@ -133,7 +134,7 @@ const useAuth = () => {
         SecretDigest: base64ExchangedSecretDigest,
       },
       {
-        baseURL: 'https://sam.dotyou.cloud', // TODO: This should be dynamic; But where to get it?
+        baseURL: `https://${identity}`, // TODO: This should be dynamic; But where to get it?
       }
     );
 
