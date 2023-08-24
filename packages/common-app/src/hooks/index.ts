@@ -6,6 +6,7 @@ export * from './errors/useErrors';
 export * from './portal/usePortal';
 export * from './darkMode/useDarkMode';
 export * from './connections/useConnections';
+export * from './connections/useDomains';
 export * from './profiles/useProfiles';
 export * from './notifications/useNotifications';
 export * from './posts';

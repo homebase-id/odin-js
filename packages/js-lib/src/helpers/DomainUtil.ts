@@ -1,3 +1,12 @@
 export const getDomainFromUrl = (url?: string): string | undefined => {
   return url?.replace(new RegExp('^(http|https)://'), '').split('/')[0];
 };
+
+export const getTwoLettersFromDomain = (domain: string): string => {
+  const domainParts = domain.split('.');
+  if (domainParts.length <= 2) {
+    return domainParts[0].substring(0, 2);
+  }
+
+  return domainParts[0].substring(0, 1) + domainParts[1].substring(0, 1);
+};

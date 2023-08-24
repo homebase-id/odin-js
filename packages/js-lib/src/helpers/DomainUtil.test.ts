@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { getDomainFromUrl } from './DomainUtil';
+import { getDomainFromUrl, getTwoLettersFromDomain } from './DomainUtil';
 
 test('Convert string to Uint8Array', () => {
   expect(
@@ -11,4 +11,12 @@ test('Convert string to Uint8Array', () => {
   expect(getDomainFromUrl('https://frodo.dotyou.cloud/')).toEqual('frodo.dotyou.cloud');
   expect(getDomainFromUrl('frodo.dotyou.cloud')).toEqual('frodo.dotyou.cloud');
   expect(getDomainFromUrl(undefined)).toEqual(undefined);
+});
+
+test('Get two letters from domain', () => {
+  expect(getTwoLettersFromDomain('github.com')).toEqual('gi');
+  expect(getTwoLettersFromDomain('frodo.dotyou.com')).toEqual('fd');
+  expect(getTwoLettersFromDomain('amazon.com.be')).toEqual('ac');
+  expect(getTwoLettersFromDomain('amazon.com')).toEqual('am');
+  expect(getTwoLettersFromDomain('abc')).toEqual('ab');
 });

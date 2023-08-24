@@ -11,6 +11,7 @@ import PersonActive from '../../../components/Connection/PersonActive/PersonActi
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useActiveConnections } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import Submenu from '../../../components/SubMenu/SubMenu';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
@@ -21,42 +22,54 @@ const Connections = () => {
 
   return (
     <>
-      <section>
-        <PageMeta
-          icon={Persons}
-          title={'Contacts'}
-          actions={
-            <>
-              <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={Plus}>
-                {t('Send Request')}
-              </ActionButton>
-            </>
-          }
-        />
-
-        {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
-          <SubtleMessage className="flex flex-row items-center">
-            <span>{t('Ready to add some connections?')}</span>
-            <ActionButton
-              onClick={(e) => {
-                e.preventDefault();
-                setIsSentConnectionOpen(true);
-
-                return false;
-              }}
-              type="secondary"
-              className="ml-2"
-              icon={Plus}
-            >
-              {t('Add')}
+      <PageMeta
+        icon={Persons}
+        title={'Contacts'}
+        actions={
+          <>
+            <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={Plus}>
+              {t('Send Request')}
             </ActionButton>
-          </SubtleMessage>
-        ) : null}
+          </>
+        }
+      />
 
-        <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
-        <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
-        <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
-      </section>
+      <Submenu
+        items={[
+          {
+            title: `Connections`,
+            path: `/owner/connections`,
+          },
+          {
+            title: `Domains`,
+            path: `/owner/domains`,
+          },
+        ]}
+        className="-mt-6 mb-6"
+      />
+
+      {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
+        <SubtleMessage className="flex flex-row items-center">
+          <span>{t('Ready to add some connections?')}</span>
+          <ActionButton
+            onClick={(e) => {
+              e.preventDefault();
+              setIsSentConnectionOpen(true);
+
+              return false;
+            }}
+            type="secondary"
+            className="ml-2"
+            icon={Plus}
+          >
+            {t('Add')}
+          </ActionButton>
+        </SubtleMessage>
+      ) : null}
+
+      <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
+      <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
+      <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
       <OutgoingConnectionDialog
         title={t('Send connection request')}
         isOpen={isSentConnectionOpen}
