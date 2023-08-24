@@ -66,78 +66,78 @@ const useAuth = () => {
     const privateKey = await retrieveKey();
     if (!privateKey) throw Error('No private key found');
 
-    const deriveSecretKey = async (privateKey: any, publicKey: string) => {
-      const publicKeyAsCryptoKey = await crypto.subtle.importKey(
-        'spki',
-        base64ToUint8Array(publicKey).buffer,
-        {
-          name: 'ECDH',
-          namedCurve: 'P-384',
-        },
-        false,
-        []
-      );
+    // TODO: Use actual publicKey; Waiting on BE work
+    // Import the remote public key
+    const importedRemotePublicKey = await crypto.subtle.importKey(
+      'jwk',
+      {
+        kty: 'EC',
+        crv: 'P-384',
+        x: 'c02Kl9me3EGXXjn9L1n41btl7WV2l_BiE-3xJkuUIs1IkmR88DWpAIwlJgPrDyyn',
+        y: 'bZhMO1MBBMohS3ynjwvkzSEQvCl0syc6ozGvwnMoOV8Gvpq9LdKyQ8cy08leNh1S',
+      },
 
-      return window.crypto.subtle.deriveKey(
-        {
-          name: 'ECDH',
-          public: publicKeyAsCryptoKey,
-        },
-        privateKey,
-        {
-          name: 'AES-GCM',
-          length: 256,
-        },
-        false,
-        ['encrypt', 'decrypt']
-      );
-    };
-
-    const exportPublicKey = async (key: CryptoKey) => {
-      // Debug, show JWK and SPKI of a natively generated key
-      console.log({ jwk: await crypto.subtle.exportKey('jwk', key) });
-      console.log({
-        spki: uint8ArrayToBase64(new Uint8Array(await crypto.subtle.exportKey('spki', key))),
-      });
-
-      return uint8ArrayToBase64(new Uint8Array(await crypto.subtle.exportKey('spki', key)));
-    };
-
-    // Generate 2 ECDH key pairs: one for Alice and one for Bob
-    // In more normal usage, they would generate their key pairs
-    // separately and exchange public keys securely
-    let alicesKeyPair = await window.crypto.subtle.generateKey(
       {
         name: 'ECDH',
         namedCurve: 'P-384',
+      },
+      true,
+      []
+    );
+
+    // Derive the hkdfKey fromt the remote public key and the local private key
+    let hkdfSharedSecret = await window.crypto.subtle.deriveKey(
+      {
+        name: 'ECDH',
+        public: importedRemotePublicKey,
+      },
+      privateKey,
+      {
+        name: 'HKDF',
       },
       false,
       ['deriveKey']
     );
 
-    let bobsKeyPair = await window.crypto.subtle.generateKey(
+    // Derive the AES Shared Secret key from the hkdfKey
+    let derivedKey = await window.crypto.subtle.deriveKey(
       {
-        name: 'ECDH',
-        namedCurve: 'P-384',
+        name: 'HKDF',
+        hash: 'SHA-256',
+        salt: base64ToUint8Array(salt),
+        info: new Uint8Array([]),
       },
-      false,
-      ['deriveKey']
+      hkdfSharedSecret,
+      {
+        name: 'AES-CBC',
+        length: 128,
+      },
+      true,
+      ['encrypt', 'decrypt']
     );
 
-    // Alice then generates a secret key using her private key and Bob's public key.
-    let alicesSecretKey = await deriveSecretKey(
-      alicesKeyPair.privateKey,
-      await exportPublicKey(bobsKeyPair.publicKey)
+    let exchangedSecret = await window.crypto.subtle.exportKey('raw', derivedKey);
+
+    const exchangedSecretDigest = await crypto.subtle.digest('SHA-256', exchangedSecret);
+    const base64ExchangedSecretDigest = uint8ArrayToBase64(new Uint8Array(exchangedSecretDigest));
+
+    console.log({ base64ExchangedSecretDigest });
+
+    const dotYouClient = getDotYouClient();
+    const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+    const tokenResponse = axiosClient.post(
+      '/api/owner/v1/youauth/token',
+      {
+        Code: code,
+        TokenDeliveryOption: 'cookie',
+        SecretDigest: base64ExchangedSecretDigest,
+      },
+      {
+        baseURL: 'https://sam.dotyou.cloud', // TODO: This should be dynamic; But where to get it?
+      }
     );
 
-    // Bob generates the same secret key using his private key and Alice's public key.
-    let bobsSecretKey = await deriveSecretKey(
-      bobsKeyPair.privateKey,
-      await exportPublicKey(alicesKeyPair.publicKey)
-    );
-
-    console.log({ alicesSecretKey, bobsSecretKey });
-
+    console.log({ tokenResponse });
     //TODO RSA decrypt
 
     // const ss = rsaEncryptedSharedSecret64;
