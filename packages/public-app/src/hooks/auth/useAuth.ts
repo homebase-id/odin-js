@@ -9,7 +9,12 @@ import {
   STORAGE_IDENTITY_KEY,
   useDotYouClient,
 } from '@youfoundation/common-app';
-import { base64ToUint8Array, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  stringToUint8Array,
+  uint8ArrayToBase64,
+} from '@youfoundation/js-lib/helpers';
 import { createPair, retrieveKey, saveKey } from './keyHelpers';
 
 export interface YouAuthorizationParams {
@@ -34,8 +39,10 @@ const useAuth = () => {
 
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const keyPair = await createPair();
-    const rawPk = await crypto.subtle.exportKey('spki', keyPair.publicKey);
-    const pk = uint8ArrayToBase64(new Uint8Array(rawPk));
+    const rawPk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+    delete rawPk.key_ops;
+    delete rawPk.ext;
+    const pk = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawPk)));
 
     saveKey(keyPair);
 
@@ -67,17 +74,12 @@ const useAuth = () => {
     const privateKey = await retrieveKey();
     if (!privateKey) throw Error('No private key found');
 
-    // TODO: Use actual publicKey; Waiting on BE work
+    const publicKeyJWK = JSON.parse(byteArrayToString(base64ToUint8Array(publicKey)));
+
     // Import the remote public key
     const importedRemotePublicKey = await crypto.subtle.importKey(
       'jwk',
-      {
-        kty: 'EC',
-        crv: 'P-384',
-        x: 'c02Kl9me3EGXXjn9L1n41btl7WV2l_BiE-3xJkuUIs1IkmR88DWpAIwlJgPrDyyn',
-        y: 'bZhMO1MBBMohS3ynjwvkzSEQvCl0syc6ozGvwnMoOV8Gvpq9LdKyQ8cy08leNh1S',
-      },
-
+      publicKeyJWK,
       {
         name: 'ECDH',
         namedCurve: 'P-384',
@@ -122,44 +124,24 @@ const useAuth = () => {
     const exchangedSecretDigest = await crypto.subtle.digest('SHA-256', exchangedSecret);
     const base64ExchangedSecretDigest = uint8ArrayToBase64(new Uint8Array(exchangedSecretDigest));
 
-    console.log({ base64ExchangedSecretDigest });
-
     const dotYouClient = getDotYouClient();
     const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
-    const tokenResponse = axiosClient.post(
+    const tokenResponse = await axiosClient.post(
       '/api/owner/v1/youauth/token',
       {
-        Code: code,
-        TokenDeliveryOption: 'cookie',
-        SecretDigest: base64ExchangedSecretDigest,
+        code: code,
+        token_delivery_option: 'cookie',
+        secret_digest: base64ExchangedSecretDigest,
       },
       {
-        baseURL: `https://${identity}`, // TODO: This should be dynamic; But where to get it?
+        baseURL: `https://${identity}`,
       }
     );
 
     console.log({ tokenResponse });
-    //TODO RSA decrypt
 
-    // const ss = rsaEncryptedSharedSecret64;
-    // window.localStorage.setItem(HOME_SHARED_SECRET, ss);
-
-    // const decodedReturnUrl = decodeURIComponent(returnUrl);
-    // const splitUpReturnUrl = decodedReturnUrl.split('?');
-    // const loggedOnIdentity =
-    //   splitUpReturnUrl?.length === 2 &&
-    //   new URLSearchParams(splitUpReturnUrl?.[1] ?? '').get('identity');
-
-    // console.log('will redirect to', decodedReturnUrl);
-
-    // if (loggedOnIdentity) {
-    //   localStorage.setItem(STORAGE_IDENTITY_KEY, loggedOnIdentity);
-    //   window.location.href = decodedReturnUrl;
-
-    //   return;
-    // }
-
-    // window.location.href = decodedReturnUrl;
+    // TODO: how to set the cookie and get the sharedSecret?
+    // TODO: use state to get the final redirectUri and redirect there
   };
 
   const logout = async (): Promise<void> => {
