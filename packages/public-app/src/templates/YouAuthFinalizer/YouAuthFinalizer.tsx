@@ -12,7 +12,7 @@ const YouAuthFinalizer = () => {
   const salt = urlParams.get('salt');
   const identity = urlParams.get('identity');
 
-  if (!code || !state || !publicKey || !salt) {
+  if (!identity || !code || !state || !publicKey || !salt) {
     return <>ERROR!</>;
   }
   // console.log('finalize auth with', xqs.get('ss64'), xqs.get('returnUrl'));
