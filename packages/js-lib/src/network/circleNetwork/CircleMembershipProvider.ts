@@ -1,6 +1,8 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { CircleGrant } from './CircleDataTypes';
 
-const root = '/circles/connections/circles';
+const connectionsRoot = '/circles/connections/circles';
+const membershipRoot = '/circles/membership';
 
 //Handles management of Circles
 export const addMemberToCircle = async (
@@ -8,7 +10,7 @@ export const addMemberToCircle = async (
   membershipGrant: { odinId: string; circleId: string }
 ) => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/add';
+  const url = connectionsRoot + '/add';
 
   return client
     .post(url, membershipGrant)
@@ -23,7 +25,7 @@ export const removeMemberFromCircle = async (
   membershipGrant: { odinId: string; circleId: string }
 ) => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/revoke';
+  const url = connectionsRoot + '/revoke';
 
   return client
     .post(url, membershipGrant)
@@ -33,17 +35,24 @@ export const removeMemberFromCircle = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
+export interface Membership {
+  circleGrant: CircleGrant;
+  domainType: 'identity' | 'youauth';
+  domain: string;
+}
+
 export const fetchMembersOfCircle = async (
   dotYouClient: DotYouClient,
   circleId: string
-): Promise<string[]> => {
+): Promise<Membership[]> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/list';
+  const url = membershipRoot + '/list';
 
   return client
-    .post(url, { circleId: circleId })
-    .then((response) => {
-      return response.data;
-    })
-    .catch(dotYouClient.handleErrorResponse);
+    .post<Membership[]>(url, { circleId: circleId })
+    .then((response) => response.data)
+    .catch((err) => {
+      dotYouClient.handleErrorResponse(err);
+      return [];
+    });
 };

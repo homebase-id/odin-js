@@ -20,6 +20,8 @@ import { AppInteractionPermissionOverview } from '../../../components/Permission
 import CircleAppInteractionDialog from '../../../components/Dialog/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { Membership } from '@youfoundation/js-lib/network';
+import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 
 const CircleDetails = () => {
   const { circleKey } = useParams();
@@ -154,9 +156,9 @@ const CircleDetails = () => {
           <div className="-m-1 flex flex-row flex-wrap">
             {members.map((member) => (
               <CircleMemberCard
-                key={member}
+                key={member.domain}
                 circleId={decodedCircleKey}
-                odinId={member}
+                member={member}
                 className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
               />
             ))}
@@ -246,7 +248,7 @@ const CircleDetails = () => {
       <MemberLookupDialog
         isOpen={isOpenMemberLookup}
         title={`${t('Add Members to')} "${circle.name}"`}
-        defaultMembers={members || []}
+        defaultMembers={members?.map((member) => member.domain) || []}
         onCancel={() => {
           setIsOpenMemberLookup(false);
         }}
@@ -283,11 +285,11 @@ const CircleDetails = () => {
 
 const CircleMemberCard = ({
   circleId,
-  odinId,
+  member,
   className,
 }: {
   circleId: string;
-  odinId: string;
+  member: Membership;
   className: string;
 }) => {
   const {
@@ -296,6 +298,34 @@ const CircleMemberCard = ({
     error: revokeGrantsError,
   } = useCircle({}).revokeGrants;
 
+  if (member.domainType === 'youauth') {
+    <DomainCard domain={member.domain} className={`${className ?? ''} relative`}>
+      <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
+        <ActionButton
+          type="secondary"
+          onClick={(e) => {
+            e.preventDefault();
+            revokeGrants({ circleId, odinIds: [member.domain] });
+            return false;
+          }}
+          confirmOptions={{
+            type: 'info',
+            title: t('Remove member'),
+            body: `${t('Are you sure you want to remove')} ${member.domain} ${t(
+              'from this circle?'
+            )}`,
+            buttonText: t('Remove'),
+          }}
+          state={revokeGrantsStatus}
+          icon={Times}
+          className="rounded-full"
+          size="square"
+        />
+      </div>
+    </DomainCard>;
+  }
+
+  const odinId = member.domain;
   return (
     <>
       <ErrorNotification error={revokeGrantsError} />

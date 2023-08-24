@@ -1,48 +1,27 @@
-import { ReactNode } from 'react';
+import CompanyCard, { CompanyCardProps } from '../CompanyCard/CompanyCard';
 
-import ContactImage from '../ContactImage/ContactImage';
-import { Shop } from '@youfoundation/common-app';
+const DomainCard = (props: CompanyCardProps) => {
+  //   if (isLoading) {
+  //     return <LoadingBlock className={`aspect-[3/5] ${props.className}`} />;
+  //   }
 
-export interface DomainCardProps {
-  odinId: string;
-  href?: string;
-  isChecked?: boolean;
-  className: string;
-  children?: ReactNode;
-  onClick?: React.MouseEventHandler<HTMLDivElement>;
-  onlyLoadAfterClick?: boolean;
-}
-
-const DomainCard = ({
-  odinId,
-  href,
-  isChecked,
-  className,
-  children,
-  onClick,
-  onlyLoadAfterClick,
-}: DomainCardProps) => {
+  const fullName = undefined;
   return (
-    <a className={`${className}`} href={href}>
-      <div
-        className={`h-full rounded-md border bg-indigo-100 transition-colors  ${
-          isChecked
-            ? 'border-4 border-indigo-500 dark:border-indigo-700'
-            : isChecked === false
-            ? 'border-4'
-            : 'border-gray-200 border-opacity-60 dark:border-gray-800 dark:bg-gray-800'
-        }
-        ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
-        onClick={onClick}
-      >
-        <div className="relative">
-          <ContactImage odinId={odinId} onlyLoadAfterClick={onlyLoadAfterClick} />
-          <div className="absolute left-0 top-0 h-0 w-0 border-b-[7rem] border-l-[7rem] border-b-transparent border-l-indigo-200" />
-          <Shop className="absolute left-4 top-4 h-8 w-8" />
-        </div>
-        <div className="p-2">{children}</div>
-      </div>
-    </a>
+    <>
+      <CompanyCard {...props}>
+        <h2 className="font-thiner mb-6 flex flex-col dark:text-white">
+          <span>{fullName ?? props.domain}</span>
+          {fullName ? (
+            <small className="d-block text-sm text-slate-500 dark:text-slate-400">
+              {props.domain}
+            </small>
+          ) : (
+            ''
+          )}
+        </h2>
+        {props.children}
+      </CompanyCard>
+    </>
   );
 };
 
