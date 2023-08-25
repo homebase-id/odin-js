@@ -45,9 +45,9 @@ export const SectionTitle = ({ title, actions }: { title?: ReactNode; actions?: 
 
   return (
     <div
-      className={`relative flex flex-row items-center border-b-[1px] border-gray-200 border-opacity-80 py-5 transition-all duration-300 dark:border-gray-700`}
+      className={`relative flex flex-row flex-wrap-reverse items-center border-b-[1px] border-gray-200 border-opacity-80 py-5 transition-all duration-300 dark:border-gray-700`}
     >
-      <h3 className="text-2xl dark:text-white">{title}</h3>
+      <h3 className="text-xl dark:text-white sm:text-2xl">{title}</h3>
       <div className="ml-auto">
         <div className="grid grid-flow-col gap-2 opacity-60 transition-opacity hover:opacity-100">
           {actions}
