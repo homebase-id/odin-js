@@ -114,7 +114,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
     }),
 
     fetchMembers: useQuery(
-      ['cirleMembers', circleId],
+      ['circleMembers', circleId],
       () => fetchMembers({ circleId: circleId as string }),
       {
         refetchOnWindowFocus: false,
@@ -177,7 +177,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         await Promise.all(
           param.odinIds.map(async (odinId) => {
             return await queryClient.invalidateQueries(['connectionInfo', odinId]);
@@ -193,7 +193,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         await Promise.all(
           param.domains.map(async (domain) => {
             return await queryClient.invalidateQueries(['domainInfo', domain]);
@@ -209,7 +209,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         await Promise.all(
           param.odinIds.map(async (odinId) => {
             return await queryClient.invalidateQueries(['connectionInfo', odinId]);
@@ -225,7 +225,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         queryClient.invalidateQueries(['connectionInfo', param.odinId]);
       },
       onError: (ex) => {
@@ -237,7 +237,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         queryClient.invalidateQueries(['connectionInfo', param.odinId]);
       },
       onError: (ex) => {
@@ -249,7 +249,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         queryClient.invalidateQueries(['domainInfo', param.domain]);
       },
       onError: (ex) => {
@@ -261,7 +261,7 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       onSuccess: async (data, param) => {
         queryClient.invalidateQueries(['circles']);
         queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['cirleMembers', circleId]);
+        queryClient.invalidateQueries(['circleMembers', circleId]);
         queryClient.invalidateQueries(['domainInfo', param.domain]);
       },
       onError: (ex) => {

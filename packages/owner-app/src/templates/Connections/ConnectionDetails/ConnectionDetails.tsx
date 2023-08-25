@@ -120,7 +120,10 @@ const ConnectionDetails = () => {
     actionGroupOptions.push({
       icon: Trash,
       label: t('Remove'),
-      onClick: () => disconnect({ connectionOdinId: odinId }),
+      onClick: () => {
+        disconnect({ connectionOdinId: odinId });
+        navigate('/owner/connections');
+      },
       confirmOptions: {
         title: `${t('Remove')} ${odinId}`,
         buttonText: t('Remove'),
@@ -148,11 +151,9 @@ const ConnectionDetails = () => {
 
   return (
     <>
-      <ErrorNotification error={disconnectError} />
-      <ErrorNotification error={revokeError} />
-      <ErrorNotification error={blockError} />
-      <ErrorNotification error={unblockError} />
-      <ErrorNotification error={ignoreError} />
+      <ErrorNotification
+        error={disconnectError || revokeError || blockError || unblockError || ignoreError}
+      />
       <PageMeta
         icon={Persons}
         title={
