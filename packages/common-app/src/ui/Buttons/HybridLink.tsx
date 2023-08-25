@@ -13,13 +13,20 @@ export const HybridLink = (props: HybridLinkProps) => {
   const { pathname } = window.location;
   const firstPathPart = pathname.split('/')[1];
   const firstHrefPart = (props.href || '/').split('/')[1];
+
   // If both are "owner", or neither is "owner", it's internal, otherwise external
   const isExternal =
-    (firstPathPart === 'owner' && firstHrefPart === 'owner') ||
-    (firstPathPart !== 'owner' && firstHrefPart !== 'owner') ||
-    props.href?.startsWith('http');
+    !(
+      (firstPathPart === 'owner' && firstHrefPart === 'owner') ||
+      (firstPathPart !== 'owner' && firstHrefPart !== 'owner')
+    ) || props.href?.startsWith('http');
 
-  if (isExternal) return <a {...props}>{props.children}</a>;
+  if (isExternal)
+    return (
+      <a {...props} data-external>
+        {props.children}
+      </a>
+    );
   else {
     const navigate = useNavigate();
     const onClickHandler =
@@ -31,7 +38,12 @@ export const HybridLink = (props: HybridLinkProps) => {
       });
 
     return (
-      <a {...props} onClick={onClickHandler} className={`${props.className || ''} cursor-pointer`}>
+      <a
+        {...props}
+        onClick={onClickHandler}
+        data-internal
+        className={`${props.className || ''} cursor-pointer`}
+      >
         {props.children}
       </a>
     );

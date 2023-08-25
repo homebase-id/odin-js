@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 
 import ContactImage from '../ContactImage/ContactImage';
+import { HybridLink } from '@youfoundation/common-app';
 
 export interface PersonCardProps {
   odinId: string;
@@ -22,7 +23,7 @@ const PersonCard = ({
   onlyLoadAfterClick,
 }: PersonCardProps) => {
   return (
-    <a className={`${className}`} href={href}>
+    <HybridLink className={`${className}`} href={href}>
       <div
         className={`h-full rounded-md border bg-white transition-colors  ${
           isChecked
@@ -37,7 +38,7 @@ const PersonCard = ({
         <ContactImage odinId={odinId} onlyLoadAfterClick={onlyLoadAfterClick} />
         <div className="p-2">{children}</div>
       </div>
-    </a>
+    </HybridLink>
   );
 };
 

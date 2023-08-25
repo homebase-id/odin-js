@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Shop } from '@youfoundation/common-app';
+import { HybridLink, Shop } from '@youfoundation/common-app';
 import { CompanyImage } from '../CompanyImage/CompanyImage';
 
 export interface CompanyCardProps {
@@ -21,7 +21,7 @@ const CompanyCard = ({
   onClick,
 }: CompanyCardProps) => {
   return (
-    <a className={`${className}`} href={href}>
+    <HybridLink className={`${className}`} href={href}>
       <div
         className={`h-full rounded-md border bg-indigo-100 transition-colors  ${
           isChecked
@@ -40,7 +40,7 @@ const CompanyCard = ({
         </div>
         <div className="p-2">{children}</div>
       </div>
-    </a>
+    </HybridLink>
   );
 };
 

@@ -118,6 +118,8 @@ export const ActionButton: FC<ActionButtonProps> = ({
           confirmOptions
             ? (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+
                 setNeedsConfirmation(true);
                 setMouseEvent(e);
                 return false;

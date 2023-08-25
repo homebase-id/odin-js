@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 
 import { useOutsideTrigger } from '../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
 import { Times } from '../../ui';
@@ -22,6 +22,13 @@ export const DialogWrapper = ({
 }) => {
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => !keepOpenOnBlur && onClose && onClose());
+
+  useEffect(() => {
+    document.documentElement.classList.add('overflow-hidden');
+    return () => {
+      document.documentElement.classList.remove('overflow-hidden');
+    };
+  });
 
   return (
     <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -69,7 +76,7 @@ export const DialogWrapper = ({
               <div
                 className={`max-h-[calc(100vh-112px)] flex-grow overflow-y-auto ${
                   isPaddingLess ? '' : 'px-4 py-8 sm:px-8'
-                } sm:max-h-[calc(100vh-10rem)] `}
+                } sm:max-h-[calc(100vh-5rem)] `}
               >
                 {children}
               </div>

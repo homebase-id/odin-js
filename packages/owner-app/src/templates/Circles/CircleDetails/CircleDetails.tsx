@@ -310,7 +310,7 @@ const CircleMemberCard = ({
         <ErrorNotification error={revokeDomainGrantsError} />
         <DomainCard
           domain={member.domain}
-          className={`${className ?? ''} relative`}
+          className={`${className ?? ''} group relative`}
           href={(member.domain && `/owner/third-parties/${member.domain}`) ?? undefined}
         >
           <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
@@ -331,7 +331,7 @@ const CircleMemberCard = ({
               }}
               state={revokeDomainGrantsStatus}
               icon={Times}
-              className="rounded-full"
+              className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
               size="square"
             />
           </div>
@@ -345,7 +345,7 @@ const CircleMemberCard = ({
     <>
       <ErrorNotification error={revokeGrantsError} />
       <ConnectionCard
-        className={`${className ?? ''} relative`}
+        className={`${className ?? ''} group relative`}
         odinId={odinId}
         href={(odinId && `/owner/connections/${odinId}`) ?? undefined}
       >
@@ -353,6 +353,7 @@ const CircleMemberCard = ({
           <ActionButton
             type="secondary"
             onClick={(e) => {
+              e.stopPropagation();
               e.preventDefault();
               revokeGrants({ circleId, odinIds: [odinId] });
               return false;
@@ -365,7 +366,7 @@ const CircleMemberCard = ({
             }}
             state={revokeGrantsStatus}
             icon={Times}
-            className="rounded-full"
+            className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
             size="square"
           />
         </div>

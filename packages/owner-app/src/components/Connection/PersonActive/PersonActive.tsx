@@ -23,15 +23,16 @@ const PersonActive = ({
     <>
       <ErrorNotification error={actionError} />
       <ConnectionCard
-        className={`${className ?? ''} relative`}
+        className={`${className ?? ''} group relative`}
         odinId={dotYouProfile.odinId}
         href={(dotYouProfile.odinId && `/owner/connections/${dotYouProfile.odinId}`) ?? undefined}
       >
         <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
           <ActionButton
             type="secondary"
-            className="rounded-full"
+            className="rounded-full transition-opacity group-hover:opacity-100"
             onClick={(e) => {
+              e.stopPropagation();
               e.preventDefault();
               disconnect({ connectionOdinId: dotYouProfile.odinId });
             }}

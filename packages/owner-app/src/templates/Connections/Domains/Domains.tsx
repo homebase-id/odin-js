@@ -100,17 +100,19 @@ const DomainActive = ({ domain, className }: { domain: DomainMembership; classNa
     <>
       <ErrorNotification error={actionError} />
       <DomainCard
-        className={`${className ?? ''} relative`}
+        className={`${className ?? ''} group relative`}
         domain={domain.domain}
         href={(domain.domain && `/owner/third-parties/${domain.domain}`) ?? undefined}
       >
         <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
           <ActionButton
             type="secondary"
-            className="rounded-full"
+            className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
             onClick={(e) => {
+              e.stopPropagation();
               e.preventDefault();
               disconnect({ domain: domain.domain });
+              return false;
             }}
             state={disconnectStatus}
             confirmOptions={{

@@ -14,6 +14,7 @@ import {
   LoadingBlock,
   Pencil,
   Refresh,
+  SubtleMessage,
   Times,
   Trash,
   t,
@@ -282,12 +283,14 @@ const DomainClients = ({ domain }: { domain: string }) => {
           <LoadingBlock className="mb-4 h-4 max-w-xs" />
           <LoadingBlock className="mb-4 h-4 max-w-xs" />
         </>
-      ) : (
+      ) : clients?.length ? (
         <div className="grid grid-flow-row gap-4">
           {clients?.map((client) => (
             <ClientView domain={domain} client={client} key={client.accessRegistrationId} />
           ))}
         </div>
+      ) : (
+        <SubtleMessage>{t('No clients curently registered')}</SubtleMessage>
       )}
     </Section>
   );
