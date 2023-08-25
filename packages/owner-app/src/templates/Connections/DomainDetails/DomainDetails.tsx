@@ -290,7 +290,7 @@ const DomainClients = ({ domain }: { domain: string }) => {
           ))}
         </div>
       ) : (
-        <SubtleMessage>{t('No clients curently registered')}</SubtleMessage>
+        <SubtleMessage>{t('No clients currently registered')}</SubtleMessage>
       )}
     </Section>
   );
