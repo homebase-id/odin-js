@@ -37,6 +37,8 @@ const useAuth = () => {
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(isOwner);
   const navigate = useNavigate();
 
+  // TODO: Move to separate hook
+  // TODO: Cleanup
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const keyPair = await createPair();
     const rawPk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
@@ -46,7 +48,7 @@ const useAuth = () => {
 
     saveKey(keyPair);
 
-    const state = 'home-app-ref-id';
+    const state = encodeURIComponent(returnUrl);
     // TODO: State should contain the returnUrl
 
     return {
@@ -56,12 +58,13 @@ const useAuth = () => {
       public_key: pk,
       permission_request: '',
       state: state,
-      redirect_uri: `https://${
-        window.location.hostname
-      }/authorization-code-callback?returnUrl=${encodeURIComponent(returnUrl)}`,
+      redirect_uri: `https://${window.location.hostname}/authorization-code-callback`,
     };
   };
 
+  // TODO: Add a processing state, so the request is only done once;
+  // TODO: Move to separate hook
+  // TODO: Cleanup
   const finalizeAuthorization = async (
     identity: string,
     code: string,
@@ -139,6 +142,7 @@ const useAuth = () => {
     );
 
     console.log({ tokenResponse });
+    console.log('redirecting to', decodeURIComponent(state));
 
     // TODO: how to set the cookie and get the sharedSecret?
     // TODO: use state to get the final redirectUri and redirect there
