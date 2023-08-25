@@ -1,5 +1,5 @@
-import { ApiType, DotYouClient, NumberCursoredResult } from '../..';
-import { CircleGrant } from './CircleDataTypes';
+import { DotYouClient, NumberCursoredResult } from '@youfoundation/js-lib/core';
+import { CircleGrant } from '@youfoundation/js-lib/network';
 
 const root = '/youauthdomain';
 
@@ -33,10 +33,6 @@ export const getDomains = async (
   // const url = root + '/list?' + stringify(data);
   // TODO: Add pagination whent the server supports it
   const url = root + '/list';
-
-  if (dotYouClient.getType() !== ApiType.Owner) {
-    throw new Error('Only owner can get domains');
-  }
 
   return client.get(url).then((response) => {
     return { results: response.data, cursor: 1 };

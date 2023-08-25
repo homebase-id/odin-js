@@ -4,9 +4,9 @@ import {
   disconnectFromDomain,
   getDomainClients,
   getDomainInfo,
-  revokeDomainAccess,
   restoreDomainAccess,
-} from '@youfoundation/js-lib/network';
+  revokeDomainAccess,
+} from '../../provider/network/domainNetwork/DomainProvider';
 
 const useDomain = ({ domain }: { domain?: string }) => {
   const queryClient = useQueryClient();

@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import useAuth from '../auth/useAuth';
-import { getDomainClients, removeDomainClient } from '@youfoundation/js-lib/network';
+import {
+  getDomainClients,
+  removeDomainClient,
+} from '../../provider/network/domainNetwork/DomainProvider';
 
 const useDomainClients = ({ domain }: { domain?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();

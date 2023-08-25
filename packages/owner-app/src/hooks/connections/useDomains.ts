@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app/src/hooks/auth/useDotYouClient';
-import { getDomains } from '@youfoundation/js-lib/network';
+import { getDomains } from '../../provider/network/domainNetwork/DomainProvider';
 
 interface useActiveDomainsProps {
   pageSize: number;
