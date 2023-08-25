@@ -72,14 +72,14 @@ const Domains = () => {
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
         {activeDomainsLoading && (
           <>
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
           </>
         )}
 
         {activeDomains?.pages?.[activePage - 1]?.results?.map((domain) => (
           <DomainActive
-            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
+            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             domain={domain}
             key={domain.domain}
           />

@@ -308,7 +308,11 @@ const CircleMemberCard = ({
     return (
       <>
         <ErrorNotification error={revokeDomainGrantsError} />
-        <DomainCard domain={member.domain} className={`${className ?? ''} relative`}>
+        <DomainCard
+          domain={member.domain}
+          className={`${className ?? ''} relative`}
+          href={(member.domain && `/owner/domains/${member.domain}`) ?? undefined}
+        >
           <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
             <ActionButton
               type="secondary"

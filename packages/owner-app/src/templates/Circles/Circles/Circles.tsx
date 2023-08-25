@@ -11,6 +11,8 @@ import { useCircle } from '@youfoundation/common-app';
 import { Ellipsis } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
+import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
+import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 
 const Circles = () => {
   const {
@@ -92,13 +94,25 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
           {members?.length ? (
             <>
               <div className="ml-auto mt-auto flex shrink-0 flex-row">
-                {members?.slice(0, 5)?.map((member) => (
-                  <img
-                    src={`https://${member.domain}/pub/image`}
-                    className="-mr-2 h-7 w-7 rounded-full border last:mr-0"
-                    key={member.domain}
-                  />
-                ))}
+                {members
+                  ?.slice(0, 5)
+                  ?.map((member) =>
+                    member.domainType === 'identity' ? (
+                      <ContactImage
+                        odinId={member.domain}
+                        key={member.domain}
+                        className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
+                        fallbackSize="xs"
+                      />
+                    ) : (
+                      <CompanyImage
+                        domain={member.domain}
+                        key={member.domain}
+                        className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
+                        fallbackSize="xs"
+                      />
+                    )
+                  )}
               </div>
               {members.length > 5 ? (
                 <span className="mb-1 mt-auto pl-2 text-slate-400">

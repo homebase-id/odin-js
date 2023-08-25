@@ -1,9 +1,19 @@
-const FallbackImg = ({ initials, className }: { initials: string; className?: string }) => {
+const FallbackImg = ({
+  initials,
+  className,
+  size,
+}: {
+  initials: string;
+  className?: string;
+  size?: 'xs';
+}) => {
   return (
     <div
-      className={`flex bg-slate-200 text-4xl font-light text-white dark:bg-slate-700 dark:text-black sm:text-6xl ${
-        className ?? ''
-      } ${className?.includes('h-') ? '' : 'h-full'} ${className?.includes('w-') ? '' : 'w-full'}`}
+      className={`flex bg-slate-100 font-light text-black dark:bg-slate-700 dark:text-white ${
+        size === 'xs' ? 'text-sm' : 'text-6xl sm:text-8xl'
+      } ${className ?? ''} ${className?.includes('h-') ? '' : 'h-full'} ${
+        className?.includes('w-') ? '' : 'w-full'
+      }`}
     >
       <span className="m-auto uppercase">{initials}</span>
     </div>

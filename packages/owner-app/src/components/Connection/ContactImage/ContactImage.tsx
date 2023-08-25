@@ -1,15 +1,40 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import useContact from '../../../hooks/contacts/useContact';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import FallbackImg from '../../ui/FallbackImg/FallbackImg';
 import { Eye, Image, LoadingBlock } from '@youfoundation/common-app';
+import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
+
+const getInitials = (
+  fullName: string | undefined,
+  first: string | undefined,
+  last: string | undefined,
+  domain: string
+) => {
+  if (fullName) {
+    return fullName
+      .split(' ')
+      .map((part) => part[0] ?? '')
+      .join('');
+  }
+
+  if (first || last) {
+    return (first?.[0] ?? '') + (last?.[0] ?? '') + '';
+  }
+
+  return getTwoLettersFromDomain(domain);
+};
 
 const ContactImage = ({
   odinId,
   onlyLoadAfterClick,
+  className,
+  fallbackSize,
 }: {
   odinId: string;
   onlyLoadAfterClick?: boolean;
+  className?: string;
+  fallbackSize?: 'xs';
 }) => {
   const [loadImage, setLoadImage] = useState(false);
 
@@ -23,36 +48,14 @@ const ContactImage = ({
       ? onlyLoadAfterClick
       : false;
 
-  // const { data: imageUrl } = useImage(
-  //   shouldOnlyLoadAfterClick
-  //     ? loadImage
-  //       ? contactData?.imageFileId || undefined
-  //       : undefined
-  //     : contactData?.imageFileId,
-  //   ContactConfig.ContactTargetDrive
-  // ).fetch;
-
   const nameData = contactData?.name;
-  const getInitials = () => {
-    if (nameData) {
-      return (
-        nameData.displayName
-          ?.split(' ')
-          .map((part) => part[0] ?? '')
-          .join('') ?? (nameData.givenName?.[0] ?? '') + (nameData.surname?.[0] ?? '') + ''
-      );
-    }
-
-    const splittedDomain = odinId?.split('.');
-    if (splittedDomain?.length >= 2) {
-      return splittedDomain[0][0] + splittedDomain[1][0] + '';
-    }
-
-    return '--';
-  };
+  const intials = useMemo(
+    () => getInitials(nameData?.displayName, nameData?.givenName, nameData?.surname, odinId),
+    [nameData, odinId]
+  );
 
   return (
-    <div className="relative aspect-square">
+    <div className={`relative aspect-square ${className || ''}`}>
       {isLoading ? (
         <LoadingBlock className={`aspect-square`} />
       ) : (shouldOnlyLoadAfterClick && loadImage) || !shouldOnlyLoadAfterClick ? (
@@ -63,11 +66,9 @@ const ContactImage = ({
           className="h-full w-full"
         />
       ) : (
-        <>
-          <FallbackImg initials={getInitials()} />
-        </>
+        <FallbackImg initials={intials} size={fallbackSize} />
       )}
-      {shouldOnlyLoadAfterClick === true && (
+      {shouldOnlyLoadAfterClick ? (
         <button
           className="absolute bottom-2 right-2 bg-white bg-opacity-60 p-2 hover:bg-opacity-100 dark:bg-black dark:bg-opacity-60 hover:dark:bg-opacity-100"
           onClick={(e) => {
@@ -81,7 +82,7 @@ const ContactImage = ({
             <span className="absolute bottom-[0.9rem] right-[0.2rem] block w-[1.5rem] rotate-45 border-b-[2px] border-black dark:border-white"></span>
           )}
         </button>
-      )}
+      ) : null}
     </div>
   );
 };

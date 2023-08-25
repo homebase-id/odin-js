@@ -117,14 +117,14 @@ const PendingConnectionSection = ({
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
         {pendingConnectionsLoading && (
           <>
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
           </>
         )}
 
         {pendingConnections?.results?.map((pendingConnection) => (
           <PersonIncomingRequest
-            className="w-full p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
+            className="w-full p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             senderOdinId={pendingConnection.senderOdinId}
             key={pendingConnection.senderOdinId}
             pendingConnection={pendingConnection}
@@ -169,14 +169,14 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
       <div className="-m-1 mt-5 flex flex-row flex-wrap">
         {sentRequestsLoading && (
           <>
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
           </>
         )}
 
         {sentRequests?.results?.map((sentRequest) => (
           <PersonOutgoingRequest
-            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
+            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             recipientOdinId={sentRequest.recipient}
             key={sentRequest.recipient}
           />
@@ -242,15 +242,15 @@ const ActiveConnectionSection = ({
           <div className="-m-1 mt-5 flex flex-row flex-wrap">
             {activeConnectionsLoading && (
               <>
-                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
-                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6" />
+                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
               </>
             )}
 
             {activeConnections?.pages?.[activePage - 1]?.results?.map((activeConnection) =>
               typeof activeConnection === 'object' ? (
                 <PersonActive
-                  className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
+                  className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
                   dotYouProfile={activeConnection as DotYouProfile}
                   key={activeConnection.odinId}
                 />
