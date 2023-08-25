@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 import {
   Cloud,
+  Globe,
   HOME_ROOT_PATH,
   MiniDarkModeToggle,
   Persons,
@@ -44,7 +45,7 @@ const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
-const moreBg = 'bg-indigo-200 text-black dark:bg-indigo-800 dark:text-white';
+const moreBg = 'bg-indigo-200 bg-opacity-50 text-black dark:bg-indigo-800 dark:text-white';
 
 export const Sidenav = ({ logout }: { logout: () => void }) => {
   const isDesktop = document.documentElement.clientWidth >= 1280;
@@ -171,6 +172,7 @@ const MoreItems = ({ isOpen: isNavOpen, logout }: { isOpen: boolean; logout: () 
         <hr className="border-b dark:border-slate-500" />
         <NavItem icon={HardDrive} label={'Drives'} to={'/owner/drives'} />
         <NavItem icon={Grid} label={'Apps'} to={'/owner/apps'} />
+        <NavItem icon={Globe} label={'Third-Parties'} to={'/owner/third-parties'} />
         <hr className="border-b dark:border-slate-500" />
         <NavItem label={t('Wallet')} to={`/owner/profile/wallet`} icon={Wallet} />
         <hr className="border-b dark:border-slate-500" />

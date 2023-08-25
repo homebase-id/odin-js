@@ -35,8 +35,8 @@ const CompanyCard = ({
       >
         <div className="relative">
           <CompanyImage domain={domain} />
-          <div className="absolute left-0 top-0 h-0 w-0 border-b-[7rem] border-l-[7rem] border-b-transparent border-l-indigo-200 border-opacity-90" />
-          <Shop className="absolute left-4 top-4 h-8 w-8 dark:text-black" />
+          <div className="absolute left-0 top-0 h-0 w-0 border-b-[7rem] border-l-[7rem] border-b-transparent border-l-indigo-200 border-opacity-90 dark:border-l-indigo-800" />
+          <Shop className="absolute left-4 top-4 h-8 w-8 dark:text-slate-100" />
         </div>
         <div className="p-2">{children}</div>
       </div>

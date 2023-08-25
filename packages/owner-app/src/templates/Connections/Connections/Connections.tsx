@@ -24,7 +24,7 @@ const Connections = () => {
     <>
       <PageMeta
         icon={Persons}
-        title={'Contacts'}
+        title={'Connections'}
         actions={
           <>
             <ActionButton onClick={() => setIsSentConnectionOpen(true)} icon={Plus}>
@@ -41,8 +41,8 @@ const Connections = () => {
             path: `/owner/connections`,
           },
           {
-            title: `Domains`,
-            path: `/owner/domains`,
+            title: `Third-Parties`,
+            path: `/owner/third-parties`,
           },
         ]}
         className="-mt-6 mb-6"

@@ -25,8 +25,9 @@ import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import { CircleDomainMembershipDialog } from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
-import { CircleGrant, DomainClient } from '@youfoundation/js-lib/network';
+import { CircleGrant, DriveGrant } from '@youfoundation/js-lib/network';
 import useDomainClients from '../../../hooks/connections/useDomainClients';
+import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
 
 const DomainDetails = () => {
   const { domain } = useParams();
@@ -64,7 +65,7 @@ const DomainDetails = () => {
       onClick: () => {
         disconnect({ domain: domain });
 
-        navigate('/owner/domains');
+        navigate('/owner/third-parties');
       },
       confirmOptions: {
         title: `${t('Remove')} ${domain}`,
@@ -141,7 +142,7 @@ const DomainDetails = () => {
             <ActionGroup options={actionGroupOptions} type="secondary" size="square" />
           </>
         }
-        breadCrumbs={[{ href: '/owner/domains', title: 'Domains' }, { title: domain }]}
+        breadCrumbs={[{ href: '/owner/third-parties', title: 'Third-Parties' }, { title: domain }]}
         browserTitle={domain}
       />
 

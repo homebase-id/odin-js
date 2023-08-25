@@ -172,8 +172,8 @@ function App() {
             <Route path="public-profile" element={<PublicProfileDetails />}></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
-            <Route path="domains" element={<Domains />}></Route>
-            <Route path="domains/:domain" element={<DomainDetails />}></Route>
+            <Route path="third-parties" element={<Domains />}></Route>
+            <Route path="third-parties/:domain" element={<DomainDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
             <Route path="apps" element={<Apps />}></Route>

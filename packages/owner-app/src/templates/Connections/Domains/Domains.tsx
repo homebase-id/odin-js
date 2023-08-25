@@ -12,9 +12,9 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
-import { DomainMembership } from '@youfoundation/js-lib/dist';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import useDomain from '../../../hooks/connections/useDomain';
+import { DomainMembership } from '../../../provider/network/domainNetwork/DomainProvider';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);
@@ -43,7 +43,7 @@ const Domains = () => {
 
   return (
     <>
-      <PageMeta icon={Globe} title={'Domains'} />
+      <PageMeta icon={Globe} title={'Third-Parties'} />
 
       <Submenu
         items={[
@@ -52,15 +52,15 @@ const Domains = () => {
             path: `/owner/connections`,
           },
           {
-            title: `Domains`,
-            path: `/owner/domains`,
+            title: `Third-Parties`,
+            path: `/owner/third-parties`,
           },
         ]}
         className="-mt-6 mb-6"
       />
 
       <SectionTitle
-        title={t('Domains')}
+        title={t('Third-Parties')}
         actions={
           <Pager
             totalPages={activeHasNextPage ? activePage + 1 : activePage}
@@ -102,7 +102,7 @@ const DomainActive = ({ domain, className }: { domain: DomainMembership; classNa
       <DomainCard
         className={`${className ?? ''} relative`}
         domain={domain.domain}
-        href={(domain.domain && `/owner/domains/${domain.domain}`) ?? undefined}
+        href={(domain.domain && `/owner/third-parties/${domain.domain}`) ?? undefined}
       >
         <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
           <ActionButton
