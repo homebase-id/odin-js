@@ -8,6 +8,14 @@ export const hasValidToken = async (): Promise<boolean> => {
   return response.status === 200 && response.data === true;
 };
 
+export const getEccPublicKey = async (): Promise<string> => {
+  const dotYouClient = new DotYouClient({ api: ApiType.YouAuth });
+  const client = dotYouClient.createAxiosClient();
+  return await client
+    .get('/public/keys/offline_ecc', { validateStatus: () => true })
+    .then((response) => response.data);
+};
+
 // TODO: Remove; Covered by central login box
 // export const authenticate = (identity: string, returnUrl: string): void => {
 //   const redirectUrl = `https://${identity}/owner/login/youauth?returnUrl=${encodeURIComponent(

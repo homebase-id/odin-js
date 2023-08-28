@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useVerifyToken from './useVerifyToken';
-import { logout as logoutYouauth } from '../../provider/AuthenticationProvider';
+import { getEccPublicKey, logout as logoutYouauth } from '../../provider/AuthenticationProvider';
 import { HOME_ROOT_PATH, logoutOwner } from '@youfoundation/common-app';
 import {
   HOME_SHARED_SECRET,
@@ -9,13 +9,6 @@ import {
   STORAGE_IDENTITY_KEY,
   useDotYouClient,
 } from '@youfoundation/common-app';
-import {
-  base64ToUint8Array,
-  byteArrayToString,
-  stringToUint8Array,
-  uint8ArrayToBase64,
-} from '@youfoundation/js-lib/helpers';
-import { createPair, retrieveKey, saveKey } from './keyHelpers';
 
 export interface YouAuthorizationParams {
   client_id: string;
@@ -40,16 +33,19 @@ const useAuth = () => {
   // TODO: Move to separate hook
   // TODO: Cleanup
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
-    const keyPair = await createPair();
-    const rawPk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
-    delete rawPk.key_ops;
-    delete rawPk.ext;
-    const pk = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawPk)));
+    // TODO: Add public key for the encryption of the eventuals shared secret:
 
-    saveKey(keyPair);
+    // const keyPair = await createPair();
+    // const rawPk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+    // delete rawPk.key_ops;
+    // delete rawPk.ext;
+    // const pk = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawPk)));
+    // saveKey(keyPair);
 
-    const state = encodeURIComponent(returnUrl);
-    // TODO: State should contain the returnUrl
+    // TODO: returnUrl needs to be passed in the state, so it can be used in the callback
+    const finalUrl = `/authorization-code-callback`;
+    const state = { finalUrl: finalUrl, eccPk64: undefined };
+    const pk = await getEccPublicKey();
 
     return {
       client_id: window.location.hostname,
@@ -57,8 +53,8 @@ const useAuth = () => {
       client_info: '',
       public_key: pk,
       permission_request: '',
-      state: state,
-      redirect_uri: `https://${window.location.hostname}/authorization-code-callback`,
+      state: JSON.stringify(state),
+      redirect_uri: `https://${window.location.hostname}/api/youauth/v1/auth/auth-code-callback`,
     };
   };
 
@@ -74,78 +70,14 @@ const useAuth = () => {
   ) => {
     console.log('Finalizing authentication');
 
-    const privateKey = await retrieveKey();
-    if (!privateKey) throw Error('No private key found');
+    // TODO: Should become:
+    // Read the encrypted sharedSecret from the queryString
+    // Decrypt the sharedSecret with the private key
+    // Store the sharedSecret to the localStorage
+    // Store the identity to the localStorage
+    // Redirect to the returnUrl
 
-    const publicKeyJWK = JSON.parse(byteArrayToString(base64ToUint8Array(publicKey)));
-
-    // Import the remote public key
-    const importedRemotePublicKey = await crypto.subtle.importKey(
-      'jwk',
-      publicKeyJWK,
-      {
-        name: 'ECDH',
-        namedCurve: 'P-384',
-      },
-      true,
-      []
-    );
-
-    // Derive the hkdfKey fromt the remote public key and the local private key
-    let hkdfSharedSecret = await window.crypto.subtle.deriveKey(
-      {
-        name: 'ECDH',
-        public: importedRemotePublicKey,
-      },
-      privateKey,
-      {
-        name: 'HKDF',
-      },
-      false,
-      ['deriveKey']
-    );
-
-    // Derive the AES Shared Secret key from the hkdfKey
-    let derivedKey = await window.crypto.subtle.deriveKey(
-      {
-        name: 'HKDF',
-        hash: 'SHA-256',
-        salt: base64ToUint8Array(salt),
-        info: new Uint8Array([]),
-      },
-      hkdfSharedSecret,
-      {
-        name: 'AES-CBC',
-        length: 128,
-      },
-      true,
-      ['encrypt', 'decrypt']
-    );
-
-    let exchangedSecret = await window.crypto.subtle.exportKey('raw', derivedKey);
-
-    const exchangedSecretDigest = await crypto.subtle.digest('SHA-256', exchangedSecret);
-    const base64ExchangedSecretDigest = uint8ArrayToBase64(new Uint8Array(exchangedSecretDigest));
-
-    const dotYouClient = getDotYouClient();
-    const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
-    const tokenResponse = await axiosClient.post(
-      '/api/owner/v1/youauth/token',
-      {
-        code: code,
-        token_delivery_option: 'cookie',
-        secret_digest: base64ExchangedSecretDigest,
-      },
-      {
-        baseURL: `https://${identity}`,
-      }
-    );
-
-    console.log({ tokenResponse });
-    console.log('redirecting to', decodeURIComponent(state));
-
-    // TODO: how to set the cookie and get the sharedSecret?
-    // TODO: use state to get the final redirectUri and redirect there
+    throw new Error('Not implemented');
   };
 
   const logout = async (): Promise<void> => {
