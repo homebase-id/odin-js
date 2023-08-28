@@ -110,11 +110,11 @@ const useAuth = () => {
         ) {
           console.error('kicked identity');
 
-          // Auth state was presumed logged in, but not allowed.. Will attempt reload page? (Browsers may ignore, as it's not a reload on user request)
-          window.localStorage.removeItem(HOME_SHARED_SECRET);
-          window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+          // // Auth state was presumed logged in, but not allowed.. Will attempt reload page? (Browsers may ignore, as it's not a reload on user request)
+          // window.localStorage.removeItem(HOME_SHARED_SECRET);
+          // window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
 
-          window.location.reload();
+          // window.location.reload();
         }
       }
     }
