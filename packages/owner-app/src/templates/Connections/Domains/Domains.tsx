@@ -4,6 +4,7 @@ import {
   Globe,
   LoadingBlock,
   Pager,
+  SubtleMessage,
   Times,
   t,
   useDomains,
@@ -59,32 +60,40 @@ const Domains = () => {
         className="-mt-6 mb-6"
       />
 
-      <SectionTitle
-        title={t('Third-Parties')}
-        actions={
-          <Pager
-            totalPages={activeHasNextPage ? activePage + 1 : activePage}
-            setPage={setActivePage}
-            currentPage={activePage}
+      {activeDomains?.pages?.[activePage - 1]?.results?.length === 0 ? (
+        <SubtleMessage className="flex flex-row items-center">
+          <span>{t('There are no third-parties with access to your identity')}</span>
+        </SubtleMessage>
+      ) : (
+        <>
+          <SectionTitle
+            title={t('Third-Parties')}
+            actions={
+              <Pager
+                totalPages={activeHasNextPage ? activePage + 1 : activePage}
+                setPage={setActivePage}
+                currentPage={activePage}
+              />
+            }
           />
-        }
-      />
-      <div className="-m-1 mt-5 flex flex-row flex-wrap">
-        {activeDomainsLoading && (
-          <>
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
-            <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
-          </>
-        )}
+          <div className="-m-1 mt-5 flex flex-row flex-wrap">
+            {activeDomainsLoading && (
+              <>
+                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
+              </>
+            )}
 
-        {activeDomains?.pages?.[activePage - 1]?.results?.map((domain) => (
-          <DomainActive
-            className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
-            domain={domain}
-            key={domain.domain}
-          />
-        ))}
-      </div>
+            {activeDomains?.pages?.[activePage - 1]?.results?.map((domain) => (
+              <DomainActive
+                className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
+                domain={domain}
+                key={domain.domain}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </>
   );
 };
