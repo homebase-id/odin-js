@@ -61,23 +61,20 @@ const useAuth = () => {
   // TODO: Add a processing state, so the request is only done once;
   // TODO: Move to separate hook
   // TODO: Cleanup
-  const finalizeAuthorization = async (
-    identity: string,
-    code: string,
-    state: string,
-    publicKey: string,
-    salt: string
-  ) => {
-    console.log('Finalizing authentication');
+  const finalizeAuthorization = async (identity: string, sharedSecret: string) => {
+    console.log('Finalizing authentication', { identity, sharedSecret });
 
     // TODO: Should become:
     // Read the encrypted sharedSecret from the queryString
     // Decrypt the sharedSecret with the private key
-    // Store the sharedSecret to the localStorage
-    // Store the identity to the localStorage
-    // Redirect to the returnUrl
 
-    throw new Error('Not implemented');
+    // Store the sharedSecret to the localStorage
+    window.localStorage.setItem(HOME_SHARED_SECRET, sharedSecret);
+    // Store the identity to the localStorage
+    window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
+
+    // Redirect to the returnUrl; With a fallback to home
+    window.location.href = '/';
   };
 
   const logout = async (): Promise<void> => {
@@ -111,7 +108,7 @@ const useAuth = () => {
           window.localStorage.getItem(HOME_SHARED_SECRET) ||
           window.localStorage.getItem(STORAGE_IDENTITY_KEY)
         ) {
-          console.log('kicked identity');
+          console.error('kicked identity');
 
           // Auth state was presumed logged in, but not allowed.. Will attempt reload page? (Browsers may ignore, as it's not a reload on user request)
           window.localStorage.removeItem(HOME_SHARED_SECRET);
