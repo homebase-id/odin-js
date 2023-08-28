@@ -123,9 +123,6 @@ export const getDecryptedVideoChunk = async (
   chunkEnd?: number,
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  const length =
-    chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined;
-
   const payload = await getPayloadBytes(
     dotYouClient,
     targetDrive,
@@ -133,7 +130,7 @@ export const getDecryptedVideoChunk = async (
     undefined,
     systemFileType,
     chunkStart,
-    length
+    chunkEnd
   );
 
   return payload?.bytes || null;

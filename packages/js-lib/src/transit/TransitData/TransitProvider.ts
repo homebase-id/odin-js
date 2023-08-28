@@ -177,7 +177,7 @@ export const getPayloadBytesOverTransit = async (
   keyHeader?: KeyHeader | undefined,
   systemFileType?: SystemFileType,
   chunkStart?: number,
-  chunkLength?: number
+  chunkEnd?: number
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDotYouClientIsOwner(dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
@@ -204,12 +204,8 @@ export const getPayloadBytesOverTransit = async (
     };
     startOffset = Math.abs(chunkStart - request.chunk.start);
 
-    if (chunkLength !== undefined) {
-      request.chunk = {
-        ...request.chunk,
-        length: roundToLargerMultipleOf16(chunkLength + startOffset),
-      };
-    }
+    if (chunkEnd !== undefined)
+      request.chunk.length = roundToLargerMultipleOf16(chunkEnd - chunkStart + 1 + startOffset);
   }
 
   const config: AxiosRequestConfig = {
@@ -229,7 +225,10 @@ export const getPayloadBytesOverTransit = async (
                   startOffset,
                   request.chunk.start
                 )
-              ).slice(0, chunkLength)
+              ).slice(
+                0,
+                chunkEnd && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined
+              )
             : await decryptBytesResponse(dotYouClient, response, keyHeader),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };

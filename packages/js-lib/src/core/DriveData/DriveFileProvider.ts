@@ -113,7 +113,7 @@ export const getPayloadBytes = async (
   keyHeader: KeyHeader | EncryptedKeyHeader | undefined,
   systemFileType?: SystemFileType,
   chunkStart?: number,
-  chunkLength?: number
+  chunkEnd?: number
 ): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -132,10 +132,8 @@ export const getPayloadBytes = async (
   if (chunkStart !== undefined) {
     request.chunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
     startOffset = Math.abs(chunkStart - request.chunkStart);
-
-    if (chunkLength !== undefined) {
-      request.chunkLength = roundToLargerMultipleOf16(chunkLength + startOffset);
-    }
+    if (chunkEnd !== undefined)
+      request.chunkLength = roundToLargerMultipleOf16(chunkEnd - chunkStart + 1 + startOffset);
   }
 
   const config: AxiosRequestConfig = {
@@ -155,7 +153,12 @@ export const getPayloadBytes = async (
                   startOffset,
                   request.chunkStart
                 )
-              ).slice(0, chunkLength)
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart + 1
+                  : undefined
+              )
             : await decryptBytesResponse(dotYouClient, response, keyHeader),
 
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,

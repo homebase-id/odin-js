@@ -19,9 +19,6 @@ export const getDecryptedVideoChunkOverTransit = async (
   chunkEnd?: number,
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  const length =
-    chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined;
-
   const payload = await getPayloadBytesOverTransit(
     dotYouClient,
     odinId,
@@ -30,7 +27,7 @@ export const getDecryptedVideoChunkOverTransit = async (
     undefined,
     systemFileType,
     chunkStart,
-    length
+    chunkEnd
   );
 
   return payload?.bytes || null;
