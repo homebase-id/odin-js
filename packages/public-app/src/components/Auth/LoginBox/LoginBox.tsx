@@ -1,5 +1,5 @@
 import { IS_DARK_CLASSNAME } from '@youfoundation/common-app';
-import useAuth, { YouAuthorizationParams } from '../../../hooks/auth/useAuth';
+import { YouAuthorizationParams, useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import { useEffect, useState } from 'react';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 
@@ -16,7 +16,7 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
 const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   // TODO: Convert to hook
   const [authParams, setAuthParams] = useState<YouAuthorizationParams>();
-  const { getAuthorizationParameters } = useAuth();
+  const { getAuthorizationParameters } = useYouAuthAuthorization();
 
   useEffect(() => {
     (async () => {
