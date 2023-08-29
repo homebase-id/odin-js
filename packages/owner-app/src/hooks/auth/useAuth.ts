@@ -37,9 +37,7 @@ const useAuth = () => {
   const authenticate = async (password: string) => {
     const response = await authenticateOwner(password);
 
-    if (!response) {
-      return false;
-    }
+    if (!response) return false;
 
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     setAuthenticationState('authenticated');

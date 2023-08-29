@@ -1,11 +1,14 @@
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { base64ToUint8Array, isLocalStorageAvailable } from '@youfoundation/js-lib/helpers';
 import { OWNER_ROOT, OwnerClient } from '../../core';
-import { APP_AUTH_TOKEN, APP_SHARED_SECRET, retrieveIdentity } from '@youfoundation/js-lib/auth';
+import { retrieveIdentity } from '@youfoundation/js-lib/auth';
 
 export const HOME_SHARED_SECRET = 'HSS';
 export const OWNER_SHARED_SECRET = 'SS';
 export const STORAGE_IDENTITY_KEY = 'identity';
+
+export const APP_AUTH_TOKEN = 'BX0900';
+export const APP_SHARED_SECRET = 'APSS';
 
 export const useDotYouClient = () => {
   // Only the feed will run as "apps";

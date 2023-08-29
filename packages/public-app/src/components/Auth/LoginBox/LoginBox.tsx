@@ -1,7 +1,8 @@
 import { IS_DARK_CLASSNAME } from '@youfoundation/common-app';
-import { YouAuthorizationParams, useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
+import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import { useEffect, useState } from 'react';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 
 const CENTRALIZED_LOGIN_BOX = !!import.meta.env.VITE_VERSION;
 

@@ -1,8 +1,8 @@
 import { isLocalStorageAvailable } from '../../helpers/BrowserUtil';
 import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 
-const STORAGE_KEY = 'pk';
-export const createPair = async () => {
+const STORAGE_KEY = 'rsa-pk';
+export const createRsaPair = async () => {
   const pair = await crypto.subtle.generateKey(
     {
       name: 'RSA-OAEP',
@@ -17,7 +17,7 @@ export const createPair = async () => {
   return pair;
 };
 
-export const decryptWithKey = async (encrypted: string, key: CryptoKey) => {
+export const decryptWithRsaKey = async (encrypted: string, key: CryptoKey) => {
   if (!key) {
     console.error('no key found');
     return '';
@@ -35,7 +35,7 @@ export const decryptWithKey = async (encrypted: string, key: CryptoKey) => {
 };
 
 // Saves private key of a pair
-export const saveKey = async (keyPair: CryptoKeyPair) => {
+export const saveRsaKey = async (keyPair: CryptoKeyPair) => {
   if (typeof crypto === 'undefined' || !isLocalStorageAvailable()) return null;
   await crypto.subtle
     .exportKey('pkcs8', keyPair.privateKey)
@@ -43,7 +43,7 @@ export const saveKey = async (keyPair: CryptoKeyPair) => {
 };
 
 // Retrieves private key of a pair
-export const retrieveKey = async () => {
+export const retrieveRsaKey = async () => {
   if (typeof crypto === 'undefined' || !isLocalStorageAvailable()) return null;
   const key = base64ToUint8Array(localStorage.getItem(STORAGE_KEY) || '');
   return await crypto.subtle
@@ -57,17 +57,12 @@ export const retrieveKey = async () => {
       true,
       ['decrypt']
     )
-    .then(function (privateKey) {
-      //returns a publicKey (or privateKey if you are importing a private key)
-
-      return privateKey;
-    })
-    .catch(function (err) {
+    .catch((err) => {
       console.error(err);
     });
 };
 
 // Clears private key from storage
-export const throwAwayTheKey = () => {
+export const throwAwayTheRsaKey = () => {
   if (isLocalStorageAvailable()) localStorage.removeItem(STORAGE_KEY);
 };

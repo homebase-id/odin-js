@@ -9,16 +9,7 @@ import {
   STORAGE_IDENTITY_KEY,
   useDotYouClient,
 } from '@youfoundation/common-app';
-
-export interface YouAuthorizationParams {
-  client_id: string;
-  client_type: string;
-  client_info: string;
-  public_key: string;
-  permission_request: string;
-  state: string;
-  redirect_uri: string;
-}
+import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 
 const useAuth = () => {
   const { getDotYouClient, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
@@ -84,11 +75,10 @@ const useAuth = () => {
   };
 };
 
+// TODO: Add ECC keys for encryption of the return value; + Cleanup
 export const useYouAuthAuthorization = () => {
-  // TODO: Move to separate hook
-  // TODO: Cleanup
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
-    // TODO: Add public key for the encryption of the eventuals shared secret:
+    // TODO: Add public key for the encryption of the eventual shared secret:
 
     // const keyPair = await createPair();
     // const rawPk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
@@ -113,8 +103,6 @@ export const useYouAuthAuthorization = () => {
     };
   };
 
-  // TODO: Add a processing state, so the request is only done once;
-  // TODO: Cleanup
   const finalizeAuthorization = async (identity: string, sharedSecret: string) => {
     console.log('Finalizing authentication', { identity, sharedSecret });
 

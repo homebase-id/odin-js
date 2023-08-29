@@ -1,20 +1,28 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { isLocalStorageAvailable } from '../../helpers/BrowserUtil';
-import { base64ToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
+import { cbcDecrypt } from '../../helpers/AesEncrypt';
+import { base64ToUint8Array, stringToUint8Array, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import { getBrowser, getOperatingSystem } from '../helpers/browserInfo';
-import { retrieveIdentity, saveIdentity } from './IdentityProvider';
-import { decryptWithKey } from './KeyProvider';
+import { getEccSharedSecret, importRemotePublicEccKey } from './EccKeyProvider';
 
-export const APP_SHARED_SECRET = 'APSS';
-export const APP_AUTH_TOKEN = 'BX0900';
+export interface YouAuthorizationParams {
+  client_id: string;
+  client_type: 'domain' | 'app';
+  client_info: string;
+  public_key: string;
+  permission_request: string;
+  state: string;
+  redirect_uri: string;
+}
 
-const getSharedSecret = () => {
-  if (!isLocalStorageAvailable()) return;
-  const raw = localStorage.getItem(APP_SHARED_SECRET);
-  if (raw) return base64ToUint8Array(raw);
-};
-
-const getAppAuthToken = () => isLocalStorageAvailable() && localStorage.getItem(APP_AUTH_TOKEN);
+export interface AppAuthorizationParams {
+  n: string;
+  appId: string;
+  fn: string;
+  d: string;
+  pk: string;
+  return: string;
+  o?: string;
+}
 
 //checks if the authentication token (stored in a cookie) is valid
 export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean> => {
@@ -36,63 +44,112 @@ export const getRegistrationParams = async (
   appName: string,
   appId: string,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
-  publicKey: CryptoKey,
+  rsaPublicKey: CryptoKey,
+  eccPublicKey: CryptoKey,
   host?: string,
-  clientFriendlyName?: string
-) => {
-  const rawPk = await crypto.subtle.exportKey('spki', publicKey);
-  const pk = uint8ArrayToBase64(new Uint8Array(rawPk));
+  clientFriendlyName?: string,
+  state?: string
+): Promise<YouAuthorizationParams> => {
+  const rawRsaPk = await crypto.subtle.exportKey('spki', rsaPublicKey);
+  const publicRsaKey = uint8ArrayToBase64(new Uint8Array(rawRsaPk));
 
   const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem()}`;
 
-  const paramsArray = [
-    `n=${appName}`,
-    `appId=${appId}`,
-    `fn=${encodeURIComponent(clientFriendly)}`,
-    `d=${encodeURIComponent(JSON.stringify(drives))}`,
-    `pk=${encodeURIComponent(pk)}`,
-    `return=${encodeURIComponent(`${returnUrl}&`)}`, // TODO: need a better way for this => // Needs to have trailing '&' to have a proper query string; As the returnUrl already contains the start of the query string
-  ];
+  const permissionRequest: AppAuthorizationParams = {
+    n: appName,
+    appId: appId,
+    fn: clientFriendly,
+    d: JSON.stringify(drives),
+    pk: publicRsaKey,
+    return: 'backend-will-decide',
+    o: undefined,
+  };
 
-  if (host) paramsArray.push(`o=${host}`);
-  return paramsArray.join('&');
+  if (host) permissionRequest.o = host;
+
+  const rawEccKey = await crypto.subtle.exportKey('jwk', eccPublicKey);
+  delete rawEccKey.key_ops;
+  delete rawEccKey.ext;
+  const publicEccKey = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawEccKey)));
+
+  return {
+    client_id: appId,
+    client_type: 'app',
+    client_info: clientFriendly,
+    public_key: publicEccKey,
+    permission_request: JSON.stringify(permissionRequest),
+    state: state || '',
+    redirect_uri: returnUrl,
+  };
 };
 
-const splitDataString = (byteArray: Uint8Array) => {
-  if (byteArray.length !== 49) {
-    throw new Error("shared secret encrypted keyheader has an unexpected length, can't split");
-  }
+const exchangeDigestForToken = async (
+  dotYouClient: DotYouClient,
+  code: string,
+  base64ExchangedSecretDigest: string
+): Promise<{
+  base64ClientAuthTokenCipher: string;
+  base64ClientAuthTokenIv: string;
+  base64SharedSecretCipher: string;
+  base64SharedSecretIv: string;
+}> => {
+  const axiosClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const tokenResponse = await axiosClient
+    .post(
+      '/youauth/token',
+      {
+        code: code,
+        secret_digest: base64ExchangedSecretDigest,
+      },
+      {
+        baseURL: axiosClient.defaults.baseURL?.replace('/api/apps/v1', '/api/owner/v1'),
+      }
+    )
+    .then((response) => response.data);
 
-  const authToken = byteArray.slice(0, 33);
-  const sharedSecret = byteArray.slice(33);
-
-  return { authToken, sharedSecret };
+  return tokenResponse;
 };
 
 export const finalizeAuthentication = async (
-  registrationData: string,
-  v: string,
-  identity: string | null,
-  privateKey: CryptoKey
-): Promise<{ authToken: Uint8Array; sharedSecret: Uint8Array }> => {
-  if (v !== '1') {
-    throw new Error('Failed to decrypt data, version unsupported');
-  }
+  identity: string,
+  privateKey: CryptoKey,
+  publicKey: string,
+  salt: string,
+  code: string
+): Promise<{ clientAuthToken: string; sharedSecret: string }> => {
+  const importedRemotePublicKey = await importRemotePublicEccKey(publicKey);
+  console.log({ importedRemotePublicKey, privateKey, salt });
 
-  if (identity) saveIdentity(identity);
+  const exchangedSecret = new Uint8Array(
+    await getEccSharedSecret(privateKey, importedRemotePublicKey, salt)
+  );
 
-  const decryptedData = await decryptWithKey(registrationData, privateKey);
-  if (!decryptedData) throw new Error('Failed to decrypt data');
+  const exchangedSecretDigest = await crypto.subtle.digest('SHA-256', exchangedSecret);
+  const base64ExchangedSecretDigest = uint8ArrayToBase64(new Uint8Array(exchangedSecretDigest));
 
-  const { authToken, sharedSecret } = splitDataString(decryptedData);
+  const dotYouClient = new DotYouClient({
+    api: ApiType.App,
+    identity: identity,
+  });
 
-  // Store authToken and sharedSecret
-  if (isLocalStorageAvailable()) {
-    localStorage.setItem(APP_SHARED_SECRET, uint8ArrayToBase64(sharedSecret));
-    localStorage.setItem(APP_AUTH_TOKEN, uint8ArrayToBase64(authToken));
-  }
+  const token = await exchangeDigestForToken(dotYouClient, code, base64ExchangedSecretDigest);
 
-  return { authToken, sharedSecret };
+  const sharedSecretCipher = base64ToUint8Array(token.base64SharedSecretCipher);
+  const sharedSecretIv = base64ToUint8Array(token.base64SharedSecretIv);
+  const sharedSecret = await cbcDecrypt(sharedSecretCipher, sharedSecretIv, exchangedSecret);
+
+  const clientAuthTokenCipher = base64ToUint8Array(token.base64ClientAuthTokenCipher);
+  const clientAuthTokenIv = base64ToUint8Array(token.base64ClientAuthTokenIv);
+  const clientAuthToken = await cbcDecrypt(
+    clientAuthTokenCipher,
+    clientAuthTokenIv,
+    exchangedSecret
+  );
+
+  return {
+    clientAuthToken: uint8ArrayToBase64(clientAuthToken),
+    sharedSecret: uint8ArrayToBase64(sharedSecret),
+  };
 };
 
 export const logout = async (dotYouClient: DotYouClient) => {
@@ -106,27 +163,14 @@ export const logout = async (dotYouClient: DotYouClient) => {
       console.error({ error });
       return { status: 400, data: false };
     });
-
-  if (isLocalStorageAvailable()) {
-    localStorage.removeItem(APP_SHARED_SECRET);
-    localStorage.removeItem(APP_AUTH_TOKEN);
-  }
 };
 
-export const preAuth = async () => {
-  const dotYouClient = new DotYouClient({
-    api: ApiType.App,
-    identity: retrieveIdentity(),
-    sharedSecret: getSharedSecret(),
-  });
+export const preAuth = async (dotYouClient: DotYouClient) => {
   const client = dotYouClient.createAxiosClient();
 
   await client
     .post('/notify/preauth', undefined, {
       validateStatus: () => true,
-      headers: {
-        BX0900: getAppAuthToken(),
-      },
     })
     .catch((error) => {
       console.error({ error });
