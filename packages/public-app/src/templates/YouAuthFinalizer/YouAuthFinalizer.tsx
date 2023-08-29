@@ -6,16 +6,17 @@ const YouAuthFinalizer = () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const result = urlParams.get('r');
-  if (!result) return <>ERROR!</>;
+  const eccInfo = urlParams.get('ecc');
+  if (!result || !eccInfo) return <>ERROR!</>;
 
-  const { identity, ss64 } = JSON.parse(result);
+  const { pk, salt, iv } = JSON.parse(eccInfo);
 
-  if (!identity || !ss64) {
+  if (!result || !pk || !salt || !iv) {
     return <>ERROR!</>;
   }
 
   useEffect(() => {
-    finalizeAuthorization(identity, ss64);
+    finalizeAuthorization(result, pk, salt, iv);
   }, []);
 
   return <></>;

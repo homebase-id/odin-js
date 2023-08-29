@@ -13,7 +13,8 @@ export const stringToUint8Array = (str: string): Uint8Array => {
 };
 
 export const base64ToUint8Array = (base64: string): Uint8Array => {
-  const binary_string = atob(base64); // TODO: Deprecated for Node.js
+  // base64 could have been urlDecoded, which would have replaced + with space
+  const binary_string = atob(base64.replaceAll(' ', '+')); // TODO: Deprecated for Node.js
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {

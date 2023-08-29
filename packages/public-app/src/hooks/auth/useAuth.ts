@@ -9,7 +9,21 @@ import {
   STORAGE_IDENTITY_KEY,
   useDotYouClient,
 } from '@youfoundation/common-app';
-import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
+import {
+  YouAuthorizationParams,
+  createEccPair,
+  getEccSharedSecret,
+  importRemotePublicEccKey,
+  retrieveEccKey,
+  saveEccKey,
+} from '@youfoundation/js-lib/auth';
+import {
+  uint8ArrayToBase64,
+  stringToUint8Array,
+  cbcDecrypt,
+  base64ToUint8Array,
+  byteArrayToString,
+} from '@youfoundation/js-lib/helpers';
 
 const useAuth = () => {
   const { getDotYouClient, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
@@ -80,16 +94,17 @@ export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     // TODO: Add public key for the encryption of the eventual shared secret:
 
-    // const keyPair = await createPair();
-    // const rawPk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
-    // delete rawPk.key_ops;
-    // delete rawPk.ext;
-    // const pk = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawPk)));
-    // saveKey(keyPair);
+    const eccKey = await createEccPair();
+    saveEccKey(eccKey);
+
+    const rawEccKey = await crypto.subtle.exportKey('jwk', eccKey.publicKey);
+    delete rawEccKey.key_ops;
+    delete rawEccKey.ext;
+    const eccPk64 = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawEccKey)));
 
     // TODO: returnUrl needs to be passed in the state, so it can be used in the callback
     const finalUrl = `/authorization-code-callback`;
-    const state = { finalUrl: finalUrl, eccPk64: undefined };
+    const state = { finalUrl: finalUrl, eccPk64: eccPk64 };
     const pk = await getEccPublicKey();
 
     return {
@@ -103,15 +118,32 @@ export const useYouAuthAuthorization = () => {
     };
   };
 
-  const finalizeAuthorization = async (identity: string, sharedSecret: string) => {
-    console.log('Finalizing authentication', { identity, sharedSecret });
+  const finalizeAuthorization = async (
+    encryptedData: string,
+    remotePublicKey: string,
+    salt: string,
+    iv: string
+  ) => {
+    console.log('Finalizing authentication', { encryptedData, remotePublicKey, salt, iv });
 
-    // TODO: Should become:
-    // Read the encrypted sharedSecret from the queryString
-    // Decrypt the sharedSecret with the private key
+    const privateKey = await retrieveEccKey();
+    if (!privateKey) throw new Error('Failed to retrieve key');
+    const importedRemotePublicKey = await importRemotePublicEccKey(remotePublicKey);
+
+    const exchangedSecret = new Uint8Array(
+      await getEccSharedSecret(privateKey, importedRemotePublicKey, salt)
+    );
+
+    const data = await cbcDecrypt(
+      base64ToUint8Array(encryptedData),
+      base64ToUint8Array(iv),
+      exchangedSecret
+    );
+
+    const { identity, ss64 } = JSON.parse(byteArrayToString(data));
 
     // Store the sharedSecret to the localStorage
-    window.localStorage.setItem(HOME_SHARED_SECRET, sharedSecret);
+    window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
     // Store the identity to the localStorage
     window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
 
