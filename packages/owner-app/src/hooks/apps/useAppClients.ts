@@ -14,7 +14,7 @@ const useAppClients = ({ appId }: { appId?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async ({ appId }: { appId: string }) => {
-    return (await GetAppClients(dotYouClient)).filter((client) => client.appId === appId);
+    return await GetAppClients(dotYouClient, appId);
   };
 
   const registerClient = async ({

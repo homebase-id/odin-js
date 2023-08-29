@@ -19,7 +19,6 @@ export interface AppAuthorizationParams {
   appId: string;
   fn: string;
   d: string;
-  pk: string;
   return: string;
   o?: string;
 }
@@ -44,15 +43,11 @@ export const getRegistrationParams = async (
   appName: string,
   appId: string,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
-  rsaPublicKey: CryptoKey,
   eccPublicKey: CryptoKey,
   host?: string,
   clientFriendlyName?: string,
   state?: string
 ): Promise<YouAuthorizationParams> => {
-  const rawRsaPk = await crypto.subtle.exportKey('spki', rsaPublicKey);
-  const publicRsaKey = uint8ArrayToBase64(new Uint8Array(rawRsaPk));
-
   const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem()}`;
 
   const permissionRequest: AppAuthorizationParams = {
@@ -60,7 +55,6 @@ export const getRegistrationParams = async (
     appId: appId,
     fn: clientFriendly,
     d: JSON.stringify(drives),
-    pk: publicRsaKey,
     return: 'backend-will-decide',
     o: undefined,
   };
