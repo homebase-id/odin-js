@@ -34,48 +34,36 @@ const Connections = () => {
         }
       />
 
-      <Submenu
-        items={[
-          {
-            title: `Connections`,
-            path: `/owner/connections`,
-          },
-          {
-            title: `Third-Parties`,
-            path: `/owner/third-parties`,
-          },
-        ]}
-        className="-mt-6 mb-6"
-      />
+      <div className="-mt-6">
+        {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
+          <SubtleMessage className="flex flex-row items-center">
+            <span>{t('Ready to add some connections?')}</span>
+            <ActionButton
+              onClick={(e) => {
+                e.preventDefault();
+                setIsSentConnectionOpen(true);
 
-      {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
-        <SubtleMessage className="flex flex-row items-center">
-          <span>{t('Ready to add some connections?')}</span>
-          <ActionButton
-            onClick={(e) => {
-              e.preventDefault();
-              setIsSentConnectionOpen(true);
+                return false;
+              }}
+              type="secondary"
+              className="ml-2"
+              icon={Plus}
+            >
+              {t('Add')}
+            </ActionButton>
+          </SubtleMessage>
+        ) : null}
 
-              return false;
-            }}
-            type="secondary"
-            className="ml-2"
-            icon={Plus}
-          >
-            {t('Add')}
-          </ActionButton>
-        </SubtleMessage>
-      ) : null}
-
-      <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
-      <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
-      <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
-      <OutgoingConnectionDialog
-        title={t('Send connection request')}
-        isOpen={isSentConnectionOpen}
-        onConfirm={() => setIsSentConnectionOpen(false)}
-        onCancel={() => setIsSentConnectionOpen(false)}
-      />
+        <PendingConnectionSection setNoPendingConnections={() => setPendingConnections(false)} />
+        <SentConnectionSection setNoSentConnections={() => setSentConnections(false)} />
+        <ActiveConnectionSection setNoActiveConnections={() => setActiveConnections(false)} />
+        <OutgoingConnectionDialog
+          title={t('Send connection request')}
+          isOpen={isSentConnectionOpen}
+          onConfirm={() => setIsSentConnectionOpen(false)}
+          onCancel={() => setIsSentConnectionOpen(false)}
+        />
+      </div>
     </>
   );
 };

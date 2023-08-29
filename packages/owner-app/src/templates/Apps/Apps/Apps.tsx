@@ -8,15 +8,29 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import { Arrow } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import Submenu from '../../../components/SubMenu/SubMenu';
 
 const Apps = () => {
   const { data: registeredApps, isLoading: loadingRegisteredApps } = useApps().fetchRegistered;
 
   return (
     <>
-      <section>
-        <PageMeta icon={Grid} title={'Apps'} />
-      </section>
+      <PageMeta icon={Grid} title={'Third party apps & services'} />
+
+      <Submenu
+        items={[
+          {
+            title: `Apps`,
+            path: `/owner/third-parties/apps`,
+          },
+          {
+            title: `Services`,
+            path: `/owner/third-parties/services`,
+          },
+        ]}
+        className="-mt-6 mb-6"
+      />
+
       <SectionTitle title={t('Registered Apps')} />
       <div className="mt-8">
         {loadingRegisteredApps ? (
@@ -31,7 +45,7 @@ const Apps = () => {
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
                 {registeredApps.map((app) => (
                   <CardLink
-                    href={`/owner/apps/${encodeURIComponent(app.appId)}`}
+                    href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
                     isDisabled={app.isRevoked}
                     title={
                       <div className="flex flex-col">

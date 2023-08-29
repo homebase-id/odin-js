@@ -45,7 +45,7 @@ const iconSize = 'h-6 w-6';
 const iconClassName = `${iconSize} flex-shrink-0`;
 
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
-const moreBg = 'bg-indigo-200 bg-opacity-50 text-black dark:bg-indigo-800 dark:text-white';
+const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
 
 export const Sidenav = ({ logout }: { logout: () => void }) => {
   const isDesktop = document.documentElement.clientWidth >= 1280;
@@ -108,6 +108,11 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             <div className="py-3">
               <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
               <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
+              <NavItem
+                icon={Grid}
+                label={'Third party apps & services'}
+                to={'/owner/third-parties'}
+              />
               <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
             </div>
 
@@ -171,8 +176,6 @@ const MoreItems = ({ isOpen: isNavOpen, logout }: { isOpen: boolean; logout: () 
         <NavItem icon={Scissors} label={'Demo Data'} to={'/owner/demo-data'} />
         <hr className="border-b dark:border-slate-500" />
         <NavItem icon={HardDrive} label={'Drives'} to={'/owner/drives'} />
-        <NavItem icon={Grid} label={'Apps'} to={'/owner/apps'} />
-        <NavItem icon={Globe} label={'Third-Parties'} to={'/owner/third-parties'} />
         <hr className="border-b dark:border-slate-500" />
         <NavItem label={t('Wallet')} to={`/owner/profile/wallet`} icon={Wallet} />
         <hr className="border-b dark:border-slate-500" />

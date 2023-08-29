@@ -172,12 +172,15 @@ function App() {
             <Route path="public-profile" element={<PublicProfileDetails />}></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
-            <Route path="third-parties" element={<Domains />}></Route>
-            <Route path="third-parties/:domain" element={<DomainDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
-            <Route path="apps" element={<Apps />}></Route>
-            <Route path="apps/:appKey" element={<AppDetails />}></Route>
+
+            {/* Third parties */}
+            <Route path="third-parties/services" element={<Domains />}></Route>
+            <Route path="third-parties/services/:domain" element={<DomainDetails />}></Route>
+            <Route path="third-parties" element={<Apps />}></Route>
+            <Route path="third-parties/apps/" element={<Apps />}></Route>
+            <Route path="third-parties/apps/:appKey" element={<AppDetails />}></Route>
 
             <Route path="follow" element={<Following />}></Route>
             <Route path="follow/followers" element={<Following />}></Route>

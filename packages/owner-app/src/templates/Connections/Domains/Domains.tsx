@@ -2,6 +2,7 @@ import {
   ActionButton,
   ErrorNotification,
   Globe,
+  Grid,
   LoadingBlock,
   Pager,
   SubtleMessage,
@@ -44,17 +45,17 @@ const Domains = () => {
 
   return (
     <>
-      <PageMeta icon={Globe} title={'Third-Parties'} />
+      <PageMeta icon={Grid} title={'Third party apps & services'} />
 
       <Submenu
         items={[
           {
-            title: `Connections`,
-            path: `/owner/connections`,
+            title: `Apps`,
+            path: `/owner/third-parties/apps`,
           },
           {
-            title: `Third-Parties`,
-            path: `/owner/third-parties`,
+            title: `Services`,
+            path: `/owner/third-parties/services`,
           },
         ]}
         className="-mt-6 mb-6"
@@ -111,7 +112,7 @@ const DomainActive = ({ domain, className }: { domain: DomainMembership; classNa
       <DomainCard
         className={`${className ?? ''} group relative`}
         domain={domain.domain}
-        href={(domain.domain && `/owner/third-parties/${domain.domain}`) ?? undefined}
+        href={(domain.domain && `/owner/third-parties/services/${domain.domain}`) ?? undefined}
       >
         <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
           <ActionButton

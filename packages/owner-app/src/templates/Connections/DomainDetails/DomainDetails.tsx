@@ -66,7 +66,7 @@ const DomainDetails = () => {
       onClick: () => {
         disconnect({ domain: domain });
 
-        navigate('/owner/third-parties');
+        navigate('/owner/third-parties/services');
       },
       confirmOptions: {
         title: `${t('Remove')} ${domain}`,
@@ -143,7 +143,10 @@ const DomainDetails = () => {
             <ActionGroup options={actionGroupOptions} type="secondary" size="square" />
           </>
         }
-        breadCrumbs={[{ href: '/owner/third-parties', title: 'Third-Parties' }, { title: domain }]}
+        breadCrumbs={[
+          { href: '/owner/third-parties/services', title: 'Third-Parties' },
+          { title: domain },
+        ]}
         browserTitle={domain}
       />
 
@@ -276,7 +279,7 @@ const DomainClients = ({ domain }: { domain: string }) => {
   } = useDomainClients({ domain: domain });
 
   return (
-    <Section title={t('Devices')}>
+    <Section title={t('Access Tokens')}>
       {clientsLoading ? (
         <>
           <LoadingBlock className="mb-4 h-4 max-w-xs" />

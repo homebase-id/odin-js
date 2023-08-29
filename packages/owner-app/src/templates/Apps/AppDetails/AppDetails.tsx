@@ -77,7 +77,10 @@ const AppDetails = () => {
             {app.corsHostName ? <small className="block text-sm">{app.corsHostName}</small> : null}
           </span>
         }
-        breadCrumbs={[{ href: '/owner/apps', title: 'My apps' }, { title: app.name ?? '' }]}
+        breadCrumbs={[
+          { href: '/owner/third-parties/apps', title: 'My apps' },
+          { title: app.name ?? '' },
+        ]}
         actions={
           <>
             {app.isRevoked ? (

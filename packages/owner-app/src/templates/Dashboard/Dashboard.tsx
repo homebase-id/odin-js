@@ -87,8 +87,8 @@ const Dashboard = () => {
           circles
         </Link>{' '}
         and{' '}
-        <Link className="underline" to="/owner/apps">
-          apps
+        <Link className="underline" to="/owner/third-parties">
+          third-parties
         </Link>
         .
       </p>

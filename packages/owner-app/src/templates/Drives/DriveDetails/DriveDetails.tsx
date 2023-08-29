@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, ActionLink, Pencil, t } from '@youfoundation/common-app';
+import { ActionButton, Pencil, t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 
 import { HardDrive } from '@youfoundation/common-app';

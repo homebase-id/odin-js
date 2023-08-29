@@ -18,7 +18,7 @@ const AppMembershipView = ({
 
   return (
     <div className={`${className ?? ''} ${appDef.isRevoked && 'opacity-50'}`}>
-      <Link to={`/owner/apps/${appDef.appId}`}>
+      <Link to={`/owner/third-parties/apps/${appDef.appId}`}>
         <h2 className="flex flex-row text-xl">
           <Grid className="my-auto mr-2 h-5 w-5" />{' '}
           <span className="my-auto">

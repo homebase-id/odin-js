@@ -311,7 +311,7 @@ const CircleMemberCard = ({
         <DomainCard
           domain={member.domain}
           className={`${className ?? ''} group relative`}
-          href={(member.domain && `/owner/third-parties/${member.domain}`) ?? undefined}
+          href={(member.domain && `/owner/third-parties/services/${member.domain}`) ?? undefined}
         >
           <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
             <ActionButton
