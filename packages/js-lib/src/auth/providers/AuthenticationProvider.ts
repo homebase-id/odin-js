@@ -85,7 +85,6 @@ export const getRegistrationParams = async (
 
 const exchangeDigestForToken = async (
   dotYouClient: DotYouClient,
-  code: string,
   base64ExchangedSecretDigest: string
 ): Promise<{
   base64ClientAuthTokenCipher: string;
@@ -98,7 +97,6 @@ const exchangeDigestForToken = async (
     .post(
       '/youauth/token',
       {
-        code: code,
         secret_digest: base64ExchangedSecretDigest,
       },
       {
@@ -114,11 +112,9 @@ export const finalizeAuthentication = async (
   identity: string,
   privateKey: CryptoKey,
   publicKey: string,
-  salt: string,
-  code: string
+  salt: string
 ): Promise<{ clientAuthToken: string; sharedSecret: string }> => {
   const importedRemotePublicKey = await importRemotePublicEccKey(publicKey);
-  console.log({ importedRemotePublicKey, privateKey, salt });
 
   const exchangedSecret = new Uint8Array(
     await getEccSharedSecret(privateKey, importedRemotePublicKey, salt)
@@ -132,7 +128,7 @@ export const finalizeAuthentication = async (
     identity: identity,
   });
 
-  const token = await exchangeDigestForToken(dotYouClient, code, base64ExchangedSecretDigest);
+  const token = await exchangeDigestForToken(dotYouClient, base64ExchangedSecretDigest);
 
   const sharedSecretCipher = base64ToUint8Array(token.base64SharedSecretCipher);
   const sharedSecretIv = base64ToUint8Array(token.base64SharedSecretIv);
