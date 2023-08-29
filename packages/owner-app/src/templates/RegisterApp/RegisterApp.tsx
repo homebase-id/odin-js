@@ -1,27 +1,21 @@
 import {
   AppRegistrationRequest,
   DriveGrantRequest,
-  RedactedAppRegistration,
 } from '../../provider/app/AppManagementProviderTypes';
 import useApp from '../../hooks/apps/useApp';
 import Section from '../../components/ui/Sections/Section';
 
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
-import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, ErrorNotification, Pencil, mergeStates } from '@youfoundation/common-app';
+import { ActionButton, ErrorNotification } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
-import useAppClients from '../../hooks/apps/useAppClients';
 import { PermissionSet } from '@youfoundation/js-lib/core';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
-import { Alert } from '@youfoundation/common-app';
 import useDrives from '../../hooks/drives/useDrives';
-import { Times } from '@youfoundation/common-app';
-import { Input } from '@youfoundation/common-app';
 
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&ui=minimal&return=odin-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
 // https://frodo.digital/owner/appreg?n=Chatr&appId=0babb1e6-7604-4bcd-b1fb-87e959226492&fn=My%20Phone&p=10,30&d=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A3%7D%2C%7B%22a%22%3A%222612429d1c3f037282b8d42fb2cc0499%22%2C%22t%22%3A%2270e92f0f94d05f5c7dcd36466094f3a5%22%2C%22n%22%3A%22Contacts%22%2C%22d%22%3A%22Contacts%22%2C%22p%22%3A3%7D%5D&cd=%5B%7B%22a%22%3A%229ff813aff2d61e2f9b9db189e72d1a11%22%2C%22t%22%3A%2266ea8355ae4155c39b5a719166b510e3%22%2C%22n%22%3A%22Chat%20Drive%22%2C%22d%22%3A%22Chat%20Drive%22%2C%22p%22%3A2%7D%5D&ui=minimal&return=odin-chat://&pk=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtP9KKODoOZpNGXQy4IdyyBJJO3HJPkbg%2FLXwR5SQGxWWuLpv2THnZoSHqaDl6YWQ3OWCndY22Q0RJZkDBuqqJyn%2B8ErpMdgtJuMhFOpEU2h9nLGeI7BIWENkuqlqBh56YC8qdfYhfpdcv53p106o%2Bi93%2Bzeb0GvfLN6fk1y8o4Rd56DBHXn9zjjDaLWa8m8EDXgZKs7waziPFArIphh0W06Wnb4wCa%2F%2B1HEULhH%2BsIY7bGpoQvgP7xucHZGrqkRmg5X2XhleBIXWYCD7QUM6PvKHdqUSrFkl9Z2UU1SkVAhUUH4UxfwyLQKHXxC7IhKu2VSOXK4%2FkjGua6iW%2BXUQtwIDAQAB
@@ -39,15 +33,13 @@ import { Input } from '@youfoundation/common-app';
  *     i.e. can create circles, etc.
  */
 
-const RegisterClient = () => {
+const RegisterApp = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
 
   const appId = searchParams.get('appId');
   const name = searchParams.get('n');
   const origin = searchParams.get('o') || undefined;
-  const publicKey64 = searchParams.get('pk')?.replaceAll(' ', '+'); // There's this stupid thing browsers do, by replacing a + with a space; So we need to undo that; Is solved as well when the params are encoded with endcodeURIComponent
-  const friendlyName = searchParams.get('fn');
   const returnUrl = searchParams.get('return');
 
   const p = searchParams.get('p');
@@ -60,62 +52,30 @@ const RegisterClient = () => {
   const cd = searchParams.get('cd');
   const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
 
-  if (!appId || !name || !publicKey64 || !friendlyName || !returnUrl) {
+  if (!appId || !name || !returnUrl) {
     console.error(
-      'Any of the following required params was not found in the url: appId, name, publicKey64, friendlyName, returnUrl'
+      'Any of the following required params was not found in the url: appId, name, returnUrl'
     );
     return <div>Bad request</div>;
   }
 
   const {
-    fetch: { data: appRegistration, isLoading: appRegIsLoading },
-    registerNewApp: { mutateAsync: registerApp, status: registerAppState, error: registerAppError },
-  } = useApp({ appId });
-  const {
-    registerClient: {
-      mutateAsync: registerClient,
-      status: registerClientState,
-      error: regsiterClientError,
-    },
-  } = useAppClients({ appId });
+    mutateAsync: registerApp,
+    status: registerAppState,
+    error: registerAppError,
+  } = useApp({ appId }).registerNewApp;
+
+  const doRegisterApp = async (request: AppRegistrationRequest) => {
+    await registerApp(request);
+    window.location.href = returnUrl;
+  };
 
   const [isCancelled, setIsCancelled] = useState<boolean>(false);
-  const [finalUrl, setFinalUrl] = useState<string | null>();
-
-  const doRegisterClient = async (customFriendlyName?: string) => {
-    const clientRegistrationResponse = await registerClient({
-      appId: appId,
-      clientPublicKey64: publicKey64,
-      clientFriendlyName: customFriendlyName || friendlyName,
-    });
-
-    console.log('data', clientRegistrationResponse.data);
-
-    const encodedData = encodeURIComponent(clientRegistrationResponse.data);
-    const url = `${returnUrl}d=${encodedData}&v=${clientRegistrationResponse.encryptionVersion}&id=${window.location.hostname}`;
-
-    console.log(url);
-    window.location.href = url;
-    setFinalUrl(url);
-  };
-
-  const doCancel = () => {
-    setIsCancelled(true);
-  };
-
-  if (appRegIsLoading) {
-    return <div>Loading...</div>;
-  }
-
-  const returnOrigin = returnUrl.startsWith('http')
-    ? new URL(returnUrl).origin
-    : `app://${decodeURIComponent(returnUrl)}`;
-  const returnHost = returnOrigin?.split('://')[1] || returnOrigin;
+  const doCancel = () => setIsCancelled(true);
 
   return (
     <>
       <ErrorNotification error={registerAppError} />
-      <ErrorNotification error={regsiterClientError} />
 
       <section className="my-20">
         <div className="container mx-auto">
@@ -129,7 +89,8 @@ const RegisterClient = () => {
                 <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
                   <ActionButton
                     onClick={() => {
-                      window.location.href = returnUrl;
+                      // window.location.href = returnUrl;
+                      alert('TODO: Redirect to cancel');
                     }}
                     type="primary"
                   >
@@ -137,27 +98,7 @@ const RegisterClient = () => {
                   </ActionButton>
                 </div>
               </>
-            ) : finalUrl ? (
-              <>
-                <h1 className="mb-5 text-4xl dark:text-white">
-                  {t('Successfully registered client')}:{' '}
-                </h1>
-                <p className="mb-5">
-                  &quot;{friendlyName}&quot; {t('on')} &quot;{name}&quot;
-                </p>
-
-                <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-                  <ActionButton
-                    onClick={() => {
-                      window.location.href = finalUrl;
-                    }}
-                    type="primary"
-                  >
-                    {t('Back to the app')}
-                  </ActionButton>
-                </div>
-              </>
-            ) : !appRegistration ? (
+            ) : (
               <AppRegistration
                 name={name}
                 appId={appId}
@@ -166,21 +107,9 @@ const RegisterClient = () => {
                 driveGrants={driveGrants}
                 circlePermissionSet={circlePermissionSet}
                 circleDriveGrants={circleDriveGrants}
-                registerApp={(request) => registerApp(request)}
+                registerApp={doRegisterApp}
                 registerAppState={registerAppState}
-                doRegisterClient={doRegisterClient}
-                registerClientState={registerClientState}
                 doCancel={doCancel}
-              />
-            ) : (
-              <AppClientRegistration
-                friendlyName={friendlyName}
-                name={name}
-                appRegistration={appRegistration}
-                doRegisterClient={doRegisterClient}
-                registerClientState={registerClientState}
-                doCancel={doCancel}
-                returnHost={returnHost}
               />
             )}
           </div>
@@ -190,7 +119,7 @@ const RegisterClient = () => {
   );
 };
 
-export default RegisterClient;
+export default RegisterApp;
 
 const AppRegistration = ({
   name,
@@ -202,8 +131,6 @@ const AppRegistration = ({
   circleDriveGrants,
   registerApp,
   registerAppState,
-  doRegisterClient,
-  registerClientState,
   doCancel,
 }: {
   name: string;
@@ -215,8 +142,6 @@ const AppRegistration = ({
   circleDriveGrants?: DriveGrantRequest[];
   registerApp: (data: AppRegistrationRequest) => Promise<void>;
   registerAppState: 'idle' | 'loading' | 'error' | 'success';
-  doRegisterClient: () => void;
-  registerClientState: 'error' | 'idle' | 'loading' | 'success';
   doCancel: () => void;
 }) => {
   const [circleIds, setCircleIds] = useState<string[]>([]);
@@ -238,8 +163,6 @@ const AppRegistration = ({
         permissionSet: circlePermissionSet,
       },
     });
-
-    await doRegisterClient();
   };
 
   const existingDriveGrants = driveGrants?.filter((grant) =>
@@ -375,7 +298,7 @@ const AppRegistration = ({
           <ActionButton
             onClick={doRegisterApp}
             type="primary"
-            state={mergeStates(registerAppState, registerClientState)}
+            state={registerAppState}
             icon={Arrow}
           >
             {t('Allow')}
@@ -391,137 +314,6 @@ const AppRegistration = ({
           )}
         </div>
       )}
-    </>
-  );
-};
-
-const AppClientRegistration = ({
-  friendlyName,
-  name,
-  appRegistration,
-  doRegisterClient,
-  registerClientState,
-  doCancel,
-  returnHost,
-}: {
-  friendlyName: string;
-  name: string;
-  appRegistration: RedactedAppRegistration;
-  doRegisterClient: (customFriendlyName?: string) => void;
-  registerClientState: 'error' | 'idle' | 'loading' | 'success';
-  doCancel: () => void;
-  returnHost?: string;
-}) => {
-  const [isDetails, setIsDetails] = useState(false);
-  const [isEditFriendlyName, setIsEditFriendlyName] = useState(false);
-  const [customFriendlyName, setCustomFriendlyName] = useState<string>();
-
-  const dateFormat: Intl.DateTimeFormatOptions = {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  };
-
-  return (
-    <>
-      <h1 className="mb-5 text-4xl dark:text-white">
-        {t('App login')}:
-        <small className="block">
-          {name}{' '}
-          {appRegistration.corsHostName && returnHost ? (
-            <>
-              (<DomainHighlighter>{returnHost}</DomainHighlighter>)
-            </>
-          ) : null}
-        </small>
-      </h1>
-      <p>{`${t('By allowing')} "${appRegistration.corsHostName || friendlyName}" ${t(
-        'to login you give it access to your'
-      )} ${name} app`}</p>
-      {appRegistration.corsHostName && appRegistration.corsHostName !== returnHost ? (
-        <Alert type="critical" className="my-10" isCompact={true}>
-          {t('The origin of this login is different from the origin the app was registered with')} (
-          {appRegistration.corsHostName})
-        </Alert>
-      ) : null}
-      <div className="py-5">
-        <button
-          onClick={() => setIsDetails(!isDetails)}
-          className={`flex flex-row items-center ${isDetails ? 'font-bold' : 'text-sm italic'}`}
-        >
-          {t('Details')}{' '}
-          <Arrow className={`ml-2 h-4 w-4 transition-transform ${isDetails ? 'rotate-90' : ''}`} />
-        </button>
-        {isDetails ? (
-          <>
-            <p className="mt-2">
-              &quot;{name}&quot; {t('is registered on your identity since')}{' '}
-              <span className="italic">
-                {new Date(appRegistration.created).toLocaleDateString(undefined, dateFormat)}
-              </span>{' '}
-              {t('and has the following access on your identity')}:
-            </p>
-            {appRegistration.grant.permissionSet?.keys?.length ? (
-              <Section>
-                <div className="flex flex-col gap-4">
-                  {appRegistration.grant.permissionSet.keys.map((permissionLevel) => {
-                    return (
-                      <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
-                    );
-                  })}
-                </div>
-              </Section>
-            ) : null}
-            {appRegistration.grant?.driveGrants ? (
-              <Section>
-                <div className="flex flex-col gap-4">
-                  {appRegistration.grant.driveGrants.map((grant) => {
-                    return (
-                      <DrivePermissionView
-                        key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
-                        driveGrant={grant}
-                      />
-                    );
-                  })}
-                </div>
-              </Section>
-            ) : null}
-            <div className={`flex  ${isEditFriendlyName ? 'flex-col' : 'flex-row'}`}>
-              <p className="flex flex-row items-center text-sm">
-                <span>{t('Your current device:')}</span> {!isEditFriendlyName ? friendlyName : ''}
-              </p>
-              <div className="flex flex-row items-center">
-                {isEditFriendlyName ? (
-                  <Input
-                    type="text"
-                    defaultValue={friendlyName}
-                    className="my-2 text-sm"
-                    onChange={(e) => setCustomFriendlyName(e.target.value)}
-                  />
-                ) : null}
-
-                <ActionButton
-                  icon={isEditFriendlyName ? Times : Pencil}
-                  onClick={() => setIsEditFriendlyName(!isEditFriendlyName)}
-                  type="mute"
-                />
-              </div>
-            </div>
-          </>
-        ) : null}
-      </div>
-      <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-        <ActionButton
-          onClick={() => doRegisterClient(isEditFriendlyName ? customFriendlyName : undefined)}
-          state={registerClientState}
-          icon={Arrow}
-        >
-          {t('Login')}
-        </ActionButton>
-        <ActionButton type="secondary" onClick={() => doCancel()}>
-          {t('Cancel')}
-        </ActionButton>
-      </div>
     </>
   );
 };

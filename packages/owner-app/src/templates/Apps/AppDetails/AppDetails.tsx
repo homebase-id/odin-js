@@ -107,7 +107,7 @@ const AppDetails = () => {
                   className="my-auto"
                   onClick={async () => {
                     await removeApp({ appId: decodedAppKey });
-                    navigate('/owner/apps');
+                    navigate('/owner/third-parties/apps');
                   }}
                   state={removeAppStatus}
                   icon={Trash}

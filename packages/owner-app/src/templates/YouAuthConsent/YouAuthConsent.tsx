@@ -21,7 +21,7 @@ const YouAuthConsent = () => {
   const targetReturnUrl = new URL(returnUrl).searchParams.get(REDIRECT_URI_PARAM);
   const targetDomain = getDomainFromUrl(targetReturnUrl || undefined) || '';
 
-  const doCancel = () => (window.location.href = returnUrl);
+  const doCancel = () => alert('TODO: Redirect to cancel');
 
   return (
     <>

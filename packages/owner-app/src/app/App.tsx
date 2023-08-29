@@ -19,7 +19,7 @@ const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthCon
 const Setup = lazy(() => import('../templates/Setup/Setup'));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
-const RegisterAppClient = lazy(() => import('../templates/RegisterAppClient/RegisterAppClient'));
+const RegisterAppClient = lazy(() => import('../templates/RegisterApp/RegisterApp'));
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
