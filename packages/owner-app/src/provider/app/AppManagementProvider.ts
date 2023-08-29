@@ -25,10 +25,13 @@ export const RegisterAppClient = async (
 };
 
 export const GetAppClients = async (
-  dotYouClient: DotYouClient
+  dotYouClient: DotYouClient,
+  appId: string
 ): Promise<AppClientRegistration[]> => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.get<AppClientRegistration[]>('appmanagement/clients');
+  const response = await client.post<AppClientRegistration[]>(`appmanagement/clients`, {
+    appId: appId,
+  });
   return response.data;
 };
 
