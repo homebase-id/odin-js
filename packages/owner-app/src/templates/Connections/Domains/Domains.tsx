@@ -3,6 +3,7 @@ import {
   ErrorNotification,
   Globe,
   Grid,
+  HybridLink,
   LoadingBlock,
   Pager,
   SubtleMessage,
@@ -13,10 +14,11 @@ import {
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
-import { SectionTitle } from '../../../components/ui/Sections/Section';
+import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
 import useDomain from '../../../hooks/connections/useDomain';
 import { DomainMembership } from '../../../provider/network/domainNetwork/DomainProvider';
+import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 
 const Domains = () => {
   const [activePage, setActivePage] = useState(1);
@@ -60,6 +62,11 @@ const Domains = () => {
         ]}
         className="-mt-6 mb-6"
       />
+      <p className="max-w-2xl text-slate-400">
+        Services are third-parties that have authorized you with your Odin identity. By default they
+        are only given access to your publicly available data. However, they can also be a member of
+        one or more circles and receive extra access that way.
+      </p>
 
       {activeDomains?.pages?.[activePage - 1]?.results?.length === 0 ? (
         <SubtleMessage className="flex flex-row items-center">
@@ -67,39 +74,38 @@ const Domains = () => {
         </SubtleMessage>
       ) : (
         <>
-          <SectionTitle
-            title={t('Third-Parties')}
-            actions={
-              <Pager
-                totalPages={activeHasNextPage ? activePage + 1 : activePage}
-                setPage={setActivePage}
-                currentPage={activePage}
-              />
-            }
+          <Pager
+            totalPages={activeHasNextPage ? activePage + 1 : activePage}
+            setPage={setActivePage}
+            currentPage={activePage}
           />
-          <div className="-m-1 mt-5 flex flex-row flex-wrap">
-            {activeDomainsLoading && (
-              <>
-                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
-                <LoadingBlock className="m-1 aspect-square w-1/2 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6" />
-              </>
-            )}
 
-            {activeDomains?.pages?.[activePage - 1]?.results?.map((domain) => (
-              <DomainActive
-                className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
-                domain={domain}
-                key={domain.domain}
-              />
-            ))}
-          </div>
+          <Section>
+            <div className="flex flex-col gap-1">
+              {activeDomainsLoading && (
+                <>
+                  <LoadingBlock className="m-1 h-12" />
+                  <LoadingBlock className="m-1 h-12" />
+                </>
+              )}
+              {activeDomains?.pages?.[activePage - 1]?.results?.map((domain) => (
+                <DomainListItem domain={domain} key={domain.domain} />
+              ))}
+            </div>
+          </Section>
         </>
       )}
     </>
   );
 };
 
-const DomainActive = ({ domain, className }: { domain: DomainMembership; className: string }) => {
+const DomainListItem = ({
+  domain,
+  className,
+}: {
+  domain: DomainMembership;
+  className?: string;
+}) => {
   const {
     mutate: disconnect,
     status: disconnectStatus,
@@ -109,15 +115,31 @@ const DomainActive = ({ domain, className }: { domain: DomainMembership; classNa
   return (
     <>
       <ErrorNotification error={actionError} />
-      <DomainCard
-        className={`${className ?? ''} group relative`}
-        domain={domain.domain}
+      <HybridLink
         href={(domain.domain && `/owner/third-parties/services/${domain.domain}`) ?? undefined}
+        className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
       >
-        <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
+        <div className={`group flex flex-row items-center gap-8 p-2 ${className ?? ''}`}>
+          <CompanyImage domain={domain.domain} className="w-12" fallbackSize="xs" />
+
+          <h2 className="font-thiner dark:text-white">
+            <span className="break-words">{domain.domain}</span>
+            <small className="block text-sm text-slate-400">
+              {t('First used')}:{' '}
+              {new Date(domain.modified).toLocaleString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+              })}
+            </small>
+          </h2>
+
           <ActionButton
             type="secondary"
-            className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+            className="ml-auto opacity-0 transition-opacity group-hover:opacity-100"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -137,7 +159,7 @@ const DomainActive = ({ domain, className }: { domain: DomainMembership; classNa
             size="square"
           />
         </div>
-      </DomainCard>
+      </HybridLink>
     </>
   );
 };

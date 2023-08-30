@@ -239,7 +239,11 @@ const DomainPermissionViewer = ({
             </>
           )}
         </Section>
-      ) : null}
+      ) : (
+        <Alert type="info" className="bg-background">
+          {t('This service has no additional access, apart from your publicly available data')}
+        </Alert>
+      )}
 
       {uniqueDriveGrants?.length ? (
         <Section title={t('Access on the following drives')}>
@@ -323,9 +327,9 @@ const ClientView = ({
       <div className="mr-2 flex flex-col">
         {client.friendlyName}
         <small className="block text-sm">
-          <span className="capitalize">{client.accessRegistrationClientType}</span> | {t('Created')}
-          : {createdDate.toLocaleDateString(undefined, dateFormat)}{' '}
-          {createdDate.toLocaleTimeString(undefined, timeFormat)}
+          <span className="capitalize">{client.accessRegistrationClientType}</span> |{' '}
+          {t('First used')}:{' '}
+          {createdDate.toLocaleString(undefined, { ...dateFormat, ...timeFormat })}
         </small>
       </div>
 

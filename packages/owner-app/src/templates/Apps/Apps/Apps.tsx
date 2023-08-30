@@ -1,11 +1,11 @@
-import { t } from '@youfoundation/common-app';
+import { SubtleMessage, t } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
 import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
+import Section from '../../../components/ui/Sections/Section';
 import { Arrow } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
@@ -30,8 +30,12 @@ const Apps = () => {
         ]}
         className="-mt-6 mb-6"
       />
+      <p className="max-w-2xl text-slate-400">
+        Apps are third-parties that have authorized you with your Odin identity. And have direct
+        access to the drives you have authorized them to. Keep in mind that they are running as if
+        it was you when you are using the app. So be extra careful what you authorize.
+      </p>
 
-      <SectionTitle title={t('Registered Apps')} />
       <div className="mt-8">
         {loadingRegisteredApps ? (
           <>
@@ -59,7 +63,7 @@ const Apps = () => {
                 ))}
               </div>
             ) : (
-              <>{t('No apps currently registered')}</>
+              <SubtleMessage>{t('No apps currently registered')}</SubtleMessage>
             )}
           </>
         )}
