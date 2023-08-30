@@ -45,11 +45,9 @@ const Setup = () => {
 
   const redirectToReturn = () => {
     const returnUrl = searchParams.get(RETURN_URL_PARAM);
-    if (returnUrl) {
-      window.location.href = decodeURIComponent(returnUrl);
-    } else {
-      window.location.href = HOME_PATH;
-    }
+
+    if (returnUrl) window.location.href = returnUrl;
+    else window.location.href = HOME_PATH;
   };
 
   useEffect(() => {
