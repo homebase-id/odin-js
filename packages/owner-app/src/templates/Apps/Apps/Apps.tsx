@@ -1,4 +1,4 @@
-import { SubtleMessage, t } from '@youfoundation/common-app';
+import { HybridLink, SubtleMessage, t } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
@@ -9,6 +9,8 @@ import Section from '../../../components/ui/Sections/Section';
 import { Arrow } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
+import { RedactedAppRegistration } from '../../../provider/app/AppManagementProviderTypes';
+import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
 
 const Apps = () => {
   const { data: registeredApps, isLoading: loadingRegisteredApps } = useApps().fetchRegistered;
@@ -30,46 +32,62 @@ const Apps = () => {
         ]}
         className="-mt-6 mb-6"
       />
-      <p className="max-w-2xl text-slate-400">
+      <p className="mb-6 max-w-2xl text-slate-400">
         Apps are third-parties that have authorized you with your Odin identity. And have direct
         access to the drives you have authorized them to. Keep in mind that they are running as if
         it was you when you are using the app. So be extra careful what you authorize.
       </p>
 
-      <div className="mt-8">
-        {loadingRegisteredApps ? (
-          <>
-            <LoadingBlock className="m-4 h-10" />
-            <LoadingBlock className="m-4 h-10" />
-            <LoadingBlock className="m-4 h-10" />
-          </>
-        ) : (
-          <>
-            {registeredApps?.length ? (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                {registeredApps.map((app) => (
-                  <CardLink
-                    href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
-                    isDisabled={app.isRevoked}
-                    title={
-                      <div className="flex flex-col">
-                        {`${app.isRevoked ? t('Revoked') : ''} ${app.name}`}{' '}
-                        <small className="block text-sm">{app.corsHostName}</small>
-                      </div>
-                    }
-                    description={`${t('Added on')}: ${new Date(app.created).toLocaleDateString()}`}
-                    key={app.appId}
-                  />
-                ))}
-              </div>
-            ) : (
-              <SubtleMessage>{t('No apps currently registered')}</SubtleMessage>
+      {!registeredApps || registeredApps?.length === 0 ? (
+        <SubtleMessage>{t('No apps currently registered')}</SubtleMessage>
+      ) : (
+        <Section>
+          <div className="flex flex-col gap-1">
+            {loadingRegisteredApps && (
+              <>
+                <LoadingBlock className="m-1 h-12" />
+                <LoadingBlock className="m-1 h-12" />
+              </>
             )}
-          </>
-        )}
-      </div>
+            {registeredApps.map((app) => (
+              <AppListItem app={app} key={app.appId} />
+            ))}
+          </div>
+        </Section>
+      )}
+
       <DiscoverApps />
     </>
+  );
+};
+
+const AppListItem = ({ app, className }: { app: RedactedAppRegistration; className?: string }) => {
+  return (
+    <HybridLink
+      href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
+      className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+    >
+      <div className={`group flex flex-row items-center gap-8 p-2 ${className ?? ''}`}>
+        <CompanyImage domain={app.corsHostName || app.name} className="w-12" fallbackSize="xs" />
+        <h2 className="font-thiner dark:text-white">
+          <span className="break-words">
+            {`${app.isRevoked ? t('Revoked') : ''}`} {app.name}{' '}
+            {app.corsHostName ? <>| {app.corsHostName}</> : null}
+          </span>
+          <small className="block text-sm text-slate-400">
+            {t('first used')}:{' '}
+            {new Date(app.created).toLocaleString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              weekday: 'short',
+              hour: 'numeric',
+              minute: 'numeric',
+            })}
+          </small>
+        </h2>
+      </div>
+    </HybridLink>
   );
 };
 

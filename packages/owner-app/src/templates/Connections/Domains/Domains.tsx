@@ -62,7 +62,7 @@ const Domains = () => {
         ]}
         className="-mt-6 mb-6"
       />
-      <p className="max-w-2xl text-slate-400">
+      <p className="mb-6 max-w-2xl text-slate-400">
         Services are third-parties that have authorized you with your Odin identity. By default they
         are only given access to your publicly available data. However, they can also be a member of
         one or more circles and receive extra access that way.
@@ -125,7 +125,7 @@ const DomainListItem = ({
           <h2 className="font-thiner dark:text-white">
             <span className="break-words">{domain.domain}</span>
             <small className="block text-sm text-slate-400">
-              {t('First used')}:{' '}
+              {t('first used')}:{' '}
               {new Date(domain.modified).toLocaleString(undefined, {
                 month: 'short',
                 day: 'numeric',
