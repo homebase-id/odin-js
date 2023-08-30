@@ -5,12 +5,12 @@ const FallbackImg = ({
 }: {
   initials: string;
   className?: string;
-  size?: 'xs';
+  size?: 'xs' | 'md';
 }) => {
   return (
     <div
       className={`flex bg-slate-100 font-light text-black dark:bg-slate-700 dark:text-white ${
-        size === 'xs' ? 'text-sm' : 'text-6xl sm:text-8xl'
+        size === 'xs' ? 'text-sm' : size === 'md' ? 'text-3xl' : 'text-6xl sm:text-8xl'
       } ${className ?? ''} ${className?.includes('h-') ? '' : 'h-full'} ${
         className?.includes('w-') ? '' : 'w-full'
       }`}

@@ -70,8 +70,10 @@ const RegisterApp = () => {
     window.location.href = returnUrl;
   };
 
-  const [isCancelled, setIsCancelled] = useState<boolean>(false);
-  const doCancel = () => setIsCancelled(true);
+  const doCancel = () =>
+    (window.location.href = returnUrl
+      ? `${returnUrl.split('?')[0]}?error=cancelled-by-user`
+      : '/owner');
 
   return (
     <>
@@ -80,38 +82,18 @@ const RegisterApp = () => {
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
-            {isCancelled ? (
-              <>
-                <h1 className="mb-5 text-4xl dark:text-white">
-                  {t('The registration was cancelled')}
-                </h1>
-
-                <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
-                  <ActionButton
-                    onClick={() => {
-                      // window.location.href = returnUrl;
-                      alert('TODO: Redirect to cancel');
-                    }}
-                    type="primary"
-                  >
-                    {t('Back to the app')}
-                  </ActionButton>
-                </div>
-              </>
-            ) : (
-              <AppRegistration
-                name={name}
-                appId={appId}
-                origin={origin}
-                permissionSet={permissionSet}
-                driveGrants={driveGrants}
-                circlePermissionSet={circlePermissionSet}
-                circleDriveGrants={circleDriveGrants}
-                registerApp={doRegisterApp}
-                registerAppState={registerAppState}
-                doCancel={doCancel}
-              />
-            )}
+            <AppRegistration
+              name={name}
+              appId={appId}
+              origin={origin}
+              permissionSet={permissionSet}
+              driveGrants={driveGrants}
+              circlePermissionSet={circlePermissionSet}
+              circleDriveGrants={circleDriveGrants}
+              registerApp={doRegisterApp}
+              registerAppState={registerAppState}
+              doCancel={doCancel}
+            />
           </div>
         </div>
       </section>

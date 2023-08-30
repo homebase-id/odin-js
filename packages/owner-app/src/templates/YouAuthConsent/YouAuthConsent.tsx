@@ -4,13 +4,22 @@ import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
+import useApp from '../../hooks/apps/useApp';
+import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
+import { useState } from 'react';
+import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
+import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
+import Section from '../../components/ui/Sections/Section';
 
 // https://frodo.dotyou.cloud/owner/youauth/consent?returnUrl=https%3A%2F%2Ffrodo.dotyou.cloud%2Fapi%2Fowner%2Fv1%2Fyouauth%2Fauthorize%3Fclient_id%3Dthirdparty.dotyou.cloud%26client_type%3Ddomain%26client_info%3D%26public_key%3DMIIBzDCCAWQGByqGSM49AgEwggFXAgEBMDwGByqGSM49AQECMQD%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252fv%252f%252f%252f%252f8AAAAAAAAAAP%252f%252f%252f%252f8wewQw%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f7%252f%252f%252f%252f%252fAAAAAAAAAAD%252f%252f%252f%252f8BDCzMS%252bn4j7n5JiOBWvj%252bC0ZGB2cbv6BQRIDFAiPUBOHWsZWOY2KLtGdKoXI7dPsKu8DFQCjNZJqoxmieh0AiWpnc6SCes2scwRhBKqHyiK%252biwU3jrHHHvMgrXRuHTtii6ebmFn3QeCCVCo4VQLyXb9VKWw6VF44cnYKtzYX3kqWJixvXZ6Yv5KS3Cn49B29KJoUfOnaMRO18LjACmCxzh1%252bgZ16Qx18kOoOXwIxAP%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f8djTYH0Ny3fWBoNskiwp3rs7BlqzMUpcwIBAQNiAAR4FrrjXd5yPBMcqT9itSIha%252bQBrmHFNbkn3xBbuHUk%252fKM1Sb2MnKs9ZCMMlXyysxOddcpIaoM0EVCXkb66qe3Kr7bp0E38aMwSD6Wd5wx2qRTu7LDEmVh68nNe2ltDx3A%253d%26redirect_uri%3Dhttps%253a%252f%252fthirdparty.dotyou.cloud%253a7280%252fauthorization-code-callback%26permission_request%3D%26state%3Dbb45aa5d-7045-482c-a23a-e2b86449d660
 const REDIRECT_URI_PARAM = 'redirect_uri';
+const CLIENT_TYPE_PARAM = 'client_type';
+const CLIENT_ID_PARAM = 'client_id';
 
 const YouAuthConsent = () => {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
+
   if (!returnUrl) {
     console.error(
       'No returnUrl found, we cannot redirect back to the target domain... => Aborting youauth'
@@ -18,11 +27,16 @@ const YouAuthConsent = () => {
     return null;
   }
 
-  const targetReturnUrl = new URL(returnUrl).searchParams.get(REDIRECT_URI_PARAM);
+  const returnUrlParams = new URL(returnUrl).searchParams;
+  const clientType = returnUrlParams.get(CLIENT_TYPE_PARAM);
+  const clientId = returnUrlParams.get(CLIENT_ID_PARAM);
+  const targetReturnUrl = returnUrlParams.get(REDIRECT_URI_PARAM);
   const targetDomain = getDomainFromUrl(targetReturnUrl || undefined) || '';
 
-  const doCancel = () => alert('TODO: Redirect to cancel');
-
+  const doCancel = () =>
+    (window.location.href = targetReturnUrl
+      ? `${targetReturnUrl.split('?')[0]}?error=cancelled-by-user`
+      : '/owner');
   return (
     <>
       <Helmet>
@@ -32,29 +46,12 @@ const YouAuthConsent = () => {
         <section className="py-20">
           <div className="container mx-auto p-5">
             <div className="max-w-[35rem] dark:text-white">
-              <div className="mb-5 flex flex-col sm:flex-row sm:items-center">
-                <img
-                  src={`https://${targetDomain}/pub/image`}
-                  className="w-24 rounded-full sm:mr-4"
-                />
+              {clientType === 'app' ? (
+                <AppDetails appId={clientId || undefined} targetDomain={targetDomain} />
+              ) : (
+                <ServiceDetails targetDomain={targetDomain} />
+              )}
 
-                <h1 className="text-4xl ">
-                  {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
-                  &quot;
-                  <small className="block text-sm dark:text-white dark:text-opacity-80">
-                    &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
-                    {t('is requesting to verify your identity.')}
-                  </small>
-                </h1>
-              </div>
-
-              <div className="dark:text-white dark:text-opacity-80">
-                <p className="mt-2">
-                  {t('By logging in you allow')} &quot;
-                  <DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
-                  {t('to verify your identity and personalise your experience')}
-                </p>
-              </div>
               <div className="mt-10 flex flex-row-reverse">
                 {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post">
@@ -75,4 +72,159 @@ const YouAuthConsent = () => {
     </>
   );
 };
+
+const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
+  return (
+    <>
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-center">
+        <CompanyImage
+          domain={targetDomain}
+          className="w-24 flex-shrink-0 overflow-hidden rounded-full sm:mr-4"
+          fallbackSize="md"
+        />
+
+        <h1 className="text-4xl ">
+          {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
+          &quot;
+          <small className="block text-sm dark:text-white dark:text-opacity-80">
+            &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
+            {t('is requesting to verify your identity.')}
+          </small>
+        </h1>
+      </div>
+
+      <div className="dark:text-white dark:text-opacity-80">
+        <p className="mt-2">
+          {t('By logging in you allow')} &quot;
+          <DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
+          {t('to verify your identity and personalise your experience')}
+        </p>
+      </div>
+    </>
+  );
+};
+
+const dateFormat: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+};
+
+const AppDetails = ({ appId, targetDomain }: { appId?: string; targetDomain: string }) => {
+  const [isDetails, setIsDetails] = useState(false);
+  const { data: appRegistration } = useApp({ appId }).fetch;
+
+  return (
+    <>
+      <div className="mb-5 flex flex-col sm:flex-row sm:items-center">
+        <CompanyImage
+          domain={targetDomain}
+          className="w-24 flex-shrink-0 overflow-hidden rounded-full sm:mr-4"
+          fallbackSize="md"
+        />
+
+        <h1 className="text-4xl ">
+          {t('Login to')}{' '}
+          {!appRegistration || appRegistration?.corsHostName ? (
+            <>
+              &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;
+              <small className="block text-sm dark:text-white dark:text-opacity-80">
+                {appRegistration?.name}
+              </small>
+            </>
+          ) : (
+            <>
+              {appRegistration?.name}
+              <small className="block text-sm dark:text-white dark:text-opacity-80">
+                <DomainHighlighter>{targetDomain}</DomainHighlighter>
+              </small>
+            </>
+          )}
+        </h1>
+      </div>
+
+      <div className="dark:text-white dark:text-opacity-80">
+        <p className="mt-2">
+          {t('By logging in you allow')} &quot;
+          <DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
+          {t('to verify your identity and personalise your experience')}
+        </p>
+      </div>
+      {appRegistration ? (
+        <div className="py-5">
+          <button
+            onClick={() => setIsDetails(!isDetails)}
+            className={`flex flex-row items-center ${isDetails ? 'font-bold' : 'text-sm italic'}`}
+          >
+            {t('Details')}{' '}
+            <Arrow
+              className={`ml-2 h-4 w-4 transition-transform ${isDetails ? 'rotate-90' : ''}`}
+            />
+          </button>
+          {isDetails ? (
+            <>
+              <p className="mt-2">
+                &quot;{appRegistration.name}&quot; {t('is registered on your identity since')}{' '}
+                <span className="italic">
+                  {new Date(appRegistration.created).toLocaleDateString(undefined, dateFormat)}
+                </span>{' '}
+                {t('and has the following access on your identity')}:
+              </p>
+              {appRegistration.grant.permissionSet?.keys?.length ? (
+                <Section>
+                  <div className="flex flex-col gap-4">
+                    {appRegistration.grant.permissionSet.keys.map((permissionLevel) => {
+                      return (
+                        <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                      );
+                    })}
+                  </div>
+                </Section>
+              ) : null}
+              {appRegistration.grant?.driveGrants ? (
+                <Section>
+                  <div className="flex flex-col gap-4">
+                    {appRegistration.grant.driveGrants.map((grant) => {
+                      return (
+                        <DrivePermissionView
+                          key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                          driveGrant={grant}
+                        />
+                      );
+                    })}
+                  </div>
+                </Section>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+{
+  /* <div className={`flex  ${isEditFriendlyName ? 'flex-col' : 'flex-row'}`}>
+  <p className="flex flex-row items-center text-sm">
+    <span>{t('Your current device:')}</span> {!isEditFriendlyName ? friendlyName : ''}
+  </p>
+  <div className="flex flex-row items-center">
+    {isEditFriendlyName ? (
+      <Input
+        type="text"
+        defaultValue={friendlyName}
+        className="my-2 text-sm"
+        onChange={(e) => setCustomFriendlyName(e.target.value)}
+      />
+    ) : null}
+
+    <ActionButton
+      icon={isEditFriendlyName ? Times : Pencil}
+      onClick={() => setIsEditFriendlyName(!isEditFriendlyName)}
+      type="mute"
+    />
+  </div>
+</div> */
+}
+
 export default YouAuthConsent;

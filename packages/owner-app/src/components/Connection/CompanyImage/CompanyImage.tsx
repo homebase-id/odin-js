@@ -9,7 +9,7 @@ export const CompanyImage = ({
 }: {
   domain: string;
   className?: string;
-  fallbackSize?: 'xs';
+  fallbackSize?: 'xs' | 'md';
 }) => {
   const [hasFavicon, setHasFavicon] = useState<boolean>(true);
   const initials = useMemo(() => getTwoLettersFromDomain(domain), [domain]);
