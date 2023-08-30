@@ -6,7 +6,6 @@ import { LoadingBlock } from '@youfoundation/common-app';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section from '../../../components/ui/Sections/Section';
-import { Arrow } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { RedactedAppRegistration } from '../../../provider/app/AppManagementProviderTypes';
@@ -131,7 +130,7 @@ const DiscoverApps = () => {
       >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
           {availableApps.map((app) => (
-            <CardLink href={app.href} title={app.name} key={app.appId} icon={Arrow} />
+            <CardLink href={app.href} title={app.name} key={app.appId} icon={Grid} />
           ))}
         </div>
       </Section>

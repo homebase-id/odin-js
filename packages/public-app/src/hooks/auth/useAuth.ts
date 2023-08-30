@@ -89,11 +89,8 @@ const useAuth = () => {
   };
 };
 
-// TODO: Add ECC keys for encryption of the return value; + Cleanup
 export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
-    // TODO: Add public key for the encryption of the eventual shared secret:
-
     const eccKey = await createEccPair();
     saveEccKey(eccKey);
 
@@ -104,7 +101,7 @@ export const useYouAuthAuthorization = () => {
 
     // TODO: returnUrl needs to be passed in the state, so it can be used in the callback
     const finalUrl = `/authorization-code-callback`;
-    const state = { finalUrl: finalUrl, eccPk64: eccPk64 };
+    const state = { finalUrl: finalUrl, eccPk64: eccPk64, returnUrl };
     const pk = await getEccPublicKey();
 
     return {
@@ -140,7 +137,7 @@ export const useYouAuthAuthorization = () => {
       exchangedSecret
     );
 
-    const { identity, ss64 } = JSON.parse(byteArrayToString(data));
+    const { identity, ss64, returnUrl } = JSON.parse(byteArrayToString(data));
 
     // Store the sharedSecret to the localStorage
     window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
@@ -148,7 +145,7 @@ export const useYouAuthAuthorization = () => {
     window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
 
     // Redirect to the returnUrl; With a fallback to home
-    window.location.href = '/';
+    window.location.href = returnUrl || '/';
   };
 
   return { getAuthorizationParameters, finalizeAuthorization };

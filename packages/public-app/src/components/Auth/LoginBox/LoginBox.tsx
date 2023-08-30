@@ -15,7 +15,6 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
 };
 
 const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  // TODO: Convert to hook
   const [authParams, setAuthParams] = useState<YouAuthorizationParams>();
   const { getAuthorizationParameters } = useYouAuthAuthorization();
 
