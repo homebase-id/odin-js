@@ -56,7 +56,6 @@ const DomainDetails = () => {
       href: `https://${domain}`,
     },
   ];
-
   if (domainInfoLoading) return <LoadingDetailPage />;
 
   if (domainInfo?.isRevoked) {

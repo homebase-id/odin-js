@@ -1,11 +1,12 @@
 import {
   ActionButton,
   ErrorNotification,
-  Globe,
+  Eye,
   Grid,
   HybridLink,
   LoadingBlock,
   Pager,
+  Shield,
   SubtleMessage,
   Times,
   t,
@@ -14,8 +15,7 @@ import {
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { useState, useEffect } from 'react';
-import Section, { SectionTitle } from '../../../components/ui/Sections/Section';
-import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
+import Section from '../../../components/ui/Sections/Section';
 import useDomain from '../../../hooks/connections/useDomain';
 import { DomainMembership } from '../../../provider/network/domainNetwork/DomainProvider';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
@@ -81,7 +81,7 @@ const Domains = () => {
           />
 
           <Section>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-4 sm:gap-1">
               {activeDomainsLoading && (
                 <>
                   <LoadingBlock className="m-1 h-12" />
@@ -107,10 +107,12 @@ const DomainListItem = ({
   className?: string;
 }) => {
   const {
-    mutate: disconnect,
-    status: disconnectStatus,
-    error: actionError,
-  } = useDomain({}).disconnect;
+    fetch: { data: fullDomainInfo },
+    disconnect: { mutate: disconnect, status: disconnectStatus, error: actionError },
+  } = useDomain({ domain: domain.domain });
+
+  const hasExtendedPermissions =
+    fullDomainInfo?.circleGrants?.length && fullDomainInfo?.circleGrants?.length > 0;
 
   return (
     <>
@@ -119,27 +121,50 @@ const DomainListItem = ({
         href={(domain.domain && `/owner/third-parties/services/${domain.domain}`) ?? undefined}
         className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
       >
-        <div className={`group flex flex-row items-center gap-8 p-2 ${className ?? ''}`}>
-          <CompanyImage domain={domain.domain} className="w-12" fallbackSize="xs" />
+        <div
+          className={`group flex flex-col gap-1 py-2 sm:flex-row sm:items-center sm:gap-8 sm:px-2 ${
+            className ?? ''
+          }`}
+        >
+          <div className="flex flex-row gap-2 sm:contents">
+            <CompanyImage domain={domain.domain} className="w-12" fallbackSize="xs" />
 
-          <h2 className="font-thiner dark:text-white">
-            <span className="break-words">{domain.domain}</span>
-            <small className="block text-sm text-slate-400">
-              {t('first used')}:{' '}
-              {new Date(domain.modified).toLocaleString(undefined, {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                weekday: 'short',
-                hour: 'numeric',
-                minute: 'numeric',
-              })}
-            </small>
-          </h2>
-
+            <h2 className="font-thiner dark:text-white">
+              <span className="break-words">{domain.domain}</span>
+              <small className="block text-sm text-slate-400">
+                {t('first used')}:{' '}
+                {new Date(domain.modified).toLocaleString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  weekday: 'short',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}
+              </small>
+            </h2>
+          </div>
+          <div className="ml-auto flex flex-row items-center text-sm text-slate-400 sm:mx-auto">
+            {hasExtendedPermissions ? (
+              <>
+                <Shield className="mr-2 h-4 w-4" />
+                <p className="flex flex-col">
+                  <span>{t('Private access')}</span>
+                  <small className="block leading-none">
+                    {t('Member of')} {fullDomainInfo.circleGrants.length}{' '}
+                    {fullDomainInfo.circleGrants.length === 1 ? t('circle') : t('circles')}
+                  </small>
+                </p>
+              </>
+            ) : (
+              <>
+                <Eye className="mr-2 h-4 w-4" /> <p>{t('Public access')}</p>
+              </>
+            )}
+          </div>
           <ActionButton
             type="secondary"
-            className="ml-auto opacity-0 transition-opacity group-hover:opacity-100"
+            className="ml-auto hidden opacity-0 transition-opacity group-hover:opacity-100 md:block"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();

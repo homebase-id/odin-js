@@ -66,7 +66,11 @@ const AppListItem = ({ app, className }: { app: RedactedAppRegistration; classNa
       href={`/owner/third-parties/apps/${encodeURIComponent(app.appId)}`}
       className="bg-transparent transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
     >
-      <div className={`group flex flex-row items-center gap-8 p-2 ${className ?? ''}`}>
+      <div
+        className={`group flex flex-row items-center gap-2 py-2 sm:gap-8 sm:px-2 ${
+          className ?? ''
+        }`}
+      >
         <CompanyImage domain={app.corsHostName || app.name} className="w-12" fallbackSize="xs" />
         <h2 className="font-thiner dark:text-white">
           <span className="break-words">
