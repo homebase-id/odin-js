@@ -36,10 +36,11 @@ const useAuth = () => {
   const navigate = useNavigate();
 
   const logout = async (): Promise<void> => {
-    if (isOwner) {
-      await logoutOwner();
-    } else {
-      await logoutYouauth();
+    try {
+      if (isOwner) await logoutOwner();
+      else await logoutYouauth();
+    } catch (e) {
+      console.log(e);
     }
 
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
@@ -66,13 +67,12 @@ const useAuth = () => {
           window.localStorage.getItem(HOME_SHARED_SECRET) ||
           window.localStorage.getItem(STORAGE_IDENTITY_KEY)
         ) {
-          console.error('kicked identity');
-
           // // Auth state was presumed logged in, but not allowed.. Will attempt reload page? (Browsers may ignore, as it's not a reload on user request)
-          window.localStorage.removeItem(HOME_SHARED_SECRET);
-          window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
-
-          window.location.reload();
+          (async () => {
+            console.error('kicking identity');
+            await logout();
+            window.location.reload();
+          })();
         }
       }
     }
