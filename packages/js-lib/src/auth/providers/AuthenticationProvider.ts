@@ -77,7 +77,7 @@ export const getRegistrationParams = async (
   };
 };
 
-const exchangeDigestForToken = async (
+export const exchangeDigestForToken = async (
   dotYouClient: DotYouClient,
   base64ExchangedSecretDigest: string
 ): Promise<{
