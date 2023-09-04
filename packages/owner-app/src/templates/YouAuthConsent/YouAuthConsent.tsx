@@ -54,14 +54,22 @@ const YouAuthConsent = () => {
 
               <div className="mt-10 flex flex-row-reverse">
                 {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
-                <form action="/api/owner/v1/youauth/authorize" method="post">
+                <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
-                  <ActionButton type="primary" className="ml-2 w-1/2 sm:w-auto" icon={Arrow}>
+                  <ActionButton
+                    type="primary"
+                    className="ml-2 w-1/2 flex-shrink-0 sm:w-auto"
+                    icon={Arrow}
+                  >
                     {t('Login')}
                   </ActionButton>
                 </form>
 
-                <ActionButton type="secondary" onClick={doCancel} className="w-1/2 sm:w-auto">
+                <ActionButton
+                  type="secondary"
+                  onClick={doCancel}
+                  className="w-1/2 flex-shrink-0 sm:w-auto"
+                >
                   {t('Cancel')}
                 </ActionButton>
               </div>
