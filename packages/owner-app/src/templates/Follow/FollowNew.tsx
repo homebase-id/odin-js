@@ -79,7 +79,7 @@ const Following = () => {
     <>
       <Helmet>
         <title>
-          {t('Follow')} &quot;{toFollowKey}&quot; | Odin
+          {t('Follow')} &quot;{toFollowKey}&quot; | Homebase
         </title>
       </Helmet>
 

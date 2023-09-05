@@ -64,7 +64,7 @@ const Login = () => {
   return (
     <>
       <Helmet>
-        <title>Login | Odin</title>
+        <title>Login | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true} noPadding={true}>
         <UrlNotifier />
@@ -73,7 +73,7 @@ const Login = () => {
             <div className="">
               <form onSubmit={doLogin}>
                 <h1 className="mb-5 text-4xl dark:text-white">
-                  Odin | Login
+                  Homebase | Login
                   <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
                     <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                   </small>

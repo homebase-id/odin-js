@@ -63,9 +63,9 @@ const Domains = () => {
         className="-mt-6 mb-6"
       />
       <p className="mb-6 max-w-2xl text-slate-400">
-        Services are third-parties that have authorized you with your Odin identity. By default they
-        are only given access to your publicly available data. However, they can also be a member of
-        one or more circles and receive extra access that way.
+        Services are third-parties that have authorized you with your Homebase identity. By default
+        they are only given access to your publicly available data. However, they can also be a
+        member of one or more circles and receive extra access that way.
       </p>
 
       {activeDomains?.pages?.[activePage - 1]?.results?.length === 0 ? (

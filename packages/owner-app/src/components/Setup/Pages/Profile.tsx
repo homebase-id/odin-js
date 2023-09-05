@@ -46,7 +46,7 @@ const Profile = ({
       <p className="flex flex-col">
         Begin your journey by sharing a bit about yourself.
         <small className="text-sm text-slate-500">
-          A little information can help friends recognize and connect with you on ODIN. This
+          A little information can help friends recognize and connect with you on Homebase. This
           information will be publicly available so don&apos;t add anything you would consider
           private. And remember, here you&apos;re in control of your personal data.
         </small>

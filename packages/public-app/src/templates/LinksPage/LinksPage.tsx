@@ -6,7 +6,7 @@ const LinksPage = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Links')} | Odin</title>
+        <title>{t('Links')} | Homebase</title>
       </Helmet>
 
       <section className="py-5">

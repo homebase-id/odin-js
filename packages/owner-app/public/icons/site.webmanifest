@@ -1,6 +1,6 @@
 {
-    "name": "Odin Owner App",
-    "short_name": "Odin",
+    "name": "Homebase Owner App",
+    "short_name": "Homebase",
     "icons": [
         {
             "src": "/owner/icons/android-chrome-192x192.png",

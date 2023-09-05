@@ -29,7 +29,7 @@ const Home = ({ tab }: { tab?: string }) => {
   return (
     <>
       <Helmet>
-        <title>{owner?.firstName ?? 'Home'} | Odin</title>
+        <title>{owner?.firstName ?? 'Home'} | Homebase</title>
       </Helmet>
       {renderBody()}
     </>

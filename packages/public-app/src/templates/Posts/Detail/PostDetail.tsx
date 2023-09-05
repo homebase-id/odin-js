@@ -40,7 +40,7 @@ const PostDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{post?.caption ?? ''} | Odin</title>
+        <title>{post?.caption ?? ''} | Homebase</title>
       </Helmet>
 
       <section className="py-5">

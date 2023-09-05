@@ -13,7 +13,7 @@ const Welcome = ({
   // Welcome and info about what will be doing
   return (
     <>
-      <p className="mb-4">Welcome to your new ODIN identity.</p>
+      <p className="mb-4">Welcome to your new Homebase identity.</p>
       <p className="mb-4">
         You will be recognized as <span className="font-semibold">{window.location.hostname}</span>.
         This will both be your personal homepage and your unique identity.

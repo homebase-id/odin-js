@@ -32,7 +32,7 @@ const Apps = () => {
         className="-mt-6 mb-6"
       />
       <p className="mb-6 max-w-2xl text-slate-400">
-        Apps are third-parties that have authorized you with your Odin identity. And have direct
+        Apps are third-parties that have authorized you with your Homebase identity. And have direct
         access to the drives you have authorized them to. Keep in mind that they are running as if
         it was you when you are using the app. So be extra careful what you authorize.
       </p>
@@ -100,12 +100,12 @@ const DiscoverApps = () => {
     {
       name: 'Chatr',
       appId: '0babb1e6-7604-4bcd-b1fb-87e959226492',
-      href: 'https://chat.odin.earth',
+      href: 'https://chat.homebase.id',
     },
     {
-      name: 'Odin - Photos',
+      name: 'Homebase - Photos',
       appId: `32f0bdbf-017f-4fc0-8004-2d4631182d1e`,
-      href: 'https://photos.odin.earth',
+      href: 'https://photos.homebase.id',
     },
   ];
 

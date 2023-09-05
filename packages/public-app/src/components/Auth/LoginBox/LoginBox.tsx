@@ -58,13 +58,13 @@ const LocalLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   //     <>
   //       <form onSubmit={doLogin}>
   //         <p className="text-lg">YouAuth</p>
-  //         <label htmlFor="odin-id" className="text-sm leading-7 text-gray-600 dark:text-gray-400">
-  //           Odin Id
+  //         <label htmlFor="homebase-id" className="text-sm leading-7 text-gray-600 dark:text-gray-400">
+  //           Homebase Id
   //         </label>
   //         <input
   //           type="text"
-  //           name="odin-id"
-  //           id="odin-id"
+  //           name="homebase-id"
+  //           id="homebase-id"
   //           defaultValue={identity}
   //           required
   //           className="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"

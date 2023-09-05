@@ -59,7 +59,7 @@ const YouAuthConsent = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Login')} | Odin</title>
+        <title>{t('Login')} | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true}>
         <section className="py-20">

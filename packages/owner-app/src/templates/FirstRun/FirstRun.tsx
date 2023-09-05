@@ -49,7 +49,7 @@ const FirstRun = () => {
   return (
     <>
       <Helmet>
-        <title>Setup | Odin</title>
+        <title>Setup | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true}>
         <UrlNotifier />
@@ -57,7 +57,7 @@ const FirstRun = () => {
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <form onSubmit={doNext}>
               <h1 className="mb-5 text-4xl dark:text-white">
-                Odin | Setup
+                Homebase | Setup
                 <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>

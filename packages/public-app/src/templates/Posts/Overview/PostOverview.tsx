@@ -59,7 +59,7 @@ const PostOverview = () => {
   return (
     <>
       <Helmet>
-        <title>{activeChannel ? activeChannel.name : t('Posts')} | Odin</title>
+        <title>{activeChannel ? activeChannel.name : t('Posts')} | Homebase</title>
       </Helmet>
 
       <section className="py-5">

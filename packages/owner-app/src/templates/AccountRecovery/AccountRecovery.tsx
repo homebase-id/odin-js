@@ -32,7 +32,7 @@ const Login = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Recover access to your account')} | Odin</title>
+        <title>{t('Recover access to your account')} | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true} noPadding={true}>
         <UrlNotifier />
@@ -40,7 +40,7 @@ const Login = () => {
           <div className="container m-auto h-full max-w-[35rem] p-5">
             <div className="">
               <h1 className="mb-5 text-4xl dark:text-white">
-                Odin | {t('Recover access')}
+                Homebase | {t('Recover access')}
                 <small className="block break-all text-slate-400 dark:text-slate-500 sm:break-normal">
                   <DomainHighlighter>{window.location.hostname}</DomainHighlighter>
                 </small>
