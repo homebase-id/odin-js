@@ -1,4 +1,11 @@
-import { ActionButton, Arrow, DomainHighlighter, t } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Arrow,
+  DomainHighlighter,
+  Label,
+  Select,
+  t,
+} from '@youfoundation/common-app';
 import { useSearchParams } from 'react-router-dom';
 import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
@@ -6,10 +13,18 @@ import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import useApp from '../../hooks/apps/useApp';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 import Section from '../../components/ui/Sections/Section';
+
+type AuthDuration =
+  | 'always'
+  | 'for-1-year'
+  | 'for-1-month'
+  | 'for-1-week'
+  | 'for-1-day'
+  | 'ask-me-every-time';
 
 // https://frodo.dotyou.cloud/owner/youauth/consent?returnUrl=https%3A%2F%2Ffrodo.dotyou.cloud%2Fapi%2Fowner%2Fv1%2Fyouauth%2Fauthorize%3Fclient_id%3Dthirdparty.dotyou.cloud%26client_type%3Ddomain%26client_info%3D%26public_key%3DMIIBzDCCAWQGByqGSM49AgEwggFXAgEBMDwGByqGSM49AQECMQD%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252fv%252f%252f%252f%252f8AAAAAAAAAAP%252f%252f%252f%252f8wewQw%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f7%252f%252f%252f%252f%252fAAAAAAAAAAD%252f%252f%252f%252f8BDCzMS%252bn4j7n5JiOBWvj%252bC0ZGB2cbv6BQRIDFAiPUBOHWsZWOY2KLtGdKoXI7dPsKu8DFQCjNZJqoxmieh0AiWpnc6SCes2scwRhBKqHyiK%252biwU3jrHHHvMgrXRuHTtii6ebmFn3QeCCVCo4VQLyXb9VKWw6VF44cnYKtzYX3kqWJixvXZ6Yv5KS3Cn49B29KJoUfOnaMRO18LjACmCxzh1%252bgZ16Qx18kOoOXwIxAP%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f%252f8djTYH0Ny3fWBoNskiwp3rs7BlqzMUpcwIBAQNiAAR4FrrjXd5yPBMcqT9itSIha%252bQBrmHFNbkn3xBbuHUk%252fKM1Sb2MnKs9ZCMMlXyysxOddcpIaoM0EVCXkb66qe3Kr7bp0E38aMwSD6Wd5wx2qRTu7LDEmVh68nNe2ltDx3A%253d%26redirect_uri%3Dhttps%253a%252f%252fthirdparty.dotyou.cloud%253a7280%252fauthorization-code-callback%26permission_request%3D%26state%3Dbb45aa5d-7045-482c-a23a-e2b86449d660
 const REDIRECT_URI_PARAM = 'redirect_uri';
@@ -19,6 +34,10 @@ const CLIENT_ID_PARAM = 'client_id';
 const YouAuthConsent = () => {
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get(RETURN_URL_PARAM);
+  const [name, setName] = useState<string | null>();
+  const [_duration, setDuration] = useState<AuthDuration>();
+
+  // TODO: Handle updated duration...
 
   if (!returnUrl) {
     console.error(
@@ -47,29 +66,44 @@ const YouAuthConsent = () => {
           <div className="container mx-auto p-5">
             <div className="max-w-[35rem] dark:text-white">
               {clientType === 'app' ? (
-                <AppDetails appId={clientId || undefined} targetDomain={targetDomain} />
+                <AppDetails
+                  appId={clientId || undefined}
+                  targetDomain={targetDomain}
+                  setName={setName}
+                />
               ) : (
                 <ServiceDetails targetDomain={targetDomain} />
               )}
 
-              <div className="mt-10 flex flex-row-reverse">
+              <div className="my-auto flex flex-col font-normal text-gray-600 dark:text-gray-300">
+                <Label htmlFor="duration">
+                  {t('Auto-approve login requests from')} {name || targetDomain}
+                </Label>
+                <Select
+                  name="duration"
+                  defaultValue={'for-1-year'}
+                  onChange={(e) => setDuration(e.target.value as AuthDuration)}
+                  className="mr-auto"
+                >
+                  <option value="always">{t('Always')}</option>
+                  <option value="for-1-year">{t('For 1 Year')}</option>
+                  <option value="for-1-month">{t('For 1 Month')}</option>
+                  <option value="for-1-week">{t('For 1 Week')}</option>
+                  <option value="for-1-day">{t('For 1 Day')}</option>
+                  <option value="ask-me-every-time">{t('Ask Me Every Time')}</option>
+                </Select>
+              </div>
+
+              <div className="mt-10 flex flex-row-reverse gap-2">
                 {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
-                  <ActionButton
-                    type="primary"
-                    className="ml-2 w-1/2 flex-shrink-0 sm:w-auto"
-                    icon={Arrow}
-                  >
+                  <ActionButton type="primary" className="w-1/2 sm:w-auto" icon={Arrow}>
                     {t('Login')}
                   </ActionButton>
                 </form>
 
-                <ActionButton
-                  type="secondary"
-                  onClick={doCancel}
-                  className="w-1/2 flex-shrink-0 sm:w-auto"
-                >
+                <ActionButton type="secondary" onClick={doCancel} className="w-1/2 sm:w-auto">
                   {t('Cancel')}
                 </ActionButton>
               </div>
@@ -118,9 +152,21 @@ const dateFormat: Intl.DateTimeFormatOptions = {
   year: 'numeric',
 };
 
-const AppDetails = ({ appId, targetDomain }: { appId?: string; targetDomain: string }) => {
+const AppDetails = ({
+  appId,
+  targetDomain,
+  setName,
+}: {
+  appId?: string;
+  targetDomain: string;
+  setName: (name: string) => void;
+}) => {
   const [isDetails, setIsDetails] = useState(false);
   const { data: appRegistration } = useApp({ appId }).fetch;
+
+  useEffect(() => {
+    if (appRegistration?.name) setName(appRegistration?.name);
+  }, [appRegistration]);
 
   return (
     <>

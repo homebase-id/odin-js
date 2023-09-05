@@ -11,7 +11,7 @@ export const CompanyImage = ({
   className?: string;
   fallbackSize?: 'xs' | 'md';
 }) => {
-  const [hasFavicon, setHasFavicon] = useState<boolean>(true);
+  const [hasFailed, setHasFailed] = useState<boolean>(false);
   const initials = useMemo(() => getTwoLettersFromDomain(domain), [domain]);
 
   const bgClass = 'bg-white dark:bg-black';
@@ -23,15 +23,18 @@ export const CompanyImage = ({
         size={fallbackSize}
         className={'absolute inset-0 flex aspect-square w-full'}
       />
-      <picture className={`relative z-10 ${!hasFavicon ? 'opacity-0' : ''}`}>
-        <source srcSet={`https://${domain}/pub/image`} />
-        <img
-          src={`https://${domain}/favicon.ico`}
-          className={`m-auto h-full w-full object-scale-down object-center ${bgClass}`}
-          alt={domain}
-          onError={() => setHasFavicon(false)}
-        />
-      </picture>
+      {/* On failed we fully hide the picture element, only visually hiding it, stays on top for safari...  */}
+      {!hasFailed ? (
+        <picture className={`relative z-10`}>
+          <source srcSet={`https://${domain}/pub/image`} />
+          <img
+            src={`https://${domain}/favicon.ico`}
+            className={`m-auto h-full w-full object-scale-down object-center ${bgClass}`}
+            alt={domain}
+            onError={() => setHasFailed(true)}
+          />
+        </picture>
+      ) : null}
     </div>
   );
 };
