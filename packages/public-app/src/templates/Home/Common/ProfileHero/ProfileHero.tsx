@@ -26,18 +26,19 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
             fit="cover"
           />
           {showProfileImage ? (
-            <a onClick={() => setIsImageLightboxOpen(true)} className="cursor-pointer">
-              <div className="container absolute bottom-0 left-0 right-0 top-0 mx-auto flex justify-center px-5 md:block">
-                <div className="absolute bottom-[-4.5rem] h-60 w-60 overflow-hidden rounded-full border-4 border-page-background bg-background md:bottom-[-7.5rem]">
-                  <Image
-                    fileId={owner?.profileImageId}
-                    targetDrive={targetDrive}
-                    className="h-full w-full"
-                    fit="cover"
-                  />
-                </div>
-              </div>
-            </a>
+            <div className="container absolute bottom-0 left-0 right-0 top-0 mx-auto flex justify-center px-5 md:block">
+              <a
+                onClick={() => setIsImageLightboxOpen(true)}
+                className="absolute bottom-[-4.5rem] block h-60 w-60 cursor-pointer overflow-hidden rounded-full border-4 border-page-background bg-background md:bottom-[-7.5rem]"
+              >
+                <Image
+                  fileId={owner?.profileImageId}
+                  targetDrive={targetDrive}
+                  className="h-full w-full"
+                  fit="cover"
+                />
+              </a>
+            </div>
           ) : null}
         </div>
         {/* min height of 8.5 rem to ensure sufficient spacing after the hero picture to support the offset of the profile picture*/}
