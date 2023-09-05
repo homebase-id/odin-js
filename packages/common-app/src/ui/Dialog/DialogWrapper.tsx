@@ -24,6 +24,20 @@ export const DialogWrapper = ({
   useOutsideTrigger(wrapperRef, () => !keepOpenOnBlur && onClose && onClose());
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onClose) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        !keepOpenOnBlur && onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  useEffect(() => {
     document.documentElement.classList.add('overflow-hidden');
     return () => {
       document.documentElement.classList.remove('overflow-hidden');
