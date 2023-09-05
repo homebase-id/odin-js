@@ -75,7 +75,7 @@ const YouAuthConsent = () => {
                 <ServiceDetails targetDomain={targetDomain} />
               )}
 
-              <div className="my-auto flex flex-col font-normal text-gray-600 dark:text-gray-300">
+              <div className="my-auto mt-5 flex flex-col font-normal text-gray-600 dark:text-gray-300">
                 <Label htmlFor="duration">
                   {t('Auto-approve login requests from')} {name || targetDomain}
                 </Label>
