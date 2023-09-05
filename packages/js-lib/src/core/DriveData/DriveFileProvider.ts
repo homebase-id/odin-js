@@ -23,11 +23,6 @@ interface GetFileRequest {
   fileId: string;
 }
 
-interface GetPayloadRequest extends GetFileRequest {
-  chunkStart?: number;
-  chunkLength?: number;
-}
-
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
 
 /// Get methods:
@@ -123,35 +118,40 @@ export const getPayloadBytes = async (
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     },
   });
-  const request: GetPayloadRequest = {
+  const request: GetFileRequest = {
     ...targetDrive,
     fileId,
   };
 
-  let startOffset = 0;
-  if (chunkStart !== undefined) {
-    request.chunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
-    startOffset = Math.abs(chunkStart - request.chunkStart);
-    if (chunkEnd !== undefined)
-      request.chunkLength = roundToLargerMultipleOf16(chunkEnd - chunkStart + 1 + startOffset);
-  }
-
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
   };
+
+  let startOffset = 0;
+  let updatedChunkEnd: number | undefined, updatedChunkStart: number | undefined;
+  if (chunkStart !== undefined) {
+    updatedChunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
+    startOffset = Math.abs(chunkStart - updatedChunkStart);
+    updatedChunkEnd = chunkEnd !== undefined ? roundToLargerMultipleOf16(chunkEnd) : undefined;
+
+    config.headers = {
+      ...config.headers,
+      range: `bytes=${updatedChunkStart}-${updatedChunkEnd || ''}`,
+    };
+  }
 
   return client
     .get<ArrayBuffer>('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
       return {
         bytes:
-          request.chunkStart !== undefined
+          updatedChunkStart !== undefined
             ? (
                 await decryptChunkedBytesResponse(
                   dotYouClient,
                   response,
                   startOffset,
-                  request.chunkStart
+                  updatedChunkStart
                 )
               ).slice(
                 0,
