@@ -2,7 +2,7 @@
 
 [![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
 
-This repo contains the various apps and libraries that are maintaned by Odin. The libraries can be easily consumed by other app developers that want to work with a Odin Identity backend.
+This repo contains the various apps and libraries that are maintaned by Homebase. The libraries can be easily consumed by other app developers that want to work with a Homebase Identity backend.
 
 ## Apps
 
@@ -10,17 +10,17 @@ The apps are setup indepentently, and can use the first party common app library
 
 ### Local development
 
-Before you can use the actual apps, you need to install and build the depencies:  
-  
-```npm install && npm run build-libs```
+Before you can use the actual apps, you need to install and build the depencies:
 
-After that you can build the apps  
-  
-```npm run build -w ./packages/{public/owner}-app```
+`npm install && npm run build-libs`
 
-or run them locally  
-  
-```npm run start -w ./packages/{public/owner}-app```
+After that you can build the apps
+
+`npm run build -w ./packages/{public/owner}-app`
+
+or run them locally
+
+`npm run start -w ./packages/{public/owner}-app`
 
 ## Libraries
 

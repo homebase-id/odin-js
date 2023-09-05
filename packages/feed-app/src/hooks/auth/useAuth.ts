@@ -6,15 +6,15 @@ import useVerifyToken from './useVerifyToken';
 import {
   logout as logoutYouauth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
-  APP_AUTH_TOKEN,
-  APP_SHARED_SECRET,
   getRegistrationParams,
   preAuth as preauthApps,
   retrieveIdentity,
-  createPair,
-  saveKey,
-  retrieveKey,
-  throwAwayTheKey,
+  saveIdentity,
+  createEccPair,
+  YouAuthorizationParams,
+  saveEccKey,
+  retrieveEccKey,
+  throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 
 export const drives = [
@@ -29,6 +29,9 @@ export const drives = [
 export const appName = 'Odin - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
 
+export const APP_SHARED_SECRET = 'APSS';
+export const APP_AUTH_TOKEN = 'BX0900';
+
 const hasSharedSecret = () => {
   const raw = window.localStorage.getItem(APP_SHARED_SECRET);
   return !!raw;
@@ -40,37 +43,11 @@ const useAuth = () => {
   >(hasSharedSecret() ? 'unknown' : 'anonymous');
   const navigate = useNavigate();
 
-  const finalizeAuthentication = async (
-    registrationData: string | null,
-    v: string | null,
-    identity: string | null
-  ) => {
-    if (!registrationData || !v) {
-      console.error('Missing data');
-      return false;
-    }
-    const privateKey = await retrieveKey();
-    if (!privateKey) {
-      console.error('Missing key');
-      return false;
-    }
-
-    try {
-      await finalizeAuthenticationYouAuth(registrationData, v, identity, privateKey);
-
-      // Remove key
-      throwAwayTheKey();
-    } catch (ex) {
-      console.error(ex);
-      return false;
-    }
-
-    return true;
-  };
-
   const logout = async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
 
+    localStorage.removeItem(APP_SHARED_SECRET);
+    localStorage.removeItem(APP_AUTH_TOKEN);
     setAuthenticationState('anonymous');
 
     navigate('/');
@@ -78,19 +55,19 @@ const useAuth = () => {
   };
 
   const preauth = async (): Promise<void> => {
-    await preauthApps();
+    await preauthApps(getDotYouClient());
   };
+
+  const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
 
   const getSharedSecret = () => {
     const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-    if (raw) {
-      return base64ToUint8Array(raw);
-    }
+    if (raw) return base64ToUint8Array(raw);
   };
 
   const getDotYouClient = () => {
     const headers: Record<string, string> = {};
-    const authToken = window.localStorage.getItem(APP_AUTH_TOKEN);
+    const authToken = getAppAuthToken();
     if (authToken) {
       headers['bx0900'] = authToken;
     }
@@ -122,24 +99,6 @@ const useAuth = () => {
   }, [hasValidToken]);
 
   return {
-    getRegistrationParams: async (returnUrl: string) => {
-      const key = await createPair();
-      if (!key) throw new Error('Failed to retrieve key');
-
-      // Persist key for usage on finalize
-      await saveKey(key);
-
-      // Get params with publicKey embedded
-      return await getRegistrationParams(
-        `${window.location.origin}/auth/finalize?returnUrl=${encodeURIComponent(returnUrl)}`,
-        appName,
-        appId,
-        drives,
-        key.publicKey,
-        window.location.host
-      );
-    },
-    finalizeAuthentication,
     logout,
     preauth,
     getDotYouClient,
@@ -147,6 +106,54 @@ const useAuth = () => {
     getIdentity: retrieveIdentity,
     isAuthenticated: authenticationState !== 'anonymous',
   };
+};
+
+export const useYouAuthAuthorization = () => {
+  const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
+    const eccKey = await createEccPair();
+
+    // Persist key for usage on finalize
+    await saveEccKey(eccKey);
+
+    const finalizeUrl = `${window.location.origin}/auth/finalize`;
+    return getRegistrationParams(
+      finalizeUrl,
+      appName,
+      appId,
+      drives,
+      eccKey.publicKey,
+      window.location.host,
+      undefined,
+      returnUrl
+    );
+  };
+
+  const finalizeAuthorization = async (identity: string, publicKey: string, salt: string) => {
+    try {
+      const privateKey = await retrieveEccKey();
+      if (!privateKey) throw new Error('Failed to retrieve key');
+
+      const { clientAuthToken, sharedSecret } = await finalizeAuthenticationYouAuth(
+        identity,
+        privateKey,
+        publicKey,
+        salt
+      );
+
+      if (identity) saveIdentity(identity);
+      localStorage.setItem(APP_SHARED_SECRET, sharedSecret);
+      localStorage.setItem(APP_AUTH_TOKEN, clientAuthToken);
+
+      throwAwayTheECCKey();
+    } catch (ex) {
+      console.error(ex);
+      return false;
+    }
+
+    return true;
+  };
+
+  return { getAuthorizationParameters, finalizeAuthorization };
 };
 
 export default useAuth;

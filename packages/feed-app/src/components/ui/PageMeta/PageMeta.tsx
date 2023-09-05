@@ -54,7 +54,7 @@ export const PageMeta = ({
                   {browserTitle ||
                     (typeof title !== 'object' && `${title}`) ||
                     window.location.pathname.split('/').pop()}{' '}
-                  | Odin
+                  | Homebase
                 </title>
               </Helmet>
             </>

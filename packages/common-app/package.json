@@ -2,7 +2,7 @@
   "name": "@youfoundation/common-app",
   "version": "0.1.0",
   "author": "YouFoundation",
-  "description": "Common things for the odin apps",
+  "description": "Common things for the Homebase apps",
   "files": [
     "src"
   ],

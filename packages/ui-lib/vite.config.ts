@@ -11,8 +11,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'odin-ui',
-      fileName: `odin-ui`,
+      name: 'homebase-ui',
+      fileName: `homebase-ui`,
     },
     rollupOptions: {
       external: ['@tanstack/react-query', 'react'],

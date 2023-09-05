@@ -41,7 +41,7 @@ export const SocialFeed = () => {
   return (
     <>
       <Helmet>
-        <title>{t('Feed')} | Odin</title>
+        <title>{t('Feed')} | Homebase</title>
       </Helmet>
       <PageMeta title={t('Feed')} icon={Feed} />
       {identityKey && channelKey && postKey ? (

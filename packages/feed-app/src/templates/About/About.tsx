@@ -18,7 +18,7 @@ const About = () => {
         <div className="absolute inset-0 flex flex-col">
           <div className="flex flex-row items-center border-b px-5 py-3">
             <Logo className="my-auto mr-2 h-10 w-10" />{' '}
-            <h1 className="mr-auto text-2xl">Odin Photos</h1>
+            <h1 className="mr-auto text-2xl">Homebase Photos</h1>
             <LoginNav />
           </div>
           <div className="h-full grid-rows-2 p-5">
@@ -60,7 +60,7 @@ const About = () => {
           <h2 className="mb-5 text-center text-5xl">{t('Keep your socials yours')}</h2>
           <div className="flex justify-center">
             <ActionLink href="/auth" className="w-auto">
-              {t('Go to Odin Feed')}
+              {t('Go to Homebase Feed')}
             </ActionLink>
           </div>
         </div>

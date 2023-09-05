@@ -7,19 +7,19 @@
     "dist"
   ],
   "type": "module",
-  "module": "./dist/odin-ui.js",
-  "main": "./dist/odin-ui.umd.cjs",
+  "module": "./dist/homebase-ui.js",
+  "main": "./dist/homebase-ui.umd.cjs",
   "exports": {
     ".": {
-      "import": "./dist/odin-ui.js",
-      "require": "./dist/odin-ui.umd.cjs"
+      "import": "./dist/homebase-ui.js",
+      "require": "./dist/homebase-ui.umd.cjs"
     },
     "./dist/style.css": {
       "import": "./dist/style.css",
       "require": "./dist/style.css"
     }
   },
-  "types": "./dist/odin-ui.d.ts",
+  "types": "./dist/homebase-ui.d.ts",
   "sideEffects": false,
   "scripts": {
     "start": "vite build --watch",
