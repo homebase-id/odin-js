@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 
 interface EmojiPickerElement extends HTMLElement {
   skinToneEmoji: string;
+  dataSource: string;
 }
 
 interface EmojiDetail {
@@ -21,24 +22,25 @@ export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
   useEffect(() => {
-    if (ref.current) {
-      const handler: EventListener = (event) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const emojiDetail = (event as any as EmojiEvent).detail.emoji;
-        onInput(emojiDetail);
-      };
+    if (!ref.current) return;
 
-      ref.current.addEventListener('emoji-click', handler);
-      ref.current.skinToneEmoji = '👍';
+    const handler: EventListener = (event) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const emojiDetail = (event as any as EmojiEvent).detail.emoji;
+      onInput(emojiDetail);
+    };
 
-      const style = document.createElement('style');
-      style.textContent = `.favorites{display:none}`;
-      ref.current?.shadowRoot?.appendChild(style);
+    ref.current.addEventListener('emoji-click', handler);
+    ref.current.skinToneEmoji = '👍';
+    ref.current.dataSource = '/emoji-data.json';
 
-      return () => {
-        ref.current?.removeEventListener('emoji-click', handler);
-      };
-    }
+    const style = document.createElement('style');
+    style.textContent = `.favorites{display:none}`;
+    ref.current?.shadowRoot?.appendChild(style);
+
+    return () => {
+      ref.current?.removeEventListener('emoji-click', handler);
+    };
   }, []);
 
   return React.createElement('emoji-picker', {
