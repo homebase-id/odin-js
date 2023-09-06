@@ -5,6 +5,7 @@ import { isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
 export enum ApiType {
   Owner,
   App,
+  // Guest,
   YouAuth,
 }
 
@@ -59,6 +60,10 @@ export class BaseDotYouClient {
       case ApiType.App:
         endpoint = '/api/apps/v1';
         break;
+
+      // case ApiType.Guest:
+      //   endpoint = '/api/guest/v1';
+      //   break;
 
       case ApiType.YouAuth:
         endpoint = '/api/youauth/v1';

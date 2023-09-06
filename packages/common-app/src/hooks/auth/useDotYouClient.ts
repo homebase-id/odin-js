@@ -29,7 +29,7 @@ export const useDotYouClient = () => {
     if (_app === 'apps') return ApiType.App;
 
     if (_isOwner) return ApiType.Owner;
-    return ApiType.YouAuth;
+    return ApiType.Guest;
   };
 
   const getRawSharedSecret = () =>
@@ -54,13 +54,13 @@ export const useDotYouClient = () => {
 
   const getDotYouClient = () => {
     // When running in an iframe, use the public YouAuth Api;
-    if (window.self !== window.top) return new DotYouClient({ api: ApiType.YouAuth });
+    if (window.self !== window.top) return new DotYouClient({ api: ApiType.Guest });
 
     const apiType = getApiType();
 
     if (apiType === ApiType.Owner)
       return new OwnerClient({ api: apiType, sharedSecret: getSharedSecret() });
-    else if (apiType === ApiType.YouAuth)
+    else if (apiType === ApiType.Guest)
       return new DotYouClient({
         api: apiType,
         sharedSecret: getSharedSecret(),
