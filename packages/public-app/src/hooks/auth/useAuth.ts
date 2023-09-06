@@ -111,7 +111,7 @@ export const useYouAuthAuthorization = () => {
       public_key: pk,
       permission_request: '',
       state: JSON.stringify(state),
-      redirect_uri: `https://${window.location.hostname}/api/youauth/v1/auth/auth-code-callback`,
+      redirect_uri: `https://${window.location.hostname}/api/guest/v1/builtin/home/auth/auth-code-callback`,
     };
   };
 

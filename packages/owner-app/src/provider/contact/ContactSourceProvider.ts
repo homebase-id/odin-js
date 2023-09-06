@@ -150,7 +150,7 @@ export const fetchDataFromPublic = async (
   odinId: string,
   loadPicture: boolean
 ): Promise<RawContact | undefined> => {
-  const client = new DotYouClient({ api: ApiType.YouAuth, identity: odinId });
+  const client = new DotYouClient({ api: ApiType.Guest, identity: odinId });
   const rawData = await GetFile(client, 'public.json');
 
   const nameAttr = rawData?.get('name')?.[0];
@@ -204,7 +204,7 @@ export const fetchDataFromPublic = async (
 };
 
 export const getPhotoDataFromPublic = async (odinId: string, imageFileId: string) => {
-  const client = new DotYouClient({ api: ApiType.YouAuth, identity: odinId });
+  const client = new DotYouClient({ api: ApiType.Guest, identity: odinId });
   const rawData = await GetFile(client, 'public.json');
 
   const photoData = rawData?.get(imageFileId)?.[0];

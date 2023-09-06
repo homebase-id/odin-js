@@ -5,7 +5,8 @@ import { isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
 export enum ApiType {
   Owner,
   App,
-  YouAuth,
+  Guest,
+  // YouAuth,
 }
 
 export interface BaseProviderOptions {
@@ -60,9 +61,13 @@ export class BaseDotYouClient {
         endpoint = '/api/apps/v1';
         break;
 
-      case ApiType.YouAuth:
-        endpoint = '/api/youauth/v1';
+      case ApiType.Guest:
+        endpoint = '/api/guest/v1';
         break;
+
+      // case ApiType.YouAuth:
+      //   endpoint = '/api/youauth/v1';
+      //   break;
     }
 
     return this.getRoot() + endpoint;
@@ -144,7 +149,7 @@ export class BaseDotYouClient {
 }
 
 export interface ProviderOptions extends BaseProviderOptions {
-  api: ApiType.App | ApiType.YouAuth;
+  api: ApiType.App | ApiType.Guest;
 }
 
 export class DotYouClient extends BaseDotYouClient {
