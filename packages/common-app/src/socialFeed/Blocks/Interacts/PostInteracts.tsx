@@ -26,6 +26,7 @@ import { LikeButton } from './Reactions/LikeButton';
 import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
+import { ShareDialog } from './ShareDialog/ShareDialog';
 
 export const PostInteracts = ({
   authorOdinId,
@@ -97,7 +98,7 @@ export const PostInteracts = ({
           className="ml-2"
         />
         <div className="ml-auto flex flex-row items-center gap-2 font-semibold">
-          {isPublic ? <ShareButton permalink={permalink} /> : null}
+          {isPublic ? <ShareButton permalink={permalink} title={postFile.content.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
           <button
             className={`inline-flex items-center hover:text-black dark:hover:text-white ${
@@ -140,21 +141,28 @@ export const PostInteracts = ({
   );
 };
 
-export const ShareButton = ({ permalink }: { permalink: string }) => {
-  if (!navigator.share) return null;
+export const ShareButton = ({ permalink, title }: { permalink: string; title?: string }) => {
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  // if (!navigator.share) return null;
 
   return (
-    <button
-      className="inline-flex items-center hover:text-black dark:hover:text-white"
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigator.share({ url: permalink });
-      }}
-    >
-      <Share className="inline-block h-6 w-6" />
-      <span className="sr-only">{t('Share')}</span>
-    </button>
+    <>
+      <button
+        className="inline-flex items-center hover:text-black dark:hover:text-white"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (navigator.share) navigator.share({ url: permalink });
+          else setShowShareDialog(true);
+        }}
+      >
+        <Share className="inline-block h-6 w-6" />
+        <span className="sr-only">{t('Share')}</span>
+      </button>
+      {showShareDialog ? (
+        <ShareDialog onClose={() => setShowShareDialog(false)} href={permalink} title={title} />
+      ) : null}
+    </>
   );
 };
 
