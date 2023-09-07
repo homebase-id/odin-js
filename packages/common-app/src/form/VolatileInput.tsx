@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { lazy, useEffect, useRef, useState } from 'react';
 import { getRichTextFromString, useDebounce } from '../..';
+const EmojiDropdown = lazy(() => import('./VolatileInput/EmojiDropdown'));
 import {
+  SelectionData,
   getAbsoluteOffsetToParent,
   getRelativeOffset,
   restoreSelection,
@@ -14,6 +16,7 @@ export const VolatileInput = ({
   placeholder,
   onChange,
   linksArePlain,
+  supportEmojiShortcut,
 }: {
   onSubmit: (val: string) => void;
   onPaste?: React.ClipboardEventHandler<HTMLDivElement>;
@@ -21,7 +24,10 @@ export const VolatileInput = ({
   placeholder?: string;
   onChange?: (val: string) => void;
   linksArePlain?: boolean;
+  supportEmojiShortcut?: boolean;
 }) => {
+  const [emojiQuery, setEmojiQuery] = useState<string>();
+
   const divRef = useRef<HTMLDivElement>(null);
   // Custom on paste handler, to only take plain text, as the input is a span, anything is allowed by default by the browser...
   const onPasteHandler: React.ClipboardEventHandler<HTMLDivElement> = (event) => {
@@ -45,6 +51,45 @@ export const VolatileInput = ({
     onChange && onChange(divRef.current?.innerText || '');
   };
 
+  const saveCaretPosition = () => {
+    if (!divRef.current) return { activeSelection: undefined, absoluteOffset: undefined };
+    const activeSelection = saveSelection();
+    const absoluteOffset = activeSelection
+      ? getAbsoluteOffsetToParent(activeSelection?.[2], activeSelection[3], divRef.current)
+      : undefined;
+
+    return { activeSelection, absoluteOffset };
+  };
+
+  const restoreCaretPosition = (
+    {
+      activeSelection,
+      absoluteOffset,
+    }: {
+      activeSelection?: SelectionData;
+      absoluteOffset?: number;
+    },
+    offset?: number
+  ) => {
+    if (!activeSelection) return;
+    if (!absoluteOffset || !divRef.current) {
+      restoreSelection(activeSelection);
+      return;
+    }
+
+    const relativeOffset = getRelativeOffset(absoluteOffset, divRef.current);
+
+    if (relativeOffset) {
+      relativeOffset.offset += offset || 0;
+      restoreSelection([
+        relativeOffset.node,
+        relativeOffset.offset,
+        relativeOffset.node,
+        relativeOffset.offset,
+      ]);
+    }
+  };
+
   const wrapLinks = () => {
     const textContents = divRef.current?.innerText;
     if (!textContents) return;
@@ -58,38 +103,23 @@ export const VolatileInput = ({
     setTimeout(() => {
       if (!divRef.current) return;
 
-      const activeSelection = saveSelection();
-      // console.log({ activeSelection });
-      const absoluteOffset = activeSelection
-        ? getAbsoluteOffsetToParent(activeSelection?.[2], activeSelection[3], divRef.current)
-        : undefined;
-      // console.log({ absoluteOffset });
-
+      const caretPos = saveCaretPosition();
       divRef.current.innerHTML = innerHtml?.join('') + '<span></span>';
-
-      if (!activeSelection) return;
-      if (!absoluteOffset) {
-        restoreSelection(activeSelection);
-        return;
-      }
-
-      const relativeOffset = getRelativeOffset(absoluteOffset, divRef.current);
-
-      if (relativeOffset) {
-        restoreSelection([
-          relativeOffset.node,
-          relativeOffset.offset,
-          relativeOffset.node,
-          relativeOffset.offset,
-        ]);
-      }
+      restoreCaretPosition(caretPos);
     }, 100);
   };
 
   useEffect(() => {
     if (divRef?.current) {
       if (divRef.current.innerText !== defaultValue) {
+        const caretPos = saveCaretPosition();
+
         divRef.current.innerText = defaultValue || '';
+
+        restoreCaretPosition(
+          caretPos
+          // supportEmojiShortcut && emojiQuery ? -(emojiQuery.length + 1) : undefined
+        );
       }
     }
   }, [defaultValue]);
@@ -97,27 +127,70 @@ export const VolatileInput = ({
   // We want values to be saved directly, while the link styling is better with a debounce
   const onInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     if (onChange) onChange((e.target as HTMLElement).innerText);
+    // if(supportEmojiShortcut) toggleEmojiPicker();
     if (!linksArePlain) debouncedLinkStyle();
+  };
+
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !emojiQuery) {
+      e.preventDefault();
+      onSubmit(e.currentTarget.innerText);
+    }
+  };
+
+  const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    const wordTillCaret = getEmojiQuery();
+
+    if (wordTillCaret && wordTillCaret.startsWith(':') && wordTillCaret.length > 1) {
+      setEmojiQuery(wordTillCaret.slice(1));
+    } else {
+      setEmojiQuery(undefined);
+    }
+  };
+
+  const getEmojiQuery = () => {
+    if (!divRef.current) return;
+    const caretPositition = saveSelection();
+    if (!caretPositition) return;
+    const textContent = caretPositition[0].textContent;
+    if (!textContent) return;
+    const textTillCaret = textContent.slice(0, caretPositition[1]);
+    const lastPreceedingSpace = textTillCaret.lastIndexOf(' ');
+    return textContent
+      .slice(lastPreceedingSpace === -1 ? 0 : lastPreceedingSpace, caretPositition[1])
+      .trim();
   };
 
   const doLinkStyle = () => wrapLinks();
   const debouncedLinkStyle = useDebounce(doLinkStyle, { timeoutMillis: 500 });
 
+  const selection = supportEmojiShortcut && window.getSelection(),
+    range = selection && selection.rangeCount ? selection.getRangeAt(0) : undefined,
+    rect = range?.getClientRects()?.[0];
+
   return (
-    <div
-      role="textbox"
-      contentEditable
-      className="before:content block w-full cursor-pointer resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          onSubmit(e.currentTarget.innerText);
-        }
-      }}
-      onPaste={onPasteHandler}
-      onInput={onInput}
-      ref={divRef}
-      style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
-    ></div>
+    <div className="relative block w-full">
+      <div
+        role="textbox"
+        contentEditable
+        className="before:content block w-full cursor-pointer resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
+        onKeyDown={onKeyDown}
+        onKeyUp={onKeyUp}
+        onPaste={onPasteHandler}
+        onInput={onInput}
+        ref={divRef}
+        style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
+      ></div>
+      {supportEmojiShortcut ? (
+        <EmojiDropdown
+          query={emojiQuery}
+          onInput={(emoji) => {
+            if (onChange && emoji)
+              onChange(`${divRef.current?.innerText.replace(`:${emojiQuery}`, emoji) || ''}`);
+          }}
+          position={rect}
+        />
+      ) : null}
+    </div>
   );
 };

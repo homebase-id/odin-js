@@ -112,6 +112,7 @@ export const CommentEditor = ({
             }
           }}
           onChange={(val) => setBody(val)}
+          supportEmojiShortcut={true}
         />
         <div className="flex flex-shrink-0 flex-row items-center ">
           <EmojiSelector
