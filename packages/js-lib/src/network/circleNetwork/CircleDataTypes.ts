@@ -46,13 +46,16 @@ export interface ConnectionInfo {
   originalContactData?: ContactData;
 }
 
-export interface ConnectionRequest {
+export interface RedactedConnectionRequest {
+  senderOdinId: string;
+  receivedTimestampMilliseconds: number;
+}
+
+export interface ConnectionRequest extends RedactedConnectionRequest {
   id: string;
   status: 'pending' | 'sent';
   recipient: string;
   message: string;
-  senderOdinId: string;
-  receivedTimestampMilliseconds: number;
   contactData?: ContactData;
 }
 

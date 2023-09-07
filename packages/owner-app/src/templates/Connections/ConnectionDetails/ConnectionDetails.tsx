@@ -239,7 +239,6 @@ const ConnectionDetails = () => {
             onCancel={() => {
               setIsAcceptDialogOpen(false);
             }}
-            pendingConnection={connectionInfo}
           />
         </>
       ) : null}

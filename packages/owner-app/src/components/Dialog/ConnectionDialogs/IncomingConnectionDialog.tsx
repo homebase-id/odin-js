@@ -17,9 +17,7 @@ import { ConnectionRequest } from '@youfoundation/js-lib/network';
 
 const IncomingConnectionDialog = ({
   confirmText,
-
   senderOdinId,
-  pendingConnection,
 
   isOpen,
 
@@ -27,9 +25,7 @@ const IncomingConnectionDialog = ({
   onCancel,
 }: {
   confirmText?: string;
-
   senderOdinId: string;
-  pendingConnection: ConnectionRequest;
 
   isOpen: boolean;
 
@@ -38,13 +34,16 @@ const IncomingConnectionDialog = ({
 }) => {
   const target = usePortal('modal-container');
 
+  // We fetch the connection info here
   const {
-    mutateAsync: acceptPending,
-    status: acceptPendingStatus,
-    error: acceptError,
-  } = useConnection({}).acceptRequest;
-  const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
+    fetch: { data: connectionInfo },
+    acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus, error: acceptError },
+  } = useConnection({ odinId: senderOdinId });
 
+  const pendingConnection: ConnectionRequest | undefined =
+    connectionInfo?.status === 'pending' ? connectionInfo : undefined;
+
+  const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
   const { data: uiSettings } = useSettings().fetchUiSettings;
 
   const checkReturnTo = useFocusedEditing();
@@ -94,8 +93,8 @@ const IncomingConnectionDialog = ({
                   />
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
-                  <p>{pendingConnection.message}</p>
-                  <p className="mt-2">-- {pendingConnection.contactData?.name}</p>
+                  <p>{pendingConnection?.message}</p>
+                  <p className="mt-2">-- {pendingConnection?.contactData?.name}</p>
                 </div>
               </div>
             </div>

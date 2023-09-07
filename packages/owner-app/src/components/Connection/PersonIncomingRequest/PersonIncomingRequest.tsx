@@ -7,16 +7,13 @@ import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import PersonCard from '../PersonCard/PersonCard';
-import { ConnectionRequest } from '@youfoundation/js-lib/network';
 
 const PersonIncomingRequest = ({
   senderOdinId,
-  pendingConnection,
   children,
   className,
 }: {
   senderOdinId: string;
-  pendingConnection: ConnectionRequest;
   children?: ReactNode;
   className: string;
 }) => {
@@ -82,7 +79,6 @@ const PersonIncomingRequest = ({
         onCancel={() => {
           setIsAcceptDialogOpen(false);
         }}
-        pendingConnection={pendingConnection}
       />
     </>
   );

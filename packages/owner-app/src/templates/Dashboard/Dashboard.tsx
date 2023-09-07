@@ -101,12 +101,7 @@ const Dashboard = () => {
                 className="w-full p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
                 senderOdinId={pendingConnection.senderOdinId}
                 key={pendingConnection.senderOdinId}
-                pendingConnection={pendingConnection}
-              >
-                <div className="-mt-3">
-                  <p className="mb-3 text-sm">{pendingConnection.message}</p>
-                </div>
-              </PersonIncomingRequest>
+              />
             ))}
           </div>
         </Section>

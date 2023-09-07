@@ -3,6 +3,7 @@
   ConnectionRequest,
   ConnectionRequestHeader,
   OdinIdRequest,
+  RedactedConnectionRequest,
 } from './CircleDataTypes';
 import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
@@ -16,12 +17,12 @@ const PendingPathRoot: string = Root + '/pending';
 export const getPendingRequests = async (
   dotYouClient: DotYouClient,
   params: PagingOptions
-): Promise<PagedResult<ConnectionRequest> | undefined> => {
+): Promise<PagedResult<RedactedConnectionRequest> | undefined> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/list?' + stringify(params as unknown as Record<string, unknown>);
 
   return client
-    .get<PagedResult<ConnectionRequest>>(url)
+    .get<PagedResult<RedactedConnectionRequest>>(url)
     .then((response) => {
       return response.data;
     })

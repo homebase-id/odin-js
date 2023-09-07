@@ -11,7 +11,6 @@ import PersonActive from '../../../components/Connection/PersonActive/PersonActi
 import { DotYouProfile } from '@youfoundation/js-lib/network';
 import { useActiveConnections } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import Submenu from '../../../components/SubMenu/SubMenu';
 
 const Connections = () => {
   const [hasActiveConnections, setActiveConnections] = useState(true);
@@ -115,12 +114,7 @@ const PendingConnectionSection = ({
             className="w-full p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 2xl:w-1/6"
             senderOdinId={pendingConnection.senderOdinId}
             key={pendingConnection.senderOdinId}
-            pendingConnection={pendingConnection}
-          >
-            <div className="-mt-3">
-              <p className="mb-3 text-sm">{pendingConnection.message}</p>
-            </div>
-          </PersonIncomingRequest>
+          />
         ))}
       </div>
     </>
