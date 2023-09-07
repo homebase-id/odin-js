@@ -117,9 +117,10 @@ export const VolatileInput = ({
         divRef.current.innerText = defaultValue || '';
 
         restoreCaretPosition(
-          caretPos
-          // supportEmojiShortcut && emojiQuery ? -(emojiQuery.length + 1) : undefined
+          caretPos,
+          supportEmojiShortcut && emojiQuery ? -(emojiQuery.length + 1) : undefined
         );
+        if (supportEmojiShortcut && emojiQuery) setEmojiQuery(undefined);
       }
     }
   }, [defaultValue]);

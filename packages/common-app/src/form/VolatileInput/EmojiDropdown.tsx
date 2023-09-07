@@ -66,9 +66,15 @@ const EmojiDropdown = ({
         {emojis?.slice(0, 5)?.map((emoji, index) => (
           <li
             key={emoji.unicode}
-            className={`flex flex-row gap-2 px-2 ${
-              index === activeIndex ? 'bg-indigo-200 dark:bg-indigo-800' : ''
+            className={`flex cursor-pointer flex-row gap-2 px-2 transition-colors ${
+              index === activeIndex
+                ? 'bg-indigo-200 dark:bg-indigo-800'
+                : 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
             }`}
+            onClick={() => {
+              onInput(emoji.unicode);
+              setEmojis([]);
+            }}
           >
             <span>{emoji.unicode}</span>
             <span>:{emoji.shortcodes?.[0]}:</span>

@@ -61,11 +61,7 @@ export const getAbsoluteOffsetToParent = (
     if (parentNode === elem.parentNode || !elem.parentNode) {
       return getTextLengthFromPreviousSiblings(elem);
     } else {
-      // console.log({ elem });
-      console.error(
-        'How did you get that? Too complex structure at the moment, keeping your caret is not implemented',
-        elem
-      );
+      // 'How did you get that? Way too complex structure, not supported',
       return 0;
       // return getAbsoluteOffsetToParent(elem.parentNode, currentOffset, parentNode);
     }
