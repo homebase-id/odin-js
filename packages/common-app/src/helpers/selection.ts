@@ -22,9 +22,13 @@ export const saveSelection = (): SelectionData | undefined => {
 };
 
 export const restoreSelection = (saved: SelectionData) => {
-  const selection = window.getSelection();
-  if (selection) {
-    selection.setBaseAndExtent(saved[0], saved[1], saved[2], saved[3]);
+  try {
+    const selection = window.getSelection();
+    if (selection) {
+      selection.setBaseAndExtent(saved[0], saved[1], saved[2], saved[3]);
+    }
+  } catch (e) {
+    // Fail silently
   }
 };
 

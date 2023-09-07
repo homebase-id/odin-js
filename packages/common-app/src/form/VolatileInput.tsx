@@ -81,11 +81,12 @@ export const VolatileInput = ({
 
     if (relativeOffset) {
       relativeOffset.offset += offset || 0;
+
       restoreSelection([
         relativeOffset.node,
-        relativeOffset.offset,
+        Math.max(0, relativeOffset.offset),
         relativeOffset.node,
-        relativeOffset.offset,
+        Math.max(0, relativeOffset.offset),
       ]);
     }
   };
@@ -118,7 +119,7 @@ export const VolatileInput = ({
 
         restoreCaretPosition(
           caretPos,
-          supportEmojiShortcut && emojiQuery ? -(emojiQuery.length + 1) : undefined
+          supportEmojiShortcut && emojiQuery ? -emojiQuery.length : undefined
         );
         if (supportEmojiShortcut && emojiQuery) setEmojiQuery(undefined);
       }
