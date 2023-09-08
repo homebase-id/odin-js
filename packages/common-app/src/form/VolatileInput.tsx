@@ -113,10 +113,7 @@ export const VolatileInput = ({
     if (!divRef?.current) return;
     if (divRef.current.innerText === defaultValue) return;
 
-    console.log(divRef.current.innerText);
-
     const caretPos = saveCaretPosition();
-    console.log({ absoluteOffset: caretPos.absoluteOffset });
 
     divRef.current.innerText = defaultValue || '';
 
@@ -165,7 +162,7 @@ export const VolatileInput = ({
   };
 
   const doLinkStyle = () => wrapLinks();
-  const debouncedLinkStyle = useDebounce(doLinkStyle, { timeoutMillis: 500 });
+  const debouncedLinkStyle = useDebounce(doLinkStyle, { timeoutMillis: 1000 });
 
   const selection = supportEmojiShortcut && window.getSelection(),
     range = selection && selection.rangeCount ? selection.getRangeAt(0) : undefined,
