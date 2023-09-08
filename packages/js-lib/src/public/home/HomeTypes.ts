@@ -36,5 +36,9 @@ export class HomePageFields {
 
 export class HomePageThemeFields {
   static readonly ThemeId: string = 'themeId';
+  static readonly Favicon: string = 'favicon';
+  static readonly Colors: string = 'colors';
+  static readonly Tabs: string = 'tabs';
+  static readonly TabsOrder: string = 'tabsOrder';
   static readonly UseDarkMode: string = 'useDarkMode';
 }

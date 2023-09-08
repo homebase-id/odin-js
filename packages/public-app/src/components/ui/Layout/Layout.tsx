@@ -1,7 +1,14 @@
-import { FC, ReactNode, Suspense, lazy } from 'react';
+import { FC, ReactNode, Suspense, lazy, useEffect } from 'react';
 import useTheme from '../../../hooks/theme/useTheme';
 import useAuth from '../../../hooks/auth/useAuth';
 import { ScrollRestoration } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { useImage } from '@youfoundation/common-app';
+import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { HomePageConfig } from '@youfoundation/js-lib/public';
+
+const faviconSvg = (emoji: string) =>
+  `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${emoji}</text></svg>`;
 
 const Sidenav = lazy(() =>
   import('@youfoundation/common-app').then((commonApp) => ({ default: commonApp.Sidenav }))
@@ -30,7 +37,16 @@ const Layout: FC<LayoutProps> = ({ children }) => {
 };
 
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
-  const { colors } = useTheme();
+  const { colors, favicon } = useTheme();
+  const { data: imageData } = useImage(
+    undefined,
+    favicon && 'fileId' in favicon ? favicon.fileId : undefined,
+    GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
+    undefined
+  ).fetch;
+
+  const emojiFavicon = favicon && 'emoji' in favicon ? faviconSvg(favicon.emoji) : undefined;
+
   return (
     <>
       <style type="text/css">
@@ -46,6 +62,20 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
           }`}
         {`html.dark { background-color: rgba(var(--color-page-background)); }`}
       </style>
+      <Helmet>
+        {imageData || emojiFavicon ? (
+          <>
+            {/* <meta name="favicon" content={faviconId} /> */}
+            <link rel="shortcut icon" href={imageData?.url || emojiFavicon}></link>
+          </>
+        ) : (
+          <>
+            <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+            <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+            <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+          </>
+        )}
+      </Helmet>
       {children}
     </>
   );

@@ -26,9 +26,7 @@ export const ImageCropper = ({ imageUrl, expectedAspectRatio, onChange }: ImageC
     const cropper = imageElement?.cropper;
 
     cropper?.getCroppedCanvas().toBlob((blob) => {
-      if (!blob) {
-        return;
-      }
+      if (!blob) return;
 
       new Blob([blob], { type: OUTPUT_MIME_TYPE }).arrayBuffer().then((buffer) => {
         const contentByteArray = new Uint8Array(buffer);

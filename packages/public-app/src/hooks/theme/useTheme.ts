@@ -6,6 +6,7 @@ interface TemplateSettings {
   isTabs: boolean;
   tabsOrder: string[];
   colors: { light: Record<string, string>; dark: Record<string, string> };
+  favicon?: { fileId: string } | { emoji: string } | undefined;
 }
 
 const isRecord = (obj: unknown): obj is Record<string, unknown> => {
@@ -56,8 +57,9 @@ const useTheme = () => {
     'dark' in (templateSettings.colors as Record<string, unknown>)
       ? templateSettings.colors
       : DEFAULT_SETTINGS.colors;
+  const favicon = templateSettings.favicon;
 
-  return { themeId, isTabs, tabsOrder, colors } as TemplateSettings;
+  return { themeId, isTabs, tabsOrder, colors, favicon } as TemplateSettings;
 };
 
 export default useTheme;

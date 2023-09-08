@@ -1,4 +1,4 @@
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -21,7 +21,7 @@ import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ProfileSection } from '@youfoundation/js-lib/profile';
+import { BuiltInProfiles, ProfileSection } from '@youfoundation/js-lib/profile';
 
 const ProfileDetails = () => {
   const {
@@ -88,27 +88,29 @@ const ProfileDetails = () => {
             <ActionButton onClick={() => setIsOpenEdit(true)} icon={Pencil}>
               {t('Edit Profile')}
             </ActionButton>
-            <ActionGroup
-              type="secondary"
-              size="square"
-              options={[
-                {
-                  label: t('Remove profile'),
-                  onClick: async () => {
-                    await removeProfile(profileDef.profileId);
-                    navigate(-1);
+            {stringGuidsEqual(BuiltInProfiles.StandardProfileId, profileDef.profileId) ? null : (
+              <ActionGroup
+                type="secondary"
+                size="square"
+                options={[
+                  {
+                    label: t('Remove profile'),
+                    onClick: async () => {
+                      await removeProfile(profileDef.profileId);
+                      navigate(-1);
+                    },
+                    confirmOptions: {
+                      title: t('Remove profile'),
+                      body: t(
+                        'Are you sure you want to remove this profile, this action cannot be undone. All data within this profile will be removed.'
+                      ),
+                      buttonText: t('Remove'),
+                    },
+                    icon: Trash,
                   },
-                  confirmOptions: {
-                    title: t('Remove profile'),
-                    body: t(
-                      'Are you sure you want to remove this profile, this action cannot be undone. All data within this profile will be removed.'
-                    ),
-                    buttonText: t('Remove'),
-                  },
-                  icon: Trash,
-                },
-              ]}
-            ></ActionGroup>
+                ]}
+              ></ActionGroup>
+            )}
           </>
         }
         breadCrumbs={[

@@ -3,6 +3,7 @@ import {
   HomePageConfig,
   HomePageFields,
   HomePageTheme,
+  HomePageThemeFields,
 } from '@youfoundation/js-lib/public';
 import {
   BirthdayFields,
@@ -32,6 +33,7 @@ import ThemeSelector from '../../Form/ThemeSelector';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
 import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
+import FaviconSelector from '../../Form/FaviconSelector';
 
 const profileInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 85, width: 250, height: 250 },
@@ -52,9 +54,6 @@ const AttributeFields = ({
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const debouncedChange = useMemo(() => debounce(onChange, 500), [onChange]);
-
-  // Home consts:
-  const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 
   switch (attribute.type) {
     case BuiltInAttributes.Name:
@@ -301,102 +300,10 @@ const AttributeFields = ({
       );
       break;
     case HomePageAttributes.HomePage:
-      return (
-        <>
-          <div className="mb-5">
-            <Label htmlFor="headerImage">{t('Background photo')}</Label>
-            <ImageSelector
-              id="headerImage"
-              name={HomePageFields.HeaderImageId}
-              defaultValue={attribute.data?.[HomePageFields.HeaderImageId] ?? ''}
-              onChange={(e) =>
-                onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
-              }
-              acl={attribute.acl}
-              targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
-              sizeClass={`${
-                !attribute.data?.[HomePageFields.HeaderImageId]
-                  ? 'aspect-[16/9] md:aspect-[5/1]'
-                  : ''
-              }  w-full object-cover`}
-              thumbInstructions={headerInstructionThumbSizes}
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor="tagLine">{t('Headline')}</Label>
-            <Input
-              id="tagLine"
-              name="tagLine"
-              defaultValue={attribute.data?.['tagLine'] ?? ''}
-              onChange={debouncedChange}
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor="leadText">{t('About')}</Label>
-            <Textarea
-              id="leadText"
-              name="leadText"
-              defaultValue={attribute.data?.['leadText'] ?? ''}
-              onChange={debouncedChange}
-            />
-          </div>
-        </>
-      );
+      return <HomeAttributeEditor attribute={attribute} onChange={debouncedChange} />;
       break;
     case HomePageAttributes.Theme:
-      return (
-        <>
-          <div className="mb-5">
-            <Label htmlFor="themeId">{t('Theme')}</Label>
-            <ThemeSelector
-              name="themeId"
-              defaultValue={attribute.data?.['themeId'] ?? ''}
-              onChange={debouncedChange}
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor="colors">{t('Color set')}</Label>
-            <ColorThemeSelector
-              id="colors"
-              name="colors"
-              defaultValue={attribute.data?.['colors'] ?? ''}
-              onChange={debouncedChange}
-            />
-          </div>
-          {(attribute.data?.['themeId'] === HomePageTheme.SocialClassic.toString() ||
-            attribute.data?.['themeId'] === HomePageTheme.ContentProducer.toString()) && (
-            <>
-              <div className="mb-5">
-                <Label htmlFor="tabs">{t('Show tabs')}</Label>
-                <Select
-                  id="tabs"
-                  name="tabs"
-                  defaultValue={attribute.data?.['tabs'] ?? ''}
-                  onChange={debouncedChange}
-                >
-                  <option>{t('No')}</option>
-                  <option value={'true'}>{t('Yes')}</option>
-                </Select>
-              </div>
-              {attribute.data?.['tabs'] === 'true' && (
-                <div className="mb-5">
-                  <Label htmlFor="tabs-order">{t('Tabs Order')}</Label>
-                  <Order
-                    elements={
-                      (attribute.data?.['tabsOrder'] &&
-                        attribute.data?.['tabsOrder'].length === DEFAULT_TABS_ORDER.length &&
-                        attribute.data['tabsOrder']) ??
-                      DEFAULT_TABS_ORDER
-                    }
-                    name="tabsOrder"
-                    onChange={debouncedChange}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </>
-      );
+      return <ThemeAttributeEditor attribute={attribute} onChange={debouncedChange} />;
       break;
     default:
       return (
@@ -622,6 +529,131 @@ const PhoneAttributeEditor = ({
         />
       </div>
     </div>
+  );
+};
+
+const HomeAttributeEditor = ({
+  attribute,
+  onChange,
+}: {
+  attribute: AttributeVm;
+  onChange: (e: { target: { value: unknown; name: string } }) => void;
+}) => {
+  return (
+    <>
+      <div className="mb-5">
+        <Label htmlFor="headerImage">{t('Background photo')}</Label>
+        <ImageSelector
+          id="headerImage"
+          name={HomePageFields.HeaderImageId}
+          defaultValue={attribute.data?.[HomePageFields.HeaderImageId] ?? ''}
+          onChange={(e) =>
+            onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+          }
+          acl={attribute.acl}
+          targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
+          sizeClass={`${
+            !attribute.data?.[HomePageFields.HeaderImageId] ? 'aspect-[16/9] md:aspect-[5/1]' : ''
+          }  w-full object-cover`}
+          thumbInstructions={headerInstructionThumbSizes}
+        />
+      </div>
+      <div className="mb-5">
+        <Label htmlFor="tagLine">{t('Headline')}</Label>
+        <Input
+          id="tagLine"
+          name="tagLine"
+          defaultValue={attribute.data?.['tagLine'] ?? ''}
+          onChange={onChange}
+        />
+      </div>
+      <div className="mb-5">
+        <Label htmlFor="leadText">{t('About')}</Label>
+        <Textarea
+          id="leadText"
+          name="leadText"
+          defaultValue={attribute.data?.['leadText'] ?? ''}
+          onChange={onChange}
+        />
+      </div>
+    </>
+  );
+};
+
+const ThemeAttributeEditor = ({
+  attribute,
+  onChange,
+}: {
+  attribute: AttributeVm;
+  onChange: (e: { target: { value: unknown; name: string } }) => void;
+}) => {
+  // Home consts:
+  const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
+
+  return (
+    <>
+      <div className="mb-5">
+        <Label htmlFor={HomePageThemeFields.ThemeId}>{t('Theme')}</Label>
+        <ThemeSelector
+          name={HomePageThemeFields.ThemeId}
+          defaultValue={attribute.data?.[HomePageThemeFields.ThemeId] ?? ''}
+          onChange={onChange}
+        />
+      </div>
+      <div className="mb-5">
+        <Label htmlFor={HomePageThemeFields.Colors}>{t('Color set')}</Label>
+        <ColorThemeSelector
+          id={HomePageThemeFields.Colors}
+          name={HomePageThemeFields.Colors}
+          defaultValue={attribute.data?.[HomePageThemeFields.Colors] ?? ''}
+          onChange={onChange}
+        />
+      </div>
+      {(attribute.data?.[HomePageThemeFields.ThemeId] === HomePageTheme.SocialClassic.toString() ||
+        attribute.data?.[HomePageThemeFields.ThemeId] ===
+          HomePageTheme.ContentProducer.toString()) && (
+        <>
+          <div className="mb-5">
+            <Label htmlFor="tabs">{t('Show tabs')}</Label>
+            <Select
+              id="tabs"
+              name={HomePageThemeFields.Tabs}
+              defaultValue={attribute.data?.[HomePageThemeFields.Tabs] ?? ''}
+              onChange={onChange}
+            >
+              <option>{t('No')}</option>
+              <option value={'true'}>{t('Yes')}</option>
+            </Select>
+          </div>
+          {attribute.data?.[HomePageThemeFields.Tabs] === 'true' && (
+            <div className="mb-5">
+              <Label htmlFor={HomePageThemeFields.TabsOrder}>{t('Tabs Order')}</Label>
+              <Order
+                elements={
+                  (attribute.data?.[HomePageThemeFields.TabsOrder] &&
+                    attribute.data?.[HomePageThemeFields.TabsOrder].length ===
+                      DEFAULT_TABS_ORDER.length &&
+                    attribute.data[HomePageThemeFields.TabsOrder]) ??
+                  DEFAULT_TABS_ORDER
+                }
+                name={HomePageThemeFields.TabsOrder}
+                onChange={onChange}
+              />
+            </div>
+          )}
+        </>
+      )}
+      <div className="mb-5">
+        <Label htmlFor={HomePageThemeFields.Favicon}>{t('Favicon')}</Label>
+        <FaviconSelector
+          name={HomePageThemeFields.Favicon}
+          defaultValue={attribute.data?.[HomePageThemeFields.Favicon] ?? ''}
+          acl={attribute.acl}
+          onChange={(e) => onChange({ target: { name: e.target.name, value: e.target.value } })}
+          targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
+        />
+      </div>
+    </>
   );
 };
 

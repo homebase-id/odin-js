@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { usePortal, DialogWrapper, Times } from '@youfoundation/common-app';
+import { usePortal, Times } from '@youfoundation/common-app';
 import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
 import { Image } from '@youfoundation/common-app';
 import { useEffect } from 'react';
@@ -44,7 +44,7 @@ export const ImageLightbox = ({
     <div className="fixed inset-0 z-50 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
-        <div className="relative flex h-full min-h-screen flex-col lg:flex-row">
+        <div className="relative flex h-full min-h-screen flex-col lg:flex-row" onClick={onClose}>
           {onClose ? (
             <button
               onClick={onClose}
@@ -53,6 +53,7 @@ export const ImageLightbox = ({
               <Times className="h-4 w-4" />
             </button>
           ) : null}
+
           <Image
             className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
             fileId={fileId}
