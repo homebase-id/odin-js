@@ -3,6 +3,7 @@ import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import { useEffect, useState } from 'react';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
+import { Helmet } from 'react-helmet-async';
 
 const CENTRALIZED_LOGIN_BOX = !!import.meta.env.VITE_VERSION;
 
@@ -25,15 +26,22 @@ const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   }, [returnUrl]);
 
   return (
-    <iframe
-      src={`${
-        import.meta.env.VITE_CENTRAL_LOGIN_URL
-      }?isDarkMode=${document.documentElement.classList.contains(IS_DARK_CLASSNAME)}${
-        authParams ? `&${stringifyToQueryParams(authParams as any)}` : ''
-      }`}
-      className="h-[16rem] w-full"
-      // loading="lazy"
-    ></iframe>
+    <>
+      {authParams ? (
+        <Helmet>
+          <meta name="youauth" content={stringifyToQueryParams(authParams as any)} />
+        </Helmet>
+      ) : null}
+      <iframe
+        src={`${
+          import.meta.env.VITE_CENTRAL_LOGIN_URL
+        }?isDarkMode=${document.documentElement.classList.contains(IS_DARK_CLASSNAME)}${
+          authParams ? `&${stringifyToQueryParams(authParams as any)}` : ''
+        }`}
+        className="h-[16rem] w-full"
+        // loading="lazy"
+      ></iframe>
+    </>
   );
 };
 
