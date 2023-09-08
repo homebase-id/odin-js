@@ -79,16 +79,15 @@ export const VolatileInput = ({
 
     const relativeOffset = getRelativeOffset(absoluteOffset, divRef.current);
 
-    if (relativeOffset) {
-      relativeOffset.offset += offset || 0;
+    if (!relativeOffset) return;
 
-      restoreSelection([
-        relativeOffset.node,
-        Math.max(0, relativeOffset.offset),
-        relativeOffset.node,
-        Math.max(0, relativeOffset.offset),
-      ]);
-    }
+    relativeOffset.offset += offset || 0;
+    restoreSelection([
+      relativeOffset.node,
+      Math.max(0, relativeOffset.offset),
+      relativeOffset.node,
+      Math.max(0, relativeOffset.offset),
+    ]);
   };
 
   const wrapLinks = () => {
@@ -111,19 +110,21 @@ export const VolatileInput = ({
   };
 
   useEffect(() => {
-    if (divRef?.current) {
-      if (divRef.current.innerText !== defaultValue) {
-        const caretPos = saveCaretPosition();
+    if (!divRef?.current) return;
+    if (divRef.current.innerText === defaultValue) return;
 
-        divRef.current.innerText = defaultValue || '';
+    console.log(divRef.current.innerText);
 
-        restoreCaretPosition(
-          caretPos,
-          supportEmojiShortcut && emojiQuery ? -emojiQuery.length : undefined
-        );
-        if (supportEmojiShortcut && emojiQuery) setEmojiQuery(undefined);
-      }
-    }
+    const caretPos = saveCaretPosition();
+    console.log({ absoluteOffset: caretPos.absoluteOffset });
+
+    divRef.current.innerText = defaultValue || '';
+
+    restoreCaretPosition(
+      caretPos,
+      supportEmojiShortcut && emojiQuery ? -emojiQuery.length : undefined
+    );
+    if (supportEmojiShortcut && emojiQuery) setEmojiQuery(undefined);
   }, [defaultValue]);
 
   // We want values to be saved directly, while the link styling is better with a debounce

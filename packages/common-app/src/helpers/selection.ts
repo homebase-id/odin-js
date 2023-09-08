@@ -9,6 +9,7 @@ export const getPreviousSiblings = (elem: Node) => {
   return sibs;
 };
 
+// Gets the selection of the current window
 export const saveSelection = (): SelectionData | undefined => {
   const selection = window.getSelection();
   if (selection && selection.anchorNode && selection.focusNode) {
@@ -21,17 +22,17 @@ export const saveSelection = (): SelectionData | undefined => {
   }
 };
 
+// Restores the selection of the current window
 export const restoreSelection = (saved: SelectionData) => {
   try {
     const selection = window.getSelection();
-    if (selection) {
-      selection.setBaseAndExtent(saved[0], saved[1], saved[2], saved[3]);
-    }
+    if (selection) selection.setBaseAndExtent(saved[0], saved[1], saved[2], saved[3]);
   } catch (e) {
     // Fail silently
   }
 };
 
+// Sums up the text length +1 of all previous siblings + 1 (for the current node)
 const getTextLengthFromPreviousSiblings = (elem: Node) => {
   return (
     getPreviousSiblings(elem)
@@ -40,34 +41,35 @@ const getTextLengthFromPreviousSiblings = (elem: Node) => {
   );
 };
 
+// Gets the absolute offset of a node to the root node
 export const getAbsoluteOffsetToParent = (
   elem: Node,
   relativeOffset: number,
-  parentNode: Node
+  rootNode: Node
 ): number => {
   if (elem.nodeType === 3) {
     // It's a text node
-    const currentOffset = getTextLengthFromPreviousSiblings(elem) + relativeOffset + 1;
-    if (parentNode === elem.parentNode || !elem.parentNode) {
+    const currentOffset = getTextLengthFromPreviousSiblings(elem) + relativeOffset;
+    if (rootNode === elem.parentNode || !elem.parentNode) {
       // console.log('text, so get siblings');
       return currentOffset;
     } else {
       // console.log('text, but deeper', currentOffset);
-      return getAbsoluteOffsetToParent(elem.parentNode, 0, parentNode) + currentOffset + 1;
+      return getAbsoluteOffsetToParent(elem.parentNode, 0, rootNode) + currentOffset + 1;
     }
   } else {
     // It's a normal node
-    if (elem === parentNode) {
+    if (elem === rootNode) {
       // console.log('normal node but it is the parent');
-      return getAbsoluteOffsetToParent(parentNode.childNodes[relativeOffset], 0, parentNode) + 1;
+      return getAbsoluteOffsetToParent(rootNode.childNodes[relativeOffset], 0, rootNode) + 1;
     }
 
-    if (parentNode === elem.parentNode || !elem.parentNode) {
+    if (rootNode === elem.parentNode || !elem.parentNode) {
       return getTextLengthFromPreviousSiblings(elem);
     } else {
       // 'How did you get that? Way too complex structure, not supported',
       return 0;
-      // return getAbsoluteOffsetToParent(elem.parentNode, currentOffset, parentNode);
+      // return getAbsoluteOffsetToParent(elem.parentNode, currentOffset, rootNode);
     }
   }
 };
@@ -95,6 +97,7 @@ export const getAbsoluteOffsetToParent = (
 
 export const getRelativeOffset = (absoluteOffset: number, parentNode: Node) => {
   const children = parentNode.childNodes;
+  console.log(children);
 
   let runningOffset = 0;
   for (let i = 0; i < children.length; i++) {
@@ -104,12 +107,18 @@ export const getRelativeOffset = (absoluteOffset: number, parentNode: Node) => {
     runningOffset += child.textContent?.length ? child.textContent?.length + 1 : 0;
 
     const node = child.childNodes[0] || child;
+    if (child.childNodes.length > 1) {
+      console.log(child.childNodes);
+    }
     if (runningOffset > absoluteOffset) {
       return { node: node, offset: relativeOffset };
     }
 
+    // If we are at the end of the parent node, return the last child, with length as offset
     if (children[children.length - 1] === child) {
-      return { node: node, offset: node.textContent?.length || 0 };
+      console.log('last child');
+      // return { node: node, offset: Array.from(node.textContent || '').length || 0 };
+      return { node: node, offset: relativeOffset };
     }
   }
 };
