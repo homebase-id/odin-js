@@ -18,10 +18,10 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
     | undefined;
 
   return (
-    <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
+    <div className="grid grid-cols-1 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
       <FaviconOption isActive={valueObject && 'emoji' in valueObject} label={t('Emoji')}>
         <EmojiSelector
-          className="mx-auto text-2xl"
+          className="mx-auto text-6xl"
           onInput={(val) =>
             onChange({
               target: {
@@ -34,29 +34,27 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
         />
       </FaviconOption>
       <FaviconOption isActive={valueObject && 'fileId' in valueObject} label={t('Custom image')}>
-        <div className="mx-auto">
-          <ImageSelector
-            {...props}
-            defaultValue={valueObject && 'fileId' in valueObject ? valueObject.fileId : undefined}
-            acl={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
-            onChange={(e) => {
-              onChange({
-                target: {
-                  name: e.target.name,
-                  value: e.target.value?.fileId
-                    ? {
-                        fileId: e.target.value.fileId,
-                      }
-                    : undefined,
-                },
-              });
-            }}
-            maxHeight={512}
-            maxWidth={512}
-            expectedAspectRatio={1}
-            sizeClass="aspect-square w-[10rem]"
-          />
-        </div>
+        <ImageSelector
+          {...props}
+          defaultValue={valueObject && 'fileId' in valueObject ? valueObject.fileId : undefined}
+          acl={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
+          onChange={(e) => {
+            onChange({
+              target: {
+                name: e.target.name,
+                value: e.target.value?.fileId
+                  ? {
+                      fileId: e.target.value.fileId,
+                    }
+                  : undefined,
+              },
+            });
+          }}
+          maxHeight={512}
+          maxWidth={512}
+          expectedAspectRatio={1}
+          sizeClass="w-full min-h-[10rem]"
+        />
       </FaviconOption>
       <FaviconOption
         isActive={!valueObject}
