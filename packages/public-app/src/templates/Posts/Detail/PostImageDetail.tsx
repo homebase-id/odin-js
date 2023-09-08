@@ -2,6 +2,7 @@ import { PostImageDetailCard, useBlog } from '@youfoundation/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import useAuth from '../../../hooks/auth/useAuth';
 import { useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 
 const PostImageDetail = () => {
   const { channelKey, postKey, attachmentKey } = useParams();
@@ -26,20 +27,26 @@ const PostImageDetail = () => {
   }, [window.location.pathname]);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">
-      <PostImageDetailCard
-        channel={blogData?.activeChannel}
-        postFile={blogData?.activeBlog}
-        attachmentKey={attachmentKey}
-        onClose={() => navigate(state?.referrer || -1, { preventScrollReset: true })}
-        navigate={(path: string) =>
-          navigate(path, { state: location.state, preventScrollReset: true })
-        }
-        rootUrl={rootUrl}
-        isOwner={isOwner}
-        isAuthenticated={isAuthenticated}
-      />
-    </div>
+    <>
+      <Helmet>
+        <title>{blogData?.activeBlog.content.caption ?? ''} | Homebase</title>
+        <meta name="og:title" content={blogData?.activeBlog.content.caption ?? ''} />
+      </Helmet>
+      <div className="fixed inset-0 z-50 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">
+        <PostImageDetailCard
+          channel={blogData?.activeChannel}
+          postFile={blogData?.activeBlog}
+          attachmentKey={attachmentKey}
+          onClose={() => navigate(state?.referrer || -1, { preventScrollReset: true })}
+          navigate={(path: string) =>
+            navigate(path, { state: location.state, preventScrollReset: true })
+          }
+          rootUrl={rootUrl}
+          isOwner={isOwner}
+          isAuthenticated={isAuthenticated}
+        />
+      </div>
+    </>
   );
 };
 

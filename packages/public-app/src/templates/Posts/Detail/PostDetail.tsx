@@ -10,6 +10,7 @@ import {
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
 import useAuth from '../../../hooks/auth/useAuth';
+import { Article } from '@youfoundation/js-lib/dist';
 
 const PostDetail = () => {
   const navigate = useNavigate();
@@ -41,6 +42,13 @@ const PostDetail = () => {
     <>
       <Helmet>
         <title>{post?.caption ?? ''} | Homebase</title>
+        <meta name="og:title" content={post?.caption ?? ''} />
+        <meta
+          name="og:description"
+          content={
+            post?.type === 'Article' ? (postData?.activeBlog.content as Article).abstract ?? '' : ''
+          }
+        />
       </Helmet>
 
       <section className="py-5">
