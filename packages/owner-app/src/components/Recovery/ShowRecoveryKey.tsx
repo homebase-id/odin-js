@@ -10,12 +10,12 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
 
   return (
     <>
-      <p className="mb-5 text-slate-800">
+      <p className="mb-5">
         Before we continue setting up your identity it{"'"}s important that you can recover access
         to your identity. As your data is encrypted with your password, you can only get access to
         your data with it. If you forget your password, you will lose access to your data.
       </p>
-      <p className="text-slate-800">
+      <p className="">
         To prevent this, we have created a recovery key. This key can be used to reset your password
         and get access to your data again. Please write down this key and store it in a safe place.
       </p>
@@ -64,7 +64,7 @@ const ClickToReveal = ({ textToShow }: { textToShow?: string }) => {
   };
 
   const buttonStyle =
-    'flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12';
+    'flex h-12 w-full cursor-pointer items-center justify-center dark:border-gray-700 md:w-12 text-foreground hover:text-primary dark:hover:text-primary-dark';
 
   return (
     <>
@@ -88,7 +88,7 @@ const ClickToReveal = ({ textToShow }: { textToShow?: string }) => {
 
         {showCopied && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="rounded-lg bg-slate-800 px-2 py-1 text-sm text-white">
+            <span className="rounded-lg bg-slate-800 px-2 py-1 text-sm text-white dark:bg-slate-600">
               {t('Copied to clipboard')}
             </span>
           </div>

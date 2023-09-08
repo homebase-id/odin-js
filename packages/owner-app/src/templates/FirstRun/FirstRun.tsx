@@ -73,7 +73,7 @@ const FirstRun = () => {
                       {t('Password')}
                     </Label>
                     <Input
-                      type="text"
+                      type="password"
                       name="password"
                       id="password"
                       required
@@ -89,7 +89,7 @@ const FirstRun = () => {
                       {t('Retype Password')}
                     </Label>
                     <Input
-                      type="text"
+                      type="password"
                       name="retypePassword"
                       id="retypePassword"
                       required

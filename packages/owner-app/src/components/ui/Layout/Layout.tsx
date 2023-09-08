@@ -26,7 +26,7 @@ const SharedStyleTag = () => (
 );
 
 const SHADED_BG = 'bg-[rgb(246,_248,_250)] dark:bg-gray-900 dark:text-gray-400';
-const NOT_SHADED_BG = 'bg-white dark:bg-black';
+const NOT_SHADED_BG = 'bg-white dark:bg-black text-foreground';
 
 const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
