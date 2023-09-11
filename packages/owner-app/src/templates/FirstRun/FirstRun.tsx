@@ -79,6 +79,7 @@ const FirstRun = () => {
                       required
                       onChange={(e) => setPassword(e.target.value)}
                       defaultValue={password}
+                      autoComplete="new-password"
                     />
                   </div>
                   <div className="mb-4">
@@ -95,6 +96,7 @@ const FirstRun = () => {
                       required
                       onChange={(e) => setRetypePassword(e.target.value)}
                       defaultValue={retypePassword}
+                      autoComplete="new-password"
                     />
                     {password !== retypePassword && retypePassword !== '' ? (
                       <p className="font-semibold text-red-800 dark:text-red-200">
