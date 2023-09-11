@@ -619,14 +619,15 @@ const ThemeAttributeEditor = ({
             <Select
               id="tabs"
               name={HomePageThemeFields.Tabs}
-              defaultValue={attribute.data?.[HomePageThemeFields.Tabs] ?? ''}
+              defaultValue={attribute.data?.[HomePageThemeFields.Tabs] ?? 'true'}
               onChange={onChange}
             >
               <option>{t('No')}</option>
               <option value={'true'}>{t('Yes')}</option>
             </Select>
           </div>
-          {attribute.data?.[HomePageThemeFields.Tabs] === 'true' && (
+          {!attribute.data?.[HomePageThemeFields.Tabs] ||
+          attribute.data?.[HomePageThemeFields.Tabs] === 'true' ? (
             <div className="mb-5">
               <Label htmlFor={HomePageThemeFields.TabsOrder}>{t('Tabs Order')}</Label>
               <Order
@@ -641,7 +642,7 @@ const ThemeAttributeEditor = ({
                 onChange={onChange}
               />
             </div>
-          )}
+          ) : null}
         </>
       )}
       <div className="mb-5">
