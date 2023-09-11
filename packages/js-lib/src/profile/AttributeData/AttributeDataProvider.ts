@@ -264,7 +264,7 @@ const themeAttributeProcessing = async (
   attr: AttributeFile
 ): Promise<AttributeFile> => {
   const imageFieldKey = HomePageThemeFields.Favicon;
-  const imageFileId = attr.data[imageFieldKey].fileId;
+  const imageFileId = attr?.data[imageFieldKey]?.fileId;
   if (!imageFileId) return attr;
 
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
