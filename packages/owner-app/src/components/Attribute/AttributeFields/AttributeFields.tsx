@@ -595,6 +595,7 @@ const ThemeAttributeEditor = ({
       <div className="mb-5">
         <Label htmlFor={HomePageThemeFields.ThemeId}>{t('Theme')}</Label>
         <ThemeSelector
+          id={attribute.fileId || attribute.id}
           name={HomePageThemeFields.ThemeId}
           defaultValue={attribute.data?.[HomePageThemeFields.ThemeId] ?? ''}
           onChange={onChange}

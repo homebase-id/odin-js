@@ -25,7 +25,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
 } from '../../helpers/helpers';
-import { HomePageAttributes, HomePageFields } from '../../public/public';
+import { HomePageAttributes, HomePageFields, HomePageThemeFields } from '../../public/public';
 import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { AttributeFile, Attribute } from './AttributeDataTypes';
@@ -259,6 +259,20 @@ const homePageAttributeProcessing = async (
   return attr;
 };
 
+const themeAttributeProcessing = async (
+  dotYouClient: DotYouClient,
+  attr: AttributeFile
+): Promise<AttributeFile> => {
+  const imageFieldKey = HomePageThemeFields.Favicon;
+  const imageFileId = attr.data[imageFieldKey].fileId;
+  if (!imageFileId) return attr;
+
+  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+
+  return attr;
+};
+
 const processAttribute = async (dotYouClient: DotYouClient, attribute: AttributeFile) => {
   switch (attribute.type) {
     case BuiltInAttributes.Name:
@@ -269,6 +283,9 @@ const processAttribute = async (dotYouClient: DotYouClient, attribute: Attribute
 
     case HomePageAttributes.HomePage:
       return await homePageAttributeProcessing(dotYouClient, attribute);
+
+    case HomePageAttributes.Theme:
+      return await themeAttributeProcessing(dotYouClient, attribute);
 
     default:
       return attribute;

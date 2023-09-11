@@ -13,6 +13,7 @@ const ThemeSelector = ({
   name,
   defaultValue,
   onChange,
+  id = '',
 }: {
   name: string;
   defaultValue: string | undefined;
@@ -22,39 +23,53 @@ const ThemeSelector = ({
       value: string;
     };
   }) => void;
+  id?: string;
 }) => {
+  const doChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    onChange({
+      target: {
+        name: name,
+        value: e.target.value,
+      },
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-4 md:gap-5">
       <Theme
-        name={name}
+        id={id + HomePageTheme.SocialClassic}
+        name={id + name}
         icon={VerticalPosts}
         label={t('Vertical Posts')}
         value={HomePageTheme.SocialClassic}
-        onChange={onChange}
+        onChange={doChange}
         checked={defaultValue === HomePageTheme.SocialClassic + ''}
       />
       <Theme
-        name={name}
+        id={id + HomePageTheme.ContentProducer}
+        name={id + name}
         icon={HorizontalPosts}
         label={t('Horizontal Posts')}
         value={HomePageTheme.ContentProducer}
-        onChange={onChange}
+        onChange={doChange}
         checked={defaultValue === HomePageTheme.ContentProducer + ''}
       />
       <Theme
-        name={name}
+        id={id + HomePageTheme.CoverPage}
+        name={id + name}
         icon={CoverPage}
         label={t('Cover Page')}
         value={HomePageTheme.CoverPage}
-        onChange={onChange}
+        onChange={doChange}
         checked={defaultValue === HomePageTheme.CoverPage + ''}
       />
       <Theme
-        name={name}
+        id={id + '0'}
+        name={id + name}
         icon={Block}
         label={t('Disable public site')}
         value={'0'}
-        onChange={onChange}
+        onChange={doChange}
         checked={defaultValue === '0'}
       />
     </div>
@@ -63,6 +78,7 @@ const ThemeSelector = ({
 
 const Theme = ({
   name,
+  id,
   icon,
   label,
   value,
@@ -70,6 +86,7 @@ const Theme = ({
   checked,
 }: {
   name: string;
+  id: string;
   icon: FC<IconProps>;
   label: string;
   value: string | number;
@@ -80,7 +97,7 @@ const Theme = ({
     <div className="flex flex-col">
       <input
         type="radio"
-        id={value + ''}
+        id={id || value + ''}
         name={name}
         value={value}
         className="peer sr-only"
@@ -88,7 +105,7 @@ const Theme = ({
         defaultChecked={checked}
       />
       <label
-        htmlFor={value + ''}
+        htmlFor={id || value + ''}
         className="flex flex-grow cursor-pointer flex-col rounded-md border-2 border-slate-100 bg-slate-100 p-2 peer-checked:border-indigo-500 peer-checked:bg-white dark:border-slate-900 dark:bg-slate-900 peer-checked:dark:bg-black"
       >
         <div className="flex flex-grow flex-col justify-center">

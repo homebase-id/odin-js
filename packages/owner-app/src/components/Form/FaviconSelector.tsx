@@ -1,6 +1,6 @@
 import { Block, EmojiSelector, t } from '@youfoundation/common-app';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
-import { AccessControlList, SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
+import { AccessControlList, TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode } from 'react';
 
 interface FaviconSelectorProps {
@@ -37,7 +37,6 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
         <ImageSelector
           {...props}
           defaultValue={valueObject && 'fileId' in valueObject ? valueObject.fileId : undefined}
-          acl={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
           onChange={(e) => {
             onChange({
               target: {
@@ -53,7 +52,7 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
           maxHeight={512}
           maxWidth={512}
           expectedAspectRatio={1}
-          sizeClass="w-full min-h-[10rem]"
+          sizeClass="w-full"
         />
       </FaviconOption>
       <FaviconOption
