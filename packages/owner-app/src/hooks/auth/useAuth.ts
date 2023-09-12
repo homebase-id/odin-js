@@ -84,6 +84,12 @@ const useAuth = () => {
       if (hasValidToken && hasSharedSecret) {
         // When authenticated check if on Login Pages and if so redirects to return or Home
         doRedirectToReturn();
+      } else if (hasSharedSecret) {
+        (async () => {
+          console.error('kicking identity');
+          await logout();
+          window.location.reload();
+        })();
       } else if (
         window.location.pathname !== LOGIN_PATH &&
         window.location.pathname !== FIRSTRUN_PATH &&
