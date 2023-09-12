@@ -57,9 +57,6 @@ const ProfileNav = () => {
         ref={wrapperRef}
       >
         <div className="min-w-[20rem] bg-slate-100 p-8 pt-6 shadow-md dark:bg-slate-700">
-          <span className={isAuthenticated ? 'hidden' : ''}>
-            <LoginBox />
-          </span>
           {isAuthenticated ? (
             <>
               <p className="mb-4">
@@ -86,7 +83,9 @@ const ProfileNav = () => {
                 {t('logout')}
               </button>
             </>
-          ) : null}
+          ) : (
+            <LoginBox />
+          )}
         </div>
       </div>
     </div>

@@ -1,9 +1,8 @@
 import { IS_DARK_CLASSNAME } from '@youfoundation/common-app';
 import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
-import { useEffect, useState } from 'react';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
-import { YouAuthorizationParams } from '@youfoundation/js-lib/auth';
 import { Helmet } from 'react-helmet-async';
+import { useQuery } from '@tanstack/react-query';
 
 const CENTRALIZED_LOGIN_BOX = !!import.meta.env.VITE_VERSION;
 
@@ -15,15 +14,16 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   );
 };
 
-const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  const [authParams, setAuthParams] = useState<YouAuthorizationParams>();
+const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
+  return useQuery(['params'], () => getAuthorizationParameters(returnUrl), {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+};
 
-  useEffect(() => {
-    (async () => {
-      setAuthParams(await getAuthorizationParameters(returnUrl || window.location.href));
-    })();
-  }, [returnUrl]);
+const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
+  const { data: authParams } = useParams(returnUrl || window.location.href);
 
   return (
     <>
@@ -46,7 +46,7 @@ const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
 };
 
 const LocalLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  return <>Login is not supported</>;
+  return <>Login is disabled</>;
   //   const { authenticate } = useAuth();
   //   const [identity, setIdentity] = useState('');
 
