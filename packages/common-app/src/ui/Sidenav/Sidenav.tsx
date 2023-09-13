@@ -84,7 +84,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
           } static top-0 h-full w-full transition-all xl:sticky xl:h-auto xl:whitespace-nowrap ${sidebarBg}`}
         >
           <div className="flex h-screen flex-col overflow-auto px-3 pb-5 pt-3">
-            <div className="flex flex-row items-center justify-between overflow-hidden">
+            <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
               <IdentityNavItem />
               <button className={navItemClassName} onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? <Times className={iconClassName} /> : <Bars className={iconClassName} />}
