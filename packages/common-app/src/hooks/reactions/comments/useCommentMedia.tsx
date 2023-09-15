@@ -50,6 +50,7 @@ export const useCommentMedia = ({
             pixelWidth: 250,
             pixelHeight: 250,
           },
+          undefined,
           'Comment'
         );
   };

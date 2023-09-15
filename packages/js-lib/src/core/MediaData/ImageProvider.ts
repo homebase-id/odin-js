@@ -193,11 +193,12 @@ export const getDecryptedImageUrl = async (
   const ss = dotYouClient.getSharedSecret();
 
   // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss) {
-    return await getDirectImageUrl();
-  }
+  if (!ss) return await getDirectImageUrl();
 
-  // If the contents is probably encrypted, we don't bother fetching the header
+  // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
+  //   we first get confirmation from the header and return a direct url if possible
+  // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
+  //   and the CAT is passed via a header that we can't set on a direct url
   if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     if (!meta?.fileMetadata.payloadIsEncrypted) {

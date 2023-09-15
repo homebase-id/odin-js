@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import {
   TargetDrive,
   SystemFileType,
@@ -48,17 +48,10 @@ export const getDecryptedImageUrlOverTransit = async (
   targetDrive: TargetDrive,
   fileId: string,
   size?: ImageSize,
+  isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
 ): Promise<string> => {
-  const meta = await getFileHeaderOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    systemFileType
-  );
-  if (!meta.fileMetadata.payloadIsEncrypted && size) {
-    // Build get url:
+  const getDirectImageUrl = async () => {
     return `https://${odinId}/api/guest/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
       ...targetDrive,
       fileId,
@@ -70,9 +63,27 @@ export const getDecryptedImageUrlOverTransit = async (
         : {}),
       xfst: systemFileType || 'Standard',
     })}`;
+  };
+
+  // Shortcut for apps that wouldn't be able to fetch anything over transit
+  // TODO: Change to have apps do fetch something over transit (When the BE allows it)
+  if (isProbablyEncrypted === false && dotYouClient.getType() === ApiType.App)
+    return getDirectImageUrl();
+
+  // If the contents is probably encrypted, we don't bother fetching the header
+  if (!isProbablyEncrypted) {
+    const meta = await getFileHeaderOverTransit(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      fileId,
+      systemFileType
+    );
+
+    if (!meta.fileMetadata.payloadIsEncrypted) getDirectImageUrl();
   }
 
-  // Fallback with download over transit
+  // Direct download over transit of the data and potentially decrypt if response headers indicate encrypted
   return getDecryptedImageDataOverTransit(
     dotYouClient,
     odinId,

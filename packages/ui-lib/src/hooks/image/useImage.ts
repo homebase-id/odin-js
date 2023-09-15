@@ -96,7 +96,8 @@ const useImage = (
                 odinId,
                 imageDrive,
                 imageFileId,
-                size
+                size,
+                probablyEncrypted
               )
             : await getDecryptedImageUrl(
                 dotYouClient,
