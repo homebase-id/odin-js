@@ -135,6 +135,7 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
           queryClient.invalidateQueries(['attribute']);
         }
 
+        queryClient.invalidateQueries(['siteData']);
         queryClient.invalidateQueries(getListItemCacheKey(newAttr));
 
         if (!_variables.fileId) {
@@ -172,6 +173,7 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
       onSettled: (_data, _err, variables) => {
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
+          queryClient.invalidateQueries(['siteData']);
           queryClient.invalidateQueries(getListItemCacheKey(variables));
 
           publishStaticFiles();
