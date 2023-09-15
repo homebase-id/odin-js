@@ -10,6 +10,7 @@ import { NoLayout } from '../../components/ui/Layout/Layout';
 import LoginNav from '../../components/Auth/LoginNav/LoginNav';
 
 import { ActionLink, Logo, t } from '@youfoundation/common-app';
+import { ROOT_PATH } from '../../app/App';
 
 const About = () => {
   return (
@@ -59,7 +60,7 @@ const About = () => {
         <div className="relative z-10">
           <h2 className="mb-5 text-center text-5xl">{t('Keep your socials yours')}</h2>
           <div className="flex justify-center">
-            <ActionLink href="/auth" className="w-auto">
+            <ActionLink href={`${ROOT_PATH}/auth`} className="w-auto">
               {t('Go to Homebase Feed')}
             </ActionLink>
           </div>

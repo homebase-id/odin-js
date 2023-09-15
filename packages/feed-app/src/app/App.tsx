@@ -27,7 +27,8 @@ import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import useAuth from '../hooks/auth/useAuth';
 
-const AUTH_PATH = '/auth';
+export const ROOT_PATH = '/';
+const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary } from '@youfoundation/common-app';
 
@@ -38,7 +39,7 @@ function App() {
     createRoutesFromElements(
       <>
         <Route
-          path=""
+          path={ROOT_PATH}
           element={
             <ErrorBoundary>
               <Suspense fallback={<></>}>
@@ -116,7 +117,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
       return <></>;
     }
 
-    return <Navigate to={`/about`} />;
+    return <Navigate to={`${ROOT_PATH}/about`} />;
   }
 
   return <>{children}</>;

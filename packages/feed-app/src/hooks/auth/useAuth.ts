@@ -16,6 +16,7 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
+import { ROOT_PATH } from '../../app/App';
 
 export const drives = [
   {
@@ -115,12 +116,15 @@ export const useYouAuthAuthorization = () => {
     // Persist key for usage on finalize
     await saveEccKey(eccKey);
 
-    const finalizeUrl = `${window.location.origin}/auth/finalize`;
+    const finalizeUrl = `${window.location.origin}${ROOT_PATH}/auth/finalize`;
     return getRegistrationParams(
       finalizeUrl,
       appName,
       appId,
+      [10, 30, 50, 80, 130, 210],
+      undefined,
       drives,
+      undefined,
       eccKey.publicKey,
       window.location.host,
       undefined,

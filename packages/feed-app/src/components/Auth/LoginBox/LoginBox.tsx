@@ -3,6 +3,7 @@ import { IS_DARK_CLASSNAME, LoadingBlock } from '@youfoundation/common-app';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
+import { ROOT_PATH } from '../../../app/App';
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
@@ -13,7 +14,7 @@ const useParams = (returnUrl: string) => {
 };
 
 export const LoginBox = () => {
-  const { data: authParams, isLoading } = useParams('/');
+  const { data: authParams, isLoading } = useParams(ROOT_PATH);
 
   if (isLoading)
     return (

@@ -18,7 +18,10 @@ export interface AppAuthorizationParams {
   n: string;
   appId: string;
   fn: string;
-  d: string;
+  p: string | undefined;
+  cp: string | undefined;
+  d: string | undefined;
+  cd: string | undefined;
   return: string;
   o?: string;
 }
@@ -42,7 +45,10 @@ export const getRegistrationParams = async (
   returnUrl: string,
   appName: string,
   appId: string,
+  permissionKeys: number[] | undefined,
+  circlePermissionKeys: number[] | undefined,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
+  circleDrives: { a: string; t: string; n: string; d: string; p: number }[] | undefined,
   eccPublicKey: CryptoKey,
   host?: string,
   clientFriendlyName?: string,
@@ -54,7 +60,10 @@ export const getRegistrationParams = async (
     n: appName,
     appId: appId,
     fn: clientFriendly,
+    p: permissionKeys?.join(','),
+    cp: circlePermissionKeys?.join(','),
     d: JSON.stringify(drives),
+    cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
     return: 'backend-will-decide',
     o: undefined,
   };
