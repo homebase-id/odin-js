@@ -65,6 +65,8 @@ const AppDetails = () => {
     return <>{t('No matching app found')}</>;
   }
 
+  console.log(app.grant.driveGrants);
+
   return (
     <>
       <ErrorNotification error={allowAppError || revokeAppError || removeAppError} />

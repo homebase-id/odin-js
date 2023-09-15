@@ -131,7 +131,7 @@ export const getSocialFeed = async (
 
   // TODO: Could optimize by combining both feed and own querybatch into a single querybatchcollection...
   if (ownOption) {
-    const ownerDotYou = window.location.hostname;
+    const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(
       dotYouClient,
       undefined,

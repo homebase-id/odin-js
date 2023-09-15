@@ -43,21 +43,23 @@ export const createCircleDefinition = async (
 };
 
 /// Convert text based permission levels to the numbered type
+// Reflects DrivePermission enum in services/Odin.Core.Services/Drives/DrivePermission.cs
 export const parsePermissions = (permission: unknown) => {
   if (typeof permission !== 'string') {
     return permission;
   }
 
   const lowered = permission.toLowerCase();
-
   return lowered === 'read'
     ? 1
     : lowered === 'write'
     ? 2
-    : lowered === 'readwrite' || lowered === 'read, write'
+    : lowered === 'read, write'
     ? 3
     : lowered === 'writereactionsandcomments'
     ? 4
+    : lowered === 'readwrite' || lowered === 'all'
+    ? 7
     : permission;
 };
 

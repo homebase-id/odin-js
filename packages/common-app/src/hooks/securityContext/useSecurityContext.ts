@@ -6,7 +6,8 @@ export const useSecurityContext = (odinId?: string) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetch = async (odinId?: string) => {
-    if (!odinId) return await getSecurityContext(dotYouClient);
+    if (!odinId || odinId === dotYouClient.getIdentity())
+      return await getSecurityContext(dotYouClient);
     else return await getSecurityContextOverTransit(dotYouClient, odinId);
   };
 

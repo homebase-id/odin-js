@@ -6,6 +6,7 @@ export const drivePermissionLevels = [
   { name: t('Writer'), value: 2 },
   { name: t('Editor'), value: 3 },
   { name: t('Commenter'), value: 4 }, // WriteReactionsAndComments
+  { name: t('Full'), value: 7 }, // Commeter + Editor
 ];
 
 export const circlePermissionLevels = [

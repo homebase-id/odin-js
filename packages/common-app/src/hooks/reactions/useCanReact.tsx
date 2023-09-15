@@ -6,6 +6,7 @@ import useSocialPost from '../socialFeed/useSocialPost';
 import { useQuery } from '@tanstack/react-query';
 import useSecurityContext from '../securityContext/useSecurityContext';
 import { useBlog } from '../blog';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 interface UseCanReactProps {
   authorOdinId: string;
@@ -31,7 +32,10 @@ export const useCanReact = ({
   isOwner,
   isAuthenticated,
 }: UseCanReactProps) => {
-  const isLocal = authorOdinId === window.location.hostname;
+  const { getIdentity } = useDotYouClient();
+
+  const isLocal = authorOdinId === getIdentity();
+  const isAuthor = (isLocal && isOwner) || authorOdinId === getIdentity();
 
   const { data: securityContext, isFetched: securityFetched } = useSecurityContext(
     isEnabled && !isLocal ? authorOdinId : undefined
@@ -63,7 +67,7 @@ export const useCanReact = ({
 
     const postFile = localBlogData?.activeBlog || externalPost;
 
-    if (isOwner && isLocal) return { canReact: true };
+    if (isAuthor) return { canReact: true };
     if (!hasDriveReactAccess) return { canReact: false, details: 'NOT_AUTHORIZED' };
     if (!isAuthenticated) return { canReact: false, details: 'NOT_AUTHENTICATED' };
     if (

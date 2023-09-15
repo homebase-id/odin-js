@@ -1,4 +1,4 @@
-import { SaveStatus } from '@youfoundation/common-app';
+import { SaveStatus, useDotYouClient } from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,8 @@ export const PageMeta = ({
   breadCrumbs?: { title: string; href?: string }[];
   icon?: FC;
 }) => {
+  const { isOwner } = useDotYouClient();
+
   return (
     <section
       className="-mx-2 -mt-4 mb-10 border-b border-gray-100 bg-white px-2 py-1 dark:border-gray-800 dark:bg-black sm:-mx-10
@@ -45,8 +47,17 @@ export const PageMeta = ({
           )}
           {title && (
             <>
-              <h1 className="flex flex-row pl-12 text-2xl dark:text-white sm:pl-4 xl:pl-0 xl:text-4xl">
-                {icon && icon({ className: 'h-8 w-8 my-auto mr-4 flex-shrink-0 hidden sm:block' })}{' '}
+              <h1
+                className={`flex flex-row  text-2xl dark:text-white ${
+                  isOwner ? 'pl-12 sm:pl-4 xl:pl-0' : ''
+                } xl:text-4xl`}
+              >
+                {icon &&
+                  icon({
+                    className: `h-8 w-8 my-auto mr-4 flex-shrink-0 ${
+                      isOwner ? 'hidden sm:block' : ''
+                    }`,
+                  })}{' '}
                 {title}
               </h1>
               <Helmet>
