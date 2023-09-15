@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
 import { getNewId } from '../../helpers/helpers';
 import { CircleDefinition } from './CircleDataTypes';
 
@@ -62,6 +62,8 @@ export const parsePermissions = (permission: unknown) => {
 };
 
 export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefinition[]> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
+
   const client = dotYouClient.createAxiosClient();
   const url = root + '/list';
 

@@ -1,14 +1,14 @@
 {
-    "name": "Homebase Owner App",
+    "name": "Homebase Feed App",
     "short_name": "Homebase",
     "icons": [
         {
-            "src": "/owner/icons/android-chrome-192x192.png",
+            "src": "/icons/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/owner/icons/android-chrome-512x512.png",
+            "src": "/icons/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
         }

@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
 import { CursoredResult } from '../../core/DriveData/DriveQueryTypes';
 import { TargetDrive } from '../../core/core';
 
@@ -11,6 +11,7 @@ export interface FollowRequest {
 export interface UnfollowRequest {
   odinId: string;
 }
+
 const root = '/followers';
 
 export const fetchFollowing = async (
@@ -79,6 +80,8 @@ export const fetchFollowers = async (
   dotYouClient: DotYouClient,
   cursorState?: string
 ): Promise<CursoredResult<string[]> | undefined> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
+
   const client = dotYouClient.createAxiosClient();
   const url = root + `/followingme${cursorState ? '?cursor=' + cursorState : ''}`;
 

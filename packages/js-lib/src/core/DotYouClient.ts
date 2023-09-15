@@ -157,3 +157,13 @@ export class DotYouClient extends BaseDotYouClient {
     super({ ...options });
   }
 }
+
+export const assertIfDotYouClientIsOwner = (dotYouClient: DotYouClient) => {
+  if (dotYouClient.getType() !== ApiType.Owner) {
+    throw new Error(
+      `This method is not available for ${
+        dotYouClient.getType() === ApiType.App ? 'app' : 'youauth'
+      } clients`
+    );
+  }
+};

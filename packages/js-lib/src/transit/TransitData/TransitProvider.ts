@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -57,16 +57,6 @@ interface TransitQueryBatchRequest {
 }
 
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
-
-const assertIfDotYouClientIsOwner = (dotYouClient: DotYouClient) => {
-  if (dotYouClient.getType() !== ApiType.Owner) {
-    throw new Error(
-      `This method is not available for ${
-        dotYouClient.getType() === ApiType.App ? 'app' : 'youauth'
-      } clients`
-    );
-  }
-};
 
 export const queryBatchOverTransit = async (
   dotYouClient: DotYouClient,
