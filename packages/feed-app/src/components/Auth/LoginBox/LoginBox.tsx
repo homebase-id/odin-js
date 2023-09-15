@@ -14,7 +14,7 @@ const useParams = (returnUrl: string) => {
 };
 
 export const LoginBox = () => {
-  const { data: authParams, isLoading } = useParams(ROOT_PATH);
+  const { data: authParams, isLoading } = useParams(ROOT_PATH || '/');
 
   if (isLoading)
     return (
