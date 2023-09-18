@@ -62,7 +62,7 @@ const ConnectionSection = ({ className }: { className?: string }) => {
         {connectionsFetched &&
         connections?.pages?.length &&
         connections?.pages[activePage - 1]?.results?.length ? (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {connections?.pages[activePage - 1].results.map((item, index) => (
               <IdentityTeaser key={index} odinId={item?.odinId} className="p-2" />
             ))}
@@ -122,7 +122,7 @@ const FollowingSection = ({ className }: { className?: string }) => {
       </div>
       <div className="px-2 py-2">
         {flattenedIdentities?.length ? (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {flattenedIdentities.map((item, index) => {
               if (!item) {
                 return null;
