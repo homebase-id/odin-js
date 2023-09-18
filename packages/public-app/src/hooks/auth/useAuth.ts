@@ -65,6 +65,7 @@ const useAuth = () => {
 
         if (
           window.localStorage.getItem(HOME_SHARED_SECRET) ||
+          (isOwner && window.localStorage.getItem(OWNER_SHARED_SECRET)) ||
           window.localStorage.getItem(STORAGE_IDENTITY_KEY)
         ) {
           // // Auth state was presumed logged in, but not allowed.. Will attempt reload page? (Browsers may ignore, as it's not a reload on user request)
