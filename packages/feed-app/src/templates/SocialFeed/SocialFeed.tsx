@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { t } from '@youfoundation/common-app';
+import { t, useDotYouClient } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
 const ConnectionsView = lazy(
@@ -27,6 +27,7 @@ import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
+  const { isOwner } = useDotYouClient();
 
   useEffect(() => {
     if (postKey) {
@@ -43,7 +44,7 @@ export const SocialFeed = () => {
       <Helmet>
         <title>{t('Feed')} | Homebase</title>
       </Helmet>
-      <PageMeta title={t('Feed')} icon={Feed} />
+      {isOwner ? <PageMeta title={t('Feed')} icon={Feed} /> : null}
       {identityKey && channelKey && postKey ? (
         <div
           className={`fixed inset-0 z-50 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm`}

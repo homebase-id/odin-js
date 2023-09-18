@@ -23,8 +23,8 @@ const PostPreview = ({
   postKey: string;
   attachmentKey?: string;
 }) => {
-  const { isOwner } = useDotYouClient();
-  const isLocal = identityKey === window.location.hostname;
+  const { isOwner, getIdentity } = useDotYouClient();
+  const isLocal = identityKey === getIdentity();
 
   const { data: externalChannel } = useSocialChannel({
     odinId: !isLocal ? identityKey : undefined,
