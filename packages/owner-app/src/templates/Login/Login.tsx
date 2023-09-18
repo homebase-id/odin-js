@@ -103,7 +103,7 @@ const Login = () => {
                 </ActionButton>
                 <Link
                   to="/owner/account-recovery"
-                  className="mt-5 block text-center text-slate-400 hover:underline dark:text-slate-800"
+                  className="mt-5 block text-center text-slate-400 hover:underline"
                 >
                   {t('Forgot your password?')}
                 </Link>

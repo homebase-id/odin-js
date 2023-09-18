@@ -3,7 +3,7 @@ import { Arrow, Shield } from '@youfoundation/common-app';
 
 const UrlNotifier = () => {
   return (
-    <div className="border-b border-slate-100 bg-slate-50 py-8 pb-8 pt-4 dark:bg-slate-700 dark:text-slate-100">
+    <div className="border-b border-slate-100 bg-slate-50 py-8 pb-8 pt-4 dark:border-b-slate-400 dark:bg-slate-700 dark:text-slate-100">
       <div className="container mx-auto px-5 sm:px-10">
         <div className="mb-4 hidden flex-row sm:flex">
           <Arrow className="left-[16rem] mx-auto mr-auto h-16 w-16 -rotate-90 animate-pulse md:relative md:mx-0" />

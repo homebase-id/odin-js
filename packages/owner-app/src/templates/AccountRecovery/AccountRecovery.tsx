@@ -87,7 +87,7 @@ const Login = () => {
                       autoComplete="off"
                     />
                   </div>
-                  <hr className="mb-5 mt-7" />
+                  <hr className="mb-5 mt-7 dark:border-slate-700" />
                   <div className="mb-2">
                     <Label>{t('New password')}</Label>
                     <Input
@@ -101,10 +101,7 @@ const Login = () => {
                     />
                   </div>
                   <div className="mb-2">
-                    <Label
-                      htmlFor="retypepassword"
-                      className="text-sm leading-7  dark:text-gray-400"
-                    >
+                    <Label htmlFor="retypepassword" className="text-sm leading-7">
                       {t('Retype Password')}
                     </Label>
                     <Input
@@ -122,7 +119,7 @@ const Login = () => {
                       </p>
                     ) : null}
                   </div>
-                  <div className="mt-5 flex flex-row-reverse justify-between">
+                  <div className="mt-5 flex flex-row-reverse justify-between gap-2">
                     <ActionButton state={state} isDisabled={!passwordIsValid}>
                       {t('Reset password')}
                     </ActionButton>
