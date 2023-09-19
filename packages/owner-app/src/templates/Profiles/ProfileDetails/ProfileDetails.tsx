@@ -171,6 +171,7 @@ const ProfileSectionCreator = ({
   profileId: string;
   onCreate: (sectionId: string) => void;
 }) => {
+  const navigate = useNavigate();
   const {
     fetchAll: { data: profileSections },
     save: {
@@ -219,9 +220,10 @@ const ProfileSectionCreator = ({
               required
             />
           </div>
-          <div className="flex flex-row">
-            <ActionButton className="ml-auto" state={saveProfileSectionStatus}>
-              {t('Add section')}
+          <div className="flex flex-row-reverse gap-2">
+            <ActionButton state={saveProfileSectionStatus}>{t('Add section')}</ActionButton>
+            <ActionButton type="secondary" onClick={() => navigate(-1)}>
+              {t('Cancel')}
             </ActionButton>
           </div>
         </form>
