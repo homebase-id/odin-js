@@ -33,8 +33,11 @@ export const useCanReact = ({
   isAuthenticated,
 }: UseCanReactProps) => {
   const { getIdentity } = useDotYouClient();
+  const currentIdentity = getIdentity();
 
-  const isLocal = authorOdinId === getIdentity();
+  const isLocal = currentIdentity
+    ? authorOdinId === currentIdentity
+    : authorOdinId === window.location.hostname;
   const isAuthor = (isLocal && isOwner) || authorOdinId === getIdentity();
 
   const { data: securityContext, isFetched: securityFetched } = useSecurityContext(
