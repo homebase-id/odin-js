@@ -51,7 +51,7 @@ const FirstRun = () => {
       <Helmet>
         <title>Setup | Homebase</title>
       </Helmet>
-      <MinimalLayout noShadedBg={true}>
+      <MinimalLayout noShadedBg={true} noPadding={true}>
         <UrlNotifier />
         <section className="body-font flex h-full pt-24 ">
           <div className="container m-auto h-full max-w-[35rem] p-5">
