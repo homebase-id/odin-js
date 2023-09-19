@@ -1,5 +1,5 @@
 import { BlogConfig } from '@youfoundation/js-lib/public';
-import { DrivePermissions, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { ApiType, DrivePermissions, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 import useSocialPost from '../socialFeed/useSocialPost';
@@ -32,16 +32,16 @@ export const useCanReact = ({
   isOwner,
   isAuthenticated,
 }: UseCanReactProps) => {
-  const { getIdentity } = useDotYouClient();
-  const currentIdentity = getIdentity();
+  const { getIdentity, getApiType } = useDotYouClient();
 
-  const isLocal = currentIdentity
-    ? authorOdinId === currentIdentity
-    : authorOdinId === window.location.hostname;
+  const isLocal =
+    authorOdinId === window.location.hostname ||
+    (getApiType() === ApiType.App && getIdentity() === authorOdinId);
   const isAuthor = (isLocal && isOwner) || authorOdinId === getIdentity();
 
   const { data: securityContext, isFetched: securityFetched } = useSecurityContext(
-    isEnabled && !isLocal ? authorOdinId : undefined
+    authorOdinId,
+    isEnabled
   ).fetch;
 
   const { data: externalPost } = useSocialPost({
