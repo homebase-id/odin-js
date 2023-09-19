@@ -46,7 +46,7 @@ const useLinks = () => {
       );
 
       return linkAttributes
-        ?.sort((attrA, attrB) => attrB.priority - attrA.priority)
+        ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
         .map((attribute) => {
           return {
             text: attribute.data[LinkFields.LinkText] as string,

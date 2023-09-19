@@ -85,7 +85,6 @@ const Links = ({
   if (!links) {
     return null;
   }
-
   const flexDir = direction === 'col' ? 'flex-col' : 'flex-row';
 
   return (
