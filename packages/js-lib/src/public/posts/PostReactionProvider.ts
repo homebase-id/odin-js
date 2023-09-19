@@ -122,7 +122,7 @@ export const saveComment = async (
     };
 
     // Use owner/youauth endpoint for reactions if the post to comment on is on the current root identity
-    const result: UploadResult = await uploadFile(
+    const result = await uploadFile(
       dotYouClient,
       instructionSet,
       metadata,
@@ -130,6 +130,7 @@ export const saveComment = async (
       additionalThumbnails,
       encrypt
     );
+    if (!result) throw new Error(`Upload failed`);
 
     return result.globalTransitIdFileIdentifier.globalTransitId;
   } else {

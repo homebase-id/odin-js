@@ -280,7 +280,7 @@ export const savePost = async <T extends PostContent>(
     accessControlList: file.acl,
   };
 
-  const result: UploadResult = await uploadFile(
+  const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
@@ -288,6 +288,7 @@ export const savePost = async <T extends PostContent>(
     undefined,
     encrypt
   );
+  if (!result) throw new Error(`Upload failed`);
 
   return result;
 };

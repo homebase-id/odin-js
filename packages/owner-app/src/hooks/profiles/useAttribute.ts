@@ -40,10 +40,31 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
   };
 
   const saveData = async (attribute: AttributeFile) => {
-    // Don't edit original attribute as it will be used for caching decisions in onSettled
-    return await saveAttribute(dotYouClient, {
-      ...attribute,
-      acl: attribute.acl ?? { requiredSecurityGroup: SecurityGroupType.Owner },
+    // We're saving, so it's not new anymore
+    if (attribute.data?.isNew) delete attribute.data.isNew;
+
+    return new Promise<AttributeFile>((resolve) => {
+      const onVersionConflict = async () => {
+        const serverAttr = await getAttribute(dotYouClient, attribute.profileId, attribute.id);
+        if (!serverAttr) return;
+
+        const newAttr = { ...attribute, ...serverAttr };
+        saveAttribute(dotYouClient, newAttr, onVersionConflict).then((result) => {
+          if (result) resolve(result);
+        });
+      };
+
+      // Don't edit original attribute as it will be used for caching decisions in onSettled
+      saveAttribute(
+        dotYouClient,
+        {
+          ...attribute,
+          acl: attribute.acl ?? { requiredSecurityGroup: SecurityGroupType.Owner },
+        },
+        onVersionConflict
+      ).then((result) => {
+        if (result) resolve(result);
+      });
     });
   };
 

@@ -26,7 +26,7 @@ export const uploadFile = async (
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => void
-): Promise<UploadResult> => {
+): Promise<UploadResult | void> => {
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadUsingKeyHeader(
     dotYouClient,
@@ -47,7 +47,7 @@ const uploadUsingKeyHeader = async (
   payload: Uint8Array | File | Blob | undefined,
   thumbnails?: ThumbnailFile[],
   onVersionConflict?: () => void
-): Promise<UploadResult> => {
+): Promise<UploadResult | void> => {
   // Rebuild instructions without the systemFileType
   const strippedInstructions: UploadInstructionSet = {
     storageOptions: instructions.storageOptions,
@@ -88,7 +88,7 @@ export const uploadHeader = async (
   encryptedKeyHeader: EncryptedKeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata
-): Promise<UploadResult> => {
+): Promise<UploadResult | void> => {
   const keyHeader = encryptedKeyHeader
     ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
     : undefined;

@@ -294,8 +294,9 @@ const processAttribute = async (dotYouClient: DotYouClient, attribute: Attribute
 
 export const saveAttribute = async (
   dotYouClient: DotYouClient,
-  toSaveAttribute: AttributeFile
-): Promise<AttributeFile> => {
+  toSaveAttribute: AttributeFile,
+  onVersionConflict?: () => void
+): Promise<AttributeFile | undefined> => {
   // Process Attribute
   const attr = await processAttribute(dotYouClient, toSaveAttribute);
 
@@ -349,17 +350,20 @@ export const saveAttribute = async (
     accessControlList: attr.acl,
   };
 
-  const result: UploadResult = await uploadFile(
+  const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
     payloadBytes,
     undefined,
-    encrypt
+    encrypt,
+    onVersionConflict
   );
+  if (!result) return;
 
   //update server-side info
   attr.fileId = result.file.fileId;
+  attr.versionTag = result.newVersionTag;
   return attr;
 };
 

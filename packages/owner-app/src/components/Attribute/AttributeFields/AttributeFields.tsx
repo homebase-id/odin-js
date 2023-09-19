@@ -53,7 +53,7 @@ const AttributeFields = ({
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
-  const debouncedChange = useMemo(() => debounce(onChange, 500), [onChange]);
+  const debouncedChange = useMemo(() => debounce(onChange, 1000), [onChange]);
 
   switch (attribute.type) {
     case BuiltInAttributes.Name:

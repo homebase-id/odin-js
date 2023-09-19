@@ -156,7 +156,17 @@ export const saveChannelDefinition = async (
     accessControlList: definition.acl,
   };
 
-  return await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  const result = await uploadFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    payloadBytes,
+    undefined,
+    encrypt
+  );
+  if (!result) throw new Error(`Upload failed`);
+
+  return result;
 };
 
 export const removeChannelDefinition = async (dotYouClient: DotYouClient, channelId: string) => {

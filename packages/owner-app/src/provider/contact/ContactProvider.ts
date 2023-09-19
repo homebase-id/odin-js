@@ -92,7 +92,7 @@ export const saveContact = async (
     payloadIsEncrypted: encrypt,
   };
 
-  const result: UploadResult = await uploadFile(
+  const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
@@ -100,6 +100,7 @@ export const saveContact = async (
     undefined,
     encrypt
   );
+  if (!result) throw new Error('Failed to upload contact');
 
   //update server-side info
   contact.fileId = result.file.fileId;

@@ -2,7 +2,12 @@ import { DotYouClient } from '../DotYouClient';
 
 import { TransitInstructionSet } from '../../transit/TransitData/TransitTypes';
 import { KeyHeader } from './DriveTypes';
-import { UploadFileMetadata, UploadInstructionSet, AppendInstructionSet } from './DriveUploadTypes';
+import {
+  UploadFileMetadata,
+  UploadInstructionSet,
+  AppendInstructionSet,
+  UploadResult,
+} from './DriveUploadTypes';
 import { encryptWithKeyheader, encryptWithSharedSecret, encryptKeyHeader } from './SecurityHelpers';
 import {
   jsonStringify64,
@@ -141,7 +146,7 @@ export const pureUpload = async (
   };
 
   return client
-    .post(url, data, config)
+    .post<UploadResult>(url, data, config)
     .then((response) => {
       return response.data;
     })

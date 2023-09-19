@@ -103,7 +103,7 @@ export const uploadVideo = async (
     accessControlList: acl,
   };
 
-  const result: UploadResult = await uploadFile(
+  const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
@@ -111,6 +111,7 @@ export const uploadVideo = async (
     additionalThumbnails,
     encrypt
   );
+  if (!result) throw new Error(`Upload failed`);
 
   return { fileId: result.file.fileId, type: 'video' };
 };

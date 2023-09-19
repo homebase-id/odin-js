@@ -53,7 +53,6 @@ const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDe
 const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
-const SocketDemo = lazy(() => import('../templates/DemoData/SocketDemo'));
 
 const SocialFeed = lazy(() =>
   import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.SocialFeed }))
@@ -192,7 +191,6 @@ function App() {
             <Route path="settings/:sectionId" element={<Settings />}></Route>
 
             <Route path="demo-data" element={<DemoData />}></Route>
-            <Route path="socket-demo" element={<SocketDemo />}></Route>
 
             {/* Feed: */}
             <Route path="feed">
