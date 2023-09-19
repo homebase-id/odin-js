@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 
 import {
   Cloud,
-  Globe,
   HOME_ROOT_PATH,
   MiniDarkModeToggle,
   Persons,
@@ -271,9 +270,17 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
 
   // If no extra profiles we just show the defaults at the first level
   if (isFetching || profiles?.length == 2) {
+    const standardProfile = profiles?.find(
+      (profile) => profile.profileId === BuiltInProfiles.StandardProfileId
+    );
+
     return (
       <>
-        <NavItem label={'Profile Settings'} icon={Person} to={'/owner/profile/standard-info'} />
+        <NavItem
+          label={'Profile Settings'}
+          icon={Person}
+          to={`/owner/profile/${standardProfile?.slug || 'standard-info'}`}
+        />
         <NavItem label={'Home Settings'} icon={Cloud} to={'/owner/profile/homepage'} />
       </>
     );

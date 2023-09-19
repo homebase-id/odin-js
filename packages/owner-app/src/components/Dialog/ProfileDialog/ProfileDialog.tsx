@@ -23,7 +23,7 @@ const ProfileDialog = ({
   isOpen: boolean;
   defaultValue?: ProfileDefinition;
 
-  onConfirm: () => void;
+  onConfirm: (newProfileDef: ProfileDefinition) => void;
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
@@ -57,7 +57,7 @@ const ProfileDialog = ({
             e.preventDefault();
 
             await saveProfileDefinition(newProfileDef);
-            onConfirm();
+            onConfirm(newProfileDef);
 
             return false;
           }}

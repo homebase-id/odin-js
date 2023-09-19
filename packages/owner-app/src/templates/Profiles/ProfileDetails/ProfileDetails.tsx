@@ -1,4 +1,4 @@
-import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getNewId, slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -155,8 +155,9 @@ const ProfileDetails = () => {
         onCancel={() => {
           setIsOpenEdit(false);
         }}
-        onConfirm={() => {
+        onConfirm={(newDef) => {
           setIsOpenEdit(false);
+          if (newDef.name !== profileDef.name) navigate(`/owner/profile/${slugify(newDef.name)}`);
         }}
       />
     </>
