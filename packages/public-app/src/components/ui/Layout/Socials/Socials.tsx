@@ -1,5 +1,5 @@
-import { Tiktok, Instagram, Facebook, Twitter, Linkedin, Person } from '@youfoundation/common-app';
 import { SocialFields } from '@youfoundation/js-lib/profile';
+import { getLinkIcon } from '../Links/Links';
 
 const Socials = ({
   socialHandles,
@@ -24,19 +24,7 @@ const Socials = ({
           rel="noreferrer noopener"
           key={index}
         >
-          {handle.type === SocialFields.Tiktok ? (
-            <Tiktok className="h-5 w-5" />
-          ) : handle.type === SocialFields.Instagram ? (
-            <Instagram className="h-5 w-5" />
-          ) : handle.type === SocialFields.Facebook ? (
-            <Facebook className="h-5 w-5" />
-          ) : handle.type === SocialFields.Twitter ? (
-            <Twitter className="h-5 w-5" />
-          ) : handle.type === SocialFields.LinkedIn ? (
-            <Linkedin className="h-5 w-5" />
-          ) : handle.type === SocialFields.Homebase ? (
-            <Person className="h-5 w-5" />
-          ) : null}
+          {getLinkIcon(handle.type)({ className: 'w-5 h-5' })}
         </a>
       ))}
     </span>

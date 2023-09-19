@@ -15,7 +15,7 @@ const useLinks = () => {
   const dotYouClient = getDotYouClient();
 
   const fetchData: () => Promise<
-    { text: string; target: string; id: string }[] | undefined
+    { text: string; target: string; id: string; priority: number }[] | undefined
   > = async () => {
     const fetchStaticData = async () => {
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
@@ -30,6 +30,7 @@ const useLinks = () => {
               text: attribute.data[LinkFields.LinkText] as string,
               target: attribute.data[LinkFields.LinkTarget] as string,
               id: attribute.id,
+              priority: attribute.priority,
             };
           });
 
@@ -52,6 +53,7 @@ const useLinks = () => {
             text: attribute.data[LinkFields.LinkText] as string,
             target: attribute.data[LinkFields.LinkTarget] as string,
             id: attribute.id,
+            priority: attribute.priority,
           };
         });
     };

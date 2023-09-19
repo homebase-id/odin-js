@@ -19,7 +19,7 @@ import {
 } from '@youfoundation/js-lib/public';
 import { queryBatchCollection } from '@youfoundation/js-lib/core';
 
-type socialInfo = { type: string; username: string; priority: number };
+type SocialInfo = { type: string; username: string; priority: number };
 
 type SiteData = {
   owner: {
@@ -28,7 +28,7 @@ type SiteData = {
     surName?: string;
     profileImageId?: string;
   };
-  social: { type: string; username: string }[];
+  social: { type: string; username: string; priority: number }[];
   home: {
     template?: string;
     templateSettings?: unknown;
@@ -70,7 +70,7 @@ export const useSiteData = (isAuthenticated = true) => {
           };
         })
         .sort((attrA, attrB) => attrA.priority - attrB.priority)
-        .filter((attr) => attr !== undefined) as socialInfo[];
+        .filter((attr) => attr !== undefined) as SocialInfo[];
     };
 
     const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]) => {
@@ -238,6 +238,7 @@ const getSocialDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
         return {
           type: Object.keys(entry.payload.data)?.[0],
           username: typeof value === 'string' ? value : '',
+          priority: entry.payload.priority,
         };
       });
 

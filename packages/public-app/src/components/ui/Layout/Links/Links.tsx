@@ -22,7 +22,7 @@ import {
 } from '@youfoundation/common-app';
 import { SocialFields } from '@youfoundation/js-lib/profile';
 
-const getIcon = (type: string): React.FC<IconProps> => {
+export const getLinkIcon = (type: string): React.FC<IconProps> => {
   switch (type) {
     case SocialFields.Facebook:
       return Facebook;
@@ -68,6 +68,14 @@ const getLink = (type: string, username: string): string => {
     : `https://${username}`;
 };
 
+type LinkType = {
+  icon: FC<IconProps>;
+  link: string;
+  copyText?: string;
+  priority?: number;
+  children: ReactNode;
+};
+
 const Links = ({
   className,
   style,
@@ -82,52 +90,50 @@ const Links = ({
   const { data: siteData } = useSiteData();
   const { data: links } = useLinks();
 
-  if (!links) {
+  if (!links && (!includeSocials || !siteData?.social)) {
     return null;
   }
   const flexDir = direction === 'col' ? 'flex-col' : 'flex-row';
 
+  const allLinks: LinkType[] = [
+    ...(includeSocials && siteData?.social
+      ? siteData.social
+          ?.filter((social) => !!social.type)
+          .map((social) => {
+            const link = getLink(social.type, social.username);
+            return {
+              icon: getLinkIcon(social.type),
+              link: link,
+              copyText: link ? undefined : social.username,
+              priority: social.priority,
+              children: link ? (
+                social.username
+              ) : (
+                <>
+                  @{social.username} <small className="my-auto ml-1">({social.type})</small>
+                </>
+              ),
+            };
+          })
+      : []),
+    ...(links || []).map((link) => ({
+      icon: Globe,
+      link: link.target,
+      copyText: undefined,
+      priority: link.priority,
+      children: link.text,
+    })),
+  ].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
+
   return (
     <div className={`-m-2 flex ${flexDir} flex-wrap ${className}`}>
-      {includeSocials && (
-        <>
-          {siteData?.social
-            ?.filter((social) => !!social.type)
-            ?.map((social, index) => {
-              const link = getLink(social.type, social.username);
-
-              return (
-                <BetterLink
-                  key={index}
-                  icon={getIcon(social.type)}
-                  link={link}
-                  style={style}
-                  className={direction === 'col' ? 'px-4 py-3' : 'px-3 py-2'}
-                  copyText={link ? undefined : social.username}
-                >
-                  {link ? (
-                    social.username
-                  ) : (
-                    <div className="flex w-full flex-row">
-                      @{social.username} <small className="my-auto ml-1">({social.type})</small>
-                      <ClipboardIcon className="ml-auto h-5 w-5" />
-                    </div>
-                  )}
-                </BetterLink>
-              );
-            })}
-        </>
-      )}
-      {links.map((link) => (
+      {allLinks.map((link, index) => (
         <BetterLink
-          key={link.target}
-          link={link.target}
-          icon={Globe}
+          key={index}
+          {...link}
           style={style}
           className={direction === 'col' ? 'px-4 py-3' : 'px-3 py-2'}
-        >
-          {link.text}
-        </BetterLink>
+        />
       ))}
     </div>
   );
@@ -176,10 +182,17 @@ const BetterLink = ({
         }}
       >
         {icon({ className: `my-auto ${style === 'secondary' ? 'mr-2' : 'mr-5'} h-4 w-4` })}
-        {children}
+        {copyText ? (
+          <div className="flex w-full flex-row">
+            {children}
+            <ClipboardIcon className="ml-auto h-5 w-5" />
+          </div>
+        ) : (
+          children
+        )}
         {isCopied && (
           <div className="absolute inset-0 z-10 flex w-full flex-row items-center justify-center">
-            <span className="rounded-lg bg-background px-2 py-1 text-foreground shadow-lg">
+            <span className="rounded-lg bg-background/75 px-2 py-1 text-foreground shadow-lg">
               {t('Copied')}
             </span>
           </div>
