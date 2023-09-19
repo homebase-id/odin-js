@@ -125,6 +125,8 @@ export const Comment = ({
   );
 };
 
+const MAX_CHAR_FOR_SUMMARY = 280;
+
 export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
   const { authorOdinId, content } = commentData;
   const { body } = content;
@@ -143,7 +145,7 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
                   {t('Encrypted')}
                 </span>
               ) : (
-                <>{ellipsisAtMaxChar(body, 140)}</>
+                <>{ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}</>
               )}
             </p>
           </div>

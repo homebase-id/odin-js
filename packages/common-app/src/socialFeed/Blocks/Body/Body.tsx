@@ -7,6 +7,8 @@ const EmbeddedPostContent = lazy(() =>
   import('./EmbeddedPostContent').then((m) => ({ default: m.EmbeddedPostContent }))
 );
 
+const MAX_CHAR_FOR_SUMMARY = 400;
+
 export const PostBody = ({
   post,
   odinId,
@@ -36,7 +38,7 @@ export const PostBody = ({
                 />
               </div>
             ) : (
-              ellipsisAtMaxChar((post as Article).abstract, 140)
+              ellipsisAtMaxChar((post as Article).abstract, MAX_CHAR_FOR_SUMMARY)
             )}
 
             <>
@@ -55,7 +57,7 @@ export const PostBody = ({
         </>
       ) : (
         <h1 className="text-foreground text-opacity-70">
-          {isExpanded || post.caption.length <= 140 ? (
+          {isExpanded || post.caption.length <= MAX_CHAR_FOR_SUMMARY ? (
             post.captionAsRichText ? (
               <RichTextRenderer
                 body={post.captionAsRichText}
@@ -67,7 +69,7 @@ export const PostBody = ({
             )
           ) : (
             <>
-              {ellipsisAtMaxChar(post.caption, 140)}{' '}
+              {ellipsisAtMaxChar(post.caption, MAX_CHAR_FOR_SUMMARY)}{' '}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
