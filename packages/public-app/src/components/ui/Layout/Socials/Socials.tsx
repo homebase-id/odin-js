@@ -1,4 +1,5 @@
 import { Tiktok, Instagram, Facebook, Twitter, Linkedin, Person } from '@youfoundation/common-app';
+import { SocialFields } from '@youfoundation/js-lib/profile';
 
 const Socials = ({
   socialHandles,
@@ -13,25 +14,27 @@ const Socials = ({
         <a
           className="ml-3 text-gray-500"
           href={
-            handle.type !== 'dotyouid'
-              ? `https://${handle.type}.com/${handle.username}`
+            handle.type !== SocialFields.Homebase
+              ? `https://${handle.type}.com/${handle.type === SocialFields.LinkedIn ? 'in/' : ''}${
+                  handle.username
+                }`
               : `https://${handle.username}`
           }
           target="_blank"
           rel="noreferrer noopener"
           key={index}
         >
-          {handle.type === 'tiktok' ? (
+          {handle.type === SocialFields.Tiktok ? (
             <Tiktok className="h-5 w-5" />
-          ) : handle.type === 'instagram' ? (
+          ) : handle.type === SocialFields.Instagram ? (
             <Instagram className="h-5 w-5" />
-          ) : handle.type === 'facebook' ? (
+          ) : handle.type === SocialFields.Facebook ? (
             <Facebook className="h-5 w-5" />
-          ) : handle.type === 'twitter' ? (
+          ) : handle.type === SocialFields.Twitter ? (
             <Twitter className="h-5 w-5" />
-          ) : handle.type === 'linkedin' ? (
+          ) : handle.type === SocialFields.LinkedIn ? (
             <Linkedin className="h-5 w-5" />
-          ) : handle.type === 'dotyouid' ? (
+          ) : handle.type === SocialFields.Homebase ? (
             <Person className="h-5 w-5" />
           ) : null}
         </a>

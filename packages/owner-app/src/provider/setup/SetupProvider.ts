@@ -303,7 +303,12 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
   };
 
   if (socialData.odinId)
-    await saveSocial(BuiltInAttributes.OdinIdentity, SocialFields.Odin, socialData.odinId, 1000);
+    await saveSocial(
+      BuiltInAttributes.HomebaseIdentity,
+      SocialFields.Homebase,
+      socialData.odinId,
+      1000
+    );
 
   if (socialData.facebook)
     await saveSocial(

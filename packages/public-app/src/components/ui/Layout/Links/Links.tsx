@@ -20,20 +20,21 @@ import {
   Twitter,
   Youtube,
 } from '@youfoundation/common-app';
+import { SocialFields } from '@youfoundation/js-lib/profile';
 
 const getIcon = (type: string): React.FC<IconProps> => {
   switch (type) {
-    case 'facebook':
+    case SocialFields.Facebook:
       return Facebook;
-    case 'twitter':
+    case SocialFields.Twitter:
       return Twitter;
-    case 'linkedin':
+    case SocialFields.LinkedIn:
       return Linkedin;
-    case 'instagram':
+    case SocialFields.Instagram:
       return Instagram;
-    case 'tiktok':
+    case SocialFields.Tiktok:
       return Tiktok;
-    case 'dotyouid':
+    case SocialFields.Homebase:
       return Person;
     case 'minecraft':
       return Minecraft;
@@ -62,7 +63,9 @@ const getLink = (type: string, username: string): string => {
   ) {
     return '';
   }
-  return type !== 'dotyouid' ? `https://${type}.com/${username}` : `https://${username}`;
+  return type !== 'dotyouid'
+    ? `https://${type}.com/${type === SocialFields.LinkedIn ? 'in/' : ''}${username}`
+    : `https://${username}`;
 };
 
 const Links = ({

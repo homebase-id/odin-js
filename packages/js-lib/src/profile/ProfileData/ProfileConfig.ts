@@ -68,7 +68,7 @@ export class CredictCardFields {
 }
 
 export class SocialFields {
-  static readonly Odin: string = 'dotyouid';
+  static readonly Homebase: string = 'dotyouid';
   static readonly Twitter: string = 'twitter';
   static readonly Facebook: string = 'facebook';
   static readonly LinkedIn: string = 'linkedin';

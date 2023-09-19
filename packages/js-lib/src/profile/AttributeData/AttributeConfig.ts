@@ -17,7 +17,7 @@ export class BuiltInAttributes {
   static readonly Birthday = toGuidId('birthday');
   static readonly PhoneNumber = toGuidId('phonenumber');
   static readonly Email = toGuidId('email');
-  static readonly OdinIdentity = toGuidId('dot_you_identity');
+  static readonly HomebaseIdentity = toGuidId('dot_you_identity');
   static readonly FacebookUsername = toGuidId('facebook_username');
   static readonly InstagramUsername = toGuidId('instagram_username');
   static readonly LinkedinUsername = toGuidId('linkedin_username');
@@ -37,7 +37,7 @@ export class BuiltInAttributes {
   static readonly Link = toGuidId('link');
 
   static readonly AllSocial = [
-    BuiltInAttributes.OdinIdentity,
+    BuiltInAttributes.HomebaseIdentity,
     BuiltInAttributes.TwitterUsername,
     BuiltInAttributes.FacebookUsername,
     BuiltInAttributes.InstagramUsername,

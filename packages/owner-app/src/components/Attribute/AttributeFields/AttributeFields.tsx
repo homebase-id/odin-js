@@ -168,15 +168,15 @@ const AttributeFields = ({
         </>
       );
       break;
-    case BuiltInAttributes.OdinIdentity:
+    case BuiltInAttributes.HomebaseIdentity:
       return (
         <>
           <div className="mb-5">
             <Label htmlFor="handle">{attribute.typeDefinition.name}</Label>
             <Input
               id="handle"
-              name={SocialFields.Odin}
-              defaultValue={attribute.data?.[SocialFields.Odin] ?? ''}
+              name={SocialFields.Homebase}
+              defaultValue={attribute.data?.[SocialFields.Homebase] ?? ''}
               onChange={debouncedChange}
             />
           </div>

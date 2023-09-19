@@ -57,8 +57,8 @@ export const AttributeDefinitions = {
 
   OdinIdentity: {
     type: toGuidId('dot_you_identity'),
-    name: 'Dot You Id',
-    description: 'A dot you id',
+    name: 'Homebase id',
+    description: 'A homebase id',
   },
 
   InstagramUsername: {
