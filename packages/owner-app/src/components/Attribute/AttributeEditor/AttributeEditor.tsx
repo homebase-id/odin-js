@@ -123,7 +123,7 @@ const AttributeEditor = ({
               type="secondary"
               onClick={() => setIsAclEdit(!isAclEdit)}
             />
-            {!attribute.data.isProtected ? (
+            {!attribute.data.isProtected && !isNewAttribute ? (
               <ActionButton
                 type="remove"
                 icon={Trash}
