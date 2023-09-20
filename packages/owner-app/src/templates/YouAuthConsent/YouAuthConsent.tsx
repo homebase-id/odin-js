@@ -187,12 +187,7 @@ const AppDetails = ({
               </small>
             </>
           ) : (
-            <>
-              {appRegistration?.name}
-              <small className="block text-sm dark:text-white dark:text-opacity-80">
-                <DomainHighlighter>{targetDomain}</DomainHighlighter>
-              </small>
-            </>
+            <>{appRegistration?.name}</>
           )}
         </h1>
       </div>
