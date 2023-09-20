@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ActionButton,
   ActionGroup,
@@ -25,6 +25,7 @@ import { createPortal } from 'react-dom';
 
 export const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
   const [isConfirmUnpublish, setIsConfirmUnpublish] = useState(false);
@@ -53,7 +54,8 @@ export const ArticleComposerPage = () => {
     error,
   } = useArticleComposer({
     postKey,
-    channelKey,
+    channelKey: channelKey || searchParams.get('channel') || undefined,
+    caption: searchParams.get('caption') || undefined,
   });
 
   const PostButton = ({ className }: { className?: string }) => {
@@ -118,6 +120,37 @@ export const ArticleComposerPage = () => {
         ]}
         actions={
           <>
+            <ActionGroup
+              type="mute"
+              size="square"
+              options={[
+                {
+                  label: t('Options'),
+                  onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
+                },
+                ...(!(postFile.fileId && !isPublished)
+                  ? [
+                      {
+                        label: t('Remove'),
+                        onClick: () => {
+                          doRemovePost();
+                          navigate('/owner/feed/articles');
+                        },
+                        icon: Trash,
+                        confirmOptions: {
+                          title: t('Remove'),
+                          body: `${t('Are you sure you want to remove')} "${
+                            postFile?.content?.caption || t('New article')
+                          }"`,
+                          buttonText: t('Remove'),
+                        },
+                      },
+                    ]
+                  : []),
+              ]}
+            >
+              ...
+            </ActionGroup>
             {postFile.fileId && !isPublished ? (
               <ActionButton
                 type="remove"
@@ -139,33 +172,6 @@ export const ArticleComposerPage = () => {
                 className="m-2"
               />
             ) : null}
-            <ActionGroup
-              type="mute"
-              size="square"
-              options={[
-                {
-                  label: t('Options'),
-                  onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
-                },
-                {
-                  label: t('Remove'),
-                  onClick: () => {
-                    doRemovePost();
-                    navigate('/owner/feed/articles');
-                  },
-                  icon: Trash,
-                  confirmOptions: {
-                    title: t('Remove'),
-                    body: `${t('Are you sure you want to remove')} "${
-                      postFile?.content?.caption || t('New article')
-                    }"`,
-                    buttonText: t('Remove'),
-                  },
-                },
-              ]}
-            >
-              ...
-            </ActionGroup>
             <PostButton />
           </>
         }

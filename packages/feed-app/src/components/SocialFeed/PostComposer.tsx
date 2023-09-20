@@ -171,7 +171,7 @@ const PostComposer = ({
               <Link
                 type="mute"
                 className={`px-2 py-1`}
-                to="/owner/feed/new"
+                to={`/owner/feed/new?caption=${caption}&channel=${channel.channelId}`}
                 title="Convert into an article"
               >
                 <Article className="h-4 w-4" />

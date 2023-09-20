@@ -17,7 +17,15 @@ export const EMPTY_POST: Article = {
   abstract: '',
 };
 
-const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; postKey?: string }) => {
+const useArticleComposer = ({
+  channelKey,
+  postKey,
+  caption,
+}: {
+  channelKey?: string;
+  postKey?: string;
+  caption?: string;
+}) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: serverData } = useBlog({
     channelSlug: channelKey,
@@ -39,6 +47,7 @@ const useArticleComposer = ({ channelKey, postKey }: { channelKey?: string; post
     ...serverData?.activeBlog,
     content: {
       ...EMPTY_POST,
+      caption: caption ?? EMPTY_POST.caption,
       authorOdinId: dotYouClient.getIdentity(),
       id: getNewId(),
       ...serverData?.activeBlog?.content,
