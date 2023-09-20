@@ -39,8 +39,10 @@ type SiteData = {
   };
 };
 
-export const useSiteData = (isAuthenticated = true) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+export const useSiteData = () => {
+  const { getDotYouClient, getIdentity, isOwner } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
+  const isAuthenticated = !!getIdentity() || isOwner;
 
   const fetchData: () => Promise<SiteData> = async () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
@@ -83,17 +85,14 @@ export const useSiteData = (isAuthenticated = true) => {
     };
 
     const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]) => {
-      const homeAttribute = homeAndThemeAttr?.find(
-        (attr) => attr.type === HomePageAttributes.HomePage
-      );
       const themeAttribute = homeAndThemeAttr?.find(
         (attr) => attr.type === HomePageAttributes.Theme
       );
 
       // Page Config
-      const tagLine = homeAttribute?.data[HomePageFields.TagLineId];
-      const leadText = homeAttribute?.data[HomePageFields.LeadTextId];
-      const headerImageFileId = homeAttribute?.data[HomePageFields.HeaderImageId];
+      const tagLine = themeAttribute?.data[HomePageFields.TagLineId];
+      const leadText = themeAttribute?.data[HomePageFields.LeadTextId];
+      const headerImageFileId = themeAttribute?.data[HomePageFields.HeaderImageId];
 
       const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
 
@@ -148,7 +147,7 @@ export const useSiteData = (isAuthenticated = true) => {
           queryParams: {
             targetDrive: homeDrive,
             fileType: [AttributeConfig.AttributeFileType],
-            tagsMatchAtLeastOne: [HomePageAttributes.HomePage, HomePageAttributes.Theme],
+            tagsMatchAtLeastOne: [HomePageAttributes.Theme],
           },
           resultOptions: {
             includeMetadataHeader: INCLUDE_METADATA_HEADER,
@@ -264,14 +263,13 @@ const getSocialDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
 
 const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
   // File based response if available
-  if (fileData.has('home') && fileData.has('theme')) {
-    const homeAttribute = fileData.get('home')?.[0]?.payload as Attribute;
+  if (fileData.has('theme')) {
     const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
 
-    if (homeAttribute && themeAttribute) {
-      const tagLine = homeAttribute?.data[HomePageFields.TagLineId];
-      const leadText = homeAttribute?.data[HomePageFields.LeadTextId];
-      const headerImageFileId = homeAttribute?.data[HomePageFields.HeaderImageId];
+    if (themeAttribute) {
+      const tagLine = themeAttribute?.data[HomePageFields.TagLineId];
+      const leadText = themeAttribute?.data[HomePageFields.LeadTextId];
+      const headerImageFileId = themeAttribute?.data[HomePageFields.HeaderImageId];
 
       const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
 

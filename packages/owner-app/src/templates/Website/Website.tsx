@@ -10,20 +10,6 @@ import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 
-const defaultHomeAttribute: AttributeVm = {
-  profileId: HomePageConfig.DefaultDriveId,
-  type: HomePageAttributes.HomePage,
-  priority: 1000,
-  sectionId: HomePageConfig.AttributeSectionNotApplicable,
-  data: { isNew: true, isProtected: true },
-  acl: undefined,
-  typeDefinition: {
-    type: HomePageAttributes.HomePage,
-    name: 'Homepage',
-    description: '',
-  },
-} as unknown as AttributeVm;
-
 const defaultThemeAttribute: AttributeVm = {
   profileId: HomePageConfig.DefaultDriveId,
   type: HomePageAttributes.Theme,
@@ -39,7 +25,6 @@ const defaultThemeAttribute: AttributeVm = {
 } as unknown as AttributeVm;
 
 const Website = () => {
-  const { data: homeData, isLoading: homeIsLoading } = useHomeAttributes().fetchHome;
   const { data: themeData, isLoading: themeIsLoading } = useHomeAttributes().fetchTheme;
 
   return (
@@ -59,16 +44,6 @@ const Website = () => {
           { title: t('Home settings') },
         ]}
       />
-      {homeIsLoading ? (
-        <div className="-m-5 pt-5">
-          <LoadingBlock className="m-5 h-20" />
-        </div>
-      ) : (
-        <AttributeGroup
-          attributes={homeData?.length ? homeData : [defaultHomeAttribute]}
-          groupTitle={t('Home')}
-        />
-      )}
       {themeIsLoading ? (
         <div className="-m-5 pt-5">
           <LoadingBlock className="m-5 h-20" />

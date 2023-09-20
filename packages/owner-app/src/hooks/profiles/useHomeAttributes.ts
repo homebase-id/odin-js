@@ -7,27 +7,6 @@ import { AttributeVm } from './useAttributes';
 const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
-  const fetchHome = async () => {
-    const foundHomettributes = (
-      await getAttributes(
-        dotYouClient,
-        HomePageConfig.DefaultDriveId,
-        [HomePageAttributes.HomePage],
-        10
-      )
-    ).map((attr) => {
-      return {
-        ...attr,
-        typeDefinition: {
-          type: HomePageAttributes.HomePage,
-          name: 'Homepage',
-          description: '',
-        },
-      } as AttributeVm;
-    });
-    return foundHomettributes;
-  };
-
   const fetchTheme = async () => {
     const foundThemeAttributes = (
       await getAttributes(
@@ -50,11 +29,6 @@ const useHomeAttributes = () => {
   };
 
   return {
-    fetchHome: useQuery(
-      ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.HomePage],
-      fetchHome,
-      { refetchOnMount: false, refetchOnWindowFocus: false, staleTime: Infinity, retry: 1 }
-    ),
     fetchTheme: useQuery(
       ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
       fetchTheme,

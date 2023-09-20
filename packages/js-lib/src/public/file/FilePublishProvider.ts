@@ -20,23 +20,23 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
   const sections = [...DEFAULT_SECTIONS];
   const publicSections = [...DEFAULT_PUBLIC_SECTIONS];
 
-  const homeAtrributes = await getAttributes(
+  const themeAttributes = await getAttributes(
     dotYouClient,
     HomePageConfig.DefaultDriveId,
-    [HomePageAttributes.HomePage],
+    [HomePageAttributes.Theme],
     10
   );
 
   // Image fileId's discovery:
-  const homeFileId = homeAtrributes?.[0]?.data[HomePageFields.HeaderImageId];
-  if (homeFileId) {
+  const headerImageFileId = themeAttributes?.[0]?.data[HomePageFields.HeaderImageId];
+  if (headerImageFileId) {
     try {
       const homeTargetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId.toString());
 
       const imageFileHeader = await getFileHeader(
         dotYouClient,
         homeTargetDrive,
-        homeFileId.toString()
+        headerImageFileId.toString()
       );
       const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
 
@@ -50,7 +50,7 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
       }
 
       sections.push({
-        name: homeFileId.toString(),
+        name: headerImageFileId.toString(),
         queryParams: headerImageQueryParam,
         resultOptions: BASE_RESULT_OPTIONS,
       });

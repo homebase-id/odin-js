@@ -65,12 +65,6 @@ const linkFileQueryParam: FileQueryParams = {
   tagsMatchAtLeastOne: [BuiltInAttributes.Link.toString()],
 };
 
-const homeFileQueryParam: FileQueryParams = {
-  targetDrive: homepageDrive,
-  fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAtLeastOne: [HomePageAttributes.HomePage.toString()],
-};
-
 export const BASE_RESULT_OPTIONS = {
   includeAdditionalThumbnails: false,
   includeJsonContent: true,
@@ -117,11 +111,6 @@ export const DEFAULT_SECTIONS = [
   {
     name: 'theme',
     queryParams: themeFileQueryParam,
-    resultOptions: BASE_RESULT_OPTIONS,
-  },
-  {
-    name: 'home',
-    queryParams: homeFileQueryParam,
     resultOptions: BASE_RESULT_OPTIONS,
   },
 ];

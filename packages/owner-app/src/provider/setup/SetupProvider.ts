@@ -88,7 +88,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     id: getNewId(),
     profileId: BuiltInProfiles.StandardProfileId,
     type: BuiltInAttributes.ShortBio,
-    priority: 1000,
+    priority: 10000,
     sectionId: BuiltInProfiles.PersonalInfoSectionId,
     data: {
       short_bio:
@@ -110,7 +110,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     id: getNewId(),
     profileId: BuiltInProfiles.StandardProfileId,
     type: BuiltInAttributes.Status,
-    priority: 1000,
+    priority: 10000,
     sectionId: BuiltInProfiles.PersonalInfoSectionId,
     data: { status: 'New Identity Owner' },
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
@@ -138,18 +138,6 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     )
   )?.fileId;
 
-  const defaultHomeAttribute: AttributeFile = {
-    id: getNewId(),
-    profileId: HomePageConfig.DefaultDriveId,
-    type: HomePageAttributes.HomePage,
-    priority: 1000,
-    sectionId: HomePageConfig.AttributeSectionNotApplicable,
-    data: {
-      isProtected: true,
-    },
-    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-  };
-
   const defaultThemeAttribute: AttributeFile = {
     id: getNewId(),
     profileId: HomePageConfig.DefaultDriveId,
@@ -163,15 +151,6 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     },
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
-
-  const homeDef = await getAttributes(
-    dotYouClient,
-    HomePageConfig.DefaultDriveId,
-    [HomePageAttributes.HomePage],
-    1
-  );
-
-  if (!homeDef?.length) await saveAttribute(dotYouClient, defaultHomeAttribute);
 
   const themeDef = await getAttributes(
     dotYouClient,

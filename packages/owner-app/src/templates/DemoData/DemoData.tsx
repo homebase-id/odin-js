@@ -504,9 +504,9 @@ const DemoDataHomeAndTheme = ({
     return null;
   }
 
-  const { data: homeData } = useHomeAttributes().fetchHome;
-  const hasHomeData =
-    homeData?.length && homeData[0].data[HomePageFields.TagLineId] === realmData.home.tagLine;
+  const { data: themeData } = useHomeAttributes().fetchTheme;
+  const hasThemeData =
+    themeData?.length && themeData[0].data[HomePageFields.TagLineId] === realmData.home.tagLine;
 
   const {
     save: { mutate: saveRoot },
@@ -515,8 +515,8 @@ const DemoDataHomeAndTheme = ({
     profileId: HomePageConfig.DefaultDriveId,
   });
 
-  const addHome = async () => {
-    if (hasHomeData) return;
+  const addTheme = async () => {
+    if (hasThemeData) return;
 
     // Create media
     const mediaFileId = await uploadMedia(
@@ -526,12 +526,12 @@ const DemoDataHomeAndTheme = ({
     );
 
     // Create attribute
-    const newRootAttr: AttributeFile = homeData?.[0] || {
+    const newRootAttr: AttributeFile = themeData?.[0] || {
       fileId: undefined,
       versionTag: undefined,
       id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId.toString(),
-      type: HomePageAttributes.HomePage.toString(),
+      type: HomePageAttributes.Theme.toString(),
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable.toString(),
       data: {},
@@ -549,15 +549,15 @@ const DemoDataHomeAndTheme = ({
 
   return (
     <div className="mb-5">
-      <h1>Home:</h1>
+      <h1>Theme:</h1>
       <button
-        onClick={addHome}
+        onClick={addTheme}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          hasHomeData ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
+          hasThemeData ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={!!hasHomeData}
+        disabled={!!hasThemeData}
       >
-        Add Home
+        Add Theme
       </button>
     </div>
   );

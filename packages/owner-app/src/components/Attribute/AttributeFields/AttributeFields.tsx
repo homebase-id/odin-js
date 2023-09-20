@@ -312,9 +312,6 @@ const AttributeFields = ({
         </>
       );
       break;
-    case HomePageAttributes.HomePage:
-      return <HomeAttributeEditor attribute={attribute} onChange={debouncedChange} />;
-      break;
     case HomePageAttributes.Theme:
       return <ThemeAttributeEditor attribute={attribute} onChange={debouncedChange} />;
       break;
@@ -545,15 +542,27 @@ const PhoneAttributeEditor = ({
   );
 };
 
-const HomeAttributeEditor = ({
+const ThemeAttributeEditor = ({
   attribute,
   onChange,
 }: {
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
+  // Home consts:
+  const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
+
   return (
     <>
+      <div className="mb-5">
+        <Label htmlFor={HomePageThemeFields.ThemeId}>{t('Theme')}</Label>
+        <ThemeSelector
+          id={attribute.fileId || attribute.id}
+          name={HomePageThemeFields.ThemeId}
+          defaultValue={attribute.data?.[HomePageThemeFields.ThemeId] ?? ''}
+          onChange={onChange}
+        />
+      </div>
       <div className="mb-5">
         <Label htmlFor="headerImage">{t('Background photo')}</Label>
         <ImageSelector
@@ -586,31 +595,6 @@ const HomeAttributeEditor = ({
           id="leadText"
           name="leadText"
           defaultValue={attribute.data?.['leadText'] ?? ''}
-          onChange={onChange}
-        />
-      </div>
-    </>
-  );
-};
-
-const ThemeAttributeEditor = ({
-  attribute,
-  onChange,
-}: {
-  attribute: AttributeVm;
-  onChange: (e: { target: { value: unknown; name: string } }) => void;
-}) => {
-  // Home consts:
-  const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
-
-  return (
-    <>
-      <div className="mb-5">
-        <Label htmlFor={HomePageThemeFields.ThemeId}>{t('Theme')}</Label>
-        <ThemeSelector
-          id={attribute.fileId || attribute.id}
-          name={HomePageThemeFields.ThemeId}
-          defaultValue={attribute.data?.[HomePageThemeFields.ThemeId] ?? ''}
           onChange={onChange}
         />
       </div>

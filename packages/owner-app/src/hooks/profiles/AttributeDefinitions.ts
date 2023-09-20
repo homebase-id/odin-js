@@ -170,10 +170,4 @@ export const AttributeDefinitions = {
     name: 'Theme',
     description: 'Theme configuration',
   },
-
-  Homepage: {
-    type: HomePageAttributes.HomePage,
-    name: 'Homepage',
-    description: 'Homepage configuration',
-  },
 };
