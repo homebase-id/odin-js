@@ -35,3 +35,5 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_DEPLOY_TO_PROD: true
           build_directory: packages/feed-app/dist
+          install_command: 'echo Skipping installing the dependencies'
+          build_command: 'echo Skipping building the web files'
