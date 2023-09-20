@@ -15,24 +15,24 @@ import { useMemo } from 'react';
 const Home = ({ tab }: { tab?: string }) => {
   const { home, owner } = useSiteData().data ?? {};
 
-  if (!home) return null;
-
   const body = useMemo(() => {
     const themeId = home?.templateSettings?.themeId;
     if (themeId === HomePageTheme.VerticalPosts.toString()) {
       return (
-        <HomeClassic templateSettings={home.templateSettings as ThemeWithTabsSettings} tab={tab} />
+        <HomeClassic templateSettings={home?.templateSettings as ThemeWithTabsSettings} tab={tab} />
       );
     } else if (themeId === HomePageTheme.HorizontalPosts.toString()) {
       return (
-        <HomeContent templateSettings={home.templateSettings as ThemeWithTabsSettings} tab={tab} />
+        <HomeContent templateSettings={home?.templateSettings as ThemeWithTabsSettings} tab={tab} />
       );
     } else if (themeId === HomePageTheme.Links.toString()) {
-      return <HomeLinks templateSettings={home.templateSettings as ThemeLinksSettings} />;
+      return <HomeLinks templateSettings={home?.templateSettings as ThemeLinksSettings} />;
     } else {
-      return <HomeCover templateSettings={home.templateSettings as ThemeCoverSettings} />;
+      return <HomeCover templateSettings={home?.templateSettings as ThemeCoverSettings} />;
     }
   }, [home, tab]);
+
+  if (!home) return null;
 
   return (
     <>
