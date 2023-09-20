@@ -2,11 +2,11 @@ name: 'Feed to netlify'
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'packages/feed-app/src/**'
+  # push:
+  #   branches:
+  #     - 'main'
+  #   paths:
+  #     - 'packages/feed-app/src/**'
 
 jobs:
   deploy:
