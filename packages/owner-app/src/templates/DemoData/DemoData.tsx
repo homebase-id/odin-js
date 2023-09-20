@@ -542,6 +542,7 @@ const DemoDataHomeAndTheme = ({
     newRootAttr.data[HomePageThemeFields.HeaderImageId] = mediaFileId?.toString();
     newRootAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
     newRootAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
+    // TODO: Save tag and leadText into status and shortBio attributes
 
     saveRoot(newRootAttr);
 

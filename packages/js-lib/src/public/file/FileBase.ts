@@ -94,7 +94,7 @@ export const DEFAULT_SECTIONS = [
     resultOptions: BASE_RESULT_OPTIONS,
   },
   {
-    name: 'full-bio',
+    name: 'long-bio',
     queryParams: fullBioFileQueryParam,
     resultOptions: BASE_RESULT_OPTIONS,
   },
