@@ -21,18 +21,21 @@ const useBiography = () => {
     const fetchStaticData = async () => {
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
       if (fileData.has('bio')) {
-        const bioAttributes = fileData.get('bio')?.map((entry) => {
-          const attribute = entry.payload as Attribute;
+        const bioAttributes = fileData
+          .get('bio')
+          ?.map((entry) => {
+            const attribute = entry.payload as Attribute;
 
-          return {
-            title: attribute.data[MinimalProfileFields.ShortBioId] as string,
-            body: attribute.data[MinimalProfileFields.FullBioId] as string,
-            id: attribute.id,
-          };
-        });
-        if (bioAttributes?.length) {
-          return bioAttributes;
-        }
+            return {
+              title: attribute.data[MinimalProfileFields.ShortBioId] as string,
+              body: attribute.data[MinimalProfileFields.FullBioId] as string,
+              id: attribute.id,
+              priority: attribute.priority,
+            };
+          })
+          .sort((a, b) => a.priority - b.priority);
+
+        if (bioAttributes?.length) return bioAttributes;
       }
     };
 
