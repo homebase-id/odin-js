@@ -16,11 +16,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@octocat'
+
+      - run: npm ci
+
+      - run: npm run build-libs
+
       - uses: jsmrcaga/action-netlify-deploy@v2.0.0
         with:
           NETLIFY_SITE_ID: 2ad91e6e-3439-40ef-842b-80380912b1e3
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_DEPLOY_TO_PROD: true
-          install_command: npm install && npm run build-libs
           build_command: npm run build -w packages/feed-app
           build_directory: packages/feed-app/dist
