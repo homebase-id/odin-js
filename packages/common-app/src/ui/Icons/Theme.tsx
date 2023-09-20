@@ -73,3 +73,29 @@ export const VerticalPosts: FC<IconProps> = ({ className }) => {
     </svg>
   );
 };
+
+export const Links: FC<IconProps> = ({ className }) => {
+  return (
+    <svg
+      width="398"
+      height="416"
+      viewBox="0 0 398 416"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="398" height="416" />
+      <rect x="16" y="138" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="168" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="198" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="228" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="258" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="288" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="318" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="348" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="378" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="13" width="363" height="115" fill="currentColor" />
+      <circle cx="59" cy="82" r="32" fill="white" />
+    </svg>
+  );
+};

@@ -4,6 +4,7 @@ import HomeClassic from './Classic/HomeClassic';
 import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';
 import { useSiteData } from '@youfoundation/common-app';
+import HomeLinks from './Links/HomeLinks';
 
 const Home = ({ tab }: { tab?: string }) => {
   const { home, owner } = useSiteData().data ?? {};
@@ -17,6 +18,8 @@ const Home = ({ tab }: { tab?: string }) => {
       return <HomeClassic templateSettings={home.templateSettings} tab={tab} />;
     } else if (home?.template === HomePageTheme.ContentProducer.toString()) {
       return <HomeContent templateSettings={home.templateSettings} tab={tab} />;
+    } else if (home?.template === HomePageTheme.Links.toString()) {
+      return <HomeLinks templateSettings={home.templateSettings} />;
     } else {
       return <HomeCover leadText={home?.leadText} templateSettings={home.templateSettings} />;
     }

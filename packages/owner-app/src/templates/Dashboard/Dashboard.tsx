@@ -179,7 +179,7 @@ const HomePageTeaser = () => {
       <div className="relative">
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
-          fileId={themeAttr?.[0]?.data[HomePageFields.HeaderImageId]}
+          fileId={themeAttr?.[0]?.data[HomePageThemeFields.HeaderImageId]}
           className="absolute left-0 right-0 top-0 h-[5rem] w-full "
           fit="cover"
         />

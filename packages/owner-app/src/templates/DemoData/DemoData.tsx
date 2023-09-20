@@ -506,7 +506,8 @@ const DemoDataHomeAndTheme = ({
 
   const { data: themeData } = useHomeAttributes().fetchTheme;
   const hasThemeData =
-    themeData?.length && themeData[0].data[HomePageFields.TagLineId] === realmData.home.tagLine;
+    themeData?.length &&
+    themeData[0].data[HomePageThemeFields.TagLineId] === realmData.home.tagLine;
 
   const {
     save: { mutate: saveRoot },
@@ -538,9 +539,9 @@ const DemoDataHomeAndTheme = ({
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     };
 
-    newRootAttr.data[HomePageFields.HeaderImageId] = mediaFileId?.toString();
-    newRootAttr.data[HomePageFields.TagLineId] = realmData.home.tagLine;
-    newRootAttr.data[HomePageFields.LeadTextId] = realmData.home.lead;
+    newRootAttr.data[HomePageThemeFields.HeaderImageId] = mediaFileId?.toString();
+    newRootAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
+    newRootAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
 
     saveRoot(newRootAttr);
 

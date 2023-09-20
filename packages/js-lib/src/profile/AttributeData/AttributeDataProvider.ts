@@ -24,7 +24,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
 } from '../../helpers/helpers';
-import { HomePageAttributes, HomePageFields, HomePageThemeFields } from '../../public/public';
+import { HomePageAttributes, HomePageThemeFields } from '../../public/public';
 import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { AttributeFile, Attribute } from './AttributeDataTypes';
@@ -256,7 +256,7 @@ const themeAttributeProcessing = async (
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
   await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, faviconFileId);
 
-  const imageFieldKey = HomePageFields.HeaderImageId;
+  const imageFieldKey = HomePageThemeFields.HeaderImageId;
   const imageFileId = attr.data[imageFieldKey];
 
   await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);

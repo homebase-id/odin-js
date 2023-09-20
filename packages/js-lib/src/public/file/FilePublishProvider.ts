@@ -10,7 +10,7 @@ import {
 } from '../posts/PostDefinitionProvider';
 import { getRecentPosts } from '../posts/PostProvider';
 import { BlogConfig } from '../posts/PostTypes';
-import { HomePageConfig, HomePageAttributes, HomePageFields } from '../home/HomeTypes';
+import { HomePageConfig, HomePageAttributes, HomePageThemeFields } from '../home/HomeTypes';
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile, QueryParamsSection } from './FileProvider';
 import { getAttributes, getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
@@ -28,7 +28,7 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
   );
 
   // Image fileId's discovery:
-  const headerImageFileId = themeAttributes?.[0]?.data[HomePageFields.HeaderImageId];
+  const headerImageFileId = themeAttributes?.[0]?.data[HomePageThemeFields.HeaderImageId];
   if (headerImageFileId) {
     try {
       const homeTargetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId.toString());

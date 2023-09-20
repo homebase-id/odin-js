@@ -13,7 +13,6 @@ import {
   GetFile,
   HomePageAttributes,
   HomePageConfig,
-  HomePageFields,
   HomePageThemeFields,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
@@ -90,9 +89,9 @@ export const useSiteData = () => {
       );
 
       // Page Config
-      const tagLine = themeAttribute?.data[HomePageFields.TagLineId];
-      const leadText = themeAttribute?.data[HomePageFields.LeadTextId];
-      const headerImageFileId = themeAttribute?.data[HomePageFields.HeaderImageId];
+      const tagLine = themeAttribute?.data[HomePageThemeFields.TagLineId];
+      const leadText = themeAttribute?.data[HomePageThemeFields.LeadTextId];
+      const headerImageFileId = themeAttribute?.data[HomePageThemeFields.HeaderImageId];
 
       const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
 
@@ -267,9 +266,9 @@ const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
     const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
 
     if (themeAttribute) {
-      const tagLine = themeAttribute?.data[HomePageFields.TagLineId];
-      const leadText = themeAttribute?.data[HomePageFields.LeadTextId];
-      const headerImageFileId = themeAttribute?.data[HomePageFields.HeaderImageId];
+      const tagLine = themeAttribute?.data[HomePageThemeFields.TagLineId];
+      const leadText = themeAttribute?.data[HomePageThemeFields.LeadTextId];
+      const headerImageFileId = themeAttribute?.data[HomePageThemeFields.HeaderImageId];
 
       const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
 
