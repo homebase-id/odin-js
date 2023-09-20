@@ -176,7 +176,7 @@ const MoreItems = ({ isOpen: isNavOpen, logout }: { isOpen: boolean; logout: () 
         <hr className="border-b dark:border-slate-500" />
         <NavItem icon={HardDrive} label={'Drives'} to={'/owner/drives'} />
         <hr className="border-b dark:border-slate-500" />
-        <NavItem label={t('Wallet')} to={`/owner/profile/wallet`} icon={Wallet} />
+        <WalletLink />
         <hr className="border-b dark:border-slate-500" />
         <button className={navItemClassName} onClick={() => toggleDarkMode()}>
           <MiniDarkModeToggle className={`my-auto ${iconClassName}`} />
@@ -326,6 +326,19 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
         </div>
       ) : null}
     </>
+  );
+};
+
+const WalletLink = () => {
+  const { data: profiles } = useProfiles().fetchProfiles;
+  const walletProfile = profiles?.find((profile) => profile.profileId === BuiltInProfiles.WalletId);
+
+  return (
+    <NavItem
+      label={t('Wallet')}
+      to={`/owner/profile/${walletProfile?.slug || 'wallet'}`}
+      icon={Wallet}
+    />
   );
 };
 
