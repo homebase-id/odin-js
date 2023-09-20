@@ -21,7 +21,7 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
     <div className="grid grid-cols-1 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
       <FaviconOption isActive={valueObject && 'emoji' in valueObject} label={t('Emoji')}>
         <EmojiSelector
-          className="mx-auto text-6xl"
+          className="mx-auto text-4xl text-foreground text-opacity-70 hover:text-opacity-100"
           onInput={(val) =>
             onChange({
               target: {

@@ -117,7 +117,7 @@ export const CommentEditor = ({
         <div className="flex flex-shrink-0 flex-row items-center ">
           <EmojiSelector
             size="small"
-            className="text-opacity-30 hover:text-opacity-100"
+            className="text-foreground text-opacity-30 hover:text-opacity-100"
             onInput={(val) => setBody((oldVal) => `${oldVal} ${val}`)}
           />
           <FileSelector

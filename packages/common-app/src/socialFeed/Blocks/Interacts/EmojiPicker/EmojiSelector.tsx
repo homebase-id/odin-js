@@ -27,10 +27,12 @@ export const EmojiSelector = ({
       <ActionButton
         type="mute"
         size={size}
-        className={`text-foreground ${
-          defaultValue ? 'text-opacity-70' : 'text-opacity-30'
-        } hover:text-opacity-100`}
-        onClick={() => setIsOpen(!isOpen)}
+        className={`text-inherit`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         icon={defaultValue ? undefined : Lol}
         children={defaultValue || null}
       />

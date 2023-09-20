@@ -7,6 +7,7 @@ import {
   AttachmentFile,
   ChannelsDialog,
   EmbeddedPostContent,
+  EmojiSelector,
   FileOverview,
   FileSelector,
   Globe,
@@ -165,18 +166,23 @@ const PostComposer = ({
                 <FileSelector
                   onChange={(files) => setFiles(files.map((file) => ({ file })))}
                   accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
+                  className="text-foreground hover:text-opacity-70"
                 />
               </div>
 
               <Link
                 type="mute"
-                className={`px-2 py-1`}
+                className={`px-2 py-1 text-foreground hover:text-opacity-70`}
                 to={`/owner/feed/new?caption=${caption}&channel=${channel.channelId}`}
                 title="Convert into an article"
               >
                 <Article className="h-4 w-4" />
               </Link>
-
+              <EmojiSelector
+                className="text-foreground hover:text-opacity-70"
+                size="small"
+                onInput={(val) => setCaption((oldVal) => `${oldVal} ${val}`)}
+              />
               <ActionGroup
                 options={[
                   {
