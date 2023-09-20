@@ -67,7 +67,7 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
           })
         }
       >
-        <Block className="mx-auto h-auto w-full max-w-[5rem]" />
+        <Block className="mx-auto h-auto w-full max-w-[5rem] cursor-pointer" />
       </FaviconOption>
     </div>
   );
@@ -86,7 +86,7 @@ const FaviconOption = ({
 }) => {
   return (
     <div
-      className={`flex flex-col rounded-md border-2 p-2 ${
+      className={`flex cursor-pointer flex-col rounded-md border-2 p-2 ${
         isActive
           ? 'border-indigo-500 bg-white dark:bg-black'
           : 'border-slate-100 bg-slate-100 dark:border-slate-900 dark:bg-slate-900'
