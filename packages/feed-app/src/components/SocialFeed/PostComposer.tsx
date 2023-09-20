@@ -3,6 +3,7 @@ import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
   ActionButton,
+  ActionLink,
   Arrow,
   AttachmentFile,
   ChannelsDialog,
@@ -170,17 +171,18 @@ const PostComposer = ({
                 />
               </div>
 
-              <Link
+              <ActionLink
                 type="mute"
                 className={`px-2 py-1 text-foreground hover:text-opacity-70`}
-                to={`/owner/feed/new?caption=${caption}&channel=${channel.channelId}`}
+                size="square"
+                href={`/owner/feed/new?caption=${caption}&channel=${channel.channelId}`}
                 title="Convert into an article"
               >
                 <Article className="h-4 w-4" />
-              </Link>
+              </ActionLink>
               <EmojiSelector
                 className="text-foreground hover:text-opacity-70"
-                size="small"
+                size="square"
                 onInput={(val) => setCaption((oldVal) => `${oldVal} ${val}`)}
               />
               <ActionGroup
