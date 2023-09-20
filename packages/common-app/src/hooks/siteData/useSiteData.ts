@@ -13,12 +13,45 @@ import {
   GetFile,
   HomePageAttributes,
   HomePageConfig,
-  HomePageThemeFields,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
 import { queryBatchCollection } from '@youfoundation/js-lib/core';
 
 type SocialInfo = { type: string; username: string; priority: number };
+
+interface DefaultTemplateSettings {
+  colors: {
+    name: string;
+    id: string;
+    light: Record<string, string>;
+    dark: Record<string, string>;
+  };
+  favicon: { fileId: string } | { emoji: string } | undefined;
+}
+
+export interface ThemeCoverSettings extends DefaultTemplateSettings {
+  themeId: '111';
+  tagLine?: string;
+  leadText?: string;
+}
+
+export interface ThemeWithTabsSettings extends DefaultTemplateSettings {
+  themeId: '222' | '333';
+  tabs?: 'true' | 'false';
+  tabsOrder?: string[];
+  headerImageId?: string;
+}
+
+export interface ThemeLinksSettings extends DefaultTemplateSettings {
+  themeId: '444';
+  headerImageId?: string;
+}
+
+export type TemplateSettings =
+  | ThemeCoverSettings
+  | ThemeLinksSettings
+  | ThemeWithTabsSettings
+  | undefined;
 
 type SiteData = {
   owner: {
@@ -30,11 +63,7 @@ type SiteData = {
   };
   social: { type: string; username: string; priority: number }[];
   home: {
-    template?: string;
-    templateSettings?: unknown;
-    tagLine?: string;
-    leadText?: string;
-    headerImageFileId?: string;
+    templateSettings?: TemplateSettings;
   };
 };
 
@@ -88,19 +117,8 @@ export const useSiteData = () => {
         (attr) => attr.type === HomePageAttributes.Theme
       );
 
-      // Page Config
-      const tagLine = themeAttribute?.data[HomePageThemeFields.TagLineId];
-      const leadText = themeAttribute?.data[HomePageThemeFields.LeadTextId];
-      const headerImageFileId = themeAttribute?.data[HomePageThemeFields.HeaderImageId];
-
-      const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
-
       return {
-        template: homePageTheme,
         templateSettings: themeAttribute?.data,
-        tagLine: tagLine,
-        leadText: leadText,
-        headerImageFileId: headerImageFileId,
       };
     };
 
@@ -266,18 +284,8 @@ const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
     const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
 
     if (themeAttribute) {
-      const tagLine = themeAttribute?.data[HomePageThemeFields.TagLineId];
-      const leadText = themeAttribute?.data[HomePageThemeFields.LeadTextId];
-      const headerImageFileId = themeAttribute?.data[HomePageThemeFields.HeaderImageId];
-
-      const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
-
       return {
-        template: homePageTheme,
         templateSettings: themeAttribute?.data,
-        tagLine: tagLine,
-        leadText: leadText,
-        headerImageFileId: headerImageFileId,
       };
     }
   }

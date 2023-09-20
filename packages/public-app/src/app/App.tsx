@@ -106,11 +106,7 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
   const { isOwner } = useAuth();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
-  if (
-    siteData &&
-    siteDataFetched &&
-    (siteData.home?.template === '0' || !siteData.home?.template)
-  ) {
+  if (siteData && siteDataFetched && !siteData.home?.templateSettings?.themeId) {
     return (
       <div className="flex min-h-screen">
         <span className="m-auto text-center">

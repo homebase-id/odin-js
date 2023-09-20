@@ -15,8 +15,8 @@ export const CoverPage: FC<IconProps> = ({ className }) => {
       <rect x="243" y="50" width="135" height="6" fill="currentColor" />
       <rect x="243" y="61" width="135" height="6" fill="currentColor" />
       <rect x="243" y="72" width="135" height="6" fill="currentColor" />
-      <rect x="243" y="110" width="135" height="58" fill="currentColor" />
-      <rect x="243" y="178" width="135" height="58" fill="currentColor" />
+      {/* <rect x="243" y="110" width="135" height="58" fill="currentColor" /> */}
+      {/* <rect x="243" y="178" width="135" height="58" fill="currentColor" /> */}
       <rect x="16" y="15" width="216" height="239" fill="currentColor" />
     </svg>
   );

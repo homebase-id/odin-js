@@ -31,7 +31,6 @@ import {
 import {
   HomePageConfig,
   HomePageAttributes,
-  HomePageFields,
   getChannelDefinition,
   ChannelDefinition,
   getChannelDefinitions,
@@ -39,6 +38,7 @@ import {
   Article,
   PostFile,
   PostContent,
+  HomePageThemeFields,
 } from '@youfoundation/js-lib/public';
 import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';

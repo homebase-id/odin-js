@@ -1,11 +1,6 @@
 import { Label, t, Input, Textarea, Select } from '@youfoundation/common-app';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
-import {
-  HomePageThemeFields,
-  HomePageFields,
-  HomePageConfig,
-  HomePageTheme,
-} from '@youfoundation/js-lib/public';
+import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import ColorThemeSelector from '../../Form/ColorThemeSelector';
@@ -157,5 +152,29 @@ const ThemeSpecificFields = ({
           </div>
         </>
       );
+    case 'Links':
+      return (
+        <div>
+          <Label htmlFor="headerImage">{t('Background photo')}</Label>
+          <ImageSelector
+            id="headerImage"
+            name={HomePageThemeFields.HeaderImageId}
+            defaultValue={attribute.data?.[HomePageThemeFields.HeaderImageId] ?? ''}
+            onChange={(e) =>
+              onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+            }
+            acl={attribute.acl}
+            targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
+            sizeClass={`${
+              !attribute.data?.[HomePageThemeFields.HeaderImageId]
+                ? 'aspect-[16/9] md:aspect-[5/1]'
+                : ''
+            }  w-full object-cover`}
+            thumbInstructions={headerInstructionThumbSizes}
+          />
+        </div>
+      );
+    default:
+      return null;
   }
 };

@@ -9,6 +9,7 @@ import { LoadingBlock } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
 
 const defaultThemeAttribute: AttributeVm = {
   profileId: HomePageConfig.DefaultDriveId,
@@ -17,11 +18,7 @@ const defaultThemeAttribute: AttributeVm = {
   sectionId: HomePageConfig.AttributeSectionNotApplicable,
   data: { isNew: true, isProtected: true },
   acl: undefined,
-  typeDefinition: {
-    type: HomePageAttributes.Theme,
-    name: 'Theme',
-    description: '',
-  },
+  typeDefinition: AttributeDefinitions.Theme,
 } as unknown as AttributeVm;
 
 const Website = () => {

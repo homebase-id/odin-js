@@ -3,6 +3,7 @@ import { getAttributes } from '@youfoundation/js-lib/profile';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 import useAuth from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
+import { AttributeDefinitions } from './AttributeDefinitions';
 
 const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
@@ -18,11 +19,7 @@ const useHomeAttributes = () => {
     ).map((attr) => {
       return {
         ...attr,
-        typeDefinition: {
-          type: HomePageAttributes.Theme,
-          name: 'Theme',
-          description: '',
-        },
+        typeDefinition: AttributeDefinitions.Theme,
       } as AttributeVm;
     });
     return foundThemeAttributes;

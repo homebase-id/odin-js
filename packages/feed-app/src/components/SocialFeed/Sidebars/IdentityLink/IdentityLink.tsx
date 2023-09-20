@@ -1,5 +1,13 @@
 import { HomePageConfig } from '@youfoundation/js-lib/public';
-import { OwnerName, t, useSiteData, Image, HOME_ROOT_PATH } from '@youfoundation/common-app';
+import {
+  OwnerName,
+  t,
+  useSiteData,
+  Image,
+  HOME_ROOT_PATH,
+  ThemeWithTabsSettings,
+  ThemeLinksSettings,
+} from '@youfoundation/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 
 const IdentityLink = ({ className }: { className?: string }) => {
@@ -10,7 +18,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
       <div className="relative">
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
-          fileId={data?.home.headerImageFileId}
+          fileId={(data?.home.templateSettings as ThemeLinksSettings).headerImageId}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"
         />

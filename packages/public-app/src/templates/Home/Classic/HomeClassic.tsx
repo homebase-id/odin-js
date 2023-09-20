@@ -9,9 +9,9 @@ import About from '../Common/About/About';
 import Channels from '../Common/Posts/Channels';
 import Connections from '../Common/Connections/Connections';
 import useTabs from '../../../hooks/tabs/useTabs';
-import { HOME_ROOT_PATH } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, ThemeWithTabsSettings } from '@youfoundation/common-app';
 
-const HomeClassic = (props: { templateSettings: unknown; tab?: string }) => {
+const HomeClassic = (props: { templateSettings: ThemeWithTabsSettings; tab?: string }) => {
   const { tabs, isTabs } = useTabs();
 
   /// Tabs

@@ -6,6 +6,7 @@ import {
   Image,
   useChannels,
   useSiteData,
+  ThemeCoverSettings,
 } from '@youfoundation/common-app';
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
@@ -13,15 +14,13 @@ import ConnectLink from '../../../components/ConnectionActions/ConnectLink/Conne
 import { useActiveConnections } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 
-const HomeCover = (props: { leadText?: string; templateSettings: unknown }) => {
-  const { owner, home } = useSiteData().data ?? {};
+const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
+  const { owner } = useSiteData().data ?? {};
   const { isAuthenticated, isOwner } = useAuth();
   const { data: channels } = useChannels({ isAuthenticated, isOwner });
   const { data: connections } = useActiveConnections({ pageSize: 10 }).fetch;
 
-  if (!owner) {
-    return <></>;
-  }
+  if (!owner) return null;
 
   const targetDrive = {
     alias: BuiltInProfiles.StandardProfileId.toString(),
@@ -46,9 +45,9 @@ const HomeCover = (props: { leadText?: string; templateSettings: unknown }) => {
               <h1 className="mb-4 text-2xl">
                 <OwnerName />
                 <br />
-                <small>{home?.tagLine ?? ''}</small>
+                <small>{templateSettings?.tagLine ?? ''}</small>
               </h1>
-              {props?.leadText && <p>{props.leadText}</p>}
+              {templateSettings?.leadText && <p>{templateSettings.leadText}</p>}
               <div className="mt-4 flex flex-row">
                 <FollowLink className="my-1 mr-3" />
                 <ConnectLink className="my-1" />
