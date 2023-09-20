@@ -79,8 +79,6 @@ export const PostInteracts = ({
     postFile.content.slug ?? postFile.content.id
   }`;
 
-  console.log(canReactDetails);
-
   return (
     <div className={`${className ?? ''}`}>
       <div

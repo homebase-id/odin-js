@@ -43,7 +43,7 @@ const useBiography = () => {
       const biographyAttributes = await getAttributeVersions(
         dotYouClient,
         BuiltInProfiles.StandardProfileId,
-        BuiltInProfiles.PersonalInfoSectionId,
+        undefined,
         [BuiltInAttributes.FullBio]
       );
 

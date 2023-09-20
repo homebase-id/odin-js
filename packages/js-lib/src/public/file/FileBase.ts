@@ -17,19 +17,15 @@ const profileDrive: TargetDrive = {
 const personalInfoNameQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAll: [
-    BuiltInProfiles.PersonalInfoSectionId.toString(),
-    BuiltInAttributes.Name.toString(),
-  ],
+  groupId: [BuiltInProfiles.PersonalInfoSectionId.toString()],
+  tagsMatchAll: [BuiltInAttributes.Name.toString()],
 };
 
 const personalInfoPhotoQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAll: [
-    BuiltInProfiles.PersonalInfoSectionId.toString(),
-    BuiltInAttributes.Photo.toString(),
-  ],
+  groupId: [BuiltInProfiles.PersonalInfoSectionId.toString()],
+  tagsMatchAll: [BuiltInAttributes.Photo.toString()],
 };
 
 const SocialQueryParam: FileQueryParams = {

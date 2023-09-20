@@ -123,7 +123,6 @@ export const useSiteData = (isAuthenticated = true) => {
           queryParams: {
             targetDrive: socialDrive,
             fileType: [AttributeConfig.AttributeFileType],
-            groupId: [BuiltInProfiles.ExternalLinksSectionId],
             tagsMatchAtLeastOne: [...BuiltInAttributes.AllSocial, ...BuiltInAttributes.AllGames],
           },
           resultOptions: {

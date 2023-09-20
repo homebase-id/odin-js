@@ -10,7 +10,6 @@ import {
   UploadInstructionSet,
   getRandom16ByteArray,
   UploadFileMetadata,
-  UploadResult,
   uploadFile,
   deleteFile,
   AccessControlList,
