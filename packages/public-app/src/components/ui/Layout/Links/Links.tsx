@@ -57,10 +57,17 @@ export const getLinkIcon = (type: string): React.FC<IconProps> => {
   }
 };
 
+export const UNLINKABLE_SOCIALS = [
+  'minecraft',
+  'steam',
+  'discord',
+  'riot games',
+  'epic games',
+  'stackoverflow',
+];
+
 const getLink = (type: string, username: string): string => {
-  if (
-    ['minecraft', 'steam', 'discord', 'riot games', 'epic games', 'stackoverflow'].includes(type)
-  ) {
+  if (UNLINKABLE_SOCIALS.includes(type)) {
     return '';
   }
   return type !== 'dotyouid'
