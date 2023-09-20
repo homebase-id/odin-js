@@ -27,10 +27,11 @@ jobs:
 
       - run: npm run build-libs
 
+      - run: npm run build -w packages/feed-app
+
       - uses: jsmrcaga/action-netlify-deploy@v2.0.0
         with:
           NETLIFY_SITE_ID: 2ad91e6e-3439-40ef-842b-80380912b1e3
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_DEPLOY_TO_PROD: true
-          build_command: npm run build -w packages/feed-app
           build_directory: packages/feed-app/dist
