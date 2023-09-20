@@ -19,11 +19,11 @@ const Home = ({ tab }: { tab?: string }) => {
 
   const body = useMemo(() => {
     const themeId = home?.templateSettings?.themeId;
-    if (themeId === HomePageTheme.SocialClassic.toString()) {
+    if (themeId === HomePageTheme.VerticalPosts.toString()) {
       return (
         <HomeClassic templateSettings={home.templateSettings as ThemeWithTabsSettings} tab={tab} />
       );
-    } else if (themeId === HomePageTheme.ContentProducer.toString()) {
+    } else if (themeId === HomePageTheme.HorizontalPosts.toString()) {
       return (
         <HomeContent templateSettings={home.templateSettings as ThemeWithTabsSettings} tab={tab} />
       );

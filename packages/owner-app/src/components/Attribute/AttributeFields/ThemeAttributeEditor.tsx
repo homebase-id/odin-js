@@ -67,9 +67,9 @@ const ThemeSpecificFields = ({
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
 
   const theme =
-    themeId === HomePageTheme.SocialClassic.toString()
+    themeId === HomePageTheme.VerticalPosts.toString()
       ? 'Vertical'
-      : themeId === HomePageTheme.ContentProducer.toString()
+      : themeId === HomePageTheme.HorizontalPosts.toString()
       ? 'Horizontal'
       : themeId === HomePageTheme.Links.toString()
       ? 'Links'

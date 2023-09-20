@@ -24,8 +24,8 @@ export class HomePageAttributes {
 
 export enum HomePageTheme {
   CoverPage = 111,
-  SocialClassic = 222,
-  ContentProducer = 333,
+  VerticalPosts = 222,
+  HorizontalPosts = 333,
   Links = 444,
 }
 

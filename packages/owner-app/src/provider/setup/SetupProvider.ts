@@ -145,7 +145,7 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     priority: 1000,
     sectionId: HomePageConfig.AttributeSectionNotApplicable,
     data: {
-      themeId: HomePageTheme.SocialClassic + '',
+      themeId: HomePageTheme.VerticalPosts + '',
       isProtected: true,
       headerImageId: headerImageFileId,
     },

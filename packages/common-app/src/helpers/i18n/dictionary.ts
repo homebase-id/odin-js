@@ -14,8 +14,8 @@ const enLocale = [
   ['largecards', 'Grid'],
   ['classicblog', 'List'],
   ['coverpage', 'Cover Page'],
-  ['socialclassic', 'Social Vertical Posts'],
-  ['contentproducer', 'Social Horizontal Posts'],
+  ['verticalposts', 'Social Vertical Posts'],
+  ['horizontalposts', 'Social Horizontal Posts'],
   ['related blogs', 'Related blogs'],
 ] as const;
 
