@@ -59,6 +59,19 @@ const AttributeFields = ({
     case BuiltInAttributes.Name:
       return <NameAttributeEditor attribute={attribute} onChange={debouncedChange} />;
       break;
+    case BuiltInAttributes.Status:
+      return (
+        <div className="mb-5">
+          <Label htmlFor="status">{t('Status')}</Label>
+          <Input
+            id="status"
+            name={MinimalProfileFields.Status}
+            defaultValue={attribute.data?.[MinimalProfileFields.Status] ?? ''}
+            onChange={debouncedChange}
+          />
+        </div>
+      );
+      break;
     case BuiltInAttributes.Nickname:
       return (
         <div className="mb-5 w-2/5">

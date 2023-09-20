@@ -25,6 +25,8 @@ export class MinimalProfileFields {
   static readonly SurnameId: string = 'surname';
   static readonly DisplayName: string = 'displayName';
   static readonly ExplicitDisplayName: string = 'explicitDisplayName';
+
+  static readonly Status: string = 'status';
 }
 
 export class LinkFields {

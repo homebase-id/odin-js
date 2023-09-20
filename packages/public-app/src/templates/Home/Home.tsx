@@ -14,13 +14,9 @@ const Home = ({ tab }: { tab?: string }) => {
 
   const renderBody = () => {
     if (home?.template === HomePageTheme.SocialClassic.toString()) {
-      return (
-        <HomeClassic leadText={home.leadText} templateSettings={home.templateSettings} tab={tab} />
-      );
+      return <HomeClassic templateSettings={home.templateSettings} tab={tab} />;
     } else if (home?.template === HomePageTheme.ContentProducer.toString()) {
-      return (
-        <HomeContent leadText={home.leadText} templateSettings={home.templateSettings} tab={tab} />
-      );
+      return <HomeContent templateSettings={home.templateSettings} tab={tab} />;
     } else {
       return <HomeCover leadText={home?.leadText} templateSettings={home.templateSettings} />;
     }

@@ -10,7 +10,7 @@ import Connections from '../Common/Connections/Connections';
 import useTabs from '../../../hooks/tabs/useTabs';
 import { HOME_ROOT_PATH } from '@youfoundation/common-app';
 
-const HomeContent = (props: { leadText?: string; templateSettings: unknown; tab?: string }) => {
+const HomeContent = (props: { templateSettings: unknown; tab?: string }) => {
   const { tabs, isTabs } = useTabs();
 
   /// Tabs

@@ -4,7 +4,7 @@ import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-
 import { Image } from '@youfoundation/common-app';
 
 const PreviewPage = () => {
-  const { owner, home, social } = useSiteData().data ?? {};
+  const { owner, home } = useSiteData().data ?? {};
 
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
   const showProfileImage = owner?.profileImageId && targetDrive;
@@ -39,7 +39,7 @@ const PreviewPage = () => {
           <h1 className="text-xl">
             <OwnerName />
           </h1>
-          <small className="block text-base text-slate-600">{home?.tagLine}</small>
+          <small className="block text-base text-slate-600">{owner?.status}</small>
         </div>
       </div>
     </section>

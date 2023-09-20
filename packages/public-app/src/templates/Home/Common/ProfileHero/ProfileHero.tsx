@@ -49,7 +49,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
                 <h1 className="text-2xl">
                   <OwnerName />
                 </h1>
-                <small className="block text-base">{home?.tagLine}</small>
+                <small className="block text-base">{owner?.status}</small>
               </div>
 
               <div className="my-3 flex flex-col justify-center md:my-auto md:ml-auto">

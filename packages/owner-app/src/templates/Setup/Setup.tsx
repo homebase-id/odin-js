@@ -7,7 +7,7 @@ import useIsConfigured from '../../hooks/configure/useIsConfigured';
 import { DomainHighlighter, ErrorNotification } from '@youfoundation/common-app';
 import ShowRecoveryKey from '../../components/Recovery/ShowRecoveryKey';
 import { ProfileSetupData, SocialSetupData } from '../../provider/setup/SetupProvider';
-import NewSetupWizard from '../../components/Setup/NewSetupWizard';
+import SetupWizard from '../../components/Setup/SetupWizard';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import LoadingPage from '../../components/Setup/Pages/LoadingPage';
 
@@ -85,7 +85,7 @@ const Setup = () => {
                 {!hasRecoveryKey ? (
                   <ShowRecoveryKey onConfirm={() => setHasRecoveryKey(true)} />
                 ) : (
-                  <NewSetupWizard doInitWithData={doInitWithData} />
+                  <SetupWizard doInitWithData={doInitWithData} />
                 )}
               </>
             )}

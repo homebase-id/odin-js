@@ -83,6 +83,47 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 
     await saveProfileSection(dotYouClient, initialWallet.profileId, initialCreditCardSection);
   }
+
+  const defaultShortBioAttribute: AttributeFile = {
+    id: getNewId(),
+    profileId: BuiltInProfiles.StandardProfileId,
+    type: BuiltInAttributes.ShortBio,
+    priority: 1000,
+    sectionId: BuiltInProfiles.PersonalInfoSectionId,
+    data: {
+      short_bio:
+        'Born in a serene town that instilled values of compassion and integrity, embodies the essence of a true global citizen.',
+    },
+    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+  };
+
+  const shortBioAttr = await getAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    [BuiltInAttributes.ShortBio],
+    1
+  );
+
+  if (!shortBioAttr?.length) await saveAttribute(dotYouClient, defaultShortBioAttribute);
+
+  const defaultStatusAttribute: AttributeFile = {
+    id: getNewId(),
+    profileId: BuiltInProfiles.StandardProfileId,
+    type: BuiltInAttributes.Status,
+    priority: 1000,
+    sectionId: BuiltInProfiles.PersonalInfoSectionId,
+    data: { status: 'New Identity Owner' },
+    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+  };
+
+  const statusAttr = await getAttributes(
+    dotYouClient,
+    BuiltInProfiles.StandardProfileId,
+    [BuiltInAttributes.Status],
+    1
+  );
+
+  if (!statusAttr?.length) await saveAttribute(dotYouClient, defaultStatusAttribute);
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
@@ -97,40 +138,30 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     )
   )?.fileId;
 
-  const defaultHomeAttribute: AttributeVm = {
+  const defaultHomeAttribute: AttributeFile = {
     id: getNewId(),
     profileId: HomePageConfig.DefaultDriveId,
     type: HomePageAttributes.HomePage,
     priority: 1000,
     sectionId: HomePageConfig.AttributeSectionNotApplicable,
     data: {
-      headerImageId: headerImageFileId,
-      leadText:
-        'Born in a serene town that instilled values of compassion and integrity, embodies the essence of a true global citizen.',
-      tagLine: 'New Identity Owner',
       isProtected: true,
     },
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-    typeDefinition: {
-      type: HomePageAttributes.HomePage,
-      name: 'Homepage',
-      description: '',
-    },
   };
 
-  const defaultThemeAttribute: AttributeVm = {
+  const defaultThemeAttribute: AttributeFile = {
     id: getNewId(),
     profileId: HomePageConfig.DefaultDriveId,
     type: HomePageAttributes.Theme,
     priority: 1000,
     sectionId: HomePageConfig.AttributeSectionNotApplicable,
-    data: { themeId: HomePageTheme.SocialClassic + '', isProtected: true },
-    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
-    typeDefinition: {
-      type: HomePageAttributes.Theme,
-      name: 'Theme',
-      description: '',
+    data: {
+      themeId: HomePageTheme.SocialClassic + '',
+      isProtected: true,
+      headerImageId: headerImageFileId,
     },
+    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
 
   const homeDef = await getAttributes(
@@ -184,6 +215,7 @@ export interface SocialSetupData {
 const ANONYMOUS_ACL = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 
 const SetupProfileData = async (dotYouClient: DotYouClient, profileData: ProfileSetupData) => {
+  // Default Photo Attribute
   const defaultPhotoAttrId = toGuidId('default_photo_attribute');
   const existingPhotoAttr = await getAttribute(
     dotYouClient,
@@ -218,6 +250,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
     await saveAttribute(dotYouClient, newPhotoAttr);
   }
 
+  // Default Name Attribute
   const defaultNameAttrId = toGuidId('default_name_attribute');
   const existingNameAttr = await getAttribute(
     dotYouClient,
@@ -245,6 +278,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
     await saveAttribute(dotYouClient, newNameAttr);
   }
 
+  // Default Location Attribute (Optional)
   if (profileData.city || profileData.country) {
     const defaultLocationAttrId = toGuidId('default_location_attribute');
     const existingLocationAttr = await getAttribute(
