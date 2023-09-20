@@ -200,7 +200,7 @@ const AppDetails = ({
       <div className="dark:text-white dark:text-opacity-80">
         <p className="mt-2">
           {t('By logging in you allow')} &quot;
-          <DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;{' '}
+          {appRegistration?.name}&quot;{' '}
           {t('to verify your identity and personalise your experience')}
         </p>
       </div>
