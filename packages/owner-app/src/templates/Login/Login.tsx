@@ -12,7 +12,7 @@ import { DomainHighlighter } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
-  const [password, setPassword] = useState(import.meta.env.MODE === 'development' ? 'a' : '');
+  const [password, setPassword] = useState(import.meta.env.DEV ? 'a' : '');
   const [passwordState, setPasswordState] = useState<'unknown' | 'pending' | 'ready'>('unknown');
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
   const { authenticate, setFirstPassword, isPasswordSet } = useAuth();
