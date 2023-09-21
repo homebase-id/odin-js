@@ -81,9 +81,9 @@ export const RichTextEditor = ({
   disabled,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  defaultValue: any[];
+  defaultValue: any[] | string | undefined;
   placeholder: string;
-  mediaDrive: TargetDrive;
+  mediaDrive?: TargetDrive;
   name: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
@@ -188,11 +188,13 @@ export const RichTextEditor = ({
           <LinkToolbarButton icon={<Link />} />
         </div>
         <div className="flex flex-row md:mr-3">
-          <ImageToolbarButton
-            targetDrive={mediaDrive}
-            icon={<ImageIcon />}
-            key={'image-component'}
-          />
+          {mediaDrive ? (
+            <ImageToolbarButton
+              targetDrive={mediaDrive}
+              icon={<ImageIcon />}
+              key={'image-component'}
+            />
+          ) : null}
           <LinkButtonToolbarButton icon={<LinkButton />} key={'link-component'} />
         </div>
       </>
@@ -210,6 +212,16 @@ export const RichTextEditor = ({
     return null;
   };
 
+  const defaultValAsRichText: RichText =
+    defaultValue && Array.isArray(defaultValue)
+      ? (defaultValue as RichText)
+      : [
+          {
+            type: 'paragraph',
+            children: [{ text: defaultValue ?? '' }] as Record<string, unknown>[],
+          },
+        ];
+
   return (
     <>
       {/* Very dirty way of overruling default styling that are applied to the RTE */}
@@ -226,7 +238,7 @@ export const RichTextEditor = ({
       />
       <section className={`relative flex w-[100%] flex-col ${className ?? ''}`}>
         <PlateProvider
-          initialValue={defaultValue}
+          initialValue={defaultValAsRichText}
           plugins={plugins}
           onChange={(newValue) => {
             const isActualChange = innerEditor?.operations.some(

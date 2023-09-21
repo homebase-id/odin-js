@@ -26,18 +26,6 @@ export const InnerFieldEditors = ({
 }) => {
   const debouncedChange = useMemo(() => debounce(onChange, 1500), [onChange]);
 
-  const body: RichText = Array.isArray((postFile.content as Article)?.body)
-    ? ((postFile.content as Article)?.body as RichText)
-    : [
-        {
-          type: 'paragraph',
-          children: [{ text: (postFile.content as Article)?.body ?? '' }] as Record<
-            string,
-            unknown
-          >[],
-        },
-      ];
-
   const [isEditTeaser, setIsEditTeaser] = useState(false);
   return (
     <>
@@ -122,7 +110,7 @@ export const InnerFieldEditors = ({
         <div className="mb-5 border-gray-200 border-opacity-60 bg-background p-2 text-foreground dark:border-gray-800 md:rounded-lg md:border md:p-4">
           <ErrorBoundary>
             <RichTextEditor
-              defaultValue={body}
+              defaultValue={(postFile.content as Article)?.body}
               placeholder={t('Start writing...')}
               mediaDrive={getChannelDrive(channel.channelId)}
               name="body"

@@ -7,6 +7,7 @@ import {
   useChannels,
   useSiteData,
   ThemeCoverSettings,
+  RichTextRenderer,
 } from '@youfoundation/common-app';
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
@@ -47,7 +48,9 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
                 <br />
                 <small>{templateSettings?.tagLine ?? ''}</small>
               </h1>
-              {templateSettings?.leadText && <p>{templateSettings.leadText}</p>}
+              {templateSettings?.leadText ? (
+                <RichTextRenderer body={templateSettings?.leadText} />
+              ) : null}
               <div className="mt-4 flex flex-row">
                 <FollowLink className="my-1 mr-3" />
                 <ConnectLink className="my-1" />

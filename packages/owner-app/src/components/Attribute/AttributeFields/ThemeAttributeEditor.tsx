@@ -1,4 +1,4 @@
-import { Label, t, Input, Textarea, Select } from '@youfoundation/common-app';
+import { Label, t, Input, Select } from '@youfoundation/common-app';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
 import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
@@ -8,6 +8,7 @@ import FaviconSelector from '../../Form/FaviconSelector';
 import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
 import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { RichTextEditor } from '@youfoundation/feed-app';
 
 const headerInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 85, width: 600, height: 600 },
@@ -143,11 +144,12 @@ const ThemeSpecificFields = ({
           </div>
           <div>
             <Label htmlFor="leadText">{t('About')}</Label>
-            <Textarea
-              id="leadText"
+            <RichTextEditor
+              defaultValue={attribute.data?.['leadText']}
+              placeholder={t('Start writing...')}
               name="leadText"
-              defaultValue={attribute.data?.['leadText'] ?? ''}
               onChange={onChange}
+              className="min-h-[20vh]"
             />
           </div>
         </>
