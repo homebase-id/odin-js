@@ -75,6 +75,14 @@ const useAuth = () => {
             window.location.reload();
           })();
         }
+      } else {
+        // We've confirmed the user is logged in, and has a valid token
+        if (window.location.pathname === '/' && !document.referrer && isOwner) {
+          console.log(
+            'Automatically redirected to /owner as you are logged in as owner, and open your homepage'
+          );
+          window.location.href = '/owner';
+        }
       }
     }
   }, [hasValidToken]);
