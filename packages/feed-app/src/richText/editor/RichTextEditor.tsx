@@ -238,7 +238,7 @@ export const RichTextEditor = ({
       />
       <section className={`relative flex w-[100%] flex-col ${className ?? ''}`}>
         <PlateProvider
-          initialValue={defaultValAsRichText}
+          initialValue={defaultValAsRichText as any[]}
           plugins={plugins}
           onChange={(newValue) => {
             const isActualChange = innerEditor?.operations.some(
