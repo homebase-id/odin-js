@@ -24,7 +24,7 @@ import {
   jsonStringify64,
   stringToUint8Array,
 } from '../../helpers/helpers';
-import { HomePageAttributes, HomePageFields, HomePageThemeFields } from '../../public/public';
+import { HomePageAttributes, HomePageThemeFields } from '../../public/public';
 import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { AttributeFile, Attribute } from './AttributeDataTypes';
@@ -245,28 +245,20 @@ const photoAttributeProcessing = async (
   return attr;
 };
 
-const homePageAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<AttributeFile> => {
-  const imageFieldKey = HomePageFields.HeaderImageId;
-  const imageFileId = attr.data[imageFieldKey];
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
-
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
-
-  return attr;
-};
-
 const themeAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
 ): Promise<AttributeFile> => {
-  const imageFieldKey = HomePageThemeFields.Favicon;
-  const imageFileId = attr?.data[imageFieldKey]?.fileId;
-  if (!imageFileId) return attr;
+  const faviconFieldKey = HomePageThemeFields.Favicon;
+  const faviconFileId = attr?.data[faviconFieldKey]?.fileId;
+  if (!faviconFileId) return attr;
 
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, faviconFileId);
+
+  const imageFieldKey = HomePageThemeFields.HeaderImageId;
+  const imageFileId = attr.data[imageFieldKey];
+
   await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
 
   return attr;
@@ -279,9 +271,6 @@ const processAttribute = async (dotYouClient: DotYouClient, attribute: Attribute
 
     case BuiltInAttributes.Photo:
       return await photoAttributeProcessing(dotYouClient, attribute);
-
-    case HomePageAttributes.HomePage:
-      return await homePageAttributeProcessing(dotYouClient, attribute);
 
     case HomePageAttributes.Theme:
       return await themeAttributeProcessing(dotYouClient, attribute);

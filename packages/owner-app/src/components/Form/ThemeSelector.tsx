@@ -5,6 +5,7 @@ import {
   Block,
   HorizontalPosts,
   VerticalPosts,
+  Links,
   CoverPage,
   IconProps,
 } from '@youfoundation/common-app';
@@ -35,24 +36,24 @@ const ThemeSelector = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-4 md:gap-5">
+    <div className="grid grid-cols-2 gap-2 py-5 text-center text-gray-500 md:grid-cols-5 md:gap-5">
       <Theme
-        id={id + HomePageTheme.SocialClassic}
+        id={id + HomePageTheme.VerticalPosts}
         name={id + name}
         icon={VerticalPosts}
         label={t('Vertical Posts')}
-        value={HomePageTheme.SocialClassic}
+        value={HomePageTheme.VerticalPosts}
         onChange={doChange}
-        checked={defaultValue === HomePageTheme.SocialClassic + ''}
+        checked={defaultValue === HomePageTheme.VerticalPosts + ''}
       />
       <Theme
-        id={id + HomePageTheme.ContentProducer}
+        id={id + HomePageTheme.HorizontalPosts}
         name={id + name}
         icon={HorizontalPosts}
         label={t('Horizontal Posts')}
-        value={HomePageTheme.ContentProducer}
+        value={HomePageTheme.HorizontalPosts}
         onChange={doChange}
-        checked={defaultValue === HomePageTheme.ContentProducer + ''}
+        checked={defaultValue === HomePageTheme.HorizontalPosts + ''}
       />
       <Theme
         id={id + HomePageTheme.CoverPage}
@@ -62,6 +63,15 @@ const ThemeSelector = ({
         value={HomePageTheme.CoverPage}
         onChange={doChange}
         checked={defaultValue === HomePageTheme.CoverPage + ''}
+      />
+      <Theme
+        id={id + HomePageTheme.Links}
+        name={id + name}
+        icon={Links}
+        label={t('Link Page')}
+        value={HomePageTheme.Links}
+        onChange={doChange}
+        checked={defaultValue === HomePageTheme.Links + ''}
       />
       <Theme
         id={id + '0'}

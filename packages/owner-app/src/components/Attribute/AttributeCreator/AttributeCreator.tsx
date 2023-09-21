@@ -65,6 +65,7 @@ const AttributeCreator = ({
               BuiltInAttributes.PhoneNumber,
               BuiltInAttributes.Email,
               BuiltInAttributes.Nickname,
+              BuiltInAttributes.Status,
             ].includes(def.type)
           ? t('Details')
           : [BuiltInAttributes.FullBio, BuiltInAttributes.ShortBio].includes(def.type)

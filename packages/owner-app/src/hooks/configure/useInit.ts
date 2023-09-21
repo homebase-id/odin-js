@@ -44,18 +44,6 @@ const useInit = () => {
     },
   ];
 
-  const doCleanInit = async () => {
-    if (!isAuthenticated) return;
-
-    // Initialize
-    await initialize(dotYouClient, firstRunToken, initDrives);
-
-    // Ensure Config
-    await SetupProfileDefinition(dotYouClient);
-    await SetupBlog(dotYouClient);
-    await SetupHome(dotYouClient);
-  };
-
   const doInitWithData = async (data: WelcomeData) => {
     if (!isAuthenticated) return;
 
@@ -87,15 +75,6 @@ const useInit = () => {
   };
 
   return {
-    init: useMutation(doCleanInit, {
-      onError: (ex) => {
-        console.error(ex);
-      },
-      retry: 0,
-      onSettled: () => {
-        queryClient.invalidateQueries(['initialized']);
-      },
-    }),
     initWithData: useMutation(doInitWithData, {
       onError: (ex) => {
         console.error(ex);

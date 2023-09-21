@@ -167,7 +167,7 @@ const AppRegistration = ({
   return (
     <>
       <h1 className="mb-5 text-4xl dark:text-white">
-        {t('Allow new app')}:
+        {t('Create new app')}:
         <small className="block">
           {name}{' '}
           {origin ? (

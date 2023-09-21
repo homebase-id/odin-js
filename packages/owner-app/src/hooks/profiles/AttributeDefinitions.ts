@@ -1,4 +1,6 @@
 import { toGuidId } from '@youfoundation/js-lib/helpers';
+import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
+import { HomePageAttributes } from '@youfoundation/js-lib/public';
 
 export interface AttributeDefinition {
   type: string;
@@ -8,164 +10,164 @@ export interface AttributeDefinition {
 
 export const AttributeDefinitions = {
   Name: {
-    type: toGuidId('name'),
+    type: BuiltInAttributes.Name,
     name: 'Name',
     description: 'First name, last name, etc.',
   },
 
   Nickname: {
-    type: toGuidId('nickname'),
+    type: BuiltInAttributes.Nickname,
     name: 'Nickname',
     description: 'Friendly name',
   },
 
   Photo: {
-    type: toGuidId('photo'),
+    type: BuiltInAttributes.Photo,
     name: 'Profile photo',
     description: 'A photo or image of various formats',
   },
 
   Address: {
-    type: toGuidId('location'),
+    type: BuiltInAttributes.Address,
     name: 'Address',
     description: 'An address',
   },
 
   Birthday: {
-    type: toGuidId('birthday'),
+    type: BuiltInAttributes.Birthday,
     name: 'Birthday',
     description: 'Your birthday',
   },
 
   PhoneNumber: {
-    type: toGuidId('phonenumber'),
+    type: BuiltInAttributes.PhoneNumber,
     name: 'Phone number',
     description: 'Your phone number',
   },
 
   Email: {
-    type: toGuidId('email'),
+    type: BuiltInAttributes.Email,
     name: 'Email',
     description: 'Your email',
   },
 
-  FacebookUsername: {
-    type: toGuidId('facebook_username'),
-    name: 'Facebook',
-    description: 'A facebook username',
-  },
-
   OdinIdentity: {
-    type: toGuidId('dot_you_identity'),
+    type: BuiltInAttributes.HomebaseIdentity,
     name: 'Homebase id',
     description: 'A homebase id',
   },
 
+  FacebookUsername: {
+    type: BuiltInAttributes.FacebookUsername,
+    name: 'Facebook',
+    description: 'A facebook username',
+  },
+
   InstagramUsername: {
-    type: toGuidId('instagram_username'),
+    type: BuiltInAttributes.InstagramUsername,
     name: 'Instagram',
     description: 'An Instagram Username',
   },
 
   LinkedinUsername: {
-    type: toGuidId('linkedin_username'),
+    type: BuiltInAttributes.LinkedinUsername,
     name: 'LinkedIn',
     description: 'A LinkedIn username',
   },
 
   TiktokUsername: {
-    type: toGuidId('tiktok_username'),
+    type: BuiltInAttributes.TiktokUsername,
     name: 'Tiktok',
     description: 'A TikTok username',
   },
 
   TwitterUsername: {
-    type: toGuidId('twitter_username'),
+    type: BuiltInAttributes.TwitterUsername,
     name: 'Twitter',
     description: 'A Twitter username',
   },
 
   YoutubeUsername: {
-    type: toGuidId('youtube_username'),
+    type: BuiltInAttributes.YoutubeUsername,
     name: 'Youtube',
     description: 'A Youtube username',
   },
 
   DiscordUsername: {
-    type: toGuidId('discord_username'),
+    type: BuiltInAttributes.DiscordUsername,
     name: 'Discord',
     description: 'A Discord username',
   },
 
   EpicUsername: {
-    type: toGuidId('epic_username'),
+    type: BuiltInAttributes.EpicUsername,
     name: 'Epic games',
     description: 'Epic username',
   },
 
   RiotUsername: {
-    type: toGuidId('riot_username'),
+    type: BuiltInAttributes.RiotUsername,
     name: 'Riot games',
     description: 'Riot username',
   },
 
   SteamUsername: {
-    type: toGuidId('steam_username'),
+    type: BuiltInAttributes.SteamUsername,
     name: 'Steam',
     description: 'Steam username',
   },
 
   MinecraftUsername: {
-    type: toGuidId('minecraft_username'),
+    type: BuiltInAttributes.MinecraftUsername,
     name: 'Minecraft',
     description: 'Minecraft username',
   },
 
   GithubUsername: {
-    type: toGuidId('github_username'),
+    type: BuiltInAttributes.GithubUsername,
     name: 'Github',
     description: 'Github username',
   },
 
   StackoverflowUsername: {
-    type: toGuidId('stackoverflow_username'),
+    type: BuiltInAttributes.StackoverflowUsername,
     name: 'Stackoverflow',
     description: 'Stackoverflow username',
   },
 
   CreditCard: {
-    type: toGuidId('creditcard'),
+    type: BuiltInAttributes.CreditCard,
     name: 'Credit Card info',
     description: 'Credit card info',
   },
 
   FullBio: {
-    type: toGuidId('full_bio'),
+    type: BuiltInAttributes.FullBio,
     name: 'Full Bio',
     description: 'A long-form bio information about yourself',
   },
 
   ShortBio: {
-    type: toGuidId('short_bio'),
+    type: BuiltInAttributes.ShortBio,
     name: 'Short Bio',
     description: 'A few lines describing yourself, your mission, your passions, etc.',
   },
 
+  Status: {
+    type: BuiltInAttributes.Status,
+    name: 'Status',
+    description: 'your current status',
+  },
+
   Link: {
-    type: toGuidId('link'),
+    type: BuiltInAttributes.Link,
     name: 'Link',
     description: 'Link entry, make your online world accessible',
   },
 
   Theme: {
-    type: toGuidId('theme_attribute'),
+    type: HomePageAttributes.Theme,
     name: 'Theme',
     description: 'Theme configuration',
-  },
-
-  Homepage: {
-    type: toGuidId('homepage_attribute'),
-    name: 'Homepage',
-    description: 'Homepage configuration',
   },
 };

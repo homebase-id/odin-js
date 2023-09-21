@@ -24,21 +24,23 @@ export class HomePageAttributes {
 
 export enum HomePageTheme {
   CoverPage = 111,
-  SocialClassic = 222,
-  ContentProducer = 333,
-}
-
-export class HomePageFields {
-  static readonly HeaderImageId: string = 'headerImageId';
-  static readonly TagLineId: string = 'tagLine';
-  static readonly LeadTextId: string = 'leadText';
+  VerticalPosts = 222,
+  HorizontalPosts = 333,
+  Links = 444,
 }
 
 export class HomePageThemeFields {
-  static readonly ThemeId: string = 'themeId';
   static readonly Favicon: string = 'favicon';
   static readonly Colors: string = 'colors';
+
+  static readonly ThemeId: string = 'themeId';
+
+  // Social Classic / Content Producer
+  static readonly HeaderImageId: string = 'headerImageId';
   static readonly Tabs: string = 'tabs';
   static readonly TabsOrder: string = 'tabsOrder';
-  static readonly UseDarkMode: string = 'useDarkMode';
+
+  // Cover Page
+  static readonly TagLineId: string = 'tagLine';
+  static readonly LeadTextId: string = 'leadText';
 }

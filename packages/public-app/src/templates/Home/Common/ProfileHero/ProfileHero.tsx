@@ -4,7 +4,13 @@ import Links from '../../../../components/ui/Layout/Links/Links';
 import Socials from '../../../../components/ui/Layout/Socials/Socials';
 import ConnectLink from '../../../../components/ConnectionActions/ConnectLink/ConnectLink';
 import FollowLink from '../../../../components/ConnectionActions/FollowLink/FollowLink';
-import { OwnerName, Image, useSiteData, ImageLightbox } from '@youfoundation/common-app';
+import {
+  OwnerName,
+  Image,
+  useSiteData,
+  ImageLightbox,
+  ThemeLinksSettings,
+} from '@youfoundation/common-app';
 import { useState } from 'react';
 
 const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
@@ -20,7 +26,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
       <section className="bg-background">
         <div className="relative h-[27vh] min-h-[330px]">
           <Image
-            fileId={home?.headerImageFileId}
+            fileId={(home?.templateSettings as ThemeLinksSettings).headerImageId}
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"
@@ -49,7 +55,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
                 <h1 className="text-2xl">
                   <OwnerName />
                 </h1>
-                <small className="block text-base">{home?.tagLine}</small>
+                <small className="block text-base">{owner?.status}</small>
               </div>
 
               <div className="my-3 flex flex-col justify-center md:my-auto md:ml-auto">

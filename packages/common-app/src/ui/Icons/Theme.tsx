@@ -15,8 +15,8 @@ export const CoverPage: FC<IconProps> = ({ className }) => {
       <rect x="243" y="50" width="135" height="6" fill="currentColor" />
       <rect x="243" y="61" width="135" height="6" fill="currentColor" />
       <rect x="243" y="72" width="135" height="6" fill="currentColor" />
-      <rect x="243" y="110" width="135" height="58" fill="currentColor" />
-      <rect x="243" y="178" width="135" height="58" fill="currentColor" />
+      {/* <rect x="243" y="110" width="135" height="58" fill="currentColor" /> */}
+      {/* <rect x="243" y="178" width="135" height="58" fill="currentColor" /> */}
       <rect x="16" y="15" width="216" height="239" fill="currentColor" />
     </svg>
   );
@@ -69,6 +69,32 @@ export const VerticalPosts: FC<IconProps> = ({ className }) => {
       <rect x="269" y="206" width="110" height="58" fill="currentColor" />
       <rect x="16" y="263" width="243" height="115" fill="currentColor" />
       <rect x="16" y="388" width="243" height="115" fill="currentColor" />
+      <circle cx="59" cy="82" r="32" fill="white" />
+    </svg>
+  );
+};
+
+export const Links: FC<IconProps> = ({ className }) => {
+  return (
+    <svg
+      width="398"
+      height="416"
+      viewBox="0 0 398 416"
+      fill="none"
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="398" height="416" />
+      <rect x="16" y="138" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="168" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="198" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="228" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="258" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="288" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="318" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="348" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="378" width="243" height="20" fill="currentColor" />
+      <rect x="16" y="13" width="363" height="115" fill="currentColor" />
       <circle cx="59" cy="82" r="32" fill="white" />
     </svg>
   );

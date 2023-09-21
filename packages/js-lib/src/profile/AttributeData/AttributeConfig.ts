@@ -34,6 +34,7 @@ export class BuiltInAttributes {
   static readonly CreditCard = toGuidId('creditcard');
   static readonly FullBio = toGuidId('full_bio');
   static readonly ShortBio = toGuidId('short_bio');
+  static readonly Status = toGuidId('status');
   static readonly Link = toGuidId('link');
 
   static readonly AllSocial = [

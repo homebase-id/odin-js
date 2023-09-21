@@ -28,6 +28,13 @@ const personalInfoPhotoQueryParam: FileQueryParams = {
   tagsMatchAll: [BuiltInAttributes.Photo.toString()],
 };
 
+const personalInfoStatusQueryParam: FileQueryParams = {
+  targetDrive: profileDrive,
+  fileType: [AttributeConfig.AttributeFileType],
+  groupId: [BuiltInProfiles.PersonalInfoSectionId.toString()],
+  tagsMatchAll: [BuiltInAttributes.Status.toString()],
+};
+
 const SocialQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
@@ -40,22 +47,22 @@ const themeFileQueryParam: FileQueryParams = {
   tagsMatchAtLeastOne: [HomePageAttributes.Theme.toString()],
 };
 
-const bioFileQueryParam: FileQueryParams = {
+const fullBioFileQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
   tagsMatchAtLeastOne: [BuiltInAttributes.FullBio.toString()],
+};
+
+const shortBioFileQueryParam: FileQueryParams = {
+  targetDrive: profileDrive,
+  fileType: [AttributeConfig.AttributeFileType],
+  tagsMatchAtLeastOne: [BuiltInAttributes.ShortBio.toString()],
 };
 
 const linkFileQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
   tagsMatchAtLeastOne: [BuiltInAttributes.Link.toString()],
-};
-
-const homeFileQueryParam: FileQueryParams = {
-  targetDrive: homepageDrive,
-  fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAtLeastOne: [HomePageAttributes.HomePage.toString()],
 };
 
 export const BASE_RESULT_OPTIONS = {
@@ -82,8 +89,18 @@ export const DEFAULT_SECTIONS = [
     resultOptions: BASE_RESULT_OPTIONS,
   },
   {
-    name: 'bio',
-    queryParams: bioFileQueryParam,
+    name: 'status',
+    queryParams: personalInfoStatusQueryParam,
+    resultOptions: BASE_RESULT_OPTIONS,
+  },
+  {
+    name: 'long-bio',
+    queryParams: fullBioFileQueryParam,
+    resultOptions: BASE_RESULT_OPTIONS,
+  },
+  {
+    name: 'short-bio',
+    queryParams: shortBioFileQueryParam,
     resultOptions: BASE_RESULT_OPTIONS,
   },
   {
@@ -94,11 +111,6 @@ export const DEFAULT_SECTIONS = [
   {
     name: 'theme',
     queryParams: themeFileQueryParam,
-    resultOptions: BASE_RESULT_OPTIONS,
-  },
-  {
-    name: 'home',
-    queryParams: homeFileQueryParam,
     resultOptions: BASE_RESULT_OPTIONS,
   },
 ];

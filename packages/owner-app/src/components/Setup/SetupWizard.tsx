@@ -1,19 +1,10 @@
-import { base64ToUint8Array, jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import LoadingPage from './Pages/LoadingPage';
-import Profile from './Pages/Profile';
-import Socials from './Pages/Socials';
-import Welcome from './Pages/Welcome';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { useState } from 'react';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
-import Pager from './SetupPager';
-import Circles from './Pages/Circles';
+import { ActionButton, Arrow, Input, Label, Person, t } from '@youfoundation/common-app';
+import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PageData = Record<string, any>;
-
-const storageKey = 'wizardInfo';
 const defaultData: WelcomeData = {
   // Default values
   profile: {
@@ -35,133 +26,123 @@ const defaultData: WelcomeData = {
   ],
 };
 
-const SetupWizard = ({
-  doInit,
-  doInitWithData,
-}: {
-  doInit: () => void;
-  doInitWithData: (data: WelcomeData) => void;
-}) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) => void }) => {
+  const [data, setData] = useState(defaultData);
 
-  const sessionData = sessionStorage.getItem(storageKey);
-  const parsedData = sessionData && JSON.parse(sessionData);
+  const changeHandler = (e: { target: { name: string; value: any } }) => {
+    const dirtyState: any = { ...data };
+    dirtyState.profile[e.target.name] = e.target.value;
 
-  const [page, setPage] = useState(parseInt(searchParams?.get('page') || '0'));
-  const [data, setData] = useState(
-    sessionData
-      ? {
-          ...parsedData,
-          profile: {
-            ...parsedData.profile,
-            imageData: {
-              ...parsedData.profile?.imageData,
-              bytes:
-                parsedData?.profile?.imageData?.bytes &&
-                base64ToUint8Array(parsedData?.profile?.imageData?.bytes),
-            },
-          },
-        }
-      : {
-          ...defaultData,
-        }
-  );
-
-  const [pages, setPages] = useState([
-    { title: 'Welcome', isValid: true },
-    { title: 'Profile', isValid: false },
-    { title: 'Socials', isValid: false },
-    { title: 'Circles', isValid: false },
-  ]);
-
-  const validityHandler = (index: number, isValid: boolean) => {
-    const dirtyPages = [...pages];
-    dirtyPages[index].isValid = isValid;
-
-    setPages(dirtyPages);
+    setData(dirtyState);
   };
 
-  const doSkip = async () => {
-    setPage(10);
+  const initials =
+    data.profile['givenName']?.[0] || data.profile['surname']?.[0]
+      ? (data.profile['givenName']?.[0] ?? '') + (data.profile['surname']?.[0] ?? '')
+      : window.location.hostname.split('.')[0].substring(0, 2);
+
+  const doSetup = async () => {
+    const dataToUse = { ...data };
+
+    // Set fallback image:
+    if (!data.profile.imageData || !data.profile.imageData.bytes)
+      dataToUse.profile.imageData = {
+        bytes: base64ToUint8Array(fallbackProfileImage(initials)),
+        type: 'image/svg+xml',
+      };
+
+    // Set fallback name:
+    if (!data.profile.givenName && !data.profile.surname) {
+      const fallbackName = window.location.hostname.split('.')[0];
+      dataToUse.profile.givenName = fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
+    }
+
+    doInitWithData(dataToUse);
   };
-
-  useEffect(() => {
-    // Update queryString
-    if (searchParams.get('page') !== page + '') {
-      searchParams.set('page', page + '');
-      setSearchParams(searchParams);
-    }
-
-    // Check if we are done, and start init if so
-    if (page === pages.length) {
-      const dataToUse = { ...data };
-
-      // Set fallback image:
-      if (!data.profile.imageData || !data.profile.imageData.bytes) {
-        const initials =
-          (data.profile['givenName']?.[0] ?? '') + (data.profile['surname']?.[0] ?? '');
-        const odinIdInitials = window.location.hostname.split('.')[0].substring(0, 2);
-
-        dataToUse.profile.imageData = {
-          bytes: base64ToUint8Array(
-            fallbackProfileImage(initials?.length >= 2 ? initials : odinIdInitials)
-          ),
-          type: 'image/svg+xml',
-        };
-      }
-
-      // Set fallback name:
-      if (!data.profile.givenName && !data.profile.surname)
-        dataToUse.profile.givenName = window.location.hostname.split('.')[0];
-
-      doInitWithData(dataToUse);
-    }
-
-    if (page === 10) {
-      doInit();
-    }
-  }, [page]);
-
-  // Store data in session
-  useEffect(() => sessionStorage.setItem(storageKey, jsonStringify64(data)), [data]);
 
   return (
     <>
-      {page < pages.length && <Pager page={page} setPage={setPage} pages={pages} />}
-      {page === 0 ? (
-        <Welcome
-          onNext={() => setPage(page + 1)}
-          onReset={() =>
-            setData({
-              ...defaultData,
-            })
-          }
-          onSkip={doSkip}
-        />
-      ) : page === 1 ? (
-        <Profile
-          pageData={data.profile}
-          onChange={(pageData) => setData({ ...data, profile: { ...pageData } })}
-          setValidity={(isValid) => validityHandler(1, isValid)}
-          onNext={() => setPage(page + 1)}
-        />
-      ) : page === 2 ? (
-        <Socials
-          pageData={data.social}
-          onChange={(pageData) => setData({ ...data, social: { ...pageData } })}
-          setValidity={(isValid) => validityHandler(2, isValid)}
-          onNext={() => setPage(page + 1)}
-        />
-      ) : page === 3 ? (
-        <Circles
-          pageData={data.circles}
-          onChange={(pageData) => setData({ ...data, circles: [...pageData] })}
-          setValidity={(isValid) => validityHandler(3, isValid)}
-          onNext={() => setPage(page + 1)}
-        />
-      ) : (
-        <LoadingPage />
-      )}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          doSetup();
+        }}
+      >
+        <p className="flex flex-col">
+          Begin your journey by sharing a bit about yourself.
+          <small className="text-sm text-slate-500">
+            A little information can help friends recognize and connect with you on Homebase. This
+            information will be publicly available so don&apos;t add anything you would consider
+            private. And remember, here you&apos;re in control of your personal data.
+          </small>
+        </p>
+
+        <div className="my-10">
+          <h2 className="mb-2 text-xl">
+            {t('Your Profile Photo')}
+            <small className="block text-sm text-slate-400">{t('Help people recognize you')}</small>
+          </h2>
+          <div className="flex flex-row">
+            <div className="mx-auto sm:max-w-[15rem]">
+              <div className="relative">
+                {!data.profile['imageData']?.bytes ? (
+                  <div className="flex aspect-square w-full bg-slate-100 dark:bg-slate-700">
+                    {initials?.length ? (
+                      <span className="m-auto text-[95px] font-light">
+                        {initials.toUpperCase()}
+                      </span>
+                    ) : (
+                      <Person className="m-auto h-16 w-16" />
+                    )}
+                  </div>
+                ) : null}
+
+                <div className="mt-5">
+                  <ImageUploadAndCrop
+                    onChange={(imageData) => {
+                      changeHandler({
+                        target: { name: 'imageData', value: imageData },
+                      });
+                    }}
+                    defaultValue={data.profile['imageData']}
+                    expectedAspectRatio={1}
+                    maxHeight={500}
+                    maxWidth={500}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h2 className="mb-2 text-xl">
+          {t('Your info')}
+          <small className="block text-sm text-slate-400">{t('Help people find you')}</small>
+        </h2>
+
+        <div className="-mx-2 flex-row sm:flex">
+          <div className="mb-5 px-2 sm:w-2/5">
+            <Label htmlFor="givenName">{t('Given name')}</Label>
+            <Input
+              id="givenName"
+              name="givenName"
+              onChange={changeHandler}
+              defaultValue={data.profile['givenName']}
+            />
+          </div>
+          <div className="mb-5 px-2 sm:w-3/5">
+            <Label htmlFor="surname">{t('Surname')}</Label>
+            <Input
+              id="surname"
+              name="surname"
+              onChange={changeHandler}
+              defaultValue={data.profile['surname']}
+            />
+          </div>
+        </div>
+        <div className="mt-auto flex flex-row-reverse gap-2">
+          <ActionButton icon={Arrow}>{t('Setup')}</ActionButton>
+        </div>
+      </form>
     </>
   );
 };

@@ -31,7 +31,6 @@ import {
 import {
   HomePageConfig,
   HomePageAttributes,
-  HomePageFields,
   getChannelDefinition,
   ChannelDefinition,
   getChannelDefinitions,
@@ -39,6 +38,7 @@ import {
   Article,
   PostFile,
   PostContent,
+  HomePageThemeFields,
 } from '@youfoundation/js-lib/public';
 import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
@@ -504,9 +504,10 @@ const DemoDataHomeAndTheme = ({
     return null;
   }
 
-  const { data: homeData } = useHomeAttributes().fetchHome;
-  const hasHomeData =
-    homeData?.length && homeData[0].data[HomePageFields.TagLineId] === realmData.home.tagLine;
+  const { data: themeData } = useHomeAttributes().fetchTheme;
+  const hasThemeData =
+    themeData?.length &&
+    themeData[0].data[HomePageThemeFields.TagLineId] === realmData.home.tagLine;
 
   const {
     save: { mutate: saveRoot },
@@ -515,8 +516,8 @@ const DemoDataHomeAndTheme = ({
     profileId: HomePageConfig.DefaultDriveId,
   });
 
-  const addHome = async () => {
-    if (hasHomeData) return;
+  const addTheme = async () => {
+    if (hasThemeData) return;
 
     // Create media
     const mediaFileId = await uploadMedia(
@@ -526,21 +527,22 @@ const DemoDataHomeAndTheme = ({
     );
 
     // Create attribute
-    const newRootAttr: AttributeFile = homeData?.[0] || {
+    const newRootAttr: AttributeFile = themeData?.[0] || {
       fileId: undefined,
       versionTag: undefined,
       id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId.toString(),
-      type: HomePageAttributes.HomePage.toString(),
+      type: HomePageAttributes.Theme.toString(),
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable.toString(),
       data: {},
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     };
 
-    newRootAttr.data[HomePageFields.HeaderImageId] = mediaFileId?.toString();
-    newRootAttr.data[HomePageFields.TagLineId] = realmData.home.tagLine;
-    newRootAttr.data[HomePageFields.LeadTextId] = realmData.home.lead;
+    newRootAttr.data[HomePageThemeFields.HeaderImageId] = mediaFileId?.toString();
+    newRootAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
+    newRootAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
+    // TODO: Save tag and leadText into status and shortBio attributes
 
     saveRoot(newRootAttr);
 
@@ -549,15 +551,15 @@ const DemoDataHomeAndTheme = ({
 
   return (
     <div className="mb-5">
-      <h1>Home:</h1>
+      <h1>Theme:</h1>
       <button
-        onClick={addHome}
+        onClick={addTheme}
         className={`my-2 block w-1/3 rounded border-0  px-4 py-2 text-white hover:bg-green-600 focus:outline-none ${
-          hasHomeData ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
+          hasThemeData ? 'pointer-events-none bg-gray-300' : 'bg-green-500'
         }`}
-        disabled={!!hasHomeData}
+        disabled={!!hasThemeData}
       >
-        Add Home
+        Add Theme
       </button>
     </div>
   );

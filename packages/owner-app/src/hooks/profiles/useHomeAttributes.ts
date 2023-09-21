@@ -3,30 +3,10 @@ import { getAttributes } from '@youfoundation/js-lib/profile';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 import useAuth from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
+import { AttributeDefinitions } from './AttributeDefinitions';
 
 const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
-
-  const fetchHome = async () => {
-    const foundHomettributes = (
-      await getAttributes(
-        dotYouClient,
-        HomePageConfig.DefaultDriveId,
-        [HomePageAttributes.HomePage],
-        10
-      )
-    ).map((attr) => {
-      return {
-        ...attr,
-        typeDefinition: {
-          type: HomePageAttributes.HomePage,
-          name: 'Homepage',
-          description: '',
-        },
-      } as AttributeVm;
-    });
-    return foundHomettributes;
-  };
 
   const fetchTheme = async () => {
     const foundThemeAttributes = (
@@ -39,22 +19,13 @@ const useHomeAttributes = () => {
     ).map((attr) => {
       return {
         ...attr,
-        typeDefinition: {
-          type: HomePageAttributes.Theme,
-          name: 'Theme',
-          description: '',
-        },
+        typeDefinition: AttributeDefinitions.Theme,
       } as AttributeVm;
     });
     return foundThemeAttributes;
   };
 
   return {
-    fetchHome: useQuery(
-      ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.HomePage],
-      fetchHome,
-      { refetchOnMount: false, refetchOnWindowFocus: false, staleTime: Infinity, retry: 1 }
-    ),
     fetchTheme: useQuery(
       ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
       fetchTheme,

@@ -4,7 +4,11 @@ import AppMembershipView from '../../components/PermissionViews/AppPermissionVie
 import InfoBox from '../../components/ui/InfoBox/InfoBox';
 import Section from '../../components/ui/Sections/Section';
 import useApps from '../../hooks/apps/useApps';
-import { HomePageConfig, HomePageAttributes, HomePageFields } from '@youfoundation/js-lib/public';
+import {
+  HomePageConfig,
+  HomePageAttributes,
+  HomePageThemeFields,
+} from '@youfoundation/js-lib/public';
 import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
@@ -161,9 +165,9 @@ const Dashboard = () => {
 };
 
 const HomePageTeaser = () => {
-  const { data: homeAttr } = useAttributeVersions({
+  const { data: themeAttr } = useAttributeVersions({
     profileId: HomePageConfig.DefaultDriveId,
-    type: HomePageAttributes.HomePage,
+    type: HomePageAttributes.Theme,
   }).fetchVersions;
 
   const { data: nameAttr } = useAttributeVersions({
@@ -179,7 +183,7 @@ const HomePageTeaser = () => {
       <div className="relative">
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
-          fileId={homeAttr?.[0]?.data[HomePageFields.HeaderImageId]}
+          fileId={themeAttr?.[0]?.data[HomePageThemeFields.HeaderImageId]}
           className="absolute left-0 right-0 top-0 h-[5rem] w-full "
           fit="cover"
         />

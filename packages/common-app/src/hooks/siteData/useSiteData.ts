@@ -13,13 +13,45 @@ import {
   GetFile,
   HomePageAttributes,
   HomePageConfig,
-  HomePageFields,
-  HomePageThemeFields,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
 import { queryBatchCollection } from '@youfoundation/js-lib/core';
 
 type SocialInfo = { type: string; username: string; priority: number };
+
+interface DefaultTemplateSettings {
+  colors: {
+    name: string;
+    id: string;
+    light: Record<string, string>;
+    dark: Record<string, string>;
+  };
+  favicon: { fileId: string } | { emoji: string } | undefined;
+}
+
+export interface ThemeCoverSettings extends DefaultTemplateSettings {
+  themeId: '111';
+  tagLine?: string;
+  leadText?: string;
+}
+
+export interface ThemeWithTabsSettings extends DefaultTemplateSettings {
+  themeId: '222' | '333';
+  tabs?: 'true' | 'false';
+  tabsOrder?: string[];
+  headerImageId?: string;
+}
+
+export interface ThemeLinksSettings extends DefaultTemplateSettings {
+  themeId: '444';
+  headerImageId?: string;
+}
+
+export type TemplateSettings =
+  | ThemeCoverSettings
+  | ThemeLinksSettings
+  | ThemeWithTabsSettings
+  | undefined;
 
 type SiteData = {
   owner: {
@@ -27,32 +59,39 @@ type SiteData = {
     firstName?: string;
     surName?: string;
     profileImageId?: string;
+    status?: string;
   };
   social: { type: string; username: string; priority: number }[];
   home: {
-    template?: string;
-    templateSettings?: unknown;
-    tagLine?: string;
-    leadText?: string;
-    headerImageFileId?: string;
+    templateSettings?: TemplateSettings;
   };
 };
 
-export const useSiteData = (isAuthenticated = true) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+export const useSiteData = () => {
+  const { getDotYouClient, getIdentity, isOwner } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
+  const isAuthenticated = !!getIdentity() || isOwner;
 
   const fetchData: () => Promise<SiteData> = async () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
-    const parseOwnerData = async (nameAndPhotoAttr?: AttributeFile[]) => {
-      const nameAttr = nameAndPhotoAttr?.find((attr) => attr.type === BuiltInAttributes.Name);
-      const photoAttr = nameAndPhotoAttr?.find((attr) => attr.type === BuiltInAttributes.Photo);
+    const parseOwnerData = async (nameAndPhotoAndStatusAttr?: AttributeFile[]) => {
+      const nameAttr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.type === BuiltInAttributes.Name
+      );
+      const photoAttr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.type === BuiltInAttributes.Photo
+      );
+      const statusAttr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.type === BuiltInAttributes.Status
+      );
 
       return {
         displayName: nameAttr?.data.displayName ?? window.location.hostname,
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
         profileImageId: photoAttr?.data.profileImageId,
+        status: statusAttr?.data.status,
       };
     };
 
@@ -74,26 +113,12 @@ export const useSiteData = (isAuthenticated = true) => {
     };
 
     const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]) => {
-      const homeAttribute = homeAndThemeAttr?.find(
-        (attr) => attr.type === HomePageAttributes.HomePage
-      );
       const themeAttribute = homeAndThemeAttr?.find(
         (attr) => attr.type === HomePageAttributes.Theme
       );
 
-      // Page Config
-      const tagLine = homeAttribute?.data[HomePageFields.TagLineId];
-      const leadText = homeAttribute?.data[HomePageFields.LeadTextId];
-      const headerImageFileId = homeAttribute?.data[HomePageFields.HeaderImageId];
-
-      const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
-
       return {
-        template: homePageTheme,
         templateSettings: themeAttribute?.data,
-        tagLine: tagLine,
-        leadText: leadText,
-        headerImageFileId: headerImageFileId,
       };
     };
 
@@ -111,7 +136,11 @@ export const useSiteData = (isAuthenticated = true) => {
             targetDrive: ownerDrive,
             fileType: [AttributeConfig.AttributeFileType],
             groupId: [BuiltInProfiles.PersonalInfoSectionId],
-            tagsMatchAtLeastOne: [BuiltInAttributes.Name, BuiltInAttributes.Photo],
+            tagsMatchAtLeastOne: [
+              BuiltInAttributes.Name,
+              BuiltInAttributes.Photo,
+              BuiltInAttributes.Status,
+            ],
           },
           resultOptions: {
             includeMetadataHeader: INCLUDE_METADATA_HEADER,
@@ -135,7 +164,7 @@ export const useSiteData = (isAuthenticated = true) => {
           queryParams: {
             targetDrive: homeDrive,
             fileType: [AttributeConfig.AttributeFileType],
-            tagsMatchAtLeastOne: [HomePageAttributes.HomePage, HomePageAttributes.Theme],
+            tagsMatchAtLeastOne: [HomePageAttributes.Theme],
           },
           resultOptions: {
             includeMetadataHeader: INCLUDE_METADATA_HEADER,
@@ -214,6 +243,7 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
   if (fileData.has('name') && fileData.has('photo')) {
     const nameAttr = fileData.get('name')?.[0]?.payload as Attribute;
     const photoAttr = fileData.get('photo')?.[0]?.payload as Attribute;
+    const statusAttr = fileData.get('status')?.[0]?.payload as Attribute;
 
     if (nameAttr && photoAttr) {
       return {
@@ -221,6 +251,7 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
         profileImageId: photoAttr?.data.profileImageId,
+        status: statusAttr?.data.status,
       };
     }
   }
@@ -249,23 +280,12 @@ const getSocialDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
 
 const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
   // File based response if available
-  if (fileData.has('home') && fileData.has('theme')) {
-    const homeAttribute = fileData.get('home')?.[0]?.payload as Attribute;
+  if (fileData.has('theme')) {
     const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
 
-    if (homeAttribute && themeAttribute) {
-      const tagLine = homeAttribute?.data[HomePageFields.TagLineId];
-      const leadText = homeAttribute?.data[HomePageFields.LeadTextId];
-      const headerImageFileId = homeAttribute?.data[HomePageFields.HeaderImageId];
-
-      const homePageTheme = themeAttribute?.data[HomePageThemeFields.ThemeId];
-
+    if (themeAttribute) {
       return {
-        template: homePageTheme,
         templateSettings: themeAttribute?.data,
-        tagLine: tagLine,
-        leadText: leadText,
-        headerImageFileId: headerImageFileId,
       };
     }
   }

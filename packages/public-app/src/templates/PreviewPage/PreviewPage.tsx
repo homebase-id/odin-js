@@ -1,10 +1,10 @@
-import { useSiteData, OwnerName } from '@youfoundation/common-app';
+import { useSiteData, OwnerName, ThemeLinksSettings } from '@youfoundation/common-app';
 import { HomePageConfig } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { Image } from '@youfoundation/common-app';
 
 const PreviewPage = () => {
-  const { owner, home, social } = useSiteData().data ?? {};
+  const { owner, home } = useSiteData().data ?? {};
 
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
   const showProfileImage = owner?.profileImageId && targetDrive;
@@ -13,7 +13,11 @@ const PreviewPage = () => {
     <section className="flex h-56 max-w-2xl flex-col bg-background">
       <div className="relative h-24">
         <Image
-          fileId={home?.headerImageFileId}
+          fileId={
+            home?.templateSettings
+              ? (home.templateSettings as ThemeLinksSettings).headerImageId
+              : undefined
+          }
           targetDrive={HomePageConfig.HomepageTargetDrive}
           className="absolute inset-0"
           fit="cover"
@@ -39,7 +43,7 @@ const PreviewPage = () => {
           <h1 className="text-xl">
             <OwnerName />
           </h1>
-          <small className="block text-base text-slate-600">{home?.tagLine}</small>
+          <small className="block text-base text-slate-600">{owner?.status}</small>
         </div>
       </div>
     </section>

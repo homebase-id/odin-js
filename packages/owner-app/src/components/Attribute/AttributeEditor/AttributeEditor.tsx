@@ -8,6 +8,7 @@ import Section from '../../ui/Sections/Section';
 import AttributeFields from '../AttributeFields/AttributeFields';
 import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
+import { HomePageAttributes } from '@youfoundation/js-lib/public';
 
 const AttributeEditor = ({
   attribute,
@@ -123,7 +124,8 @@ const AttributeEditor = ({
               type="secondary"
               onClick={() => setIsAclEdit(!isAclEdit)}
             />
-            {!attribute.data.isProtected && !isNewAttribute ? (
+            {!(attribute.data.isProtected && attribute.type === HomePageAttributes.Theme) &&
+            !isNewAttribute ? (
               <ActionButton
                 type="remove"
                 icon={Trash}

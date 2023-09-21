@@ -18,7 +18,7 @@ const isRecord = (obj: unknown): obj is Record<string, unknown> => {
 };
 
 const DEFAULT_SETTINGS: TemplateSettings = {
-  themeId: HomePageTheme.SocialClassic,
+  themeId: HomePageTheme.VerticalPosts,
   isTabs: true,
   tabsOrder: ['Posts', 'Links', 'About', 'Connections'],
   colors: {

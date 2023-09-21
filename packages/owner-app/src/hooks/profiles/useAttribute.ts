@@ -16,8 +16,7 @@ import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public
 const getListItemCacheKey = (newAttrVm: Attribute) => {
   return [
     'attributes',
-    ...(newAttrVm.type !== HomePageAttributes.HomePage &&
-    newAttrVm.type !== HomePageAttributes.Theme
+    ...(newAttrVm.type !== HomePageAttributes.Theme
       ? [newAttrVm.profileId, newAttrVm.sectionId]
       : [HomePageConfig.DefaultDriveId, newAttrVm.type]),
   ];
@@ -94,13 +93,7 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
         });
 
         if (!typeDefinition) {
-          if (newAttr.type === HomePageAttributes.HomePage) {
-            typeDefinition = {
-              type: HomePageAttributes.HomePage,
-              name: 'Homepage',
-              description: '',
-            };
-          } else if (newAttr.type === HomePageAttributes.Theme) {
+          if (newAttr.type === HomePageAttributes.Theme) {
             typeDefinition = {
               type: HomePageAttributes.Theme,
               name: 'Theme',
