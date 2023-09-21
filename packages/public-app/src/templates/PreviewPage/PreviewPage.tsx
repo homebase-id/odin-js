@@ -15,7 +15,7 @@ const PreviewPage = () => {
         <Image
           fileId={
             home?.templateSettings
-              ? (home.templateSettings as ThemeLinksSettings).headerImageId
+              ? (home.templateSettings as ThemeLinksSettings)?.headerImageId
               : undefined
           }
           targetDrive={HomePageConfig.HomepageTargetDrive}

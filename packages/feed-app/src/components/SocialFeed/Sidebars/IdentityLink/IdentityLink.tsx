@@ -18,7 +18,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
       <div className="relative">
         <Image
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
-          fileId={(data?.home.templateSettings as ThemeLinksSettings).headerImageId}
+          fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageId}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"
         />

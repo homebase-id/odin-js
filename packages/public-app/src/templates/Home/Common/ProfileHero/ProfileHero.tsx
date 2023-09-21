@@ -26,7 +26,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
       <section className="bg-background">
         <div className="relative h-[27vh] min-h-[330px]">
           <Image
-            fileId={(home?.templateSettings as ThemeLinksSettings).headerImageId}
+            fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"
