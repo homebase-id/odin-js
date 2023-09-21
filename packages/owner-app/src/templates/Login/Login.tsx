@@ -15,7 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState(import.meta.env.DEV ? 'a' : '');
   const [passwordState, setPasswordState] = useState<'unknown' | 'pending' | 'ready'>('unknown');
   const [state, setState] = useState<'loading' | 'error' | 'success' | undefined>();
-  const { authenticate, setFirstPassword, isPasswordSet } = useAuth();
+  const { authenticate, setFirstPassword, isPasswordSet, isAuthenticated } = useAuth();
 
   const doLogin: FormEventHandler = async (e) => {
     e.preventDefault();
@@ -46,14 +46,14 @@ const Login = () => {
     }
   }, []);
 
-  if (passwordState === 'unknown' || passwordState === 'pending') {
+  if (passwordState === 'unknown' || passwordState === 'pending' || isAuthenticated) {
     return (
       <MinimalLayout noShadedBg={true} noPadding={true}>
         <div className="h-screen">
           <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col p-5">
             <div className="my-auto flex flex-col">
               <Loader className="mx-auto mb-10 h-20 w-20" />
-              <div className="text-center">{t('Configuring...')}</div>
+              {!isAuthenticated ? <div className="text-center">{t('Configuring...')}</div> : null}
             </div>
           </div>
         </div>
