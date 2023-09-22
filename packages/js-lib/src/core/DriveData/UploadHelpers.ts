@@ -25,7 +25,7 @@ const EMPTY_KEY_HEADER: KeyHeader = {
 const toBlob = (o: unknown): Blob => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
-  return new Blob([content]);
+  return new Blob([content], { type: 'application/octet-stream' });
 };
 
 export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mimeType: string) => {
@@ -151,7 +151,7 @@ export const pureUpload = async (
       return response.data;
     })
     .catch((error) => {
-      if (error.response.data.errorCode === 4160 && onVersionConflict) {
+      if (error.response?.data?.errorCode === 4160 && onVersionConflict) {
         onVersionConflict();
         return;
       }
@@ -185,7 +185,7 @@ export const pureAppend = async (
       return response.data;
     })
     .catch((error) => {
-      if (error.response.data.errorCode === 4160 && onVersionConflict) {
+      if (error.response?.data?.errorCode === 4160 && onVersionConflict) {
         onVersionConflict();
         return;
       }
