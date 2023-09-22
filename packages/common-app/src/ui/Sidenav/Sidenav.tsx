@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import {
@@ -48,6 +48,7 @@ const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
 
 export const Sidenav = ({ logout }: { logout: () => void }) => {
   const isDesktop = document.documentElement.clientWidth >= 1280;
+  const isLow = isDesktop && document.documentElement.clientHeight < 740;
   const storedState = localStorage.getItem(STORAGE_KEY);
   const overruledOpen = storedState ? storedState === '1' : undefined;
   const [isOpen, setIsOpen] = useState(isDesktop ? overruledOpen : false);
@@ -67,7 +68,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
         <Bars className={`h-4 w-4`} />
       </button>
       <aside
-        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-40 h-screen max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:transition-all ${
+        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-40 max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:bottom-auto xl:min-h-screen xl:transition-all ${
           isOpen
             ? 'translate-x-0 xl:min-w-[20rem]'
             : 'w-full translate-x-[-100%] xl:w-[4.3rem] xl:min-w-0 xl:translate-x-0'
@@ -82,7 +83,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             isOpen ? 'overflow-y-auto xl:overflow-visible' : 'hover:sticky hover:w-[20rem]'
           } static top-0 h-full w-full transition-all xl:sticky xl:h-auto xl:whitespace-nowrap ${sidebarBg}`}
         >
-          <div className="flex h-screen flex-col overflow-auto px-3 pb-5 pt-3">
+          <div className="flex flex-col overflow-auto px-3 pb-5 pt-3 xl:min-h-screen">
             <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
               <IdentityNavItem />
               <button className={navItemClassName} onClick={() => setIsOpen(!isOpen)}>
@@ -104,7 +105,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
               <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
             </div>
 
-            <div className="py-3">
+            <div className={`py-3 ${isLow ? 'hidden' : ''}`}>
               <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
               <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
               <NavItem
@@ -115,7 +116,20 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
               <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
             </div>
 
-            <MoreItems isOpen={isOpen || isHoverOpen} logout={logout} />
+            <MoreItems isOpen={isOpen || isHoverOpen} logout={logout}>
+              {isLow ? (
+                <>
+                  <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
+                  <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
+                  <NavItem
+                    icon={Grid}
+                    label={'Third party apps & services'}
+                    to={'/owner/third-parties'}
+                  />
+                  <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
+                </>
+              ) : null}
+            </MoreItems>
 
             <div>
               <p className={`${navItemClassName} opacity-40`}>
@@ -133,7 +147,15 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
   );
 };
 
-const MoreItems = ({ isOpen: isNavOpen, logout }: { isOpen: boolean; logout: () => void }) => {
+const MoreItems = ({
+  isOpen: isNavOpen,
+  logout,
+  children,
+}: {
+  isOpen: boolean;
+  logout: () => void;
+  children?: ReactNode;
+}) => {
   const wrapperRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
@@ -182,6 +204,13 @@ const MoreItems = ({ isOpen: isNavOpen, logout }: { isOpen: boolean; logout: () 
           <MiniDarkModeToggle className={`my-auto ${iconClassName}`} />
           <span className={`mx-3 my-auto`}>{isDarkMode ? t('Light mode') : t('Dark mode')}</span>
         </button>
+
+        {children ? (
+          <>
+            <hr className="border-b dark:border-slate-500" />
+            {children}
+          </>
+        ) : null}
       </div>
     </div>
   );
