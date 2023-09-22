@@ -179,15 +179,14 @@ const AppDetails = ({
 
         <h1 className="text-4xl ">
           {t('Login to')}{' '}
-          {!appRegistration || appRegistration?.corsHostName ? (
+          {!appRegistration ? (
             <>
-              &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>&quot;
-              <small className="block text-sm dark:text-white dark:text-opacity-80">
-                {appRegistration?.name}
-              </small>
+              &quot;
+              <DomainHighlighter>{targetDomain}</DomainHighlighter>
+              &quot;
             </>
           ) : (
-            <>{appRegistration?.name}</>
+            <>&quot;{appRegistration?.name}&quot;</>
           )}
         </h1>
       </div>
