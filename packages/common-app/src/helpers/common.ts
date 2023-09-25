@@ -1,4 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
+import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { AttributeFile } from '@youfoundation/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
@@ -58,6 +59,7 @@ export const pascalCase = (str: string) => {
   return capital.toUpperCase() + lowercased.join('');
 };
 
+// TODO: Simplify this function
 export const getHighestPrioAttributesFromMultiTypes = (
   attributes?: (AttributeFile | undefined)[]
 ) => {
@@ -65,12 +67,14 @@ export const getHighestPrioAttributesFromMultiTypes = (
     return (attributes?.filter((attr) => !!attr) as AttributeFile[])?.reduce(
       (highestPrioArr, attr) => {
         const highAttr = highestPrioArr.find((highAttr) => highAttr.type === attr.type);
-        if (!attr.data) {
-          return highestPrioArr;
-        }
+        if (!attr.data) return highestPrioArr;
 
         if (highAttr) {
-          if (highAttr.priority < attr.priority) {
+          if (
+            getAclPriority(highAttr.acl) < getAclPriority(attr.acl) ||
+            (getAclPriority(highAttr.acl) === getAclPriority(attr.acl) &&
+              highAttr.priority < attr.priority)
+          ) {
             return highestPrioArr;
           } else {
             return [...highestPrioArr.filter((highPrio) => highPrio.type !== attr.type), attr];
@@ -82,4 +86,24 @@ export const getHighestPrioAttributesFromMultiTypes = (
       [] as AttributeFile[]
     );
   }
+};
+
+const getAclPriority = (acl: AccessControlList) => {
+  if (acl.requiredSecurityGroup === SecurityGroupType.Owner) return 0;
+  if (
+    acl.requiredSecurityGroup === SecurityGroupType.Connected &&
+    acl.odinIdList?.length &&
+    acl.odinIdList?.length > 0
+  )
+    return 1;
+  if (
+    acl.requiredSecurityGroup === SecurityGroupType.Connected &&
+    acl.circleIdList?.length &&
+    acl.circleIdList?.length > 0
+  )
+    return 2;
+  if (acl.requiredSecurityGroup === SecurityGroupType.Connected) return 3;
+
+  if (acl.requiredSecurityGroup === SecurityGroupType.Authenticated) return 4;
+  return 10;
 };
