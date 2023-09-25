@@ -28,7 +28,6 @@ import { Article } from '@youfoundation/common-app';
 import { Lock } from '@youfoundation/common-app';
 
 import { ActionGroup } from '@youfoundation/common-app';
-import { Link } from 'react-router-dom';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 

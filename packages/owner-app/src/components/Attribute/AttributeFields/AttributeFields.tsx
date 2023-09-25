@@ -209,7 +209,7 @@ const AttributeFields = ({
         <>
           <div className="mb-5">
             <Label htmlFor="short-bio">{t('Bio')}</Label>
-            <Input
+            <Textarea
               id="short-bio"
               name={MinimalProfileFields.ShortBioId}
               defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
