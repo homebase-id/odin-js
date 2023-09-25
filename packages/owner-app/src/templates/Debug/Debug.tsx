@@ -2,6 +2,7 @@ import { Label, Input, Select, ActionButton, Times, t, Plus } from '@youfoundati
 import useAuth from '../../hooks/auth/useAuth';
 import { useRef, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 
 const Debug = () => {
   const dotYouClient = useAuth().getDotYouClient();
@@ -19,7 +20,9 @@ const Debug = () => {
     addToOutput(`Requesting ${isPost ? 'POST' : 'GET'} ${url}\n`);
     const result = isPost
       ? await client.post(url, params).catch((data) => data.response)
-      : await client.get(url).catch((data) => data.response);
+      : await client
+          .get(`${url}?${params ? stringifyToQueryParams(params) : ''}`)
+          .catch((data) => data.response);
 
     addToOutput(`Status: ${result.status}\n`);
     addToOutput(JSON.stringify(result.data || result.statusText, null, 2));
