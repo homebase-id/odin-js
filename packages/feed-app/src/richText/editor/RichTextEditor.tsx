@@ -46,6 +46,7 @@ import {
   Link,
   LinkButton,
   ImageIcon,
+  useDarkMode,
 } from '@youfoundation/common-app';
 import {
   AnchorElement,
@@ -89,10 +90,10 @@ export const RichTextEditor = ({
   className?: string;
   disabled?: boolean;
 }) => {
+  const { isDarkMode } = useDarkMode();
   const editableProps: TEditableProps = {
     placeholder: placeholder,
   };
-
   const plugins = createPlugins(
     [
       createNodeIdPlugin(),
@@ -233,7 +234,8 @@ export const RichTextEditor = ({
       flex-grow: 1;
     }.slate-ToolbarButton-active{
       color: rgb(0, 102, 204);
-    }[class^="styles__FloatingIconWrapper"]{color: inherit;}[class^="PlateFloatingLink___"]{background-color:rgba(51, 65, 85, 1);}`,
+    }[class^="styles__FloatingIconWrapper"]{color: inherit;}
+    ${isDarkMode ? '[class^="PlateFloatingLink___"]{background-color:rgba(51, 65, 85, 1);}' : ''}`,
         }}
       />
       <section className={`relative flex w-[100%] flex-col ${className ?? ''}`}>
