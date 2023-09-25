@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { ActionLink, HOME_ROOT_PATH, t } from '@youfoundation/common-app';
+import {
+  ActionLink,
+  Check,
+  HOME_ROOT_PATH,
+  t,
+  useSecurityContext,
+} from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Persons } from '@youfoundation/common-app';
@@ -8,6 +14,9 @@ const ConnectLink = ({ className }: { className: string }) => {
   const { isOwner, getIdentity } = useAuth();
   const identity = getIdentity();
   const [isLogin, setIsLogin] = useState(false);
+
+  const { data: securityContext } = useSecurityContext().fetch;
+  const alreadyConnected = securityContext?.caller?.securityLevel === 'connected' || false;
 
   if (isOwner) {
     return null;
@@ -23,9 +32,9 @@ const ConnectLink = ({ className }: { className: string }) => {
             : undefined
         }
         onClick={!identity ? () => setIsLogin(true) : undefined}
-        icon={Persons}
+        icon={alreadyConnected ? Check : Persons}
       >
-        {t('Connect')}
+        {alreadyConnected ? t('Connected') : t('Connect')}
       </ActionLink>
 
       <LoginDialog

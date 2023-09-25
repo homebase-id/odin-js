@@ -3,7 +3,7 @@ import { PermissionSet } from '../DriveData/DriveTypes';
 
 export interface SecurityCaller {
   odinId?: string;
-  securityLevel: string;
+  securityLevel: 'connected' | 'anonymous' | 'owner' | undefined;
 }
 
 export interface PermissionGroup {
