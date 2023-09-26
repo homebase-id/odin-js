@@ -29,6 +29,9 @@ const Debug = () => {
     addToOutput('\n-----------------\n');
   };
 
+  const isDebug = (localStorage && localStorage.getItem('debug') === '1') || import.meta.env.DEV;
+  if (!isDebug) return null;
+
   return (
     <>
       <div className="flex min-h-full flex-col">
