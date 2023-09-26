@@ -74,7 +74,7 @@
     "mp4box": "^0.5.2"
   },
   "devDependencies": {
-    "vitest": "^0.34.2"
+    "vitest": "^0.34.5"
   },
   "peerDependencies": {
     "axios": "^1.2.0"
