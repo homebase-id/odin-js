@@ -92,7 +92,7 @@ const AttributeEditor = ({
             >
               <AclIcon className="h-5 w-5" acl={latestAttr.acl} />
             </button>
-            <span onClick={() => setIsAclEdit(true)}>
+            <span onClick={() => setIsAclEdit(true)} data-type={latestAttr?.type}>
               {title ?? latestAttr.typeDefinition.name}{' '}
               <small className="block text-xs">{<AclSummary acl={latestAttr.acl} />}</small>
             </span>

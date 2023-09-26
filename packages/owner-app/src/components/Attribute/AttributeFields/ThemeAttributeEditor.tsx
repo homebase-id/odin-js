@@ -8,7 +8,10 @@ import FaviconSelector from '../../Form/FaviconSelector';
 import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
 import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
-import { RichTextEditor } from '@youfoundation/feed-app';
+import { lazy } from 'react';
+const RichTextEditor = lazy(() =>
+  import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
+);
 
 const headerInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 85, width: 600, height: 600 },

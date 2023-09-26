@@ -16,7 +16,7 @@ import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
-const Setup = lazy(() => import('../templates/Setup/Setup'));
+const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
 const RegisterAppClient = lazy(() => import('../templates/RegisterApp/RegisterApp'));
@@ -71,9 +71,13 @@ const ArticleComposerPage = lazy(() =>
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import useAuth, { FIRSTRUN_PATH, LOGIN_PATH, RECOVERY_PATH } from '../hooks/auth/useAuth';
+import useAuth, {
+  FIRSTRUN_PATH,
+  LOGIN_PATH,
+  RECOVERY_PATH,
+  SETUP_PATH,
+} from '../hooks/auth/useAuth';
 import useIsConfigured from '../hooks/configure/useIsConfigured';
-import { SETUP_PATH } from '../templates/Setup/Setup';
 import { useTransitProcessor, ErrorBoundary, t } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();

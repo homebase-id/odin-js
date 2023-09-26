@@ -1,23 +1,20 @@
 import {
   createPluginFactory,
   useEventPlateId,
-  usePlateEditorRef,
-  Value,
+  useEditorRef,
   PlateEditor,
-  insertNodes,
-  removeNodes,
-  TElement,
   PlateRenderElementProps,
 } from '@udecode/plate-core';
+import { Value, insertNodes, removeNodes, TElement } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
-import { ToolbarButton, ToolbarButtonProps } from '@udecode/plate-ui-toolbar';
 import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
-import { Pencil, Trash, t, useImage } from '@youfoundation/common-app';
+import { ImageIcon, Pencil, Trash, t, useImage } from '@youfoundation/common-app';
 import { Image } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ImageDialog } from '@youfoundation/common-app';
+import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 
 export interface TImageElement extends TElement {
   targetDrive: TargetDrive;
@@ -52,7 +49,7 @@ interface ImageToolbarButtonProps extends ToolbarButtonProps {
 
 export const ImageToolbarButton = ({ targetDrive, ...props }: ImageToolbarButtonProps) => {
   const [isActive, setIsActive] = useState(false);
-  const editor = usePlateEditorRef(useEventPlateId());
+  const editor = useEditorRef(useEventPlateId());
 
   return (
     <>
@@ -63,7 +60,9 @@ export const ImageToolbarButton = ({ targetDrive, ...props }: ImageToolbarButton
           setIsActive(true);
         }}
         {...props}
-      />
+      >
+        <ImageIcon />
+      </ToolbarButton>
       <ImageDialog
         isOpen={isActive}
         onCancel={() => {
@@ -91,7 +90,7 @@ export const ImageElementBlock = <V extends Value = Value>(
   const { mutateAsync: removeImage, error: removeError } = useImage().remove;
   const { attributes, children, nodeProps, element } = props;
 
-  const editor = usePlateEditorRef(useEventPlateId());
+  const editor = useEditorRef(useEventPlateId());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const path = ReactEditor.findPath(editor as any, element as any);
 

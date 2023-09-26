@@ -17,6 +17,8 @@ import {
   useDotYouClient,
 } from '@youfoundation/common-app';
 
+export const SETUP_PATH = '/owner/setup';
+
 export const LOGIN_PATH = '/owner/login';
 export const FIRSTRUN_PATH = '/owner/firstrun';
 export const RECOVERY_PATH = '/owner/account-recovery';

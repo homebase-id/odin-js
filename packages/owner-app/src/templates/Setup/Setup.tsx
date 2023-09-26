@@ -24,9 +24,7 @@ export interface WelcomeData {
   circles: { name: string; description: string }[];
 }
 
-export const SETUP_PATH = '/owner/setup';
-
-const Setup = () => {
+export const Setup = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: isConfigured, refetch: refreshIsConfigured } = useIsConfigured().isConfigured;
 
@@ -97,5 +95,3 @@ const Setup = () => {
     </>
   );
 };
-
-export default Setup;

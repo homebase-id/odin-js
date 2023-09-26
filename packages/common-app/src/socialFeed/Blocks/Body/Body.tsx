@@ -1,11 +1,8 @@
 import { Article, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
-import { lazy, useState } from 'react';
+import { useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
-
-const EmbeddedPostContent = lazy(() =>
-  import('./EmbeddedPostContent').then((m) => ({ default: m.EmbeddedPostContent }))
-);
+import { EmbeddedPostContent } from './EmbeddedPostContent';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 

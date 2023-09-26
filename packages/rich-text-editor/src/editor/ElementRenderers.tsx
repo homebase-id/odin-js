@@ -1,10 +1,5 @@
-import {
-  PlateRenderElementProps,
-  PlateRenderLeafProps,
-  Value,
-  EText,
-  EElement,
-} from '@udecode/plate-core';
+import { PlateRenderElementProps, PlateRenderLeafProps } from '@udecode/plate-core';
+import { Value, EText, EElement } from '@udecode/plate-common';
 
 // The custom element props interface should extend PlateRenderElementProps<V> where TElement is the element type.
 // The custom leaf props interface should extend PlateRenderLeafProps<V> where TText is the leaf type.
@@ -51,9 +46,9 @@ export const ParagraphElement = <V extends Value = Value, N extends EElement<V> 
   const { attributes, children, nodeProps } = props;
 
   return (
-    <p {...attributes} {...nodeProps} className="mb-3">
+    <span {...attributes} {...nodeProps} className="mb-3">
       {children}
-    </p>
+    </span>
   );
 };
 export const CodeBlock = <V extends Value = Value, N extends EElement<V> = EElement<V>>(

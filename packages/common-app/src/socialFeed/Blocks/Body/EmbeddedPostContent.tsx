@@ -1,6 +1,6 @@
 import { EmbeddedPost } from '@youfoundation/js-lib/public';
 import { useNavigate } from 'react-router-dom';
-import { lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { t } from '../../../helpers';
 import { AuthorImage } from '../Author/Image';
 import { AuthorName } from '../Author/Name';
@@ -9,8 +9,7 @@ import { useSocialChannel, useChannel } from '../../../hooks';
 import { FakeAnchor } from '../../../ui';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { PostBody } from './Body';
-
-const PostMedia = lazy(() => import('../Media/Media').then((m) => ({ default: m.PostMedia })));
+import { PostMedia } from '../Media/Media';
 
 export const EmbeddedPostContent = ({
   content,

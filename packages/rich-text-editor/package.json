@@ -1,0 +1,91 @@
+{
+  "name": "@youfoundation/rich-text-editor",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "src"
+  ],
+  "module": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "start": "vite",
+    "build_NOT-NEEDED": "tsc && vite build",
+    "serve": "vite preview",
+    "type": "tsc",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-toggle": "^1.0.3",
+    "@radix-ui/react-toolbar": "^1.0.4",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "@udecode/plate-autoformat": "^24.0.2",
+    "@udecode/plate-basic-marks": "^24.0.2",
+    "@udecode/plate-block-quote": "^24.0.2",
+    "@udecode/plate-break": "^24.0.2",
+    "@udecode/plate-code-block": "^24.0.2",
+    "@udecode/plate-combobox": "^24.0.2",
+    "@udecode/plate-common": "^24.0.2",
+    "@udecode/plate-floating": "^24.0.2",
+    "@udecode/plate-heading": "^24.0.2",
+    "@udecode/plate-indent-list": "^24.0.2",
+    "@udecode/plate-kbd": "^24.0.2",
+    "@udecode/plate-link": "^24.0.2",
+    "@udecode/plate-list": "^24.0.2",
+    "@udecode/plate-mention": "^24.0.2",
+    "@udecode/plate-node-id": "^24.0.2",
+    "@udecode/plate-paragraph": "^24.0.2",
+    "@udecode/plate-reset-node": "^24.0.2",
+    "@udecode/plate-select": "^24.0.2",
+    "@udecode/plate-selection": "^24.0.2",
+    "@udecode/plate-serializer-md": "^24.0.2",
+    "@udecode/plate-tabbable": "^24.0.2",
+    "@udecode/plate-trailing-block": "^24.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "cmdk": "^0.2.0",
+    "lucide-react": "^0.279.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "slate": "^0.94.1",
+    "slate-history": "^0.93.0",
+    "slate-hyperscript": "^0.77.0",
+    "slate-react": "^0.99.0",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.7.0",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.30",
+    "prettier-plugin-tailwindcss": "^0.1.12",
+    "tailwindcss": "^3.3.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "overrides": {
+    "react": "$react"
+  }
+}
