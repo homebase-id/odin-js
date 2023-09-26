@@ -88,7 +88,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
       profilePhotoFileIds[0],
-      { pixelWidth: 300, pixelHeight: 300 }
+      { pixelWidth: 250, pixelHeight: 250 }
     );
     if (imageData) {
       await publishProfileImageFile(
