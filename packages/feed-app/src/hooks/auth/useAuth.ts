@@ -26,6 +26,30 @@ export const drives = [
     d: '',
     p: 3,
   },
+  {
+    // Standard profile Info
+    a: '8f12d8c4933813d378488d91ed23b64c',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: '',
+    d: '',
+    p: 3,
+  },
+  {
+    // Homepage Config
+    a: 'ec83345af6a747d4404ef8b0f8844caa',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: '',
+    d: '',
+    p: 3,
+  },
+  {
+    // Public posts
+    a: 'e8475dc46cb4b6651c2d0dbd0f3aad5f',
+    t: '8f448716e34cedf9014145e043ca6612',
+    n: '',
+    d: '',
+    p: 3,
+  },
 ];
 export const appName = 'Odin - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
