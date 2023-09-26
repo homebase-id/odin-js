@@ -4,30 +4,16 @@ import AppMembershipView from '../../components/PermissionViews/AppPermissionVie
 import InfoBox from '../../components/ui/InfoBox/InfoBox';
 import Section from '../../components/ui/Sections/Section';
 import useApps from '../../hooks/apps/useApps';
-import {
-  HomePageConfig,
-  HomePageAttributes,
-  HomePageThemeFields,
-} from '@youfoundation/js-lib/public';
-import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
   usePendingConnections,
   useCircles,
   t,
-  ActionButton,
-  Cog,
   Alert,
   CirclePermissionView,
-  AuthorImage,
-  Image,
+  useFollowingInfinite,
+  ConnectionImage,
 } from '@youfoundation/common-app';
-import {
-  BuiltInAttributes,
-  BuiltInProfiles,
-  GetTargetDriveFromProfileId,
-  MinimalProfileFields,
-} from '@youfoundation/js-lib/profile';
 
 const About = {
   drives: (
@@ -112,18 +98,8 @@ const Dashboard = () => {
       ) : null}
 
       <div className="gap-4 lg:grid lg:grid-cols-3">
-        <Section
-          title={t('Your homepage')}
-          className="h-full"
-          actions={
-            <ActionButton
-              icon={Cog}
-              onClick={() => navigate('/owner/profile/homepage')}
-              type="mute"
-            />
-          }
-        >
-          <HomePageTeaser />
+        <Section title={t('Your Feed')} className="h-full">
+          <FeedTeaser />
         </Section>
         <Section
           className="h-full"
@@ -164,44 +140,37 @@ const Dashboard = () => {
   );
 };
 
-const HomePageTeaser = () => {
-  const { data: themeAttr } = useAttributeVersions({
-    profileId: HomePageConfig.DefaultDriveId,
-    type: HomePageAttributes.Theme,
-  }).fetchVersions;
+const FeedTeaser = () => {
+  const { data: following, isFetched: followingFetched } = useFollowingInfinite({
+    pageSize: 5,
+  }).fetch;
 
-  const { data: nameAttr } = useAttributeVersions({
-    profileId: BuiltInProfiles.StandardProfileId,
-    type: BuiltInAttributes.Name,
-  }).fetchVersions;
+  const followingList = following?.pages
+    .flatMap((page) => page?.results)
+    .filter(Boolean) as string[];
 
   return (
-    <a
-      href={`https://${window.location.hostname}`}
-      className="block h-full hover:shadow-md hover:dark:shadow-slate-600"
-    >
-      <div className="relative">
-        <Image
-          targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
-          fileId={themeAttr?.[0]?.data[HomePageThemeFields.HeaderImageId]}
-          className="absolute left-0 right-0 top-0 h-[5rem] w-full "
-          fit="cover"
-        />
-
-        <div className="relative z-10 mx-auto max-w-[18rem] pt-[1.5rem]">
-          <div className="flex h-full px-5">
-            <AuthorImage
-              size="custom"
-              className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-neutral-200 object-cover"
-            />
-          </div>
+    <>
+      <Link to={`/owner/feed`} className="block h-full">
+        <small className="mb-5 block text-sm text-slate-400">
+          {t('See what everyone is up to')}
+        </small>
+        <div className="flex flex-row flex-wrap gap-2">
+          {followingFetched && followingList
+            ? followingList.map((odinId) => {
+                return (
+                  <ConnectionImage
+                    odinId={odinId}
+                    size="custom"
+                    className="w-1h-12 h-12 rounded-full"
+                    key={odinId}
+                  />
+                );
+              })
+            : null}
         </div>
-        <p className="pb-4 pt-3 text-center">
-          {nameAttr?.[0]?.data?.[MinimalProfileFields.DisplayName]}
-          <small className="block text-sm text-slate-400">{t('View your online identity')}</small>
-        </p>
-      </div>
-    </a>
+      </Link>
+    </>
   );
 };
 
