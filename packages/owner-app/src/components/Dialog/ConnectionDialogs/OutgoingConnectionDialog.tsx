@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, Textarea, t } from '@youfoundation/common-app';
+import { Arrow, Textarea, t, useCheckIdentity } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
@@ -13,6 +13,7 @@ import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
+import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 
@@ -50,9 +51,14 @@ const OutgoingConnectionDialog = ({
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 
-  if (!isOpen) {
-    return null;
-  }
+  const { data: isValidIdentity } = useCheckIdentity(connectionTarget);
+  const [invalid, setInvalid] = useState(false);
+
+  if (!isOpen) return null;
+
+  useEffect(() => {
+    setInvalid(false);
+  }, [connectionTarget]);
 
   const dialog = (
     <DialogWrapper
@@ -99,8 +105,10 @@ const OutgoingConnectionDialog = ({
                 });
               }
             } else {
-              if (e.currentTarget.checkValidity()) {
+              if (e.currentTarget.checkValidity() && isValidIdentity) {
                 setDoubleChecked(true);
+              } else if (!isValidIdentity) {
+                setInvalid(true);
               }
             }
           }}
@@ -112,14 +120,18 @@ const OutgoingConnectionDialog = ({
                 <Input
                   id="dotyouid"
                   name="dotyouid"
-                  onChange={(e) => {
-                    setConnectionTarget(e.target.value);
-                  }}
+                  onChange={(e) => setConnectionTarget(getDomainFromUrl(e.target.value))}
                   defaultValue={connectionTarget}
-                  readOnly={!!targetOdinId}
-                  disabled={!!targetOdinId}
+                  readOnly={!!targetOdinId && !invalid}
+                  disabled={!!targetOdinId && !invalid}
                   required
+                  className={invalid ? 'border-red-500 dark:border-red-500' : ''}
                 />
+                {invalid ? (
+                  <p className="text-red-500">
+                    {t(`We can't seem to find that identity, please confirm it is correct`)}
+                  </p>
+                ) : null}
               </div>
               <div className="mb-5">
                 <Label htmlFor="message">{t('Message')}</Label>

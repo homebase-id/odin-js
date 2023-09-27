@@ -27,3 +27,4 @@ export * from './doubleClick/useDoubleTap';
 export * from './follow/useFollowers';
 export * from './follow/useFollowing';
 export * from './debounce/useDebounce';
+export * from './checkIdentity/useCheckIdentity';
