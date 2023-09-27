@@ -125,6 +125,9 @@ export const PostImageDetailCard = ({
                   fileId={currentMediaFile?.fileId}
                   className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
                   targetDrive={getChannelDrive(post.channelId)}
+                  previewThumbnail={
+                    mediaFileIds?.length === 1 ? postFile.previewThumbnail : undefined
+                  }
                   odinId={odinId}
                   probablyEncrypted={postFile.payloadIsEncrypted}
                 />

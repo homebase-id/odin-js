@@ -179,6 +179,7 @@ const PostTeaser: FC<PostTeaserProps> = ({
                 fileId={blog.primaryMediaFile.fileId}
                 className={className}
                 probablyEncrypted={payloadIsEncrypted}
+                previewThumbnail={previewThumbnail}
               />
             )
           ) : (

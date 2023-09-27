@@ -1,10 +1,19 @@
 import { OdinVideo, OdinVideoProps } from '@youfoundation/ui-lib';
 import { useDotYouClient } from '../..';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { useMemo } from 'react';
 
-export type VideoProps = Omit<OdinVideoProps, 'dotYouClient'>;
+export interface VideoProps extends Omit<OdinVideoProps, 'dotYouClient'> {
+  previewThumbnail?: EmbeddedThumb;
+}
 
-export const Video = (props: VideoProps) => {
+export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  return <OdinVideo dotYouClient={dotYouClient} {...props} />;
+  const poster = useMemo(() => {
+    if (!previewThumbnail || !!props.poster) return undefined;
+    return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+  }, [previewThumbnail]);
+
+  return <OdinVideo dotYouClient={dotYouClient} poster={poster || props.poster} {...props} />;
 };

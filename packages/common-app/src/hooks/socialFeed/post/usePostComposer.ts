@@ -2,6 +2,7 @@ import {
   ImageUploadResult,
   VideoUploadResult,
   SecurityGroupType,
+  EmbeddedThumb,
 } from '@youfoundation/js-lib/core';
 import {
   MediaFile,
@@ -88,14 +89,11 @@ export const usePostComposer = () => {
           uploadResults && uploadResults.length >= 4
             ? await makeGrid(
                 uploadResults
-                  .filter((result) => result?.type === 'image')
-                  .map((result) => (result as ImageUploadResult).previewThumbnail)
+                  .filter((result) => result?.previewThumbnail !== undefined)
+                  .map((result) => result.previewThumbnail) as EmbeddedThumb[]
               )
-            : (
-                uploadResults?.filter(
-                  (result) => result?.type === 'image'
-                )?.[0] as ImageUploadResult
-              )?.previewThumbnail || undefined,
+            : uploadResults?.filter((result) => result?.previewThumbnail !== undefined)?.[0]
+                ?.previewThumbnail || undefined,
       };
 
       await savePostFile({ blogFile: postFile, channelId: channel.channelId });

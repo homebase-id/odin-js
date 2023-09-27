@@ -12,7 +12,6 @@ import {
   UploadInstructionSet,
   EmbeddedThumb,
   UploadFileMetadata,
-  UploadResult,
   uploadFile,
   SystemFileType,
   getPayloadBytes,
@@ -103,6 +102,8 @@ export const uploadVideo = async (
     accessControlList: acl,
   };
 
+  console.log('uploading video', additionalThumbnails);
+
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
@@ -113,7 +114,7 @@ export const uploadVideo = async (
   );
   if (!result) throw new Error(`Upload failed`);
 
-  return { fileId: result.file.fileId, type: 'video' };
+  return { fileId: result.file.fileId, previewThumbnail, type: 'video' };
 };
 
 export const getDecryptedVideoChunk = async (

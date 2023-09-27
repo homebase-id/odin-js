@@ -18,7 +18,6 @@ import {
   EmbeddedThumb,
   getFileHeader,
   UploadFileMetadata,
-  UploadResult,
   uploadFile,
   deleteFile,
   ImageSize,

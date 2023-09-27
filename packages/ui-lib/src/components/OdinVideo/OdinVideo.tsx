@@ -9,6 +9,7 @@ import { useIntersection } from '../../hooks/intersection/useIntersection';
 import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';
 
 import '../../app/app.css';
+import useImage from '../../hooks/image/useImage';
 
 interface Segment {
   sequence: number;
@@ -59,6 +60,17 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     fetchMetadata: { data: videoMetaData },
   } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, targetDrive);
 
+  const { data: posterData } = useImage(
+    dotYouClient,
+    odinId,
+    videoProps.fileId,
+    videoProps.targetDrive,
+    {
+      pixelHeight: 100,
+      pixelWidth: 100,
+    }
+  ).fetch;
+
   return (
     <video
       controls={!videoProps.hideControls}
@@ -68,7 +80,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       key={shouldFallback ? 'fallback' : 'video'} // Get a new video element when we fallback to direct source
       onClick={(e) => e.stopPropagation()}
       autoPlay={videoProps.autoPlay}
-      poster={videoProps.poster}
+      poster={posterData?.url || videoProps.poster}
     >
       {isInView && videoMetaData?.isSegmented && !shouldFallback ? (
         <ChunkedSource

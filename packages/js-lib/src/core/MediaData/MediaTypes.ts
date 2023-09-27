@@ -22,6 +22,7 @@ export interface MediaUploadMeta {
 
 export interface MediaUploadResult {
   fileId: string;
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export interface VideoUploadResult extends MediaUploadResult {
@@ -30,7 +31,6 @@ export interface VideoUploadResult extends MediaUploadResult {
 
 export interface ImageUploadResult extends MediaUploadResult {
   type: 'image';
-  previewThumbnail: EmbeddedThumb;
 }
 
 export interface ImageMetadata {

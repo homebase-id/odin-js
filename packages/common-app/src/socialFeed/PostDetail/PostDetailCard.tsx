@@ -139,6 +139,7 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
                 probablyEncrypted={postFile?.payloadIsEncrypted}
+                previewThumbnail={postFile?.previewThumbnail}
               />
             )}
           </div>
