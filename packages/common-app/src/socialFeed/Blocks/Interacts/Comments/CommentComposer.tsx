@@ -54,10 +54,6 @@ export const CommentComposer = ({
     onPost && onPost();
   };
 
-  if (!canReactDetails) {
-    return null;
-  }
-
   return (
     <div className={`${replyThreadId ? 'pl-4' : ''}`}>
       {canReactDetails === 'ALLOWED' ? (
@@ -77,6 +73,7 @@ export const CommentComposer = ({
           {canReactDetails === 'NOT_AUTHORIZED' &&
             t('You do not have the necessary access to react on this post')}
           {canReactDetails === 'DISABLED_ON_POST' && t('Reactions are disabled on this post')}
+          {!canReactDetails && t('We could not determine if you can react on this post')}
         </p>
       )}
       <ErrorNotification error={postCommentError} />
