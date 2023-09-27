@@ -1,6 +1,6 @@
 import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { Image, Video } from '@youfoundation/common-app';
+import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
 
 export const PrimaryMedia = ({
   odinId,
@@ -10,6 +10,7 @@ export const PrimaryMedia = ({
   previewThumbnail,
   probablyEncrypted,
   onClick,
+  clickToLoad,
 }: {
   odinId?: string;
   post: PostContent;
@@ -18,6 +19,7 @@ export const PrimaryMedia = ({
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  clickToLoad?: boolean;
 }) => {
   const doNavigate = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     onClick && onClick(e);
@@ -35,6 +37,14 @@ export const PrimaryMedia = ({
           fit={fit}
           probablyEncrypted={probablyEncrypted}
         />
+      ) : clickToLoad ? (
+        <VideoClickToLoad
+          odinId={odinId}
+          targetDrive={getChannelDrive(post.channelId)}
+          fileId={post.primaryMediaFile?.fileId}
+          className={className}
+          probablyEncrypted={probablyEncrypted}
+        />
       ) : (
         <Video
           odinId={odinId}
@@ -42,7 +52,6 @@ export const PrimaryMedia = ({
           fileId={post.primaryMediaFile?.fileId}
           className={className}
           probablyEncrypted={probablyEncrypted}
-          previewThumbnail={previewThumbnail}
         />
       )}
     </div>

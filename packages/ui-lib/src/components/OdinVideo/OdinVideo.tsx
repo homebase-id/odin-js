@@ -71,6 +71,12 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     }
   ).fetch;
 
+  useEffect(() => {
+    if (videoProps.autoPlay && videoRef.current) {
+      videoRef.current.play();
+    }
+  }, [videoProps.autoPlay]);
+
   return (
     <video
       controls={!videoProps.hideControls}

@@ -12,7 +12,7 @@ export interface OdinImageProps {
   dotYouClient: DotYouClient;
   odinId?: string;
   targetDrive: TargetDrive;
-  fileId: string | undefined;
+  fileId?: string;
   fit?: 'cover' | 'contain';
   position?: 'left' | 'right' | 'center';
   className?: string;

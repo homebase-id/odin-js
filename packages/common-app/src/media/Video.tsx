@@ -1,7 +1,7 @@
-import { OdinVideo, OdinVideoProps } from '@youfoundation/ui-lib';
-import { useDotYouClient } from '../..';
+import { OdinImage, OdinVideo, OdinVideoProps } from '@youfoundation/ui-lib';
+import { Triangle, useDotYouClient } from '../..';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export interface VideoProps extends Omit<OdinVideoProps, 'dotYouClient'> {
   previewThumbnail?: EmbeddedThumb;
@@ -15,5 +15,48 @@ export const Video = ({ previewThumbnail, ...props }: VideoProps) => {
     return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
   }, [previewThumbnail]);
 
-  return <OdinVideo dotYouClient={dotYouClient} poster={poster || props.poster} {...props} />;
+  return (
+    <OdinVideo
+      dotYouClient={dotYouClient}
+      poster={poster || props.poster}
+      {...props}
+      autoPlay={props.autoPlay}
+    />
+  );
+};
+
+export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClient'> {
+  fit?: 'cover' | 'contain';
+  preload?: boolean;
+}
+
+export const VideoClickToLoad = ({ preload = true, ...props }: VideoClickToLoadProps) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const [loadVideo, setLoadVideo] = useState(false);
+
+  return (
+    <div
+      className={`relative ${props.className || ''}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        setLoadVideo(true);
+      }}
+    >
+      <OdinImage dotYouClient={dotYouClient} {...props} fit={props.fit} avoidPayload={true} />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <Triangle className="text-background h-16 w-16" />
+      </div>
+
+      {preload || loadVideo ? (
+        <OdinVideo
+          dotYouClient={dotYouClient}
+          {...props}
+          autoPlay={loadVideo}
+          className={`absolute inset-0 ${props.className || ''} ${
+            loadVideo ? 'opacity-100' : 'pointer-events-none opacity-0'
+          }`}
+        />
+      ) : null}
+    </div>
+  );
 };

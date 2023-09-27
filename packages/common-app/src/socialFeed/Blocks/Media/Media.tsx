@@ -62,6 +62,7 @@ export const PostMedia = ({
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
         onClick={onClick ? (e) => onClick(e, 0) : undefined}
+        clickToLoad={true}
       />
     </div>
   );

@@ -1,7 +1,6 @@
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
-import { Video, Image, useIntersection, useDarkMode } from '@youfoundation/common-app';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { Image, useIntersection, useDarkMode, Triangle } from '@youfoundation/common-app';
 import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
 
 interface MediaGalleryProps {
@@ -66,27 +65,23 @@ export const MediaGallery = ({
                 } h-auto w-full cursor-pointer`}
                 onClick={onClick ? (e) => onClick(e, index) : undefined}
               >
-                {file.type === 'image' ? (
-                  <Image
-                    odinId={odinId}
-                    className={`h-full w-auto`}
-                    fileId={file.fileId}
-                    targetDrive={targetDrive}
-                    fit="cover"
-                    probablyEncrypted={probablyEncrypted}
-                  />
-                ) : (
-                  <Video
-                    odinId={odinId}
-                    targetDrive={targetDrive}
-                    fileId={file.fileId}
-                    className={`h-full w-auto object-cover`}
-                    probablyEncrypted={probablyEncrypted}
-                  />
-                )}
+                <Image
+                  odinId={odinId}
+                  className={`h-full w-auto`}
+                  fileId={file.fileId}
+                  targetDrive={targetDrive}
+                  fit="cover"
+                  probablyEncrypted={probablyEncrypted}
+                  avoidPayload={file.type === 'video'}
+                />
+
                 {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                   <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
                     <span className="block text-center">+{countExcludedFromView}</span>
+                  </div>
+                ) : file.type === 'video' ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Triangle className="text-background h-16 w-16" />
                   </div>
                 ) : null}
               </div>
