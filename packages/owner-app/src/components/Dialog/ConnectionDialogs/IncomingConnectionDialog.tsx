@@ -44,7 +44,6 @@ const IncomingConnectionDialog = ({
     connectionInfo?.status === 'pending' ? connectionInfo : undefined;
 
   const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
-  const { data: uiSettings } = useSettings().fetchUiSettings;
 
   const checkReturnTo = useFocusedEditing();
 
@@ -87,10 +86,7 @@ const IncomingConnectionDialog = ({
               </h2>
               <div className="-m-4 flex flex-row flex-wrap sm:flex-nowrap">
                 <div className="w-full p-4 md:w-2/5">
-                  <ContactImage
-                    odinId={senderOdinId}
-                    onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
-                  />
+                  <ContactImage odinId={senderOdinId} />
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
                   <p>{pendingConnection?.message}</p>

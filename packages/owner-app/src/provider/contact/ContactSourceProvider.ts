@@ -10,13 +10,13 @@ import {
 
 import { RawContact } from './ContactTypes';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
-import { getConnectionInfo, getPendingRequest } from '@youfoundation/js-lib/network';
 import {
   getProfileAttributesOverTransit,
   getDecryptedImageDataOverTransit,
 } from '@youfoundation/js-lib/transit';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { GetFile } from '@youfoundation/js-lib/public';
+import { getDetailedConnectionInfo } from '../../hooks/connections/useConnection';
 
 //Handles fetching and parsing of Contact Source data
 
@@ -25,32 +25,30 @@ export const fetchConnectionInfo = async (
   odinId: string
 ): Promise<RawContact | undefined> => {
   const [connectionContactData, contactFromTransit] = await Promise.all([
-    getConnectionInfo(dotYouClient, odinId, true),
-    queryConnectionAttributes(dotYouClient, odinId),
+    getDetailedConnectionInfo({ dotYouClient, odinId, includeContactData: true }),
+    queryRemoteAttributes(dotYouClient, odinId),
   ]);
 
-  if (connectionContactData) {
-    if (connectionContactData?.originalContactData) {
-      return {
-        odinId,
-        name: connectionContactData.originalContactData.name
-          ? {
-              displayName: connectionContactData.originalContactData.name,
-            }
-          : undefined,
-        image: connectionContactData.originalContactData.imageId
-          ? await getPhotoDataFromPublic(odinId, connectionContactData.originalContactData.imageId)
-          : undefined,
-        ...contactFromTransit,
-        source: 'contact',
-      };
-    } else {
-      return contactFromTransit;
-    }
-  }
+  return {
+    odinId,
+    name:
+      contactFromTransit?.name ||
+      (connectionContactData?.contactData?.name
+        ? {
+            displayName: connectionContactData.contactData.name,
+          }
+        : undefined),
+    image:
+      contactFromTransit?.image ||
+      (connectionContactData?.contactData?.imageId
+        ? await getPhotoDataFromPublic(odinId, connectionContactData.contactData.imageId)
+        : undefined),
+    ...contactFromTransit,
+    source: connectionContactData?.status === 'connected' ? 'contact' : 'public',
+  };
 };
 
-export const queryConnectionAttributes = async (
+export const queryRemoteAttributes = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<RawContact | undefined> => {
@@ -68,7 +66,7 @@ export const queryConnectionAttributes = async (
     ]);
 
     return {
-      source: 'contact',
+      source: 'public',
       odinId,
       name: {
         displayName: name?.data?.[MinimalProfileFields.DisplayName],
@@ -117,39 +115,7 @@ export const queryConnectionPhotoData = async (
   };
 };
 
-export const fetchPendingInfo = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  loadPicture: boolean
-): Promise<RawContact | undefined> => {
-  try {
-    const pendingContactData = await getPendingRequest(dotYouClient, odinId);
-
-    // TODO: Don't think this check should be needed; Pending request is also returning sent ones
-    if (pendingContactData.senderOdinId === odinId) {
-      if (pendingContactData?.contactData) {
-        return {
-          name: pendingContactData.contactData.name
-            ? { displayName: pendingContactData.contactData.name }
-            : undefined,
-          image:
-            loadPicture && pendingContactData.contactData.imageId
-              ? await getPhotoDataFromPublic(odinId, pendingContactData.contactData.imageId)
-              : undefined,
-
-          source: 'pending',
-        };
-      }
-    }
-  } catch (ex) {
-    return;
-  }
-};
-
-export const fetchDataFromPublic = async (
-  odinId: string,
-  loadPicture: boolean
-): Promise<RawContact | undefined> => {
+export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | undefined> => {
   const client = new DotYouClient({ api: ApiType.Guest, identity: odinId });
   const rawData = await GetFile(client, 'public.json');
 
@@ -157,22 +123,7 @@ export const fetchDataFromPublic = async (
   const photoRefAttr = rawData?.get('photo')?.[0];
   const photoFile = rawData?.get(photoRefAttr?.payload?.data?.profileImageId)?.[0] ?? undefined;
 
-  if (!photoFile || !loadPicture) {
-    return {
-      name:
-        nameAttr?.payload?.data.givenName || nameAttr?.payload?.data.surname
-          ? {
-              displayName: nameAttr.payload.data[MinimalProfileFields.DisplayName],
-              givenName: nameAttr.payload.data[MinimalProfileFields.GivenNameId],
-              surname: nameAttr.payload.data[MinimalProfileFields.SurnameId],
-            }
-          : undefined,
-      image: undefined,
-      source: 'public',
-    };
-  }
-
-  const previewThumbnail = photoFile.additionalThumbnails?.reduce(
+  const previewThumbnail = photoFile?.additionalThumbnails?.reduce(
     (prevVal, curValue) => {
       if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) {
         return curValue;

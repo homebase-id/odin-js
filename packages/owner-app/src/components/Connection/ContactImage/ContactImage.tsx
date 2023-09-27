@@ -40,13 +40,9 @@ const ContactImage = ({
 
   const { data: contactData, isLoading } = useContact({
     odinId: odinId,
-    loadPicture: onlyLoadAfterClick ? loadImage : true,
+    canSave: onlyLoadAfterClick,
   }).fetch;
-
-  const shouldOnlyLoadAfterClick =
-    contactData?.source === 'pending' || contactData?.source === 'public'
-      ? onlyLoadAfterClick
-      : false;
+  const shouldOnlyLoadAfterClick = false;
 
   const nameData = contactData?.name;
   const intials = useMemo(
@@ -58,13 +54,15 @@ const ContactImage = ({
     <div className={`relative aspect-square ${className || ''}`}>
       {isLoading ? (
         <LoadingBlock className={`aspect-square`} />
-      ) : (shouldOnlyLoadAfterClick && loadImage) || !shouldOnlyLoadAfterClick ? (
+      ) : contactData?.imageFileId ? (
         <Image
           fileId={contactData?.imageFileId}
           targetDrive={ContactConfig.ContactTargetDrive}
           fit="cover"
           className="h-full w-full"
         />
+      ) : contactData?.imageUrl ? (
+        <img src={contactData?.imageUrl} className="h-full w-full" />
       ) : (
         <FallbackImg initials={intials} size={fallbackSize} />
       )}

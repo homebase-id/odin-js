@@ -72,14 +72,19 @@ export const getConnectionInfo = (
   includeContactData = false
 ): Promise<ConnectionInfo | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + `/status?omitContactData=${!includeContactData}`;
+  const url = root + `/status${includeContactData ? `?omitContactData=false` : ''}`;
 
   const data: OdinIdRequest = { odinId: odinId };
 
   return client
     .post(url, data)
     .then((response) => {
-      return { ...response.data, status: response.data?.status?.toLowerCase() };
+      return {
+        ...response.data,
+        status: response.data?.status?.toLowerCase(),
+        contactData: response.data?.originalContactData,
+        originalContactData: undefined,
+      };
     })
     .catch(dotYouClient.handleErrorResponse);
 };

@@ -21,7 +21,7 @@ export interface ContactFile {
   id?: string;
   fileId?: string;
   versionTag?: string;
-  source: 'contact' | 'pending' | 'public' | 'user';
+  source: 'contact' | 'public' | 'user';
 
   // Contact data
   name?: { displayName: string; givenName?: string; additionalName?: string; surname?: string };
@@ -45,5 +45,5 @@ export interface ContactVm {
   imageUrl?: string;
 
   odinId?: string;
-  source: 'contact' | 'pending' | 'public' | 'user';
+  source: 'contact' | 'public' | 'user';
 }

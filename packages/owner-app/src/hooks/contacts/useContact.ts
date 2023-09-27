@@ -4,7 +4,6 @@ import { getContactByUniqueId, saveContact } from '../../provider/contact/Contac
 import {
   fetchConnectionInfo,
   fetchDataFromPublic,
-  fetchPendingInfo,
 } from '../../provider/contact/ContactSourceProvider';
 import { ContactFile, ContactVm, RawContact } from '../../provider/contact/ContactTypes';
 import useAuth from '../auth/useAuth';
@@ -12,11 +11,11 @@ import useAuth from '../auth/useAuth';
 const useContact = ({
   odinId,
   id,
-  loadPicture,
+  canSave,
 }: {
   odinId?: string;
   id?: string;
-  loadPicture?: boolean;
+  canSave?: boolean;
 }) => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
@@ -24,16 +23,14 @@ const useContact = ({
   const fetchSingle = async ({
     odinId,
     id,
-    loadPicture,
+    canSave,
   }: {
     odinId: string;
     id: string;
-    loadPicture?: boolean;
+    canSave?: boolean;
   }): Promise<ContactVm | undefined> => {
     if (!odinId) {
-      if (!id) {
-        return;
-      }
+      if (!id) return;
 
       //Direct fetch with id:
       const directContact = await getContactByUniqueId(dotYouClient, id);
@@ -46,43 +43,22 @@ const useContact = ({
       return contactBookContact;
     }
 
-    // If no contact in the contact book:
-    // Get contact data from connection single:
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, odinId);
-    if (connectionInfo) {
-      // => And automatically push into the Contact
-      const connectionContact = await saveContact(dotYouClient, {
-        ...connectionInfo,
-        odinId: odinId,
-      });
-
-      return parseContact(connectionContact);
-    }
-
-    console.debug(
-      `Contact book and connection detail is empty for ${odinId}, gone hunting for best fallback`
-    );
-
     let returnContact;
 
-    // Else fallback to:
-    // Get contact data from pending single:
-    if (!returnContact) {
-      const pendingInfo =
-        (await fetchPendingInfo(dotYouClient, odinId, loadPicture || false)) ?? undefined;
-      returnContact = pendingInfo ? { ...pendingInfo } : returnContact;
-    }
-
-    // Get contact data from public.json
-    if (!returnContact) {
-      const publicContact = await fetchDataFromPublic(odinId, loadPicture || false);
+    // If no contact in the contact book:
+    // Get contact data from ICRs/Remote Attributes:
+    const connectionInfo = await fetchConnectionInfo(dotYouClient, odinId);
+    if (connectionInfo) {
+      returnContact = connectionInfo;
+    } else {
+      // Or from their public data
+      const publicContact = await fetchDataFromPublic(odinId);
       returnContact = publicContact ? { ...publicContact } : returnContact;
     }
 
     if (returnContact) {
-      // Don't save contacts if we weren't allowed to fetch images
-      if (loadPicture) {
-        // => And automatically push into the Contact
+      // Only save contacts if we were allowed to or if the source is of the "contact" level
+      if (canSave) {
         const savedReturnedContact = await saveContact(dotYouClient, {
           ...returnContact,
           odinId: odinId,
@@ -117,7 +93,7 @@ const useContact = ({
 
       return;
     } else {
-      const publicContact = await fetchDataFromPublic(contact.odinId, true);
+      const publicContact = await fetchDataFromPublic(contact.odinId);
       if (!publicContact) return;
       newContact = await saveContact(dotYouClient, {
         ...publicContact,
@@ -129,12 +105,12 @@ const useContact = ({
 
   return {
     fetch: useQuery(
-      ['contact', odinId ?? id, loadPicture],
+      ['contact', odinId ?? id, canSave],
       () =>
         fetchSingle({
           odinId: odinId as string, // Defined as otherwise query would not be triggered
           id: id as string, // Defined as otherwise query would not be triggered
-          loadPicture: loadPicture,
+          canSave: canSave,
         }),
       {
         refetchOnWindowFocus: false,
@@ -172,7 +148,7 @@ export const parseContact = (contact: RawContact): ContactVm => {
   const imageUrl =
     contact.image && !contact.imageFileId
       ? `data:${contact.image.contentType};base64,${contact.image.content}`
-      : undefined;
+      : `https://${contact.odinId}/pub/image`;
 
   const { id, name, location, phone, birthday, imageFileId, odinId, source } = contact;
 

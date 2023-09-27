@@ -14,7 +14,6 @@ export interface CircleNetworkNotification {
 
 export interface DotYouProfile {
   odinId: string;
-  originalContactData: ContactData;
 }
 
 export interface CircleGrant {
@@ -43,7 +42,7 @@ export interface ConnectionInfo {
   clientAccessTokenHalfKey: string;
   clientAccessTokenId: string;
   clientAccessTokenSharedSecret: string;
-  originalContactData?: ContactData;
+  contactData?: ContactData;
 }
 
 export interface RedactedConnectionRequest {

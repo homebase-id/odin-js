@@ -15,34 +15,35 @@ import {
 } from '@youfoundation/js-lib/network';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
+import { DotYouClient } from '@youfoundation/js-lib/core';
+
+export const getDetailedConnectionInfo = async ({
+  dotYouClient,
+  odinId,
+  includeContactData = false,
+}: {
+  dotYouClient: DotYouClient;
+  odinId: string;
+  includeContactData?: boolean;
+}) => {
+  if (!odinId) return;
+
+  const connectionInfo = await getConnectionInfo(dotYouClient, odinId, includeContactData);
+  if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none') return connectionInfo;
+
+  const pendingRequest = await getPendingRequest(dotYouClient, odinId);
+  if (pendingRequest) return { ...pendingRequest, contactData: connectionInfo?.contactData };
+
+  const sentRequest = await getSentRequest(dotYouClient, odinId);
+  if (sentRequest) return { ...sentRequest, contactData: connectionInfo?.contactData };
+
+  return {} as ConnectionRequest;
+};
 
 const useConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
 
   const dotYouClient = useAuth().getDotYouClient();
-
-  const fetchSingle = async ({ odinId }: { odinId: string }) => {
-    if (!odinId) {
-      return;
-    }
-
-    const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
-    if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none') {
-      return connectionInfo;
-    }
-
-    const pendingRequest = await getPendingRequest(dotYouClient, odinId);
-    if (pendingRequest) {
-      return pendingRequest;
-    }
-
-    const sentRequest = await getSentRequest(dotYouClient, odinId);
-    if (sentRequest) {
-      return sentRequest;
-    }
-
-    return {} as ConnectionRequest;
-  };
 
   const disconnect = async ({ connectionOdinId }: { connectionOdinId: string }) => {
     return await disconnectFromContact(dotYouClient, connectionOdinId);
@@ -101,10 +102,14 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['connectionInfo', odinId], () => fetchSingle({ odinId: odinId as string }), {
-      refetchOnWindowFocus: false,
-      enabled: !!odinId,
-    }),
+    fetch: useQuery(
+      ['connectionInfo', odinId],
+      () => getDetailedConnectionInfo({ dotYouClient, odinId: odinId as string }),
+      {
+        refetchOnWindowFocus: false,
+        enabled: !!odinId,
+      }
+    ),
 
     disconnect: useMutation(disconnect, {
       onSuccess: (data, param) => {
