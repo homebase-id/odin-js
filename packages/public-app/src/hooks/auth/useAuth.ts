@@ -39,15 +39,15 @@ const useAuth = () => {
     try {
       if (isOwner) await logoutOwner();
       else await logoutYouauth();
+
+      window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+      window.localStorage.removeItem(HOME_SHARED_SECRET);
+      window.localStorage.removeItem(OWNER_SHARED_SECRET);
+
+      setAuthenticationState('anonymous');
     } catch (e) {
-      console.log(e);
+      console.error('Really bad auth state', e);
     }
-
-    window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
-    window.localStorage.removeItem(HOME_SHARED_SECRET);
-    window.localStorage.removeItem(OWNER_SHARED_SECRET);
-
-    setAuthenticationState('anonymous');
 
     navigate(HOME_ROOT_PATH);
   };
