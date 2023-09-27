@@ -202,14 +202,12 @@ export const OdinImage = ({
             } ${imgClassNames} transition-opacity duration-300 ${
               isFinal ? 'opacity-100' : 'opacity-0'
             }`}
-            title={
-              title ||
-              `${fileId}@${
-                loadSize && loadSize !== 'full'
-                  ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
-                  : loadSize
-              }`
-            }
+            title={title}
+            data-file={`${fileId}@${
+              loadSize && loadSize !== 'full'
+                ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
+                : loadSize
+            }`}
             width={width}
             height={height}
             key="full"
