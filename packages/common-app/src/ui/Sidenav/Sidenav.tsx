@@ -102,31 +102,34 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             <div className="py-3">
               <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
               <NavItem icon={Article} label={'Articles'} to="/owner/feed/articles" />
-              <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
+              {isLow ? null : <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />}
             </div>
 
-            <div className={`py-3 ${isLow ? 'hidden' : ''}`}>
+            <div className={`py-3`}>
               <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
-              <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
-              <NavItem
-                icon={Grid}
-                label={'Third party apps & services'}
-                to={'/owner/third-parties'}
-              />
+              {isLow ? null : (
+                <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
+              )}
+              {isLow ? null : (
+                <NavItem
+                  icon={Grid}
+                  label={'Third party apps & services'}
+                  to={'/owner/third-parties'}
+                />
+              )}
               <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
             </div>
 
             <MoreItems isOpen={isOpen || isHoverOpen} logout={logout}>
               {isLow ? (
                 <>
-                  <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
+                  <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
                   <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
                   <NavItem
                     icon={Grid}
                     label={'Third party apps & services'}
                     to={'/owner/third-parties'}
                   />
-                  <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
                 </>
               ) : null}
             </MoreItems>
