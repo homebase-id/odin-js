@@ -49,6 +49,7 @@ export const buildIvFromQueryString = async (querystring: string) => {
 export const encryptUrl = async (url: string, ss: Uint8Array) => {
   const parts = (url ?? '').split('?');
   const querystring = parts.length == 2 ? parts[1] : '';
+  if (!querystring.length) return url;
 
   const dedicatedIv = await buildIvFromQueryString(querystring);
 

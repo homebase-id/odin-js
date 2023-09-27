@@ -89,7 +89,7 @@ export const getHighestPrioAttributesFromMultiTypes = (
 };
 
 const getAclPriority = (acl: AccessControlList) => {
-  if (acl.requiredSecurityGroup === SecurityGroupType.Owner) return 0;
+  if (!acl || acl.requiredSecurityGroup === SecurityGroupType.Owner) return 0;
   if (
     acl.requiredSecurityGroup === SecurityGroupType.Connected &&
     acl.odinIdList?.length &&
