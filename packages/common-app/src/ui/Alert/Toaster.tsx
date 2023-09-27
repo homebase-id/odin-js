@@ -4,13 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useErrors } from '@youfoundation/common-app';
 
 export const Toaster = () => {
-  const { notifications, dismiss } = useNotifications();
+  const { liveNotifications, dismiss } = useNotifications();
   const {
     fetch: { data: errors },
     dismiss: dismissError,
   } = useErrors();
-
-  const liveNotifications = notifications.filter((notification) => notification.live);
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">

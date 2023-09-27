@@ -375,14 +375,14 @@ const WalletLink = () => {
 };
 
 const NotificationBell = () => {
-  const { notifications } = useNotifications();
+  const { hasUnread } = useNotifications();
 
   return (
     <NavItem
       label={t('Notifications')}
       to={'/owner/notifications'}
       icon={Bell}
-      unread={!!notifications.length}
+      unread={hasUnread}
     />
   );
 };

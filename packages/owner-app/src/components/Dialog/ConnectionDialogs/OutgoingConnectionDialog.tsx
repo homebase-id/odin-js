@@ -54,11 +54,11 @@ const OutgoingConnectionDialog = ({
   const { data: isValidIdentity } = useCheckIdentity(connectionTarget);
   const [invalid, setInvalid] = useState(false);
 
-  if (!isOpen) return null;
-
   useEffect(() => {
     setInvalid(false);
   }, [connectionTarget]);
+
+  if (!isOpen) return null;
 
   const dialog = (
     <DialogWrapper
