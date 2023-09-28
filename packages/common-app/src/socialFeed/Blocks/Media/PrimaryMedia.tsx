@@ -44,6 +44,7 @@ export const PrimaryMedia = ({
           fileId={post.primaryMediaFile?.fileId}
           className={className}
           probablyEncrypted={probablyEncrypted}
+          preload={false}
         />
       ) : (
         <Video
