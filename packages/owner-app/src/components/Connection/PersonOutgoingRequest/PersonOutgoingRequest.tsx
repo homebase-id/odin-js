@@ -33,6 +33,7 @@ const PersonOutgoingRequest = ({
           type="secondary"
           className="mb-2 w-full"
           onClick={(e) => {
+            e.stopPropagation();
             e.preventDefault();
             revokeRequest({ targetOdinId: recipientOdinId });
             return false;

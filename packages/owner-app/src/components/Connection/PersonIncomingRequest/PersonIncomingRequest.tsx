@@ -41,6 +41,7 @@ const PersonIncomingRequest = ({
           className="mb-2 w-full"
           onClick={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             setIsAcceptDialogOpen(true);
             return false;
           }}
@@ -52,6 +53,7 @@ const PersonIncomingRequest = ({
           className="mb-2 w-full"
           onClick={async (e) => {
             e.preventDefault();
+            e.stopPropagation();
             await ignoreRequest({ senderOdinId: senderOdinId });
 
             return false;
