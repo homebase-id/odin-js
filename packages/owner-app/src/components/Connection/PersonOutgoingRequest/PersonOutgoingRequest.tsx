@@ -34,6 +34,7 @@ const PersonOutgoingRequest = ({
           className="mb-2 w-full"
           onClick={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             revokeRequest({ targetOdinId: recipientOdinId });
             return false;
           }}
