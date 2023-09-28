@@ -7,14 +7,10 @@ import {
   getSentRequest,
   sendRequest,
   deleteSentRequest,
-  acceptConnectionRequest,
-  deletePendingRequest,
   blockOdinId,
   unblockOdinId,
   ConnectionRequest,
 } from '@youfoundation/js-lib/network';
-import { saveContact } from '../../provider/contact/ContactProvider';
-import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 import { DotYouClient } from '@youfoundation/js-lib/core';
 
 export const getDetailedConnectionInfo = async ({
@@ -68,30 +64,6 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
 
   const revokeConnectionRequest = async ({ targetOdinId }: { targetOdinId: string }) => {
     return await deleteSentRequest(dotYouClient, targetOdinId);
-  };
-
-  const acceptRequest = async ({
-    senderOdinId,
-    name,
-    photoFileId,
-    circleIds,
-  }: {
-    senderOdinId: string;
-    name: string;
-    photoFileId: string | undefined;
-    circleIds: string[];
-  }) => {
-    await acceptConnectionRequest(dotYouClient, senderOdinId, name, photoFileId, circleIds);
-
-    // Save contact
-    const connectionInfo = await fetchConnectionInfo(dotYouClient, senderOdinId);
-    if (connectionInfo) await saveContact(dotYouClient, connectionInfo);
-
-    return { senderOdinId };
-  };
-
-  const ignoreRequest = async ({ senderOdinId }: { senderOdinId: string }) => {
-    return await deletePendingRequest(dotYouClient, senderOdinId);
   };
 
   const block = async (odinId: string) => {
@@ -154,45 +126,6 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
       onSuccess: (data, param) => {
         queryClient.invalidateQueries(['sentRequests']);
         queryClient.invalidateQueries(['connectionInfo', param.targetOdinId]);
-      },
-      onError: (ex) => {
-        console.error(ex);
-      },
-    }),
-    acceptRequest: useMutation(acceptRequest, {
-      onMutate: async (newRequest) => {
-        await queryClient.cancelQueries(['activeConnections']);
-
-        const previousConnections: ConnectionRequest[] | undefined = queryClient.getQueryData([
-          'activeConnections',
-        ]);
-        const newConnections = [
-          {
-            status: 'pending', // Set to pending to not update the connetion details page yet, as we don't have the data for that
-            odinId: newRequest.senderOdinId,
-          },
-          ...(previousConnections ?? []),
-        ];
-
-        queryClient.setQueryData(['activeConnections'], newConnections);
-
-        return { previousConnections, newRequest };
-      },
-      onError: (err, newData, context) => {
-        console.error(err);
-
-        queryClient.setQueryData(['activeConnections'], context?.previousConnections);
-      },
-      onSettled: (data) => {
-        queryClient.invalidateQueries(['pendingConnections']);
-        queryClient.invalidateQueries(['activeConnections']);
-        queryClient.invalidateQueries(['connectionInfo', data?.senderOdinId]);
-      },
-    }),
-    ignoreRequest: useMutation(ignoreRequest, {
-      onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['pendingConnections']);
-        queryClient.invalidateQueries(['connectionInfo', param.senderOdinId]);
       },
       onError: (ex) => {
         console.error(ex);

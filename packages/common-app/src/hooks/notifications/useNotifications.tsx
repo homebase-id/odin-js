@@ -2,7 +2,7 @@ import {
   ClientConnectionNotification,
   TypedConnectionNotification,
 } from '@youfoundation/js-lib/core';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 import {
   DomainHighlighter,
@@ -62,6 +62,7 @@ export const useNotifications = () => {
 
       if (wsNotification.notificationType === 'connectionRequestReceived') {
         queryClient.invalidateQueries(['pendingConnections']);
+        queryClient.invalidateQueries(['pendingConnection']);
       } else {
         queryClient.invalidateQueries(['sentRequests']);
       }

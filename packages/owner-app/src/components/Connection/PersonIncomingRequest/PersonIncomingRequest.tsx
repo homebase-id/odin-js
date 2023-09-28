@@ -1,12 +1,12 @@
 import { ReactNode, useState } from 'react';
-import { Check, Times, t } from '@youfoundation/common-app';
-import useConnection from '../../../hooks/connections/useConnection';
+import { Times, t } from '@youfoundation/common-app';
 import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import IncomingConnectionDialog from '../../Dialog/ConnectionDialogs/IncomingConnectionDialog';
 import PersonCard from '../PersonCard/PersonCard';
+import usePendingConnection from '../../../hooks/connections/usePendingConnection';
 
 const PersonIncomingRequest = ({
   senderOdinId,
@@ -19,7 +19,7 @@ const PersonIncomingRequest = ({
 }) => {
   const {
     ignoreRequest: { mutateAsync: ignoreRequest, status: ignoreRequestStatus, error: ignoreError },
-  } = useConnection({});
+  } = usePendingConnection({});
   const { data: uiSettings } = useSettings().fetchUiSettings;
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
 
@@ -44,7 +44,6 @@ const PersonIncomingRequest = ({
             setIsAcceptDialogOpen(true);
             return false;
           }}
-          icon={Check}
         >
           {t('Confirm request')}...
         </ActionButton>

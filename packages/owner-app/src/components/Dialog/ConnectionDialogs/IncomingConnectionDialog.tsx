@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Arrow, t, useFollowingInfinite } from '@youfoundation/common-app';
-import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
-import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
@@ -13,7 +11,7 @@ import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import { ConnectionRequest } from '@youfoundation/js-lib/network';
+import usePendingConnection from '../../../hooks/connections/usePendingConnection';
 
 const IncomingConnectionDialog = ({
   confirmText,
@@ -34,14 +32,10 @@ const IncomingConnectionDialog = ({
 }) => {
   const target = usePortal('modal-container');
 
-  // We fetch the connection info here
   const {
-    fetch: { data: connectionInfo },
+    fetch: { data: pendingConnection },
     acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus, error: acceptError },
-  } = useConnection({ odinId: senderOdinId });
-
-  const pendingConnection: ConnectionRequest | undefined =
-    connectionInfo?.status === 'pending' ? connectionInfo : undefined;
+  } = usePendingConnection({ odinId: senderOdinId });
 
   const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
 
