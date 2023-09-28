@@ -65,13 +65,16 @@ export const getDecryptedImageUrlOverTransit = async (
     })}`;
   };
 
-  // Shortcut for apps that wouldn't be able to fetch anything over transit
-  // TODO: Change to have apps do fetch something over transit (When the BE allows it)
-  if (isProbablyEncrypted === false && dotYouClient.getType() === ApiType.App)
-    return getDirectImageUrl();
+  const ss = dotYouClient.getSharedSecret();
 
-  // If the contents is probably encrypted, we don't bother fetching the header
-  if (!isProbablyEncrypted) {
+  // If there is no shared secret, we wouldn't even be able to decrypt
+  if (!ss) return await getDirectImageUrl();
+
+  // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
+  //   we first get confirmation from the header and return a direct url if possible
+  // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
+  //   and the CAT is passed via a header that we can't set on a direct url
+  if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeaderOverTransit(
       dotYouClient,
       odinId,
@@ -79,8 +82,9 @@ export const getDecryptedImageUrlOverTransit = async (
       fileId,
       systemFileType
     );
-
-    if (!meta.fileMetadata.payloadIsEncrypted) getDirectImageUrl();
+    if (!meta?.fileMetadata.payloadIsEncrypted) {
+      return await getDirectImageUrl();
+    }
   }
 
   // Direct download over transit of the data and potentially decrypt if response headers indicate encrypted

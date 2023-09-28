@@ -15,17 +15,19 @@ const useTinyThumb = (
   imageFileId?: string,
   imageDrive?: TargetDrive
 ) => {
-  const localHost = window.location.hostname;
+  const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
   const fetchImageData = async (odinId: string, imageFileId?: string, imageDrive?: TargetDrive) => {
     if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
 
-    if (odinId !== localHost && dotYouClient.getType() === ApiType.Owner)
-      return await getDecryptedThumbnailMetaOverTransit(
-        dotYouClient,
-        odinId,
-        imageDrive,
-        imageFileId
+    if (odinId !== localHost)
+      return (
+        (await getDecryptedThumbnailMetaOverTransit(
+          dotYouClient,
+          odinId,
+          imageDrive,
+          imageFileId
+        )) || null
       );
 
     // Look for tiny thumb in already fetched data:
