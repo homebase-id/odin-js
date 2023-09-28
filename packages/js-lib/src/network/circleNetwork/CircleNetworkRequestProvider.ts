@@ -35,18 +35,17 @@ export const getPendingRequests = async (
 export const getPendingRequest = async (
   dotYouClient: DotYouClient,
   odinId: string
-): Promise<ConnectionRequest> => {
+): Promise<ConnectionRequest | null> => {
   const client = dotYouClient.createAxiosClient();
   const url = PendingPathRoot + '/single';
   const data: OdinIdRequest = { odinId: odinId };
   return client
-    .post(url, data)
+    .post<ConnectionRequest>(url, data)
     .then((response) => {
-      return { ...response.data, status: 'pending' };
+      if (response.status === 404 || !response?.data) return null;
+      return { ...response.data, status: 'pending' } as const;
     })
-    .catch(() => {
-      return undefined;
-    });
+    .catch(() => null);
 };
 
 export const getSentRequests = async (

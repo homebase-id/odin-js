@@ -14,7 +14,7 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const getDetailedConnectionInfo = async ({ odinId }: { odinId: string }) => {
-    if (!odinId) return;
+    if (!odinId) return null;
 
     return await getPendingRequest(dotYouClient, odinId);
   };

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, t, useFollowingInfinite } from '@youfoundation/common-app';
+import { Alert, Arrow, t, useFollowingInfinite } from '@youfoundation/common-app';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -12,6 +12,7 @@ import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import usePendingConnection from '../../../hooks/connections/usePendingConnection';
+import useConnection from '../../../hooks/connections/useConnection';
 
 const IncomingConnectionDialog = ({
   confirmText,
@@ -31,6 +32,8 @@ const IncomingConnectionDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
+
+  const { data: connectionInfo } = useConnection({ odinId: senderOdinId }).fetch;
 
   const {
     fetch: { data: pendingConnection },
@@ -70,6 +73,13 @@ const IncomingConnectionDialog = ({
         <ErrorNotification error={acceptError || followError} />
         {!doubleChecked ? (
           <>
+            {connectionInfo?.status === 'connected' ? (
+              <Alert type={'warning'} className="mb-5">
+                {t(
+                  'You are already connected, confirming this request, will reset your connection keys'
+                )}
+              </Alert>
+            ) : null}
             <div className="mb-4 pb-4">
               <h2 className="mb-8">
                 {t('The user with the identity')}:{' '}
@@ -88,6 +98,7 @@ const IncomingConnectionDialog = ({
                 </div>
               </div>
             </div>
+
             <div className="-m-2 flex flex-col py-3 sm:flex-row-reverse">
               <ActionButton className="m-2" icon={Arrow} onClick={() => setDoubleChecked(true)}>
                 {t('Continue')}
