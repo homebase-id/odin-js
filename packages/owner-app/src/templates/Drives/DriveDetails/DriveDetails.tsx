@@ -8,19 +8,17 @@ import { HardDrive } from '@youfoundation/common-app';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import useExport from '../../../hooks/drives/useExport';
-import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
-import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { getAccessFromPermissionNumber } from '../../DemoData/helpers';
 import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
 import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
-import { Upload } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
+import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -37,9 +35,7 @@ const DriveDetails = () => {
   const { data: circles } = useCircles().fetch;
   const { data: apps } = useApps().fetchRegistered;
 
-  const [downloadUrl, setDownloadUrl] = useState<string>();
-
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  // const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
   const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
 
@@ -92,13 +88,13 @@ const DriveDetails = () => {
             >
               {t('Export')}
             </ActionButton>
-            <ActionButton
+            {/* <ActionButton
               onClick={async () => setIsImportOpen(true)}
               type="secondary"
               icon={Upload}
             >
               {t('Import')}...
-            </ActionButton>
+            </ActionButton> */}
           </>
         }
         breadCrumbs={[
@@ -183,13 +179,13 @@ const DriveDetails = () => {
       <FileBrowser targetDrive={targetDriveInfo} />
       <FileBrowser targetDrive={targetDriveInfo} systemFileType={'Comment'} />
 
-      <ImportDialog
+      {/* <ImportDialog
         title={`${t('Import to')} ${driveDef.name}`}
         isOpen={isImportOpen}
         onConfirm={() => setIsImportOpen(false)}
         onCancel={() => setIsImportOpen(false)}
         targetDrive={driveDef.targetDriveInfo}
-      />
+      /> */}
 
       <DriveCircleAccessDialog
         driveDefinition={driveDef}

@@ -1,8 +1,7 @@
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import React, { useState } from 'react';
-import { ActionButton, t } from '@youfoundation/common-app';
+import React from 'react';
+import { t } from '@youfoundation/common-app';
 import useDrives from '../../../hooks/drives/useDrives';
-import ImportDialog from '../../../components/Dialog/ImportDialog/ImportDialog';
 import { HardDrive } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
@@ -18,7 +17,7 @@ const Drives = () => {
     fetch: { data: drives, isLoading: isDrivesLoading },
   } = useDrives();
 
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  // const [isImportOpen, setIsImportOpen] = useState(false);
 
   if (isDrivesLoading) {
     <LoadingDetailPage />;
@@ -56,11 +55,11 @@ const Drives = () => {
       <PageMeta
         icon={HardDrive}
         title={t('My Drives')}
-        actions={
-          <ActionButton onClick={async () => setIsImportOpen(true)} type="secondary">
-            {t('Import drive')}...
-          </ActionButton>
-        }
+        // actions={
+        //   <ActionButton onClick={async () => setIsImportOpen(true)} type="secondary">
+        //     {t('Import drive')}...
+        //   </ActionButton>
+        // }
       />
       <section className="-my-4">
         {isDrivesLoading ? (
@@ -95,13 +94,13 @@ const Drives = () => {
           ))
         )}
       </section>
-
+      {/*
       <ImportDialog
         title={`${t('Import new Drive')}`}
         isOpen={isImportOpen}
         onConfirm={() => setIsImportOpen(false)}
         onCancel={() => setIsImportOpen(false)}
-      />
+      /> */}
     </>
   );
 };

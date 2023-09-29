@@ -1,0 +1,141 @@
+import { useMutation } from '@tanstack/react-query';
+import {
+  TargetDrive,
+  ensureDrive,
+  getFileHeader,
+  uploadImage,
+  ImageContentType,
+  UploadInstructionSet,
+  getRandom16ByteArray,
+  UploadFileMetadata,
+  uploadFile,
+} from '@youfoundation/js-lib/core';
+import {
+  base64ToUint8Array,
+  jsonStringify64,
+  stringToUint8Array,
+} from '@youfoundation/js-lib/helpers';
+import { purgeAllFiles } from '../../provider/drives/DrivePurgeProvider';
+import useAuth from '../auth/useAuth';
+import { isImportable } from './useExport';
+
+const useImport = () => {
+  const dotYouClient = useAuth().getDotYouClient();
+
+  const clearAllFilesOnDrive = async (drive: TargetDrive) => {
+    // TODO: Fix, as this doesn't work anymore, purging works, but unqiueIds will keep conflicting with new uploads...
+    return await purgeAllFiles(dotYouClient, drive);
+  };
+
+  const importUnencrypted = async ({
+    drive,
+    formatDrive,
+    data,
+  }: {
+    drive?: TargetDrive;
+    formatDrive?: boolean;
+    data: unknown;
+  }) => {
+    if (!isImportable(data)) {
+      return [{ fileId: 'root', status: false }];
+    }
+
+    let targetDrive: TargetDrive = drive || data.metadata.drive.targetDriveInfo;
+    if (!drive) {
+      await ensureDrive(
+        dotYouClient,
+        data.metadata.drive.targetDriveInfo,
+        data.metadata.drive.name,
+        data.metadata.drive.metadata,
+        data.metadata.drive.allowAnonymousReads
+      );
+
+      targetDrive = data.metadata.drive.targetDriveInfo;
+    } else if (formatDrive) {
+      await clearAllFilesOnDrive(targetDrive);
+    }
+
+    return await Promise.all(
+      data.files.map(async (file) => {
+        try {
+          const existingFile = await getFileHeader(dotYouClient, targetDrive, file.fileId);
+          const overwriteFileId = formatDrive || !existingFile ? undefined : file.fileId;
+          const versionTag = formatDrive || !existingFile ? undefined : file.fileId;
+
+          // Check if image file:
+          if (
+            ['image/png', 'image/jpeg', 'image/tiff', 'image/webp', 'image/svg+xml'].includes(
+              file.fileMetadata.contentType
+            )
+          ) {
+            await uploadImage(
+              dotYouClient,
+              targetDrive,
+              file.fileMetadata.accessControlList,
+              base64ToUint8Array(file.payload.toString()),
+              undefined,
+              {
+                tag: file.fileMetadata.appData.tags || [],
+                fileId: overwriteFileId,
+                versionTag: versionTag,
+                type: file.fileMetadata.contentType as ImageContentType,
+              }
+            );
+          } else {
+            const instructionSet: UploadInstructionSet = {
+              transferIv: getRandom16ByteArray(),
+              storageOptions: {
+                overwriteFileId: overwriteFileId,
+                drive: targetDrive,
+              },
+              transitOptions: null,
+            };
+
+            const payloadJson =
+              file.fileMetadata.contentType === 'application/json'
+                ? jsonStringify64(file.payload)
+                : null;
+
+            const payloadBytes = payloadJson
+              ? stringToUint8Array(payloadJson)
+              : base64ToUint8Array(file.payload.toString());
+
+            const shouldEmbedContent = payloadBytes.length < 3000;
+            const metadata: UploadFileMetadata = {
+              allowDistribution: file.fileMetadata.allowDistribution,
+              contentType: file.fileMetadata.contentType,
+              senderOdinId: file.fileMetadata.senderOdinId,
+              payloadIsEncrypted: file.fileMetadata.payloadIsEncrypted,
+              accessControlList: file.fileMetadata.accessControlList,
+              appData: {
+                ...file.fileMetadata.appData,
+                contentIsComplete: shouldEmbedContent,
+                jsonContent: shouldEmbedContent ? payloadJson : null,
+              },
+            };
+
+            await uploadFile(
+              dotYouClient,
+              instructionSet,
+              metadata,
+              payloadBytes,
+              undefined,
+              file.fileMetadata.payloadIsEncrypted
+            );
+          }
+        } catch (ex) {
+          console.error(ex);
+          return { fileId: file.fileId, status: false };
+        }
+
+        return { fileId: file.fileId, status: true };
+      })
+    );
+  };
+
+  return {
+    importUnencrypted: useMutation(importUnencrypted),
+  };
+};
+
+export default useImport;
