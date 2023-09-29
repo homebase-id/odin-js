@@ -61,6 +61,8 @@ export const parsePermissions = (permission: unknown): number | string | unknown
     ? DrivePermissionType.React
     : lowered === 'comment'
     ? DrivePermissionType.Comment
+    : lowered === 'read, react'
+    ? DrivePermissionType.ReadAndWriteReactions
     : lowered === 'read, writereactionsandcomments'
     ? DrivePermissionType.ReadAndWriteReactionsAndComments
     : lowered === 'writereactionsandcomments'
