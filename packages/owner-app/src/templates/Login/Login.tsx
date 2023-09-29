@@ -1,6 +1,6 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Arrow, t } from '@youfoundation/common-app';
+import { Arrow, CloseEye, Eye, t } from '@youfoundation/common-app';
 import useAuth from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
@@ -82,9 +82,7 @@ const Login = () => {
                   <Label htmlFor="password" className="text-sm leading-7  dark:text-gray-400">
                     Password
                   </Label>
-                  <Input
-                    type="password"
-                    autoComplete="current-password"
+                  <PasswordInput
                     name="password"
                     id="password"
                     required
@@ -117,3 +115,36 @@ const Login = () => {
 };
 
 export default Login;
+
+const PasswordInput = (
+  props: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
+) => {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setShow(false), 1000 * 15);
+    return () => clearTimeout(timeout);
+  }, [show]);
+
+  return (
+    <div className="relative">
+      <Input
+        {...props}
+        ref={undefined}
+        type={show ? 'input' : 'password'}
+        autoComplete="current-password"
+        className={`appearance-none pr-10 ${props.className}`}
+      />
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setShow(!show);
+        }}
+        className="absolute bottom-0 right-0 top-0 pr-3 opacity-70 transition-opacity hover:opacity-100"
+      >
+        {show ? <CloseEye className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+      </button>
+    </div>
+  );
+};
