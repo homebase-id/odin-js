@@ -27,7 +27,7 @@ const useImage = (
   probablyEncrypted?: boolean,
   naturalSize?: ImageSize
 ) => {
-  const localHost = window.location.hostname;
+  const localHost = dotYouClient.getIdentity() || window.location.hostname;
   const queryClient = useQueryClient();
 
   const checkIfWeHaveLargerCachedImage = (

@@ -166,6 +166,12 @@ export const OdinImage = ({
         className ?? ''
       }`}
       ref={wrapperRef}
+      data-odinid={odinId}
+      data-load-size={
+        loadSize && loadSize !== 'full'
+          ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
+          : loadSize
+      }
       data-fileid={fileId}
     >
       {!fileId ? null : isLoadingTiny ? (
@@ -203,11 +209,6 @@ export const OdinImage = ({
               isFinal ? 'opacity-100' : 'opacity-0'
             }`}
             title={title}
-            data-file={`${fileId}@${
-              loadSize && loadSize !== 'full'
-                ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
-                : loadSize
-            }`}
             width={width}
             height={height}
             key="full"
