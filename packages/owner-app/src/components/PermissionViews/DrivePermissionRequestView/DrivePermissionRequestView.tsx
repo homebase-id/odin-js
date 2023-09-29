@@ -1,10 +1,9 @@
 import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
 import { DriveGrantRequest } from '../../../provider/app/AppManagementProviderTypes';
-import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { HardDrive } from '@youfoundation/common-app';
-import { getAccessFromPermissionNumber } from '../../../templates/DemoData/helpers';
 import { LoadingBlock } from '@youfoundation/common-app';
+import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
 
 const DrivePermissionRequestView = ({
   driveGrant,
@@ -39,12 +38,7 @@ const DrivePermissionRequestView = ({
               </>
             )}
             {!isNew
-              ? `: ${
-                  getAccessFromPermissionNumber(
-                    driveGrant.permissionedDrive.permission,
-                    drivePermissionLevels
-                  ).name
-                }`
+              ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission).name)}`
               : null}
           </p>
           {permissionTree && <small className="ml-1">{permissionTree}</small>}

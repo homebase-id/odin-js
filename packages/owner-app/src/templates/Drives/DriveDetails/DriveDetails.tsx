@@ -12,13 +12,12 @@ import AppMembershipView from '../../../components/PermissionViews/AppPermission
 import { CirclePermissionView } from '@youfoundation/common-app';
 import useApps from '../../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
-import { getAccessFromPermissionNumber } from '../../DemoData/helpers';
 import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
 import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
+import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -130,12 +129,10 @@ const DriveDetails = () => {
                 <CirclePermissionView
                   circleDef={circle}
                   key={circle.id}
-                  permissionDetails={
-                    getAccessFromPermissionNumber(
-                      matchingGrant?.permissionedDrive?.permission || 0,
-                      drivePermissionLevels
-                    ).name
-                  }
+                  permissionDetails={t(
+                    getDrivePermissionFromNumber(matchingGrant?.permissionedDrive?.permission || 0)
+                      .name
+                  )}
                   className="my-4"
                 />
               );
@@ -163,12 +160,10 @@ const DriveDetails = () => {
                   className="my-4"
                   appDef={app}
                   key={app.appId}
-                  permissionLevel={
-                    getAccessFromPermissionNumber(
-                      matchingGrant?.permissionedDrive.permission || 0,
-                      drivePermissionLevels
-                    ).name
-                  }
+                  permissionLevel={t(
+                    getDrivePermissionFromNumber(matchingGrant?.permissionedDrive.permission || 0)
+                      .name
+                  )}
                 />
               );
             })}

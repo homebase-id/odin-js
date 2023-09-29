@@ -115,19 +115,6 @@ export const arrayBufferToBase64 = (buffer: Iterable<number>) => {
   return window.btoa(binary);
 };
 
-export const getAccessFromPermissionNumber = (
-  value: number,
-  permissionLevels: { name: string; value: number }[]
-) => {
-  return permissionLevels.reduce((prevValue, currValue) => {
-    if (currValue.value > prevValue.value && currValue.value <= value) {
-      return currValue;
-    }
-
-    return prevValue;
-  }, permissionLevels[0]);
-};
-
 export const moveElementInArray = (arr: Array<unknown>, fromIndex: number, toIndex: number) => {
   const element = arr[fromIndex];
   arr.splice(fromIndex, 1);

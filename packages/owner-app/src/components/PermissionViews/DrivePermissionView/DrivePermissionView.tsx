@@ -2,12 +2,11 @@ import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { Link } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
-import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { Arrow } from '@youfoundation/common-app';
 import { HardDrive } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
-import { getAccessFromPermissionNumber } from '../../../templates/DemoData/helpers';
 import { DriveGrant } from '@youfoundation/js-lib/network';
+import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
 
 const DrivePermissionView = ({
   driveGrant,
@@ -40,12 +39,7 @@ const DrivePermissionView = ({
         <div className="mr-2 flex flex-col">
           <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
             {drive?.name}:{' '}
-            {
-              getAccessFromPermissionNumber(
-                driveGrant?.permissionedDrive.permission,
-                drivePermissionLevels
-              ).name
-            }
+            {t(getDrivePermissionFromNumber(driveGrant?.permissionedDrive.permission).name)}
           </p>
           {permissionTree && (
             <small className="">

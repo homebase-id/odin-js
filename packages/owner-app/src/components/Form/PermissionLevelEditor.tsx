@@ -1,15 +1,14 @@
 import { ReactNode, useRef, useState } from 'react';
-import { Check, useOutsideTrigger } from '@youfoundation/common-app';
+import { Check, t, useOutsideTrigger } from '@youfoundation/common-app';
 import { Triangle } from '@youfoundation/common-app';
+import { DrivePermissionType } from '@youfoundation/js-lib/network';
 
 const PermissionLevelEditor = ({
   className,
-  permissionLevels,
   onChange,
   defaultValue,
 }: {
   className: string;
-  permissionLevels: { name: string; value: number }[];
   onChange?: (value: number) => void;
   defaultValue: number;
 }) => {
@@ -18,13 +17,17 @@ const PermissionLevelEditor = ({
   const wrapperRef = useRef(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
 
-  const currentValue = permissionLevels.reduce((prevValue, currValue) => {
-    if (currValue.value > prevValue.value && currValue.value <= defaultValue) {
+  const numericDrivePermissionLevels = Object.values(DrivePermissionType).filter(
+    (v) => typeof v === 'number'
+  ) as number[];
+
+  const currentValue = numericDrivePermissionLevels.reduce((prevValue, currValue) => {
+    if (currValue > prevValue && currValue <= defaultValue) {
       return currValue;
     }
 
     return prevValue;
-  }, permissionLevels[0]);
+  }, numericDrivePermissionLevels[0]);
 
   const setValue = (value: number) => {
     setInnerValue(value);
@@ -39,7 +42,7 @@ const PermissionLevelEditor = ({
         ref={wrapperRef}
       >
         <div className="flex min-w-[6rem] flex-row px-2 py-1">
-          <span className="my-auto mr-2 select-none">{currentValue.name}</span>{' '}
+          <span className="my-auto mr-2 select-none">{t(DrivePermissionType[currentValue])}</span>{' '}
           <Triangle className="my-auto ml-auto h-2 w-2 rotate-90" />
         </div>
         <ul
@@ -49,13 +52,13 @@ const PermissionLevelEditor = ({
               : 'max-h-0'
           }`}
         >
-          {permissionLevels.map((level) => (
+          {numericDrivePermissionLevels.map((level) => (
             <Option
-              key={level.value}
-              isChecked={value === level.value}
-              onChange={() => (value !== level.value ? setValue(level.value) : setValue(0))}
+              key={level}
+              isChecked={value === level}
+              onChange={() => (value !== level ? setValue(level) : setValue(0))}
             >
-              {level.name}
+              {t(DrivePermissionType[level])}
             </Option>
           ))}
         </ul>

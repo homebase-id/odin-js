@@ -1,15 +1,14 @@
 import { ReactNode, useRef, useState } from 'react';
-import { Check, useOutsideTrigger } from '@youfoundation/common-app';
+import { Check, t, useOutsideTrigger } from '@youfoundation/common-app';
 import { Triangle } from '@youfoundation/common-app';
+import { CirclePermissionType } from '@youfoundation/js-lib/network';
 
 const PermissionFlagsEditor = ({
   className,
-  permissionLevels,
   onChange,
   defaultValue,
 }: {
   className: string;
-  permissionLevels: { name: string; value: number }[];
   onChange?: (value: number[]) => void;
   defaultValue: number[];
 }) => {
@@ -21,14 +20,16 @@ const PermissionFlagsEditor = ({
   const currentValue =
     defaultValue?.length >= 2
       ? 'Multiple'
-      : (defaultValue?.[0]
-          ? permissionLevels.find((level) => level.value === defaultValue[0])?.name
-          : permissionLevels[0].name) ?? permissionLevels[0].name;
+      : (defaultValue[0] && t(CirclePermissionType[defaultValue[0]])) ?? t(CirclePermissionType[0]);
 
   const setValue = (value: number[]) => {
     setInnerValue(value);
     onChange && onChange(value);
   };
+
+  const numericPermissionLevels = Object.values(CirclePermissionType).filter(
+    (v) => typeof v === 'number'
+  ) as number[];
 
   return (
     <div className={className ?? ''}>
@@ -48,22 +49,19 @@ const PermissionFlagsEditor = ({
               : 'max-h-0'
           }`}
         >
-          {permissionLevels.map((level) => (
+          {numericPermissionLevels.map((level) => (
             <Option
-              key={level.value}
-              isChecked={
-                value.some((val) => val === level.value) ||
-                (value.length === 0 && level.value === 0)
-              }
+              key={level}
+              isChecked={value.some((val) => val === level) || (value.length === 0 && level === 0)}
               onChange={() =>
-                value.some((val) => val === level.value)
-                  ? setValue(value.filter((val) => val !== level.value))
-                  : level.value !== 0
-                  ? setValue([...value, level.value])
+                value.some((val) => val === level)
+                  ? setValue(value.filter((val) => val !== level))
+                  : level !== 0
+                  ? setValue([...value, level])
                   : setValue([])
               }
             >
-              {level.name}
+              {t(CirclePermissionType[level])}
             </Option>
           ))}
         </ul>

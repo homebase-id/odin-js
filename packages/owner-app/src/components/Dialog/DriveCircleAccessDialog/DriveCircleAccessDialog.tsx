@@ -4,7 +4,6 @@ import { createPortal } from 'react-dom';
 import { t, ActionButton, ActionButtonState, usePortal, Arrow } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
-import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
 import { CirclePermissionView } from '@youfoundation/common-app';
@@ -95,7 +94,6 @@ const DriveCircleAccessDialog = ({
                     />
                     <PermissionLevelEditor
                       className="ml-auto"
-                      permissionLevels={drivePermissionLevels}
                       defaultValue={driveGrant?.permissionedDrive.permission || 0}
                       onChange={(newValue) => {
                         setNewCircles([

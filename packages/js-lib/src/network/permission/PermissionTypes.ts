@@ -6,6 +6,7 @@ export enum DrivePermissionType {
   React = 4,
   Comment = 8,
   WriteReactionsAndComments = 12,
+  ReadAndWriteReactionsAndComments = 13,
   Full = 17,
 }
 

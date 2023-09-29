@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { Arrow, Textarea, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import { circlePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
@@ -11,7 +10,7 @@ import { Label } from '@youfoundation/common-app';
 import PermissionFlagsEditor from '../../Form/PermissionFlagsEditor';
 
 import { DialogWrapper } from '@youfoundation/common-app';
-import { CircleDefinition } from '@youfoundation/js-lib/network';
+import { AppPermissionLevels, CircleDefinition } from '@youfoundation/js-lib/network';
 
 const CircleDialog = ({
   title,
@@ -102,7 +101,6 @@ const CircleDialog = ({
             </Label>
             <PermissionFlagsEditor
               className="ml-auto"
-              permissionLevels={circlePermissionLevels}
               defaultValue={newCircleDefinition.permissions?.keys ?? [0]}
               onChange={(newValue) => {
                 setNewCircleDefinition({

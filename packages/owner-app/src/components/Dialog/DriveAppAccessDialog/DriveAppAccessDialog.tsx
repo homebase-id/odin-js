@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
-import { drivePermissionLevels } from '../../../provider/permission/permissionLevels';
 import { ErrorNotification } from '@youfoundation/common-app';
 import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -93,7 +92,6 @@ const DriveAppAccessDialog = ({
                     <AppMembershipView appDef={app} key={app.appId} />
                     <PermissionLevelEditor
                       className="ml-auto"
-                      permissionLevels={drivePermissionLevels}
                       defaultValue={driveGrant?.permissionedDrive.permission || 0}
                       onChange={(newValue) => {
                         setNewAppPermission([

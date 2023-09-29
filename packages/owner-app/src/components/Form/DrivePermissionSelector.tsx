@@ -1,6 +1,5 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { t, Label } from '@youfoundation/common-app';
-import { drivePermissionLevels } from '../../provider/permission/permissionLevels';
 import { HardDrive } from '@youfoundation/common-app';
 import PermissionLevelEditor from './PermissionLevelEditor';
 import { DriveGrant } from '@youfoundation/js-lib/network';
@@ -49,7 +48,6 @@ const DrivePermissionSelector = ({
                   </Label>
                   <PermissionLevelEditor
                     className="my-auto ml-auto"
-                    permissionLevels={drivePermissionLevels}
                     defaultValue={
                       driveGrants?.find(
                         (driveGrant) =>
