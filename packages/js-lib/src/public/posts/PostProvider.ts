@@ -195,7 +195,8 @@ export const getPostBySlug = async <T extends PostContent>(
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: PostFile<T>,
-  channelId: string
+  channelId: string,
+  onVersionConflict?: () => void
 ): Promise<UploadResult> => {
   if (!file.content.id) {
     file.content.id = file.content.slug ? toGuidId(file.content.slug) : getNewId();
@@ -286,7 +287,8 @@ export const savePost = async <T extends PostContent>(
     metadata,
     payloadBytes,
     undefined,
-    encrypt
+    encrypt,
+    onVersionConflict
   );
   if (!result) throw new Error(`Upload failed`);
 

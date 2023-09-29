@@ -1,23 +1,29 @@
-import { DriveGrant } from '@youfoundation/js-lib/network';
+import {
+  AppPermissionLevels,
+  DriveGrant,
+  DrivePermissionType,
+} from '@youfoundation/js-lib/network';
 import { HardDrive, useSecurityContext } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
+// TODO: Lots of duplicate code here, the ping page shows owner types on the public page;
 const drivePermissionLevels = [
-  { name: t('None'), value: 0 },
-  { name: t('Reader'), value: 1 },
-  { name: t('Writer'), value: 2 },
-  { name: t('Editor'), value: 3 },
-  { name: t('Commenter'), value: 4 }, // WriteReactionsAndComments
+  { name: t('None'), value: DrivePermissionType.None },
+  { name: t('Reader'), value: DrivePermissionType.Reader },
+  { name: t('Writer'), value: DrivePermissionType.Writer },
+  { name: t('Editor'), value: DrivePermissionType.Editor },
+  { name: t('Commenter'), value: DrivePermissionType.Commenter }, // WriteReactionsAndComments
+  { name: t('Full'), value: DrivePermissionType.Full }, // Commeter + Editor
 ];
 
 const connectionPermissionLevels = [
-  { name: t('None'), value: 0 },
-  { name: t('Read Connections'), value: 10 },
-  { name: t('Manage Connection Requests'), value: 30 },
-  { name: t('Read Circle Members'), value: 50 },
-  { name: t('Read Who I Follow'), value: 80 },
-  { name: t('Read My Followers'), value: 130 },
+  { name: t('None'), value: AppPermissionLevels.None },
+  { name: t('Read Connections'), value: AppPermissionLevels.ReadConnections },
+  { name: t('Manage Connection Requests'), value: AppPermissionLevels.ManageConnectionRequests },
+  { name: t('Read Circle Members'), value: AppPermissionLevels.ReadCircleMembers },
+  { name: t('Read Who I Follow'), value: AppPermissionLevels.ReadWhoIFollow },
+  { name: t('Read My Followers'), value: AppPermissionLevels.ReadMyFollowers },
 ];
 
 const getAccessFromPermissionNumber = (

@@ -36,13 +36,14 @@ const ContactImage = ({
   className?: string;
   fallbackSize?: 'xs';
 }) => {
-  const [loadImage, setLoadImage] = useState(false);
+  // Deprecated "shouldOnlyLoadAfterClick";
+  // const [loadImage, setLoadImage] = useState(false);
 
   const { data: contactData, isLoading } = useContact({
     odinId: odinId,
     canSave: onlyLoadAfterClick,
   }).fetch;
-  const shouldOnlyLoadAfterClick = false;
+  // const shouldOnlyLoadAfterClick = false;
 
   const nameData = contactData?.name;
   const intials = useMemo(
@@ -66,7 +67,7 @@ const ContactImage = ({
       ) : (
         <FallbackImg initials={intials} size={fallbackSize} />
       )}
-      {shouldOnlyLoadAfterClick ? (
+      {/* {shouldOnlyLoadAfterClick ? (
         <button
           className="absolute bottom-2 right-2 bg-white bg-opacity-60 p-2 hover:bg-opacity-100 dark:bg-black dark:bg-opacity-60 hover:dark:bg-opacity-100"
           onClick={(e) => {
@@ -80,7 +81,7 @@ const ContactImage = ({
             <span className="absolute bottom-[0.9rem] right-[0.2rem] block w-[1.5rem] rotate-45 border-b-[2px] border-black dark:border-white"></span>
           )}
         </button>
-      ) : null}
+      ) : null} */}
     </div>
   );
 };

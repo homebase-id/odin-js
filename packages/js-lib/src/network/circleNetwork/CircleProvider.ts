@@ -1,5 +1,6 @@
 import { DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
 import { getNewId } from '../../helpers/helpers';
+import { DrivePermissionType } from '../network';
 import { CircleDefinition } from './CircleDataTypes';
 
 //Handles management of Circles
@@ -44,22 +45,26 @@ export const createCircleDefinition = async (
 
 /// Convert text based permission levels to the numbered type
 // Reflects DrivePermission enum in services/Odin.Core.Services/Drives/DrivePermission.cs
-export const parsePermissions = (permission: unknown) => {
+export const parsePermissions = (permission: unknown): number | string | unknown => {
   if (typeof permission !== 'string') {
     return permission;
   }
 
   const lowered = permission.toLowerCase();
   return lowered === 'read'
-    ? 1
+    ? DrivePermissionType.Reader
     : lowered === 'write'
-    ? 2
+    ? DrivePermissionType.Writer
     : lowered === 'read, write'
-    ? 3
+    ? DrivePermissionType.Editor
+    : lowered === 'react'
+    ? DrivePermissionType.React
+    : lowered === 'comment'
+    ? DrivePermissionType.Comment
     : lowered === 'writereactionsandcomments'
-    ? 4
+    ? DrivePermissionType.WriteReactionsAndComments
     : lowered === 'readwrite' || lowered === 'all'
-    ? 7
+    ? DrivePermissionType.Full
     : permission;
 };
 

@@ -136,7 +136,7 @@ export function InsertDropdownMenu(props: DropdownMenuProps) {
 
       <DropdownMenuContent
         align="start"
-        className="bg-background flex max-h-[500px] min-w-0 flex-col gap-0.5 overflow-y-auto"
+        className="text-foreground bg-background flex max-h-[500px] min-w-0 flex-col gap-0.5 overflow-y-auto"
       >
         {items.map(({ items: nestedItems, label }, index) => (
           <React.Fragment key={label}>

@@ -222,7 +222,7 @@ export const RichTextEditor = ({
       <section
         className={`relative flex w-[100%] flex-col ${className ?? ''}`}
         onSubmit={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
+        onClick={disabled ? undefined : (e) => e.stopPropagation()}
       >
         <Plate
           initialValue={defaultValAsRichText}

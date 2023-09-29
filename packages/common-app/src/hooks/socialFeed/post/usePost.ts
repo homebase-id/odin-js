@@ -5,6 +5,7 @@ import {
   getChannelDrive,
   removePost,
   savePost as savePostFile,
+  getPost,
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient, useStaticFiles } from '@youfoundation/common-app';
 import {
@@ -13,6 +14,7 @@ import {
   ImageUploadResult,
   MultiRequestCursoredResult,
   ThumbnailFile,
+  UploadResult,
   VideoContentType,
   VideoUploadResult,
   deleteFile,
@@ -45,17 +47,32 @@ const usePost = () => {
     blogFile: PostFile<PostContent>;
     channelId: string;
   }) => {
-    return await savePostFile(
-      dotYouClient,
-      {
-        ...blogFile,
-        content: {
-          ...blogFile.content,
-          captionAsRichText: getRichTextFromString(blogFile.content.caption.trim()),
+    return new Promise<UploadResult>((resolve) => {
+      const onVersionConflict = async () => {
+        const serverPost = await getPost(dotYouClient, channelId, blogFile.content.id);
+        if (!serverPost) return;
+
+        const newPost = { ...serverPost, content: { ...serverPost.content, ...blogFile.content } };
+        savePostFile(dotYouClient, newPost, channelId, onVersionConflict).then((result) => {
+          if (result) resolve(result);
+        });
+      };
+
+      savePostFile(
+        dotYouClient,
+        {
+          ...blogFile,
+          content: {
+            ...blogFile.content,
+            captionAsRichText: getRichTextFromString(blogFile.content.caption.trim()),
+          },
         },
-      },
-      channelId
-    );
+        channelId,
+        onVersionConflict
+      ).then((result) => {
+        if (result) resolve(result);
+      });
+    });
   };
 
   const saveFiles = async ({

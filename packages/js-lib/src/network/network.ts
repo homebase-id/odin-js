@@ -9,3 +9,6 @@ export * from './circleNetwork/CircleDataTypes';
 
 // Follow
 export * from './follow/FollowProvider';
+
+// Permissions
+export * from './permission/PermissionTypes';

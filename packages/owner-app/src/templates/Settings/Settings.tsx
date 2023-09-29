@@ -189,6 +189,81 @@ const PrivacySettings = () => {
               />
             </div>
           </Section>
+          <Section
+            title={
+              <div className="flex flex-col">
+                {t('Who can react on your public posts?')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'People that are member of a circle that has access to view who you follow will always be able to see who you follow'
+                  )}
+                </small>
+              </div>
+            }
+          >
+            <div className="mb-5 flex flex-row">
+              <Label
+                htmlFor="authenticatedIdentitiesCanReactOnAnonymousDrives"
+                className="my-auto mr-2 flex flex-col"
+              >
+                {t('Authenticated')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'Every authenticated user will be able to react with an emoji to your public posts'
+                  )}
+                </small>
+              </Label>
+              <Checkbox
+                className="ml-auto"
+                name="authenticatedIdentitiesCanReactOnAnonymousDrives"
+                defaultChecked={
+                  systemSettings?.authenticatedIdentitiesCanReactOnAnonymousDrives ?? true
+                }
+                onChange={(e) => updateFlag({ name: e.target.name, value: e.target.checked })}
+              />
+            </div>
+            <div className="mb-5 flex flex-row">
+              <Label
+                htmlFor="connectedIdentitiesCanReactOnAnonymousDrives"
+                className="my-auto mr-2 flex flex-col"
+              >
+                {t('Connected')}
+                <small className="text-sm text-gray-400">
+                  {t(
+                    'Every connected user will be able to react with an emoji to your public posts'
+                  )}
+                </small>
+              </Label>
+
+              <Checkbox
+                className="ml-auto"
+                name="connectedIdentitiesCanReactOnAnonymousDrives"
+                defaultChecked={
+                  systemSettings?.connectedIdentitiesCanReactOnAnonymousDrives ?? true
+                }
+                onChange={(e) => updateFlag({ name: e.target.name, value: e.target.checked })}
+              />
+            </div>
+            <div className="mb-5 flex flex-row">
+              <Label
+                htmlFor="connectedIdentitiesCanCommentOnAnonymousDrives"
+                className="my-auto mr-2 flex flex-col"
+              >
+                {t('Connected')}
+                <small className="text-sm text-gray-400">
+                  {t('Every connected user will be able to comment on your public posts')}
+                </small>
+              </Label>
+              <Checkbox
+                className="ml-auto"
+                name="connectedIdentitiesCanCommentOnAnonymousDrives"
+                defaultChecked={
+                  systemSettings?.connectedIdentitiesCanCommentOnAnonymousDrives ?? true
+                }
+                onChange={(e) => updateFlag({ name: e.target.name, value: e.target.checked })}
+              />
+            </div>
+          </Section>
         </>
       )}
     </>
@@ -241,7 +316,7 @@ const SecuritySettings = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { changePassword, getDotYouClient} = useAuth();
+  const { changePassword, getDotYouClient } = useAuth();
 
   const passwordIsValid = password === retypePassword && password !== '';
 

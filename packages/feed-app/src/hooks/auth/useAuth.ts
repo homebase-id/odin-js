@@ -17,6 +17,7 @@ import {
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
+import { AppPermissionLevels, DrivePermissionType } from '@youfoundation/js-lib/dist';
 
 export const drives = [
   {
@@ -24,7 +25,7 @@ export const drives = [
     t: 'a3227ffba87608beeb24fee9b70d92a6',
     n: 'Feed',
     d: '',
-    p: 3,
+    p: DrivePermissionType.Reader,
   },
   {
     // Standard profile Info
@@ -32,7 +33,7 @@ export const drives = [
     t: '597241530e3ef24b28b9a75ec3a5c45c',
     n: '',
     d: '',
-    p: 3,
+    p: DrivePermissionType.Reader,
   },
   {
     // Homepage Config
@@ -40,7 +41,7 @@ export const drives = [
     t: '597241530e3ef24b28b9a75ec3a5c45c',
     n: '',
     d: '',
-    p: 3,
+    p: DrivePermissionType.Reader,
   },
   {
     // Public posts
@@ -48,7 +49,7 @@ export const drives = [
     t: '8f448716e34cedf9014145e043ca6612',
     n: '',
     d: '',
-    p: 3,
+    p: DrivePermissionType.Editor,
   },
 ];
 export const appName = 'Odin - Feed';
@@ -145,7 +146,15 @@ export const useYouAuthAuthorization = () => {
       finalizeUrl,
       appName,
       appId,
-      [10, 30, 50, 80, 130, 210],
+      [
+        AppPermissionLevels.ReadConnections,
+        AppPermissionLevels.ManageConnectionRequests,
+        AppPermissionLevels.ReadCircleMembers,
+        AppPermissionLevels.ReadWhoIFollow,
+        AppPermissionLevels.ReadMyFollowers,
+        AppPermissionLevels.SendDataToOtherIdentitiesOnMyBehalf,
+        AppPermissionLevels.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+      ],
       undefined,
       drives,
       undefined,
