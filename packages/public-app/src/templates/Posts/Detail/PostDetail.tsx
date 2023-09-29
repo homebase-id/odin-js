@@ -10,7 +10,7 @@ import {
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
 import useAuth from '../../../hooks/auth/useAuth';
-import { Article } from '@youfoundation/js-lib/dist';
+import { Article } from '@youfoundation/js-lib/public';
 
 const PostDetail = () => {
   const navigate = useNavigate();

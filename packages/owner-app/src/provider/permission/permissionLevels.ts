@@ -10,7 +10,7 @@ export const drivePermissionLevels = [
   { name: t('Reader'), value: DrivePermissionType.Reader },
   { name: t('Writer'), value: DrivePermissionType.Writer },
   { name: t('Editor'), value: DrivePermissionType.Editor },
-  { name: t('Commenter'), value: DrivePermissionType.Commenter }, // WriteReactionsAndComments
+  { name: t('Commenter'), value: DrivePermissionType.Comment }, // WriteReactionsAndComments
   { name: t('Full'), value: DrivePermissionType.Full }, // Commeter + Editor
 ];
 

@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
 import useDrive from '../../../hooks/drives/useDrive';
-import useExport, { importable, isImportable } from '../../../hooks/drives/useExport';
+import { importable, isImportable } from '../../../hooks/drives/useExport';
 import { usePortal } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
+import useImport from '../../../hooks/drives/useImport';
 
 const ImportDialog = ({
   title,
@@ -33,7 +34,7 @@ const ImportDialog = ({
     mutateAsync: importUnencrypted,
     status: importStatus,
     error: importError,
-  } = useExport().importUnencrypted;
+  } = useImport().importUnencrypted;
   const [errorMessage, setErrorMessage] = useState<string>();
   const [dataObject, setDataObject] = useState<importable>();
   const {

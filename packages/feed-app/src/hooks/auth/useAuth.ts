@@ -17,7 +17,7 @@ import {
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
-import { AppPermissionLevels, DrivePermissionType } from '@youfoundation/js-lib/dist';
+import { AppPermissionLevels, DrivePermissionType } from '@youfoundation/js-lib/network';
 
 export const drives = [
   {
