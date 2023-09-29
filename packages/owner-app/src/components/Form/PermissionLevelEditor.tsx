@@ -18,7 +18,12 @@ const PermissionLevelEditor = ({
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
 
   const numericDrivePermissionLevels = Object.values(DrivePermissionType).filter(
-    (v) => typeof v === 'number'
+    (v) =>
+      typeof v === 'number' &&
+      // Remove the "stupid" permission levels
+      v !== DrivePermissionType.WriteReactionsAndComments &&
+      v !== DrivePermissionType.React &&
+      v !== DrivePermissionType.Comment
   ) as number[];
 
   const currentValue = numericDrivePermissionLevels.reduce((prevValue, currValue) => {

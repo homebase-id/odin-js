@@ -6,6 +6,7 @@ export enum DrivePermissionType {
   React = 4,
   Comment = 8,
   WriteReactionsAndComments = 12,
+  ReadAndWriteReactions = 5,
   ReadAndWriteReactionsAndComments = 13,
   Full = 17,
 }
@@ -16,7 +17,15 @@ export enum CirclePermissionType {
   ReadCircleMembers = 50,
 }
 
-export enum AppPermissionLevels {
+export enum AppCirclePermissionType {
+  None = 0,
+  ReadConnections = 10,
+  ReadCircleMembers = 50,
+  ReadWhoIFollow = 80,
+  ReadMyFollowers = 130,
+}
+
+export enum AppPermissionType {
   None = 0,
   ReadConnections = 10,
   ManageConnectionRequests = 30,

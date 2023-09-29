@@ -1,8 +1,8 @@
-import { DrivePermissionType, AppPermissionLevels } from '../network/permission/PermissionTypes';
+import { DrivePermissionType, AppPermissionType } from '../network/permission/PermissionTypes';
 
 const getPermissionFromNumber = (
   value: number,
-  levels: typeof DrivePermissionType | typeof AppPermissionLevels
+  levels: typeof DrivePermissionType | typeof AppPermissionType
 ): { name: string; value: number } => {
   const directMatch = DrivePermissionType[value];
   if (directMatch) return { name: directMatch, value: value };
@@ -24,4 +24,4 @@ export const getDrivePermissionFromNumber = (value: number) =>
   getPermissionFromNumber(value, DrivePermissionType);
 
 export const getAppPermissionFromNumber = (value: number) =>
-  getPermissionFromNumber(value, AppPermissionLevels);
+  getPermissionFromNumber(value, AppPermissionType);

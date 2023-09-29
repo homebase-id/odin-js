@@ -2,13 +2,11 @@ import { PermissionSet } from '@youfoundation/js-lib/core';
 
 import { Persons, t } from '@youfoundation/common-app';
 import CheckboxToggle from './CheckboxToggle';
-import { AppPermissionLevels, CirclePermissionType } from '@youfoundation/js-lib/network';
-
-const thingsAppCirclesCantDo = [
-  AppPermissionLevels.ManageConnectionRequests,
-  AppPermissionLevels.SendDataToOtherIdentitiesOnMyBehalf,
-  AppPermissionLevels.ReceiveDataFromOtherIdentitiesOnMyBehalf,
-];
+import {
+  AppPermissionType,
+  AppCirclePermissionType,
+  CirclePermissionType,
+} from '@youfoundation/js-lib/network';
 
 const PermissionSelector = ({
   type,
@@ -20,10 +18,12 @@ const PermissionSelector = ({
   onChange: (val: PermissionSet) => void;
 }) => {
   const levels =
-    type === 'app' || type === 'app-circles' ? AppPermissionLevels : CirclePermissionType;
-  const numericLevels = Object.values(levels).filter(
-    (v) => typeof v === 'number' && (type !== 'app-circles' || !thingsAppCirclesCantDo.includes(v))
-  ) as number[];
+    type === 'app'
+      ? AppPermissionType
+      : type === 'app-circles'
+      ? AppCirclePermissionType
+      : CirclePermissionType;
+  const numericLevels = Object.values(levels).filter((v) => typeof v === 'number') as number[];
 
   return (
     <>

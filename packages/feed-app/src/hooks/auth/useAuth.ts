@@ -17,7 +17,7 @@ import {
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
-import { AppPermissionLevels, DrivePermissionType } from '@youfoundation/js-lib/network';
+import { AppPermissionType, DrivePermissionType } from '@youfoundation/js-lib/network';
 
 export const drives = [
   {
@@ -147,13 +147,13 @@ export const useYouAuthAuthorization = () => {
       appName,
       appId,
       [
-        AppPermissionLevels.ReadConnections,
-        AppPermissionLevels.ManageConnectionRequests,
-        AppPermissionLevels.ReadCircleMembers,
-        AppPermissionLevels.ReadWhoIFollow,
-        AppPermissionLevels.ReadMyFollowers,
-        AppPermissionLevels.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionLevels.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+        AppPermissionType.ReadConnections,
+        AppPermissionType.ManageConnectionRequests,
+        AppPermissionType.ReadCircleMembers,
+        AppPermissionType.ReadWhoIFollow,
+        AppPermissionType.ReadMyFollowers,
+        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
       ],
       undefined,
       drives,

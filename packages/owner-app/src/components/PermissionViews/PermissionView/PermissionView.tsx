@@ -1,8 +1,8 @@
 import { Persons, t } from '@youfoundation/common-app';
-import { AppPermissionLevels } from '@youfoundation/js-lib/network';
+import { AppPermissionType } from '@youfoundation/js-lib/network';
 
 const PermissionView = ({ permission, className }: { permission: number; className?: string }) => {
-  const permissionLevel = AppPermissionLevels[permission];
+  const permissionLevel = AppPermissionType[permission];
 
   return (
     <div key={`${permissionLevel}`} className={`flex flex-row ${className}`}>

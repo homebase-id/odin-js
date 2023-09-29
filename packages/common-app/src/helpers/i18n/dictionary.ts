@@ -17,6 +17,24 @@ const enLocale = [
   ['verticalposts', 'Social Vertical Posts'],
   ['horizontalposts', 'Social Horizontal Posts'],
   ['related blogs', 'Related blogs'],
+
+  // PermssionTypes
+  ['comment', 'Comment'],
+  ['editor', 'Edit'],
+  ['full', 'Full'],
+  ['manageconnectionrequests', 'Manage Connection Requests'],
+  ['none', 'None'],
+  ['react', 'React'],
+  ['readandwritereactionsandcomments', 'React/Comment'],
+  ['readcirclemembers', 'Read Circle Members'],
+  ['readconnections', 'Read Connections'],
+  ['reader', 'Read'],
+  ['readmyfollowers', 'Read My Followers'],
+  ['readwhoifollow', 'Read Who I Follow'],
+  ['receivedatafromotheridentitiesonmybehalf', 'Receive data from other identities on my behalf'],
+  ['senddatatootheridentitiesonmybehalf', 'Send data to other identities on my behalf'],
+  ['writer', 'Write'],
+  ['writereactionsandcomments', 'Write Reactions and Comments'],
 ] as const;
 
 const internalDict: Map<string, string> = new Map(enLocale);
