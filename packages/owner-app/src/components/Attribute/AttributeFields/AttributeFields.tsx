@@ -13,7 +13,7 @@ import {
   SocialFields,
 } from '@youfoundation/js-lib/profile';
 import { debounce } from 'lodash-es';
-import { useMemo, useState } from 'react';
+import { ClipboardEventHandler, useMemo, useState } from 'react';
 import { Textarea, t } from '@youfoundation/common-app';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Input } from '@youfoundation/common-app';
@@ -149,21 +149,7 @@ const AttributeFields = ({
     case BuiltInAttributes.MinecraftUsername:
     case BuiltInAttributes.GithubUsername:
     case BuiltInAttributes.StackoverflowUsername:
-      return (
-        <>
-          <div className="mb-5">
-            <Label htmlFor="handle">
-              {attribute.typeDefinition.name} {t('Username')}
-            </Label>
-            <Input
-              id="handle"
-              name={attribute.typeDefinition.name.toLowerCase()}
-              defaultValue={attribute.data?.[attribute.typeDefinition.name.toLowerCase()] ?? ''}
-              onChange={debouncedChange}
-            />
-          </div>
-        </>
-      );
+      return <SocialAttributeEditor attribute={attribute} onChange={debouncedChange} />;
       break;
     case BuiltInAttributes.HomebaseIdentity:
       return (
@@ -523,6 +509,45 @@ const PhoneAttributeEditor = ({
         />
       </div>
     </div>
+  );
+};
+
+const SocialAttributeEditor = ({
+  attribute,
+  onChange,
+}: {
+  attribute: AttributeVm;
+  onChange: (e: { target: { value: unknown; name: string } }) => void;
+}) => {
+  // When a URL is paste, only use the last part of it, as it's most likely the username; And we don't support url values either...
+  const pasteHandler: ClipboardEventHandler<HTMLInputElement> = (e) => {
+    const text = e.clipboardData.getData('text');
+
+    if (text.startsWith('https://')) {
+      const lastPart = text.split('/').pop();
+      if (lastPart && lastPart.length > 0) {
+        e.currentTarget.value = lastPart;
+        onChange({ target: { name: e.currentTarget.name, value: lastPart } });
+        e.preventDefault();
+      }
+    }
+  };
+
+  return (
+    <>
+      <div className="mb-5">
+        <Label htmlFor="handle">
+          {attribute.typeDefinition.name} {t('Username')}
+        </Label>
+        <Input
+          id="handle"
+          name={attribute.typeDefinition.name.toLowerCase()}
+          defaultValue={attribute.data?.[attribute.typeDefinition.name.toLowerCase()] ?? ''}
+          onChange={onChange}
+          onPaste={pasteHandler}
+        />
+      </div>
+    </>
   );
 };
 
