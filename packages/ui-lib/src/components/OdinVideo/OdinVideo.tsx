@@ -51,6 +51,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   const [shouldFallback, setShouldFallback] = useState(
     !!videoProps.skipChunkedPlayback || !('MediaSource' in window)
   );
+  const [fatalError, setFatalError] = useState(false);
   useIntersection(videoRef, () => setIsInView(true));
 
   useEffect(() => {
@@ -75,6 +76,18 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
   }, [videoProps.autoPlay]);
 
+  const isChunkedPlayback = isInView && videoMetaData?.isSegmented && !shouldFallback;
+  const isDirectPlayback =
+    isInView && videoMetaData && (videoMetaData.isSegmented === false || shouldFallback);
+
+  if (fatalError) {
+    return (
+      <div className={`${className} flex aspect-video items-center justify-center`}>
+        <p>Something went wrong</p>
+      </div>
+    );
+  }
+
   return (
     <video
       controls={!videoProps.hideControls}
@@ -85,8 +98,9 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       onClick={(e) => e.stopPropagation()}
       autoPlay={videoProps.autoPlay}
       poster={posterData?.url || videoProps.poster}
+      onError={() => isDirectPlayback && setFatalError(true)}
     >
-      {isInView && videoMetaData?.isSegmented && !shouldFallback ? (
+      {isChunkedPlayback ? (
         <ChunkedSource
           {...videoProps}
           videoMetaData={videoMetaData}
@@ -94,9 +108,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
           onFatalError={() => setShouldFallback(true)}
         />
       ) : null}
-      {isInView && videoMetaData && (videoMetaData.isSegmented === false || shouldFallback) ? (
-        <DirectSource {...videoProps} videoMetaData={videoMetaData} />
-      ) : null}
+      {isDirectPlayback ? <DirectSource {...videoProps} videoMetaData={videoMetaData} /> : null}
     </video>
   );
 };

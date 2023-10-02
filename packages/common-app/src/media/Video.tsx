@@ -33,27 +33,38 @@ export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClien
 export const VideoClickToLoad = ({ preload = true, ...props }: VideoClickToLoadProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const [loadVideo, setLoadVideo] = useState(false);
+  const [shouldFallback, setShouldFallback] = useState(false);
 
   return (
     <div
-      className={`relative overflow-hidden ${props.className || ''}`}
+      className={`bg-page-background relative overflow-hidden ${props.className || ''}`}
       onClick={(e) => {
         e.stopPropagation();
         setLoadVideo(true);
       }}
     >
-      <OdinImage dotYouClient={dotYouClient} {...props} fit={props.fit} avoidPayload={true} />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <Triangle className="text-background h-16 w-16" />
-      </div>
+      {shouldFallback ? null : (
+        <>
+          <OdinImage
+            dotYouClient={dotYouClient}
+            {...props}
+            fit={props.fit}
+            avoidPayload={true}
+            onError={() => setShouldFallback(true)}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Triangle className="text-background h-16 w-16" />
+          </div>
+        </>
+      )}
 
-      {preload || loadVideo ? (
+      {preload || loadVideo || shouldFallback ? (
         <OdinVideo
           dotYouClient={dotYouClient}
           {...props}
           autoPlay={loadVideo}
-          className={`absolute inset-0 ${props.className || ''} ${
-            loadVideo ? 'opacity-100' : 'pointer-events-none opacity-0'
+          className={`${shouldFallback ? '' : 'absolute inset-0'} ${props.className || ''} ${
+            loadVideo || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'
           }`}
         />
       ) : null}

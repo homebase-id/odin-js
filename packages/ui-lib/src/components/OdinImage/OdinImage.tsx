@@ -64,12 +64,11 @@ export const OdinImage = ({
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
-  const { data: tinyThumb, error: tinyError } = useTinyThumb(
-    dotYouClient,
-    odinId,
-    isInView && !skipTiny ? fileId : undefined,
-    targetDrive
-  );
+  const {
+    data: tinyThumb,
+    error: tinyError,
+    isFetched: isTinyFetched,
+  } = useTinyThumb(dotYouClient, odinId, isInView && !skipTiny ? fileId : undefined, targetDrive);
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
   const naturalSize: ImageSize | undefined = tinyThumb
@@ -77,7 +76,9 @@ export const OdinImage = ({
     : cachedImage?.naturalSize || previewThumbnail;
 
   const {
-    fetch: { data: imageData, error: imageError },
+    data: imageData,
+    error: imageError,
+    isFetched: isImageFetched,
   } = useImage(
     dotYouClient,
     odinId,
@@ -90,7 +91,7 @@ export const OdinImage = ({
       : undefined,
     probablyEncrypted,
     naturalSize
-  );
+  ).fetch;
 
   useEffect(() => {
     if (loadSize !== undefined) return;
@@ -104,6 +105,9 @@ export const OdinImage = ({
 
     // When we have a preview/cached image already, don't wait for the tinyThumb to load
     if (skipTiny && isTinyLoaded) calculateSize();
+
+    // If there's no tinyThumb data, don't wait for it to load
+    if (isTinyFetched && !tinyThumb) calculateSize();
   }, [isInView, tinyThumb, isTinyLoaded]);
 
   useEffect(() => {
@@ -157,7 +161,7 @@ export const OdinImage = ({
     setLoadSize(matchingSize);
   };
 
-  const isLoadingTiny = !imageData && !previewUrl;
+  const isLoadingTiny = !imageData && !previewUrl && !isImageFetched && !isTinyFetched;
   const width = naturalSize?.pixelWidth;
   const height = naturalSize?.pixelHeight;
   const imgClassNames = `${
@@ -168,7 +172,11 @@ export const OdinImage = ({
       : 'h-auto max-h-[inherit] w-full'
   } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
 
-  if (tinyError || imageError) console.error({ fileId, tinyError, imageError });
+  if (tinyError || imageError) console.warn('[OdinImage]', { fileId, tinyError, imageError });
+
+  useEffect(() => {
+    if (!imageData?.url && isImageFetched) onError && onError();
+  }, [imageData]);
 
   return (
     <figure
@@ -227,7 +235,10 @@ export const OdinImage = ({
               setIsFinal(true);
               onLoad && onLoad();
             }}
-            onError={() => setIsFinal(true)}
+            onError={() => {
+              setIsFinal(true);
+              onError && onError();
+            }}
           />
         </>
       )}
