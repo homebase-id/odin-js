@@ -67,20 +67,21 @@ export const getDecryptedVideoUrlOverTransit = async (
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
-  const meta = await getFileHeaderOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    systemFileType
-  );
-  if (!meta.fileMetadata.payloadIsEncrypted) {
-    return `https://${odinId}/api/guest/v1/drive/files/payload?${stringify({
-      ...targetDrive,
-      fileId,
-      xfst: systemFileType || 'Standard',
-    })}`;
-  }
+  // TODO: Decide to use direct urls or not
+  // const meta = await getFileHeaderOverTransit(
+  //   dotYouClient,
+  //   odinId,
+  //   targetDrive,
+  //   fileId,
+  //   systemFileType
+  // );
+  // if (!meta.fileMetadata.payloadIsEncrypted) {
+  //   return `https://${odinId}/api/guest/v1/drive/files/payload?${stringify({
+  //     ...targetDrive,
+  //     fileId,
+  //     xfst: systemFileType || 'Standard',
+  //   })}`;
+  // }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   return getPayloadBytesOverTransit(

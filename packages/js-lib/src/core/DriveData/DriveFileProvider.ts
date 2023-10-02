@@ -326,6 +326,7 @@ export const deletePayload = async (
 };
 
 /// Helper methods:
+// TODO: Rename this one getContentFromHeaderOrPayload
 export const getPayload = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -346,7 +347,7 @@ export const getPayload = async <T>(
   if (fileMetadata.appData.contentIsComplete && includesJsonContent) {
     return await decryptJsonContent<T>(fileMetadata, keyheader);
   } else if (fileMetadata.appData.contentIsComplete) {
-    // When contentIsComplete but !includesJsonContent the query before was done without including the jsonContent; So we just get and parse
+    // When contentIsComplete but includesJsonContent == false the query before was done without including the jsonContent; So we just get and parse
     const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     if (!fileHeader) return null;
     return await decryptJsonContent<T>(fileHeader.fileMetadata, keyheader);

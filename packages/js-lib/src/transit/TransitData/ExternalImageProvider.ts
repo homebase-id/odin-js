@@ -51,41 +51,42 @@ export const getDecryptedImageUrlOverTransit = async (
   isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
 ): Promise<string> => {
-  const getDirectImageUrl = async () => {
-    return `https://${odinId}/api/guest/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
-      ...targetDrive,
-      fileId,
-      ...(size
-        ? {
-            width: size.pixelWidth,
-            height: size.pixelHeight,
-          }
-        : {}),
-      xfst: systemFileType || 'Standard',
-    })}`;
-  };
+  // TODO: Decide to use direct urls or not
+  // const getDirectImageUrl = async () => {
+  //   return `https://${odinId}/api/guest/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
+  //     ...targetDrive,
+  //     fileId,
+  //     ...(size
+  //       ? {
+  //           width: size.pixelWidth,
+  //           height: size.pixelHeight,
+  //         }
+  //       : {}),
+  //     xfst: systemFileType || 'Standard',
+  //   })}`;
+  // };
 
-  const ss = dotYouClient.getSharedSecret();
+  // const ss = dotYouClient.getSharedSecret();
 
-  // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss) return await getDirectImageUrl();
+  // // If there is no shared secret, we wouldn't even be able to decrypt
+  // if (!ss) return await getDirectImageUrl();
 
-  // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
-  //   we first get confirmation from the header and return a direct url if possible
-  // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
-  //   and the CAT is passed via a header that we can't set on a direct url
-  if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
-    const meta = await getFileHeaderOverTransit(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      fileId,
-      systemFileType
-    );
-    if (!meta?.fileMetadata.payloadIsEncrypted) {
-      return await getDirectImageUrl();
-    }
-  }
+  // // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
+  // //   we first get confirmation from the header and return a direct url if possible
+  // // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
+  // //   and the CAT is passed via a header that we can't set on a direct url
+  // if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
+  //   const meta = await getFileHeaderOverTransit(
+  //     dotYouClient,
+  //     odinId,
+  //     targetDrive,
+  //     fileId,
+  //     systemFileType
+  //   );
+  //   if (!meta?.fileMetadata.payloadIsEncrypted) {
+  //     return await getDirectImageUrl();
+  //   }
+  // }
 
   // Direct download over transit of the data and potentially decrypt if response headers indicate encrypted
   return getDecryptedImageDataOverTransit(
