@@ -13,6 +13,7 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import ContactImage from '../../../components/Connection/ContactImage/ContactImage';
 import { CompanyImage } from '../../../components/Connection/CompanyImage/CompanyImage';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
 
 const Circles = () => {
   const {
@@ -63,7 +64,7 @@ const Circles = () => {
             {
               permissionedDrive: {
                 drive: GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-                permission: 4,
+                permission: [DrivePermissionType.Read],
               },
             },
           ],

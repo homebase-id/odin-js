@@ -38,7 +38,7 @@ const DrivePermissionRequestView = ({
               </>
             )}
             {!isNew
-              ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission).name)}`
+              ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission))}`
               : null}
           </p>
           {permissionTree && <small className="ml-1">{permissionTree}</small>}

@@ -332,7 +332,8 @@ const drivesParamToDriveGrantRequest = (queryParamVal: string | undefined): Driv
             alias: d.a,
             type: d.t,
           },
-          permission: parseInt(d.p),
+          // I know, probably not really "safe" to do this... But hey, the drivePermission are hard
+          permission: [parseInt(d.p)],
         },
         driveMeta: {
           name: d.n,

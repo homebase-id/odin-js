@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { ActionButton, ActionButtonState, Arrow, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
+import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
 import { DialogWrapper } from '@youfoundation/common-app';
 import useApp from '../../../hooks/apps/useApp';
 import useApps from '../../../hooks/apps/useApps';
@@ -80,7 +80,7 @@ const DriveAppAccessDialog = ({
                     driveGrant.permissionedDrive.drive.type === targetDriveInfo.type
                 );
 
-                const isChecked = (driveGrant?.permissionedDrive.permission || 0) > 0;
+                const isChecked = !!driveGrant?.permissionedDrive.permission?.length;
 
                 return (
                   <div
@@ -90,9 +90,9 @@ const DriveAppAccessDialog = ({
                     key={app.appId}
                   >
                     <AppMembershipView appDef={app} key={app.appId} />
-                    <PermissionLevelEditor
+                    <DrivePermissionFlagEditor
                       className="ml-auto"
-                      defaultValue={driveGrant?.permissionedDrive.permission || 0}
+                      defaultValue={driveGrant?.permissionedDrive.permission || []}
                       onChange={(newValue) => {
                         setNewAppPermission([
                           ...newAppPermission.filter((appPerm) => appPerm.appId !== app.appId),

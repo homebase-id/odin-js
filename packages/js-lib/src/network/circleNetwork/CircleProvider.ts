@@ -1,6 +1,10 @@
 import { DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
-import { getDrivePermissionFromString, getNewId } from '../../helpers/helpers';
-import { CircleDefinition } from './CircleDataTypes';
+import {
+  getDrivePermissionFromString,
+  getNewId,
+  getPermissionNumberFromDrivePermission,
+} from '../../helpers/helpers';
+import { CircleDefinition, DriveGrant } from './CircleDataTypes';
 
 //Handles management of Circles
 const root = '/circles/definitions';
@@ -12,8 +16,12 @@ export const updateCircleDefinition = async (
   const client = dotYouClient.createAxiosClient();
   const url = root + '/update';
 
-  const data = { ...circleDefinition };
-  data.driveGrants = data.driveGrants || [];
+  const data: any = { ...circleDefinition };
+  data.driveGrants =
+    data.driveGrants?.map((grant: DriveGrant) => ({
+      ...grant,
+      permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
+    })) || [];
 
   return client
     .post(url, data)

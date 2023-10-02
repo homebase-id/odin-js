@@ -5,6 +5,7 @@ import { t } from '@youfoundation/common-app';
 import {
   getAppPermissionFromNumber,
   getDrivePermissionFromNumber,
+  getUniqueDrivesWithHighestPermission,
 } from '@youfoundation/js-lib/helpers';
 
 const Ping = () => {
@@ -13,23 +14,7 @@ const Ping = () => {
 
   const { odinId, securityLevel } = securityContext.caller;
   const grants = securityContext.permissionContext.permissionGroups.flatMap((pg) => pg.driveGrants);
-  const uniqueDrivesWithHighestPermission = grants?.reduce((prevValue, grantedDrive) => {
-    const existingGrantIndex = prevValue.findIndex(
-      (driveGrant) =>
-        driveGrant.permissionedDrive.drive.alias === grantedDrive.permissionedDrive.drive.alias &&
-        driveGrant.permissionedDrive.drive.type === grantedDrive.permissionedDrive.drive.type
-    );
-
-    if (existingGrantIndex !== -1) {
-      prevValue[existingGrantIndex].permissionedDrive.permission = Math.max(
-        prevValue[existingGrantIndex].permissionedDrive.permission,
-        grantedDrive.permissionedDrive.permission
-      );
-      return prevValue;
-    } else {
-      return [...prevValue, grantedDrive];
-    }
-  }, [] as DriveGrant[]);
+  const uniqueDrivesWithHighestPermission = getUniqueDrivesWithHighestPermission(grants);
 
   const permissionKeys = Array.from(
     new Set(
@@ -61,7 +46,7 @@ const Ping = () => {
                     >
                       <HardDrive className="mr-4 h-8 w-8 flex-shrink-0" />
                       <span className="mr-5">
-                        {t(getDrivePermissionFromNumber(grant.permissionedDrive.permission).name)}
+                        {t(getDrivePermissionFromNumber(grant.permissionedDrive.permission))}
                       </span>
                       <span>
                         A: {grant.permissionedDrive.drive.alias}

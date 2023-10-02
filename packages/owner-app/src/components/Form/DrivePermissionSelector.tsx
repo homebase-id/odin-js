@@ -1,7 +1,7 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { t, Label } from '@youfoundation/common-app';
 import { HardDrive } from '@youfoundation/common-app';
-import PermissionLevelEditor from './PermissionLevelEditor';
+import DrivePermissionFlagEditor from './DrivePermissionFlagEditor';
 import { DriveGrant } from '@youfoundation/js-lib/network';
 
 const DrivePermissionSelector = ({
@@ -27,13 +27,13 @@ const DrivePermissionSelector = ({
                   (driveGrant) =>
                     driveGrant.permissionedDrive.drive.alias === drive.targetDriveInfo.alias &&
                     driveGrant.permissionedDrive.drive.type === drive.targetDriveInfo.type
-                )?.permissionedDrive.permission ?? 0;
+                )?.permissionedDrive.permission ?? [];
 
               return (
                 <div
                   key={index}
                   className={`my-2 flex w-full select-none flex-row rounded-lg border p-4 dark:border-slate-800 ${
-                    defaultVal > 0 && 'bg-slate-50 dark:bg-slate-700'
+                    defaultVal?.length > 0 && 'bg-slate-50 dark:bg-slate-700'
                   }`}
                 >
                   <HardDrive className="my-auto mr-3 h-6 w-6" />
@@ -46,7 +46,7 @@ const DrivePermissionSelector = ({
                       {drive.allowAnonymousReads && t('Allows anonymous read access')}
                     </small>
                   </Label>
-                  <PermissionLevelEditor
+                  <DrivePermissionFlagEditor
                     className="my-auto ml-auto"
                     defaultValue={
                       driveGrants?.find(
@@ -54,10 +54,10 @@ const DrivePermissionSelector = ({
                           driveGrant.permissionedDrive.drive.alias ===
                             drive.targetDriveInfo.alias &&
                           driveGrant.permissionedDrive.drive.type === drive.targetDriveInfo.type
-                      )?.permissionedDrive.permission ?? 0
+                      )?.permissionedDrive.permission ?? []
                     }
                     onChange={(value) => {
-                      if (value > 0) {
+                      if (value?.length > 0) {
                         onChange([
                           ...(driveGrants?.filter(
                             (driveGrant) =>

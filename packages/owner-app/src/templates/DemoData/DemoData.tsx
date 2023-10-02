@@ -754,7 +754,7 @@ const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
                   alias: BuiltInProfiles.StandardProfileId,
                   type: ProfileConfig.ProfileDriveType,
                 },
-                permission: DrivePermissionType.Read,
+                permission: [DrivePermissionType.Read],
               },
             },
           ],

@@ -26,9 +26,10 @@ import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import { CircleDomainMembershipDialog } from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
-import { CircleGrant, DriveGrant } from '@youfoundation/js-lib/network';
+import { CircleGrant } from '@youfoundation/js-lib/network';
 import useDomainClients from '../../../hooks/connections/useDomainClients';
 import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
+import { getUniqueDrivesWithHighestPermission } from '@youfoundation/js-lib/helpers';
 
 const DomainDetails = () => {
   const { domain } = useParams();
@@ -193,23 +194,7 @@ const DomainPermissionViewer = ({
 
   const grantedDrives = [...(grantedCircles?.flatMap((circle) => circle.driveGrants ?? []) ?? [])];
 
-  const uniqueDriveGrants = grantedDrives?.reduce((prevValue, grantedDrive) => {
-    const existingGrantIndex = prevValue.findIndex(
-      (driveGrant) =>
-        driveGrant.permissionedDrive.drive.alias === grantedDrive.permissionedDrive.drive.alias &&
-        driveGrant.permissionedDrive.drive.type === grantedDrive.permissionedDrive.drive.type
-    );
-
-    if (existingGrantIndex !== -1) {
-      prevValue[existingGrantIndex].permissionedDrive.permission = Math.max(
-        prevValue[existingGrantIndex].permissionedDrive.permission,
-        grantedDrive.permissionedDrive.permission
-      );
-      return prevValue;
-    } else {
-      return [...prevValue, grantedDrive];
-    }
-  }, [] as DriveGrant[]);
+  const uniqueDriveGrants = getUniqueDrivesWithHighestPermission(grantedDrives);
 
   return (
     <>

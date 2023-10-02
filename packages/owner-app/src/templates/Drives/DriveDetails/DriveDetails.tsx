@@ -130,8 +130,7 @@ const DriveDetails = () => {
                   circleDef={circle}
                   key={circle.id}
                   permissionDetails={t(
-                    getDrivePermissionFromNumber(matchingGrant?.permissionedDrive?.permission || 0)
-                      .name
+                    getDrivePermissionFromNumber(matchingGrant?.permissionedDrive?.permission)
                   )}
                   className="my-4"
                 />
@@ -161,8 +160,7 @@ const DriveDetails = () => {
                   appDef={app}
                   key={app.appId}
                   permissionLevel={t(
-                    getDrivePermissionFromNumber(matchingGrant?.permissionedDrive.permission || 0)
-                      .name
+                    getDrivePermissionFromNumber(matchingGrant?.permissionedDrive.permission)
                   )}
                 />
               );

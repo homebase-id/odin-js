@@ -1,4 +1,7 @@
-import { getDrivePermissionFromString } from '@youfoundation/js-lib/helpers';
+import {
+  getDrivePermissionFromString,
+  getPermissionNumberFromDrivePermission,
+} from '@youfoundation/js-lib/helpers';
 import {
   AppClientRegistrationRequest,
   AppClientRegistrationResponse,
@@ -88,10 +91,13 @@ export const RegisterApp = async (
   request: AppRegistrationRequest
 ): Promise<RedactedAppRegistration> => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post<RedactedAppRegistration>(
-    'appmanagement/register/app',
-    request
-  );
+  const response = await client.post<RedactedAppRegistration>('appmanagement/register/app', {
+    ...request,
+    drives: request.drives?.map((driveGrant) => ({
+      ...driveGrant,
+      permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
+    })),
+  });
 
   console.log('RegisterApp returning response');
   console.log(response);
@@ -206,7 +212,15 @@ export const UpdateAuthorizedCircles = async (
   }
 ) => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/register/updateauthorizedcircles', request);
+  const response = await client.post('appmanagement/register/updateauthorizedcircles', {
+    ...request,
+    circleMemberPermissionGrant: {
+      ...request.circleMemberPermissionGrant,
+      drives: request.circleMemberPermissionGrant?.drives?.map((driveGrant) => ({
+        permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
+      })),
+    },
+  });
 
   return response.data;
 };
@@ -216,7 +230,12 @@ export const UpdatePermissions = async (
   request: PermissionUpdateRequest
 ) => {
   const client = dotYouClient.createAxiosClient();
-  const response = await client.post('appmanagement/register/updateapppermissions', request);
+  const response = await client.post('appmanagement/register/updateapppermissions', {
+    ...request,
+    drives: request.drives.map((driveGrant) => ({
+      permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
+    })),
+  });
 
   return response.data;
 };

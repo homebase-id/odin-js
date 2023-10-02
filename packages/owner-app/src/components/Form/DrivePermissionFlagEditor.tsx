@@ -2,15 +2,16 @@ import { ReactNode, useRef, useState } from 'react';
 import { Check, t, useOutsideTrigger } from '@youfoundation/common-app';
 import { Triangle } from '@youfoundation/common-app';
 import { DrivePermissionType } from '@youfoundation/js-lib/core';
+import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
 
-const PermissionLevelEditor = ({
+const DrivePermissionFlagEditor = ({
   className,
   onChange,
   defaultValue,
 }: {
   className: string;
-  onChange?: (value: number) => void;
-  defaultValue: number;
+  onChange?: (value: DrivePermissionType[]) => void;
+  defaultValue: DrivePermissionType[];
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setInnerValue] = useState(defaultValue);
@@ -18,23 +19,12 @@ const PermissionLevelEditor = ({
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
 
   const numericDrivePermissionLevels = Object.values(DrivePermissionType).filter(
-    (v) =>
-      typeof v === 'number' &&
-      // Remove the "stupid" permission levels
-      v !== DrivePermissionType.WriteReactionsAndComments &&
-      v !== DrivePermissionType.React &&
-      v !== DrivePermissionType.Comment
+    (v) => typeof v === 'number'
   ) as number[];
 
-  const currentValue = numericDrivePermissionLevels.reduce((prevValue, currValue) => {
-    if (currValue > prevValue && currValue <= defaultValue) {
-      return currValue;
-    }
+  const currentValue = getDrivePermissionFromNumber(defaultValue);
 
-    return prevValue;
-  }, numericDrivePermissionLevels[0]);
-
-  const setValue = (value: number) => {
+  const setValue = (value: DrivePermissionType[]) => {
     setInnerValue(value);
     onChange && onChange(value);
   };
@@ -47,7 +37,7 @@ const PermissionLevelEditor = ({
         ref={wrapperRef}
       >
         <div className="flex min-w-[6rem] flex-row px-2 py-1">
-          <span className="my-auto mr-2 select-none">{t(DrivePermissionType[currentValue])}</span>{' '}
+          <span className="my-auto mr-2 select-none">{t(currentValue)}</span>{' '}
           <Triangle className="my-auto ml-auto h-2 w-2 rotate-90" />
         </div>
         <ul
@@ -60,8 +50,12 @@ const PermissionLevelEditor = ({
           {numericDrivePermissionLevels.map((level) => (
             <Option
               key={level}
-              isChecked={value === level}
-              onChange={() => (value !== level ? setValue(level) : setValue(0))}
+              isChecked={value.includes(level)}
+              onChange={() =>
+                value.includes(level)
+                  ? setValue([...value.filter((x) => x !== level)])
+                  : setValue([...value, level])
+              }
             >
               {t(DrivePermissionType[level])}
             </Option>
@@ -98,4 +92,4 @@ const Option = ({
   );
 };
 
-export default PermissionLevelEditor;
+export default DrivePermissionFlagEditor;

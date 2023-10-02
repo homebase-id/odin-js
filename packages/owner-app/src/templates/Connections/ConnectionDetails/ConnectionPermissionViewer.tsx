@@ -6,12 +6,15 @@ import {
   LoadingBlock,
   CirclePermissionView,
 } from '@youfoundation/common-app';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import {
+  getUniqueDrivesWithHighestPermission,
+  stringGuidsEqual,
+} from '@youfoundation/js-lib/helpers';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
 import useApps from '../../../hooks/apps/useApps';
-import { AccessGrant, DriveGrant } from '@youfoundation/js-lib/network';
+import { AccessGrant } from '@youfoundation/js-lib/network';
 
 export const ConnectionPermissionViewer = ({
   accessGrant,
@@ -40,46 +43,30 @@ export const ConnectionPermissionViewer = ({
       []),
   ];
 
-  const uniqueDrivesWithHighestPermission = grantedDrives?.reduce((prevValue, grantedDrive) => {
-    const existingGrantIndex = prevValue.findIndex(
-      (driveGrant) =>
-        driveGrant.permissionedDrive.drive.alias === grantedDrive.permissionedDrive.drive.alias &&
-        driveGrant.permissionedDrive.drive.type === grantedDrive.permissionedDrive.drive.type
-    );
-
-    if (existingGrantIndex !== -1) {
-      prevValue[existingGrantIndex].permissionedDrive.permission = Math.max(
-        prevValue[existingGrantIndex].permissionedDrive.permission,
-        grantedDrive.permissionedDrive.permission
+  const driveGrantsWithPermissionTree = getUniqueDrivesWithHighestPermission(grantedDrives)?.map(
+    (drive) => {
+      const viaCircles = grantedCircles?.filter((circle) =>
+        circle.driveGrants?.some(
+          (driveGrant) =>
+            driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
+            driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
+        )
       );
-      return prevValue;
-    } else {
-      return [...prevValue, grantedDrive];
+
+      const viaApps = grantedApps?.filter((app) =>
+        app.circleMemberPermissionSetGrantRequest.drives?.some(
+          (driveGrant) =>
+            driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
+            driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
+        )
+      );
+
+      const circleNames = viaCircles?.map((circle) => circle.name) ?? [];
+      const appNames = viaApps?.map((app) => app.name) ?? [];
+
+      return { driveGrant: drive, permissionTree: [...circleNames, ...appNames].join(', ') };
     }
-  }, [] as DriveGrant[]);
-
-  const driveGrantsWithPermissionTree = uniqueDrivesWithHighestPermission?.map((drive) => {
-    const viaCircles = grantedCircles?.filter((circle) =>
-      circle.driveGrants?.some(
-        (driveGrant) =>
-          driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
-          driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
-      )
-    );
-
-    const viaApps = grantedApps?.filter((app) =>
-      app.circleMemberPermissionSetGrantRequest.drives?.some(
-        (driveGrant) =>
-          driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
-          driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
-      )
-    );
-
-    const circleNames = viaCircles?.map((circle) => circle.name) ?? [];
-    const appNames = viaApps?.map((app) => app.name) ?? [];
-
-    return { driveGrant: drive, permissionTree: [...circleNames, ...appNames].join(', ') };
-  });
+  );
 
   return (
     <div className={className}>

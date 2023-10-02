@@ -69,27 +69,38 @@ export const useCanReact = ({
   });
 
   const isCanReact = async (): Promise<CanReactInfo> => {
-    // TODO: Expand with React/Comment permissions
-    const hasDriveReactAccess = securityContext?.permissionContext.permissionGroups
-      .flatMap((group) => group.driveGrants)
-      .some(
-        (grant) =>
-          stringGuidsEqual(grant.permissionedDrive.drive.alias, channelId) &&
-          stringGuidsEqual(grant.permissionedDrive.drive.type, BlogConfig.DriveType) &&
-          grant.permissionedDrive.permission >= DrivePermissionType.React
-      );
+    const driveGrants =
+      securityContext?.permissionContext.permissionGroups
+        .flatMap((group) => group.driveGrants)
+        .filter(
+          (grant) =>
+            stringGuidsEqual(grant.permissionedDrive.drive.alias, channelId) &&
+            stringGuidsEqual(grant.permissionedDrive.drive.type, BlogConfig.DriveType)
+        ) || [];
+
+    const hasReactDriveReactAccess = driveGrants?.some((grant) =>
+      grant.permissionedDrive.permission.includes(DrivePermissionType.React)
+    );
+
+    const hasCommentDriveReactAccess = driveGrants?.some((grant) =>
+      grant.permissionedDrive.permission.includes(DrivePermissionType.Comment)
+    );
 
     const postFile = localBlogData?.activeBlog || externalPost;
 
     if (!isAuthenticated) return { canReact: false, details: 'NOT_AUTHENTICATED' };
-
     if (isAuthor) return { canReact: true };
-    if (!hasDriveReactAccess) return { canReact: false, details: 'NOT_AUTHORIZED' };
+    if (!hasReactDriveReactAccess && !hasCommentDriveReactAccess)
+      return { canReact: false, details: 'NOT_AUTHORIZED' };
     if (
       postFile?.content.reactAccess &&
       postFile.content.reactAccess !== SecurityGroupType.Connected
     )
       return { canReact: false, details: 'DISABLED_ON_POST' };
+
+    // Partial react access
+    if (!hasReactDriveReactAccess && hasCommentDriveReactAccess) return { canReact: 'comment' };
+    else if (hasReactDriveReactAccess && !hasCommentDriveReactAccess) return { canReact: 'emoji' };
 
     // Unspecified, default true
     return { canReact: true };

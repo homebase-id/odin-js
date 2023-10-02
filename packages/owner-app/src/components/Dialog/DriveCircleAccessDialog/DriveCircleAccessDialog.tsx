@@ -5,7 +5,7 @@ import { t, ActionButton, ActionButtonState, usePortal, Arrow } from '@youfounda
 import { useCircle } from '@youfoundation/common-app';
 import { useCircles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import PermissionLevelEditor from '../../Form/PermissionLevelEditor';
+import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
 import { CirclePermissionView } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
@@ -77,7 +77,7 @@ const DriveCircleAccessDialog = ({
                     driveGrant.permissionedDrive.drive.type === targetDriveInfo.type
                 );
 
-                const isChecked = (driveGrant?.permissionedDrive.permission || 0) > 0;
+                const isChecked = !!driveGrant?.permissionedDrive.permission?.length;
 
                 return (
                   <div
@@ -92,9 +92,9 @@ const DriveCircleAccessDialog = ({
                       onClick={() => undefined}
                       isChecked={isChecked}
                     />
-                    <PermissionLevelEditor
+                    <DrivePermissionFlagEditor
                       className="ml-auto"
-                      defaultValue={driveGrant?.permissionedDrive.permission || 0}
+                      defaultValue={driveGrant?.permissionedDrive.permission || []}
                       onChange={(newValue) => {
                         setNewCircles([
                           ...newCircles.filter((circleToUpdate) => circleToUpdate.id !== circle.id),

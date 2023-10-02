@@ -39,7 +39,7 @@ const DrivePermissionView = ({
         <div className="mr-2 flex flex-col">
           <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
             {drive?.name}:{' '}
-            {t(getDrivePermissionFromNumber(driveGrant?.permissionedDrive.permission).name)}
+            {t(getDrivePermissionFromNumber(driveGrant?.permissionedDrive.permission))}
           </p>
           {permissionTree && (
             <small className="">
