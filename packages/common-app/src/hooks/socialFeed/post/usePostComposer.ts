@@ -40,9 +40,10 @@ export const usePostComposer = () => {
       return;
     }
 
-    const shouldSecureAttachments =
-      channel.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
-      channel.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
+    const shouldSecureAttachments = !(
+      channel.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+      channel.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+    );
 
     try {
       // Process files, if any

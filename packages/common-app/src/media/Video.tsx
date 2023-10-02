@@ -36,7 +36,7 @@ export const VideoClickToLoad = ({ preload = true, ...props }: VideoClickToLoadP
 
   return (
     <div
-      className={`relative ${props.className || ''}`}
+      className={`relative overflow-hidden ${props.className || ''}`}
       onClick={(e) => {
         e.stopPropagation();
         setLoadVideo(true);

@@ -3,7 +3,13 @@ import { Helmet } from 'react-helmet-async';
 import { useParams } from 'react-router-dom';
 import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
-import { HOME_ROOT_PATH, SubtleMessage, t, useBlogPostsInfinite } from '@youfoundation/common-app';
+import {
+  HOME_ROOT_PATH,
+  Lock,
+  SubtleMessage,
+  t,
+  useBlogPostsInfinite,
+} from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
@@ -13,6 +19,7 @@ import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingBlock } from '@youfoundation/common-app';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 10;
 const PostOverview = () => {
@@ -76,6 +83,10 @@ const PostOverview = () => {
 
               <h1 className="text-4xl">{activeChannel?.name}</h1>
               <p className="my-2 max-w-md text-foreground text-opacity-80">
+                {activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
+                activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated ? (
+                  <Lock className="inline h-3 w-3" />
+                ) : null}{' '}
                 {activeChannel?.description}
               </p>
             </div>

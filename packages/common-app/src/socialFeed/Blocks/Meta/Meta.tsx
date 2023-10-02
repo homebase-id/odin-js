@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { Lock } from '@youfoundation/common-app';
 
 import {
   ChannelDefinitionVm,
@@ -63,10 +64,11 @@ export const PostMeta = ({
       <span>{date.toLocaleDateString(undefined, format)}</span>
       {channel ? (
         <a
-          className="text-primary ml-1 border-l pl-1 hover:underline dark:border-slate-500"
+          className="text-primary ml-1 flex flex-row items-center gap-1 border-l pl-1 hover:underline dark:border-slate-500"
           href={`${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}`}
           onClick={(e) => e.stopPropagation()}
         >
+          {postFile?.payloadIsEncrypted ? <Lock className="h-3 w-3" /> : null}
           {channel?.name ? `${channel?.name}` : ''}
         </a>
       ) : null}
