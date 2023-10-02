@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { getDrivePermissionFromString } from './PermissionHelpers';
-import { DrivePermissionType } from '../../core';
+import { DrivePermissionType } from '../core/DriveData/DriveTypes';
 
 test('Get read write permissions', () => {
   // Individual permissions
