@@ -1,4 +1,5 @@
-import { DrivePermissionType, AppPermissionType } from '../network/permission/PermissionTypes';
+import { DrivePermissionType } from '../core/DriveData/DriveTypes';
+import { AppPermissionType } from '../network/permission/PermissionTypes';
 
 const getPermissionFromNumber = (
   value: number,
@@ -25,3 +26,32 @@ export const getDrivePermissionFromNumber = (value: number) =>
 
 export const getAppPermissionFromNumber = (value: number) =>
   getPermissionFromNumber(value, AppPermissionType);
+
+/// Convert text based permission levels to the numbered type
+// Reflects DrivePermission enum in services/Odin.Core.Services/Drives/DrivePermission.cs
+export const getDrivePermissionFromString = (permission: unknown): DrivePermissionType => {
+  if (typeof permission !== 'string') {
+    return DrivePermissionType.None;
+  }
+
+  const lowered = permission.toLowerCase();
+  return lowered === 'read'
+    ? DrivePermissionType.Read
+    : lowered === 'write'
+    ? DrivePermissionType.Write
+    : lowered === 'read, write'
+    ? DrivePermissionType.ReadWrite
+    : lowered === 'react'
+    ? DrivePermissionType.React
+    : lowered === 'comment'
+    ? DrivePermissionType.Comment
+    : lowered === 'read, react'
+    ? DrivePermissionType.ReadAndWriteReactions
+    : lowered === 'read, writereactionsandcomments'
+    ? DrivePermissionType.ReadAndWriteReactionsAndComments
+    : lowered === 'writereactionsandcomments'
+    ? DrivePermissionType.WriteReactionsAndComments
+    : lowered === 'readwrite' || lowered === 'all'
+    ? DrivePermissionType.Full
+    : DrivePermissionType.None;
+};

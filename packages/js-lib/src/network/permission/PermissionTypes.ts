@@ -1,16 +1,3 @@
-export enum DrivePermissionType {
-  None = 0,
-  Reader = 1,
-  Writer = 2,
-  Editor = 3,
-  React = 4,
-  Comment = 8,
-  WriteReactionsAndComments = 12,
-  ReadAndWriteReactions = 5,
-  ReadAndWriteReactionsAndComments = 13,
-  Full = 17,
-}
-
 export enum CirclePermissionType {
   None = 0,
   ReadConnections = 10,

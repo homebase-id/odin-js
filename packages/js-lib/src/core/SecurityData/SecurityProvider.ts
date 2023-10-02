@@ -1,6 +1,5 @@
-import { parsePermissions } from '../../network/circleNetwork/CircleProvider';
+import { getDrivePermissionFromString } from '../../helpers/PermissionHelpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import { DrivePermissions } from '../DriveData/DriveTypes';
 import { SecurityContex } from './SecurityTypes';
 
 export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<SecurityContex> => {
@@ -32,9 +31,7 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
                   ...grant,
                   permissionedDrive: {
                     ...grant.permissionedDrive,
-                    permission: parsePermissions(
-                      grant.permissionedDrive.permission
-                    ) as DrivePermissions,
+                    permission: getDrivePermissionFromString(grant.permissionedDrive.permission),
                   },
                 };
               }),
@@ -67,9 +64,7 @@ export const getSecurityContextOverTransit = async (
                   ...grant,
                   permissionedDrive: {
                     ...grant.permissionedDrive,
-                    permission: parsePermissions(
-                      grant.permissionedDrive.permission
-                    ) as DrivePermissions,
+                    permission: getDrivePermissionFromString(grant.permissionedDrive.permission),
                   },
                 };
               }),

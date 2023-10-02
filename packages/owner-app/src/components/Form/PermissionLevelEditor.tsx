@@ -1,7 +1,7 @@
 import { ReactNode, useRef, useState } from 'react';
 import { Check, t, useOutsideTrigger } from '@youfoundation/common-app';
 import { Triangle } from '@youfoundation/common-app';
-import { DrivePermissionType } from '@youfoundation/js-lib/network';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
 
 const PermissionLevelEditor = ({
   className,

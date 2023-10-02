@@ -1,5 +1,5 @@
 import { BlogConfig } from '@youfoundation/js-lib/public';
-import { ApiType, DrivePermissions, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { ApiType, DrivePermissionType, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 import useSocialPost from '../socialFeed/useSocialPost';
@@ -76,7 +76,7 @@ export const useCanReact = ({
         (grant) =>
           stringGuidsEqual(grant.permissionedDrive.drive.alias, channelId) &&
           stringGuidsEqual(grant.permissionedDrive.drive.type, BlogConfig.DriveType) &&
-          grant.permissionedDrive.permission >= DrivePermissions.React
+          grant.permissionedDrive.permission >= DrivePermissionType.React
       );
 
     const postFile = localBlogData?.activeBlog || externalPost;

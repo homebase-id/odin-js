@@ -2,7 +2,7 @@ import useAuth from '../../hooks/auth/useAuth';
 import {
   SecurityGroupType,
   TargetDrive,
-  DrivePermissions,
+  DrivePermissionType,
   AccessControlList,
   DotYouClient,
   queryBatch,
@@ -754,7 +754,7 @@ const CirclesAndConnections = ({ realmData }: { realmData: RealmData }) => {
                   alias: BuiltInProfiles.StandardProfileId,
                   type: ProfileConfig.ProfileDriveType,
                 },
-                permission: DrivePermissions.Read,
+                permission: DrivePermissionType.Read,
               },
             },
           ],

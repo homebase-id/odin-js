@@ -8,16 +8,20 @@ import {
 
 export interface PermissionedDrive {
   drive: TargetDrive;
-  permission: DrivePermissions;
+  permission: DrivePermissionType;
 }
 
-export enum DrivePermissions {
+export enum DrivePermissionType {
   None = 0,
   Read = 1,
   Write = 2,
+  ReadWrite = 3,
   React = 4,
-  ReadWrite = Read | Write | React,
-  All = ReadWrite,
+  Comment = 8,
+  WriteReactionsAndComments = 12,
+  ReadAndWriteReactions = 5,
+  ReadAndWriteReactionsAndComments = 13,
+  Full = 17,
 }
 
 export interface PermissionSet {

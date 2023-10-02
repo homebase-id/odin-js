@@ -1,6 +1,5 @@
 import { DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
-import { getNewId } from '../../helpers/helpers';
-import { DrivePermissionType } from '../network';
+import { getDrivePermissionFromString, getNewId } from '../../helpers/helpers';
 import { CircleDefinition } from './CircleDataTypes';
 
 //Handles management of Circles
@@ -43,35 +42,6 @@ export const createCircleDefinition = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
-/// Convert text based permission levels to the numbered type
-// Reflects DrivePermission enum in services/Odin.Core.Services/Drives/DrivePermission.cs
-export const parsePermissions = (permission: unknown): number | string | unknown => {
-  if (typeof permission !== 'string') {
-    return permission;
-  }
-
-  const lowered = permission.toLowerCase();
-  return lowered === 'read'
-    ? DrivePermissionType.Reader
-    : lowered === 'write'
-    ? DrivePermissionType.Writer
-    : lowered === 'read, write'
-    ? DrivePermissionType.Editor
-    : lowered === 'react'
-    ? DrivePermissionType.React
-    : lowered === 'comment'
-    ? DrivePermissionType.Comment
-    : lowered === 'read, react'
-    ? DrivePermissionType.ReadAndWriteReactions
-    : lowered === 'read, writereactionsandcomments'
-    ? DrivePermissionType.ReadAndWriteReactionsAndComments
-    : lowered === 'writereactionsandcomments'
-    ? DrivePermissionType.WriteReactionsAndComments
-    : lowered === 'readwrite' || lowered === 'all'
-    ? DrivePermissionType.Full
-    : permission;
-};
-
 export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefinition[]> => {
   assertIfDotYouClientIsOwner(dotYouClient);
 
@@ -87,7 +57,7 @@ export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefi
         return {
           permissionedDrive: {
             ...grant.permissionedDrive,
-            permission: parsePermissions(grant.permissionedDrive.permission),
+            permission: getDrivePermissionFromString(grant.permissionedDrive.permission),
           },
         };
       }),
@@ -112,7 +82,7 @@ export const getCircle = async (
       return {
         permissionedDrive: {
           ...grant.permissionedDrive,
-          permission: parsePermissions(grant.permissionedDrive.permission),
+          permission: getDrivePermissionFromString(grant.permissionedDrive.permission),
         },
       };
     }),

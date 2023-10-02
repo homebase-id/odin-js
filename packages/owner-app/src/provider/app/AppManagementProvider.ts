@@ -1,4 +1,4 @@
-import { parsePermissions } from '@youfoundation/js-lib/network';
+import { getDrivePermissionFromString } from '@youfoundation/js-lib/helpers';
 import {
   AppClientRegistrationRequest,
   AppClientRegistrationResponse,
@@ -9,7 +9,7 @@ import {
   PermissionUpdateRequest,
   PermissionSetGrantRequest,
 } from './AppManagementProviderTypes';
-import { DotYouClient, DrivePermissions } from '@youfoundation/js-lib/core';
+import { DotYouClient } from '@youfoundation/js-lib/core';
 
 //adds the specified client to the list of allowed clients for a given app; returns a CAT
 export const RegisterAppClient = async (
@@ -117,9 +117,7 @@ export const GetAppRegistration = async (
         return {
           permissionedDrive: {
             drive: driveGrant.permissionedDrive.drive,
-            permission: parsePermissions(
-              driveGrant.permissionedDrive.permission
-            ) as DrivePermissions,
+            permission: getDrivePermissionFromString(driveGrant.permissionedDrive.permission),
           },
         };
       }),
@@ -130,9 +128,7 @@ export const GetAppRegistration = async (
         return {
           permissionedDrive: {
             drive: driveGrant.permissionedDrive.drive,
-            permission: parsePermissions(
-              driveGrant.permissionedDrive.permission
-            ) as DrivePermissions,
+            permission: getDrivePermissionFromString(driveGrant.permissionedDrive.permission),
           },
         };
       }),
@@ -155,9 +151,7 @@ export const GetAppRegistrations = async (
           return {
             permissionedDrive: {
               drive: driveGrant.permissionedDrive.drive,
-              permission: parsePermissions(
-                driveGrant.permissionedDrive.permission
-              ) as DrivePermissions,
+              permission: getDrivePermissionFromString(driveGrant.permissionedDrive.permission),
             },
           };
         }),
@@ -168,9 +162,7 @@ export const GetAppRegistrations = async (
           return {
             permissionedDrive: {
               drive: driveGrant.permissionedDrive.drive,
-              permission: parsePermissions(
-                driveGrant.permissionedDrive.permission
-              ) as DrivePermissions,
+              permission: getDrivePermissionFromString(driveGrant.permissionedDrive.permission),
             },
           };
         }),
