@@ -72,9 +72,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   ).fetch;
 
   useEffect(() => {
-    if (videoProps.autoPlay && videoRef.current) {
-      videoRef.current.play();
-    }
+    if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
   }, [videoProps.autoPlay]);
 
   return (
@@ -122,6 +120,16 @@ const ChunkedSource = ({
   const fileLength = videoMetaData.fileSize;
   const metaDuration = videoMetaData.isSegmented ? videoMetaData.duration : undefined;
   const segmentMap = videoMetaData.isSegmented ? videoMetaData.segmentMap : undefined;
+
+  useEffect(() => {
+    const errorHandler = (e: unknown) => {
+      console.error('[Odin-Video]', e);
+      onFatalError && onFatalError();
+    };
+
+    videoRef.current?.addEventListener('error', errorHandler);
+    return () => videoRef.current?.removeEventListener('error', errorHandler);
+  });
 
   const objectUrl = useMemo(() => {
     if (!codec || !fileLength || !metaDuration || !segmentMap) return null;
@@ -204,13 +212,7 @@ const ChunkedSource = ({
 
     const appendToBuffer = (chunk: Uint8Array) => {
       if (sourceBuffer.updating) {
-        sourceBuffer.addEventListener(
-          'updateend',
-          () => {
-            appendToBuffer(chunk);
-          },
-          { once: true }
-        );
+        sourceBuffer.addEventListener('updateend', () => appendToBuffer(chunk), { once: true });
       } else {
         try {
           sourceBuffer.appendBuffer(chunk.buffer);
