@@ -21,11 +21,6 @@ const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
   const doLike = () => {
-    console.log({
-      authorOdinId: getIdentity() || '',
-      content: { body: '❤️' },
-      context: threadContext,
-    });
     postReaction({
       authorOdinId: getIdentity() || '',
       content: { body: '❤️' },
@@ -46,7 +41,8 @@ const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }
             className="absolute left-0 top-0"
             isActive={isReact}
             context={threadContext}
-            canReactDetails="ALLOWED"
+            // Forced to yes, as this component won't render if the user can't react
+            canReact={{ canReact: true }}
             onClose={() => setIsReact(false)}
           />
         </div>

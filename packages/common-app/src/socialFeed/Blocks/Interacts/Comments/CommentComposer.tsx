@@ -2,7 +2,8 @@ import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import {
   AuthorImage,
-  CanReactDetails,
+  CanReactInfo,
+  CantReactDisplay,
   EmojiSelector,
   FileOverview,
   FileSelector,
@@ -19,12 +20,12 @@ import { ErrorNotification } from '@youfoundation/common-app';
 export const CommentComposer = ({
   context,
   replyThreadId,
-  canReactDetails,
+  canReact,
   onPost,
 }: {
   context: ReactionContext;
   replyThreadId?: string;
-  canReactDetails: CanReactDetails;
+  canReact?: CanReactInfo;
   onPost?: () => void;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
@@ -56,7 +57,7 @@ export const CommentComposer = ({
 
   return (
     <div className={`${replyThreadId ? 'pl-4' : ''}`}>
-      {canReactDetails === 'ALLOWED' ? (
+      {canReact?.canReact === true || canReact?.canReact === 'comment' ? (
         <div className="text-foreground flex flex-row text-opacity-80">
           <AuthorImage odinId={odinId} size="xs" className="flex-shrink-0" />
           <CommentEditor
@@ -68,12 +69,7 @@ export const CommentComposer = ({
         </div>
       ) : (
         <p className="text-foreground text-sm italic text-opacity-50">
-          {canReactDetails === 'NOT_AUTHENTICATED' &&
-            t('Reactions are disabled for anonymous users')}
-          {canReactDetails === 'NOT_AUTHORIZED' &&
-            t('You do not have the necessary access to react on this post')}
-          {canReactDetails === 'DISABLED_ON_POST' && t('Reactions are disabled on this post')}
-          {!canReactDetails && t('We could not determine if you can react on this post')}
+          {CantReactDisplay(canReact)}
         </p>
       )}
       <ErrorNotification error={postCommentError} />

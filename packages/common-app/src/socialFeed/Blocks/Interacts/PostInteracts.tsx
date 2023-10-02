@@ -9,7 +9,6 @@ import { Suspense, useState } from 'react';
 import {
   Bubble,
   t,
-  CanReactDetails,
   useCanReact,
   useCommentSummary,
   useComments,
@@ -17,6 +16,7 @@ import {
   Repost,
   Share,
   HOME_ROOT_PATH,
+  CanReactInfo,
 } from '../../../..';
 
 import { CommentTeaser } from './Comments/Comment';
@@ -65,7 +65,7 @@ export const PostInteracts = ({
     },
   };
 
-  const { data } = useCanReact({
+  const { data: canReact } = useCanReact({
     authorOdinId,
     channelId: postFile.content.channelId,
     postId: postFile.content.id,
@@ -73,7 +73,6 @@ export const PostInteracts = ({
     isAuthenticated: isAuthenticated || false,
     isOwner: isOwner || false,
   });
-  const canReactDetails = data?.canReact ? 'ALLOWED' : data?.details;
 
   const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postFile.content.channelId}/${
     postFile.content.slug ?? postFile.content.id
@@ -90,7 +89,7 @@ export const PostInteracts = ({
         <LikeButton
           context={reactionContext}
           onIntentToReact={() => setHasIntentToReact(true)}
-          canReactDetails={canReactDetails}
+          canReact={canReact}
         />
         <EmojiSummary
           context={reactionContext}
@@ -128,7 +127,7 @@ export const PostInteracts = ({
         >
           <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20" />
           <Suspense fallback={null}>
-            <CommentList context={reactionContext} canReactDetails={canReactDetails} />
+            <CommentList context={reactionContext} canReact={canReact} />
           </Suspense>
         </div>
       ) : showSummary ? (
@@ -314,10 +313,10 @@ const CommentTeaserList = ({
 
 const CommentList = ({
   context,
-  canReactDetails,
+  canReact,
 }: {
   context: ReactionContext;
-  canReactDetails: CanReactDetails;
+  canReact?: CanReactInfo;
 }) => {
   const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
   const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
@@ -335,13 +334,13 @@ const CommentList = ({
       {flattenedComments?.map((comment, index) => (
         <Comment
           context={context}
-          canReactDetails={canReactDetails}
+          canReact={canReact}
           commentData={comment}
           key={comment.id ?? index}
           isThread={false}
         />
       ))}
-      <CommentComposer context={context} canReactDetails={canReactDetails} />
+      <CommentComposer context={context} canReact={canReact} />
     </>
   );
 };

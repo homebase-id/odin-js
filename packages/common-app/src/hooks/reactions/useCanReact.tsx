@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import useSecurityContext from '../securityContext/useSecurityContext';
 import { useBlog } from '../blog';
 import { useDotYouClient } from '../auth/useDotYouClient';
+import { t } from '../../helpers';
 
 interface UseCanReactProps {
   authorOdinId: string;
@@ -17,12 +18,24 @@ interface UseCanReactProps {
   isAuthenticated: boolean;
 }
 
-export type CanReactDetails =
+type CanReactDetails =
   | 'NOT_AUTHORIZED'
   | 'NOT_AUTHENTICATED'
   | 'DISABLED_ON_POST'
   | 'ALLOWED'
+  | 'UNKNOWN'
   | undefined;
+
+export type CanReact = {
+  canReact: 'emoji' | 'comment' | true;
+};
+
+export type CantReact = {
+  canReact: false;
+  details: CanReactDetails;
+};
+
+export type CanReactInfo = CanReact | CantReact;
 
 export const useCanReact = ({
   authorOdinId,
@@ -55,10 +68,8 @@ export const useCanReact = ({
     blogSlug: isEnabled && isLocal ? postId : undefined,
   });
 
-  const isCanReact = async (): Promise<{
-    canReact: boolean;
-    details?: CanReactDetails;
-  }> => {
+  const isCanReact = async (): Promise<CanReactInfo> => {
+    // TODO: Expand with React/Comment permissions
     const hasDriveReactAccess = securityContext?.permissionContext.permissionGroups
       .flatMap((group) => group.driveGrants)
       .some(
@@ -70,8 +81,9 @@ export const useCanReact = ({
 
     const postFile = localBlogData?.activeBlog || externalPost;
 
-    if (isAuthor) return { canReact: true };
     if (!isAuthenticated) return { canReact: false, details: 'NOT_AUTHENTICATED' };
+
+    if (isAuthor) return { canReact: true };
     if (!hasDriveReactAccess) return { canReact: false, details: 'NOT_AUTHORIZED' };
     if (
       postFile?.content.reactAccess &&
@@ -89,4 +101,21 @@ export const useCanReact = ({
     staleTime: Infinity,
     enabled: isEnabled && securityFetched && (!!externalPost || !!localBlogData),
   });
+};
+
+export const CantReactDisplay = (cantReact?: CanReactInfo) => {
+  // If we can react.. Then it's just partial
+  if (cantReact?.canReact === 'emoji')
+    return t('You do not have the necessary access to react on this post');
+  if (cantReact?.canReact === 'comment')
+    return t('You do not have the necessary access to react on this post');
+
+  const details = (cantReact as CantReact).details;
+  return details === 'NOT_AUTHENTICATED'
+    ? t('Reactions are disabled for anonymous users')
+    : details === 'NOT_AUTHORIZED'
+    ? t('You do not have the necessary access to react on this post')
+    : details === 'DISABLED_ON_POST'
+    ? t('Reactions are disabled on this post')
+    : t("We couldn't determine if you can react on this post");
 };

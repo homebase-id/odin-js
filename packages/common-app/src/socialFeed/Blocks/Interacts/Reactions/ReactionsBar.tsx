@@ -1,7 +1,8 @@
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import {
-  CanReactDetails,
+  CanReactInfo,
+  CantReactDisplay,
   EmojiPicker,
   t,
   useDotYouClient,
@@ -16,13 +17,13 @@ export const ReactionsBar = ({
   className,
   isActive,
   context,
-  canReactDetails,
+  canReact,
   onClose,
 }: {
   className: string;
   isActive: boolean;
   context: ReactionContext;
-  canReactDetails: CanReactDetails;
+  canReact?: CanReactInfo;
   onClose: () => void;
 }) => {
   const [isHover, setIsHover] = useState(false);
@@ -80,7 +81,7 @@ export const ReactionsBar = ({
     return null;
   }
 
-  if (canReactDetails && canReactDetails !== 'ALLOWED') {
+  if (canReact && (canReact.canReact === false || canReact.canReact === 'comment')) {
     return (
       <div
         className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
@@ -88,11 +89,7 @@ export const ReactionsBar = ({
         }`}
       >
         <p className="text-foreground text-sm italic text-opacity-50">
-          {canReactDetails === 'NOT_AUTHENTICATED' &&
-            t('Reactions are disabled for anonymous users')}
-          {canReactDetails === 'NOT_AUTHORIZED' &&
-            t('You do not have the necessary access to react on this post')}
-          {canReactDetails === 'DISABLED_ON_POST' && t('Reactions are disabled on this post')}
+          {CantReactDisplay(canReact)}
         </p>
       </div>
     );

@@ -1,11 +1,5 @@
 import { lazy, useState } from 'react';
-import {
-  AuthorImage,
-  AuthorName,
-  CanReactDetails,
-  t,
-  useReaction,
-} from '@youfoundation/common-app';
+import { AuthorImage, AuthorName, CanReactInfo, t, useReaction } from '@youfoundation/common-app';
 
 import {
   CommentReactionPreview,
@@ -24,7 +18,7 @@ const CommentThread = lazy(() =>
 
 export interface CommentProps {
   context: ReactionContext;
-  canReactDetails: CanReactDetails;
+  canReact?: CanReactInfo;
   commentData: ReactionFile;
   isThread: boolean;
   onReply?: () => void;
@@ -38,13 +32,7 @@ export interface dirtyReactionContext extends Omit<ReactionContext, 'target'> {
   };
 }
 
-export const Comment = ({
-  context,
-  canReactDetails,
-  commentData,
-  onReply,
-  isThread,
-}: CommentProps) => {
+export const Comment = ({ context, canReact, commentData, onReply, isThread }: CommentProps) => {
   const [isReply, setIsReply] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
@@ -102,7 +90,7 @@ export const Comment = ({
         </div>
         {threadContext.target.fileId && threadContext.target.globalTransitId ? (
           <CommentMeta
-            canReact={canReactDetails === 'ALLOWED'}
+            canReact={canReact}
             threadContext={threadContext as ReactionContext}
             created={commentData.date}
             updated={commentData.updated}
@@ -115,7 +103,7 @@ export const Comment = ({
         <>
           <CommentThread
             context={threadContext as ReactionContext}
-            canReactDetails={canReactDetails}
+            canReact={canReact}
             isReply={isReply}
             setIsReply={setIsReply}
           />

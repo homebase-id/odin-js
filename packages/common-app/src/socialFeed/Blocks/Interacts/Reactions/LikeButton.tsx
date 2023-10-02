@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import {
-  CanReactDetails,
+  CanReactInfo,
   Heart,
   ReactionsBar,
   t,
@@ -16,11 +16,11 @@ import { ErrorNotification } from '@youfoundation/common-app';
 export const LikeButton = ({
   context,
   onIntentToReact,
-  canReactDetails,
+  canReact,
 }: {
   context: ReactionContext;
   onIntentToReact?: () => void;
-  canReactDetails: CanReactDetails;
+  canReact?: CanReactInfo;
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
@@ -48,7 +48,9 @@ export const LikeButton = ({
     <>
       <div
         className={`relative select-none ${
-          canReactDetails && canReactDetails !== 'ALLOWED' ? 'cursor-not-allowed' : ''
+          canReact && canReact.canReact !== true && canReact.canReact !== 'emoji'
+            ? 'cursor-not-allowed'
+            : ''
         } `}
         ref={wrapperRef}
       >
@@ -62,7 +64,7 @@ export const LikeButton = ({
             className={`absolute left-0 top-0`}
             isActive={isReact}
             context={context}
-            canReactDetails={canReactDetails}
+            canReact={canReact}
             onClose={() => setIsReact(false)}
           />
         </div>

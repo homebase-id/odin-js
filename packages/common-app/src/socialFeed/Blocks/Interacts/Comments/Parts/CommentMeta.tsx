@@ -1,4 +1,4 @@
-import { EmojiSummary, t } from '@youfoundation/common-app';
+import { CanReactInfo, EmojiSummary, t } from '@youfoundation/common-app';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { format } from '../../../../../helpers/timeago/format';
 import { lazy } from 'react';
@@ -12,7 +12,7 @@ const CommentMeta = ({
   updated,
   onReply,
 }: {
-  canReact: boolean;
+  canReact?: CanReactInfo;
   threadContext: ReactionContext;
   created?: number;
   updated?: number;
@@ -22,7 +22,7 @@ const CommentMeta = ({
 
   return (
     <div className="text-foreground relative ml-[2.25rem] flex flex-row items-center px-2 pt-[2px] text-sm text-opacity-20 dark:text-opacity-30">
-      {canReact ? (
+      {canReact?.canReact === true || canReact?.canReact === 'emoji' ? (
         <>
           <CommentLikeButton threadContext={threadContext} />
           <span className="block px-1">·</span>
@@ -32,7 +32,7 @@ const CommentMeta = ({
         context={threadContext}
         className="after:content[''] text-xs after:my-auto after:ml-1 after:block after:h-3 after:border-l after:pl-1 dark:after:border-slate-600"
       />
-      {canReact && onReply ? (
+      {(canReact?.canReact === true || canReact?.canReact === 'comment') && onReply ? (
         <button
           className="text-primary ml-1 mr-2 text-opacity-80 hover:underline"
           onClick={onReply}

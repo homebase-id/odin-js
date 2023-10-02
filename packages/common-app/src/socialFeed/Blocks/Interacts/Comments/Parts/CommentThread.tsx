@@ -1,15 +1,15 @@
-import { CanReactDetails, CommentComposer, t, useComments } from '@youfoundation/common-app';
+import { CanReactInfo, CommentComposer, t, useComments } from '@youfoundation/common-app';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { Comment } from '../Comment';
 
 export const CommentThread = ({
   context,
-  canReactDetails,
+  canReact,
   isReply,
   setIsReply,
 }: {
   context: ReactionContext;
-  canReactDetails: CanReactDetails;
+  canReact?: CanReactInfo;
   isReply: boolean;
   setIsReply: (isReply: boolean) => void;
 }) => {
@@ -38,7 +38,7 @@ export const CommentThread = ({
             <Comment
               context={context}
               commentData={comment}
-              canReactDetails={canReactDetails}
+              canReact={canReact}
               key={comment.id || index}
               onReply={() => setIsReply(!isReply)}
               isThread={true}
@@ -49,7 +49,7 @@ export const CommentThread = ({
         <CommentComposer
           context={context}
           replyThreadId={context.target.globalTransitId}
-          canReactDetails={canReactDetails}
+          canReact={canReact}
           onPost={() => setIsReply(false)}
         />
       ) : null}
