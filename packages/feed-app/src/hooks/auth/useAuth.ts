@@ -49,7 +49,7 @@ export const drives = [
     t: '8f448716e34cedf9014145e043ca6612',
     n: '',
     d: '',
-    p: DrivePermissionType.ReadWrite,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
 ];
 export const appName = 'Odin - Feed';
