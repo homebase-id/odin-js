@@ -65,7 +65,7 @@ const Ping = () => {
                 {permissionKeys.map((key) => (
                   <li key={key} className="flex flex-row items-center">
                     <Persons className="mr-4 h-8 w-8 flex-shrink-0" />
-                    {t(getAppPermissionFromNumber(key).name)}
+                    {t(getAppPermissionFromNumber(key))}
                   </li>
                 ))}
               </ul>

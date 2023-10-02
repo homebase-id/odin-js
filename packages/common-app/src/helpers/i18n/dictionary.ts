@@ -19,6 +19,9 @@ const enLocale = [
   ['related blogs', 'Related blogs'],
 
   // PermssionTypes
+  ['readandwrite', 'Read & Write'],
+  ['reactandcomment', 'React & Comment'],
+  ['full', 'Full'],
   ['comment', 'Comment'],
   ['editor', 'Edit'],
   ['full', 'Full'],

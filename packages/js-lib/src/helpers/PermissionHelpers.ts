@@ -2,39 +2,39 @@ import { DrivePermissionType, PermissionedDrive } from '../core/DriveData/DriveT
 import { DriveGrant } from '../network/network';
 import { AppPermissionType } from '../network/permission/PermissionTypes';
 
-const getPermissionFromNumber = (
-  value: number,
-  levels: typeof DrivePermissionType | typeof AppPermissionType
-): { name: string; value: number } => {
-  const directMatch = DrivePermissionType[value];
-  if (directMatch) return { name: directMatch, value: value };
-
-  const numericLevels = Object.values(levels).filter((v) => typeof v === 'number') as number[];
-
-  const numericMatch = numericLevels.reduce((prevValue, currValue) => {
-    if (currValue > prevValue && currValue <= value) {
-      return currValue;
-    }
-
-    return prevValue;
-  }, numericLevels[0]);
-
-  return { name: levels[numericMatch], value: numericMatch };
-};
-
-export const getDrivePermissionFromNumber = (value?: DrivePermissionType[]) => {
+export const getDrivePermissionFromNumber = (value?: number[]) => {
   if (!value || !Array.isArray(value)) return 'none';
 
-  const permissions = value?.map((permission) => {
-    return getPermissionFromNumber(permission, DrivePermissionType);
+  const permissions = value.map((permission) => {
+    const directMatch = DrivePermissionType[permission];
+    if (directMatch) return directMatch;
+
+    if (permission === DrivePermissionType.Read + DrivePermissionType.Write) return 'ReadAndWrite';
+    if (permission === DrivePermissionType.React + DrivePermissionType.Comment)
+      return 'ReactAndComment';
+
+    if (
+      permission ===
+      DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment
+    )
+      return 'full';
+
+    return 'none';
   });
   if (permissions.length === 0) return 'none';
 
-  return permissions.map((obj) => obj.name).join(', ');
+  return permissions.join(', ');
 };
 
-export const getAppPermissionFromNumber = (value: number) =>
-  getPermissionFromNumber(value, AppPermissionType);
+export const getAppPermissionFromNumber = (value: number) => {
+  const directMatch = AppPermissionType[value];
+  if (directMatch) return directMatch;
+
+  return 'none';
+};
 
 /// Convert text based permission levels to the numbered type
 // Reflects DrivePermission enum in services/Odin.Core.Services/Drives/DrivePermission.cs
