@@ -18,7 +18,7 @@
   "dependencies": {
     "@youfoundation/common-app": "^0.1.0",
     "@youfoundation/feed-app": "0.1.0",
-    "@youfoundation/js-lib": "^0.0.1-alpha.8",
+    "@youfoundation/js-lib": "*",
     "@tanstack/react-query": "^4.28.0",
     "@tanstack/react-virtual": "^3.0.0-beta.54",
     "axios": "^1.2.0",

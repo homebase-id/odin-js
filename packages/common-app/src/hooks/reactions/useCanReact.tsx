@@ -121,7 +121,7 @@ export const CantReactDisplay = (cantReact?: CanReactInfo) => {
   if (cantReact?.canReact === 'comment')
     return t('You do not have the necessary access to react on this post');
 
-  const details = (cantReact as CantReact).details;
+  const details = (cantReact as CantReact)?.details;
   return details === 'NOT_AUTHENTICATED'
     ? t('Reactions are disabled for anonymous users')
     : details === 'NOT_AUTHORIZED'

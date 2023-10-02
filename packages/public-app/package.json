@@ -14,8 +14,8 @@
   "dependencies": {
     "@tanstack/react-query": "^4.28.0",
     "@tanstack/react-virtual": "^3.0.0-beta.54",
-    "@youfoundation/js-lib": "^0.0.1-alpha.8",
-    "@youfoundation/ui-lib": "^0.0.1-alpha.6",
+    "@youfoundation/js-lib": "*",
+    "@youfoundation/ui-lib": "*",
     "@youfoundation/common-app": "^0.1.0",
     "axios": "^1.2.0",
     "emoji-picker-element": "^1.15.1",

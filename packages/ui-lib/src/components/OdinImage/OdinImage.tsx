@@ -21,6 +21,7 @@ export interface OdinImageProps {
   previewThumbnail?: EmbeddedThumb;
   probablyEncrypted?: boolean;
   onLoad?: () => void;
+  onError?: () => void;
   avoidPayload?: boolean;
   explicitSize?: ImageSize | 'full';
 }
@@ -40,6 +41,7 @@ export const OdinImage = ({
   onLoad,
   avoidPayload,
   explicitSize,
+  onError,
 }: OdinImageProps) => {
   const previewImgRef = useRef<HTMLImageElement>(null);
   const wrapperRef = useRef<HTMLPictureElement>(null);
@@ -48,9 +50,7 @@ export const OdinImage = ({
   const [isTinyLoaded, setIsTinyLoaded] = useState(false);
   const [isFinal, setIsFinal] = useState(false);
   const [isInView, setIsInView] = useState(false);
-  useIntersection(wrapperRef, () => {
-    setIsInView(true);
-  });
+  useIntersection(wrapperRef, () => setIsInView(true));
 
   const embeddedThumbUrl = useMemo(() => {
     if (!previewThumbnail) return;
@@ -64,7 +64,7 @@ export const OdinImage = ({
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
-  const { data: tinyThumb } = useTinyThumb(
+  const { data: tinyThumb, error: tinyError } = useTinyThumb(
     dotYouClient,
     odinId,
     isInView && !skipTiny ? fileId : undefined,
@@ -77,7 +77,7 @@ export const OdinImage = ({
     : cachedImage?.naturalSize || previewThumbnail;
 
   const {
-    fetch: { data: imageData },
+    fetch: { data: imageData, error: imageError },
   } = useImage(
     dotYouClient,
     odinId,
@@ -105,6 +105,14 @@ export const OdinImage = ({
     // When we have a preview/cached image already, don't wait for the tinyThumb to load
     if (skipTiny && isTinyLoaded) calculateSize();
   }, [isInView, tinyThumb, isTinyLoaded]);
+
+  useEffect(() => {
+    if (tinyError && !loadSize) setLoadSize('full');
+  }, [tinyError]);
+
+  useEffect(() => {
+    if (imageError) onError && onError();
+  }, [imageError]);
 
   const calculateSize = () => {
     // If no element or nothing to create a size that has the aspect ratio, don't bother and load full...
@@ -160,6 +168,8 @@ export const OdinImage = ({
       : 'h-auto max-h-[inherit] w-full'
   } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
 
+  if (tinyError || imageError) console.error({ fileId, tinyError, imageError });
+
   return (
     <figure
       className={`${className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${
@@ -188,6 +198,7 @@ export const OdinImage = ({
             height={height}
             key="tiny"
             onLoad={() => setIsTinyLoaded(true)}
+            onError={() => setIsTinyLoaded(true)}
           />
           {!isFinal ? (
             <div
@@ -216,6 +227,7 @@ export const OdinImage = ({
               setIsFinal(true);
               onLoad && onLoad();
             }}
+            onError={() => setIsFinal(true)}
           />
         </>
       )}
