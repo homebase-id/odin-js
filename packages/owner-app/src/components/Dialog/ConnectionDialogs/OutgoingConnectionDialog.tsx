@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Arrow, Textarea, t, useCheckIdentity } from '@youfoundation/common-app';
+import { Alert, Arrow, Textarea, t, useCheckIdentity } from '@youfoundation/common-app';
 import useConnection from '../../../hooks/connections/useConnection';
 import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
@@ -31,6 +31,7 @@ const OutgoingConnectionDialog = ({
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
+
   const {
     mutateAsync: sendConnectionRequest,
     status: sendConnectionRequestStatus,
@@ -54,9 +55,11 @@ const OutgoingConnectionDialog = ({
   const { data: isValidIdentity } = useCheckIdentity(connectionTarget);
   const [invalid, setInvalid] = useState(false);
 
-  useEffect(() => {
-    setInvalid(false);
-  }, [connectionTarget]);
+  const { data: connectionInfo } = useConnection({
+    odinId: isValidIdentity ? connectionTarget : undefined,
+  }).fetch;
+
+  useEffect(() => setInvalid(false), [connectionTarget]);
 
   if (!isOpen) return null;
 
@@ -115,6 +118,13 @@ const OutgoingConnectionDialog = ({
         >
           {!doubleChecked ? (
             <>
+              {connectionInfo?.status === 'connected' ? (
+                <Alert type={'warning'} className="mb-5">
+                  {t(
+                    'You are already connected, if this request is accepted, it will reset your connection keys'
+                  )}
+                </Alert>
+              ) : null}
               <div className="mb-5">
                 <Label htmlFor="dotyouid">{t('Recipient identity')}</Label>
                 <Input
@@ -152,6 +162,7 @@ const OutgoingConnectionDialog = ({
                   setPhotoFileId(publicInfo.imageFileId);
                 }}
               />
+
               <div className="-m-2 flex flex-row-reverse py-3">
                 <ActionButton className="m-2" icon={Arrow}>
                   {t('Continue')}

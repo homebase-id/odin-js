@@ -39,10 +39,8 @@ export const DialogWrapper = ({
 
   useEffect(() => {
     document.documentElement.classList.add('overflow-hidden');
-    return () => {
-      document.documentElement.classList.remove('overflow-hidden');
-    };
-  });
+    return () => document.documentElement.classList.remove('overflow-hidden');
+  }, []);
 
   return (
     <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">

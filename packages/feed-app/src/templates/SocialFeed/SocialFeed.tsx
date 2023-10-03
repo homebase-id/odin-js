@@ -30,11 +30,8 @@ export const SocialFeed = () => {
   const { isOwner } = useDotYouClient();
 
   useEffect(() => {
-    if (postKey) {
-      document.documentElement.classList.add('overflow-hidden');
-    } else {
-      document.documentElement.classList.remove('overflow-hidden');
-    }
+    if (postKey) document.documentElement.classList.add('overflow-hidden');
+    else document.documentElement.classList.remove('overflow-hidden');
   }, [postKey]);
 
   const isDesktop = document.documentElement.clientWidth >= 1024;

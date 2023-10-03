@@ -38,7 +38,7 @@ export const ImageLightbox = ({
     return () => {
       document.documentElement.classList.remove('overflow-hidden');
     };
-  });
+  }, []);
 
   const dialog = (
     <div className="fixed inset-0 z-50 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
