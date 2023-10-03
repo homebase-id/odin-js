@@ -29,11 +29,10 @@ jobs:
 
       - run: npm run build -w packages/feed-app
 
-      - uses: jsmrcaga/action-netlify-deploy@v2.0.0
+      - name: Publish to Netlify
+        uses: netlify/actions/cli@master
         with:
+          args: deploy --dir=packages/web/dist --prod --filter '@youfoundation/feed-app'
+        env:
           NETLIFY_SITE_ID: 2ad91e6e-3439-40ef-842b-80380912b1e3
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_DEPLOY_TO_PROD: true
-          build_directory: packages/feed-app/dist
-          install_command: 'echo Skipping installing the dependencies'
-          build_command: 'echo Skipping building the web files'
