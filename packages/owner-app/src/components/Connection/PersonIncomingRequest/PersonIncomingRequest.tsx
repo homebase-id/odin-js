@@ -30,7 +30,7 @@ const PersonIncomingRequest = ({
         className={className}
         odinId={senderOdinId}
         key={senderOdinId}
-        onlyLoadAfterClick={!uiSettings?.automaticallyLoadProfilePicture}
+        canSave={!!uiSettings?.automaticallyLoadProfilePicture}
       >
         <h2 className="font-thiner mb-6 dark:text-white">
           <DomainHighlighter>{senderOdinId}</DomainHighlighter>

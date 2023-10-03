@@ -11,7 +11,7 @@ import useAuth from '../auth/useAuth';
 const useContact = ({
   odinId,
   id,
-  canSave,
+  canSave = true,
 }: {
   odinId?: string;
   id?: string;
@@ -33,15 +33,12 @@ const useContact = ({
       if (!id) return;
 
       //Direct fetch with id:
-      const directContact = await getContactByUniqueId(dotYouClient, id);
-      return directContact;
+      return await getContactByUniqueId(dotYouClient, id);
     }
 
     // Direct fetch with odinId:
     const contactBookContact = await getContactByUniqueId(dotYouClient, toGuidId(odinId));
-    if (contactBookContact) {
-      return contactBookContact;
-    }
+    if (contactBookContact) return contactBookContact;
 
     let returnContact;
 

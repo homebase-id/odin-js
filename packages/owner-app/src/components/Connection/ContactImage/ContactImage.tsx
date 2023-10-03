@@ -27,23 +27,19 @@ const getInitials = (
 
 const ContactImage = ({
   odinId,
-  onlyLoadAfterClick,
+  canSave,
   className,
   fallbackSize,
 }: {
   odinId: string;
-  onlyLoadAfterClick?: boolean;
+  canSave?: boolean;
   className?: string;
   fallbackSize?: 'xs';
 }) => {
-  // Deprecated "shouldOnlyLoadAfterClick";
-  // const [loadImage, setLoadImage] = useState(false);
-
   const { data: contactData, isLoading } = useContact({
     odinId: odinId,
-    canSave: onlyLoadAfterClick,
+    canSave: canSave,
   }).fetch;
-  // const shouldOnlyLoadAfterClick = false;
 
   const nameData = contactData?.name;
   const intials = useMemo(
@@ -67,21 +63,6 @@ const ContactImage = ({
       ) : (
         <FallbackImg initials={intials} size={fallbackSize} />
       )}
-      {/* {shouldOnlyLoadAfterClick ? (
-        <button
-          className="absolute bottom-2 right-2 bg-white bg-opacity-60 p-2 hover:bg-opacity-100 dark:bg-black dark:bg-opacity-60 hover:dark:bg-opacity-100"
-          onClick={(e) => {
-            e.preventDefault();
-            setLoadImage(!loadImage);
-            return false;
-          }}
-        >
-          <Eye className="h-4 w-4" />
-          {loadImage && (
-            <span className="absolute bottom-[0.9rem] right-[0.2rem] block w-[1.5rem] rotate-45 border-b-[2px] border-black dark:border-white"></span>
-          )}
-        </button>
-      ) : null} */}
     </div>
   );
 };

@@ -10,7 +10,7 @@ export interface PersonCardProps {
   className: string;
   children?: ReactNode;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
-  onlyLoadAfterClick?: boolean;
+  canSave?: boolean;
 }
 
 const PersonCard = ({
@@ -20,7 +20,7 @@ const PersonCard = ({
   className,
   children,
   onClick,
-  onlyLoadAfterClick,
+  canSave,
 }: PersonCardProps) => {
   return (
     <HybridLink className={`${className}`} href={href}>
@@ -35,7 +35,7 @@ const PersonCard = ({
         ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}
       >
-        <ContactImage odinId={odinId} onlyLoadAfterClick={onlyLoadAfterClick} />
+        <ContactImage odinId={odinId} canSave={canSave} />
         <div className="p-2">{children}</div>
       </div>
     </HybridLink>

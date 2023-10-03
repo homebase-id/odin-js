@@ -12,6 +12,8 @@ import {
   ConnectionRequest,
 } from '@youfoundation/js-lib/network';
 import { DotYouClient } from '@youfoundation/js-lib/core';
+import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
+import { saveContact } from '../../provider/contact/ContactProvider';
 
 export const getDetailedConnectionInfo = async ({
   dotYouClient,
@@ -59,6 +61,11 @@ const useConnection = ({ odinId }: { odinId?: string }) => {
     circleIds: string[];
   }) => {
     await sendRequest(dotYouClient, targetOdinId, message, name, photoFileId, circleIds);
+
+    // Save contact
+    const connectionInfo = await fetchConnectionInfo(dotYouClient, targetOdinId);
+    if (connectionInfo) await saveContact(dotYouClient, connectionInfo);
+
     return { targetOdinId };
   };
 
