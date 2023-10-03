@@ -1,6 +1,7 @@
 import { FC } from 'react';
 
 import './Loader.css';
+import { IconProps } from '../Types';
 
 const Loader: FC<IconProps> = ({ className }) => {
   return (

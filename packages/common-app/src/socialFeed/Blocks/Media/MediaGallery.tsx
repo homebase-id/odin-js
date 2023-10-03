@@ -61,7 +61,11 @@ export const MediaGallery = ({
             >
               <div
                 className={`relative ${
-                  files.length === 2 ? 'aspect-[1/2]' : 'aspect-square'
+                  files.length === 2
+                    ? 'aspect-[1/2]'
+                    : slicedFiles.length === 3 && index === 2
+                    ? 'aspect-[2/1]'
+                    : 'aspect-square'
                 } h-auto w-full cursor-pointer`}
                 onClick={onClick ? (e) => onClick(e, index) : undefined}
               >

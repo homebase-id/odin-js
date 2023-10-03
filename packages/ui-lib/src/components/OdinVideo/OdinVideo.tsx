@@ -10,6 +10,7 @@ import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';
 
 import '../../app/app.css';
 import useImage from '../../hooks/image/useImage';
+import { Exclamation } from '../ui/Icons/Exclamation';
 
 interface Segment {
   sequence: number;
@@ -82,8 +83,10 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
 
   if (fatalError) {
     return (
-      <div className={`${className} flex aspect-video items-center justify-center`}>
-        <p>Something went wrong</p>
+      <div
+        className={`${className} flex aspect-video items-center justify-center bg-white/75 dark:bg-black/75`}
+      >
+        <Exclamation className="mr-2 h-6 w-6" /> <p>Something went wrong</p>
       </div>
     );
   }

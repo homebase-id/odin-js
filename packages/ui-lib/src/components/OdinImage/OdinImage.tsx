@@ -7,6 +7,7 @@ import { TargetDrive, EmbeddedThumb, ImageSize, DotYouClient } from '@youfoundat
 
 import '../../app/app.css';
 import LoadingBlock from '../ui/LoadingBlock/LoadingBlock';
+import { Exclamation } from '../ui/Icons/Exclamation';
 
 export interface OdinImageProps {
   dotYouClient: DotYouClient;
@@ -49,6 +50,7 @@ export const OdinImage = ({
 
   const [isTinyLoaded, setIsTinyLoaded] = useState(false);
   const [isFinal, setIsFinal] = useState(false);
+  const [isFatalError, setIsFatalError] = useState(false);
   const [isInView, setIsInView] = useState(false);
   useIntersection(wrapperRef, () => setIsInView(true));
 
@@ -97,26 +99,30 @@ export const OdinImage = ({
     if (loadSize !== undefined) return;
     // When we have a tinyThumb find the optimal size
     // With setTimeout to allow other tinies to load before blocking the main thread for those
-    if (tinyThumb && tinyThumb.url?.length) {
-      setTimeout(() => {
-        calculateSize();
-      }, 100);
-    }
+    if (tinyThumb && tinyThumb.url?.length) setTimeout(() => calculateSize(), 100);
 
     // When we have a preview/cached image already, don't wait for the tinyThumb to load
     if (skipTiny && isTinyLoaded) calculateSize();
 
-    // If there's no tinyThumb data, don't wait for it to load
+    // If there's no tinyThumb data, still trigger the calculateSize
     if (isTinyFetched && !tinyThumb) calculateSize();
   }, [isInView, tinyThumb, isTinyLoaded]);
 
   useEffect(() => {
-    if (tinyError && !loadSize) setLoadSize('full');
+    if (tinyError && !loadSize) calculateSize();
   }, [tinyError]);
 
   useEffect(() => {
-    if (imageError) onError && onError();
-  }, [imageError]);
+    // Trigger error, when fetching the image fails;
+    if (imageError) setIsFatalError(true);
+
+    // Trigger error, when the data that comes back is emtpy;
+    if (!imageData?.url && isImageFetched) setIsFatalError(true);
+  }, [imageError, imageData]);
+
+  useEffect(() => {
+    if (isFatalError) onError && onError();
+  }, [isFatalError]);
 
   const calculateSize = () => {
     // If no element or nothing to create a size that has the aspect ratio, don't bother and load full...
@@ -174,10 +180,6 @@ export const OdinImage = ({
 
   if (tinyError || imageError) console.warn('[OdinImage]', { fileId, tinyError, imageError });
 
-  useEffect(() => {
-    if (!imageData?.url && isImageFetched) onError && onError();
-  }, [imageData]);
-
   return (
     <figure
       className={`${className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${
@@ -208,7 +210,7 @@ export const OdinImage = ({
             onLoad={() => setIsTinyLoaded(true)}
             onError={() => setIsTinyLoaded(true)}
           />
-          {!isFinal ? (
+          {!isFinal && !isFatalError ? (
             <div
               className={`absolute inset-0 flex text-white transition-opacity delay-[2000ms] ${
                 isTinyLoaded ? 'opacity-100' : 'opacity-0'
@@ -235,11 +237,15 @@ export const OdinImage = ({
               setIsFinal(true);
               onLoad && onLoad();
             }}
-            onError={() => {
-              setIsFinal(true);
-              onError && onError();
-            }}
+            onError={() => setIsFatalError(true)}
           />
+          {isFatalError ? (
+            <div
+              className={`absolute inset-0 flex items-center justify-center bg-white/75 dark:bg-black/75`}
+            >
+              <Exclamation className="mr-2 h-6 w-6" /> <p>Something went wrong</p>
+            </div>
+          ) : null}
         </>
       )}
     </figure>
