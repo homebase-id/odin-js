@@ -32,7 +32,7 @@ jobs:
       - name: Publish to Netlify
         uses: netlify/actions/cli@master
         with:
-          args: deploy --dir=packages/web/dist --prod --filter '@youfoundation/feed-app'
+          args: deploy --dir=packages/feed-app/dist --prod --filter '@youfoundation/feed-app'
         env:
           NETLIFY_SITE_ID: 2ad91e6e-3439-40ef-842b-80380912b1e3
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
