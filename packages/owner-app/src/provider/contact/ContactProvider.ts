@@ -2,7 +2,6 @@ import {
   DriveSearchResult,
   UploadFileMetadata,
   UploadInstructionSet,
-  UploadResult,
   SecurityGroupType,
   CursoredResult,
   DotYouClient,
@@ -27,9 +26,7 @@ export const saveContact = async (
   dotYouClient: DotYouClient,
   contact: RawContact
 ): Promise<ContactFile> => {
-  if (contact.id) {
-    contact.fileId = (await getContactByUniqueId(dotYouClient, contact.id))?.fileId;
-  }
+  if (contact.id) contact.fileId = (await getContactByUniqueId(dotYouClient, contact.id))?.fileId;
 
   if (!contact.fileId && contact.odinId) {
     const existingContact = await getContactByUniqueId(dotYouClient, toGuidId(contact.odinId));
@@ -37,6 +34,12 @@ export const saveContact = async (
     contact.id = existingContact?.id ?? getNewId();
     contact.fileId = existingContact?.fileId ?? undefined;
     contact.versionTag = existingContact?.versionTag || contact.versionTag;
+
+    // If we have an existing image, we don't want to overwrite it
+    if (existingContact?.imageFileId) {
+      contact.imageFileId = existingContact?.imageFileId ?? undefined;
+      contact.image = undefined;
+    }
   }
 
   // Save raw image:
