@@ -78,7 +78,7 @@ export const RichTextEditor = ({
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
-  placeholder: string;
+  placeholder?: string;
   mediaDrive?: TargetDrive;
   name: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;

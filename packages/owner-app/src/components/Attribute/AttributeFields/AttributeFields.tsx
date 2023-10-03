@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
 import {
   BirthdayFields,
@@ -24,6 +25,9 @@ import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelecto
 import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
 import { ThemeAttributeEditor } from './ThemeAttributeEditor';
+const RichTextEditor = lazy(() =>
+  import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
+);
 
 const profileInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 85, width: 250, height: 250 },
@@ -180,8 +184,7 @@ const AttributeFields = ({
           </div>
           <div className="mb-5">
             <Label htmlFor="full-bio">{t('Full bio')}</Label>
-            <Textarea
-              id="full-bio"
+            <RichTextEditor
               name={MinimalProfileFields.FullBioId}
               defaultValue={attribute.data?.[MinimalProfileFields.FullBioId] ?? ''}
               onChange={debouncedChange}

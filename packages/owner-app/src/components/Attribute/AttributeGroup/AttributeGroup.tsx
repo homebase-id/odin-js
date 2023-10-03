@@ -109,8 +109,8 @@ const AttributeGroup = ({
                 title={attr.id ?? 'pending'}
                 className={
                   !isActive && index !== 0
-                    ? `absolute left-0 right-0 top-0 max-h-full overflow-hidden rounded-lg border-b border-gray-200 border-opacity-80 bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900`
-                    : ''
+                    ? `absolute left-0 right-0 top-0 z-10 max-h-full overflow-hidden rounded-lg border-b border-gray-200 border-opacity-80 bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900`
+                    : 'relative z-10'
                 }
                 style={{ transform: `translateX(${index * 4}px) translateY(${index * 10}px)` }}
               >

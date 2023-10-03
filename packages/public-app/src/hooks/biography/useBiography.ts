@@ -16,7 +16,7 @@ export type BiographyData = {
   };
   longBio: {
     title: string;
-    body: string;
+    body: string | Record<string, unknown>[];
     id: string;
   }[];
 };
@@ -51,7 +51,9 @@ const useBiography = () => {
 
             return {
               title: attribute.data[MinimalProfileFields.ShortBioId] as string,
-              body: attribute.data[MinimalProfileFields.FullBioId] as string,
+              body: attribute.data[MinimalProfileFields.FullBioId] as
+                | string
+                | Record<string, unknown>[],
               id: attribute.id,
               priority: attribute.priority,
             };

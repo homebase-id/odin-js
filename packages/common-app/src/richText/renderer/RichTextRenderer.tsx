@@ -7,6 +7,7 @@ export const RichTextRenderer = ({
   imageDrive,
   odinId,
   options,
+  className,
 }: {
   body: string | Record<string, unknown>[] | undefined;
   imageDrive?: TargetDrive;
@@ -14,6 +15,7 @@ export const RichTextRenderer = ({
   options?: {
     linksAlwaysBlank?: boolean;
   };
+  className?: string;
 }) => {
   if (!body || typeof body === 'string') {
     return <>{body}</>;
@@ -170,7 +172,7 @@ export const RichTextRenderer = ({
   };
 
   return (
-    <div className="whitespace-pre-wrap break-words">
+    <div className={`whitespace-pre-wrap break-words ${className ?? ''}`}>
       {body.map((element, index) => {
         return <React.Fragment key={index}>{render(element)}</React.Fragment>;
       })}

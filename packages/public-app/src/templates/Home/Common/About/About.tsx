@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
 import useBiography from '../../../../hooks/biography/useBiography';
+import { RichTextRenderer } from '@youfoundation/common-app';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
@@ -35,13 +35,13 @@ const BiographyBlock = ({
   className,
 }: {
   title: string;
-  children: string | ReactNode;
+  children: string | Record<string, unknown>[];
   className: string;
 }) => {
   return (
     <div className={`relative overflow-hidden rounded-lg bg-background px-8 py-12 ${className}`}>
       <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{title}</h1>
-      <p className="whitespace-pre-line leading-relaxed">{children}</p>
+      <RichTextRenderer className="leading-relaxe" body={children} />
     </div>
   );
 };
