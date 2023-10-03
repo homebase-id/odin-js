@@ -2,6 +2,7 @@ import { IconProps } from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
 import { HybridLink } from './HybridLink';
 
+import { ButtonColors } from './ColorConfig';
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 
 type ActionLinkProps = {
@@ -31,18 +32,15 @@ export const ActionLink: FC<ActionLinkProps> = ({
   target,
   rel,
 }) => {
-  const Icon = (props: { className: string }) => {
-    return icon ? icon(props) : null;
-  };
-
+  const Icon = (props: { className: string }) => (icon ? icon(props) : null);
   const colorClasses =
     type === 'secondary'
-      ? 'bg-secondary text-secondary-contrast hover:filter hover:brightness-90'
+      ? ButtonColors.secondary
       : type === 'remove'
-      ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
+      ? ButtonColors.remove
       : type === 'mute'
-      ? ''
-      : 'bg-primary text-primary-contrast hover:filter hover:brightness-90';
+      ? ButtonColors.mute
+      : ButtonColors.primary;
 
   const widthClasses =
     children && type !== 'mute'

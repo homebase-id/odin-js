@@ -3,6 +3,7 @@ import { ConfirmDialog, ConfirmDialogProps } from '@youfoundation/common-app';
 import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app';
 
 export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
+import { ButtonColors } from './ColorConfig';
 
 export interface ActionButtonProps {
   children?: ReactNode;
@@ -21,25 +22,12 @@ export const mergeStates = (
   stateA: ActionButtonState,
   stateB: ActionButtonState
 ): ActionButtonState => {
-  if (stateA === 'error' || stateB === 'error') {
-    return 'error';
-  }
-
-  if (stateA === 'loading' || stateB === 'loading') {
-    return 'loading';
-  }
-
-  if (stateA === 'idle' && stateB === 'idle') {
-    return 'idle';
-  }
-
-  if (stateA === 'success' && stateB === 'success') {
+  if (stateA === 'error' || stateB === 'error') return 'error';
+  if (stateA === 'loading' || stateB === 'loading') return 'loading';
+  if (stateA === 'idle' && stateB === 'idle') return 'idle';
+  if (stateA === 'success' && stateB === 'success') return 'success';
+  if ((stateA === 'success' && stateB === 'idle') || (stateA === 'idle' && stateB === 'success'))
     return 'success';
-  }
-
-  if ((stateA === 'success' && stateB === 'idle') || (stateA === 'idle' && stateB === 'success')) {
-    return 'success';
-  }
 
   return 'idle';
 };
@@ -57,15 +45,9 @@ export const ActionButton: FC<ActionButtonProps> = ({
   isDisabled,
 }) => {
   const Icon = (props: { className: string }) => {
-    if (state === 'loading') {
-      return <Loader {...props} />;
-    }
-    if (state === 'success') {
-      return <Check {...props} />;
-    }
-    if (state === 'error') {
-      return <Exclamation {...props} />;
-    }
+    if (state === 'loading') return <Loader {...props} />;
+    if (state === 'success') return <Check {...props} />;
+    if (state === 'error') return <Exclamation {...props} />;
 
     return icon ? icon(props) : null;
   };
@@ -75,15 +57,14 @@ export const ActionButton: FC<ActionButtonProps> = ({
 
   const colorClasses =
     (state === 'error'
-      ? 'bg-red-500 hover:bg-red-600 text-white'
+      ? ButtonColors.error
       : type === 'secondary'
-      ? 'bg-secondary text-secondary-contrast hover:filter hover:brightness-90'
+      ? ButtonColors.secondary
       : type === 'remove'
-      ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
+      ? ButtonColors.remove
       : type === 'mute'
-      ? ''
-      : 'bg-primary text-primary-contrast hover:filter hover:brightness-90') +
-    (isDisabled ? ' opacity-50 cursor-not-allowed' : '');
+      ? ButtonColors.mute
+      : ButtonColors.primary) + (isDisabled ? ` ${ButtonColors.disabledSuffix}` : '');
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
