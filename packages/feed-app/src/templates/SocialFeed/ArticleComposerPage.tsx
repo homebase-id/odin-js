@@ -11,6 +11,7 @@ import {
   SaveStatus,
   Select,
   Trash,
+  useDebounce,
   usePortal,
 } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
@@ -58,13 +59,19 @@ export const ArticleComposerPage = () => {
     caption: searchParams.get('caption') || undefined,
   });
 
+  const debouncedSave = useDebounce(() => doSave(postFile), { timeoutMillis: 1500 });
+
   const PostButton = ({ className }: { className?: string }) => {
     if (isPublished)
       return (
         <ActionButton
           className={`m-2 md:w-auto ${className ?? ''}`}
           state={saveStatus !== 'success' ? saveStatus : undefined}
-          onClick={() => doSave(postFile, 'draft')}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            doSave(postFile, 'draft');
+          }}
           confirmOptions={{
             title: t('Post'),
             body: t(
@@ -88,7 +95,11 @@ export const ArticleComposerPage = () => {
         } ${className ?? ''}`}
         icon={Arrow}
         state={saveStatus !== 'success' ? saveStatus : undefined}
-        onClick={() => doSave(postFile, 'publish')}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          doSave(postFile, 'publish');
+        }}
         confirmOptions={{
           title: t('Post'),
           body: t('Are you sure you want to publish this post?'),
@@ -209,7 +220,7 @@ export const ArticleComposerPage = () => {
                 }
 
                 setPostFile(dirtyPostFile);
-                doSave(dirtyPostFile);
+                debouncedSave();
               }}
               disabled={isPublished}
             />

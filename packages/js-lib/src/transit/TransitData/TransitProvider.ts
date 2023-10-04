@@ -85,6 +85,14 @@ export const queryBatchOverTransit = async (
     .post<QueryBatchResponse>('/transit/query/batch', request, config)
     .then((response) => {
       return response.data;
+    })
+    .catch(() => {
+      return {
+        searchResults: [],
+        cursorState: '',
+        includeMetadataHeader: false,
+        queryTime: 0,
+      };
     });
 };
 

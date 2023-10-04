@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AclIcon, AclSummary, AclWizard, SaveStatus, Times, t } from '@youfoundation/common-app';
+import {
+  AclIcon,
+  AclSummary,
+  AclWizard,
+  SaveStatus,
+  Times,
+  t,
+  useDebounce,
+} from '@youfoundation/common-app';
 import useAttribute from '../../../hooks/profiles/useAttribute';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { ActionButton } from '@youfoundation/common-app';
@@ -16,7 +24,7 @@ const AttributeEditor = ({
   reorderAttr,
   title,
   onCancel,
-  onSave,
+  onSave: onManualSave,
 }: {
   attribute: AttributeVm;
   className?: string;
@@ -31,7 +39,7 @@ const AttributeEditor = ({
     remove: { mutate: removeAttr },
   } = useAttribute({});
 
-  // Local state of the changes, for when it's a new attribute, as saving is manuel in that case
+  // Local state of the changes
   const [latestAttr, setLatestAttr] = useState<AttributeVm>({
     ...attribute,
     ...(updatedAttr || {}),
@@ -41,28 +49,25 @@ const AttributeEditor = ({
   const [isFadeOut, setIsFadeOut] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
-  const doSaveAttr = (dirtyAttr: AttributeVm) => {
+  const doManualSave = (dirtyAttr: AttributeVm) => {
     saveAttr({ ...dirtyAttr });
-    if (onSave) onSave();
+    if (onManualSave) onManualSave();
   };
 
-  // usCallback so the changeHandler changes less, so the the debounce is more effective
-  const changeHandler = useCallback(
-    (e: { target: { value: unknown; name: string } }) => {
-      const dirtyAttr = { ...latestAttr };
-      dirtyAttr.data[e.target.name] = e.target.value;
+  const debouncedSave = useDebounce(() => saveAttr(latestAttr), { timeoutMillis: 1500 });
+  const changeHandler = (e: { target: { value: unknown; name: string } }) => {
+    const dirtyAttr = { ...latestAttr };
+    dirtyAttr.data[e.target.name] = e.target.value;
+    setLatestAttr(dirtyAttr);
 
-      if (isNewAttribute) setLatestAttr(dirtyAttr);
-      else doSaveAttr(dirtyAttr);
-    },
-    [latestAttr, setLatestAttr]
-  );
+    if (!isNewAttribute) debouncedSave();
+  };
 
   const reorder = async (dir: 1 | -1) => {
     const newPriority = reorderAttr && (await reorderAttr(attribute, dir));
     if (!newPriority) return;
 
-    doSaveAttr({ ...latestAttr, priority: newPriority });
+    saveAttr({ ...latestAttr, priority: newPriority });
   };
 
   useEffect(() => {
@@ -75,9 +80,11 @@ const AttributeEditor = ({
     }
   }, [attribute]);
 
-  useEffect(() => {
-    setLatestAttr({ ...attribute, ...(updatedAttr || {}) });
-  }, [attribute, updatedAttr]);
+  // Sync the latest attribute with data from server
+  useEffect(
+    () => setLatestAttr({ ...attribute, ...(updatedAttr || {}) }),
+    [attribute, updatedAttr]
+  );
 
   return (
     <Section
@@ -143,7 +150,11 @@ const AttributeEditor = ({
             ) : null}
           </div>
           {saveStatus === 'error' && !isNewAttribute ? (
-            <ActionButton state={saveStatus} type="primary" onClick={() => doSaveAttr(latestAttr)}>
+            <ActionButton
+              state={saveStatus}
+              type="primary"
+              onClick={() => doManualSave(latestAttr)}
+            >
               {t('Save')}
             </ActionButton>
           ) : null}
@@ -204,7 +215,7 @@ const AttributeEditor = ({
             const dirtyAttr = { ...latestAttr, acl: newAcl };
 
             if (isNewAttribute) setLatestAttr(dirtyAttr);
-            else doSaveAttr(dirtyAttr);
+            else doManualSave(dirtyAttr);
           }}
           onCancel={() => {
             if (isNewAttribute && onCancel) onCancel();
@@ -227,7 +238,7 @@ const AttributeEditor = ({
               <ActionButton
                 type="primary"
                 className="ml-2"
-                onClick={() => doSaveAttr(latestAttr)}
+                onClick={() => doManualSave(latestAttr)}
                 state={saveStatus}
               >
                 {t('Save')}

@@ -13,8 +13,7 @@ import {
   PhoneFields,
   SocialFields,
 } from '@youfoundation/js-lib/profile';
-import { debounce } from 'lodash-es';
-import { ClipboardEventHandler, useMemo, useState } from 'react';
+import { ClipboardEventHandler, useState } from 'react';
 import { Textarea, t } from '@youfoundation/common-app';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Input } from '@youfoundation/common-app';
@@ -41,11 +40,9 @@ const AttributeFields = ({
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
-  const debouncedChange = useMemo(() => debounce(onChange, 500), [onChange]);
-
   switch (attribute.type) {
     case BuiltInAttributes.Name:
-      return <NameAttributeEditor attribute={attribute} onChange={debouncedChange} />;
+      return <NameAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     case BuiltInAttributes.Status:
       return (
@@ -55,7 +52,7 @@ const AttributeFields = ({
             id="status"
             name={MinimalProfileFields.Status}
             defaultValue={attribute.data?.[MinimalProfileFields.Status] ?? ''}
-            onChange={debouncedChange}
+            onChange={onChange}
           />
         </div>
       );
@@ -68,13 +65,13 @@ const AttributeFields = ({
             id="nickName"
             name={NicknameFields.NickName}
             defaultValue={attribute.data?.[NicknameFields.NickName] ?? ''}
-            onChange={debouncedChange}
+            onChange={onChange}
           />
         </div>
       );
       break;
     case BuiltInAttributes.Address:
-      return <LocationAttributeEditor attribute={attribute} onChange={debouncedChange} />;
+      return <LocationAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     case BuiltInAttributes.Birthday:
       return (
@@ -86,14 +83,14 @@ const AttributeFields = ({
               type="date"
               name={BirthdayFields.Date}
               defaultValue={attribute.data?.[BirthdayFields.Date] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
         </div>
       );
       break;
     case BuiltInAttributes.PhoneNumber:
-      return <PhoneAttributeEditor attribute={attribute} onChange={debouncedChange} />;
+      return <PhoneAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     case BuiltInAttributes.Email:
       return (
@@ -104,7 +101,7 @@ const AttributeFields = ({
               id="Label"
               name={EmailFields.Label}
               defaultValue={attribute.data?.[EmailFields.Label] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
           <div className="mb-5 w-3/5 px-2">
@@ -113,7 +110,7 @@ const AttributeFields = ({
               id="Email"
               name={EmailFields.Email}
               defaultValue={attribute.data?.[EmailFields.Email] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
         </div>
@@ -153,7 +150,7 @@ const AttributeFields = ({
     case BuiltInAttributes.MinecraftUsername:
     case BuiltInAttributes.GithubUsername:
     case BuiltInAttributes.StackoverflowUsername:
-      return <SocialAttributeEditor attribute={attribute} onChange={debouncedChange} />;
+      return <SocialAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     case BuiltInAttributes.HomebaseIdentity:
       return (
@@ -164,7 +161,7 @@ const AttributeFields = ({
               id="handle"
               name={SocialFields.Homebase}
               defaultValue={attribute.data?.[SocialFields.Homebase] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
         </>
@@ -179,7 +176,7 @@ const AttributeFields = ({
               id={MinimalProfileFields.ExperienceTitleId}
               name={MinimalProfileFields.ExperienceTitleId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceTitleId] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
               placeholder={t('Job, project, life event, etc.')}
             />
           </div>
@@ -188,7 +185,7 @@ const AttributeFields = ({
             <RichTextEditor
               name={MinimalProfileFields.ExperienceDecriptionId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
               className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
             />
           </div>
@@ -198,7 +195,7 @@ const AttributeFields = ({
               id={MinimalProfileFields.ExperienceLinkId}
               name={MinimalProfileFields.ExperienceLinkId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceLinkId] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
               placeholder={t('Link to the project, company, etc.')}
             />
           </div>
@@ -214,7 +211,7 @@ const AttributeFields = ({
               id="short-bio"
               name={MinimalProfileFields.ShortBioId}
               defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
         </>
@@ -229,7 +226,7 @@ const AttributeFields = ({
               id="link-text"
               name={LinkFields.LinkText}
               defaultValue={attribute.data?.[LinkFields.LinkText] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
           <div className="mb-5">
@@ -238,7 +235,7 @@ const AttributeFields = ({
               id="link-target"
               name={LinkFields.LinkTarget}
               defaultValue={attribute.data?.[LinkFields.LinkTarget] ?? 'https://'}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
         </>
@@ -253,7 +250,7 @@ const AttributeFields = ({
               id="cc-alias"
               name={CredictCardFields.Alias}
               defaultValue={attribute.data?.[CredictCardFields.Alias] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
           <div className="mb-5">
@@ -262,7 +259,7 @@ const AttributeFields = ({
               id="cc-name"
               name={CredictCardFields.Name}
               defaultValue={attribute.data?.[CredictCardFields.Name] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
           <div className="mb-5">
@@ -271,7 +268,7 @@ const AttributeFields = ({
               id="cc-number"
               name={CredictCardFields.Number}
               defaultValue={attribute.data?.[CredictCardFields.Number] ?? ''}
-              onChange={debouncedChange}
+              onChange={onChange}
             />
           </div>
           <div className="-mx-2 mb-5 flex flex-row">
@@ -281,7 +278,7 @@ const AttributeFields = ({
                 id="cc-expiration"
                 name={CredictCardFields.Expiration}
                 defaultValue={attribute.data?.[CredictCardFields.Expiration] ?? ''}
-                onChange={debouncedChange}
+                onChange={onChange}
               />
             </div>
             <div className="w-1/2 px-2">
@@ -290,7 +287,7 @@ const AttributeFields = ({
                 id="cc-cvc"
                 name={CredictCardFields.Cvc}
                 defaultValue={attribute.data?.[CredictCardFields.Cvc] ?? ''}
-                onChange={debouncedChange}
+                onChange={onChange}
               />
             </div>
           </div>
@@ -298,7 +295,7 @@ const AttributeFields = ({
       );
       break;
     case HomePageAttributes.Theme:
-      return <ThemeAttributeEditor attribute={attribute} onChange={debouncedChange} />;
+      return <ThemeAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     default:
       return (

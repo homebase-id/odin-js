@@ -18,33 +18,37 @@ export const getProfileAttributesOverTransit = async (
     fileType: [AttributeConfig.AttributeFileType],
     tagsMatchAll: attributeType ? [attributeType] : undefined,
   };
+  try {
+    const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams);
+    if (!result) return [];
+    //sort where lowest number is higher priority (!! sort happens in place)
+    const searchResults = result.searchResults.sort((a, b) => {
+      return a.priority - b.priority;
+    });
 
-  const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams);
+    return (
+      await Promise.all(
+        searchResults.map(async (dsr) => {
+          const attrPayLoad: AttributeFile | null = await getPayloadOverTransit<AttributeFile>(
+            dotYouClient,
+            odinId,
+            targetDrive,
+            dsr,
+            result.includeMetadataHeader
+          );
 
-  //sort where lowest number is higher priority (!! sort happens in place)
-  const searchResults = result.searchResults.sort((a, b) => {
-    return a.priority - b.priority;
-  });
+          if (!attrPayLoad) return undefined;
 
-  return (
-    await Promise.all(
-      searchResults.map(async (dsr) => {
-        const attrPayLoad: AttributeFile | null = await getPayloadOverTransit<AttributeFile>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          dsr,
-          result.includeMetadataHeader
-        );
-
-        if (!attrPayLoad) return undefined;
-
-        return {
-          ...attrPayLoad,
-          profileId: profileId,
-          acl: dsr.serverMetadata?.accessControlList,
-        };
-      })
-    )
-  ).filter((item) => !!item) as AttributeFile[];
+          return {
+            ...attrPayLoad,
+            profileId: profileId,
+            acl: dsr.serverMetadata?.accessControlList,
+          };
+        })
+      )
+    ).filter((item) => !!item) as AttributeFile[];
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
 };

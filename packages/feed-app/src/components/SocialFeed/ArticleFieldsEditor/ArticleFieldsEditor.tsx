@@ -26,8 +26,6 @@ export const InnerFieldEditors = ({
   onChange: (e: { target: { name: string; value: string | ImageUploadResult | RichText } }) => void;
   disabled?: boolean;
 }) => {
-  const debouncedChange = useMemo(() => debounce(onChange, 1500), [onChange]);
-
   const [isEditTeaser, setIsEditTeaser] = useState(false);
   return (
     <>
@@ -43,7 +41,7 @@ export const InnerFieldEditors = ({
                 id="caption"
                 name="caption"
                 defaultValue={postFile.content.caption}
-                onChange={debouncedChange}
+                onChange={onChange}
                 placeholder={t('Title')}
                 className={`w-full resize-none rounded-md bg-transparent px-2 py-1 text-lg`}
                 disabled={disabled}
@@ -75,7 +73,7 @@ export const InnerFieldEditors = ({
                   id="abstract"
                   name="abstract"
                   defaultValue={(postFile.content as Article).abstract}
-                  onChange={debouncedChange}
+                  onChange={onChange}
                   placeholder={t('Summary')}
                   className={`resize-none`}
                   disabled={disabled}
@@ -116,7 +114,7 @@ export const InnerFieldEditors = ({
               placeholder={t('Start writing...')}
               mediaDrive={getChannelDrive(channel.channelId)}
               name="body"
-              onChange={debouncedChange}
+              onChange={onChange}
               className="min-h-[50vh]"
               disabled={disabled}
             />
