@@ -35,7 +35,7 @@ const Connections = () => {
 
       <div className="-mt-6">
         {!hasActiveConnections && !hasSentConnections && !hasPendingConnections ? (
-          <SubtleMessage className="flex flex-row items-center">
+          <SubtleMessage className="flex flex-row items-center gap-3">
             <span>{t('Ready to add some connections?')}</span>
             <ActionButton
               onClick={(e) => {
@@ -45,7 +45,6 @@ const Connections = () => {
                 return false;
               }}
               type="secondary"
-              className="ml-2"
               icon={Plus}
             >
               {t('Add')}

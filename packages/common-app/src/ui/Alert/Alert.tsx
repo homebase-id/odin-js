@@ -69,11 +69,11 @@ export const SubtleMessage = (
   props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>
 ) => {
   return (
-    <p
-      {...props}
-      className={`bg-background max-w-2xl rounded-lg px-3 py-3 italic text-gray-400 ${
-        props.className || ''
-      }`}
-    />
+    <div className="flex flex-row">
+      <p
+        {...props}
+        className={`mr-auto rounded-lg py-3 italic text-gray-400 ${props.className || ''}`}
+      />
+    </div>
   );
 };
