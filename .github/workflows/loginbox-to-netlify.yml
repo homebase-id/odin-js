@@ -1,4 +1,4 @@
-name: 'CI to netlify'
+name: 'Loginbox to netlify'
 
 on:
   workflow_dispatch:
@@ -25,9 +25,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build-libs
-
-      - run: npm run build -w packages/feed-app
+      - run: npm run build -w packages/login-app
 
       - name: Publish to Netlify
         uses: netlify/actions/cli@master

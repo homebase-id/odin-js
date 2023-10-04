@@ -25,4 +25,6 @@ jobs:
 
       - run: npm run build --w ./packages/owner-app
 
+      - run: npm run build --w ./packages/provisioning-app
+
       - run: npm run test
