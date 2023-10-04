@@ -1,7 +1,7 @@
 import { Block, EmojiSelector, t } from '@youfoundation/common-app';
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
 import { AccessControlList, TargetDrive } from '@youfoundation/js-lib/core';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 interface FaviconSelectorProps {
   name?: string;
@@ -17,11 +17,19 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
     | { emoji: string }
     | undefined;
 
+  const [isEmojiOpen, setIsEmojiOpen] = useState(false);
+  const [isImageOpen, setIsImageOpen] = useState(false);
+
   return (
     <div className="grid grid-cols-1 gap-2 py-5 text-center text-gray-500 md:grid-cols-3 md:gap-5">
-      <FaviconOption isActive={valueObject && 'emoji' in valueObject} label={t('Emoji')}>
+      <FaviconOption
+        isActive={valueObject && 'emoji' in valueObject}
+        label={t('Emoji')}
+        onClick={() => setIsEmojiOpen(true)}
+      >
         <EmojiSelector
-          className="mx-auto text-4xl text-foreground text-opacity-70 hover:text-opacity-100"
+          wrapperClassName="relative flex flex-row justify-center items-center"
+          className="text-4xl text-foreground text-opacity-70 hover:text-opacity-100"
           onInput={(val) =>
             onChange({
               target: {
@@ -30,12 +38,19 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
               },
             })
           }
+          isOpen={isEmojiOpen}
+          onClose={() => setIsEmojiOpen(false)}
           defaultValue={valueObject && 'emoji' in valueObject ? valueObject.emoji : undefined}
         />
       </FaviconOption>
-      <FaviconOption isActive={valueObject && 'fileId' in valueObject} label={t('Custom image')}>
+      <FaviconOption
+        isActive={valueObject && 'fileId' in valueObject}
+        label={t('Custom image')}
+        onClick={() => setIsImageOpen(true)}
+      >
         <ImageSelector
           {...props}
+          label=""
           defaultValue={valueObject && 'fileId' in valueObject ? valueObject.fileId : undefined}
           onChange={(e) => {
             onChange({
@@ -53,6 +68,8 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
           maxWidth={512}
           expectedAspectRatio={1}
           sizeClass="w-full"
+          isOpen={isImageOpen}
+          onClose={() => setIsImageOpen(false)}
         />
       </FaviconOption>
       <FaviconOption
@@ -67,7 +84,7 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
           })
         }
       >
-        <Block className="mx-auto h-auto w-full max-w-[5rem] cursor-pointer" />
+        <Block className="mx-auto h-8 w-8 cursor-pointer" />
       </FaviconOption>
     </div>
   );
@@ -86,15 +103,15 @@ const FaviconOption = ({
 }) => {
   return (
     <div
-      className={`flex cursor-pointer flex-col rounded-md border-2 p-2 ${
+      className={`flex cursor-pointer flex-col rounded-md border-2 ${
         isActive
           ? 'border-indigo-500 bg-white dark:bg-black'
           : 'border-slate-100 bg-slate-100 dark:border-slate-900 dark:bg-slate-900'
       }`}
       onClick={onClick}
     >
-      <div className="flex flex-grow flex-col justify-center">{children}</div>
-      <p>{label}</p>
+      <div className="relative flex flex-grow flex-col justify-center px-2 py-4">{children}</div>
+      <p className="p-2 pt-0">{label}</p>
     </div>
   );
 };

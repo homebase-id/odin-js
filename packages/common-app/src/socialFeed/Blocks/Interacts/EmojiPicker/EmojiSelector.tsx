@@ -1,4 +1,4 @@
-import { useState, useRef, lazy, Suspense } from 'react';
+import { useState, useRef, lazy, Suspense, useEffect } from 'react';
 
 import { ActionButton, Lol, useMostSpace, useOutsideTrigger } from '@youfoundation/common-app';
 const EmojiPicker = lazy(() =>
@@ -7,27 +7,43 @@ const EmojiPicker = lazy(() =>
 
 export const EmojiSelector = ({
   className,
+  wrapperClassName,
   onInput,
   defaultValue,
   size,
+  isOpen: isDefaultOpen,
+  onClose,
 }: {
   className?: string;
+  wrapperClassName?: string;
   onInput: (val: string) => void;
   defaultValue?: string;
   size?: 'large' | 'small' | 'square' | 'none';
+  isOpen?: boolean;
+  onClose?: () => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(!!isDefaultOpen);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsOpen(false));
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
+  useEffect(() => setIsOpen(!!isDefaultOpen), [isDefaultOpen]);
+  useEffect(() => (!isOpen && onClose ? onClose() : undefined), [isOpen]);
+
   return (
-    <div className={`relative ${className ?? ''}`}>
+    <div
+      className={wrapperClassName || `relative`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOpen(!isOpen);
+      }}
+    >
       <ActionButton
         type="mute"
         size={size}
-        className={`text-inherit`}
+        className={className}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

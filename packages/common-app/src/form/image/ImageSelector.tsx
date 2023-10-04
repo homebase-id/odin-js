@@ -4,7 +4,7 @@ import {
   TargetDrive,
   ThumbnailInstruction,
 } from '@youfoundation/js-lib/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActionButton, t, useImage } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
@@ -29,6 +29,9 @@ interface ImageSelectorProps
   label?: string;
 
   disabled?: boolean;
+
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const ImageSelector = ({
@@ -44,12 +47,17 @@ const ImageSelector = ({
   thumbInstructions,
   label,
   disabled,
+  isOpen: isDefaultOpen,
+  onClose,
 }: ImageSelectorProps) => {
   const {
     fetch: { data: imageData, isLoading },
     remove: { mutateAsync: removeImage, error: removeError },
   } = useImage(undefined, typeof defaultValue === 'string' ? defaultValue : undefined, targetDrive);
   const [isEdit, setIsEdit] = useState(false);
+
+  useEffect(() => setIsEdit(!!isDefaultOpen), [isDefaultOpen]);
+  useEffect(() => (!isEdit && onClose ? onClose() : undefined), [isEdit]);
 
   const removeData = async () => {
     if (typeof defaultValue !== 'string') return;
