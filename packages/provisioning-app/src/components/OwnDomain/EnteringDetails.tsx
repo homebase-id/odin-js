@@ -13,17 +13,10 @@ interface Props {
   domain: string;
   setDomain: React.Dispatch<React.SetStateAction<string>>;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
-  setProvisionState: React.Dispatch<
-    React.SetStateAction<OwnDomainProvisionState>
-  >;
+  setProvisionState: React.Dispatch<React.SetStateAction<OwnDomainProvisionState>>;
 }
 
-const EnteringDetails = ({
-  domain,
-  setDomain,
-  setEmail,
-  setProvisionState,
-}: Props) => {
+const EnteringDetails = ({ domain, setDomain, setEmail, setProvisionState }: Props) => {
   //
   // API
   //
@@ -44,7 +37,7 @@ const EnteringDetails = ({
         onSubmit={(e) => {
           e.preventDefault();
           if (isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')
-            setProvisionState('UpdatingDnsRecords');
+            setProvisionState('DnsRecords');
 
           return false;
         }}
@@ -53,7 +46,7 @@ const EnteringDetails = ({
         <div className="flex flex-row flex-wrap items-center">
           <Label htmlFor="domain">{t('Your own domain')}</Label>
           {isOwnDomainAvailable === false && domain ? (
-            <p className="order-1 mt-2 ml-auto flex flex-row items-center rounded-lg bg-slate-100 py-1 px-2 md:order-none md:mt-0 md:rounded-b-none">
+            <p className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
               <Exclamation className="mr-2 h-4 w-4" />
               {t(`This domain isn't available, try another one`)}
             </p>
@@ -65,9 +58,7 @@ const EnteringDetails = ({
             required
             placeholder={t('your.domain.here')}
             defaultValue={domain}
-            onKeyDown={(e) =>
-              e.key.match(validDomainRegEx) && e.preventDefault()
-            }
+            onKeyDown={(e) => e.key.match(validDomainRegEx) && e.preventDefault()}
             debouncedOnChange={(e) => setDomain(e.target.value)}
           />
         </div>
@@ -95,15 +86,9 @@ const EnteringDetails = ({
           <ActionButton
             className="h-[2.66rem]"
             icon={Arrow}
-            isDisabled={
-              !(
-                isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success'
-              )
-            }
+            isDisabled={!(isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')}
             state={
-              statusIsOwnDomainAvailable !== 'success'
-                ? statusIsOwnDomainAvailable
-                : undefined
+              statusIsOwnDomainAvailable !== 'success' ? statusIsOwnDomainAvailable : undefined
             }
           >
             {t('Register your domain')}

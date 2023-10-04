@@ -4,7 +4,9 @@ import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
 import Arrow from '../ui/Icons/Arrow/Arrow';
 import { DnsConfig, DnsRecord } from '../../hooks/commonDomain/commonDomain';
 import Exclamation from '../ui/Icons/Exclamation/Exclamation';
-import Question from '../ui/Icons/Question/Question';
+import Check from '../ui/Icons/Check/Check';
+import Loader from '../ui/Icons/Loader/Loader';
+// import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
 
 const DnsSettingsView = ({
   domain,
@@ -15,71 +17,66 @@ const DnsSettingsView = ({
   dnsConfig: DnsConfig;
   showStatus?: boolean;
 }) => {
+  // const { data: apexDomain } = useApexDomain(domain);
+  // console.log({ apexDomain });
+
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
-  const dnsRecords = (Object.values(dnsConfig).flat() as Array<DnsRecord>).sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
+  const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
 
+  const subRecords = dnsConfig.filter((record) => !!record.name);
   return (
     <>
-      <p className="mb-4">
-        {t('Set the following DNS records on your domain')}{' '}
-        <span className="rounded-lg bg-slate-50 px-1 py-1">{domain}</span>
-        <button onClick={() => setInfoDialogOpen(true)} className="block underline">
-          {t('How do I do this?')}
-        </button>
-      </p>
+      <section className="">
+        <p className="mb-4">
+          <button onClick={() => setInfoDialogOpen(true)} className="block underline">
+            {t('How do I do this?')}
+          </button>
+        </p>
 
-      <table className="whitespace-no-wrap w-full table-auto text-left">
-        <thead>
-          <tr>
-            <td className="title-font bg-gray-100 px-4 py-3 text-sm font-medium tracking-wider text-gray-900">
-              {t('Type')}
-            </td>
-            <td className="title-font bg-gray-100 px-4 py-3 text-sm font-medium tracking-wider text-gray-900">
-              {t('Name')}
-            </td>
-            <td className="title-font bg-gray-100 px-4 py-3 text-sm font-medium tracking-wider text-gray-900">
-              {t('Value')}
-            </td>
-            <td className="title-font bg-gray-100 px-4 py-3 text-sm font-medium tracking-wider text-gray-900"></td>
-          </tr>
-        </thead>
-        <tbody>
-          {dnsRecords.map((dnsRecord, index) => {
-            const status = dnsRecord.status;
-
-            return (
-              <tr key={index}>
-                <td className="border-b-2 border-gray-200 px-4 py-3">{dnsRecord.type}</td>
-                <td className="border-b-2 border-gray-200 px-4 py-3">{dnsRecord.name || '@'}</td>
-                <td className="border-b-2 border-gray-200 px-4 py-3">{dnsRecord.value}</td>
-                <td
-                  className={`${
-                    showStatus ? 'flex flex-row items-center justify-start' : ''
-                  } border-b-2 border-gray-200 px-4 py-3`}
-                >
-                  {showStatus ? (
-                    <>
-                      {status === 'incorrectValue' ? (
-                        <div className="rounded-lg bg-red-400 p-2 text-white">
-                          <Exclamation className="h-5 w-5" />
-                        </div>
-                      ) : status === 'domainOrRecordNotFound' ? (
-                        <div className="rounded-lg bg-blue-400 p-2 text-white">
-                          <Question className="h-5 w-5" />
-                        </div>
-                      ) : null}{' '}
-                      <p className="ml-2">{t(status)}</p>
-                    </>
-                  ) : null}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+        <div className="mb-10 flex flex-col gap-4">
+          <p className="text-2xl">Point your domain to Homebase</p>
+          {aliasARecord ? (
+            <>
+              <p>
+                <span className="font-medium">Recommended:</span>
+                <br />
+                Point ALIAS, ANAME, or flattened CNAME record to {aliasARecord.value}
+              </p>
+              <p className="text-sm text-slate-400">
+                If your DNS provider supports ALIAS, ANAME, or flattened CNAME records, use this
+                recommended configuration, which is more resilient than the fallback option.
+              </p>
+              <RecordView record={aliasARecord} domain={domain} showStatus={showStatus} />
+            </>
+          ) : null}
+          {fallbackARecord ? (
+            <>
+              <p className="mt-4">
+                <span className="font-medium">Fallback:</span>
+                <br />
+                Point A record to {fallbackARecord?.value}
+              </p>
+              <p className="text-sm text-slate-400">
+                If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, use
+                this fallback option.
+              </p>
+              <RecordView record={fallbackARecord} domain={domain} showStatus={showStatus} />
+            </>
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="mb-5 text-2xl">Add the required subdomains</p>
+          {subRecords.length > 0 ? (
+            <>
+              {subRecords.map((record) => (
+                <RecordView key={record.name} record={record} showStatus={showStatus} />
+              ))}
+            </>
+          ) : null}
+        </div>
+      </section>
       <InfoDialog
         title={t('How do I do this?')}
         isOpen={infoDialogOpen}
@@ -119,6 +116,42 @@ const DnsSettingsView = ({
         </>
       </InfoDialog>
     </>
+  );
+};
+
+const RecordView = ({
+  record,
+  domain,
+  showStatus,
+}: {
+  record: DnsRecord;
+  domain?: string;
+  showStatus: boolean;
+}) => {
+  const isGood = record.status === 'success';
+  const isLoading = record.status === 'unknown';
+
+  return (
+    <div
+      className={`flex flex-row items-center gap-2 rounded-lg ${
+        showStatus && !isLoading ? (isGood ? 'bg-green-100' : 'bg-orange-100') : 'bg-gray-100'
+      } px-4 py-3 font-mono text-base shadow-sm`}
+    >
+      <p>{record.name || domain || '@'}</p>
+      <p>{record.type}</p>
+      <p>{record.value}</p>
+      {showStatus ? (
+        <div className="ml-auto">
+          {isLoading ? (
+            <Loader className="h-4 w-4" />
+          ) : isGood ? (
+            <Check className="h-4 w-4" />
+          ) : (
+            <Exclamation className="h-4 w-4" />
+          )}
+        </div>
+      ) : null}
+    </div>
   );
 };
 

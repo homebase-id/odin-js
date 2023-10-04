@@ -4,16 +4,9 @@ import { DnsConfig } from '../commonDomain/commonDomain';
 
 const root = '//' + window.location.host + '/api/registration/v1';
 
-//
-
 export const useFetchOwnDomainDnsConfig = (domain: string) => {
-  const fetchOwnDomainDnsConfig = async (
-    domain: string
-  ): Promise<DnsConfig> => {
-    const response = await axios.get(
-      `${root}/registration/dns-config/${domain}`
-    );
-    // console.log(response.data)
+  const fetchOwnDomainDnsConfig = async (domain: string): Promise<DnsConfig> => {
+    const response = await axios.get(`${root}/registration/dns-config/${domain}?includeAlias=true`);
     return response.data;
   };
 
@@ -33,14 +26,10 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
 //
 
 export const useFetchIsOwnDomainAvailable = (domain: string) => {
-  const fetchIsOwnDomainAvailable = async (
-    domain: string
-  ): Promise<boolean> => {
+  const fetchIsOwnDomainAvailable = async (domain: string): Promise<boolean> => {
     if (!domain) return false;
 
-    const response = await axios.get(
-      root + `/registration/is-own-domain-available/${domain}`
-    );
+    const response = await axios.get(root + `/registration/is-own-domain-available/${domain}`);
 
     return response.data;
   };
@@ -62,32 +51,44 @@ export const useFetchIsOwnDomainAvailable = (domain: string) => {
 //
 
 export const useFetchOwnDomainDnsStatus = (
-  domain: string,
+  domain: string | undefined,
   refetchNeeded: (dnsConfig: DnsConfig) => boolean
 ) => {
-  const fetchOwnDomainDnsStatus = async (
-    domain: string
-  ): Promise<DnsConfig> => {
+  const fetchOwnDomainDnsStatus = async (domain: string): Promise<DnsConfig | null> => {
+    if (!domain) return null;
     const response = await axios.get(
-      `${root}/registration/own-domain-dns-status/${domain}`
+      `${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`
     );
-    // console.log(response.data)
     return response.data;
   };
 
   return {
-    fetchOwnDomainDnsStatus: useQuery<DnsConfig, AxiosError>(
+    fetchOwnDomainDnsStatus: useQuery<DnsConfig | null, AxiosError>(
       ['own-domain-dns-config', domain],
-      () => fetchOwnDomainDnsStatus(domain),
+      () => fetchOwnDomainDnsStatus(domain as string),
       {
         enabled: !!domain,
-        refetchInterval: (dnsConfig) =>
-          !dnsConfig || refetchNeeded(dnsConfig) ? 2000 : false,
+        refetchInterval: (dnsConfig) => (!dnsConfig || refetchNeeded(dnsConfig) ? 2000 : false),
         retry: (failureCount, error) =>
           error?.response?.status ? error.response.status >= 500 : false,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
       }
     ),
   };
 };
 
 //
+
+export const useApexDomain = (domain?: string) => {
+  const getApexDomain = async (domain?: string) => {
+    if (!domain) return null;
+    const response = await axios.get(`${root}/registration/lookup-zone-apex/${domain}`);
+    return response.data;
+  };
+
+  return useQuery(['apex-domain', domain], () => getApexDomain(domain), {
+    retry: false,
+    enabled: !!domain,
+  });
+};

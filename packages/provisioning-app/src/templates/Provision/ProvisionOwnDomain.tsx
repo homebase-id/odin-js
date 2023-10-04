@@ -2,7 +2,6 @@ import { useState } from 'react';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import EnteringDetails from '../../components/OwnDomain/EnteringDetails';
-import UpdatingDnsRecords from '../../components/OwnDomain/UpdatingDnsRecords';
 import ValidatingDnsRecords from '../../components/OwnDomain/ValidatingDnsRecords';
 import CreateIdentityView from '../../components/CreateIdentityView.tsx/CreateIdentityView';
 import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
@@ -11,32 +10,25 @@ import useCheckInvitationCode from '../../hooks/invitationCode/useCheckInvitatio
 import Times from '../../components/ui/Icons/Times/Times';
 
 const ProvisionOwnDomain = () => {
-  const [provisionState, setProvisionState] =
-    useState<OwnDomainProvisionState>('EnteringDetails');
+  const [provisionState, setProvisionState] = useState<OwnDomainProvisionState>('EnteringDetails');
   const [domain, setDomain] = useState<string>('');
   const [email, setEmail] = useState<string>('');
 
   const [searchParams] = useSearchParams();
   const [planId] = useState<string>(searchParams.get('plan-id') || 'free');
-  const [invitationCode] = useState<string | null>(
-    searchParams.get('invitation-code')
-  );
+  const [invitationCode] = useState<string | null>(searchParams.get('invitation-code'));
 
-  const { data: isValid } = useCheckInvitationCode(
-    invitationCode || undefined
-  ).checkInvitationCode;
+  const { data: isValid } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
 
   if (!invitationCode || isValid === false) return <Navigate to="/" />;
 
   return (
     <section className="mb-10 flex flex-grow flex-col ">
       <div className="container mx-auto flex h-full min-h-full flex-grow flex-col px-5">
-        <div className="mt-20 min-h-[20rem]">
+        <div className={`${provisionState === 'DnsRecords' ? 'mt-10' : 'mt-20'} min-h-[20rem]`}>
           <h1 className="mb-10 text-4xl">
             Homebase | Signup
-            <span className="mt-1 block text-3xl text-slate-400">
-              {t('Create a new identity')}
-            </span>
+            <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
           </h1>
           {provisionState === 'EnteringDetails' ? (
             <EnteringDetails
@@ -45,16 +37,8 @@ const ProvisionOwnDomain = () => {
               setEmail={setEmail}
               setProvisionState={setProvisionState}
             />
-          ) : provisionState === 'UpdatingDnsRecords' ? (
-            <UpdatingDnsRecords
-              domain={domain}
-              setProvisionState={setProvisionState}
-            />
-          ) : provisionState === 'ValidatingDnsRecords' ? (
-            <ValidatingDnsRecords
-              domain={domain}
-              setProvisionState={setProvisionState}
-            />
+          ) : provisionState === 'DnsRecords' ? (
+            <ValidatingDnsRecords domain={domain} setProvisionState={setProvisionState} />
           ) : provisionState === 'Provisioning' ? (
             <CreateIdentityView
               domain={domain}
@@ -65,9 +49,7 @@ const ProvisionOwnDomain = () => {
           ) : (
             <div>
               <p className="text-lg">
-                {t(
-                  'Mmh something went wrong, and we are not sure what happened exactly...'
-                )}{' '}
+                {t('Mmh something went wrong, and we are not sure what happened exactly...')}{' '}
                 {t('Want to try again?')}
               </p>
               <ActionButton
