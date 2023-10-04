@@ -1,9 +1,7 @@
-import { useState, useRef, lazy, Suspense, useEffect } from 'react';
+import { useState, useRef, Suspense, useEffect } from 'react';
 
 import { ActionButton, Lol, useMostSpace, useOutsideTrigger } from '@youfoundation/common-app';
-const EmojiPicker = lazy(() =>
-  import('./EmojiPicker').then((mod) => ({ default: mod.EmojiPicker }))
-);
+import { EmojiPicker } from '@youfoundation/common-app';
 
 export const EmojiSelector = ({
   className,

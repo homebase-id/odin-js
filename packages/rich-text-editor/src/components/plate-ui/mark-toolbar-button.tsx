@@ -1,5 +1,3 @@
-'use client';
-
 import { useMarkToolbarButton, useMarkToolbarButtonState } from '@udecode/plate-common';
 
 import { ToolbarButton, ToolbarButtonProps } from './toolbar';

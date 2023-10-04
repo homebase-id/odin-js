@@ -1,5 +1,3 @@
-'use client';
-
 import { PlateLeaf, PlateLeafProps } from '@udecode/plate-common';
 
 import { cn } from '../../lib/utils';

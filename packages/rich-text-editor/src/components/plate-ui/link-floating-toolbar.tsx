@@ -1,5 +1,3 @@
-'use client';
-
 import { flip, offset, UseVirtualFloatingOptions } from '@udecode/plate-floating';
 import {
   FloatingLinkUrlInput,

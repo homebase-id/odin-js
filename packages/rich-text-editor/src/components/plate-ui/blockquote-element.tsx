@@ -1,5 +1,3 @@
-'use client';
-
 import { PlateElement, PlateElementProps } from '@udecode/plate-common';
 
 import { cn } from '../../lib/utils';
