@@ -1,0 +1,38 @@
+name: 'CI to netlify'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'packages/login-app/src/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: 'Deploy to Netlify'
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://npm.pkg.github.com'
+          # Defaults to the user or organization that owns the workflow file
+          scope: '@octocat'
+
+      - run: npm ci
+
+      - run: npm run build-libs
+
+      - run: npm run build -w packages/feed-app
+
+      - name: Publish to Netlify
+        uses: netlify/actions/cli@master
+        with:
+          args: deploy --dir=packages/login-app/dist --prod --filter '@youfoundation/login-app'
+        env:
+          NETLIFY_SITE_ID: b63c83a3-1caf-486d-9a2f-4db2de190ee1
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
