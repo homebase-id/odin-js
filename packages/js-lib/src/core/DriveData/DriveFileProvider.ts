@@ -201,6 +201,7 @@ export const getThumbBytes = async (
   return client
     .get<ArrayBuffer>('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
     .then(async (response) => {
+      if (!response.data) return null;
       return {
         bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
