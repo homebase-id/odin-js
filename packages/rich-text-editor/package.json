@@ -68,11 +68,6 @@
     "prettier-plugin-tailwindcss": "^0.1.12",
     "tailwindcss": "^3.3.3"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
