@@ -15,7 +15,7 @@ const DnsSettingsView = ({
 }: {
   domain: string;
   dnsConfig: DnsConfig;
-  showStatus?: boolean;
+  showStatus: boolean;
 }) => {
   // const { data: apexDomain } = useApexDomain(domain);
   // console.log({ apexDomain });
