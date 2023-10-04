@@ -13,6 +13,18 @@ import {
 } from '@youfoundation/common-app';
 import { useState } from 'react';
 
+// Component set to maximize the visibility of the hero image
+{
+  /* <div className="relative">
+<div className="mx-auto flex min-h-[15rem] max-w-[1920px] flex-col justify-items-start">
+  <Image
+    fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+    targetDrive={HomePageConfig.HomepageTargetDrive}
+    className="mt-auto h-auto w-full"
+  />
+</div> */
+}
+
 const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
   const { owner, home, social } = useSiteData().data ?? {};
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
