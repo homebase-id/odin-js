@@ -17,8 +17,8 @@ const DnsSettingsView = ({
 }) => {
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
 
-  const dnsRecords = (Object.values(dnsConfig).flat() as Array<DnsRecord>).sort(
-    (a, b) => a.name.localeCompare(b.name)
+  const dnsRecords = (Object.values(dnsConfig).flat() as Array<DnsRecord>).sort((a, b) =>
+    a.name.localeCompare(b.name)
   );
 
   return (
@@ -26,10 +26,7 @@ const DnsSettingsView = ({
       <p className="mb-4">
         {t('Set the following DNS records on your domain')}{' '}
         <span className="rounded-lg bg-slate-50 px-1 py-1">{domain}</span>
-        <button
-          onClick={() => setInfoDialogOpen(true)}
-          className="block underline"
-        >
+        <button onClick={() => setInfoDialogOpen(true)} className="block underline">
           {t('How do I do this?')}
         </button>
       </p>
@@ -55,15 +52,9 @@ const DnsSettingsView = ({
 
             return (
               <tr key={index}>
-                <td className="border-b-2 border-gray-200 px-4 py-3">
-                  {dnsRecord.type}
-                </td>
-                <td className="border-b-2 border-gray-200 px-4 py-3">
-                  {dnsRecord.name || '@'}
-                </td>
-                <td className="border-b-2 border-gray-200 px-4 py-3">
-                  {dnsRecord.value}
-                </td>
+                <td className="border-b-2 border-gray-200 px-4 py-3">{dnsRecord.type}</td>
+                <td className="border-b-2 border-gray-200 px-4 py-3">{dnsRecord.name || '@'}</td>
+                <td className="border-b-2 border-gray-200 px-4 py-3">{dnsRecord.value}</td>
                 <td
                   className={`${
                     showStatus ? 'flex flex-row items-center justify-start' : ''
