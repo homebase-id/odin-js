@@ -38,12 +38,20 @@ export const createCircleDefinition = async (
   const client = dotYouClient.createAxiosClient();
   const url = root + '/create';
 
-  if (!circleDefinition.id) {
-    circleDefinition.id = getNewId();
+  const data: any = { ...circleDefinition };
+
+  if (!data.id) {
+    data.id = getNewId();
   }
 
+  data.driveGrants =
+    data.driveGrants?.map((grant: DriveGrant) => ({
+      ...grant,
+      permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
+    })) || [];
+
   return client
-    .post(url, circleDefinition)
+    .post(url, data)
     .then((response) => {
       return response.data;
     })
