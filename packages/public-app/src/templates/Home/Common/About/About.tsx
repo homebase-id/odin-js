@@ -1,5 +1,5 @@
 import useBiography from '../../../../hooks/biography/useBiography';
-import { RichTextRenderer } from '@youfoundation/common-app';
+import { Arrow, RichTextRenderer, t } from '@youfoundation/common-app';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
@@ -11,13 +11,14 @@ const About = ({ className }: { className?: string }) => {
           {bioData?.shortBio && (
             <p className="whitespace-pre-line pb-10">{bioData.shortBio.body}</p>
           )}
-          {bioData?.longBio ? (
+          {bioData?.experience ? (
             <div className="-my-5">
-              {bioData.longBio.map((bioItem) => (
-                <BiographyBlock
-                  title={bioItem.title}
-                  children={bioItem.body}
-                  key={bioItem.id}
+              {bioData.experience.map((experienceItem) => (
+                <ExperienceBlock
+                  title={experienceItem.title}
+                  body={experienceItem.body}
+                  link={experienceItem.link}
+                  key={experienceItem.id}
                   className="my-5"
                 />
               ))}
@@ -29,19 +30,32 @@ const About = ({ className }: { className?: string }) => {
   );
 };
 
-const BiographyBlock = ({
+const ExperienceBlock = ({
   title,
-  children,
+  body,
+  link,
   className,
 }: {
   title: string;
-  children: string | Record<string, unknown>[];
+  body: string | Record<string, unknown>[];
+  link?: string;
   className: string;
 }) => {
   return (
     <div className={`relative overflow-hidden rounded-lg bg-background px-8 py-12 ${className}`}>
       <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{title}</h1>
-      <RichTextRenderer className="leading-relaxe" body={children} />
+      <RichTextRenderer className="leading-relaxe" body={body} />
+      {link ? (
+        <div className="flex flex-row-reverse">
+          <a
+            href={link.startsWith('http') ? link : `https://${link}`}
+            className="flex flex-row items-center gap-1 text-primary"
+          >
+            {t('More')}
+            <Arrow className="h-4 w-4" />
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 };

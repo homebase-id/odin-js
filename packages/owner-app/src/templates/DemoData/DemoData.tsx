@@ -391,8 +391,8 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
       };
 
-      bioAttr.data[MinimalProfileFields.ShortBioId] = title;
-      bioAttr.data[MinimalProfileFields.FullBioId] = body;
+      bioAttr.data[MinimalProfileFields.ExperienceLinkId] = title;
+      bioAttr.data[MinimalProfileFields.ExperienceDecriptionId] = body;
 
       saveBio(bioAttr);
 

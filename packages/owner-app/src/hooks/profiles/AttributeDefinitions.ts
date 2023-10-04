@@ -141,15 +141,15 @@ export const AttributeDefinitions = {
     description: 'Credit card info',
   },
 
-  FullBio: {
+  Experience: {
     type: BuiltInAttributes.FullBio,
-    name: 'Full Bio',
-    description: 'A long-form bio information about yourself',
+    name: 'Experience',
+    description: 'A description of your experience, education, etc',
   },
 
-  ShortBio: {
+  Bio: {
     type: BuiltInAttributes.ShortBio,
-    name: 'Short Bio',
+    name: 'Bio',
     description: 'A few lines describing yourself, your mission, your passions, etc.',
   },
 

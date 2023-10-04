@@ -14,8 +14,9 @@ export type BiographyData = {
     id: string;
     body: string;
   };
-  longBio: {
+  experience: {
     title: string;
+    link?: string;
     body: string | Record<string, unknown>[];
     id: string;
   }[];
@@ -50,10 +51,11 @@ const useBiography = () => {
             const attribute = entry.payload as Attribute;
 
             return {
-              title: attribute.data[MinimalProfileFields.ShortBioId] as string,
-              body: attribute.data[MinimalProfileFields.FullBioId] as
+              title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
+              body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
                 | string
                 | Record<string, unknown>[],
+              link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
               id: attribute.id,
               priority: attribute.priority,
             };
@@ -62,7 +64,7 @@ const useBiography = () => {
 
         return {
           shortBio: shortBioAttributes?.[0],
-          longBio: longBioAttributes || [],
+          experience: longBioAttributes || [],
         };
       }
     };
@@ -86,15 +88,19 @@ const useBiography = () => {
         ])
       )?.map((attribute) => {
         return {
-          title: attribute.data[MinimalProfileFields.ShortBioId] as string,
-          body: attribute.data[MinimalProfileFields.FullBioId] as string,
+          title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
+          body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
+            | string
+            | Record<string, unknown>[],
+          link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
           id: attribute.id,
+          priority: attribute.priority,
         };
       });
 
       return {
         shortBio: shortBiographyAttributes?.[0],
-        longBio: longBiographyAttributes || [],
+        experience: longBiographyAttributes || [],
       };
     };
 

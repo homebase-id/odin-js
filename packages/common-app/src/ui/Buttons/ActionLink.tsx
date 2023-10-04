@@ -58,7 +58,9 @@ export const ActionLink: FC<ActionLinkProps> = ({
 
   return (
     <HybridLink
-      className={`relative flex flex-row items-center rounded-md text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${className}`}
+      className={`relative flex flex-row items-center rounded-md text-left ${
+        onClick ? 'cursor-pointer' : ''
+      } ${widthClasses} ${sizeClasses} ${colorClasses} ${className}`}
       download={download}
       href={href}
       title={title}

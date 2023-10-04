@@ -174,20 +174,32 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor="short-bio">{t('Bio')}</Label>
+            <Label htmlFor={MinimalProfileFields.ExperienceTitleId}>{t('Title')}</Label>
             <Input
-              id="short-bio"
-              name={MinimalProfileFields.ShortBioId}
-              defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
+              id={MinimalProfileFields.ExperienceTitleId}
+              name={MinimalProfileFields.ExperienceTitleId}
+              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceTitleId] ?? ''}
               onChange={debouncedChange}
+              placeholder={t('Job, project, life event, etc.')}
             />
           </div>
           <div className="mb-5">
-            <Label htmlFor="full-bio">{t('Full bio')}</Label>
+            <Label htmlFor={MinimalProfileFields.ExperienceDecriptionId}>{t('Description')}</Label>
             <RichTextEditor
-              name={MinimalProfileFields.FullBioId}
-              defaultValue={attribute.data?.[MinimalProfileFields.FullBioId] ?? ''}
+              name={MinimalProfileFields.ExperienceDecriptionId}
+              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] ?? ''}
               onChange={debouncedChange}
+              className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
+            />
+          </div>
+          <div className="mb-5">
+            <Label htmlFor={MinimalProfileFields.ExperienceLinkId}>{t('Link')}</Label>
+            <Input
+              id={MinimalProfileFields.ExperienceLinkId}
+              name={MinimalProfileFields.ExperienceLinkId}
+              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceLinkId] ?? ''}
+              onChange={debouncedChange}
+              placeholder={t('Link to the project, company, etc.')}
             />
           </div>
         </>
