@@ -207,11 +207,11 @@ const AttributeFields = ({
         <>
           <div className="mb-5">
             <Label htmlFor="short-bio">{t('Bio')}</Label>
-            <Textarea
-              id="short-bio"
+            <RichTextEditor
               name={MinimalProfileFields.ShortBioId}
               defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
               onChange={onChange}
+              className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
             />
           </div>
         </>

@@ -18,7 +18,7 @@ export const RichTextRenderer = ({
   className?: string;
 }) => {
   if (!body || typeof body === 'string') {
-    return <>{body}</>;
+    return <p className={className}>{body}</p>;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

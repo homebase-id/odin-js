@@ -9,7 +9,7 @@ const About = ({ className }: { className?: string }) => {
       <div className="-mx-2 flex max-w-6xl flex-col lg:flex-row xl:-mx-4">
         <div className="px-2 py-2 lg:w-2/3 xl:px-4">
           {bioData?.shortBio && (
-            <p className="whitespace-pre-line pb-10">{bioData.shortBio.body}</p>
+            <RichTextRenderer className="pb-10 leading-relaxed" body={bioData.shortBio.body} />
           )}
           {bioData?.experience ? (
             <div className="-my-5">
@@ -44,7 +44,7 @@ const ExperienceBlock = ({
   return (
     <div className={`relative overflow-hidden rounded-lg bg-background px-8 py-12 ${className}`}>
       <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{title}</h1>
-      <RichTextRenderer className="leading-relaxe" body={body} />
+      <RichTextRenderer className="leading-relaxed" body={body} />
       {link ? (
         <div className="flex flex-row-reverse">
           <a
