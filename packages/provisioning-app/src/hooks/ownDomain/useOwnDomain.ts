@@ -90,5 +90,7 @@ export const useApexDomain = (domain?: string) => {
   return useQuery(['apex-domain', domain], () => getApexDomain(domain), {
     retry: false,
     enabled: !!domain,
+    cacheTime: Infinity,
+    staleTime: Infinity,
   });
 };
