@@ -19,7 +19,8 @@ const DnsSettingsView = ({
   showStatus: boolean;
 }) => {
   const { data: apexDomain, isFetched: gotApexInfo } = useApexDomain(domain);
-  const subdomain = apexDomain ? domain.replace(`.${apexDomain}`, '') : undefined;
+  let subdomain = apexDomain ? domain.replace(apexDomain, '') : undefined;
+  subdomain = subdomain?.slice(0, -1);
 
   const isApexDomain = apexDomain === domain;
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
