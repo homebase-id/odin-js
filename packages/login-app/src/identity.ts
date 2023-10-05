@@ -5,13 +5,18 @@ export const stripIdentity = (identity: string) => {
 };
 
 export const checkStorageAccess = async () => {
-  let storagePartioned = !!document.requestStorageAccess; // Checks => https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#disable_dynamic_state_partitioning
-  await (window.document.hasStorageAccess &&
-    window.document.hasStorageAccess().then((hasAccess) => {
-      storagePartioned = !hasAccess;
-    }));
+  try {
+    let storagePartioned = !!document.requestStorageAccess; // Checks => https://developer.mozilla.org/en-US/docs/Web/Privacy/State_Partitioning#disable_dynamic_state_partitioning
+    await (window.document.hasStorageAccess &&
+      window.document.hasStorageAccess().then((hasAccess) => {
+        storagePartioned = !hasAccess;
+      }));
 
-  return storagePartioned;
+    return storagePartioned;
+  } catch (ex) {
+    console.debug('window.document.hasStorageAccess is not accessible');
+    return false;
+  }
 };
 
 export const requestStorageAccess = async () => {
