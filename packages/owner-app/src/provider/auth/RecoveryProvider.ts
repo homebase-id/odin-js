@@ -18,6 +18,6 @@ export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
     })
     .catch((error) => {
       console.log(error);
-      return { key: 'BGQf-eBBJ-G9JM-VTa6-UhEa-Hg7K-gG' };
+      return null;
     });
 };
