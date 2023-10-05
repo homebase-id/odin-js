@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
 import AppMembershipView from '../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import InfoBox from '../../components/ui/InfoBox/InfoBox';
@@ -12,8 +12,10 @@ import {
   Alert,
   CirclePermissionView,
   useFollowingInfinite,
-  ConnectionImage,
+  EmbeddedPostContent,
 } from '@youfoundation/common-app';
+import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
+import ContactImage from '../../components/Connection/ContactImage/ContactImage';
 
 const About = {
   drives: (
@@ -57,8 +59,6 @@ const Dashboard = () => {
   } = useCircles();
   const { data: apps, isLoading: isAppsLoading } = useApps().fetchRegistered;
 
-  const navigate = useNavigate();
-
   return (
     <>
       <PageMeta title={t('Dashboard')} />
@@ -98,9 +98,8 @@ const Dashboard = () => {
       ) : null}
 
       <div className="gap-4 lg:grid lg:grid-cols-3">
-        <Section title={t('Your Feed')} className="h-full">
-          <FeedTeaser />
-        </Section>
+        <FeedTeaser />
+
         <Section
           className="h-full"
           title={t('Circles')}
@@ -149,27 +148,40 @@ const FeedTeaser = () => {
     .flatMap((page) => page?.results)
     .filter(Boolean) as string[];
 
+  const { data: posts } = useSocialFeed({ pageSize: 1 }).fetchAll;
+  const latestPost = posts?.pages?.[0]?.results?.[0];
+
   return (
     <>
-      <Link to={`/owner/feed`} className="block h-full">
-        <small className="mb-5 block text-sm text-slate-400">
-          {t('See what everyone is up to')}
-        </small>
-        <div className="flex flex-row flex-wrap gap-2">
-          {followingFetched && followingList
-            ? followingList.map((odinId) => {
+      <Section
+        title={t('Your Feed')}
+        actions={
+          followingFetched && followingList ? (
+            <div className="pointer-events-none ml-auto mt-auto flex shrink-0 flex-row">
+              {followingList.map((odinId) => {
                 return (
-                  <ConnectionImage
+                  <ContactImage
                     odinId={odinId}
-                    size="custom"
-                    className="w-1h-12 h-12 rounded-full"
+                    className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
+                    fallbackSize="xs"
                     key={odinId}
                   />
                 );
-              })
-            : null}
-        </div>
-      </Link>
+              })}
+            </div>
+          ) : null
+        }
+        className="h-full"
+      >
+        <Link to={`/owner/feed`} className="block h-full">
+          <div className="pointer-events-none">
+            <p className="mb-5 text-slate-400">{t('See what everyone has been up to')}</p>
+            {latestPost ? (
+              <EmbeddedPostContent content={{ ...latestPost.content, permalink: '' }} />
+            ) : null}
+          </div>
+        </Link>
+      </Section>
     </>
   );
 };
