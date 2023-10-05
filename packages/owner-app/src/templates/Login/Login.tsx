@@ -135,16 +135,14 @@ const PasswordInput = (
         autoComplete="current-password"
         className={`appearance-none pr-10 ${props.className}`}
       />
-      <button
+      <a
         onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
           setShow(!show);
         }}
-        className="absolute bottom-0 right-0 top-0 pr-3 opacity-70 transition-opacity hover:opacity-100"
+        className="absolute bottom-0 right-0 top-0 flex cursor-pointer items-center justify-center pr-3 opacity-70 transition-opacity hover:opacity-100"
       >
         {show ? <CloseEye className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
-      </button>
+      </a>
     </div>
   );
 };
