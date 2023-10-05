@@ -1,14 +1,14 @@
 import {
-    checkStorageAccess,
-    getIdentityFromStorage,
-    requestStorageAccess,
-    storeIdentityAndAuthorize,
-    stripIdentity,
+  checkStorageAccess,
+  getIdentityFromStorage,
+  requestStorageAccess,
+  storeIdentityAndAuthorize,
+  stripIdentity,
 } from './identity';
 import { debounce } from 'lodash-es';
 
 const setupHtml = () => {
-    document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <form id="main" class="form">
         <h1 class="text-lg">YouAuth</h1>
         <div class="label-group">
@@ -27,74 +27,76 @@ const setupHtml = () => {
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 
 export const setupLogon = async () => {
-    setupHtml();
+  setupHtml();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const isDarkMode = urlParams.get('isDarkMode') === 'true';
-    urlParams.delete('isDarkMode');
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDarkMode = urlParams.get('isDarkMode') === 'true';
+  urlParams.delete('isDarkMode');
 
-    document.documentElement.classList.toggle('dark', isDarkMode);
+  document.documentElement.classList.toggle('dark', isDarkMode);
 
-    const mainForm = document.getElementById('main');
-    const dotyouInputBox: HTMLInputElement | null = document.getElementById(
-        'homebase-id'
-    ) as HTMLInputElement;
+  const mainForm = document.getElementById('main');
+  const dotyouInputBox: HTMLInputElement | null = document.getElementById(
+    'homebase-id'
+  ) as HTMLInputElement;
 
-    if (!mainForm || !dotyouInputBox) return;
+  if (!mainForm || !dotyouInputBox) return;
 
-    const pingIdentity = async (identity: string) => {
-        return await fetch(`https://${identity}/api/guest/v1/auth/ident`)
-            .then((response) => response.json())
-            .then((validation) => validation?.odinId.toLowerCase() === identity)
-            .catch(() => false);
-    };
+  const pingIdentity = async (identity: string) => {
+    return await fetch(`https://${identity}/api/guest/v1/auth/ident`)
+      .then((response) => response.json())
+      .then((validation) => validation?.odinId.toLowerCase() === identity)
+      .catch(() => false);
+  };
 
-    const debouncedDomainValidator = debounce(async (e) => {
-        const strippedIdentity = stripIdentity(e.target.value);
-        const isComplete = strippedIdentity.split('.').length >= 2;
+  const debouncedDomainValidator = debounce(async (e) => {
+    const strippedIdentity = stripIdentity(e.target.value);
+    const isComplete = strippedIdentity.split('.').length >= 2;
 
-        if (!isComplete) return mainForm.classList.remove('invalid');
+    if (!isComplete) return mainForm.classList.remove('invalid');
 
-        const isValid = domainRegex.test(strippedIdentity);
+    const isValid = domainRegex.test(strippedIdentity);
 
-        mainForm.classList.toggle('invalid', !isValid);
-    }, 500);
+    mainForm.classList.toggle('invalid', !isValid);
+  }, 500);
 
-    dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);
+  dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);
 
-    const fillIdentityFromStorage = () => {
-        const previousIdentity = getIdentityFromStorage();
-        if (!dotyouInputBox.value && previousIdentity) dotyouInputBox.value = previousIdentity;
-    };
+  const fillIdentityFromStorage = () => {
+    const previousIdentity = getIdentityFromStorage();
+    if (!dotyouInputBox.value && previousIdentity) dotyouInputBox.value = previousIdentity;
+  };
 
-    const storagePartioned = await checkStorageAccess();
-    mainForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
+  const storagePartioned = await checkStorageAccess();
+  mainForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-        if (mainForm.classList.contains('invalid')) return;
+    if (mainForm.classList.contains('invalid')) return;
+    mainForm.classList.add('loading');
 
-        const strippedIdentity = stripIdentity(dotyouInputBox.value);
-        if (!(await pingIdentity(strippedIdentity))) {
-            mainForm.classList.add('invalid');
-            return;
-        }
+    const strippedIdentity = stripIdentity(dotyouInputBox.value);
+    if (!(await pingIdentity(strippedIdentity))) {
+      mainForm.classList.add('invalid');
+      mainForm.classList.remove('loading');
+      return;
+    }
 
-        // If storage is partioned, onclick of the input box, requestAccess to store the identity (We need a user interaction before we can request access)
-        if (storagePartioned) await requestStorageAccess();
-        storeIdentityAndAuthorize(strippedIdentity, urlParams);
+    // If storage is partioned, onclick of the input box, requestAccess to store the identity (We need a user interaction before we can request access)
+    if (storagePartioned) await requestStorageAccess();
+    storeIdentityAndAuthorize(strippedIdentity, urlParams);
 
-        return false;
+    return false;
+  });
+
+  // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
+  if (storagePartioned) {
+    dotyouInputBox.addEventListener('click', async (e) => {
+      if (!e.target || 'value' in e.target) return;
+
+      if ((e.target as HTMLInputElement).value) return;
+      requestStorageAccess().then(() => {
+        fillIdentityFromStorage();
+      });
     });
-
-    // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
-    if (storagePartioned) {
-        dotyouInputBox.addEventListener('click', async (e) => {
-            if (!e.target || 'value' in e.target) return;
-
-            if ((e.target as HTMLInputElement).value) return;
-            requestStorageAccess().then(() => {
-                fillIdentityFromStorage();
-            });
-        });
-    } else fillIdentityFromStorage();
+  } else fillIdentityFromStorage();
 };
