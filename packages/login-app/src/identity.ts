@@ -20,23 +20,23 @@ export const checkStorageAccess = async () => {
 };
 
 export const requestStorageAccess = async () => {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     try {
       if (window.document.requestStorageAccess) {
         window.document
           .requestStorageAccess()
           .then(resolve, () => {
             // Ignore success; this is just a best-effort attempt to get storage access
-            console.debug('window.document.requestStorageAccess is not accessible');
+            resolve();
           })
           .catch(() => {
             // Ignore errors; this is just a best-effort attempt to get storage access
-            console.debug('window.document.requestStorageAccess is not accessible');
+            resolve();
           });
       }
     } catch (ex) {
       // Ignore errors; this is just a best-effort attempt to get storage access
-      console.debug('window.document.requestStorageAccess is not accessible');
+      resolve();
     }
   });
 };
