@@ -50,6 +50,8 @@ const YouAuthConsent = () => {
       : '/owner');
 
   const consentRequirements = useMemo(() => {
+    if (clientType === 'app') return undefined;
+
     const expiration = new Date();
 
     switch (duration) {
@@ -100,34 +102,38 @@ const YouAuthConsent = () => {
                 <ServiceDetails targetDomain={targetDomain} />
               )}
 
-              <div className="my-auto mt-5 flex flex-col font-normal text-gray-600 dark:text-gray-300">
-                <Label htmlFor="duration">
-                  {t('Auto-approve login requests from')} {name || targetDomain}
-                </Label>
-                <Select
-                  name="duration"
-                  defaultValue={duration}
-                  onChange={(e) => setDuration(e.target.value as AuthDuration)}
-                  className="mr-auto"
-                >
-                  <option value="always">{t('Always')}</option>
-                  <option value="for-1-year">{t('For 1 Year')}</option>
-                  <option value="for-1-month">{t('For 1 Month')}</option>
-                  <option value="for-1-week">{t('For 1 Week')}</option>
-                  <option value="for-1-day">{t('For 1 Day')}</option>
-                  <option value="never">{t('Ask Me Every Time')}</option>
-                </Select>
-              </div>
+              {clientType !== 'app' ? (
+                <div className="my-auto mt-5 flex flex-col font-normal text-gray-600 dark:text-gray-300">
+                  <Label htmlFor="duration">
+                    {t('Auto-approve login requests from')} {name || targetDomain}
+                  </Label>
+                  <Select
+                    name="duration"
+                    defaultValue={duration}
+                    onChange={(e) => setDuration(e.target.value as AuthDuration)}
+                    className="mr-auto"
+                  >
+                    <option value="always">{t('Always')}</option>
+                    <option value="for-1-year">{t('For 1 Year')}</option>
+                    <option value="for-1-month">{t('For 1 Month')}</option>
+                    <option value="for-1-week">{t('For 1 Week')}</option>
+                    <option value="for-1-day">{t('For 1 Day')}</option>
+                    <option value="never">{t('Ask Me Every Time')}</option>
+                  </Select>
+                </div>
+              ) : null}
 
               <div className="mt-10 flex flex-row-reverse gap-2">
                 {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
-                  <input
-                    type="hidden"
-                    name="consent_req"
-                    value={JSON.stringify(consentRequirements)}
-                  />
+                  {consentRequirements ? (
+                    <input
+                      type="hidden"
+                      name="consent_req"
+                      value={JSON.stringify(consentRequirements)}
+                    />
+                  ) : null}
                   <ActionButton type="primary" className="w-1/2 sm:w-auto" icon={Arrow}>
                     {t('Login')}
                   </ActionButton>
