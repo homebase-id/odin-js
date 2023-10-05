@@ -31,7 +31,6 @@ import {
   SocialFields,
   getAttributeVersions,
 } from '@youfoundation/js-lib/profile';
-import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {

@@ -62,7 +62,7 @@ export const IdentityPageMetaAndActions = ({
           type="remove"
           onClick={() => {
             revokeRequest(
-              { targetOdinId: connectionInfo.senderOdinId },
+              { targetOdinId: odinId },
               { onSuccess: () => navigate('/owner/connections') }
             );
           }}
