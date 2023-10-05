@@ -35,8 +35,9 @@ const IdentityThatFollowsDialog = ({
   const channels =
     follower.notificationType === 'selectedChannels'
       ? (follower.channels
-          ?.map((chnlRef) =>
-            allChannels?.find((chnl) => stringGuidsEqual(chnl.channelId, chnlRef.alias))
+          ?.map(
+            (chnlRef) =>
+              allChannels?.find((chnl) => stringGuidsEqual(chnl.channelId, chnlRef.alias))
           )
           .filter(Boolean) as ChannelDefinitionVm[])
       : allChannels;
@@ -55,7 +56,7 @@ const IdentityThatFollowsDialog = ({
           return (
             <li
               key={chnl.channelId}
-              className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-800"
+              className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
             >
               <Quote className="mr-3 mt-1 h-6 w-6" />
               <div>

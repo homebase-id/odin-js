@@ -99,7 +99,7 @@ const IdentityIFollowEditDialog = ({
             return (
               <li
                 key={chnl.channelId}
-                className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-800"
+                className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
                 onClick={() => {
                   if (isChecked) {
                     setChannelSelection(

@@ -74,12 +74,10 @@ export const getSentRequest = async (
   return client
     .post(url, data)
     .then((response) => {
+      if (!response?.data) return null;
       return { ...response.data, status: 'sent' };
     })
     .catch((err) => {
-      if (err.response.status === 404) {
-        return null;
-      }
       dotYouClient.handleErrorResponse(err);
     });
 };

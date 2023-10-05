@@ -152,7 +152,7 @@ export const useYouAuthAuthorization = () => {
     window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
     // Store the identity to the localStorage
     window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
-
+    console.log({ returnUrl });
     // Redirect to the returnUrl; With a fallback to home
     window.location.href = returnUrl || '/';
   };

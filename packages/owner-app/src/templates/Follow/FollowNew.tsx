@@ -47,10 +47,7 @@ const Following = () => {
     }
   }, [identityIFollowLoaded]);
 
-  const navigate = useNavigate();
-  const cancel = () => {
-    navigate(-1);
-  };
+  const doCancel = () => (window.location.href = `https://${toFollowKey}`);
 
   const { mutateAsync: follow, status: followStatus } = useFollowingInfinite({}).follow;
   const doFollow = async () => {
@@ -68,7 +65,7 @@ const Following = () => {
         : undefined,
       // Pass undefined if all socialChannels are selected so it remains a follow all
     });
-    navigate(-1);
+    window.location.href = `https://${toFollowKey}`;
   };
 
   if (!toFollowKey) return null;
@@ -123,7 +120,7 @@ const Following = () => {
                   return (
                     <li
                       key={chnl.channelId}
-                      className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-800"
+                      className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
                       onClick={() => {
                         if (isChecked) {
                           setChannelSelection(
@@ -155,7 +152,7 @@ const Following = () => {
               <ActionButton onClick={doFollow} state={followStatus} type="primary">
                 {t('Confirm')}
               </ActionButton>
-              <ActionButton className="my-3 sm:mx-2 sm:my-auto" type="secondary" onClick={cancel}>
+              <ActionButton className="my-3 sm:mx-2 sm:my-auto" type="secondary" onClick={doCancel}>
                 {t('Cancel')}
               </ActionButton>
             </div>

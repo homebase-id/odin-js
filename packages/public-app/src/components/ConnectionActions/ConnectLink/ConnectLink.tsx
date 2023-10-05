@@ -28,7 +28,9 @@ const ConnectLink = ({ className }: { className: string }) => {
         className={`w-auto cursor-pointer ${className ?? ''}`}
         href={
           identity
-            ? `https://${getIdentity()}/owner/connections/${window.location.host}`
+            ? `https://${getIdentity()}/owner/connections/${
+                window.location.host
+              }?connect-dialog=true`
             : undefined
         }
         onClick={!identity ? () => setIsLogin(true) : undefined}
@@ -41,7 +43,7 @@ const ConnectLink = ({ className }: { className: string }) => {
         isOpen={isLogin}
         onCancel={() => setIsLogin(false)}
         title={t('Login required')}
-        returnPath={`${HOME_ROOT_PATH}action?targetPath=${`/owner/connections/${window.location.host}`}`}
+        returnPath={`${HOME_ROOT_PATH}action?targetPath=${`/owner/connections/${window.location.host}?connect-dialog=true`}`}
       >
         {t('You need to login before you can connect')}
       </LoginDialog>

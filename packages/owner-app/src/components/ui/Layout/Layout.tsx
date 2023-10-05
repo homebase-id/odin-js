@@ -25,7 +25,7 @@ const SharedStyleTag = () => (
   </style>
 );
 
-const SHADED_BG = 'bg-[rgb(246,_248,_250)] dark:bg-gray-900 dark:text-gray-400';
+const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black text-foreground';
 
 const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {

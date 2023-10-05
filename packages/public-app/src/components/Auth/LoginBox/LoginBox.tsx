@@ -16,7 +16,7 @@ export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
-  return useQuery(['params'], () => getAuthorizationParameters(returnUrl), {
+  return useQuery(['params', returnUrl], () => getAuthorizationParameters(returnUrl), {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

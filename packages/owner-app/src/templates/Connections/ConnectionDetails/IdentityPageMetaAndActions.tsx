@@ -10,7 +10,7 @@ import {
   Persons,
   ActionGroup,
 } from '@youfoundation/common-app';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';
@@ -25,7 +25,10 @@ export const IdentityPageMetaAndActions = ({
   setIsEditPermissionActive: (newState: boolean) => void;
 }) => {
   const navigate = useNavigate();
-  const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(false);
+  const [params] = useSearchParams();
+  const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(
+    params.get('connect-dialog') === 'true'
+  );
 
   // Connection data:
   const {
