@@ -143,6 +143,7 @@ export const getPayloadBytes = async (
   return client
     .get<ArrayBuffer>('/drive/files/payload?' + stringify(request), config)
     .then(async (response) => {
+      if (!response.data) return null;
       return {
         bytes:
           updatedChunkStart !== undefined

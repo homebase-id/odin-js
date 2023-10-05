@@ -128,9 +128,6 @@ export class BaseDotYouClient {
         return response;
       },
       async function (error) {
-        // 404 is not an "error"
-        if (error.response.status === 404)
-          return Promise.resolve({ ...error.response, data: null });
         if (error?.response?.data?.data && ss) {
           // Try and get a more detailed error message
           console.error(

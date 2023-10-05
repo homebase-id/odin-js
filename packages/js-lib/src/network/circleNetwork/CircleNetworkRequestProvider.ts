@@ -42,7 +42,6 @@ export const getPendingRequest = async (
   return client
     .post<ConnectionRequest>(url, data)
     .then((response) => {
-      if (response.status === 404 || !response?.data) return null;
       return { ...response.data, status: 'pending' } as const;
     })
     .catch(() => null);
@@ -77,9 +76,7 @@ export const getSentRequest = async (
       if (!response?.data) return null;
       return { ...response.data, status: 'sent' };
     })
-    .catch((err) => {
-      dotYouClient.handleErrorResponse(err);
-    });
+    .catch(() => null);
 };
 
 export const acceptConnectionRequest = async (
