@@ -54,6 +54,13 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     isSystemSection: true,
   };
 
+  const initialAboutSection = {
+    sectionId: BuiltInProfiles.AboutSectionId,
+    name: 'About',
+    priority: 3000,
+    isSystemSection: true,
+  };
+
   const initialWallet: ProfileDefinition = {
     profileId: BuiltInProfiles.WalletId,
     name: 'Wallet',
@@ -76,6 +83,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
       initialPersonalInfoSection
     );
     await saveProfileSection(dotYouClient, initialStandardProfile.profileId, initialLinksSection);
+    await saveProfileSection(dotYouClient, initialStandardProfile.profileId, initialAboutSection);
   }
   if (!(await getProfileDefinition(dotYouClient, initialWallet.profileId))) {
     await saveProfileDefinition(dotYouClient, initialWallet);
@@ -88,7 +96,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     profileId: BuiltInProfiles.StandardProfileId,
     type: BuiltInAttributes.ShortBio,
     priority: 10000,
-    sectionId: BuiltInProfiles.PersonalInfoSectionId,
+    sectionId: BuiltInProfiles.AboutSectionId,
     data: {
       short_bio:
         'Born in a serene town that instilled values of compassion and integrity, embodies the essence of a true global citizen.',

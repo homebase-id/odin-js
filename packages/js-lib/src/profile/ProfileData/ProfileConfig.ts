@@ -12,6 +12,7 @@ export class BuiltInProfiles {
 
   static readonly PersonalInfoSectionId: string = toGuidId('PersonalInfoSection');
   static readonly ExternalLinksSectionId: string = toGuidId('ExternalLinksSection');
+  static readonly AboutSectionId: string = toGuidId('AboutSection');
   static readonly CreditCardsSectionId: string = toGuidId('CreditCardsSection');
 }
 
