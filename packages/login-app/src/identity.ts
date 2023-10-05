@@ -16,15 +16,22 @@ export const checkStorageAccess = async () => {
 
 export const requestStorageAccess = async () => {
   return new Promise((resolve) => {
-    if (window.document.requestStorageAccess) {
-      window.document
-        .requestStorageAccess()
-        .then(resolve, () => {
-          // Ignore success; this is just a best-effort attempt to get storage access
-        })
-        .catch(() => {
-          // Ignore errors; this is just a best-effort attempt to get storage access
-        });
+    try {
+      if (window.document.requestStorageAccess) {
+        window.document
+          .requestStorageAccess()
+          .then(resolve, () => {
+            // Ignore success; this is just a best-effort attempt to get storage access
+            console.debug('window.document.requestStorageAccess is not accessible');
+          })
+          .catch(() => {
+            // Ignore errors; this is just a best-effort attempt to get storage access
+            console.debug('window.document.requestStorageAccess is not accessible');
+          });
+      }
+    } catch (ex) {
+      // Ignore errors; this is just a best-effort attempt to get storage access
+      console.debug('window.document.requestStorageAccess is not accessible');
     }
   });
 };
