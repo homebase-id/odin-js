@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import EnteringDetails from '../../components/OwnDomain/EnteringDetails';
@@ -9,16 +9,36 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import useCheckInvitationCode from '../../hooks/invitationCode/useCheckInvitationCode';
 import Times from '../../components/ui/Icons/Times/Times';
 
+const LOCAL_EMAIL_STORAGE_KEY = 'email';
+const LOCAL_DOMAIN_STORAGE_KEY = 'domain';
+
 const ProvisionOwnDomain = () => {
   const [provisionState, setProvisionState] = useState<OwnDomainProvisionState>('EnteringDetails');
-  const [domain, setDomain] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
+
+  const [domain, setDomain] = useState<string>(
+    window.localStorage?.getItem(LOCAL_DOMAIN_STORAGE_KEY) || ''
+  );
+  const [email, setEmail] = useState<string>(
+    window.localStorage?.getItem(LOCAL_EMAIL_STORAGE_KEY) || ''
+  );
 
   const [searchParams] = useSearchParams();
   const [planId] = useState<string>(searchParams.get('plan-id') || 'free');
   const [invitationCode] = useState<string | null>(searchParams.get('invitation-code'));
 
   const { data: isValid } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
+
+  useEffect(() => {
+    if (provisionState === 'DnsRecords') {
+      window.localStorage.setItem(LOCAL_DOMAIN_STORAGE_KEY, domain);
+      window.localStorage.setItem(LOCAL_EMAIL_STORAGE_KEY, email);
+    }
+
+    if (provisionState === 'Provisioning') {
+      window.localStorage.removeItem(LOCAL_DOMAIN_STORAGE_KEY);
+      window.localStorage.removeItem(LOCAL_EMAIL_STORAGE_KEY);
+    }
+  }, [provisionState]);
 
   if (!invitationCode || isValid === false) return <Navigate to="/" />;
 
@@ -34,6 +54,7 @@ const ProvisionOwnDomain = () => {
             <EnteringDetails
               domain={domain}
               setDomain={setDomain}
+              email={email}
               setEmail={setEmail}
               setProvisionState={setProvisionState}
             />
@@ -53,9 +74,7 @@ const ProvisionOwnDomain = () => {
                 {t('Want to try again?')}
               </p>
               <ActionButton
-                onClick={() => {
-                  setProvisionState('EnteringDetails');
-                }}
+                onClick={() => setProvisionState('EnteringDetails')}
                 type="secondary"
                 className="mt-3"
                 icon={Times}

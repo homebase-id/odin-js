@@ -12,11 +12,12 @@ import Arrow from '../ui/Icons/Arrow/Arrow';
 interface Props {
   domain: string;
   setDomain: React.Dispatch<React.SetStateAction<string>>;
+  email: string;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
   setProvisionState: React.Dispatch<React.SetStateAction<OwnDomainProvisionState>>;
 }
 
-const EnteringDetails = ({ domain, setDomain, setEmail, setProvisionState }: Props) => {
+const EnteringDetails = ({ domain, setDomain, email, setEmail, setProvisionState }: Props) => {
   //
   // API
   //
@@ -36,7 +37,13 @@ const EnteringDetails = ({ domain, setDomain, setEmail, setProvisionState }: Pro
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (isOwnDomainAvailable && statusIsOwnDomainAvailable === 'success')
+          e.currentTarget.reportValidity();
+
+          if (
+            e.currentTarget.checkValidity() &&
+            isOwnDomainAvailable &&
+            statusIsOwnDomainAvailable === 'success'
+          )
             setProvisionState('DnsRecords');
 
           return false;
@@ -59,7 +66,7 @@ const EnteringDetails = ({ domain, setDomain, setEmail, setProvisionState }: Pro
             placeholder={t('your.domain.here')}
             defaultValue={domain}
             onKeyDown={(e) => e.key.match(validDomainRegEx) && e.preventDefault()}
-            debouncedOnChange={(e) => setDomain(e.target.value)}
+            onChange={(e) => setDomain(e.target.value)}
           />
         </div>
 
@@ -78,7 +85,8 @@ const EnteringDetails = ({ domain, setDomain, setEmail, setProvisionState }: Pro
             type="email"
             required
             placeholder={t('someone@example.com')}
-            debouncedOnChange={(e) => setEmail(e.target.value)}
+            defaultValue={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
