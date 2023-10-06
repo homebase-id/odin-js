@@ -14,7 +14,7 @@ import {
   SocialFields,
 } from '@youfoundation/js-lib/profile';
 import { ClipboardEventHandler, useState } from 'react';
-import { Textarea, t } from '@youfoundation/common-app';
+import { t } from '@youfoundation/common-app';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
@@ -47,9 +47,9 @@ const AttributeFields = ({
     case BuiltInAttributes.Status:
       return (
         <div className="mb-5">
-          <Label htmlFor="status">{t('Status')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-status`}>{t('Status')}</Label>
           <Input
-            id="status"
+            id={`${attribute.fileId ?? 'new'}-status`}
             name={MinimalProfileFields.Status}
             defaultValue={attribute.data?.[MinimalProfileFields.Status] ?? ''}
             onChange={onChange}
@@ -60,9 +60,9 @@ const AttributeFields = ({
     case BuiltInAttributes.Nickname:
       return (
         <div className="mb-5 w-2/5">
-          <Label htmlFor="nickName">{t('Nickname')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-nickName`}>{t('Nickname')}</Label>
           <Input
-            id="nickName"
+            id={`${attribute.fileId ?? 'new'}-nickName`}
             name={NicknameFields.NickName}
             defaultValue={attribute.data?.[NicknameFields.NickName] ?? ''}
             onChange={onChange}
@@ -77,9 +77,9 @@ const AttributeFields = ({
       return (
         <div className="-mx-2 flex flex-row">
           <div className="mb-5 w-2/5 px-2">
-            <Label htmlFor="Birthday">{t('Birthday')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-Birthday`}>{t('Birthday')}</Label>
             <Input
-              id="Birthday"
+              id={`${attribute.fileId ?? 'new'}-Birthday`}
               type="date"
               name={BirthdayFields.Date}
               defaultValue={attribute.data?.[BirthdayFields.Date] ?? ''}
@@ -96,18 +96,18 @@ const AttributeFields = ({
       return (
         <div className="-mx-2 flex flex-row">
           <div className="mb-5 w-2/5 px-2">
-            <Label htmlFor="Label">{t('Label')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-Label`}>{t('Label')}</Label>
             <Input
-              id="Label"
+              id={`${attribute.fileId ?? 'new'}-Label`}
               name={EmailFields.Label}
               defaultValue={attribute.data?.[EmailFields.Label] ?? ''}
               onChange={onChange}
             />
           </div>
           <div className="mb-5 w-3/5 px-2">
-            <Label htmlFor="Email">{t('Email')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-Email`}>{t('Email')}</Label>
             <Input
-              id="Email"
+              id={`${attribute.fileId ?? 'new'}-Email`}
               name={EmailFields.Email}
               defaultValue={attribute.data?.[EmailFields.Email] ?? ''}
               onChange={onChange}
@@ -119,9 +119,11 @@ const AttributeFields = ({
     case BuiltInAttributes.Photo:
       return (
         <div className="mb-5">
-          <Label htmlFor="profileImageId">{t('Profile Image')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-profileImageId`}>
+            {t('Profile Image')}
+          </Label>
           <ImageSelector
-            id="profileImageId"
+            id={`${attribute.fileId ?? 'new'}-profileImageId`}
             name={MinimalProfileFields.ProfileImageId}
             defaultValue={attribute.data?.[MinimalProfileFields.ProfileImageId] ?? ''}
             onChange={(e) =>
@@ -156,9 +158,11 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor="handle">{attribute.typeDefinition.name}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-handle`}>
+              {attribute.typeDefinition.name}
+            </Label>
             <Input
-              id="handle"
+              id={`${attribute.fileId ?? 'new'}-handle`}
               name={SocialFields.Homebase}
               defaultValue={attribute.data?.[SocialFields.Homebase] ?? ''}
               onChange={onChange}
@@ -171,9 +175,9 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor={MinimalProfileFields.ExperienceTitleId}>{t('Title')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-title`}>{t('Title')}</Label>
             <Input
-              id={MinimalProfileFields.ExperienceTitleId}
+              id={`${attribute.fileId ?? 'new'}-experience-title`}
               name={MinimalProfileFields.ExperienceTitleId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceTitleId] ?? ''}
               onChange={onChange}
@@ -181,7 +185,9 @@ const AttributeFields = ({
             />
           </div>
           <div className="mb-5">
-            <Label htmlFor={MinimalProfileFields.ExperienceDecriptionId}>{t('Description')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-description`}>
+              {t('Description')}
+            </Label>
             <RichTextEditor
               uniqueId={attribute.fileId}
               name={MinimalProfileFields.ExperienceDecriptionId}
@@ -191,9 +197,9 @@ const AttributeFields = ({
             />
           </div>
           <div className="mb-5">
-            <Label htmlFor={MinimalProfileFields.ExperienceLinkId}>{t('Link')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-link`}>{t('Link')}</Label>
             <Input
-              id={MinimalProfileFields.ExperienceLinkId}
+              id={`${attribute.fileId ?? 'new'}-experience-link`}
               name={MinimalProfileFields.ExperienceLinkId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceLinkId] ?? ''}
               onChange={onChange}
@@ -207,7 +213,7 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor="short-bio">{t('Bio')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-short-bio`}>{t('Bio')}</Label>
             <RichTextEditor
               uniqueId={attribute.fileId}
               name={MinimalProfileFields.ShortBioId}
@@ -223,18 +229,18 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor="link-text">{t('Text')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-link-text`}>{t('Text')}</Label>
             <Input
-              id="link-text"
+              id={`${attribute.fileId ?? 'new'}-link-text`}
               name={LinkFields.LinkText}
               defaultValue={attribute.data?.[LinkFields.LinkText] ?? ''}
               onChange={onChange}
             />
           </div>
           <div className="mb-5">
-            <Label htmlFor="link-target">{t('Target')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-link-target`}>{t('Target')}</Label>
             <Input
-              id="link-target"
+              id={`${attribute.fileId ?? 'new'}-link-target`}
               name={LinkFields.LinkTarget}
               defaultValue={attribute.data?.[LinkFields.LinkTarget] ?? 'https://'}
               onChange={onChange}
@@ -247,27 +253,29 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor="cc-alias">{t('Alias')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-ccalias`}>{t('Alias')}</Label>
             <Input
-              id="cc-alias"
+              id={`${attribute.fileId ?? 'new'}-ccalias`}
               name={CredictCardFields.Alias}
               defaultValue={attribute.data?.[CredictCardFields.Alias] ?? ''}
               onChange={onChange}
             />
           </div>
           <div className="mb-5">
-            <Label htmlFor="cc-name">{t('Name on Card')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-ccname`}>{t('Name on Card')}</Label>
             <Input
-              id="cc-name"
+              id={`${attribute.fileId ?? 'new'}-ccname`}
               name={CredictCardFields.Name}
               defaultValue={attribute.data?.[CredictCardFields.Name] ?? ''}
               onChange={onChange}
             />
           </div>
           <div className="mb-5">
-            <Label htmlFor="cc-number">{t('Credit Card Number')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-ccnumber`}>
+              {t('Credit Card Number')}
+            </Label>
             <Input
-              id="cc-number"
+              id={`${attribute.fileId ?? 'new'}-ccnumber`}
               name={CredictCardFields.Number}
               defaultValue={attribute.data?.[CredictCardFields.Number] ?? ''}
               onChange={onChange}
@@ -275,18 +283,20 @@ const AttributeFields = ({
           </div>
           <div className="-mx-2 mb-5 flex flex-row">
             <div className="w-1/2 px-2">
-              <Label htmlFor="cc-expiration">{t('Credit Card Expiration')}</Label>
+              <Label htmlFor={`${attribute.fileId ?? 'new'}-ccexpiration`}>
+                {t('Credit Card Expiration')}
+              </Label>
               <Input
-                id="cc-expiration"
+                id={`${attribute.fileId ?? 'new'}-ccexpiration`}
                 name={CredictCardFields.Expiration}
                 defaultValue={attribute.data?.[CredictCardFields.Expiration] ?? ''}
                 onChange={onChange}
               />
             </div>
             <div className="w-1/2 px-2">
-              <Label htmlFor="cc-cvc">{t('Credit Card CVC')}</Label>
+              <Label htmlFor={`${attribute.fileId ?? 'new'}-cccvc`}>{t('Credit Card CVC')}</Label>
               <Input
-                id="cc-cvc"
+                id={`${attribute.fileId ?? 'new'}-cccvc`}
                 name={CredictCardFields.Cvc}
                 defaultValue={attribute.data?.[CredictCardFields.Cvc] ?? ''}
                 onChange={onChange}
@@ -332,9 +342,9 @@ const NameAttributeEditor = ({
     <>
       <div className="-mx-2 flex flex-col sm:flex-row">
         <div className="mb-5 px-2 sm:w-2/5">
-          <Label htmlFor="givenName">{t('First name')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-givenName`}>{t('First name')}</Label>
           <Input
-            id="givenName"
+            id={`${attribute.fileId ?? 'new'}-givenName`}
             name={MinimalProfileFields.GivenNameId}
             defaultValue={attribute.data?.[MinimalProfileFields.GivenNameId] ?? ''}
             onChange={onChange}
@@ -342,9 +352,11 @@ const NameAttributeEditor = ({
         </div>
         {showMore ? (
           <div className="mb-5 px-2 sm:w-2/5">
-            <Label htmlFor="additionalName">{t('Additional Names')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-additionalName`}>
+              {t('Additional Names')}
+            </Label>
             <Input
-              id="additionalName"
+              id={`${attribute.fileId ?? 'new'}-additionalName`}
               name={MinimalProfileFields.AdditionalName}
               defaultValue={attribute.data?.[MinimalProfileFields.AdditionalName] ?? ''}
               onChange={onChange}
@@ -352,9 +364,9 @@ const NameAttributeEditor = ({
           </div>
         ) : null}
         <div className="mb-5 px-2 sm:w-3/5">
-          <Label htmlFor="surname">{t('Surname')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-surname`}>{t('Surname')}</Label>
           <Input
-            id="surname"
+            id={`${attribute.fileId ?? 'new'}-surname`}
             name={MinimalProfileFields.SurnameId}
             defaultValue={attribute.data?.[MinimalProfileFields.SurnameId] ?? ''}
             onChange={onChange}
@@ -363,9 +375,9 @@ const NameAttributeEditor = ({
       </div>
       {showMore ? (
         <div className="mb-5 mt-5 border-t pt-5">
-          <Label htmlFor="displayName">{t('Display name')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-displayName`}>{t('Display name')}</Label>
           <Input
-            id="displayName"
+            id={`${attribute.fileId ?? 'new'}-displayName`}
             name={MinimalProfileFields.ExplicitDisplayName}
             placeholder={displayName}
             defaultValue={attribute.data?.[MinimalProfileFields.ExplicitDisplayName]}
@@ -400,18 +412,18 @@ const LocationAttributeEditor = ({
   return (
     <>
       <div className="mb-5 w-2/5">
-        <Label htmlFor="Label">{t('Label')}</Label>
+        <Label htmlFor={`${attribute.fileId ?? 'new'}-Label`}>{t('Label')}</Label>
         <Input
-          id="Label"
+          id={`${attribute.fileId ?? 'new'}-Label`}
           name={LocationFields.Label}
           defaultValue={attribute.data?.[LocationFields.Label] ?? ''}
           onChange={onChange}
         />
       </div>
       <div className="mb-5">
-        <Label htmlFor="addressLine1">{t('Street address')}</Label>
+        <Label htmlFor={`${attribute.fileId ?? 'new'}-addressLine1`}>{t('Street address')}</Label>
         <Input
-          id="addressLine1"
+          id={`${attribute.fileId ?? 'new'}-addressLine1`}
           name={LocationFields.AddressLine1}
           defaultValue={attribute.data?.[LocationFields.AddressLine1] ?? ''}
           onChange={onChange}
@@ -419,9 +431,11 @@ const LocationAttributeEditor = ({
       </div>
       {showMore ? (
         <div className="mb-5">
-          <Label htmlFor="addressLine2">{t('Street address line 2')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-addressLine2`}>
+            {t('Street address line 2')}
+          </Label>
           <Input
-            id="addressLine2"
+            id={`${attribute.fileId ?? 'new'}-addressLine2`}
             name={LocationFields.AddressLine2}
             defaultValue={attribute.data?.[LocationFields.AddressLine2] ?? ''}
             onChange={onChange}
@@ -430,18 +444,18 @@ const LocationAttributeEditor = ({
       ) : null}
       <div className="flex-rox -mx-2 mb-5 flex">
         <div className="w-2/5 px-2">
-          <Label htmlFor="Postcode">{t('Postcode')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-Postcode`}>{t('Postcode')}</Label>
           <Input
-            id="Postcode"
+            id={`${attribute.fileId ?? 'new'}-Postcode`}
             name={LocationFields.Postcode}
             defaultValue={attribute.data?.[LocationFields.Postcode] ?? ''}
             onChange={onChange}
           />
         </div>
         <div className="w-3/5 px-2">
-          <Label htmlFor="City">{t('City')}</Label>
+          <Label htmlFor={`${attribute.fileId ?? 'new'}-City`}>{t('City')}</Label>
           <Input
-            id="City"
+            id={`${attribute.fileId ?? 'new'}-City`}
             name={LocationFields.City}
             defaultValue={attribute.data?.[LocationFields.City] ?? ''}
             onChange={onChange}
@@ -450,9 +464,9 @@ const LocationAttributeEditor = ({
       </div>
 
       <div className="mb-5">
-        <Label htmlFor="Country">{t('Country')}</Label>
+        <Label htmlFor={`${attribute.fileId ?? 'new'}-Country`}>{t('Country')}</Label>
         <Input
-          id="Country"
+          id={`${attribute.fileId ?? 'new'}-Country`}
           name={LocationFields.Country}
           defaultValue={attribute.data?.[LocationFields.Country] ?? ''}
           onChange={onChange}
@@ -462,9 +476,11 @@ const LocationAttributeEditor = ({
         <>
           <hr className="mb-5" />
           <div className="mb-5">
-            <Label htmlFor="DisplayLocation">{t('Display Location')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-DisplayLocation`}>
+              {t('Display Location')}
+            </Label>
             <Input
-              id="DisplayLocation"
+              id={`${attribute.fileId ?? 'new'}-DisplayLocation`}
               name={LocationFields.DisplayLocation}
               placeholder={displayLocation}
               defaultValue={attribute.data?.[LocationFields.DisplayLocation] ?? ''}
@@ -477,9 +493,9 @@ const LocationAttributeEditor = ({
         <>
           <hr className="mb-5" />
           <div className="mb-5">
-            <Label htmlFor="Coordinates">{t('Coordinates')}</Label>
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-Coordinates`}>{t('Coordinates')}</Label>
             <Input
-              id="Coordinates"
+              id={`${attribute.fileId ?? 'new'}-Coordinates`}
               name={LocationFields.Coordinates}
               defaultValue={attribute.data?.[LocationFields.Coordinates] ?? ''}
               onChange={onChange}
@@ -504,18 +520,18 @@ const PhoneAttributeEditor = ({
   return (
     <div className="-mx-2 flex flex-row">
       <div className="mb-5 w-2/5 px-2">
-        <Label htmlFor="Label">{t('Label')}</Label>
+        <Label htmlFor={`${attribute.fileId ?? 'new'}-Label`}>{t('Label')}</Label>
         <Input
-          id="Label"
+          id={`${attribute.fileId ?? 'new'}-Label`}
           name={PhoneFields.Label}
           defaultValue={attribute.data?.[PhoneFields.Label] ?? ''}
           onChange={onChange}
         />
       </div>
       <div className="mb-5 w-3/5 px-2">
-        <Label htmlFor="Phone">{t('Phone')}</Label>
+        <Label htmlFor={`${attribute.fileId ?? 'new'}-Phone`}>{t('Phone')}</Label>
         <Input
-          id="Phone"
+          id={`${attribute.fileId ?? 'new'}-Phone`}
           name={PhoneFields.PhoneNumber}
           defaultValue={attribute.data?.[PhoneFields.PhoneNumber] ?? ''}
           onChange={onChange}
@@ -550,11 +566,11 @@ const SocialAttributeEditor = ({
   return (
     <>
       <div className="mb-5">
-        <Label htmlFor="handle">
+        <Label htmlFor={`${attribute.fileId ?? 'new'}-handle`}>
           {attribute.typeDefinition.name} {t('Username')}
         </Label>
         <Input
-          id="handle"
+          id={`${attribute.fileId ?? 'new'}-handle`}
           name={attribute.typeDefinition.name.toLowerCase()}
           defaultValue={attribute.data?.[attribute.typeDefinition.name.toLowerCase()] ?? ''}
           onChange={onChange}
