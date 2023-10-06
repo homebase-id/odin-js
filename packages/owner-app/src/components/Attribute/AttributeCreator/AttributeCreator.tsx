@@ -40,8 +40,8 @@ const AttributeCreator = ({
       },
       typeDefinition: targetObj,
       profileId: profileId,
-      acl: { requiredSecurityGroup: SecurityGroupType.Owner },
-    });
+      acl: undefined,
+    } as unknown as AttributeVm);
   };
 
   const discard = () => {
