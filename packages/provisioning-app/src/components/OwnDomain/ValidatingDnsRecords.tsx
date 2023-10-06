@@ -46,7 +46,7 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       {dnsConfig && !statePending && hasInvalid ? (
         <Alert type="info" className="mt-5">
           {t(
-            'Sometimes it can take hours for DNS changes to propogate, please try agian later if you just set them up. Otherwise please inspect your DNS configuration for any incorrect settings.'
+            'Sometimes it can take hours for DNS changes to propagate, please try again later if you just set them up. Otherwise, please inspect your DNS configuration for any incorrect settings.'
           )}
         </Alert>
       ) : null}
