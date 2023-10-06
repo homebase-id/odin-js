@@ -73,7 +73,7 @@ const AttributeEditor = ({
   useEffect(() => {
     if (attribute && attribute.data?.isNew) {
       setIsNewAttribute(true);
-      if (!attribute.acl || attribute.data?.isNew) setIsAclEdit(true);
+      if (!latestAttr.acl) setIsAclEdit(true);
 
       sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => setIsFadeOut(true), 500);
