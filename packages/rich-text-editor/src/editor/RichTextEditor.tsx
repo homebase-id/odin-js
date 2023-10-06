@@ -75,6 +75,7 @@ export const RichTextEditor = ({
   onChange,
   className,
   disabled,
+  uniqueId,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
@@ -84,6 +85,7 @@ export const RichTextEditor = ({
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
   disabled?: boolean;
+  uniqueId?: string;
 }) => {
   const { isDarkMode } = useDarkMode();
 
@@ -225,6 +227,7 @@ export const RichTextEditor = ({
         onClick={disabled ? undefined : (e) => e.stopPropagation()}
       >
         <Plate
+          id={uniqueId}
           initialValue={defaultValAsRichText}
           plugins={plugins}
           onChange={(newValue) => {

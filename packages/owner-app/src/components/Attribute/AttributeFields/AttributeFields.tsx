@@ -183,6 +183,7 @@ const AttributeFields = ({
           <div className="mb-5">
             <Label htmlFor={MinimalProfileFields.ExperienceDecriptionId}>{t('Description')}</Label>
             <RichTextEditor
+              uniqueId={attribute.fileId}
               name={MinimalProfileFields.ExperienceDecriptionId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] ?? ''}
               onChange={onChange}
@@ -208,6 +209,7 @@ const AttributeFields = ({
           <div className="mb-5">
             <Label htmlFor="short-bio">{t('Bio')}</Label>
             <RichTextEditor
+              uniqueId={attribute.fileId}
               name={MinimalProfileFields.ShortBioId}
               defaultValue={attribute.data?.[MinimalProfileFields.ShortBioId] ?? ''}
               onChange={onChange}
