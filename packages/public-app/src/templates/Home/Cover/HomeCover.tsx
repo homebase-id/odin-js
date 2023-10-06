@@ -12,7 +12,6 @@ import {
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
-import { useActiveConnections } from '@youfoundation/common-app';
 import useAuth from '../../../hooks/auth/useAuth';
 
 const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
@@ -32,7 +31,12 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
         <div className="flex flex-col lg:flex-row lg:gap-5">
           <div className="mx-auto mb-12 max-w-[none] md:max-w-[30rem] lg:w-1/2 lg:max-w-[35rem]">
             {owner?.profileImageId && targetDrive ? (
-              <Image fileId={owner?.profileImageId} targetDrive={targetDrive} className="w-full" />
+              <Image
+                fileId={owner?.profileImageId}
+                targetDrive={targetDrive}
+                className="w-full"
+                explicitSize={{ pixelHeight: 800, pixelWidth: 800 }}
+              />
             ) : null}
           </div>
           <div className="flex h-full flex-grow flex-col lg:w-1/2">

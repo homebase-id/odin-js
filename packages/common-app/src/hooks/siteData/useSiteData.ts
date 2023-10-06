@@ -200,7 +200,7 @@ export const useSiteData = () => {
           .get('home')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, ownerDrive, INCLUDE_METADATA_HEADER)
+              await dsrToAttributeFile(dotYouClient, dsr, homeDrive, INCLUDE_METADATA_HEADER)
           ) ?? []
       );
 
@@ -212,9 +212,9 @@ export const useSiteData = () => {
     };
 
     const staticData = {
-      owner: (await getOwnerDataStatic(fileData)) ?? {},
-      social: (await getSocialDataStatic(fileData)) ?? [],
-      home: (await getHomeDataStatic(fileData)) ?? {},
+      owner: await getOwnerDataStatic(fileData),
+      social: await getSocialDataStatic(fileData),
+      home: await getHomeDataStatic(fileData),
     };
 
     if (!staticData.owner || !staticData.social || !staticData.home || isAuthenticated) {
@@ -222,7 +222,11 @@ export const useSiteData = () => {
         return await getFullData();
       } catch (ex) {
         console.error('Fetching sitedata over api failed, fallback to static data', ex);
-        return staticData;
+        return {
+          owner: staticData.owner ?? {},
+          social: staticData.social ?? [],
+          home: staticData.home ?? {},
+        } as SiteData;
       }
     }
 
@@ -282,7 +286,6 @@ const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
   // File based response if available
   if (fileData.has('theme')) {
     const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
-
     if (themeAttribute) {
       return {
         templateSettings: themeAttribute?.data,
