@@ -45,9 +45,7 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
         fileType: [0],
       };
 
-      if (uniqueId) {
-        headerImageQueryParam.clientUniqueIdAtLeastOne = [uniqueId];
-      }
+      if (uniqueId) headerImageQueryParam.clientUniqueIdAtLeastOne = [uniqueId];
 
       sections.push({
         name: headerImageFileId.toString(),

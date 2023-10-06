@@ -5,21 +5,28 @@ import {
   MinimalProfileFields,
   Attribute,
   getAttributeVersions,
+  getAttribute,
 } from '@youfoundation/js-lib/profile';
 import useAuth from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
 
+type ShortBioData = {
+  id: string;
+  body: string;
+  priority: number;
+};
+
+type ExperienceData = {
+  title: string;
+  link?: string;
+  body: string | Record<string, unknown>[];
+  id: string;
+  priority: number;
+};
+
 export type BiographyData = {
-  shortBio?: {
-    id: string;
-    body: string;
-  };
-  experience: {
-    title: string;
-    link?: string;
-    body: string | Record<string, unknown>[];
-    id: string;
-  }[];
+  shortBio?: ShortBioData;
+  experience: ExperienceData[];
 };
 
 const useBiography = () => {
@@ -31,42 +38,62 @@ const useBiography = () => {
   const fetchData: () => Promise<BiographyData | undefined> = async () => {
     const fetchStaticData = async (): Promise<BiographyData | undefined> => {
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
-      if (fileData.has('short-bio') || fileData.has('long-bio')) {
-        const shortBioAttributes = fileData
-          .get('short-bio')
-          ?.map((entry) => {
-            const attribute = entry.payload as Attribute;
+      if (!fileData.has('short-bio') && !fileData.has('long-bio')) return;
 
+      const shortBioAttributes = await (async () => {
+        const shortBioEntries = fileData.get('short-bio');
+        if (!shortBioEntries) return undefined;
+        const allPromise = await Promise.all(
+          shortBioEntries.map(async (entry) => {
+            let attribute: Attribute | undefined = entry.payload as Attribute;
+            if (
+              !attribute &&
+              !entry.header.fileMetadata.appData.contentIsComplete &&
+              entry.header.fileMetadata.appData.uniqueId
+            ) {
+              // Fetch attribute if it is not included in the static data
+              attribute = await getAttribute(
+                dotYouClient,
+                BuiltInProfiles.StandardProfileId,
+                entry.header.fileMetadata.appData.uniqueId
+              );
+            }
+
+            if (!attribute) return undefined;
             return {
               body: attribute.data[MinimalProfileFields.ShortBioId] as string,
               id: attribute.id,
               priority: attribute.priority,
             };
           })
-          .sort((a, b) => a.priority - b.priority);
+        );
 
-        const longBioAttributes = fileData
-          .get('long-bio')
-          ?.map((entry) => {
-            const attribute = entry.payload as Attribute;
+        return (allPromise.filter(Boolean) as ShortBioData[]).sort(
+          (a, b) => a.priority - b.priority
+        );
+      })();
 
-            return {
-              title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
-              body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
-                | string
-                | Record<string, unknown>[],
-              link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-              id: attribute.id,
-              priority: attribute.priority,
-            };
-          })
-          .sort((a, b) => a.priority - b.priority);
+      const longBioAttributes: ExperienceData[] | undefined = fileData
+        .get('long-bio')
+        ?.map((entry) => {
+          const attribute = entry.payload as Attribute;
 
-        return {
-          shortBio: shortBioAttributes?.[0],
-          experience: longBioAttributes || [],
-        };
-      }
+          return {
+            title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
+            body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
+              | string
+              | Record<string, unknown>[],
+            link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
+            id: attribute.id,
+            priority: attribute.priority,
+          };
+        })
+        .sort((a, b) => a.priority - b.priority);
+
+      return {
+        shortBio: shortBioAttributes?.[0],
+        experience: longBioAttributes || [],
+      };
     };
 
     const fetchDynamicData = async (): Promise<BiographyData | undefined> => {
