@@ -14,15 +14,20 @@ export type DnsConfig = Array<DnsRecord>;
 
 //
 
-export function hasInvalidDnsRecords(
-  dnsConfig: DnsConfig | undefined
-): boolean {
+export function hasInvalidDnsRecords(dnsConfig: DnsConfig | undefined): boolean {
   if (!dnsConfig) {
     return true;
   }
-  return (Object.values(dnsConfig).flat() as Array<DnsRecord>).some(
-    (r) => r.status !== 'success'
-  );
+  const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
+  const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
+  const subRecords = dnsConfig.filter((record) => !!record.name);
+
+  const mainRecordValid =
+    aliasARecord?.status === 'success' || fallbackARecord?.status === 'success';
+
+  const subRecordsValid = !subRecords.some((record) => record.status !== 'success');
+
+  return !mainRecordValid || !subRecordsValid;
 }
 
 //
@@ -35,9 +40,7 @@ export const useDidDnsRecordsPropagate = (domain: string) => {
       return Promise.resolve(false);
     }
 
-    const response = await axios.get(
-      root + `/registration/did-dns-records-propagate/${domain}`
-    );
+    const response = await axios.get(root + `/registration/did-dns-records-propagate/${domain}`);
     // console.log(response.data)
     return response.data;
   };
@@ -61,18 +64,12 @@ export const useDidDnsRecordsPropagate = (domain: string) => {
 export const useCanConnectToDomain = (domain: string, port: number) => {
   const root = '//' + window.location.host + '/api/registration/v1';
 
-  const canConnectToDomain = async (
-    domain: string,
-    port: number
-  ): Promise<boolean> => {
+  const canConnectToDomain = async (domain: string, port: number): Promise<boolean> => {
     if (!domain) {
       return Promise.resolve(false);
     }
 
-    const response = await axios.get(
-      root + `/registration/can-connect-to/${domain}/${port}`
-    );
-    // console.log(response.data)
+    const response = await axios.get(root + `/registration/can-connect-to/${domain}/${port}`);
     return response.data;
   };
 
@@ -92,22 +89,15 @@ export const useCanConnectToDomain = (domain: string, port: number) => {
 
 //
 
-export const useDomainHasValidCertificate = (
-  domain: string,
-  enabled: boolean
-) => {
+export const useDomainHasValidCertificate = (domain: string, enabled: boolean) => {
   const root = '//' + window.location.host + '/api/registration/v1';
 
-  const domainHasValidCertificate = async (
-    domain: string
-  ): Promise<boolean> => {
+  const domainHasValidCertificate = async (domain: string): Promise<boolean> => {
     if (!domain) {
       return Promise.resolve(false);
     }
 
-    const response = await axios.get(
-      root + `/registration/has-valid-certificate/${domain}`
-    );
+    const response = await axios.get(root + `/registration/has-valid-certificate/${domain}`);
     // console.log(response.data)
     return response.data;
   };
@@ -139,9 +129,7 @@ type CreateIdentityKey = {
 export const useCreateIdentity = () => {
   const root = '//' + window.location.host + '/api/registration/v1';
 
-  const createIdentity = async (
-    identity: CreateIdentityKey
-  ): Promise<string> => {
+  const createIdentity = async (identity: CreateIdentityKey): Promise<string> => {
     const response = await axios.post(
       root + `/registration/create-identity-on-domain/${identity.domain}`,
       {
@@ -155,8 +143,6 @@ export const useCreateIdentity = () => {
   };
 
   return {
-    createIdentity: useMutation<string, AxiosError, CreateIdentityKey>(
-      createIdentity
-    ),
+    createIdentity: useMutation<string, AxiosError, CreateIdentityKey>(createIdentity),
   };
 };

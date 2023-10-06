@@ -1,11 +1,8 @@
 import DnsSettingsView from '../DnsSettingsView/DnsSettingsView';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
-import {
-  useFetchOwnDomainDnsConfig,
-  useFetchOwnDomainDnsStatus,
-} from '../../hooks/ownDomain/useOwnDomain';
-import { DnsConfig, hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
+import { useFetchOwnDomainDnsConfig } from '../../hooks/ownDomain/useOwnDomain';
+import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
 import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import Arrow from '../ui/Icons/Arrow/Arrow';
@@ -19,18 +16,16 @@ interface Props {
 
 const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
   const [showStatus, setShowStatus] = useState<boolean>(false);
-  const refetchNeeded = (dnsConfig: DnsConfig) => hasInvalidDnsRecords(dnsConfig);
 
   const {
     fetchOwnDomainDnsConfig: { data: initialDnsConfig, error: initialError },
+    fetchOwnDomainDnsStatus: {
+      data: dnsConfig,
+      error: statusError,
+      isFetching,
+      refetch: refetchDnsStatus,
+    },
   } = useFetchOwnDomainDnsConfig(domain);
-
-  const {
-    fetchOwnDomainDnsStatus: { data: dnsConfig, error: statusError, isFetching },
-  } = useFetchOwnDomainDnsStatus(
-    showStatus && initialDnsConfig ? domain : undefined,
-    refetchNeeded
-  );
 
   const activeDnsConfig = dnsConfig || initialDnsConfig;
   const hasInvalid = useMemo(
@@ -58,9 +53,12 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       <div className="mt-10 flex flex-row-reverse">
         {hasInvalid ? (
           <ActionButton
-            onClick={() => setShowStatus(true)}
+            onClick={() => {
+              setShowStatus(true);
+              refetchDnsStatus();
+            }}
             icon={Arrow}
-            state={isFetching && statePending ? 'loading' : undefined}
+            state={isFetching ? 'loading' : undefined}
           >
             {t('Validate')}
           </ActionButton>

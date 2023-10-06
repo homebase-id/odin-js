@@ -2,26 +2,7 @@ import axios, { AxiosError } from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { DnsConfig } from '../commonDomain/commonDomain';
 
-const root = '//' + window.location.host + '/api/registration/v1';
-
-export const useFetchOwnDomainDnsConfig = (domain: string) => {
-  const fetchOwnDomainDnsConfig = async (domain: string): Promise<DnsConfig> => {
-    const response = await axios.get(`${root}/registration/dns-config/${domain}?includeAlias=true`);
-    return response.data;
-  };
-
-  return {
-    fetchOwnDomainDnsConfig: useQuery<DnsConfig, AxiosError>(
-      ['own-domain-dns-config', domain],
-      () => fetchOwnDomainDnsConfig(domain),
-      {
-        enabled: !!domain,
-        retry: (failureCount, error) =>
-          error?.response?.status ? error.response.status >= 500 : false,
-      }
-    ),
-  };
-};
+const root = '/api/registration/v1';
 
 //
 
@@ -50,10 +31,12 @@ export const useFetchIsOwnDomainAvailable = (domain: string) => {
 
 //
 
-export const useFetchOwnDomainDnsStatus = (
-  domain: string | undefined,
-  refetchNeeded: (dnsConfig: DnsConfig) => boolean
-) => {
+export const useFetchOwnDomainDnsConfig = (domain: string) => {
+  const fetchOwnDomainDnsConfig = async (domain: string): Promise<DnsConfig> => {
+    const response = await axios.get(`${root}/registration/dns-config/${domain}?includeAlias=true`);
+    return response.data;
+  };
+
   const fetchOwnDomainDnsStatus = async (domain: string): Promise<DnsConfig | null> => {
     if (!domain) return null;
     const response = await axios.get(
@@ -63,16 +46,25 @@ export const useFetchOwnDomainDnsStatus = (
   };
 
   return {
+    fetchOwnDomainDnsConfig: useQuery<DnsConfig, AxiosError>(
+      ['own-domain-dns-config', domain],
+      () => fetchOwnDomainDnsConfig(domain),
+      {
+        enabled: !!domain,
+        retry: (_failureCount, error) =>
+          error?.response?.status ? error.response.status >= 500 : false,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+      }
+    ),
     fetchOwnDomainDnsStatus: useQuery<DnsConfig | null, AxiosError>(
       ['own-domain-dns-config', domain],
       () => fetchOwnDomainDnsStatus(domain as string),
       {
         enabled: !!domain,
-        refetchInterval: (dnsConfig) => (!dnsConfig || refetchNeeded(dnsConfig) ? 2000 : false),
-        retry: (failureCount, error) =>
+        retry: (_failureCount, error) =>
           error?.response?.status ? error.response.status >= 500 : false,
         refetchOnMount: false,
-        refetchOnWindowFocus: false,
       }
     ),
   };

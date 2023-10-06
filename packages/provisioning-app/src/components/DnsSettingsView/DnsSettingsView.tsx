@@ -157,7 +157,6 @@ const ApexInfoBlock = ({
             {t(
               'If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, use this fallback option.'
             )}
-            '
           </p>
           <RecordView record={fallbackARecord} domain={domain} showStatus={showStatus} />
         </>
@@ -185,13 +184,11 @@ const SubdomainInfoBlock = ({
       <p className="text-2xl">Point your domain to Homebase</p>
 
       {aliasARecord ? (
-        <>
-          <RecordView
-            record={{ ...aliasARecord, type: 'CNAME' }}
-            domain={domain}
-            showStatus={showStatus}
-          />
-        </>
+        <RecordView
+          record={{ ...aliasARecord, type: 'CNAME' }}
+          domain={domain}
+          showStatus={showStatus}
+        />
       ) : null}
       <button onClick={() => setShowAdvanced(true)} className="ml-auto underline">
         {t(`I can't do this`)}
@@ -204,12 +201,7 @@ const SubdomainInfoBlock = ({
           isSidePanel={false}
           size="2xlarge"
         >
-          <ApexInfoBlock
-            dnsConfig={dnsConfig}
-            domain={domain}
-            showStatus={showStatus}
-            className=""
-          />
+          <ApexInfoBlock dnsConfig={dnsConfig} domain={domain} showStatus={false} className="" />
         </DialogWrapper>
       ) : null}
     </div>
@@ -228,12 +220,11 @@ const RecordView = ({
   showStatus: boolean;
 }) => {
   const isGood = record.status === 'success';
-  const isLoading = record.status === 'unknown';
 
   return (
     <div
-      className={`flex flex-row items-center gap-2 rounded-lg ${
-        showStatus && !isLoading ? (isGood ? 'bg-green-100' : 'bg-orange-100') : 'bg-gray-100'
+      className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
+        showStatus ? (isGood ? 'bg-green-100' : 'bg-orange-100') : 'bg-gray-100'
       } px-4 py-3 font-mono text-base shadow-sm`}
     >
       <p>
@@ -243,13 +234,14 @@ const RecordView = ({
       <p>{record.type}</p>
       <p>{record.value}</p>
       {showStatus ? (
-        <div className="ml-auto">
-          {isLoading ? (
-            <Loader className="h-4 w-4" />
-          ) : isGood ? (
+        <div className="ml-auto flex flex-row items-center gap-2 text-sm">
+          {isGood ? (
             <Check className="h-4 w-4" />
           ) : (
-            <Exclamation className="h-4 w-4" />
+            <>
+              {record.status === 'incorrectValue' ? 'Incorrect value' : 'Not found'}
+              <Exclamation className="h-4 w-4" />
+            </>
           )}
         </div>
       ) : null}
