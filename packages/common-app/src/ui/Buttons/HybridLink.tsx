@@ -42,7 +42,9 @@ export const HybridLink = (props: HybridLinkProps) => {
         {...props}
         onClick={onClickHandler}
         data-internal
-        className={`${props.className || ''} cursor-pointer`}
+        className={`${props.className || ''} ${
+          props?.onClick || props.href ? 'cursor-pointer' : ''
+        }`}
       >
         {props.children}
       </a>

@@ -21,9 +21,7 @@ const FollowLink = ({
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const { data } = useFollowDetail().fetch;
 
-  if (isOwner) {
-    return null;
-  }
+  if (isOwner) return null;
 
   const alreadyFollowingThis =
     (!channel && data?.notificationType === 'allNotifications') ||
@@ -37,7 +35,7 @@ const FollowLink = ({
           className ?? ''
         }`}
         href={
-          identity
+          identity && !alreadyFollowingThis
             ? `https://${identity}/owner/follow/${window.location.hostname}` +
               (channel ? `?chnl=${channel.channelId}` : '')
             : undefined

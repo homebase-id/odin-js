@@ -18,16 +18,14 @@ const ConnectLink = ({ className }: { className: string }) => {
   const { data: securityContext } = useSecurityContext().fetch;
   const alreadyConnected = securityContext?.caller?.securityLevel === 'connected' || false;
 
-  if (isOwner) {
-    return null;
-  }
+  if (isOwner) return null;
 
   return (
     <>
       <ActionLink
-        className={`w-auto cursor-pointer ${className ?? ''}`}
+        className={`w-auto ${className ?? ''}`}
         href={
-          identity
+          identity && !alreadyConnected
             ? `https://${getIdentity()}/owner/connections/${
                 window.location.host
               }?connect-dialog=true`
