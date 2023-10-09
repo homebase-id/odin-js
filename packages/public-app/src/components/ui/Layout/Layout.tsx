@@ -65,7 +65,6 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
       <Helmet>
         {imageData || emojiFavicon ? (
           <>
-            {/* <meta name="favicon" content={faviconId} /> */}
             <link rel="shortcut icon" href={imageData?.url || emojiFavicon}></link>
           </>
         ) : (
@@ -73,6 +72,7 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
             <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
             <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
             <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+            <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5" />
           </>
         )}
       </Helmet>
