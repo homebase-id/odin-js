@@ -87,7 +87,7 @@ export const useCanReact = ({
     );
 
     const postFile = localBlogData?.activeBlog || externalPost;
-
+    console.log({ isAuthenticated });
     if (!isAuthenticated && !isOwner) return { canReact: false, details: 'NOT_AUTHENTICATED' };
     if (isAuthor) return { canReact: true };
     if (!hasReactDriveReactAccess && !hasCommentDriveReactAccess)

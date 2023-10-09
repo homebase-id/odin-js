@@ -70,7 +70,7 @@ export const PostInteracts = ({
     channelId: postFile.content.channelId,
     postId: postFile.content.id,
     isEnabled: !!isExpanded || !!hasIntentToReact,
-    isAuthenticated: isAuthenticated || false,
+    isAuthenticated: isAuthenticated ?? false,
     isOwner: isOwner || false,
   });
 

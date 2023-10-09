@@ -33,9 +33,9 @@ export const PostTeaser: FC<PostTeaserProps> = ({
 }) => {
   const { content: post } = postFile;
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
-  const { isOwner } = useDotYouClient();
+  const { isOwner, getIdentity } = useDotYouClient();
   const navigate = useNavigate();
-
+  const isAuthenticated = !!getIdentity();
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
   //   If there is any media linked and not an article, we load the blogImageDetailPage
   const postPath = `${HOME_ROOT_PATH}posts/${channel ? channel.slug : 'public-posts'}/${
@@ -83,6 +83,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               className="px-4"
               showSummary={true}
               isOwner={isOwner}
+              isAuthenticated={isAuthenticated}
               isPublic={
                 channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
                 channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
