@@ -7,15 +7,13 @@ const useEula = () => {
   const fetchRequired = async (): Promise<string | false> => {
     const client = dotYouClient.createAxiosClient();
     const required = await client
-      .post<boolean>('/config/system/IsEulaSignatureRequired')
+      .post<boolean>('/config/system/iseulasignaturerequired')
       .then((response) => !!response?.data);
-    if (required) {
-      return await client
-        .post<string>('/config/system/GetRequiredEulaVersion')
-        .then((response) => response?.data?.toString() || false)
-        .catch(() => false);
-    }
-    return false;
+    if (!required) return false;
+    return await client
+      .post<{ version: string }>('/config/system/getrequiredeulaversion')
+      .then((response) => response?.data?.version || false)
+      .catch(() => false);
   };
 
   const markAccepted = (version: string) => {
