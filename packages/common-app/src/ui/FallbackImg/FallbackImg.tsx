@@ -1,4 +1,4 @@
-const FallbackImg = ({
+export const FallbackImg = ({
   initials,
   className,
   size,
@@ -19,5 +19,3 @@ const FallbackImg = ({
     </div>
   );
 };
-
-export default FallbackImg;

@@ -3,7 +3,7 @@ export const getDomainFromUrl = (url?: string): string | undefined => {
 };
 
 export const getTwoLettersFromDomain = (domain: string): string => {
-  const domainParts = domain.split('.');
+  const domainParts = domain.replace('www.', '').split('.');
   if (domainParts.length <= 2) {
     return domainParts[0].substring(0, 2);
   }

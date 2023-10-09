@@ -6,8 +6,8 @@ import {
 } from '@youfoundation/js-lib/profile';
 import useImage from '../../hooks/media/useImage';
 import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
-import FallbackImg from '../ui/FallbackImg/FallbackImg';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { FallbackImg } from '@youfoundation/common-app';
 
 const PhotoSelector = ({
   defaultValue,

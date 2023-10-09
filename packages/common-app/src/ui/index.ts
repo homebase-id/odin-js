@@ -17,6 +17,7 @@ export * from './Buttons/HybridLink';
 
 export * from './DarkModeToggle/DarkModeToggle';
 export * from './Sidenav/Sidenav';
+export * from './FallbackImg/FallbackImg';
 
 export * from './Icons/AddressBook';
 export * from './Icons/Anonymous';

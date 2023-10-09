@@ -1,5 +1,7 @@
+import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import useBiography from '../../../../hooks/biography/useBiography';
-import { Arrow, RichTextRenderer, t } from '@youfoundation/common-app';
+import { Arrow, FallbackImg, RichTextRenderer, t } from '@youfoundation/common-app';
+import { useMemo, useState } from 'react';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
@@ -41,20 +43,71 @@ const ExperienceBlock = ({
   link?: string;
   className: string;
 }) => {
+  const domain = link ? new URL(link).hostname : undefined;
+
   return (
-    <div className={`relative overflow-hidden rounded-lg bg-background px-8 py-12 ${className}`}>
-      <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{title}</h1>
-      <RichTextRenderer className="leading-relaxed" body={body} />
-      {link ? (
-        <div className="flex flex-row-reverse">
-          <a
-            href={link.startsWith('http') ? link : `https://${link}`}
-            className="flex flex-row items-center gap-1 text-primary"
-          >
-            {t('More')}
-            <Arrow className="h-4 w-4" />
-          </a>
+    <div
+      className={`relative flex flex-row gap-2 overflow-hidden rounded-lg bg-background px-5 py-8 sm:gap-4 sm:px-8 sm:py-12 ${className}`}
+    >
+      {domain ? (
+        <div className="w-1/6 flex-shrink-0 flex-grow-0">
+          <ExternalLinkImage domain={domain} fallbackSize="md" />
         </div>
+      ) : null}
+      <div>
+        <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{title}</h1>
+        <RichTextRenderer className="leading-relaxed" body={body} />
+        {link ? (
+          <div className="flex flex-row-reverse">
+            <a
+              href={link.startsWith('http') ? link : `https://${link}`}
+              target="_blank"
+              className="flex flex-row items-center gap-1 text-primary"
+              rel="noreferrer"
+            >
+              {t('Link')}
+              <Arrow className="h-4 w-4" />
+            </a>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+// Similar to CompanyImage, duplicated as it has a different goal
+const ExternalLinkImage = ({
+  domain,
+  className,
+  fallbackSize,
+}: {
+  domain: string;
+  className?: string;
+  fallbackSize?: 'xs' | 'md';
+}) => {
+  const [hasFailed, setHasFailed] = useState<boolean>(false);
+  const initials = useMemo(() => getTwoLettersFromDomain(domain), [domain]);
+
+  const bgClass = 'bg-white dark:bg-black';
+
+  return (
+    <div className={`relative z-0 aspect-square ${className || ''}`}>
+      <FallbackImg
+        initials={initials}
+        size={fallbackSize}
+        className={'absolute inset-0 flex aspect-square w-full'}
+      />
+      {/* On failed we fully hide the picture element, only visually hiding it, stays on top for safari...  */}
+      {!hasFailed ? (
+        <picture className={`relative z-10`}>
+          <source srcSet={`https://${domain}/pub/image`} />
+          <img
+            src={`https://${domain}/favicon.ico`}
+            className={`m-auto h-full w-full object-scale-down object-center ${bgClass}`}
+            alt={domain}
+            onError={() => setHasFailed(true)}
+          />
+        </picture>
       ) : null}
     </div>
   );

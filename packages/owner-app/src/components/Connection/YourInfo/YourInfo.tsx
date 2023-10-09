@@ -11,10 +11,9 @@ import {
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
-import { t } from '@youfoundation/common-app';
+import { FallbackImg, t } from '@youfoundation/common-app';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
-import FallbackImg from '../../ui/FallbackImg/FallbackImg';
 import { LoadingBlock, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
 import InfoBox from '../../ui/InfoBox/InfoBox';
 
@@ -45,8 +44,11 @@ const filterAttributesWithCircleGrants = (attributes: AttributeFile[], circleGra
     ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
     ?.filter((attr) =>
       attr.acl?.circleIdList?.length
-        ? attr.acl.circleIdList.some((allowedCircleId) =>
-            circleGrants?.some((circleGrantId) => stringGuidsEqual(circleGrantId, allowedCircleId))
+        ? attr.acl.circleIdList.some(
+            (allowedCircleId) =>
+              circleGrants?.some((circleGrantId) =>
+                stringGuidsEqual(circleGrantId, allowedCircleId)
+              )
           )
         : true
     );

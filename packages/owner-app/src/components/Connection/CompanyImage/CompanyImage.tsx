@@ -1,6 +1,6 @@
+import { FallbackImg } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import { useState, useMemo } from 'react';
-import FallbackImg from '../../ui/FallbackImg/FallbackImg';
 
 export const CompanyImage = ({
   domain,

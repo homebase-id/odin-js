@@ -8,8 +8,7 @@ import {
 import { useEffect } from 'react';
 import useImage from '../../../hooks/media/useImage';
 import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
-import FallbackImg from '../../ui/FallbackImg/FallbackImg';
-import { LoadingBlock } from '@youfoundation/common-app';
+import { FallbackImg, LoadingBlock } from '@youfoundation/common-app';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
 
