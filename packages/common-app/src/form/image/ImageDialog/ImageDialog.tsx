@@ -5,9 +5,16 @@ import {
   TargetDrive,
   ThumbnailInstruction,
 } from '@youfoundation/js-lib/core';
-import { useState } from 'react';
+import { createRef, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, t, useImage, usePortal } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  CropperRef,
+  GetCroppedData,
+  t,
+  useImage,
+  usePortal,
+} from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import ImageUploadAndCrop from '../ImageUploadAndCrop';
@@ -43,17 +50,15 @@ export const ImageDialog = ({
 }) => {
   const target = usePortal('modal-container');
   const { mutate: saveImage, status, error: saveError } = useImage().save;
+  const [isGettingData, setIsGettingData] = useState(false);
+  const cropperRef = createRef<CropperRef>();
+  if (!isOpen) return null;
 
-  const [imageData, setImageData] = useState<{ bytes: Uint8Array; type: ImageContentType }>();
+  const doUploadImage = async () => {
+    setIsGettingData(true);
+    const imageData = await GetCroppedData(cropperRef);
 
-  if (!isOpen) {
-    return null;
-  }
-
-  const uploadImage = async () => {
-    if (!imageData) {
-      return;
-    }
+    if (!imageData) return;
     saveImage(
       {
         acl: acl,
@@ -71,10 +76,11 @@ export const ImageDialog = ({
         },
       }
     );
+    setIsGettingData(false);
   };
 
   const reset = () => {
-    setImageData(undefined);
+    // setImageData(undefined);
     return true;
   };
 
@@ -84,15 +90,18 @@ export const ImageDialog = ({
         <ErrorNotification error={saveError} />
         <ImageUploadAndCrop
           expectedAspectRatio={expectedAspectRatio}
-          onChange={setImageData}
-          defaultValue={imageData}
           disableClear={true}
           maxHeight={maxHeight}
           maxWidth={maxWidth}
+          ref={cropperRef}
         />
 
         <div className="-m-2 flex flex-row-reverse py-3">
-          <ActionButton className="m-2" onClick={uploadImage} state={status}>
+          <ActionButton
+            className="m-2"
+            onClick={doUploadImage}
+            state={isGettingData ? 'loading' : status}
+          >
             {confirmText ?? 'Add'}
           </ActionButton>
           <ActionButton className="m-2" type="secondary" onClick={() => reset() && onCancel()}>

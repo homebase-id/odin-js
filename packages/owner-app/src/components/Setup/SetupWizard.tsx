@@ -99,11 +99,11 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
 
                 <div className="mt-5">
                   <ImageUploadAndCrop
-                    onChange={(imageData) => {
+                    onChange={(imageData) =>
                       changeHandler({
                         target: { name: 'imageData', value: imageData },
-                      });
-                    }}
+                      })
+                    }
                     defaultValue={data.profile['imageData']}
                     expectedAspectRatio={1}
                     maxHeight={500}

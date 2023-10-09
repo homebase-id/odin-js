@@ -1,7 +1,7 @@
 import Cropper from 'react-cropper';
 import './cropper.css';
-import { useEffect, useRef, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { t, useDebounce } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { ImageContentType } from '@youfoundation/js-lib/core';
 
@@ -11,17 +11,16 @@ interface ImageCropperProps {
   onChange?: (imageData: { bytes: Uint8Array; type: ImageContentType }) => void;
 }
 
-interface CropperRef extends HTMLImageElement {
+export interface CropperRef extends HTMLImageElement {
   cropper: Cropper;
 }
 
 const OUTPUT_MIME_TYPE = 'image/webp';
 
-export const ImageCropper = ({ imageUrl, expectedAspectRatio, onChange }: ImageCropperProps) => {
-  const cropperRef = useRef<CropperRef>(null);
-  const [aspectRatio, setAspectRatio] = useState<number>();
-
-  const onCrop = () => {
+export const GetCroppedData = (
+  cropperRef: React.RefObject<CropperRef>
+): Promise<{ bytes: Uint8Array; type: ImageContentType }> => {
+  return new Promise((resolve) => {
     const imageElement = cropperRef?.current;
     const cropper = imageElement?.cropper;
 
@@ -30,71 +29,85 @@ export const ImageCropper = ({ imageUrl, expectedAspectRatio, onChange }: ImageC
 
       new Blob([blob], { type: OUTPUT_MIME_TYPE }).arrayBuffer().then((buffer) => {
         const contentByteArray = new Uint8Array(buffer);
-        onChange && onChange({ bytes: contentByteArray, type: OUTPUT_MIME_TYPE });
+        resolve({ bytes: contentByteArray, type: OUTPUT_MIME_TYPE });
       });
     }, OUTPUT_MIME_TYPE);
-  };
-
-  useEffect(() => {
-    if (expectedAspectRatio) {
-      return;
-    }
-    if (aspectRatio) {
-      cropperRef?.current?.cropper.setAspectRatio(aspectRatio);
-    } else {
-      cropperRef?.current?.cropper.setAspectRatio(-1);
-    }
-  }, [aspectRatio]);
-
-  return (
-    <>
-      <Cropper
-        ref={cropperRef}
-        src={imageUrl}
-        // Cropper.js options
-        aspectRatio={expectedAspectRatio}
-        guides={false}
-        crop={onCrop}
-        viewMode={3}
-        dragMode="move"
-        autoCropArea={1}
-        rotatable={false}
-        zoomable={false}
-      />
-      {!expectedAspectRatio ? (
-        <div className="py-5">
-          <Label>{t('Aspect ratio')}:</Label>
-          <div className="mt-2 grid grid-cols-4 gap-2">
-            <AspectOption
-              val={undefined}
-              currentVal={aspectRatio}
-              onChange={setAspectRatio}
-              label={t('Free')}
-            />
-            <AspectOption
-              val={1}
-              currentVal={aspectRatio}
-              onChange={setAspectRatio}
-              label={t('Square')}
-            />
-            <AspectOption
-              val={4 / 3}
-              currentVal={aspectRatio}
-              onChange={setAspectRatio}
-              label={t('4 / 3')}
-            />
-            <AspectOption
-              val={16 / 9}
-              currentVal={aspectRatio}
-              onChange={setAspectRatio}
-              label={t('16 / 9')}
-            />
-          </div>
-        </div>
-      ) : null}
-    </>
-  );
+  });
 };
+
+const ImageCropper = forwardRef<CropperRef, ImageCropperProps>(
+  ({ imageUrl, expectedAspectRatio, onChange }, ref) => {
+    const internalRef = useRef<CropperRef>(null);
+    useImperativeHandle<CropperRef | null, CropperRef | null>(ref, () => internalRef.current);
+
+    const [aspectRatio, setAspectRatio] = useState<number>();
+
+    const onCrop = onChange
+      ? useDebounce(() => GetCroppedData(internalRef).then((data) => onChange && onChange(data)), {
+          timeoutMillis: 750,
+        })
+      : undefined;
+
+    useEffect(() => {
+      if (expectedAspectRatio) return;
+
+      if (aspectRatio) internalRef?.current?.cropper.setAspectRatio(aspectRatio);
+      else internalRef?.current?.cropper.setAspectRatio(-1);
+    }, [aspectRatio]);
+
+    return (
+      <>
+        <Cropper
+          ref={internalRef}
+          src={imageUrl}
+          // Cropper.js options
+          aspectRatio={expectedAspectRatio}
+          guides={false}
+          crop={onCrop}
+          viewMode={3}
+          dragMode="move"
+          autoCropArea={1}
+          rotatable={false}
+          zoomable={false}
+        />
+        {!expectedAspectRatio ? (
+          <div className="py-5">
+            <Label>{t('Aspect ratio')}:</Label>
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              <AspectOption
+                val={undefined}
+                currentVal={aspectRatio}
+                onChange={setAspectRatio}
+                label={t('Free')}
+              />
+              <AspectOption
+                val={1}
+                currentVal={aspectRatio}
+                onChange={setAspectRatio}
+                label={t('Square')}
+              />
+              <AspectOption
+                val={4 / 3}
+                currentVal={aspectRatio}
+                onChange={setAspectRatio}
+                label={t('4 / 3')}
+              />
+              <AspectOption
+                val={16 / 9}
+                currentVal={aspectRatio}
+                onChange={setAspectRatio}
+                label={t('16 / 9')}
+              />
+            </div>
+          </div>
+        ) : null}
+      </>
+    );
+  }
+);
+
+ImageCropper.displayName = 'ImageCropper';
+export { ImageCropper };
 
 const AspectOption = ({
   val,
