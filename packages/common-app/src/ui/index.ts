@@ -45,6 +45,7 @@ export * from './Icons/EpicGames';
 export * from './Icons/Exclamation';
 export * from './Icons/Expand';
 export * from './Icons/ExternalLink';
+export * from './Icons/Envelope';
 export * from './Icons/Eye';
 export * from './Icons/Facebook';
 export * from './Icons/Feed';

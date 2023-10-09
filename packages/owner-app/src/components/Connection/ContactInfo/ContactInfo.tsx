@@ -1,4 +1,4 @@
-import { t } from '@youfoundation/common-app';
+import { Envelope, t } from '@youfoundation/common-app';
 import useContact from '../../../hooks/contacts/useContact';
 import useImage from '../../../hooks/media/useImage';
 import { ContactConfig } from '../../../provider/contact/ContactTypes';
@@ -71,19 +71,25 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
                 <Phone className="h-4 w-4" />
-              </IconFrame>{' '}
+              </IconFrame>
               {contact.phone?.number ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
+                <Envelope className="h-4 w-4" />
+              </IconFrame>
+              {contact.email?.email ?? ''}
+            </div>
+            <div className="my-3 flex flex-row">
+              <IconFrame className="mr-2">
                 <House className="h-4 w-4" />
-              </IconFrame>{' '}
+              </IconFrame>
               {contact.location?.city ?? ''} {contact.location?.country ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
                 <Cake className="h-4 w-4" />
-              </IconFrame>{' '}
+              </IconFrame>
               {contact.birthday?.date ?? ''}
             </div>
           </div>

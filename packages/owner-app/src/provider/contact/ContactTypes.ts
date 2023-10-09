@@ -27,6 +27,7 @@ export interface ContactFile {
   name?: { displayName: string; givenName?: string; additionalName?: string; surname?: string };
   location?: { city?: string; country?: string };
   phone?: { number: string };
+  email?: { email: string };
   birthday?: { date: string };
   imageFileId?: string;
 }
@@ -40,6 +41,7 @@ export interface ContactVm {
   name?: { displayName: string; givenName?: string; additionalName?: string; surname?: string };
   location?: { city?: string; country?: string };
   phone?: { number: string };
+  email?: { email: string };
   birthday?: { date: string };
   imageFileId?: string;
   imageUrl?: string;

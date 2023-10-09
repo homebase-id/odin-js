@@ -6,6 +6,7 @@ import {
   BirthdayFields,
   GetTargetDriveFromProfileId,
   BuiltInProfiles,
+  EmailFields,
 } from '@youfoundation/js-lib/profile';
 
 import { RawContact } from './ContactTypes';
@@ -53,11 +54,12 @@ export const queryRemoteAttributes = async (
   odinId: string
 ): Promise<RawContact | undefined> => {
   try {
-    const [name, phone, location, birthday, photo] = await Promise.all([
+    const [name, phone, email, location, birthday, photo] = await Promise.all([
       (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Name))?.[0],
       (
         await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.PhoneNumber)
       )?.[0],
+      (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Email))?.[0],
       (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Address))?.[0],
       (
         await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Birthday)
@@ -79,6 +81,7 @@ export const queryRemoteAttributes = async (
         country: location?.data?.[LocationFields.Country],
       },
       phone: { number: phone?.data?.[PhoneFields.PhoneNumber] },
+      email: { email: email?.data?.[EmailFields.Email] },
       birthday: { date: birthday?.data?.[BirthdayFields.Date] },
       image: photo
         ? (await queryConnectionPhotoData(
