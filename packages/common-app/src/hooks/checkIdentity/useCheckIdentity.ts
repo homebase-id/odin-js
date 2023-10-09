@@ -4,7 +4,7 @@ import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 export const useCheckIdentity = (odinId?: string) => {
   const doCheckIdentity = async (odinId?: string) => {
     if (!odinId) return false;
-    const strippedIdentity = getDomainFromUrl(odinId);
+    const strippedIdentity = getDomainFromUrl(odinId)?.toLowerCase();
 
     const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
     const isValid = domainRegex.test(strippedIdentity || '');
