@@ -77,6 +77,7 @@ export class SocialFields {
   static readonly Twitter: string = 'twitter';
   static readonly Facebook: string = 'facebook';
   static readonly LinkedIn: string = 'linkedin';
+  static readonly Snapchat: string = 'snapchat';
   static readonly Tiktok: string = 'tiktok';
   static readonly Instagram: string = 'instagram';
 }

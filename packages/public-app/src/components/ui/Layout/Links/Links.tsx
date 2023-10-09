@@ -10,6 +10,7 @@ import {
   Globe,
   IconProps,
   Instagram,
+  Snapchat,
   Linkedin,
   Minecraft,
   Person,
@@ -42,6 +43,8 @@ export const getLinkIcon = (type: string): React.FC<IconProps> => {
       return Steam;
     case 'discord':
       return Discord;
+    case 'snapchat':
+      return Snapchat;
     case 'youtube':
       return Youtube;
     case 'riot games':
@@ -66,12 +69,13 @@ export const UNLINKABLE_SOCIALS = [
   'stackoverflow',
 ];
 
-const getLink = (type: string, username: string): string => {
-  if (UNLINKABLE_SOCIALS.includes(type)) {
-    return '';
-  }
+export const getLink = (type: string, username: string): string => {
+  if (UNLINKABLE_SOCIALS.includes(type)) return '';
+
   return type !== 'dotyouid'
-    ? `https://${type}.com/${type === SocialFields.LinkedIn ? 'in/' : ''}${username}`
+    ? `https://${type}.com/${
+        type === SocialFields.LinkedIn ? 'in/' : type === SocialFields.Snapchat ? 'add/' : ''
+      }${username}`
     : `https://${username}`;
 };
 
@@ -97,15 +101,15 @@ const Links = ({
   const { data: siteData } = useSiteData();
   const { data: links } = useLinks();
 
-  if (!links && (!includeSocials || !siteData?.social)) {
+  if (!siteData || (!links && (!includeSocials || !siteData?.social))) {
     return null;
   }
   const flexDir = direction === 'col' ? 'flex-col' : 'flex-row';
 
   const allLinks: LinkType[] = [
-    ...(includeSocials && siteData?.social
+    ...(includeSocials && siteData.social
       ? siteData.social
-          ?.filter((social) => !!social.type)
+          .filter((social) => !!social?.type)
           .map((social) => {
             const link = getLink(social.type, social.username);
             return {

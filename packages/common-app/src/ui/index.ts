@@ -38,6 +38,7 @@ export * from './Icons/Collapse';
 export * from './Icons/ConnectedPeople';
 export * from './Icons/Crop';
 export * from './Icons/Discord';
+export * from './Icons/Snapchat';
 export * from './Icons/Download';
 export * from './Icons/Ellipsis';
 export * from './Icons/EpicGames';

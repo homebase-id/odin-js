@@ -1,5 +1,4 @@
-import { SocialFields } from '@youfoundation/js-lib/profile';
-import { UNLINKABLE_SOCIALS, getLinkIcon } from '../Links/Links';
+import { UNLINKABLE_SOCIALS, getLink, getLinkIcon } from '../Links/Links';
 
 const Socials = ({
   socialHandles,
@@ -15,13 +14,7 @@ const Socials = ({
         .map((handle, index) => (
           <a
             className="ml-3 text-gray-500"
-            href={
-              handle.type !== SocialFields.Homebase
-                ? `https://${handle.type}.com/${
-                    handle.type === SocialFields.LinkedIn ? 'in/' : ''
-                  }${handle.username}`
-                : `https://${handle.username}`
-            }
+            href={getLink(handle.type, handle.username)}
             target="_blank"
             rel="noreferrer noopener"
             key={index}

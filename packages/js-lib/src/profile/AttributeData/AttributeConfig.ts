@@ -25,6 +25,7 @@ export class BuiltInAttributes {
   static readonly TwitterUsername = toGuidId('twitter_username');
   static readonly YoutubeUsername = toGuidId('youtube_username');
   static readonly DiscordUsername = toGuidId('discord_username');
+  static readonly SnapchatUsername = toGuidId('snapchat_username');
   static readonly EpicUsername = toGuidId('epic_username');
   static readonly RiotUsername = toGuidId('riot_username');
   static readonly SteamUsername = toGuidId('steam_username');
@@ -46,6 +47,7 @@ export class BuiltInAttributes {
     BuiltInAttributes.LinkedinUsername,
     BuiltInAttributes.YoutubeUsername,
     BuiltInAttributes.DiscordUsername,
+    BuiltInAttributes.SnapchatUsername,
     BuiltInAttributes.GithubUsername,
     BuiltInAttributes.StackoverflowUsername,
   ];

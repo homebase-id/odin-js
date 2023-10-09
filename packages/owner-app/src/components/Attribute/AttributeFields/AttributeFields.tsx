@@ -146,6 +146,7 @@ const AttributeFields = ({
     case BuiltInAttributes.FacebookUsername:
     case BuiltInAttributes.YoutubeUsername:
     case BuiltInAttributes.DiscordUsername:
+    case BuiltInAttributes.SnapchatUsername:
     case BuiltInAttributes.EpicUsername:
     case BuiltInAttributes.RiotUsername:
     case BuiltInAttributes.SteamUsername:

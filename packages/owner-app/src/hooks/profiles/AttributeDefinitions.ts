@@ -99,6 +99,12 @@ export const AttributeDefinitions = {
     description: 'A Discord username',
   },
 
+  SnapchatUsername: {
+    type: BuiltInAttributes.SnapchatUsername,
+    name: 'Snapchat',
+    description: 'A Snapchat username',
+  },
+
   EpicUsername: {
     type: BuiltInAttributes.EpicUsername,
     name: 'Epic games',
