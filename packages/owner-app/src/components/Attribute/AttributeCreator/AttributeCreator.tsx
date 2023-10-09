@@ -1,4 +1,3 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
 import {
@@ -35,9 +34,8 @@ const AttributeCreator = ({
       type: typeId,
       sectionId: sectionId,
       priority: newPriority,
-      data: {
-        isNew: true,
-      },
+      isNew: true,
+      data: {},
       typeDefinition: targetObj,
       profileId: profileId,
       acl: undefined,

@@ -6,9 +6,16 @@ import {
 } from '@youfoundation/js-lib/profile';
 import useAuth from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
+import { AccessControlList } from '@youfoundation/js-lib/core';
 
 export interface AttributeVm extends AttributeFile {
   typeDefinition: AttributeDefinition;
+}
+
+export interface NewAttributeVm extends Omit<AttributeFile, 'acl'> {
+  typeDefinition: AttributeDefinition;
+  acl?: AccessControlList;
+  isNew: true;
 }
 
 const useAttributes = ({ profileId, sectionId }: { profileId?: string; sectionId?: string }) => {

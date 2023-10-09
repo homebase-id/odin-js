@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AclIcon,
   AclSummary,
@@ -9,7 +9,7 @@ import {
   useDebounce,
 } from '@youfoundation/common-app';
 import useAttribute from '../../../hooks/profiles/useAttribute';
-import { AttributeVm } from '../../../hooks/profiles/useAttributes';
+import { AttributeVm, NewAttributeVm } from '../../../hooks/profiles/useAttributes';
 import { ActionButton } from '@youfoundation/common-app';
 
 import Section from '../../ui/Sections/Section';
@@ -17,6 +17,7 @@ import AttributeFields from '../AttributeFields/AttributeFields';
 import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const AttributeEditor = ({
   attribute,
@@ -26,14 +27,14 @@ const AttributeEditor = ({
   onCancel,
   onSave: onManualSave,
 }: {
-  attribute: AttributeVm;
+  attribute: AttributeVm | NewAttributeVm;
   className?: string;
   reorderAttr?: (attr: AttributeVm, dir: 1 | -1) => Promise<number | undefined>;
   title?: string;
   onCancel?: () => void;
   onSave?: () => void;
 }) => {
-  const [isNewAttribute, setIsNewAttribute] = useState(false);
+  const isNewAttribute = 'isNew' in attribute && attribute.isNew;
   const {
     save: { data: updatedAttr, mutate: saveAttr, status: saveStatus, error: saveError },
     remove: { mutate: removeAttr },
@@ -41,15 +42,18 @@ const AttributeEditor = ({
 
   // Local state of the changes
   const [latestAttr, setLatestAttr] = useState<AttributeVm>({
+    acl: { requiredSecurityGroup: SecurityGroupType.Owner },
     ...attribute,
     ...(updatedAttr || {}),
   });
 
-  const [isAclEdit, setIsAclEdit] = useState(false);
+  const [isAclEdit, setIsAclEdit] = useState(!attribute.acl);
   const [isFadeOut, setIsFadeOut] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   const doManualSave = (dirtyAttr: AttributeVm) => {
+    delete (dirtyAttr as any).isNew;
+
     saveAttr({ ...dirtyAttr });
     if (onManualSave) onManualSave();
   };
@@ -64,17 +68,15 @@ const AttributeEditor = ({
   };
 
   const reorder = async (dir: 1 | -1) => {
-    const newPriority = reorderAttr && (await reorderAttr(attribute, dir));
+    if (isNewAttribute) return;
+    const newPriority = reorderAttr && (await reorderAttr(attribute as AttributeVm, dir));
     if (!newPriority) return;
 
     saveAttr({ ...latestAttr, priority: newPriority });
   };
 
   useEffect(() => {
-    if (attribute && attribute.data?.isNew) {
-      setIsNewAttribute(true);
-      if (!latestAttr.acl) setIsAclEdit(true);
-
+    if (attribute && isNewAttribute) {
       sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => setIsFadeOut(true), 500);
     }
@@ -82,7 +84,13 @@ const AttributeEditor = ({
 
   // Sync the latest attribute with data from server
   useEffect(
-    () => setLatestAttr({ ...attribute, ...(updatedAttr || {}) }),
+    () =>
+      'acl' in attribute
+        ? setLatestAttr({
+            ...(attribute as AttributeVm),
+            ...(updatedAttr || {}),
+          })
+        : undefined,
     [attribute, updatedAttr]
   );
 
@@ -145,7 +153,7 @@ const AttributeEditor = ({
                     attribute.typeDefinition.name
                   } ${t('attribute. This action cannot be undone.')}`,
                 }}
-                onClick={() => removeAttr(attribute)}
+                onClick={() => removeAttr(latestAttr)}
               />
             ) : null}
           </div>
@@ -191,7 +199,7 @@ const AttributeEditor = ({
                     attribute.typeDefinition.name
                   } ${t('attribute. This action cannot be undone.')}`,
                 },
-                onClick: () => removeAttr(attribute),
+                onClick: () => removeAttr(latestAttr),
               },
             ]}
           />

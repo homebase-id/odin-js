@@ -7,7 +7,7 @@ import {
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
 import useAttributeOrderer, { attributeGroup } from '../../../hooks/profiles/useAttributeOrderer';
-import { AttributeVm } from '../../../hooks/profiles/useAttributes';
+import { AttributeVm, NewAttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 
@@ -155,15 +155,14 @@ const AddAnotherButton = ({
       type: type,
       sectionId: sectionId,
       priority: priority,
-      data: {
-        isNew: true,
-      },
+      isNew: true,
+      data: {},
       typeDefinition: Object.values(AttributeDefinitions).find(
         (curr) => curr.type === type
       ) as AttributeDefinition,
       profileId: profileId,
       acl: undefined,
-    } as unknown as AttributeVm;
+    } as NewAttributeVm;
   }, [type, profileId, sectionId, priority]);
 
   if (isActive) {
