@@ -1,7 +1,6 @@
 import ChannelTeaser from '../Common/ChannelTeaser/ChannelTeaser';
 import { BuiltInProfiles, ProfileConfig } from '@youfoundation/js-lib/profile';
 import {
-  IdentityTeaser,
   OwnerName,
   Image,
   useChannels,
@@ -27,16 +26,11 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
 
   return (
     <section className="body-font my-auto">
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5 py-5">
         <div className="flex flex-col lg:flex-row lg:gap-5">
-          <div className="mx-auto mb-12 max-w-[none] md:max-w-[30rem] lg:w-1/2 lg:max-w-[35rem]">
+          <div className="mx-auto mb-12 min-w-[15rem] md:max-w-[30rem] lg:w-1/2 lg:max-w-[35rem]">
             {owner?.profileImageId && targetDrive ? (
-              <Image
-                fileId={owner?.profileImageId}
-                targetDrive={targetDrive}
-                className="w-full"
-                explicitSize={{ pixelHeight: 800, pixelWidth: 800 }}
-              />
+              <Image fileId={owner?.profileImageId} targetDrive={targetDrive} className="w-full" />
             ) : null}
           </div>
           <div className="flex h-full flex-grow flex-col lg:w-1/2">
