@@ -90,11 +90,7 @@ export const PostDetailCard = ({
             }`}
           >
             {post.type !== 'Article' && post.captionAsRichText ? (
-              <RichTextRenderer
-                body={post.captionAsRichText}
-                odinId={odinId}
-                options={{ linksAlwaysBlank: true }}
-              />
+              <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
             ) : (
               post.caption
             )}
@@ -171,7 +167,6 @@ export const PostDetailCard = ({
               odinId={odinId}
               body={(post as Article)?.body}
               imageDrive={getChannelDrive(post.channelId)}
-              options={{ linksAlwaysBlank: true }}
             />
           </div>
         )

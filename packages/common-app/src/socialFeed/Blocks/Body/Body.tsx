@@ -56,11 +56,7 @@ export const PostBody = ({
         <h1 className="text-foreground text-opacity-70">
           {isExpanded || post.caption.length <= MAX_CHAR_FOR_SUMMARY ? (
             post.captionAsRichText ? (
-              <RichTextRenderer
-                body={post.captionAsRichText}
-                odinId={odinId}
-                options={{ linksAlwaysBlank: true }}
-              />
+              <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
             ) : (
               <span className="whitespace-pre-wrap">{post.caption}</span>
             )

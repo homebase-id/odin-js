@@ -12,9 +12,7 @@ export const RichTextRenderer = ({
   body: string | Record<string, unknown>[] | undefined;
   imageDrive?: TargetDrive;
   odinId?: string;
-  options?: {
-    linksAlwaysBlank?: boolean;
-  };
+  options?: unknown;
   className?: string;
 }) => {
   if (!body || typeof body === 'string') {
@@ -123,7 +121,7 @@ export const RichTextRenderer = ({
             href={(attributes?.url as string) ?? ''}
             {...attributes}
             target={
-              options?.linksAlwaysBlank ? '_blank' : (attributes?.target as string) || '_self'
+              (attributes?.url as string)?.startsWith(window.location.origin) ? '_self' : '_blank'
             }
             rel="noopener noreferrer"
             className="text-primary hover:underline"

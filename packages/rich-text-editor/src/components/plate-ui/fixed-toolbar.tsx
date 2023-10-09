@@ -10,7 +10,7 @@ const FixedToolbar = React.forwardRef<HTMLDivElement, ToolbarProps>(
       <Toolbar
         ref={ref}
         className={cn(
-          'supports-backdrop-blur:bg-background/60 border-b-border bg-background/95 sticky left-0 z-50 w-full justify-between overflow-x-auto rounded-t-lg border-b border-b-gray-300 backdrop-blur dark:border-b-gray-700',
+          'supports-backdrop-blur:bg-background/60 sticky left-0 w-full justify-between overflow-x-auto rounded-t-lg border-b border-b-border border-b-gray-300 bg-background/95 backdrop-blur dark:border-b-gray-700',
           className
         )}
         {...props}
