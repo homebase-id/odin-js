@@ -17,8 +17,6 @@ import {
 } from '@youfoundation/js-lib/public';
 import { queryBatchCollection } from '@youfoundation/js-lib/core';
 
-type SocialInfo = { type: string; username: string; priority: number };
-
 interface DefaultTemplateSettings {
   colors: {
     name: string;
@@ -53,18 +51,24 @@ export type TemplateSettings =
   | ThemeWithTabsSettings
   | undefined;
 
+type OwnerSiteData = {
+  displayName?: string;
+  firstName?: string;
+  surName?: string;
+  profileImageId?: string;
+  status?: string;
+};
+
+type SocialSiteData = { type: string; username: string; priority: number }[];
+
+type HomeSiteData = {
+  templateSettings?: TemplateSettings;
+};
+
 type SiteData = {
-  owner: {
-    displayName?: string;
-    firstName?: string;
-    surName?: string;
-    profileImageId?: string;
-    status?: string;
-  };
-  social: { type: string; username: string; priority: number }[];
-  home: {
-    templateSettings?: TemplateSettings;
-  };
+  owner: OwnerSiteData;
+  social: SocialSiteData;
+  home: HomeSiteData;
 };
 
 export const useSiteData = () => {
@@ -75,7 +79,9 @@ export const useSiteData = () => {
   const fetchData: () => Promise<SiteData> = async () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
-    const parseOwnerData = async (nameAndPhotoAndStatusAttr?: AttributeFile[]) => {
+    const parseOwnerData = async (
+      nameAndPhotoAndStatusAttr?: AttributeFile[]
+    ): Promise<OwnerSiteData> => {
       const nameAttr = nameAndPhotoAndStatusAttr?.find(
         (attr) => attr.type === BuiltInAttributes.Name
       );
@@ -95,9 +101,7 @@ export const useSiteData = () => {
       };
     };
 
-    const parseSocialData = async (socialAttributeVersions?: AttributeFile[]) => {
-      const socialAttributes = getHighestPrioAttributesFromMultiTypes(socialAttributeVersions);
-
+    const parseSocialData = async (socialAttributes?: AttributeFile[]): Promise<SocialSiteData> => {
       return socialAttributes
         ?.map((attr) => {
           const value = Object.values(attr?.data)?.[0];
@@ -109,16 +113,16 @@ export const useSiteData = () => {
           };
         })
         .sort((attrA, attrB) => attrA.priority - attrB.priority)
-        .filter((attr) => attr !== undefined) as SocialInfo[];
+        .filter((attr) => attr !== undefined) as SocialSiteData;
     };
 
-    const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]) => {
+    const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]): Promise<HomeSiteData> => {
       const themeAttribute = homeAndThemeAttr?.find(
         (attr) => attr.type === HomePageAttributes.Theme
       );
 
       return {
-        templateSettings: themeAttribute?.data,
+        templateSettings: themeAttribute?.data as TemplateSettings,
       };
     };
 
@@ -206,7 +210,9 @@ export const useSiteData = () => {
 
       return {
         owner: await parseOwnerData(getHighestPrioAttributesFromMultiTypes(ownerAttr)),
-        social: await parseSocialData(getHighestPrioAttributesFromMultiTypes(socialAttr)),
+        social: await parseSocialData(
+          socialAttr.filter((attr) => attr !== undefined) as AttributeFile[]
+        ),
         home: await parseHomeData(getHighestPrioAttributesFromMultiTypes(homeAttr)),
       } as SiteData;
     };
@@ -230,7 +236,7 @@ export const useSiteData = () => {
       }
     }
 
-    return staticData;
+    return staticData as SiteData;
   };
 
   return useQuery(['siteData'], fetchData, {
@@ -243,7 +249,7 @@ export const useSiteData = () => {
   });
 };
 
-const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
+const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteData | undefined => {
   if (fileData.has('name') && fileData.has('photo')) {
     const nameAttr = fileData.get('name')?.[0]?.payload as Attribute;
     const photoAttr = fileData.get('photo')?.[0]?.payload as Attribute;
@@ -261,7 +267,9 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
   }
 };
 
-const getSocialDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
+const getSocialDataStatic = (
+  fileData: Map<string, ResponseEntry[]>
+): SocialSiteData | undefined => {
   if (fileData.has('socials')) {
     const fileBasedResponse = fileData
       .get('socials')
@@ -282,13 +290,13 @@ const getSocialDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
   }
 };
 
-const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>) => {
+const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>): HomeSiteData | undefined => {
   // File based response if available
   if (fileData.has('theme')) {
     const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
     if (themeAttribute) {
       return {
-        templateSettings: themeAttribute?.data,
+        templateSettings: themeAttribute?.data as TemplateSettings,
       };
     }
   }
