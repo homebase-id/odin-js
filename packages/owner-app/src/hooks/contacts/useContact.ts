@@ -38,8 +38,12 @@ const useContact = ({
 
     // Direct fetch with odinId:
     const contactBookContact = await getContactByUniqueId(dotYouClient, toGuidId(odinId));
-    if (contactBookContact) return contactBookContact;
-
+    // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
+    // TODO: Not sure if this is the best way yet... But it works for now
+    if (contactBookContact && (contactBookContact.source === 'contact' || !canSave))
+      return contactBookContact;
+    else if (contactBookContact)
+      console.log(`[${odinId}] Ignoring contact book record`, contactBookContact);
     let returnContact;
 
     // If no contact in the contact book:

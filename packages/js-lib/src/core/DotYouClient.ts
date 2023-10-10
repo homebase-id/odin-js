@@ -128,7 +128,7 @@ export class BaseDotYouClient {
         return response;
       },
       async function (error) {
-        if (error?.response?.data?.data && ss) {
+        if (error?.response?.data?.data && ss && error.response.status !== 404) {
           // Try and get a more detailed error message
           console.error(
             '[DotYouCore-js]',

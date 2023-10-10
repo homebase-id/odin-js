@@ -64,7 +64,9 @@ export const useNotifications = () => {
         queryClient.invalidateQueries(['pendingConnections']);
         queryClient.invalidateQueries(['pendingConnection']);
       } else {
+        // Accepted
         queryClient.invalidateQueries(['sentRequests']);
+        queryClient.invalidateQueries(['activeConnections']);
       }
     }
   };
