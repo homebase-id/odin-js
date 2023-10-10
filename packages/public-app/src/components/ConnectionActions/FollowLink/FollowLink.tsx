@@ -31,11 +31,9 @@ const FollowLink = ({
   return (
     <>
       <ActionLink
-        className={`w-auto ${alreadyFollowingThis ? 'pointer-events-none' : 'cursor-pointer'} ${
-          className ?? ''
-        }`}
+        className={`w-auto ${className ?? ''}`}
         href={
-          identity && !alreadyFollowingThis
+          identity
             ? `https://${identity}/owner/follow/${window.location.hostname}` +
               (channel ? `?chnl=${channel.channelId}` : '')
             : undefined

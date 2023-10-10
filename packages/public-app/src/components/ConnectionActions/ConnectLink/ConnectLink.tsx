@@ -25,10 +25,12 @@ const ConnectLink = ({ className }: { className: string }) => {
       <ActionLink
         className={`w-auto ${className ?? ''}`}
         href={
-          identity && !alreadyConnected
-            ? `https://${getIdentity()}/owner/connections/${
-                window.location.host
-              }?connect-dialog=true`
+          identity
+            ? alreadyConnected
+              ? `https://${getIdentity()}/owner/connections/${window.location.host}`
+              : `https://${getIdentity()}/owner/connections/${
+                  window.location.host
+                }?connect-dialog=true`
             : undefined
         }
         onClick={!identity ? () => setIsLogin(true) : undefined}

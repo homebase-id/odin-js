@@ -1,7 +1,7 @@
 import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import CheckboxToggle from '../../components/Form/CheckboxToggle';
 import { Alert, useFollowingInfinite, useSocialChannels } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -26,9 +26,8 @@ const Following = () => {
   const [channelSelection, setChannelSelection] = useState(channels);
   useEffect(() => {
     // if no specific list is set, add all existing ones as selected; Eg: if no channel is explicitly passed then it's a follow all
-    if (!channelSelection && socialChannels?.length) {
+    if (!channelSelection && socialChannels?.length)
       setChannelSelection(socialChannels?.map((chnl) => chnl.channelId));
-    }
   }, [socialChannelsLoaded]);
 
   useEffect(() => {
@@ -45,7 +44,7 @@ const Following = () => {
           setChannelSelection(socialChannels.map((chnl) => chnl?.channelId));
       }
     }
-  }, [identityIFollowLoaded]);
+  }, [identityIFollowLoaded, socialChannels]);
 
   const doCancel = () => (window.location.href = `https://${toFollowKey}`);
 
