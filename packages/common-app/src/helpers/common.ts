@@ -17,7 +17,7 @@ export const getVersion = () => {
 
     const t = new Date(1970, 0, 1); // Epoch
     t.setSeconds(numberedVersion);
-    return `${t.toLocaleDateString()} ${t.toLocaleTimeString()}`;
+    return t.toISOString();
   } catch (ex) {
     console.error(ex);
     return import.meta.env.VITE_VERSION;
