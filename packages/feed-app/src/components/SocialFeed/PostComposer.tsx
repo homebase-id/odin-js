@@ -73,9 +73,7 @@ const PostComposer = ({
 
   useEffect(() => {
     // We don't accept images (from the clipboard) when we're in embedded mode
-    if (embeddedPost) {
-      return;
-    }
+    if (embeddedPost) return;
 
     const messageListener = (e: MessageEvent) => {
       if (e?.data?.source?.startsWith('react-devtools-')) return;

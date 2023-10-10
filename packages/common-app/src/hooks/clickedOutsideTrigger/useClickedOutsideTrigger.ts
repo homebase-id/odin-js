@@ -13,9 +13,7 @@ export const useOutsideTrigger = (
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function handleClickOutside(event: { target: any }) {
-      if (ref?.current && !ref.current.contains(event.target)) {
-        onClick();
-      }
+      if (ref?.current && !ref.current.contains(event.target)) onClick();
     }
     // Bind the event listener
     document.addEventListener('mousedown', handleClickOutside);

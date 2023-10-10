@@ -54,6 +54,7 @@ export const EmojiSelector = ({
         className={`absolute ${verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'} ${
           horizontalSpace === 'left' ? 'right-[-2.7rem] sm:right-0' : 'left-[-2.7rem] sm:left-0'
         }  z-20 `}
+        onClick={(e) => e.stopPropagation()}
         ref={wrapperRef}
       >
         {isOpen ? (
