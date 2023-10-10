@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { Lock } from '@youfoundation/common-app';
 
@@ -12,7 +12,7 @@ import {
   Times,
   UserX,
 } from '@youfoundation/common-app';
-const OwnerActions = lazy(() => import('./OwnerActions'));
+import OwnerActions from './OwnerActions';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;

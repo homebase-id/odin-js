@@ -1,6 +1,6 @@
-import { lazy, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getRichTextFromString, useDebounce } from '../..';
-const EmojiDropdown = lazy(() => import('./VolatileInput/EmojiDropdown'));
+import EmojiDropdown from './VolatileInput/EmojiDropdown';
 import {
   SelectionData,
   getAbsoluteOffsetToParent,

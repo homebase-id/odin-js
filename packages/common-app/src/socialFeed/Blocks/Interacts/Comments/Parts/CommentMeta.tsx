@@ -1,9 +1,7 @@
 import { CanReactInfo, EmojiSummary, t } from '@youfoundation/common-app';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { format } from '../../../../../helpers/timeago/format';
-import { lazy } from 'react';
-
-const CommentLikeButton = lazy(() => import('./CommentLikeButton'));
+import CommentLikeButton from './CommentLikeButton';
 
 const CommentMeta = ({
   canReact,

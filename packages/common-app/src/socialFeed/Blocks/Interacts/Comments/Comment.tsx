@@ -1,4 +1,4 @@
-import { lazy, useState } from 'react';
+import { useState } from 'react';
 import { AuthorImage, AuthorName, CanReactInfo, t, useReaction } from '@youfoundation/common-app';
 
 import {
@@ -8,13 +8,10 @@ import {
 } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
-
-const CommentHead = lazy(() => import('./Parts/CommentHead'));
-const CommentBody = lazy(() => import('./Parts/CommentBody'));
-const CommentMeta = lazy(() => import('./Parts/CommentMeta'));
-const CommentThread = lazy(() =>
-  import('./Parts/CommentThread').then((m) => ({ default: m.CommentThread }))
-);
+import CommentHead from './Parts/CommentHead';
+import CommentBody from './Parts/CommentBody';
+import CommentMeta from './Parts/CommentMeta';
+import { CommentThread } from './Parts/CommentThread';
 
 export interface CommentProps {
   context: ReactionContext;
