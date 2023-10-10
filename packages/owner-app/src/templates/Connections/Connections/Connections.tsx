@@ -76,7 +76,7 @@ const PendingConnectionSection = ({
   const [pendingPage, setPendingPage] = useState(1);
 
   const { data: pendingConnections, isLoading: pendingConnectionsLoading } = usePendingConnections({
-    pageSize: 15,
+    pageSize: 6,
     pageNumber: pendingPage,
   }).fetch;
 
@@ -116,6 +116,15 @@ const PendingConnectionSection = ({
           />
         ))}
       </div>
+
+      <div className="flex flex-row justify-center pt-5 md:hidden">
+        <Pager
+          totalPages={pendingConnections?.totalPages}
+          setPage={setPendingPage}
+          currentPage={pendingPage}
+          size="xl"
+        />
+      </div>
     </>
   );
 };
@@ -123,7 +132,7 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
   const [sentPage, setSentPage] = useState(1);
 
   const { data: sentRequests, isLoading: sentRequestsLoading } = useSentConnections({
-    pageSize: 15,
+    pageSize: 6,
     pageNumber: sentPage,
   }).fetch;
 
@@ -163,6 +172,14 @@ const SentConnectionSection = ({ setNoSentConnections }: { setNoSentConnections:
           />
         ))}
       </div>
+      <div className="flex flex-row justify-center pt-5 md:hidden">
+        <Pager
+          totalPages={sentRequests?.totalPages}
+          setPage={setSentPage}
+          currentPage={sentPage}
+          size="xl"
+        />
+      </div>
     </>
   );
 };
@@ -181,17 +198,12 @@ const ActiveConnectionSection = ({
     hasNextPage: activeHasNextPageOnServer,
     fetchNextPage: fetchNextActivePage,
   } = useActiveConnections({
-    pageSize: 5,
+    pageSize: 6,
   }).fetch;
 
   useEffect(() => {
-    if (!activeConnectionsFetchedAfterMount) {
-      return;
-    }
-
-    if (activeConnections?.pages[0]?.results?.length === 0) {
-      setNoActiveConnections();
-    }
+    if (!activeConnectionsFetchedAfterMount) return;
+    if (activeConnections?.pages[0]?.results?.length === 0) setNoActiveConnections();
 
     if (activeConnections?.pages[activePage - 1]) {
       // already have that
@@ -202,9 +214,7 @@ const ActiveConnectionSection = ({
 
   const activeHasNextPage = activeConnections?.pages[activePage] || activeHasNextPageOnServer;
 
-  if (!activeConnections?.pages?.[0]?.results?.length) {
-    return null;
-  }
+  if (!activeConnections?.pages?.[0]?.results?.length) return null;
 
   return (
     <>
@@ -237,6 +247,14 @@ const ActiveConnectionSection = ({
                 />
               ) : null
             )}
+          </div>
+          <div className="flex flex-row justify-center pt-5 md:hidden">
+            <Pager
+              totalPages={activeHasNextPage ? activePage + 1 : activePage}
+              setPage={setActivePage}
+              currentPage={activePage}
+              size="xl"
+            />
           </div>
         </>
       ) : null}
