@@ -51,14 +51,22 @@ export const ImageDialog = ({
   const target = usePortal('modal-container');
   const { mutate: saveImage, status, error: saveError } = useImage().save;
   const [isGettingData, setIsGettingData] = useState(false);
+  const [unCroppedImageData, setUnCroppedImageData] = useState<{
+    bytes: Uint8Array;
+    type: ImageContentType;
+  }>();
   const cropperRef = createRef<CropperRef>();
   if (!isOpen) return null;
 
   const doUploadImage = async () => {
     setIsGettingData(true);
-    const imageData = await GetCroppedData(cropperRef);
+    const imageData = (await GetCroppedData(cropperRef)) ?? unCroppedImageData;
 
-    if (!imageData) return;
+    if (!imageData) {
+      setIsGettingData(false);
+      return;
+    }
+
     saveImage(
       {
         acl: acl,
@@ -80,7 +88,7 @@ export const ImageDialog = ({
   };
 
   const reset = () => {
-    // setImageData(undefined);
+    setUnCroppedImageData(undefined);
     return true;
   };
 
@@ -94,6 +102,8 @@ export const ImageDialog = ({
           maxHeight={maxHeight}
           maxWidth={maxWidth}
           ref={cropperRef}
+          onChange={setUnCroppedImageData}
+          autoSave={false}
         />
 
         <div className="-m-2 flex flex-row-reverse py-3">

@@ -10,11 +10,20 @@ interface ImageUploadAndCropProps {
   maxHeight?: number;
   defaultValue?: { bytes: Uint8Array; type: ImageContentType };
   disableClear?: boolean;
+  autoSave?: boolean;
 }
 
 const ImageUploadAndCrop = forwardRef<CropperRef, ImageUploadAndCropProps>(
   (
-    { expectedAspectRatio, onChange, maxWidth, maxHeight, defaultValue, disableClear },
+    {
+      expectedAspectRatio,
+      onChange,
+      maxWidth,
+      maxHeight,
+      defaultValue,
+      disableClear,
+      autoSave = true,
+    },
     cropperRef
   ) => {
     const [rawImageData, setRawImageData] = useState<
@@ -89,7 +98,7 @@ const ImageUploadAndCrop = forwardRef<CropperRef, ImageUploadAndCropProps>(
               <ImageCropper
                 imageUrl={uploadedImageUrl}
                 expectedAspectRatio={expectedAspectRatio}
-                onChange={onChange}
+                onChange={onChange && autoSave ? onChange : undefined}
                 ref={cropperRef}
               />
               {disableClear ? null : (

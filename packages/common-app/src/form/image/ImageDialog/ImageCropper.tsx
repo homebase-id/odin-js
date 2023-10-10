@@ -19,12 +19,17 @@ const OUTPUT_MIME_TYPE = 'image/webp';
 
 export const GetCroppedData = (
   cropperRef: React.RefObject<CropperRef>
-): Promise<{ bytes: Uint8Array; type: ImageContentType }> => {
+): Promise<{ bytes: Uint8Array; type: ImageContentType } | null> => {
   return new Promise((resolve) => {
     const imageElement = cropperRef?.current;
     const cropper = imageElement?.cropper;
 
-    cropper?.getCroppedCanvas().toBlob((blob) => {
+    if (!cropper) {
+      resolve(null);
+      return;
+    }
+
+    cropper.getCroppedCanvas().toBlob((blob) => {
       if (!blob) return;
 
       new Blob([blob], { type: OUTPUT_MIME_TYPE }).arrayBuffer().then((buffer) => {
