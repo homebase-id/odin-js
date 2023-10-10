@@ -8,7 +8,7 @@ import { ImageContentType } from '@youfoundation/js-lib/core';
 interface ImageCropperProps {
   imageUrl: string;
   expectedAspectRatio?: number;
-  onChange?: (imageData: { bytes: Uint8Array; type: ImageContentType }) => void;
+  onChange?: (imageData: { bytes: Uint8Array; type: ImageContentType } | undefined) => void;
 }
 
 export interface CropperRef extends HTMLImageElement {
@@ -19,13 +19,13 @@ const OUTPUT_MIME_TYPE = 'image/webp';
 
 export const GetCroppedData = (
   cropperRef: React.RefObject<CropperRef>
-): Promise<{ bytes: Uint8Array; type: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; type: ImageContentType } | undefined> => {
   return new Promise((resolve) => {
     const imageElement = cropperRef?.current;
     const cropper = imageElement?.cropper;
 
     if (!cropper) {
-      resolve(null);
+      resolve(undefined);
       return;
     }
 

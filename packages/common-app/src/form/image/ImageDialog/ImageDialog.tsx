@@ -102,7 +102,7 @@ export const ImageDialog = ({
           maxHeight={maxHeight}
           maxWidth={maxWidth}
           ref={cropperRef}
-          onChange={setUnCroppedImageData}
+          onChange={(data) => data && setUnCroppedImageData(data)}
           autoSave={false}
         />
 
