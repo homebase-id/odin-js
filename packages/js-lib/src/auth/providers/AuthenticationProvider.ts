@@ -31,14 +31,10 @@ export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean
   const client = dotYouClient.createAxiosClient();
 
   const response = await client
-    .get('/auth/verifytoken', {
-      validateStatus: () => true,
-    })
-    .catch((error) => {
-      console.error({ error });
-      return { status: 400, data: false };
-    });
-  return response.status === 200 && response.data === true;
+    .get('/auth/verifytoken')
+    .catch((_error) => ({ status: 400, data: false }));
+
+  return response.status === 200;
 };
 
 export const getRegistrationParams = async (
