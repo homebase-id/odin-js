@@ -60,7 +60,7 @@ const AttributeGroup = ({
     setIsActive(false);
   };
 
-  if (attributes.length === 1) {
+  if (attributes.length === 1)
     return (
       <>
         <div className={`relative my-6 overflow-x-hidden`}>
@@ -78,7 +78,6 @@ const AttributeGroup = ({
         </div>
       </>
     );
-  }
 
   return (
     <div
@@ -101,37 +100,40 @@ const AttributeGroup = ({
             : 'border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
         } transition-all ${isActive ? 'pl-2 sm:pl-5' : '-translate-x-4 md:hover:translate-x-0'}`}
       >
-        {attributes.map((attr, index) => {
-          return (
-            <React.Fragment key={attr.id ?? 'pending'}>
-              <span
-                key={attr.id ?? 'pending'}
-                title={attr.id ?? 'pending'}
-                className={`z-0 ${
-                  !isActive && index !== 0
-                    ? `absolute left-0 right-0 top-0 max-h-full overflow-hidden rounded-lg border-b border-gray-200 border-opacity-80 bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900`
-                    : 'relative'
-                }`}
-                style={{ transform: `translateX(${index * 4}px) translateY(${index * 10}px)` }}
-              >
-                <AttributeEditor
-                  attribute={attr}
-                  className={`${!isActive ? 'pointer-events-none my-0' : 'mb-2 mt-0'}`}
-                  reorderAttr={reorderAttr}
-                  // title={!isActive ? `${groupTitle} (${attributes.length})` : undefined}
-                />
-              </span>
-              {isActive && (
-                <AddAnotherButton
-                  profileId={attributes[0].profileId}
-                  sectionId={attributes[0].sectionId}
-                  type={attributes[0].type}
-                  priority={attr.priority + 10}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
+        {/* Sort again, as order of the attributes takes the ACL into account, which the user can't "change" */}
+        {attributes
+          .sort((a, b) => a.priority - b.priority)
+          .map((attr, index) => {
+            return (
+              <React.Fragment key={attr.id ?? 'pending'}>
+                <span
+                  key={attr.id ?? 'pending'}
+                  title={attr.id ?? 'pending'}
+                  className={`z-0 ${
+                    !isActive && index !== 0
+                      ? `absolute left-0 right-0 top-0 max-h-full overflow-hidden rounded-lg border-b border-gray-200 border-opacity-80 bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900`
+                      : 'relative'
+                  }`}
+                  style={{ transform: `translateX(${index * 4}px) translateY(${index * 10}px)` }}
+                >
+                  <AttributeEditor
+                    attribute={attr}
+                    className={`${!isActive ? 'pointer-events-none my-0' : 'mb-2 mt-0'}`}
+                    reorderAttr={reorderAttr}
+                    // title={!isActive ? `${groupTitle} (${attributes.length})` : undefined}
+                  />
+                </span>
+                {isActive && (
+                  <AddAnotherButton
+                    profileId={attributes[0].profileId}
+                    sectionId={attributes[0].sectionId}
+                    type={attributes[0].type}
+                    priority={attr.priority + 10}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
       </div>
     </div>
   );

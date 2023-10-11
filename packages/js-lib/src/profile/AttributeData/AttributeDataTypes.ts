@@ -4,6 +4,7 @@ export interface AttributeFile extends Attribute {
   fileId?: string;
   versionTag?: string;
   acl: AccessControlList;
+  aclPriority?: number;
 }
 
 export interface AttributeDisplayHash {

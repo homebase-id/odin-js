@@ -29,6 +29,9 @@ import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { AttributeFile, Attribute } from './AttributeDataTypes';
 
+const sortAttrs = (a: AttributeFile, b: AttributeFile) =>
+  (a.aclPriority || 0) - (b.aclPriority || 0) || a.priority - b.priority;
+
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
 export const getProfileAttributes = async (
   dotYouClient: DotYouClient,
@@ -56,11 +59,7 @@ export const getProfileAttributes = async (
     )
   ).filter((attr) => !!attr) as AttributeFile[];
 
-  //sort where lowest number is higher priority
-  attributes = attributes.sort((a, b) => {
-    return a.priority - b.priority;
-  });
-
+  attributes = attributes.sort(sortAttrs);
   return attributes;
 };
 
@@ -92,11 +91,7 @@ export const getAttributeVersions = async (
     )
   ).filter((attr) => !!attr) as AttributeFile[];
 
-  //sort where lowest number is higher priority (!! sort happens in place)
-  attributes = attributes.sort((a, b) => {
-    return a.priority - b.priority;
-  });
-
+  attributes = attributes.sort(sortAttrs);
   return attributes;
 };
 
@@ -159,11 +154,7 @@ export const getAttributes = async (
     )
   ).filter((attr) => !!attr) as AttributeFile[];
 
-  //sort where lowest number is higher priority
-  attributes = attributes.sort((a, b) => {
-    return a.priority - b.priority;
-  });
-
+  attributes = attributes.sort(sortAttrs);
   return attributes;
 };
 
@@ -186,6 +177,7 @@ export const dsrToAttributeFile = async (
       fileId: attrPayload.fileId ?? dsr.fileId,
       versionTag: dsr.fileMetadata.versionTag,
       acl: dsr.serverMetadata?.accessControlList,
+      aclPriority: dsr.priority,
     };
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);

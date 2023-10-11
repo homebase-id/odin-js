@@ -63,47 +63,27 @@ export const pascalCase = (str: string) => {
 export const getHighestPrioAttributesFromMultiTypes = (
   attributes?: (AttributeFile | undefined)[]
 ) => {
-  if (attributes) {
-    return (attributes?.filter((attr) => !!attr) as AttributeFile[])?.reduce(
-      (highestPrioArr, attr) => {
-        const highAttr = highestPrioArr.find((highAttr) => highAttr.type === attr.type);
-        if (!attr.data) return highestPrioArr;
+  if (!attributes) return undefined;
 
-        if (highAttr) {
-          if (
-            getAclPriority(highAttr.acl) < getAclPriority(attr.acl) ||
-            (getAclPriority(highAttr.acl) === getAclPriority(attr.acl) &&
-              highAttr.priority < attr.priority)
-          ) {
-            return highestPrioArr;
-          } else {
-            return [...highestPrioArr.filter((highPrio) => highPrio.type !== attr.type), attr];
-          }
+  return (attributes?.filter((attr) => !!attr) as AttributeFile[])?.reduce(
+    (highestPrioArr, attr) => {
+      const highAttr = highestPrioArr.find((highAttr) => highAttr.type === attr.type);
+      if (!attr.data) return highestPrioArr;
+
+      if (highAttr) {
+        if (
+          (highAttr.aclPriority || 0) < (attr.aclPriority || 0) ||
+          ((highAttr.aclPriority || 0) === (attr.aclPriority || 0) &&
+            highAttr.priority < attr.priority)
+        ) {
+          return highestPrioArr;
         } else {
-          return [...highestPrioArr, attr];
+          return [...highestPrioArr.filter((highPrio) => highPrio.type !== attr.type), attr];
         }
-      },
-      [] as AttributeFile[]
-    );
-  }
-};
-
-const getAclPriority = (acl: AccessControlList) => {
-  if (!acl || acl.requiredSecurityGroup === SecurityGroupType.Owner) return 0;
-  if (
-    acl.requiredSecurityGroup === SecurityGroupType.Connected &&
-    acl.odinIdList?.length &&
-    acl.odinIdList?.length > 0
-  )
-    return 1;
-  if (
-    acl.requiredSecurityGroup === SecurityGroupType.Connected &&
-    acl.circleIdList?.length &&
-    acl.circleIdList?.length > 0
-  )
-    return 2;
-  if (acl.requiredSecurityGroup === SecurityGroupType.Connected) return 3;
-
-  if (acl.requiredSecurityGroup === SecurityGroupType.Authenticated) return 4;
-  return 10;
+      } else {
+        return [...highestPrioArr, attr];
+      }
+    },
+    [] as AttributeFile[]
+  );
 };
