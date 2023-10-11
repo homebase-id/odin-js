@@ -1,10 +1,9 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CursoredResult } from '@youfoundation/js-lib/core';
-import { getContacts } from '../../provider/contact/ContactProvider';
 
-import { RawContact } from '../../provider/contact/ContactTypes';
 import useAuth from '../auth/useAuth';
 import { parseContact } from './useContact';
+import { RawContact, getContacts } from '@youfoundation/js-lib/network';
 
 const pageSize = 10;
 

@@ -80,8 +80,6 @@ export const fetchFollowers = async (
   dotYouClient: DotYouClient,
   cursorState?: string
 ): Promise<CursoredResult<string[]> | undefined> => {
-  assertIfDotYouClientIsOwner(dotYouClient);
-
   const client = dotYouClient.createAxiosClient();
   const url = root + `/followingme${cursorState ? '?cursor=' + cursorState : ''}`;
 

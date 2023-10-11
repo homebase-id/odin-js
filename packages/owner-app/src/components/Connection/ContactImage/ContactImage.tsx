@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import useContact from '../../../hooks/contacts/useContact';
-import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
+import { ContactConfig } from '@youfoundation/js-lib/network';
 
 const getInitials = (
   fullName: string | undefined,

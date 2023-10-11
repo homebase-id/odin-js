@@ -1,12 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toGuidId } from '@youfoundation/js-lib/helpers';
-import { getContactByUniqueId, saveContact } from '../../provider/contact/ContactProvider';
+import { saveContact } from '../../provider/contact/ContactProvider';
 import {
   fetchConnectionInfo,
   fetchDataFromPublic,
 } from '../../provider/contact/ContactSourceProvider';
-import { ContactFile, ContactVm, RawContact } from '../../provider/contact/ContactTypes';
 import useAuth from '../auth/useAuth';
+import {
+  ContactFile,
+  ContactVm,
+  RawContact,
+  getContactByOdinId,
+  getContactByUniqueId,
+} from '@youfoundation/js-lib/network';
 
 const useContact = ({
   odinId,
@@ -37,7 +43,7 @@ const useContact = ({
     }
 
     // Direct fetch with odinId:
-    const contactBookContact = await getContactByUniqueId(dotYouClient, toGuidId(odinId));
+    const contactBookContact = await getContactByOdinId(dotYouClient, toGuidId(odinId));
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
     // TODO: Not sure if this is the best way yet... But it works for now
     if (contactBookContact && (contactBookContact.source === 'contact' || !canSave))

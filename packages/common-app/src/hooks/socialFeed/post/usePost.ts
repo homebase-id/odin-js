@@ -21,6 +21,7 @@ import {
   uploadImage,
   uploadVideo,
 } from '@youfoundation/js-lib/core';
+import { segmentVideoFile } from '@youfoundation/js-lib/helpers';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
 
 export interface FileLike {
@@ -103,8 +104,6 @@ const usePost = () => {
               }
             );
 
-          // Segment video file
-          const segmentVideoFile = (await import('@youfoundation/js-lib/helpers')).segmentVideoFile;
           const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
 
           return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {

@@ -1,4 +1,4 @@
-import { TargetDrive, ThumbSize } from '@youfoundation/js-lib/core';
+import { TargetDrive, ThumbSize } from '../../core/DriveData/DriveFileTypes';
 
 export class ContactConfig {
   static readonly ContactFileType: number = 100;

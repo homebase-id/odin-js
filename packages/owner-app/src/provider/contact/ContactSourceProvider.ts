@@ -9,7 +9,6 @@ import {
   EmailFields,
 } from '@youfoundation/js-lib/profile';
 
-import { RawContact } from './ContactTypes';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import {
   getProfileAttributesOverTransit,
@@ -18,6 +17,7 @@ import {
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { GetFile } from '@youfoundation/js-lib/public';
 import { getDetailedConnectionInfo } from '../../hooks/connections/useConnection';
+import { RawContact } from '@youfoundation/js-lib/network';
 
 //Handles fetching and parsing of Contact Source data
 

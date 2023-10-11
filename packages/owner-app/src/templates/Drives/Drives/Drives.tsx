@@ -5,12 +5,12 @@ import useDrives from '../../../hooks/drives/useDrives';
 import { HardDrive } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';
-import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import CardLink from '../../../components/ui/Buttons/CardLink';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { ProfileConfig } from '@youfoundation/js-lib/profile';
 import { BlogConfig } from '@youfoundation/js-lib/public';
+import { ContactConfig } from '@youfoundation/js-lib/network';
 
 const Drives = () => {
   const {

@@ -1,11 +1,11 @@
 import { Envelope, FallbackImg, t } from '@youfoundation/common-app';
 import useContact from '../../../hooks/contacts/useContact';
 import useImage from '../../../hooks/media/useImage';
-import { ContactConfig } from '../../../provider/contact/ContactTypes';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
+import { ContactConfig } from '@youfoundation/js-lib/network';
 
 interface ContactInfoProps {
   odinId?: string;

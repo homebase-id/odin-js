@@ -1,16 +1,18 @@
 import {
-  DriveSearchResult,
   UploadFileMetadata,
   UploadInstructionSet,
   SecurityGroupType,
-  CursoredResult,
   DotYouClient,
   uploadImage,
   uploadFile,
-  getPayload,
-  queryBatch,
   getRandom16ByteArray,
 } from '@youfoundation/js-lib/core';
+import {
+  RawContact,
+  ContactFile,
+  getContactByUniqueId,
+  ContactConfig,
+} from '@youfoundation/js-lib/network';
 import {
   base64ToUint8Array,
   getNewId,
@@ -18,8 +20,6 @@ import {
   toGuidId,
   jsonStringify64,
 } from '@youfoundation/js-lib/helpers';
-
-import { ContactConfig, ContactFile, RawContact } from './ContactTypes';
 
 //Handles management of Contacts
 export const saveContact = async (
@@ -35,11 +35,9 @@ export const saveContact = async (
     contact.fileId = existingContact?.fileId ?? undefined;
     contact.versionTag = existingContact?.versionTag || contact.versionTag;
 
-    // If we have an existing image, we don't want to overwrite it
-    if (existingContact?.imageFileId) {
+    // If we have an existing image, we don't want to remove it
+    if (existingContact?.imageFileId)
       contact.imageFileId = existingContact?.imageFileId ?? undefined;
-      contact.image = undefined;
-    }
   }
 
   // Save raw image:
@@ -108,118 +106,4 @@ export const saveContact = async (
   //update server-side info
   contact.fileId = result.file.fileId;
   return contact;
-};
-
-export const getContactByUniqueId = async (
-  dotYouClient: DotYouClient,
-  uniqueId: string
-): Promise<ContactFile | undefined> => {
-  try {
-    const response = await queryBatch(dotYouClient, {
-      targetDrive: ContactConfig.ContactTargetDrive,
-      clientUniqueIdAtLeastOne: [uniqueId],
-    });
-
-    if (response.searchResults.length == 0) {
-      return;
-    }
-
-    if (response.searchResults.length > 1) {
-      console.warn('UniqueId [' + uniqueId + '] in contacts has more than one file. Using latest');
-    }
-
-    const dsr: DriveSearchResult = response.searchResults[0];
-    const contact: ContactFile | null = await getPayload<ContactFile>(
-      dotYouClient,
-      ContactConfig.ContactTargetDrive,
-      dsr,
-      response.includeMetadataHeader
-    );
-    if (!contact) return;
-
-    // Set fileId for future replace
-    contact.fileId = dsr.fileId;
-    contact.versionTag = dsr.fileMetadata.versionTag;
-
-    return contact;
-  } catch (ex) {
-    throw new Error('Something went wrong fetching a contact');
-  }
-};
-
-export const getContactByTag = async (
-  dotYouClient: DotYouClient,
-  tag: string
-): Promise<ContactFile | undefined> => {
-  const response = await queryBatch(dotYouClient, {
-    targetDrive: ContactConfig.ContactTargetDrive,
-    tagsMatchAtLeastOne: [tag],
-  });
-
-  if (response.searchResults.length == 0) {
-    return;
-  }
-
-  if (response.searchResults.length > 1) {
-    console.warn('Tag [' + tag + '] in contacts has more than one file. Using latest');
-  }
-
-  const dsr: DriveSearchResult = response.searchResults[0];
-  const contact: ContactFile | null = await getPayload<ContactFile>(
-    dotYouClient,
-    ContactConfig.ContactTargetDrive,
-    dsr,
-    response.includeMetadataHeader
-  );
-  if (!contact) return;
-
-  // Set fileId for future replace
-  contact.fileId = dsr.fileId;
-  contact.versionTag = dsr.fileMetadata.versionTag;
-
-  return contact;
-};
-
-export const getContacts = async (
-  dotYouClient: DotYouClient,
-  cursorState: string | undefined = undefined,
-  pageSize = 10
-): Promise<CursoredResult<ContactFile[]>> => {
-  const response = await queryBatch(
-    dotYouClient,
-    {
-      targetDrive: ContactConfig.ContactTargetDrive,
-      fileType: [ContactConfig.ContactFileType],
-    },
-    { maxRecords: pageSize, cursorState: cursorState, includeMetadataHeader: true }
-  );
-
-  if (response.searchResults.length == 0) {
-    return { results: [], cursorState: '' };
-  }
-
-  return {
-    results: (
-      await Promise.all(
-        response.searchResults.map(async (result) => {
-          const dsr: DriveSearchResult = result;
-          const contact: ContactFile | null = await getPayload<ContactFile>(
-            dotYouClient,
-            ContactConfig.ContactTargetDrive,
-            dsr,
-            response.includeMetadataHeader
-          );
-
-          if (!contact) return;
-
-          // Set fileId for future replace
-          contact.fileId = dsr.fileId;
-          contact.versionTag = dsr.fileMetadata.versionTag;
-
-          return contact;
-        })
-      )
-    ).filter(Boolean) as ContactFile[],
-    cursorState: response.cursorState,
-  };
 };
