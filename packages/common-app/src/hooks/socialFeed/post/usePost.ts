@@ -209,14 +209,25 @@ const usePost = () => {
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
-          const newFeed = { ...previousFeed };
-          newFeed.pages[0].results = [
-            {
-              ...newPost.blogFile,
-              odinId: window.location.hostname,
-            },
-            ...newFeed.pages[0].results,
-          ];
+          const newFeed = {
+            ...previousFeed,
+            pages: previousFeed.pages.map((page, index) => {
+              return {
+                ...page,
+                results: [
+                  ...(index === 0
+                    ? [
+                        {
+                          ...newPost.blogFile,
+                          odinId: window.location.hostname,
+                        },
+                      ]
+                    : []),
+                  ...page.results,
+                ],
+              };
+            }),
+          };
 
           queryClient.setQueryData(['social-feeds'], newFeed);
         }

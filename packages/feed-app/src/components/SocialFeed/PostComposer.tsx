@@ -54,11 +54,7 @@ const PostComposer = ({
 
   const doPost = async () => {
     await savePost(caption, files, embeddedPost, channel, reactAccess);
-
-    // Reset UI:
     resetUi();
-
-    // Notifiy parent:
     onPost && onPost();
   };
 

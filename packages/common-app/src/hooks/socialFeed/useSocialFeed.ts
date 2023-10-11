@@ -32,12 +32,10 @@ const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   }: {
     pageParam?: { cursorState: string; ownerCursorState: Record<string, string> };
   }) => {
-    const response = await getSocialFeed(dotYouClient, pageSize, pageParam?.cursorState, {
+    return await getSocialFeed(dotYouClient, pageSize, pageParam?.cursorState, {
       ownCursorState: pageParam?.ownerCursorState,
       ownChannels,
     });
-
-    return response;
   };
 
   return {
@@ -48,7 +46,6 @@ const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
           : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
       enabled: channelsFetched,
     }),
   };
