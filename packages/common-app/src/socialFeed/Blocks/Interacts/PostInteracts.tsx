@@ -55,16 +55,6 @@ export const PostInteracts = ({
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
   const toggleable = !defaultExpanded && allowExpand;
 
-  const reactionContext: ReactionContext = {
-    authorOdinId: authorOdinId,
-    channelId: postFile.content.channelId,
-    target: {
-      globalTransitId: postFile.globalTransitId ?? 'unknown',
-      fileId: postFile.fileId ?? 'unknown',
-      isEncrypted: postFile.payloadIsEncrypted || false,
-    },
-  };
-
   const { data: canReact } = useCanReact({
     authorOdinId,
     channelId: postFile.content.channelId,
@@ -73,6 +63,18 @@ export const PostInteracts = ({
     isAuthenticated: isAuthenticated ?? false,
     isOwner: isOwner || false,
   });
+
+  if (!postFile.globalTransitId || !postFile.fileId) return null;
+
+  const reactionContext: ReactionContext = {
+    authorOdinId: authorOdinId,
+    channelId: postFile.content.channelId,
+    target: {
+      globalTransitId: postFile.globalTransitId, // TODO: remove 'unknown' fallback
+      fileId: postFile.fileId, // TODO: remove 'unknown' fallback
+      isEncrypted: postFile.payloadIsEncrypted || false,
+    },
+  };
 
   const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postFile.content.channelId}/${
     postFile.content.slug ?? postFile.content.id

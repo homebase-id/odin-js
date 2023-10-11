@@ -3,7 +3,12 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useParams, useSearchParams } from 'react-router-dom';
 import CheckboxToggle from '../../components/Form/CheckboxToggle';
-import { Alert, useFollowingInfinite, useSocialChannels } from '@youfoundation/common-app';
+import {
+  Alert,
+  ErrorNotification,
+  useFollowingInfinite,
+  useSocialChannels,
+} from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
@@ -15,55 +20,67 @@ const Following = () => {
   const [searchParams] = useSearchParams();
   const channels = searchParams.get('chnl')?.split(',') || [];
 
-  const { data: identityIFollow, isFetchedAfterMount: identityIFollowLoaded } = useIdentityIFollow({
+  const {
+    fetch: { data: identityIFollow, isFetchedAfterMount: identityIFollowLoaded },
+    unfollow: { mutateAsync: unfollow, error: unfollowError },
+  } = useIdentityIFollow({
     odinId: toFollowKey,
-  }).fetch;
+  });
 
   const { data: socialChannels, isFetchedAfterMount: socialChannelsLoaded } = useSocialChannels({
     odinId: toFollowKey,
   }).fetch;
 
+  const {
+    mutateAsync: follow,
+    status: followStatus,
+    error: followError,
+  } = useFollowingInfinite({}).follow;
+
   const [channelSelection, setChannelSelection] = useState(channels);
   useEffect(() => {
     // if no specific list is set, add all existing ones as selected; Eg: if no channel is explicitly passed then it's a follow all
-    if (!channelSelection && socialChannels?.length)
+    if (!channelSelection?.length && socialChannels?.length)
       setChannelSelection(socialChannels?.map((chnl) => chnl.channelId));
-  }, [socialChannelsLoaded]);
+  }, [socialChannels]);
 
   useEffect(() => {
-    if (identityIFollow) {
-      //Already following
-      if (identityIFollow.channels) {
-        // Selected set of channels
-        setChannelSelection(
-          Array.from(new Set([...identityIFollow.channels.map((chnl) => chnl.alias), ...channels]))
-        );
-      } else {
-        // All channels
-        if (socialChannels?.length)
-          setChannelSelection(socialChannels.map((chnl) => chnl?.channelId));
-      }
+    if (!identityIFollow) return;
+
+    //Already following
+    if (identityIFollow.channels) {
+      // Selected set of channels
+      setChannelSelection(
+        Array.from(new Set([...identityIFollow.channels.map((chnl) => chnl.alias), ...channels]))
+      );
+    } else {
+      // All channels
+      if (socialChannels?.length)
+        setChannelSelection(socialChannels.map((chnl) => chnl?.channelId));
     }
   }, [identityIFollowLoaded, socialChannels]);
 
   const doCancel = () => (window.location.href = `https://${toFollowKey}`);
 
-  const { mutateAsync: follow, status: followStatus } = useFollowingInfinite({}).follow;
   const doFollow = async () => {
     if (!toFollowKey) return null;
 
-    const selectChannels = channelSelection?.length !== socialChannels?.length;
+    if (identityIFollow && channelSelection?.length === 0) unfollow({ odinId: toFollowKey });
+    else {
+      const selectChannels = channelSelection?.length !== socialChannels?.length;
 
-    await follow({
-      odinId: toFollowKey,
-      notificationType: selectChannels ? 'selectedChannels' : 'allNotifications',
-      channels: selectChannels
-        ? channelSelection?.map((chnl) => {
-            return { alias: chnl, type: BlogConfig.DriveType };
-          })
-        : undefined,
-      // Pass undefined if all socialChannels are selected so it remains a follow all
-    });
+      await follow({
+        odinId: toFollowKey,
+        notificationType: selectChannels ? 'selectedChannels' : 'allNotifications',
+        channels: selectChannels
+          ? channelSelection?.map((chnl) => {
+              return { alias: chnl, type: BlogConfig.DriveType };
+            })
+          : undefined,
+        // Pass undefined if all socialChannels are selected so it remains a follow all
+      });
+    }
+
     window.location.href = `https://${toFollowKey}`;
   };
 
@@ -78,6 +95,8 @@ const Following = () => {
           {t('Follow')} &quot;{toFollowKey}&quot; | Homebase
         </title>
       </Helmet>
+
+      <ErrorNotification error={followError || unfollowError} />
 
       <section className="py-20">
         <div className="container mx-auto">
