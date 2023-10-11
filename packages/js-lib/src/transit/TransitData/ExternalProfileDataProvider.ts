@@ -21,14 +21,10 @@ export const getProfileAttributesOverTransit = async (
   try {
     const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams);
     if (!result) return [];
-    //sort where lowest number is higher priority (!! sort happens in place)
-    const searchResults = result.searchResults.sort((a, b) => {
-      return a.priority - b.priority;
-    });
 
-    return (
+    let attributes = (
       await Promise.all(
-        searchResults.map(async (dsr) => {
+        result.searchResults.map(async (dsr) => {
           const attrPayLoad: AttributeFile | null = await getPayloadOverTransit<AttributeFile>(
             dotYouClient,
             odinId,
@@ -43,10 +39,17 @@ export const getProfileAttributesOverTransit = async (
             ...attrPayLoad,
             profileId: profileId,
             acl: dsr.serverMetadata?.accessControlList,
+            aclPriority: dsr.priority,
           };
         })
       )
     ).filter((item) => !!item) as AttributeFile[];
+
+    attributes = attributes.sort(
+      (a, b) => (a.aclPriority || 0) - (b.aclPriority || 0) || a.priority - b.priority
+    );
+
+    return attributes;
   } catch (e) {
     console.error(e);
     return [];
