@@ -130,7 +130,7 @@ export const useSiteData = () => {
       const INCLUDE_METADATA_HEADER = true;
       const ownerDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
       const socialDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
-      const homeDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId);
+      const homeDrive = HomePageConfig.HomepageTargetDrive;
 
       /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getAttributeVersions`
       const collectionResult = await queryBatchCollection(dotYouClient, [

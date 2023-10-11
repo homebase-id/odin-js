@@ -81,7 +81,9 @@ export const fetchFollowers = async (
   cursorState?: string
 ): Promise<CursoredResult<string[]> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + `/followingme${cursorState ? '?cursor=' + cursorState : ''}`;
+  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
+
+  const url = currentRoot + `/followingme${cursorState ? '?cursor=' + cursorState : ''}`;
 
   return client
     .get(url)

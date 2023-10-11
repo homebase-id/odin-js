@@ -40,7 +40,8 @@ export const getContactByUniqueId = async (
 
     return contact;
   } catch (ex) {
-    throw new Error('Something went wrong fetching a contact');
+    console.error(ex);
+    return undefined;
   }
 };
 
