@@ -39,15 +39,11 @@ const MasonryPostOverview = ({ blogPosts }: { blogPosts: PostFile<PostContent>[]
   }, [calculateCols]);
 
   return (
-    <div
-      className={`-my-4 gap-4 ${blogPosts.length > 2 ? 'sm:columns-2' : ''} ${
-        blogPosts.length > 3 ? 'lg:columns-3' : ''
-      } ${blogPosts.length > 4 ? 'xl:columns-4' : ''}`}
-    >
+    <div className={`-my-4 gap-4 sm:columns-2 lg:columns-3 xl:columns-4`}>
       {reorder(blogPosts, cols).map((postFile) => {
         return (
           <PostTeaser
-            className="py-2"
+            className="break-inside-avoid py-2"
             key={postFile.content.id}
             postFile={postFile}
             hideImageWhenNone={true}
