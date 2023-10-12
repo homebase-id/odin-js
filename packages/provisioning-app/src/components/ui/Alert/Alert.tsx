@@ -1,6 +1,5 @@
+import { Exclamation, Question } from '@youfoundation/common-app';
 import { ReactNode } from 'react';
-import Exclamation from '../Icons/Exclamation/Exclamation';
-import Question from '../Icons/Question/Question';
 
 interface AlertProps {
   type: 'success' | 'warning' | 'critical' | 'info';
@@ -10,13 +9,7 @@ interface AlertProps {
   isCompact?: boolean;
 }
 
-export const Alert = ({
-  type,
-  title,
-  children,
-  className,
-  isCompact,
-}: AlertProps) => {
+export const Alert = ({ type, title, children, className, isCompact }: AlertProps) => {
   const bgClass =
     type === 'critical'
       ? 'bg-red-50 dark:bg-red-900 border-red-100 dark:border-red-800 dark:text-white'
@@ -26,9 +19,9 @@ export const Alert = ({
 
   return (
     <section
-      className={`bg-red rounded-lg border ${
-        isCompact ? 'p-2' : 'p-5'
-      } ${bgClass} ${className ?? ''}`}
+      className={`bg-red rounded-lg border ${isCompact ? 'p-2' : 'p-5'} ${bgClass} ${
+        className ?? ''
+      }`}
     >
       <div className={`flex w-full flex-row flex-wrap sm:flex-nowrap`}>
         {type === 'critical' ? (
@@ -56,11 +49,7 @@ export const Alert = ({
             <Question />
           </div>
         )}
-        <div
-          className={`ml-5 flex-grow ${
-            isCompact ? 'contents' : 'contents sm:block'
-          }`}
-        >
+        <div className={`ml-5 flex-grow ${isCompact ? 'contents' : 'contents sm:block'}`}>
           {title && <p className="mb-1 ml-3 font-bold sm:ml-0">{title}</p>}
           {children}
         </div>

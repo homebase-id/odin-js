@@ -6,11 +6,8 @@ import {
   useCreateIdentity,
   useDomainHasValidCertificate,
 } from '../../hooks/commonDomain/commonDomain';
-import Loader from '../ui/Icons/Loader/Loader';
+import { Arrow, Check, Loader, Question } from '@youfoundation/common-app';
 import { useEffect, useMemo, useState } from 'react';
-import Question from '../ui/Icons/Question/Question';
-import Check from '../ui/Icons/Check/Check';
-import Arrow from '../ui/Icons/Arrow/Arrow';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 
 interface Props {
@@ -20,24 +17,13 @@ interface Props {
   invitationCode: string;
 }
 
-const CreateIdentityView = ({
-  domain,
-  email,
-  planId,
-  invitationCode,
-}: Props) => {
+const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   const { data: didDnsRecordsPropagate } =
     useDidDnsRecordsPropagate(domain).fetchDidDnsRecordsPropagate;
-  const { data: canConnectToPort80 } = useCanConnectToDomain(
-    domain,
-    80
-  ).fetchCanConnectToDomain;
-  const { data: canConnectToPort443 } = useCanConnectToDomain(
-    domain,
-    443
-  ).fetchCanConnectToDomain;
+  const { data: canConnectToPort80 } = useCanConnectToDomain(domain, 80).fetchCanConnectToDomain;
+  const { data: canConnectToPort443 } = useCanConnectToDomain(domain, 443).fetchCanConnectToDomain;
 
   const {
     mutate: createIdentity,
@@ -52,11 +38,9 @@ const CreateIdentityView = ({
 
   //
 
-  const doCreateIdentity = () =>
-    createIdentity({ domain, email, planId, invitationCode });
+  const doCreateIdentity = () => createIdentity({ domain, email, planId, invitationCode });
 
-  const canProvision =
-    didDnsRecordsPropagate && canConnectToPort80 && canConnectToPort443;
+  const canProvision = didDnsRecordsPropagate && canConnectToPort80 && canConnectToPort443;
 
   useEffect(() => {
     if (canProvision && createIdentityStatus === 'idle') doCreateIdentity();
@@ -88,13 +72,10 @@ const CreateIdentityView = ({
 
   return (
     <div>
-      <AlertError
-        error={createIdentityError}
-        doRetry={() => doCreateIdentity}
-      />
+      <AlertError error={createIdentityError} doRetry={() => doCreateIdentity} />
 
       <div className="flex flex-col justify-center">
-        <div className="mx-auto mt-20 mb-10 flex w-full max-w-xl flex-col items-center text-center">
+        <div className="mx-auto mb-10 mt-20 flex w-full max-w-xl flex-col items-center text-center">
           {canProvision && !!firstRunToken ? (
             <>
               <p className="text-center">
@@ -174,8 +155,7 @@ const CreateIdentityView = ({
             ) : (
               <p>
                 <Question className="mr-2 inline-block h-8 w-8 rounded-lg bg-blue-400 p-2 text-white" />
-                Waiting for valid certificate on domain (this can take a few
-                minutes)
+                Waiting for valid certificate on domain (this can take a few minutes)
               </p>
             )
           ) : null}

@@ -5,9 +5,9 @@ import { useFetchOwnDomainDnsConfig } from '../../hooks/ownDomain/useOwnDomain';
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
 import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import Arrow from '../ui/Icons/Arrow/Arrow';
 import { useMemo, useState } from 'react';
 import { Alert } from '../ui/Alert/Alert';
+import { Arrow } from '@youfoundation/common-app';
 
 interface Props {
   domain: string;

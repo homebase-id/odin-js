@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
-import Arrow from '../ui/Icons/Arrow/Arrow';
 import { DnsConfig, DnsRecord } from '../../hooks/commonDomain/commonDomain';
-import Exclamation from '../ui/Icons/Exclamation/Exclamation';
-import Check from '../ui/Icons/Check/Check';
-import Loader from '../ui/Icons/Loader/Loader';
+import { Arrow, Check, Exclamation, Loader } from '@youfoundation/common-app';
 import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
 import DialogWrapper from '../ui/Dialog/DialogWrapper';
 

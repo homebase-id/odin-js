@@ -5,9 +5,8 @@ import { t } from '../../helpers/i18n/dictionary';
 import { validDomainRegEx } from '../../helpers/common';
 import { useFetchIsOwnDomainAvailable } from '../../hooks/ownDomain/useOwnDomain';
 import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
-import Exclamation from '../ui/Icons/Exclamation/Exclamation';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import Arrow from '../ui/Icons/Arrow/Arrow';
+import { Arrow, Exclamation } from '@youfoundation/common-app';
 
 interface Props {
   domain: string;

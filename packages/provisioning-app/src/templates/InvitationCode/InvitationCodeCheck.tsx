@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import useCheckInvitationCode from '../../hooks/invitationCode/useCheckInvitationCode';
 import { t } from '../../helpers/i18n/dictionary';
-import Loader from '../../components/ui/Icons/Loader/Loader';
+import { Loader } from '@youfoundation/common-app';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
 import Label from '../../components/Form/Label';
@@ -21,11 +21,9 @@ const InvitationCodeCheck = () => {
     status,
   } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
 
-  if (invitationCode && isLoading && !isEnterCode)
-    return <Loader className="m-auto h-16 w-16" />;
+  if (invitationCode && isLoading && !isEnterCode) return <Loader className="m-auto h-16 w-16" />;
 
-  if (isValid === true)
-    return <Navigate to={`/sign-up${window.location.search}`} />;
+  if (isValid === true) return <Navigate to={`/sign-up${window.location.search}`} />;
 
   const doSetInvitationCode = (newCode?: string) => {
     if (!newCode) {
@@ -54,9 +52,7 @@ const InvitationCodeCheck = () => {
         <div className="mx-auto mt-20 min-h-[20rem] w-full max-w-lg text-center">
           <h1 className="mb-10 text-4xl">
             Homebase | Signup
-            <span className="mt-1 block text-3xl text-slate-400">
-              {t('Create a new identity')}
-            </span>
+            <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
           </h1>
 
           <p className="my-7 block border-y py-3 text-center italic">
@@ -73,12 +69,7 @@ const InvitationCodeCheck = () => {
                 <Label htmlFor="invitationCode" className="text-left">
                   {t('Your invitation code')}:
                 </Label>
-                <Input
-                  id="invitationCode"
-                  name="invitation-code"
-                  required
-                  key={'input'}
-                />
+                <Input id="invitationCode" name="invitation-code" required key={'input'} />
               </div>
               <div className="flex flex-row-reverse gap-2">
                 <ActionButton
@@ -86,8 +77,7 @@ const InvitationCodeCheck = () => {
                   className="flex-grow justify-center text-center"
                   type="primary"
                   state={
-                    (status === 'loading' || status === 'error') &&
-                    invitationCode
+                    (status === 'loading' || status === 'error') && invitationCode
                       ? status
                       : undefined
                   }

@@ -1,6 +1,7 @@
 import { FC, ReactNode } from 'react';
 
 import { config } from '../../../app/config';
+import { IconProps } from '@youfoundation/common-app';
 
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 
@@ -49,11 +50,7 @@ const ActionLink: FC<ActionLinkProps> = ({
       : '';
 
   const sizeClasses =
-    size === 'large'
-      ? 'px-5 py-3'
-      : size === 'small'
-      ? 'px-3 py-1 text-sm'
-      : 'px-3 py-2';
+    size === 'large' ? 'px-5 py-3' : size === 'small' ? 'px-3 py-1 text-sm' : 'px-3 py-2';
 
   const stateClasses = state === 'loading' ? 'animate-pulse' : '';
 

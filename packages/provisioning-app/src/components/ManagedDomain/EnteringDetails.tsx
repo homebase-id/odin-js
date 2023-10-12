@@ -9,26 +9,19 @@ import {
   useFetchIsManagedDomainAvailable,
   ManagedDomainApex,
 } from '../../hooks/managedDomain/useManagedDomain';
-import Loader from '../ui/Icons/Loader/Loader';
-import {
-  domainFromPrefixAndApex,
-  validDomainLabelRegEx,
-} from '../../helpers/common';
+import { Arrow, Exclamation, Loader } from '@youfoundation/common-app';
+import { domainFromPrefixAndApex, validDomainLabelRegEx } from '../../helpers/common';
 import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import CreateManagedDomain from './CreateManagedDomain';
 import { debounce } from 'lodash-es';
-import Exclamation from '../ui/Icons/Exclamation/Exclamation';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import Arrow from '../ui/Icons/Arrow/Arrow';
 
 interface EnteringDetailsProps {
   domain: string;
   setDomain: React.Dispatch<React.SetStateAction<string>>;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
   provisionState: ManagedDomainProvisionState;
-  setProvisionState: React.Dispatch<
-    React.SetStateAction<ManagedDomainProvisionState>
-  >;
+  setProvisionState: React.Dispatch<React.SetStateAction<ManagedDomainProvisionState>>;
 }
 
 const EnteringDetails = ({
@@ -39,23 +32,18 @@ const EnteringDetails = ({
   setEmail,
 }: EnteringDetailsProps) => {
   const [prefixes, setPrefixes] = useState<string[]>([]); // array of prefixes in ui, e.g ['john', 'doe']
-  const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(
-    undefined
-  );
+  const [domainApex, setDomainApex] = useState<ManagedDomainApex | undefined>(undefined);
 
   const domainPrefix = useMemo(() => {
     const hasAllPrefixes =
-      prefixes.filter((x) => x.length > 0).length ===
-      domainApex?.prefixLabels.length;
-    if (hasAllPrefixes)
-      return prefixes.slice(0, domainApex?.prefixLabels.length).join('.');
+      prefixes.filter((x) => x.length > 0).length === domainApex?.prefixLabels.length;
+    if (hasAllPrefixes) return prefixes.slice(0, domainApex?.prefixLabels.length).join('.');
     else return '';
   }, [prefixes, domainApex]);
 
   useEffect(() => {
     const hasAllPrefixes =
-      prefixes.filter((x) => x.length > 0).length ===
-      domainApex?.prefixLabels.length;
+      prefixes.filter((x) => x.length > 0).length === domainApex?.prefixLabels.length;
     if (!hasAllPrefixes || !domainApex) {
       setDomain('');
     } else {
@@ -68,10 +56,7 @@ const EnteringDetails = ({
   //
 
   const {
-    fetchManagedDomainApexes: {
-      data: managedDomainApexes,
-      error: errorManagedDomainApexes,
-    },
+    fetchManagedDomainApexes: { data: managedDomainApexes, error: errorManagedDomainApexes },
   } = useFetchManagedDomainsApexes();
 
   const {
@@ -121,16 +106,11 @@ const EnteringDetails = ({
   if (provisionState === 'EnteringDetails') {
     return (
       <>
-        <AlertError
-          error={errorManagedDomainApexes || errorIsManagedDomainAvailable}
-        />
+        <AlertError error={errorManagedDomainApexes || errorIsManagedDomainAvailable} />
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (
-              isManagedDomainAvailable &&
-              isManagedDomainAvailableStatus === 'success'
-            )
+            if (isManagedDomainAvailable && isManagedDomainAvailableStatus === 'success')
               setProvisionState('CreatingManagedDomain');
 
             return false;
@@ -140,7 +120,7 @@ const EnteringDetails = ({
           <div className="flex flex-row flex-wrap items-center">
             <Label>{t('Your domain')}</Label>
             {isManagedDomainAvailable === false && domain ? (
-              <p className="order-1 mt-2 ml-auto flex flex-row items-center rounded-lg bg-slate-100 py-1 px-2 md:order-none md:mt-0 md:rounded-b-none">
+              <p className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
                 <Exclamation className="mr-2 h-4 w-4" />
                 {t(`This domain isn't available, try another one`)}
               </p>
@@ -162,9 +142,7 @@ const EnteringDetails = ({
               <Select
                 onChange={(e) => {
                   if (managedDomainApexes) {
-                    const apex = managedDomainApexes?.find(
-                      (x) => x.apex === e.target.value
-                    );
+                    const apex = managedDomainApexes?.find((x) => x.apex === e.target.value);
                     setDomainApex(apex);
                   }
                 }}
@@ -199,10 +177,7 @@ const EnteringDetails = ({
           <div className="mt-5 flex flex-row-reverse">
             <ActionButton
               isDisabled={
-                !(
-                  isManagedDomainAvailable === true &&
-                  isManagedDomainAvailableStatus === 'success'
-                )
+                !(isManagedDomainAvailable === true && isManagedDomainAvailableStatus === 'success')
               }
               icon={Arrow}
               state={
@@ -249,9 +224,7 @@ const PrefixInput = ({
       defaultValue={defaultValue}
       placeholder={placeholder}
       required
-      onKeyDown={(e) =>
-        e.key.match(validDomainLabelRegEx) && e.preventDefault()
-      }
+      onKeyDown={(e) => e.key.match(validDomainLabelRegEx) && e.preventDefault()}
       onChange={debouncedChange}
       className="focus:outline-t-0 focus:outline-x-0 border-x-0 border-t-0 focus:ring-0"
     />

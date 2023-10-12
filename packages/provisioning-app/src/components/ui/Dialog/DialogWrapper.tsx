@@ -1,6 +1,6 @@
 import { ReactNode, useRef } from 'react';
 import useOutsideTrigger from '../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
-import Times from '../Icons/Times/Times';
+import { Times } from '@youfoundation/common-app';
 
 const DialogWrapper = ({
   children,
@@ -21,27 +21,18 @@ const DialogWrapper = ({
   useOutsideTrigger(wrapperRef, () => !keepOpenOnBlur && onClose && onClose());
 
   return (
-    <div
-      className="relative z-50"
-      aria-labelledby="modal-title"
-      role="dialog"
-      aria-modal="true"
-    >
+    <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
       <div className="fixed inset-0 z-10 overflow-y-auto">
         <div
           className={`flex min-h-full ${
-            isSidePanel
-              ? 'justify-end'
-              : 'items-end justify-center p-4 sm:items-center sm:p-0'
+            isSidePanel ? 'justify-end' : 'items-end justify-center p-4 sm:items-center sm:p-0'
           }  text-center `}
         >
           <div
             ref={wrapperRef}
             className={`relative transform ${
-              !isSidePanel
-                ? 'overflow-hidden rounded-lg shadow-xl sm:w-full'
-                : 'w-full'
+              !isSidePanel ? 'overflow-hidden rounded-lg shadow-xl sm:w-full' : 'w-full'
             } bg-white text-left  transition-all dark:bg-black  ${
               size === 'normal'
                 ? 'sm:max-w-lg'

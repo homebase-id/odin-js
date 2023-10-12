@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../helpers/i18n/dictionary';
 import usePortal from '../../../hooks/portal/usePortal';
 import ActionButton from '../../ui/Buttons/ActionButton';
-import Question from '../../ui/Icons/Question/Question';
 import DialogWrapper from '../../ui/Dialog/DialogWrapper';
+import { Question } from '@youfoundation/common-app';
 
 const InfoDialog = ({
   title,

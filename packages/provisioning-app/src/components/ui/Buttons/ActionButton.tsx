@@ -1,7 +1,6 @@
 import { FC, ReactNode } from 'react';
-import Check from '../Icons/Check/Check';
-import Exclamation from '../Icons/Exclamation/Exclamation';
-import Loader from '../Icons/Loader/Loader';
+
+import { Check, Exclamation, IconProps, Loader } from '@youfoundation/common-app';
 import { config } from '../../../app/config';
 export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
 
@@ -29,15 +28,9 @@ const ActionButton: FC<ActionButtonProps> = ({
   isDisabled,
 }) => {
   const Icon = (props: { className: string }) => {
-    if (state === 'loading') {
-      return <Loader {...props} />;
-    }
-    if (state === 'success') {
-      return <Check {...props} />;
-    }
-    if (state === 'error') {
-      return <Exclamation {...props} />;
-    }
+    if (state === 'loading') return <Loader {...props} />;
+    if (state === 'success') return <Check {...props} />;
+    if (state === 'error') return <Exclamation {...props} />;
 
     return icon ? icon(props) : null;
   };
@@ -51,8 +44,7 @@ const ActionButton: FC<ActionButtonProps> = ({
       ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
       : type === 'mute'
       ? ''
-      : config.primaryClassName) +
-    (isDisabled ? ' opacity-50 cursor-not-allowed' : '');
+      : config.primaryClassName) + (isDisabled ? ' opacity-50 cursor-not-allowed' : '');
 
   const widthClasses =
     children && type !== 'mute'

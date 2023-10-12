@@ -1,4 +1,4 @@
-import Cog from '../../Icons/Cog/Cog';
+import { Cog } from '@youfoundation/common-app';
 
 const LinkToConsole = ({ className }: { className: string }) => {
   return (

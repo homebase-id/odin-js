@@ -4,15 +4,13 @@ import { t } from '../../helpers/i18n/dictionary';
 import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import { useCreateManagedDomain } from '../../hooks/managedDomain/useManagedDomain';
 import ActionButton from '../ui/Buttons/ActionButton';
-import Arrow, { ArrowLeft } from '../ui/Icons/Arrow/Arrow';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
+import { Arrow, ArrowLeft } from '@youfoundation/common-app';
 
 interface CreateManagedDomainProps {
   domainPrefix: string;
   domainApex: string;
-  setProvisionState: React.Dispatch<
-    React.SetStateAction<ManagedDomainProvisionState>
-  >;
+  setProvisionState: React.Dispatch<React.SetStateAction<ManagedDomainProvisionState>>;
 }
 
 const CreateManagedDomain = ({
@@ -37,12 +35,10 @@ const CreateManagedDomain = ({
   //
 
   useEffect(() => {
-    if (createManagedDomainStatus === 'success')
-      setProvisionState('Provisioning');
+    if (createManagedDomainStatus === 'success') setProvisionState('Provisioning');
   }, [createManagedDomainStatus]);
 
-  const doCreateManagedDomain = async () =>
-    await createManagedDomain({ domainPrefix, domainApex });
+  const doCreateManagedDomain = async () => await createManagedDomain({ domainPrefix, domainApex });
 
   const doCancel = () => setProvisionState('EnteringDetails');
 
@@ -55,10 +51,7 @@ const CreateManagedDomain = ({
         {t('Create managed domain')} <strong>{domain}</strong>?
         <small className="block text-sm">
           {t('You unique identity will be ')}
-          {domain}{' '}
-          {t(
-            'During the Alpha, this cannot be changed without creating a new identity.'
-          )}
+          {domain} {t('During the Alpha, this cannot be changed without creating a new identity.')}
         </small>
         <div className="mt-10 flex flex-row-reverse">
           <ActionButton

@@ -6,7 +6,7 @@ import CreateIdentityView from '../../components/CreateIdentityView.tsx/CreateId
 import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import useCheckInvitationCode from '../../hooks/invitationCode/useCheckInvitationCode';
-import Times from '../../components/ui/Icons/Times/Times';
+import { Times } from '@youfoundation/common-app';
 
 const Provision = () => {
   const [provisionState, setProvisionState] =
@@ -16,13 +16,9 @@ const Provision = () => {
 
   const [searchParams] = useSearchParams();
   const [planId] = useState<string>(searchParams.get('plan-id') || 'free');
-  const [invitationCode] = useState<string | null>(
-    searchParams.get('invitation-code')
-  );
+  const [invitationCode] = useState<string | null>(searchParams.get('invitation-code'));
 
-  const { data: isValid } = useCheckInvitationCode(
-    invitationCode || undefined
-  ).checkInvitationCode;
+  const { data: isValid } = useCheckInvitationCode(invitationCode || undefined).checkInvitationCode;
 
   if (!invitationCode || isValid === false) return <Navigate to="/" />;
 
@@ -32,12 +28,9 @@ const Provision = () => {
         <div className="mt-20 min-h-[20rem]">
           <h1 className="mb-10 text-4xl">
             Homebase | Signup
-            <span className="mt-1 block text-3xl text-slate-400">
-              {t('Create a new identity')}
-            </span>
+            <span className="mt-1 block text-3xl text-slate-400">{t('Create a new identity')}</span>
           </h1>
-          {provisionState === 'EnteringDetails' ||
-          provisionState === 'CreatingManagedDomain' ? (
+          {provisionState === 'EnteringDetails' || provisionState === 'CreatingManagedDomain' ? (
             <EnteringDetails
               domain={domain}
               setDomain={setDomain}
@@ -55,9 +48,7 @@ const Provision = () => {
           ) : (
             <div>
               <p className="text-lg">
-                {t(
-                  'Mmh something went wrong, and we are not sure what happened exactly...'
-                )}{' '}
+                {t('Mmh something went wrong, and we are not sure what happened exactly...')}{' '}
                 {t('Want to try again?')}
               </p>
               <ActionButton
