@@ -1,4 +1,4 @@
-import { DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
+import { DotYouClient } from '../../core/DotYouClient';
 import {
   getDrivePermissionFromString,
   getNewId,
@@ -59,8 +59,6 @@ export const createCircleDefinition = async (
 };
 
 export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefinition[]> => {
-  assertIfDotYouClientIsOwner(dotYouClient);
-
   const client = dotYouClient.createAxiosClient();
   const url = root + '/list';
 
