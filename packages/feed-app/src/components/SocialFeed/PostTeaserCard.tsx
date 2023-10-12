@@ -14,6 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import useAuth from '../../hooks/auth/useAuth';
 interface PostTeaserCardProps {
   className?: string;
   postFile: PostFile<PostContent>;
@@ -22,15 +23,18 @@ interface PostTeaserCardProps {
 }
 
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
+  const { getIdentity } = useAuth();
   const { content: post } = postFile;
-  const isExternal = !odinId || odinId !== window.location.hostname;
+  const isExternal = odinId !== getIdentity();
   const navigate = useNavigate();
 
   const { data: externalChannel } = useSocialChannel({
     odinId: isExternal ? odinId : undefined,
     channelId: post.channelId,
   }).fetch;
-  const { data: internalChannel } = useChannel({ channelId: post.channelId }).fetch;
+  const { data: internalChannel } = useChannel({
+    channelId: isExternal ? undefined : post.channelId,
+  }).fetch;
 
   const channel = externalChannel || internalChannel;
   const postPath = `preview/${odinId}/${channel?.channelId}/${post.id}`;

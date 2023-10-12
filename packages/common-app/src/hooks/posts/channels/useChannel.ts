@@ -25,9 +25,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
 
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
-    if (!channelSlug && !channelId) {
-      return null;
-    }
+    if (!channelSlug && !channelId) return null;
 
     const cachedChannels = queryClient.getQueryData<ChannelDefinitionVm[]>(['channels']);
     if (cachedChannels) {

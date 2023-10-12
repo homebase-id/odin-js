@@ -1,15 +1,13 @@
 import { Suspense } from 'react';
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
-import { Lock } from '@youfoundation/common-app';
+import { ActionGroupOptionProps, Lock } from '@youfoundation/common-app';
 
 import {
   ChannelDefinitionVm,
   HOME_ROOT_PATH,
   t,
-  useChannel,
   useDotYouClient,
   ActionGroup,
-  Times,
   UserX,
 } from '@youfoundation/common-app';
 import OwnerActions from './OwnerActions';
@@ -80,58 +78,26 @@ export const PostMeta = ({
           <OwnerActions postFile={postFile} />
         </Suspense>
       ) : odinId ? (
-        <ExternalActions postFile={postFile} odinId={odinId} />
+        <ExternalActions odinId={odinId} />
       ) : null}
     </div>
   );
 };
 
-const ExternalActions = ({
-  odinId,
-  postFile,
-}: {
-  odinId: string;
-  postFile: PostFile<PostContent>;
-}) => {
-  const { data: channel } = useChannel({ channelId: postFile.content.channelId }).fetch;
+const ExternalActions = ({ odinId }: { odinId: string }) => {
+  const identity = useDotYouClient().getIdentity();
+
+  const options: ActionGroupOptionProps[] = [
+    {
+      icon: UserX,
+      label: `${t('Edit what I follow from')} "${odinId}"`,
+      href: `https://${identity}/owner/follow/${odinId}`,
+    },
+  ];
 
   return (
     <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
-      <ActionGroup
-        className=""
-        type="mute"
-        size="none"
-        options={[
-          {
-            icon: Times,
-            label: `${t('Unfollow')} "${channel?.name}"`,
-            onClick: (e) => {
-              e.stopPropagation();
-              // TODO
-            },
-            confirmOptions: {
-              title: `${t('Unfollow')} "${channel?.name}"`,
-              body: `${t('Are you sure you want to unfollow')} "${channel?.name}" ${t(
-                'from'
-              )} "${odinId}"`,
-              buttonText: t('Unfollow'),
-            },
-          },
-          {
-            icon: UserX,
-            label: `${t('Unfollow')} "${odinId}"`,
-            onClick: (e) => {
-              e.stopPropagation();
-              // TODO
-            },
-            confirmOptions: {
-              title: `${t('Unfollow')} "${odinId}"`,
-              body: `${t('Are you sure you want to unfollow')} "${odinId}"`,
-              buttonText: t('Unfollow'),
-            },
-          },
-        ]}
-      />
+      <ActionGroup className="" type="mute" size="none" options={options} />
     </div>
   );
 };
