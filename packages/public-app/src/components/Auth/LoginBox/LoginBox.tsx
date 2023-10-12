@@ -21,26 +21,26 @@ const useParams = (returnUrl: string) => {
     refetchOnMount: false,
   });
 };
-
+// Iframes and navigation is weird
+// https://www.aleksandrhovhannisyan.com/blog/react-iframes-back-navigation-bug/
 const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   const { data: authParams } = useParams(returnUrl || window.location.href);
+  const iframeSrc = `${
+    import.meta.env.VITE_CENTRAL_LOGIN_URL
+  }?isDarkMode=${document.documentElement.classList.contains(IS_DARK_CLASSNAME)}${
+    authParams ? `&${stringifyToQueryParams(authParams as any)}` : ''
+  }`;
 
   return (
     <>
       {authParams ? (
-        <Helmet>
-          <meta name="youauth" content={stringifyToQueryParams(authParams as any)} />
-        </Helmet>
+        <>
+          <Helmet>
+            <meta name="youauth" content={stringifyToQueryParams(authParams as any)} />
+          </Helmet>
+          <iframe src={iframeSrc} key={iframeSrc} className="h-[16rem] w-full"></iframe>
+        </>
       ) : null}
-      <iframe
-        src={`${
-          import.meta.env.VITE_CENTRAL_LOGIN_URL
-        }?isDarkMode=${document.documentElement.classList.contains(IS_DARK_CLASSNAME)}${
-          authParams ? `&${stringifyToQueryParams(authParams as any)}` : ''
-        }`}
-        className="h-[16rem] w-full"
-        // loading="lazy"
-      ></iframe>
     </>
   );
 };
