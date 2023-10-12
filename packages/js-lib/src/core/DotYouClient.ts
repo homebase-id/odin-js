@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
-import { isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
+import { hasDebugFlag, isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
 
 export enum ApiType {
   Owner,
@@ -85,7 +85,7 @@ export class BaseDotYouClient {
 
     // Encryption/Decryption on requests and responses
     const ss = this.getSharedSecret();
-    const isDebug = isLocalStorageAvailable() ? localStorage.getItem('debug') === '1' : false;
+    const isDebug = hasDebugFlag();
 
     client.interceptors.request.use(
       async function (request) {

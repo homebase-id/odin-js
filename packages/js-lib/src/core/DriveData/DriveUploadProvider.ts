@@ -1,3 +1,4 @@
+import { hasDebugFlag } from '../../helpers/BrowserUtil';
 import { DotYouClient } from '../DotYouClient';
 import { ThumbnailFile } from './DriveFileTypes';
 import { KeyHeader, EncryptedKeyHeader } from './DriveTypes';
@@ -17,6 +18,8 @@ import {
   pureAppend,
 } from './UploadHelpers';
 
+const isDebug = hasDebugFlag();
+
 /// Upload methods:
 export const uploadFile = async (
   dotYouClient: DotYouClient,
@@ -27,6 +30,12 @@ export const uploadFile = async (
   encrypt = true,
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
+  isDebug &&
+    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
+      instructions,
+      metadata,
+    });
+
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadUsingKeyHeader(
     dotYouClient,

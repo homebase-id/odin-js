@@ -8,3 +8,6 @@ export const isLocalStorageAvailable = () => {
     return false;
   }
 };
+
+export const hasDebugFlag = () =>
+  isLocalStorageAvailable() ? localStorage.getItem('debug') === '1' : false;

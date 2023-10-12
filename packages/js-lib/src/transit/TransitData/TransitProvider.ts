@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { ApiType, DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
+import { DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
 import {
   decryptKeyHeader,
   decryptJsonContent,
@@ -37,6 +37,7 @@ import {
   roundToLargerMultipleOf16,
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
+import { hasDebugFlag } from '../../helpers/BrowserUtil';
 
 interface GetFileRequest {
   odinId: string;
@@ -350,6 +351,8 @@ export const getDrivesByTypeOverTransit = async (
   });
 };
 
+const isDebug = hasDebugFlag();
+
 /// Upload methods
 export const uploadFileOverTransit = async (
   dotYouClient: DotYouClient,
@@ -359,6 +362,16 @@ export const uploadFileOverTransit = async (
   thumbnails?: ThumbnailFile[],
   encrypt = true
 ) => {
+  isDebug &&
+    console.debug(
+      'request',
+      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
+      {
+        instructions,
+        metadata,
+      }
+    );
+
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadFileOverTransitUsingKeyHeader(
     dotYouClient,
