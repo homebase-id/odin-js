@@ -58,10 +58,10 @@ export const PostInteracts = ({
   const { data: canReact } = useCanReact({
     authorOdinId,
     channelId: postFile.content.channelId,
-    postId: postFile.content.id,
+    postContent: postFile.content,
     isEnabled: !!isExpanded || !!hasIntentToReact,
     isAuthenticated: isAuthenticated ?? false,
-    isOwner: isOwner || false,
+    isOwner: isOwner ?? false,
   });
 
   if (!postFile.globalTransitId || !postFile.fileId) return null;

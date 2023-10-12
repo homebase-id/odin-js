@@ -16,7 +16,7 @@
     "@tanstack/react-virtual": "^3.0.0-beta.54",
     "@youfoundation/js-lib": "*",
     "@youfoundation/ui-lib": "*",
-    "@youfoundation/common-app": "^0.1.0",
+    "@youfoundation/common-app": "*",
     "axios": "^1.2.0",
     "emoji-picker-element": "^1.15.1",
     "lodash-es": "^4.17.21",

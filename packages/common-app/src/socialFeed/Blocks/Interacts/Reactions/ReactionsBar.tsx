@@ -81,7 +81,7 @@ export const ReactionsBar = ({
     return null;
   }
 
-  if (canReact && (canReact.canReact === false || canReact.canReact === 'comment')) {
+  if (!canReact || canReact?.canReact === false || canReact?.canReact === 'comment') {
     return (
       <div
         className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${

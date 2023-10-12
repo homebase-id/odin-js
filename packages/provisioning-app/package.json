@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "/",
   "dependencies": {
+    "@youfoundation/common-app": "*",
     "@tanstack/react-query": "^4.28.0",
     "axios": "^0.27.2",
     "lodash-es": "^4.17.21",
