@@ -138,7 +138,7 @@ export const saveComment = async (
       targetDrive: targetDrive,
       globalTransitId: comment.threadId || comment.context.target.globalTransitId,
     };
-    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Owner };
+    metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Connected };
     metadata.allowDistribution = true;
 
     const instructionSet: TransitInstructionSet = {
