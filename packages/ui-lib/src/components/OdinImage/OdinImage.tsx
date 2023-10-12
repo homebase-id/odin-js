@@ -27,6 +27,8 @@ export interface OdinImageProps {
   explicitSize?: ImageSize | 'full';
 }
 
+const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
+
 export const OdinImage = ({
   dotYouClient,
   odinId,
@@ -131,7 +133,7 @@ export const OdinImage = ({
     if (
       !previewImgRef.current ||
       (!tinyThumb?.sizes?.length && !skipTiny) ||
-      previewThumbnail?.contentType === 'image/svg+xml'
+      thumblessContentTypes.includes(previewThumbnail?.contentType ?? '')
     ) {
       setLoadSize('full');
       return;
@@ -222,6 +224,7 @@ export const OdinImage = ({
           <img
             src={imageData?.url}
             alt={alt}
+            key={loadSize === 'full' ? 'full' : `${loadSize?.pixelWidth}x${loadSize?.pixelHeight}`}
             // Setting the aspect ratio sets the figure element to be the same size as the image while the image is still loading
             style={{ aspectRatio: `${width ?? 1}/${height ?? 1}` }}
             className={`${
@@ -232,12 +235,12 @@ export const OdinImage = ({
             title={title}
             width={width}
             height={height}
-            key="full"
             onLoad={() => {
               setIsFinal(true);
               onLoad && onLoad();
             }}
-            onError={() => setIsFatalError(true)}
+            // If loading a thumb fails, try to load the full image
+            onError={() => (loadSize !== 'full' ? setLoadSize('full') : setIsFatalError(true))}
           />
           {isFatalError ? (
             <div

@@ -16,6 +16,7 @@ const tinyThumbSize: ThumbnailInstruction = {
 };
 
 const svgType = 'image/svg+xml';
+const gifType = 'image/gif';
 
 export const createThumbnails = async (
   imageBytes: Uint8Array,
@@ -35,6 +36,16 @@ export const createThumbnails = async (
     return {
       tinyThumb: vectorThumb.thumb,
       naturalSize: vectorThumb.naturalSize,
+      additionalThumbnails: [],
+    };
+  }
+
+  if (contentType === gifType) {
+    const gifThumb = await createImageThumbnail(imageBytes, { ...tinyThumbSize, type: 'gif' });
+
+    return {
+      tinyThumb: gifThumb.thumb,
+      naturalSize: gifThumb.naturalSize,
       additionalThumbnails: [],
     };
   }
@@ -113,12 +124,12 @@ const createVectorThumbnail = async (
 
 const createImageThumbnail = async (
   imageBytes: Uint8Array,
-  instruction: ThumbnailInstruction,
-  format: 'webp' | 'png' | 'bmp' | 'jpeg' | 'gif' = 'webp'
+  instruction: ThumbnailInstruction
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
   const blob: Blob = new Blob([imageBytes], {});
+  const type = instruction.type || 'webp';
 
-  return fromBlob(blob, instruction.quality, instruction.width, instruction.height, format).then(
+  return fromBlob(blob, instruction.quality, instruction.width, instruction.height, type).then(
     (resizedData) => {
       return resizedData.blob.arrayBuffer().then((buffer) => {
         const contentByteArray = new Uint8Array(buffer);
@@ -132,7 +143,7 @@ const createImageThumbnail = async (
             pixelWidth: resizedData.size.width,
             pixelHeight: resizedData.size.height,
             payload: contentByteArray,
-            contentType: `image/${instruction.type || format}`,
+            contentType: `image/${type}`,
           },
         };
       });

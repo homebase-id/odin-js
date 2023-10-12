@@ -159,7 +159,7 @@ const PostComposer = ({
               >
                 <FileSelector
                   onChange={(files) => setFiles(files.map((file) => ({ file })))}
-                  accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, video/mp4"
+                  accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
                   className="text-foreground hover:text-opacity-70"
                 />
               </div>
