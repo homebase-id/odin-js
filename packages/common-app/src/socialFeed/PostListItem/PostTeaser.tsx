@@ -41,14 +41,14 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   const postPath = `${HOME_ROOT_PATH}posts/${channel ? channel.slug : 'public-posts'}/${
     post.slug ?? post.id
   }`;
-  const imagePath = `${postPath}${
+  const targetPath = `${postPath}${
     post.type !== 'Article' && post.primaryMediaFile?.fileId ? '/0' : ''
   }`;
 
   return (
     <div className={`w-full ${className ?? ''}`}>
-      <ErrorBoundary>
-        <FakeAnchor href={imagePath} className="contents">
+      <FakeAnchor href={targetPath}>
+        <ErrorBoundary>
           <div
             className={`relative h-full rounded-lg border border-gray-200 border-opacity-60 transition-colors ${'hover:shadow-md hover:dark:shadow-slate-600'} bg-background dark:border-gray-800`}
           >
@@ -90,8 +90,8 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               }
             />
           </div>
-        </FakeAnchor>
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </FakeAnchor>
     </div>
   );
 };
