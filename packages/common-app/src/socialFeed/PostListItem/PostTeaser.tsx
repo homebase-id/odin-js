@@ -21,6 +21,7 @@ interface PostTeaserProps {
   showChannel?: boolean;
   forceAspectRatio?: boolean;
   allowExpand?: boolean;
+  login?: () => void;
 }
 
 export const PostTeaser: FC<PostTeaserProps> = ({
@@ -30,6 +31,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   showChannel,
   forceAspectRatio,
   allowExpand,
+  login,
 }) => {
   const { content: post } = postFile;
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
@@ -88,6 +90,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
                 channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
               }
+              login={login}
             />
           </div>
         </ErrorBoundary>

@@ -29,6 +29,7 @@ export const PostImageDetailCard = ({
   attachmentKey,
   onClose,
   navigate,
+  login,
   rootUrl,
 }: {
   odinId?: string;
@@ -39,6 +40,7 @@ export const PostImageDetailCard = ({
   attachmentKey?: string;
   onClose: () => void;
   navigate: (path: string) => void;
+  login?: () => void;
   rootUrl: string;
 }) => {
   const [currIndex, setCurrIndex] = useState(attachmentKey ? parseInt(attachmentKey) : 0);
@@ -188,6 +190,7 @@ export const PostImageDetailCard = ({
                 className="p-5"
                 isAuthenticated={isAuthenticated}
                 isOwner={isOwner}
+                login={login}
               />
             ) : null}
           </div>

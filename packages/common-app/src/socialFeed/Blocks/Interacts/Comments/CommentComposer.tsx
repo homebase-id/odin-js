@@ -3,7 +3,7 @@ import { useState } from 'react';
 import {
   AuthorImage,
   CanReactInfo,
-  CantReactDisplay,
+  CantReactInfo,
   EmojiSelector,
   FileOverview,
   FileSelector,
@@ -22,11 +22,13 @@ export const CommentComposer = ({
   replyThreadId,
   canReact,
   onPost,
+  login,
 }: {
   context: ReactionContext;
   replyThreadId?: string;
   canReact?: CanReactInfo;
   onPost?: () => void;
+  login?: () => void;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const { getIdentity } = useDotYouClient();
@@ -68,7 +70,7 @@ export const CommentComposer = ({
           />
         </div>
       ) : (
-        CantReactDisplay(canReact)
+        <CantReactInfo cantReact={canReact} login={login} />
       )}
       <ErrorNotification error={postCommentError} />
     </div>

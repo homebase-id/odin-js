@@ -15,6 +15,7 @@ import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingBlock } from '@youfoundation/common-app';
 import useAuth from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
+import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PAGE_SIZE = 12;
 
@@ -79,6 +80,7 @@ const ChannelSidebar = ({
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const MainVerticalPosts = ({ className, channelId }: { className: string; channelId?: string }) => {
   const [isStatic, setIsStatic] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
 
   const { data: staticPosts, isFetchedAfterMount: staticPostsLoaded } = useBlogPosts({
     pageSize: PAGE_SIZE,
@@ -130,75 +132,84 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
   const items = virtualizer.getVirtualItems();
 
   return (
-    <div className={className}>
-      {!staticPostsLoaded && !combinePosts ? (
-        <div className="-mx-4">
-          <LoadingBlock className="m-4 h-10" />
-          <LoadingBlock className="m-4 h-10" />
-          <LoadingBlock className="m-4 h-10" />
-        </div>
-      ) : combinedPosts?.length ? (
-        <div ref={parentRef}>
-          <div
-            className="relative w-full"
-            style={{
-              height: virtualizer.getTotalSize(),
-            }}
-          >
+    <>
+      <div className={className}>
+        {!staticPostsLoaded && !combinePosts ? (
+          <div className="-mx-4">
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+            <LoadingBlock className="m-4 h-10" />
+          </div>
+        ) : combinedPosts?.length ? (
+          <div ref={parentRef}>
             <div
-              className="absolute left-0 top-0 grid w-full grid-flow-row"
+              className="relative w-full"
               style={{
-                transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
+                height: virtualizer.getTotalSize(),
               }}
             >
-              {items.map((virtualRow) => {
-                const isLoaderRow = virtualRow.index > combinedPosts.length - 1;
-                if (isLoaderRow) {
+              <div
+                className="absolute left-0 top-0 grid w-full grid-flow-row"
+                style={{
+                  transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
+                }}
+              >
+                {items.map((virtualRow) => {
+                  const isLoaderRow = virtualRow.index > combinedPosts.length - 1;
+                  if (isLoaderRow) {
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        data-index={virtualRow.index}
+                        ref={virtualizer.measureElement}
+                        className="pt-5"
+                      >
+                        {hasMorePosts || isFetchingNextPage ? (
+                          <div className="animate-pulse" key={'loading'}>
+                            {t('Loading...')}
+                          </div>
+                        ) : (
+                          <div className="italic opacity-50" key={'no-more'}>
+                            {t('No more posts')}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  const postFile = combinedPosts[virtualRow.index];
                   return (
                     <div
                       key={virtualRow.key}
                       data-index={virtualRow.index}
                       ref={virtualizer.measureElement}
-                      className="pt-5"
+                      className="py-2 first:pt-0 last:pb-0"
                     >
-                      {hasMorePosts || isFetchingNextPage ? (
-                        <div className="animate-pulse" key={'loading'}>
-                          {t('Loading...')}
-                        </div>
-                      ) : (
-                        <div className="italic opacity-50" key={'no-more'}>
-                          {t('No more posts')}
-                        </div>
-                      )}
+                      <PostTeaser
+                        key={postFile.fileId}
+                        postFile={postFile}
+                        hideImageWhenNone={true}
+                        showChannel={true}
+                        allowExpand={true}
+                        login={() => setIsLogin(true)}
+                      />
                     </div>
                   );
-                }
-
-                const postFile = combinedPosts[virtualRow.index];
-                return (
-                  <div
-                    key={virtualRow.key}
-                    data-index={virtualRow.index}
-                    ref={virtualizer.measureElement}
-                    className="py-2 first:pt-0 last:pb-0"
-                  >
-                    <PostTeaser
-                      key={postFile.fileId}
-                      postFile={postFile}
-                      hideImageWhenNone={true}
-                      showChannel={true}
-                      allowExpand={true}
-                    />
-                  </div>
-                );
-              })}
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
-      )}
-    </div>
+        ) : (
+          <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
+        )}
+      </div>
+      <LoginDialog
+        isOpen={isLogin}
+        onCancel={() => setIsLogin(false)}
+        title={t('Login required')}
+        returnPath={window.location.pathname}
+      />
+    </>
   );
 };
 

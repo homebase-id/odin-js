@@ -29,6 +29,7 @@ export const PostDetailCard = ({
   isAuthenticated,
   isOwner,
   onNavigate,
+  login,
 }: {
   odinId?: string;
   channel?: ChannelDefinition;
@@ -38,6 +39,7 @@ export const PostDetailCard = ({
   isAuthenticated: boolean;
   isOwner: boolean;
   onNavigate?: (path: string) => void;
+  login?: () => void;
 }) => {
   const post = postFile?.content;
   const mediaFiles = (post as Media)?.mediaFiles;
@@ -178,6 +180,7 @@ export const PostDetailCard = ({
           defaultExpanded={true}
           isAuthenticated={isAuthenticated}
           isOwner={isOwner}
+          login={login}
         />
       ) : null}
     </div>

@@ -2,7 +2,7 @@ import { ReactionContext } from '@youfoundation/js-lib/public';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import {
   CanReactInfo,
-  CantReactDisplay,
+  CantReactInfo,
   EmojiPicker,
   t,
   useDotYouClient,
@@ -88,7 +88,7 @@ export const ReactionsBar = ({
           className ?? ''
         }`}
       >
-        {CantReactDisplay(canReact)}
+        <CantReactInfo cantReact={canReact} />
       </div>
     );
   }

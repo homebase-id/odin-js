@@ -13,7 +13,7 @@ const LoginDialog = ({
   onCancel,
 }: {
   title: string;
-  children: ReactNode;
+  children?: ReactNode;
 
   returnPath?: string;
   isOpen: boolean;
@@ -28,7 +28,7 @@ const LoginDialog = ({
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel} isSidePanel={false}>
       {children}
-      <hr className="my-4" />
+      {children ? <hr className="my-4" /> : null}
       <LoginBox
         returnUrl={returnPath ? `https://${window.location.hostname}${returnPath}` : undefined}
       />

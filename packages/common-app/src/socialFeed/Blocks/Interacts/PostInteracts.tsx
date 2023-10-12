@@ -39,6 +39,7 @@ export const PostInteracts = ({
   allowExpand = true,
   showSummary = false,
   className,
+  login,
 }: {
   authorOdinId: string;
   postFile: PostFile<PostContent>;
@@ -50,6 +51,7 @@ export const PostInteracts = ({
   allowExpand?: boolean;
   showSummary?: boolean;
   className?: string;
+  login?: () => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
@@ -129,7 +131,7 @@ export const PostInteracts = ({
         >
           <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20" />
           <Suspense fallback={null}>
-            <CommentList context={reactionContext} canReact={canReact} />
+            <CommentList context={reactionContext} canReact={canReact} login={login} />
           </Suspense>
         </div>
       ) : showSummary ? (
@@ -316,9 +318,11 @@ const CommentTeaserList = ({
 const CommentList = ({
   context,
   canReact,
+  login,
 }: {
   context: ReactionContext;
   canReact?: CanReactInfo;
+  login?: () => void;
 }) => {
   const { data: comments, hasNextPage, fetchNextPage } = useComments({ context }).fetch;
   const flattenedComments = comments?.pages.flatMap((page) => page.comments).reverse();
@@ -342,7 +346,7 @@ const CommentList = ({
           isThread={false}
         />
       ))}
-      <CommentComposer context={context} canReact={canReact} />
+      <CommentComposer context={context} canReact={canReact} login={login} />
     </>
   );
 };

@@ -5,8 +5,6 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useQuery } from '@tanstack/react-query';
 import useSecurityContext from '../securityContext/useSecurityContext';
 import { useDotYouClient } from '../auth/useDotYouClient';
-import { t } from '../../helpers';
-import { Loader } from '../../ui/Icons/Loader';
 
 interface UseCanReactProps {
   authorOdinId: string;
@@ -91,36 +89,4 @@ export const useCanReact = ({
     staleTime: Infinity,
     enabled: isEnabled && securityFetched,
   });
-};
-
-export const CantReactDisplay = (cantReact?: CanReactInfo) => {
-  // If we can react.. Then it's just partial
-  if (cantReact?.canReact === 'emoji')
-    return t('You do not have the necessary access to react on this post');
-  if (cantReact?.canReact === 'comment')
-    return t('You do not have the necessary access to react on this post');
-
-  const details = (cantReact as CantReact)?.details;
-  return details === 'NOT_AUTHENTICATED' ? (
-    <p className="text-foreground text-sm italic text-opacity-50">
-      {t('Reactions are disabled for anonymous users')}
-    </p>
-  ) : details === 'NOT_AUTHORIZED' ? (
-    <p className="text-foreground text-sm italic text-opacity-50">
-      {t('You do not have the necessary access to react on this post')}
-    </p>
-  ) : details === 'DISABLED_ON_POST' ? (
-    <p className="text-foreground text-sm italic text-opacity-50">
-      {t('Reactions are disabled on this post')}
-    </p>
-  ) : details === 'UNKNOWN' ? (
-    <p className="text-foreground text-sm italic text-opacity-50">
-      {t("We couldn't determine if you can react on this post")}
-    </p>
-  ) : (
-    <div className="flex flex-row items-center gap-2">
-      <Loader className="h-5 w-5 text-foreground" />
-      <p>{t('Determining if you can react')}</p>
-    </div>
-  );
 };

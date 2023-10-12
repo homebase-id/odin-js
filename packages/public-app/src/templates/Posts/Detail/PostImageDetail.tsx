@@ -1,8 +1,9 @@
-import { PostImageDetailCard, useBlog } from '@youfoundation/common-app';
+import { PostImageDetailCard, t, useBlog } from '@youfoundation/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import useAuth from '../../../hooks/auth/useAuth';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PostImageDetail = () => {
   const { channelKey, postKey, attachmentKey } = useParams();
@@ -16,6 +17,7 @@ const PostImageDetail = () => {
   );
 
   const { isAuthenticated, isOwner } = useAuth();
+  const [isLogin, setIsLogin] = useState(false);
   const location = useLocation();
   const state = location.state as Record<string, unknown> | undefined;
   const navigate = useNavigate();
@@ -44,8 +46,16 @@ const PostImageDetail = () => {
           rootUrl={rootUrl}
           isOwner={isOwner}
           isAuthenticated={isAuthenticated}
+          login={() => setIsLogin(true)}
         />
       </div>
+
+      <LoginDialog
+        isOpen={isLogin}
+        onCancel={() => setIsLogin(false)}
+        title={t('Login required')}
+        returnPath={window.location.pathname}
+      />
     </>
   );
 };

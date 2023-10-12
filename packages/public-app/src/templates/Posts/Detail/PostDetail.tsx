@@ -11,6 +11,8 @@ import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
 import useAuth from '../../../hooks/auth/useAuth';
 import { Article } from '@youfoundation/js-lib/public';
+import { useState } from 'react';
+import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PostDetail = () => {
   const navigate = useNavigate();
@@ -26,6 +28,7 @@ const PostDetail = () => {
   );
 
   const { isOwner, isAuthenticated } = useAuth();
+  const [isLogin, setIsLogin] = useState(false);
 
   if (!postData && !postDataLoading) {
     return (
@@ -67,6 +70,7 @@ const PostDetail = () => {
             isOwner={isOwner}
             isAuthenticated={isAuthenticated}
             onNavigate={(path: string) => navigate(path)}
+            login={() => setIsLogin(true)}
           />
         </div>
       </section>
@@ -75,6 +79,13 @@ const PostDetail = () => {
           <RelatedArticles blog={postData?.activeBlog} channel={channel} />
         )}
       </div>
+
+      <LoginDialog
+        isOpen={isLogin}
+        onCancel={() => setIsLogin(false)}
+        title={t('Login required')}
+        returnPath={window.location.pathname}
+      />
     </>
   );
 };

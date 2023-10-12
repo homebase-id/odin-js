@@ -14,6 +14,7 @@ export * from './Blocks/Interacts/Reactions/LikeButton';
 export * from './Blocks/Interacts/Reactions/ReactionsBar';
 
 export * from './Blocks/Interacts/PostInteracts';
+export * from './Blocks/Interacts/CantReactInfo';
 
 export * from './Blocks/Media/Media';
 export * from './Blocks/Media/MediaGallery';
