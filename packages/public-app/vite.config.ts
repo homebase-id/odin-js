@@ -29,11 +29,11 @@ export default defineConfig({
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
         warn(warning);
       },
-      output: {
-        manualChunks: {
-          richTextEditor: ['@youfoundation/rich-text-editor'],
-        },
-      },
+      // output: {
+      //   manualChunks: {
+      //     richTextEditor: ['@youfoundation/rich-text-editor'],
+      //   },
+      // },
     },
   },
 });
