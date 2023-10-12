@@ -102,13 +102,21 @@ export const CantReactDisplay = (cantReact?: CanReactInfo) => {
 
   const details = (cantReact as CantReact)?.details;
   return details === 'NOT_AUTHENTICATED' ? (
-    t('Reactions are disabled for anonymous users')
+    <p className="text-foreground text-sm italic text-opacity-50">
+      {t('Reactions are disabled for anonymous users')}
+    </p>
   ) : details === 'NOT_AUTHORIZED' ? (
-    t('You do not have the necessary access to react on this post')
+    <p className="text-foreground text-sm italic text-opacity-50">
+      {t('You do not have the necessary access to react on this post')}
+    </p>
   ) : details === 'DISABLED_ON_POST' ? (
-    t('Reactions are disabled on this post')
+    <p className="text-foreground text-sm italic text-opacity-50">
+      {t('Reactions are disabled on this post')}
+    </p>
   ) : details === 'UNKNOWN' ? (
-    t("We couldn't determine if you can react on this post")
+    <p className="text-foreground text-sm italic text-opacity-50">
+      {t("We couldn't determine if you can react on this post")}
+    </p>
   ) : (
     <div className="flex flex-row items-center gap-2">
       <Loader className="h-5 w-5 text-foreground" />

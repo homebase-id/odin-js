@@ -13,6 +13,7 @@ import {
   CirclePermissionView,
   useFollowingInfinite,
   EmbeddedPostContent,
+  FakeAnchor,
 } from '@youfoundation/common-app';
 import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
 import ContactImage from '../../components/Connection/ContactImage/ContactImage';
@@ -173,14 +174,14 @@ const FeedTeaser = () => {
         }
         className="h-full"
       >
-        <Link to={`/owner/feed`} className="block h-full">
+        <FakeAnchor href={`/owner/feed`} className="block h-full">
           <div className="pointer-events-none">
             <p className="mb-5 text-slate-400">{t('See what everyone has been up to')}</p>
             {latestPost ? (
               <EmbeddedPostContent content={{ ...latestPost.content, permalink: '' }} />
             ) : null}
           </div>
-        </Link>
+        </FakeAnchor>
       </Section>
     </>
   );

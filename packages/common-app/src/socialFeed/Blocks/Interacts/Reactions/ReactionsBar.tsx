@@ -88,9 +88,7 @@ export const ReactionsBar = ({
           className ?? ''
         }`}
       >
-        <p className="text-foreground text-sm italic text-opacity-50">
-          {CantReactDisplay(canReact)}
-        </p>
+        {CantReactDisplay(canReact)}
       </div>
     );
   }

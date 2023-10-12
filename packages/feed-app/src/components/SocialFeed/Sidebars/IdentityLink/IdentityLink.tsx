@@ -5,7 +5,6 @@ import {
   useSiteData,
   Image,
   HOME_ROOT_PATH,
-  ThemeWithTabsSettings,
   ThemeLinksSettings,
 } from '@youfoundation/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
@@ -17,7 +16,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
     <a href={HOME_ROOT_PATH} className={`block ${className ?? ''}`}>
       <div className="relative">
         <Image
-          targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
+          targetDrive={HomePageConfig.HomepageTargetDrive}
           fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageId}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"

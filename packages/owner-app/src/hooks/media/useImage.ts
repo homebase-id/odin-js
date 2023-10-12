@@ -9,12 +9,9 @@ import {
   uploadImage,
 } from '@youfoundation/js-lib/core';
 import useAuth from '../auth/useAuth';
-import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
-const defaultDrive: TargetDrive = {
-  alias: HomePageConfig.BlogMainContentDriveId.toString(),
-  type: BlogConfig.DriveType.toString(),
-};
+const defaultDrive: TargetDrive = BlogConfig.PublicChannelDrive;
 
 const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   const dotYouClient = useAuth().getDotYouClient();

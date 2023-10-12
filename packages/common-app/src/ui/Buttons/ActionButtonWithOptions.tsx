@@ -63,7 +63,7 @@ export const ActionButtonWithOptions: FC<ActionButtonWithOptionsProps> = ({
           className={`absolute ${
             verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
           } right-0 w-full shadow-md ${
-            isOpen ? 'max-h-[15rem]' : 'max-h-0'
+            isOpen ? 'max-h-[15.5rem]' : 'max-h-0'
           } overflow-auto bg-white text-black dark:bg-slate-900 dark:text-white`}
         >
           {optionGroups.map((group) => (

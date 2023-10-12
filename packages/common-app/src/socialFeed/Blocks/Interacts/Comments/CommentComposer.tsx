@@ -68,9 +68,7 @@ export const CommentComposer = ({
           />
         </div>
       ) : (
-        <p className="text-foreground text-sm italic text-opacity-50">
-          {CantReactDisplay(canReact)}
-        </p>
+        CantReactDisplay(canReact)
       )}
       <ErrorNotification error={postCommentError} />
     </div>

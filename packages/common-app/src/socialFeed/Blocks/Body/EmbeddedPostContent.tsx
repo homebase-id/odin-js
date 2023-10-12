@@ -52,7 +52,7 @@ export const EmbeddedPostContent = ({
     channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous;
 
   return (
-    <div className={`overflow-hidden rounded-lg border ${className ?? ''}`}>
+    <div className={`overflow-hidden rounded-lg border dark:border-slate-700 ${className ?? ''}`}>
       <FakeAnchor href={postPath} onClick={(e) => e.stopPropagation()}>
         <div className="p-1">
           <div className="flex flex-row">
