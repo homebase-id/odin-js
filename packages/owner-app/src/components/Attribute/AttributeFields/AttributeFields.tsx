@@ -172,7 +172,7 @@ const AttributeFields = ({
         </>
       );
       break;
-    case BuiltInAttributes.FullBio:
+    case BuiltInAttributes.Experience:
       return (
         <>
           <div className="mb-5">

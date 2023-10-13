@@ -1,4 +1,3 @@
-import { toGuidId } from '@youfoundation/js-lib/helpers';
 import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
 
@@ -148,7 +147,7 @@ export const AttributeDefinitions = {
   },
 
   Experience: {
-    type: BuiltInAttributes.FullBio,
+    type: BuiltInAttributes.Experience,
     name: 'Experience',
     description: 'A description of your experience, education, etc',
   },
@@ -177,3 +176,18 @@ export const AttributeDefinitions = {
     description: 'Theme configuration',
   },
 };
+
+export class AttributeGroups {
+  static readonly PersonalInfoSectionAttributes = BuiltInAttributes.AllPersonal;
+  static readonly ExternalLinksSectionAttributes = [
+    ...BuiltInAttributes.AllSocial,
+    ...BuiltInAttributes.AllGames,
+    BuiltInAttributes.Link,
+  ];
+  static readonly AboutSectionAttributes = [
+    BuiltInAttributes.Experience,
+    BuiltInAttributes.ShortBio,
+    BuiltInAttributes.Status,
+  ];
+  static readonly CreditCardSectionAttributes = [BuiltInAttributes.CreditCard];
+}

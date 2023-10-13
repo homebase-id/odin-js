@@ -384,7 +384,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         versionTag: undefined,
         id: id,
         profileId: profileId,
-        type: BuiltInAttributes.FullBio,
+        type: BuiltInAttributes.Experience,
         priority: priority,
         sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
         data: {},

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { t } from '@youfoundation/common-app';
 import {
+  AttributeGroups,
   AttributeDefinition,
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
@@ -8,7 +9,29 @@ import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { ActionButtonWithOptions } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 import { getNewId } from '@youfoundation/js-lib/helpers';
-import { BuiltInAttributes } from '@youfoundation/js-lib/profile';
+import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+
+const getAllowedAttributes = (sectionId: string) => {
+  if (sectionId === BuiltInProfiles.PersonalInfoSectionId)
+    return Object.values(AttributeDefinitions).filter((def) =>
+      AttributeGroups.PersonalInfoSectionAttributes.includes(def.type)
+    );
+  if (sectionId === BuiltInProfiles.ExternalLinksSectionId)
+    return Object.values(AttributeDefinitions).filter((def) =>
+      AttributeGroups.ExternalLinksSectionAttributes.includes(def.type)
+    );
+  if (sectionId === BuiltInProfiles.AboutSectionId)
+    return Object.values(AttributeDefinitions).filter((def) =>
+      AttributeGroups.AboutSectionAttributes.includes(def.type)
+    );
+
+  if (sectionId === BuiltInProfiles.CreditCardsSectionId)
+    return Object.values(AttributeDefinitions).filter((def) =>
+      AttributeGroups.CreditCardSectionAttributes.includes(def.type)
+    );
+
+  return Object.values(AttributeDefinitions);
+};
 
 const AttributeCreator = ({
   profileId,
@@ -23,9 +46,10 @@ const AttributeCreator = ({
 }) => {
   const [attribute, setAttribute] = useState<AttributeVm>();
   const [isActive, setIsActive] = useState(false);
+  const alloweddAttributes = getAllowedAttributes(sectionId);
 
   const setType = (typeId: string) => {
-    const targetObj = Object.values(AttributeDefinitions).find(
+    const targetObj = alloweddAttributes.find(
       (curr) => curr.type.toString() === typeId
     ) as AttributeDefinition;
 
@@ -47,7 +71,7 @@ const AttributeCreator = ({
     setAttribute(undefined);
   };
 
-  const options = Object.values(AttributeDefinitions)
+  const options = alloweddAttributes
     .filter((def) => !excludedTypes?.some((exclude) => exclude === def.type))
     .map((def) => {
       return {
@@ -66,7 +90,7 @@ const AttributeCreator = ({
               BuiltInAttributes.Status,
             ].includes(def.type)
           ? t('Details')
-          : [BuiltInAttributes.FullBio, BuiltInAttributes.ShortBio].includes(def.type)
+          : [BuiltInAttributes.Experience, BuiltInAttributes.ShortBio].includes(def.type)
           ? t('Bio')
           : [BuiltInAttributes.CreditCard].includes(def.type)
           ? t('Wallet')

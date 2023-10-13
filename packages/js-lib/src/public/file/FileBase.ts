@@ -50,7 +50,7 @@ const themeFileQueryParam: FileQueryParams = {
 const fullBioFileQueryParam: FileQueryParams = {
   targetDrive: profileDrive,
   fileType: [AttributeConfig.AttributeFileType],
-  tagsMatchAtLeastOne: [BuiltInAttributes.FullBio.toString()],
+  tagsMatchAtLeastOne: [BuiltInAttributes.Experience.toString()],
 };
 
 const shortBioFileQueryParam: FileQueryParams = {

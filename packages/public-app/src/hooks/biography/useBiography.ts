@@ -111,7 +111,7 @@ const useBiography = () => {
 
       const longBiographyAttributes = (
         await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
-          BuiltInAttributes.FullBio,
+          BuiltInAttributes.Experience,
         ])
       )?.map((attribute) => {
         return {

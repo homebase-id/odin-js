@@ -21,7 +21,7 @@ import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { BuiltInProfiles, ProfileSection } from '@youfoundation/js-lib/profile';
+import { ProfileSection } from '@youfoundation/js-lib/profile';
 
 const ProfileDetails = () => {
   const {

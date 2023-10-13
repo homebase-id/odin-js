@@ -17,6 +17,7 @@ export class BuiltInAttributes {
   static readonly Birthday = toGuidId('birthday');
   static readonly PhoneNumber = toGuidId('phonenumber');
   static readonly Email = toGuidId('email');
+
   static readonly HomebaseIdentity = toGuidId('dot_you_identity');
   static readonly FacebookUsername = toGuidId('facebook_username');
   static readonly InstagramUsername = toGuidId('instagram_username');
@@ -32,11 +33,22 @@ export class BuiltInAttributes {
   static readonly MinecraftUsername = toGuidId('minecraft_username');
   static readonly GithubUsername = toGuidId('github_username');
   static readonly StackoverflowUsername = toGuidId('stackoverflow_username');
+  static readonly Link = toGuidId('link');
+
   static readonly CreditCard = toGuidId('creditcard');
-  static readonly FullBio = toGuidId('full_bio');
+  static readonly Experience = toGuidId('full_bio');
   static readonly ShortBio = toGuidId('short_bio');
   static readonly Status = toGuidId('status');
-  static readonly Link = toGuidId('link');
+
+  static readonly AllPersonal = [
+    BuiltInAttributes.Name,
+    BuiltInAttributes.Nickname,
+    BuiltInAttributes.Photo,
+    BuiltInAttributes.Address,
+    BuiltInAttributes.Birthday,
+    BuiltInAttributes.PhoneNumber,
+    BuiltInAttributes.Email,
+  ];
 
   static readonly AllSocial = [
     BuiltInAttributes.HomebaseIdentity,
