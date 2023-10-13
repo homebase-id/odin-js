@@ -253,7 +253,13 @@ export const CommentSummary = ({
   onToggle?: () => void;
   reactionPreview?: CommentsReactionSummary;
 }) => {
-  const { data: totalCount } = useCommentSummary({ ...context, reactionPreview }).fetch;
+  const { data: totalCount } = useCommentSummary({
+    authorOdinId: context.authorOdinId,
+    channelId: context.channelId,
+    postGlobalTransitId: context.target.globalTransitId,
+    reactionPreview: reactionPreview,
+  }).fetch;
+
   return totalCount ? (
     <>
       <span className="block">·</span>

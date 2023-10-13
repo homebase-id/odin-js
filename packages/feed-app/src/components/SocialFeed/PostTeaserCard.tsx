@@ -23,9 +23,9 @@ interface PostTeaserCardProps {
 }
 
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
-  const { getIdentity } = useAuth();
+  const { getDotYouClient } = useAuth();
   const { content: post } = postFile;
-  const isExternal = odinId !== getIdentity();
+  const isExternal = odinId !== getDotYouClient().getIdentity();
   const navigate = useNavigate();
 
   const { data: externalChannel } = useSocialChannel({

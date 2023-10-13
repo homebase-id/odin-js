@@ -45,17 +45,9 @@ const ProfileDetails = () => {
     (sectionKey && decodeURIComponent(sectionKey)) ||
     (sections?.length ? sections[0].sectionId : '');
 
-  if (profilesLoading) {
-    return <LoadingDetailPage />;
-  }
-
-  if (!profiles) {
-    return <>{t('no-data-found')}</>;
-  }
-
-  if (!profileDef) {
-    return <>Incorrect profile path</>;
-  }
+  if (profilesLoading) return <LoadingDetailPage />;
+  if (!profiles) return <>{t('no-data-found')}</>;
+  if (!profileDef) return <>{t('Incorrect profile path')}</>;
 
   const isCreateSection = activeSectionKey === 'new' || (!sections?.length && !sectionsLoading);
 
