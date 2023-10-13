@@ -48,6 +48,7 @@ export const useDotYouClient = () => {
     if (raw) return base64ToUint8Array(raw);
   };
 
+  // Get the logged in user's identity
   const getIdentity = () => {
     return _app === 'owner' ? window.location.host : localStorage.getItem(STORAGE_IDENTITY_KEY);
   };

@@ -5,7 +5,8 @@ import { useDotYouClient } from '../../../..';
 const PAGE_SIZE = 10;
 
 export const useMyEmojiReactions = (context?: ReactionContext) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getDotYouClient, getIdentity } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
 
   const fetch = async ({
     context,
@@ -24,7 +25,7 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
     return (
       (await getMyReactions(
         dotYouClient,
-        window.location.hostname,
+        getIdentity() || undefined,
         context,
         PAGE_SIZE,
         pageParam

@@ -217,7 +217,7 @@ export const getReactions = async (
 
 export const getMyReactions = async (
   dotYouClient: DotYouClient,
-  odinId: string,
+  odinId: string | undefined,
   context: ReactionContext,
   pageSize = 15,
   cursor?: string
@@ -231,7 +231,7 @@ export const getMyReactions = async (
       fileId: context.target.fileId,
       globalTransitId: context.target.globalTransitId,
     },
-    identity: odinId,
+    identity: odinId || dotYouClient.getIdentity(),
     cursor: cursor,
     maxRecords: pageSize,
   };

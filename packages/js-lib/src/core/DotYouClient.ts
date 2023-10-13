@@ -38,6 +38,7 @@ export class BaseDotYouClient {
     return this._options.api;
   }
 
+  // Gets the identity to where the client is pointing to
   getIdentity(): string {
     return (
       this._options.identity ||
