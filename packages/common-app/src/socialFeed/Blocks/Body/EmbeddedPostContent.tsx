@@ -58,7 +58,9 @@ export const EmbeddedPostContent = ({
           <div className="flex flex-row">
             <div className="flex flex-grow flex-col px-2 py-2">
               <div className="text-foreground mb-1 flex flex-row gap-2 text-opacity-60">
-                <AuthorImage odinId={content.authorOdinId} className="h-7 w-7 rounded-full" />
+                <div className="flex-shrink-0">
+                  <AuthorImage odinId={content.authorOdinId} className="h-7 w-7 rounded-full" />
+                </div>
                 <div className="flex flex-col md:flex-row md:items-center lg:flex-col lg:items-start xl:flex-row xl:items-center">
                   <h2>
                     <AuthorName odinId={content.authorOdinId} />
