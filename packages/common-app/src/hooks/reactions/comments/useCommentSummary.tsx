@@ -37,9 +37,8 @@ export const useCommentSummary = ({
       postGlobalTransitId,
     ]);
 
-    if (commentsList?.pages?.length) {
+    if (commentsList?.pages?.length)
       return commentsList.pages.flatMap((page) => page.comments).length;
-    }
 
     return reactionPreview?.totalCount || 0;
   };

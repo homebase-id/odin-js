@@ -55,12 +55,23 @@ export const saveComment = async (
     const imageFile = comment.content.attachment;
     const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
 
-    const { additionalThumbnails: thumbs } = await createThumbnails(
-      imageBytes,
-      imageFile.type as ImageContentType,
-      [{ height: 250, width: 250, quality: 100 }]
-    );
-    additionalThumbnails = thumbs;
+    if (imageFile.type === 'image/gif') {
+      additionalThumbnails = [
+        {
+          contentType: 'image/gif',
+          payload: imageBytes,
+          pixelHeight: 100,
+          pixelWidth: 100,
+        },
+      ];
+    } else {
+      const { additionalThumbnails: thumbs } = await createThumbnails(
+        imageBytes,
+        imageFile.type as ImageContentType,
+        [{ height: 250, width: 250, quality: 100 }]
+      );
+      additionalThumbnails = thumbs;
+    }
     delete comment.content.attachment;
 
     comment.content.hasAttachment = true;

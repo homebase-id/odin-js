@@ -32,7 +32,7 @@ export const FileSelector = ({
           }
         }}
         type="file"
-        accept={accept || 'image/png, image/jpeg, image/tiff, image/webp, image/svg+xml'}
+        accept={accept || 'image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif'}
         multiple
         className={`sr-only`}
       />
