@@ -1,9 +1,9 @@
 import { Times, t } from '@youfoundation/common-app';
-import useConnection from '../../../hooks/connections/useConnection';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import PersonCard from '../PersonCard/PersonCard';
+import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 
 const PersonOutgoingRequest = ({
   recipientOdinId,
@@ -16,7 +16,7 @@ const PersonOutgoingRequest = ({
     mutate: revokeRequest,
     status: revokeRequestStatus,
     error: actionError,
-  } = useConnection({}).revokeConnectionRequest;
+  } = useConnectionActions().revokeConnectionRequest;
 
   return (
     <>

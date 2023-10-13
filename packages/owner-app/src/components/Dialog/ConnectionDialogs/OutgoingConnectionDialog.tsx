@@ -14,6 +14,7 @@ import { Label } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
+import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 
 const DEFAULT_MESSAGE = t('Hi, I would like to connect with you');
 
@@ -37,7 +38,7 @@ const OutgoingConnectionDialog = ({
     status: sendConnectionRequestStatus,
     reset: resetConnectionRequest,
     error: actionError,
-  } = useConnection({}).sendConnectionRequest;
+  } = useConnectionActions().sendConnectionRequest;
   const { mutateAsync: follow, error: followError } = useFollowingInfinite({}).follow;
   const checkReturnTo = useFocusedEditing();
 

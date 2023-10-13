@@ -5,6 +5,7 @@ export * from './transitProcessor/useTransitProcessor';
 export * from './errors/useErrors';
 export * from './portal/usePortal';
 export * from './darkMode/useDarkMode';
+export * from './connections/useIsConnected';
 export * from './connections/useConnections';
 export * from '../../../owner-app/src/hooks/connections/useDomains';
 export * from './profiles/useProfiles';

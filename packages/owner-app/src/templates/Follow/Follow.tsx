@@ -14,12 +14,12 @@ import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useConnection from '../../hooks/connections/useConnection';
 import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../components/SubMenu/SubMenu';
+import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 
 const Follow = () => {
   const followersMatch = useMatch({ path: 'owner/follow/followers' });
@@ -116,7 +116,7 @@ const Followers = () => {
 };
 
 const FollowIdentity = ({ odinId }: { odinId: string }) => {
-  const { mutate: block } = useConnection({}).block;
+  const { mutate: block } = useConnectionActions().block;
   const [isShowDetails, setIsDetails] = useState(false);
 
   return (

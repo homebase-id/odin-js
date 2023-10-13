@@ -16,6 +16,7 @@ import useConnection from '../../../hooks/connections/useConnection';
 import useContact from '../../../hooks/contacts/useContact';
 import { useState } from 'react';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
+import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 
 export const IdentityPageMetaAndActions = ({
   odinId,
@@ -33,6 +34,8 @@ export const IdentityPageMetaAndActions = ({
   // Connection data:
   const {
     fetch: { data: connectionInfo },
+  } = useConnection({ odinId: odinId });
+  const {
     disconnect: { mutate: disconnect, error: disconnectError },
     revokeConnectionRequest: {
       mutate: revokeRequest,
@@ -41,7 +44,7 @@ export const IdentityPageMetaAndActions = ({
     },
     block: { mutate: block, error: blockError },
     unblock: { mutate: unblock, status: unblockStatus, error: unblockError },
-  } = useConnection({ odinId: odinId });
+  } = useConnectionActions();
 
   // Contact data:
   const { data: contactData } = useContact({ odinId: odinId }).fetch;

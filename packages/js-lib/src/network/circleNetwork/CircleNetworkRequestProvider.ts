@@ -1,5 +1,6 @@
 ﻿import {
   AcceptRequestHeader,
+  ConnectionInfo,
   ConnectionRequest,
   ConnectionRequestHeader,
   OdinIdRequest,
@@ -8,6 +9,7 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
 import { stringify } from '../../helpers/helpers';
+import { getConnectionInfo } from './CircleNetworkProvider';
 
 //Handles making and reading requests to connect with others
 const Root = '/circles/requests';
@@ -199,4 +201,23 @@ export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) 
       dotYouClient.handleErrorResponse(err);
       return false;
     });
+};
+
+export const getDetailedConnectionInfo = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  includeContactData = false
+): Promise<ConnectionRequest | ConnectionInfo | undefined> => {
+  if (!odinId) return;
+
+  const connectionInfo = await getConnectionInfo(dotYouClient, odinId, includeContactData);
+  if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none') return connectionInfo;
+
+  const pendingRequest = await getPendingRequest(dotYouClient, odinId);
+  if (pendingRequest) return { ...pendingRequest, contactData: connectionInfo?.contactData };
+
+  const sentRequest = await getSentRequest(dotYouClient, odinId);
+  if (sentRequest) return { ...sentRequest, contactData: connectionInfo?.contactData };
+
+  return undefined;
 };

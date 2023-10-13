@@ -124,9 +124,7 @@ const FollowingSection = ({ className }: { className?: string }) => {
         {flattenedIdentities?.length ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {flattenedIdentities.map((item, index) => {
-              if (!item) {
-                return null;
-              }
+              if (!item) return null;
               return <IdentityTeaser key={index} odinId={item} className="p-2" />;
             })}
           </div>

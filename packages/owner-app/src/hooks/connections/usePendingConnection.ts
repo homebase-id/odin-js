@@ -13,7 +13,7 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
-  const getDetailedConnectionInfo = async ({ odinId }: { odinId: string }) => {
+  const getPendingConnectionInfo = async ({ odinId }: { odinId: string }) => {
     if (!odinId) return null;
 
     return await getPendingRequest(dotYouClient, odinId);
@@ -46,7 +46,7 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   return {
     fetch: useQuery(
       ['pendingConnection', odinId],
-      () => getDetailedConnectionInfo({ odinId: odinId as string }),
+      () => getPendingConnectionInfo({ odinId: odinId as string }),
       {
         refetchOnWindowFocus: false,
         enabled: !!odinId,
