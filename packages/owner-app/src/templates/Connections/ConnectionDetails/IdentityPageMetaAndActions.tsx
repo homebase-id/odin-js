@@ -159,7 +159,7 @@ export const IdentityPageMetaAndActions = ({
         actions={
           <>
             {mainAction}
-            <ActionGroup options={actionGroupOptions} type="secondary" size="square" />
+            <ActionGroup options={actionGroupOptions} type="mute" size="square" />
           </>
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}

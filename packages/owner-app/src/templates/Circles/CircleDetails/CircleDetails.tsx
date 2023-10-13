@@ -78,7 +78,7 @@ const CircleDetails = () => {
               {t('Edit Circle')}
             </ActionButton>
             <ActionGroup
-              type="secondary"
+              type="mute"
               size="square"
               options={[
                 {

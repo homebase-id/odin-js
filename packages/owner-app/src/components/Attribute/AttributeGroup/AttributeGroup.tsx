@@ -167,7 +167,7 @@ const AddAnotherButton = ({
     } as NewAttributeVm;
   }, [type, profileId, sectionId, priority]);
 
-  if (isActive) {
+  if (isActive)
     return (
       <AttributeEditor
         attribute={newAttr}
@@ -176,15 +176,15 @@ const AddAnotherButton = ({
         onSave={() => setIsActive(false)}
       />
     );
-  }
 
   return (
     <div className="relative mb-4 mt-[-1.6rem] flex text-slate-500 transition-colors hover:text-slate-800 hover:dark:text-slate-100">
       <span
-        className="relative mx-auto cursor-pointer rounded-full border bg-white transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 hover:dark:bg-slate-800"
+        className="relative mx-auto flex cursor-pointer flex-row items-center gap-1 rounded-full border bg-white transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 hover:dark:bg-slate-800"
         onClick={() => setIsActive(true)}
       >
         <Plus className="m-2 h-4 w-4" />
+        {/* <p className="pr-3">Add</p> */}
       </span>
     </div>
   );

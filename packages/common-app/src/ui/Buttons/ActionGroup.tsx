@@ -3,6 +3,7 @@ import {
   ActionButton,
   ActionButtonProps,
   ConfirmDialogProps,
+  Ellipsis,
   t,
   useMostSpace,
 } from '@youfoundation/common-app';
@@ -42,13 +43,15 @@ export const ActionGroup = ({
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
+        className="group"
         {...actionButtonProps}
       >
         {children ? (
           children
         ) : (
           <>
-            ...<span className="sr-only ml-1">{t('More')}</span>
+            <Ellipsis className="opacity-50 group-hover:opacity-100 w-5 h-5" />
+            <span className="sr-only ml-1">{t('More')}</span>
           </>
         )}
       </ActionButton>

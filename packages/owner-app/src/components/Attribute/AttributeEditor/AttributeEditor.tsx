@@ -162,7 +162,7 @@ const AttributeEditor = ({
       }
       actions={
         <>
-          <ActionGroup type="secondary" size="square" options={actions} />
+          <ActionGroup type="mute" size="square" options={actions} />
           {saveStatus === 'error' && !isNewAttribute ? (
             <ActionButton
               state={saveStatus}

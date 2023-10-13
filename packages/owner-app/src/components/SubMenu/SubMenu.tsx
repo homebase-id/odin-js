@@ -36,7 +36,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
                 `${item.className} cursor-pointer border-b-2 px-3 py-2 text-lg ${
                   isActive || (activeFallback && index === 0)
                     ? 'border-indigo-500'
-                    : 'border-transparent transition-colors duration-300 hover:border-indigo-400 dark:border-gray-800 hover:dark:border-indigo-600'
+                    : 'border-transparent transition-colors duration-300 hover:border-indigo-400 dark:border-transparent hover:dark:border-indigo-600'
                 } ${item.className ?? ''}`
               }
               to={item.path}

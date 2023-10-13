@@ -140,7 +140,7 @@ const DomainDetails = () => {
                 {t('Edit Access')}
               </ActionButton>
             )}
-            <ActionGroup options={actionGroupOptions} type="secondary" size="square" />
+            <ActionGroup options={actionGroupOptions} type="mute" size="square" />
           </>
         }
         breadCrumbs={[

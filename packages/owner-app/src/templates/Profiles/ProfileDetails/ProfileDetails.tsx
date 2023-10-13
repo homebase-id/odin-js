@@ -83,7 +83,7 @@ const ProfileDetails = () => {
               </ActionButton>
 
               <ActionGroup
-                type="secondary"
+                type="mute"
                 size="square"
                 options={[
                   {
