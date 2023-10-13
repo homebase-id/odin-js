@@ -63,7 +63,7 @@ const AttributeGroup = ({
   if (attributes.length === 1)
     return (
       <>
-        <div className={`relative my-6 overflow-x-hidden`}>
+        <div className={`relative my-6`}>
           <AttributeEditor
             attribute={attributes[0]}
             reorderAttr={(_attr, dir) => reorderAttrGroup(groupTitle, dir)}
@@ -81,7 +81,7 @@ const AttributeGroup = ({
 
   return (
     <div
-      className={`relative my-4 ${!isActive ? 'cursor-pointer transition-transform' : ''}`}
+      className={`relative my-6 ${!isActive ? 'cursor-pointer transition-transform' : ''}`}
       style={{ paddingBottom: `${attributes.length * 10}px` }}
       onClick={open}
     >
@@ -97,7 +97,7 @@ const AttributeGroup = ({
         className={`mt-2 border-l-[8px] sm:border-l-[16px] ${
           isActive
             ? 'border-slate-200 border-opacity-40 dark:border-slate-800'
-            : 'border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
+            : 'overflow-hidden border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
         } transition-all ${isActive ? 'pl-2 sm:pl-5' : '-translate-x-4 md:hover:translate-x-0'}`}
       >
         {/* Sort again, as order of the attributes takes the ACL into account, which the user can't "change" */}

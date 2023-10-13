@@ -3,6 +3,7 @@ import { usePortal, Times } from '@youfoundation/common-app';
 import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
 import { Image } from '@youfoundation/common-app';
 import { useEffect } from 'react';
+import { ButtonColors } from '../../ui/Buttons/ColorConfig';
 
 export const ImageLightbox = ({
   targetDrive,
@@ -48,7 +49,7 @@ export const ImageLightbox = ({
           {onClose ? (
             <button
               onClick={onClose}
-              className="bg-secondary text-secondary-contrast absolute left-4 top-4 rounded-full p-3 hover:brightness-90 hover:filter"
+              className={`absolute left-4 top-4 rounded-full p-3 ${ButtonColors.secondary}`}
             >
               <Times className="h-4 w-4" />
             </button>

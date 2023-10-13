@@ -12,8 +12,6 @@ module.exports = {
       colors: {
         primary: '#6366f1',
         'primary-contrast': '#fff',
-        secondary: '#fff',
-        'secondary-contrast': '#000',
 
         'page-background': 'rgb(var(--color-page-background) / <alpha-value>)',
         background: 'rgb(var(--color-background) / <alpha-value>)',

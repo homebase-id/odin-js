@@ -6,10 +6,9 @@ import {
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { ActionButtonWithOptions } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 import { getNewId } from '@youfoundation/js-lib/helpers';
-import { BuiltInAttributes, BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
 
 const getAllowedAttributes = (sectionId: string) => {
   if (sectionId === BuiltInProfiles.PersonalInfoSectionId)
@@ -71,37 +70,13 @@ const AttributeCreator = ({
     setAttribute(undefined);
   };
 
-  const options = alloweddAttributes
-    .filter((def) => !excludedTypes?.some((exclude) => exclude === def.type))
-    .map((def) => {
-      return {
-        value: def.type.toString(),
-        name: def.name,
-        group: [...BuiltInAttributes.AllSocial, BuiltInAttributes.Link].includes(def.type)
-          ? t('Link')
-          : [
-              BuiltInAttributes.Name,
-              BuiltInAttributes.Photo,
-              BuiltInAttributes.Address,
-              BuiltInAttributes.Birthday,
-              BuiltInAttributes.PhoneNumber,
-              BuiltInAttributes.Email,
-              BuiltInAttributes.Nickname,
-              BuiltInAttributes.Status,
-            ].includes(def.type)
-          ? t('Details')
-          : [BuiltInAttributes.Experience, BuiltInAttributes.ShortBio].includes(def.type)
-          ? t('Bio')
-          : [BuiltInAttributes.CreditCard].includes(def.type)
-          ? t('Wallet')
-          : BuiltInAttributes.AllGames.includes(def.type)
-          ? t('Games')
-          : '',
-      };
-    });
+  const onSelect = (type: string) => {
+    type && setType(type);
+    setIsActive(true);
+  };
 
   return (
-    <>
+    <section className="pb-16">
       {isActive && attribute ? (
         <AttributeEditor
           attribute={attribute}
@@ -110,21 +85,30 @@ const AttributeCreator = ({
           onSave={discard}
         />
       ) : (
-        <div className="flex flex-row">
-          <ActionButtonWithOptions
-            type="primary"
-            className="mx-auto"
-            onClick={(type) => {
-              type && setType(type);
-              setIsActive(true);
-            }}
-            options={options}
-          >
-            {t('Add Attribute')}
-          </ActionButtonWithOptions>
-        </div>
+        <>
+          <p className="mb-5 text-xl">
+            {t('Add a new attribute')}
+            <small className="block text-sm text-slate-400">
+              {t(`Add the information you want, and keep it secure. You're in control.`)}
+            </small>
+          </p>
+          <div className="flex flex-row flex-wrap gap-4">
+            {alloweddAttributes
+              .filter((attr) => !excludedTypes?.includes(attr.type))
+              .map((option) => (
+                <div
+                  key={option.name}
+                  className={`cursor-pointer rounded-md bg-background p-4 hover:shadow-md hover:dark:shadow-slate-600`}
+                  onClick={() => onSelect(option.type)}
+                  title={option.description}
+                >
+                  {option.name}
+                </div>
+              ))}
+          </div>
+        </>
       )}
-    </>
+    </section>
   );
 };
 

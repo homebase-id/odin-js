@@ -16,8 +16,6 @@ module.exports = {
 
         primary: 'rgb(var(--color-button) / <alpha-value>)',
         'primary-contrast': 'rgb(var(--color-button-text) / <alpha-value>)',
-        secondary: 'rgb(var(--color-page-background) / <alpha-value>)',
-        'secondary-contrast': 'rgb(var(--color-foreground) / <alpha-value>)',
       },
     },
   },
