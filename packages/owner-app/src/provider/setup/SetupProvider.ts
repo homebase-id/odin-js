@@ -38,6 +38,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     profileId: BuiltInProfiles.StandardProfileId,
     name: 'Standard Info',
     description: 'Standard Profile Information',
+    isSystemSection: true,
   };
 
   const initialPersonalInfoSection = {
@@ -65,6 +66,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     profileId: BuiltInProfiles.WalletId,
     name: 'Wallet',
     description: 'My wallet',
+    isSystemSection: true,
   };
 
   const initialCreditCardSection = {

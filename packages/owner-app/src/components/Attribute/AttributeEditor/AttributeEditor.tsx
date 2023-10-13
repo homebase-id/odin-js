@@ -3,6 +3,7 @@ import {
   AclIcon,
   AclSummary,
   AclWizard,
+  ActionGroupOptionProps,
   SaveStatus,
   Times,
   t,
@@ -94,6 +95,51 @@ const AttributeEditor = ({
     [attribute, updatedAttr]
   );
 
+  const actions: ActionGroupOptionProps[] = [];
+  if (reorderAttr) {
+    actions.push({
+      label: t('Move up'),
+      icon: ArrowUp,
+      onClick: () => reorder(-1),
+    });
+    actions.push({
+      label: t('Move down'),
+      icon: ArrowDown,
+      onClick: () => reorder(1),
+    });
+  }
+
+  if (isAclEdit)
+    actions.push({
+      label: t('Cancel'),
+      icon: Times,
+      onClick: () => setIsAclEdit(false),
+    });
+  else
+    actions.push({
+      label: t('Change security'),
+      icon: Shield,
+      onClick: () => setIsAclEdit(true),
+    });
+
+  if (
+    !(attribute.data.isProtected && attribute.type === HomePageAttributes.Theme) &&
+    !isNewAttribute
+  ) {
+    actions.push({
+      label: t('Remove'),
+      icon: Trash,
+      confirmOptions: {
+        title: t('Remove Attribute'),
+        buttonText: t('Permanently remove'),
+        body: `${t('Are you sure you want to remove this')} ${attribute.typeDefinition.name} ${t(
+          'attribute. This action cannot be undone.'
+        )}`,
+      },
+      onClick: () => removeAttr(latestAttr),
+    });
+  }
+
   return (
     <Section
       ref={sectionRef}
@@ -116,47 +162,7 @@ const AttributeEditor = ({
       }
       actions={
         <>
-          <div className="hidden md:contents">
-            {reorderAttr && (
-              <>
-                <ActionButton
-                  className="hidden sm:flex"
-                  icon={ArrowUp}
-                  type="mute"
-                  onClick={() => reorder(-1)}
-                />
-                <ActionButton
-                  className="hidden sm:flex"
-                  icon={ArrowDown}
-                  type="mute"
-                  onClick={() => reorder(1)}
-                />
-              </>
-            )}
-            <ActionButton
-              icon={isAclEdit ? Times : Shield}
-              className="hidden sm:flex"
-              type="secondary"
-              onClick={() => setIsAclEdit(!isAclEdit)}
-            />
-            {!(attribute.data.isProtected && attribute.type === HomePageAttributes.Theme) &&
-            !isNewAttribute ? (
-              <ActionButton
-                type="remove"
-                icon={Trash}
-                className={`${!attribute.fileId ? 'pointer-events-none' : ''}`}
-                confirmOptions={{
-                  type: 'critical',
-                  title: t('Remove Attribute'),
-                  buttonText: t('Permanently remove'),
-                  body: `${t('Are you sure you want to remove your')} ${
-                    attribute.typeDefinition.name
-                  } ${t('attribute. This action cannot be undone.')}`,
-                }}
-                onClick={() => removeAttr(latestAttr)}
-              />
-            ) : null}
-          </div>
+          <ActionGroup type="secondary" size="square" options={actions} />
           {saveStatus === 'error' && !isNewAttribute ? (
             <ActionButton
               state={saveStatus}
@@ -166,43 +172,6 @@ const AttributeEditor = ({
               {t('Save')}
             </ActionButton>
           ) : null}
-          <ActionGroup
-            type="mute"
-            className="md:hidden"
-            options={[
-              ...(reorderAttr
-                ? [
-                    {
-                      icon: ArrowUp,
-                      label: t('Move up'),
-                      onClick: () => reorder(-1),
-                    },
-                    {
-                      icon: ArrowDown,
-                      label: t('Move down'),
-                      onClick: () => reorder(1),
-                    },
-                  ]
-                : []),
-              {
-                icon: Shield,
-                label: t('Change security'),
-                onClick: () => setIsAclEdit(true),
-              },
-              {
-                icon: Trash,
-                label: t('Remove'),
-                confirmOptions: {
-                  title: t('Remove Attribute'),
-                  buttonText: t('Permanently remove'),
-                  body: `${t('Are you sure you want to remove this')} ${
-                    attribute.typeDefinition.name
-                  } ${t('attribute. This action cannot be undone.')}`,
-                },
-                onClick: () => removeAttr(latestAttr),
-              },
-            ]}
-          />
         </>
       }
       className={`relative ${

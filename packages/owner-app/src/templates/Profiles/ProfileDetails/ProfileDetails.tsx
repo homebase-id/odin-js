@@ -76,11 +76,12 @@ const ProfileDetails = () => {
         icon={Heart}
         title={profileDef.name}
         actions={
-          <>
-            <ActionButton onClick={() => setIsOpenEdit(true)} icon={Pencil}>
-              {t('Edit Profile')}
-            </ActionButton>
-            {stringGuidsEqual(BuiltInProfiles.StandardProfileId, profileDef.profileId) ? null : (
+          profileDef.isSystemSection === true ? null : (
+            <>
+              <ActionButton onClick={() => setIsOpenEdit(true)} icon={Pencil}>
+                {t('Edit Profile')}
+              </ActionButton>
+
               <ActionGroup
                 type="secondary"
                 size="square"
@@ -101,9 +102,9 @@ const ProfileDetails = () => {
                     icon: Trash,
                   },
                 ]}
-              ></ActionGroup>
-            )}
-          </>
+              />
+            </>
+          )
         }
         breadCrumbs={[
           { href: '/owner/profile', title: 'Social Presence' },
@@ -280,28 +281,30 @@ const ProfileSectionEditor = ({
   }, 0);
 
   return (
-    <div className="pt-5">
-      {section ? (
-        isEditActive ? (
-          <SectionEditor
-            key={section.sectionId}
-            section={section}
-            profileId={profileId}
-            onClose={() => setIsEditActive(false)}
-            className="bg-white dark:bg-black"
-          />
-        ) : (
-          <section className="items-center bg-white p-3 dark:bg-black sm:flex sm:flex-row">
-            <p className="sm:mr-2">{section.name}</p>
-            <ActionButton
-              type="secondary"
-              className="ml-auto"
-              onClick={() => setIsEditActive(true)}
-            >
-              {t('Edit Section')}
-            </ActionButton>
-          </section>
-        )
+    <>
+      {section && !section.isSystemSection ? (
+        <div className="pt-5">
+          {isEditActive ? (
+            <SectionEditor
+              key={section.sectionId}
+              section={section}
+              profileId={profileId}
+              onClose={() => setIsEditActive(false)}
+              className="bg-white dark:bg-black"
+            />
+          ) : (
+            <section className="items-center bg-white p-3 dark:bg-black sm:flex sm:flex-row">
+              <p className="sm:mr-2">{section.name}</p>
+              <ActionButton
+                type="secondary"
+                className="ml-auto"
+                onClick={() => setIsEditActive(true)}
+              >
+                {t('Edit Section')}
+              </ActionButton>
+            </section>
+          )}
+        </div>
       ) : null}
       {attributes.length ? (
         groupedAttributes.map((attrGroup) => {
@@ -323,7 +326,7 @@ const ProfileSectionEditor = ({
         newPriority={highestPriority + 1000}
         excludedTypes={types}
       />
-    </div>
+    </>
   );
 };
 

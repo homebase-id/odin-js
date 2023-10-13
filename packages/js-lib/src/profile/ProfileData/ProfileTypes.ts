@@ -2,6 +2,7 @@ export interface ProfileDefinition {
   profileId: string;
   name: string;
   description: string;
+  isSystemSection?: boolean;
 }
 
 export interface ProfileSection {
