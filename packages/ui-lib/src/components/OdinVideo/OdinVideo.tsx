@@ -42,6 +42,8 @@ interface OndinChunkedProps extends OdinVideoProps {
 
 interface OndinDirectProps extends OdinVideoProps {
   videoMetaData: PlainVideoMetadata | SegmentedVideoMetadata;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  onFatalError?: () => void;
 }
 
 export const OdinVideo = (videoProps: OdinVideoProps) => {
@@ -101,7 +103,6 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       onClick={(e) => e.stopPropagation()}
       autoPlay={videoProps.autoPlay}
       poster={posterData?.url || videoProps.poster}
-      onError={() => isDirectPlayback && setFatalError(true)}
     >
       {isChunkedPlayback ? (
         <ChunkedSource
@@ -111,7 +112,14 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
           onFatalError={() => setShouldFallback(true)}
         />
       ) : null}
-      {isDirectPlayback ? <DirectSource {...videoProps} videoMetaData={videoMetaData} /> : null}
+      {isDirectPlayback ? (
+        <DirectSource
+          {...videoProps}
+          videoMetaData={videoMetaData}
+          videoRef={videoRef}
+          onFatalError={() => setFatalError(true)}
+        />
+      ) : null}
     </video>
   );
 };
@@ -137,8 +145,8 @@ const ChunkedSource = ({
   const segmentMap = videoMetaData.isSegmented ? videoMetaData.segmentMap : undefined;
 
   useEffect(() => {
-    const errorHandler = (e: unknown) => {
-      console.error('[Odin-Video]', e);
+    const errorHandler = (e: any) => {
+      console.error('[Odin-Video]-Chunked', e);
       onFatalError && onFatalError();
     };
 
@@ -332,6 +340,8 @@ const DirectSource = ({
   fileId,
   videoMetaData,
   directFileSizeLimit,
+  videoRef,
+  onFatalError,
 }: OndinDirectProps) => {
   const { data: videoUrl } = useVideoUrl(
     dotYouClient,
@@ -340,6 +350,16 @@ const DirectSource = ({
     targetDrive,
     directFileSizeLimit
   ).fetch;
+
+  useEffect(() => {
+    const errorHandler = (e: any) => {
+      console.error('[Odin-Video]-Direct', e);
+      onFatalError && onFatalError();
+    };
+
+    videoRef.current?.addEventListener('error', errorHandler);
+    return () => videoRef.current?.removeEventListener('error', errorHandler);
+  });
 
   if (!videoUrl) return null;
   return <source src={videoUrl} type={videoMetaData.mimeType} data-type="direct" />;
