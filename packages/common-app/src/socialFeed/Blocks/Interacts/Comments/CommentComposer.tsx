@@ -123,7 +123,7 @@ export const CommentEditor = ({
       </div>
       <FileOverview
         files={attachment ? [{ file: attachment }] : []}
-        setFiles={(newFiles) => setAttachment(newFiles?.[0].file as File)}
+        setFiles={(newFiles) => setAttachment(newFiles?.[0]?.file as File)}
         className="mt-2"
       />
     </div>

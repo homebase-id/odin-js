@@ -54,7 +54,7 @@ const ExperienceBlock = ({
           <ExternalLinkImage domain={domain} fallbackSize="md" />
         </div>
       ) : null}
-      <div>
+      <div className="flex-grow">
         <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{title}</h1>
         <RichTextRenderer className="leading-relaxed" body={body} />
         {link ? (
@@ -100,7 +100,7 @@ const ExternalLinkImage = ({
       {/* On failed we fully hide the picture element, only visually hiding it, stays on top for safari...  */}
       {!hasFailed ? (
         <picture className={`relative z-10`}>
-          <source srcSet={`https://${domain}/pub/image`} />
+          {/* <source srcSet={`https://${domain}/pub/image`} /> */}
           <img
             src={`https://${domain}/favicon.ico`}
             className={`m-auto h-full w-full object-scale-down object-center ${bgClass}`}
