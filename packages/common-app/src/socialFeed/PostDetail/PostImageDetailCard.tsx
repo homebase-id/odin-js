@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   Arrow,
 } from '../../..';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -191,6 +192,10 @@ export const PostImageDetailCard = ({
                 isAuthenticated={isAuthenticated}
                 isOwner={isOwner}
                 login={login}
+                isPublic={
+                  channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+                  channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+                }
               />
             ) : null}
           </div>

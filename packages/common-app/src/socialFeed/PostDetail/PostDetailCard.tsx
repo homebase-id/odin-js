@@ -19,6 +19,7 @@ import {
   MediaGallery,
   EmbeddedPostContent,
 } from '../../..';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -181,6 +182,10 @@ export const PostDetailCard = ({
           isAuthenticated={isAuthenticated}
           isOwner={isOwner}
           login={login}
+          isPublic={
+            channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+            channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+          }
         />
       ) : null}
     </div>
