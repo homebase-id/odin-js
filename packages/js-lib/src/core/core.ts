@@ -27,5 +27,6 @@ export * from './NotificationData/NotificationTypes';
 // MediaData
 export * from './MediaData/MediaTypes';
 export * from './MediaData/Thumbs/ImageResizer';
+export * from './MediaData/Thumbs/ThumbnailProvider';
 export * from './MediaData/ImageProvider';
 export * from './MediaData/VideoProvider';
