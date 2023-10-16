@@ -140,6 +140,16 @@ export const getRecentPosts = async <T extends PostContent>(
   return { results: sortedPosts, cursorState: allCursors };
 };
 
+export const getPostByFileId = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  channelId: string,
+  fileId: string
+): Promise<PostFile<T> | undefined> => {
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+  if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
+};
+
 //Gets the content for a given post id
 export const getPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,

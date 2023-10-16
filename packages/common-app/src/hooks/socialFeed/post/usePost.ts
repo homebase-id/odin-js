@@ -6,6 +6,8 @@ import {
   removePost,
   savePost as savePostFile,
   getPost,
+  Media,
+  getPostByFileId,
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient, useStaticFiles } from '@youfoundation/common-app';
 import {
@@ -161,6 +163,22 @@ const usePost = () => {
     channelId: string;
     slug: string;
   }) => {
+    const post = await getPostByFileId(dotYouClient, channelId, fileId);
+    const channelDrive = getChannelDrive(channelId);
+    if (post) {
+      if (post.content.primaryMediaFile)
+        await deleteFile(dotYouClient, channelDrive, post.content.primaryMediaFile.fileId);
+
+      const mediaPost = post as any as Media;
+      if (mediaPost.mediaFiles) {
+        await Promise.all(
+          mediaPost.mediaFiles.map(async (file) => {
+            await deleteFile(dotYouClient, channelDrive, file.fileId);
+          })
+        );
+      }
+    }
+
     return await removePost(dotYouClient, fileId, channelId);
   };
 

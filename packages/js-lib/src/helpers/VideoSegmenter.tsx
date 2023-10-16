@@ -101,7 +101,7 @@ export const segmentVideoFile = async (
       for (let i = 0; i < info.tracks.length; i++) {
         const track = info.tracks[i];
         const nbrSamples = Math.round(
-          (track.nb_samples / (track.movie_duration / track.movie_timescale)) * 30
+          (track.nb_samples / (track.movie_duration / track.movie_timescale)) * 2
         );
         mp4File.setSegmentOptions(track.id, null, {
           nbSamples: nbrSamples,
@@ -119,9 +119,8 @@ export const segmentVideoFile = async (
       sampleNum: number,
       is_last: boolean
     ) {
-      if (id === videoTrackId) {
+      if (id === videoTrackId)
         metadata.segmentMap.push({ offset: segmentedByteOffset, samples: sampleNum });
-      }
 
       const segment = new Uint8Array(buffer);
       segmentedByteOffset += segment.length;
