@@ -1,5 +1,5 @@
 import { ReactionContext } from '@youfoundation/js-lib/public';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   AuthorImage,
   CanReactInfo,
@@ -88,6 +88,7 @@ export const CommentEditor = ({
 }) => {
   const [body, setBody] = useState(defaultBody);
   const [attachment, setAttachment] = useState<File | undefined>(defaultAttachment);
+  const files = useMemo(() => (attachment ? [{ file: attachment }] : []), [attachment?.size]);
 
   return (
     <div className="ml-2 flex-grow rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-10">
@@ -122,7 +123,7 @@ export const CommentEditor = ({
         </div>
       </div>
       <FileOverview
-        files={attachment ? [{ file: attachment }] : []}
+        files={files}
         setFiles={(newFiles) => setAttachment(newFiles?.[0]?.file as File)}
         className="mt-2"
       />
