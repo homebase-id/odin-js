@@ -39,7 +39,7 @@ export const PostMedia = ({
     return <div className={`${className || ''}`}></div>;
   }
 
-  if (mediaFileIds && mediaFileIds.length > 1) {
+  if (mediaFileIds && mediaFileIds.length > 1)
     return (
       <MediaGallery
         odinId={odinId}
@@ -51,14 +51,14 @@ export const PostMedia = ({
         onClick={onClick}
       />
     );
-  }
 
   return (
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
+        fit="contain"
         post={post}
         odinId={odinId}
-        className={`w-full ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
+        className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.payloadIsEncrypted}
         onClick={onClick ? (e) => onClick(e, 0) : undefined}

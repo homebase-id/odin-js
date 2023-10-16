@@ -55,18 +55,16 @@ export const DoubleClickHeartForMedia = ({
   });
 
   return (
-    <span ref={wrapperRef}>
-      <span onClick={(e) => e.stopPropagation()}>
-        <PostMedia
-          odinId={odinId}
-          postFile={postFile}
-          showFallback={showFallback}
-          forceAspectRatio={forceAspectRatio}
-          className={`cursor-pointer ${className || ''}`}
-          {...bind}
-        />
-        <ErrorNotification error={postEmojiError} />
-      </span>
+    <span ref={wrapperRef} onClick={(e) => e.stopPropagation()}>
+      <PostMedia
+        odinId={odinId}
+        postFile={postFile}
+        showFallback={showFallback}
+        forceAspectRatio={forceAspectRatio}
+        className={`cursor-pointer ${className || ''}`}
+        {...bind}
+      />
+      <ErrorNotification error={postEmojiError} />
     </span>
   );
 };

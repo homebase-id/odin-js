@@ -48,6 +48,7 @@ export const VideoClickToLoad = ({ preload = true, ...props }: VideoClickToLoadP
           <OdinImage
             dotYouClient={dotYouClient}
             {...props}
+            className={`blur-[10px] ${props.className || ''}`}
             fit={props.fit}
             avoidPayload={true}
             onError={() => setShouldFallback(true)}

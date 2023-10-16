@@ -45,6 +45,7 @@ export const PrimaryMedia = ({
           className={className}
           probablyEncrypted={probablyEncrypted}
           preload={false}
+          fit="contain"
         />
       ) : (
         <Video

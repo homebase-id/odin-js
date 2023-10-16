@@ -108,6 +108,7 @@ const usePost = () => {
 
           return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
             type: file.file.type as VideoContentType,
+            thumb: 'thumbnail' in file ? file.thumbnail : undefined,
           });
         } else {
           return await uploadImage(
