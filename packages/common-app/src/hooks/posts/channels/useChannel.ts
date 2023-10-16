@@ -46,11 +46,9 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
               BlogConfig.ChannelDefinitionFileType &&
             (channelSlug
               ? possibleChannel.payload.slug === channelSlug
-              : possibleChannel.payload.channelId === channelId)
+              : stringGuidsEqual(possibleChannel.payload.channelId, channelId))
         );
-        if (foundEntry) {
-          channel = foundEntry.payload as ChannelDefinition;
-        }
+        if (foundEntry) channel = foundEntry.payload as ChannelDefinition;
       });
     }
 
@@ -102,7 +100,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
           'channels',
         ]);
         const updatedChannels = previousChannels?.map((chnl) =>
-          chnl.channelId === toSaveChannelAsVm.channelId ? toSaveChannelAsVm : chnl
+          stringGuidsEqual(chnl.channelId, toSaveChannelAsVm.channelId) ? toSaveChannelAsVm : chnl
         );
         queryClient.setQueryData(['channels'], updatedChannels);
 

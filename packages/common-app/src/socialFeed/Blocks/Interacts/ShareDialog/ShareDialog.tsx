@@ -11,6 +11,10 @@ import {
   Reddit,
 } from '../../../../ui';
 import { usePortal } from '../../../../hooks';
+import { Input } from '../../../../form/Input';
+import { Clipboard } from '../../../../ui/Icons/Clipboard';
+import { useState } from 'react';
+import { Label } from '../../../../form';
 
 export const ShareDialog = ({
   onClose,
@@ -46,7 +50,7 @@ export const ShareDialog = ({
           className="justify-center"
           target="_blank"
           rel="noopener noreferrer"
-        ></ActionLink>
+        />
         <ActionLink
           href={`https://www.facebook.com/sharer.php?u=${href}`}
           icon={Facebook}
@@ -55,7 +59,7 @@ export const ShareDialog = ({
           className="justify-center"
           target="_blank"
           rel="noopener noreferrer"
-        ></ActionLink>
+        />
         <ActionLink
           href={`https://twitter.com/share?url=${href}&text=${title || ''}`}
           icon={Twitter}
@@ -64,7 +68,7 @@ export const ShareDialog = ({
           className="justify-center"
           target="_blank"
           rel="noopener noreferrer"
-        ></ActionLink>
+        />
         <ActionLink
           href={`https://www.linkedin.com/shareArticle?url=${href}&title=${title || ''}`}
           icon={Linkedin}
@@ -73,7 +77,7 @@ export const ShareDialog = ({
           className="justify-center"
           target="_blank"
           rel="noopener noreferrer"
-        ></ActionLink>
+        />
         <ActionLink
           href={`https://reddit.com/submit?url=${href}&title=${title || ''}`}
           icon={Reddit}
@@ -82,10 +86,40 @@ export const ShareDialog = ({
           className="justify-center"
           target="_blank"
           rel="noopener noreferrer"
-        ></ActionLink>
+        />
+      </div>
+      <div className="mt-7">
+        <Label>Permalink:</Label>
+        <ClickToCopy text={href} />
       </div>
     </DialogWrapper>
   );
 
   return createPortal(dialog, target);
+};
+
+const ClickToCopy = ({ text }: { text: string }) => {
+  const [showCopied, setShowCopied] = useState(false);
+
+  const doCopy = () => {
+    text && navigator.clipboard.writeText(text);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 1500);
+  };
+
+  return (
+    <div className="relative cursor-pointer" onClick={doCopy}>
+      <Input readOnly className="pointer-events-none pl-12" value={text} />
+      <div className="absolute bottom-0 left-0 top-0 border-r p-2">
+        <Clipboard className="h-6 w-6" />
+      </div>
+      {showCopied && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="rounded-lg bg-slate-800 px-2 py-1 text-sm text-white dark:bg-slate-600">
+            {t('Copied to clipboard')}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 };
