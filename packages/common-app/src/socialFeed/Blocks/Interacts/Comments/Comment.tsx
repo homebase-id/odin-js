@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { AuthorImage, AuthorName, CanReactInfo, t, useReaction } from '@youfoundation/common-app';
+import {
+  AuthorImage,
+  AuthorName,
+  CanReactInfo,
+  ErrorNotification,
+  t,
+  useReaction,
+} from '@youfoundation/common-app';
 
 import {
   CommentReactionPreview,
@@ -34,8 +41,8 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
   const [isEdit, setIsEdit] = useState(false);
 
   const {
-    saveComment: { mutateAsync: postComment },
-    removeComment: { mutateAsync: removeComment },
+    saveComment: { mutateAsync: postComment, error: postCommentError },
+    removeComment: { mutateAsync: removeComment, error: removeCommentError },
   } = useReaction();
 
   const { fileId, authorOdinId, content } = commentData;
@@ -49,21 +56,24 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
   };
 
   const doUpdate = (newBody: string, newAttachment?: File) => {
-    postComment({
-      ...commentData,
-      content: {
-        ...commentData.content,
-        body: newBody,
-        attachment: newAttachment,
-      },
-      context,
-    });
+    (async () => {
+      await postComment({
+        ...commentData,
+        content: {
+          ...commentData.content,
+          body: newBody,
+          attachment: newAttachment,
+        },
+        context,
+      });
 
-    setIsEdit(false);
+      setIsEdit(false);
+    })();
   };
 
   return (
     <>
+      <ErrorNotification error={postCommentError || removeCommentError} />
       <div className={isThread ? 'pl-4' : ''}>
         <div className="text-foreground flex flex-row text-opacity-80">
           <div className="flex-shrink-0">
