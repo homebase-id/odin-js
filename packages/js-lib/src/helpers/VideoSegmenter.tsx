@@ -100,9 +100,11 @@ export const segmentVideoFile = async (
 
       for (let i = 0; i < info.tracks.length; i++) {
         const track = info.tracks[i];
-        const nbrSamples = Math.round(
-          (track.nb_samples / (track.movie_duration / track.movie_timescale)) * 2
-        );
+        const nbSamples = track.nb_samples;
+        const time =
+          (track.movie_duration || info.duration || info.initial_duration || 0) /
+          (track.movie_timescale || info.timescale || 1);
+        const nbrSamples = Math.round((nbSamples / time) * 5);
         mp4File.setSegmentOptions(track.id, null, {
           nbSamples: nbrSamples,
         });

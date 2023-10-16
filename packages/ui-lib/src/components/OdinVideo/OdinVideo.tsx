@@ -9,7 +9,6 @@ import { useIntersection } from '../../hooks/intersection/useIntersection';
 import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';
 
 import '../../app/app.css';
-import useImage from '../../hooks/image/useImage';
 import { Exclamation } from '../ui/Icons/Exclamation';
 
 interface Segment {
@@ -178,6 +177,12 @@ const ChunkedSource = ({
 
     let sourceBuffer: SourceBuffer;
 
+    const checkAndFetchNextSegment = async () => {
+      const nextSegement = segments.find((s) => s.requested === false) || segments[0];
+      await fetchRange(nextSegement.start, nextSegement.end);
+      nextSegement.requested = true;
+    };
+
     const sourceOpen = async () => {
       URL.revokeObjectURL(objectUrl);
       sourceBuffer = innerMediaSource.addSourceBuffer(codec);
@@ -186,7 +191,9 @@ const ChunkedSource = ({
 
       videoRef.current?.addEventListener('timeupdate', checkBuffer);
       videoRef.current?.addEventListener('seeking', seek);
-      videoRef?.current?.addEventListener('error', (e) => {
+      videoRef.current?.addEventListener('stalled', checkAndFetchNextSegment);
+      videoRef.current?.addEventListener('waiting', checkAndFetchNextSegment);
+      videoRef.current?.addEventListener('error', (e) => {
         console.error(e);
       });
       // In case we start playing and the readyState isn't good enough...
@@ -194,11 +201,7 @@ const ChunkedSource = ({
         if (!videoRef.current) return;
         console.debug('readyState', videoRef.current?.readyState);
 
-        if (videoRef.current.readyState < 3) {
-          const nextSegement = segments.find((s) => s.requested === false) || segments[0];
-          await fetchRange(nextSegement.start, nextSegement.end);
-          nextSegement.requested = true;
-        }
+        if (videoRef.current.readyState < 3) await checkAndFetchNextSegment();
       });
     };
 
@@ -257,9 +260,9 @@ const ChunkedSource = ({
 
       const currentSample = getCurrentSample();
       const nextSegment = getNextSegment(currentSegment);
-      if (currentSample > currentSegment.samples * 0.6 && !nextSegment.requested) {
+
+      if (currentSample > currentSample * 0.3 && nextSegment && !nextSegment.requested) {
         console.debug(`time to fetch next chunk ${videoRef.current?.currentTime}s`);
-        const nextSegment = segments[currentSegment.sequence + 1];
 
         fetchRange(nextSegment.start, nextSegment.end);
         nextSegment.requested = true;
@@ -297,11 +300,7 @@ const ChunkedSource = ({
       return currentSegment;
     };
 
-    const getNextSegment = (currentSegment: Segment) => {
-      const nextSegment = segments[currentSegment.sequence + 1];
-      return nextSegment;
-    };
-
+    const getNextSegment = (currentSegment: Segment) => segments[currentSegment.sequence + 1];
     const haveAllSegments = () => {
       return segments.every((val) => {
         return !!val.requested;
