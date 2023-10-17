@@ -95,6 +95,17 @@ export const getAttributeVersions = async (
   return attributes;
 };
 
+export const getAttributeByFileId = async (
+  dotYouClient: DotYouClient,
+  profileId: string,
+  fileId: string
+): Promise<AttributeFile | undefined> => {
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
+  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+  if (!header) return;
+  return dsrToAttributeFile(dotYouClient, header, targetDrive, true);
+};
+
 export const getAttribute = async (
   dotYouClient: DotYouClient,
   profileId: string,
@@ -237,6 +248,19 @@ const photoAttributeProcessing = async (
   return attr;
 };
 
+const experienceAttributeProcessing = async (
+  dotYouClient: DotYouClient,
+  attr: AttributeFile
+): Promise<AttributeFile> => {
+  const imageFieldKey = MinimalProfileFields.ExperienceImageFileId;
+  const imageFileId = attr.data[imageFieldKey];
+  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+
+  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+
+  return attr;
+};
+
 const themeAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
@@ -266,6 +290,9 @@ const processAttribute = async (dotYouClient: DotYouClient, attribute: Attribute
 
     case HomePageAttributes.Theme:
       return await themeAttributeProcessing(dotYouClient, attribute);
+
+    case BuiltInAttributes.Experience:
+      return await experienceAttributeProcessing(dotYouClient, attribute);
 
     default:
       return attribute;
@@ -353,5 +380,25 @@ export const removeAttribute = async (
   attributeFileId: string
 ): Promise<void> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
+
+  const attr: AttributeFile | undefined = await getAttributeByFileId(
+    dotYouClient,
+    profileId,
+    attributeFileId
+  );
+
+  const mediaFileIds = [
+    attr?.data[HomePageThemeFields.Favicon]?.fileId,
+    attr?.data[HomePageThemeFields.HeaderImageId],
+    attr?.data[MinimalProfileFields.ProfileImageId],
+    attr?.data[MinimalProfileFields.ExperienceImageFileId],
+  ];
+
+  await Promise.all(
+    mediaFileIds.map(async (fileId) => {
+      if (fileId) await deleteFile(dotYouClient, targetDrive, fileId);
+    })
+  );
+
   deleteFile(dotYouClient, targetDrive, attributeFileId);
 };

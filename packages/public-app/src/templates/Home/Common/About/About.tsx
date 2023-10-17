@@ -1,7 +1,8 @@
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import useBiography from '../../../../hooks/biography/useBiography';
-import { Arrow, FallbackImg, RichTextRenderer, t } from '@youfoundation/common-app';
+import { Arrow, FallbackImg, RichTextRenderer, t, Image } from '@youfoundation/common-app';
 import { useMemo, useState } from 'react';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
@@ -20,6 +21,7 @@ const About = ({ className }: { className?: string }) => {
                   title={experienceItem.title}
                   body={experienceItem.body}
                   link={experienceItem.link}
+                  imageFileId={experienceItem.imageFileId}
                   key={experienceItem.id}
                   className="my-5"
                 />
@@ -36,11 +38,13 @@ const ExperienceBlock = ({
   title,
   body,
   link,
+  imageFileId,
   className,
 }: {
   title: string;
   body: string | Record<string, unknown>[];
   link?: string;
+  imageFileId?: string;
   className: string;
 }) => {
   const domain = link ? new URL(link).hostname : undefined;
@@ -49,7 +53,14 @@ const ExperienceBlock = ({
     <div
       className={`relative flex flex-row gap-2 overflow-hidden rounded-lg bg-background px-5 py-8 sm:gap-4 sm:px-8 sm:py-12 ${className}`}
     >
-      {domain ? (
+      {imageFileId ? (
+        <Image
+          targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
+          fileId={imageFileId}
+          fit="contain"
+          className="relative aspect-square w-1/6 flex-shrink-0 flex-grow-0"
+        />
+      ) : domain ? (
         <div className="w-1/6 flex-shrink-0 flex-grow-0">
           <ExternalLinkImage domain={domain} fallbackSize="md" />
         </div>

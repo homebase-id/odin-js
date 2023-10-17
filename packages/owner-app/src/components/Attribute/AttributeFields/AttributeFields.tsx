@@ -207,6 +207,23 @@ const AttributeFields = ({
               placeholder={t('Link to the project, company, etc.')}
             />
           </div>
+          <div className="mb-5">
+            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-image`}>{t('Image')}</Label>
+            <ImageSelector
+              id={`${attribute.fileId ?? 'new'}-experience-image`}
+              name={MinimalProfileFields.ExperienceImageFileId}
+              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceImageFileId] ?? ''}
+              onChange={(e) =>
+                onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+              }
+              acl={attribute.acl}
+              targetDrive={GetTargetDriveFromProfileId(attribute.profileId)}
+              expectedAspectRatio={1}
+              maxHeight={500}
+              maxWidth={500}
+              thumbInstructions={profileInstructionThumbSizes}
+            />
+          </div>
         </>
       );
       break;

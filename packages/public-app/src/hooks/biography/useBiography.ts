@@ -19,6 +19,7 @@ type ShortBioData = {
 type ExperienceData = {
   title: string;
   link?: string;
+  imageFileId?: string;
   body: string | Record<string, unknown>[];
   id: string;
   priority: number;
@@ -84,6 +85,7 @@ const useBiography = () => {
               | string
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
+            imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileId] as string,
             id: attribute.id,
             priority: attribute.priority,
           };
@@ -120,6 +122,7 @@ const useBiography = () => {
             | string
             | Record<string, unknown>[],
           link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
+          imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileId] as string,
           id: attribute.id,
           priority: attribute.priority,
         };
