@@ -2,6 +2,8 @@ import { SegmentedVideoMetadata } from '../core/core';
 import { mergeByteArrays } from './helpers';
 
 type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
+const MB = 1024 * 1024;
+const MB_PER_CHUNK = 5 * MB;
 
 const loadMp4box = async () => {
   try {
@@ -101,10 +103,13 @@ export const segmentVideoFile = async (
       for (let i = 0; i < info.tracks.length; i++) {
         const track = info.tracks[i];
         const nbSamples = track.nb_samples;
-        const time =
+        const durationInSec =
           (track.movie_duration || info.duration || info.initial_duration || 0) /
           (track.movie_timescale || info.timescale || 1);
-        const nbrSamples = Math.round((nbSamples / time) * 5);
+        const secondsFor8MbOfData = (metadata.duration / file.size) * MB_PER_CHUNK;
+        console.debug({ track: i, secondsFor8MbOfData });
+
+        const nbrSamples = Math.round((nbSamples / durationInSec) * secondsFor8MbOfData);
         mp4File.setSegmentOptions(track.id, null, {
           nbSamples: nbrSamples,
         });
