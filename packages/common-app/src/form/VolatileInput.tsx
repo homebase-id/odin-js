@@ -27,6 +27,7 @@ export const VolatileInput = ({
   supportEmojiShortcut?: boolean;
 }) => {
   const [emojiQuery, setEmojiQuery] = useState<string>();
+  const [lastInsertedEmoji, setLastInsertedEmoji] = useState<string>();
 
   const divRef = useRef<HTMLDivElement>(null);
   // Custom on paste handler, to only take plain text, as the input is a span, anything is allowed by default by the browser...
@@ -78,7 +79,6 @@ export const VolatileInput = ({
     }
 
     const relativeOffset = getRelativeOffset(absoluteOffset, divRef.current);
-
     if (!relativeOffset) return;
 
     relativeOffset.offset += offset || 0;
@@ -116,18 +116,19 @@ export const VolatileInput = ({
     const caretPos = saveCaretPosition();
 
     divRef.current.innerText = defaultValue || '';
-
     restoreCaretPosition(
       caretPos,
-      supportEmojiShortcut && emojiQuery ? -emojiQuery.length : undefined
+      supportEmojiShortcut && emojiQuery
+        ? -(emojiQuery.length + 1 - (lastInsertedEmoji?.length || 1))
+        : undefined
     );
     if (supportEmojiShortcut && emojiQuery) setEmojiQuery(undefined);
+    if (supportEmojiShortcut && lastInsertedEmoji) setLastInsertedEmoji(undefined);
   }, [defaultValue]);
 
   // We want values to be saved directly, while the link styling is better with a debounce
   const onInput: React.FormEventHandler<HTMLDivElement> = (e) => {
     if (onChange) onChange((e.target as HTMLElement).innerText);
-    // if(supportEmojiShortcut) toggleEmojiPicker();
     if (!linksArePlain) debouncedLinkStyle();
   };
 
@@ -141,11 +142,9 @@ export const VolatileInput = ({
   const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     const wordTillCaret = getEmojiQuery();
 
-    if (wordTillCaret && wordTillCaret.startsWith(':') && wordTillCaret.length > 1) {
+    if (wordTillCaret && wordTillCaret.startsWith(':') && wordTillCaret.length > 1)
       setEmojiQuery(wordTillCaret.slice(1));
-    } else {
-      setEmojiQuery(undefined);
-    }
+    else setEmojiQuery(undefined);
   };
 
   const getEmojiQuery = () => {
@@ -170,7 +169,7 @@ export const VolatileInput = ({
 
   return (
     <div className="relative block w-full">
-      <div
+      <span
         role="textbox"
         contentEditable
         className="before:content block w-full cursor-pointer resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
@@ -180,13 +179,15 @@ export const VolatileInput = ({
         onInput={onInput}
         ref={divRef}
         style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
-      ></div>
+      ></span>
       {supportEmojiShortcut ? (
         <EmojiDropdown
           query={emojiQuery}
           onInput={(emoji) => {
-            if (onChange && emoji)
+            if (onChange && emoji) {
+              setLastInsertedEmoji(emoji);
               onChange(`${divRef.current?.innerText.replace(`:${emojiQuery}`, emoji) || ''}`);
+            }
           }}
           position={rect}
         />
