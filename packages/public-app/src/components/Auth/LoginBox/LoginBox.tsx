@@ -3,15 +3,14 @@ import { useYouAuthAuthorization } from '../../../hooks/auth/useAuth';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
-const CENTRALIZED_LOGIN_BOX = !!import.meta.env.VITE_VERSION;
+const AUTO_LOGON_PARAM = 'youauth-logon';
+const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
 export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  return CENTRALIZED_LOGIN_BOX ? (
-    <CentralLoginBox returnUrl={returnUrl} />
-  ) : (
-    <LocalLoginBox returnUrl={returnUrl} />
-  );
+  <CentralLoginBox returnUrl={returnUrl} />;
 };
 
 const useParams = (returnUrl: string) => {
@@ -21,74 +20,39 @@ const useParams = (returnUrl: string) => {
     refetchOnMount: false,
   });
 };
+
 // Iframes and navigation is weird
 // https://www.aleksandrhovhannisyan.com/blog/react-iframes-back-navigation-bug/
 const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  const { data: authParams } = useParams(returnUrl || window.location.href);
-  const iframeSrc = `${
-    import.meta.env.VITE_CENTRAL_LOGIN_URL
-  }?isDarkMode=${document.documentElement.classList.contains(IS_DARK_CLASSNAME)}${
-    authParams ? `&${stringifyToQueryParams(authParams as any)}` : ''
-  }`;
+  const { data: authParams } = useParams(returnUrl || window.location.href.split('?')[0]);
+  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams as any);
+  const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
+
+  // Auto logon when requested by a queryString param
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.has(AUTO_LOGON_PARAM) && authParams)
+      window.location.href = `https://${searchParams.get(
+        AUTO_LOGON_PARAM
+      )}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
+  }, [authParams]);
 
   return (
     <>
-      {authParams ? (
+      {stringifiedAuthParams ? (
         <>
           <Helmet>
-            <meta name="youauth" content={stringifyToQueryParams(authParams as any)} />
+            <meta name="youauth" content={stringifiedAuthParams} />
           </Helmet>
-          <iframe src={iframeSrc} key={iframeSrc} className="h-[16rem] w-full"></iframe>
+          <iframe
+            src={`${
+              import.meta.env.VITE_CENTRAL_LOGIN_URL
+            }?isDarkMode=${isDarkMode}${`&${stringifiedAuthParams}`}`}
+            key={stringifiedAuthParams}
+            className="h-[16rem] w-full"
+          ></iframe>
         </>
       ) : null}
     </>
   );
-};
-
-const LocalLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  return <>Login is disabled</>;
-  //   const { authenticate } = useAuth();
-  //   const [identity, setIdentity] = useState('');
-
-  //   const doLogin: FormEventHandler = (e) => {
-  //     e.preventDefault();
-
-  //     authenticate(identity, returnUrl || window.location.href);
-  //   };
-
-  //   const doRegister: MouseEventHandler = (e) => {
-  //     e.preventDefault();
-
-  //     console.log('register');
-  //   };
-
-  //   return (
-  //     <>
-  //       <form onSubmit={doLogin}>
-  //         <p className="text-lg">YouAuth</p>
-  //         <label htmlFor="homebase-id" className="text-sm leading-7 text-gray-600 dark:text-gray-400">
-  //           Homebase Id
-  //         </label>
-  //         <input
-  //           type="text"
-  //           name="homebase-id"
-  //           id="homebase-id"
-  //           defaultValue={identity}
-  //           required
-  //           className="w-full rounded border border-gray-300 bg-gray-100 bg-opacity-50 px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:bg-transparent focus:ring-2 focus:ring-indigo-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-  //           onChange={(e) => setIdentity(e.target.value)}
-  //         />
-  //         <button className="mt-2 block w-full rounded border-0 bg-green-500 px-4 py-2 text-white hover:bg-green-600 focus:outline-none ">
-  //           {t('login')}
-  //         </button>
-  //       </form>
-  //       <p className="my-3 text-center">{t('or')}</p>
-  //       <button
-  //         onClick={doRegister}
-  //         className="block w-full rounded border-0 bg-button px-4 py-2 text-white hover:bg-indigo-600 focus:outline-none "
-  //       >
-  //         {t('signup')}
-  //       </button>
-  //     </>
-  //   );
 };

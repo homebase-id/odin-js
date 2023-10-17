@@ -1,5 +1,5 @@
 import { ReactNode, useRef, useState } from 'react';
-import { useExternalOdinId, useIntersection } from '../..';
+import { useDotYouClient, useExternalOdinId, useIntersection, useIsConnected } from '../..';
 
 export const IdentityTeaser = ({
   odinId,
@@ -14,6 +14,8 @@ export const IdentityTeaser = ({
   isBorderLess?: boolean;
   children?: ReactNode;
 }) => {
+  const { isOwner, getIdentity } = useDotYouClient();
+  const identity = getIdentity();
   const [isInView, setIsInView] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -22,11 +24,12 @@ export const IdentityTeaser = ({
     odinId: isInView ? odinId : undefined,
   }).fetch;
 
-  useIntersection(wrapperRef, () => {
-    setIsInView(true);
-  });
+  const { data: isConnected } = useIsConnected(isInView && isOwner ? odinId : undefined);
+
+  useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
+  const link = `https://${odinId}${isConnected ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <div
@@ -36,7 +39,7 @@ export const IdentityTeaser = ({
       ref={wrapperRef}
     >
       <div className="flex h-full w-full items-center">
-        <a href={`https://${odinId}`} rel="noreferrer noopener">
+        <a href={link} rel="noreferrer noopener">
           {connectionDetails?.image ? (
             <img
               src={connectionDetails?.image}
@@ -50,7 +53,7 @@ export const IdentityTeaser = ({
         </a>
 
         <div className="flex-grow ">
-          <a href={`https://${odinId}`} rel="noreferrer noopener">
+          <a href={link} rel="noreferrer noopener">
             <h2
               className={`title-font font-medium ${
                 size === 'sm' ? 'text-sm' : ''
