@@ -87,7 +87,7 @@ const AttributeCreator = ({
       ) : (
         <>
           <p className="mb-5 text-xl">
-            {t('Add a new attribute')}
+            {t('Add new')}
             <small className="block text-sm text-slate-400">
               {t(`Add the information you want, and keep it secure. You're in control.`)}
             </small>

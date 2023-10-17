@@ -166,7 +166,7 @@ export const AttributeDefinitions = {
 
   Link: {
     type: BuiltInAttributes.Link,
-    name: 'Any url',
+    name: 'Website link',
     description: 'Link entry, make your online world accessible',
   },
 
