@@ -84,11 +84,13 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
 }
 
+export type ReactAccess = 'emoji' | 'comment' | boolean;
+
 export interface PostContent {
   id: string;
   channelId: string;
   authorOdinId: string;
-  reactAccess?: SecurityGroupType.Owner | SecurityGroupType.Connected;
+  reactAccess?: ReactAccess;
 
   caption: string;
   captionAsRichText?: RichText;

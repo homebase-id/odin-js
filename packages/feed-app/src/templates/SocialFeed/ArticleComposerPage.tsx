@@ -17,8 +17,14 @@ import {
 import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { SecurityGroupType, ImageUploadResult } from '@youfoundation/js-lib/core';
-import { RichText, Article, ChannelDefinition, PostFile } from '@youfoundation/js-lib/public';
+import { ImageUploadResult } from '@youfoundation/js-lib/core';
+import {
+  RichText,
+  Article,
+  ChannelDefinition,
+  PostFile,
+  ReactAccess,
+} from '@youfoundation/js-lib/public';
 import useArticleComposer from '@youfoundation/common-app/src/hooks/socialFeed/article/useArticleComposer';
 import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
@@ -240,10 +246,10 @@ export const ArticleComposerPage = () => {
         onConfirm={async (newReactAccess, newChannel) => {
           setIsOptionsDialogOpen(false);
 
-          if (newReactAccess) {
+          if (newReactAccess !== undefined) {
             const dirtyPostFile = { ...postFile };
             dirtyPostFile.content.reactAccess =
-              newReactAccess === SecurityGroupType.Owner ? SecurityGroupType.Owner : undefined;
+              newReactAccess !== true ? newReactAccess : undefined;
 
             setPostFile(dirtyPostFile);
             await doSave(dirtyPostFile);
@@ -287,15 +293,15 @@ const OptionsDialog = ({
   isOpen: boolean;
   onCancel: () => void;
   onConfirm: (
-    newReactAccess: SecurityGroupType.Connected | SecurityGroupType.Owner | undefined,
+    newReactAccess: ReactAccess | undefined,
     newChannel: ChannelDefinition | undefined
   ) => void;
 }) => {
   const target = usePortal('modal-container');
 
-  const [newReactAccess, setNewReactAccess] = useState<
-    SecurityGroupType.Connected | SecurityGroupType.Owner | undefined
-  >(postFile.content.reactAccess);
+  const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
+    postFile.content.reactAccess
+  );
   const [newChannel, setNewChannel] = useState<ChannelDefinition | undefined>();
 
   if (!isOpen) return null;
@@ -308,17 +314,18 @@ const OptionsDialog = ({
           <Select
             id="reactAccess"
             name="reactAccess"
-            defaultValue={postFile.content.reactAccess}
-            onChange={(e) =>
-              setNewReactAccess(
-                e.target.value as SecurityGroupType.Connected | SecurityGroupType.Owner
-              )
+            defaultValue={
+              postFile.content.reactAccess !== undefined
+                ? postFile.content.reactAccess
+                  ? 'true'
+                  : 'false'
+                : undefined
             }
+            onChange={(e) => setNewReactAccess(e.target.value === 'true')}
           >
             <option>{t('Make a selection')}</option>
-            {/* <option value={SecurityGroupType.Authenticated}>{t('Authenticated')}</option> */}
-            <option value={SecurityGroupType.Connected}>{t('Enabled')}</option>
-            <option value={SecurityGroupType.Owner}>{t('Disabled')}</option>
+            <option value={'true'}>{t('Enabled')}</option>
+            <option value={'false'}>{t('Disabled')}</option>
           </Select>
         </div>
         <div className="mt-4 px-2 pt-4">

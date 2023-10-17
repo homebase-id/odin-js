@@ -10,7 +10,7 @@ const AUTO_LOGON_PARAM = 'youauth-logon';
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
 export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  <CentralLoginBox returnUrl={returnUrl} />;
+  return <CentralLoginBox returnUrl={returnUrl} />;
 };
 
 const useParams = (returnUrl: string) => {

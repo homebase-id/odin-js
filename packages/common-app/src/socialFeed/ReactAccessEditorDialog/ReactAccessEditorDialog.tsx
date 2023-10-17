@@ -1,4 +1,3 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
@@ -7,6 +6,7 @@ import { Label } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
+import { ReactAccess } from '@youfoundation/js-lib/public';
 
 export const ReactAccessEditorDialog = ({
   title,
@@ -19,14 +19,12 @@ export const ReactAccessEditorDialog = ({
   title: string;
 
   isOpen: boolean;
-  defaultValue: SecurityGroupType.Owner | SecurityGroupType.Connected | undefined;
-  onConfirm: (access: SecurityGroupType.Owner | SecurityGroupType.Connected) => void;
+  defaultValue: ReactAccess | undefined;
+  onConfirm: (access: ReactAccess | undefined) => void;
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const [newReactAccess, setNewReactAccess] = useState<
-    SecurityGroupType.Connected | SecurityGroupType.Owner
-  >(defaultValue || SecurityGroupType.Connected);
+  const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(defaultValue);
 
   if (!isOpen) {
     return null;
@@ -39,18 +37,14 @@ export const ReactAccessEditorDialog = ({
         <Select
           id="reactAccess"
           name="reactAccess"
-          defaultValue={defaultValue}
-          onChange={(e) =>
-            setNewReactAccess(
-              e.target.value === SecurityGroupType.Owner
-                ? SecurityGroupType.Owner
-                : SecurityGroupType.Connected
-            )
+          defaultValue={
+            newReactAccess !== undefined ? (newReactAccess ? 'true' : 'false') : undefined
           }
+          onChange={(e) => setNewReactAccess(e.target.value === 'true')}
         >
-          {/* <option value={SecurityGroupType.Authenticated}>{t('Authenticated')}</option> */}
-          <option value={SecurityGroupType.Connected}>{t('Enabled')}</option>
-          <option value={SecurityGroupType.Owner}>{t('Disabled')}</option>
+          <option>{t('Make a selection')}</option>
+          <option value={'true'}>{t('Enabled')}</option>
+          <option value={'false'}>{t('Disabled')}</option>
         </Select>
       </div>
       <div className="-m-2 flex flex-row-reverse py-3">

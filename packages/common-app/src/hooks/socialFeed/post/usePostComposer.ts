@@ -12,13 +12,12 @@ import {
   ChannelDefinition,
   BlogConfig,
   EmbeddedPost,
+  ReactAccess,
 } from '@youfoundation/js-lib/public';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import usePost, { AttachmentFile } from './usePost';
 import { makeGrid, useDotYouClient } from '../../../..';
-
-export type ReactAccess = SecurityGroupType.Owner | SecurityGroupType.Connected | undefined;
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<
@@ -33,7 +32,7 @@ export const usePostComposer = () => {
     files: AttachmentFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
     channel: ChannelDefinition,
-    reactAccess: ReactAccess
+    reactAccess: ReactAccess | undefined
   ) => {
     if (!files && !caption && !embeddedPost) {
       console.log('fast fail');

@@ -1,4 +1,9 @@
-import { BlogConfig, ChannelDefinition, EmbeddedPost } from '@youfoundation/js-lib/public';
+import {
+  BlogConfig,
+  ChannelDefinition,
+  EmbeddedPost,
+  ReactAccess,
+} from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
@@ -12,24 +17,19 @@ import {
   FileOverview,
   FileSelector,
   Globe,
-  ReactAccess,
   ReactAccessEditorDialog,
   VolatileInput,
   getImagesFromPasteEvent,
   getVideosFromPasteEvent,
   t,
   usePostComposer,
+  useChannels,
+  ErrorNotification,
+  Article,
+  Lock,
+  ActionGroup,
 } from '@youfoundation/common-app';
-import { useChannels } from '@youfoundation/common-app';
-
-import { ErrorNotification } from '@youfoundation/common-app';
-import { Article } from '@youfoundation/common-app';
-
-import { Lock } from '@youfoundation/common-app';
-
-import { ActionGroup } from '@youfoundation/common-app';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PostComposer = ({
   onPost,
@@ -49,7 +49,7 @@ const PostComposer = ({
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
   const [files, setFiles] = useState<AttachmentFile[]>();
 
-  const [reactAccess, setReactAccess] = useState<ReactAccess>(undefined);
+  const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
   const doPost = async () => {
@@ -99,7 +99,6 @@ const PostComposer = ({
     };
 
     window.addEventListener('message', messageListener);
-
     return () => window.removeEventListener('message', messageListener);
   }, []);
 
@@ -182,7 +181,7 @@ const PostComposer = ({
                 options={[
                   {
                     label: t('Who can react'),
-                    icon: reactAccess && reactAccess === SecurityGroupType.Owner ? Lock : Globe,
+                    icon: reactAccess && reactAccess !== true ? Lock : Globe,
                     onClick: () => setIsReactAccessEditorOpen(true),
                   },
                 ]}

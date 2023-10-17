@@ -43,8 +43,7 @@ export const useCanReact = ({
   isAuthenticated,
 }: UseCanReactProps) => {
   const { getIdentity } = useDotYouClient();
-  const isAuthor = authorOdinId === window.location.hostname || authorOdinId === getIdentity();
-
+  const isAuthor = authorOdinId === (getIdentity() || window.location.hostname);
   const { data: securityContext, isFetched: securityFetched } = useSecurityContext(
     authorOdinId,
     isEnabled
@@ -72,8 +71,8 @@ export const useCanReact = ({
     if (isAuthor) return { canReact: true };
     if (!hasReactDriveReactAccess && !hasCommentDriveReactAccess)
       return { canReact: false, details: 'NOT_AUTHORIZED' };
-    if (postContent?.reactAccess && postContent.reactAccess !== SecurityGroupType.Connected)
-      return { canReact: false, details: 'DISABLED_ON_POST' };
+
+    if (postContent?.reactAccess === false) return { canReact: false, details: 'DISABLED_ON_POST' };
 
     // Partial react access
     if (!hasReactDriveReactAccess && hasCommentDriveReactAccess) return { canReact: 'comment' };
