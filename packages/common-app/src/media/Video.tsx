@@ -43,30 +43,32 @@ export const VideoClickToLoad = ({ preload = true, ...props }: VideoClickToLoadP
         setLoadVideo(true);
       }}
     >
-      {shouldFallback ? null : (
-        <>
-          <OdinImage
-            dotYouClient={dotYouClient}
-            {...props}
-            className={`blur-[10px] ${props.className || ''}`}
-            fit={props.fit}
-            avoidPayload={true}
-            onError={() => setShouldFallback(true)}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Triangle className="text-background h-16 w-16" />
-          </div>
-        </>
+      {shouldFallback ? (
+        loadVideo ? null : (
+          <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full"></div>
+        )
+      ) : (
+        <OdinImage
+          dotYouClient={dotYouClient}
+          {...props}
+          className={`blur-[5px] ${props.className || ''}`}
+          fit={props.fit}
+          avoidPayload={true}
+          onError={() => setShouldFallback(true)}
+        />
       )}
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <Triangle className="text-background h-16 w-16" />
+      </div>
 
-      {preload || loadVideo || shouldFallback ? (
+      {preload || loadVideo ? (
         <OdinVideo
           dotYouClient={dotYouClient}
           {...props}
           autoPlay={loadVideo}
-          className={`${shouldFallback ? '' : 'absolute inset-0'} ${props.className || ''} ${
-            loadVideo || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'
-          }`}
+          className={`z-0 ${shouldFallback ? 'relative' : 'absolute inset-0'} ${
+            props.className || ''
+          } ${loadVideo || shouldFallback ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
         />
       ) : null}
     </div>
