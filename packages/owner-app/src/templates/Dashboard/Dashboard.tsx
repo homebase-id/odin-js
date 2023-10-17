@@ -1,38 +1,22 @@
 import { Link } from 'react-router-dom';
 import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
-import AppMembershipView from '../../components/PermissionViews/AppPermissionView/AppPermissionView';
-import InfoBox from '../../components/ui/InfoBox/InfoBox';
-import Section from '../../components/ui/Sections/Section';
 import useApps from '../../hooks/apps/useApps';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
   usePendingConnections,
   useCircles,
   t,
-  Alert,
   CirclePermissionView,
   useFollowingInfinite,
   EmbeddedPostContent,
   FakeAnchor,
+  Arrow,
+  House,
 } from '@youfoundation/common-app';
 import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
 import ContactImage from '../../components/Connection/ContactImage/ContactImage';
 
 const About = {
-  drives: (
-    <>
-      <p>
-        Drives are the center of your identity. They contain your data in their many different
-        forms. Drives hold the data of your profile(s), drafted and published blogs.{' '}
-      </p>
-      <p className="mt-2">
-        Data on these drives can be accessed by you, one of your approved connections, one of your
-        approved apps and the <span className="line-through">YouFoundation</span>. No scratch that,
-        it is your data you are always in control. We will never access your data, because we
-        promise not to... And because it is technically impossible.
-      </p>
-    </>
-  ),
   circles: (
     <p>
       Circles are groups of members that share the same permissions. You can name them based on
@@ -51,21 +35,12 @@ const About = {
 };
 
 const Dashboard = () => {
-  const { data: pendingConnections, isLoading: pendingConnectionsLoading } = usePendingConnections({
-    pageSize: 5,
-    pageNumber: 1,
-  }).fetch;
-  const {
-    fetch: { data: circles, isLoading: isCirclesLoading },
-  } = useCircles();
-  const { data: apps, isLoading: isAppsLoading } = useApps().fetchRegistered;
-
   return (
     <>
-      <PageMeta title={t('Dashboard')} />
+      <PageMeta title={t('Dashboard')} icon={House} />
 
-      <p className="max-w-md">
-        Welcome to your owner console. Here you will be able to edit your{' '}
+      <p className="max-w-md text-slate-400">
+        Welcome to your owner console. Edit your{' '}
         <Link className="underline" to="/owner/profile">
           profile
         </Link>
@@ -84,106 +59,134 @@ const Dashboard = () => {
         .
       </p>
 
-      {!pendingConnectionsLoading && pendingConnections?.results?.length ? (
-        <Section title={t('Connection requests')} className="mb-4">
-          <div className="-m-1 flex flex-row flex-wrap">
-            {pendingConnections?.results?.map((pendingConnection) => (
-              <PersonIncomingRequest
-                className="w-full p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
-                senderOdinId={pendingConnection.senderOdinId}
-                key={pendingConnection.senderOdinId}
-              />
-            ))}
+      <div className="mt-9 grid gap-10 lg:grid-cols-2 2xl:grid-cols-3">
+        <FeedTeaser className="" />
+
+        <div className="flex w-full flex-col gap-10 2xl:col-span-2 2xl:flex-row">
+          <div className="flex flex-col gap-10">
+            <HomebaseAppTeaser className="w-full" />
+            <CircleTeaser className="w-full" />
           </div>
-        </Section>
-      ) : null}
-
-      <div className="gap-4 lg:grid lg:grid-cols-3">
-        <FeedTeaser />
-
-        <Section
-          className="h-full"
-          title={t('Circles')}
-          actions={<InfoBox title={t('About Circles')}>{About['circles']}</InfoBox>}
-        >
-          <ul className="-my-4">
-            {!circles?.length && !isCirclesLoading ? (
-              <Alert className="my-2" type={'info'} isCompact={true}>
-                {About['circles']}
-              </Alert>
-            ) : (
-              circles?.map((circle) => {
-                return <CirclePermissionView circleDef={circle} key={circle.id} className="my-4" />;
-              })
-            )}
-          </ul>
-        </Section>
-        <Section
-          className="h-full"
-          title={t('Apps')}
-          actions={<InfoBox title={t('About Apps')}>{About['apps']}</InfoBox>}
-        >
-          <ul className="-my-4">
-            {!apps?.length && !isAppsLoading ? (
-              <Alert className="my-2" type={'info'} isCompact={true}>
-                {About['apps']}
-              </Alert>
-            ) : (
-              apps?.map((app) => {
-                return <AppMembershipView className="my-4" appDef={app} key={app.appId} />;
-              })
-            )}
-          </ul>
-        </Section>
+          <ConnectionTeaser className="w-full" />
+        </div>
       </div>
     </>
   );
 };
 
-const FeedTeaser = () => {
-  const { data: following, isFetched: followingFetched } = useFollowingInfinite({
-    pageSize: 5,
-  }).fetch;
+const FeedTeaser = ({ className }: { className?: string }) => {
+  const { data: posts } = useSocialFeed({ pageSize: 2 }).fetchAll;
+  const latestPosts = posts?.pages?.[0]?.results;
 
-  const followingList = following?.pages
-    .flatMap((page) => page?.results)
-    .filter(Boolean) as string[];
-
-  const { data: posts } = useSocialFeed({ pageSize: 1 }).fetchAll;
-  const latestPost = posts?.pages?.[0]?.results?.[0];
+  const hasPosts = latestPosts && latestPosts?.length;
 
   return (
-    <>
-      <Section
-        title={t('Your Feed')}
-        actions={
-          followingFetched && followingList ? (
-            <div className="pointer-events-none ml-auto mt-auto flex shrink-0 flex-row">
-              {followingList.map((odinId) => {
-                return (
-                  <ContactImage
-                    odinId={odinId}
-                    className="-mr-2 h-7 w-7 overflow-hidden rounded-full border last:mr-0 dark:border-slate-500"
-                    fallbackSize="xs"
-                    key={odinId}
-                  />
-                );
-              })}
-            </div>
-          ) : null
-        }
-        className="h-full"
-      >
-        <FakeAnchor href={`/owner/feed`} className="block h-full">
-          <div className="pointer-events-none">
-            <p className="mb-5 text-slate-400">{t('See what everyone has been up to')}</p>
-            {latestPost ? (
-              <EmbeddedPostContent content={{ ...latestPost.content, permalink: '' }} />
-            ) : null}
-          </div>
-        </FakeAnchor>
-      </Section>
-    </>
+    <div className={className}>
+      <div className="mb-4 flex flex-row items-center justify-between">
+        <p className="text-2xl">{t('What has everyone been up to?')}</p>
+      </div>
+      <FakeAnchor href={hasPosts ? `/owner/feed` : `/owner/connections`} className="">
+        <div className="pointer-events-none flex flex-col gap-4">
+          {hasPosts ? (
+            latestPosts.map((post, index) => (
+              <div
+                className={`rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
+                key={post.fileId}
+              >
+                <EmbeddedPostContent content={{ ...post.content, permalink: '' }} />
+              </div>
+            ))
+          ) : (
+            <p className="rounded-md bg-background px-4 py-4 text-slate-400">
+              {t(
+                'Fill up your feed, by following people, or making connections with other identtiies'
+              )}
+            </p>
+          )}
+        </div>
+      </FakeAnchor>
+    </div>
+  );
+};
+
+const ConnectionTeaser = ({ className }: { className?: string }) => {
+  const { data: pendingConnections, isLoading: pendingConnectionsLoading } = usePendingConnections({
+    pageSize: 5,
+    pageNumber: 1,
+  }).fetch;
+
+  if (pendingConnectionsLoading || !pendingConnections?.results?.length) return null;
+
+  return (
+    <div className={className}>
+      <p className="text-2xl">{t('Connection requests')}</p>
+      <div className="flex flex-row flex-wrap gap-1">
+        {pendingConnections?.results?.map((pendingConnection) => (
+          <PersonIncomingRequest
+            className="w-1/2 max-w-[18rem]"
+            senderOdinId={pendingConnection.senderOdinId}
+            key={pendingConnection.senderOdinId}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CircleTeaser = ({ className }: { className?: string }) => {
+  const {
+    fetch: { data: circles, isLoading: isCirclesLoading },
+  } = useCircles();
+
+  return (
+    <div className={className}>
+      <p className="mb-4 text-2xl">{t('Circles & Services')}</p>
+      {!circles?.length && !isCirclesLoading ? (
+        <p className="rounded-md bg-background px-4 py-4 text-slate-400">{About['circles']}</p>
+      ) : (
+        <div className="flex flex-row flex-wrap gap-2">
+          {circles?.map((circle) => {
+            return (
+              <CirclePermissionView
+                circleDef={circle}
+                key={circle.id}
+                hideMembers={true}
+                className="rounded-md bg-background px-5 py-4 text-lg transition-colors hover:bg-primary/10"
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const HomebaseAppTeaser = ({ className }: { className?: string }) => {
+  const { data: apps, isLoading: isAppsLoading } = useApps().fetchRegistered;
+  const webApps = apps?.filter((app) => !!app.corsHostName && !app.isRevoked);
+
+  return (
+    <div className={className}>
+      <p className="mb-4 text-2xl">{t('Apps & Services')}</p>
+      {!apps?.length && !isAppsLoading ? (
+        <p className="rounded-md bg-background px-4 py-4 text-slate-400">{About['apps']}</p>
+      ) : (
+        <div className="flex flex-row flex-wrap gap-2">
+          {webApps?.map((app) => {
+            return (
+              <a
+                href={`https://${app.corsHostName}`}
+                className="flex flex-grow items-center justify-between gap-2 rounded-md bg-background px-5 py-4 text-lg transition-colors hover:bg-primary/10"
+                key={app.appId}
+              >
+                {app.name}
+                <Arrow className="h-5 w-5" />
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 };
 

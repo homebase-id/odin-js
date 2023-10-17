@@ -4,6 +4,7 @@ import { NavLink } from 'react-router-dom';
 import {
   Cloud,
   HOME_ROOT_PATH,
+  House,
   MiniDarkModeToggle,
   Persons,
   ellipsisAtMaxChar,
@@ -92,6 +93,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             </div>
 
             <div className="pb-3">
+              <NavItem icon={House} label={'Dashboard'} to={'/owner'} end={true} />
               <NotificationBell />
             </div>
 
