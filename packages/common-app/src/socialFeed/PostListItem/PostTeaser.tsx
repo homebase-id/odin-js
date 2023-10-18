@@ -21,6 +21,7 @@ interface PostTeaserProps {
   showChannel?: boolean;
   forceAspectRatio?: boolean;
   allowExpand?: boolean;
+  hideEmbeddedPostMedia?: boolean;
   login?: () => void;
 }
 
@@ -31,6 +32,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   showChannel,
   forceAspectRatio,
   allowExpand,
+  hideEmbeddedPostMedia,
   login,
 }) => {
   const { content: post } = postFile;
@@ -76,7 +78,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 ) : null}
               </div>
 
-              <PostBody post={post} hideEmbeddedPostMedia={true} />
+              <PostBody post={post} hideEmbeddedPostMedia={hideEmbeddedPostMedia} />
             </div>
             <PostInteracts
               authorOdinId={window.location.hostname}

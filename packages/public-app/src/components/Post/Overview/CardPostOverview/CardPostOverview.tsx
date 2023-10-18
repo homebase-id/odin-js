@@ -11,6 +11,7 @@ const CardPostOverview = ({ blogPosts }: { blogPosts: PostFile<PostContent>[] })
             postFile={postFile}
             className="p-4 md:w-1/2 lg:w-1/3"
             forceAspectRatio={true}
+            hideEmbeddedPostMedia={true}
           />
         );
       })}

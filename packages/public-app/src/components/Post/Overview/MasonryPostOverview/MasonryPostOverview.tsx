@@ -47,6 +47,7 @@ const MasonryPostOverview = ({ blogPosts }: { blogPosts: PostFile<PostContent>[]
             key={postFile.content.id}
             postFile={postFile}
             hideImageWhenNone={true}
+            hideEmbeddedPostMedia={true}
           />
         );
       })}
