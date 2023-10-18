@@ -6,7 +6,7 @@ import {
   useCreateIdentity,
   useDomainHasValidCertificate,
 } from '../../hooks/commonDomain/commonDomain';
-import { Arrow, Check, Loader, Question } from '@youfoundation/common-app';
+import { Alert, Arrow, Check, Loader, Question } from '@youfoundation/common-app';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 
@@ -15,9 +15,10 @@ interface Props {
   email: string;
   planId: string;
   invitationCode: string;
+  ownDomain?: boolean;
 }
 
-const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) => {
+const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }: Props) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   const { data: didDnsRecordsPropagate } =
@@ -47,18 +48,11 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) =>
   }, [didDnsRecordsPropagate, canConnectToPort80, canConnectToPort443]);
 
   const summarizedState = useMemo(() => {
-    if (!didDnsRecordsPropagate) {
-      return 'Waiting for DNS records to propagate';
-    }
-    if (!canConnectToPort80) {
-      return 'Waiting for domain to accept connections on port 80';
-    }
-    if (!canConnectToPort443) {
-      return 'Waiting for domain to accept connections on port 443';
-    }
-    if (!domainHasValidCertificate) {
+    if (!didDnsRecordsPropagate) return 'Waiting for DNS records to propagate';
+    if (!canConnectToPort80) return 'Waiting for domain to accept connections on port 80';
+    if (!canConnectToPort443) return 'Waiting for domain to accept connections on port 443';
+    if (!domainHasValidCertificate)
       return 'Waiting for valid certificate on domain (this can take a while)';
-    }
 
     return 'Creating your identity';
   }, [
@@ -75,28 +69,38 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) =>
       <AlertError error={createIdentityError} doRetry={() => doCreateIdentity} />
 
       <div className="flex flex-col justify-center">
-        <div className="mx-auto mb-10 mt-20 flex w-full max-w-xl flex-col items-center text-center">
+        <div className="mx-auto mb-2 mt-20 flex w-full max-w-xl flex-col items-center text-center">
           {canProvision && !!firstRunToken ? (
             <>
-              <p className="text-center">
-                {t('Your identity')} {domain} {t('has been provisioned')}.
+              <p className="text-center text-3xl">
+                {t('Your identity')} {domain} {t('has been provisioned')}
+                <span className="ml-3">🎉</span>
               </p>
               <ActionLink
-                className="mt-10 h-[2.66rem]"
+                className="mt-10 text-lg underline underline-offset-2"
                 href={`https://${domain}/owner/firstrun?frt=${firstRunToken}`}
                 icon={Arrow}
               >
-                {t('Go to your identity!')}
+                {domain}
               </ActionLink>
+              {ownDomain ? (
+                <Alert type={'info'} isCompact={true} className="mt-10 text-left">
+                  <p>
+                    {t(
+                      `Although we have confirmed that your DNS records have been successfully setup. Your identity might not be accessible yet, as it can take up to 24 hours for your records to propagate.`
+                    )}
+                  </p>
+                </Alert>
+              ) : null}
             </>
           ) : (
             <>
               <Loader className="h-16 w-16" />
-              <div className="mt-10 flex flex-col items-center">
+              <div className="mt-10 flex flex-col items-center gap-2">
                 <p>{summarizedState}</p>
                 <button
                   onClick={() => setShowDetails(!showDetails)}
-                  className="ml-1 flex flex-row items-center text-sm underline"
+                  className="flex flex-row items-center text-sm text-slate-500 underline underline-offset-2"
                 >
                   {t('Details')}
                   <Arrow

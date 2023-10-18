@@ -62,6 +62,7 @@ const ProvisionOwnDomain = () => {
             <ValidatingDnsRecords domain={domain} setProvisionState={setProvisionState} />
           ) : provisionState === 'Provisioning' ? (
             <CreateIdentityView
+              ownDomain={true}
               domain={domain}
               email={email}
               planId={planId}
