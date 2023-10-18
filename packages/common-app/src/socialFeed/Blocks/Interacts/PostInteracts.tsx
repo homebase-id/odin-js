@@ -57,6 +57,13 @@ export const PostInteracts = ({
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
   const toggleable = !defaultExpanded && allowExpand;
 
+  const postDisabledEmoji =
+    postFile.content.reactAccess !== undefined &&
+    (postFile.content.reactAccess === false || postFile.content.reactAccess === 'comment');
+  const postDisabledComment =
+    postFile.content.reactAccess !== undefined &&
+    (postFile.content.reactAccess === false || postFile.content.reactAccess === 'emoji');
+
   const { data: canReact } = useCanReact({
     authorOdinId,
     channelId: postFile.content.channelId,
@@ -87,11 +94,13 @@ export const PostInteracts = ({
       <div
         className={`mt-auto flex text-foreground items-center pb-4 text-sm text-opacity-20 dark:text-opacity-30`}
       >
-        <LikeButton
-          context={reactionContext}
-          onIntentToReact={() => setHasIntentToReact(true)}
-          canReact={canReact}
-        />
+        {!postDisabledEmoji ? (
+          <LikeButton
+            context={reactionContext}
+            onIntentToReact={() => setHasIntentToReact(true)}
+            canReact={canReact}
+          />
+        ) : null}
         <EmojiSummary
           context={reactionContext}
           reactionPreview={postFile.reactionPreview?.reactions}
@@ -103,19 +112,21 @@ export const PostInteracts = ({
         >
           {isPublic ? <ShareButton permalink={permalink} title={postFile.content.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
-          <button
-            className={`inline-flex items-center hover:text-black dark:hover:text-white ${
-              !toggleable ? 'pointer-events-none' : ''
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (toggleable) setIsExpanded(!isExpanded);
-            }}
-          >
-            <Bubble className="inline-block h-6 w-6" />
-            <span className="sr-only">{t('Toggle comments')}</span>
-          </button>
+          {!postDisabledComment ? (
+            <button
+              className={`inline-flex items-center hover:text-black dark:hover:text-white ${
+                !toggleable ? 'pointer-events-none' : ''
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (toggleable) setIsExpanded(!isExpanded);
+              }}
+            >
+              <Bubble className="inline-block h-6 w-6" />
+              <span className="sr-only">{t('Toggle comments')}</span>
+            </button>
+          ) : null}
           {!showSummary ? (
             <CommentSummary
               context={reactionContext}
