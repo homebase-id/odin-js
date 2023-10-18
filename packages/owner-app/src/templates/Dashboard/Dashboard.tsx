@@ -168,7 +168,7 @@ const HomebaseAppTeaser = ({ className }: { className?: string }) => {
   return (
     <div className={className}>
       <p className="mb-4 text-2xl">{t('Apps & Services')}</p>
-      {!apps?.length && !isAppsLoading ? (
+      {!webApps?.length && !isAppsLoading ? (
         <p className="rounded-md bg-background px-4 py-4 text-slate-400">{About['apps']}</p>
       ) : (
         <div className="flex flex-row flex-wrap gap-2">
