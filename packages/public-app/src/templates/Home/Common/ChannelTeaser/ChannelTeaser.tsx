@@ -18,14 +18,12 @@ const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
 
   const targetHref = `${HOME_ROOT_PATH}posts/${channel.slug ?? '#'}`;
 
-  if (blogPostsFetched && !blogPosts?.length) {
-    return null;
-  }
+  if (blogPostsFetched && !blogPosts?.length) return null;
 
   return (
     <div className={className}>
       <Link to={targetHref}>
-        <div className="relative h-full overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background px-4 py-4 dark:border-gray-800 lg:border lg:px-8 lg:py-16">
+        <div className="relative h-full overflow-hidden rounded-lg border-gray-200 border-opacity-60 bg-background px-4 py-4 hover:shadow-md dark:border-gray-800 lg:border lg:px-8 lg:py-16">
           <h1 className="title-font mb-3 text-xl font-medium sm:text-2xl">{channel.name}</h1>
           {channel.description && <p className="mb-3 leading-relaxed">{channel.description}</p>}
           <p className="inline-flex items-center text-button">

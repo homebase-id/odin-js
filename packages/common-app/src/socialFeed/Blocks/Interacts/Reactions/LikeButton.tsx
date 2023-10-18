@@ -53,6 +53,7 @@ export const LikeButton = ({
             : ''
         } `}
         ref={wrapperRef}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div

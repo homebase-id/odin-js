@@ -85,10 +85,7 @@ export const PostInteracts = ({
   return (
     <div className={`${className ?? ''}`}>
       <div
-        className={`mt-auto flex ${
-          allowExpand ? 'cursor-default' : ''
-        } text-foreground items-center pb-4 text-sm text-opacity-20 dark:text-opacity-30`}
-        onClick={(e) => allowExpand && e.stopPropagation()}
+        className={`mt-auto flex text-foreground items-center pb-4 text-sm text-opacity-20 dark:text-opacity-30`}
       >
         <LikeButton
           context={reactionContext}
@@ -100,7 +97,10 @@ export const PostInteracts = ({
           reactionPreview={postFile.reactionPreview?.reactions}
           className="ml-2"
         />
-        <div className="ml-auto flex flex-row items-center gap-2 font-semibold">
+        <div
+          className="ml-auto flex flex-row items-center gap-2 font-semibold"
+          onClick={(e) => e.stopPropagation()}
+        >
           {isPublic ? <ShareButton permalink={permalink} title={postFile.content.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
           <button
@@ -108,6 +108,7 @@ export const PostInteracts = ({
               !toggleable ? 'pointer-events-none' : ''
             }`}
             onClick={(e) => {
+              e.stopPropagation();
               e.preventDefault();
               if (toggleable) setIsExpanded(!isExpanded);
             }}
@@ -119,9 +120,7 @@ export const PostInteracts = ({
             <CommentSummary
               context={reactionContext}
               reactionPreview={postFile.reactionPreview?.comments}
-              onToggle={() => {
-                if (toggleable) setIsExpanded(!isExpanded);
-              }}
+              onToggle={() => toggleable && setIsExpanded(!isExpanded)}
             />
           ) : null}
         </div>
@@ -219,7 +218,7 @@ export const EmojiSummary = ({
   const [isShowDetails, setIsShowDetails] = useState(false);
 
   return reactionSummary && reactionSummary.totalCount > 0 ? (
-    <>
+    <span onClick={(e) => e.stopPropagation()}>
       <span
         className={`hover:text-primary flex cursor-pointer flex-row items-center ${
           className ?? ''
@@ -242,7 +241,7 @@ export const EmojiSummary = ({
           context={context}
         />
       ) : null}
-    </>
+    </span>
   ) : null;
 };
 
