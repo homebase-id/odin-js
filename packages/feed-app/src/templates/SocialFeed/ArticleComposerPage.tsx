@@ -256,8 +256,8 @@ export const ArticleComposerPage = () => {
           }
 
           if (newChannel) {
-            if (postFile.fileId && channel) movePost(channel);
-            else if (channel) setChannel(channel);
+            if (postFile.fileId) movePost(newChannel);
+            else setChannel(newChannel);
           }
         }}
       />

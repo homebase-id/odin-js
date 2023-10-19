@@ -263,7 +263,7 @@ export const savePost = async <T extends PostContent>(
     ? payloadJson
     : jsonStringify64({ channelId: file.content.channelId }); // If the full payload can't be embedded into the header file, at least pass the channelId so when getting the location is known
 
-  const isDraft = file.acl?.requiredSecurityGroup === SecurityGroupType.Owner;
+  const isDraft = file.isDraft ?? false;
 
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
   let versionTag = file?.versionTag;

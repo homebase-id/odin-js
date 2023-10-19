@@ -198,9 +198,7 @@ const usePost = () => {
 
         queryClient.removeQueries(['blogs']);
 
-        if (!variables.blogFile.isDraft) {
-          publishStaticFiles();
-        }
+        if (!variables.blogFile.isDraft) publishStaticFiles();
 
         // Update versionTag of post in social feeds cache
         const previousFeed:

@@ -116,6 +116,7 @@ const useArticleComposer = ({
         channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed
         readingTimeStats: getReadingTime(dirtyPostFile.content.body),
       },
+      isDraft: !isPublish || isUnpublish,
       acl:
         targetChannel.acl && (isPublish || isPublished) && !isUnpublish
           ? { ...targetChannel.acl }
@@ -171,6 +172,7 @@ const useArticleComposer = ({
     await doRemovePost();
     resetRemovePostStatus();
 
+    setPostFile(dataToMove);
     doSave(dataToMove, 'save', newChannelDefinition);
   };
 
