@@ -13,7 +13,7 @@ const Socials = ({
         ?.filter((handle) => !UNLINKABLE_SOCIALS.includes(handle.type))
         .map((handle, index) => (
           <a
-            className="ml-3 text-gray-500"
+            className="ml-3 text-gray-500 hover:text-primary"
             href={getLink(handle.type, handle.username)}
             target="_blank"
             rel="noreferrer noopener"

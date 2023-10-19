@@ -30,9 +30,7 @@ const ConnectionSection = ({ className }: { className?: string }) => {
   }).fetch;
 
   useEffect(() => {
-    if (!isFetchedAfterMount) {
-      return;
-    }
+    if (!isFetchedAfterMount) return;
 
     if (connections?.pages[activePage - 1]) {
       // already have that
@@ -43,9 +41,8 @@ const ConnectionSection = ({ className }: { className?: string }) => {
 
   const hasNextPage = connections?.pages[activePage] || hasNextPageOnServer;
 
-  if (connectionsFetched && (!connections?.pages.length || !connections.pages[0].results.length)) {
+  if (connectionsFetched && (!connections?.pages.length || !connections.pages[0].results.length))
     return <SubtleMessage>{t('No connections')}</SubtleMessage>;
-  }
 
   return (
     <div className={className ?? ''}>
@@ -89,9 +86,7 @@ const FollowingSection = ({ className }: { className?: string }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (!isFetchedAfterMount) {
-      return;
-    }
+    if (!isFetchedAfterMount) return;
 
     if (identitiesIFollow?.pages[currentPage - 1]) {
       // already have that
@@ -105,9 +100,8 @@ const FollowingSection = ({ className }: { className?: string }) => {
   if (
     identitiesFetched &&
     (!identitiesIFollow?.pages.length || !identitiesIFollow.pages[0].results.length)
-  ) {
+  )
     return null;
-  }
 
   return (
     <div className={className ?? ''}>

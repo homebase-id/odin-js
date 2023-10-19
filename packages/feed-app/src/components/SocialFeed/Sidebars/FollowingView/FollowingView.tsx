@@ -20,7 +20,7 @@ const FollowingView = ({ className }: { className?: string }) => {
 
   return (
     <div className={`block overflow-hidden px-4 py-3 ${className ?? ''}`}>
-      <div className="flex flex-row flex-wrap items-center">
+      <div className="flex flex-col">
         <h2 className="text-foreground">{t('Who I follow')}</h2>
       </div>
       {isFollowingLoading ? (
