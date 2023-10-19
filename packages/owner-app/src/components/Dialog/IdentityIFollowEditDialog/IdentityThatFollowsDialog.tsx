@@ -46,7 +46,7 @@ const IdentityThatFollowsDialog = ({
     <DialogWrapper
       title={
         <div className="flex flex-row items-center">
-          <Persons className="mr-2 h-6 w-6" /> {t('Edit follow')}
+          <Persons className="mr-2 h-6 w-6" /> {t('Follower details')}
         </div>
       }
       onClose={onCancel}

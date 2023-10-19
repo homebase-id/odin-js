@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { CursoredResult } from '../../core/DriveData/DriveQueryTypes';
 import { TargetDrive } from '../../core/core';
 

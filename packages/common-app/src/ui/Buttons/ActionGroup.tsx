@@ -4,6 +4,7 @@ import {
   ActionButtonProps,
   ConfirmDialogProps,
   Ellipsis,
+  FakeAnchor,
   t,
   useMostSpace,
 } from '@youfoundation/common-app';
@@ -88,7 +89,7 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
   return (
     <>
       <li className="text-foreground bg-background cursor-pointer text-base hover:bg-slate-200 dark:hover:bg-slate-700">
-        <a
+        <FakeAnchor
           href={href}
           onClick={
             confirmOptions
@@ -100,12 +101,18 @@ const ActionOption = ({ icon, label, onClick, href, confirmOptions }: ActionGrou
                   return false;
                 }
               : onClick
+              ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClick(e);
+                }
+              : undefined
           }
           className="flex w-full flex-row px-2 py-1"
         >
           {icon && icon({ className: 'h-4 w-4 my-auto mr-2 flex-shrink-0' })}
           <span className={''}>{label}</span>
-        </a>
+        </FakeAnchor>
       </li>
       {confirmOptions && onClick && needsConfirmation ? (
         <ConfirmDialog

@@ -25,17 +25,19 @@ export const FakeAnchor = ({
     <span
       {...props}
       className={`${className ?? ''} ${href ? 'cursor-pointer' : ''}`}
-      onClick={(e) => {
-        if (href) {
-          e.stopPropagation();
-          if (!href.startsWith('http') && !isExternal) {
-            navigate(href, { preventScrollReset: preventScrollReset });
-            onNavigate && onNavigate();
-          } else {
-            window.location.href = href;
-          }
-        }
-      }}
+      onClick={
+        href
+          ? (e) => {
+              e.stopPropagation();
+              if (!href.startsWith('http') && !isExternal) {
+                navigate(href, { preventScrollReset: preventScrollReset });
+                onNavigate && onNavigate();
+              } else {
+                window.location.href = href;
+              }
+            }
+          : props.onClick
+      }
       tabIndex={0}
       role="link"
     >
