@@ -7,14 +7,12 @@ import {
   useCircles,
   t,
   CirclePermissionView,
-  useFollowingInfinite,
   EmbeddedPostContent,
   FakeAnchor,
   Arrow,
   House,
 } from '@youfoundation/common-app';
 import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
-import ContactImage from '../../components/Connection/ContactImage/ContactImage';
 
 const About = {
   circles: (
@@ -74,8 +72,9 @@ const Dashboard = () => {
   );
 };
 
+const POSTS_TO_SHOW = 2;
 const FeedTeaser = ({ className }: { className?: string }) => {
-  const { data: posts } = useSocialFeed({ pageSize: 2 }).fetchAll;
+  const { data: posts } = useSocialFeed({ pageSize: POSTS_TO_SHOW }).fetchAll;
   const latestPosts = posts?.pages?.[0]?.results;
 
   const hasPosts = latestPosts && latestPosts?.length;
@@ -88,7 +87,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
       <FakeAnchor href={hasPosts ? `/owner/feed` : `/owner/connections`} className="">
         <div className="pointer-events-none flex flex-col gap-4">
           {hasPosts ? (
-            latestPosts.map((post, index) => (
+            latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (
               <div
                 className={`rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
                 key={post.fileId}

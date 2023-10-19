@@ -148,7 +148,9 @@ export const getSocialFeed = async (
       });
 
     return {
-      results: [...allPostFiles, ...postsOfOwn],
+      results: [...allPostFiles, ...postsOfOwn]
+        .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime)
+        .slice(0, pageSize),
       cursorState: result.cursorState,
       ownerCursorState: resultOfOwn.cursorState,
     };
