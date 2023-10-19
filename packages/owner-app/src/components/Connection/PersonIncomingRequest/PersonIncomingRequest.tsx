@@ -1,6 +1,5 @@
 import { ReactNode, useState } from 'react';
 import { Times, t } from '@youfoundation/common-app';
-import useSettings from '../../../hooks/settings/useSettings';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DomainHighlighter } from '@youfoundation/common-app';
@@ -20,18 +19,12 @@ const PersonIncomingRequest = ({
   const {
     ignoreRequest: { mutateAsync: ignoreRequest, status: ignoreRequestStatus, error: ignoreError },
   } = usePendingConnection({});
-  const { data: uiSettings } = useSettings().fetchUiSettings;
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
 
   return (
     <>
       <ErrorNotification error={ignoreError} />
-      <PersonCard
-        className={className}
-        odinId={senderOdinId}
-        key={senderOdinId}
-        canSave={!!uiSettings?.automaticallyLoadProfilePicture}
-      >
+      <PersonCard className={className} odinId={senderOdinId} key={senderOdinId} canSave={false}>
         <h2 className="font-thiner mb-6 dark:text-white">
           <DomainHighlighter>{senderOdinId}</DomainHighlighter>
         </h2>
