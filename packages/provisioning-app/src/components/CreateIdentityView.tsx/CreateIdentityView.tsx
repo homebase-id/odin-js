@@ -83,15 +83,8 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }
               >
                 {domain}
               </ActionLink>
-              {ownDomain ? (
-                <Alert type={'info'} isCompact={true} className="mt-10 text-left">
-                  <p>
-                    {t(
-                      `Although we have confirmed that your DNS records have been successfully setup. Your identity might not be accessible yet, as it can take up to 24 hours for your records to propagate.`
-                    )}
-                  </p>
-                </Alert>
-              ) : null}
+
+              {ownDomain ? <DomainAccessibleAlert domain={domain} /> : null}
             </>
           ) : (
             <>
@@ -167,6 +160,29 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }
       ) : null}
     </div>
   );
+};
+
+export const DomainAccessibleAlert = ({ domain }: { domain: string }) => {
+  const [isPinged, setPinged] = useState<boolean>(false);
+  const [accessible, setAccessible] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetch(`https://${domain}/api/guest/v1/auth/ident`)
+      .then((response) => response.json())
+      .then((validation) => validation?.odinId.toLowerCase() === domain && setAccessible(true))
+      .catch()
+      .finally(() => setPinged(true));
+  }, [isPinged]);
+
+  return isPinged && !accessible ? (
+    <Alert type={'info'} isCompact={true} className="mt-10 text-left">
+      <p>
+        {t(
+          `Although we have confirmed that your DNS records have been successfully setup. Your identity might not be accessible yet, as it can take up to 24 hours for your records to propagate.`
+        )}
+      </p>
+    </Alert>
+  ) : null;
 };
 
 export default CreateIdentityView;
