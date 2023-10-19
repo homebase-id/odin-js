@@ -65,6 +65,8 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
         retry: (_failureCount, error) =>
           error?.response?.status ? error.response.status >= 500 : false,
         refetchOnMount: false,
+        cacheTime: 1000 * 60 * 10,
+        staleTime: 1000 * 60 * 10,
       }
     ),
   };

@@ -42,7 +42,7 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       {activeDnsConfig ? (
         <DnsSettingsView domain={domain} dnsConfig={activeDnsConfig} showStatus={showStatus} />
       ) : null}
-      {dnsConfig && !statePending && hasInvalid ? (
+      {dnsConfig && !statePending && hasInvalid && showStatus ? (
         <Alert type="info" className="mt-5">
           {t(
             'Sometimes it can take hours for DNS changes to propagate, please try again later if you just set them up. Otherwise, please inspect your DNS configuration for any incorrect settings.'

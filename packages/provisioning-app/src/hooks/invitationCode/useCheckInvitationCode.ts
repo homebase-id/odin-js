@@ -19,6 +19,10 @@ const useCheckInvitationCode = (code?: string) => {
       {
         enabled: !!code,
         retry: false,
+        cacheTime: 1000 * 60 * 60, // 1 hour
+        staleTime: 1000 * 60 * 60, // 1 hour
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
       }
     ),
   };
