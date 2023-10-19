@@ -70,12 +70,14 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
             : []),
         ]}
       />
-      <EditPostDialog
-        postFile={postFile}
-        isOpen={isEditOpen}
-        onConfirm={() => setIsEditOpen(false)}
-        onCancel={() => setIsEditOpen(false)}
-      />
+      {isEditOpen ? (
+        <EditPostDialog
+          postFile={postFile}
+          isOpen={isEditOpen}
+          onConfirm={() => setIsEditOpen(false)}
+          onCancel={() => setIsEditOpen(false)}
+        />
+      ) : null}
     </div>
   );
 };

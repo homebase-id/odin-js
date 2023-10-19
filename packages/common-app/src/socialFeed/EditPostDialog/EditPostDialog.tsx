@@ -1,7 +1,13 @@
 import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, ExistingFileOverview, Save, t } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ExistingFileOverview,
+  Save,
+  VolatileInput,
+  t,
+} from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -81,8 +87,19 @@ export const EditPostDialog = ({
             return false;
           }}
         >
-          <div className="relative">
-            <textarea
+          <VolatileInput
+            defaultValue={postFile.content.caption}
+            onChange={(newCaption) =>
+              setPostFile({
+                ...postFile,
+                content: { ...postFile.content, caption: newCaption },
+              })
+            }
+            supportEmojiShortcut={true}
+            placeholder={t("What's up?")}
+            className={`w-full resize-none rounded-md border bg-transparent p-2`}
+          />
+          {/* <textarea
               defaultValue={postFile.content.caption}
               onChange={(e) =>
                 setPostFile({
@@ -94,8 +111,7 @@ export const EditPostDialog = ({
               className={`w-full resize-none rounded-sm border bg-transparent p-2 ${
                 postFile.content.caption?.length ? '' : 'h-[2.5rem]'
               }`}
-            />
-          </div>
+            /> */}
           <ExistingFileOverview
             className="mt-2"
             mediaFiles={

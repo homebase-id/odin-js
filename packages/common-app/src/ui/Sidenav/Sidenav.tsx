@@ -69,7 +69,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
         <Bars className={`h-4 w-4`} />
       </button>
       <aside
-        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-40 max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:bottom-auto xl:min-h-screen xl:transition-all ${
+        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:bottom-auto xl:min-h-screen xl:transition-all ${
           isOpen
             ? 'translate-x-0 xl:min-w-[20rem]'
             : 'w-full translate-x-[-100%] xl:w-[4.3rem] xl:min-w-0 xl:translate-x-0'

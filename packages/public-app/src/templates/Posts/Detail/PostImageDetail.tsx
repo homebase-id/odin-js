@@ -34,7 +34,7 @@ const PostImageDetail = () => {
         <title>{blogData?.activeBlog.content.caption ?? ''} | Homebase</title>
         <meta name="og:title" content={blogData?.activeBlog.content.caption ?? ''} />
       </Helmet>
-      <div className="fixed inset-0 z-50 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">
+      <div className="fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">
         <PostImageDetailCard
           channel={blogData?.activeChannel}
           postFile={blogData?.activeBlog}

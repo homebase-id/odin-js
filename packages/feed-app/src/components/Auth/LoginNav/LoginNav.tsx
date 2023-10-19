@@ -38,7 +38,7 @@ const LoginNav = () => {
       )}
       {isOpen ? (
         <div
-          className="fixed left-0 right-0 top-[4rem] z-50 sm:absolute sm:left-auto sm:top-[3.5rem]"
+          className="fixed left-0 right-0 top-[4rem] z-40 sm:absolute sm:left-auto sm:top-[3.5rem]"
           ref={wrapperRef}
         >
           <div className="min-w-[20rem] bg-slate-100 p-8 pt-6 shadow-md dark:bg-slate-700">

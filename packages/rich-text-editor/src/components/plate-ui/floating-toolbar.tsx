@@ -46,7 +46,7 @@ const FloatingToolbar = React.forwardRef<React.ElementRef<typeof Toolbar>, Float
         <Toolbar
           ref={ref}
           className={cn(
-            'bg-popover absolute z-50 whitespace-nowrap border px-1 opacity-100 shadow-md print:hidden'
+            'absolute z-40 whitespace-nowrap border bg-popover px-1 opacity-100 shadow-md print:hidden'
           )}
           {...rootProps}
           {...props}

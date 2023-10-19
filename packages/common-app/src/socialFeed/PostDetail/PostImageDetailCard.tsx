@@ -100,7 +100,7 @@ export const PostImageDetailCard = ({
   const currentMediaFile = mediaFileIds?.[currIndex];
 
   return (
-    <div className="relative z-50 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
+    <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
         <div className="flex h-full min-h-screen flex-col lg:flex-row">

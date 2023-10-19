@@ -17,14 +17,16 @@ export const VolatileInput = ({
   onChange,
   linksArePlain,
   supportEmojiShortcut,
+  className,
 }: {
-  onSubmit: (val: string) => void;
+  onSubmit?: (val: string) => void;
   onPaste?: React.ClipboardEventHandler<HTMLDivElement>;
   defaultValue?: string;
   placeholder?: string;
   onChange?: (val: string) => void;
   linksArePlain?: boolean;
   supportEmojiShortcut?: boolean;
+  className?: string;
 }) => {
   const [emojiQuery, setEmojiQuery] = useState<string>();
   const [lastInsertedEmoji, setLastInsertedEmoji] = useState<string>();
@@ -135,7 +137,7 @@ export const VolatileInput = ({
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key === 'Enter' && !e.shiftKey && !emojiQuery) {
       e.preventDefault();
-      onSubmit(e.currentTarget.innerText);
+      onSubmit && onSubmit(e.currentTarget.innerText);
     }
   };
 
@@ -168,7 +170,7 @@ export const VolatileInput = ({
     rect = range?.getClientRects()?.[0];
 
   return (
-    <div className="relative block w-full">
+    <div className={`relative block w-full ${className || ''}`}>
       <span
         role="textbox"
         contentEditable

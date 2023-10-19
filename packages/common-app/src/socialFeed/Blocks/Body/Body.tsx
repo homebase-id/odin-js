@@ -22,12 +22,10 @@ export const PostBody = ({
       {/* Type specific content */}
       {post.type === 'Article' ? (
         <>
-          <h1 className={`text-foreground text-opacity-80 ${isExpanded ? 'text-2xl' : ''}`}>
-            {post.caption}
-          </h1>
+          <h1 className={`text-foreground ${isExpanded ? 'text-2xl' : ''}`}>{post.caption}</h1>
           <div className="text-foreground leading-relaxed text-opacity-70">
             {isExpanded ? (
-              <div className="rich-text-content mb-5 leading-relaxed">
+              <div className="rich-text-content leading-relaxed">
                 <RichTextRenderer
                   body={(post as Article)?.body}
                   imageDrive={getChannelDrive(post.channelId)}
@@ -38,22 +36,26 @@ export const PostBody = ({
               ellipsisAtMaxChar((post as Article).abstract, MAX_CHAR_FOR_SUMMARY)
             )}
 
-            <>
-              {' '}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsExpanded(!isExpanded);
-                }}
-                className="text-primary hover:underline"
-              >
-                {isExpanded ? t('Less') : <>{t('More')}...</>}
-              </button>
-            </>
+            {(post as Article).body ||
+            ((post as Article).abstract &&
+              (post as Article).abstract?.length > MAX_CHAR_FOR_SUMMARY) ? (
+              <>
+                {' '}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                  }}
+                  className="text-primary/80 hover:underline"
+                >
+                  {isExpanded ? t('Less') : <>{t('More')}...</>}
+                </button>
+              </>
+            ) : null}
           </div>
         </>
       ) : (
-        <h1 className="text-foreground text-opacity-70">
+        <h1 className="text-foreground">
           {isExpanded || post.caption.length <= MAX_CHAR_FOR_SUMMARY ? (
             post.captionAsRichText ? (
               <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
@@ -68,7 +70,7 @@ export const PostBody = ({
                   e.stopPropagation();
                   setIsExpanded(true);
                 }}
-                className="text-primary hover:underline"
+                className="text-primary/80 hover:underline"
               >
                 {t('More')}...
               </button>

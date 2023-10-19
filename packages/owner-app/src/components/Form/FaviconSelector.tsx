@@ -29,7 +29,7 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
       >
         <EmojiSelector
           wrapperClassName="relative flex flex-row justify-center items-center"
-          className="text-4xl text-foreground text-opacity-70 hover:text-opacity-100"
+          className="text-4xl text-foreground/70 hover:text-opacity-100"
           onInput={(val) =>
             onChange({
               target: {

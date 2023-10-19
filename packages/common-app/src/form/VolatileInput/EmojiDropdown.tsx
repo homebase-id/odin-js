@@ -19,7 +19,7 @@ const EmojiDropdown = ({
   const [emojis, setEmojis] = useState<NativeEmoji[]>();
   const [activeIndex, setActiveIndex] = useState(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const { verticalSpace } = useMostSpace(wrapperRef);
+  const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   useEffect(() => {
     (async () => {
@@ -57,12 +57,14 @@ const EmojiDropdown = ({
           ? { left: position.x, top: position.y, position: 'fixed', bottom: 'auto', height: '1rem' }
           : undefined
       }
+      className="z-50"
       ref={wrapperRef}
     >
       <ul
-        className={`bg-background text-foreground absolute  left-0 z-10 flex flex-col overflow-hidden rounded-md py-2 shadow-md ${
+        className={`bg-background text-foreground absolute flex flex-col overflow-hidden rounded-md py-2 shadow-md ${
           verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
-        }`}
+        }
+        ${horizontalSpace === 'left' ? 'right-0' : 'left-0'}`}
       >
         {emojis?.slice(0, 5)?.map((emoji, index) => (
           <li
