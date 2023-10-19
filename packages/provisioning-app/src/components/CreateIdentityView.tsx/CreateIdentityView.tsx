@@ -1,7 +1,6 @@
 import { t } from '../../helpers/i18n/dictionary';
 import ActionLink from '../ui/Buttons/ActionLink';
 import {
-  useDidDnsRecordsPropagate,
   useCanConnectToDomain,
   useCreateIdentity,
   useDomainHasValidCertificate,
@@ -15,14 +14,11 @@ interface Props {
   email: string;
   planId: string;
   invitationCode: string;
-  ownDomain?: boolean;
 }
 
-const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }: Props) => {
+const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
-  const { data: didDnsRecordsPropagate } =
-    useDidDnsRecordsPropagate(domain).fetchDidDnsRecordsPropagate;
   const { data: canConnectToPort80 } = useCanConnectToDomain(domain, 80).fetchCanConnectToDomain;
   const { data: canConnectToPort443 } = useCanConnectToDomain(domain, 443).fetchCanConnectToDomain;
 
@@ -40,28 +36,20 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }
   //
 
   const doCreateIdentity = () => createIdentity({ domain, email, planId, invitationCode });
-
-  const canProvision = didDnsRecordsPropagate && canConnectToPort80 && canConnectToPort443;
+  const canProvision = canConnectToPort80 && canConnectToPort443;
 
   useEffect(() => {
     if (canProvision && createIdentityStatus === 'idle') doCreateIdentity();
-  }, [didDnsRecordsPropagate, canConnectToPort80, canConnectToPort443]);
+  }, [canConnectToPort80, canConnectToPort443]);
 
   const summarizedState = useMemo(() => {
-    if (!didDnsRecordsPropagate) return 'Waiting for DNS records to propagate';
     if (!canConnectToPort80) return 'Waiting for domain to accept connections on port 80';
     if (!canConnectToPort443) return 'Waiting for domain to accept connections on port 443';
     if (!domainHasValidCertificate)
       return 'Waiting for valid certificate on domain (this can take a while)';
 
     return 'Creating your identity';
-  }, [
-    didDnsRecordsPropagate,
-    canConnectToPort80,
-    canConnectToPort443,
-    createIdentityStatus,
-    domainHasValidCertificate,
-  ]);
+  }, [canConnectToPort80, canConnectToPort443, createIdentityStatus, domainHasValidCertificate]);
   //
 
   return (
@@ -84,7 +72,7 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }
                 {domain}
               </ActionLink>
 
-              {ownDomain ? <DomainAccessibleAlert domain={domain} /> : null}
+              <DomainAccessibleAlert domain={domain} />
             </>
           ) : (
             <>
@@ -110,17 +98,6 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode, ownDomain }
 
       {showDetails ? (
         <div className="mx-auto flex w-full max-w-xl flex-col gap-2 text-center">
-          {didDnsRecordsPropagate ? (
-            <p>
-              <Check className="mr-2 inline-block h-8 w-8 rounded-lg bg-green-400 p-2 text-white" />
-              DNS records for {domain} have propagated to major DNS resolvers
-            </p>
-          ) : (
-            <p>
-              <Question className="mr-2 inline-block h-8 w-8 rounded-lg bg-blue-400 p-2 text-white" />
-              Waiting for DNS records for {domain} to propagate
-            </p>
-          )}
           {canConnectToPort80 ? (
             <p>
               <Check className="mr-2 inline-block h-8 w-8 rounded-lg bg-green-400 p-2 text-white" />
@@ -178,7 +155,7 @@ export const DomainAccessibleAlert = ({ domain }: { domain: string }) => {
     <Alert type={'info'} isCompact={true} className="mt-10 text-left">
       <p>
         {t(
-          `Although we have confirmed that your DNS records have been successfully setup. Your identity might not be accessible yet, as it can take up to 24 hours for your records to propagate.`
+          `Although we have confirmed that your domain and identity is correctly setup and provisioned. Your identity might not be accessible yet, as it can take up to 24 hours for the DNS records to propagate.`
         )}
       </p>
     </Alert>

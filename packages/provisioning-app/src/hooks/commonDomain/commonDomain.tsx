@@ -30,34 +30,34 @@ export function hasInvalidDnsRecords(dnsConfig: DnsConfig | undefined): boolean 
   return !mainRecordValid || !subRecordsValid;
 }
 
-//
+// //
 
-export const useDidDnsRecordsPropagate = (domain: string) => {
-  const root = '//' + window.location.host + '/api/registration/v1';
+// export const useDidDnsRecordsPropagate = (domain: string) => {
+//   const root = '//' + window.location.host + '/api/registration/v1';
 
-  const didDnsRecordsPropagete = async (domain: string): Promise<boolean> => {
-    if (!domain) {
-      return Promise.resolve(false);
-    }
+//   const didDnsRecordsPropagete = async (domain: string): Promise<boolean> => {
+//     if (!domain) {
+//       return Promise.resolve(false);
+//     }
 
-    const response = await axios.get(root + `/registration/did-dns-records-propagate/${domain}`);
-    // console.log(response.data)
-    return response.data;
-  };
+//     const response = await axios.get(root + `/registration/did-dns-records-propagate/${domain}`);
+//     // console.log(response.data)
+//     return response.data;
+//   };
 
-  return {
-    fetchDidDnsRecordsPropagate: useQuery<boolean, AxiosError>(
-      ['did-dns-records-propagate', domain],
-      () => didDnsRecordsPropagete(domain),
-      {
-        enabled: !!domain,
-        refetchInterval: (propagated) => (!propagated ? 2000 : false),
-        refetchOnWindowFocus: false,
-        retry: false,
-      }
-    ),
-  };
-};
+//   return {
+//     fetchDidDnsRecordsPropagate: useQuery<boolean, AxiosError>(
+//       ['did-dns-records-propagate', domain],
+//       () => didDnsRecordsPropagete(domain),
+//       {
+//         enabled: !!domain,
+//         refetchInterval: (propagated) => (!propagated ? 2000 : false),
+//         refetchOnWindowFocus: false,
+//         retry: false,
+//       }
+//     ),
+//   };
+// };
 
 //
 
