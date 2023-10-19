@@ -40,7 +40,7 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
           }
           isOpen={isEmojiOpen}
           onClose={() => setIsEmojiOpen(false)}
-          defaultValue={valueObject && 'emoji' in valueObject ? valueObject.emoji : undefined}
+          defaultValue={valueObject && 'emoji' in valueObject ? valueObject.emoji : '😀'}
         />
       </FaviconOption>
       <FaviconOption
