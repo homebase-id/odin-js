@@ -1,5 +1,5 @@
 import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
-import { t, useBlogPosts } from '@youfoundation/common-app';
+import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { PostTeaser } from '../PostListItem/PostTeaser';
 
@@ -10,22 +10,19 @@ export const RelatedArticles = ({
   blog: PostFile<PostContent>;
   channel: ChannelDefinitionVm | ChannelDefinition | undefined;
 }) => {
-  const { data: blogPosts } = useBlogPosts(
+  const { data: blogPosts } = useBlogPostsInfinite(
     channel ? { channelId: channel.channelId, postType: 'Article' } : {}
   );
 
-  if (!blogPosts) {
-    return <></>;
-  }
+  if (!blogPosts) return null;
 
-  const filteredBlogPosts = blogPosts
+  const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
+  const filteredBlogPosts = flattenedPosts
     .slice(0, 4)
     .filter((relatedBlog) => relatedBlog.content.id !== blog.content.id)
     .slice(0, 3);
 
-  if (!filteredBlogPosts?.length) {
-    return null;
-  }
+  if (!filteredBlogPosts?.length) return null;
 
   return (
     <section className="mt-10 bg-slate-50 pb-10 pt-16 dark:bg-slate-800 dark:bg-opacity-50">

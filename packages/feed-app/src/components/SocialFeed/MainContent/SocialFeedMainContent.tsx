@@ -10,7 +10,7 @@ import PostTeaserCard from '../PostTeaserCard';
 import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
 
-const PAGE_SIZE = 10; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
+const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll

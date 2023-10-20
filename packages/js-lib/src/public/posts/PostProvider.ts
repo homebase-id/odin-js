@@ -312,7 +312,7 @@ export const removePost = async (dotYouClient: DotYouClient, fileId: string, cha
 
 ///
 
-const dsrToPostFile = async <T extends PostContent>(
+export const dsrToPostFile = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,

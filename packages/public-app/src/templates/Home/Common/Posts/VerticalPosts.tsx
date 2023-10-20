@@ -1,12 +1,7 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {
-  Label,
-  SubtleMessage,
-  useBlogPosts,
-  useBlogPostsInfinite,
-} from '@youfoundation/common-app';
+import { Label, SubtleMessage, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
@@ -17,7 +12,7 @@ import useAuth from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 30;
 
 const VerticalPosts = ({ className }: { className?: string }) => {
   const [mobileChannelId, setMobileChannelId] = useState<string>();
@@ -79,21 +74,16 @@ const ChannelSidebar = ({
 // Docs for combination of Virtual and infinite:
 // https://tanstack.com/virtual/v3/docs/examples/react/infinite-scroll
 const MainVerticalPosts = ({ className, channelId }: { className: string; channelId?: string }) => {
-  const [isStatic, setIsStatic] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
 
-  const { data: staticPosts, isFetchedAfterMount: staticPostsLoaded } = useBlogPosts({
-    pageSize: PAGE_SIZE,
-    channelId: channelId,
-  });
   const {
     data: blogPosts,
     hasNextPage: hasMorePosts,
     fetchNextPage,
     isFetchingNextPage,
-  } = useBlogPostsInfinite({ pageSize: PAGE_SIZE, enabled: !isStatic, channelId: channelId });
+    isFetchedAfterMount: isPostsLoaded,
+  } = useBlogPostsInfinite({ pageSize: PAGE_SIZE, channelId: channelId });
   const flattenedPosts = flattenInfinteData<PostFile<PostContent>>(blogPosts, PAGE_SIZE);
-  const combinedPosts = combinePosts(staticPosts, flattenedPosts);
 
   const parentRef = useRef<HTMLDivElement>(null);
   const parentOffsetRef = useRef(0);
@@ -103,7 +93,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
   }, []);
 
   const virtualizer = useWindowVirtualizer({
-    count: combinedPosts?.length + 1, // Add 1 so we have an index for the 'loaderRow'
+    count: flattenedPosts?.length + 1, // Add 1 so we have an index for the 'loaderRow'
     estimateSize: () => 300, // Rough size of a postTeasercard
     scrollMargin: parentOffsetRef.current,
     overscan: 5, // Amount of items to load before and after (improved performance especially with images)
@@ -114,17 +104,13 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
     if (!lastItem) return;
 
-    if (
-      lastItem.index >= combinedPosts?.length - 1 &&
-      ((isStatic && staticPostsLoaded) || (hasMorePosts && !isFetchingNextPage))
-    ) {
-      if (isStatic) setIsStatic(false);
-      else fetchNextPage();
+    if (lastItem.index >= flattenedPosts?.length - 1 && hasMorePosts && !isFetchingNextPage) {
+      fetchNextPage();
     }
   }, [
     hasMorePosts,
     fetchNextPage,
-    combinedPosts?.length,
+    flattenedPosts?.length,
     isFetchingNextPage,
     virtualizer.getVirtualItems(),
   ]);
@@ -134,13 +120,13 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
   return (
     <>
       <div className={className}>
-        {!staticPostsLoaded && !combinePosts ? (
+        {!isPostsLoaded && !combinePosts ? (
           <div className="-mx-4">
             <LoadingBlock className="m-4 h-10" />
             <LoadingBlock className="m-4 h-10" />
             <LoadingBlock className="m-4 h-10" />
           </div>
-        ) : combinedPosts?.length ? (
+        ) : flattenedPosts?.length ? (
           <div ref={parentRef}>
             <div
               className="relative w-full"
@@ -155,7 +141,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
                 }}
               >
                 {items.map((virtualRow) => {
-                  const isLoaderRow = virtualRow.index > combinedPosts.length - 1;
+                  const isLoaderRow = virtualRow.index > flattenedPosts.length - 1;
                   if (isLoaderRow) {
                     return (
                       <div
@@ -177,7 +163,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
                     );
                   }
 
-                  const postFile = combinedPosts[virtualRow.index];
+                  const postFile = flattenedPosts[virtualRow.index];
                   return (
                     <div
                       key={virtualRow.key}

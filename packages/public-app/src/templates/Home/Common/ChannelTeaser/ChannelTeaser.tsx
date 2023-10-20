@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { HOME_ROOT_PATH, t, useBlogPosts } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, t, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 
 import { Arrow } from '@youfoundation/common-app';
@@ -11,14 +11,15 @@ interface ChannelTeaserProps {
 }
 
 const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
-  const { data: blogPosts, isFetched: blogPostsFetched } = useBlogPosts({
+  const { data: blogPosts, isFetched: blogPostsFetched } = useBlogPostsInfinite({
     channelId: channel.channelId,
-    pageSize: 1,
+    // We don't pass the pageSize as it would force another call to the API when fetching the actual first page
   });
 
-  const targetHref = `${HOME_ROOT_PATH}posts/${channel.slug ?? '#'}`;
+  const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
+  if (blogPostsFetched && !flattenedPosts?.length) return null;
 
-  if (blogPostsFetched && !blogPosts?.length) return null;
+  const targetHref = `${HOME_ROOT_PATH}posts/${channel.slug ?? '#'}`;
 
   return (
     <div className={className}>

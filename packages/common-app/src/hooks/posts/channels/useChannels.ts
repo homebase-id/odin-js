@@ -1,13 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  BlogConfig,
   ChannelDefinition,
   ChannelTemplate,
   getChannelDefinitions,
-  GetFile,
 } from '@youfoundation/js-lib/public';
 
 import { useDotYouClient } from '../../../..';
+import { fetchCachedPublicChannels } from '../cachedDataHelpers';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }
@@ -32,34 +31,6 @@ export const useChannels = ({
   const queryClient = useQueryClient();
 
   const fetchChannelData = async () => {
-    const fetchStaticData = async () => {
-      const fileData = await GetFile(dotYouClient, 'blogs.json');
-      if (fileData) {
-        let channels: ChannelDefinition[] = [];
-
-        fileData.forEach((entry) => {
-          const entries = entry.filter(
-            (possibleChannel) =>
-              possibleChannel.header.fileMetadata.appData.fileType ===
-              BlogConfig.ChannelDefinitionFileType
-          );
-          channels = [
-            ...channels,
-            ...entries.map((entry) => {
-              return { ...entry.payload } as ChannelDefinition;
-            }),
-          ];
-        });
-
-        return channels.map((channel) => {
-          return {
-            ...channel,
-            template: parseChannelTemplate(channel?.templateId),
-          } as ChannelDefinitionVm;
-        });
-      }
-    };
-
     const fetchDynamicData = async () =>
       (await getChannelDefinitions(dotYouClient))?.map((channel) => {
         return {
@@ -70,7 +41,8 @@ export const useChannels = ({
 
     const returnData = isOwner
       ? await fetchDynamicData()
-      : (await fetchStaticData()) ?? (await fetchDynamicData());
+      : (await fetchCachedPublicChannels(dotYouClient)) ?? (await fetchDynamicData());
+
     if (isAuthenticated) {
       // We are authenticated, so we might have more data when fetching non-static data; Let's do so async with timeout to allow other static info to load and render
       setTimeout(async () => {

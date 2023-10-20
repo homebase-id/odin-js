@@ -21,7 +21,7 @@ import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingBlock } from '@youfoundation/common-app';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 30;
 const PostOverview = () => {
   const { channelKey } = useParams();
   const { data: activeChannel } = useChannel(
@@ -38,6 +38,7 @@ const PostOverview = () => {
   } = useBlogPostsInfinite({
     channelId: activeChannel?.channelId,
     pageSize: PAGE_SIZE,
+    enabled: !channelKey || !!activeChannel,
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);

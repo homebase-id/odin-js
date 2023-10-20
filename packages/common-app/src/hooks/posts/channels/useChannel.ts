@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  BlogConfig,
   ChannelDefinition,
   getChannelDefinition,
   getChannelDefinitionBySlug,
-  GetFile,
   removeChannelDefinition,
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
@@ -13,6 +11,7 @@ import { useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { fetchCachedPublicChannels } from '../cachedDataHelpers';
 
 type useChannelsProps = {
   channelSlug?: string;
@@ -35,33 +34,19 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       if (foundChannel) return foundChannel;
     }
 
-    let channel: ChannelDefinition | undefined = undefined;
+    const channel = (await fetchCachedPublicChannels(dotYouClient))?.find(
+      (chnl) => stringGuidsEqual(chnl.channelId, channelId) || chnl.slug === channelSlug
+    );
+    if (channel) return channel;
 
-    const fileData = await GetFile(dotYouClient, 'blogs.json');
-    if (fileData) {
-      fileData.forEach((entry) => {
-        const foundEntry = entry.find(
-          (possibleChannel) =>
-            possibleChannel.header.fileMetadata.appData.fileType ===
-              BlogConfig.ChannelDefinitionFileType &&
-            (channelSlug
-              ? possibleChannel.payload.slug === channelSlug
-              : stringGuidsEqual(possibleChannel.payload.channelId, channelId))
-        );
-        if (foundEntry) channel = foundEntry.payload as ChannelDefinition;
-      });
-    }
-
-    if (!channel) {
-      channel =
-        (channelSlug ? await getChannelDefinitionBySlug(dotYouClient, channelSlug) : undefined) ||
-        (channelId ? await getChannelDefinition(dotYouClient, channelId) : undefined);
-    }
+    const directFetchOfChannel =
+      (channelSlug ? await getChannelDefinitionBySlug(dotYouClient, channelSlug) : undefined) ||
+      (channelId ? await getChannelDefinition(dotYouClient, channelId) : undefined);
 
     if (channel) {
       return {
-        ...channel,
-        template: parseChannelTemplate(channel?.templateId),
+        ...directFetchOfChannel,
+        template: parseChannelTemplate(directFetchOfChannel?.templateId),
       } as ChannelDefinitionVm;
     }
     return null;

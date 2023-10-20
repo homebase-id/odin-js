@@ -2,7 +2,11 @@ import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib/pu
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ChannelDefinitionVm, HOME_ROOT_PATH, useBlogPosts } from '@youfoundation/common-app';
+import {
+  ChannelDefinitionVm,
+  HOME_ROOT_PATH,
+  useBlogPostsInfinite,
+} from '@youfoundation/common-app';
 import { Arrow, Image, Video } from '@youfoundation/common-app';
 
 import { t } from '@youfoundation/common-app';
@@ -29,9 +33,10 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const [clientWidth, setClientWidth] = useState<number>();
   const scrollContainer = useRef<HTMLDivElement>(null);
 
-  const { data: blogPosts, isFetched: blogsFetched } = useBlogPosts({
+  const { data: blogPosts, isFetched: blogsFetched } = useBlogPostsInfinite({
     channelId: channel?.channelId,
   });
+  const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
 
   const doScroll = (direction: number) => {
     if (scrollContainer?.current) {
@@ -77,7 +82,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
     calculateIndex();
   }, []);
 
-  if (!blogPosts?.length && blogsFetched) {
+  if (!flattenedPosts?.length && blogsFetched) {
     return <>{fallback}</> || null;
   }
 
@@ -111,7 +116,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
           ref={scrollContainer}
           onScroll={calculateIndex}
         >
-          {blogPosts?.map((postFile) => {
+          {flattenedPosts?.map((postFile) => {
             return (
               <PostTeaser
                 className="w-1/2 sm:w-1/3 md:w-1/4 xl:w-1/6"

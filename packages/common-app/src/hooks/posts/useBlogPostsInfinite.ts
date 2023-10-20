@@ -6,7 +6,8 @@ import {
   PostFile,
   PostType,
 } from '@youfoundation/js-lib/public';
-import { useDotYouClient } from '../../..';
+import { useChannels, useDotYouClient } from '../../..';
+import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
 
 type useBlogPostsInfiniteProps = {
   channelId?: string;
@@ -26,7 +27,10 @@ export const useBlogPostsInfinite = ({
   postType,
   enabled = true,
 }: useBlogPostsInfiniteProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getDotYouClient, isOwner, getIdentity } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
+  const isAuthenticated = isOwner || !!getIdentity();
+  const { data: channels } = useChannels({ isAuthenticated, isOwner });
 
   const fetchBlogData = async ({
     channelId,
@@ -35,22 +39,33 @@ export const useBlogPostsInfinite = ({
     channelId?: string;
     pageParam: string | Record<string, string> | undefined;
   }): Promise<useBlogPostsInfiniteReturn> => {
-    const response = channelId
-      ? await getPosts(
-          dotYouClient,
-          channelId,
-          postType,
-          false,
-          typeof pageParam === 'string' ? pageParam : undefined,
-          pageSize
-        )
-      : await getRecentPosts(
-          dotYouClient,
-          postType,
-          false,
-          typeof pageParam === 'object' ? pageParam : undefined,
-          pageSize
-        );
+    const canRunCached = !pageParam && !isAuthenticated;
+
+    const cachedData = canRunCached
+      ? channelId
+        ? await getCachedPosts(dotYouClient, channelId, postType)
+        : await getCachedRecentPosts(dotYouClient, postType)
+      : undefined;
+
+    const response =
+      cachedData ||
+      (channelId
+        ? await getPosts(
+            dotYouClient,
+            channelId,
+            postType,
+            false,
+            typeof pageParam === 'string' ? pageParam : undefined,
+            pageSize
+          )
+        : await getRecentPosts(
+            dotYouClient,
+            postType,
+            false,
+            typeof pageParam === 'object' ? pageParam : undefined,
+            pageSize,
+            channels
+          ));
 
     return {
       results: response.results.filter((file) => !file.isDraft),
