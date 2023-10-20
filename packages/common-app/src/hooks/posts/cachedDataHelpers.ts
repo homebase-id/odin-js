@@ -55,7 +55,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
 };
 
 export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
-  const fileData = await GetFile(dotYouClient, 'blogs.json');
+  const fileData = await GetFile(dotYouClient, 'channels.json');
   if (fileData) {
     let channels: ChannelDefinition[] = [];
 
@@ -72,6 +72,8 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
         }),
       ];
     });
+
+    if (!channels.length) return null;
 
     return channels.map((channel) => {
       return {

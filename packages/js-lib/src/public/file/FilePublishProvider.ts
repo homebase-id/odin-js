@@ -18,7 +18,7 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
     const channelDrive = getChannelDrive(channel.channelId);
     const blogOnChannelQuery: FileQueryParams = {
       targetDrive: channelDrive,
-      fileType: [BlogConfig.PostFileType, BlogConfig.ChannelDefinitionFileType],
+      fileType: [BlogConfig.ChannelDefinitionFileType],
     };
     return {
       name: channel.channelId,
@@ -30,5 +30,5 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
   if (!sections.length) {
     return;
   }
-  return await publishFile(dotYouClient, 'blogs.json', [...sections]);
+  return await publishFile(dotYouClient, 'channels.json', [...sections]);
 };

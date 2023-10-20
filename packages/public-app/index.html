@@ -19,14 +19,14 @@
     <!-- Open Bug on Chrome to respect the spec: https://bugs.chromium.org/p/chromium/issues/detail?id=1072144#c18 -->
     <!--
       <link rel="preload" href="/cdn/sitedata.json" as="fetch" />
-      <link rel="preload" href="/cdn/blogs.json" as="fetch" />
+      <link rel="preload" href="/cdn/channels.json" as="fetch" />
     -->
     <script>
       (function () {
         if (window.location.pathname === '/preview') return;
         const apiDomain = `https://${window.location.hostname}`;
         fetch(`${apiDomain}/cdn/sitedata.json`, { cache: 'no-cache' });
-        fetch(`${apiDomain}/cdn/blogs.json`, { cache: 'no-cache' });
+        fetch(`${apiDomain}/cdn/channels.json`, { cache: 'no-cache' });
       })();
     </script>
   </head>
