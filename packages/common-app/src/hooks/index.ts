@@ -16,7 +16,6 @@ export * from './circles/useCircle';
 export * from './circles/useCircles';
 export * from './socialFeed';
 export * from './image/useImage';
-export * from './blog';
 export * from './intersection/useIntersection';
 export * from './intersection/useMostSpace';
 export * from './siteData/useSiteData';
