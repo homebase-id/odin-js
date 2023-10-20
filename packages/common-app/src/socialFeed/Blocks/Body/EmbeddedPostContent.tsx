@@ -1,5 +1,4 @@
 import { EmbeddedPost } from '@youfoundation/js-lib/public';
-import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { t } from '../../../helpers';
 import { AuthorImage } from '../Author/Image';

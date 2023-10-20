@@ -10,7 +10,7 @@ export const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps)
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchBlogData = async ({ pageParam }: { pageParam?: string }) => {
-    const response = await fetchFollowers(dotYouClient, pageParam);
+    const response = await fetchFollowers(dotYouClient, pageParam, pageSize);
     return response;
   };
 

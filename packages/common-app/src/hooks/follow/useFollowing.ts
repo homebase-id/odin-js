@@ -12,7 +12,7 @@ export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProp
 
   const fetchFollowingInternal = async ({ pageParam }: { pageParam?: string }) => {
     try {
-      const response = await fetchFollowing(dotYouClient, pageParam);
+      const response = await fetchFollowing(dotYouClient, pageParam, pageSize);
       if (response) return response;
     } catch (ex) {
       //
