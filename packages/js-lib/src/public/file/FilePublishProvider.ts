@@ -3,16 +3,11 @@ import { FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
-import {
-  getChannelDefinitions,
-  getChannelDrive,
-  GetTargetDriveFromChannelId,
-} from '../posts/PostDefinitionProvider';
-import { getRecentPosts } from '../posts/PostProvider';
+import { getChannelDefinitions, getChannelDrive } from '../posts/PostDefinitionProvider';
 import { BlogConfig } from '../posts/PostTypes';
 import { HomePageConfig, HomePageAttributes, HomePageThemeFields } from '../home/HomeTypes';
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
-import { publishFile, QueryParamsSection } from './FileProvider';
+import { publishFile } from './FileProvider';
 import { getAttributes, getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
 import { getFileHeader } from '../../core/DriveData/DriveFileProvider';
 
@@ -138,62 +133,8 @@ export const publishBlog = async (dotYouClient: DotYouClient) => {
     };
   });
 
-  const imageSections = (
-    await Promise.all(
-      (
-        await getRecentPosts(
-          dotYouClient,
-          undefined,
-          false,
-          undefined,
-          channels.length * 6,
-          channels
-        )
-      ).results
-        .filter(
-          (blog) =>
-            blog?.acl?.requiredSecurityGroup.toLowerCase() !== SecurityGroupType.Owner.toLowerCase()
-        )
-        .map(async (blog) => {
-          try {
-            const targetDrive = GetTargetDriveFromChannelId(blog.content.channelId);
-
-            if (!blog?.content?.primaryMediaFile?.fileId) {
-              return undefined;
-            }
-
-            const imageFileHeader = await getFileHeader(
-              dotYouClient,
-              targetDrive,
-              blog.content.primaryMediaFile?.fileId
-            );
-            const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
-
-            const params: FileQueryParams = {
-              targetDrive: targetDrive,
-              fileType: [0],
-            };
-
-            if (uniqueId) {
-              params.clientUniqueIdAtLeastOne = [uniqueId];
-            }
-
-            return {
-              name: blog.content.primaryMediaFile?.fileId,
-              queryParams: params,
-              resultOptions: BASE_RESULT_OPTIONS,
-            };
-          } catch (ex) {
-            return undefined;
-          }
-        })
-    )
-  )
-    .filter((sectionItem) => sectionItem && sectionItem.name?.length !== 0)
-    .filter(Boolean) as QueryParamsSection[];
-
   if (!sections.length) {
     return;
   }
-  return await publishFile(dotYouClient, 'blogs.json', [...sections, ...imageSections]);
+  return await publishFile(dotYouClient, 'blogs.json', [...sections]);
 };

@@ -130,24 +130,6 @@ export const GetFile = async (
   }
 };
 
-/// Looks through the _internalcache to find a ResponseEntry that matches the key provided
-export const GetFileEntryFromCache = async (key: string) => {
-  if (!_internalFileCache) {
-    return;
-  }
-  try {
-    for (const filePromise of _internalFileCache.values()) {
-      const responseEntries = await filePromise;
-      if (responseEntries.has(`${key}`)) {
-        return responseEntries.get(`${key}`);
-      }
-    }
-  } catch (ex) {
-    // The promises could be erroring out, so we need to return if anything fails before waisting any more time waiting on failing responses;
-    return;
-  }
-};
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertFileToResponseEntry = async (file: any) => {
   let parsedObj = undefined;
