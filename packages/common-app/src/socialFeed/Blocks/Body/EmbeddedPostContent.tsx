@@ -20,8 +20,6 @@ export const EmbeddedPostContent = ({
   className?: string;
   hideMedia?: boolean;
 }) => {
-  const navigate = useNavigate();
-
   const [shouldHideMedia, setShouldHideMedia] = useState(hideMedia);
   const isExternal = !content.authorOdinId || content.authorOdinId !== window.location.hostname;
 
@@ -89,16 +87,12 @@ export const EmbeddedPostContent = ({
 
         {!shouldHideMedia ? (
           <PostMedia
-            postFile={{ content, payloadIsEncrypted: isChannelPublic }}
-            odinId={content.authorOdinId}
-            onClick={(e, index) => {
-              e.stopPropagation();
-
-              // Only navigate to the article if we're on desktop
-              if (content.type !== 'Article')
-                navigate(`${postPath}/${index}`, { state: { referrer: window.location.pathname } });
-              else navigate(postPath, { state: { referrer: window.location.pathname } });
+            postFile={{
+              content,
+              previewThumbnail: content.previewThumbnail,
+              payloadIsEncrypted: isChannelPublic,
             }}
+            odinId={content.authorOdinId}
           />
         ) : null}
       </FakeAnchor>

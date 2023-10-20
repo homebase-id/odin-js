@@ -204,7 +204,11 @@ export const RepostButton = ({
       </button>
       {isRepostDialogOpen ? (
         <RepostDialog
-          embeddedPost={{ ...postFile.content, permalink }}
+          embeddedPost={{
+            ...postFile.content,
+            permalink,
+            previewThumbnail: postFile.previewThumbnail,
+          }}
           isOpen={isRepostDialogOpen}
           onClose={() => setIsReposeDialogOpen(false)}
         />

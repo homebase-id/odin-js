@@ -152,7 +152,7 @@ export const PostDetailCard = ({
       ) : null}
 
       {post?.embeddedPost ? (
-        <EmbeddedPostContent content={post.embeddedPost} hideMedia={true} className="my-5" />
+        <EmbeddedPostContent content={post.embeddedPost} className="my-5" />
       ) : null}
 
       {!post ? (

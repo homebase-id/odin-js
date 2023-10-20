@@ -92,7 +92,13 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                 className={`rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
                 key={post.fileId}
               >
-                <EmbeddedPostContent content={{ ...post.content, permalink: '' }} />
+                <EmbeddedPostContent
+                  content={{
+                    ...post.content,
+                    permalink: '',
+                    previewThumbnail: post.previewThumbnail,
+                  }}
+                />
               </div>
             ))
           ) : (

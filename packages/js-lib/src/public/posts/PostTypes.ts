@@ -82,6 +82,7 @@ export type RichText = Record<string, unknown>[];
 
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export type ReactAccess = 'emoji' | 'comment' | boolean;
