@@ -9,13 +9,14 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm install && npm run build -workspaces --if-present",
+    "build": "npm i && npm run build -workspaces --if-present",
+    "build-libs": "npm i && npm run build -w ./packages/js-lib -w ./packages/ui-lib",
     "test": "npm run test -workspaces --if-present",
-    "build-libs": "npm run build -w ./packages/js-lib -w ./packages/ui-lib",
-    "owner-app": "npm install && npm start -w ./packages/owner-app",
-    "feed-app": "npm install && npm start -w ./packages/feed-app",
-    "public-app": "npm install && npm start -w ./packages/public-app",
-    "provisioning-app": "npm install && npm start -w ./packages/provisioning-app"
+    "start:owner": "npm start -w ./packages/owner-app",
+    "start:feed": "npm start -w ./packages/feed-app",
+    "start:public": "npm start -w ./packages/public-app",
+    "start:provisioning": "npm start -w ./packages/provisioning-app",
+    "start:login": "npm start -w ./packages/login-app"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
