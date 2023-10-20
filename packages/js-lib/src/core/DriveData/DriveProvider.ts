@@ -1,6 +1,6 @@
 import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../DotYouClient';
-import { stringify } from '../../helpers/helpers';
+import { stringifyToQueryParams } from '../../helpers/helpers';
 import { PagedResult, PagingOptions, TargetDrive } from '../core';
 
 export const getDrives = async (
@@ -29,12 +29,12 @@ export const getDrivesByType = async (
 
   if (dotYouClient.getType() === ApiType.Owner) {
     const client = dotYouClient.createAxiosClient();
-    return client.get('drive/mgmt/type?' + stringify(params)).then((response) => {
+    return client.get('drive/mgmt/type?' + stringifyToQueryParams(params)).then((response) => {
       return response.data;
     });
   } else {
     const client = dotYouClient.createAxiosClient();
-    return client.get('drive/metadata/type?' + stringify(params)).then((response) => {
+    return client.get('drive/metadata/type?' + stringifyToQueryParams(params)).then((response) => {
       return {
         ...response.data,
         results: response?.data?.results?.map((result: { targetDrive: TargetDrive }) => {

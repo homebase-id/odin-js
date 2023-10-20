@@ -8,7 +8,7 @@
 } from './CircleDataTypes';
 import { DotYouClient } from '../../core/DotYouClient';
 import { PagingOptions, PagedResult } from '../../core/core';
-import { stringify } from '../../helpers/helpers';
+import { stringifyToQueryParams } from '../../helpers/helpers';
 import { getConnectionInfo } from './CircleNetworkProvider';
 
 //Handles making and reading requests to connect with others
@@ -21,7 +21,10 @@ export const getPendingRequests = async (
   params: PagingOptions
 ): Promise<PagedResult<RedactedConnectionRequest> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const url = PendingPathRoot + '/list?' + stringify(params as unknown as Record<string, unknown>);
+  const url =
+    PendingPathRoot +
+    '/list?' +
+    stringifyToQueryParams(params as unknown as Record<string, unknown>);
 
   return client
     .get<PagedResult<RedactedConnectionRequest>>(url)
@@ -54,7 +57,8 @@ export const getSentRequests = async (
   params: PagingOptions
 ): Promise<PagedResult<ConnectionRequest>> => {
   const client = dotYouClient.createAxiosClient();
-  const url = SentPathRoot + '/list?' + stringify(params as unknown as Record<string, unknown>);
+  const url =
+    SentPathRoot + '/list?' + stringifyToQueryParams(params as unknown as Record<string, unknown>);
 
   return client
     .get(url)

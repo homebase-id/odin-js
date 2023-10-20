@@ -1,4 +1,9 @@
-import { uint8ArrayToBase64, getNewId, jsonStringify64, stringify } from '../../helpers/DataUtil';
+import {
+  uint8ArrayToBase64,
+  getNewId,
+  jsonStringify64,
+  stringifyToQueryParams,
+} from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
 import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
@@ -166,7 +171,7 @@ export const getDecryptedVideoUrl = async (
   fileSizeLimit?: number
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
-    const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringify({
+    const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
       xfst: systemFileType || 'Standard',

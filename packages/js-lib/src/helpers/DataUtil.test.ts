@@ -9,7 +9,6 @@ import {
   base64ToUint8Array,
   uint8ArrayToBase64,
   jsonStringify64,
-  stringify,
   stringGuidsEqual,
   aclEqual,
   getNewId,
@@ -44,15 +43,6 @@ test('Convert Uint8Array to string', () => {
 
 test('Convert Uint8Array to number', () => {
   expect(byteArrayToNumber(new Uint8Array([116]))).toEqual(116);
-});
-
-test('Stringify object', () => {
-  expect(
-    stringify({
-      test: 'test',
-      test2: 'test2',
-    })
-  ).toEqual('test=test&test2=test2');
 });
 
 test('Convert string to a Guid md5 hash', () => {
@@ -162,6 +152,15 @@ test('Round to smaller multiple of 16', () => {
 
 test('Round to larger multiple of 16', () => {
   expect(roundToLargerMultipleOf16(1032)).toBe(1040);
+});
+
+test('Stringify object', () => {
+  expect(
+    stringifyToQueryParams({
+      test: 'test',
+      test2: 'test2',
+    })
+  ).toEqual('test=test&test2=test2');
 });
 
 test('Stringify complex QueryParams', () => {

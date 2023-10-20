@@ -4,14 +4,8 @@ import {
   PagedResult,
   PagingOptions,
 } from '../../core/DriveData/DriveQueryTypes';
+import { stringifyToQueryParams } from '../../helpers/DataUtil';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const stringify = (obj: any) => {
-  return Object.keys(obj)
-    .map((key) => key + '=' + obj[key])
-    .join('&');
-};
 
 const root = '/circles/connections';
 
@@ -38,7 +32,7 @@ export const getConnections = async (
   }
 ): Promise<NumberCursoredResult<{ odinId: string } | DotYouProfile>> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/connected?' + stringify(data);
+  const url = root + '/connected?' + stringifyToQueryParams(data);
 
   if (dotYouClient.getType() === ApiType.Owner) {
     // Post needed
@@ -57,7 +51,7 @@ export const getBlockedConnections = (
   params: PagingOptions
 ): Promise<PagedResult<DotYouProfile>> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/blocked?' + stringify(params);
+  const url = root + '/blocked?' + stringifyToQueryParams(params as any);
   return client
     .get(url)
     .then((response) => {

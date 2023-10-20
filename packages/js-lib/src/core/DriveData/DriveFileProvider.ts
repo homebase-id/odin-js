@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import {
-  stringify,
+  stringifyToQueryParams,
   byteArrayToString,
   roundToSmallerMultipleOf16,
   roundToLargerMultipleOf16,
@@ -53,7 +53,7 @@ export const getFileHeader = async (
   };
 
   const promise: Promise<DriveSearchResult | null> = client
-    .get('/drive/files/header?' + stringify(request))
+    .get('/drive/files/header?' + stringifyToQueryParams(request as any))
     .then((response) => {
       _internalMetadataPromiseCache.delete(cacheKey);
       return response.data;
@@ -141,7 +141,7 @@ export const getPayloadBytes = async (
   }
 
   return client
-    .get<ArrayBuffer>('/drive/files/payload?' + stringify(request), config)
+    .get<ArrayBuffer>('/drive/files/payload?' + stringifyToQueryParams(request as any), config)
     .then(async (response) => {
       if (!response.data) return null;
       return {
@@ -200,7 +200,10 @@ export const getThumbBytes = async (
   };
 
   return client
-    .get<ArrayBuffer>('/drive/files/thumb?' + stringify({ ...request, width, height }), config)
+    .get<ArrayBuffer>(
+      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height }),
+      config
+    )
     .then(async (response) => {
       if (!response.data) return null;
       return {
@@ -212,118 +215,6 @@ export const getThumbBytes = async (
       if (error.response?.status === 404) return null;
       console.error('[DotYouCore-js:getThumbBytes]', error);
       return null;
-    });
-};
-
-/// Delete methods:
-
-export const deleteFile = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  deleteLinkedFiles?: boolean,
-  recipients?: string[],
-  systemFileType?: SystemFileType
-): Promise<boolean | void> => {
-  assertIfDefined('TargetDrive', targetDrive);
-  assertIfDefined('FileId', fileId);
-
-  const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  });
-
-  const request = {
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-    deleteLinkedFiles: deleteLinkedFiles ?? true,
-    recipients: recipients,
-  };
-
-  return client
-    .post('/drive/files/delete', request)
-    .then((response) => {
-      if (response.status === 200) {
-        return true;
-      }
-
-      return false;
-    })
-    .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
-      throw error;
-    });
-};
-
-export const deleteThumbnail = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  width: number,
-  height: number,
-  systemFileType?: SystemFileType
-) => {
-  const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  });
-
-  const request = {
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-    width,
-    height,
-  };
-
-  client
-    .post('/attachments/deletethumbnail', request)
-    .then((response) => {
-      if (response.status === 200) {
-        return true;
-      }
-
-      return false;
-    })
-    .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
-      throw error;
-    });
-};
-
-export const deletePayload = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  width: number,
-  height: number,
-  systemFileType?: SystemFileType
-) => {
-  const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  });
-
-  const request = {
-    key: '', // TODO: Add key (reference to a key for multiple payloads in a single file)
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-  };
-
-  client
-    .post('/attachments/deletepayload', request)
-    .then((response) => response.status === 200)
-    .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
-      throw error;
     });
 };
 

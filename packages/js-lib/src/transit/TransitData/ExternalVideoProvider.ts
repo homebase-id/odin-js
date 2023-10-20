@@ -6,7 +6,7 @@ import {
   SystemFileType,
   TargetDrive,
 } from '../../core/core';
-import { stringify } from '../../helpers/helpers';
+import { stringifyToQueryParams } from '../../helpers/helpers';
 
 import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './TransitProvider';
 
@@ -76,7 +76,7 @@ export const getDecryptedVideoUrlOverTransit = async (
     systemFileType
   );
   if (!meta.fileMetadata.payloadIsEncrypted) {
-    return `https://${odinId}/api/guest/v1/drive/files/payload?${stringify({
+    return `https://${odinId}/api/guest/v1/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
       xfst: systemFileType || 'Standard',

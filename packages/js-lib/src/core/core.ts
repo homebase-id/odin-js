@@ -11,6 +11,7 @@ export * from './SecurityData/SecurityProvider';
 export * from './DriveData/DriveProvider';
 export * from './DriveData/DriveTypes';
 
+export * from './DriveData/DriveManageFileProvider';
 export * from './DriveData/DriveFileProvider';
 export * from './DriveData/DriveFileTypes';
 

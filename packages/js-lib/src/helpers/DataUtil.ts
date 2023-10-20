@@ -65,13 +65,6 @@ export const getNewId = () => {
   return Guid.create().toString().replace(/-/g, '');
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const stringify = (obj: any) => {
-  return Object.keys(obj)
-    .map((key) => key + '=' + encodeURIComponent(obj[key]))
-    .join('&');
-};
-
 // Creates a base64 encoded byte array of the given input
 export const toGuidId = (input: string): string => {
   return md5(input).toString();
@@ -160,6 +153,13 @@ export const roundToSmallerMultipleOf16 = (x: number) => {
 
 export const roundToLargerMultipleOf16 = (x: number) => {
   return Math.ceil(x / 16) * 16;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const stringify = (obj: Record<string, any>) => {
+  return Object.keys(obj)
+    .map((key) => key + '=' + encodeURIComponent(obj[key]))
+    .join('&');
 };
 
 export const stringifyToQueryParams = (obj: Record<string, unknown>) => {

@@ -6,7 +6,7 @@ import {
   getNewId,
   jsonStringify64,
   base64ToUint8Array,
-  stringify,
+  stringifyToQueryParams,
 } from '../../helpers/DataUtil';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
@@ -171,7 +171,7 @@ export const getDecryptedImageUrl = async (
   const getDirectImageUrl = async () => {
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
       size ? 'thumb' : 'payload'
-    }?${stringify({
+    }?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
       ...(size

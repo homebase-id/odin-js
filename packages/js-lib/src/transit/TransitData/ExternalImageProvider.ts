@@ -6,7 +6,11 @@ import {
   ImageSize,
   ImageContentType,
 } from '../../core/core';
-import { base64ToUint8Array, stringify, uint8ArrayToBase64 } from '../../helpers/DataUtil';
+import {
+  base64ToUint8Array,
+  stringifyToQueryParams,
+  uint8ArrayToBase64,
+} from '../../helpers/DataUtil';
 import {
   getFileHeaderOverTransit,
   getThumbBytesOverTransit,
@@ -53,7 +57,9 @@ export const getDecryptedImageUrlOverTransit = async (
 ): Promise<string> => {
   // TODO: Decide to use direct urls or not
   const getDirectImageUrl = async () => {
-    return `https://${odinId}/api/guest/v1/drive/files/${size ? 'thumb' : 'payload'}?${stringify({
+    return `https://${odinId}/api/guest/v1/drive/files/${
+      size ? 'thumb' : 'payload'
+    }?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
       ...(size
