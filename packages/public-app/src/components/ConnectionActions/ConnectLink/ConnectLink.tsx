@@ -11,11 +11,11 @@ import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Persons } from '@youfoundation/common-app';
 
 const ConnectLink = ({ className }: { className: string }) => {
-  const { isOwner, getIdentity } = useAuth();
+  const { isOwner, getIdentity, isAuthenticated } = useAuth();
   const identity = getIdentity();
   const [isLogin, setIsLogin] = useState(false);
 
-  const { data: securityContext } = useSecurityContext().fetch;
+  const { data: securityContext } = useSecurityContext(undefined, isAuthenticated).fetch;
   const alreadyConnected = securityContext?.caller?.securityLevel === 'connected' || false;
 
   if (isOwner) return null;

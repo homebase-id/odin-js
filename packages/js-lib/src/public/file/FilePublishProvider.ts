@@ -1,120 +1,14 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { FileQueryParams } from '../../core/DriveData/DriveTypes';
-import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
-import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
-import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { getChannelDefinitions, getChannelDrive } from '../posts/PostDefinitionProvider';
 import { BlogConfig } from '../posts/PostTypes';
-import { HomePageConfig, HomePageAttributes, HomePageThemeFields } from '../home/HomeTypes';
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile } from './FileProvider';
-import { getAttributes, getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
-import { getFileHeader } from '../../core/DriveData/DriveFileProvider';
 
 export const publishProfile = async (dotYouClient: DotYouClient) => {
-  const sections = [...DEFAULT_SECTIONS];
-  const publicSections = [...DEFAULT_PUBLIC_SECTIONS];
-
-  const themeAttributes = await getAttributes(
-    dotYouClient,
-    HomePageConfig.DefaultDriveId,
-    [HomePageAttributes.Theme],
-    10
-  );
-
-  // Image fileId's discovery:
-  const headerImageFileId = themeAttributes?.[0]?.data[HomePageThemeFields.HeaderImageId];
-  if (headerImageFileId) {
-    try {
-      const homeTargetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId.toString());
-
-      const imageFileHeader = await getFileHeader(
-        dotYouClient,
-        homeTargetDrive,
-        headerImageFileId.toString()
-      );
-      const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
-
-      const headerImageQueryParam: FileQueryParams = {
-        targetDrive: homeTargetDrive,
-        fileType: [0],
-      };
-
-      if (uniqueId) headerImageQueryParam.clientUniqueIdAtLeastOne = [uniqueId];
-
-      sections.push({
-        name: headerImageFileId.toString(),
-        queryParams: headerImageQueryParam,
-        resultOptions: BASE_RESULT_OPTIONS,
-      });
-    } catch (ex) {
-      console.log('No header images found => none published');
-    }
-  }
-
-  const profileAttributes = await getAttributeVersions(
-    dotYouClient,
-    BuiltInProfiles.StandardProfileId,
-    BuiltInProfiles.PersonalInfoSectionId,
-    [BuiltInAttributes.Photo]
-  );
-
-  const profilePhotoFileIds = profileAttributes
-    ?.filter(
-      (attr) =>
-        attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
-    )
-    ?.map((attr) => attr?.data?.['profileImageId'] as string)
-    .filter((fileId) => fileId !== undefined);
-
-  if (profilePhotoFileIds?.length) {
-    try {
-      // We only use the first public profile photo id
-      const profilePhotoFileId = profilePhotoFileIds[0];
-
-      const profileTargetDrive = GetTargetDriveFromProfileId(
-        BuiltInProfiles.StandardProfileId.toString()
-      );
-
-      const imageFileHeader = await getFileHeader(
-        dotYouClient,
-        profileTargetDrive,
-        profilePhotoFileId
-      );
-      const uniqueId = imageFileHeader?.fileMetadata.appData.uniqueId;
-
-      const profilePhotoQueryParams: FileQueryParams = {
-        targetDrive: profileTargetDrive,
-        fileType: [0],
-      };
-
-      if (uniqueId) {
-        profilePhotoQueryParams.clientUniqueIdAtLeastOne = [uniqueId];
-      }
-
-      // Only add first anonymous picture into the siteData;
-      sections.push({
-        name: profilePhotoFileId,
-        queryParams: profilePhotoQueryParams,
-        resultOptions: BASE_RESULT_OPTIONS,
-      });
-
-      publicSections.push({
-        name: profilePhotoFileId,
-        queryParams: profilePhotoQueryParams,
-        resultOptions: {
-          ...BASE_RESULT_OPTIONS,
-          includeAdditionalThumbnails: true,
-        },
-      });
-    } catch (ex) {
-      console.log('No profile photos found => none published');
-    }
-  }
-
   return await Promise.all([
-    await publishFile(dotYouClient, 'sitedata.json', sections),
-    await publishFile(dotYouClient, 'public.json', publicSections, 'allowAllOrigins'),
+    await publishFile(dotYouClient, 'sitedata.json', DEFAULT_SECTIONS),
+    await publishFile(dotYouClient, 'public.json', DEFAULT_PUBLIC_SECTIONS, 'allowAllOrigins'),
   ]);
 };
 
