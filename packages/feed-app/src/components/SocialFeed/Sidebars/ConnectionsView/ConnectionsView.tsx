@@ -33,7 +33,7 @@ const ConnectionsView = ({ className }: { className?: string }) => {
 
   const hasNextPage = connections?.pages[activePage] || hasNextPageOnServer;
 
-  if (connectionsFetched && (!connections?.pages.length || !connections.pages[0]?.results.length))
+  if (connectionsFetched && (!connections?.pages?.length || !connections.pages[0]?.results.length))
     return null;
 
   return (
