@@ -1,3 +1,4 @@
+import { EmbeddedThumb } from '../../../core';
 import { AccessControlList, SecurityGroupType } from '../../core/core';
 
 export interface AttributeFile extends Attribute {
@@ -17,6 +18,7 @@ export interface Attribute {
   type: string;
   priority: number;
   sectionId: string;
+  previewThumbnail?: EmbeddedThumb;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;
 }

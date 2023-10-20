@@ -42,6 +42,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"
+            previewThumbnail={home?.headerPreviewThumbnail}
           />
           {showProfileImage ? (
             <div className="container absolute bottom-0 left-0 right-0 top-0 mx-auto flex justify-center px-5 md:block">
@@ -52,6 +53,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
                 <Image
                   fileId={owner?.profileImageId}
                   targetDrive={targetDrive}
+                  previewThumbnail={owner?.profileImagePreviewThumbnail}
                   className="h-full w-full"
                   fit="cover"
                 />

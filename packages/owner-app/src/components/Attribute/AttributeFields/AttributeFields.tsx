@@ -21,7 +21,7 @@ import { Label } from '@youfoundation/common-app';
 import { AsYouType } from 'libphonenumber-js';
 
 import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
-import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
 import { ThemeAttributeEditor } from './ThemeAttributeEditor';
 const RichTextEditor = lazy(() =>
@@ -38,7 +38,9 @@ const AttributeFields = ({
   onChange,
 }: {
   attribute: AttributeVm;
-  onChange: (e: { target: { value: unknown; name: string } }) => void;
+  onChange: (e: {
+    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
+  }) => void;
 }) => {
   switch (attribute.type) {
     case BuiltInAttributes.Name:
@@ -127,7 +129,13 @@ const AttributeFields = ({
             name={MinimalProfileFields.ProfileImageId}
             defaultValue={attribute.data?.[MinimalProfileFields.ProfileImageId] ?? ''}
             onChange={(e) =>
-              onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+              onChange({
+                target: {
+                  name: e.target.name,
+                  value: e.target.value?.fileId,
+                  previewThumbnail: e.target.value?.previewThumbnail,
+                },
+              })
             }
             acl={attribute.acl}
             targetDrive={GetTargetDriveFromProfileId(attribute.profileId)}
@@ -214,7 +222,13 @@ const AttributeFields = ({
               name={MinimalProfileFields.ExperienceImageFileId}
               defaultValue={attribute.data?.[MinimalProfileFields.ExperienceImageFileId] ?? ''}
               onChange={(e) =>
-                onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+                onChange({
+                  target: {
+                    name: e.target.name,
+                    value: e.target.value?.fileId,
+                    previewThumbnail: e.target.value?.previewThumbnail,
+                  },
+                })
               }
               acl={attribute.acl}
               targetDrive={GetTargetDriveFromProfileId(attribute.profileId)}

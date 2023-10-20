@@ -32,6 +32,7 @@ const PreviewPage = () => {
           <div className="h-24 w-24 overflow-hidden rounded-full bg-background">
             <Image
               fileId={owner?.profileImageId}
+              previewThumbnail={owner?.profileImagePreviewThumbnail}
               targetDrive={targetDrive}
               className="h-full w-full"
               fit="cover"

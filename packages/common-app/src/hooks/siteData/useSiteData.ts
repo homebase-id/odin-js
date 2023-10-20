@@ -15,7 +15,7 @@ import {
   HomePageConfig,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
-import { queryBatchCollection } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
 
 interface DefaultTemplateSettings {
   colors: {
@@ -56,6 +56,7 @@ type OwnerSiteData = {
   firstName?: string;
   surName?: string;
   profileImageId?: string;
+  profileImagePreviewThumbnail?: EmbeddedThumb;
   status?: string;
 };
 
@@ -63,6 +64,7 @@ type SocialSiteData = { type: string; username: string; priority: number }[];
 
 type HomeSiteData = {
   templateSettings?: TemplateSettings;
+  headerPreviewThumbnail?: EmbeddedThumb;
 };
 
 type SiteData = {
@@ -97,6 +99,7 @@ export const useSiteData = () => {
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
         profileImageId: photoAttr?.data.profileImageId,
+        profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
         status: statusAttr?.data.status,
       };
     };
@@ -123,6 +126,7 @@ export const useSiteData = () => {
 
       return {
         templateSettings: themeAttribute?.data as TemplateSettings,
+        headerPreviewThumbnail: themeAttribute?.previewThumbnail,
       };
     };
 
@@ -261,6 +265,7 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
         profileImageId: photoAttr?.data.profileImageId,
+        profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
         status: statusAttr?.data.status,
       };
     }
@@ -297,6 +302,7 @@ const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>): HomeSiteData
     if (themeAttribute) {
       return {
         templateSettings: themeAttribute?.data as TemplateSettings,
+        headerPreviewThumbnail: themeAttribute?.previewThumbnail,
       };
     }
   }

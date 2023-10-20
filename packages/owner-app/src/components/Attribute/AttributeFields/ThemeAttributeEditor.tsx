@@ -7,7 +7,7 @@ import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import FaviconSelector from '../../Form/FaviconSelector';
 import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
-import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { lazy } from 'react';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
@@ -23,7 +23,9 @@ const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 
 export const ThemeAttributeEditor = (props: {
   attribute: AttributeVm;
-  onChange: (e: { target: { value: unknown; name: string } }) => void;
+  onChange: (e: {
+    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
+  }) => void;
 }) => {
   const { attribute, onChange } = props;
   return (
@@ -66,7 +68,9 @@ const ThemeSpecificFields = ({
   onChange,
 }: {
   attribute: AttributeVm;
-  onChange: (e: { target: { value: unknown; name: string } }) => void;
+  onChange: (e: {
+    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
+  }) => void;
 }) => {
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
 
@@ -91,7 +95,13 @@ const ThemeSpecificFields = ({
               name={HomePageThemeFields.HeaderImageId}
               defaultValue={attribute.data?.[HomePageThemeFields.HeaderImageId] ?? ''}
               onChange={(e) =>
-                onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+                onChange({
+                  target: {
+                    name: e.target.name,
+                    value: e.target.value?.fileId,
+                    previewThumbnail: e.target.value?.previewThumbnail,
+                  },
+                })
               }
               acl={attribute.acl}
               targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}

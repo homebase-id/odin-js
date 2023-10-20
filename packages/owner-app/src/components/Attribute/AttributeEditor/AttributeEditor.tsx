@@ -18,7 +18,7 @@ import AttributeFields from '../AttributeFields/AttributeFields';
 import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const AttributeEditor = ({
   attribute,
@@ -60,9 +60,12 @@ const AttributeEditor = ({
   };
 
   const debouncedSave = useDebounce(() => saveAttr(latestAttr), { timeoutMillis: 1500 });
-  const changeHandler = (e: { target: { value: unknown; name: string } }) => {
+  const changeHandler = (e: {
+    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
+  }) => {
     const dirtyAttr = { ...latestAttr };
     dirtyAttr.data[e.target.name] = e.target.value;
+    dirtyAttr.previewThumbnail = e.target.previewThumbnail;
     setLatestAttr(dirtyAttr);
 
     if (!isNewAttribute) debouncedSave();

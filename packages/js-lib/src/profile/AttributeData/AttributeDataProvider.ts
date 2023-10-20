@@ -189,6 +189,7 @@ export const dsrToAttributeFile = async (
       versionTag: dsr.fileMetadata.versionTag,
       acl: dsr.serverMetadata?.accessControlList,
       aclPriority: dsr.priority,
+      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
     };
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
@@ -352,6 +353,7 @@ export const saveAttribute = async (
       fileType: AttributeConfig.AttributeFileType,
       contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
+      previewThumbnail: attr.previewThumbnail,
     },
     payloadIsEncrypted: encrypt,
     accessControlList: attr.acl,

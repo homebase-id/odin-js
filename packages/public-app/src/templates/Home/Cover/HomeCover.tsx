@@ -30,7 +30,12 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
         <div className="flex flex-col lg:flex-row lg:gap-5">
           <div className="mx-auto mb-12 min-w-[15rem] md:max-w-[30rem] lg:w-1/2 lg:max-w-[35rem]">
             {owner?.profileImageId && targetDrive ? (
-              <Image fileId={owner?.profileImageId} targetDrive={targetDrive} className="w-full" />
+              <Image
+                fileId={owner?.profileImageId}
+                previewThumbnail={owner?.profileImagePreviewThumbnail}
+                targetDrive={targetDrive}
+                className="w-full"
+              />
             ) : null}
           </div>
           <div className="flex h-full flex-grow flex-col lg:w-1/2">
