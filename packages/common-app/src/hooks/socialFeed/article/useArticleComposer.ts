@@ -3,7 +3,7 @@ import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
-import usePost from '../post/usePost';
+import { usePost } from '../post/usePost';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -17,7 +17,7 @@ export const EMPTY_POST: Article = {
   abstract: '',
 };
 
-const useArticleComposer = ({
+export const useArticleComposer = ({
   channelKey,
   postKey,
   caption,
@@ -200,5 +200,3 @@ const useArticleComposer = ({
     error: savePostError || removePostError,
   };
 };
-
-export default useArticleComposer;

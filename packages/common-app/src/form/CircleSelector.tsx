@@ -88,5 +88,3 @@ export const CircleSelector = ({
     </>
   );
 };
-
-export default CircleSelector;

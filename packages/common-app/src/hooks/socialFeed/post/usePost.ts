@@ -38,7 +38,7 @@ export interface AttachmentFile {
   thumbnail?: ThumbnailFile;
 }
 
-const usePost = () => {
+export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
@@ -278,5 +278,3 @@ const usePost = () => {
     }),
   };
 };
-
-export default usePost;

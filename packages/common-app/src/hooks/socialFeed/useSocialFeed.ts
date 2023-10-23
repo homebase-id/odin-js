@@ -6,7 +6,7 @@ import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { getSocialFeed } from '@youfoundation/js-lib/transit';
 
-const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
+export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: ownChannels, isFetched: channelsFetched } = useChannels({
     isAuthenticated: true,
@@ -49,5 +49,3 @@ const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
     }),
   };
 };
-
-export default useSocialFeed;

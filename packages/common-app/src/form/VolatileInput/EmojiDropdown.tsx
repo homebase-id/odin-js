@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useMostSpace, usePortal } from '../../hooks';
 const database = new Database();
 
-const EmojiDropdown = ({
+export const EmojiDropdown = ({
   query,
   onInput,
   position,
@@ -92,4 +92,3 @@ const EmojiDropdown = ({
 
   return createPortal(dialog, target);
 };
-export default EmojiDropdown;

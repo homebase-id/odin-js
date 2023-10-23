@@ -144,4 +144,4 @@ const ImageUploadAndCrop = forwardRef<CropperRef, ImageUploadAndCropProps>(
 );
 ImageUploadAndCrop.displayName = 'ImageUploadAndCrop';
 
-export default ImageUploadAndCrop;
+export { ImageUploadAndCrop };

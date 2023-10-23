@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
 import { ActionButton, Arrow, Input, Label, Person, t } from '@youfoundation/common-app';
-import ImageUploadAndCrop from '@youfoundation/common-app/src/form/image/ImageUploadAndCrop';
+import { ImageUploadAndCrop } from '@youfoundation/common-app';
 
 const defaultData: WelcomeData = {
   // Default values

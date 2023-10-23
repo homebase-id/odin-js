@@ -1,9 +1,9 @@
 import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
-import { DrivePermissionType, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 import { useQuery } from '@tanstack/react-query';
-import useSecurityContext from '../securityContext/useSecurityContext';
+import { useSecurityContext } from '../securityContext/useSecurityContext';
 import { useDotYouClient } from '../auth/useDotYouClient';
 
 interface UseCanReactProps {

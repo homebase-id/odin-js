@@ -1,5 +1,5 @@
 import { Label, t, Input, Select } from '@youfoundation/common-app';
-import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
+import { ImageSelector } from '@youfoundation/common-app';
 import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';

@@ -29,5 +29,3 @@ export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
     }),
   };
 };
-
-export default useSecurityContext;

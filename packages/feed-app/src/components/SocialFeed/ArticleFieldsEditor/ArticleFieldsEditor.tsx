@@ -5,11 +5,10 @@ import {
   getChannelDrive,
   RichText,
 } from '@youfoundation/js-lib/public';
-import { lazy, useMemo, useState } from 'react';
+import { lazy, useState } from 'react';
 import { t, ErrorBoundary, Label, ActionButton, Arrow, Textarea } from '@youfoundation/common-app';
-import { debounce } from 'lodash-es';
 
-import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
+import { ImageSelector } from '@youfoundation/common-app';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );

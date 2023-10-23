@@ -12,7 +12,7 @@ import { usePortal } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import usePost from '../../hooks/socialFeed/post/usePost';
+import { usePost } from '../../hooks/socialFeed/post/usePost';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,

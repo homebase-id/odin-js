@@ -10,7 +10,7 @@ import {
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { ErrorNotification } from '@youfoundation/common-app';
 
-const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
+export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isReact, setIsReact] = useState(false);
 
@@ -62,5 +62,3 @@ const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }
     </>
   );
 };
-
-export default CommentLikeButton;

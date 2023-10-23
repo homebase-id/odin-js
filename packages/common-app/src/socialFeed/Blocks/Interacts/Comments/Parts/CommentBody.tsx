@@ -5,9 +5,9 @@ import {
 } from '@youfoundation/js-lib/public';
 import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
-import CommentMedia from './CommentMedia';
+import { CommentMedia } from './CommentMedia';
 
-const CommentBody = ({
+export const CommentBody = ({
   context,
   commentFileId,
   content,
@@ -46,5 +46,3 @@ const CommentBody = ({
     </>
   );
 };
-
-export default CommentBody;

@@ -3,7 +3,7 @@ import { useDotYouClient } from '../../../../../hooks';
 import { ActionGroup, Pencil, Times, Ellipsis } from '../../../../../ui';
 import { AuthorName } from '../../../Author/Name';
 
-const CommentHead = ({
+export const CommentHead = ({
   authorOdinId,
   setIsEdit,
   // commentBody,
@@ -46,5 +46,3 @@ const CommentHead = ({
     </div>
   );
 };
-
-export default CommentHead;

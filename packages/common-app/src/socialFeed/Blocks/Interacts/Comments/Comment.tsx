@@ -15,9 +15,9 @@ import {
 } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
-import CommentHead from './Parts/CommentHead';
-import CommentBody from './Parts/CommentBody';
-import CommentMeta from './Parts/CommentMeta';
+import { CommentHead } from './Parts/CommentHead';
+import { CommentBody } from './Parts/CommentBody';
+import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
 
 export interface CommentProps {

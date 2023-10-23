@@ -20,7 +20,7 @@ import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { AsYouType } from 'libphonenumber-js';
 
-import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
+import { ImageSelector } from '@youfoundation/common-app';
 import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
 import { ThemeAttributeEditor } from './ThemeAttributeEditor';

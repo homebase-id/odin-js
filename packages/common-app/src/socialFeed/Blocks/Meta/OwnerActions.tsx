@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
 import { useChannel } from '@youfoundation/common-app';
-import usePost from '../../../hooks/socialFeed/post/usePost';
+import { usePost } from '../../../hooks/socialFeed/post/usePost';
 import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { EditPostDialog } from '@youfoundation/common-app';
 
-const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
+export const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { mutateAsync: removePost, error: removePostError } = usePost().remove;
   const { data: channel } = useChannel({ channelId: postFile.content.channelId }).fetch;
@@ -81,5 +81,3 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
     </div>
   );
 };
-
-export default OwnerActions;

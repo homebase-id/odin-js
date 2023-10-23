@@ -1,5 +1,4 @@
-import { Block, EmojiSelector, t } from '@youfoundation/common-app';
-import ImageSelector from '@youfoundation/common-app/src/form/image/ImageSelector';
+import { Block, EmojiSelector, t, ImageSelector } from '@youfoundation/common-app';
 import { AccessControlList, TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 

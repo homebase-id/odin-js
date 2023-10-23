@@ -12,7 +12,7 @@ import {
   Arrow,
   House,
 } from '@youfoundation/common-app';
-import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
+import { useSocialFeed } from '@youfoundation/common-app';
 
 const About = {
   circles: (

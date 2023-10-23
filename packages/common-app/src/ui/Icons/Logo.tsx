@@ -43,5 +43,3 @@ export const Logo: FC<IconProps> = ({ className }) => {
     </svg>
   );
 };
-
-export default Logo;
