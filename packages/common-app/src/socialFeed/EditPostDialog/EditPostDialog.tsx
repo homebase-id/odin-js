@@ -76,6 +76,7 @@ export const EditPostDialog = ({
       <DialogWrapper
         title={<div className="flex flex-row items-center">{t('Edit Post')}</div>}
         onClose={onCancel}
+        keepOpenOnBlur={true}
         isSidePanel={true}
       >
         <form
