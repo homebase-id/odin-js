@@ -51,6 +51,7 @@ const DnsSettingsView = ({
           <SubdomainInfoBlock
             dnsConfig={dnsConfig}
             domain={domain}
+            subdomain={subdomain}
             showStatus={showStatus}
             className="mb-10"
           />
@@ -165,11 +166,13 @@ const ApexInfoBlock = ({
 const SubdomainInfoBlock = ({
   dnsConfig,
   domain,
+  subdomain,
   showStatus,
   className,
 }: {
   dnsConfig: DnsRecord[];
   domain: string;
+  subdomain?: string;
   showStatus: boolean;
   className: string;
 }) => {
@@ -183,7 +186,7 @@ const SubdomainInfoBlock = ({
       {aliasARecord ? (
         <RecordView
           record={{ ...aliasARecord, type: 'CNAME' }}
-          domain={domain}
+          subdomain={subdomain}
           showStatus={showStatus}
         />
       ) : null}
@@ -224,10 +227,7 @@ const RecordView = ({
         showStatus ? (isGood ? 'bg-green-100' : 'bg-orange-100') : 'bg-gray-100'
       } px-4 py-3 font-mono text-base shadow-sm`}
     >
-      <p>
-        {record.name || domain || '@'}
-        {subdomain ? `.${subdomain}` : null}
-      </p>
+      <p>{[record.name || domain, subdomain].filter(Boolean).join('.')}</p>
       <p>{record.type}</p>
       <p>{record.value}</p>
       {showStatus ? (
