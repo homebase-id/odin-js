@@ -31,9 +31,12 @@ const EmojiDropdown = ({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      if (!emojis || !emojis.length) return;
+
       if (event.key === 'ArrowDown') setActiveIndex((index) => index + 1);
       else if (event.key === 'ArrowUp') setActiveIndex((index) => index - 1);
-      else if (event.key === 'Enter') onInput(emojis?.[activeIndex].unicode);
+      else if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey)
+        onInput(emojis?.[activeIndex].unicode);
       else if (event.key === 'Tab') onInput(emojis?.[activeIndex].unicode);
       else return;
 
