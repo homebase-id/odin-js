@@ -59,9 +59,9 @@ const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
                       slug: postFile.content.slug,
                     });
 
-                    setTimeout(() => {
-                      window.location.reload();
-                    }, 200);
+                    // setTimeout(() => {
+                    //   window.location.reload();
+                    // }, 200);
 
                     return false;
                   },

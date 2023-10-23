@@ -264,12 +264,14 @@ const usePost = () => {
     removeFiles: useMutation(removeFiles),
     remove: useMutation(removeData, {
       onSuccess: (_data, variables) => {
+        queryClient.invalidateQueries(['social-feeds']);
+
         if (variables && variables.slug) {
           queryClient.invalidateQueries(['blog', variables.slug]);
         } else {
           queryClient.invalidateQueries(['blog']);
         }
-        queryClient.removeQueries(['blogs']);
+        queryClient.invalidateQueries(['blogs']);
 
         publishStaticFiles();
       },
