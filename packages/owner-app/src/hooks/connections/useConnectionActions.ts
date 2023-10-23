@@ -22,17 +22,13 @@ export const useConnectionActions = () => {
   const sendConnectionRequest = async ({
     targetOdinId,
     message,
-    name,
-    photoFileId,
     circleIds,
   }: {
     targetOdinId: string;
     message: string;
-    name: string;
-    photoFileId: string | undefined;
     circleIds: string[];
   }) => {
-    await sendRequest(dotYouClient, targetOdinId, message, name, photoFileId, circleIds);
+    await sendRequest(dotYouClient, targetOdinId, message, circleIds);
 
     // Save contact
     const connectionInfo = await fetchConnectionInfo(dotYouClient, targetOdinId);

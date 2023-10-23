@@ -21,16 +21,12 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
 
   const acceptRequest = async ({
     senderOdinId,
-    name,
-    photoFileId,
     circleIds,
   }: {
     senderOdinId: string;
-    name: string;
-    photoFileId: string | undefined;
     circleIds: string[];
   }) => {
-    await acceptConnectionRequest(dotYouClient, senderOdinId, name, photoFileId, circleIds);
+    await acceptConnectionRequest(dotYouClient, senderOdinId, circleIds);
 
     // Save contact
     const connectionInfo = await fetchConnectionInfo(dotYouClient, senderOdinId);

@@ -125,9 +125,8 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
   };
 
   useEffect(() => {
-    if (filteredNameAttributes?.length && onChange && typeof onChange === 'function') {
+    if (filteredNameAttributes?.length && onChange && typeof onChange === 'function')
       onChange(info);
-    }
   }, [isFetchedAfterMount]);
 
   return (

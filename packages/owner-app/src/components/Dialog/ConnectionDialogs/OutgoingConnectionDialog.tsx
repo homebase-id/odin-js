@@ -48,8 +48,6 @@ const OutgoingConnectionDialog = ({
     targetOdinId || undefined
   );
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
-  const [name, setName] = useState<string>(window.location.hostname);
-  const [photoFileId, setPhotoFileId] = useState<string>();
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 
@@ -83,9 +81,8 @@ const OutgoingConnectionDialog = ({
               await sendConnectionRequest(
                 {
                   message: message,
-                  name: name,
-                  photoFileId: photoFileId,
                   targetOdinId: connectionTarget as string, // Will be defined as otherwise it would have failed validation before
+
                   circleIds: circleGrants,
                 },
                 {
@@ -157,12 +154,7 @@ const OutgoingConnectionDialog = ({
                 />
               </div>
               <Label>{t('From')}</Label>
-              <YourSignature
-                onChange={(publicInfo) => {
-                  setName(publicInfo.name);
-                  setPhotoFileId(publicInfo.imageFileId);
-                }}
-              />
+              <YourSignature />
 
               <div className="-m-2 flex flex-row-reverse py-3">
                 <ActionButton className="m-2" icon={Arrow}>

@@ -25,24 +25,14 @@ export const fetchConnectionInfo = async (
   odinId: string
 ): Promise<RawContact | undefined> => {
   const [connectionContactData, contactFromTransit] = await Promise.all([
-    getDetailedConnectionInfo(dotYouClient, odinId, true),
+    getDetailedConnectionInfo(dotYouClient, odinId),
     queryRemoteAttributes(dotYouClient, odinId),
   ]);
 
   return {
     odinId,
-    name:
-      contactFromTransit?.name ||
-      (connectionContactData?.contactData?.name
-        ? {
-            displayName: connectionContactData.contactData.name,
-          }
-        : undefined),
-    image:
-      contactFromTransit?.image ||
-      (connectionContactData?.contactData?.imageId
-        ? await getPhotoDataFromPublic(odinId, connectionContactData.contactData.imageId)
-        : undefined),
+    name: contactFromTransit?.name,
+    image: contactFromTransit?.image,
     ...contactFromTransit,
     source: connectionContactData?.status === 'connected' ? 'contact' : 'public',
   };

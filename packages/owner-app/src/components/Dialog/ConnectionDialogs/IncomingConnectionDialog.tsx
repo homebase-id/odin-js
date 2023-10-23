@@ -132,8 +132,6 @@ const IncomingConnectionDialog = ({
                 e.preventDefault();
                 await acceptPending({
                   senderOdinId: senderOdinId,
-                  name: name,
-                  photoFileId: photoFileId,
                   circleIds: circleGrants,
                 });
                 if (shouldFollow)
@@ -162,14 +160,7 @@ const IncomingConnectionDialog = ({
                   {senderOdinId} {t('will get access to these contact details')}
                 </small>
               </h2>
-              <YourInfo
-                circleGrants={circleGrants}
-                onChange={({ name, imageFileId }) => {
-                  setName(name);
-                  setPhotoFileId(imageFileId);
-                }}
-                className="mb-4"
-              />
+              <YourInfo circleGrants={circleGrants} className="mb-4" />
 
               <div
                 className="flex cursor-pointer flex-row items-center rounded-lg border bg-white px-4 py-3 dark:border-slate-800 dark:bg-black"

@@ -20,7 +20,7 @@ interface infoObject {
 
 interface YourSignatureProps {
   className?: string;
-  onChange: ({ name, imageFileId }: infoObject) => void;
+  onChange?: ({ name, imageFileId }: infoObject) => void;
 }
 
 const filterAttributes = (attributes: AttributeFile[]) => {
@@ -69,7 +69,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
   };
 
   useEffect(() => {
-    if (filteredNameAttributes?.length) {
+    if (filteredNameAttributes?.length && onChange) {
       onChange(info);
     }
   }, [isNameFetchedAfterMount, isPhotoFetchedAfterMount]);

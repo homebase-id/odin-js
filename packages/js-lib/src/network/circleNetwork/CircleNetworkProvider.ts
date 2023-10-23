@@ -62,11 +62,10 @@ export const getBlockedConnections = (
 
 export const getConnectionInfo = (
   dotYouClient: DotYouClient,
-  odinId: string,
-  includeContactData = false
+  odinId: string
 ): Promise<ConnectionInfo | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + `/status${includeContactData ? `?omitContactData=false` : ''}`;
+  const url = root + `/status`;
 
   const data: OdinIdRequest = { odinId: odinId };
 
