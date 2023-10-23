@@ -38,6 +38,8 @@ const getTextLengthFromPreviousSiblings = (elem: Node) => {
     getPreviousSiblings(elem)
       .map((node) => node.textContent)
       .join('')
+      // Dont't count line breaks; Chrome counts them.. Firefox doesn't
+      .replaceAll('\n', '')
   ).length;
 };
 
