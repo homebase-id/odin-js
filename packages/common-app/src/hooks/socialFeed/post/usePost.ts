@@ -41,7 +41,6 @@ export interface AttachmentFile {
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
-  const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
 
   const savePost = async ({
     blogFile,
@@ -198,8 +197,6 @@ export const usePost = () => {
 
         queryClient.removeQueries(['blogs']);
 
-        if (!variables.blogFile.isDraft) publishStaticFiles();
-
         // Update versionTag of post in social feeds cache
         const previousFeed:
           | InfiniteData<MultiRequestCursoredResult<PostFileVm<PostContent>[]>>
@@ -272,8 +269,6 @@ export const usePost = () => {
           queryClient.invalidateQueries(['blog']);
         }
         queryClient.invalidateQueries(['blogs']);
-
-        publishStaticFiles();
       },
     }),
   };

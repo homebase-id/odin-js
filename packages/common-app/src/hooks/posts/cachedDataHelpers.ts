@@ -55,7 +55,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
 };
 
 export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
-  const fileData = await GetFile(dotYouClient, 'channels.json');
+  const fileData = await GetFile(dotYouClient, 'sitedata.json');
   if (fileData) {
     let channels: ChannelDefinition[] = [];
 

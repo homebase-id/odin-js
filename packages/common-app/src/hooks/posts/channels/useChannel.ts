@@ -21,7 +21,7 @@ type useChannelsProps = {
 export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
-  const { mutate: publishStaticFiles } = useStaticFiles().publishBlog;
+  const { mutate: publishStaticFiles } = useStaticFiles().publish;
 
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) return null;
