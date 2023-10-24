@@ -5,7 +5,7 @@ import { useFetchOwnDomainDnsConfig } from '../../hooks/ownDomain/useOwnDomain';
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
 import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Alert, Arrow } from '@youfoundation/common-app';
 
 interface Props {
@@ -14,12 +14,11 @@ interface Props {
 }
 
 const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
-  const [showStatus, setShowStatus] = useState<boolean>(false);
-
   const {
     fetchOwnDomainDnsConfig: { data: initialDnsConfig, error: initialError },
     fetchOwnDomainDnsStatus: {
       data: dnsConfig,
+      isFetched: isDnsStateFetched,
       error: statusError,
       isFetching,
       refetch: refetchDnsStatus,
@@ -35,6 +34,8 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
     () => (dnsConfig ? dnsConfig.some((record) => record.status === 'unknown') : false),
     [dnsConfig]
   );
+
+  const showStatus = isDnsStateFetched && !statePending;
 
   return (
     <section className="max-w-3xl">
@@ -52,10 +53,7 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       <div className="mt-10 flex flex-row-reverse">
         {hasInvalid ? (
           <ActionButton
-            onClick={() => {
-              setShowStatus(true);
-              refetchDnsStatus();
-            }}
+            onClick={() => refetchDnsStatus()}
             icon={Arrow}
             state={isFetching ? 'loading' : undefined}
           >
