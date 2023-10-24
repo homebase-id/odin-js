@@ -22,21 +22,8 @@ export const useStaticFiles = () => {
     console.debug('[COMPLETEDED] Static file publish');
   };
 
-  const publishBlogData = async () => {
-    console.debug('[STARTED] Static file blog publish');
-
-    await Promise.all([await publishBlog(dotYouClient)]);
-
-    console.debug('[COMPLETEDED] Static file blog publish');
-  };
-
   return {
     publish: useMutation(publishData, {
-      onError: (ex) => {
-        console.error(ex);
-      },
-    }),
-    publishBlog: useMutation(publishBlogData, {
       onError: (ex) => {
         console.error(ex);
       },

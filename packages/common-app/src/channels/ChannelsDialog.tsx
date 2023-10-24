@@ -19,7 +19,7 @@ import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
-import TemplateSelector from './ChannelTemplateSelector';
+import { ChannelTemplateSelector } from './ChannelTemplateSelector';
 import { ChannelTemplate } from '@youfoundation/js-lib/public';
 import { slugify } from '@youfoundation/js-lib/helpers';
 
@@ -195,7 +195,7 @@ export const ChannelItem = ({
                 </div>
                 <div className="mb-5">
                   <Label htmlFor="template">{t('Template')}</Label>
-                  <TemplateSelector
+                  <ChannelTemplateSelector
                     name="templateId"
                     defaultValue={(chnl?.templateId ?? ChannelTemplate.ClassicBlog) + ''}
                     onChange={(e) => setNewTemplateId(parseInt(e.target.value))}

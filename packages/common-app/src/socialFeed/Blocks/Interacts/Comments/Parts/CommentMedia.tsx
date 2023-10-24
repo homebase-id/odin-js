@@ -2,7 +2,7 @@ import { TargetDrive } from '@youfoundation/js-lib/core';
 import { useCommentMedia } from '../../../../../hooks';
 import { t } from '../../../../../helpers';
 
-const CommentMedia = ({
+export const CommentMedia = ({
   postAuthorOdinId,
   targetDrive,
   fileId,
@@ -31,5 +31,3 @@ const CommentMedia = ({
     </>
   );
 };
-
-export default CommentMedia;

@@ -154,5 +154,3 @@ export const RequiredSecurityGroupSelect = ({
     </>
   );
 };
-
-export default AclDialog;

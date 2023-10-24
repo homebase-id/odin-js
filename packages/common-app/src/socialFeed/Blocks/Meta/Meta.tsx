@@ -10,7 +10,7 @@ import {
   ActionGroup,
   UserX,
 } from '@youfoundation/common-app';
-import OwnerActions from './OwnerActions';
+import { OwnerActions } from './OwnerActions';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;

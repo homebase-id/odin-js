@@ -17,7 +17,7 @@ import {
 } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import ImageUploadAndCrop from '../ImageUploadAndCrop';
+import { ImageUploadAndCrop } from '../ImageUploadAndCrop';
 
 export const ImageDialog = ({
   title,

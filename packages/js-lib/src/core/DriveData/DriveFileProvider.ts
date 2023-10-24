@@ -413,14 +413,14 @@ export const getPayload = async <T>(
   systemFileType?: SystemFileType
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
-
+  const contentIsComplete = fileMetadata.appData.contentIsComplete;
   const keyheader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;
 
-  if (fileMetadata.appData.contentIsComplete && includesJsonContent) {
+  if (contentIsComplete && includesJsonContent) {
     return await decryptJsonContent<T>(fileMetadata, keyheader);
-  } else if (fileMetadata.appData.contentIsComplete) {
+  } else if (contentIsComplete) {
     // When contentIsComplete but includesJsonContent == false the query before was done without including the jsonContent; So we just get and parse
     const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
     if (!fileHeader) return null;

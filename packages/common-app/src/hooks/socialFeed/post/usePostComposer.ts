@@ -16,7 +16,7 @@ import {
 } from '@youfoundation/js-lib/public';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
-import usePost, { AttachmentFile } from './usePost';
+import { usePost, AttachmentFile } from './usePost';
 import { makeGrid, useDotYouClient } from '../../../..';
 
 export const usePostComposer = () => {

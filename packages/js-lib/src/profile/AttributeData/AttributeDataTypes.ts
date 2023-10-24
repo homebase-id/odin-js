@@ -1,5 +1,4 @@
-import { EmbeddedThumb } from '../../../core';
-import { AccessControlList, SecurityGroupType } from '../../core/core';
+import { EmbeddedThumb, AccessControlList, SecurityGroupType } from '../../core/core';
 
 export interface AttributeFile extends Attribute {
   fileId?: string;

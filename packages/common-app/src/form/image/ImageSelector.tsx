@@ -34,7 +34,7 @@ interface ImageSelectorProps
   onClose?: () => void;
 }
 
-const ImageSelector = ({
+export const ImageSelector = ({
   targetDrive,
   acl,
   onChange,
@@ -154,5 +154,3 @@ const ImageSelector = ({
     </>
   );
 };
-
-export default ImageSelector;

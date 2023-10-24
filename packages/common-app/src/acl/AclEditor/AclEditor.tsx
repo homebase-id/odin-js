@@ -3,9 +3,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import { Lock, OpenLock } from '@youfoundation/common-app';
-import { useCircles } from '@youfoundation/common-app';
-import AclDialog from '../AclDialog/AclDialog';
+import { Lock, OpenLock, useCircles, AclDialog } from '@youfoundation/common-app';
 
 export const AclSummary = ({
   acl,

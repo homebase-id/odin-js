@@ -26,5 +26,3 @@ export const useSocialChannels = ({ odinId }: useSocialChannelsProps) => {
     }),
   };
 };
-
-export default useSocialChannels;

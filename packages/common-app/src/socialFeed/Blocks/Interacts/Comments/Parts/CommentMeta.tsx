@@ -1,9 +1,9 @@
 import { CanReactInfo, EmojiSummary, t } from '@youfoundation/common-app';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { format } from '../../../../../helpers/timeago/format';
-import CommentLikeButton from './CommentLikeButton';
+import { CommentLikeButton } from './CommentLikeButton';
 
-const CommentMeta = ({
+export const CommentMeta = ({
   canReact,
   threadContext,
   created,
@@ -47,5 +47,3 @@ const CommentMeta = ({
     </div>
   );
 };
-
-export default CommentMeta;

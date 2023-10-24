@@ -25,7 +25,7 @@ import {
   PostFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
-import useArticleComposer from '@youfoundation/common-app/src/hooks/socialFeed/article/useArticleComposer';
+import { useArticleComposer } from '@youfoundation/common-app';
 import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';

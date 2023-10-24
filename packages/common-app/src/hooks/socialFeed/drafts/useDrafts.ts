@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Article, getPosts, PostContent, PostFile, removePost } from '@youfoundation/js-lib/public';
+import { Article, getPosts, PostFile, removePost } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 
 export const useDrafts = () => {
@@ -62,5 +62,3 @@ export const useDrafts = () => {
     }),
   };
 };
-
-export default useDrafts;

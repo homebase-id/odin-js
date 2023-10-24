@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { getRichTextFromString, useDebounce } from '../..';
-import EmojiDropdown from './VolatileInput/EmojiDropdown';
+import { EmojiDropdown } from './VolatileInput/EmojiDropdown';
 import {
   SelectionData,
   getAbsoluteOffsetToParent,

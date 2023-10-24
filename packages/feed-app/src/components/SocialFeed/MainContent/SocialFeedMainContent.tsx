@@ -7,7 +7,7 @@ import { t } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
 import PostTeaserCard from '../PostTeaserCard';
-import useSocialFeed from '@youfoundation/common-app/src/hooks/socialFeed/useSocialFeed';
+import { useSocialFeed } from '@youfoundation/common-app';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...

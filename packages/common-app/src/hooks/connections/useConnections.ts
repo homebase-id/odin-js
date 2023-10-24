@@ -89,7 +89,7 @@ export const useActiveConnections = (
   ) => {
     try {
       return await getConnections(dotYouClient, {
-        cursor: cursor ?? 0,
+        cursor: cursor ?? undefined,
         count: pageSize,
       });
     } catch (ex) {

@@ -10,7 +10,7 @@ import {
   useOutsideTrigger,
   useSocialChannel,
 } from '@youfoundation/common-app';
-import useSocialPost from '@youfoundation/common-app/src/hooks/socialFeed/useSocialPost';
+import { useSocialPost } from '@youfoundation/common-app';
 
 const PostPreview = ({
   identityKey,

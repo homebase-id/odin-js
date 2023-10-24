@@ -8,7 +8,7 @@ interface useSocialPostProps {
   postId?: string;
 }
 
-const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps) => {
+export const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetch = async ({ odinId, channelId, postId }: useSocialPostProps) => {
@@ -32,5 +32,3 @@ const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps) => {
     ),
   };
 };
-
-export default useSocialPost;

@@ -58,5 +58,3 @@ export const useCommentSummary = ({
     ),
   };
 };
-
-export default useCommentSummary;

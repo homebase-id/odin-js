@@ -13,7 +13,8 @@ import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando 
 import { lotrRealm } from './DemoLotr';
 import useAttribute from '../../hooks/profiles/useAttribute';
 import { Select, useChannel } from '@youfoundation/common-app';
-import usePost from '../../hooks/posts/usePost';
+import { usePost } from '@youfoundation/common-app';
+
 import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -588,9 +589,7 @@ const DemoDataBlog = ({
   } = usePost();
 
   const addChannels = async () => {
-    if (channelAttr) {
-      return;
-    }
+    if (channelAttr) return;
 
     const addChannel = async (channelId: string, name: string, description: string) => {
       const foundDef = await getChannelDefinition(client, channelId);
