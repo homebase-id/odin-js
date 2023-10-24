@@ -41,7 +41,7 @@ export const PostMeta = ({
   size = 'text-xs',
   excludeContextMenu,
 }: PostMetaWithPostFileProps | PostMetaWithPostContentProps) => {
-  const { isOwner } = useDotYouClient();
+  const { isOwner, getIdentity } = useDotYouClient();
   const now = new Date();
   const date = new Date(postFile?.content.dateUnixTime || postContent?.dateUnixTime || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
@@ -52,6 +52,7 @@ export const PostMeta = ({
     hour: 'numeric',
     minute: 'numeric',
   };
+  const isAuthor = odinId === getIdentity();
 
   return (
     <div
@@ -71,9 +72,7 @@ export const PostMeta = ({
         </a>
       ) : null}
 
-      {/* There is only a odinId when on the feed and displaying external data */}
-      {excludeContextMenu || !postFile ? null : isOwner &&
-        (!odinId || odinId === window.location.hostname) ? (
+      {excludeContextMenu || !postFile ? null : (!odinId && isOwner) || isAuthor ? (
         <Suspense>
           <OwnerActions postFile={postFile} />
         </Suspense>

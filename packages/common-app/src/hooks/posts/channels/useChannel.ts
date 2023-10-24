@@ -43,7 +43,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       (channelSlug ? await getChannelDefinitionBySlug(dotYouClient, channelSlug) : undefined) ||
       (channelId ? await getChannelDefinition(dotYouClient, channelId) : undefined);
 
-    if (channel) {
+    if (directFetchOfChannel) {
       return {
         ...directFetchOfChannel,
         template: parseChannelTemplate(directFetchOfChannel?.templateId),
