@@ -45,9 +45,7 @@ export const uploadVideo = async (
     thumb?: ThumbnailFile;
   }
 ): Promise<VideoUploadResult | undefined> => {
-  if (!targetDrive) {
-    throw 'Missing target drive';
-  }
+  if (!targetDrive) throw 'Missing target drive';
 
   const encrypt = !(
     acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||

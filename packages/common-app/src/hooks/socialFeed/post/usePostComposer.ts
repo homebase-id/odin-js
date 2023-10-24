@@ -23,6 +23,7 @@ export const usePostComposer = () => {
   const [postState, setPostState] = useState<
     'processing' | 'uploading' | 'encrypting' | 'error' | undefined
   >();
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
   const { mutateAsync: saveFiles, error: saveFilesError } = usePost().saveFiles;
@@ -49,7 +50,6 @@ export const usePostComposer = () => {
       let uploadResults: (ImageUploadResult | VideoUploadResult)[] | undefined = undefined;
       if (files?.length && channel?.acl) {
         setPostState('processing');
-        if (shouldSecureAttachments) setPostState('encrypting');
 
         uploadResults = await saveFiles({
           acl: shouldSecureAttachments
@@ -57,7 +57,10 @@ export const usePostComposer = () => {
             : channel.acl,
           channelId: channel.channelId,
           files,
+          onUpdate: (progress) => setProcessingProgress(progress),
         });
+
+        setPostState('encrypting');
       }
 
       const mediaFiles: MediaFile[] | undefined = uploadResults?.map((result) => {
@@ -102,11 +105,13 @@ export const usePostComposer = () => {
     }
 
     setPostState(undefined);
+    setProcessingProgress(0);
   };
 
   return {
     savePost,
     postState,
+    processingProgress,
     error: postState === 'error' ? savePostError || saveFilesError : undefined,
   };
 };

@@ -9,7 +9,7 @@ import {
   Media,
   getPostByFileId,
 } from '@youfoundation/js-lib/public';
-import { getRichTextFromString, useDotYouClient, useStaticFiles } from '@youfoundation/common-app';
+import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
   AccessControlList,
   ImageContentType,
@@ -81,55 +81,63 @@ export const usePost = () => {
     files,
     acl,
     channelId,
+    onUpdate,
   }: {
     files: AttachmentFile[];
     acl: AccessControlList;
     channelId: string;
+    onUpdate?: (progress: number) => void;
   }): Promise<(ImageUploadResult | VideoUploadResult)[]> => {
     const targetDrive = getChannelDrive(channelId);
+    let progress = 0;
 
-    const imageUploadResults = await Promise.all(
-      files.map(async (file) => {
-        if (file.file.type === 'video/mp4') {
-          // if video is tiny enough (less than 10MB), don't segment just upload
-          if (file.file.size < 10000000 || 'bytes' in file.file)
-            return await uploadVideo(
-              dotYouClient,
-              targetDrive,
-              acl,
-              'bytes' in file.file ? file.file.bytes : file.file,
-              { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
-              {
-                type: file.file.type as VideoContentType,
-                thumb: 'thumbnail' in file ? file.thumbnail : undefined,
-              }
-            );
-
-          const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
-
-          return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
-            type: file.file.type as VideoContentType,
-            thumb: 'thumbnail' in file ? file.thumbnail : undefined,
-          });
-        } else {
-          return await uploadImage(
+    const uploadPromises = files.map(async (file) => {
+      if (file.file.type === 'video/mp4') {
+        // if video is tiny enough (less than 10MB), don't segment just upload
+        if (file.file.size < 10000000 || 'bytes' in file.file)
+          return await uploadVideo(
             dotYouClient,
             targetDrive,
             acl,
             'bytes' in file.file ? file.file.bytes : file.file,
-            undefined,
+            { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
             {
-              type: file.file.type as ImageContentType,
-            },
-            [
-              { quality: 85, width: 600, height: 600 },
-              { quality: 99, width: 1600, height: 1600, type: 'jpeg' },
-            ]
+              type: file.file.type as VideoContentType,
+              thumb: 'thumbnail' in file ? file.thumbnail : undefined,
+            }
           );
-        }
-      })
-    );
 
+        onUpdate?.(++progress / files.length);
+
+        const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
+
+        return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
+          type: file.file.type as VideoContentType,
+          thumb: 'thumbnail' in file ? file.thumbnail : undefined,
+        });
+      } else {
+        return await uploadImage(
+          dotYouClient,
+          targetDrive,
+          acl,
+          'bytes' in file.file ? file.file.bytes : file.file,
+          undefined,
+          {
+            type: file.file.type as ImageContentType,
+          },
+          [
+            { quality: 85, width: 600, height: 600 },
+            { quality: 99, width: 1600, height: 1600, type: 'jpeg' },
+          ],
+          (update) => {
+            progress += update;
+            onUpdate?.(progress / files.length);
+          }
+        );
+      }
+    });
+
+    const imageUploadResults = await Promise.all(uploadPromises);
     return imageUploadResults.filter(Boolean) as (ImageUploadResult | VideoUploadResult)[];
   };
 

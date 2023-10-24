@@ -42,7 +42,8 @@ export const uploadImage = async (
   imageData: Uint8Array | File,
   fileMetadata?: ImageMetadata,
   uploadMeta?: MediaUploadMeta,
-  thumbsToGenerate?: ThumbnailInstruction[]
+  thumbsToGenerate?: ThumbnailInstruction[],
+  onUpdate?: (progress: number) => void
 ): Promise<ImageUploadResult | undefined> => {
   if (!targetDrive) {
     throw 'Missing target drive';
@@ -83,6 +84,8 @@ export const uploadImage = async (
     };
   });
 
+  onUpdate?.(0.5);
+
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
   let versionTag = uploadMeta?.versionTag;
   if (!versionTag && uploadMeta?.fileId) {
@@ -122,6 +125,7 @@ export const uploadImage = async (
   );
   if (!result) throw new Error(`Upload failed`);
 
+  onUpdate?.(0.5);
   return { fileId: result.file.fileId, previewThumbnail, type: 'image' };
 };
 

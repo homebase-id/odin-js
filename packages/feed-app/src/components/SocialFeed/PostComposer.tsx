@@ -42,7 +42,7 @@ const PostComposer = ({
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
-  const { savePost, postState, error } = usePostComposer();
+  const { savePost, postState, processingProgress, error } = usePostComposer();
   const selectRef = useRef<HTMLSelectElement>(null);
 
   const [caption, setCaption] = useState<string>('');
@@ -142,16 +142,11 @@ const PostComposer = ({
         {embeddedPost ? (
           <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
         ) : null}
-        {postState ? (
-          <div className="flex flex-row-reverse">
-            {['processing', 'encrypting', 'uploading'].includes(postState) ? (
-              <span className="animate-pulse text-sm text-foreground text-opacity-40">
-                {t(postState)}
-              </span>
-            ) : null}
-            {postState === 'error' ? t('Error') : ''}
-          </div>
-        ) : null}
+        <ProgressIndicator
+          postState={postState}
+          processingProgress={processingProgress}
+          files={files?.length || 0}
+        />
 
         <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
           {!embeddedPost ? (
@@ -299,5 +294,37 @@ export const ChannelSelector = React.forwardRef(
     );
   }
 );
+
+const ProgressIndicator = ({
+  postState,
+  processingProgress,
+  files,
+}: {
+  postState: 'processing' | 'uploading' | 'encrypting' | 'error' | undefined;
+  processingProgress: number;
+  files: number;
+}) => {
+  if (!postState) return null;
+
+  let progressText = '';
+  if (postState === 'processing')
+    if (processingProgress < 0.5)
+      if (files > 1) progressText = t('Generating thumbnails');
+      else progressText = t('Generating thumbnail');
+    else progressText = t('Uploading media');
+  else progressText = t(postState);
+
+  return (
+    <div className="mt-2 flex flex-row-reverse">
+      {postState === 'error' ? (
+        t('Error')
+      ) : (
+        <span className="animate-pulse text-sm text-foreground text-opacity-40">
+          {progressText}
+        </span>
+      )}
+    </div>
+  );
+};
 
 export default PostComposer;
