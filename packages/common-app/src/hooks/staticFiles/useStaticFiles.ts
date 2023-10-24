@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import {
   publishProfile,
-  publishBlog,
   publishProfileImage,
   publishProfileCard,
 } from '@youfoundation/js-lib/public';
