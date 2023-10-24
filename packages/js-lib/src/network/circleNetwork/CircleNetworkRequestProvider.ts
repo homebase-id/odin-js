@@ -99,6 +99,8 @@ export const acceptConnectionRequest = async (
     permissions: undefined,
   };
 
+  (header as any).contactData = { name: 'NO_LONGER_USED' };
+
   return client
     .post(url, header)
     .then((response) => {
@@ -150,6 +152,10 @@ export const sendRequest = async (
     recipient: odinId,
     message: message,
     circleIds: circleIds,
+  };
+
+  (data as any).contactData = {
+    name: 'NO_LONGER_USED',
   };
 
   const client = dotYouClient.createAxiosClient();
