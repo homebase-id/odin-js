@@ -1,7 +1,6 @@
 import { PermissionedDrive, PermissionSet } from '../../core/DriveData/DriveTypes';
 
 export interface ConnectionRequestHeader {
-  contactData: ContactData;
   recipient: string;
   message: string;
   circleIds: string[];
@@ -93,7 +92,6 @@ export interface AcceptRequestHeader {
   sender: string;
   circleIds: string[];
   permissions?: PermissionSet;
-  contactData: ContactData;
 }
 
 export interface OdinIdRequest {

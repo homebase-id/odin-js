@@ -88,8 +88,6 @@ export const getSentRequest = async (
 export const acceptConnectionRequest = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  name: string,
-  photoFileId?: string | undefined,
   circleIds?: string[]
 ): Promise<boolean> => {
   const client = dotYouClient.createAxiosClient();
@@ -99,12 +97,9 @@ export const acceptConnectionRequest = async (
     sender: odinId,
     circleIds: circleIds || [],
     permissions: undefined,
-    contactData: { name },
   };
 
-  if (photoFileId) {
-    header.contactData.imageId = photoFileId;
-  }
+  (header as any).contactData = { name: 'NO_LONGER_USED' };
 
   return client
     .post(url, header)
@@ -150,21 +145,18 @@ export const sendRequest = async (
   dotYouClient: DotYouClient,
   odinId: string,
   message: string,
-  name: string,
-  photoFileId: string | undefined,
   circleIds: string[]
 ): Promise<boolean> => {
   const url = Root + '/sendrequest';
   const data: ConnectionRequestHeader = {
     recipient: odinId,
     message: message,
-    contactData: { name },
     circleIds: circleIds,
   };
 
-  if (photoFileId) {
-    data.contactData.imageId = photoFileId;
-  }
+  (data as any).contactData = {
+    name: 'NO_LONGER_USED',
+  };
 
   const client = dotYouClient.createAxiosClient();
   return client
@@ -209,19 +201,18 @@ export const unblockOdinId = async (dotYouClient: DotYouClient, odinId: string) 
 
 export const getDetailedConnectionInfo = async (
   dotYouClient: DotYouClient,
-  odinId: string,
-  includeContactData = false
+  odinId: string
 ): Promise<ConnectionRequest | ConnectionInfo | undefined> => {
   if (!odinId) return;
 
-  const connectionInfo = await getConnectionInfo(dotYouClient, odinId, includeContactData);
+  const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
   if (connectionInfo && connectionInfo.status.toLowerCase() !== 'none') return connectionInfo;
 
   const pendingRequest = await getPendingRequest(dotYouClient, odinId);
-  if (pendingRequest) return { ...pendingRequest, contactData: connectionInfo?.contactData };
+  if (pendingRequest) return { ...pendingRequest };
 
   const sentRequest = await getSentRequest(dotYouClient, odinId);
-  if (sentRequest) return { ...sentRequest, contactData: connectionInfo?.contactData };
+  if (sentRequest) return { ...sentRequest };
 
   return undefined;
 };

@@ -13,6 +13,7 @@ import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
 import usePendingConnection from '../../../hooks/connections/usePendingConnection';
 import useConnection from '../../../hooks/connections/useConnection';
+import useContact from '../../../hooks/contacts/useContact';
 
 const IncomingConnectionDialog = ({
   confirmText,
@@ -35,6 +36,9 @@ const IncomingConnectionDialog = ({
 
   const { data: connectionInfo } = useConnection({ odinId: senderOdinId }).fetch;
 
+  const { data: contactData } = useContact({
+    odinId: senderOdinId,
+  }).fetch;
   const {
     fetch: { data: pendingConnection },
     acceptRequest: { mutateAsync: acceptPending, status: acceptPendingStatus, error: acceptError },
@@ -94,7 +98,7 @@ const IncomingConnectionDialog = ({
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
                   <p>{pendingConnection?.message}</p>
-                  <p className="mt-2">-- {pendingConnection?.contactData?.name}</p>
+                  <p className="mt-2">-- {contactData?.name?.displayName}</p>
                 </div>
               </div>
             </div>
@@ -132,8 +136,6 @@ const IncomingConnectionDialog = ({
                 e.preventDefault();
                 await acceptPending({
                   senderOdinId: senderOdinId,
-                  name: name,
-                  photoFileId: photoFileId,
                   circleIds: circleGrants,
                 });
                 if (shouldFollow)
@@ -162,14 +164,7 @@ const IncomingConnectionDialog = ({
                   {senderOdinId} {t('will get access to these contact details')}
                 </small>
               </h2>
-              <YourInfo
-                circleGrants={circleGrants}
-                onChange={({ name, imageFileId }) => {
-                  setName(name);
-                  setPhotoFileId(imageFileId);
-                }}
-                className="mb-4"
-              />
+              <YourInfo circleGrants={circleGrants} className="mb-4" />
 
               <div
                 className="flex cursor-pointer flex-row items-center rounded-lg border bg-white px-4 py-3 dark:border-slate-800 dark:bg-black"
