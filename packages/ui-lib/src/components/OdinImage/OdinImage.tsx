@@ -68,6 +68,7 @@ export const OdinImage = ({
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
+  console.log({ fileId, isInView, skipTiny, previewThumbnail, cachedImage });
   const shouldLoadTiny = !skipTiny && isInView;
   const {
     data: tinyThumb,
@@ -180,8 +181,6 @@ export const OdinImage = ({
 
   if (tinyError || imageError) console.warn('[OdinImage]', { fileId, tinyError, imageError });
 
-  if (!fileId) return null;
-
   const weDontHaveAnything = !previewUrl && !isTinyFetched && !imageData && !isImageFetched;
   return (
     <figure
@@ -197,7 +196,7 @@ export const OdinImage = ({
       }
       data-fileid={fileId}
     >
-      {weDontHaveAnything ? (
+      {!fileId ? null : weDontHaveAnything ? (
         <LoadingBlock className="aspect-square h-full w-full" />
       ) : (
         <>
