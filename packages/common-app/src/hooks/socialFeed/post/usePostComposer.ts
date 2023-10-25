@@ -72,12 +72,12 @@ export const usePostComposer = () => {
       // Upload post
       const postId = getNewId();
       const postFile: PostFile<Tweet | Media> = {
+        userDate: new Date().getTime(),
         content: {
           authorOdinId: dotYouClient.getIdentity(),
           type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
           mediaFiles: mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined,
           caption: caption?.trim() || '',
-          dateUnixTime: new Date().getTime(),
           id: postId,
           slug: postId,
           channelId: channel.channelId || BlogConfig.PublicChannel.channelId,

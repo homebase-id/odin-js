@@ -95,6 +95,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                 <EmbeddedPostContent
                   content={{
                     ...post.content,
+                    userDate: post.userDate,
                     permalink: '',
                     previewThumbnail: post.previewThumbnail,
                   }}

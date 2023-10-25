@@ -1,5 +1,10 @@
 import { Suspense } from 'react';
-import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import {
+  ChannelDefinition,
+  EmbeddedPost,
+  PostContent,
+  PostFile,
+} from '@youfoundation/js-lib/public';
 import { ActionGroupOptionProps, Lock } from '@youfoundation/common-app';
 
 import {
@@ -15,17 +20,17 @@ import { OwnerActions } from './OwnerActions';
 interface PostMetaWithPostFileProps {
   odinId?: string;
   postFile: PostFile<PostContent>;
-  postContent?: PostContent;
+  embeddedPost?: undefined;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
 }
 
-interface PostMetaWithPostContentProps {
+interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
   postFile?: PostFile<PostContent>;
-  postContent: PostContent;
+  embeddedPost: EmbeddedPost;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
   size?: 'text-xs' | 'text-sm';
@@ -35,15 +40,15 @@ interface PostMetaWithPostContentProps {
 export const PostMeta = ({
   odinId,
   postFile,
-  postContent,
+  embeddedPost,
   channel,
   className,
   size = 'text-xs',
   excludeContextMenu,
-}: PostMetaWithPostFileProps | PostMetaWithPostContentProps) => {
+}: PostMetaWithPostFileProps | PostMetaWithEmbeddedPostContentProps) => {
   const { isOwner, getIdentity } = useDotYouClient();
   const now = new Date();
-  const date = new Date(postFile?.content.dateUnixTime || postContent?.dateUnixTime || now);
+  const date = new Date(postFile?.userDate || embeddedPost?.userDate || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   const format: Intl.DateTimeFormatOptions = {
     month: 'short',

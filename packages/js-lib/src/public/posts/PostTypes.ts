@@ -68,6 +68,7 @@ export interface PostFile<T extends PostContent> {
   versionTag?: string;
   globalTransitId?: string;
   acl?: AccessControlList;
+  userDate: number;
   content: T;
   previewThumbnail?: EmbeddedThumb;
   reactionPreview?: {
@@ -83,6 +84,7 @@ export type RichText = Record<string, unknown>[];
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
   previewThumbnail?: EmbeddedThumb;
+  userDate: number;
 }
 
 export type ReactAccess = 'emoji' | 'comment' | boolean;
@@ -96,7 +98,6 @@ export interface PostContent {
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
-  dateUnixTime: number;
   primaryMediaFile?: MediaFile;
   type: 'Article' | 'Media' | 'Tweet';
 

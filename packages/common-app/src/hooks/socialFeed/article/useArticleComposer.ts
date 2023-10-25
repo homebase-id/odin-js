@@ -10,7 +10,6 @@ export const EMPTY_POST: Article = {
   authorOdinId: '',
   channelId: BlogConfig.PublicChannel.channelId,
   slug: '',
-  dateUnixTime: 0,
   type: 'Article',
   caption: '',
   body: '',
@@ -44,6 +43,7 @@ export const useArticleComposer = ({
   } = usePost();
 
   const [postFile, setPostFile] = useState<PostFile<Article>>({
+    userDate: new Date().getTime(),
     ...serverData?.activeBlog,
     content: {
       ...EMPTY_POST,
@@ -108,9 +108,9 @@ export const useArticleComposer = ({
     const toPostFile: PostFile<Article> = {
       ...dirtyPostFile,
       versionTag: undefined, // VersionTag is set undefined so we always reset it to the latest
+      userDate: new Date().getTime(), // Set current date as userDate of the post
       content: {
         ...dirtyPostFile.content,
-        dateUnixTime: new Date().getTime(), // Set current date as userDate of the post
         id: dirtyPostFile.content.id ?? getNewId(), // Generate new id if there is none
         slug: slugify(dirtyPostFile.content.caption), // Reset slug to match caption each time
         channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed

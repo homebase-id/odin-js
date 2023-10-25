@@ -64,7 +64,7 @@ export const EmbeddedPostContent = ({
                   </h2>
                   <span className="hidden px-2 leading-4 md:block lg:hidden xl:block">·</span>
                   <PostMeta
-                    postContent={content}
+                    embeddedPost={content}
                     odinId={content.authorOdinId}
                     excludeContextMenu={true}
                     channel={channel || undefined}

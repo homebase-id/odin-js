@@ -214,7 +214,7 @@ const combinePosts = (
     }
   }, [] as PostFile<PostContent>[]);
 
-  combinedPosts.sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
+  combinedPosts.sort((a, b) => b.userDate - a.userDate);
 
   return combinedPosts;
 };

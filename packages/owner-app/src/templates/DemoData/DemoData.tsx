@@ -664,7 +664,6 @@ const DemoDataBlog = ({
             channelId: channel.channelId,
             caption: randomTitle,
             slug: slugify(randomTitle),
-            dateUnixTime: new Date().getTime(),
             primaryMediaFile: imageFileId ? { fileId: imageFileId, type: 'image' } : undefined,
             type: 'Article',
             readingTimeStats: {
@@ -677,6 +676,7 @@ const DemoDataBlog = ({
 
           const blogFile: PostFile<PostContent> = {
             fileId: undefined,
+            userDate: new Date().getTime(),
             versionTag: undefined,
             acl: channel.acl
               ? {

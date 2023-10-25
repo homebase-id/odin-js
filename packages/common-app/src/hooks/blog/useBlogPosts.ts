@@ -65,7 +65,7 @@
 //           ];
 
 //           // Sorted descending
-//           foundBlogPosts.sort((a, b) => b?.content?.dateUnixTime - a?.content?.dateUnixTime);
+//           foundBlogPosts.sort((a, b) => b?.userDate - a?.userDate);
 //         }
 //       } else {
 //         foundBlogPosts = (await getRecentPosts(dotYouClient, postType, false, undefined, pageSize))

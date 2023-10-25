@@ -207,6 +207,7 @@ export const RepostButton = ({
           embeddedPost={{
             ...postFile.content,
             permalink,
+            userDate: postFile.userDate,
             previewThumbnail: postFile.previewThumbnail,
           }}
           isOpen={isRepostDialogOpen}

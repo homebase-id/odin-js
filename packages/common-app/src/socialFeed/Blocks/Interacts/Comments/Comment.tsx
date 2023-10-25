@@ -41,7 +41,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
   const [isEdit, setIsEdit] = useState(false);
 
   const {
-    saveComment: { mutateAsync: postComment, error: postCommentError },
+    saveComment: { mutateAsync: postComment, error: postCommentError, status: postState },
     removeComment: { mutateAsync: removeComment, error: removeCommentError },
   } = useReaction();
 
@@ -92,6 +92,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
               commentFileId={fileId}
               isEdit={isEdit}
               onUpdate={doUpdate}
+              updateState={postState}
             />
           </div>
         </div>

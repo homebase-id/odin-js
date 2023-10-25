@@ -29,7 +29,7 @@ const SocialFeedMainContent = () => {
       flattenInfinteData<PostFileVm<PostContent>>(
         posts,
         PAGE_SIZE,
-        (a, b) => b.content?.dateUnixTime - a.content?.dateUnixTime
+        (a, b) => b.userDate - a.userDate
       ),
     [posts]
   );

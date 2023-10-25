@@ -8,6 +8,8 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   queryBatch,
+  DriveSearchResult,
+  TargetDrive,
 } from '../../core/core';
 import {
   ChannelDefinition,
@@ -104,30 +106,14 @@ export const getSocialFeed = async (
   const result = await queryBatch(dotYouClient, queryParams, ro);
 
   // Parse results and do getPayload (In most cases, data should be there in jsonContent, and nothing in actual payload);
-  const allPostFiles = await Promise.all(
-    result.searchResults.map(async (dsr) => {
-      const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
-
-      return {
-        fileId: dsr.fileId,
-        globalTransitId: dsr.fileMetadata.globalTransitId,
-        acl: dsr.serverMetadata?.accessControlList,
-        content: await getSocialFeedPostPayload(
-          odinId,
-          dotYouClient,
-          dsr.fileId,
-          dsr.fileMetadata,
-          dsr.sharedSecretEncryptedKeyHeader,
-          result.includeMetadataHeader
-        ),
-        odinId: odinId,
-        previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-        reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
-        additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
-        payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-      } as PostFileVm<PostContent>;
-    })
-  );
+  const allPostFiles = (
+    await Promise.all(
+      result.searchResults.map(async (dsr) => {
+        const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
+        return dsrToPostFile(dotYouClient, odinId, dsr, feedDrive, result.includeMetadataHeader);
+      })
+    )
+  ).filter(Boolean) as PostFileVm<PostContent>[];
 
   // TODO: Could optimize by combining both feed and own querybatch into a single querybatchcollection...
   if (ownOption) {
@@ -149,7 +135,7 @@ export const getSocialFeed = async (
 
     return {
       results: [...allPostFiles, ...postsOfOwn]
-        .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime)
+        .sort((a, b) => b.userDate - a.userDate)
         .slice(0, pageSize),
       cursorState: result.cursorState,
       ownerCursorState: resultOfOwn.cursorState,
@@ -226,24 +212,10 @@ export const getRecentsOverTransit = async (
   const posts = (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
-        return {
-          fileId: dsr.fileId,
-          globalTransitId: dsr.fileMetadata.globalTransitId,
-          acl: dsr.serverMetadata?.accessControlList,
-          content: await getPayloadOverTransit<PostContent>(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            dsr,
-            result.includeMetadataHeader
-          ),
-          odinId: odinId,
-          previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-          additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
-        } as PostFileVm<PostContent>;
+        return dsrToPostFile(dotYouClient, odinId, dsr, targetDrive, result.includeMetadataHeader);
       })
     )
-  ).filter((item) => !!item);
+  ).filter(Boolean) as PostFileVm<PostContent>[];
 
   return { cursorState: result.cursorState, results: posts };
 };
@@ -311,23 +283,47 @@ export const getPostOverTransit = async (
       console.warn(`Found more than one file with id [${postId}].  Using first entry.`);
     }
 
-    const dsr = response.searchResults[0];
-    return {
-      fileId: dsr.fileId,
-      globalTransitId: dsr.fileMetadata.globalTransitId,
-      acl: dsr.serverMetadata?.accessControlList,
-      content: await getPayloadOverTransit<PostContent>(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        dsr,
-        response.includeMetadataHeader
-      ),
-      odinId: odinId,
-      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-      additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
-    } as PostFileVm<PostContent>;
+    return dsrToPostFile(dotYouClient, odinId, response.searchResults[0], targetDrive, true);
   }
 
   return;
+};
+
+const dsrToPostFile = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  odinId: string,
+  dsr: DriveSearchResult,
+  targetDrive: TargetDrive,
+  includeMetadataHeader: boolean
+): Promise<PostFileVm<T> | undefined> => {
+  try {
+    const content = await getPayloadOverTransit<T>(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      dsr,
+      includeMetadataHeader
+    );
+
+    if (!content) return undefined;
+
+    const file: PostFileVm<T> = {
+      fileId: dsr.fileId,
+      odinId: odinId,
+      versionTag: dsr.fileMetadata.versionTag,
+      globalTransitId: dsr.fileMetadata.globalTransitId,
+      acl: dsr.serverMetadata?.accessControlList,
+      userDate: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
+      content: content,
+      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
+      payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+      isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
+    };
+
+    return file;
+  } catch (ex) {
+    console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
+    return undefined;
+  }
 };

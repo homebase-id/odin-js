@@ -13,12 +13,14 @@ export const CommentBody = ({
   content,
   isEdit,
   onUpdate,
+  updateState,
 }: {
   context?: ReactionContext;
   commentFileId?: string;
   content: ReactionContent;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
+  updateState: 'loading' | 'idle' | 'error' | 'success';
 }) => {
   const { body, bodyAsRichText } = content;
   const sourceTargetDrive = context && GetTargetDriveFromChannelId(context.channelId);
@@ -26,7 +28,7 @@ export const CommentBody = ({
   return (
     <>
       {isEdit && onUpdate ? (
-        <CommentEditor defaultBody={body} doPost={onUpdate} />
+        <CommentEditor defaultBody={body} doPost={onUpdate} postState={updateState} />
       ) : (
         <>
           {bodyAsRichText ? (

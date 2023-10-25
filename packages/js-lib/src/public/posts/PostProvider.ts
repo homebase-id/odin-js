@@ -135,7 +135,7 @@ export const getRecentPosts = async <T extends PostContent>(
 
   const sortedPosts = postsPerChannel
     .flatMap((chnl) => chnl?.posts)
-    .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
+    .sort((a, b) => b.userDate - a.userDate);
 
   return { results: sortedPosts, cursorState: allCursors };
 };
@@ -284,7 +284,7 @@ export const savePost = async <T extends PostContent>(
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
       jsonContent: jsonContent,
       previewThumbnail: file.previewThumbnail,
-      userDate: file.content.dateUnixTime,
+      userDate: file.userDate,
       dataType: postTypeToDataType(file.content.type),
     },
     payloadIsEncrypted: encrypt,
@@ -328,6 +328,7 @@ export const dsrToPostFile = async <T extends PostContent>(
       versionTag: dsr.fileMetadata.versionTag,
       globalTransitId: dsr.fileMetadata.globalTransitId,
       acl: dsr.serverMetadata?.accessControlList,
+      userDate: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
       reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),

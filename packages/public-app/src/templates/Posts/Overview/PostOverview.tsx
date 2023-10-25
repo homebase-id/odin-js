@@ -61,7 +61,7 @@ const PostOverview = () => {
   const blogPosts = flattenInfinteData<PostFile<PostContent>>(
     data,
     PAGE_SIZE,
-    (a, b) => b.content.dateUnixTime - a.content.dateUnixTime
+    (a, b) => b.userDate - a.userDate
   );
 
   return (

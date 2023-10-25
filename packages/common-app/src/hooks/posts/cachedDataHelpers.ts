@@ -49,7 +49,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
   const sortedPosts = postsPerChannel
     .flatMap((chnl) => chnl?.posts)
     .filter((post) => (postType ? post?.content?.type === postType : true))
-    .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
+    .sort((a, b) => b.userDate - a.userDate);
 
   return { results: sortedPosts, cursorState: allCursors };
 };
