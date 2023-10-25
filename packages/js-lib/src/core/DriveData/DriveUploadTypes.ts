@@ -94,7 +94,6 @@ export interface UploadAppFileMetaData {
   previewThumbnail?: EmbeddedThumb;
   additionalThumbnails?: ThumbSize[];
   archivalStatus?: ArchivalStatus;
-  alias?: string;
 }
 
 export interface UploadResult {

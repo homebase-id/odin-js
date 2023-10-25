@@ -224,7 +224,13 @@ const RecordView = ({
   return (
     <div
       className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
-        showStatus ? (isGood ? 'bg-green-100' : 'bg-orange-100') : 'bg-gray-100'
+        showStatus
+          ? isGood
+            ? 'bg-green-100'
+            : record.status === 'incorrectValue'
+            ? 'bg-orange-100'
+            : 'bg-gray-100'
+          : 'bg-gray-100'
       } px-4 py-3 font-mono text-base shadow-sm`}
     >
       <p>{[record.name || domain, subdomain].filter(Boolean).join('.')}</p>
