@@ -21,6 +21,8 @@ export * from './DriveData/DriveQueryTypes';
 export * from './DriveData/DriveUploadProvider';
 export * from './DriveData/DriveUploadTypes';
 
+export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
+
 // NotificationData
 export * from './NotificationData/NotificationProvider';
 export * from './NotificationData/NotificationTypes';

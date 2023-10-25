@@ -1,5 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
+  decryptJsonContent,
+  decryptKeyHeader,
   DriveSearchResult,
   getPayload,
   getPayloadBytes,
@@ -52,21 +54,21 @@ const useFiles = ({
       );
     }
 
+    const decryptedJsonContent =
+      result.fileMetadata.appData.jsonContent && result.fileMetadata.payloadIsEncrypted
+        ? await decryptJsonContent<Record<string, string>>(
+            result.fileMetadata,
+            await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
+          )
+        : result.fileMetadata.appData.jsonContent;
+
     const exportable = {
       fileId: result.fileId,
       fileMetadata: {
-        globalTransitId: result.fileMetadata.globalTransitId,
-        contentType: result.fileMetadata.contentType,
-        senderOdinId: result.fileMetadata.senderOdinId,
-        payloadIsEncrypted: result.fileMetadata.payloadIsEncrypted,
-        allowDistribution: result.serverMetadata.allowDistribution,
-        accessControlList: result.serverMetadata.accessControlList,
+        ...result.fileMetadata,
         appData: {
           ...result.fileMetadata.appData,
-          jsonContent: undefined,
-          previewThumbnail: undefined,
-          additionalThumbnails: undefined,
-          contentIsComplete: undefined,
+          jsonContent: decryptedJsonContent,
         },
       },
       payload:
