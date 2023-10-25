@@ -25,6 +25,7 @@ import {
   KeyHeader,
   SystemFileType,
   ImageContentType,
+  ContentType,
   PagedResult,
   DriveDefinition,
   UploadFileMetadata,
@@ -39,7 +40,6 @@ import {
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import { hasDebugFlag } from '../../helpers/BrowserUtil';
-import { ContentType } from '../../../core';
 
 interface GetFileRequest {
   odinId: string;
