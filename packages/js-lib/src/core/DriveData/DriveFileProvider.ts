@@ -8,7 +8,7 @@ import {
 } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { DriveSearchResult, KeyHeader, EncryptedKeyHeader } from './DriveTypes';
-import { SystemFileType } from './DriveFileTypes';
+import { ContentType, SystemFileType } from './DriveFileTypes';
 import {
   decryptChunkedBytesResponse,
   decryptBytesResponse,
@@ -85,7 +85,7 @@ export const getPayloadBytes = async (
   systemFileType?: SystemFileType,
   chunkStart?: number,
   chunkEnd?: number
-): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -248,7 +248,7 @@ export const getPayloadBytesByUniqueId = async (
   systemFileType?: SystemFileType,
   chunkStart?: number,
   chunkEnd?: number
-): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
@@ -359,7 +359,7 @@ const getAxiosClient = (dotYouClient: DotYouClient, systemFileType?: SystemFileT
 const parseBytesToObject = (
   data: {
     bytes: Uint8Array;
-    contentType: ImageContentType;
+    contentType: ContentType;
   } | null
 ) => {
   if (!data) return null;

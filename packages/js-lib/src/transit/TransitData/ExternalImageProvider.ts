@@ -159,7 +159,7 @@ export const getDecryptedImageDataOverTransit = async (
   if (!payloadData) return null;
 
   return {
-    contentType: payloadData.contentType,
+    contentType: payloadData.contentType as ImageContentType,
     content: payloadData.bytes,
   };
 };

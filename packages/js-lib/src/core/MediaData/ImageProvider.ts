@@ -252,7 +252,18 @@ export const getDecryptedImageData = async (
     }
   }
 
-  return await getPayloadBytes(dotYouClient, targetDrive, fileId, undefined, systemFileType);
+  const payload = await getPayloadBytes(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    undefined,
+    systemFileType
+  );
+  if (!payload) return null;
+  return {
+    bytes: payload.bytes,
+    contentType: payload.contentType as ImageContentType,
+  };
 };
 
 export const getDecryptedImageMetadata = async (

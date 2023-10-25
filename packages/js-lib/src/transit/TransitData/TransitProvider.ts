@@ -38,6 +38,7 @@ import {
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import { hasDebugFlag } from '../../helpers/BrowserUtil';
+import { ContentType } from '../../../core';
 
 interface GetFileRequest {
   odinId: string;
@@ -174,7 +175,7 @@ export const getPayloadBytesOverTransit = async (
   systemFileType?: SystemFileType,
   chunkStart?: number,
   chunkEnd?: number
-): Promise<{ bytes: Uint8Array; contentType: ImageContentType } | null> => {
+): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
@@ -225,7 +226,7 @@ export const getPayloadBytesOverTransit = async (
                 chunkEnd && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined
               )
             : await decryptBytesResponse(dotYouClient, response, keyHeader),
-        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
     })
     .catch((error) => {

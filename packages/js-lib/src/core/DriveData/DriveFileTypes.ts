@@ -78,6 +78,8 @@ export type ImageContentType =
   | 'image/gif'
   | 'image/svg+xml';
 
+export type ContentType = ImageContentType | string;
+
 export interface ReactionPreview {
   comments: {
     created: number;
