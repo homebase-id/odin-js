@@ -18,7 +18,7 @@ export const CommentHead = ({
   const isAuthor = authorOdinId === getIdentity();
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row justify-space-between">
       <AuthorName odinId={authorOdinId} />
       {isAuthor && setIsEdit && onRemove ? (
         <ActionGroup

@@ -1,4 +1,4 @@
-import { isLocalStorageAvailable, jsonStringify64 } from '../../helpers/helpers';
+import { isLocalStorageAvailable, jsonStringify64, tryJsonParse } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
@@ -29,9 +29,8 @@ const isDebug = isLocalStorageAvailable() && localStorage.getItem('debug') === '
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = JSON.parse(
-    notification.data
-  );
+  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } =
+    tryJsonParse<any>(notification.data);
 
   if (notification.notificationType === 'transitFileReceived') {
     return {
@@ -164,8 +163,8 @@ export const Notify = async (command: Command | EstablishConnectionRequest) => {
 };
 
 const parseMessage = async (e: MessageEvent): Promise<RawClientNotification> => {
-  const metaPayload = JSON.parse(e.data);
-  const encryptedPayload = JSON.parse(metaPayload.payload);
+  const metaPayload = tryJsonParse<any>(e.data);
+  const encryptedPayload = tryJsonParse<any>(metaPayload.payload);
 
   const decryptedData = metaPayload.isEncrypted
     ? await decryptData(encryptedPayload.data, encryptedPayload.iv, activeSs)

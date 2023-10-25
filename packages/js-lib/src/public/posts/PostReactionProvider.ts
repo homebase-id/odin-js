@@ -21,7 +21,12 @@ import {
   getPayload,
   ReactionPreview,
 } from '../../core/core';
-import { jsonStringify64, stringToUint8Array, getNewId } from '../../helpers/DataUtil';
+import {
+  jsonStringify64,
+  stringToUint8Array,
+  getNewId,
+  tryJsonParse,
+} from '../../helpers/DataUtil';
 import {
   deleteFileOverTransit,
   getPayloadOverTransit,
@@ -301,7 +306,7 @@ const parseReactions = (
       .map((reaction) => {
         try {
           return {
-            emoji: JSON.parse(reaction.reactionContent).emoji as string,
+            emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
             count: parseInt(reaction.count),
           };
         } catch (ex) {
@@ -332,7 +337,7 @@ export const parseReactionPreview = (
                 content:
                   commentPreview.isEncrypted && !commentPreview.jsonContent.length
                     ? { body: '' }
-                    : JSON.parse(commentPreview.jsonContent),
+                    : tryJsonParse(commentPreview.jsonContent),
                 payloadIsEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };

@@ -11,6 +11,7 @@ import {
   ImageIcon,
   Loader,
   PaperPlane,
+  Times,
   VolatileInput,
   getImagesFromPasteEvent,
   t,
@@ -92,11 +93,13 @@ export const CommentEditor = ({
   defaultBody = '',
   defaultAttachment,
   doPost,
+  onCancel,
   postState,
 }: {
   defaultBody?: string;
   defaultAttachment?: File;
   doPost: (commentBody: string, attachment?: File) => void;
+  onCancel?: () => void;
   postState: 'idle' | 'loading' | 'success' | 'error';
 }) => {
   const [body, setBody] = useState(defaultBody);
@@ -140,18 +143,30 @@ export const CommentEditor = ({
             <ImageIcon className="h-5 w-5" />
           </FileSelector>
           {hasContent ? (
-            <ActionButton
-              type="mute"
-              size="none"
-              className={`ml-auto text-primary transition-opacity px-1 py-1`}
-              onClick={() => doPost(body, attachment)}
-            >
-              {postState === 'loading' ? (
-                <Loader className="h-4 w-4" />
-              ) : (
-                <PaperPlane className="h-4 w-4" />
-              )}
-            </ActionButton>
+            <div className="flex flex-row ml-auto">
+              {onCancel ? (
+                <ActionButton
+                  onClick={onCancel}
+                  type="mute"
+                  size="none"
+                  className="px-1 py-1 mr-2 text-sm hover:underline"
+                >
+                  Cancel
+                </ActionButton>
+              ) : null}
+              <ActionButton
+                type="mute"
+                size="none"
+                className={`text-primary transition-opacity px-1 py-1 hover:bg-foreground/10 `}
+                onClick={() => doPost(body, attachment)}
+              >
+                {postState === 'loading' ? (
+                  <Loader className="h-4 w-4" />
+                ) : (
+                  <PaperPlane className="h-4 w-4" />
+                )}
+              </ActionButton>
+            </div>
           ) : null}
         </div>
       </div>

@@ -5,6 +5,7 @@ import {
   roundToSmallerMultipleOf16,
   roundToLargerMultipleOf16,
   assertIfDefined,
+  tryJsonParse,
 } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { DriveSearchResult, KeyHeader, EncryptedKeyHeader } from './DriveTypes';
@@ -73,7 +74,7 @@ export const getPayloadAsJson = async <T>(
   systemFileType?: SystemFileType
 ): Promise<T | null> => {
   return getPayloadBytes(dotYouClient, targetDrive, fileId, keyHeader, systemFileType).then(
-    parseBytesToObject
+    (bytes) => parseBytesToObject<T>(bytes)
   );
 };
 
@@ -237,7 +238,7 @@ export const getPayloadAsJsonByUniqueId = async <T>(
     uniqueId,
     keyHeader,
     systemFileType
-  ).then(parseBytesToObject);
+  ).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
 export const getPayloadBytesByUniqueId = async (
@@ -356,7 +357,7 @@ const getAxiosClient = (dotYouClient: DotYouClient, systemFileType?: SystemFileT
     },
   });
 
-const parseBytesToObject = (
+const parseBytesToObject = <T>(
   data: {
     bytes: Uint8Array;
     contentType: ContentType;
@@ -364,23 +365,7 @@ const parseBytesToObject = (
 ) => {
   if (!data) return null;
   const json = byteArrayToString(new Uint8Array(data.bytes));
-  try {
-    const o = JSON.parse(json);
-    return o;
-  } catch (ex) {
-    console.warn('base JSON.parse failed');
-    const replaceAll = (str: string, find: string, replace: string) => {
-      return str.replace(new RegExp(find, 'g'), replace);
-    };
-
-    const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
-    const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
-
-    const o = JSON.parse(jsonWithRemovedEmDash);
-
-    console.warn('... but we fixed it');
-    return o;
-  }
+  return tryJsonParse<T>(json);
 };
 
 const getRangeHeader = (chunkStart?: number, chunkEnd?: number) => {

@@ -23,6 +23,7 @@ import {
   cbcDecrypt,
   base64ToUint8Array,
   byteArrayToString,
+  tryJsonParse,
 } from '@youfoundation/js-lib/helpers';
 
 const useAuth = () => {
@@ -146,7 +147,11 @@ export const useYouAuthAuthorization = () => {
       exchangedSecret
     );
 
-    const { identity, ss64, returnUrl } = JSON.parse(byteArrayToString(data));
+    const { identity, ss64, returnUrl } = tryJsonParse<{
+      identity: string;
+      ss64: string;
+      returnUrl: string;
+    }>(byteArrayToString(data));
 
     // Store the sharedSecret to the localStorage
     window.localStorage.setItem(HOME_SHARED_SECRET, ss64);

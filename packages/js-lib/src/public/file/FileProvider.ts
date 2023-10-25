@@ -1,7 +1,12 @@
 import { EmbeddedThumb } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
-import { base64ToUint8Array, byteArrayToString, uint8ArrayToBase64 } from '../../helpers/helpers';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  tryJsonParse,
+  uint8ArrayToBase64,
+} from '../../helpers/helpers';
 
 export interface ResponseEntry {
   additionalThumbnails?: EmbeddedThumb[];
@@ -140,12 +145,12 @@ const convertFileToResponseEntry = async (file: any) => {
       file.header.fileMetadata.appData.contentIsComplete &&
       file.header.fileMetadata.appData.jsonContent.length !== 0
     ) {
-      parsedObj = JSON.parse(file.header.fileMetadata.appData.jsonContent);
+      parsedObj = tryJsonParse(file.header.fileMetadata.appData.jsonContent);
     } else if (file.payload) {
       const bytes = base64ToUint8Array(file.payload);
       const json = byteArrayToString(bytes);
 
-      parsedObj = JSON.parse(json);
+      parsedObj = tryJsonParse(json);
     }
   } catch (ex) {
     console.warn(ex);

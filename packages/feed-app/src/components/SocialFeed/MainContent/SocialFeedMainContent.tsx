@@ -87,7 +87,7 @@ const SocialFeedMainContent = () => {
               }}
             >
               <div
-                className="absolute left-0 top-0 w-full"
+                className="absolute left-0 top-0 z-10 w-full"
                 style={{
                   transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
                 }}

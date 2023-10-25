@@ -13,6 +13,7 @@ export const CommentBody = ({
   content,
   isEdit,
   onUpdate,
+  onCancel,
   updateState,
 }: {
   context?: ReactionContext;
@@ -20,6 +21,7 @@ export const CommentBody = ({
   content: ReactionContent;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
+  onCancel?: () => void;
   updateState: 'loading' | 'idle' | 'error' | 'success';
 }) => {
   const { body, bodyAsRichText } = content;
@@ -28,7 +30,12 @@ export const CommentBody = ({
   return (
     <>
       {isEdit && onUpdate ? (
-        <CommentEditor defaultBody={body} doPost={onUpdate} postState={updateState} />
+        <CommentEditor
+          defaultBody={body}
+          doPost={onUpdate}
+          onCancel={onCancel}
+          postState={updateState}
+        />
       ) : (
         <>
           {bodyAsRichText ? (

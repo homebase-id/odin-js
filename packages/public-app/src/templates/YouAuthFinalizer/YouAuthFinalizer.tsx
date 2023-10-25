@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useYouAuthAuthorization } from '../../hooks/auth/useAuth';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const YouAuthFinalizer = () => {
   const { finalizeAuthorization } = useYouAuthAuthorization();
@@ -9,7 +10,7 @@ const YouAuthFinalizer = () => {
   const eccInfo = urlParams.get('ecc');
   if (!result || !eccInfo) return <>ERROR!</>;
 
-  const { pk, salt, iv } = JSON.parse(eccInfo);
+  const { pk, salt, iv } = tryJsonParse<{ pk: string; salt: string; iv: string }>(eccInfo);
 
   if (!result || !pk || !salt || !iv) {
     return <>ERROR!</>;

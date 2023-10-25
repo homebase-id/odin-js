@@ -10,6 +10,7 @@ import {
   byteArrayToString,
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
+  tryJsonParse,
 } from '../../helpers/DataUtil';
 import { FileMetadata } from './DriveFileTypes';
 
@@ -80,13 +81,13 @@ export const decryptJsonContent = async <T>(
       const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
       const json = byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
 
-      return JSON.parse(json);
+      return tryJsonParse<T>(json);
     } catch (err) {
       console.error('[DotYouCore-js]', 'Json Content Decryption failed. Trying to only parse JSON');
     }
   }
 
-  return JSON.parse(fileMetaData.appData.jsonContent);
+  return tryJsonParse<T>(fileMetaData.appData.jsonContent);
 };
 
 export const decryptUsingKeyHeader = async (

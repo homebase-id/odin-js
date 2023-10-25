@@ -35,6 +35,7 @@ import {
   assertIfDefined,
   roundToSmallerMultipleOf16,
   roundToLargerMultipleOf16,
+  tryJsonParse,
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import { hasDebugFlag } from '../../helpers/BrowserUtil';
@@ -146,23 +147,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
   ).then((data) => {
     if (!data) return null;
     const json = byteArrayToString(new Uint8Array(data.bytes));
-    try {
-      const o = JSON.parse(json);
-      return o;
-    } catch (ex) {
-      console.warn('base JSON.parse failed');
-      const replaceAll = (str: string, find: string, replace: string) => {
-        return str.replace(new RegExp(find, 'g'), replace);
-      };
-
-      const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
-      const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
-
-      const o = JSON.parse(jsonWithRemovedEmDash);
-
-      console.warn('... but we fixed it');
-      return o;
-    }
+    return tryJsonParse<T>(json);
   });
 };
 

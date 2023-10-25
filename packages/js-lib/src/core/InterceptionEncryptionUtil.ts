@@ -5,6 +5,7 @@ import {
   jsonStringify64,
   base64ToUint8Array,
   byteArrayToString,
+  tryJsonParse,
 } from '../helpers/DataUtil';
 
 export interface SharedSecretEncryptedPayload {
@@ -71,8 +72,7 @@ export const decryptData = async (data: string, iv: string, ss: Uint8Array) => {
     const bytes = await cbcDecrypt(encryptedBytes, ivAsByteArray, ss);
     const json = byteArrayToString(bytes);
 
-    // Don't parse empty data (it will always fail)
-    return json?.length ? JSON.parse(json) : undefined;
+    return tryJsonParse(json);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (ex: any) {
     const isParseError = ex?.message.indexOf('JSON.parse') !== -1;

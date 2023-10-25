@@ -275,3 +275,29 @@ export const getQueryBatchCursorFromTime = (fromUnixTimeInMs: number, toUnixTime
 
   return uint8ArrayToBase64(bytes);
 };
+
+export const tryJsonParse = <T>(json: string): T => {
+  try {
+    if (!json || !json?.length) return {} as T;
+    const o = JSON.parse(json);
+    return o;
+  } catch (ex) {
+    console.warn('base JSON.parse failed', json);
+    try {
+      const replaceAll = (str: string, find: string, replace: string) => {
+        return str.replace(new RegExp(find, 'g'), replace);
+      };
+
+      const jsonWithRemovedQuote = replaceAll(json, '\u0019', '');
+      const jsonWithRemovedEmDash = replaceAll(jsonWithRemovedQuote, '\u0014', '');
+
+      const o = JSON.parse(jsonWithRemovedEmDash);
+
+      console.warn('... but we fixed it');
+      return o;
+    } catch (ex) {
+      console.error(ex);
+      return {} as T;
+    }
+  }
+};

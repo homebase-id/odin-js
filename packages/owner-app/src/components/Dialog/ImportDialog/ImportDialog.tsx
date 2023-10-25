@@ -1,5 +1,5 @@
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { byteArrayToString } from '@youfoundation/js-lib/helpers';
+import { byteArrayToString, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
@@ -81,7 +81,7 @@ const ImportDialog = ({
             if (file) {
               const arrayBuffer = await file.arrayBuffer();
               const contents = byteArrayToString(new Uint8Array(arrayBuffer));
-              const dataObject = JSON.parse(contents);
+              const dataObject = tryJsonParse(contents);
 
               if (!isImportable(dataObject)) {
                 setErrorMessage(t('The file provided is not in the right JSON format'));
