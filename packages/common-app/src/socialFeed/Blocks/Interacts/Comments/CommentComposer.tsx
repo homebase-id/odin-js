@@ -9,6 +9,7 @@ import {
   FileOverview,
   FileSelector,
   ImageIcon,
+  Loader,
   PaperPlane,
   VolatileInput,
   getImagesFromPasteEvent,
@@ -37,7 +38,7 @@ export const CommentComposer = ({
   const {
     mutateAsync: postComment,
     error: postCommentError,
-    isLoading,
+    status: postState,
   } = useReaction().saveComment;
 
   const [bodyAfterError, setBodyAfterError] = useState<string | undefined>();
@@ -45,8 +46,7 @@ export const CommentComposer = ({
 
   const odinId = getIdentity() || '';
   const doPost = async (commentBody: string, attachment?: File) => {
-    if (isLoading) return;
-    setStateIndex((i) => i + 1);
+    if (postState === 'loading') return;
 
     try {
       await postComment({
@@ -57,10 +57,13 @@ export const CommentComposer = ({
       });
       setBodyAfterError(undefined);
       setAttachementAfterError(undefined);
+
+      setStateIndex((i) => i + 1);
     } catch (e) {
       setBodyAfterError(commentBody);
       setAttachementAfterError(attachment);
     }
+
     onPost && onPost();
   };
 
@@ -71,6 +74,7 @@ export const CommentComposer = ({
           <AuthorImage odinId={odinId} size="xs" className="flex-shrink-0" />
           <CommentEditor
             doPost={doPost}
+            postState={postState}
             defaultAttachment={attachementAfterError}
             defaultBody={bodyAfterError}
             key={stateIndex}
@@ -88,10 +92,12 @@ export const CommentEditor = ({
   defaultBody = '',
   defaultAttachment,
   doPost,
+  postState,
 }: {
   defaultBody?: string;
   defaultAttachment?: File;
   doPost: (commentBody: string, attachment?: File) => void;
+  postState: 'idle' | 'loading' | 'success' | 'error';
 }) => {
   const [body, setBody] = useState(defaultBody);
   const [attachment, setAttachment] = useState<File | undefined>(defaultAttachment);
@@ -140,7 +146,11 @@ export const CommentEditor = ({
               className={`ml-auto text-primary transition-opacity px-1 py-1`}
               onClick={() => doPost(body, attachment)}
             >
-              <PaperPlane className="h-4 w-4" />
+              {postState === 'loading' ? (
+                <Loader className="h-4 w-4" />
+              ) : (
+                <PaperPlane className="h-4 w-4" />
+              )}
             </ActionButton>
           ) : null}
         </div>
