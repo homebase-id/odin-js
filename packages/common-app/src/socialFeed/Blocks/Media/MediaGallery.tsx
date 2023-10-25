@@ -34,9 +34,7 @@ export const MediaGallery = ({
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
 
-  useIntersection(containerRef, () => {
-    setIsInView(true);
-  });
+  useIntersection(containerRef, () => setIsInView(true));
 
   const tinyThumbUrl = useMemo(
     () => (previewThumbnail ? getEmbeddedThumbUrl(previewThumbnail) : undefined),
@@ -47,51 +45,47 @@ export const MediaGallery = ({
   return (
     <div className={`overflow-hidden ${className ?? ''}`} ref={containerRef}>
       <div className="relative">
-        {isInView && tinyThumbUrl ? (
+        {tinyThumbUrl ? (
           <MediaGalleryLoading tinyThumbUrl={tinyThumbUrl} totalCount={slicedFiles.length} />
         ) : null}
 
-        <div
-          className={`${tinyThumbUrl ? 'absolute inset-0' : ''} -m-[2px] flex flex-row flex-wrap`}
-        >
-          {slicedFiles.map((file, index) => (
-            <div
-              className={`${slicedFiles.length === 3 && index === 2 ? 'w-full' : 'w-1/2'} p-[2px]`}
-              key={file.fileId}
-            >
+        {isInView || !tinyThumbUrl ? (
+          <div className={`${tinyThumbUrl ? 'absolute inset-0' : ''} grid grid-cols-2 gap-1`}>
+            {slicedFiles.map((file, index) => (
               <div
-                className={`relative ${
-                  files.length === 2
-                    ? 'aspect-[1/2]'
-                    : slicedFiles.length === 3 && index === 2
-                    ? 'aspect-[2/1]'
-                    : 'aspect-square'
-                } h-auto w-full cursor-pointer`}
-                onClick={onClick ? (e) => onClick(e, index) : undefined}
+                className={slicedFiles.length === 3 && index === 2 ? 'col-span-2' : undefined}
+                key={file.fileId}
               >
-                <Image
-                  odinId={odinId}
-                  className={`h-full w-auto`}
-                  fileId={file.fileId}
-                  targetDrive={targetDrive}
-                  fit="cover"
-                  probablyEncrypted={probablyEncrypted}
-                  avoidPayload={file.type === 'video'}
-                />
+                <div
+                  className={`relative ${
+                    slicedFiles.length === 3 && index === 2 ? 'aspect-[2/1]' : 'aspect-square'
+                  } h-auto w-full cursor-pointer`}
+                  onClick={onClick ? (e) => onClick(e, index) : undefined}
+                >
+                  <Image
+                    odinId={odinId}
+                    className={`h-full w-auto`}
+                    fileId={file.fileId}
+                    targetDrive={targetDrive}
+                    fit="cover"
+                    probablyEncrypted={probablyEncrypted}
+                    avoidPayload={file.type === 'video'}
+                  />
 
-                {index === maxVisible - 1 && countExcludedFromView > 0 ? (
-                  <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
-                    <span className="block text-center">+{countExcludedFromView}</span>
-                  </div>
-                ) : file.type === 'video' ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Triangle className="text-background h-16 w-16" />
-                  </div>
-                ) : null}
+                  {index === maxVisible - 1 && countExcludedFromView > 0 ? (
+                    <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
+                      <span className="block text-center">+{countExcludedFromView}</span>
+                    </div>
+                  ) : file.type === 'video' ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Triangle className="text-background h-16 w-16" />
+                    </div>
+                  ) : null}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -108,7 +102,9 @@ const MediaGalleryLoading = ({
   const singleRow = totalCount === 2;
 
   return (
-    <div className={`relative aspect-square h-auto w-full`}>
+    <div
+      className={`relative ${totalCount === 2 ? 'aspect-[2.02]' : 'aspect-square'} h-auto w-full`}
+    >
       <img src={tinyThumbUrl} className="h-full w-full blur-[20px]" />
       <div
         className="absolute inset-0"

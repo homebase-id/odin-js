@@ -68,11 +68,12 @@ export const OdinImage = ({
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
+  const shouldLoadTiny = !skipTiny && isInView;
   const {
     data: tinyThumb,
     error: tinyError,
     isFetched: isTinyFetched,
-  } = useTinyThumb(dotYouClient, odinId, isInView && !skipTiny ? fileId : undefined, targetDrive);
+  } = useTinyThumb(dotYouClient, odinId, shouldLoadTiny ? fileId : undefined, targetDrive);
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
   const naturalSize: ImageSize | undefined = tinyThumb
@@ -98,19 +99,15 @@ export const OdinImage = ({
   ).fetch;
 
   useEffect(() => {
-    if (loadSize !== undefined) return;
-    // When we have a tinyThumb find the optimal size
-    // With setTimeout to allow other tinies to load before blocking the main thread for those
-    if (tinyThumb && tinyThumb.url?.length) setTimeout(() => calculateSize(), 100);
+    // When we have a tinyThumb, we can calculate the size
+    if (isTinyLoaded) calculateSize();
 
-    // When we have a preview/cached image already, don't wait for the tinyThumb to load
-    if (skipTiny && isTinyLoaded) calculateSize();
-
-    // If there's no tinyThumb data, still trigger the calculateSize
+    // If there's no tinyThumb data available, trigger the calculateSize
     if (isTinyFetched && !tinyThumb) calculateSize();
-  }, [isInView, tinyThumb, isTinyLoaded]);
+  }, [tinyThumb, isTinyLoaded]);
 
   useEffect(() => {
+    // When the tiny fails and we don't have a loadSize yet => calculcate it
     if (tinyError && !loadSize) calculateSize();
   }, [tinyError]);
 
@@ -127,6 +124,8 @@ export const OdinImage = ({
   }, [isFatalError]);
 
   const calculateSize = () => {
+    if (loadSize !== undefined) return;
+
     // If no element or nothing to create a size that has the aspect ratio, don't bother and load full...
     // If the image is an svg.. Then there are no thumbs and we should just load the full image;
     // TODO: Avoid this by having the Back-end return the payload if there's no matching thumbnail
@@ -169,7 +168,6 @@ export const OdinImage = ({
     setLoadSize(matchingSize);
   };
 
-  const isLoadingTiny = !imageData && !previewUrl && !isImageFetched && !isTinyFetched;
   const width = naturalSize?.pixelWidth;
   const height = naturalSize?.pixelHeight;
   const imgClassNames = `${
@@ -182,6 +180,9 @@ export const OdinImage = ({
 
   if (tinyError || imageError) console.warn('[OdinImage]', { fileId, tinyError, imageError });
 
+  if (!fileId) return null;
+
+  const weDontHaveAnything = !previewUrl && !isTinyFetched && !imageData && !isImageFetched;
   return (
     <figure
       className={`${className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${
@@ -196,7 +197,7 @@ export const OdinImage = ({
       }
       data-fileid={fileId}
     >
-      {!fileId ? null : isLoadingTiny ? (
+      {weDontHaveAnything ? (
         <LoadingBlock className="aspect-square h-full w-full" />
       ) : (
         <>
