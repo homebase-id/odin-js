@@ -68,7 +68,6 @@ export const OdinImage = ({
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
-  console.log({ fileId, isInView, skipTiny, previewThumbnail, cachedImage });
   const shouldLoadTiny = !skipTiny && isInView;
   const {
     data: tinyThumb,
