@@ -128,8 +128,12 @@ const ApexInfoBlock = ({
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
   const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
 
-  const aliasValid = aliasARecord?.status === 'success';
-  const fallbackValid = aliasARecord?.status === 'success';
+  // if one of them is good, they are both:
+  const uniformStatus =
+    aliasARecord?.status === 'success' || fallbackARecord?.status === 'success'
+      ? 'success'
+      : undefined;
+
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">{t('Point your domain to Homebase')}</p>
@@ -145,9 +149,9 @@ const ApexInfoBlock = ({
             recommended configuration, which is more resilient than the fallback option.
           </p>
           <RecordView
-            record={aliasARecord}
+            record={{ ...aliasARecord, status: uniformStatus || aliasARecord.status }}
             domain={domain}
-            showStatus={showStatus && !fallbackValid}
+            showStatus={showStatus}
           />
         </>
       ) : null}
@@ -164,9 +168,9 @@ const ApexInfoBlock = ({
             )}
           </p>
           <RecordView
-            record={fallbackARecord}
+            record={{ ...fallbackARecord, status: uniformStatus || fallbackARecord.status }}
             domain={domain}
-            showStatus={showStatus && !aliasValid}
+            showStatus={showStatus}
           />
         </>
       ) : null}
@@ -219,6 +223,7 @@ const SubdomainInfoBlock = ({
   );
 };
 
+const errorStates = ['incorrectValue', 'aaaaRecordsNotSupported', 'multipleRecordsNotSupported'];
 const RecordView = ({
   record,
   domain,
@@ -238,7 +243,7 @@ const RecordView = ({
         showStatus
           ? isGood
             ? 'bg-green-100'
-            : record.status === 'incorrectValue'
+            : errorStates.includes(record.status)
             ? 'bg-orange-100'
             : 'bg-gray-100'
           : 'bg-gray-100'
@@ -253,7 +258,13 @@ const RecordView = ({
             <Check className="h-4 w-4" />
           ) : (
             <>
-              {record.status === 'incorrectValue' ? 'Incorrect value' : 'Not found'}
+              {record.status === 'incorrectValue'
+                ? 'Incorrect value'
+                : record.status === 'aaaaRecordsNotSupported'
+                ? 'AAAA records are not supported'
+                : record.status === 'multipleRecordsNotSupported'
+                ? 'Multiple A or CNAME records are currently not supported'
+                : 'Not found'}
               <Exclamation className="h-4 w-4" />
             </>
           )}

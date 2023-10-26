@@ -6,7 +6,14 @@ export interface DnsRecord {
   name: string;
   value: string;
   description: string;
-  status: 'unknown' | 'success' | 'domainOrRecordNotFound' | 'incorrectValue';
+  status:
+    | 'unknown'
+    | 'success'
+    | 'domainOrRecordNotFound'
+    | 'incorrectValue'
+    | 'multipleRecordsNotSupported'
+    | 'aaaaRecordsNotSupported'
+    | 'noAuthorativeNameServer';
   statusText: string;
 }
 
