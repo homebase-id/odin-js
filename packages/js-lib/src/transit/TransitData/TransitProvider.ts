@@ -380,9 +380,9 @@ export const uploadFileOverTransit = async (
 };
 
 const failedTransferStatuses = [
-  TransferStatus.FileDoesNotAllowDistribution.toString().toLowerCase(),
-  TransferStatus.RecipientReturnedAccessDenied.toString().toLowerCase(),
-  TransferStatus.TotalRejectionClientShouldRetry.toString().toLowerCase(),
+  TransferStatus?.FileDoesNotAllowDistribution.toString().toLowerCase(),
+  TransferStatus?.RecipientReturnedAccessDenied.toString().toLowerCase(),
+  TransferStatus?.TotalRejectionClientShouldRetry.toString().toLowerCase(),
 ];
 
 export const uploadFileOverTransitUsingKeyHeader = async (
