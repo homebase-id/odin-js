@@ -69,7 +69,11 @@ export const saveContact = async (
     transitOptions: null,
   };
 
-  const payloadJson: string = jsonStringify64(contact as ContactFile);
+  const payloadJson: string = jsonStringify64({
+    ...contact,
+    fileId: undefined,
+    versionTag: undefined,
+  });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   const tags = [];

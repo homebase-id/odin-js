@@ -137,7 +137,7 @@ export const saveChannelDefinition = async (
     },
   };
 
-  const payloadJson: string = jsonStringify64(definition);
+  const payloadJson: string = jsonStringify64({ ...definition, acl: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metedata
@@ -221,6 +221,8 @@ const getChannelDefinitionInternal = async (
       );
 
       if (!definition) return undefined;
+
+      definition.acl = dsr.serverMetadata.accessControlList;
 
       return {
         fileId: dsr.fileId,

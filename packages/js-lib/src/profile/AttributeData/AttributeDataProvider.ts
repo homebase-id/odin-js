@@ -337,6 +337,9 @@ export const saveAttribute = async (
     ...attr,
     acl: undefined,
     fileId: undefined,
+    previewThumbnail: undefined,
+    typeDefinition: undefined,
+    aclPriority: undefined,
   } as Attribute);
   const payloadBytes = stringToUint8Array(payloadJson);
 

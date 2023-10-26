@@ -306,9 +306,7 @@ const CommentTeaserList = ({
   reactionPreview?: CommentsReactionSummary;
   onExpand: () => void;
 }) => {
-  if (!reactionPreview?.comments.length) {
-    return null;
-  }
+  if (!reactionPreview?.comments.length) return null;
 
   const allEncrypted = reactionPreview.comments.every((comment) => comment.payloadIsEncrypted);
 
@@ -316,7 +314,13 @@ const CommentTeaserList = ({
     <div className="mb-5">
       <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20"></hr>
 
-      <div className="flex cursor-pointer flex-col gap-[0.2rem]" onClick={() => onExpand()}>
+      <div
+        className="flex cursor-pointer flex-col gap-[0.2rem]"
+        onClick={(e) => {
+          e.stopPropagation();
+          onExpand();
+        }}
+      >
         {reactionPreview.comments.slice(0, 3).map((comment, index) => (
           <CommentTeaser commentData={comment} key={index} />
         ))}

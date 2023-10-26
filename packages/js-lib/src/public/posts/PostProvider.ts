@@ -254,7 +254,7 @@ export const savePost = async <T extends PostContent>(
   }
   const uniqueId = file.content.slug ? toGuidId(file.content.slug) : file.content.id;
 
-  const payloadJson: string = jsonStringify64(file.content);
+  const payloadJson: string = jsonStringify64({ ...file.content, fileId: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for jsonContent so enough room is left for metadata

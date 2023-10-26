@@ -24,6 +24,7 @@ export const IdentityTeaser = ({
     odinId: isInView ? odinId : undefined,
   }).fetch;
 
+  // TODO: is the isOwner check needed here?
   const { data: isConnected } = useIsConnected(isInView && isOwner ? odinId : undefined);
   useIntersection(wrapperRef, () => setIsInView(true));
 
