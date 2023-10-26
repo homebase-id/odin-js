@@ -95,7 +95,7 @@ const ExternalActions = ({ odinId }: { odinId: string }) => {
     {
       icon: UserX,
       label: `${t('Edit what I follow from')} "${odinId}"`,
-      href: `https://${identity}/owner/follow/${odinId}`,
+      href: `https://${identity}/owner/follow/following/${odinId}`,
     },
   ];
 

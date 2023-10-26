@@ -52,7 +52,7 @@ const FollowLink = ({
         isOpen={isLoginOpen}
         onCancel={() => setIsLoginOpen(false)}
         returnPath={`${HOME_ROOT_PATH}action?targetPath=${
-          `/owner/follow/${window.location.hostname}` +
+          `/owner/follow/following/${window.location.hostname}` +
           (channel ? `?chnl=${channel.channelId}` : '')
         }`}
       >

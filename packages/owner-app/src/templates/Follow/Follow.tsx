@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import {
@@ -22,7 +22,7 @@ import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 
 const Follow = () => {
-  const followersMatch = useMatch({ path: 'owner/follow/followers' });
+  const followersMatch = useMatch({ path: 'owner/follow/followers/*' });
 
   return (
     <>
@@ -68,14 +68,16 @@ const Following = () => {
 
   return (
     <>
-      {isFollowingLoading ? (
-        <></>
-      ) : following?.length ? (
+      {isFollowingLoading ? null : following?.length ? (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {following.map((odinId) => {
             if (!odinId) return null;
             return (
-              <FollowingIdentity odinId={odinId} key={odinId} onEdit={() => navigate(odinId)} />
+              <FollowingIdentity
+                odinId={odinId}
+                key={odinId}
+                onEdit={() => navigate(`/owner/follow/following/${odinId}`)}
+              />
             );
           })}
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
@@ -114,6 +116,9 @@ const Followers = () => {
     true
   );
 
+  const { followerKey } = useParams();
+  const navigate = useNavigate();
+
   return (
     <>
       {isFollowersLoading ? (
@@ -122,20 +127,33 @@ const Followers = () => {
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {followers.map((odinId) => {
             if (!odinId) return null;
-            return <FollowIdentity odinId={odinId} key={odinId} />;
+            return (
+              <FollowIdentity
+                odinId={odinId}
+                key={odinId}
+                onEdit={() => navigate(`/owner/follow/followers/${odinId}`)}
+              />
+            );
           })}
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
         <SubtleMessage>{t("You don't have any followers")}</SubtleMessage>
       )}
+      {followerKey ? (
+        <IdentityThatFollowsDialog
+          odinId={followerKey}
+          isOpen={!!followerKey}
+          onConfirm={() => navigate(`/owner/follow/followers`)}
+          onCancel={() => navigate(`/owner/follow/followers`)}
+        />
+      ) : null}
     </>
   );
 };
 
-const FollowIdentity = ({ odinId }: { odinId: string }) => {
+const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: block } = useConnectionActions().block;
-  const [isShowDetails, setIsDetails] = useState(false);
 
   return (
     <>
@@ -148,7 +166,7 @@ const FollowIdentity = ({ odinId }: { odinId: string }) => {
               onClick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setIsDetails(true);
+                onEdit();
               },
               icon: Eye,
               label: t('Details'),
@@ -175,14 +193,6 @@ const FollowIdentity = ({ odinId }: { odinId: string }) => {
           ...
         </ActionGroup>
       </IdentityTeaser>
-      {isShowDetails ? (
-        <IdentityThatFollowsDialog
-          odinId={odinId}
-          isOpen={isShowDetails}
-          onConfirm={() => setIsDetails(false)}
-          onCancel={() => setIsDetails(false)}
-        />
-      ) : null}
     </>
   );
 };

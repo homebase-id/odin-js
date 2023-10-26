@@ -187,6 +187,7 @@ function App() {
 
             <Route path="follow" element={<Following />}></Route>
             <Route path="follow/followers" element={<Following />}></Route>
+            <Route path="follow/followers/:followerKey" element={<Following />}></Route>
             <Route path="follow/following" element={<Following />}></Route>
             <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
 
