@@ -263,7 +263,7 @@ const RecordView = ({
                 : record.status === 'aaaaRecordsNotSupported'
                 ? 'AAAA records are not supported'
                 : record.status === 'multipleRecordsNotSupported'
-                ? 'Multiple A or CNAME records are currently not supported'
+                ? 'Multiple A or CNAME records are not supported'
                 : 'Not found'}
               <Exclamation className="h-4 w-4" />
             </>
