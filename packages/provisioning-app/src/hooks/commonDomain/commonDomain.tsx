@@ -15,9 +15,8 @@ export type DnsConfig = Array<DnsRecord>;
 //
 
 export function hasInvalidDnsRecords(dnsConfig: DnsConfig | undefined): boolean {
-  if (!dnsConfig) {
-    return true;
-  }
+  if (!dnsConfig) return true;
+
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
   const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
   const subRecords = dnsConfig.filter((record) => !!record.name);

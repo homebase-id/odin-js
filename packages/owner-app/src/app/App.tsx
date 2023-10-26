@@ -46,7 +46,6 @@ const AppDetails = lazy(() => import('../templates/Apps/AppDetails/AppDetails'))
 
 const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
-const FollowNew = lazy(() => import('../templates/Follow/FollowNew'));
 
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
@@ -146,7 +145,6 @@ function App() {
             }
           >
             <Route path="appreg" element={<RegisterAppClient />} />
-            <Route path="follow/:toFollowKey" element={<FollowNew />}></Route>
           </Route>
 
           <Route
@@ -176,6 +174,7 @@ function App() {
             <Route path="public-profile" element={<PublicProfileDetails />}></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
 
@@ -189,6 +188,7 @@ function App() {
             <Route path="follow" element={<Following />}></Route>
             <Route path="follow/followers" element={<Following />}></Route>
             <Route path="follow/following" element={<Following />}></Route>
+            <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
 
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>

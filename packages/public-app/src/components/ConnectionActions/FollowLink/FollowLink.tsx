@@ -34,7 +34,7 @@ const FollowLink = ({
         className={`w-auto ${className ?? ''}`}
         href={
           identity
-            ? `https://${identity}/owner/follow/${window.location.hostname}` +
+            ? `https://${identity}/owner/follow/following/${window.location.hostname}` +
               (channel ? `?chnl=${channel.channelId}` : '')
             : undefined
         }
