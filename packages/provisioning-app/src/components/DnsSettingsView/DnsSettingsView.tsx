@@ -127,6 +127,9 @@ const ApexInfoBlock = ({
 }) => {
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
   const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
+
+  const aliasValid = aliasARecord?.status === 'success';
+  const fallbackValid = aliasARecord?.status === 'success';
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">{t('Point your domain to Homebase')}</p>
@@ -141,7 +144,11 @@ const ApexInfoBlock = ({
             If your DNS provider supports ALIAS, ANAME, or flattened CNAME records, use this
             recommended configuration, which is more resilient than the fallback option.
           </p>
-          <RecordView record={aliasARecord} domain={domain} showStatus={showStatus} />
+          <RecordView
+            record={aliasARecord}
+            domain={domain}
+            showStatus={showStatus && !fallbackValid}
+          />
         </>
       ) : null}
       {fallbackARecord ? (
@@ -156,7 +163,11 @@ const ApexInfoBlock = ({
               'If your DNS provider does not support ALIAS, ANAME, or flattened CNAME records, use this fallback option.'
             )}
           </p>
-          <RecordView record={fallbackARecord} domain={domain} showStatus={showStatus} />
+          <RecordView
+            record={fallbackARecord}
+            domain={domain}
+            showStatus={showStatus && !aliasValid}
+          />
         </>
       ) : null}
     </div>
