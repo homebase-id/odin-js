@@ -5,7 +5,7 @@ import {
   PostContent,
   PostFile,
 } from '@youfoundation/js-lib/public';
-import { ActionGroupOptionProps, Lock } from '@youfoundation/common-app';
+import { ActionGroupOptionProps, Lock, useIsConnected } from '@youfoundation/common-app';
 
 import {
   ChannelDefinitionVm,
@@ -57,7 +57,15 @@ export const PostMeta = ({
     hour: 'numeric',
     minute: 'numeric',
   };
-  const isAuthor = odinId === getIdentity();
+  const identity = getIdentity();
+  const isAuthor = odinId === identity;
+
+  const isConnected = useIsConnected(odinId).data;
+  const channelLink = channel
+    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}${
+        isConnected ? '?youauth-logon=' + identity : ''
+      }`
+    : undefined;
 
   return (
     <div
@@ -69,7 +77,7 @@ export const PostMeta = ({
       {channel ? (
         <a
           className="text-primary ml-1 flex flex-row items-center gap-1 border-l pl-1 hover:underline dark:border-slate-500"
-          href={`${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}`}
+          href={channelLink}
           onClick={(e) => e.stopPropagation()}
         >
           {postFile?.payloadIsEncrypted ? <Lock className="h-3 w-3" /> : null}

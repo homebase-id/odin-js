@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
 import {
   NumberCursoredResult,
   PagedResult,
@@ -50,6 +50,7 @@ export const getBlockedConnections = (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<DotYouProfile>> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const client = dotYouClient.createAxiosClient();
   const url = root + '/blocked?' + stringifyToQueryParams(params as any);
   return client
@@ -64,6 +65,8 @@ export const getConnectionInfo = (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionInfo | undefined> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
+
   const client = dotYouClient.createAxiosClient();
   const url = root + `/status`;
 

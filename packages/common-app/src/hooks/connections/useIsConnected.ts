@@ -16,9 +16,12 @@ export const useIsConnected = (odinId?: string) => {
       odinId,
     ]);
     if (fullConnectionInfo?.status === 'connected') return true;
-
-    const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
-    return connectionInfo && connectionInfo.status.toLowerCase() === 'connected';
+    try {
+      const connectionInfo = await getConnectionInfo(dotYouClient, odinId);
+      return connectionInfo && connectionInfo.status.toLowerCase() === 'connected';
+    } catch (e) {
+      return false;
+    }
   };
 
   return useQuery(['isConnected', odinId], () => getIsConnected(odinId as string), {

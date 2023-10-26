@@ -103,7 +103,8 @@ function App() {
 }
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
-  const { isOwner } = useAuth();
+  const { isOwner, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
   if (siteData && siteDataFetched && !siteData.home?.templateSettings?.themeId) {
@@ -123,6 +124,10 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
       </div>
     );
   }
+
+  // Remove the youauth-logon param from the url if we are alrady logged on
+  if ((isAuthenticated || isOwner) && searchParams.has('youauth-logon'))
+    window.history.replaceState(null, '', window.location.pathname);
 
   return <>{children}</>;
 };

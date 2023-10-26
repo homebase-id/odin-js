@@ -76,7 +76,7 @@ export const getDecryptedImageUrlOverTransit = async (
   const ss = dotYouClient.getSharedSecret();
 
   // // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss) return await getDirectImageUrl();
+  if (!ss || dotYouClient.getType() === ApiType.Guest) return await getDirectImageUrl();
 
   // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
   //   we first get confirmation from the header and return a direct url if possible
