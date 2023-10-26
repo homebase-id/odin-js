@@ -30,6 +30,7 @@ import {
   DriveDefinition,
   UploadFileMetadata,
   ThumbnailFile,
+  TransferStatus,
 } from '../../core/core';
 import {
   byteArrayToString,
@@ -359,7 +360,7 @@ export const uploadFileOverTransit = async (
     );
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  return uploadFileOverTransitUsingKeyHeader(
+  const response = await uploadFileOverTransitUsingKeyHeader(
     dotYouClient,
     keyHeader,
     instructions,
@@ -367,7 +368,22 @@ export const uploadFileOverTransit = async (
     payload,
     thumbnails
   );
+
+  isDebug &&
+    console.debug(
+      'response',
+      new URL(`${dotYouClient.getEndpoint()}/transit/sender/files/send'`).pathname,
+      response
+    );
+
+  return response;
 };
+
+const failedTransferStatuses = [
+  TransferStatus.FileDoesNotAllowDistribution.toString().toLowerCase(),
+  TransferStatus.RecipientReturnedAccessDenied.toString().toLowerCase(),
+  TransferStatus.TotalRejectionClientShouldRetry.toString().toLowerCase(),
+];
 
 export const uploadFileOverTransitUsingKeyHeader = async (
   dotYouClient: DotYouClient,
@@ -419,8 +435,14 @@ export const uploadFileOverTransitUsingKeyHeader = async (
   };
 
   return client
-    .post(url, data, config)
+    .post<TransitUploadResult>(url, data, config)
     .then((response) => {
+      const recipientStatus = response.data.recipientStatus;
+      Object.keys(recipientStatus).forEach((key) => {
+        if (failedTransferStatuses.includes(recipientStatus[key].toLowerCase()))
+          throw new Error(`Recipient ${key} failed to receive file`);
+      });
+
       return response.data;
     })
     .catch((error) => {

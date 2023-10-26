@@ -29,10 +29,12 @@ const Header = () => {
             <OwnerName />
           </span>
         </Link>
-        <nav className="ml-auto flex flex-wrap items-center justify-center text-base">
-          <DarkModeToggle className="mr-2" />
-          <ProfileNav />
-        </nav>
+        {isOwner ? null : (
+          <nav className="ml-auto flex flex-wrap items-center justify-center text-base">
+            <DarkModeToggle className="mr-2" />
+            <ProfileNav />
+          </nav>
+        )}
       </div>
     </header>
   );

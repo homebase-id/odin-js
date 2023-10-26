@@ -46,9 +46,7 @@ export const saveEmojiReaction = async (
     const url = emojiRootTransit + '/add';
     return client
       .post(url, { odinId: emoji.context.authorOdinId, request: data })
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
+      .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
       .catch(dotYouClient.handleErrorResponse);
   }
 };

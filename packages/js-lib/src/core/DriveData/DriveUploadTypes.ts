@@ -106,12 +106,12 @@ export interface UploadResult {
 }
 
 export enum TransferStatus {
-  AwaitingTransferKey = 1,
-  TransferKeyCreated = 3,
-  DeliveredToInbox = 5,
-  DeliveredToTargetDrive = 7,
-  PendingRetry = 8,
-  TotalRejectionClientShouldRetry = 9,
-  FileDoesNotAllowDistribution = 11,
-  RecipientReturnedAccessDenied = 13,
+  AwaitingTransferKey = 'awaitingtransferkey',
+  TransferKeyCreated = 'transferkeycreated',
+  DeliveredToInbox = 'deliveredtoinbox',
+  DeliveredToTargetDrive = 'deliveredtotargetdrive',
+  PendingRetry = 'pendingretry',
+  TotalRejectionClientShouldRetry = 'totalrejectionclientshouldretry',
+  FileDoesNotAllowDistribution = 'filedoesnotallowdistribution',
+  RecipientReturnedAccessDenied = 'recipientreturnedaccessdenied',
 }
