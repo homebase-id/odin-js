@@ -29,7 +29,7 @@ export const IdentityTeaser = ({
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const link = `https://${odinId}${isConnected ? '?youauth-logon=' + identity : ''}`;
+  const link = `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <a

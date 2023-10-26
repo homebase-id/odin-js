@@ -63,7 +63,7 @@ export const PostMeta = ({
   const isConnected = useIsConnected(odinId).data;
   const channelLink = channel
     ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}${
-        isConnected ? '?youauth-logon=' + identity : ''
+        isConnected && identity ? '?youauth-logon=' + identity : ''
       }`
     : undefined;
 

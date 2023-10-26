@@ -114,7 +114,7 @@ export const IdentityPageMetaAndActions = ({
     {
       icon: House,
       label: t('Open homepage'),
-      href: `https://${odinId}${isConnected ? '?youauth-logon=' + identity : ''}`,
+      href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
     },
   ];
 

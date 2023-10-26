@@ -8,7 +8,7 @@ export const AuthorName = ({ odinId }: { odinId?: string }) => {
 
   return (
     <a
-      href={`https://${odinId}${isConnected ? '?youauth-logon=' + identity : ''}`}
+      href={`https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`}
       className="hover:underline"
     >
       <ConnectionName odinId={odinId} />

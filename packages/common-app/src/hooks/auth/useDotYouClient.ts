@@ -50,7 +50,9 @@ export const useDotYouClient = () => {
 
   // Get the logged in user's identity
   const getIdentity = () => {
-    return _app === 'owner' ? window.location.host : localStorage.getItem(STORAGE_IDENTITY_KEY);
+    return _app === 'owner' || (_app === 'home' && _isOwner)
+      ? window.location.host
+      : localStorage.getItem(STORAGE_IDENTITY_KEY);
   };
 
   const getDotYouClient = () => {
