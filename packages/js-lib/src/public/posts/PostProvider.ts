@@ -17,7 +17,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   getFileHeader,
-  getPayload,
+  getContentFromHeaderOrPayload,
   MultiRequestCursoredResult,
   queryBatch,
   queryBatchCollection,
@@ -325,7 +325,12 @@ export const dsrToPostFile = async <T extends PostContent>(
   includeMetadataHeader: boolean
 ): Promise<PostFile<T> | undefined> => {
   try {
-    const content = await getPayload<T>(dotYouClient, targetDrive, dsr, includeMetadataHeader);
+    const content = await getContentFromHeaderOrPayload<T>(
+      dotYouClient,
+      targetDrive,
+      dsr,
+      includeMetadataHeader
+    );
 
     if (!content) return undefined;
 

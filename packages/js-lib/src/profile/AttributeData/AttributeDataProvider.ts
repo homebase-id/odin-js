@@ -5,7 +5,7 @@ import {
   GetBatchQueryResultOptions,
   DriveSearchResult,
   TargetDrive,
-  getPayload,
+  getContentFromHeaderOrPayload,
   SecurityGroupType,
   UploadInstructionSet,
   UploadFileMetadata,
@@ -176,7 +176,7 @@ export const dsrToAttributeFile = async (
   includeMetadataHeader: boolean
 ): Promise<AttributeFile | undefined> => {
   try {
-    const attrPayload = await getPayload<AttributeFile>(
+    const attrPayload = await getContentFromHeaderOrPayload<AttributeFile>(
       dotYouClient,
       targetDrive,
       dsr,

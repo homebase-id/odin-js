@@ -17,7 +17,7 @@ import {
   getChannelDrive,
 } from '../../public/public';
 import {
-  getPayloadOverTransit,
+  getContentFromHeaderOrPayloadOverTransit,
   getDrivesByTypeOverTransit,
   queryBatchOverTransit,
 } from './TransitProvider';
@@ -197,7 +197,7 @@ export const getChannelOverTransit = async (
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
       return (
-        (await getPayloadOverTransit<ChannelDefinition>(
+        (await getContentFromHeaderOrPayloadOverTransit<ChannelDefinition>(
           dotYouClient,
           odinId,
           targetDrive,
@@ -250,7 +250,7 @@ const dsrToPostFile = async <T extends PostContent>(
   includeMetadataHeader: boolean
 ): Promise<PostFileVm<T> | undefined> => {
   try {
-    const content = await getPayloadOverTransit<T>(
+    const content = await getContentFromHeaderOrPayloadOverTransit<T>(
       dotYouClient,
       odinId,
       targetDrive,

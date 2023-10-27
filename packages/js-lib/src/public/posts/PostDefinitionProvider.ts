@@ -4,7 +4,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   queryBatchCollection,
-  getPayload,
+  getContentFromHeaderOrPayload,
   UploadResult,
   SecurityGroupType,
   ensureDrive,
@@ -66,7 +66,7 @@ export const getChannelDefinitions = async (
         const channelDrive = getChannelDrive(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await getPayload<ChannelDefinition>(
+        const definition = await getContentFromHeaderOrPayload<ChannelDefinition>(
           dotYouClient,
           channelDrive,
           dsr,
@@ -217,7 +217,7 @@ const getChannelDefinitionInternal = async (
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      const definition = await getPayload<ChannelDefinition>(
+      const definition = await getContentFromHeaderOrPayload<ChannelDefinition>(
         dotYouClient,
         targetDrive,
         dsr,

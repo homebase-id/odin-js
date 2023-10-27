@@ -222,8 +222,7 @@ export const getThumbBytes = async (
     });
 };
 
-// TODO: Rename this one getContentFromHeaderOrPayload
-export const getPayload = async <T>(
+export const getContentFromHeaderOrPayload = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   dsr: {

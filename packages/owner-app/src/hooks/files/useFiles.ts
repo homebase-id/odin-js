@@ -3,7 +3,7 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
   DriveSearchResult,
-  getPayload,
+  getContentFromHeaderOrPayload,
   getPayloadBytes,
   queryBatch,
   SystemFileType,
@@ -72,7 +72,12 @@ const useFiles = ({
       },
       payload:
         result.fileMetadata.contentType === 'application/json'
-          ? await getPayload(dotYouClient, targetDrive, result, includeMetadataHeader)
+          ? await getContentFromHeaderOrPayload(
+              dotYouClient,
+              targetDrive,
+              result,
+              includeMetadataHeader
+            )
           : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, {
               keyHeader: result.fileMetadata.payloadIsEncrypted
                 ? result.sharedSecretEncryptedKeyHeader

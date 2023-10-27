@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   AccessControlList,
   DriveDefinition,
-  getPayload,
+  getContentFromHeaderOrPayload,
   getPayloadBytes,
   queryBatch,
   QueryBatchResponse,
@@ -109,7 +109,12 @@ const useExport = () => {
 
     const getPayloadForDsr = async (dsr: DriveSearchResult) => {
       if (dsr.fileMetadata.contentType === 'application/json') {
-        return await getPayload(dotYouClient, targetDrive, dsr, includeMetadataHeader);
+        return await getContentFromHeaderOrPayload(
+          dotYouClient,
+          targetDrive,
+          dsr,
+          includeMetadataHeader
+        );
       } else {
         return (
           (

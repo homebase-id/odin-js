@@ -4,7 +4,7 @@ import {
   FileQueryParams,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
   queryBatchCollection,
-  getPayload,
+  getContentFromHeaderOrPayload,
   ensureDrive,
   UploadInstructionSet,
   UploadFileMetadata,
@@ -60,7 +60,7 @@ export const getProfileDefinitions = async (
         const profileDrive = GetTargetDriveFromProfileId(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await getPayload<ProfileDefinition>(
+        const definition = await getContentFromHeaderOrPayload<ProfileDefinition>(
           dotYouClient,
           profileDrive,
           dsr,
@@ -250,7 +250,7 @@ export const getProfileSections = async (
       await Promise.all(
         response.searchResults.map(
           async (dsr) =>
-            await getPayload<ProfileSection>(
+            await getContentFromHeaderOrPayload<ProfileSection>(
               dotYouClient,
               targetDrive,
               dsr,
@@ -298,7 +298,7 @@ const getProfileDefinitionInternal = async (
       );
     }
     const dsr = response.searchResults[0];
-    const definition = await getPayload<ProfileDefinition>(
+    const definition = await getContentFromHeaderOrPayload<ProfileDefinition>(
       dotYouClient,
       targetDrive,
       dsr,
@@ -339,7 +339,7 @@ const getProfileSectionInternal = async (
       );
     }
     const dsr = response.searchResults[0];
-    const definition = await getPayload<ProfileSection>(
+    const definition = await getContentFromHeaderOrPayload<ProfileSection>(
       dotYouClient,
       targetDrive,
       dsr,

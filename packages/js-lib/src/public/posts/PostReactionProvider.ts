@@ -17,7 +17,7 @@ import {
   queryBatch,
   DriveSearchResult,
   TargetDrive,
-  getPayload,
+  getContentFromHeaderOrPayload,
   ReactionPreview,
 } from '../../core/core';
 import {
@@ -28,7 +28,7 @@ import {
 } from '../../helpers/DataUtil';
 import {
   deleteFileOverTransit,
-  getPayloadOverTransit,
+  getContentFromHeaderOrPayloadOverTransit,
   queryBatchOverTransit,
   uploadFileOverTransit,
 } from '../../transit/TransitData/TransitProvider';
@@ -274,8 +274,12 @@ const dsrToComment = async (
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 
   const contentData = isLocal
-    ? await getPayload<RawReactionContent>(dotYouClient, ...params)
-    : await getPayloadOverTransit<RawReactionContent>(dotYouClient, odinId, ...params);
+    ? await getContentFromHeaderOrPayload<RawReactionContent>(dotYouClient, ...params)
+    : await getContentFromHeaderOrPayloadOverTransit<RawReactionContent>(
+        dotYouClient,
+        odinId,
+        ...params
+      );
 
   if (!contentData) return null;
 

@@ -506,7 +506,7 @@ export const deleteFileOverTransit = async (
     });
 };
 
-export const getPayloadOverTransit = async <T>(
+export const getContentFromHeaderOrPayloadOverTransit = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,

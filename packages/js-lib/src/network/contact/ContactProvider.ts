@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getPayload } from '../../core/DriveData/File/DriveFileProvider';
+import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
 import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
 import { DriveSearchResult } from '../../core/DriveData/Drive/DriveTypes';
@@ -26,7 +26,7 @@ export const getContactByUniqueId = async (
       console.warn('UniqueId [' + uniqueId + '] in contacts has more than one file. Using latest');
 
     const dsr: DriveSearchResult = response.searchResults[0];
-    const contact: ContactFile | null = await getPayload<ContactFile>(
+    const contact: ContactFile | null = await getContentFromHeaderOrPayload<ContactFile>(
       dotYouClient,
       ContactConfig.ContactTargetDrive,
       dsr,
@@ -68,7 +68,7 @@ export const getContacts = async (
       await Promise.all(
         response.searchResults.map(async (result) => {
           const dsr: DriveSearchResult = result;
-          const contact: ContactFile | null = await getPayload<ContactFile>(
+          const contact: ContactFile | null = await getContentFromHeaderOrPayload<ContactFile>(
             dotYouClient,
             ContactConfig.ContactTargetDrive,
             dsr,
