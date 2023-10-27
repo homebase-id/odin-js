@@ -6,9 +6,9 @@ import {
   updateFlag,
   updateSettings,
 } from '../../provider/system/SettingsProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useSettings = () => {
+export const useSettings = () => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
@@ -47,5 +47,3 @@ const useSettings = () => {
     }),
   };
 };
-
-export default useSettings;

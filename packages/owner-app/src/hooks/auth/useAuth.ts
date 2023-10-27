@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import useVerifyToken from './useVerifyToken';
+import { useVerifyToken } from './useVerifyToken';
 import {
   authenticate as authenticateOwner,
   isPasswordSet as isPasswordSetOwner,
@@ -26,7 +26,7 @@ export const RECOVERY_PATH = '/owner/account-recovery';
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
-const useAuth = () => {
+export const useAuth = () => {
   const { getDotYouClient, getApiType, getSharedSecret, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
@@ -119,5 +119,3 @@ const useAuth = () => {
     isAuthenticated: authenticationState !== 'anonymous',
   };
 };
-
-export default useAuth;

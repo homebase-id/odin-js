@@ -9,7 +9,7 @@ import {
 import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import useIdentityIFollow from '../../../hooks/follow/useIdentityIFollow';
+import { useIdentityIFollow } from '../../../hooks/follow/useIdentityIFollow';
 
 import { Alert } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';

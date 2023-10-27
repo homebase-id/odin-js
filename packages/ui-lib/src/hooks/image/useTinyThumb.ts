@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TargetDrive, DotYouClient, getDecryptedThumbnailMeta } from '@youfoundation/js-lib/core';
 import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
 
-const useTinyThumb = (
+export const useTinyThumb = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string,
@@ -42,5 +42,3 @@ const useTinyThumb = (
     }
   );
 };
-
-export default useTinyThumb;

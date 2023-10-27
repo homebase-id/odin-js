@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFollowDetail } from '@youfoundation/js-lib/network';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useFollowDetail = () => {
+export const useFollowDetail = () => {
   const { getDotYouClient, isAuthenticated, isOwner } = useAuth();
   const dotYouClient = getDotYouClient();
 
@@ -16,5 +16,3 @@ const useFollowDetail = () => {
 
   return { fetch: useQuery(['followDetail'], fetchDetail) };
 };
-
-export default useFollowDetail;

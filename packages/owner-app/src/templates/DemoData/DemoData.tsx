@@ -1,4 +1,4 @@
-import useAuth from '../../hooks/auth/useAuth';
+import { useAuth } from '../../hooks/auth/useAuth';
 import {
   SecurityGroupType,
   TargetDrive,
@@ -11,14 +11,14 @@ import {
 import { demoImageArray } from './DemoImages';
 import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
 import { lotrRealm } from './DemoLotr';
-import useAttribute from '../../hooks/profiles/useAttribute';
+import { useAttribute } from '../../hooks/profiles/useAttribute';
 import { Select, useChannel } from '@youfoundation/common-app';
 import { usePost } from '@youfoundation/common-app';
 
 import { useCircles } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import useHomeAttributes from '../../hooks/profiles/useHomeAttributes';
+import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import {
   AttributeFile,
   BuiltInAttributes,

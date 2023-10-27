@@ -9,7 +9,7 @@ import {
   t,
   useDebounce,
 } from '@youfoundation/common-app';
-import useAttribute from '../../../hooks/profiles/useAttribute';
+import { useAttribute } from '../../../hooks/profiles/useAttribute';
 import { AttributeVm, NewAttributeVm } from '../../../hooks/profiles/useAttributes';
 import { ActionButton } from '@youfoundation/common-app';
 

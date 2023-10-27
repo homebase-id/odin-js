@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { getRecoveryKey } from '../../provider/auth/RecoveryProvider';
 
-const useRecoveryKey = () => {
+export const useRecoveryKey = () => {
   const { getDotYouClient } = useAuth();
   const dotYouClient = getDotYouClient();
 
@@ -17,5 +17,3 @@ const useRecoveryKey = () => {
     }),
   };
 };
-
-export default useRecoveryKey;

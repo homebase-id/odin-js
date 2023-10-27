@@ -1,7 +1,7 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useEffect, useState } from 'react';
 import { AclIcon, AclSummary, t } from '@youfoundation/common-app';
-import useFiles from '../../hooks/files/useFiles';
+import { useFiles } from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';

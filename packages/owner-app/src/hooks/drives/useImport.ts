@@ -16,10 +16,10 @@ import {
   getRandom16ByteArray,
 } from '@youfoundation/js-lib/helpers';
 import { purgeAllFiles } from '../../provider/drives/DrivePurgeProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { isImportable } from './useExport';
 
-const useImport = () => {
+export const useImport = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const clearAllFilesOnDrive = async (drive: TargetDrive) => {
@@ -137,5 +137,3 @@ const useImport = () => {
     importUnencrypted: useMutation(importUnencrypted),
   };
 };
-
-export default useImport;

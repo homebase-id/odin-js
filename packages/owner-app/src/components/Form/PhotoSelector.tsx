@@ -4,8 +4,8 @@ import {
   GetTargetDriveFromProfileId,
   MinimalProfileFields,
 } from '@youfoundation/js-lib/profile';
-import useImage from '../../hooks/media/useImage';
-import useAttributeVersions from '../../hooks/profiles/useAttributeVersions';
+import { useImage } from '../../hooks/media/useImage';
+import { useAttributeVersions } from '../../hooks/profiles/useAttributeVersions';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { FallbackImg } from '@youfoundation/common-app';
 

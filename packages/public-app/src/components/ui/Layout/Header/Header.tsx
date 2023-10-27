@@ -8,7 +8,7 @@ import {
   OwnerName,
   useSiteData,
 } from '@youfoundation/common-app';
-import useAuth from '../../../../hooks/auth/useAuth';
+import { useAuth } from '../../../../hooks/auth/useAuth';
 
 const Header = () => {
   const { isOwner } = useAuth();

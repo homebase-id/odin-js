@@ -7,9 +7,9 @@ import {
   AllowClient,
 } from '../../provider/app/AppManagementProvider';
 import { AppClientRegistrationRequest } from '../../provider/app/AppManagementProviderTypes';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useAppClients = ({ appId }: { appId?: string }) => {
+export const useAppClients = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
@@ -108,5 +108,3 @@ const useAppClients = ({ appId }: { appId?: string }) => {
     }),
   };
 };
-
-export default useAppClients;

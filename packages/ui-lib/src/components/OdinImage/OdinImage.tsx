@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import useImage from '../../hooks/image/useImage';
-import useTinyThumb from '../../hooks/image/useTinyThumb';
+import { useImage } from '../../hooks/image/useImage';
+import { useTinyThumb } from '../../hooks/image/useTinyThumb';
 import Loader from '../ui/Icons/Loader/Loader';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import { TargetDrive, EmbeddedThumb, ImageSize, DotYouClient } from '@youfoundation/js-lib/core';

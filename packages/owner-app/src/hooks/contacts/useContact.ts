@@ -4,7 +4,7 @@ import {
   fetchConnectionInfo,
   fetchDataFromPublic,
 } from '../../provider/contact/ContactSourceProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   ContactFile,
   ContactVm,
@@ -13,7 +13,7 @@ import {
   getContactByUniqueId,
 } from '@youfoundation/js-lib/network';
 
-const useContact = ({
+export const useContact = ({
   odinId,
   id,
   canSave = true,
@@ -171,5 +171,3 @@ export const parseContact = (contact: RawContact): ContactVm => {
     source,
   };
 };
-
-export default useContact;

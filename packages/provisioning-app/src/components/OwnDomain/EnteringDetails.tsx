@@ -4,7 +4,7 @@ import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import { validDomainRegEx } from '../../helpers/common';
 import { useFetchIsOwnDomainAvailable } from '../../hooks/ownDomain/useOwnDomain';
-import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
+import { OwnDomainProvisionState } from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { Arrow, Exclamation } from '@youfoundation/common-app';
 

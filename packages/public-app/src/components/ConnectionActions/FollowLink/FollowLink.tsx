@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ActionLink, HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 
 import { Feed } from '@youfoundation/common-app';
-import useFollowDetail from '../../../hooks/follow/useFollowDetail';
+import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
 
 const FollowLink = ({

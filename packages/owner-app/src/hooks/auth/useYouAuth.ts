@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { createHomeToken } from '../../provider/auth/YouAuthProvider';
 
-const useYouAuth = () => {
+export const useYouAuth = () => {
   return {
     homeToken: useMutation(createHomeToken, {
       onError: (err) => {
@@ -10,5 +10,3 @@ const useYouAuth = () => {
     }),
   };
 };
-
-export default useYouAuth;

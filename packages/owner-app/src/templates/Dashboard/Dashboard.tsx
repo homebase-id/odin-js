@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
-import useApps from '../../hooks/apps/useApps';
+import { useApps } from '../../hooks/apps/useApps';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
   usePendingConnections,

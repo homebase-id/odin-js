@@ -4,9 +4,9 @@ import { t } from '../../helpers/i18n/dictionary';
 import EnteringDetails from '../../components/OwnDomain/EnteringDetails';
 import ValidatingDnsRecords from '../../components/OwnDomain/ValidatingDnsRecords';
 import CreateIdentityView from '../../components/CreateIdentityView.tsx/CreateIdentityView';
-import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
+import { OwnDomainProvisionState } from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import useCheckInvitationCode from '../../hooks/invitationCode/useCheckInvitationCode';
+import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { Times } from '@youfoundation/common-app';
 
 const LOCAL_EMAIL_STORAGE_KEY = 'email';

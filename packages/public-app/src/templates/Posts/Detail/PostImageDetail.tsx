@@ -1,6 +1,6 @@
 import { PostImageDetailCard, t, useBlog } from '@youfoundation/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';

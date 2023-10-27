@@ -6,7 +6,7 @@ import {
   t,
   useSecurityContext,
 } from '@youfoundation/common-app';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Persons } from '@youfoundation/common-app';
 

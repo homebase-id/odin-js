@@ -18,7 +18,7 @@ interface ImageData {
   naturalSize?: ImageSize;
 }
 
-const useImage = (
+export const useImage = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string | undefined,
@@ -204,5 +204,3 @@ const useImage = (
     remove: useMutation(removeImageFile),
   };
 };
-
-export default useImage;

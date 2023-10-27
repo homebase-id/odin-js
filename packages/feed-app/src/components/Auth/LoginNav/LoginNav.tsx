@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 
 import { LoginBox } from '../LoginBox/LoginBox';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { useOutsideTrigger, Times, Person, ConnectionImage, t } from '@youfoundation/common-app';
 
 const LoginNav = () => {

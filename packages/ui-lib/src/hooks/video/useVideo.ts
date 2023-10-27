@@ -14,7 +14,7 @@ import {
   getDecryptedVideoUrlOverTransit,
 } from '@youfoundation/js-lib/transit';
 
-const useVideo = (
+export const useVideo = (
   dotYouClient: DotYouClient,
   odinId?: string,
   videoFileId?: string | undefined,
@@ -115,5 +115,3 @@ export const useVideoUrl = (
     ),
   };
 };
-
-export default useVideo;

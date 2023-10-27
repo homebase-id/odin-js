@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
 import { ConnectionImage, OwnerImage, t } from '@youfoundation/common-app';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { Person, useOutsideTrigger } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { LoginBox } from '../LoginBox/LoginBox';

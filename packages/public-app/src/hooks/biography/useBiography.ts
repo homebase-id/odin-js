@@ -7,7 +7,7 @@ import {
   getAttributeVersions,
   getAttribute,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
 
 type ShortBioData = {
@@ -30,7 +30,7 @@ export type BiographyData = {
   experience: ExperienceData[];
 };
 
-const useBiography = () => {
+export const useBiography = () => {
   const { isAuthenticated, getDotYouClient } = useAuth();
   const queryClient = useQueryClient();
 
@@ -155,5 +155,3 @@ const useBiography = () => {
     staleTime: Infinity,
   });
 };
-
-export default useBiography;

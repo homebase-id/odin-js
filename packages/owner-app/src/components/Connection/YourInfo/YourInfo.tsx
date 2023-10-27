@@ -12,8 +12,8 @@ import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
 import { FallbackImg, t } from '@youfoundation/common-app';
-import useImage from '../../../hooks/media/useImage';
-import useAttributeVersions from '../../../hooks/profiles/useAttributeVersions';
+import { useImage } from '../../../hooks/media/useImage';
+import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { LoadingBlock, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
 import InfoBox from '../../ui/InfoBox/InfoBox';
 

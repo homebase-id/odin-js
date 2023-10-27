@@ -70,13 +70,14 @@ const ArticleComposerPage = lazy(() =>
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import useAuth, {
+import {
+  useAuth,
   FIRSTRUN_PATH,
   LOGIN_PATH,
   RECOVERY_PATH,
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
-import useIsConfigured from '../hooks/configure/useIsConfigured';
+import { useIsConfigured } from '../hooks/configure/useIsConfigured';
 import { useTransitProcessor, ErrorBoundary, t } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();

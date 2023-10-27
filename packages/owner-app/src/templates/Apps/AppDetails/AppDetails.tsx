@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Pencil, Trash, t } from '@youfoundation/common-app';
-import useApp from '../../../hooks/apps/useApp';
+import { useApp } from '../../../hooks/apps/useApp';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -15,11 +15,11 @@ import { HardDrive } from '@youfoundation/common-app';
 import { useState } from 'react';
 import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Dialog/PermissionSelectorDialog/PermissionSelectorDialog';
-import useAppClients from '../../../hooks/apps/useAppClients';
+import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { Times } from '@youfoundation/common-app';
 import { Refresh } from '@youfoundation/common-app';
 import CirclePermissionSelectorDialog from '../../../components/Dialog/CirclePermissionSelectorDialog/CirclePermissionSelectorDialog';
-import useDrives from '../../../hooks/drives/useDrives';
+import { useDrives } from '../../../hooks/drives/useDrives';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 

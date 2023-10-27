@@ -8,12 +8,12 @@ import {
   TargetDrive,
   uploadImage,
 } from '@youfoundation/js-lib/core';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const defaultDrive: TargetDrive = BlogConfig.PublicChannelDrive;
 
-const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
+export const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
@@ -87,5 +87,3 @@ const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
     // The remove mutation doesn't force invalidate the cache anymore, as removing an image always corresponds to removing the refrence as well.
   };
 };
-
-export default useImage;

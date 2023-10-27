@@ -4,7 +4,7 @@ import {
   getProfileAttributes,
   removeAttribute,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
 import { AccessControlList } from '@youfoundation/js-lib/core';
 
@@ -18,7 +18,13 @@ export interface NewAttributeVm extends Omit<AttributeFile, 'acl'> {
   isNew: true;
 }
 
-const useAttributes = ({ profileId, sectionId }: { profileId?: string; sectionId?: string }) => {
+export const useAttributes = ({
+  profileId,
+  sectionId,
+}: {
+  profileId?: string;
+  sectionId?: string;
+}) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
@@ -84,5 +90,3 @@ const useAttributes = ({ profileId, sectionId }: { profileId?: string; sectionId
     }),
   };
 };
-
-export default useAttributes;

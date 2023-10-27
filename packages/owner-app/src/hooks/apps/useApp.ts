@@ -14,9 +14,9 @@ import {
   PermissionSetGrantRequest,
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useApp = ({ appId }: { appId?: string }) => {
+export const useApp = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
@@ -147,5 +147,3 @@ const useApp = ({ appId }: { appId?: string }) => {
     }),
   };
 };
-
-export default useApp;

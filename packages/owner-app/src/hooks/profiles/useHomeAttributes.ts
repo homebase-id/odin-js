@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAttributes } from '@youfoundation/js-lib/profile';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 import { AttributeDefinitions } from './AttributeDefinitions';
 
-const useHomeAttributes = () => {
+export const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchTheme = async () => {
@@ -33,5 +33,3 @@ const useHomeAttributes = () => {
     ),
   };
 };
-
-export default useHomeAttributes;

@@ -6,7 +6,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
-import useVideo, { useVideoUrl } from '../../hooks/video/useVideo';
+import { useVideo, useVideoUrl } from '../../hooks/video/useVideo';
 
 import '../../app/app.css';
 import { Exclamation } from '../ui/Icons/Exclamation';

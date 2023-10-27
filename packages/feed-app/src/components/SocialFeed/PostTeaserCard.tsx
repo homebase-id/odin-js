@@ -14,7 +14,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
-import useAuth from '../../hooks/auth/useAuth';
+import { useAuth } from '../../hooks/auth/useAuth';
 interface PostTeaserCardProps {
   className?: string;
   postFile: PostFile<PostContent>;

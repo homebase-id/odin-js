@@ -1,8 +1,8 @@
-import { getNewId, slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getNewId, slugify } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import useAttributes from '../../../hooks/profiles/useAttributes';
+import { useAttributes } from '../../../hooks/profiles/useAttributes';
 import { ActionButton, ActionGroup, Pencil, useProfiles } from '@youfoundation/common-app';
 
 import AttributeCreator from '../../../components/Attribute/AttributeCreator/AttributeCreator';
@@ -13,7 +13,7 @@ import AttributeGroup from '../../../components/Attribute/AttributeGroup/Attribu
 import ProfileDialog from '../../../components/Dialog/ProfileDialog/ProfileDialog';
 import { Heart, Plus } from '@youfoundation/common-app';
 import SectionEditor from '../../../components/SectionEditor/SectionEditor';
-import useProfileSections from '../../../hooks/profiles/useProfileSections';
+import { useProfileSections } from '../../../hooks/profiles/useProfileSections';
 import Submenu from '../../../components/SubMenu/SubMenu';
 import { LoadingBlock } from '@youfoundation/common-app';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';

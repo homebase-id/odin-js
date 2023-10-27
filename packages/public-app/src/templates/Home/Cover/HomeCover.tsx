@@ -11,7 +11,7 @@ import {
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 
 const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
   const { owner } = useSiteData().data ?? {};

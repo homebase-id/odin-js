@@ -11,7 +11,7 @@ import {
 } from '../../hooks/managedDomain/useManagedDomain';
 import { Arrow, Exclamation, Loader } from '@youfoundation/common-app';
 import { domainFromPrefixAndApex, validDomainLabelRegEx } from '../../helpers/common';
-import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
+import { ManagedDomainProvisionState } from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import CreateManagedDomain from './CreateManagedDomain';
 import { debounce } from 'lodash-es';
 import { AlertError } from '../ErrorAlert/ErrorAlert';

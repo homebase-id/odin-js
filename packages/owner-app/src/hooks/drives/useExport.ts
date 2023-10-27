@@ -11,7 +11,7 @@ import {
   DriveSearchResult,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
 const includeMetadataHeader = true;
 const pageSize = 10;
@@ -71,7 +71,7 @@ export const isImportable = (obj: unknown): obj is importable => {
   return true;
 };
 
-const useExport = () => {
+export const useExport = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
@@ -168,5 +168,3 @@ const useExport = () => {
     exportUnencrypted: useMutation(exportUnencrypted),
   };
 };
-
-export default useExport;

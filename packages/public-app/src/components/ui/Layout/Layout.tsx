@@ -1,6 +1,6 @@
 import { FC, ReactNode, Suspense, lazy, useEffect } from 'react';
-import useTheme from '../../../hooks/theme/useTheme';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useTheme } from '../../../hooks/theme/useTheme';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useImage } from '@youfoundation/common-app';

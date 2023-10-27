@@ -17,7 +17,7 @@ const hasSharedSecret = (isOwner?: boolean) => {
   }
 };
 
-const useVerifyToken = (isOwner?: boolean) => {
+export const useVerifyToken = (isOwner?: boolean) => {
   const fetchData = async () => {
     if (!hasSharedSecret(isOwner)) return false;
 
@@ -29,5 +29,3 @@ const useVerifyToken = (isOwner?: boolean) => {
     staleTime: MINUTE_IN_MS * 10,
   });
 };
-
-export default useVerifyToken;

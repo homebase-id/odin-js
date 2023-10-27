@@ -1,7 +1,7 @@
 import { t } from '@youfoundation/common-app';
-import useTheme from '../theme/useTheme';
+import { useTheme } from '../theme/useTheme';
 
-const useTabs = () => {
+export const useTabs = () => {
   const { isTabs, tabsOrder } = useTheme();
 
   const tabsArray = tabsOrder.map((tab) => {
@@ -16,5 +16,3 @@ const useTabs = () => {
     tabs: [...tabsArray],
   };
 };
-
-export default useTabs;

@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const root = '//' + window.location.host + '/api/registration/v1';
 
-const useCheckInvitationCode = (code?: string) => {
+export const useCheckInvitationCode = (code?: string) => {
   const doCheckInvitationCode = async (code: string) => {
     const response = await axios
       .get(`${root}/registration/is-valid-invitation-code/${code}`)
@@ -27,5 +27,3 @@ const useCheckInvitationCode = (code?: string) => {
     ),
   };
 };
-
-export default useCheckInvitationCode;

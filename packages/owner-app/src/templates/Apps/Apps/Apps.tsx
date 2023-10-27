@@ -1,5 +1,5 @@
 import { HybridLink, SubtleMessage, t } from '@youfoundation/common-app';
-import useApps from '../../../hooks/apps/useApps';
+import { useApps } from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
 import { LoadingBlock } from '@youfoundation/common-app';

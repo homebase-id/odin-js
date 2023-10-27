@@ -8,7 +8,7 @@ import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingBlock } from '@youfoundation/common-app';
-import useAuth from '../../../../hooks/auth/useAuth';
+import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 

@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DriveDefinition, getDrivesByType, TargetDrive } from '@youfoundation/js-lib/core';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
+export const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
@@ -40,5 +40,3 @@ const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
     ),
   };
 };
-
-export default useDrive;

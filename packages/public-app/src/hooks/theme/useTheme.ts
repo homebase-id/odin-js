@@ -39,7 +39,7 @@ const DEFAULT_SETTINGS: TemplateSettings = {
   },
 };
 
-const useTheme = () => {
+export const useTheme = () => {
   const { home } = useSiteData().data ?? {};
   const templateSettings = home?.templateSettings;
 
@@ -61,5 +61,3 @@ const useTheme = () => {
 
   return { themeId, isTabs, tabsOrder, colors, favicon } as TemplateSettings;
 };
-
-export default useTheme;

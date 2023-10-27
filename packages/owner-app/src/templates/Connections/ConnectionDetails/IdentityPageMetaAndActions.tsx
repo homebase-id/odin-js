@@ -13,8 +13,8 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import useConnection from '../../../hooks/connections/useConnection';
-import useContact from '../../../hooks/contacts/useContact';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useContact } from '../../../hooks/contacts/useContact';
 import { useEffect, useState } from 'react';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';

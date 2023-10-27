@@ -1,5 +1,5 @@
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
-import useBiography from '../../../../hooks/biography/useBiography';
+import { useBiography } from '../../../../hooks/biography/useBiography';
 import { Arrow, FallbackImg, RichTextRenderer, t, Image } from '@youfoundation/common-app';
 import { useMemo, useState } from 'react';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';

@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchFollower } from '@youfoundation/js-lib/network';
 
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
 type useFollowerProps = {
   odinId?: string;
 };
 
-const useFollower = ({ odinId }: useFollowerProps) => {
+export const useFollower = ({ odinId }: useFollowerProps) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchFollowDetails = async ({ odinId }: { odinId: string }) => {
@@ -24,5 +24,3 @@ const useFollower = ({ odinId }: useFollowerProps) => {
     }),
   };
 };
-
-export default useFollower;

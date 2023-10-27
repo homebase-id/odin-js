@@ -3,7 +3,7 @@ import { hasValidToken } from '../../provider/auth/AuthenticationProvider';
 
 const MINUTE_IN_MS = 60000;
 
-const useVerifyToken = () => {
+export const useVerifyToken = () => {
   const fetchData = async () => {
     return await hasValidToken();
   };
@@ -12,5 +12,3 @@ const useVerifyToken = () => {
     staleTime: MINUTE_IN_MS * 10,
   });
 };
-
-export default useVerifyToken;

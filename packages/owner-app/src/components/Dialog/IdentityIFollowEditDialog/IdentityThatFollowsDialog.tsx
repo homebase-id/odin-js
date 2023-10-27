@@ -6,7 +6,7 @@ import { DialogWrapper } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import useFollower from '../../../hooks/follow/useFollower';
+import { useFollower } from '../../../hooks/follow/useFollower';
 
 const IdentityThatFollowsDialog = ({
   odinId,

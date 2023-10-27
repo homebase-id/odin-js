@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert, Arrow, Textarea, t, useCheckIdentity } from '@youfoundation/common-app';
-import useConnection from '../../../hooks/connections/useConnection';
-import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';

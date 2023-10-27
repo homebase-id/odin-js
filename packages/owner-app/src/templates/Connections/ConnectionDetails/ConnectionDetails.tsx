@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
-import useConnection from '../../../hooks/connections/useConnection';
-import useContact from '../../../hooks/contacts/useContact';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useContact } from '../../../hooks/contacts/useContact';
 import ContactInfo from '../../../components/Connection/ContactInfo/ContactInfo';
 import { CircleMembershipDialog } from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';

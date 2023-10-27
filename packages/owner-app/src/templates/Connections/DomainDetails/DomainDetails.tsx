@@ -20,14 +20,14 @@ import {
   t,
   useCircles,
 } from '@youfoundation/common-app';
-import useDomain from '../../../hooks/connections/useDomain';
+import { useDomain } from '../../../hooks/connections/useDomain';
 import { useState } from 'react';
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import { CircleDomainMembershipDialog } from '../../../components/Dialog/CircleMembershipDialog/CircleMembershipDialog';
 import { CircleGrant } from '@youfoundation/js-lib/network';
-import useDomainClients from '../../../hooks/connections/useDomainClients';
+import { useDomainClients } from '../../../hooks/connections/useDomainClients';
 import { DomainClient } from '../../../provider/network/domainNetwork/DomainProvider';
 import { getUniqueDrivesWithHighestPermission } from '@youfoundation/js-lib/helpers';
 

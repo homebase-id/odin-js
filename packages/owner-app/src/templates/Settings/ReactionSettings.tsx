@@ -2,7 +2,7 @@
 import { ErrorNotification, t, Label } from '@youfoundation/common-app';
 import RadioButton from '../../components/Form/RadioButton';
 import Section from '../../components/ui/Sections/Section';
-import useSettings from '../../hooks/settings/useSettings';
+import { useSettings } from '../../hooks/settings/useSettings';
 
 export const ReactionSettings = () => {
   const {

@@ -9,9 +9,9 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import IncomingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/IncomingConnectionDialog';
-import useConnection from '../../../hooks/connections/useConnection';
-import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
-import usePendingConnection from '../../../hooks/connections/usePendingConnection';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
+import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 
 export const IdentityAlerts = ({ odinId }: { odinId: string }) => {
   const navigate = useNavigate();

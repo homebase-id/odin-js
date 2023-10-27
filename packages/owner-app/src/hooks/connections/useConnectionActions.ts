@@ -9,7 +9,7 @@ import {
 } from '@youfoundation/js-lib/network';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
 export const useConnectionActions = () => {
   const queryClient = useQueryClient();

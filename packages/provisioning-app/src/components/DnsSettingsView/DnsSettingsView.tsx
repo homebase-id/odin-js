@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
 import { DnsConfig, DnsRecord } from '../../hooks/commonDomain/commonDomain';
-import { Arrow, Check, Exclamation, Loader } from '@youfoundation/common-app';
+import { Arrow, Check, DialogWrapper, Exclamation, Loader } from '@youfoundation/common-app';
 import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
-import DialogWrapper from '../ui/Dialog/DialogWrapper';
 
 const DnsSettingsView = ({
   domain,

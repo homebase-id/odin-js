@@ -11,7 +11,7 @@ import { RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 import { Helmet } from 'react-helmet-async';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
-import useApp from '../../hooks/apps/useApp';
+import { useApp } from '../../hooks/apps/useApp';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { useEffect, useMemo, useState } from 'react';
 import DrivePermissionView from '../../components/PermissionViews/DrivePermissionView/DrivePermissionView';

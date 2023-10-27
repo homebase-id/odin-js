@@ -6,7 +6,7 @@ import {
   saveAttribute,
   removeAttribute,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
@@ -22,7 +22,13 @@ const getListItemCacheKey = (newAttrVm: Attribute) => {
   ];
 };
 
-const useAttribute = ({ profileId, attributeId }: { profileId?: string; attributeId?: string }) => {
+export const useAttribute = ({
+  profileId,
+  attributeId,
+}: {
+  profileId?: string;
+  attributeId?: string;
+}) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
@@ -196,5 +202,3 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
     }),
   };
 };
-
-export default useAttribute;

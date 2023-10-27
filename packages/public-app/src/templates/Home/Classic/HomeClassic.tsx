@@ -8,7 +8,7 @@ import LinksHome from '../Common/Links/Links';
 import About from '../Common/About/About';
 import Channels from '../Common/Posts/Channels';
 import Connections from '../Common/Connections/Connections';
-import useTabs from '../../../hooks/tabs/useTabs';
+import { useTabs } from '../../../hooks/tabs/useTabs';
 import { HOME_ROOT_PATH, ThemeWithTabsSettings } from '@youfoundation/common-app';
 
 const HomeClassic = (props: { templateSettings: ThemeWithTabsSettings; tab?: string }) => {

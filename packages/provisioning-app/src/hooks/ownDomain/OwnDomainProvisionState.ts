@@ -1,3 +1,1 @@
-type OwnDomainProvisionState = 'EnteringDetails' | 'DnsRecords' | 'Provisioning' | 'Failed';
-
-export default OwnDomainProvisionState;
+export type OwnDomainProvisionState = 'EnteringDetails' | 'DnsRecords' | 'Provisioning' | 'Failed';

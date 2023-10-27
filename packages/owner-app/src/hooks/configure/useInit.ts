@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { toGuidId } from '@youfoundation/js-lib/helpers';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
@@ -16,7 +16,7 @@ import { useStaticFiles } from '@youfoundation/common-app';
 
 export const FIRST_RUN_TOKEN_STORAGE_KEY = 'first-run-token';
 
-const useInit = () => {
+export const useInit = () => {
   const { isAuthenticated } = useAuth();
   const firstRunToken = localStorage.getItem(FIRST_RUN_TOKEN_STORAGE_KEY);
 
@@ -86,5 +86,3 @@ const useInit = () => {
     }),
   };
 };
-
-export default useInit;

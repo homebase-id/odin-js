@@ -5,10 +5,10 @@ import {
   removeProfileSection,
   saveProfileSection,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
-import useAttributes from './useAttributes';
+import { useAuth } from '../auth/useAuth';
+import { useAttributes } from './useAttributes';
 
-const useProfileSections = ({ profileId }: { profileId?: string }) => {
+export const useProfileSections = ({ profileId }: { profileId?: string }) => {
   const queryClient = useQueryClient();
   const { mutateAsync: removeAttributes } = useAttributes({}).removeAttributes;
   const dotYouClient = useAuth().getDotYouClient();
@@ -105,5 +105,3 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
     }),
   };
 };
-
-export default useProfileSections;

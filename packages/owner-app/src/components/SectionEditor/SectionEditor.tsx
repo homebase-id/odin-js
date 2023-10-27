@@ -1,7 +1,7 @@
 import { ProfileSection } from '@youfoundation/js-lib/profile';
 import { useState } from 'react';
 import { Trash, t } from '@youfoundation/common-app';
-import useProfileSections from '../../hooks/profiles/useProfileSections';
+import { useProfileSections } from '../../hooks/profiles/useProfileSections';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';

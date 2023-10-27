@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   ConnectionRequest,
   acceptConnectionRequest,
@@ -9,7 +9,7 @@ import {
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 
-const usePendingConnection = ({ odinId }: { odinId?: string }) => {
+export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
@@ -91,5 +91,3 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
     }),
   };
 };
-
-export default usePendingConnection;

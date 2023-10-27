@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 
-const useEula = () => {
+export const useEula = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchRequired = async (): Promise<string | false> => {
@@ -33,5 +33,3 @@ const useEula = () => {
     markEulaAsAccepted: useMutation(markAccepted),
   };
 };
-
-export default useEula;

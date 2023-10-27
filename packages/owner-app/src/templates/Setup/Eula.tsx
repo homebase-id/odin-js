@@ -1,7 +1,7 @@
 import { ActionButton, t } from '@youfoundation/common-app';
 import { useEffect } from 'react';
 import Checkbox from '../../components/Form/Checkbox';
-import useEula from '../../hooks/eula/useEula';
+import { useEula } from '../../hooks/eula/useEula';
 
 export const Eula = ({ onConfirm }: { onConfirm: () => void }) => {
   const {

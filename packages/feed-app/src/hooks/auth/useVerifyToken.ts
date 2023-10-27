@@ -10,7 +10,7 @@ const hasSharedSecret = () => {
   return !!raw;
 };
 
-const useVerifyToken = (dotYouClient: DotYouClient) => {
+export const useVerifyToken = (dotYouClient: DotYouClient) => {
   const fetchData = async () => {
     if (!hasSharedSecret()) {
       return false;
@@ -23,5 +23,3 @@ const useVerifyToken = (dotYouClient: DotYouClient) => {
     staleTime: MINUTE_IN_MS * 10,
   });
 };
-
-export default useVerifyToken;

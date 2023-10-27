@@ -1,5 +1,5 @@
 import { moveElementInArray } from '../../templates/DemoData/helpers';
-import useAttribute from './useAttribute';
+import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';
 
 export type attributeGroup = {
@@ -8,7 +8,7 @@ export type attributeGroup = {
   priority: number;
 };
 
-const useAttributeOrderer = ({
+export const useAttributeOrderer = ({
   attributes,
   groupedAttributes,
 }: {
@@ -112,5 +112,3 @@ const useAttributeOrderer = ({
 
   return { reorderAttr, reorderAttrGroup };
 };
-
-export default useAttributeOrderer;

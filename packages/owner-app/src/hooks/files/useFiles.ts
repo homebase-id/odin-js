@@ -9,13 +9,13 @@ import {
   SystemFileType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const includeMetadataHeader = true;
 const pageSize = 300;
 
-const useFiles = ({
+export const useFiles = ({
   targetDrive,
   systemFileType,
 }: {
@@ -109,5 +109,3 @@ const useFiles = ({
     fetchFile: fetchFile,
   };
 };
-
-export default useFiles;

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import useContact from '../../../hooks/contacts/useContact';
+import { useContact } from '../../../hooks/contacts/useContact';
 import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import { ContactConfig } from '@youfoundation/js-lib/network';

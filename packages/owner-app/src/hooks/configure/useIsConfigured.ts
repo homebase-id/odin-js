@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { isConfigured } from '../../provider/system/SystemProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
 const LOCAL_STORAGE_KEY = 'isConfigured';
 const MINUTE_IN_MS = 60000;
 
-const useIsConfigured = () => {
+export const useIsConfigured = () => {
   const { getSharedSecret, isAuthenticated } = useAuth();
   const dotYouClient = useAuth().getDotYouClient();
   const sharedSecret = getSharedSecret();
@@ -41,5 +41,3 @@ const useIsConfigured = () => {
     }),
   };
 };
-
-export default useIsConfigured;

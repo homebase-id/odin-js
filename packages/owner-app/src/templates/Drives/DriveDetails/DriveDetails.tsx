@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ActionButton, Pencil, t } from '@youfoundation/common-app';
-import useDrive from '../../../hooks/drives/useDrive';
+import { useDrive } from '../../../hooks/drives/useDrive';
 
 import { HardDrive } from '@youfoundation/common-app';
 
 import Section from '../../../components/ui/Sections/Section';
 import LoadingDetailPage from '../../../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import useExport from '../../../hooks/drives/useExport';
+import { useExport } from '../../../hooks/drives/useExport';
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import { CirclePermissionView } from '@youfoundation/common-app';
-import useApps from '../../../hooks/apps/useApps';
+import { useApps } from '../../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
 import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
 import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
@@ -48,12 +48,13 @@ const DriveDetails = () => {
 
   const targetDriveInfo = driveDef?.targetDriveInfo;
 
-  const circlesWithAGrantOnThis = circles?.filter((circle) =>
-    circle.driveGrants?.some(
-      (grant) =>
-        grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
-        grant.permissionedDrive.drive.type === targetDriveInfo.type
-    )
+  const circlesWithAGrantOnThis = circles?.filter(
+    (circle) =>
+      circle.driveGrants?.some(
+        (grant) =>
+          grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
+          grant.permissionedDrive.drive.type === targetDriveInfo.type
+      )
   );
 
   const appsWithAGrantOnThis = apps?.filter((app) =>

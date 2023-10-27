@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   disconnectFromDomain,
   getDomainClients,
@@ -8,7 +8,7 @@ import {
   revokeDomainAccess,
 } from '../../provider/network/domainNetwork/DomainProvider';
 
-const useDomain = ({ domain }: { domain?: string }) => {
+export const useDomain = ({ domain }: { domain?: string }) => {
   const queryClient = useQueryClient();
 
   const dotYouClient = useAuth().getDotYouClient();
@@ -81,5 +81,3 @@ const useDomain = ({ domain }: { domain?: string }) => {
     }),
   };
 };
-
-export default useDomain;

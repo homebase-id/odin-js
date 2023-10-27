@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CursoredResult } from '@youfoundation/js-lib/core';
 
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { parseContact } from './useContact';
 import { RawContact, getContacts } from '@youfoundation/js-lib/network';
 
 const pageSize = 10;
 
-const useContacts = () => {
+export const useContacts = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetch = async (cursorState: string): Promise<CursoredResult<RawContact[]>> => {
@@ -25,5 +25,3 @@ const useContacts = () => {
     }),
   };
 };
-
-export default useContacts;

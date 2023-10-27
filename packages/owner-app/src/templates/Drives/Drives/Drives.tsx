@@ -1,7 +1,7 @@
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import React from 'react';
 import { t } from '@youfoundation/common-app';
-import useDrives from '../../../hooks/drives/useDrives';
+import { useDrives } from '../../../hooks/drives/useDrives';
 import { HardDrive } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import { SectionTitle } from '../../../components/ui/Sections/Section';

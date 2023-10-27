@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { domainFromPrefixAndApex } from '../../helpers/common';
 import { t } from '../../helpers/i18n/dictionary';
-import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
+import { ManagedDomainProvisionState } from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import { useCreateManagedDomain } from '../../hooks/managedDomain/useManagedDomain';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';

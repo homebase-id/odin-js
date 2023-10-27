@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { GetAppRegistrations } from '../../provider/app/AppManagementProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useApps = () => {
+export const useApps = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchRegistered = async () => {
@@ -16,5 +16,3 @@ const useApps = () => {
     }),
   };
 };
-
-export default useApps;

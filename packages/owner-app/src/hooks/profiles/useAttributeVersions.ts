@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAttributeVersions } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useAttributeVersions = ({ profileId, type }: { profileId: string; type: string }) => {
+export const useAttributeVersions = ({ profileId, type }: { profileId: string; type: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchVersions = async ({ profileId, type }: { profileId: string; type: string }) => {
@@ -18,5 +18,3 @@ const useAttributeVersions = ({ profileId, type }: { profileId: string; type: st
     ),
   };
 };
-
-export default useAttributeVersions;

@@ -7,8 +7,8 @@ import { DomainHighlighter } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import { useEffect } from 'react';
 import { Loader } from '@youfoundation/common-app';
-import useConnection from '../../hooks/connections/useConnection';
-import useYouAuth from '../../hooks/auth/useYouAuth';
+import { useConnection } from '../../hooks/connections/useConnection';
+import { useYouAuth } from '../../hooks/auth/useYouAuth';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 
 // OLD implementation

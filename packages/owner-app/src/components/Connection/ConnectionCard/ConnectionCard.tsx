@@ -1,4 +1,4 @@
-import useContact from '../../../hooks/contacts/useContact';
+import { useContact } from '../../../hooks/contacts/useContact';
 import { LoadingBlock } from '@youfoundation/common-app';
 import PersonCard, { PersonCardProps } from '../PersonCard/PersonCard';
 

@@ -14,7 +14,7 @@ import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
+import { useIdentityIFollow } from '../../hooks/follow/useIdentityIFollow';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
