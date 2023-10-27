@@ -40,6 +40,9 @@ export const uploadFile = async (
       metadata,
     });
 
+  // Force payloadIsEncrypted on the metadata to match the encrypt flag
+  metadata.payloadIsEncrypted = encrypt;
+
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadUsingKeyHeader(
     dotYouClient,
