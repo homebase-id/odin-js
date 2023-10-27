@@ -1,8 +1,8 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getPayload } from '../../core/DriveData/DriveFileProvider';
-import { queryBatch } from '../../core/DriveData/DriveQueryProvider';
-import { CursoredResult } from '../../core/DriveData/DriveQueryTypes';
-import { DriveSearchResult } from '../../core/DriveData/DriveTypes';
+import { getPayload } from '../../core/DriveData/File/DriveFileProvider';
+import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
+import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
+import { DriveSearchResult } from '../../core/DriveData/Drive/DriveTypes';
 import { toGuidId } from '../../helpers/DataUtil';
 import { ContactConfig, ContactFile } from './ContactTypes';
 

@@ -1,8 +1,8 @@
-import { AccessControlList } from './DriveUploadTypes';
+import { AccessControlList } from '../Upload/DriveUploadTypes';
 
 export type SystemFileType = 'Standard' | 'Comment';
 
-export interface FileMetadata {
+export interface FileMetadata<T = string> {
   created: number;
   globalTransitId?: string;
   updated: number;
@@ -11,7 +11,7 @@ export interface FileMetadata {
   senderOdinId: string;
   payloadSize: number;
   originalRecipientList: string[];
-  appData: AppFileMetaData;
+  appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
   versionTag: string;
 }
@@ -47,7 +47,7 @@ type Removed = 2;
 
 export type ArchivalStatus = None | Archived | Removed | number;
 
-export interface AppFileMetaData {
+export interface AppFileMetaData<T = string> {
   fileType: number;
   dataType: number;
   groupId?: string;
@@ -55,7 +55,7 @@ export interface AppFileMetaData {
   tags: string[] | null;
   uniqueId?: string;
   contentIsComplete: boolean;
-  jsonContent: string;
+  jsonContent: T;
   previewThumbnail?: EmbeddedThumb;
   additionalThumbnails?: ThumbSize[];
   archivalStatus?: ArchivalStatus;

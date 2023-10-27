@@ -1,4 +1,4 @@
-import { TargetDrive, ThumbSize } from '../../core/DriveData/DriveFileTypes';
+import { TargetDrive, ThumbSize } from '../../core/DriveData/File/DriveFileTypes';
 
 export class ContactConfig {
   static readonly ContactFileType: number = 100;

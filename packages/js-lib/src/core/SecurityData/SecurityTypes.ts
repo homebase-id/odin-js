@@ -1,5 +1,5 @@
 import { DriveGrant } from '../../network/circleNetwork/CircleDataTypes';
-import { PermissionSet } from '../DriveData/DriveTypes';
+import { PermissionSet } from '../DriveData/Drive/DriveTypes';
 
 export interface SecurityCaller {
   odinId?: string;

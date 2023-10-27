@@ -1,10 +1,6 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { decryptKeyHeader, decryptJsonContent } from '../../core/DriveData/SecurityHelpers';
 import {
   CursoredResult,
-  FileMetadata,
-  EncryptedKeyHeader,
-  getPayload,
   FileQueryParams,
   GetBatchQueryResultOptions,
   queryBatch,
@@ -15,7 +11,6 @@ import {
   ChannelDefinition,
   PostContent,
   PostFile,
-  GetTargetDriveFromChannelId,
   BlogConfig,
   parseReactionPreview,
   getRecentPosts,
@@ -36,48 +31,6 @@ export interface PostFileVm<T extends PostContent> extends PostFile<T> {
 export interface RecentsFromConnectionsReturn extends CursoredResult<PostFileVm<PostContent>[]> {
   ownerCursorState?: Record<string, string>;
 }
-
-const getSocialFeedPostPayload = async (
-  odinId: string,
-  dotYouClient: DotYouClient,
-  fileId: string,
-  fileMetadata: FileMetadata,
-  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader,
-  includesJsonContent: boolean
-) => {
-  const isLocal = odinId === window.location.hostname;
-
-  const getPayloadParams = [
-    // targetDrive,
-    { fileId, fileMetadata, sharedSecretEncryptedKeyHeader },
-    includesJsonContent,
-  ] as const;
-
-  if (!includesJsonContent) {
-    // Shouldn't ever happen..
-    console.error('[DotYouCore-js] Missing content');
-  }
-
-  // Get and parse Json Content
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
-    : undefined;
-
-  const contentFromHeader = await decryptJsonContent<PostContent>(fileMetadata, keyheader);
-  if (fileMetadata.appData.contentIsComplete) return contentFromHeader;
-
-  // Content isn't complete, we fetch the payload from the source drive with the drive baesd on the channelId in the post:
-  const targetDrive =
-    GetTargetDriveFromChannelId(contentFromHeader.channelId) || BlogConfig.PublicChannelDrive;
-  return isLocal
-    ? await getPayload<PostContent>(dotYouClient, targetDrive, ...getPayloadParams)
-    : await getPayloadOverTransit<PostContent>(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        ...getPayloadParams
-      );
-};
 
 export const getSocialFeed = async (
   dotYouClient: DotYouClient,

@@ -25,24 +25,24 @@ export const getDecryptedThumbnailMetaOverTransit = async (
   systemFileType?: SystemFileType
 ): Promise<ThumbnailMeta | undefined> => {
   //it seems these will be fine for images but for video and audio we must stream decrypt
-  return getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, systemFileType).then(
-    (header) => {
-      if (!header.fileMetadata.appData.previewThumbnail) {
-        return;
-      }
-
-      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-      const bytes = base64ToUint8Array(previewThumbnail.content);
-      const url = `data:${previewThumbnail.contentType};base64,${uint8ArrayToBase64(bytes)}`;
-
-      return {
-        naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-        sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
-        url: url,
-        contentType: previewThumbnail.contentType,
-      };
+  return getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+    systemFileType,
+  }).then((header) => {
+    if (!header?.fileMetadata.appData.previewThumbnail) {
+      return;
     }
-  );
+
+    const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+    const bytes = base64ToUint8Array(previewThumbnail.content);
+    const url = `data:${previewThumbnail.contentType};base64,${uint8ArrayToBase64(bytes)}`;
+
+    return {
+      naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+      sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
+      url: url,
+      contentType: previewThumbnail.contentType,
+    };
+  });
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
@@ -83,13 +83,9 @@ export const getDecryptedImageUrlOverTransit = async (
   // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
   //   and the CAT is passed via a header that we can't set on a direct url
   if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
-    const meta = await getFileHeaderOverTransit(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      fileId,
-      systemFileType
-    );
+    const meta = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+      systemFileType,
+    });
     if (!meta?.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();
     }
@@ -147,14 +143,9 @@ export const getDecryptedImageDataOverTransit = async (
     }
   }
 
-  const payloadData = await getPayloadBytesOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    undefined,
-    systemFileType
-  );
+  const payloadData = await getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+    systemFileType,
+  });
 
   if (!payloadData) return null;
 

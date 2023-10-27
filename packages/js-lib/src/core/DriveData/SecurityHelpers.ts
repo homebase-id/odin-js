@@ -1,8 +1,8 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { EncryptedKeyHeader, KeyHeader } from './DriveTypes';
-import { streamToByteArray } from './UploadHelpers';
+import { EncryptedKeyHeader, KeyHeader } from './Drive/DriveTypes';
+import { streamToByteArray } from './Upload/UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
   jsonStringify64,
@@ -10,9 +10,8 @@ import {
   byteArrayToString,
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
-  tryJsonParse,
 } from '../../helpers/DataUtil';
-import { FileMetadata } from './DriveFileTypes';
+import { FileMetadata } from './File/DriveFileTypes';
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -72,30 +71,25 @@ export const encryptWithSharedSecret = async (
 };
 
 /// Decryption
-export const decryptJsonContent = async <T>(
+export const decryptJsonContent = async (
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
-): Promise<T> => {
-  if (keyheader) {
-    try {
-      const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
-      const json = byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
+): Promise<string> => {
+  if (!keyheader) return fileMetaData.appData.jsonContent;
 
-      return tryJsonParse<T>(json);
-    } catch (err) {
-      console.error('[DotYouCore-js]', 'Json Content Decryption failed. Trying to only parse JSON');
-    }
+  try {
+    const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
+    return byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
+  } catch (err) {
+    console.error('[DotYouCore-js]', 'Json Content Decryption failed');
+    return '';
   }
-
-  return tryJsonParse<T>(fileMetaData.appData.jsonContent);
 };
 
 export const decryptUsingKeyHeader = async (
   cipher: Uint8Array,
   keyHeader: KeyHeader
-): Promise<Uint8Array> => {
-  return await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
-};
+): Promise<Uint8Array> => await cbcDecrypt(cipher, keyHeader.iv, keyHeader.aesKey);
 
 export const decryptBytesResponse = async (
   dotYouClient: DotYouClient,

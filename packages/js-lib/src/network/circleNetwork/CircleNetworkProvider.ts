@@ -3,7 +3,7 @@ import {
   NumberCursoredResult,
   PagedResult,
   PagingOptions,
-} from '../../core/DriveData/DriveQueryTypes';
+} from '../../core/DriveData/Query/DriveQueryTypes';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 

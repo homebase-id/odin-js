@@ -1,4 +1,4 @@
-import { FileQueryParams } from '../../core/DriveData/DriveTypes';
+import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { TargetDrive } from '../../core/core';
 import { ProfileConfig, BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { AttributeConfig, BuiltInAttributes } from '../../profile/profile';

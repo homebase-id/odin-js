@@ -12,7 +12,7 @@ import {
   encryptMetaData,
   buildDescriptor,
   buildFormData,
-} from '../../core/DriveData/UploadHelpers';
+} from '../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
   FileQueryParams,
@@ -41,6 +41,7 @@ import {
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import { hasDebugFlag } from '../../helpers/BrowserUtil';
+import { parseBytesToObject } from '../../core/DriveData/File/DriveFileHelper';
 
 interface GetFileRequest {
   odinId: string;
@@ -100,56 +101,23 @@ export const queryBatchOverTransit = async (
     });
 };
 
-export const getPayloadOverTransit = async <T>(
-  dotYouClient: DotYouClient,
-  odinId: string,
-  targetDrive: TargetDrive,
-  dsr: {
-    fileId: string;
-    fileMetadata: FileMetadata;
-    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
-  },
-  includesJsonContent: boolean
-): Promise<T | null> => {
-  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
-
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
-    : undefined;
-
-  if (fileMetadata.appData.contentIsComplete && includesJsonContent) {
-    return await decryptJsonContent<T>(fileMetadata, keyheader);
-  } else {
-    return await getPayloadAsJsonOverTransit<T>(
-      dotYouClient,
-      odinId,
-      targetDrive,
-      fileId,
-      keyheader
-    );
-  }
-};
-
 export const getPayloadAsJsonOverTransit = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader: KeyHeader | undefined,
-  systemFileType?: SystemFileType
+  options: {
+    keyHeader: KeyHeader | EncryptedKeyHeader | undefined;
+    systemFileType?: SystemFileType;
+  }
 ): Promise<T | null> => {
-  return getPayloadBytesOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
+  const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
+
+  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, {
     keyHeader,
-    systemFileType
-  ).then((data) => {
-    if (!data) return null;
-    const json = byteArrayToString(new Uint8Array(data.bytes));
-    return tryJsonParse<T>(json);
-  });
+    systemFileType,
+    decrypt: true,
+  }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
 export const getPayloadBytesOverTransit = async (
@@ -157,13 +125,20 @@ export const getPayloadBytesOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  keyHeader?: KeyHeader | undefined,
-  systemFileType?: SystemFileType,
-  chunkStart?: number,
-  chunkEnd?: number
+  options: {
+    keyHeader?: KeyHeader | EncryptedKeyHeader;
+    systemFileType?: SystemFileType;
+    chunkStart?: number;
+    chunkEnd?: number;
+    decrypt?: boolean;
+  }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
+
+  const { keyHeader, chunkStart, chunkEnd } = options;
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
 
   const client = dotYouClient.createAxiosClient({
     headers: {
@@ -198,20 +173,18 @@ export const getPayloadBytesOverTransit = async (
     .post<ArrayBuffer>('/transit/query/payload', request, config)
     .then(async (response) => {
       return {
-        bytes:
-          request.chunk?.start !== undefined
-            ? (
-                await decryptChunkedBytesResponse(
-                  dotYouClient,
-                  response,
-                  startOffset,
-                  request.chunk.start
-                )
-              ).slice(
-                0,
-                chunkEnd && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined
+        bytes: !decrypt
+          ? new Uint8Array(response.data)
+          : request.chunk?.start !== undefined
+          ? (
+              await decryptChunkedBytesResponse(
+                dotYouClient,
+                response,
+                startOffset,
+                request.chunk.start
               )
-            : await decryptBytesResponse(dotYouClient, response, keyHeader),
+            ).slice(0, chunkEnd && chunkStart !== undefined ? chunkEnd - chunkStart + 1 : undefined)
+          : await decryptBytesResponse(dotYouClient, response, keyHeader),
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
     })
@@ -261,14 +234,48 @@ export const getThumbBytesOverTransit = async (
     });
 };
 
-export const getFileHeaderOverTransit = async (
+export const getFileHeaderOverTransit = async <T = string>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  systemFileType?: SystemFileType
+  options?: { systemFileType?: SystemFileType }
+): Promise<DriveSearchResult<T> | null> => {
+  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const fileHeader = await getFileHeaderBytesOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    {
+      decrypt: true,
+      systemFileType,
+    }
+  );
+  if (!fileHeader) return null;
+
+  const typedFileHeader = fileHeader as DriveSearchResult<T>;
+  typedFileHeader.fileMetadata.appData.jsonContent = tryJsonParse<T>(
+    fileHeader.fileMetadata.appData.jsonContent
+  );
+
+  return typedFileHeader;
+};
+
+export const getFileHeaderBytesOverTransit = async (
+  dotYouClient: DotYouClient,
+  odinId: string,
+  targetDrive: TargetDrive,
+  fileId: string,
+  options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<DriveSearchResult> => {
-  const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}`;
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('OdinId', odinId);
+  assertIfDefined('FileId', fileId);
+  const decrypt = options?.decrypt ?? true;
+  const systemFileType = options?.systemFileType ?? 'Standard';
+
+  const cacheKey = `${odinId}+${targetDrive.alias}-${targetDrive.type}+${fileId}+${decrypt}`;
   if (_internalMetadataPromiseCache.has(cacheKey)) {
     const cacheData = await _internalMetadataPromiseCache.get(cacheKey);
     if (cacheData) return cacheData;
@@ -290,12 +297,24 @@ export const getFileHeaderOverTransit = async (
 
   const promise = client
     .post('/transit/query/header', request)
-    .then((response) => {
+    .then((response) => response.data)
+    .then(async (fileHeader) => {
+      if (decrypt) {
+        const keyheader = fileHeader.fileMetadata.payloadIsEncrypted
+          ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
+          : undefined;
+
+        fileHeader.fileMetadata.appData.jsonContent = await decryptJsonContent(
+          fileHeader.fileMetadata,
+          keyheader
+        );
+      }
       _internalMetadataPromiseCache.delete(cacheKey);
-      return response.data as DriveSearchResult;
+      return fileHeader;
     })
     .catch((error) => {
-      console.error(error);
+      if (error.response?.status === 404) return null;
+      console.error('[DotYouCore-js:getFileHeaderOverTransit]', error);
       throw error;
     });
 
@@ -485,4 +504,42 @@ export const deleteFileOverTransit = async (
       console.error('[DotYouCore-js:deleteFileOverTransit]', error);
       throw error;
     });
+};
+
+export const getPayloadOverTransit = async <T>(
+  dotYouClient: DotYouClient,
+  odinId: string,
+  targetDrive: TargetDrive,
+  dsr: {
+    fileId: string;
+    fileMetadata: FileMetadata;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+  },
+  includesJsonContent: boolean,
+  systemFileType?: SystemFileType
+): Promise<T | null> => {
+  const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
+  const contentIsComplete = fileMetadata.appData.contentIsComplete;
+  const keyHeader = fileMetadata.payloadIsEncrypted
+    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
+    : undefined;
+
+  if (contentIsComplete) {
+    let decryptedJsonContent;
+    if (includesJsonContent) {
+      decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
+    } else {
+      // When contentIsComplete but includesJsonContent == false the query before was done without including the jsonContent; So we just get and parse
+      const fileHeader = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+        systemFileType,
+      });
+      if (!fileHeader) return null;
+      decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
+    }
+    return tryJsonParse<T>(decryptedJsonContent);
+  } else {
+    return await getPayloadAsJsonOverTransit<T>(dotYouClient, odinId, targetDrive, fileId, {
+      keyHeader,
+    });
+  }
 };

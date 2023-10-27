@@ -6,7 +6,6 @@ import {
   uploadImage,
   ImageContentType,
   UploadInstructionSet,
-  getRandom16ByteArray,
   UploadFileMetadata,
   uploadFile,
 } from '@youfoundation/js-lib/core';
@@ -14,6 +13,7 @@ import {
   base64ToUint8Array,
   jsonStringify64,
   stringToUint8Array,
+  getRandom16ByteArray,
 } from '@youfoundation/js-lib/helpers';
 import { purgeAllFiles } from '../../provider/drives/DrivePurgeProvider';
 import useAuth from '../auth/useAuth';

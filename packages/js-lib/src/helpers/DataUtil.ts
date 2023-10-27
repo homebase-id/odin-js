@@ -3,6 +3,10 @@ import { Guid } from 'guid-typescript';
 import md5 from './md5/md5';
 import { AccessControlList, EncryptedKeyHeader } from '../core/core';
 
+export const getRandom16ByteArray = (): Uint8Array => {
+  return crypto.getRandomValues(new Uint8Array(16));
+};
+
 export const assertIfDefined = (key: string, value: unknown) => {
   if (!value) throw new Error(`${key} undefined`);
 };

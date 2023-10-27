@@ -1,4 +1,4 @@
-import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
+import { AccessControlList, SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { TargetDrive, EmbeddedThumb } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 

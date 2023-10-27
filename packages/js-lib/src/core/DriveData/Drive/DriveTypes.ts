@@ -4,7 +4,7 @@ import {
   ServerMetaData,
   ArchivalStatus,
   SystemFileType,
-} from './DriveFileTypes';
+} from '../File/DriveFileTypes';
 
 export interface PermissionedDrive {
   drive: TargetDrive;
@@ -43,11 +43,11 @@ export interface DriveDefinition {
   ownerOnly: boolean;
 }
 
-export interface DriveSearchResult {
+export interface DriveSearchResult<T = string> {
   fileId: string;
   fileState: 'active';
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
-  fileMetadata: FileMetadata;
+  fileMetadata: FileMetadata<T>;
   serverMetadata: ServerMetaData;
   priority: number;
 }

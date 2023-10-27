@@ -8,7 +8,7 @@ import {
   PostType,
   postTypeToDataType,
 } from './PostTypes';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+
 import {
   CursoredResult,
   deleteFile,
@@ -30,7 +30,13 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/core';
-import { toGuidId, getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/DataUtil';
+import {
+  toGuidId,
+  getNewId,
+  jsonStringify64,
+  stringToUint8Array,
+  getRandom16ByteArray,
+} from '../../helpers/DataUtil';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
 export const getPosts = async <T extends PostContent>(

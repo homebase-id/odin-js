@@ -1,4 +1,4 @@
-import { TransitOptions } from '../DriveData/DriveUploadTypes';
+import { TransitOptions } from '../DriveData/Upload/DriveUploadTypes';
 import { ThumbSize, ImageContentType, ArchivalStatus, EmbeddedThumb } from '../core';
 
 export type ThumbnailMeta = {

@@ -1,5 +1,5 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { CursoredResult } from '../../core/DriveData/DriveQueryTypes';
+import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
 import { TargetDrive } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
 

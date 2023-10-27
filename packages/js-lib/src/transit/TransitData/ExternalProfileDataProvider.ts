@@ -1,9 +1,9 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { FileQueryParams } from '../../core/DriveData/DriveTypes';
 import { queryBatchOverTransit, getPayloadOverTransit } from './TransitProvider';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { AttributeFile, AttributeConfig } from '../../profile/profile';
+import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 
 export const getProfileAttributesOverTransit = async (
   dotYouClient: DotYouClient,

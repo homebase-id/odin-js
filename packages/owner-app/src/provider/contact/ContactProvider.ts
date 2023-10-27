@@ -5,7 +5,6 @@ import {
   DotYouClient,
   uploadImage,
   uploadFile,
-  getRandom16ByteArray,
 } from '@youfoundation/js-lib/core';
 import {
   RawContact,
@@ -19,6 +18,7 @@ import {
   stringToUint8Array,
   toGuidId,
   jsonStringify64,
+  getRandom16ByteArray,
 } from '@youfoundation/js-lib/helpers';
 
 //Handles management of Contacts

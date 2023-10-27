@@ -3,10 +3,9 @@ import {
   getNewId,
   jsonStringify64,
   stringifyToQueryParams,
+  getRandom16ByteArray,
 } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
-import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
-import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import {
   TargetDrive,
@@ -128,15 +127,11 @@ export const getDecryptedVideoChunk = async (
   chunkEnd?: number,
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  const payload = await getPayloadBytes(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    undefined,
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, {
     systemFileType,
     chunkStart,
-    chunkEnd
-  );
+    chunkEnd,
+  });
 
   return payload?.bytes || null;
 };
@@ -147,18 +142,14 @@ export const getDecryptedVideoMetadata = async (
   fileId: string,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
-  if (!fileHeader) return undefined;
-  const fileMetadata = fileHeader.fileMetadata;
-
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
-    : undefined;
-
-  return await decryptJsonContent<PlainVideoMetadata | SegmentedVideoMetadata>(
-    fileMetadata,
-    keyheader
+  const fileHeader = await getFileHeader<PlainVideoMetadata | SegmentedVideoMetadata>(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    { systemFileType }
   );
+  if (!fileHeader) return undefined;
+  return fileHeader.fileMetadata.appData.jsonContent;
 };
 
 export const getDecryptedVideoUrl = async (
@@ -187,7 +178,7 @@ export const getDecryptedVideoUrl = async (
     return await getDirectImageUrl();
   }
 
-  const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
   if (!meta?.fileMetadata.payloadIsEncrypted) {
     return await getDirectImageUrl();
   }
@@ -198,10 +189,8 @@ export const getDecryptedVideoUrl = async (
     dotYouClient,
     targetDrive,
     fileId,
-    undefined,
-    systemFileType,
-    fileSizeLimit ? 0 : undefined,
-    fileSizeLimit
+
+    { systemFileType, chunkStart: fileSizeLimit ? 0 : undefined, chunkEnd: fileSizeLimit }
   ).then((data) => {
     if (!data) return '';
     const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));

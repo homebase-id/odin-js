@@ -1,5 +1,5 @@
-import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/DriveTypes';
-import { ScheduleOptions, TransferStatus } from '../../core/DriveData/DriveUploadTypes';
+import { FileQueryParams, GetBatchQueryResultOptions } from '../../core/DriveData/Drive/DriveTypes';
+import { ScheduleOptions, TransferStatus } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { TargetDrive, SystemFileType } from '../../core/core';
 
 export interface TransitQueryBatchRequest {

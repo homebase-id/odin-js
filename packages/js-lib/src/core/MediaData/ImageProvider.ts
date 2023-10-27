@@ -1,5 +1,4 @@
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
-import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
 import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
 import {
   uint8ArrayToBase64,
@@ -7,6 +6,7 @@ import {
   jsonStringify64,
   base64ToUint8Array,
   stringifyToQueryParams,
+  getRandom16ByteArray,
 } from '../../helpers/DataUtil';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
@@ -204,7 +204,7 @@ export const getDecryptedImageUrl = async (
   // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
   //   and the CAT is passed via a header that we can't set on a direct url
   if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
-    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
     if (!meta?.fileMetadata.payloadIsEncrypted) {
       return await getDirectImageUrl();
     }
@@ -241,10 +241,9 @@ export const getDecryptedImageData = async (
         dotYouClient,
         targetDrive,
         fileId,
-        undefined,
         size.pixelWidth,
         size.pixelHeight,
-        systemFileType
+        { systemFileType }
       );
       if (thumbBytes) return thumbBytes;
     } catch (ex) {
@@ -252,13 +251,7 @@ export const getDecryptedImageData = async (
     }
   }
 
-  const payload = await getPayloadBytes(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    undefined,
-    systemFileType
-  );
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, { systemFileType });
   if (!payload) return null;
   return {
     bytes: payload.bytes,
@@ -272,17 +265,8 @@ export const getDecryptedImageMetadata = async (
   fileId: string,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
   if (!fileHeader) return null;
-  const fileMetadata = fileHeader.fileMetadata;
 
-  if (!fileMetadata.appData.jsonContent) {
-    return null;
-  }
-
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
-    : undefined;
-
-  return await decryptJsonContent<ImageMetadata>(fileMetadata, keyheader);
+  return fileHeader.fileMetadata.appData.jsonContent;
 };

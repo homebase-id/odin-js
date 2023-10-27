@@ -1,14 +1,18 @@
-import { hasDebugFlag } from '../../helpers/BrowserUtil';
-import { DotYouClient } from '../DotYouClient';
-import { ThumbnailFile } from './DriveFileTypes';
-import { KeyHeader, EncryptedKeyHeader } from './DriveTypes';
+import { hasDebugFlag } from '../../../helpers/BrowserUtil';
+import { DotYouClient } from '../../DotYouClient';
+import { ThumbnailFile } from '../File/DriveFileTypes';
+import { KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,
   UploadResult,
   AppendInstructionSet,
 } from './DriveUploadTypes';
-import { encryptWithKeyheader, decryptKeyHeader, encryptWithSharedSecret } from './SecurityHelpers';
+import {
+  encryptWithKeyheader,
+  decryptKeyHeader,
+  encryptWithSharedSecret,
+} from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
   encryptMetaData,

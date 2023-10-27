@@ -1,5 +1,4 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -15,7 +14,12 @@ import {
   queryBatch,
   TargetDrive,
 } from '../../core/core';
-import { getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/helpers';
+import {
+  getNewId,
+  getRandom16ByteArray,
+  jsonStringify64,
+  stringToUint8Array,
+} from '../../helpers/helpers';
 import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
 

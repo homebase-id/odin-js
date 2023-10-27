@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '../DriveData/DriveTypes';
+import { DriveSearchResult } from '../DriveData/Drive/DriveTypes';
 import { TargetDrive, ExternalFileIdentifier } from '../core';
 
 export interface EstablishConnectionRequest {

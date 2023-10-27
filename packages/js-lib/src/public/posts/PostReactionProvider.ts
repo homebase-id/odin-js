@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+import { getRandom16ByteArray } from '../../helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
@@ -10,7 +10,6 @@ import {
   ScheduleOptions,
   SendContents,
   UploadInstructionSet,
-  UploadResult,
   uploadFile,
   TransferStatus,
   deleteFile,

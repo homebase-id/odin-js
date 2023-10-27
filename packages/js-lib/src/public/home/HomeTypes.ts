@@ -1,4 +1,4 @@
-import { TargetDrive } from '../../core/DriveData/DriveFileTypes';
+import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 import { toGuidId } from '../../helpers/helpers';
 import { ProfileConfig } from '../../profile/ProfileData/ProfileConfig';
 

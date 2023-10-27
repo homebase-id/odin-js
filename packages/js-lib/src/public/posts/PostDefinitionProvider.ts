@@ -1,5 +1,4 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -18,7 +17,12 @@ import {
   TargetDrive,
   queryBatch,
 } from '../../core/core';
-import { jsonStringify64, stringToUint8Array, toGuidId } from '../../helpers/helpers';
+import {
+  getRandom16ByteArray,
+  jsonStringify64,
+  stringToUint8Array,
+  toGuidId,
+} from '../../helpers/helpers';
 import { ChannelDefinition, BlogConfig } from './PostTypes';
 
 export const getChannelDefinitions = async (

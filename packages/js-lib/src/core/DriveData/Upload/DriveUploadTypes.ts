@@ -6,8 +6,8 @@ import {
   ArchivalStatus,
   ExternalFileIdentifier,
   SystemFileType,
-} from './DriveFileTypes';
-import { EncryptedKeyHeader } from './DriveTypes';
+} from '../File/DriveFileTypes';
+import { EncryptedKeyHeader } from '../Drive/DriveTypes';
 
 export interface UploadInstructionSet {
   transferIv: Uint8Array;

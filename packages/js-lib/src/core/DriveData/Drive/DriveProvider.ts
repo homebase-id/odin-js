@@ -1,7 +1,7 @@
 import { DriveDefinition } from './DriveTypes';
-import { ApiType, DotYouClient } from '../DotYouClient';
-import { stringifyToQueryParams } from '../../helpers/helpers';
-import { PagedResult, PagingOptions, TargetDrive } from '../core';
+import { ApiType, DotYouClient } from '../../DotYouClient';
+import { stringifyToQueryParams } from '../../../helpers/helpers';
+import { PagedResult, PagingOptions, TargetDrive } from '../../core';
 
 export const getDrives = async (
   dotYouClient: DotYouClient,

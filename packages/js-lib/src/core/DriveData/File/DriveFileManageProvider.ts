@@ -1,5 +1,5 @@
-import { assertIfDefined } from '../../helpers/DataUtil';
-import { DotYouClient } from '../DotYouClient';
+import { assertIfDefined } from '../../../helpers/DataUtil';
+import { DotYouClient } from '../../DotYouClient';
 import { SystemFileType } from './DriveFileTypes';
 import { TargetDrive } from './DriveFileTypes';
 

@@ -8,7 +8,6 @@ import {
   getPayload,
   SecurityGroupType,
   UploadInstructionSet,
-  getRandom16ByteArray,
   UploadFileMetadata,
   uploadFile,
   deleteFile,
@@ -21,6 +20,7 @@ import {
   aclEqual,
   getDisplayNameOfNameAttribute,
   getNewId,
+  getRandom16ByteArray,
   jsonStringify64,
   stringToUint8Array,
 } from '../../helpers/helpers';

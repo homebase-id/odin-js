@@ -1,21 +1,26 @@
-import { DotYouClient } from '../DotYouClient';
+import { DotYouClient } from '../../DotYouClient';
 
-import { TransitInstructionSet } from '../../transit/TransitData/TransitTypes';
-import { KeyHeader } from './DriveTypes';
+import { TransitInstructionSet } from '../../../transit/TransitData/TransitTypes';
+import { KeyHeader } from '../Drive/DriveTypes';
 import {
   UploadFileMetadata,
   UploadInstructionSet,
   AppendInstructionSet,
   UploadResult,
 } from './DriveUploadTypes';
-import { encryptWithKeyheader, encryptWithSharedSecret, encryptKeyHeader } from './SecurityHelpers';
+import {
+  encryptWithKeyheader,
+  encryptWithSharedSecret,
+  encryptKeyHeader,
+} from '../SecurityHelpers';
 import {
   jsonStringify64,
   mergeByteArrays,
   uint8ArrayToBase64,
   stringToUint8Array,
-} from '../../helpers/DataUtil';
-import { ThumbnailFile, SystemFileType } from './DriveFileTypes';
+  getRandom16ByteArray,
+} from '../../../helpers/DataUtil';
+import { ThumbnailFile, SystemFileType } from '../File/DriveFileTypes';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -200,8 +205,4 @@ export const GenerateKeyHeader = (): KeyHeader => {
     iv: getRandom16ByteArray(),
     aesKey: getRandom16ByteArray(),
   };
-};
-
-export const getRandom16ByteArray = (): Uint8Array => {
-  return crypto.getRandomValues(new Uint8Array(16));
 };

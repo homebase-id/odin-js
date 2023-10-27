@@ -1,6 +1,6 @@
 import { EmbeddedThumb } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
-import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
+import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import {
   base64ToUint8Array,
   byteArrayToString,

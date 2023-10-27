@@ -1,5 +1,4 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { decryptJsonContent, decryptKeyHeader } from '../../core/DriveData/SecurityHelpers';
 import {
   PlainVideoMetadata,
   SegmentedVideoMetadata,
@@ -24,10 +23,8 @@ export const getDecryptedVideoChunkOverTransit = async (
     odinId,
     targetDrive,
     fileId,
-    undefined,
-    systemFileType,
-    chunkStart,
-    chunkEnd
+
+    { systemFileType, chunkStart, chunkEnd }
   );
 
   return payload?.bytes || null;
@@ -40,23 +37,17 @@ export const getDecryptedVideoMetadataOverTransit = async (
   fileId: string,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeaderOverTransit(
+  const fileHeader = await getFileHeaderOverTransit<PlainVideoMetadata | SegmentedVideoMetadata>(
     dotYouClient,
     odinId,
     targetDrive,
     fileId,
-    systemFileType
+    {
+      systemFileType,
+    }
   );
-  const fileMetadata = fileHeader.fileMetadata;
-
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
-    : undefined;
-
-  return await decryptJsonContent<PlainVideoMetadata | SegmentedVideoMetadata>(
-    fileMetadata,
-    keyheader
-  );
+  if (!fileHeader) return undefined;
+  return fileHeader.fileMetadata.appData.jsonContent;
 };
 
 export const getDecryptedVideoUrlOverTransit = async (
@@ -68,14 +59,10 @@ export const getDecryptedVideoUrlOverTransit = async (
   fileSizeLimit?: number
 ): Promise<string> => {
   // TODO: Decide to use direct urls or not
-  const meta = await getFileHeaderOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    systemFileType
-  );
-  if (!meta.fileMetadata.payloadIsEncrypted) {
+  const meta = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+    systemFileType,
+  });
+  if (!meta?.fileMetadata.payloadIsEncrypted) {
     return `https://${odinId}/api/guest/v1/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
@@ -85,16 +72,11 @@ export const getDecryptedVideoUrlOverTransit = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytesOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    undefined,
+  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, {
     systemFileType,
-    fileSizeLimit ? 0 : undefined,
-    fileSizeLimit
-  ).then((data) => {
+    chunkStart: fileSizeLimit ? 0 : undefined,
+    chunkEnd: fileSizeLimit,
+  }).then((data) => {
     if (!data) return '';
     const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
     return url;
