@@ -89,14 +89,14 @@ export const MentionDropdown = ({
         {identities?.slice(0, 5)?.map((identity, index) => (
           <li
             key={identity.odinId}
-            className={`flex cursor-pointer flex-row gap-2 px-2 transition-colors ${
+            className={`flex cursor-pointer flex-row items-center gap-2 px-2 transition-colors ${
               index === activeIndex
                 ? 'bg-indigo-200 dark:bg-indigo-800'
                 : 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
             }`}
             onClick={() => doInput(identity.odinId)}
           >
-            {identity.name}
+            {identity.name} <span className="text-sm">({identity.odinId})</span>
           </li>
         ))}
       </ul>
