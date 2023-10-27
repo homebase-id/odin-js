@@ -87,9 +87,7 @@ export const getSocialFeed = async (
       });
 
     return {
-      results: [...allPostFiles, ...postsOfOwn]
-        .sort((a, b) => b.userDate - a.userDate)
-        .slice(0, pageSize),
+      results: [...allPostFiles, ...postsOfOwn].sort((a, b) => b.userDate - a.userDate),
       cursorState: result.cursorState,
       ownerCursorState: resultOfOwn.cursorState,
     };
