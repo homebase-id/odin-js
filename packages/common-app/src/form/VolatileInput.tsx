@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getRichTextFromString, useDebounce } from '../..';
 import { EmojiDropdown } from './VolatileInput/EmojiDropdown';
+import { MentionDropdown } from './VolatileInput/MentionDropdown';
 import {
   SelectionData,
   getAbsoluteOffsetToParent,
@@ -16,7 +17,6 @@ export const VolatileInput = ({
   placeholder,
   onChange,
   linksArePlain,
-  supportEmojiShortcut,
   className,
 }: {
   onSubmit?: (val: string) => void;
@@ -25,20 +25,17 @@ export const VolatileInput = ({
   placeholder?: string;
   onChange?: (val: string) => void;
   linksArePlain?: boolean;
-  supportEmojiShortcut?: boolean;
   className?: string;
 }) => {
-  const [emojiQuery, setEmojiQuery] = useState<string>();
-  const [lastInsertedEmoji, setLastInsertedEmoji] = useState<string>();
+  const [wordTillCaret, setWordTillCaret] = useState<string>();
+  const [lastInsertedContent, setLastInsertedContent] = useState<string>();
 
   const divRef = useRef<HTMLDivElement>(null);
   // Custom on paste handler, to only take plain text, as the input is a span, anything is allowed by default by the browser...
   const onPasteHandler: React.ClipboardEventHandler<HTMLDivElement> = (event) => {
     if (onPaste && typeof onPaste === 'function') {
       onPaste(event);
-      if (event.isDefaultPrevented()) {
-        return;
-      }
+      if (event.isDefaultPrevented()) return;
     }
 
     event.stopPropagation();
@@ -98,7 +95,7 @@ export const VolatileInput = ({
 
     const richTextData = getRichTextFromString(textContents);
     const innerHtml = richTextData?.map((part) =>
-      part.type === 'a' ? `<span class="text-primary">${part?.url}</span>` : part.text
+      part.type === 'a' ? `<span class="text-primary">${part?.text || part?.url}</span>` : part.text
     );
 
     if (!innerHtml || !divRef.current) return;
@@ -120,12 +117,10 @@ export const VolatileInput = ({
     divRef.current.innerText = defaultValue || '';
     restoreCaretPosition(
       caretPos,
-      supportEmojiShortcut && emojiQuery
-        ? -(emojiQuery.length + 1 - (lastInsertedEmoji?.length || 1))
-        : undefined
+      wordTillCaret ? -(wordTillCaret.length - (lastInsertedContent?.length || 1)) : undefined
     );
-    if (supportEmojiShortcut && emojiQuery) setEmojiQuery(undefined);
-    if (supportEmojiShortcut && lastInsertedEmoji) setLastInsertedEmoji(undefined);
+    if (wordTillCaret) setWordTillCaret(undefined);
+    if (lastInsertedContent) setLastInsertedContent(undefined);
   }, [defaultValue]);
 
   // We want values to be saved directly, while the link styling is better with a debounce
@@ -135,21 +130,23 @@ export const VolatileInput = ({
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && !emojiQuery) {
+    if (e.key === 'Enter' && !e.shiftKey && !wordTillCaret) {
       e.preventDefault();
       onSubmit && onSubmit(e.currentTarget.innerText);
     }
   };
 
   const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    const wordTillCaret = getEmojiQuery();
-
-    if (wordTillCaret && wordTillCaret.startsWith(':') && wordTillCaret.length > 1)
-      setEmojiQuery(wordTillCaret.slice(1));
-    else setEmojiQuery(undefined);
+    const wordTillCaret = getCurrentWordTillCaret();
+    if (
+      (wordTillCaret?.startsWith(':') || wordTillCaret?.startsWith('@')) &&
+      wordTillCaret.length > 1
+    )
+      setWordTillCaret(wordTillCaret);
+    else setWordTillCaret(undefined);
   };
 
-  const getEmojiQuery = () => {
+  const getCurrentWordTillCaret = () => {
     if (!divRef.current) return;
     const caretPositition = saveSelection();
     if (!caretPositition) return;
@@ -165,7 +162,7 @@ export const VolatileInput = ({
   const doLinkStyle = () => wrapLinks();
   const debouncedLinkStyle = useDebounce(doLinkStyle, { timeoutMillis: 1000 });
 
-  const selection = supportEmojiShortcut && window.getSelection(),
+  const selection = window.getSelection(),
     range = selection && selection.rangeCount ? selection.getRangeAt(0) : undefined,
     rect = range?.getClientRects()?.[0];
 
@@ -182,18 +179,27 @@ export const VolatileInput = ({
         ref={divRef}
         style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
       ></span>
-      {supportEmojiShortcut ? (
-        <EmojiDropdown
-          query={emojiQuery}
-          onInput={(emoji) => {
-            if (onChange && emoji) {
-              setLastInsertedEmoji(emoji);
-              onChange(`${divRef.current?.innerText.replace(`:${emojiQuery}`, emoji) || ''}`);
-            }
-          }}
-          position={rect}
-        />
-      ) : null}
+
+      <EmojiDropdown
+        query={wordTillCaret}
+        onInput={(emoji) => {
+          if (onChange && emoji && wordTillCaret) {
+            setLastInsertedContent(emoji);
+            onChange(`${divRef.current?.innerText.replace(wordTillCaret, emoji) || ''}`);
+          }
+        }}
+        position={rect}
+      />
+      <MentionDropdown
+        query={wordTillCaret}
+        onInput={(link) => {
+          if (onChange && link && wordTillCaret) {
+            setLastInsertedContent(link);
+            onChange(`${divRef.current?.innerText.replace(wordTillCaret, link) || ''}`);
+          }
+        }}
+        position={rect}
+      />
     </div>
   );
 };

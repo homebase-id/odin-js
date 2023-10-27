@@ -123,7 +123,6 @@ export const CommentEditor = ({
             }
           }}
           onChange={(val) => setBody(val)}
-          supportEmojiShortcut={true}
         />
         <FileOverview
           files={files}

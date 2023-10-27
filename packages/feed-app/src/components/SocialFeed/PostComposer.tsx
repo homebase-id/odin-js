@@ -135,7 +135,6 @@ const PostComposer = ({
               return false;
             }}
             key={stateIndex}
-            supportEmojiShortcut={true}
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />

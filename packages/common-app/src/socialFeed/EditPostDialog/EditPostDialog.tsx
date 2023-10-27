@@ -96,23 +96,9 @@ export const EditPostDialog = ({
                 content: { ...postFile.content, caption: newCaption },
               })
             }
-            supportEmojiShortcut={true}
             placeholder={t("What's up?")}
             className={`w-full resize-none rounded-md border bg-transparent p-2`}
           />
-          {/* <textarea
-              defaultValue={postFile.content.caption}
-              onChange={(e) =>
-                setPostFile({
-                  ...postFile,
-                  content: { ...postFile.content, caption: e.target.value },
-                })
-              }
-              placeholder={t("What's up?")}
-              className={`w-full resize-none rounded-sm border bg-transparent p-2 ${
-                postFile.content.caption?.length ? '' : 'h-[2.5rem]'
-              }`}
-            /> */}
           <ExistingFileOverview
             className="mt-2"
             mediaFiles={

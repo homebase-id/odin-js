@@ -15,13 +15,11 @@ export const RichTextRenderer = ({
   options?: unknown;
   className?: string;
 }) => {
-  if (!body || typeof body === 'string') {
-    return <p className={className}>{body}</p>;
-  }
+  if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const render = (node: any): ReactNode => {
-    if ('text' in node) {
+    if ('text' in node && (!('type' in node) || node.type === 'text')) {
       return renderLeaf(node, node.text, {});
     } else {
       const { type, ...attributes } = node;
@@ -116,6 +114,7 @@ export const RichTextRenderer = ({
       case 'li':
         return <li {...attributes}>{children}</li>;
       case 'a':
+        // TODO: expand with check for attributes?.odinId, and if so check if it is a contact, and if we have a name for them...
         return (
           <a
             href={(attributes?.url as string) ?? ''}
@@ -127,7 +126,7 @@ export const RichTextRenderer = ({
             className="text-primary hover:underline"
             onClick={(e) => e.stopPropagation()}
           >
-            {children ?? attributes?.url + ''}
+            {children ?? (attributes?.text || attributes?.url) + ''}
           </a>
         );
       case 'local_image':

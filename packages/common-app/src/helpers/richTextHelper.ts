@@ -1,14 +1,22 @@
 import { ReadTimeStats, RichText } from '@youfoundation/js-lib/public';
 
-const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
+const urlAndMentionRegex = new RegExp(/(https?:\/\/[^\s]+|@[^\s]+)/);
+
+const urlRegex = new RegExp(
+  /https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(:\d{1,5})?)(\/[^\s]*)?/
+);
+const mentionRegex = new RegExp(/@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
 
 export const getRichTextFromString = (body: string): RichText | undefined => {
-  const splitUpCaption = body.split(urlRegex);
+  const splitUpCaption = body.split(urlAndMentionRegex);
   const richText = splitUpCaption
     .map((part) => {
       if (!part || !part.length) return;
 
-      if (urlRegex.test(part)) return { type: 'a', url: part };
+      if (urlRegex.test(part))
+        return { type: 'a', url: part, text: part.replace(/https?:\/\//, '') };
+      if (mentionRegex.test(part))
+        return { type: 'a', url: `https://${part.slice(1)}`, text: part, odinId: part.slice(1) };
       else return { text: part };
     })
     .filter(Boolean) as RichText;
