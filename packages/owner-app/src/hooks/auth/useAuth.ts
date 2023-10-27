@@ -41,6 +41,13 @@ export const useAuth = () => {
 
     if (!response) return false;
 
+    // Cleanup the public items: (There might have been a public login already in place)
+    // This will corrupt the publicly logged in state when the owner logs out...
+    // TODO: Find a better way to handle this
+    window.localStorage.removeItem(HOME_SHARED_SECRET);
+    window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+
+    // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     setAuthenticationState('authenticated');
 
