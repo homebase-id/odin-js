@@ -264,8 +264,10 @@ export const getDecryptedImageMetadata = async (
   targetDrive: TargetDrive,
   fileId: string,
   systemFileType?: SystemFileType
-) => {
-  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
+): Promise<ImageMetadata | null> => {
+  const fileHeader = await getFileHeader<ImageMetadata>(dotYouClient, targetDrive, fileId, {
+    systemFileType,
+  });
   if (!fileHeader) return null;
 
   return fileHeader.fileMetadata.appData.jsonContent;
