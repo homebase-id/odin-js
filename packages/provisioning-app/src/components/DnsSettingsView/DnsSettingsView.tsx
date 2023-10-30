@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { t } from '../../helpers/i18n/dictionary';
 import InfoDialog from '../Dialog/InfoDialog/InfoDialog';
-import { DnsConfig, DnsRecord } from '../../hooks/commonDomain/commonDomain';
-import { Arrow, Check, DialogWrapper, Exclamation, Loader } from '@youfoundation/common-app';
+import { DnsConfig, DnsRecord, DnsRecordStatus } from '../../hooks/commonDomain/commonDomain';
+import { Alert, Arrow, Check, DialogWrapper, Exclamation, Loader } from '@youfoundation/common-app';
 import { useApexDomain } from '../../hooks/ownDomain/useOwnDomain';
 
 const DnsSettingsView = ({
@@ -148,7 +148,8 @@ const ApexInfoBlock = ({
             recommended configuration, which is more resilient than the fallback option.
           </p>
           <RecordView
-            record={{ ...aliasARecord, status: uniformStatus || aliasARecord.status }}
+            record={aliasARecord}
+            status={uniformStatus}
             domain={domain}
             showStatus={showStatus}
           />
@@ -167,7 +168,8 @@ const ApexInfoBlock = ({
             )}
           </p>
           <RecordView
-            record={{ ...fallbackARecord, status: uniformStatus || fallbackARecord.status }}
+            record={fallbackARecord}
+            status={uniformStatus}
             domain={domain}
             showStatus={showStatus}
           />
@@ -191,18 +193,32 @@ const SubdomainInfoBlock = ({
   className: string;
 }) => {
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
+  const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const fallbackOnlyCorrect =
+    fallbackARecord?.status === 'success' && aliasARecord?.status !== 'success';
 
   return (
     <div className={`${className} flex flex-col gap-4`}>
       <p className="text-2xl">Point your domain to Homebase</p>
 
       {aliasARecord ? (
-        <RecordView
-          record={{ ...aliasARecord, type: 'CNAME' }}
-          subdomain={subdomain}
-          showStatus={showStatus}
-        />
+        <>
+          <RecordView
+            record={{ ...aliasARecord, type: 'CNAME' }}
+            status={fallbackOnlyCorrect ? 'success' : undefined}
+            subdomain={subdomain}
+            showStatus={showStatus}
+          />
+          {fallbackOnlyCorrect ? (
+            <Alert type="info">
+              {t(
+                `We found a direct A record pointing to your identity, while this is correct we only recommend this in case your DNS provider doesn't support an ALIAS, ANAME, or flattened CNAME record.`
+              )}
+            </Alert>
+          ) : null}
+        </>
       ) : null}
       <button onClick={() => setShowAdvanced(true)} className="ml-auto underline">
         {t(`I can't do this`)}
@@ -225,16 +241,19 @@ const SubdomainInfoBlock = ({
 const errorStates = ['incorrectValue', 'aaaaRecordsNotSupported', 'multipleRecordsNotSupported'];
 const RecordView = ({
   record,
+  status,
   domain,
   subdomain,
   showStatus,
 }: {
   record: DnsRecord;
+  status?: DnsRecordStatus;
   domain?: string;
   subdomain?: string;
   showStatus: boolean;
 }) => {
-  const isGood = record.status === 'success';
+  const simpleStatus = status || record.status;
+  const isGood = simpleStatus === 'success';
 
   return (
     <div
@@ -242,7 +261,7 @@ const RecordView = ({
         showStatus
           ? isGood
             ? 'bg-green-100'
-            : errorStates.includes(record.status)
+            : errorStates.includes(simpleStatus)
             ? 'bg-orange-100'
             : 'bg-gray-100'
           : 'bg-gray-100'
@@ -257,13 +276,13 @@ const RecordView = ({
             <Check className="h-4 w-4" />
           ) : (
             <>
-              {record.status === 'incorrectValue'
+              {simpleStatus === 'incorrectValue'
                 ? 'Incorrect value'
-                : record.status === 'aaaaRecordsNotSupported'
+                : simpleStatus === 'aaaaRecordsNotSupported'
                 ? 'AAAA records are not supported'
-                : record.status === 'multipleRecordsNotSupported'
+                : simpleStatus === 'multipleRecordsNotSupported'
                 ? 'Multiple A or CNAME records are not supported'
-                : 'Not found'}
+                : 'Record not found'}
               <Exclamation className="h-4 w-4" />
             </>
           )}

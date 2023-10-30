@@ -1,19 +1,21 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 
+export type DnsRecordStatus =
+  | 'unknown'
+  | 'success'
+  | 'domainOrRecordNotFound'
+  | 'incorrectValue'
+  | 'multipleRecordsNotSupported'
+  | 'aaaaRecordsNotSupported'
+  | 'noAuthorativeNameServer';
+
 export interface DnsRecord {
   type: string;
   name: string;
   value: string;
   description: string;
-  status:
-    | 'unknown'
-    | 'success'
-    | 'domainOrRecordNotFound'
-    | 'incorrectValue'
-    | 'multipleRecordsNotSupported'
-    | 'aaaaRecordsNotSupported'
-    | 'noAuthorativeNameServer';
+  status: DnsRecordStatus;
   statusText: string;
 }
 
