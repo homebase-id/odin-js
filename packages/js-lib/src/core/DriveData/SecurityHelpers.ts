@@ -169,9 +169,7 @@ export const decryptKeyHeader = async (
   encryptedKeyHeader: EncryptedKeyHeader
 ): Promise<KeyHeader> => {
   const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    throw new Error('attempting to decrypt but missing the shared secret');
-  }
+  if (!ss) throw new Error('attempting to decrypt but missing the shared secret');
 
   // Check if used params aren't still base64 encoded if so parse to bytearrays
   let encryptedAesKey = encryptedKeyHeader.encryptedAesKey;

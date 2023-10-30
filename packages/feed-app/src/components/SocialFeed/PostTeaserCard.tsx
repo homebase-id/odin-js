@@ -41,7 +41,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
   return (
-    <div className={`w-full break-all rounded-lg ${className ?? ''}`}>
+    <div className={`w-full break-words rounded-lg ${className ?? ''}`}>
       <ErrorBoundary>
         <FakeAnchor
           href={clickable ? postPath : undefined}
