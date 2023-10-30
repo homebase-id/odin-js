@@ -40,11 +40,10 @@ const PostDetail = () => {
 
   const post = postData?.activeBlog.content;
   const channel = postData?.activeChannel;
-
   return (
     <>
       <Helmet>
-        <title>{post?.caption ?? ''} | Homebase</title>
+        <title>{post?.caption || channel?.name || ''} | Homebase</title>
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"

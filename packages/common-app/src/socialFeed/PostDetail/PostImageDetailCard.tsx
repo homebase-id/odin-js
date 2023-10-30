@@ -44,7 +44,7 @@ export const PostImageDetailCard = ({
   login?: () => void;
   rootUrl: string;
 }) => {
-  const [currIndex, setCurrIndex] = useState(attachmentKey ? parseInt(attachmentKey) : 0);
+  const currIndex = attachmentKey ? parseInt(attachmentKey) : 0;
   const post = postFile?.content;
 
   const mediaFileIds =
@@ -64,13 +64,10 @@ export const PostImageDetailCard = ({
       return;
     }
 
-    setCurrIndex(newIndex);
     navigate(`${rootUrl}/${newIndex}`);
   };
 
-  const doClose = () => {
-    onClose();
-  };
+  const doClose = onClose;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -92,9 +89,7 @@ export const PostImageDetailCard = ({
 
     window.addEventListener('keydown', handleKeyDown);
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currIndex]);
 
   const currentMediaFile = mediaFileIds?.[currIndex];

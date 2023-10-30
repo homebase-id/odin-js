@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { getPostOverTransit } from '@youfoundation/js-lib/transit';
+import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { RecentsFromConnectionsReturn, getPostOverTransit } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../..';
 
 interface useSocialPostProps {
@@ -10,10 +10,19 @@ interface useSocialPostProps {
 
 export const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const queryClient = useQueryClient();
 
   const fetch = async ({ odinId, channelId, postId }: useSocialPostProps) => {
-    if (!odinId || !channelId || !postId) {
-      return;
+    if (!odinId || !channelId || !postId) return;
+
+    // Check if the post is already in the social feed cache
+    const socialFeedCache = queryClient.getQueryData<InfiniteData<RecentsFromConnectionsReturn>>([
+      'social-feeds',
+    ]);
+    for (let i = 0; socialFeedCache && i < socialFeedCache.pages.length; i++) {
+      const page = socialFeedCache.pages[i];
+      const post = page.results.find((x) => x.content.id === postId);
+      if (post) return post;
     }
 
     return await getPostOverTransit(dotYouClient, odinId, channelId, postId);
