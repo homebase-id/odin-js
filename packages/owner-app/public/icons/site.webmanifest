@@ -1,6 +1,7 @@
 {
     "name": "Homebase Owner App",
-    "short_name": "Homebase",
+    "short_name": "Owner",
+    "start_url": "/owner",
     "icons": [
         {
             "src": "/owner/icons/android-chrome-192x192.png",

@@ -1,6 +1,7 @@
 {
     "name": "Homebase Feed App",
-    "short_name": "Homebase",
+    "short_name": "Feed",
+    "start_url": "/",
     "icons": [
         {
             "src": "/icons/android-chrome-192x192.png",
