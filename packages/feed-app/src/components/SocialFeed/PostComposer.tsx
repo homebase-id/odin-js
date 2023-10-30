@@ -161,29 +161,26 @@ const PostComposer = ({
                 />
               </div>
 
-              <ActionLink
-                type="mute"
-                className={`px-2 py-1 text-foreground hover:text-opacity-70`}
-                size="square"
-                href={`/owner/feed/new?caption=${caption}&channel=${channel.channelId}`}
-                title="Convert into an article"
-              >
-                <Article className="h-4 w-4" />
-              </ActionLink>
               <EmojiSelector
                 className="text-foreground hover:text-opacity-70"
                 size="square"
                 onInput={(val) => setCaption((oldVal) => `${oldVal} ${val}`)}
               />
               <ActionGroup
+                size="square"
+                type="mute"
                 options={[
                   {
                     label: t('Who can react'),
                     icon: reactAccess && reactAccess !== true ? Lock : Globe,
                     onClick: () => setIsReactAccessEditorOpen(true),
                   },
+                  {
+                    label: t('Convert to an article'),
+                    href: `/owner/feed/new?caption=${caption}&channel=${channel.channelId}`,
+                    icon: Article,
+                  },
                 ]}
-                type="mute"
               />
             </>
           ) : null}
