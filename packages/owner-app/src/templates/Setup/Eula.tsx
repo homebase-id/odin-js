@@ -65,7 +65,8 @@ const EulaContents = () => {
         </li>
         <li>
           <em className="font-medium not-italic">No Lawsuits: </em>By using this software, you agree
-          that you will not sue us or hold us.
+          that you will not sue us or hold us responsible for any losses or damages that come from
+          using Homebase.
         </li>
         <li>
           <em className="font-medium not-italic">Illegal Content: </em>You agree not to distribute
@@ -81,14 +82,14 @@ const EulaContents = () => {
         Details but remain equally binding.
       </p>
       <p>
-        If your identity is hosted by a hosting company, be sure to read their terms and conditions.
+        If your identity is hosted by a hosting company, be sure to read their terms and conditions.{' '}
       </p>
       <p>
-        Please refer to Homebase&apos;s Hosting User License Agreement (HULA) for your general
+        Please refer to Homebase&quot;s Hosting User License Agreement (HULA) for your general
         rights when someone else is hosting your identity.
       </p>
       <p>
-        Please refer to Homebase&apos;s Open-Source License Agreement (OSLA) if you wish to inspect,
+        Please refer to Homebase&quot;s Open-Source License Agreement (OSLA) if you wish to inspect,
         use, modify or distribute the source code.
       </p>
       <p className="text-xl">Additional Legal Details</p>
@@ -220,7 +221,18 @@ const EulaContents = () => {
         <li>Patents.</li>
         <li>Trade secrets.</li>
       </ul>
-      <p className="text-xl">9. INDEMNIFICATION</p>
+
+      <p className="text-xl">9. CRYPTOGRAPHIC NOTICE</p>
+      <p>
+        This distribution includes cryptographic software. The country in which you currently reside
+        may have restrictions on the import, possession, use, and/or re-export to another country,
+        of encryption software. BEFORE using any encryption software, please check your
+        country&quot;s laws, regulations and policies concerning the import, possession, or use, and
+        re-export of encryption software, to see if this is permitted. See http://www.wassenaar.org/
+        for more information.
+      </p>
+
+      <p className="text-xl">10. INDEMNIFICATION</p>
       <p>
         You, the licensee, agree to indemnify, defend, and hold harmless the Licensor from and
         against any claims or damages arising from:
@@ -230,29 +242,29 @@ const EulaContents = () => {
         <li>Your violation of any term of this Agreement.</li>
         <li>Any claim that Your use of the Software caused damage to a third party.</li>
       </ul>
-      <p className="text-xl">10. DISCLAIMER OF WARRANTIES</p>
+      <p className="text-xl">11. DISCLAIMER OF WARRANTIES</p>
       <p>
         The Software is provided &quot;as is&quot; and &quot;as available&quot;, without warranty of
         any kind, express or implied, including but not limited to the warranties of
         merchantability, fitness for a particular purpose, or non-infringement.
       </p>
-      <p className="text-xl">11. TERMINATION AND TRANSITION</p>
+      <p className="text-xl">12. TERMINATION AND TRANSITION</p>
       <p>
         Your license to use the Software is effective until terminated. It will terminate
         automatically if you fail to comply with any of its terms. Additionally, the Licensor
         reserves the right to terminate this Agreement, with reasonable notice, upon the decision to
-        conclude the Software&apos;s alpha phase.
+        conclude the Software&quot;s alpha phase.
       </p>
       <p>
         Should the Software transition to a subsequent phase, whether it be another trial, testing,
-        or production stage, at the Licensor&apos;s full discretion, You may be offered a new
+        or production stage, at the Licensor&quot;s full discretion, You may be offered a new
         license agreement on standard terms for that phase or version of the Software.
       </p>
       <p>
         Upon termination for any reason, you must immediately cease using the Software and delete
         all copies.
       </p>
-      <p className="text-xl">12. INTELLECTUAL PROPERTY RIGHTS (IPR)</p>
+      <p className="text-xl">13. INTELLECTUAL PROPERTY RIGHTS (IPR)</p>
       <p>You acknowledge and agree that:</p>
       <ul className="list-outside list-disc pl-4">
         <li>
@@ -266,7 +278,7 @@ const EulaContents = () => {
           in, the Software, and is not a sale of any rights in the Software.
         </li>
       </ul>
-      <p className="text-xl">13. GOVERNING LAW</p>
+      <p className="text-xl">14. GOVERNING LAW</p>
       <p>
         This Agreement shall be governed by, and construed in accordance with, the laws of Denmark,
         without regard to its conflict of laws principles. The Parties agree that any disputes
@@ -286,7 +298,7 @@ const EulaContents = () => {
         or location. If you do not agree with this clause, you are not permitted to use the
         Software.
       </p>
-      <p className="text-xl">14. ENTIRE AGREEMENT</p>
+      <p className="text-xl">15. ENTIRE AGREEMENT</p>
       <p>
         This Agreement constitutes the entire agreement between the parties concerning the subject
         matter hereof and supersedes all prior and contemporaneous agreements and communications,
