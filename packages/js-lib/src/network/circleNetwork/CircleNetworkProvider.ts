@@ -1,4 +1,9 @@
-import { ApiType, DotYouClient, assertIfDotYouClientIsOwner } from '../../core/DotYouClient';
+import {
+  ApiType,
+  DotYouClient,
+  assertIfDotYouClientIsOwner,
+  assertIfDotYouClientIsOwnerOrApp,
+} from '../../core/DotYouClient';
 import {
   NumberCursoredResult,
   PagedResult,
@@ -65,7 +70,7 @@ export const getConnectionInfo = (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionInfo | undefined> => {
-  assertIfDotYouClientIsOwner(dotYouClient);
+  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
 
   const client = dotYouClient.createAxiosClient();
   const url = root + `/status`;

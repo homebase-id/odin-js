@@ -16,7 +16,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
   const odinId = getIdentity() || undefined;
 
   return (
-    <a href={HOME_ROOT_PATH} className={`block ${className ?? ''}`}>
+    <a href={`https://${odinId}${HOME_ROOT_PATH}`} className={`block ${className ?? ''}`}>
       <div className="relative">
         <Image
           targetDrive={HomePageConfig.HomepageTargetDrive}

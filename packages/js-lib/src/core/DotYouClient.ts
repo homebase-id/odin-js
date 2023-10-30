@@ -168,3 +168,9 @@ export const assertIfDotYouClientIsOwner = (dotYouClient: DotYouClient) => {
     );
   }
 };
+
+export const assertIfDotYouClientIsOwnerOrApp = (dotYouClient: DotYouClient) => {
+  if (dotYouClient.getType() !== ApiType.Owner && dotYouClient.getType() !== ApiType.App) {
+    throw new Error(`This method is not available for youauth clients`);
+  }
+};
