@@ -72,7 +72,9 @@ export const getChannelDefinitions = async (
           dsr,
           response.includeMetadataHeader
         );
+        if (!definition) return null;
 
+        definition.acl = dsr.serverMetadata.accessControlList;
         return definition;
       }
     })
