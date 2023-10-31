@@ -3,10 +3,10 @@ import ActionButton from '../../components/ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import EnteringDetails from '../../components/ManagedDomain/EnteringDetails';
 import CreateIdentityView from '../../components/CreateIdentityView.tsx/CreateIdentityView';
-import { ManagedDomainProvisionState } from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { Times } from '@youfoundation/common-app';
+import { ManagedDomainProvisionState } from '../../hooks/managedDomain/useManagedDomain';
 
 const Provision = () => {
   const [provisionState, setProvisionState] =

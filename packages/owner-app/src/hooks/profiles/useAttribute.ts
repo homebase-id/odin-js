@@ -82,17 +82,17 @@ export const useAttribute = ({
   };
 
   return {
-    fetch: useQuery(
-      ['attribute', profileId, attributeId],
-      () => fetchData(profileId, attributeId),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!profileId && !!attributeId,
-      }
-    ),
-    save: useMutation(saveData, {
+    fetch: useQuery({
+      queryKey: ['attribute', profileId, attributeId],
+      queryFn: () => fetchData(profileId, attributeId),
+
+      refetchOnWindowFocus: false,
+      enabled: !!profileId && !!attributeId,
+    }),
+    save: useMutation({
+      mutationFn: saveData,
       onMutate: async (newAttr) => {
-        await queryClient.cancelQueries(['attribute', newAttr.profileId, newAttr.id]);
+        await queryClient.cancelQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
 
         let typeDefinition = Object.values(AttributeDefinitions).find((def) => {
           return def.type.toString() === newAttr.type;
@@ -150,30 +150,31 @@ export const useAttribute = ({
         if (!newAttr) return;
 
         if (newAttr.id) {
-          queryClient.invalidateQueries(['attribute', newAttr.profileId, newAttr.id]);
+          queryClient.invalidateQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
         } else {
-          queryClient.invalidateQueries(['attribute']);
+          queryClient.invalidateQueries({ queryKey: ['attribute'] });
         }
 
-        queryClient.invalidateQueries(['siteData']);
-        queryClient.invalidateQueries(getListItemCacheKey(newAttr));
+        queryClient.invalidateQueries({ queryKey: ['siteData'] });
+        queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
         if (!_variables.fileId) {
-          queryClient.invalidateQueries(['attributes']);
+          queryClient.invalidateQueries({ queryKey: ['attributes'] });
         }
-        queryClient.invalidateQueries(['attributeVersions', newAttr.profileId, newAttr.type]);
+        queryClient.invalidateQueries({
+          queryKey: ['attributeVersions', newAttr.profileId, newAttr.type],
+        });
       },
       onSuccess: () => {
         publishStaticFiles();
       },
     }),
-    remove: useMutation(removeData, {
+    remove: useMutation({
+      mutationFn: removeData,
       onMutate: async (toRemoveAttr) => {
-        await queryClient.cancelQueries([
-          'attributes',
-          toRemoveAttr.profileId,
-          toRemoveAttr.sectionId,
-        ]);
+        await queryClient.cancelQueries({
+          queryKey: ['attributes', toRemoveAttr.profileId, toRemoveAttr.sectionId],
+        });
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(toRemoveAttr);
@@ -193,8 +194,8 @@ export const useAttribute = ({
       onSettled: (_data, _err, variables) => {
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
-          queryClient.invalidateQueries(['siteData']);
-          queryClient.invalidateQueries(getListItemCacheKey(variables));
+          queryClient.invalidateQueries({ queryKey: ['siteData'] });
+          queryClient.invalidateQueries({ queryKey: getListItemCacheKey(variables) });
 
           publishStaticFiles();
         }, 1000);

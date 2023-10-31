@@ -190,20 +190,23 @@ export const usePost = () => {
   };
 
   return {
-    save: useMutation(savePost, {
+    save: useMutation({
+      mutationFn: savePost,
       onSuccess: (_data, variables) => {
         if (variables.blogFile.content.slug) {
-          queryClient.invalidateQueries(['blog', variables.blogFile.content.slug]);
+          queryClient.invalidateQueries({ queryKey: ['blog', variables.blogFile.content.slug] });
         } else {
-          queryClient.invalidateQueries(['blog']);
+          queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
-        queryClient.invalidateQueries(['blog', variables.blogFile.fileId]);
-        queryClient.invalidateQueries(['blog', variables.blogFile.content.id]);
-        queryClient.invalidateQueries(['blog', variables.blogFile.content.id?.replaceAll('-', '')]);
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.blogFile.fileId] });
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.blogFile.content.id] });
+        queryClient.invalidateQueries({
+          queryKey: ['blog', variables.blogFile.content.id?.replaceAll('-', '')],
+        });
 
-        queryClient.removeQueries(['blogs']);
+        queryClient.removeQueries({ queryKey: ['blogs'] });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
@@ -222,7 +225,7 @@ export const usePost = () => {
         }
       },
       onMutate: async (newPost) => {
-        await queryClient.cancelQueries(['social-feeds']);
+        await queryClient.cancelQueries({ queryKey: ['social-feeds'] });
 
         // Update section attributes
         const previousFeed:
@@ -262,21 +265,22 @@ export const usePost = () => {
         queryClient.setQueryData(['social-feeds'], context?.previousFeed);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['social-feeds']);
+        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
       },
     }),
-    saveFiles: useMutation(saveFiles),
-    removeFiles: useMutation(removeFiles),
-    remove: useMutation(removeData, {
+    saveFiles: useMutation({ mutationFn: saveFiles }),
+    removeFiles: useMutation({ mutationFn: removeFiles }),
+    remove: useMutation({
+      mutationFn: removeData,
       onSuccess: (_data, variables) => {
-        queryClient.invalidateQueries(['social-feeds']);
+        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
 
         if (variables && variables.slug) {
-          queryClient.invalidateQueries(['blog', variables.slug]);
+          queryClient.invalidateQueries({ queryKey: ['blog', variables.slug] });
         } else {
-          queryClient.invalidateQueries(['blog']);
+          queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
-        queryClient.invalidateQueries(['blogs']);
+        queryClient.invalidateQueries({ queryKey: ['blogs'] });
       },
     }),
   };

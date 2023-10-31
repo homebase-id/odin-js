@@ -11,7 +11,9 @@ export const useCircles = () => {
   };
 
   return {
-    fetch: useQuery(['circles'], () => fetchAll(), {
+    fetch: useQuery({
+      queryKey: ['circles'],
+      queryFn: () => fetchAll(),
       refetchOnWindowFocus: false,
     }),
   };

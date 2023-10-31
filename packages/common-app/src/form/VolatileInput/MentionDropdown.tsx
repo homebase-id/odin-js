@@ -127,10 +127,12 @@ const useMentionTargets = (enabled: boolean) => {
     return internalGetContacts(undefined, CHUNKSIZE);
   };
 
-  return useQuery(['mention-targets'], fetchMentionTargets, {
+  return useQuery({
+    queryKey: ['mention-targets'],
+    queryFn: fetchMentionTargets,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
-    cacheTime: Infinity,
+    gcTime: Infinity,
     staleTime: Infinity,
     enabled,
   });

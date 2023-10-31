@@ -49,19 +49,21 @@ export const useConnectionActions = () => {
   };
 
   return {
-    disconnect: useMutation(disconnect, {
+    disconnect: useMutation({
+      mutationFn: disconnect,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['activeConnections']);
-        queryClient.invalidateQueries(['connectionInfo', param.connectionOdinId]);
+        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.connectionOdinId] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    sendConnectionRequest: useMutation(sendConnectionRequest, {
+    sendConnectionRequest: useMutation({
+      mutationFn: sendConnectionRequest,
       onMutate: async (newRequest) => {
-        await queryClient.cancelQueries(['sentRequests']);
+        await queryClient.cancelQueries({ queryKey: ['sentRequests'] });
 
         const previousRequests: ConnectionRequest[] | undefined = queryClient.getQueryData([
           'sentRequests',
@@ -84,31 +86,34 @@ export const useConnectionActions = () => {
         queryClient.setQueryData(['sentRequests'], context?.previousRequests);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries(['sentRequests']);
-        queryClient.invalidateQueries(['connectionInfo', data?.targetOdinId]);
+        queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', data?.targetOdinId] });
       },
     }),
-    revokeConnectionRequest: useMutation(revokeConnectionRequest, {
+    revokeConnectionRequest: useMutation({
+      mutationFn: revokeConnectionRequest,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['sentRequests']);
-        queryClient.invalidateQueries(['connectionInfo', param.targetOdinId]);
+        queryClient.invalidateQueries({ queryKey: ['sentRequests'] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.targetOdinId] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    block: useMutation(block, {
+    block: useMutation({
+      mutationFn: block,
       onSettled: (_data, _err, odinId) => {
-        queryClient.invalidateQueries(['pendingConnections']);
-        queryClient.invalidateQueries(['activeConnections']);
-        queryClient.invalidateQueries(['connectionInfo', odinId]);
+        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
       },
     }),
-    unblock: useMutation(unblock, {
+    unblock: useMutation({
+      mutationFn: unblock,
       onSettled: (_data, _err, odinId) => {
-        queryClient.invalidateQueries(['pendingConnections']);
-        queryClient.invalidateQueries(['activeConnections']);
-        queryClient.invalidateQueries(['connectionInfo', odinId]);
+        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
       },
     }),
   };

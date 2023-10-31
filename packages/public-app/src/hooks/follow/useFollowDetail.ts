@@ -14,5 +14,5 @@ export const useFollowDetail = () => {
     return await fetchFollowDetail(dotYouClient);
   };
 
-  return { fetch: useQuery(['followDetail'], fetchDetail) };
+  return { fetch: useQuery({ queryKey: ['followDetail'], queryFn: fetchDetail }) };
 };

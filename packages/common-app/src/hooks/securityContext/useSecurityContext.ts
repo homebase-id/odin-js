@@ -21,7 +21,9 @@ export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
   };
 
   return {
-    fetch: useQuery(['security-context', odinId], () => fetch(odinId), {
+    fetch: useQuery({
+      queryKey: ['security-context', odinId],
+      queryFn: () => fetch(odinId),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

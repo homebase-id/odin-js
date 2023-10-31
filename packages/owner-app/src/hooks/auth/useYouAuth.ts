@@ -3,7 +3,8 @@ import { createHomeToken } from '../../provider/auth/YouAuthProvider';
 
 export const useYouAuth = () => {
   return {
-    homeToken: useMutation(createHomeToken, {
+    homeToken: useMutation({
+      mutationFn: createHomeToken,
       onError: (err) => {
         console.error(err);
       },

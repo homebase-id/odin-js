@@ -22,15 +22,18 @@ export const useIdentityIFollow = ({ odinId }: useIdentityIFollowProps) => {
   };
 
   return {
-    fetch: useQuery(['following', odinId], () => fetchBlogData({ odinId: odinId as string }), {
+    fetch: useQuery({
+      queryKey: ['following', odinId],
+      queryFn: () => fetchBlogData({ odinId: odinId as string }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
       enabled: !!odinId,
     }),
-    unfollow: useMutation(unfollow, {
+    unfollow: useMutation({
+      mutationFn: unfollow,
       onSuccess: () => {
-        queryClient.invalidateQueries(['following']);
+        queryClient.invalidateQueries({ queryKey: ['following'] });
       },
       onError: (ex) => {
         console.error(ex);

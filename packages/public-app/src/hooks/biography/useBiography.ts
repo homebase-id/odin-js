@@ -149,7 +149,9 @@ export const useBiography = () => {
     return returnData;
   };
 
-  return useQuery(['biography'], fetchData, {
+  return useQuery({
+    queryKey: ['biography'],
+    queryFn: fetchData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,

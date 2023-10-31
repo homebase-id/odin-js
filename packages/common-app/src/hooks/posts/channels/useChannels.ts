@@ -56,7 +56,9 @@ export const useChannels = ({
     return returnData;
   };
 
-  return useQuery(['channels'], fetchChannelData, {
+  return useQuery({
+    queryKey: ['channels'],
+    queryFn: fetchChannelData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,

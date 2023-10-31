@@ -75,13 +75,14 @@ export const useInit = () => {
   };
 
   return {
-    initWithData: useMutation(doInitWithData, {
+    initWithData: useMutation({
+      mutationFn: doInitWithData,
       onError: (ex) => {
         console.error(ex);
       },
       retry: 0,
       onSettled: () => {
-        queryClient.invalidateQueries(['initialized']);
+        queryClient.invalidateQueries({ queryKey: ['initialized'] });
       },
     }),
   };

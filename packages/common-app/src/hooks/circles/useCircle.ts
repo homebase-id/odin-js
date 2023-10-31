@@ -108,23 +108,25 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['circle', circleId], () => fetch({ circleId: circleId as string }), {
+    fetch: useQuery({
+      queryKey: ['circle', circleId],
+      queryFn: () => fetch({ circleId: circleId as string }),
       refetchOnWindowFocus: false,
       enabled: !!circleId,
     }),
 
-    fetchMembers: useQuery(
-      ['circleMembers', circleId],
-      () => fetchMembers({ circleId: circleId as string }),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!circleId,
-      }
-    ),
+    fetchMembers: useQuery({
+      queryKey: ['circleMembers', circleId],
+      queryFn: () => fetchMembers({ circleId: circleId as string }),
 
-    createOrUpdate: useMutation(createOrUpdate, {
+      refetchOnWindowFocus: false,
+      enabled: !!circleId,
+    }),
+
+    createOrUpdate: useMutation({
+      mutationFn: createOrUpdate,
       onMutate: async (newCircle) => {
-        await queryClient.cancelQueries(['circle', newCircle.id]);
+        await queryClient.cancelQueries({ queryKey: ['circle', newCircle.id] });
 
         // Update single attribute
         const previousCircle = queryClient.getQueryData(['circle', newCircle.id]);
@@ -149,38 +151,41 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
         queryClient.setQueryData(['circles'], context?.previousCircles);
       },
       onSettled: (newCircle) => {
-        queryClient.invalidateQueries(['circles']);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
         if (newCircle?.id) {
-          queryClient.invalidateQueries(['circle', newCircle.id]);
+          queryClient.invalidateQueries({ queryKey: ['circle', newCircle.id] });
         }
       },
     }),
 
-    disableCircle: useMutation(disableCircleInternal, {
+    disableCircle: useMutation({
+      mutationFn: disableCircleInternal,
       onSuccess: (data, params) => {
-        queryClient.invalidateQueries(['circles']);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
         if (params?.circleId) {
-          queryClient.invalidateQueries(['circle', params.circleId]);
+          queryClient.invalidateQueries({ queryKey: ['circle', params.circleId] });
         }
       },
     }),
-    enableCircle: useMutation(enableCircleInternal, {
+    enableCircle: useMutation({
+      mutationFn: enableCircleInternal,
       onSuccess: (data, params) => {
-        queryClient.invalidateQueries(['circles']);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
         if (params?.circleId) {
-          queryClient.invalidateQueries(['circle', params.circleId]);
+          queryClient.invalidateQueries({ queryKey: ['circle', params.circleId] });
         }
       },
     }),
 
-    provideGrants: useMutation(provideGrants, {
+    provideGrants: useMutation({
+      mutationFn: provideGrants,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.odinIds.map(async (odinId) => {
-            return await queryClient.invalidateQueries(['connectionInfo', odinId]);
+            return await queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
           })
         );
       },
@@ -189,14 +194,15 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       },
     }),
 
-    revokeDomainGrants: useMutation(revokeDomainGrants, {
+    revokeDomainGrants: useMutation({
+      mutationFn: revokeDomainGrants,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.domains.map(async (domain) => {
-            return await queryClient.invalidateQueries(['domainInfo', domain]);
+            return await queryClient.invalidateQueries({ queryKey: ['domainInfo', domain] });
           })
         );
       },
@@ -205,14 +211,15 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       },
     }),
 
-    revokeIdentityGrants: useMutation(revokeIdentityGrants, {
+    revokeIdentityGrants: useMutation({
+      mutationFn: revokeIdentityGrants,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
         await Promise.all(
           param.odinIds.map(async (odinId) => {
-            return await queryClient.invalidateQueries(['connectionInfo', odinId]);
+            return await queryClient.invalidateQueries({ queryKey: ['connectionInfo', odinId] });
           })
         );
       },
@@ -221,58 +228,63 @@ export const useCircle = ({ circleId }: { circleId?: string }) => {
       },
     }),
 
-    provideGrant: useMutation(provideGrant, {
+    provideGrant: useMutation({
+      mutationFn: provideGrant,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
-        queryClient.invalidateQueries(['connectionInfo', param.odinId]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.odinId] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    revokeGrant: useMutation(revokeGrant, {
+    revokeGrant: useMutation({
+      mutationFn: revokeGrant,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
-        queryClient.invalidateQueries(['connectionInfo', param.odinId]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.odinId] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    provideDomainGrant: useMutation(provideDomainGrant, {
+    provideDomainGrant: useMutation({
+      mutationFn: provideDomainGrant,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
-        queryClient.invalidateQueries(['domainInfo', param.domain]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    revokeDomainGrant: useMutation(revokeDomainGrant, {
+    revokeDomainGrant: useMutation({
+      mutationFn: revokeDomainGrant,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', circleId]);
-        queryClient.invalidateQueries(['circleMembers', circleId]);
-        queryClient.invalidateQueries(['domainInfo', param.domain]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['circleMembers', circleId] });
+        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    removeCircle: useMutation(removeCircleInternal, {
+    removeCircle: useMutation({
+      mutationFn: removeCircleInternal,
       onSuccess: async (data, param) => {
-        queryClient.invalidateQueries(['circles']);
-        queryClient.invalidateQueries(['circle', param.circleId]);
+        queryClient.invalidateQueries({ queryKey: ['circles'] });
+        queryClient.invalidateQueries({ queryKey: ['circle', param.circleId] });
       },
       onError: (ex) => {
         console.error(ex);

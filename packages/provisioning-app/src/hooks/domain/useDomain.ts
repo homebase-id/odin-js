@@ -49,17 +49,20 @@ export const useDomain = () => {
   };
 
   return {
-    reserve: useMutation(reserveDomain, {
+    reserve: useMutation({
+      mutationFn: reserveDomain,
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    register: useMutation(registerDomain, {
+    register: useMutation({
+      mutationFn: registerDomain,
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    poll: useMutation(pollProvisioningState, {
+    poll: useMutation({
+      mutationFn: pollProvisioningState,
       onError: (ex) => {
         console.error(ex);
       },

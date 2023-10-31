@@ -9,7 +9,7 @@ import PermissionView from '../../components/PermissionViews/PermissionView/Perm
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, ErrorNotification } from '@youfoundation/common-app';
+import { ActionButton, ActionButtonState, ErrorNotification } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { CircleSelector } from '@youfoundation/common-app';
 import { PermissionSet } from '@youfoundation/js-lib/core';
@@ -124,7 +124,7 @@ const AppRegistration = ({
   circlePermissionSet?: PermissionSet;
   circleDriveGrants?: DriveGrantRequest[];
   registerApp: (data: AppRegistrationRequest) => Promise<void>;
-  registerAppState: 'idle' | 'loading' | 'error' | 'success';
+  registerAppState: ActionButtonState;
   doCancel: () => void;
 }) => {
   const [circleIds, setCircleIds] = useState<string[]>([]);

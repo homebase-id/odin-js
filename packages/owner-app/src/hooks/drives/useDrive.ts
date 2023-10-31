@@ -30,13 +30,11 @@ export const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
   };
 
   return {
-    fetch: useQuery(
-      ['drive', `${targetDrive?.alias}_${targetDrive?.type}`],
-      () => fetch(targetDrive as TargetDrive),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!targetDrive,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['drive', `${targetDrive?.alias}_${targetDrive?.type}`],
+      queryFn: () => fetch(targetDrive as TargetDrive),
+      refetchOnWindowFocus: false,
+      enabled: !!targetDrive,
+    }),
   };
 };

@@ -27,18 +27,14 @@ export const useTinyThumb = (
     return (await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId)) || null;
   };
 
-  return useQuery(
-    ['tinyThumb', odinId || localHost, imageDrive?.alias, imageFileId],
-    () => fetchImageData(odinId || localHost, imageFileId, imageDrive),
-    {
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 10, // 10min
-      cacheTime: Infinity,
-      enabled: !!imageFileId && imageFileId !== '',
-      onError: (error) => {
-        console.error(error);
-      },
-    }
-  );
+  return useQuery({
+    queryKey: ['tinyThumb', odinId || localHost, imageDrive?.alias, imageFileId],
+    queryFn: () => fetchImageData(odinId || localHost, imageFileId, imageDrive),
+
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 10, // 10min
+    gcTime: Infinity,
+    enabled: !!imageFileId && imageFileId !== '',
+  });
 };

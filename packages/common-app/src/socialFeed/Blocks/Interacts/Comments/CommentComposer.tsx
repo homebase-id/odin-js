@@ -2,6 +2,7 @@ import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
 import {
   ActionButton,
+  ActionButtonState,
   AuthorImage,
   CanReactInfo,
   CantReactInfo,
@@ -11,7 +12,6 @@ import {
   ImageIcon,
   Loader,
   PaperPlane,
-  Times,
   VolatileInput,
   getImagesFromPasteEvent,
   t,
@@ -47,7 +47,7 @@ export const CommentComposer = ({
 
   const odinId = getIdentity() || '';
   const doPost = async (commentBody: string, attachment?: File) => {
-    if (postState === 'loading') return;
+    if (postState === 'pending') return;
 
     try {
       await postComment({
@@ -100,7 +100,7 @@ export const CommentEditor = ({
   defaultAttachment?: File;
   doPost: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;
-  postState: 'idle' | 'loading' | 'success' | 'error';
+  postState: ActionButtonState;
 }) => {
   const [body, setBody] = useState(defaultBody);
   const [attachment, setAttachment] = useState<File | undefined>(defaultAttachment);

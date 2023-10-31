@@ -72,20 +72,21 @@ export const useAttributes = ({
   };
 
   return {
-    fetch: useQuery(
-      ['attributes', profileId, sectionId],
-      () => fetchData(profileId as string, sectionId as string),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!profileId && !!sectionId,
-      }
-    ),
-    removeAttributes: useMutation(removeAttributes, {
+    fetch: useQuery({
+      queryKey: ['attributes', profileId, sectionId],
+      queryFn: () => fetchData(profileId as string, sectionId as string),
+      refetchOnWindowFocus: false,
+      enabled: !!profileId && !!sectionId,
+    }),
+    removeAttributes: useMutation({
+      mutationFn: removeAttributes,
       onError: (err) => {
         console.error(err);
       },
       onSettled: (data, err, variables) => {
-        queryClient.invalidateQueries(['attributes', variables.profileId, variables.sectionId]);
+        queryClient.invalidateQueries({
+          queryKey: ['attributes', variables.profileId, variables.sectionId],
+        });
       },
     }),
   };

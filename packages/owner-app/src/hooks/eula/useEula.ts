@@ -29,7 +29,7 @@ export const useEula = () => {
   };
 
   return {
-    isEulaSignatureRequired: useQuery(['eula'], fetchRequired),
-    markEulaAsAccepted: useMutation(markAccepted),
+    isEulaSignatureRequired: useQuery({ queryKey: ['eula'], queryFn: fetchRequired }),
+    markEulaAsAccepted: useMutation({ mutationFn: markAccepted }),
   };
 };

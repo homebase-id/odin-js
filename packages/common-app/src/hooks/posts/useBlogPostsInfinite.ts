@@ -73,16 +73,15 @@ export const useBlogPostsInfinite = ({
     };
   };
 
-  return useInfiniteQuery(
-    ['blogs', channelId, postType],
-    ({ pageParam }) => fetchBlogData({ channelId, pageParam }),
-    {
-      getNextPageParam: (lastPage) =>
-        (lastPage?.results?.length >= pageSize && lastPage?.cursorState) ?? undefined,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      enabled: enabled,
-    }
-  );
+  return useInfiniteQuery({
+    queryKey: ['blogs', channelId, postType],
+    initialPageParam: undefined as string | Record<string, string> | undefined,
+    queryFn: ({ pageParam }) => fetchBlogData({ channelId, pageParam }),
+    getNextPageParam: (lastPage) =>
+      lastPage?.results?.length >= pageSize ? lastPage.cursorState : undefined,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+    enabled: enabled,
+  });
 };

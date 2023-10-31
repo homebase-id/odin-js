@@ -94,18 +94,17 @@ export const useFiles = ({
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['files', systemFileType || 'Standard', targetDrive.alias],
-      ({ pageParam }) => fetchFiles({ targetDrive, pageParam }),
-      {
-        getNextPageParam: (lastPage) =>
-          (lastPage?.searchResults?.length >= pageSize && lastPage?.cursorState) || undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!targetDrive,
-      }
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetchFiles({ targetDrive, pageParam }),
+      getNextPageParam: (lastPage) =>
+        lastPage?.searchResults?.length >= pageSize ? lastPage?.cursorState : undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!targetDrive,
+    }),
     fetchFile: fetchFile,
   };
 };

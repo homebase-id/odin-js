@@ -11,9 +11,14 @@ export const useRecoveryKey = () => {
   };
 
   return {
-    fetchKey: useQuery(['recoveryKey'], fetchKey, {
-      cacheTime: Infinity, // Recovery key can only be fetch once at the moment.. If it fails, you're screwed
+    fetchKey: useQuery({
+      queryKey: ['recoveryKey'],
+      queryFn: fetchKey,
+      gcTime: Infinity, // Recovery key can only be fetch once at the moment.. If it fails, you're screwed
       staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     }),
   };
 };

@@ -165,6 +165,6 @@ export const useExport = () => {
   };
 
   return {
-    exportUnencrypted: useMutation(exportUnencrypted),
+    exportUnencrypted: useMutation({ mutationFn: exportUnencrypted }),
   };
 };

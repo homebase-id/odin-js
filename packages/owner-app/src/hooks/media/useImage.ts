@@ -59,31 +59,29 @@ export const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   };
 
   return {
-    fetch: useQuery(
-      ['image', imageFileId, imageDrive?.alias],
-      () => fetchImageData(imageFileId as string, imageDrive),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!imageFileId,
-      }
-    ),
-    save: useMutation(saveImage, {
+    fetch: useQuery({
+      queryKey: ['image', imageFileId, imageDrive?.alias],
+      queryFn: () => fetchImageData(imageFileId as string, imageDrive),
+
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!imageFileId,
+    }),
+    save: useMutation({
+      mutationFn: saveImage,
       onSuccess: (_data, variables) => {
         // Boom baby!
         if (variables.fileId) {
-          queryClient.invalidateQueries([
-            'image',
-            variables.fileId,
-            variables.targetDrive ?? defaultDrive,
-          ]);
+          queryClient.invalidateQueries({
+            queryKey: ['image', variables.fileId, variables.targetDrive ?? defaultDrive],
+          });
         } else {
-          queryClient.removeQueries(['image']);
+          queryClient.invalidateQueries({ queryKey: ['image'], exact: false });
         }
       },
     }),
-    remove: useMutation(removeImageInternal),
+    remove: useMutation({ mutationFn: removeImageInternal }),
     // The remove mutation doesn't force invalidate the cache anymore, as removing an image always corresponds to removing the refrence as well.
   };
 };

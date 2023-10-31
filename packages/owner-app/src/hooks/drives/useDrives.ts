@@ -12,7 +12,9 @@ export const useDrives = () => {
   };
 
   return {
-    fetch: useQuery(['drives'], () => fetchAll(), {
+    fetch: useQuery({
+      queryKey: ['drives'],
+      queryFn: () => fetchAll(),
       refetchOnWindowFocus: false,
     }),
   };

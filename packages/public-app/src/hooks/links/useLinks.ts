@@ -73,7 +73,9 @@ export const useLinks = () => {
     return returnData;
   };
 
-  return useQuery(['links'], fetchData, {
+  return useQuery({
+    queryKey: ['links'],
+    queryFn: fetchData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,

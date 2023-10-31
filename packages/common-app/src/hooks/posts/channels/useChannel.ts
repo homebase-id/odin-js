@@ -61,19 +61,18 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   };
 
   return {
-    fetch: useQuery(
-      ['channel', channelSlug || channelId],
-      () => fetchChannelData({ channelSlug, channelId }),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!channelId || !!channelSlug,
-      }
-    ),
-    save: useMutation(saveData, {
+    fetch: useQuery({
+      queryKey: ['channel', channelSlug || channelId],
+      queryFn: () => fetchChannelData({ channelSlug, channelId }),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!channelId || !!channelSlug,
+    }),
+    save: useMutation({
+      mutationFn: saveData,
       onMutate: async (toSaveChannel) => {
-        await queryClient.cancelQueries(['channels']);
+        await queryClient.cancelQueries({ queryKey: ['channels'] });
 
         const toSaveChannelAsVm = {
           ...toSaveChannel,
@@ -104,11 +103,11 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       onSettled: (_data, _error, variables) => {
         // Boom baby!
         if (variables.channelId && variables.channelId !== '') {
-          queryClient.invalidateQueries(['channel', variables.channelId]);
-          queryClient.invalidateQueries(['channel', variables.slug]);
+          queryClient.invalidateQueries({ queryKey: ['channel', variables.channelId] });
+          queryClient.invalidateQueries({ queryKey: ['channel', variables.slug] });
         } else {
-          queryClient.invalidateQueries(['channel']);
-          queryClient.invalidateQueries(['channels']);
+          queryClient.invalidateQueries({ queryKey: ['channel'] });
+          queryClient.invalidateQueries({ queryKey: ['channels'] });
         }
         // We don't invalidate channels by default, as fetching the channels is a combination of static and dynamic data
         // queryClient.invalidateQueries(['channels']);
@@ -116,9 +115,10 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         publishStaticFiles();
       },
     }),
-    remove: useMutation(removeChannel, {
+    remove: useMutation({
+      mutationFn: removeChannel,
       onMutate: async (toRemoveChannel) => {
-        await queryClient.cancelQueries(['channels']);
+        await queryClient.cancelQueries({ queryKey: ['channels'] });
 
         const previousChannels: ChannelDefinitionVm[] | undefined = queryClient.getQueryData([
           'channels',
@@ -137,7 +137,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         queryClient.setQueryData(['channels'], context?.previousChannels);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['channels']);
+        queryClient.invalidateQueries({ queryKey: ['channels'] });
       },
     }),
   };

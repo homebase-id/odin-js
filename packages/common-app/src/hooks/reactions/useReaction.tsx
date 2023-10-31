@@ -47,7 +47,8 @@ export const useReaction = () => {
   };
 
   return {
-    saveComment: useMutation(saveCommentData, {
+    saveComment: useMutation({
+      mutationFn: saveCommentData,
       onMutate: async (toSaveCommentData) => {
         const { authorOdinId, channelId, target } = toSaveCommentData.context;
 
@@ -109,12 +110,9 @@ export const useReaction = () => {
         ]);
 
         if (!prevInfinite) {
-          queryClient.invalidateQueries([
-            'comments',
-            authorOdinId,
-            channelId,
-            target.globalTransitId,
-          ]);
+          queryClient.invalidateQueries({
+            queryKey: ['comments', authorOdinId, channelId, target.globalTransitId],
+          });
           return;
         }
 
@@ -138,28 +136,34 @@ export const useReaction = () => {
         setTimeout(
           () => {
             // Allow server some time to process
-            queryClient.invalidateQueries([
-              'comments',
-              _data.context.authorOdinId,
-              _data.context.channelId,
-              _data.context.target.globalTransitId,
-            ]);
+            queryClient.invalidateQueries({
+              queryKey: [
+                'comments',
+                _data.context.authorOdinId,
+                _data.context.channelId,
+                _data.context.target.globalTransitId,
+              ],
+            });
           },
           _error ? 100 : 2000
         );
       },
     }),
-    removeComment: useMutation(removeCommentData, {
+    removeComment: useMutation({
+      mutationFn: removeCommentData,
       onSuccess: (_variables, _data) => {
-        queryClient.invalidateQueries([
-          'comments',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.globalTransitId,
-        ]);
+        queryClient.invalidateQueries({
+          queryKey: [
+            'comments',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.globalTransitId,
+          ],
+        });
       },
     }),
-    saveEmoji: useMutation(saveEmojiReactionData, {
+    saveEmoji: useMutation({
+      mutationFn: saveEmojiReactionData,
       onMutate: (toSaveEmoji) => {
         const cacheKey = [
           toSaveEmoji.context.authorOdinId,
@@ -212,30 +216,37 @@ export const useReaction = () => {
         queryClient.setQueryData(['my-emojis', ...cacheKey], newMyEmojis);
       },
       onSettled: (_variables, _error, _data) => {
-        queryClient.invalidateQueries([
-          'my-emojis',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.fileId,
-          _data.context.target.globalTransitId,
-        ]);
-        queryClient.invalidateQueries([
-          'emojis',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.fileId,
-          _data.context.target.globalTransitId,
-        ]);
-        queryClient.invalidateQueries([
-          'emojis-summary',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.fileId,
-          _data.context.target.globalTransitId,
-        ]);
+        queryClient.invalidateQueries({
+          queryKey: [
+            'my-emojis',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.fileId,
+            _data.context.target.globalTransitId,
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'emojis',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.fileId,
+            _data.context.target.globalTransitId,
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'emojis-summary',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.fileId,
+            _data.context.target.globalTransitId,
+          ],
+        });
       },
     }),
-    removeEmoji: useMutation(removeEmojiReactionData, {
+    removeEmoji: useMutation({
+      mutationFn: removeEmojiReactionData,
       onMutate: (toRemoveEmoji) => {
         const cacheKey = [
           toRemoveEmoji.context.authorOdinId,
@@ -279,27 +290,33 @@ export const useReaction = () => {
         queryClient.setQueryData(['my-emojis', ...cacheKey], newMyEmojis);
       },
       onSettled: (_variables, _error, _data) => {
-        queryClient.invalidateQueries([
-          'my-emojis',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.fileId,
-          _data.context.target.globalTransitId,
-        ]);
-        queryClient.invalidateQueries([
-          'emojis',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.fileId,
-          _data.context.target.globalTransitId,
-        ]);
-        queryClient.invalidateQueries([
-          'emojis-summary',
-          _data.context.authorOdinId,
-          _data.context.channelId,
-          _data.context.target.fileId,
-          _data.context.target.globalTransitId,
-        ]);
+        queryClient.invalidateQueries({
+          queryKey: [
+            'my-emojis',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.fileId,
+            _data.context.target.globalTransitId,
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'emojis',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.fileId,
+            _data.context.target.globalTransitId,
+          ],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'emojis-summary',
+            _data.context.authorOdinId,
+            _data.context.channelId,
+            _data.context.target.fileId,
+            _data.context.target.globalTransitId,
+          ],
+        });
       },
     }),
   };

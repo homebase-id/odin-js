@@ -16,7 +16,9 @@ export const useFollower = ({ odinId }: useFollowerProps) => {
   };
 
   return {
-    fetch: useQuery(['follower', odinId], () => fetchFollowDetails({ odinId: odinId as string }), {
+    fetch: useQuery({
+      queryKey: ['follower', odinId],
+      queryFn: () => fetchFollowDetails({ odinId: odinId as string }),
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,

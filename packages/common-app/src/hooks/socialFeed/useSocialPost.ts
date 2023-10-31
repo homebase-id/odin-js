@@ -29,15 +29,13 @@ export const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps)
   };
 
   return {
-    fetch: useQuery(
-      ['post', odinId, channelId, postId],
-      () => fetch({ odinId, channelId, postId }),
-      {
-        enabled: !!odinId && !!channelId && !!postId,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['post', odinId, channelId, postId],
+      queryFn: () => fetch({ odinId, channelId, postId }),
+      enabled: !!odinId && !!channelId && !!postId,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+    }),
   };
 };

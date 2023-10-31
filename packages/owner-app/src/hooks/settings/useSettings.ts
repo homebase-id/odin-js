@@ -29,20 +29,26 @@ export const useSettings = () => {
   };
 
   return {
-    fetchFlags: useQuery(['systemFlags'], () => fetchFlags(), {
+    fetchFlags: useQuery({
+      queryKey: ['systemFlags'],
+      queryFn: () => fetchFlags(),
       refetchOnWindowFocus: false,
     }),
-    updateFlag: useMutation(updateFlagInternal, {
+    updateFlag: useMutation({
+      mutationFn: updateFlagInternal,
       onSuccess: () => {
-        queryClient.invalidateQueries(['systemFlags']);
+        queryClient.invalidateQueries({ queryKey: ['systemFlags'] });
       },
     }),
-    fetchUiSettings: useQuery(['uiSettings'], () => fetchUiSettings(), {
+    fetchUiSettings: useQuery({
+      queryKey: ['uiSettings'],
+      queryFn: () => fetchUiSettings(),
       refetchOnWindowFocus: false,
     }),
-    updateUiSetting: useMutation(updateUiSetting, {
+    updateUiSetting: useMutation({
+      mutationFn: updateUiSetting,
       onSuccess: () => {
-        queryClient.invalidateQueries(['uiSettings']);
+        queryClient.invalidateQueries({ queryKey: ['uiSettings'] });
       },
     }),
   };

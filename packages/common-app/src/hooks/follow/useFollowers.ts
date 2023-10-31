@@ -14,10 +14,12 @@ export const useFollowerInfinite = ({ pageSize = 30 }: useFollowerInfiniteProps)
     return response;
   };
 
-  return useInfiniteQuery(['followers'], ({ pageParam }) => fetchBlogData({ pageParam }), {
+  return useInfiniteQuery({
+    queryKey: ['followers'],
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => fetchBlogData({ pageParam }),
     getNextPageParam: (lastPage) =>
-      (lastPage?.results && lastPage.results.length >= pageSize && lastPage?.cursorState) ??
-      undefined,
+      lastPage?.results && lastPage.results.length >= pageSize ? lastPage.cursorState : undefined,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,

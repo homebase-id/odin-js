@@ -10,7 +10,9 @@ export const useConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['connectionInfo', odinId], () => doGetConnectionInfo(odinId as string), {
+    fetch: useQuery({
+      queryKey: ['connectionInfo', odinId],
+      queryFn: () => doGetConnectionInfo(odinId as string),
       refetchOnWindowFocus: false,
       enabled: !!odinId,
     }),

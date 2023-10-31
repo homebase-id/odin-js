@@ -9,12 +9,10 @@ export const useAttributeVersions = ({ profileId, type }: { profileId: string; t
     return await getAttributeVersions(dotYouClient, profileId, undefined, [type]);
   };
   return {
-    fetchVersions: useQuery(
-      ['attributeVersions', profileId, type],
-      () => fetchVersions({ profileId, type }),
-      {
-        refetchOnWindowFocus: false,
-      }
-    ),
+    fetchVersions: useQuery({
+      queryKey: ['attributeVersions', profileId, type],
+      queryFn: () => fetchVersions({ profileId, type }),
+      refetchOnWindowFocus: false,
+    }),
   };
 };

@@ -243,13 +243,12 @@ export const useSiteData = () => {
     return staticData as SiteData;
   };
 
-  return useQuery(['siteData'], fetchData, {
+  return useQuery({
+    queryKey: ['siteData'],
+    queryFn: fetchData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,
-    onError: (er) => {
-      console.error(er);
-    },
   });
 };
 

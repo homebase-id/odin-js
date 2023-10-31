@@ -3,8 +3,10 @@ import Label from '../Form/Label';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import { validDomainRegEx } from '../../helpers/common';
-import { useFetchIsOwnDomainAvailable } from '../../hooks/ownDomain/useOwnDomain';
-import { OwnDomainProvisionState } from '../../hooks/ownDomain/OwnDomainProvisionState';
+import {
+  OwnDomainProvisionState,
+  useFetchIsOwnDomainAvailable,
+} from '../../hooks/ownDomain/useOwnDomain';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { Arrow, Exclamation } from '@youfoundation/common-app';
 

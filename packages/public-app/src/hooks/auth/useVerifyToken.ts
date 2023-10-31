@@ -24,7 +24,9 @@ export const useVerifyToken = (isOwner?: boolean) => {
     if (isOwner) return await hasValidOwnerToken();
     else return await hasValidYouAuthToken();
   };
-  return useQuery(['verifyToken'], fetchData, {
+  return useQuery({
+    queryKey: ['verifyToken'],
+    queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });

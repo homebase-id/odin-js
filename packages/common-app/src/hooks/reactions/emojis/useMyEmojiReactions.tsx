@@ -34,26 +34,23 @@ export const useMyEmojiReactions = (context?: ReactionContext) => {
   };
 
   return {
-    fetch: useQuery(
-      [
+    fetch: useQuery({
+      queryKey: [
         'my-emojis',
         context?.authorOdinId,
         context?.channelId,
         context?.target?.fileId,
         context?.target?.globalTransitId,
       ],
-      ({ pageParam }) => fetch({ context, pageParam }),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        onError: (er) => {
-          console.log(er);
-        },
-        enabled:
-          !!context?.authorOdinId &&
-          !!context?.channelId &&
-          (!!context?.target?.fileId || !!context?.target?.globalTransitId),
-      }
-    ),
+      queryFn: () => fetch({ context }),
+
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+
+      enabled:
+        !!context?.authorOdinId &&
+        !!context?.channelId &&
+        (!!context?.target?.fileId || !!context?.target?.globalTransitId),
+    }),
   };
 };

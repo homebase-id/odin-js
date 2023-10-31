@@ -11,7 +11,9 @@ export const useApps = () => {
   };
 
   return {
-    fetchRegistered: useQuery(['registeredApps'], () => fetchRegistered(), {
+    fetchRegistered: useQuery({
+      queryKey: ['registeredApps'],
+      queryFn: () => fetchRegistered(),
       refetchOnWindowFocus: false,
     }),
   };

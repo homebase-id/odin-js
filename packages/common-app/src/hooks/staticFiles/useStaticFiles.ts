@@ -22,7 +22,8 @@ export const useStaticFiles = () => {
   };
 
   return {
-    publish: useMutation(publishData, {
+    publish: useMutation({
+      mutationFn: publishData,
       onError: (ex) => {
         console.error(ex);
       },

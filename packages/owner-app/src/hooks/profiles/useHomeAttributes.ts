@@ -26,10 +26,13 @@ export const useHomeAttributes = () => {
   };
 
   return {
-    fetchTheme: useQuery(
-      ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
-      fetchTheme,
-      { refetchOnMount: false, refetchOnWindowFocus: false, staleTime: Infinity, retry: 1 }
-    ),
+    fetchTheme: useQuery({
+      queryKey: ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
+      queryFn: fetchTheme,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      retry: 1,
+    }),
   };
 };

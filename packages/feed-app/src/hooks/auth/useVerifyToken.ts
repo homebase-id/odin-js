@@ -18,7 +18,9 @@ export const useVerifyToken = (dotYouClient: DotYouClient) => {
 
     return await hasValidYouAuthToken(dotYouClient);
   };
-  return useQuery(['verifyToken'], fetchData, {
+  return useQuery({
+    queryKey: ['verifyToken'],
+    queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });

@@ -16,5 +16,5 @@ export const useCheckIdentity = (odinId?: string) => {
       .catch(() => false);
   };
 
-  return useQuery(['check-identity', odinId], () => doCheckIdentity(odinId));
+  return useQuery({ queryKey: ['check-identity', odinId], queryFn: () => doCheckIdentity(odinId) });
 };

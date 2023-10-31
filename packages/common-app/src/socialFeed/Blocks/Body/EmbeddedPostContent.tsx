@@ -34,7 +34,7 @@ export const EmbeddedPostContent = ({
 
   // Hide media if we can't get channel info, when there's no channel we can't get the media either
   useEffect(() => {
-    if (externalChannelStatus !== 'loading' && internalChannelStatus !== 'loading' && !channel)
+    if (externalChannelStatus !== 'pending' && internalChannelStatus !== 'pending' && !channel)
       setShouldHideMedia(true);
   }, [externalChannel, internalChannel, externalChannelStatus, internalChannelStatus]);
 

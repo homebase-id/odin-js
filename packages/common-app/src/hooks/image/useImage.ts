@@ -111,15 +111,15 @@ export const useImage = (
   };
 
   return {
-    fetch: useQuery(
-      [
+    fetch: useQuery({
+      queryKey: [
         'image',
         odinId || localHost,
         imageDrive?.alias,
         imageFileId,
         `${size?.pixelHeight}x${size?.pixelWidth}`,
       ],
-      () =>
+      queryFn: () =>
         fetchImageData(
           odinId || localHost,
           imageFileId,
@@ -128,28 +128,24 @@ export const useImage = (
           probablyEncrypted,
           naturalSize
         ),
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!imageFileId && imageFileId !== '',
-      }
-    ),
-    save: useMutation(saveImageFile, {
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!imageFileId && imageFileId !== '',
+    }),
+    save: useMutation({
+      mutationFn: saveImageFile,
       onSuccess: (_data, variables) => {
         // Boom baby!
         if (variables.fileId) {
-          queryClient.invalidateQueries([
-            'image',
-            localHost,
-            variables.targetDrive.alias,
-            variables.fileId,
-          ]);
+          queryClient.invalidateQueries({
+            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
+          });
         } else {
-          queryClient.removeQueries(['image']);
+          queryClient.invalidateQueries({ queryKey: ['image'], exact: false });
         }
       },
     }),
-    remove: useMutation(removeImageFile),
+    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

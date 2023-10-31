@@ -1,9 +1,11 @@
 import DnsSettingsView from '../DnsSettingsView/DnsSettingsView';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
-import { useFetchOwnDomainDnsConfig } from '../../hooks/ownDomain/useOwnDomain';
+import {
+  OwnDomainProvisionState,
+  useFetchOwnDomainDnsConfig,
+} from '../../hooks/ownDomain/useOwnDomain';
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
-import { OwnDomainProvisionState } from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { useMemo } from 'react';
 import { Alert, Arrow } from '@youfoundation/common-app';

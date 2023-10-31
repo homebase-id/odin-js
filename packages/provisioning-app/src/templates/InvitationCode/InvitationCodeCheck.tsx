@@ -77,7 +77,7 @@ const InvitationCodeCheck = () => {
                   className="flex-grow justify-center text-center"
                   type="primary"
                   state={
-                    (status === 'loading' || status === 'error') && invitationCode
+                    (status === 'pending' || status === 'error') && invitationCode
                       ? status
                       : undefined
                   }

@@ -86,60 +86,68 @@ export const useApp = ({ appId }: { appId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['app', appId], () => fetch({ appId: appId as string }), {
+    fetch: useQuery({
+      queryKey: ['app', appId],
+      queryFn: () => fetch({ appId: appId as string }),
       refetchOnWindowFocus: false,
       retry: false,
       enabled: !!appId,
     }),
-    registerNewApp: useMutation(registerNewApp, {
+    registerNewApp: useMutation({
+      mutationFn: registerNewApp,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['app', param.appId]);
-        queryClient.invalidateQueries(['registeredApps']);
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    revokeApp: useMutation(revokeAppInternal, {
+    revokeApp: useMutation({
+      mutationFn: revokeAppInternal,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['app', param.appId]);
-        queryClient.invalidateQueries(['registeredApps']);
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    allowApp: useMutation(allowAppInternal, {
+    allowApp: useMutation({
+      mutationFn: allowAppInternal,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['app', param.appId]);
-        queryClient.invalidateQueries(['registeredApps']);
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    removeApp: useMutation(removeAppInternal, {
+    removeApp: useMutation({
+      mutationFn: removeAppInternal,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['app', param.appId]);
-        queryClient.invalidateQueries(['registeredApps']);
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    updateAuthorizedCircles: useMutation(updateAuthorizedCircles, {
+    updateAuthorizedCircles: useMutation({
+      mutationFn: updateAuthorizedCircles,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['app', param.appId]);
-        queryClient.invalidateQueries(['registeredApps']);
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    updatePermissions: useMutation(updatePermissions, {
+    updatePermissions: useMutation({
+      mutationFn: updatePermissions,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['app', param.appId]);
-        queryClient.invalidateQueries(['registeredApps']);
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
       },
       onError: (ex) => {
         console.error(ex);

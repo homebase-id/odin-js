@@ -24,9 +24,11 @@ export const useIsConnected = (odinId?: string) => {
     }
   };
 
-  return useQuery(['isConnected', odinId], () => getIsConnected(odinId as string), {
+  return useQuery({
+    queryKey: ['isConnected', odinId],
+    queryFn: () => getIsConnected(odinId as string),
     enabled: !!odinId,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     staleTime: 10 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,

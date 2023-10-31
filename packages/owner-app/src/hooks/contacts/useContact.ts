@@ -110,24 +110,23 @@ export const useContact = ({
   };
 
   return {
-    fetch: useQuery(
-      ['contact', odinId ?? id, canSave],
-      () =>
+    fetch: useQuery({
+      queryKey: ['contact', odinId ?? id, canSave],
+      queryFn: () =>
         fetchSingle({
           odinId: odinId as string, // Defined as otherwise query would not be triggered
           id: id as string, // Defined as otherwise query would not be triggered
           canSave: canSave,
         }),
-      {
-        refetchOnWindowFocus: false,
-        onError: (err) => console.error(err),
-        retry: false,
-        enabled: !!odinId || !!id,
-      }
-    ),
-    refresh: useMutation(refresh, {
+      refetchOnWindowFocus: false,
+
+      retry: false,
+      enabled: !!odinId || !!id,
+    }),
+    refresh: useMutation({
+      mutationFn: refresh,
       onMutate: async (newContact) => {
-        await queryClient.cancelQueries(['contact', odinId ?? id]);
+        await queryClient.cancelQueries({ queryKey: ['contact', odinId ?? id] });
 
         // Update single attribute
         const previousContact = queryClient.getQueryData(['contact', odinId ?? id]);
@@ -143,8 +142,8 @@ export const useContact = ({
         queryClient.setQueryData(['contact', odinId ?? id], context?.previousContact);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['contact', odinId]);
-        queryClient.invalidateQueries(['contact', id]);
+        queryClient.invalidateQueries({ queryKey: ['contact', odinId] });
+        queryClient.invalidateQueries({ queryKey: ['contact', id] });
       },
     }),
   };

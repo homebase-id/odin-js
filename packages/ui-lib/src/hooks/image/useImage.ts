@@ -38,7 +38,10 @@ export const useImage = (
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
-      .findAll(['image', odinId || localHost, imageDrive?.alias, imageFileId], { exact: false })
+      .findAll({
+        queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId],
+        exact: false,
+      })
       .filter((query) => query.state.status !== 'error');
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
@@ -146,8 +149,8 @@ export const useImage = (
   };
 
   return {
-    fetch: useQuery(
-      [
+    fetch: useQuery({
+      queryKey: [
         'image',
         odinId || localHost,
         imageDrive?.alias,
@@ -157,7 +160,7 @@ export const useImage = (
           ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
           : undefined,
       ],
-      () =>
+      queryFn: () =>
         fetchImageData(
           odinId || localHost,
           imageFileId,
@@ -166,41 +169,37 @@ export const useImage = (
           probablyEncrypted,
           naturalSize
         ),
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: false,
-        staleTime: 1000 * 60, // 1 min
-        cacheTime: Infinity,
-        enabled: !!imageFileId && imageFileId !== '',
-        onError: (error) => {
-          console.error(error);
-        },
-      }
-    ),
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60, // 1 min
+      gcTime: Infinity,
+      enabled: !!imageFileId && imageFileId !== '',
+    }),
     getFromCache: (odinId: string | undefined, imageFileId: string, imageDrive: TargetDrive) => {
       const cachedEntries = queryClient
         .getQueryCache()
-        .findAll(['image', odinId || localHost, imageDrive?.alias, imageFileId], { exact: false })
+        .findAll({
+          queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId],
+          exact: false,
+        })
         .filter((query) => query.state.status === 'success');
 
       if (cachedEntries?.length)
         return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
     },
-    save: useMutation(saveImageFile, {
+    save: useMutation({
+      mutationFn: saveImageFile,
       onSuccess: (_data, variables) => {
         // Boom baby!
         if (variables.fileId) {
-          queryClient.invalidateQueries([
-            'image',
-            localHost,
-            variables.targetDrive.alias,
-            variables.fileId,
-          ]);
+          queryClient.invalidateQueries({
+            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
+          });
         } else {
-          queryClient.removeQueries(['image']);
+          queryClient.removeQueries({ queryKey: ['image'] });
         }
       },
     }),
-    remove: useMutation(removeImageFile),
+    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

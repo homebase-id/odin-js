@@ -9,13 +9,15 @@ import { useSearchParams } from 'react-router-dom';
 const AUTO_LOGON_PARAM = 'youauth-logon';
 const AUTHORIZE_PATH = '/api/owner/v1/youauth/authorize';
 
-export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => {
-  return <CentralLoginBox returnUrl={returnUrl} />;
-};
+export const LoginBox = ({ returnUrl }: { returnUrl?: string }) => (
+  <CentralLoginBox returnUrl={returnUrl} />
+);
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
-  return useQuery(['params', returnUrl], () => getAuthorizationParameters(returnUrl), {
+  return useQuery({
+    queryKey: ['params', returnUrl],
+    queryFn: () => getAuthorizationParameters(returnUrl),
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

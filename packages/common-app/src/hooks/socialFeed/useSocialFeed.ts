@@ -22,7 +22,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       notification.targetDrive?.type === BlogConfig.FeedDrive.type
     ) {
       console.log({ notification });
-      queryClient.invalidateQueries(['social-feeds']);
+      queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
     }
   };
   useNotificationSubscriber(handler, ['fileAdded']);
@@ -30,7 +30,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const fetchAll = async ({
     pageParam,
   }: {
-    pageParam?: { cursorState: string; ownerCursorState: Record<string, string> };
+    pageParam?: { cursorState?: string; ownerCursorState?: Record<string, string> };
   }) =>
     await getSocialFeed(dotYouClient, pageSize, pageParam?.cursorState, {
       ownCursorState: pageParam?.ownerCursorState,
@@ -38,10 +38,17 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
     });
 
   return {
-    fetchAll: useInfiniteQuery(['social-feeds'], ({ pageParam }) => fetchAll({ pageParam }), {
+    fetchAll: useInfiniteQuery({
+      queryKey: ['social-feeds'],
+      initialPageParam: undefined as
+        | { cursorState?: string; ownerCursorState?: Record<string, string> }
+        | undefined,
+      queryFn: ({ pageParam }) => fetchAll({ pageParam }),
       getNextPageParam: (lastPage) =>
-        lastPage?.results?.length >= 1 && (lastPage?.cursorState || lastPage?.ownerCursorState)
-          ? { cursorState: lastPage?.cursorState, ownerCursorState: lastPage?.ownerCursorState }
+        lastPage &&
+        lastPage?.results?.length >= 1 &&
+        (lastPage?.cursorState || lastPage?.ownerCursorState)
+          ? { cursorState: lastPage.cursorState, ownerCursorState: lastPage.ownerCursorState }
           : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,

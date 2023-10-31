@@ -6,6 +6,7 @@ import {
 import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
 import { CommentMedia } from './CommentMedia';
+import { ActionButtonState } from '../../../../../ui';
 
 export const CommentBody = ({
   context,
@@ -22,7 +23,7 @@ export const CommentBody = ({
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;
-  updateState: 'loading' | 'idle' | 'error' | 'success';
+  updateState: ActionButtonState;
 }) => {
   const { body, bodyAsRichText } = content;
   const sourceTargetDrive = context && GetTargetDriveFromChannelId(context.channelId);

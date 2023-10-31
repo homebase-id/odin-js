@@ -29,7 +29,9 @@ const useInboxProcessor = (isEnabled?: boolean) => {
     return true;
   };
 
-  return useQuery(['processInbox'], fetchData, {
+  return useQuery({
+    queryKey: ['processInbox'],
+    queryFn: fetchData,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: MINUTE_IN_MS * 60,

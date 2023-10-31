@@ -41,15 +41,13 @@ export const useVideo = (
   };
 
   return {
-    fetchMetadata: useQuery(
-      ['video', odinId || localHost, videoDrive?.alias, videoFileId],
-      () => fetchVideoData(odinId || localHost, videoFileId, videoDrive),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        enabled: !!videoFileId && videoFileId !== '',
-      }
-    ),
+    fetchMetadata: useQuery({
+      queryKey: ['video', odinId || localHost, videoDrive?.alias, videoFileId],
+      queryFn: () => fetchVideoData(odinId || localHost, videoFileId, videoDrive),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!videoFileId && videoFileId !== '',
+    }),
     getChunk: (chunkStart: number, chunkEnd?: number) => {
       if (!videoFileId || !videoDrive) {
         return null;
@@ -104,14 +102,12 @@ export const useVideoUrl = (
   };
 
   return {
-    fetch: useQuery(
-      ['video-url', odinId || localHost, videoDrive?.alias, videoFileId],
-      () => fetchVideoData(odinId || localHost, videoFileId, videoDrive),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        enabled: !!videoFileId && videoFileId !== '',
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['video-url', odinId || localHost, videoDrive?.alias, videoFileId],
+      queryFn: () => fetchVideoData(odinId || localHost, videoFileId, videoDrive),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!videoFileId && videoFileId !== '',
+    }),
   };
 };

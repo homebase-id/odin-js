@@ -14,7 +14,9 @@ export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['connectionDetails', odinId], () => fetchSingle({ odinId }), {
+    fetch: useQuery({
+      queryKey: ['connectionDetails', odinId],
+      queryFn: () => fetchSingle({ odinId }),
       refetchOnWindowFocus: false,
       enabled: !!odinId,
     }),

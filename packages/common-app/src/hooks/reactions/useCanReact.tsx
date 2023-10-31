@@ -82,7 +82,9 @@ export const useCanReact = ({
     return { canReact: true };
   };
 
-  return useQuery(['can-react', authorOdinId, channelId, postContent.id], isCanReact, {
+  return useQuery({
+    queryKey: ['can-react', authorOdinId, channelId, postContent.id],
+    queryFn: isCanReact,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: Infinity,

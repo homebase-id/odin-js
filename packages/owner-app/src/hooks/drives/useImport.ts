@@ -134,6 +134,6 @@ export const useImport = () => {
   };
 
   return {
-    importUnencrypted: useMutation(importUnencrypted),
+    importUnencrypted: useMutation({ mutationFn: importUnencrypted }),
   };
 };

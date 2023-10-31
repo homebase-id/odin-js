@@ -25,30 +25,26 @@ export const useEmojiReactions = (context?: ReactionContext) => {
   };
 
   return {
-    fetch: useInfiniteQuery(
-      [
+    fetch: useInfiniteQuery({
+      queryKey: [
         'emojis',
         context?.authorOdinId,
         context?.channelId,
         context?.target?.fileId,
         context?.target?.globalTransitId,
       ],
-      ({ pageParam }) => fetch({ context, pageParam }),
-      {
-        staleTime: 1000 * 60 * 1, // 1 minutes
-        cacheTime: Infinity,
-        getNextPageParam: (lastPage) =>
-          (lastPage && lastPage.reactions?.length >= PAGE_SIZE && lastPage.cursor) ?? undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        onError: (er) => {
-          console.log(er);
-        },
-        enabled:
-          !!context?.authorOdinId &&
-          !!context?.channelId &&
-          (!!context?.target?.fileId || !!context?.target?.globalTransitId),
-      }
-    ),
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetch({ context, pageParam }),
+      staleTime: 1000 * 60 * 1, // 1 minute
+      gcTime: Infinity,
+      getNextPageParam: (lastPage) =>
+        lastPage && lastPage.reactions?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled:
+        !!context?.authorOdinId &&
+        !!context?.channelId &&
+        (!!context?.target?.fileId || !!context?.target?.globalTransitId),
+    }),
   };
 };

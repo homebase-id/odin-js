@@ -2,7 +2,7 @@ import { FC, ReactNode, useState } from 'react';
 import { ConfirmDialog, ConfirmDialogProps } from '@youfoundation/common-app';
 import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app';
 
-export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
+export type ActionButtonState = 'pending' | 'loading' | 'success' | 'error' | 'idle';
 import { ButtonColors } from './ColorConfig';
 
 export interface ActionButtonProps {
@@ -23,6 +23,7 @@ export const mergeStates = (
   stateB: ActionButtonState
 ): ActionButtonState => {
   if (stateA === 'error' || stateB === 'error') return 'error';
+  if (stateA === 'pending' || stateB === 'pending') return 'pending';
   if (stateA === 'loading' || stateB === 'loading') return 'loading';
   if (stateA === 'idle' && stateB === 'idle') return 'idle';
   if (stateA === 'success' && stateB === 'success') return 'success';
@@ -45,7 +46,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
   isDisabled,
 }) => {
   const Icon = (props: { className: string }) => {
-    if (state === 'loading') return <Loader {...props} />;
+    if (state === 'loading' || state === 'pending') return <Loader {...props} />;
     if (state === 'success') return <Check {...props} />;
     if (state === 'error') return <Exclamation {...props} />;
 
@@ -82,7 +83,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
       ? ''
       : 'px-3 py-2';
 
-  const stateClasses = state === 'loading' ? 'animate-pulse' : '';
+  const stateClasses = state === 'loading' || state === 'pending' ? 'animate-pulse' : '';
 
   return (
     <>
@@ -94,7 +95,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
         } flex flex-row items-center ${
           className && className.indexOf('rounded-') !== -1 ? '' : 'rounded-md'
         } text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${stateClasses} ${className}`}
-        disabled={isDisabled || state === 'loading'}
+        disabled={isDisabled || state === 'loading' || state === 'pending'}
         onClick={
           confirmOptions
             ? (e) => {

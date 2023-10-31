@@ -76,7 +76,7 @@ export const Setup = () => {
       <MinimalLayout noShadedBg={true}>
         <div className="min-h-screen">
           <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col p-5">
-            {initWithDataStatus === 'loading' || initWithDataStatus === 'success' ? (
+            {initWithDataStatus === 'pending' || initWithDataStatus === 'success' ? (
               <LoadingPage />
             ) : (
               <>

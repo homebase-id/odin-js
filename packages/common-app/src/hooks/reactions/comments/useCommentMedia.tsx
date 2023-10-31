@@ -56,17 +56,12 @@ export const useCommentMedia = ({
   };
 
   return {
-    fetch: useQuery(
-      ['comment-media', odinId, targetDrive?.alias, fileId],
-      () => fetch({ odinId, targetDrive, fileId }),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        onError: (er) => {
-          console.log(er);
-        },
-        enabled: !!odinId && !!targetDrive && !!fileId,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['comment-media', odinId, targetDrive?.alias, fileId],
+      queryFn: () => fetch({ odinId, targetDrive, fileId }),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!odinId && !!targetDrive && !!fileId,
+    }),
   };
 };

@@ -66,41 +66,47 @@ export const useAppClients = ({ appId }: { appId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['appClients', appId], () => fetch({ appId: appId as string }), {
+    fetch: useQuery({
+      queryKey: ['appClients', appId],
+      queryFn: () => fetch({ appId: appId as string }),
       refetchOnWindowFocus: false,
       retry: false,
       enabled: !!appId,
     }),
-    registerClient: useMutation(registerClient, {
+    registerClient: useMutation({
+      mutationFn: registerClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['appClients', param.appId]);
+        queryClient.invalidateQueries({ queryKey: ['appClients', param.appId] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    removeClient: useMutation(removeClient, {
+    removeClient: useMutation({
+      mutationFn: removeClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['appClients', param.appId]);
-        queryClient.invalidateQueries(['appClients']);
+        queryClient.invalidateQueries({ queryKey: ['appClients', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['appClients'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    revokeClient: useMutation(revokeClient, {
+    revokeClient: useMutation({
+      mutationFn: revokeClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['appClients', param.appId]);
-        queryClient.invalidateQueries(['appClients']);
+        queryClient.invalidateQueries({ queryKey: ['appClients', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['appClients'] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
-    allowClient: useMutation(allowClient, {
+    allowClient: useMutation({
+      mutationFn: allowClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['appClients', param.appId]);
-        queryClient.invalidateQueries(['appClients']);
+        queryClient.invalidateQueries({ queryKey: ['appClients', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['appClients'] });
       },
       onError: (ex) => {
         console.error(ex);
