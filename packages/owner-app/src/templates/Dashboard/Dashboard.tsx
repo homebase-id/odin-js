@@ -16,19 +16,19 @@ import { useSocialFeed } from '@youfoundation/common-app';
 
 const About = {
   circles: (
-    <p>
+    <>
       Circles are groups of members that share the same permissions. You can name them based on
       which social circle your connections belong (eg: family, friends, co-workers, ...). Or
       anything else that works for you
-    </p>
+    </>
   ),
   apps: (
-    <p>
+    <>
       Apps are applications that have been granted access to one or more of your drives. They are
       able to access that information on your behalf so do make sure when registering new apps on
       your identity that they don&apos;t request any drive access that you don&apos;t feel
       comfortable with.
-    </p>
+    </>
   ),
 };
 

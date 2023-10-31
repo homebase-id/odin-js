@@ -28,10 +28,10 @@ export const useTinyThumb = (
   };
 
   return useQuery(
-    ['tinyThumb', odinId || localHost, imageFileId, imageDrive?.alias],
+    ['tinyThumb', odinId || localHost, imageDrive?.alias, imageFileId],
     () => fetchImageData(odinId || localHost, imageFileId, imageDrive),
     {
-      refetchOnMount: true,
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 10, // 10min
       cacheTime: Infinity,
