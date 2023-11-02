@@ -9,8 +9,6 @@ export interface FileMetadata<T = string> {
   contentType: string;
   payloadIsEncrypted: boolean;
   senderOdinId: string;
-  payloadSize: number;
-  originalRecipientList: string[];
   appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
   versionTag: string;
