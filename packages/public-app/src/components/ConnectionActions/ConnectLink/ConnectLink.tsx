@@ -33,6 +33,7 @@ const ConnectLink = ({ className }: { className: string }) => {
         }
         onClick={!identity ? () => setIsLogin(true) : undefined}
         icon={alreadyConnected ? Check : Persons}
+        type={alreadyConnected ? 'secondary' : 'primary'}
       >
         {alreadyConnected ? t('Connected') : t('Connect')}
       </ActionLink>
