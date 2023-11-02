@@ -16,7 +16,7 @@ export interface FileMetadata<T = string> {
   versionTag: string;
 
   payloads: PayloadDesriptor[];
-  thubmnails: ThumbSize[];
+  thumbnails: ThumbSize[];
 }
 
 export interface ServerMetaData {

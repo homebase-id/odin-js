@@ -60,20 +60,14 @@ const uploadUsingKeyHeader = async (
   thumbnails?: ThumbnailFile[],
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
-  // Rebuild instructions without the systemFileType
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
-  };
+  const { systemFileType, ...strippedInstructions } = instructions;
 
   // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     keyHeader,
     instructions,
-    encryptedMetaData
+    metadata
   );
 
   const data = await buildFormData(
@@ -85,7 +79,7 @@ const uploadUsingKeyHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType, onVersionConflict);
+  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
 };
 
 export const uploadHeader = async (
@@ -98,12 +92,7 @@ export const uploadHeader = async (
     ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
     : undefined;
 
-  // Rebuild instructions without the systemFileType
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
-  };
+  const { systemFileType, ...strippedInstructions } = instructions;
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
@@ -125,7 +114,7 @@ export const uploadHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType);
+  return await pureUpload(dotYouClient, data, systemFileType);
 };
 
 export const appendDataToFile = async (
@@ -136,10 +125,7 @@ export const appendDataToFile = async (
   keyHeader: KeyHeader,
   onVersionConflict?: () => void
 ) => {
-  const strippedInstructions: AppendInstructionSet = {
-    targetFile: instructions.targetFile,
-    thumbnails: instructions.thumbnails,
-  };
+  const { systemFileType, ...strippedInstructions } = instructions;
 
   const data = await buildFormData(
     strippedInstructions,
@@ -149,5 +135,5 @@ export const appendDataToFile = async (
     keyHeader
   );
 
-  return await pureAppend(dotYouClient, data, instructions.systemFileType, onVersionConflict);
+  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);
 };

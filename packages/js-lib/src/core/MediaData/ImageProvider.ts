@@ -45,9 +45,7 @@ export const uploadImage = async (
   thumbsToGenerate?: ThumbnailInstruction[],
   onUpdate?: (progress: number) => void
 ): Promise<ImageUploadResult | undefined> => {
-  if (!targetDrive) {
-    throw 'Missing target drive';
-  }
+  if (!targetDrive) throw 'Missing target drive';
 
   const encrypt = !(
     acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -139,7 +137,7 @@ export const getDecryptedThumbnailMeta = (
 
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes: header.fileMetadata.thubmnails ?? [],
+      sizes: header.fileMetadata.thumbnails ?? [],
       url: url,
     };
   });

@@ -77,7 +77,7 @@ export const buildDescriptor = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet | TransitInstructionSet,
-  encryptedMetaData: UploadFileMetadata
+  metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
   return await encryptWithSharedSecret(
     dotYouClient,
@@ -87,7 +87,7 @@ export const buildDescriptor = async (
         keyHeader ?? EMPTY_KEY_HEADER,
         instructions.transferIv
       ),
-      fileMetadata: encryptedMetaData,
+      fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
     instructions.transferIv
   );
