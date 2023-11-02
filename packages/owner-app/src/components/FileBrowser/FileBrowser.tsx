@@ -75,10 +75,12 @@ const FileBrowser = ({
 };
 
 const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSearchResult }) => {
+  console.log(file);
+
   const fileType = file.fileMetadata.appData.fileType;
-  const contentType = file.fileMetadata.contentType;
-  const isImage = ['image/webp', 'image/jpeg'].includes(contentType);
-  const contentTypeExtension = contentType.split('/')[1];
+  const contentType = file.fileMetadata.payloads?.[0]?.contentType;
+  const isImage = ['image/webp', 'image/jpeg', 'image/svg+xml', 'image/gif'].includes(contentType);
+  const contentTypeExtension = (contentType || 'application/json').split('/')[1];
 
   const fetchFile = useFiles({ targetDrive }).fetchFile;
 

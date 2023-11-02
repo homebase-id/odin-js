@@ -49,7 +49,7 @@ export const useBiography = () => {
             let attribute: Attribute | undefined = entry.payload as Attribute;
             if (
               !attribute &&
-              !entry.header.fileMetadata.appData.contentIsComplete &&
+              entry.header.fileMetadata.payloads.length !== 0 &&
               entry.header.fileMetadata.appData.uniqueId
             ) {
               // Fetch attribute if it is not included in the static data

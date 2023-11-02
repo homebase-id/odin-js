@@ -14,6 +14,9 @@ export interface FileMetadata<T = string> {
   appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
   versionTag: string;
+
+  payloads: PayloadDesriptor[];
+  thubmnails: ThumbSize[];
 }
 
 export interface ServerMetaData {
@@ -54,11 +57,11 @@ export interface AppFileMetaData<T = string> {
   userDate?: number;
   tags: string[] | null;
   uniqueId?: string;
-  contentIsComplete: boolean;
   jsonContent: T;
   previewThumbnail?: EmbeddedThumb;
-  additionalThumbnails?: ThumbSize[];
   archivalStatus?: ArchivalStatus;
+  // contentIsComplete: boolean;
+  // additionalThumbnails?: ThumbSize[];
 }
 
 export interface ExternalFileIdentifier {
@@ -97,4 +100,11 @@ export interface ReactionPreview {
 export interface TargetDrive {
   alias: string;
   type: string;
+}
+
+export interface PayloadDesriptor {
+  key: string;
+  contentType: ContentType;
+  bytesWritten: number;
+  lastModified: number;
 }

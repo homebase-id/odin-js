@@ -282,7 +282,6 @@ export const savePost = async <T extends PostContent>(
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: !isDraft,
-    contentType: 'application/json',
     appData: {
       tags: [file.content.id],
       uniqueId: uniqueId,
@@ -301,7 +300,7 @@ export const savePost = async <T extends PostContent>(
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
+    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
     undefined,
     encrypt,
     onVersionConflict

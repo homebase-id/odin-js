@@ -60,7 +60,7 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
   allowDistribution: boolean;
-  contentType: string;
+  // contentType: string;
   senderOdinId?: string;
   payloadIsEncrypted: boolean;
   accessControlList?: AccessControlList;

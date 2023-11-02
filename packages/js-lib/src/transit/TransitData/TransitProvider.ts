@@ -519,7 +519,7 @@ export const getContentFromHeaderOrPayloadOverTransit = async <T>(
   systemFileType?: SystemFileType
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
-  const contentIsComplete = fileMetadata.appData.contentIsComplete;
+  const contentIsComplete = fileMetadata.payloads.length === 0;
   const keyHeader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;

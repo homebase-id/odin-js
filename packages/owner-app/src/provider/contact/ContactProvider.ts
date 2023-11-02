@@ -84,7 +84,6 @@ export const saveContact = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       tags: tags,
       fileType: ContactConfig.ContactFileType,
@@ -101,7 +100,7 @@ export const saveContact = async (
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
+    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
     undefined,
     encrypt
   );

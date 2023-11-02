@@ -1,5 +1,4 @@
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
-import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
 import {
   uint8ArrayToBase64,
   getNewId,
@@ -34,6 +33,7 @@ import {
   MediaConfig,
   ThumbnailMeta,
 } from './MediaTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,
@@ -97,7 +97,6 @@ export const uploadImage = async (
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
-    contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
       tags: uploadMeta?.tag
         ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
@@ -119,7 +118,9 @@ export const uploadImage = async (
     dotYouClient,
     instructionSet,
     metadata,
-    imageData,
+    imageData instanceof File
+      ? imageData
+      : new Blob([imageData.buffer], { type: uploadMeta?.type }),
     additionalThumbnails,
     encrypt
   );
@@ -142,11 +143,8 @@ export const getDecryptedThumbnailMeta = (
   targetDrive: TargetDrive,
   fileId: string
 ): Promise<ThumbnailMeta | undefined> => {
-  //it seems these will be fine for images but for video and audio we must stream decrypt
   return getFileHeader(dotYouClient, targetDrive, fileId).then((header) => {
-    if (!header || !header.fileMetadata.appData.previewThumbnail) {
-      return;
-    }
+    if (!header || !header.fileMetadata.appData.previewThumbnail) return;
 
     const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
     const bytes = base64ToUint8Array(previewThumbnail.content);
@@ -154,7 +152,7 @@ export const getDecryptedThumbnailMeta = (
 
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
+      sizes: header.fileMetadata.thubmnails ?? [],
       url: url,
     };
   });
@@ -173,6 +171,19 @@ export const getDecryptedImageUrl = async (
   systemFileType?: SystemFileType
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
+    console.log({
+      ...targetDrive,
+      fileId,
+      ...(size
+        ? {
+            width: size.pixelWidth,
+            height: size.pixelHeight,
+          }
+        : {}),
+      xfst: systemFileType || 'Standard',
+      key: DEFAULT_PAYLOAD_KEY,
+    });
+
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
       size ? 'thumb' : 'payload'
     }?${stringifyToQueryParams({
@@ -185,12 +196,10 @@ export const getDecryptedImageUrl = async (
           }
         : {}),
       xfst: systemFileType || 'Standard',
+      key: DEFAULT_PAYLOAD_KEY,
     })}`;
 
-    if (ss) {
-      return await encryptUrl(directUrl, ss);
-    }
-
+    if (ss) return await encryptUrl(directUrl, ss);
     return directUrl;
   };
 

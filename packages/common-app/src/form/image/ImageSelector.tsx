@@ -113,7 +113,6 @@ export const ImageSelector = ({
             </ActionButton>
             <img
               src={imageData.url}
-              alt={imageData.url}
               className="max-h-[20rem]"
               onClick={() => {
                 setIsEdit(true);

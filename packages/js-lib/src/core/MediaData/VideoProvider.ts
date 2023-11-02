@@ -87,7 +87,6 @@ export const uploadVideo = async (
   const metadata: UploadFileMetadata = {
     versionTag: uploadMeta?.versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
-    contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
       tags: uploadMeta?.tag
         ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
@@ -110,7 +109,7 @@ export const uploadVideo = async (
     dotYouClient,
     instructionSet,
     metadata,
-    file,
+    file instanceof Uint8Array ? new Blob([file.buffer], { type: uploadMeta?.type }) : file,
     additionalThumbnails,
     encrypt
   );

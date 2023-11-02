@@ -46,10 +46,16 @@ export interface DriveDefinition {
 export interface DriveSearchResult<T = string> {
   fileId: string;
   fileState: 'active';
+  fileSystemType: SystemFileType;
+
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   fileMetadata: FileMetadata<T>;
   serverMetadata: ServerMetaData;
+
   priority: number;
+
+  // payloads: [];
+  // fileByteCount: number;
 }
 
 export interface QueryParams {

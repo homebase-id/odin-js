@@ -1,4 +1,5 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
   SystemFileType,
@@ -38,7 +39,7 @@ export const getDecryptedThumbnailMetaOverTransit = async (
 
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
+      sizes: header.fileMetadata.thubmnails ?? [],
       url: url,
       contentType: previewThumbnail.contentType,
     };
@@ -70,6 +71,7 @@ export const getDecryptedImageUrlOverTransit = async (
         : {}),
       xfst: systemFileType || 'Standard',
       iac: true,
+      key: DEFAULT_PAYLOAD_KEY,
     })}`;
   };
 

@@ -12,11 +12,16 @@ import {
 } from '../SecurityHelpers';
 import { getCacheKey, getAxiosClient, parseBytesToObject, getRangeHeader } from './DriveFileHelper';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
+import { DEFAULT_PAYLOAD_KEY } from '../Upload/UploadHelpers';
 
 interface GetFileRequest {
   alias: string;
   type: string;
   fileId: string;
+}
+
+interface GetFilePayloadRequest extends GetFileRequest {
+  key: string;
 }
 
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
@@ -132,9 +137,10 @@ export const getPayloadBytes = async (
   const systemFileType = options?.systemFileType ?? 'Standard';
 
   const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileRequest = {
+  const request: GetFilePayloadRequest = {
     ...targetDrive,
     fileId,
+    key: DEFAULT_PAYLOAD_KEY,
   };
 
   const config: AxiosRequestConfig = {
@@ -234,7 +240,7 @@ export const getContentFromHeaderOrPayload = async <T>(
   systemFileType?: SystemFileType
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
-  const contentIsComplete = fileMetadata.appData.contentIsComplete;
+  const contentIsComplete = fileMetadata.payloads.length === 0;
   const keyHeader = fileMetadata.payloadIsEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;

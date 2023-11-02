@@ -93,6 +93,7 @@ export const buildDescriptor = async (
   );
 };
 
+export const DEFAULT_PAYLOAD_KEY = 'default';
 export const buildFormData = async (
   instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
@@ -109,7 +110,8 @@ export const buildFormData = async (
   } else {
     data.append(
       'payload',
-      payload instanceof File || payload instanceof Blob ? payload : new Blob([payload])
+      payload instanceof File || payload instanceof Blob ? payload : new Blob([payload]),
+      DEFAULT_PAYLOAD_KEY
     );
   }
 

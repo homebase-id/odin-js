@@ -103,7 +103,6 @@ export const useImport = () => {
             const shouldEmbedContent = payloadBytes.length < 3000;
             const metadata: UploadFileMetadata = {
               allowDistribution: file.fileMetadata.allowDistribution,
-              contentType: file.fileMetadata.contentType,
               senderOdinId: file.fileMetadata.senderOdinId,
               payloadIsEncrypted: file.fileMetadata.payloadIsEncrypted,
               accessControlList: file.fileMetadata.accessControlList,
@@ -118,7 +117,7 @@ export const useImport = () => {
               dotYouClient,
               instructionSet,
               metadata,
-              payloadBytes,
+              new Blob([payloadBytes], { type: file.fileMetadata.contentType }),
               undefined,
               file.fileMetadata.payloadIsEncrypted
             );

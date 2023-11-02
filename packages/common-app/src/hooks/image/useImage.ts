@@ -39,9 +39,7 @@ export const useImage = (
     probablyEncrypted?: boolean,
     naturalSize?: ImageSize
   ): Promise<ImageData | undefined> => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) {
-      return;
-    }
+    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
 
     const fetchDataPromise = async () => {
       return {

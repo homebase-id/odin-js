@@ -29,7 +29,7 @@ export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | Blob | File | undefined,
+  payload: Blob | File | undefined,
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => void
@@ -60,7 +60,7 @@ const uploadUsingKeyHeader = async (
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | File | Blob | undefined,
+  payload: File | Blob | undefined,
   thumbnails?: ThumbnailFile[],
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {

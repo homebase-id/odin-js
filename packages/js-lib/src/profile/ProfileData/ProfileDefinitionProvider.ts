@@ -130,7 +130,6 @@ export const saveProfileDefinition = async (
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       uniqueId: definition.profileId,
       tags: [definition.profileId],
@@ -144,7 +143,14 @@ export const saveProfileDefinition = async (
   };
 
   //reshape the definition to group attributes by their type
-  await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  await uploadFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    undefined,
+    encrypt
+  );
   return;
 };
 
@@ -187,7 +193,6 @@ export const saveProfileSection = async (
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       tags: [profileId, profileSection.sectionId],
       groupId: profileId,
@@ -200,7 +205,14 @@ export const saveProfileSection = async (
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
   };
 
-  await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  await uploadFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    undefined,
+    encrypt
+  );
 };
 
 export const removeProfileSection = async (

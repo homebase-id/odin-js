@@ -151,7 +151,6 @@ export const saveChannelDefinition = async (
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: true,
-    contentType: 'application/json',
     appData: {
       tags: [definition.channelId],
       contentIsComplete: shouldEmbedContent,
@@ -166,7 +165,7 @@ export const saveChannelDefinition = async (
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
+    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
     undefined,
     encrypt
   );

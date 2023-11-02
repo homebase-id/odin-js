@@ -348,7 +348,6 @@ export const saveAttribute = async (
   const metadata: UploadFileMetadata = {
     versionTag: attr.versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       uniqueId: attr.id,
       tags: [attr.type, attr.sectionId, attr.profileId, attr.id],
@@ -366,7 +365,7 @@ export const saveAttribute = async (
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
+    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
     undefined,
     encrypt,
     onVersionConflict

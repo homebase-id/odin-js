@@ -90,7 +90,6 @@ export const saveComment = async (
     // allowDistribution: true, // Disable
     versionTag: comment.versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     senderOdinId: comment.authorOdinId,
     referencedFile: {
       targetDrive,
@@ -141,7 +140,7 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      payloadBytes,
+      shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
       additionalThumbnails,
       encrypt
     );
