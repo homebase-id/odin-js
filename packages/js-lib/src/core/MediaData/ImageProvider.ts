@@ -171,19 +171,6 @@ export const getDecryptedImageUrl = async (
   systemFileType?: SystemFileType
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
-    console.log({
-      ...targetDrive,
-      fileId,
-      ...(size
-        ? {
-            width: size.pixelWidth,
-            height: size.pixelHeight,
-          }
-        : {}),
-      xfst: systemFileType || 'Standard',
-      key: DEFAULT_PAYLOAD_KEY,
-    });
-
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
       size ? 'thumb' : 'payload'
     }?${stringifyToQueryParams({

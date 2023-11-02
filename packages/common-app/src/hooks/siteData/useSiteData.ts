@@ -277,20 +277,20 @@ const getSocialDataStatic = (
   if (fileData.has('socials')) {
     const fileBasedResponse = fileData
       .get('socials')
-      ?.sort((a, b) => (a?.payload.priority ?? 0) - (b?.payload.priority ?? 0))
+      ?.sort((a, b) => (a?.payload?.priority ?? 0) - (b?.payload?.priority ?? 0))
       ?.map((entry) => {
-        const value = Object.values(entry.payload.data)?.[0];
+        if (!entry.payload?.data) return null;
+        const value = Object.values(entry.payload?.data)?.[0];
 
         return {
-          type: Object.keys(entry.payload.data)?.[0],
+          type: Object.keys(entry.payload?.data)?.[0],
           username: typeof value === 'string' ? value : '',
-          priority: entry.payload.priority,
+          priority: entry.payload?.priority,
         };
-      });
+      })
+      ?.filter(Boolean) as SocialSiteData | undefined;
 
-    if (fileBasedResponse?.length) {
-      return fileBasedResponse;
-    }
+    if (fileBasedResponse?.length) return fileBasedResponse;
   }
 };
 

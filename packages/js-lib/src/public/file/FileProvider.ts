@@ -12,7 +12,7 @@ export interface ResponseEntry {
   additionalThumbnails?: EmbeddedThumb[];
   header: DriveSearchResult;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload: Record<string, any>;
+  payload: Record<string, any> | undefined;
 }
 
 export type QueryParamsSection = {
@@ -142,7 +142,7 @@ const convertFileToResponseEntry = async (file: any) => {
   try {
     // Checking if there is actual content in jsonContent as could be excluded from the static file
     if (
-      file.header.fileMetadata.appData.contentIsComplete &&
+      file.header.fileMetadata.payloads.length === 0 &&
       file.header.fileMetadata.appData.jsonContent.length !== 0
     ) {
       parsedObj = tryJsonParse(file.header.fileMetadata.appData.jsonContent);
