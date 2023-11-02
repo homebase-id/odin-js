@@ -60,7 +60,6 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
   allowDistribution: boolean;
-  // contentType: string;
   senderOdinId?: string;
   payloadIsEncrypted: boolean;
   accessControlList?: AccessControlList;
@@ -92,7 +91,6 @@ export interface UploadAppFileMetaData {
   contentIsComplete: boolean;
   jsonContent: string | null;
   previewThumbnail?: EmbeddedThumb;
-  additionalThumbnails?: ThumbSize[];
   archivalStatus?: ArchivalStatus;
 }
 

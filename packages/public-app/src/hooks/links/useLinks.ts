@@ -9,22 +9,28 @@ import {
 import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
 
+interface LinkData {
+  text: string;
+  target: string;
+  id: string;
+  priority: number;
+}
+
 export const useLinks = () => {
   const { isAuthenticated, getDotYouClient } = useAuth();
   const queryClient = useQueryClient();
   const dotYouClient = getDotYouClient();
 
-  const fetchData: () => Promise<
-    { text: string; target: string; id: string; priority: number }[] | undefined
-  > = async () => {
+  const fetchData: () => Promise<LinkData[] | undefined> = async () => {
     const fetchStaticData = async () => {
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
       if (fileData.has('link')) {
         const linkAttributes = fileData
           .get('link')
-          ?.sort((attrA, attrB) => attrB.payload.priority - attrA.payload.priority)
+          ?.sort((attrA, attrB) => attrB.payload?.priority - attrA.payload?.priority)
           .map((entry) => {
             const attribute = entry.payload as Attribute;
+            if (!attribute.data) return undefined;
 
             return {
               text: attribute.data[LinkFields.LinkText] as string,
@@ -32,7 +38,8 @@ export const useLinks = () => {
               id: attribute.id,
               priority: attribute.priority,
             };
-          });
+          })
+          .filter(Boolean) as LinkData[];
 
         return linkAttributes;
       }

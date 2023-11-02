@@ -127,7 +127,7 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
 
   return {
     name:
-      nameAttr?.payload.data.givenName || nameAttr?.payload.data.surname
+      nameAttr?.payload?.data.givenName || nameAttr?.payload?.data.surname
         ? {
             displayName: nameAttr?.payload.data[MinimalProfileFields.DisplayName],
             givenName: nameAttr?.payload.data[MinimalProfileFields.GivenNameId],

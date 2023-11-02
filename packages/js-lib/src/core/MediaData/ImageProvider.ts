@@ -76,14 +76,6 @@ export const uploadImage = async (
     content: uint8ArrayToBase64(tinyThumb.payload),
   };
 
-  const additionalThumbs = additionalThumbnails.map((thumb) => {
-    return {
-      pixelHeight: thumb.pixelHeight,
-      pixelWidth: thumb.pixelWidth,
-      contentType: thumb.contentType,
-    };
-  });
-
   onUpdate?.(0.5);
 
   // Updating images in place is a rare thing, but if it happens there is often no versionTag, so we need to fetch it first
@@ -106,7 +98,6 @@ export const uploadImage = async (
       fileType: MediaConfig.MediaFileType,
       jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
       previewThumbnail: previewThumbnail,
-      additionalThumbnails: additionalThumbs,
       userDate: uploadMeta?.userDate,
       archivalStatus: uploadMeta?.archivalStatus,
     },

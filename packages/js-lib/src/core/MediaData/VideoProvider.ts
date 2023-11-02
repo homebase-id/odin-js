@@ -76,14 +76,6 @@ export const uploadVideo = async (
         }
       : undefined;
 
-  const additionalThumbs = additionalThumbnails?.map((thumb) => {
-    return {
-      pixelHeight: thumb.pixelHeight,
-      pixelWidth: thumb.pixelWidth,
-      contentType: thumb.contentType,
-    };
-  });
-
   const metadata: UploadFileMetadata = {
     versionTag: uploadMeta?.versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
@@ -97,7 +89,6 @@ export const uploadVideo = async (
       jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
       userDate: uploadMeta?.userDate,
       previewThumbnail,
-      additionalThumbnails: additionalThumbs,
     },
     payloadIsEncrypted: encrypt,
     accessControlList: acl,

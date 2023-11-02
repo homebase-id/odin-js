@@ -118,15 +118,11 @@ export const uploadHeader = async (
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
-  const strippedMetaData: UploadFileMetadata = {
-    ...encryptedMetaData,
-    appData: { ...encryptedMetaData.appData, additionalThumbnails: undefined },
-  };
 
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
-      fileMetadata: strippedMetaData,
+      fileMetadata: encryptedMetaData,
     },
     instructions.transferIv
   );
