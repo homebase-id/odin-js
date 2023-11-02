@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
   getDecryptedImageUrl,
-  ImageContentType,
   ImageSize,
   removeImage,
   SecurityGroupType,
@@ -67,16 +66,14 @@ export const useImage = (
   };
 
   const saveImageFile = async ({
-    bytes,
-    type,
+    image,
     targetDrive,
     acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
     fileId = undefined,
     versionTag = undefined,
     thumbInstructions,
   }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
+    image: Blob;
     targetDrive: TargetDrive;
     acl?: AccessControlList;
     fileId?: string;
@@ -87,12 +84,11 @@ export const useImage = (
       dotYouClient,
       targetDrive,
       acl,
-      bytes,
+      image,
       undefined,
       {
         fileId,
         versionTag,
-        type,
       },
       thumbInstructions
     );

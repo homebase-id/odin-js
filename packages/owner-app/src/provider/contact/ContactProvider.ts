@@ -5,6 +5,7 @@ import {
   DotYouClient,
   uploadImage,
   uploadFile,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import {
   RawContact,
@@ -47,11 +48,10 @@ export const saveContact = async (
         dotYouClient,
         ContactConfig.ContactTargetDrive,
         { requiredSecurityGroup: SecurityGroupType.Owner },
-        base64ToUint8Array(contact.image.content),
+        new Blob([base64ToUint8Array(contact.image.content)], { type: contact.image.contentType }),
         undefined,
         {
           fileId: contact.imageFileId,
-          type: contact.image.contentType,
         }
       )
     )?.fileId;
@@ -87,7 +87,6 @@ export const saveContact = async (
     appData: {
       tags: tags,
       fileType: ContactConfig.ContactFileType,
-      contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
       // Having the odinId MD5 hashed as unique id, should avoid having duplicates getting created, enforced servers side;
       uniqueId: contact.odinId ? toGuidId(contact.odinId) : contact.id,
@@ -100,7 +99,14 @@ export const saveContact = async (
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt
   );

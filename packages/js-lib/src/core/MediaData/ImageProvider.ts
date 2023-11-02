@@ -39,7 +39,7 @@ export const uploadImage = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  imageData: Uint8Array | File,
+  imageData: Blob | File,
   fileMetadata?: ImageMetadata,
   uploadMeta?: MediaUploadMeta,
   thumbsToGenerate?: ThumbnailInstruction[],
@@ -64,16 +64,15 @@ export const uploadImage = async (
   };
 
   const { naturalSize, tinyThumb, additionalThumbnails } = await createThumbnails(
-    imageData instanceof File ? new Uint8Array(await imageData.arrayBuffer()) : imageData,
-    uploadMeta?.type,
+    imageData,
     thumbsToGenerate
   );
 
   const previewThumbnail: EmbeddedThumb = {
     pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
     pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-    contentType: tinyThumb.contentType,
-    content: uint8ArrayToBase64(tinyThumb.payload),
+    contentType: tinyThumb.payload.type,
+    content: uint8ArrayToBase64(new Uint8Array(await tinyThumb.payload.arrayBuffer())),
   };
 
   onUpdate?.(0.5);
@@ -94,7 +93,6 @@ export const uploadImage = async (
         ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
-      contentIsComplete: false,
       fileType: MediaConfig.MediaFileType,
       jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
       previewThumbnail: previewThumbnail,
@@ -109,9 +107,7 @@ export const uploadImage = async (
     dotYouClient,
     instructionSet,
     metadata,
-    imageData instanceof File
-      ? imageData
-      : new Blob([imageData.buffer], { type: uploadMeta?.type }),
+    [{ payload: imageData, key: DEFAULT_PAYLOAD_KEY }],
     additionalThumbnails,
     encrypt
   );

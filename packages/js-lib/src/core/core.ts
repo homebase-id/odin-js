@@ -21,6 +21,7 @@ export * from './DriveData/Upload/DriveFileUploadProvider';
 export * from './DriveData/Upload/DriveUploadTypes';
 
 export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
+export { DEFAULT_PAYLOAD_KEY } from './DriveData/Upload/UploadHelpers';
 
 // NotificationData
 export * from './NotificationData/NotificationProvider';

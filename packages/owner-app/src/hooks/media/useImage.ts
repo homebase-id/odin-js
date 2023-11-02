@@ -27,24 +27,21 @@ export const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   };
 
   const saveImage = async ({
-    bytes,
-    type,
+    image,
     targetDrive = defaultDrive,
     acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
     fileId = undefined,
     versionTag = undefined,
   }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
+    image: Blob;
     targetDrive: TargetDrive;
     acl?: AccessControlList;
     fileId?: string;
     versionTag?: string;
   }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
+    return await uploadImage(dotYouClient, targetDrive, acl, image, undefined, {
       fileId: fileId,
       versionTag: versionTag,
-      type: type,
     });
   };
 

@@ -44,6 +44,7 @@ import {
   ReactionFile,
   ReactionVm,
 } from './PostTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
@@ -57,23 +58,19 @@ export const saveComment = async (
   let additionalThumbnails: ThumbnailFile[] | undefined;
   if (comment.content.attachment) {
     const imageFile = comment.content.attachment;
-    const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
 
     if (imageFile.type === 'image/gif') {
       additionalThumbnails = [
         {
-          contentType: 'image/gif',
-          payload: imageBytes,
+          payload: imageFile,
           pixelHeight: 100,
           pixelWidth: 100,
         },
       ];
     } else {
-      const { additionalThumbnails: thumbs } = await createThumbnails(
-        imageBytes,
-        imageFile.type as ImageContentType,
-        [{ height: 250, width: 250, quality: 100 }]
-      );
+      const { additionalThumbnails: thumbs } = await createThumbnails(imageFile, [
+        { height: 250, width: 250, quality: 100 },
+      ]);
       additionalThumbnails = thumbs;
     }
     delete comment.content.attachment;
@@ -98,7 +95,6 @@ export const saveComment = async (
     appData: {
       tags: [],
       uniqueId: comment.id ?? getNewId(),
-      contentIsComplete: shouldEmbedContent,
       fileType: ReactionConfig.CommentFileType,
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: undefined,
@@ -133,7 +129,14 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+      shouldEmbedContent
+        ? undefined
+        : [
+            {
+              payload: new Blob([payloadBytes], { type: 'application/json' }),
+              key: DEFAULT_PAYLOAD_KEY,
+            },
+          ],
       additionalThumbnails,
       encrypt
     );
@@ -161,7 +164,14 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      payloadBytes,
+      shouldEmbedContent
+        ? undefined
+        : [
+            {
+              payload: new Blob([payloadBytes], { type: 'application/json' }),
+              key: DEFAULT_PAYLOAD_KEY,
+            },
+          ],
       additionalThumbnails,
       encrypt
     );

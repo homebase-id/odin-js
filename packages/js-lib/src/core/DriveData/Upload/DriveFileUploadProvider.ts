@@ -1,6 +1,6 @@
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { DotYouClient } from '../../DotYouClient';
-import { ThumbnailFile } from '../File/DriveFileTypes';
+import { PayloadFile, ThumbnailFile } from '../File/DriveFileTypes';
 import { KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
 import {
   UploadInstructionSet,
@@ -8,11 +8,7 @@ import {
   UploadResult,
   AppendInstructionSet,
 } from './DriveUploadTypes';
-import {
-  encryptWithKeyheader,
-  decryptKeyHeader,
-  encryptWithSharedSecret,
-} from '../SecurityHelpers';
+import { decryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
   encryptMetaData,
@@ -29,7 +25,7 @@ export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Blob | File | undefined,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => void
@@ -49,7 +45,7 @@ export const uploadFile = async (
     keyHeader,
     instructions,
     metadata,
-    payload,
+    payloads,
     thumbnails,
     onVersionConflict
   );
@@ -60,7 +56,7 @@ const uploadUsingKeyHeader = async (
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: File | Blob | undefined,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
@@ -80,17 +76,10 @@ const uploadUsingKeyHeader = async (
     encryptedMetaData
   );
 
-  const processedPayload =
-    metadata.appData.contentIsComplete || !payload
-      ? undefined
-      : keyHeader
-      ? await encryptWithKeyheader(payload, keyHeader)
-      : payload;
-
   const data = await buildFormData(
     strippedInstructions,
     encryptedDescriptor,
-    processedPayload,
+    payloads,
     thumbnails,
     keyHeader
   );
@@ -142,7 +131,7 @@ export const uploadHeader = async (
 export const appendDataToFile = async (
   dotYouClient: DotYouClient,
   instructions: AppendInstructionSet,
-  payload: Uint8Array | File | undefined,
+  payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader,
   onVersionConflict?: () => void
@@ -152,16 +141,10 @@ export const appendDataToFile = async (
     thumbnails: instructions.thumbnails,
   };
 
-  const processedPayload = !payload
-    ? undefined
-    : keyHeader
-    ? await encryptWithKeyheader(payload, keyHeader)
-    : payload;
-
   const data = await buildFormData(
     strippedInstructions,
     undefined,
-    processedPayload,
+    payloads,
     thumbnails,
     keyHeader
   );

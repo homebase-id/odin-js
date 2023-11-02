@@ -6,6 +6,7 @@ import {
   getRandom16ByteArray,
 } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import {
   TargetDrive,
@@ -30,7 +31,7 @@ export const uploadVideo = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  file: Uint8Array | Blob | File,
+  file: Blob | File,
   fileMetadata?: PlainVideoMetadata | SegmentedVideoMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];
@@ -61,9 +62,7 @@ export const uploadVideo = async (
   };
 
   const { naturalSize, tinyThumb, additionalThumbnails } = uploadMeta?.thumb
-    ? await createThumbnails(uploadMeta.thumb.payload, uploadMeta.thumb.contentType, [
-        { quality: 100, width: 250, height: 250 },
-      ])
+    ? await createThumbnails(uploadMeta.thumb.payload, [{ quality: 100, width: 250, height: 250 }])
     : { naturalSize: undefined, tinyThumb: undefined, additionalThumbnails: undefined };
 
   const previewThumbnail: EmbeddedThumb | undefined =
@@ -71,8 +70,8 @@ export const uploadVideo = async (
       ? {
           pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
           pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          contentType: tinyThumb.contentType,
-          content: uint8ArrayToBase64(tinyThumb.payload),
+          contentType: tinyThumb.payload.type,
+          content: uint8ArrayToBase64(new Uint8Array(await tinyThumb.payload.arrayBuffer())),
         }
       : undefined;
 
@@ -84,7 +83,6 @@ export const uploadVideo = async (
         ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
-      contentIsComplete: false,
       fileType: 0,
       jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
       userDate: uploadMeta?.userDate,
@@ -100,7 +98,7 @@ export const uploadVideo = async (
     dotYouClient,
     instructionSet,
     metadata,
-    file instanceof Uint8Array ? new Blob([file.buffer], { type: uploadMeta?.type }) : file,
+    [{ payload: file, key: DEFAULT_PAYLOAD_KEY }],
     additionalThumbnails,
     encrypt
   );

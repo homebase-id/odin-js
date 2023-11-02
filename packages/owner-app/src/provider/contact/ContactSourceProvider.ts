@@ -9,7 +9,7 @@ import {
   EmailFields,
 } from '@youfoundation/js-lib/profile';
 
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
 import {
   getProfileAttributesOverTransit,
   getDecryptedImageDataOverTransit,
@@ -117,9 +117,7 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
 
   const previewThumbnail = photoFile?.additionalThumbnails?.reduce(
     (prevVal, curValue) => {
-      if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) {
-        return curValue;
-      }
+      if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) return curValue;
       return prevVal;
     },
     { ...photoFile.header.fileMetadata.appData.previewThumbnail, pixelWidth: 20, pixelHeight: 20 }
@@ -138,7 +136,7 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
       ? {
           pixelWidth: previewThumbnail.pixelWidth,
           pixelHeight: previewThumbnail.pixelHeight,
-          contentType: previewThumbnail.contentType || 'image/jpeg',
+          contentType: (previewThumbnail.contentType as ImageContentType) || 'image/jpeg',
           content: previewThumbnail.content.toString(),
         }
       : undefined,

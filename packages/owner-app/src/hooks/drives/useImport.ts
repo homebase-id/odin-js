@@ -8,6 +8,7 @@ import {
   UploadInstructionSet,
   UploadFileMetadata,
   uploadFile,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import {
   base64ToUint8Array,
@@ -72,13 +73,14 @@ export const useImport = () => {
               dotYouClient,
               targetDrive,
               file.fileMetadata.accessControlList,
-              base64ToUint8Array(file.payload.toString()),
+              new Blob([base64ToUint8Array(file.payload.toString())], {
+                type: file.fileMetadata.contentType,
+              }),
               undefined,
               {
                 tag: file.fileMetadata.appData.tags || [],
                 fileId: overwriteFileId,
                 versionTag: versionTag,
-                type: file.fileMetadata.contentType as ImageContentType,
               }
             );
           } else {
@@ -108,7 +110,6 @@ export const useImport = () => {
               accessControlList: file.fileMetadata.accessControlList,
               appData: {
                 ...file.fileMetadata.appData,
-                contentIsComplete: shouldEmbedContent,
                 jsonContent: shouldEmbedContent ? payloadJson : null,
               },
             };
@@ -117,7 +118,12 @@ export const useImport = () => {
               dotYouClient,
               instructionSet,
               metadata,
-              new Blob([payloadBytes], { type: file.fileMetadata.contentType }),
+              [
+                {
+                  payload: new Blob([payloadBytes], { type: file.fileMetadata.contentType }),
+                  key: DEFAULT_PAYLOAD_KEY,
+                },
+              ],
               undefined,
               file.fileMetadata.payloadIsEncrypted
             );

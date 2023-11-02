@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   FileQueryParams,
   queryBatch,
@@ -223,12 +224,11 @@ const confirmDependencyAcl = async (
           dotYouClient,
           targetDrive,
           targetAcl,
-          new Uint8Array(imageData.bytes),
+          new Blob([imageData.bytes], { type: imageData.contentType }),
           undefined,
           {
             fileId,
             versionTag: imageFileMeta.fileMetadata.versionTag,
-            type: imageData.contentType,
           }
         );
       }
@@ -353,7 +353,6 @@ export const saveAttribute = async (
       tags: [attr.type, attr.sectionId, attr.profileId, attr.id],
       groupId: attr.sectionId,
       fileType: AttributeConfig.AttributeFileType,
-      contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: attr.previewThumbnail,
     },
@@ -365,7 +364,14 @@ export const saveAttribute = async (
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt,
     onVersionConflict

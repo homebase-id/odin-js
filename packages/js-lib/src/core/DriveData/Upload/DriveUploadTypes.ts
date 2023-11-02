@@ -82,16 +82,15 @@ export enum SecurityGroupType {
 }
 
 export interface UploadAppFileMetaData {
-  tags: string[] | null;
-  groupId?: string;
   uniqueId?: string;
+  tags: string[] | null;
   fileType?: number;
   dataType?: number;
   userDate?: number;
-  contentIsComplete: boolean;
+  groupId?: string;
+  archivalStatus?: ArchivalStatus;
   jsonContent: string | null;
   previewThumbnail?: EmbeddedThumb;
-  archivalStatus?: ArchivalStatus;
 }
 
 export interface UploadResult {

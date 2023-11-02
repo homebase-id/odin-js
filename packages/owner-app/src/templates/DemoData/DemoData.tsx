@@ -128,7 +128,7 @@ const uploadMedia = async (
       client,
       targetDrive,
       acl,
-      new Uint8Array(imageArrayBuffer),
+      new Blob([new Uint8Array(imageArrayBuffer)], { type: 'image/webp' }),
       undefined,
       {
         tag: tag || imageData.id,

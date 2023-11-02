@@ -41,7 +41,7 @@ export const getDecryptedThumbnailMetaOverTransit = async (
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
       sizes: header.fileMetadata.thubmnails ?? [],
       url: url,
-      contentType: previewThumbnail.contentType,
+      contentType: previewThumbnail.contentType as ImageContentType,
     };
   });
 };

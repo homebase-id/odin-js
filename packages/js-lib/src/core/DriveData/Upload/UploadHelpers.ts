@@ -20,7 +20,7 @@ import {
   stringToUint8Array,
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
-import { ThumbnailFile, SystemFileType } from '../File/DriveFileTypes';
+import { ThumbnailFile, SystemFileType, PayloadFile } from '../File/DriveFileTypes';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -94,10 +94,11 @@ export const buildDescriptor = async (
 };
 
 export const DEFAULT_PAYLOAD_KEY = 'default';
+
 export const buildFormData = async (
   instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
-  payload: Uint8Array | Blob | File | undefined,
+  payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined
 ) => {
@@ -105,14 +106,16 @@ export const buildFormData = async (
   data.append('instructions', toBlob(instructionSet));
   if (encryptedDescriptor) data.append('metaData', new Blob([encryptedDescriptor]));
 
-  if (!payload) {
-    data.append('payload', new Blob([]));
-  } else {
-    data.append(
-      'payload',
-      payload instanceof File || payload instanceof Blob ? payload : new Blob([payload]),
-      DEFAULT_PAYLOAD_KEY
-    );
+  if (payloads) {
+    for (let i = 0; i < payloads.length; i++) {
+      const payload = payloads[i];
+
+      const encryptedPayload = keyHeader
+        ? await encryptWithKeyheader(payload.payload, keyHeader)
+        : payload.payload;
+
+      data.append('payload', encryptedPayload, payload.key);
+    }
   }
 
   if (thumbnails) {
@@ -120,16 +123,11 @@ export const buildFormData = async (
       const thumb = thumbnails[i];
       const filename = `${thumb.pixelWidth}x${thumb.pixelHeight}`;
 
-      const thumbnailBytes = keyHeader
+      const encryptedThumb = keyHeader
         ? await encryptWithKeyheader(thumb.payload, keyHeader)
         : thumb.payload;
-      data.append(
-        'thumbnail',
-        new Blob([thumbnailBytes], {
-          type: thumb.contentType,
-        }),
-        filename
-      );
+
+      data.append('thumbnail', encryptedThumb, filename);
     }
   }
 

@@ -159,7 +159,6 @@ export const OdinImage = ({
         : targetHeight;
 
       matchingSize = {
-        contentType: previewThumbnail?.contentType ?? 'image/webp',
         pixelWidth: targetWidth,
         pixelHeight: validatedHeight,
       };

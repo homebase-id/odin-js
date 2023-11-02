@@ -89,12 +89,7 @@ const PostComposer = ({
 
         const bytes = base64ToUint8Array(base64);
         const file: AttachmentFile = {
-          file: {
-            name: e.data.note,
-            type: e.data.type,
-            bytes: bytes,
-            size: bytes.length,
-          },
+          file: new Blob([bytes], { type: e.data.type }),
         };
 
         setFiles([...(files ?? []), file]);

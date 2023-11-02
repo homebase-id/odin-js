@@ -13,7 +13,6 @@ export interface MediaUploadMeta {
   uniqueId?: string;
   fileId?: string;
   versionTag?: string;
-  type?: ImageContentType;
   transitOptions?: TransitOptions;
   allowDistribution?: boolean;
   userDate?: number;

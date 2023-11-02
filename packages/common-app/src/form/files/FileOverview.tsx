@@ -40,14 +40,11 @@ export const FileOverview = ({
       const url = window.URL.createObjectURL(blob);
       console.log(url);
 
-      const payload = await blob.arrayBuffer().then((buffer) => new Uint8Array(buffer));
-
       const newFiles = [...files];
       newFiles[fileIndex] = {
         ...file,
         thumbnail: {
-          payload: payload,
-          contentType: blob.type as ImageContentType,
+          payload: blob,
           pixelHeight: video.videoHeight,
           pixelWidth: video.videoWidth,
         },
@@ -61,9 +58,7 @@ export const FileOverview = ({
     return files.map((currFile, index) => {
       const url =
         'bytes' in currFile.file
-          ? window.URL.createObjectURL(
-              new Blob([currFile.file.bytes], { type: currFile.file.type })
-            )
+          ? window.URL.createObjectURL(currFile.file)
           : URL.createObjectURL(currFile.file);
 
       if (currFile.file.type === 'video/mp4') {

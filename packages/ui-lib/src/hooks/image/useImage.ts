@@ -1,15 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   ImageSize,
   TargetDrive,
   DotYouClient,
   getDecryptedImageUrl,
-  SecurityGroupType,
-  ImageContentType,
-  AccessControlList,
-  uploadImage,
-  removeImage,
 } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
 
@@ -116,38 +111,6 @@ export const useImage = (
     return await fetchDataPromise();
   };
 
-  const saveImageFile = async ({
-    bytes,
-    type,
-    targetDrive,
-    acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
-    fileId = undefined,
-    versionTag = undefined,
-  }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
-    targetDrive: TargetDrive;
-    acl?: AccessControlList;
-    fileId?: string;
-    versionTag?: string;
-  }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
-      fileId,
-      versionTag,
-      type,
-    });
-  };
-
-  const removeImageFile = async ({
-    targetDrive,
-    fileId,
-  }: {
-    targetDrive: TargetDrive;
-    fileId: string;
-  }) => {
-    return await removeImage(dotYouClient, fileId, targetDrive);
-  };
-
   return {
     fetch: useQuery({
       queryKey: [
@@ -187,19 +150,5 @@ export const useImage = (
       if (cachedEntries?.length)
         return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
     },
-    save: useMutation({
-      mutationFn: saveImageFile,
-      onSuccess: (_data, variables) => {
-        // Boom baby!
-        if (variables.fileId) {
-          queryClient.invalidateQueries({
-            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
-          });
-        } else {
-          queryClient.removeQueries({ queryKey: ['image'] });
-        }
-      },
-    }),
-    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

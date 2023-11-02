@@ -26,15 +26,8 @@ import {
 import { segmentVideoFile } from '@youfoundation/js-lib/helpers';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
 
-export interface FileLike {
-  name: string;
-  bytes: Uint8Array;
-  size: number;
-  type: 'image/jpeg' | 'image/png' | 'video/mp4';
-}
-
 export interface AttachmentFile {
-  file: File | FileLike;
+  file: File | Blob;
   thumbnail?: ThumbnailFile;
 }
 
@@ -99,7 +92,7 @@ export const usePost = () => {
             dotYouClient,
             targetDrive,
             acl,
-            'bytes' in file.file ? file.file.bytes : file.file,
+            file.file,
             { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
             {
               type: file.file.type as VideoContentType,
@@ -109,9 +102,9 @@ export const usePost = () => {
 
         onUpdate?.(++progress / files.length);
 
-        const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
+        const { data: segmentedVideoData, metadata } = await segmentVideoFile(file.file);
 
-        return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
+        return await uploadVideo(dotYouClient, targetDrive, acl, segmentedVideoData, metadata, {
           type: file.file.type as VideoContentType,
           thumb: 'thumbnail' in file ? file.thumbnail : undefined,
         });
@@ -120,11 +113,9 @@ export const usePost = () => {
           dotYouClient,
           targetDrive,
           acl,
-          'bytes' in file.file ? file.file.bytes : file.file,
+          file.file,
           undefined,
-          {
-            type: file.file.type as ImageContentType,
-          },
+          {},
           [
             { quality: 85, width: 600, height: 600 },
             { quality: 99, width: 1600, height: 1600, type: 'jpeg' },

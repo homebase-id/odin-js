@@ -19,8 +19,7 @@ const svgType = 'image/svg+xml';
 const gifType = 'image/gif';
 
 export const createThumbnails = async (
-  imageBytes: Uint8Array,
-  contentType?: ImageContentType,
+  image: Blob,
   thumbSizes?: ThumbnailInstruction[]
 ): Promise<{
   naturalSize: ImageSize;
@@ -30,7 +29,10 @@ export const createThumbnails = async (
   if (typeof document === 'undefined')
     throw new Error('Thumbnails can only be created in a browser environment');
 
-  if (contentType === svgType) {
+  const imageBytes = await new Uint8Array(await image.arrayBuffer());
+  const contentType = image.type as ImageContentType;
+
+  if (image.type === svgType) {
     const vectorThumb = await createVectorThumbnail(imageBytes);
 
     return {
@@ -54,7 +56,7 @@ export const createThumbnails = async (
   const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(imageBytes, tinyThumbSize);
 
   const applicableThumbSizes = (thumbSizes || baseThumbSizes).reduce((currArray, thumbSize) => {
-    if (tinyThumb.contentType === svgType) return currArray;
+    if (tinyThumb.payload.type === svgType) return currArray;
 
     if (naturalSize.pixelWidth < thumbSize.width && naturalSize.pixelHeight < thumbSize.height)
       return currArray;
@@ -97,8 +99,7 @@ const createVectorThumbnail = async (
   const thumb: ThumbnailFile = {
     pixelWidth: 50,
     pixelHeight: 50,
-    payload: imageBytes,
-    contentType: `image/svg+xml`,
+    payload: new Blob([imageBytes], { type: svgType }),
   };
 
   const imageSizePromise: Promise<ImageSize | null> = new Promise((resolve) => {
@@ -131,22 +132,18 @@ const createImageThumbnail = async (
 
   return fromBlob(blob, instruction.quality, instruction.width, instruction.height, type).then(
     (resizedData) => {
-      return resizedData.blob.arrayBuffer().then((buffer) => {
-        const contentByteArray = new Uint8Array(buffer);
-
-        return {
-          naturalSize: {
-            pixelWidth: resizedData.naturalSize.width,
-            pixelHeight: resizedData.naturalSize.height,
-          },
-          thumb: {
-            pixelWidth: resizedData.size.width,
-            pixelHeight: resizedData.size.height,
-            payload: contentByteArray,
-            contentType: `image/${type}`,
-          },
-        };
-      });
+      return {
+        naturalSize: {
+          pixelWidth: resizedData.naturalSize.width,
+          pixelHeight: resizedData.naturalSize.height,
+        },
+        thumb: {
+          pixelWidth: resizedData.size.width,
+          pixelHeight: resizedData.size.height,
+          payload: resizedData.blob,
+          contentType: `image/${type}`,
+        },
+      };
     }
   );
 };

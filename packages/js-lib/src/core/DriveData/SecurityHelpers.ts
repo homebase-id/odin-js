@@ -34,10 +34,13 @@ export const encryptKeyHeader = async (
   };
 };
 
-export const encryptWithKeyheader = async (
-  content: Uint8Array | File | Blob,
+export const encryptWithKeyheader = async <
+  T extends Blob | Uint8Array,
+  R = T extends Blob ? Blob : Uint8Array,
+>(
+  content: T,
   keyHeader: KeyHeader
-): Promise<Uint8Array> => {
+): Promise<R> => {
   if (content instanceof File || content instanceof Blob) {
     const encryptedStream = await streamEncryptWithCbc(
       content.stream(),
@@ -45,11 +48,13 @@ export const encryptWithKeyheader = async (
       keyHeader.iv
     );
 
-    return streamToByteArray(encryptedStream, content.type);
+    return new Blob([await streamToByteArray(encryptedStream, content.type)], {
+      type: content.type,
+    }) as R;
   }
 
   const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
-  return cipher;
+  return cipher as R;
 };
 
 export const encryptWithSharedSecret = async (
@@ -75,13 +80,13 @@ export const decryptJsonContent = async (
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
 ): Promise<string> => {
-  if (!keyheader) return fileMetaData.appData.jsonContent;
+  if (!keyheader || !fileMetaData.appData.jsonContent) return fileMetaData.appData.jsonContent;
 
   try {
     const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
     return byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
   } catch (err) {
-    console.error('[DotYouCore-js]', 'Json Content Decryption failed');
+    console.error('[DotYouCore-js]', 'Json Content Decryption failed', err);
     return '';
   }
 };

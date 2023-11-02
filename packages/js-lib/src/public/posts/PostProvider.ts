@@ -37,6 +37,7 @@ import {
   stringToUint8Array,
   getRandom16ByteArray,
 } from '../../helpers/DataUtil';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 
 //Gets posts. if type is specified, returns a filtered list of the requested type; otherwise all types are returned
 export const getPosts = async <T extends PostContent>(
@@ -285,7 +286,6 @@ export const savePost = async <T extends PostContent>(
     appData: {
       tags: [file.content.id],
       uniqueId: uniqueId,
-      contentIsComplete: shouldEmbedContent,
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
       jsonContent: jsonContent,
       previewThumbnail: file.previewThumbnail,
@@ -300,7 +300,14 @@ export const savePost = async <T extends PostContent>(
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt,
     onVersionConflict

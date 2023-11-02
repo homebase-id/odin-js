@@ -12,6 +12,7 @@ import {
   encryptMetaData,
   buildDescriptor,
   buildFormData,
+  DEFAULT_PAYLOAD_KEY,
 } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
@@ -31,6 +32,7 @@ import {
   UploadFileMetadata,
   ThumbnailFile,
   TransferStatus,
+  PayloadFile,
 } from '../../core/core';
 import {
   byteArrayToString,
@@ -53,6 +55,7 @@ interface GetFileRequest {
 
 interface GetPayloadRequest extends GetFileRequest {
   chunk?: { start: number; length?: number };
+  key: string;
 }
 
 interface TransitQueryBatchRequest {
@@ -151,6 +154,7 @@ export const getPayloadBytesOverTransit = async (
       targetDrive: targetDrive,
       fileId: fileId,
     },
+    key: DEFAULT_PAYLOAD_KEY,
   };
 
   let startOffset = 0;
@@ -364,7 +368,7 @@ export const uploadFileOverTransit = async (
   dotYouClient: DotYouClient,
   instructions: TransitInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true
 ) => {
@@ -384,7 +388,7 @@ export const uploadFileOverTransit = async (
     keyHeader,
     instructions,
     metadata,
-    payload,
+    payloads,
     thumbnails
   );
 
@@ -409,7 +413,7 @@ export const uploadFileOverTransitUsingKeyHeader = async (
   keyHeader: KeyHeader | undefined,
   instructions: TransitInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[]
 ): Promise<TransitUploadResult> => {
   assertIfDotYouClientIsOwner(dotYouClient);
@@ -429,16 +433,10 @@ export const uploadFileOverTransitUsingKeyHeader = async (
     encryptedMetaData
   );
 
-  const processedPayload = metadata.appData.contentIsComplete
-    ? undefined
-    : keyHeader
-    ? await encryptWithKeyheader(payload, keyHeader)
-    : payload;
-
   const data = await buildFormData(
     strippedInstructions,
     encryptedDescriptor,
-    processedPayload,
+    payloads,
     thumbnails,
     keyHeader
   );

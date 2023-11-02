@@ -30,18 +30,22 @@ export interface ImageSize {
   pixelWidth: number;
 }
 
-export interface ThumbSize extends ImageSize {
-  contentType: ImageContentType;
-}
+export type ThumbSize = ImageSize;
 
 // Thumb that gets embedded; E.g: previewThumbnail
 export interface EmbeddedThumb extends ThumbSize {
+  contentType: ContentType;
   content: string;
 }
 
 // Thumb that gets appended; E.g: additionalThumbnails
 export interface ThumbnailFile extends ThumbSize {
-  payload: Uint8Array;
+  payload: File | Blob;
+}
+
+export interface PayloadFile {
+  key: string;
+  payload: File | Blob;
 }
 
 type None = 0;

@@ -51,10 +51,7 @@ export const ImageDialog = ({
   const target = usePortal('modal-container');
   const { mutate: saveImage, status, error: saveError } = useImage().save;
   const [isGettingData, setIsGettingData] = useState(false);
-  const [unCroppedImageData, setUnCroppedImageData] = useState<{
-    bytes: Uint8Array;
-    type: ImageContentType;
-  }>();
+  const [unCroppedImageData, setUnCroppedImageData] = useState<Blob | undefined>();
   const cropperRef = createRef<CropperRef>();
   if (!isOpen) return null;
 
@@ -70,8 +67,7 @@ export const ImageDialog = ({
     saveImage(
       {
         acl: acl,
-        bytes: imageData.bytes,
-        type: imageData.type,
+        image: imageData,
         fileId: undefined,
         versionTag: undefined,
         targetDrive,

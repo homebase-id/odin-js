@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -135,7 +136,6 @@ export const saveProfileDefinition = async (
       tags: [definition.profileId],
       fileType: ProfileConfig.ProfileDefinitionFileType,
       dataType: undefined,
-      contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
     },
     payloadIsEncrypted: encrypt,
@@ -147,7 +147,14 @@ export const saveProfileDefinition = async (
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt
   );
@@ -198,7 +205,6 @@ export const saveProfileSection = async (
       groupId: profileId,
       fileType: ProfileConfig.ProfileSectionFileType,
       dataType: undefined,
-      contentIsComplete: shouldEmbedContent,
       jsonContent: shouldEmbedContent ? payloadJson : null,
     },
     payloadIsEncrypted: encrypt,
@@ -209,7 +215,14 @@ export const saveProfileSection = async (
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt
   );

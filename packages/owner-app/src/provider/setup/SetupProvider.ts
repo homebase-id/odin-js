@@ -141,9 +141,8 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
       dotYouClient,
       HomePageConfig.HomepageTargetDrive,
       ANONYMOUS_ACL,
-      base64ToUint8Array(fallbackHeaderImage()),
-      undefined,
-      { type: 'image/svg+xml' }
+      new Blob([base64ToUint8Array(fallbackHeaderImage())], { type: 'image/svg+xml' }),
+      undefined
     )
   )?.fileId;
 
@@ -184,10 +183,7 @@ export interface ProfileSetupData {
   surname: string;
   city?: string;
   country?: string;
-  imageData?: {
-    bytes: Uint8Array;
-    type: ImageContentType;
-  };
+  imageData?: Blob;
 }
 
 export interface SocialSetupData {
@@ -217,9 +213,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
         dotYouClient,
         GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
         ANONYMOUS_ACL,
-        profileData.imageData.bytes,
-        undefined,
-        { type: profileData.imageData?.type as ImageContentType }
+        profileData.imageData
       )
     )?.fileId;
 

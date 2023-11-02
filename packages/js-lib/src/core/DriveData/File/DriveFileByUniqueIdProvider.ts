@@ -11,11 +11,16 @@ import {
 import { TargetDrive, SystemFileType, ContentType, ImageContentType } from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
+import { DEFAULT_PAYLOAD_KEY } from '../Upload/UploadHelpers';
 
 interface GetFileByUniqueIdRequest {
   alias: string;
   type: string;
   clientUniqueId: string;
+}
+
+interface GetFileByUniqueIdPayloadRequest extends GetFileByUniqueIdRequest {
+  key: string;
 }
 
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
@@ -135,9 +140,10 @@ export const getPayloadBytesByUniqueId = async (
   const systemFileType = options?.systemFileType ?? 'Standard';
 
   const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileByUniqueIdRequest = {
+  const request: GetFileByUniqueIdPayloadRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
+    key: DEFAULT_PAYLOAD_KEY,
   };
 
   const config: AxiosRequestConfig = {

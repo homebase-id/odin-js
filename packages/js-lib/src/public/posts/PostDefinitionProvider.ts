@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -153,7 +154,6 @@ export const saveChannelDefinition = async (
     allowDistribution: true,
     appData: {
       tags: [definition.channelId],
-      contentIsComplete: shouldEmbedContent,
       fileType: BlogConfig.ChannelDefinitionFileType,
       jsonContent: shouldEmbedContent ? payloadJson : null,
     },
@@ -165,7 +165,14 @@ export const saveChannelDefinition = async (
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent ? undefined : new Blob([payloadBytes], { type: 'application/json' }),
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt
   );

@@ -120,9 +120,8 @@ const fromBlob = (
         canvas.getContext('2d')?.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(
           (blob) => {
-            if (!blob) {
-              return;
-            }
+            if (!blob) return;
+
             resolve({
               naturalSize: { width: img.naturalWidth, height: img.naturalHeight },
               size: { width: size.width, height: size.height },

@@ -305,3 +305,9 @@ export const tryJsonParse = <T>(json: string): T => {
     }
   }
 };
+
+export const getDataUriFromBlob = async (blob: Blob) => {
+  if (!blob) return '';
+
+  return `data:${blob.type};base64,${uint8ArrayToBase64(new Uint8Array(await blob.arrayBuffer()))}`;
+};
