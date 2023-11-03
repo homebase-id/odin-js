@@ -1,5 +1,6 @@
 import {
   AccessControlList,
+  DEFAULT_PAYLOAD_KEY,
   ImageUploadResult,
   TargetDrive,
   ThumbnailInstruction,
@@ -53,7 +54,12 @@ export const ImageSelector = ({
   const {
     fetch: { data: imageData, isLoading },
     remove: { mutateAsync: removeImage, error: removeError },
-  } = useImage(undefined, typeof defaultValue === 'string' ? defaultValue : undefined, targetDrive);
+  } = useImage(
+    undefined,
+    typeof defaultValue === 'string' ? defaultValue : undefined,
+    DEFAULT_PAYLOAD_KEY,
+    targetDrive
+  );
   const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => setIsEdit(!!isDefaultOpen), [isDefaultOpen]);

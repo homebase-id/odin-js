@@ -135,6 +135,7 @@ export const RichTextRenderer = ({
             <Image
               targetDrive={imageDrive}
               fileId={attributes.fileId as string}
+              fileKey={attributes.fileKey as string}
               className="my-4 max-w-md"
               odinId={odinId}
             />

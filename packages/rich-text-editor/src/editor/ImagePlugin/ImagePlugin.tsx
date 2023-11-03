@@ -7,7 +7,7 @@ import {
 } from '@udecode/plate-core';
 import { Value, insertNodes, removeNodes, TElement } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
-import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { ImageIcon, Pencil, Trash, t, useImage } from '@youfoundation/common-app';
 import { Image } from '@youfoundation/common-app';
@@ -19,6 +19,7 @@ import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/too
 export interface TImageElement extends TElement {
   targetDrive: TargetDrive;
   fileId: string;
+  fileKey: string;
 }
 
 export const ELEMENT_IMAGE = 'local_image';
@@ -26,12 +27,14 @@ export const ELEMENT_IMAGE = 'local_image';
 export const insertImage = <V extends Value>(
   editor: PlateEditor<V>,
   fileId: string,
+  fileKey: string,
   targetDrive: TargetDrive
 ) => {
   const text = { text: '' };
   const image: TImageElement = {
     type: ELEMENT_IMAGE,
     fileId,
+    fileKey,
     targetDrive,
     children: [text],
   };
@@ -70,7 +73,7 @@ export const ImageToolbarButton = ({ targetDrive, ...props }: ImageToolbarButton
         }}
         onConfirm={(uploadResult) => {
           if (uploadResult) {
-            insertImage(editor, uploadResult.fileId, targetDrive);
+            insertImage(editor, uploadResult.fileId, DEFAULT_PAYLOAD_KEY, targetDrive);
             setIsActive(false);
           }
         }}
@@ -105,7 +108,12 @@ export const ImageElementBlock = <V extends Value = Value>(
         {children}
         <div className="flex">
           <div className="relative mr-auto max-w-lg flex-grow">
-            <Image targetDrive={element.targetDrive} fileId={element.fileId} className={` ${''}`} />
+            <Image
+              targetDrive={element.targetDrive}
+              fileId={element.fileId}
+              fileKey={element.fileKey}
+              className={` ${''}`}
+            />
             <ActionButton
               onClick={() => setIsActive(true)}
               type="secondary"

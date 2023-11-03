@@ -2,6 +2,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   decryptJsonContent,
   decryptKeyHeader,
+  DEFAULT_PAYLOAD_KEY,
   DriveSearchResult,
   getContentFromHeaderOrPayload,
   getPayloadBytes,
@@ -41,11 +42,17 @@ export const useFiles = ({
 
   const fetchFile = async (result: DriveSearchResult, payloadOnly?: boolean) => {
     if (result.fileMetadata.contentType !== 'application/json' && payloadOnly) {
-      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, {
-        keyHeader: result.fileMetadata.payloadIsEncrypted
-          ? result.sharedSecretEncryptedKeyHeader
-          : undefined,
-      });
+      const payload = await getPayloadBytes(
+        dotYouClient,
+        targetDrive,
+        result.fileId,
+        DEFAULT_PAYLOAD_KEY,
+        {
+          keyHeader: result.fileMetadata.isEncrypted
+            ? result.sharedSecretEncryptedKeyHeader
+            : undefined,
+        }
+      );
       if (!payload) return null;
 
       return window.URL.createObjectURL(
@@ -54,12 +61,12 @@ export const useFiles = ({
     }
 
     const decryptedJsonContent =
-      result.fileMetadata.appData.jsonContent && result.fileMetadata.payloadIsEncrypted
+      result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
         ? await decryptJsonContent(
             result.fileMetadata,
             await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
           )
-        : result.fileMetadata.appData.jsonContent;
+        : result.fileMetadata.appData.content;
 
     const exportable = {
       fileId: result.fileId,
@@ -67,7 +74,7 @@ export const useFiles = ({
         ...result.fileMetadata,
         appData: {
           ...result.fileMetadata.appData,
-          jsonContent: tryJsonParse(decryptedJsonContent),
+          content: tryJsonParse(decryptedJsonContent),
         },
       },
       payload:
@@ -78,8 +85,8 @@ export const useFiles = ({
               result,
               includeMetadataHeader
             )
-          : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, {
-              keyHeader: result.fileMetadata.payloadIsEncrypted
+          : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
+              keyHeader: result.fileMetadata.isEncrypted
                 ? result.sharedSecretEncryptedKeyHeader
                 : undefined,
             }),

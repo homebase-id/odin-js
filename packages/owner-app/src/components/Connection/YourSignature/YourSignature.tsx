@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useImage } from '../../../hooks/media/useImage';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { FallbackImg, LoadingBlock } from '@youfoundation/common-app';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
 
 interface infoObject {
@@ -59,6 +59,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
 
   const { data: imageUrl } = useImage(
     filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],
+    DEFAULT_PAYLOAD_KEY,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 

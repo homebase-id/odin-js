@@ -60,6 +60,7 @@ export const postTypeToDataType = (type: PostType): number => {
 
 export interface MediaFile {
   fileId: string;
+  fileKey: string;
   type: 'video' | 'image';
 }
 
@@ -75,7 +76,7 @@ export interface PostFile<T extends PostContent> {
     reactions: EmojiReactionSummary;
     comments: CommentsReactionSummary;
   };
-  payloadIsEncrypted?: boolean;
+  isEncrypted?: boolean;
   isDraft?: boolean;
 }
 
@@ -156,7 +157,7 @@ export interface ReactionFile {
   id?: string;
   threadId?: string;
 
-  payloadIsEncrypted?: boolean;
+  isEncrypted?: boolean;
 
   authorOdinId: string;
   date?: number;

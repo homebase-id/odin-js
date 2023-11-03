@@ -80,10 +80,10 @@ export const decryptJsonContent = async (
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
 ): Promise<string> => {
-  if (!keyheader || !fileMetaData.appData.jsonContent) return fileMetaData.appData.jsonContent;
+  if (!keyheader || !fileMetaData.appData.content) return fileMetaData.appData.content;
 
   try {
-    const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
+    const cipher = base64ToUint8Array(fileMetaData.appData.content);
     return byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
   } catch (err) {
     console.error('[DotYouCore-js]', 'Json Content Decryption failed', err);

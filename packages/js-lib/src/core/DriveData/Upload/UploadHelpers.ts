@@ -55,22 +55,37 @@ export const encryptMetaData = async (
   metadata: UploadFileMetadata,
   keyHeader: KeyHeader | undefined
 ) => {
-  return keyHeader && metadata.appData.jsonContent
+  return keyHeader && metadata.appData.content
     ? {
         ...metadata,
         appData: {
           ...metadata.appData,
-          jsonContent: metadata.appData.jsonContent
+          content: metadata.appData.content
             ? uint8ArrayToBase64(
-                await encryptWithKeyheader(
-                  stringToUint8Array(metadata.appData.jsonContent),
-                  keyHeader
-                )
+                await encryptWithKeyheader(stringToUint8Array(metadata.appData.content), keyHeader)
               )
             : null,
         },
       }
     : metadata;
+};
+
+export const buildManifest = (
+  payloads: PayloadFile[] | undefined,
+  thumbnails: ThumbnailFile[] | undefined
+) => {
+  return {
+    PayloadDescriptors: payloads?.map((payload) => ({
+      payloadKey: payload.key,
+      thumbnails: thumbnails
+        ?.filter((thumb) => thumb.key === payload.key)
+        .map((thumb) => ({
+          thumbnailKey: thumb.key + thumb.pixelWidth,
+          pixelWidth: thumb.pixelWidth,
+          pixelHeight: thumb.pixelHeight,
+        })),
+    })),
+  };
 };
 
 export const buildDescriptor = async (
@@ -93,7 +108,7 @@ export const buildDescriptor = async (
   );
 };
 
-export const DEFAULT_PAYLOAD_KEY = 'default';
+export const DEFAULT_PAYLOAD_KEY = 'dflt_key';
 
 export const buildFormData = async (
   instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
@@ -121,13 +136,12 @@ export const buildFormData = async (
   if (thumbnails) {
     for (let i = 0; i < thumbnails.length; i++) {
       const thumb = thumbnails[i];
-      const filename = `${thumb.pixelWidth}x${thumb.pixelHeight}`;
 
       const encryptedThumb = keyHeader
         ? await encryptWithKeyheader(thumb.payload, keyHeader)
         : thumb.payload;
 
-      data.append('thumbnail', encryptedThumb, filename);
+      data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
     }
   }
 

@@ -106,11 +106,11 @@ export const useImport = () => {
             const metadata: UploadFileMetadata = {
               allowDistribution: file.fileMetadata.allowDistribution,
               senderOdinId: file.fileMetadata.senderOdinId,
-              payloadIsEncrypted: file.fileMetadata.payloadIsEncrypted,
+              isEncrypted: file.fileMetadata.isEncrypted,
               accessControlList: file.fileMetadata.accessControlList,
               appData: {
                 ...file.fileMetadata.appData,
-                jsonContent: shouldEmbedContent ? payloadJson : null,
+                content: shouldEmbedContent ? payloadJson : null,
               },
             };
 
@@ -125,7 +125,7 @@ export const useImport = () => {
                 },
               ],
               undefined,
-              file.fileMetadata.payloadIsEncrypted
+              file.fileMetadata.isEncrypted
             );
           }
         } catch (ex) {

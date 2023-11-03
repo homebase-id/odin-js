@@ -17,6 +17,7 @@ export const useImage = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string | undefined,
+  imageFileKey?: string | undefined,
   imageDrive?: TargetDrive,
   size?: ImageSize,
   probablyEncrypted?: boolean,
@@ -72,12 +73,20 @@ export const useImage = (
   const fetchImageData = async (
     odinId: string,
     imageFileId: string | undefined,
+    imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
     probablyEncrypted?: boolean,
     naturalSize?: ImageSize
   ): Promise<ImageData | undefined> => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      !imageDrive ||
+      imageFileKey === undefined ||
+      imageFileKey === ''
+    )
+      return;
 
     const cachedEntry = checkIfWeHaveLargerCachedImage(odinId, imageFileId, imageDrive, size);
     if (cachedEntry) {
@@ -94,6 +103,7 @@ export const useImage = (
                 odinId,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size,
                 probablyEncrypted
               )
@@ -101,6 +111,7 @@ export const useImage = (
                 dotYouClient,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size,
                 probablyEncrypted
               ),
@@ -118,6 +129,7 @@ export const useImage = (
         odinId || localHost,
         imageDrive?.alias,
         imageFileId,
+        imageFileKey,
         // Rounding the cache key of the size so close enough sizes will be cached together
         size
           ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
@@ -127,6 +139,7 @@ export const useImage = (
         fetchImageData(
           odinId || localHost,
           imageFileId,
+          imageFileKey,
           imageDrive,
           size,
           probablyEncrypted,

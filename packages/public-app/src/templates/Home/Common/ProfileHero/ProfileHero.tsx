@@ -12,6 +12,7 @@ import {
   ThemeLinksSettings,
 } from '@youfoundation/common-app';
 import { useState } from 'react';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 // Component set to maximize the visibility of the hero image
 {
@@ -39,6 +40,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
         <div className="relative h-[27vh] min-h-[330px]">
           <Image
             fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+            fileKey={DEFAULT_PAYLOAD_KEY}
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"
@@ -52,6 +54,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
               >
                 <Image
                   fileId={owner?.profileImageId}
+                  fileKey={DEFAULT_PAYLOAD_KEY}
                   targetDrive={targetDrive}
                   previewThumbnail={owner?.profileImagePreviewThumbnail}
                   className="h-full w-full"
@@ -102,6 +105,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
         <ImageLightbox
           targetDrive={targetDrive}
           fileId={owner.profileImageId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           onClose={() => setIsImageLightboxOpen(false)}
         />
       ) : null}

@@ -1,3 +1,4 @@
+import { DEFAULT_PAYLOAD_KEY } from '../../../core';
 import { DotYouClient } from '../../core/DotYouClient';
 import { SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
@@ -88,6 +89,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
       profilePhotoFileIds[0],
+      DEFAULT_PAYLOAD_KEY,
       { pixelWidth: 250, pixelHeight: 250 }
     );
     if (imageData) {

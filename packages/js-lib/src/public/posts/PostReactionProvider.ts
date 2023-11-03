@@ -65,6 +65,7 @@ export const saveComment = async (
           payload: imageFile,
           pixelHeight: 100,
           pixelWidth: 100,
+          key: DEFAULT_PAYLOAD_KEY,
         },
       ];
     } else {
@@ -81,7 +82,7 @@ export const saveComment = async (
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metadata
+  // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     // allowDistribution: true, // Disable
@@ -96,11 +97,11 @@ export const saveComment = async (
       tags: [],
       uniqueId: comment.id ?? getNewId(),
       fileType: ReactionConfig.CommentFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: undefined,
       userDate: comment.date ?? new Date().getTime(),
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: {
       requiredSecurityGroup: encrypt ? SecurityGroupType.Connected : SecurityGroupType.Anonymous,
     },
@@ -240,7 +241,7 @@ export const getComments = async (
   const ro = {
     maxRecords: pageSize,
     cursorState: cursorState,
-    includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
+    includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   };
 
   const result = isLocal
@@ -295,7 +296,7 @@ const dsrToComment = async (
     content: { ...contentData },
     date: dsr.fileMetadata.created,
     updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
-    payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+    isEncrypted: dsr.fileMetadata.isEncrypted,
   };
 };
 
@@ -340,10 +341,10 @@ export const parseReactionPreview = (
               return {
                 authorOdinId: commentPreview.odinId,
                 content:
-                  commentPreview.isEncrypted && !commentPreview.jsonContent.length
+                  commentPreview.isEncrypted && !commentPreview.content.length
                     ? { body: '' }
-                    : tryJsonParse(commentPreview.jsonContent),
-                payloadIsEncrypted: commentPreview.isEncrypted,
+                    : tryJsonParse(commentPreview.content),
+                isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };
             } catch (ex) {

@@ -81,7 +81,7 @@ export const PostInteracts = ({
     target: {
       globalTransitId: postFile.globalTransitId, // TODO: remove 'unknown' fallback
       fileId: postFile.fileId, // TODO: remove 'unknown' fallback
-      isEncrypted: postFile.payloadIsEncrypted || false,
+      isEncrypted: postFile.isEncrypted || false,
     },
   };
 
@@ -308,7 +308,7 @@ const CommentTeaserList = ({
 }) => {
   if (!reactionPreview?.comments.length) return null;
 
-  const allEncrypted = reactionPreview.comments.every((comment) => comment.payloadIsEncrypted);
+  const allEncrypted = reactionPreview.comments.every((comment) => comment.isEncrypted);
 
   return (
     <div className="mb-5">

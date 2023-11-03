@@ -5,14 +5,12 @@ import {
   decryptJsonContent,
   decryptChunkedBytesResponse,
   decryptBytesResponse,
-  encryptWithKeyheader,
 } from '../../core/DriveData/SecurityHelpers';
 import {
   GenerateKeyHeader,
   encryptMetaData,
   buildDescriptor,
   buildFormData,
-  DEFAULT_PAYLOAD_KEY,
 } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
@@ -35,7 +33,6 @@ import {
   PayloadFile,
 } from '../../core/core';
 import {
-  byteArrayToString,
   assertIfDefined,
   roundToSmallerMultipleOf16,
   roundToLargerMultipleOf16,
@@ -44,6 +41,7 @@ import {
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import { hasDebugFlag } from '../../helpers/BrowserUtil';
 import { parseBytesToObject } from '../../core/DriveData/File/DriveFileHelper';
+import { DEFAULT_PAYLOAD_KEY } from '../../../core';
 
 interface GetFileRequest {
   odinId: string;
@@ -56,6 +54,10 @@ interface GetFileRequest {
 interface GetPayloadRequest extends GetFileRequest {
   chunk?: { start: number; length?: number };
   key: string;
+}
+
+interface GetThumbRequest extends GetFileRequest {
+  payloadKey: string;
 }
 
 interface TransitQueryBatchRequest {
@@ -109,6 +111,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   options: {
     keyHeader: KeyHeader | EncryptedKeyHeader | undefined;
     systemFileType?: SystemFileType;
@@ -116,7 +119,7 @@ export const getPayloadAsJsonOverTransit = async <T>(
 ): Promise<T | null> => {
   const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
 
-  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, key, {
     keyHeader,
     systemFileType,
     decrypt: true,
@@ -128,6 +131,7 @@ export const getPayloadBytesOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   options: {
     keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
@@ -138,6 +142,7 @@ export const getPayloadBytesOverTransit = async (
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
+  assertIfDefined('Key', key);
 
   const { keyHeader, chunkStart, chunkEnd } = options;
   const decrypt = options?.decrypt ?? true;
@@ -154,7 +159,7 @@ export const getPayloadBytesOverTransit = async (
       targetDrive: targetDrive,
       fileId: fileId,
     },
-    key: DEFAULT_PAYLOAD_KEY,
+    key: key,
   };
 
   let startOffset = 0;
@@ -203,6 +208,7 @@ export const getThumbBytesOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   keyHeader: KeyHeader | undefined,
   width: number,
   height: number,
@@ -213,12 +219,13 @@ export const getThumbBytesOverTransit = async (
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
     },
   });
-  const request: GetFileRequest = {
+  const request: GetThumbRequest = {
     odinId: odinId,
     file: {
       targetDrive: targetDrive,
       fileId: fileId,
     },
+    payloadKey: key,
   };
 
   const config: AxiosRequestConfig = {
@@ -259,8 +266,8 @@ export const getFileHeaderOverTransit = async <T = string>(
   if (!fileHeader) return null;
 
   const typedFileHeader = fileHeader as DriveSearchResult<T>;
-  typedFileHeader.fileMetadata.appData.jsonContent = tryJsonParse<T>(
-    fileHeader.fileMetadata.appData.jsonContent
+  typedFileHeader.fileMetadata.appData.content = tryJsonParse<T>(
+    fileHeader.fileMetadata.appData.content
   );
 
   return typedFileHeader;
@@ -304,11 +311,11 @@ export const getFileHeaderBytesOverTransit = async (
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
-        const keyheader = fileHeader.fileMetadata.payloadIsEncrypted
+        const keyheader = fileHeader.fileMetadata.isEncrypted
           ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
-        fileHeader.fileMetadata.appData.jsonContent = await decryptJsonContent(
+        fileHeader.fileMetadata.appData.content = await decryptJsonContent(
           fileHeader.fileMetadata,
           keyheader
         );
@@ -518,7 +525,7 @@ export const getContentFromHeaderOrPayloadOverTransit = async <T>(
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   const contentIsComplete = fileMetadata.payloads.length === 0;
-  const keyHeader = fileMetadata.payloadIsEncrypted
+  const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;
 
@@ -527,7 +534,7 @@ export const getContentFromHeaderOrPayloadOverTransit = async <T>(
     if (includesJsonContent) {
       decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
     } else {
-      // When contentIsComplete but includesJsonContent == false the query before was done without including the jsonContent; So we just get and parse
+      // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
       const fileHeader = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
         systemFileType,
       });
@@ -536,8 +543,15 @@ export const getContentFromHeaderOrPayloadOverTransit = async <T>(
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
-    return await getPayloadAsJsonOverTransit<T>(dotYouClient, odinId, targetDrive, fileId, {
-      keyHeader,
-    });
+    return await getPayloadAsJsonOverTransit<T>(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      fileId,
+      DEFAULT_PAYLOAD_KEY,
+      {
+        keyHeader,
+      }
+    );
   }
 };

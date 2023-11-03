@@ -58,7 +58,7 @@ export const getSocialFeed = async (
 
   const result = await queryBatch(dotYouClient, queryParams, ro);
 
-  // Parse results and do getPayload (In most cases, data should be there in jsonContent, and nothing in actual payload);
+  // Parse results and do getPayload (In most cases, data should be there in content, and nothing in actual payload);
   const allPostFiles = (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
@@ -268,7 +268,7 @@ const dsrToPostFile = async <T extends PostContent>(
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
       reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
-      payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+      isEncrypted: dsr.fileMetadata.isEncrypted,
       isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
     };
 

@@ -2,6 +2,7 @@ import { useSiteData, OwnerName, ThemeLinksSettings } from '@youfoundation/commo
 import { HomePageConfig } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { Image } from '@youfoundation/common-app';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const PreviewPage = () => {
   const { owner, home } = useSiteData().data ?? {};
@@ -18,6 +19,7 @@ const PreviewPage = () => {
               ? (home.templateSettings as ThemeLinksSettings)?.headerImageId
               : undefined
           }
+          fileKey={DEFAULT_PAYLOAD_KEY}
           targetDrive={HomePageConfig.HomepageTargetDrive}
           className="absolute inset-0"
           fit="cover"
@@ -32,6 +34,7 @@ const PreviewPage = () => {
           <div className="h-24 w-24 overflow-hidden rounded-full bg-background">
             <Image
               fileId={owner?.profileImageId}
+              fileKey={DEFAULT_PAYLOAD_KEY}
               previewThumbnail={owner?.profileImagePreviewThumbnail}
               targetDrive={targetDrive}
               className="h-full w-full"

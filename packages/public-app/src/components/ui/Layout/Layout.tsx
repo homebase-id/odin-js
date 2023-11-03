@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import { useImage } from '@youfoundation/common-app';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { HomePageConfig } from '@youfoundation/js-lib/public';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const faviconSvg = (emoji: string) =>
   `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${emoji}</text></svg>`;
@@ -41,6 +42,7 @@ export const NoLayout: FC<LayoutProps> = ({ children }) => {
   const { data: imageData } = useImage(
     undefined,
     favicon && 'fileId' in favicon ? favicon.fileId : undefined,
+    DEFAULT_PAYLOAD_KEY,
     GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
     undefined
   ).fetch;

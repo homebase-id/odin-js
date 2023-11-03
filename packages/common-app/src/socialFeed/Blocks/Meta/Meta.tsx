@@ -80,7 +80,7 @@ export const PostMeta = ({
           href={channelLink}
           onClick={(e) => e.stopPropagation()}
         >
-          {postFile?.payloadIsEncrypted ? <Lock className="h-3 w-3" /> : null}
+          {postFile?.isEncrypted ? <Lock className="h-3 w-3" /> : null}
           {channel?.name ? `${channel?.name}` : ''}
         </a>
       ) : null}

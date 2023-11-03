@@ -125,7 +125,7 @@ export const saveProfileDefinition = async (
   const payloadJson: string = jsonStringify64(definition);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
 
   const metadata: UploadFileMetadata = {
@@ -136,9 +136,9 @@ export const saveProfileDefinition = async (
       tags: [definition.profileId],
       fileType: ProfileConfig.ProfileDefinitionFileType,
       dataType: undefined,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
   };
 
@@ -193,7 +193,7 @@ export const saveProfileSection = async (
   const payloadJson: string = jsonStringify64(profileSection);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
 
   // Note: we tag it with the profile id AND also a tag indicating it is a definition
@@ -205,9 +205,9 @@ export const saveProfileSection = async (
       groupId: profileId,
       fileType: ProfileConfig.ProfileSectionFileType,
       dataType: undefined,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
   };
 

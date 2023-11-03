@@ -89,7 +89,7 @@ export const EmbeddedPostContent = ({
             postFile={{
               content,
               previewThumbnail: content.previewThumbnail,
-              payloadIsEncrypted: isChannelPublic,
+              isEncrypted: isChannelPublic,
             }}
             odinId={content.authorOdinId}
           />

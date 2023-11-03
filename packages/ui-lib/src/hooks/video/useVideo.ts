@@ -18,6 +18,7 @@ export const useVideo = (
   dotYouClient: DotYouClient,
   odinId?: string,
   videoFileId?: string | undefined,
+  videoFileKey?: string | undefined,
   videoDrive?: TargetDrive
 ) => {
   const localHost = window.location.hostname;
@@ -49,11 +50,9 @@ export const useVideo = (
       enabled: !!videoFileId && videoFileId !== '',
     }),
     getChunk: (chunkStart: number, chunkEnd?: number) => {
-      if (!videoFileId || !videoDrive) {
-        return null;
-      }
+      if (!videoFileId || !videoDrive || !videoFileKey) return null;
 
-      const params = [videoDrive, videoFileId, chunkStart, chunkEnd] as const;
+      const params = [videoDrive, videoFileId, videoFileKey, chunkStart, chunkEnd] as const;
       return odinId && odinId !== localHost
         ? getDecryptedVideoChunkOverTransit(dotYouClient, odinId, ...params)
         : getDecryptedVideoChunk(dotYouClient, ...params);
@@ -65,6 +64,7 @@ export const useVideoUrl = (
   dotYouClient: DotYouClient,
   odinId?: string,
   videoFileId?: string | undefined,
+  videoFileKey?: string | undefined,
   videoDrive?: TargetDrive,
   fileSizeLimit?: number
 ) => {
@@ -75,9 +75,14 @@ export const useVideoUrl = (
     videoFileId: string | undefined,
     videoDrive?: TargetDrive
   ): Promise<string | null> => {
-    if (videoFileId === undefined || videoFileId === '' || !videoDrive) {
+    if (
+      videoFileId === undefined ||
+      videoFileId === '' ||
+      !videoDrive ||
+      videoFileKey === undefined ||
+      videoFileKey === ''
+    )
       return null;
-    }
 
     const fetchMetaPromise = async () => {
       return odinId !== localHost
@@ -86,6 +91,7 @@ export const useVideoUrl = (
             odinId,
             videoDrive,
             videoFileId,
+            videoFileKey,
             undefined,
             fileSizeLimit
           )
@@ -93,6 +99,7 @@ export const useVideoUrl = (
             dotYouClient,
             videoDrive,
             videoFileId,
+            videoFileKey,
             undefined,
             fileSizeLimit
           );

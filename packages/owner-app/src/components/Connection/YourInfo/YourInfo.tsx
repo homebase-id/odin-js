@@ -8,7 +8,7 @@ import {
   PhoneFields,
   LocationFields,
 } from '@youfoundation/js-lib/profile';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
 import { FallbackImg, t } from '@youfoundation/common-app';
@@ -81,6 +81,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
 
   const { data: imageUrl } = useImage(
     filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],
+    DEFAULT_PAYLOAD_KEY,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 

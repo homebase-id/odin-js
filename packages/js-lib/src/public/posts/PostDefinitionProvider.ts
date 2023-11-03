@@ -147,7 +147,7 @@ export const saveChannelDefinition = async (
   const payloadJson: string = jsonStringify64({ ...definition, acl: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
@@ -155,9 +155,9 @@ export const saveChannelDefinition = async (
     appData: {
       tags: [definition.channelId],
       fileType: BlogConfig.ChannelDefinitionFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: definition.acl,
   };
 

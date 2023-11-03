@@ -3,6 +3,7 @@ import {
   VideoUploadResult,
   SecurityGroupType,
   EmbeddedThumb,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import {
   MediaFile,
@@ -64,7 +65,7 @@ export const usePostComposer = () => {
       }
 
       const mediaFiles: MediaFile[] | undefined = uploadResults?.map((result) => {
-        return { type: result.type, fileId: result.fileId };
+        return { type: result.type, fileId: result.fileId, fileKey: DEFAULT_PAYLOAD_KEY };
       });
 
       setPostState('uploading');

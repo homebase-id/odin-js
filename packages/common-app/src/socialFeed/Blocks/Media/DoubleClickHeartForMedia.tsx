@@ -34,7 +34,7 @@ export const DoubleClickHeartForMedia = ({
     target: {
       globalTransitId: postFile.globalTransitId ?? 'unknown',
       fileId: postFile.fileId ?? 'unknown',
-      isEncrypted: postFile.payloadIsEncrypted || false,
+      isEncrypted: postFile.isEncrypted || false,
     },
   };
 

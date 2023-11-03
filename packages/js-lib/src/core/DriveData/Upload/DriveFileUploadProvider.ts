@@ -16,6 +16,7 @@ import {
   buildFormData,
   pureUpload,
   pureAppend,
+  buildManifest,
 } from './UploadHelpers';
 
 const isDebug = hasDebugFlag();
@@ -36,8 +37,8 @@ export const uploadFile = async (
       metadata,
     });
 
-  // Force payloadIsEncrypted on the metadata to match the encrypt flag
-  metadata.payloadIsEncrypted = encrypt;
+  // Force isEncrypted on the metadata to match the encrypt flag
+  metadata.isEncrypted = encrypt;
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadUsingKeyHeader(
@@ -62,6 +63,12 @@ const uploadUsingKeyHeader = async (
 ): Promise<UploadResult | void> => {
   const { systemFileType, ...strippedInstructions } = instructions;
 
+  const manifest = buildManifest(payloads, thumbnails);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+  };
+
   // Build package
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
@@ -71,7 +78,7 @@ const uploadUsingKeyHeader = async (
   );
 
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     encryptedDescriptor,
     payloads,
     thumbnails,

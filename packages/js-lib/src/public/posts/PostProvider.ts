@@ -264,9 +264,9 @@ export const savePost = async <T extends PostContent>(
   const payloadJson: string = jsonStringify64({ ...file.content, fileId: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metadata
+  // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
-  const jsonContent = shouldEmbedContent
+  const content = shouldEmbedContent
     ? payloadJson
     : jsonStringify64({ channelId: file.content.channelId }); // If the full payload can't be embedded into the header file, at least pass the channelId so when getting the location is known
 
@@ -287,12 +287,12 @@ export const savePost = async <T extends PostContent>(
       tags: [file.content.id],
       uniqueId: uniqueId,
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
-      jsonContent: jsonContent,
+      content: content,
       previewThumbnail: file.previewThumbnail,
       userDate: file.userDate,
       dataType: postTypeToDataType(file.content.type),
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: file.acl,
   };
 
@@ -349,7 +349,7 @@ export const dsrToPostFile = async <T extends PostContent>(
       content: content,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
       reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
-      payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+      isEncrypted: dsr.fileMetadata.isEncrypted,
       isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
     };
 

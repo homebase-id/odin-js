@@ -87,12 +87,12 @@ export const saveContact = async (
     appData: {
       tags: tags,
       fileType: ContactConfig.ContactFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
       // Having the odinId MD5 hashed as unique id, should avoid having duplicates getting created, enforced servers side;
       uniqueId: contact.odinId ? toGuidId(contact.odinId) : contact.id,
     },
     versionTag: contact.versionTag,
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
   };
 
   const result = await uploadFile(

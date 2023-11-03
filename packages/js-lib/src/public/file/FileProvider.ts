@@ -140,12 +140,12 @@ const convertFileToResponseEntry = async (file: any) => {
   let parsedObj = undefined;
 
   try {
-    // Checking if there is actual content in jsonContent as could be excluded from the static file
+    // Checking if there is actual content in content as could be excluded from the static file
     if (
       file.header.fileMetadata.payloads.length === 0 &&
-      file.header.fileMetadata.appData.jsonContent.length !== 0
+      file.header.fileMetadata.appData.content.length !== 0
     ) {
-      parsedObj = tryJsonParse(file.header.fileMetadata.appData.jsonContent);
+      parsedObj = tryJsonParse(file.header.fileMetadata.appData.content);
     } else if (file.payload) {
       const bytes = base64ToUint8Array(file.payload);
       const json = byteArrayToString(bytes);

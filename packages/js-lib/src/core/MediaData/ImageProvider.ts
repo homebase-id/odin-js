@@ -92,12 +92,12 @@ export const uploadImage = async (
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       fileType: MediaConfig.MediaFileType,
-      jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
+      content: fileMetadata ? jsonStringify64(fileMetadata) : null,
       previewThumbnail: previewThumbnail,
       userDate: uploadMeta?.userDate,
       archivalStatus: uploadMeta?.archivalStatus,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: acl,
   };
 
@@ -151,6 +151,7 @@ export const getDecryptedImageUrl = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   size?: ImageSize,
   isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
@@ -168,7 +169,7 @@ export const getDecryptedImageUrl = async (
           }
         : {}),
       xfst: systemFileType || 'Standard',
-      key: DEFAULT_PAYLOAD_KEY,
+      ...(size ? { payloadKey: key } : { key: key }),
     })}`;
 
     if (ss) return await encryptUrl(directUrl, ss);
@@ -186,13 +187,11 @@ export const getDecryptedImageUrl = async (
   //   and the CAT is passed via a header that we can't set on a direct url
   if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
-    if (!meta?.fileMetadata.payloadIsEncrypted) {
-      return await getDirectImageUrl();
-    }
+    if (!meta?.fileMetadata.isEncrypted) return await getDirectImageUrl();
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getDecryptedImageData(dotYouClient, targetDrive, fileId, size, systemFileType).then(
+  return getDecryptedImageData(dotYouClient, targetDrive, fileId, key, size, systemFileType).then(
     (data) => {
       if (!data) return '';
       const url = `data:${data.contentType};base64,${uint8ArrayToBase64(
@@ -208,6 +207,7 @@ export const getDecryptedImageData = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   size?: ImageSize,
   systemFileType?: SystemFileType
 ): Promise<{
@@ -222,6 +222,7 @@ export const getDecryptedImageData = async (
         dotYouClient,
         targetDrive,
         fileId,
+        key,
         size.pixelWidth,
         size.pixelHeight,
         { systemFileType }
@@ -232,7 +233,7 @@ export const getDecryptedImageData = async (
     }
   }
 
-  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, { systemFileType });
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, { systemFileType });
   if (!payload) return null;
   return {
     bytes: payload.bytes,
@@ -251,5 +252,5 @@ export const getDecryptedImageMetadata = async (
   });
   if (!fileHeader) return null;
 
-  return fileHeader.fileMetadata.appData.jsonContent;
+  return fileHeader.fileMetadata.appData.content;
 };

@@ -8,7 +8,7 @@ import {
   Video,
 } from '@youfoundation/common-app';
 
-import { ImageContentType, TargetDrive } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, ImageContentType, TargetDrive } from '@youfoundation/js-lib/core';
 import { MediaFile } from '@youfoundation/js-lib/public';
 
 export const FileOverview = ({
@@ -47,6 +47,7 @@ export const FileOverview = ({
           payload: blob,
           pixelHeight: video.videoHeight,
           pixelWidth: video.videoWidth,
+          key: DEFAULT_PAYLOAD_KEY,
         },
       };
 
@@ -126,9 +127,7 @@ export const ExistingFileOverview = ({
   setToRemoveFileIds: (mediaFileIds: string[]) => void;
   className?: string;
 }) => {
-  if (!mediaFiles) {
-    return null;
-  }
+  if (!mediaFiles) return null;
 
   const renderedFiles = useMemo(() => {
     return mediaFiles
@@ -139,6 +138,7 @@ export const ExistingFileOverview = ({
             {image.type === 'video' ? (
               <Video
                 fileId={image.fileId}
+                fileKey={image.fileKey}
                 targetDrive={targetDrive}
                 className="aspect-square h-full w-full"
                 directFileSizeLimit={10 * 1024}
@@ -146,6 +146,7 @@ export const ExistingFileOverview = ({
             ) : (
               <Image
                 fileId={image.fileId}
+                fileKey={image.fileKey}
                 targetDrive={targetDrive}
                 className="aspect-square h-full w-full"
                 fit="cover"

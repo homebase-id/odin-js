@@ -52,6 +52,7 @@ export const getDecryptedImageUrlOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   size?: ImageSize,
   isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
@@ -71,7 +72,7 @@ export const getDecryptedImageUrlOverTransit = async (
         : {}),
       xfst: systemFileType || 'Standard',
       iac: true,
-      key: DEFAULT_PAYLOAD_KEY,
+      ...(size ? { payloadKey: key } : { key: key }),
     })}`;
   };
 
@@ -88,7 +89,7 @@ export const getDecryptedImageUrlOverTransit = async (
     const meta = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
       systemFileType,
     });
-    if (!meta?.fileMetadata.payloadIsEncrypted) {
+    if (!meta?.fileMetadata.isEncrypted) {
       return await getDirectImageUrl();
     }
   }
@@ -99,6 +100,7 @@ export const getDecryptedImageUrlOverTransit = async (
     odinId,
     targetDrive,
     fileId,
+    key,
     size,
     systemFileType
   ).then((data) => {
@@ -115,6 +117,7 @@ export const getDecryptedImageDataOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   size?: ImageSize,
   systemFileType?: SystemFileType
 ): Promise<{
@@ -130,6 +133,7 @@ export const getDecryptedImageDataOverTransit = async (
         odinId,
         targetDrive,
         fileId,
+        key,
         undefined,
         size.pixelWidth,
         size.pixelHeight,
@@ -145,9 +149,16 @@ export const getDecryptedImageDataOverTransit = async (
     }
   }
 
-  const payloadData = await getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, {
-    systemFileType,
-  });
+  const payloadData = await getPayloadBytesOverTransit(
+    dotYouClient,
+    odinId,
+    targetDrive,
+    fileId,
+    key,
+    {
+      systemFileType,
+    }
+  );
 
   if (!payloadData) return null;
 

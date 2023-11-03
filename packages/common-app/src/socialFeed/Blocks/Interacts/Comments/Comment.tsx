@@ -51,7 +51,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
     target: {
       fileId: commentData.fileId,
       globalTransitId: commentData.globalTransitId,
-      isEncrypted: commentData.payloadIsEncrypted || false,
+      isEncrypted: commentData.isEncrypted || false,
     },
   };
 
@@ -141,7 +141,7 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
               <span className="text-foreground font-bold text-opacity-70">
                 <AuthorName odinId={authorOdinId} />
               </span>{' '}
-              {commentData.payloadIsEncrypted && body === '' ? (
+              {commentData.isEncrypted && body === '' ? (
                 <span className="ml-2 h-3 w-20 rounded bg-slate-200 text-slate-200 dark:bg-slate-700 dark:text-slate-700">
                   {t('Encrypted')}
                 </span>

@@ -20,7 +20,8 @@ export interface ImageData {
 
 export const useImage = (
   odinId?: string,
-  imageFileId?: string | undefined,
+  imageFileId?: string,
+  imageFileKey?: string,
   imageDrive?: TargetDrive,
   size?: ImageSize,
   probablyEncrypted?: boolean,
@@ -33,12 +34,20 @@ export const useImage = (
   const fetchImageData = async (
     odinId: string,
     imageFileId: string | undefined,
+    imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
     probablyEncrypted?: boolean,
     naturalSize?: ImageSize
   ): Promise<ImageData | undefined> => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      !imageDrive ||
+      imageFileKey === undefined ||
+      imageFileKey === ''
+    )
+      return;
 
     const fetchDataPromise = async () => {
       return {
@@ -49,12 +58,14 @@ export const useImage = (
                 odinId,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size
               )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size,
                 probablyEncrypted
               ),
@@ -111,12 +122,14 @@ export const useImage = (
         odinId || localHost,
         imageDrive?.alias,
         imageFileId,
+        imageFileKey,
         `${size?.pixelHeight}x${size?.pixelWidth}`,
       ],
       queryFn: () =>
         fetchImageData(
           odinId || localHost,
           imageFileId,
+          imageFileKey,
           imageDrive,
           size,
           probablyEncrypted,

@@ -61,7 +61,7 @@ export interface UploadFileDescriptor {
 export interface UploadFileMetadata {
   allowDistribution: boolean;
   senderOdinId?: string;
-  payloadIsEncrypted: boolean;
+  isEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
   referencedFile?: GlobalTransitIdFileIdentifier;
@@ -89,7 +89,7 @@ export interface UploadAppFileMetaData {
   userDate?: number;
   groupId?: string;
   archivalStatus?: ArchivalStatus;
-  jsonContent: string | null;
+  content: string | null;
   previewThumbnail?: EmbeddedThumb;
 }
 

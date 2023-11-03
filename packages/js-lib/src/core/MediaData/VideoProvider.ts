@@ -84,11 +84,11 @@ export const uploadVideo = async (
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       fileType: 0,
-      jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
+      content: fileMetadata ? jsonStringify64(fileMetadata) : null,
       userDate: uploadMeta?.userDate,
       previewThumbnail,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: acl,
   };
 
@@ -111,11 +111,12 @@ export const getDecryptedVideoChunk = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   chunkStart?: number,
   chunkEnd?: number,
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, {
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     chunkStart,
     chunkEnd,
@@ -137,13 +138,14 @@ export const getDecryptedVideoMetadata = async (
     { systemFileType }
   );
   if (!fileHeader) return undefined;
-  return fileHeader.fileMetadata.appData.jsonContent;
+  return fileHeader.fileMetadata.appData.content;
 };
 
 export const getDecryptedVideoUrl = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
@@ -167,19 +169,17 @@ export const getDecryptedVideoUrl = async (
   }
 
   const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
-  if (!meta?.fileMetadata.payloadIsEncrypted) {
+  if (!meta?.fileMetadata.isEncrypted) {
     return await getDirectImageUrl();
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   // We limit download to 10MB to avoid memory issues
-  return getPayloadBytes(
-    dotYouClient,
-    targetDrive,
-    fileId,
-
-    { systemFileType, chunkStart: fileSizeLimit ? 0 : undefined, chunkEnd: fileSizeLimit }
-  ).then((data) => {
+  return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
+    systemFileType,
+    chunkStart: fileSizeLimit ? 0 : undefined,
+    chunkEnd: fileSizeLimit,
+  }).then((data) => {
     if (!data) return '';
     const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
     return url;

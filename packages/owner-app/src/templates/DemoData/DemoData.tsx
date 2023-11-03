@@ -7,6 +7,7 @@ import {
   DotYouClient,
   queryBatch,
   uploadImage,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
 import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
@@ -664,7 +665,9 @@ const DemoDataBlog = ({
             channelId: channel.channelId,
             caption: randomTitle,
             slug: slugify(randomTitle),
-            primaryMediaFile: imageFileId ? { fileId: imageFileId, type: 'image' } : undefined,
+            primaryMediaFile: imageFileId
+              ? { fileId: imageFileId, fileKey: DEFAULT_PAYLOAD_KEY, type: 'image' }
+              : undefined,
             type: 'Article',
             readingTimeStats: {
               words: 382,

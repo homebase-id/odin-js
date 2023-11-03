@@ -23,7 +23,8 @@ export interface OdinVideoProps {
   dotYouClient: DotYouClient;
   odinId?: string;
   targetDrive: TargetDrive;
-  fileId?: string;
+  fileId: string | undefined;
+  fileKey: string | undefined;
   className?: string;
   probablyEncrypted?: boolean;
   skipChunkedPlayback?: boolean;
@@ -46,7 +47,7 @@ interface OndinDirectProps extends OdinVideoProps {
 }
 
 export const OdinVideo = (videoProps: OdinVideoProps) => {
-  const { dotYouClient, odinId, targetDrive, fileId, className } = videoProps;
+  const { dotYouClient, odinId, targetDrive, fileId, fileKey, className } = videoProps;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
@@ -61,7 +62,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   }, [videoProps.skipChunkedPlayback]);
   const {
     fetchMetadata: { data: videoMetaData },
-  } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, targetDrive);
+  } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, fileKey, targetDrive);
 
   useEffect(() => {
     if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
@@ -119,13 +120,14 @@ const ChunkedSource = ({
   odinId,
   targetDrive,
   fileId,
+  fileKey,
   videoMetaData,
   videoRef,
   onFatalError,
 }: OndinChunkedProps) => {
   const activeObjectUrl = useRef<string>();
 
-  const { getChunk } = useVideo(dotYouClient, odinId, fileId, targetDrive);
+  const { getChunk } = useVideo(dotYouClient, odinId, fileId, fileKey, targetDrive);
 
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
   const fileLength = videoMetaData.fileSize;
@@ -326,6 +328,7 @@ const DirectSource = ({
   odinId,
   targetDrive,
   fileId,
+  fileKey,
   videoMetaData,
   directFileSizeLimit,
   videoRef,
@@ -335,6 +338,7 @@ const DirectSource = ({
     dotYouClient,
     odinId,
     fileId,
+    fileKey,
     targetDrive,
     directFileSizeLimit
   ).fetch;

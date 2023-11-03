@@ -12,6 +12,7 @@ import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
 import { useAuth } from '../../../hooks/auth/useAuth';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
   const { owner } = useSiteData().data ?? {};
@@ -32,6 +33,7 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
             {owner?.profileImageId && targetDrive ? (
               <Image
                 fileId={owner?.profileImageId}
+                fileKey={DEFAULT_PAYLOAD_KEY}
                 previewThumbnail={owner?.profileImagePreviewThumbnail}
                 targetDrive={targetDrive}
                 className="w-full"

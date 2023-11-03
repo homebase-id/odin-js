@@ -1,4 +1,4 @@
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
 import { useCommentMedia } from '../../../../../hooks';
 import { t } from '../../../../../helpers';
 
@@ -16,6 +16,7 @@ export const CommentMedia = ({
     odinId: postAuthorOdinId,
     targetDrive,
     fileId,
+    fileKey: DEFAULT_PAYLOAD_KEY,
   }).fetch;
 
   if (!imageUrl?.length)

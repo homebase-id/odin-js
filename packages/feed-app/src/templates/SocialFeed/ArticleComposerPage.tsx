@@ -17,7 +17,7 @@ import {
 import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ImageUploadResult } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, ImageUploadResult } from '@youfoundation/js-lib/core';
 import {
   RichText,
   Article,
@@ -218,6 +218,7 @@ export const ArticleComposerPage = () => {
                   const uploadResult = e.target.value as ImageUploadResult;
                   dirtyPostFile.content.primaryMediaFile = {
                     fileId: uploadResult.fileId,
+                    fileKey: DEFAULT_PAYLOAD_KEY,
                     type: 'image',
                   };
                   dirtyPostFile.previewThumbnail = uploadResult.previewThumbnail;

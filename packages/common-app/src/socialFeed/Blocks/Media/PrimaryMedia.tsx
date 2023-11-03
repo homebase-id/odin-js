@@ -1,5 +1,5 @@
 import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
 
 export const PrimaryMedia = ({
@@ -32,6 +32,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(post.channelId)}
           fileId={post.primaryMediaFile?.fileId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           className={className}
           previewThumbnail={previewThumbnail}
           fit={fit}
@@ -42,6 +43,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(post.channelId)}
           fileId={post.primaryMediaFile?.fileId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           className={className}
           probablyEncrypted={probablyEncrypted}
           previewThumbnail={previewThumbnail}
@@ -53,6 +55,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(post.channelId)}
           fileId={post.primaryMediaFile?.fileId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           className={className}
           probablyEncrypted={probablyEncrypted}
         />

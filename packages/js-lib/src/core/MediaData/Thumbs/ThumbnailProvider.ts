@@ -1,5 +1,5 @@
 import { uint8ArrayToBase64 } from '../../../helpers/DataUtil';
-import { ImageContentType, ImageSize, ThumbnailFile } from '../../core';
+import { DEFAULT_PAYLOAD_KEY, ImageContentType, ImageSize, ThumbnailFile } from '../../core';
 import { ThumbnailInstruction } from '../MediaTypes';
 import { fromBlob } from './ImageResizer';
 
@@ -100,6 +100,7 @@ const createVectorThumbnail = async (
     pixelWidth: 50,
     pixelHeight: 50,
     payload: new Blob([imageBytes], { type: svgType }),
+    key: DEFAULT_PAYLOAD_KEY,
   };
 
   const imageSizePromise: Promise<ImageSize | null> = new Promise((resolve) => {
@@ -142,6 +143,7 @@ const createImageThumbnail = async (
           pixelHeight: resizedData.size.height,
           payload: resizedData.blob,
           contentType: `image/${type}`,
+          key: DEFAULT_PAYLOAD_KEY,
         },
       };
     }

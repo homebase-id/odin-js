@@ -49,7 +49,7 @@ export const getProfileAttributes = async (
 
   const result = await queryBatch(dotYouClient, qp, {
     maxRecords: pageSize,
-    includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
+    includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   });
 
   let attributes: AttributeFile[] = (
@@ -207,6 +207,7 @@ const nameAttributeProcessing = (nameAttr: AttributeFile): AttributeFile => {
   return { ...nameAttr, data: newData };
 };
 
+// TODO: remove, we shouldn't need this one anymore, with multi-payload support
 const confirmDependencyAcl = async (
   dotYouClient: DotYouClient,
   targetAcl: AccessControlList,
@@ -218,7 +219,12 @@ const confirmDependencyAcl = async (
 
     if (imageFileMeta && !aclEqual(targetAcl, imageFileMeta.serverMetadata.accessControlList)) {
       // Not what it should be, going to reupload it in full
-      const imageData = await getDecryptedImageData(dotYouClient, targetDrive, fileId);
+      const imageData = await getDecryptedImageData(
+        dotYouClient,
+        targetDrive,
+        fileId,
+        DEFAULT_PAYLOAD_KEY
+      );
       if (imageData) {
         await uploadImage(
           dotYouClient,
@@ -343,7 +349,7 @@ export const saveAttribute = async (
   } as Attribute);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     versionTag: attr.versionTag,
@@ -353,10 +359,10 @@ export const saveAttribute = async (
       tags: [attr.type, attr.sectionId, attr.profileId, attr.id],
       groupId: attr.sectionId,
       fileType: AttributeConfig.AttributeFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
       previewThumbnail: attr.previewThumbnail,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: attr.acl,
   };
 

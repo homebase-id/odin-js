@@ -9,6 +9,7 @@ import {
   useDotYouClient,
 } from '@youfoundation/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();
@@ -21,6 +22,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
         <Image
           targetDrive={HomePageConfig.HomepageTargetDrive}
           fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           previewThumbnail={data?.home?.headerPreviewThumbnail}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"
@@ -32,6 +34,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
             <Image
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={data?.owner.profileImageId}
+              fileKey={DEFAULT_PAYLOAD_KEY}
               previewThumbnail={data?.owner.profileImagePreviewThumbnail}
               className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-neutral-200"
               fit="cover"

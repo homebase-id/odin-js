@@ -13,6 +13,7 @@ import { t } from '@youfoundation/common-app';
 import { ActionLink } from '@youfoundation/common-app';
 
 import './PostChannelTeaser.css';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 interface PostChannelTeaserProps {
   className?: string;
@@ -160,7 +161,7 @@ interface PostTeaserProps {
 
 const PostTeaser: FC<PostTeaserProps> = ({
   className,
-  postFile: { content: blog, previewThumbnail, payloadIsEncrypted },
+  postFile: { content: blog, previewThumbnail, isEncrypted },
   linkRoot,
 }) => {
   return (
@@ -172,18 +173,20 @@ const PostTeaser: FC<PostTeaserProps> = ({
               <Image
                 className="h-full w-full object-cover object-center"
                 fileId={blog.primaryMediaFile.fileId}
+                fileKey={DEFAULT_PAYLOAD_KEY}
                 targetDrive={getChannelDrive(blog.channelId)}
                 alt="blog"
                 fit="cover"
                 previewThumbnail={previewThumbnail}
-                probablyEncrypted={payloadIsEncrypted}
+                probablyEncrypted={isEncrypted}
               />
             ) : (
               <Video
                 targetDrive={getChannelDrive(blog.channelId)}
                 fileId={blog.primaryMediaFile.fileId}
+                fileKey={DEFAULT_PAYLOAD_KEY}
                 className={className}
-                probablyEncrypted={payloadIsEncrypted}
+                probablyEncrypted={isEncrypted}
                 previewThumbnail={previewThumbnail}
               />
             )

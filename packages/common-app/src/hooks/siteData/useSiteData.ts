@@ -105,6 +105,7 @@ export const useSiteData = () => {
     };
 
     const parseSocialData = async (socialAttributes?: AttributeFile[]): Promise<SocialSiteData> => {
+      console.log('socialAttributes', socialAttributes);
       return socialAttributes
         ?.map((attr) => {
           const value = Object.values(attr?.data)?.[0];

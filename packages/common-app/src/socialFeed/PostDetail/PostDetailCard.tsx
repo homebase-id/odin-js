@@ -19,7 +19,7 @@ import {
   MediaGallery,
   EmbeddedPostContent,
 } from '../../..';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -109,7 +109,7 @@ export const PostDetailCard = ({
             className="my-4"
             maxVisible={4}
             odinId={odinId}
-            probablyEncrypted={postFile?.payloadIsEncrypted}
+            probablyEncrypted={postFile?.isEncrypted}
             onClick={
               onNavigate
                 ? (e, index) => {
@@ -126,18 +126,20 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId}
+                fileKey={DEFAULT_PAYLOAD_KEY}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
                 previewThumbnail={postFile?.previewThumbnail}
-                probablyEncrypted={postFile?.payloadIsEncrypted}
+                probablyEncrypted={postFile?.isEncrypted}
               />
             ) : (
               <Video
                 targetDrive={getChannelDrive(post.channelId)}
                 fileId={post.primaryMediaFile.fileId}
+                fileKey={DEFAULT_PAYLOAD_KEY}
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
-                probablyEncrypted={postFile?.payloadIsEncrypted}
+                probablyEncrypted={postFile?.isEncrypted}
                 previewThumbnail={postFile?.previewThumbnail}
               />
             )}

@@ -9,7 +9,12 @@ import {
   EmailFields,
 } from '@youfoundation/js-lib/profile';
 
-import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
+import {
+  ApiType,
+  DEFAULT_PAYLOAD_KEY,
+  DotYouClient,
+  ImageContentType,
+} from '@youfoundation/js-lib/core';
 import {
   getProfileAttributesOverTransit,
   getDecryptedImageDataOverTransit,
@@ -76,7 +81,8 @@ export const queryRemoteAttributes = async (
         ? (await queryConnectionPhotoData(
             dotYouClient,
             odinId,
-            photo.data[MinimalProfileFields.ProfileImageId]
+            photo.data[MinimalProfileFields.ProfileImageId],
+            DEFAULT_PAYLOAD_KEY
           )) || undefined
         : undefined,
     };
@@ -88,13 +94,15 @@ export const queryRemoteAttributes = async (
 export const queryConnectionPhotoData = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  profileImageId: string
+  profileImageId: string,
+  profileImageKey: string
 ) => {
   const imageData = await getDecryptedImageDataOverTransit(
     dotYouClient,
     odinId,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-    profileImageId
+    profileImageId,
+    profileImageKey
   );
 
   if (!imageData) return null;

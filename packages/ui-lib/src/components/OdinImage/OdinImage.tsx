@@ -13,7 +13,8 @@ export interface OdinImageProps {
   dotYouClient: DotYouClient;
   odinId?: string;
   targetDrive: TargetDrive;
-  fileId?: string;
+  fileId: string | undefined;
+  fileKey: string | undefined;
   fit?: 'cover' | 'contain';
   position?: 'left' | 'right' | 'center';
   className?: string;
@@ -34,6 +35,7 @@ export const OdinImage = ({
   odinId,
   targetDrive,
   fileId,
+  fileKey,
   fit,
   position,
   className,
@@ -88,6 +90,7 @@ export const OdinImage = ({
     dotYouClient,
     odinId,
     loadSize !== undefined ? fileId : undefined,
+    fileKey,
     targetDrive,
     loadSize !== 'full'
       ? loadSize
@@ -194,7 +197,7 @@ export const OdinImage = ({
       }
       data-fileid={fileId}
     >
-      {!fileId ? null : weDontHaveAnything ? (
+      {!fileId || !fileKey ? null : weDontHaveAnything ? (
         <LoadingBlock className="aspect-square h-full w-full" />
       ) : (
         <>

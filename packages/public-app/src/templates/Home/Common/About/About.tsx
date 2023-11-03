@@ -3,6 +3,7 @@ import { useBiography } from '../../../../hooks/biography/useBiography';
 import { Arrow, FallbackImg, RichTextRenderer, t, Image } from '@youfoundation/common-app';
 import { useMemo, useState } from 'react';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
@@ -57,6 +58,7 @@ const ExperienceBlock = ({
         <Image
           targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
           fileId={imageFileId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           fit="contain"
           className="relative aspect-square w-1/6 flex-shrink-0 flex-grow-0"
         />

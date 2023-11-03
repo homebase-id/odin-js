@@ -14,7 +14,7 @@ export const PostMedia = ({
   postFile: {
     content: PostContent;
     previewThumbnail?: EmbeddedThumb;
-    payloadIsEncrypted?: boolean;
+    isEncrypted?: boolean;
   };
   showFallback?: boolean;
   forceAspectRatio?: boolean;
@@ -47,7 +47,7 @@ export const PostMedia = ({
         files={mediaFileIds}
         className={`${className || ''}`}
         previewThumbnail={previewThumbnail}
-        probablyEncrypted={postFile.payloadIsEncrypted}
+        probablyEncrypted={postFile.isEncrypted}
         onClick={onClick}
       />
     );
@@ -60,7 +60,7 @@ export const PostMedia = ({
         odinId={odinId}
         className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
-        probablyEncrypted={postFile.payloadIsEncrypted}
+        probablyEncrypted={postFile.isEncrypted}
         onClick={onClick ? (e) => onClick(e, 0) : undefined}
         clickToLoad={true}
       />

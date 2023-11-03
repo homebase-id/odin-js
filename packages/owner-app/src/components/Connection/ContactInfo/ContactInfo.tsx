@@ -6,6 +6,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 import { ContactConfig } from '@youfoundation/js-lib/network';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -109,6 +110,7 @@ export const ContactImage = ({ odinId, contactId, className }: ContactImageProps
 
   const { data: imageUrl } = useImage(
     contact?.imageFileId || undefined,
+    DEFAULT_PAYLOAD_KEY,
     ContactConfig.ContactTargetDrive
   ).fetch;
 

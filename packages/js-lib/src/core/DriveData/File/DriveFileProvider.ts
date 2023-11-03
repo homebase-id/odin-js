@@ -24,6 +24,10 @@ interface GetFilePayloadRequest extends GetFileRequest {
   key: string;
 }
 
+interface GetFileThumbRequest extends GetFileRequest {
+  payloadKey: string;
+}
+
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
 
 /// Get methods by FileId:
@@ -41,8 +45,8 @@ export const getFileHeader = async <T = string>(
   if (!fileHeader) return null;
 
   const typedFileHeader = fileHeader as DriveSearchResult<T>;
-  typedFileHeader.fileMetadata.appData.jsonContent = tryJsonParse<T>(
-    fileHeader.fileMetadata.appData.jsonContent
+  typedFileHeader.fileMetadata.appData.content = tryJsonParse<T>(
+    fileHeader.fileMetadata.appData.content
   );
 
   return typedFileHeader;
@@ -77,11 +81,11 @@ export const getFileHeaderBytes = async (
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
-        const keyheader = fileHeader.fileMetadata.payloadIsEncrypted
+        const keyheader = fileHeader.fileMetadata.isEncrypted
           ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
-        fileHeader.fileMetadata.appData.jsonContent = await decryptJsonContent(
+        fileHeader.fileMetadata.appData.content = await decryptJsonContent(
           fileHeader.fileMetadata,
           keyheader
         );
@@ -104,13 +108,14 @@ export const getPayloadAsJson = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   options: {
     keyHeader: KeyHeader | EncryptedKeyHeader | undefined;
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
   const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
-  return getPayloadBytes(dotYouClient, targetDrive, fileId, {
+  return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     keyHeader,
     systemFileType,
     decrypt: true,
@@ -121,6 +126,7 @@ export const getPayloadBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   options: {
     keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
@@ -140,7 +146,7 @@ export const getPayloadBytes = async (
   const request: GetFilePayloadRequest = {
     ...targetDrive,
     fileId,
-    key: DEFAULT_PAYLOAD_KEY,
+    key,
   };
 
   const config: AxiosRequestConfig = {
@@ -189,21 +195,24 @@ export const getThumbBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   width: number,
   height: number,
   options: { keyHeader?: KeyHeader; systemFileType?: SystemFileType }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
+  assertIfDefined('Key', key);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
   const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
 
   const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileRequest = {
+  const request: GetFileThumbRequest = {
     ...targetDrive,
     fileId,
+    payloadKey: key,
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
@@ -241,7 +250,7 @@ export const getContentFromHeaderOrPayload = async <T>(
 ): Promise<T | null> => {
   const { fileId, fileMetadata, sharedSecretEncryptedKeyHeader } = dsr;
   const contentIsComplete = fileMetadata.payloads.length === 0;
-  const keyHeader = fileMetadata.payloadIsEncrypted
+  const keyHeader = fileMetadata.isEncrypted
     ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
     : undefined;
 
@@ -250,14 +259,14 @@ export const getContentFromHeaderOrPayload = async <T>(
     if (includesJsonContent) {
       decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
     } else {
-      // When contentIsComplete but includesJsonContent == false the query before was done without including the jsonContent; So we just get and parse
+      // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
       const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
       if (!fileHeader) return null;
       decryptedJsonContent = await decryptJsonContent(fileHeader.fileMetadata, keyHeader);
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
-    return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, {
+    return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
       keyHeader,
       systemFileType,
     });

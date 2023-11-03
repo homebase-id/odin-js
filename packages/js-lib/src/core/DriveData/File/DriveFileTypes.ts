@@ -7,7 +7,7 @@ export interface FileMetadata<T = string> {
   globalTransitId?: string;
   updated: number;
   contentType: string;
-  payloadIsEncrypted: boolean;
+  isEncrypted: boolean;
   senderOdinId: string;
   appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
@@ -38,6 +38,7 @@ export interface EmbeddedThumb extends ThumbSize {
 
 // Thumb that gets appended; E.g: additionalThumbnails
 export interface ThumbnailFile extends ThumbSize {
+  key: string;
   payload: File | Blob;
 }
 
@@ -59,7 +60,7 @@ export interface AppFileMetaData<T = string> {
   userDate?: number;
   tags: string[] | null;
   uniqueId?: string;
-  jsonContent: T;
+  content: T;
   previewThumbnail?: EmbeddedThumb;
   archivalStatus?: ArchivalStatus;
   // contentIsComplete: boolean;
@@ -92,7 +93,7 @@ export interface ReactionPreview {
     fileId: string;
     isEncrypted: boolean;
     odinId: string;
-    jsonContent: string;
+    content: string;
     reactions: { key: string; count: string; reactionContent: string }[];
   }[];
   reactions: Record<string, { key: string; count: string; reactionContent: string }>;

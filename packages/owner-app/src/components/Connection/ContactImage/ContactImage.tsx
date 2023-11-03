@@ -3,6 +3,7 @@ import { useContact } from '../../../hooks/contacts/useContact';
 import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import { ContactConfig } from '@youfoundation/js-lib/network';
+import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const getInitials = (
   fullName: string | undefined,
@@ -53,6 +54,7 @@ const ContactImage = ({
       ) : contactData?.imageFileId ? (
         <Image
           fileId={contactData?.imageFileId}
+          fileKey={DEFAULT_PAYLOAD_KEY}
           targetDrive={ContactConfig.ContactTargetDrive}
           fit="cover"
           className="h-full w-full"

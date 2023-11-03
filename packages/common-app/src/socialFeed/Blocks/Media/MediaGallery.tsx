@@ -1,4 +1,4 @@
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
 import { Image, useIntersection, useDarkMode, Triangle } from '@youfoundation/common-app';
 import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
@@ -66,6 +66,7 @@ export const MediaGallery = ({
                     odinId={odinId}
                     className={`h-full w-auto`}
                     fileId={file.fileId}
+                    fileKey={DEFAULT_PAYLOAD_KEY}
                     targetDrive={targetDrive}
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}

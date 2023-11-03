@@ -19,7 +19,7 @@ import {
   ArrowLeft,
   Arrow,
 } from '../../..';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -110,24 +110,26 @@ export const PostImageDetailCard = ({
                   odinId={odinId}
                   className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
                   fileId={currentMediaFile?.fileId}
+                  fileKey={DEFAULT_PAYLOAD_KEY}
                   targetDrive={getChannelDrive(post.channelId)}
                   alt="post"
                   fit="contain"
                   previewThumbnail={
                     mediaFileIds?.length === 1 ? postFile.previewThumbnail : undefined
                   }
-                  probablyEncrypted={postFile.payloadIsEncrypted}
+                  probablyEncrypted={postFile.isEncrypted}
                 />
               ) : (
                 <Video
                   fileId={currentMediaFile?.fileId}
+                  fileKey={DEFAULT_PAYLOAD_KEY}
                   className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={
                     mediaFileIds?.length === 1 ? postFile.previewThumbnail : undefined
                   }
                   odinId={odinId}
-                  probablyEncrypted={postFile.payloadIsEncrypted}
+                  probablyEncrypted={postFile.isEncrypted}
                 />
               )}
             </div>

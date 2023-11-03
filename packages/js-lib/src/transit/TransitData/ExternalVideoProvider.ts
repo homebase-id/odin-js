@@ -14,18 +14,16 @@ export const getDecryptedVideoChunkOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   chunkStart?: number,
   chunkEnd?: number,
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  const payload = await getPayloadBytesOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-
-    { systemFileType, chunkStart, chunkEnd }
-  );
+  const payload = await getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, key, {
+    systemFileType,
+    chunkStart,
+    chunkEnd,
+  });
 
   return payload?.bytes || null;
 };
@@ -47,7 +45,7 @@ export const getDecryptedVideoMetadataOverTransit = async (
     }
   );
   if (!fileHeader) return undefined;
-  return fileHeader.fileMetadata.appData.jsonContent;
+  return fileHeader.fileMetadata.appData.content;
 };
 
 export const getDecryptedVideoUrlOverTransit = async (
@@ -55,6 +53,7 @@ export const getDecryptedVideoUrlOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
@@ -62,17 +61,18 @@ export const getDecryptedVideoUrlOverTransit = async (
   const meta = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
     systemFileType,
   });
-  if (!meta?.fileMetadata.payloadIsEncrypted) {
+  if (!meta?.fileMetadata.isEncrypted) {
     return `https://${odinId}/api/guest/v1/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
+      key,
       xfst: systemFileType || 'Standard',
       iac: true,
     })}`;
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, key, {
     systemFileType,
     chunkStart: fileSizeLimit ? 0 : undefined,
     chunkEnd: fileSizeLimit,
