@@ -40,23 +40,20 @@ export const useFiles = ({
     return reponse;
   };
 
-  const fetchFile = async (result: DriveSearchResult, payloadOnly?: boolean) => {
-    if (result.fileMetadata.contentType !== 'application/json' && payloadOnly) {
-      const payload = await getPayloadBytes(
-        dotYouClient,
-        targetDrive,
-        result.fileId,
-        DEFAULT_PAYLOAD_KEY,
-        {
-          keyHeader: result.fileMetadata.isEncrypted
-            ? result.sharedSecretEncryptedKeyHeader
-            : undefined,
-        }
-      );
+  const fetchFile = async (result: DriveSearchResult, payloadKey?: string) => {
+    if (result.fileMetadata.contentType !== 'application/json' && payloadKey) {
+      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
+        keyHeader: result.fileMetadata.isEncrypted
+          ? result.sharedSecretEncryptedKeyHeader
+          : undefined,
+      });
       if (!payload) return null;
 
       return window.URL.createObjectURL(
-        new Blob([payload.bytes], { type: `${result.fileMetadata.contentType};charset=utf-8` })
+        new Blob([payload.bytes], {
+          type: `${result.fileMetadata.payloads.find((payload) => payload.key === payloadKey)
+            ?.contentType};charset=utf-8`,
+        })
       );
     }
 

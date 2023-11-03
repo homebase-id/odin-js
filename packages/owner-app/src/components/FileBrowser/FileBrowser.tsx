@@ -80,10 +80,9 @@ const FileBrowser = ({
 };
 
 const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSearchResult }) => {
-  console.log(file);
-
   const fileType = file.fileMetadata.appData.fileType;
-  const contentType = file.fileMetadata.payloads?.[0]?.contentType;
+  const firstPayload = file.fileMetadata.payloads?.[0];
+  const contentType = firstPayload?.contentType;
   const isImage = ['image/webp', 'image/jpeg', 'image/svg+xml', 'image/gif'].includes(contentType);
   const contentTypeExtension = (contentType || 'application/json').split('/')[1];
 
@@ -119,17 +118,17 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
             <Image
               targetDrive={targetDrive}
               fileId={file.fileId}
-              fileKey={DEFAULT_PAYLOAD_KEY}
+              fileKey={firstPayload.key}
               fit="contain"
               className="aspect-square h-full w-full"
             />
             <div
               className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 p-2 opacity-0 hover:opacity-100"
-              onClick={async () => doDownload((await fetchFile(file, true)) || '')}
+              onClick={async () => doDownload((await fetchFile(file, firstPayload.key)) || '')}
             >
               <ActionButton
                 icon={Download}
-                onClick={async () => doDownload((await fetchFile(file, true)) || '')}
+                onClick={async () => doDownload((await fetchFile(file, firstPayload.key)) || '')}
                 size="square"
                 type="mute"
               />
