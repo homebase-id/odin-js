@@ -1,5 +1,4 @@
 import {
-  uint8ArrayToBase64,
   getNewId,
   jsonStringify64,
   stringifyToQueryParams,
@@ -15,7 +14,6 @@ import {
   ThumbnailFile,
   SecurityGroupType,
   UploadInstructionSet,
-  EmbeddedThumb,
   UploadFileMetadata,
   uploadFile,
   SystemFileType,
@@ -61,19 +59,11 @@ export const uploadVideo = async (
     transitOptions: uploadMeta?.transitOptions || null,
   };
 
-  const { naturalSize, tinyThumb, additionalThumbnails } = uploadMeta?.thumb
-    ? await createThumbnails(uploadMeta.thumb.payload, [{ quality: 100, width: 250, height: 250 }])
-    : { naturalSize: undefined, tinyThumb: undefined, additionalThumbnails: undefined };
-
-  const previewThumbnail: EmbeddedThumb | undefined =
-    naturalSize && tinyThumb
-      ? {
-          pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          contentType: tinyThumb.payload.type,
-          content: uint8ArrayToBase64(new Uint8Array(await tinyThumb.payload.arrayBuffer())),
-        }
-      : undefined;
+  const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
+    ? await createThumbnails(uploadMeta.thumb.payload, DEFAULT_PAYLOAD_KEY, [
+        { quality: 100, width: 250, height: 250 },
+      ])
+    : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   const metadata: UploadFileMetadata = {
     versionTag: uploadMeta?.versionTag,
@@ -86,7 +76,7 @@ export const uploadVideo = async (
       fileType: 0,
       content: fileMetadata ? jsonStringify64(fileMetadata) : null,
       userDate: uploadMeta?.userDate,
-      previewThumbnail,
+      previewThumbnail: tinyThumb,
     },
     isEncrypted: encrypt,
     accessControlList: acl,
@@ -104,7 +94,7 @@ export const uploadVideo = async (
   );
   if (!result) throw new Error(`Upload failed`);
 
-  return { fileId: result.file.fileId, previewThumbnail, type: 'video' };
+  return { fileId: result.file.fileId, previewThumbnail: tinyThumb, type: 'video' };
 };
 
 export const getDecryptedVideoChunk = async (

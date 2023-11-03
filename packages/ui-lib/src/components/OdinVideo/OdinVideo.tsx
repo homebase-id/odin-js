@@ -92,6 +92,9 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       onClick={(e) => e.stopPropagation()}
       autoPlay={videoProps.autoPlay}
       poster={!shouldFallback ? videoProps.poster : undefined}
+      data-odinid={odinId}
+      data-fileid={fileId}
+      data-filekey={fileKey}
     >
       {isChunkedPlayback ? (
         <ChunkedSource

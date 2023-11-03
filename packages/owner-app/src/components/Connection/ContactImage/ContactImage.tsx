@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
-import { ContactConfig } from '@youfoundation/js-lib/network';
+import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
 import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const getInitials = (
@@ -51,10 +51,10 @@ const ContactImage = ({
     <div className={`relative aspect-square ${className || ''}`}>
       {isLoading ? (
         <LoadingBlock className={`aspect-square`} />
-      ) : contactData?.imageFileId ? (
+      ) : contactData?.hasImage ? (
         <Image
-          fileId={contactData?.imageFileId}
-          fileKey={DEFAULT_PAYLOAD_KEY}
+          fileId={contactData?.fileId}
+          fileKey={CONTACT_PROFILE_IMAGE_KEY}
           targetDrive={ContactConfig.ContactTargetDrive}
           fit="cover"
           className="h-full w-full"

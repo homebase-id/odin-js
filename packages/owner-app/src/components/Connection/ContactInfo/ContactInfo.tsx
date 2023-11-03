@@ -5,8 +5,8 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
-import { ContactConfig } from '@youfoundation/js-lib/network';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
+import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
+import ContactImage from '../ContactImage/ContactImage';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -19,9 +19,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
   } = useContact(odinId ? { odinId: odinId } : { id: contactId });
 
-  if (!contact) {
-    return null;
-  }
+  if (!contact) return null;
 
   return (
     <>
@@ -52,11 +50,9 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
       >
         <div className="-mx-4 sm:flex sm:flex-row">
           <div className="flex flex-row px-4 sm:mx-0">
-            <ContactImage
-              odinId={odinId}
-              contactId={contactId}
-              className="mx-auto h-[12rem] w-[12rem]"
-            />
+            {odinId ? (
+              <ContactImage odinId={odinId} className="mx-auto h-[12rem] w-[12rem]" />
+            ) : null}
           </div>
           <div className="px-4">
             {contact.name && (
@@ -95,43 +91,6 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
           </div>
         </div>
       </Section>
-    </>
-  );
-};
-
-interface ContactImageProps extends ContactInfoProps {
-  className?: string;
-}
-
-export const ContactImage = ({ odinId, contactId, className }: ContactImageProps) => {
-  const {
-    fetch: { data: contact },
-  } = useContact(odinId ? { odinId: odinId } : { id: contactId });
-
-  const { data: imageUrl } = useImage(
-    contact?.imageFileId || undefined,
-    DEFAULT_PAYLOAD_KEY,
-    ContactConfig.ContactTargetDrive
-  ).fetch;
-
-  return (
-    <>
-      {contact?.imageUrl || imageUrl ? (
-        <figure className={`relative overflow-hidden ${className ?? ''}`}>
-          <img src={contact?.imageUrl ?? imageUrl} className="aspect-square w-full object-cover" />
-        </figure>
-      ) : (
-        <FallbackImg
-          initials={
-            contact?.name
-              ? `${contact.name.givenName?.[0] ?? contact.name.displayName?.[0] ?? ''}${
-                  contact.name.surname?.[0] ?? ''
-                }`
-              : ''
-          }
-          className={`${className ?? ''}`}
-        />
-      )}
     </>
   );
 };

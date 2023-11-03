@@ -61,17 +61,11 @@ export const uploadImage = async (
     transitOptions: uploadMeta?.transitOptions || null,
   };
 
-  const { naturalSize, tinyThumb, additionalThumbnails } = await createThumbnails(
+  const { tinyThumb, additionalThumbnails } = await createThumbnails(
     imageData,
+    DEFAULT_PAYLOAD_KEY,
     thumbsToGenerate
   );
-
-  const previewThumbnail: EmbeddedThumb = {
-    pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-    pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-    contentType: tinyThumb.payload.type,
-    content: uint8ArrayToBase64(new Uint8Array(await tinyThumb.payload.arrayBuffer())),
-  };
 
   onUpdate?.(0.5);
 
@@ -93,7 +87,7 @@ export const uploadImage = async (
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       fileType: MediaConfig.MediaFileType,
       content: fileMetadata ? jsonStringify64(fileMetadata) : null,
-      previewThumbnail: previewThumbnail,
+      previewThumbnail: tinyThumb,
       userDate: uploadMeta?.userDate,
       archivalStatus: uploadMeta?.archivalStatus,
     },
@@ -112,7 +106,7 @@ export const uploadImage = async (
   if (!result) throw new Error(`Upload failed`);
 
   onUpdate?.(0.5);
-  return { fileId: result.file.fileId, previewThumbnail, type: 'image' };
+  return { fileId: result.file.fileId, previewThumbnail: tinyThumb, type: 'image' };
 };
 
 export const removeImage = async (

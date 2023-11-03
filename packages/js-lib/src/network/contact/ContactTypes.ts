@@ -31,7 +31,7 @@ export interface ContactFile {
   phone?: { number: string };
   email?: { email: string };
   birthday?: { date: string };
-  imageFileId?: string;
+  hasImage?: boolean;
 }
 export interface RawContact extends ContactFile {
   image?: ContactDataImage;
@@ -39,13 +39,14 @@ export interface RawContact extends ContactFile {
 
 export interface ContactVm {
   id?: string;
+  fileId?: string;
 
   name?: { displayName: string; givenName?: string; additionalName?: string; surname?: string };
   location?: { city?: string; country?: string };
   phone?: { number: string };
   email?: { email: string };
   birthday?: { date: string };
-  imageFileId?: string;
+  hasImage?: boolean;
   imageUrl?: string;
 
   odinId?: string;

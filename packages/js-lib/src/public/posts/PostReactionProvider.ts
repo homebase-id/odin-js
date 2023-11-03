@@ -69,9 +69,11 @@ export const saveComment = async (
         },
       ];
     } else {
-      const { additionalThumbnails: thumbs } = await createThumbnails(imageFile, [
-        { height: 250, width: 250, quality: 100 },
-      ]);
+      const { additionalThumbnails: thumbs } = await createThumbnails(
+        imageFile,
+        DEFAULT_PAYLOAD_KEY,
+        [{ height: 250, width: 250, quality: 100 }]
+      );
       additionalThumbnails = thumbs;
     }
     delete comment.content.attachment;

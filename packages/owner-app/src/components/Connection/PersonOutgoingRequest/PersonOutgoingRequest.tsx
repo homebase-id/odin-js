@@ -25,6 +25,7 @@ const PersonOutgoingRequest = ({
         className={className}
         odinId={recipientOdinId}
         href={(recipientOdinId && `/owner/connections/${recipientOdinId}`) ?? undefined}
+        canSave={false}
       >
         <h2 className="font-thiner mb-6 dark:text-white">
           <DomainHighlighter>{recipientOdinId}</DomainHighlighter>

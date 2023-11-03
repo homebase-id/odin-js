@@ -85,13 +85,11 @@ export const useContact = ({
       return;
     }
 
-    let newContact: ContactFile | undefined;
-
     const connectionInfo = (await fetchConnectionInfo(dotYouClient, contact.odinId)) ?? undefined;
-    newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
+    const newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
 
     if (newContact) {
-      newContact = await saveContact(dotYouClient, {
+      await saveContact(dotYouClient, {
         ...newContact,
         odinId: contact.odinId,
         versionTag: contact.versionTag,
@@ -101,7 +99,7 @@ export const useContact = ({
     } else {
       const publicContact = await fetchDataFromPublic(contact.odinId);
       if (!publicContact) return;
-      newContact = await saveContact(dotYouClient, {
+      await saveContact(dotYouClient, {
         ...publicContact,
         odinId: contact.odinId,
         versionTag: contact.versionTag,
@@ -151,11 +149,11 @@ export const useContact = ({
 
 export const parseContact = (contact: RawContact): ContactVm => {
   const imageUrl =
-    contact.image && !contact.imageFileId
+    contact.image && !contact.hasImage
       ? `data:${contact.image.contentType};base64,${contact.image.content}`
       : `https://${contact.odinId}/pub/image`;
 
-  const { id, name, location, phone, birthday, imageFileId, odinId, source } = contact;
+  const { id, name, location, phone, birthday, hasImage, odinId, source } = contact;
 
   return {
     id,
@@ -163,7 +161,7 @@ export const parseContact = (contact: RawContact): ContactVm => {
     location,
     phone,
     birthday,
-    imageFileId,
+    hasImage,
 
     imageUrl,
     odinId,

@@ -196,6 +196,7 @@ export const OdinImage = ({
           : loadSize
       }
       data-fileid={fileId}
+      data-filekey={fileKey}
     >
       {!fileId || !fileKey ? null : weDontHaveAnything ? (
         <LoadingBlock className="aspect-square h-full w-full" />
