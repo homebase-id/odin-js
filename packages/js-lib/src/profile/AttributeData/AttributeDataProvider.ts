@@ -12,13 +12,15 @@ import {
   UploadFileMetadata,
   uploadFile,
   deleteFile,
-  AccessControlList,
-  getDecryptedImageData,
   getFileHeader,
-  uploadImage,
+  getPayloadBytes,
+  EmbeddedThumb,
+  PayloadFile,
+  ThumbnailFile,
+  createThumbnails,
 } from '../../core/core';
 import {
-  aclEqual,
+  getBlobFromBytes,
   getDisplayNameOfNameAttribute,
   getNewId,
   getRandom16ByteArray,
@@ -184,6 +186,11 @@ export const dsrToAttributeFile = async (
       includeMetadataHeader
     );
     if (!attrPayload) return undefined;
+
+    const mediaPayloads = dsr.fileMetadata.payloads.filter(
+      (payload) => payload.contentType !== 'application/json'
+    );
+
     return {
       ...attrPayload,
       fileId: attrPayload.fileId ?? dsr.fileId,
@@ -191,6 +198,7 @@ export const dsrToAttributeFile = async (
       acl: dsr.serverMetadata?.accessControlList,
       aclPriority: dsr.priority,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      mediaPayloads: mediaPayloads,
     };
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
@@ -200,91 +208,154 @@ export const dsrToAttributeFile = async (
 
 // Attribute Processors:
 // Helpers:
-const nameAttributeProcessing = (nameAttr: AttributeFile): AttributeFile => {
+type ProcessedAttribute = {
+  attr: AttributeFile;
+  payloads: PayloadFile[];
+  thumbnails?: ThumbnailFile[] | undefined;
+  previewThumb?: EmbeddedThumb | undefined;
+};
+
+const nameAttributeProcessing = (nameAttr: AttributeFile): ProcessedAttribute => {
   const newData = { ...nameAttr.data };
   newData[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
 
-  return { ...nameAttr, data: newData };
+  return {
+    attr: { ...nameAttr, data: newData },
+    payloads: [],
+    thumbnails: [],
+    previewThumb: undefined,
+  };
 };
 
-// TODO: remove, we shouldn't need this one anymore, with multi-payload support
-const confirmDependencyAcl = async (
+// TODO: Fix that we don't need to fetch the existing Blob, if there's no update to it
+const getNewOrExistingThumbnails = async (
   dotYouClient: DotYouClient,
-  targetAcl: AccessControlList,
+  attrFileId: string | undefined,
+  dataKey: Blob | string | undefined,
   targetDrive: TargetDrive,
-  fileId: string
+  payloadKey: string
 ) => {
-  if (fileId) {
-    const imageFileMeta = await getFileHeader(dotYouClient, targetDrive, fileId);
+  if (!dataKey) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
 
-    if (imageFileMeta && !aclEqual(targetAcl, imageFileMeta.serverMetadata.accessControlList)) {
-      // Not what it should be, going to reupload it in full
-      const imageData = await getDecryptedImageData(
-        dotYouClient,
-        targetDrive,
-        fileId,
-        DEFAULT_PAYLOAD_KEY
-      );
-      if (imageData) {
-        await uploadImage(
-          dotYouClient,
-          targetDrive,
-          targetAcl,
-          new Blob([imageData.bytes], { type: imageData.contentType }),
-          undefined,
-          {
-            fileId,
-            versionTag: imageFileMeta.fileMetadata.versionTag,
-          }
-        );
-      }
-    }
+  const newData = dataKey instanceof Blob;
+
+  if (newData) {
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(dataKey, payloadKey);
+    return { additionalThumbnails, tinyThumb, blob: dataKey };
   }
+
+  if (!attrFileId) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
+
+  const payloadBytes = await getPayloadBytes(dotYouClient, targetDrive, attrFileId, payloadKey, {});
+
+  if (!payloadBytes) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
+
+  const imageBlob = getBlobFromBytes(payloadBytes);
+  const { additionalThumbnails, tinyThumb } = await createThumbnails(imageBlob, payloadKey);
+  return { additionalThumbnails, tinyThumb, blob: imageBlob };
 };
 
+const PHOTO_PAYLOAD_KEY = 'prfl_key';
 const photoAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
-): Promise<AttributeFile> => {
+): Promise<ProcessedAttribute> => {
   const imageFieldKey = MinimalProfileFields.ProfileImageId;
-  const imageFileId = attr.data[imageFieldKey];
+  const imageData = attr.data[imageFieldKey];
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
 
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+  const { additionalThumbnails, blob, tinyThumb } = await getNewOrExistingThumbnails(
+    dotYouClient,
+    attr.fileId,
+    imageData,
+    targetDrive,
+    PHOTO_PAYLOAD_KEY
+  );
+  attr.data[imageFieldKey] = PHOTO_PAYLOAD_KEY;
 
-  return attr;
+  return {
+    attr,
+    thumbnails: additionalThumbnails,
+    previewThumb: tinyThumb,
+    payloads: blob ? [{ payload: blob, key: PHOTO_PAYLOAD_KEY }] : [],
+  };
 };
 
+const EXPERIENCE_PAYLOAD_KEY = 'xprnc_key';
 const experienceAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
-): Promise<AttributeFile> => {
+): Promise<ProcessedAttribute> => {
   const imageFieldKey = MinimalProfileFields.ExperienceImageFileId;
-  const imageFileId = attr.data[imageFieldKey];
+  const imageData = attr.data[imageFieldKey];
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
 
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+  const { additionalThumbnails, blob, tinyThumb } = await getNewOrExistingThumbnails(
+    dotYouClient,
+    attr.fileId,
+    imageData,
+    targetDrive,
+    EXPERIENCE_PAYLOAD_KEY
+  );
 
-  return attr;
+  attr.data[imageFieldKey] = EXPERIENCE_PAYLOAD_KEY;
+
+  return {
+    attr,
+    thumbnails: additionalThumbnails,
+    previewThumb: tinyThumb,
+    payloads: blob ? [{ payload: blob, key: EXPERIENCE_PAYLOAD_KEY }] : [],
+  };
 };
 
+const FAVICON_PAYLOAD_KEY = 'fvcn_key';
+const HEADER_PAYLOAD_KEY = 'headr_key';
 const themeAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
-): Promise<AttributeFile> => {
-  const faviconFieldKey = HomePageThemeFields.Favicon;
-  const faviconFileId = attr?.data[faviconFieldKey]?.fileId;
-  if (!faviconFileId) return attr;
-
+): Promise<ProcessedAttribute> => {
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, faviconFileId);
+
+  const faviconFieldKey = HomePageThemeFields.Favicon;
+  const faviconImageData = attr?.data[faviconFieldKey]?.fileId;
+
+  const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } =
+    await getNewOrExistingThumbnails(
+      dotYouClient,
+      attr.fileId,
+      faviconImageData,
+      targetDrive,
+      FAVICON_PAYLOAD_KEY
+    );
+
+  attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
 
   const imageFieldKey = HomePageThemeFields.HeaderImageId;
-  const imageFileId = attr.data[imageFieldKey];
+  const headerImageData = attr.data[imageFieldKey];
 
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+  const {
+    additionalThumbnails: headerThumbnails,
+    blob: headerBlob,
+    tinyThumb: headerTiny,
+  } = await getNewOrExistingThumbnails(
+    dotYouClient,
+    attr.fileId,
+    headerImageData,
+    targetDrive,
+    HEADER_PAYLOAD_KEY
+  );
 
-  return attr;
+  attr.data[imageFieldKey] = HEADER_PAYLOAD_KEY;
+
+  return {
+    attr,
+    thumbnails: [...faviconThumbnails, ...headerThumbnails],
+    previewThumb: headerTiny,
+    payloads: [
+      ...(faviconBlob ? [{ payload: faviconBlob, key: FAVICON_PAYLOAD_KEY }] : []),
+      ...(headerBlob ? [{ payload: headerBlob, key: HEADER_PAYLOAD_KEY }] : []),
+    ],
+  };
 };
 
 const processAttribute = async (dotYouClient: DotYouClient, attribute: AttributeFile) => {
@@ -302,7 +373,12 @@ const processAttribute = async (dotYouClient: DotYouClient, attribute: Attribute
       return await experienceAttributeProcessing(dotYouClient, attribute);
 
     default:
-      return attribute;
+      return {
+        attr: attribute,
+        payloads: [],
+        thumbnails: [],
+        previewThumb: undefined,
+      } as ProcessedAttribute;
   }
 };
 
@@ -312,7 +388,10 @@ export const saveAttribute = async (
   onVersionConflict?: () => void
 ): Promise<AttributeFile | undefined> => {
   // Process Attribute
-  const attr = await processAttribute(dotYouClient, toSaveAttribute);
+  const { attr, payloads, thumbnails, previewThumb } = await processAttribute(
+    dotYouClient,
+    toSaveAttribute
+  );
 
   // If a new attribute
   if (!attr.id) {
@@ -360,25 +439,25 @@ export const saveAttribute = async (
       groupId: attr.sectionId,
       fileType: AttributeConfig.AttributeFileType,
       content: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: attr.previewThumbnail,
+      previewThumbnail: previewThumb,
     },
     isEncrypted: encrypt,
     accessControlList: attr.acl,
   };
 
+  if (!shouldEmbedContent) {
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
+  }
+
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
-    shouldEmbedContent
-      ? undefined
-      : [
-          {
-            payload: new Blob([payloadBytes], { type: 'application/json' }),
-            key: DEFAULT_PAYLOAD_KEY,
-          },
-        ],
-    undefined,
+    payloads,
+    thumbnails,
     encrypt,
     onVersionConflict
   );
@@ -397,24 +476,24 @@ export const removeAttribute = async (
 ): Promise<void> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
 
-  const attr: AttributeFile | undefined = await getAttributeByFileId(
-    dotYouClient,
-    profileId,
-    attributeFileId
-  );
+  // const attr: AttributeFile | undefined = await getAttributeByFileId(
+  //   dotYouClient,
+  //   profileId,
+  //   attributeFileId
+  // );
 
-  const mediaFileIds = [
-    attr?.data[HomePageThemeFields.Favicon]?.fileId,
-    attr?.data[HomePageThemeFields.HeaderImageId],
-    attr?.data[MinimalProfileFields.ProfileImageId],
-    attr?.data[MinimalProfileFields.ExperienceImageFileId],
-  ];
+  // const mediaFileIds = [
+  //   attr?.data[HomePageThemeFields.Favicon]?.fileId,
+  //   attr?.data[HomePageThemeFields.HeaderImageId],
+  //   attr?.data[MinimalProfileFields.ProfileImageId],
+  //   attr?.data[MinimalProfileFields.ExperienceImageFileId],
+  // ];
 
-  await Promise.all(
-    mediaFileIds.map(async (fileId) => {
-      if (fileId) await deleteFile(dotYouClient, targetDrive, fileId);
-    })
-  );
+  // await Promise.all(
+  //   mediaFileIds.map(async (fileId) => {
+  //     if (fileId) await deleteFile(dotYouClient, targetDrive, fileId);
+  //   })
+  // );
 
   deleteFile(dotYouClient, targetDrive, attributeFileId);
 };

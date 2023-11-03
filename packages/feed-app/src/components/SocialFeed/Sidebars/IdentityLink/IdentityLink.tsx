@@ -21,8 +21,8 @@ const IdentityLink = ({ className }: { className?: string }) => {
       <div className="relative">
         <Image
           targetDrive={HomePageConfig.HomepageTargetDrive}
-          fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageId}
-          fileKey={DEFAULT_PAYLOAD_KEY}
+          fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.imageFileId}
+          fileKey={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageId}
           previewThumbnail={data?.home?.headerPreviewThumbnail}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"
@@ -33,8 +33,8 @@ const IdentityLink = ({ className }: { className?: string }) => {
           <div className="flex h-full px-5">
             <Image
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
-              fileId={data?.owner.profileImageId}
-              fileKey={DEFAULT_PAYLOAD_KEY}
+              fileId={data?.owner.profileImageFileId}
+              fileKey={data?.owner.profileImageFileKey}
               previewThumbnail={data?.owner.profileImagePreviewThumbnail}
               className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-neutral-200"
               fit="cover"

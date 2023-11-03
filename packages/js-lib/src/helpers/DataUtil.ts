@@ -311,3 +311,13 @@ export const getDataUriFromBlob = async (blob: Blob) => {
 
   return `data:${blob.type};base64,${uint8ArrayToBase64(new Uint8Array(await blob.arrayBuffer()))}`;
 };
+
+export const getBlobFromBytes = ({
+  bytes,
+  contentType,
+}: {
+  bytes: Uint8Array;
+  contentType: string;
+}) => {
+  return new Blob([bytes], { type: contentType });
+};

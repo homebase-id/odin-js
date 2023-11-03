@@ -25,7 +25,6 @@ export const getDecryptedThumbnailMetaOverTransit = async (
   fileId: string,
   systemFileType?: SystemFileType
 ): Promise<ThumbnailMeta | undefined> => {
-  //it seems these will be fine for images but for video and audio we must stream decrypt
   return getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
     systemFileType,
   }).then((header) => {

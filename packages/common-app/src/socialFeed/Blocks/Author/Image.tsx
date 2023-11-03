@@ -36,8 +36,8 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
 
   return (
     <Image
-      fileId={owner?.profileImageId}
-      fileKey={DEFAULT_PAYLOAD_KEY}
+      fileId={owner?.profileImageFileId}
+      fileKey={owner?.profileImageFileKey}
       previewThumbnail={owner?.profileImagePreviewThumbnail}
       targetDrive={targetDrive}
       className={`${

@@ -1,4 +1,9 @@
-import { EmbeddedThumb, AccessControlList, SecurityGroupType } from '../../core/core';
+import {
+  PayloadDesriptor,
+  EmbeddedThumb,
+  AccessControlList,
+  SecurityGroupType,
+} from '../../core/core';
 
 export interface AttributeFile extends Attribute {
   fileId?: string;
@@ -17,6 +22,7 @@ export interface Attribute {
   type: string;
   priority: number;
   sectionId: string;
+  mediaPayloads?: PayloadDesriptor[];
   previewThumbnail?: EmbeddedThumb;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;

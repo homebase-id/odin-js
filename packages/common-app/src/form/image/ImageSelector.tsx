@@ -1,26 +1,18 @@
-import {
-  AccessControlList,
-  DEFAULT_PAYLOAD_KEY,
-  ImageUploadResult,
-  TargetDrive,
-  ThumbnailInstruction,
-} from '@youfoundation/js-lib/core';
-import { useEffect, useState } from 'react';
-import { ActionButton, t, useImage } from '@youfoundation/common-app';
+import { useEffect, useMemo, useState } from 'react';
+import { ActionButton, t } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
-import { ErrorNotification, ImageDialog } from '@youfoundation/common-app';
+import { ImageDialog } from '@youfoundation/common-app';
 
 interface ImageSelectorProps
   extends Omit<
     React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-    'onChange'
+    'onChange' | 'defaultValue'
   > {
-  thumbInstructions?: ThumbnailInstruction[];
-  targetDrive: TargetDrive;
-  acl: AccessControlList;
-  onChange: (event: { target: { name: string; value: ImageUploadResult | undefined } }) => void;
+  defaultValue?: Blob;
+
+  onChange: (event: { target: { name: string; value: Blob | undefined } }) => void;
   expectedAspectRatio?: number;
 
   maxHeight?: number;
@@ -36,8 +28,6 @@ interface ImageSelectorProps
 }
 
 export const ImageSelector = ({
-  targetDrive,
-  acl,
   onChange,
   defaultValue,
   name,
@@ -45,46 +35,31 @@ export const ImageSelector = ({
   maxHeight,
   maxWidth,
   sizeClass: externalSizeClass,
-  thumbInstructions,
   label,
   disabled,
   isOpen: isDefaultOpen,
   onClose,
 }: ImageSelectorProps) => {
-  const {
-    fetch: { data: imageData, isLoading },
-    remove: { mutateAsync: removeImage, error: removeError },
-  } = useImage(
-    undefined,
-    typeof defaultValue === 'string' ? defaultValue : undefined,
-    DEFAULT_PAYLOAD_KEY,
-    targetDrive
-  );
   const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => setIsEdit(!!isDefaultOpen), [isDefaultOpen]);
   useEffect(() => (!isEdit && onClose ? onClose() : undefined), [isEdit]);
 
   const removeData = async () => {
-    if (typeof defaultValue !== 'string') return;
-
-    await removeImage({
-      fileId: defaultValue,
-      targetDrive: targetDrive,
-    });
     onChange({ target: { name: name || '', value: undefined } });
   };
 
-  // const sizeClass = 'aspect-square max-w-[20rem]';
   const sizeClass = externalSizeClass ?? 'aspect-square max-w-[20rem]';
 
-  if (isLoading && defaultValue) {
-    return <div className={`${sizeClass} animate-pulse bg-slate-100 dark:bg-slate-700`}></div>;
-  }
+  const imageUrl = useMemo(
+    () =>
+      defaultValue && defaultValue instanceof Blob ? URL.createObjectURL(defaultValue) : undefined,
+    [defaultValue]
+  );
 
   return (
     <>
-      {imageData ? (
+      {imageUrl ? (
         <div className="flex">
           <div className="relative mr-auto">
             <ActionButton
@@ -118,7 +93,7 @@ export const ImageSelector = ({
               <Trash className="h-4 w-4 " />
             </ActionButton>
             <img
-              src={imageData.url}
+              src={imageUrl}
               className="max-h-[20rem]"
               onClick={() => {
                 setIsEdit(true);
@@ -140,22 +115,18 @@ export const ImageSelector = ({
       )}
 
       <ImageDialog
-        acl={acl}
         isOpen={isEdit && !disabled}
-        targetDrive={targetDrive}
         title={t('Upload image')}
         confirmText={t('Add')}
         onCancel={() => setIsEdit(false)}
         expectedAspectRatio={expectedAspectRatio}
         maxHeight={maxHeight}
         maxWidth={maxWidth}
-        thumbInstructions={thumbInstructions}
         onConfirm={(uploadResult) => {
           onChange({ target: { name: name || '', value: uploadResult } });
           setIsEdit(false);
         }}
       />
-      <ErrorNotification error={removeError} />
     </>
   );
 };

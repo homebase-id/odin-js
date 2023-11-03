@@ -1,23 +1,8 @@
-import {
-  AccessControlList,
-  ImageContentType,
-  ImageUploadResult,
-  TargetDrive,
-  ThumbnailInstruction,
-} from '@youfoundation/js-lib/core';
-import { createRef, useRef, useState } from 'react';
+import { createRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ActionButton,
-  CropperRef,
-  GetCroppedData,
-  t,
-  useImage,
-  usePortal,
-} from '@youfoundation/common-app';
-import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { ImageUploadAndCrop } from '../ImageUploadAndCrop';
+import { ActionButton, CropperRef, GetCroppedData, t, usePortal } from '@youfoundation/common-app';
 
 export const ImageDialog = ({
   title,
@@ -26,9 +11,6 @@ export const ImageDialog = ({
   maxHeight,
   maxWidth,
   isOpen,
-  acl,
-  targetDrive,
-  thumbInstructions,
   onConfirm,
   onCancel,
 }: {
@@ -40,16 +22,10 @@ export const ImageDialog = ({
 
   isOpen: boolean;
 
-  acl: AccessControlList;
-  targetDrive: TargetDrive;
-
-  thumbInstructions?: ThumbnailInstruction[];
-
-  onConfirm: (uploadResult?: ImageUploadResult) => void;
+  onConfirm: (uploadResult: Blob | undefined) => void;
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
-  const { mutate: saveImage, status, error: saveError } = useImage().save;
   const [isGettingData, setIsGettingData] = useState(false);
   const [unCroppedImageData, setUnCroppedImageData] = useState<Blob | undefined>();
   const cropperRef = createRef<CropperRef>();
@@ -59,27 +35,7 @@ export const ImageDialog = ({
     setIsGettingData(true);
     const imageData = (await GetCroppedData(cropperRef)) ?? unCroppedImageData;
 
-    if (!imageData) {
-      setIsGettingData(false);
-      return;
-    }
-
-    saveImage(
-      {
-        acl: acl,
-        image: imageData,
-        fileId: undefined,
-        versionTag: undefined,
-        targetDrive,
-        thumbInstructions,
-      },
-      {
-        onSuccess: (uploadResult) => {
-          onConfirm(uploadResult);
-          reset();
-        },
-      }
-    );
+    onConfirm(imageData);
     setIsGettingData(false);
   };
 
@@ -91,7 +47,6 @@ export const ImageDialog = ({
   const dialog = (
     <DialogWrapper onClose={() => reset() && onCancel()} title={title} size="2xlarge">
       <>
-        <ErrorNotification error={saveError} />
         <ImageUploadAndCrop
           expectedAspectRatio={expectedAspectRatio}
           disableClear={true}
@@ -106,7 +61,7 @@ export const ImageDialog = ({
           <ActionButton
             className="m-2"
             onClick={doUploadImage}
-            state={isGettingData ? 'loading' : status}
+            state={isGettingData ? 'loading' : undefined}
           >
             {confirmText ?? 'Add'}
           </ActionButton>

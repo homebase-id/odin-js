@@ -9,6 +9,7 @@ import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
 import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { lazy } from 'react';
+import { usePayloadBlob } from '../../../hooks/media/usePayloadBlob';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
@@ -33,6 +34,7 @@ export const ThemeAttributeEditor = (props: {
       <div>
         <Label htmlFor={HomePageThemeFields.Favicon}>{t('Favicon')}</Label>
         <FaviconSelector
+          attribute={attribute}
           name={HomePageThemeFields.Favicon}
           defaultValue={attribute.data?.[HomePageThemeFields.Favicon] ?? ''}
           acl={attribute.acl}
@@ -68,11 +70,15 @@ const ThemeSpecificFields = ({
   onChange,
 }: {
   attribute: AttributeVm;
-  onChange: (e: {
-    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
-  }) => void;
+  onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
+  const targetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId);
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
+  const { data: imageBlob } = usePayloadBlob(
+    attribute.fileId,
+    attribute.data?.[HomePageThemeFields.HeaderImageId],
+    targetDrive
+  );
 
   const theme =
     themeId === HomePageTheme.VerticalPosts.toString()
@@ -93,24 +99,20 @@ const ThemeSpecificFields = ({
             <ImageSelector
               id="headerImage"
               name={HomePageThemeFields.HeaderImageId}
-              defaultValue={attribute.data?.[HomePageThemeFields.HeaderImageId] ?? ''}
+              defaultValue={imageBlob || undefined}
               onChange={(e) =>
                 onChange({
                   target: {
                     name: e.target.name,
-                    value: e.target.value?.fileId,
-                    previewThumbnail: e.target.value?.previewThumbnail,
+                    value: e.target.value,
                   },
                 })
               }
-              acl={attribute.acl}
-              targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
               sizeClass={`${
                 !attribute.data?.[HomePageThemeFields.HeaderImageId]
                   ? 'aspect-[16/9] md:aspect-[5/1]'
                   : ''
               }  w-full object-cover`}
-              thumbInstructions={headerInstructionThumbSizes}
             />
           </div>
           <div>
@@ -174,18 +176,20 @@ const ThemeSpecificFields = ({
           <ImageSelector
             id="headerImage"
             name={HomePageThemeFields.HeaderImageId}
-            defaultValue={attribute.data?.[HomePageThemeFields.HeaderImageId] ?? ''}
+            defaultValue={imageBlob || undefined}
             onChange={(e) =>
-              onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+              onChange({
+                target: {
+                  name: e.target.name,
+                  value: e.target.value,
+                },
+              })
             }
-            acl={attribute.acl}
-            targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
             sizeClass={`${
               !attribute.data?.[HomePageThemeFields.HeaderImageId]
                 ? 'aspect-[16/9] md:aspect-[5/1]'
                 : ''
             }  w-full object-cover`}
-            thumbInstructions={headerInstructionThumbSizes}
           />
         </div>
       );

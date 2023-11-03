@@ -18,6 +18,7 @@ import {
 import { EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
 
 interface DefaultTemplateSettings {
+  imageFileId: string;
   colors: {
     name: string;
     id: string;
@@ -55,7 +56,8 @@ type OwnerSiteData = {
   displayName?: string;
   firstName?: string;
   surName?: string;
-  profileImageId?: string;
+  profileImageFileId?: string;
+  profileImageFileKey?: string;
   profileImagePreviewThumbnail?: EmbeddedThumb;
   status?: string;
 };
@@ -98,7 +100,8 @@ export const useSiteData = () => {
         displayName: nameAttr?.data.displayName ?? window.location.hostname,
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
-        profileImageId: photoAttr?.data.profileImageId,
+        profileImageFileId: photoAttr?.fileId,
+        profileImageFileKey: photoAttr?.data.profileImageId,
         profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
         status: statusAttr?.data.status,
       };
@@ -125,7 +128,10 @@ export const useSiteData = () => {
       );
 
       return {
-        templateSettings: themeAttribute?.data as TemplateSettings,
+        templateSettings: {
+          ...themeAttribute?.data,
+          imageFileId: themeAttribute?.fileId,
+        } as TemplateSettings,
         headerPreviewThumbnail: themeAttribute?.previewThumbnail,
       };
     };
@@ -255,6 +261,7 @@ export const useSiteData = () => {
 const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteData | undefined => {
   if (fileData.has('name') && fileData.has('photo')) {
     const nameAttr = fileData.get('name')?.[0]?.payload as Attribute;
+    const photoAttrHeader = fileData.get('photo')?.[0]?.header;
     const photoAttr = fileData.get('photo')?.[0]?.payload as Attribute;
     const statusAttr = fileData.get('status')?.[0]?.payload as Attribute;
 
@@ -263,7 +270,8 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         displayName: nameAttr?.data.displayName,
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
-        profileImageId: photoAttr?.data.profileImageId,
+        profileImageFileId: photoAttrHeader?.fileId,
+        profileImageFileKey: photoAttr?.data.profileImageId,
         profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
         status: statusAttr?.data.status,
       };
@@ -297,10 +305,14 @@ const getSocialDataStatic = (
 const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>): HomeSiteData | undefined => {
   // File based response if available
   if (fileData.has('theme')) {
-    const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
+    const entry = fileData.get('theme')?.[0];
+    const themeAttribute = entry?.payload as Attribute;
     if (themeAttribute) {
       return {
-        templateSettings: themeAttribute?.data as TemplateSettings,
+        templateSettings: {
+          ...themeAttribute?.data,
+          imageFileId: entry?.header?.fileId,
+        } as TemplateSettings,
         headerPreviewThumbnail: themeAttribute?.previewThumbnail,
       };
     }

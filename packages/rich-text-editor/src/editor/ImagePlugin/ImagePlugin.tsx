@@ -52,6 +52,9 @@ interface ImageToolbarButtonProps extends ToolbarButtonProps {
 
 export const ImageToolbarButton = ({ targetDrive, ...props }: ImageToolbarButtonProps) => {
   const [isActive, setIsActive] = useState(false);
+  const {
+    save: { mutateAsync: saveImage },
+  } = useImage();
   const editor = useEditorRef(useEventPlateId());
 
   return (
@@ -71,16 +74,22 @@ export const ImageToolbarButton = ({ targetDrive, ...props }: ImageToolbarButton
         onCancel={() => {
           setIsActive(false);
         }}
-        onConfirm={(uploadResult) => {
-          if (uploadResult) {
-            insertImage(editor, uploadResult.fileId, DEFAULT_PAYLOAD_KEY, targetDrive);
-            setIsActive(false);
+        onConfirm={async (image) => {
+          if (image) {
+            const uploadResult = await saveImage({
+              image,
+              targetDrive,
+              acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+            });
+
+            if (uploadResult)
+              insertImage(editor, uploadResult.fileId, DEFAULT_PAYLOAD_KEY, targetDrive);
           }
+
+          setIsActive(false);
         }}
         title={t('Upload image')}
         confirmText={t('Add')}
-        acl={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
-        targetDrive={targetDrive} // TODO Add support for having the drive passed via props
       />
     </>
   );
@@ -90,7 +99,10 @@ export const ImageElementBlock = <V extends Value = Value>(
   props: PlateRenderElementProps<V, TImageElement>
 ) => {
   const [isActive, setIsActive] = useState(false);
-  const { mutateAsync: removeImage, error: removeError } = useImage().remove;
+  const {
+    remove: { mutateAsync: removeImage, error: removeError },
+    save: { mutateAsync: saveImage, error: saveError },
+  } = useImage();
   const { attributes, children, nodeProps, element } = props;
 
   const editor = useEditorRef(useEventPlateId());
@@ -111,7 +123,7 @@ export const ImageElementBlock = <V extends Value = Value>(
             <Image
               targetDrive={element.targetDrive}
               fileId={element.fileId}
-              fileKey={element.fileKey}
+              fileKey={DEFAULT_PAYLOAD_KEY}
               className={` ${''}`}
             />
             <ActionButton
@@ -131,22 +143,26 @@ export const ImageElementBlock = <V extends Value = Value>(
           </div>
         </div>
       </div>
-      <ErrorNotification error={removeError} />
+      <ErrorNotification error={removeError || saveError} />
       <ImageDialog
         isOpen={isActive}
         onCancel={() => setIsActive(false)}
-        onConfirm={async (uploadResult) => {
-          if (uploadResult) {
-            await removeImage({ targetDrive: element.targetDrive, fileId: element.fileId });
-
-            element.fileId = uploadResult.fileId;
-            setIsActive(false);
+        onConfirm={async (newImage) => {
+          if (!newImage) {
+            doRemove();
+          } else {
+            const uploadResult = await saveImage({
+              image: newImage,
+              targetDrive: element.targetDrive,
+              fileId: element.fileId,
+              acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+            });
+            if (uploadResult) element.fileId = uploadResult.fileId;
           }
+          setIsActive(false);
         }}
         title={t('Upload image')}
         confirmText={t('Add')}
-        acl={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
-        targetDrive={element.targetDrive} // TODO Add support for having the drive passed via props
       />
     </>
   );

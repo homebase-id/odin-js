@@ -5,7 +5,6 @@ import {
   BuiltInAttributes,
   CredictCardFields,
   EmailFields,
-  GetTargetDriveFromProfileId,
   LinkFields,
   LocationFields,
   MinimalProfileFields,
@@ -20,10 +19,11 @@ import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { AsYouType } from 'libphonenumber-js';
 
-import { ImageSelector } from '@youfoundation/common-app';
-import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
 import { ThemeAttributeEditor } from './ThemeAttributeEditor';
+import { PhotoAttributeEditor } from './PhotoAttributeEditor';
+import { ExperienceAttributeEditor } from './ExperienceAttributeEditor';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
@@ -38,9 +38,7 @@ const AttributeFields = ({
   onChange,
 }: {
   attribute: AttributeVm;
-  onChange: (e: {
-    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
-  }) => void;
+  onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   switch (attribute.type) {
     case BuiltInAttributes.Name:
@@ -119,33 +117,7 @@ const AttributeFields = ({
       );
       break;
     case BuiltInAttributes.Photo:
-      return (
-        <div className="mb-5">
-          <Label htmlFor={`${attribute.fileId ?? 'new'}-profileImageId`}>
-            {t('Profile Image')}
-          </Label>
-          <ImageSelector
-            id={`${attribute.fileId ?? 'new'}-profileImageId`}
-            name={MinimalProfileFields.ProfileImageId}
-            defaultValue={attribute.data?.[MinimalProfileFields.ProfileImageId] ?? ''}
-            onChange={(e) =>
-              onChange({
-                target: {
-                  name: e.target.name,
-                  value: e.target.value?.fileId,
-                  previewThumbnail: e.target.value?.previewThumbnail,
-                },
-              })
-            }
-            acl={attribute.acl}
-            targetDrive={GetTargetDriveFromProfileId(attribute.profileId)}
-            expectedAspectRatio={1}
-            maxHeight={500}
-            maxWidth={500}
-            thumbInstructions={profileInstructionThumbSizes}
-          />
-        </div>
-      );
+      return <PhotoAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     case BuiltInAttributes.InstagramUsername:
     case BuiltInAttributes.TiktokUsername:
@@ -181,65 +153,7 @@ const AttributeFields = ({
       );
       break;
     case BuiltInAttributes.Experience:
-      return (
-        <>
-          <div className="mb-5">
-            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-title`}>{t('Title')}</Label>
-            <Input
-              id={`${attribute.fileId ?? 'new'}-experience-title`}
-              name={MinimalProfileFields.ExperienceTitleId}
-              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceTitleId] ?? ''}
-              onChange={onChange}
-              placeholder={t('Job, project, life event, etc.')}
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-description`}>
-              {t('Description')}
-            </Label>
-            <RichTextEditor
-              uniqueId={attribute.fileId}
-              name={MinimalProfileFields.ExperienceDecriptionId}
-              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] ?? ''}
-              onChange={onChange}
-              className="rounded border border-gray-300 px-2 pb-3 dark:border-gray-700"
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-link`}>{t('Link')}</Label>
-            <Input
-              id={`${attribute.fileId ?? 'new'}-experience-link`}
-              name={MinimalProfileFields.ExperienceLinkId}
-              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceLinkId] ?? ''}
-              onChange={onChange}
-              placeholder={t('Link to the project, company, etc.')}
-            />
-          </div>
-          <div className="mb-5">
-            <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-image`}>{t('Image')}</Label>
-            <ImageSelector
-              id={`${attribute.fileId ?? 'new'}-experience-image`}
-              name={MinimalProfileFields.ExperienceImageFileId}
-              defaultValue={attribute.data?.[MinimalProfileFields.ExperienceImageFileId] ?? ''}
-              onChange={(e) =>
-                onChange({
-                  target: {
-                    name: e.target.name,
-                    value: e.target.value?.fileId,
-                    previewThumbnail: e.target.value?.previewThumbnail,
-                  },
-                })
-              }
-              acl={attribute.acl}
-              targetDrive={GetTargetDriveFromProfileId(attribute.profileId)}
-              expectedAspectRatio={1}
-              maxHeight={500}
-              maxWidth={500}
-              thumbInstructions={profileInstructionThumbSizes}
-            />
-          </div>
-        </>
-      );
+      return <ExperienceAttributeEditor attribute={attribute} onChange={onChange} />;
       break;
     case BuiltInAttributes.ShortBio:
       return (
