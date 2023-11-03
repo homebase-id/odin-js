@@ -138,6 +138,7 @@ export const getDecryptedThumbnailMeta = (
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
       sizes: header.fileMetadata.thumbnails ?? [],
+      contentType: previewThumbnail.contentType as ImageContentType,
       url: url,
     };
   });

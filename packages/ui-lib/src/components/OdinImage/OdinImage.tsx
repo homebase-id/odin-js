@@ -135,7 +135,7 @@ export const OdinImage = ({
     if (
       !previewImgRef.current ||
       (!tinyThumb?.sizes?.length && !skipTiny) ||
-      thumblessContentTypes.includes(previewThumbnail?.contentType ?? '')
+      thumblessContentTypes.includes(previewThumbnail?.contentType || tinyThumb?.contentType || '')
     ) {
       setLoadSize('full');
       return;

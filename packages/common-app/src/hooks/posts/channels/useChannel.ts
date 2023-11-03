@@ -47,6 +47,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       return {
         ...directFetchOfChannel,
         template: parseChannelTemplate(directFetchOfChannel?.templateId),
+        acl: directFetchOfChannel?.acl,
       } as ChannelDefinitionVm;
     }
     return null;
