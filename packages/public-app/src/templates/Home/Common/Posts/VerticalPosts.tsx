@@ -137,7 +137,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
               <div
                 className="absolute left-0 top-0 grid w-full grid-flow-row"
                 style={{
-                  transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
+                  transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
                 }}
               >
                 {items.map((virtualRow) => {
