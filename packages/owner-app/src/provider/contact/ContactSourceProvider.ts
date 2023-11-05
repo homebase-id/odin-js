@@ -81,8 +81,8 @@ export const queryRemoteAttributes = async (
         ? (await queryConnectionPhotoData(
             dotYouClient,
             odinId,
-            photo.data[MinimalProfileFields.ProfileImageId],
-            DEFAULT_PAYLOAD_KEY
+            photo.fileId as string,
+            photo.data[MinimalProfileFields.ProfileImageId]
           )) || undefined
         : undefined,
     };

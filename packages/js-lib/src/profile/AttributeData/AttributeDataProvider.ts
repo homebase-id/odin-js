@@ -475,25 +475,5 @@ export const removeAttribute = async (
   attributeFileId: string
 ): Promise<void> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-
-  // const attr: AttributeFile | undefined = await getAttributeByFileId(
-  //   dotYouClient,
-  //   profileId,
-  //   attributeFileId
-  // );
-
-  // const mediaFileIds = [
-  //   attr?.data[HomePageThemeFields.Favicon]?.fileId,
-  //   attr?.data[HomePageThemeFields.HeaderImageId],
-  //   attr?.data[MinimalProfileFields.ProfileImageId],
-  //   attr?.data[MinimalProfileFields.ExperienceImageFileId],
-  // ];
-
-  // await Promise.all(
-  //   mediaFileIds.map(async (fileId) => {
-  //     if (fileId) await deleteFile(dotYouClient, targetDrive, fileId);
-  //   })
-  // );
-
   deleteFile(dotYouClient, targetDrive, attributeFileId);
 };
