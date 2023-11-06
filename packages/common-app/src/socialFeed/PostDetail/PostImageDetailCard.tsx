@@ -5,7 +5,7 @@ import {
   Media,
   getChannelDrive,
 } from '@youfoundation/js-lib/public';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Loader,
   Video,
@@ -19,7 +19,7 @@ import {
   ArrowLeft,
   Arrow,
 } from '../../..';
-import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -109,8 +109,8 @@ export const PostImageDetailCard = ({
                 <Image
                   odinId={odinId}
                   className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
-                  fileId={currentMediaFile?.fileId}
-                  fileKey={DEFAULT_PAYLOAD_KEY}
+                  fileId={currentMediaFile?.fileId || postFile.fileId}
+                  fileKey={currentMediaFile?.fileKey}
                   targetDrive={getChannelDrive(post.channelId)}
                   alt="post"
                   fit="contain"
@@ -121,8 +121,8 @@ export const PostImageDetailCard = ({
                 />
               ) : (
                 <Video
-                  fileId={currentMediaFile?.fileId}
-                  fileKey={DEFAULT_PAYLOAD_KEY}
+                  fileId={currentMediaFile?.fileId || postFile.fileId}
+                  fileKey={currentMediaFile?.fileKey}
                   className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={

@@ -94,7 +94,12 @@ export const uploadVideo = async (
   );
   if (!result) throw new Error(`Upload failed`);
 
-  return { fileId: result.file.fileId, previewThumbnail: tinyThumb, type: 'video' };
+  return {
+    fileId: result.file.fileId,
+    fileKey: DEFAULT_PAYLOAD_KEY,
+    previewThumbnail: tinyThumb,
+    type: 'video',
+  };
 };
 
 export const getDecryptedVideoChunk = async (

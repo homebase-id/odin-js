@@ -2,7 +2,6 @@ import { useSiteData, OwnerName, ThemeLinksSettings } from '@youfoundation/commo
 import { HomePageConfig } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
 import { Image } from '@youfoundation/common-app';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const PreviewPage = () => {
   const { owner, home } = useSiteData().data ?? {};

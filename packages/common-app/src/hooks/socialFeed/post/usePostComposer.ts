@@ -14,10 +14,11 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
+  NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
-import { usePost, AttachmentFile } from './usePost';
+import { usePost } from './usePost';
 import { makeGrid, useDotYouClient } from '../../../..';
 
 export const usePostComposer = () => {
@@ -27,16 +28,15 @@ export const usePostComposer = () => {
   const [processingProgress, setProcessingProgress] = useState<number>(0);
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
-  const { mutateAsync: saveFiles, error: saveFilesError } = usePost().saveFiles;
 
   const savePost = async (
     caption: string | undefined,
-    files: AttachmentFile[] | undefined,
+    mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
     channel: ChannelDefinition,
     reactAccess: ReactAccess | undefined
   ) => {
-    if (!files && !caption && !embeddedPost) {
+    if (!mediaFiles && !caption && !embeddedPost) {
       console.log('fast fail');
       return;
     }
@@ -47,26 +47,28 @@ export const usePostComposer = () => {
     );
 
     try {
-      // Process files, if any
-      let uploadResults: (ImageUploadResult | VideoUploadResult)[] | undefined = undefined;
-      if (files?.length && channel?.acl) {
-        setPostState('processing');
+      // // Process files, if any
+      // let uploadResults: VideoUploadResult[] | undefined = undefined;
+      // if (mediaFiles?.length && channel?.acl) {
+      //   setPostState('processing');
 
-        uploadResults = await saveFiles({
-          acl: shouldSecureAttachments
-            ? { requiredSecurityGroup: SecurityGroupType.Anonymous }
-            : channel.acl,
-          channelId: channel.channelId,
-          files,
-          onUpdate: (progress) => setProcessingProgress(progress),
-        });
+      //   uploadResults = await saveVideoFiles({
+      //     acl: shouldSecureAttachments
+      //       ? { requiredSecurityGroup: SecurityGroupType.Anonymous }
+      //       : channel.acl,
+      //     channelId: channel.channelId,
+      //     files: mediaFiles.filter((file) => file.file.type.startsWith('video/')),
+      //     onUpdate: (progress) => setProcessingProgress(progress),
+      //   });
 
-        setPostState('encrypting');
-      }
+      //   setPostState('encrypting');
+      // }
 
-      const mediaFiles: MediaFile[] | undefined = uploadResults?.map((result) => {
-        return { type: result.type, fileId: result.fileId, fileKey: DEFAULT_PAYLOAD_KEY };
-      });
+      // const videoFiles: MediaFile[] | undefined = uploadResults?.map((result) => {
+      //   return { type: result.type, fileId: result.fileId, fileKey: DEFAULT_PAYLOAD_KEY };
+      // });
+
+      // const imageFiles = mediaFiles?.filter((file) => file.file.type.startsWith('image/'));
 
       setPostState('uploading');
 
@@ -77,30 +79,23 @@ export const usePostComposer = () => {
         content: {
           authorOdinId: dotYouClient.getIdentity(),
           type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
-          mediaFiles: mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined,
           caption: caption?.trim() || '',
           id: postId,
           slug: postId,
           channelId: channel.channelId || BlogConfig.PublicChannel.channelId,
-          primaryMediaFile: mediaFiles?.[0] ?? undefined,
           reactAccess: reactAccess,
 
           embeddedPost: embeddedPost,
         },
 
         acl: channel.acl ? { ...channel.acl } : { requiredSecurityGroup: SecurityGroupType.Owner },
-        previewThumbnail:
-          uploadResults && uploadResults.length >= 4
-            ? await makeGrid(
-                uploadResults
-                  .filter((result) => result?.previewThumbnail !== undefined)
-                  .map((result) => result.previewThumbnail) as EmbeddedThumb[]
-              )
-            : uploadResults?.filter((result) => result?.previewThumbnail !== undefined)?.[0]
-                ?.previewThumbnail || undefined,
       };
 
-      await savePostFile({ blogFile: postFile, channelId: channel.channelId });
+      await savePostFile({
+        postFile: postFile,
+        channelId: channel.channelId,
+        mediaFiles: mediaFiles,
+      });
     } catch (ex) {
       setPostState('error');
     }
@@ -113,6 +108,6 @@ export const usePostComposer = () => {
     savePost,
     postState,
     processingProgress,
-    error: postState === 'error' ? savePostError || saveFilesError : undefined,
+    error: postState === 'error' ? savePostError : undefined,
   };
 };

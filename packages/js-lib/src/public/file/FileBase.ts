@@ -66,8 +66,7 @@ const linkFileQueryParam: FileQueryParams = {
 };
 
 export const BASE_RESULT_OPTIONS = {
-  includeJsonContent: true,
-  includePayload: false,
+  includeHeaderContent: true,
   excludePreviewThumbnail: false,
 };
 

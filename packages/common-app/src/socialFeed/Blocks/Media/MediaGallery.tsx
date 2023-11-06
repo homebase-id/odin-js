@@ -1,4 +1,4 @@
-import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
 import { Image, useIntersection, useDarkMode, Triangle } from '@youfoundation/common-app';
 import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
@@ -6,6 +6,7 @@ import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
 interface MediaGalleryProps {
   odinId?: string;
   files: MediaFile[];
+  fileId: string;
   channelId: string;
   className?: string;
   maxVisible?: number;
@@ -20,6 +21,7 @@ const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
 export const MediaGallery = ({
   odinId,
   files,
+  fileId,
   channelId,
   className,
   maxVisible = 4,
@@ -50,11 +52,15 @@ export const MediaGallery = ({
         ) : null}
 
         {isInView || !tinyThumbUrl ? (
-          <div className={`${tinyThumbUrl ? 'absolute inset-0' : ''} grid grid-cols-2 gap-1`}>
+          <div
+            className={`${
+              tinyThumbUrl ? 'absolute inset-0' : ''
+            } grid grid-cols-2 gap-1 bg-background`}
+          >
             {slicedFiles.map((file, index) => (
               <div
                 className={slicedFiles.length === 3 && index === 2 ? 'col-span-2' : undefined}
-                key={file.fileId}
+                key={file.fileId + file.fileKey}
               >
                 <div
                   className={`relative ${
@@ -65,8 +71,8 @@ export const MediaGallery = ({
                   <Image
                     odinId={odinId}
                     className={`h-full w-auto`}
-                    fileId={file.fileId}
-                    fileKey={DEFAULT_PAYLOAD_KEY}
+                    fileId={file.fileId || fileId}
+                    fileKey={file.fileKey}
                     targetDrive={targetDrive}
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}
@@ -113,11 +119,11 @@ const MediaGalleryLoading = ({
           backgroundSize: '52% 52%',
           backgroundImage: `linear-gradient(to right, ${
             isDarkMode ? 'black' : 'white'
-          } 4px, transparent 1px)${
+          } 0.25rem, transparent 1px)${
             !singleRow
               ? `, linear-gradient(to bottom, ${
                   isDarkMode ? 'black' : 'white'
-                } 4px, transparent 1px)`
+                } 0.25rem, transparent 1px)`
               : ''
           }`,
           backgroundPositionX: '-5%',

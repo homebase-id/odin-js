@@ -106,7 +106,12 @@ export const uploadImage = async (
   if (!result) throw new Error(`Upload failed`);
 
   onUpdate?.(0.5);
-  return { fileId: result.file.fileId, previewThumbnail: tinyThumb, type: 'image' };
+  return {
+    fileId: result.file.fileId,
+    fileKey: DEFAULT_PAYLOAD_KEY,
+    previewThumbnail: tinyThumb,
+    type: 'image',
+  };
 };
 
 export const removeImage = async (

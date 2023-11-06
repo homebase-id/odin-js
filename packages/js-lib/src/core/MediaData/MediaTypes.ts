@@ -21,6 +21,7 @@ export interface MediaUploadMeta {
 
 export interface MediaUploadResult {
   fileId: string;
+  fileKey: string;
   previewThumbnail?: EmbeddedThumb;
 }
 

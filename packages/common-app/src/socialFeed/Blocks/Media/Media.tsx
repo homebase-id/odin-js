@@ -12,6 +12,7 @@ export const PostMedia = ({
 }: {
   odinId?: string;
   postFile: {
+    fileId: string;
     content: PostContent;
     previewThumbnail?: EmbeddedThumb;
     isEncrypted?: boolean;
@@ -23,7 +24,6 @@ export const PostMedia = ({
 }) => {
   const { content: post, previewThumbnail } = postFile;
   const mediaFileIds = (post as Media).mediaFiles;
-
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (
@@ -43,6 +43,7 @@ export const PostMedia = ({
     return (
       <MediaGallery
         odinId={odinId}
+        fileId={postFile.fileId}
         channelId={post.channelId}
         files={mediaFileIds}
         className={`${className || ''}`}
@@ -56,7 +57,9 @@ export const PostMedia = ({
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
         fit="contain"
-        post={post}
+        primaryMediaFile={post.primaryMediaFile}
+        channelId={post.channelId}
+        fileId={postFile.fileId}
         odinId={odinId}
         className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}

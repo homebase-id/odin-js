@@ -1,5 +1,4 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
   SystemFileType,

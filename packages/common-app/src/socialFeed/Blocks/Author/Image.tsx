@@ -4,7 +4,6 @@ import { Image, t, useIntersection } from '@youfoundation/common-app';
 import { useSiteData } from '@youfoundation/common-app';
 
 import { Person } from '@youfoundation/common-app';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 interface ImageProps {
   className?: string;

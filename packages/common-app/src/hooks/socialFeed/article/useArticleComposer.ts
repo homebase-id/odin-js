@@ -125,7 +125,7 @@ export const useArticleComposer = ({
 
     // Save and process result
     const uploadResult = await savePost({
-      blogFile: toPostFile,
+      postFile: toPostFile,
       channelId: targetChannel.channelId,
     });
 

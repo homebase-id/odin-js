@@ -19,8 +19,7 @@ export type QueryParamsSection = {
   name: string;
   queryParams: FileQueryParams;
   resultOptions: {
-    includeJsonContent: boolean;
-    includePayload: boolean;
+    includeHeaderContent: boolean;
     excludePreviewThumbnail: boolean;
   };
 };

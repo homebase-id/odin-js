@@ -1,10 +1,12 @@
-import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
+import { getChannelDrive, MediaFile, PostContent } from '@youfoundation/js-lib/public';
 import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
 
 export const PrimaryMedia = ({
   odinId,
-  post,
+  primaryMediaFile,
+  fileId,
+  channelId,
   className,
   fit,
   previewThumbnail,
@@ -13,7 +15,9 @@ export const PrimaryMedia = ({
   clickToLoad,
 }: {
   odinId?: string;
-  post: PostContent;
+  primaryMediaFile: MediaFile;
+  fileId: string;
+  channelId: string;
   className?: string;
   fit?: 'cover' | 'contain';
   previewThumbnail?: EmbeddedThumb;
@@ -27,12 +31,12 @@ export const PrimaryMedia = ({
 
   return (
     <div onClick={doNavigate}>
-      {post.primaryMediaFile?.type === 'image' ? (
+      {primaryMediaFile?.type === 'image' ? (
         <Image
           odinId={odinId}
-          targetDrive={getChannelDrive(post.channelId)}
-          fileId={post.primaryMediaFile?.fileId}
-          fileKey={DEFAULT_PAYLOAD_KEY}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={primaryMediaFile?.fileId || fileId}
+          fileKey={primaryMediaFile?.fileKey}
           className={className}
           previewThumbnail={previewThumbnail}
           fit={fit}
@@ -41,9 +45,9 @@ export const PrimaryMedia = ({
       ) : clickToLoad ? (
         <VideoClickToLoad
           odinId={odinId}
-          targetDrive={getChannelDrive(post.channelId)}
-          fileId={post.primaryMediaFile?.fileId}
-          fileKey={DEFAULT_PAYLOAD_KEY}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={primaryMediaFile?.fileId || fileId}
+          fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
           previewThumbnail={previewThumbnail}
@@ -53,9 +57,9 @@ export const PrimaryMedia = ({
       ) : (
         <Video
           odinId={odinId}
-          targetDrive={getChannelDrive(post.channelId)}
-          fileId={post.primaryMediaFile?.fileId}
-          fileKey={DEFAULT_PAYLOAD_KEY}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={primaryMediaFile?.fileId || fileId}
+          fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
         />

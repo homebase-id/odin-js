@@ -1,5 +1,5 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { TargetDrive, EmbeddedThumb } from '../../core/core';
+import { TargetDrive, EmbeddedThumb, ThumbnailFile } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
 export interface ChannelDefinition {
@@ -59,9 +59,15 @@ export const postTypeToDataType = (type: PostType): number => {
 };
 
 export interface MediaFile {
-  fileId: string;
+  // When undefined.. It's the fileId of the postFile itself
+  fileId: string | undefined;
   fileKey: string;
   type: 'video' | 'image';
+}
+
+export interface NewMediaFile {
+  file: File | Blob;
+  thumbnail?: ThumbnailFile;
 }
 
 export interface PostFile<T extends PostContent> {

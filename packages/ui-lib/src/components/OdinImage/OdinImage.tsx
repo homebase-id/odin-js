@@ -131,7 +131,6 @@ export const OdinImage = ({
 
     // If no element or nothing to create a size that has the aspect ratio, don't bother and load full...
     // If the image is an svg.. Then there are no thumbs and we should just load the full image;
-    // TODO: Avoid this by having the Back-end return the payload if there's no matching thumbnail
     if (
       !previewImgRef.current ||
       (!tinyThumb?.sizes?.length && !skipTiny) ||

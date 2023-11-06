@@ -8,61 +8,58 @@ import {
   getPost,
   Media,
   getPostByFileId,
+  NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
   AccessControlList,
-  ImageContentType,
-  ImageUploadResult,
   MultiRequestCursoredResult,
-  ThumbnailFile,
   UploadResult,
   VideoContentType,
   VideoUploadResult,
   deleteFile,
-  uploadImage,
   uploadVideo,
 } from '@youfoundation/js-lib/core';
 import { segmentVideoFile } from '@youfoundation/js-lib/helpers';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
-
-export interface AttachmentFile {
-  file: File | Blob;
-  thumbnail?: ThumbnailFile;
-}
 
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
   const savePost = async ({
-    blogFile,
+    postFile,
     channelId,
+    mediaFiles,
   }: {
-    blogFile: PostFile<PostContent>;
+    postFile: PostFile<PostContent>;
     channelId: string;
+    mediaFiles?: NewMediaFile[];
   }) => {
     return new Promise<UploadResult>((resolve) => {
       const onVersionConflict = async () => {
-        const serverPost = await getPost(dotYouClient, channelId, blogFile.content.id);
+        const serverPost = await getPost(dotYouClient, channelId, postFile.content.id);
         if (!serverPost) return;
 
-        const newPost = { ...serverPost, content: { ...serverPost.content, ...blogFile.content } };
-        savePostFile(dotYouClient, newPost, channelId, onVersionConflict).then((result) => {
-          if (result) resolve(result);
-        });
+        const newPost = { ...serverPost, content: { ...serverPost.content, ...postFile.content } };
+        savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
+          (result) => {
+            if (result) resolve(result);
+          }
+        );
       };
 
       savePostFile(
         dotYouClient,
         {
-          ...blogFile,
+          ...postFile,
           content: {
-            ...blogFile.content,
-            captionAsRichText: getRichTextFromString(blogFile.content.caption.trim()),
+            ...postFile.content,
+            captionAsRichText: getRichTextFromString(postFile.content.caption.trim()),
           },
         },
         channelId,
+        mediaFiles,
         onVersionConflict
       ).then((result) => {
         if (result) resolve(result);
@@ -76,60 +73,60 @@ export const usePost = () => {
     channelId,
     onUpdate,
   }: {
-    files: AttachmentFile[];
+    files: NewMediaFile[];
     acl: AccessControlList;
     channelId: string;
     onUpdate?: (progress: number) => void;
-  }): Promise<(ImageUploadResult | VideoUploadResult)[]> => {
+  }): Promise<VideoUploadResult[]> => {
     const targetDrive = getChannelDrive(channelId);
     let progress = 0;
 
     const uploadPromises = files.map(async (file) => {
-      if (file.file.type === 'video/mp4') {
-        // if video is tiny enough (less than 10MB), don't segment just upload
-        if (file.file.size < 10000000 || 'bytes' in file.file)
-          return await uploadVideo(
-            dotYouClient,
-            targetDrive,
-            acl,
-            file.file,
-            { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
-            {
-              type: file.file.type as VideoContentType,
-              thumb: 'thumbnail' in file ? file.thumbnail : undefined,
-            }
-          );
-
-        onUpdate?.(++progress / files.length);
-
-        const { data: segmentedVideoData, metadata } = await segmentVideoFile(file.file);
-
-        return await uploadVideo(dotYouClient, targetDrive, acl, segmentedVideoData, metadata, {
-          type: file.file.type as VideoContentType,
-          thumb: 'thumbnail' in file ? file.thumbnail : undefined,
-        });
-      } else {
-        return await uploadImage(
+      // if (file.file.type === 'video/mp4') {
+      // if video is tiny enough (less than 10MB), don't segment just upload
+      if (file.file.size < 10000000 || 'bytes' in file.file)
+        return await uploadVideo(
           dotYouClient,
           targetDrive,
           acl,
           file.file,
-          undefined,
-          {},
-          [
-            { quality: 85, width: 600, height: 600 },
-            { quality: 99, width: 1600, height: 1600, type: 'jpeg' },
-          ],
-          (update) => {
-            progress += update;
-            onUpdate?.(progress / files.length);
+          { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
+          {
+            type: file.file.type as VideoContentType,
+            thumb: 'thumbnail' in file ? file.thumbnail : undefined,
           }
         );
-      }
+
+      onUpdate?.(++progress / files.length);
+
+      const { data: segmentedVideoData, metadata } = await segmentVideoFile(file.file);
+
+      return await uploadVideo(dotYouClient, targetDrive, acl, segmentedVideoData, metadata, {
+        type: file.file.type as VideoContentType,
+        thumb: 'thumbnail' in file ? file.thumbnail : undefined,
+      });
+      // } else {
+      //   return await uploadImage(
+      //     dotYouClient,
+      //     targetDrive,
+      //     acl,
+      //     file.file,
+      //     undefined,
+      //     {},
+      //     [
+      //       { quality: 85, width: 600, height: 600 },
+      //       { quality: 99, width: 1600, height: 1600, type: 'jpeg' },
+      //     ],
+      //     (update) => {
+      //       progress += update;
+      //       onUpdate?.(progress / files.length);
+      //     }
+      //   );
+      // }
     });
 
     const imageUploadResults = await Promise.all(uploadPromises);
-    return imageUploadResults.filter(Boolean) as (ImageUploadResult | VideoUploadResult)[];
+    return imageUploadResults.filter(Boolean) as VideoUploadResult[];
   };
 
   const removeFiles = async ({
@@ -184,17 +181,17 @@ export const usePost = () => {
     save: useMutation({
       mutationFn: savePost,
       onSuccess: (_data, variables) => {
-        if (variables.blogFile.content.slug) {
-          queryClient.invalidateQueries({ queryKey: ['blog', variables.blogFile.content.slug] });
+        if (variables.postFile.content.slug) {
+          queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.slug] });
         } else {
           queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
-        queryClient.invalidateQueries({ queryKey: ['blog', variables.blogFile.fileId] });
-        queryClient.invalidateQueries({ queryKey: ['blog', variables.blogFile.content.id] });
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.id] });
         queryClient.invalidateQueries({
-          queryKey: ['blog', variables.blogFile.content.id?.replaceAll('-', '')],
+          queryKey: ['blog', variables.postFile.content.id?.replaceAll('-', '')],
         });
 
         queryClient.removeQueries({ queryKey: ['blogs'] });
@@ -207,7 +204,7 @@ export const usePost = () => {
         if (previousFeed) {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
-            post.content.id === variables.blogFile.content.id
+            post.content.id === variables.postFile.content.id
               ? { ...post, versionTag: _data.newVersionTag }
               : post
           );
@@ -233,7 +230,7 @@ export const usePost = () => {
                   ...(index === 0
                     ? [
                         {
-                          ...newPost.blogFile,
+                          ...newPost.postFile,
                           odinId: window.location.hostname,
                         },
                       ]
@@ -259,8 +256,8 @@ export const usePost = () => {
         queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
       },
     }),
-    saveFiles: useMutation({ mutationFn: saveFiles }),
-    removeFiles: useMutation({ mutationFn: removeFiles }),
+    // saveVideoFiles: useMutation({ mutationFn: saveFiles }),
+    // removeFiles: useMutation({ mutationFn: removeFiles }),
     remove: useMutation({
       mutationFn: removeData,
       onSuccess: (_data, variables) => {

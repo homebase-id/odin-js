@@ -67,7 +67,6 @@ export interface QueryParams {
 
   //specifies if the DriveSearchResult.content field should be parsed as JSON
   includeMetadataHeader?: boolean;
-  includePayload?: boolean;
   pageNumber: number;
   pageSize: number;
 }
@@ -90,7 +89,7 @@ export interface FileQueryParams {
 
 export interface GetModifiedResultOptions {
   maxRecords: number;
-  includeJsonContent?: boolean;
+  includeHeaderContent?: boolean;
   excludePreviewThumbnail?: boolean;
   maxDate?: number | undefined;
   cursor?: number | undefined;
@@ -105,7 +104,7 @@ export interface GetBatchQueryResultOptions {
 }
 
 export interface QueryModifiedResponse {
-  includeJsonContent: boolean;
+  includeHeaderContent: boolean;
   cursor: number;
   searchResults: DriveSearchResult[];
 }
