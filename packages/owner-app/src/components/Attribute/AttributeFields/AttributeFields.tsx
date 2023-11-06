@@ -19,7 +19,6 @@ import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { AsYouType } from 'libphonenumber-js';
 
-import { ThumbnailInstruction } from '@youfoundation/js-lib/core';
 import { generateDisplayLocation, generateDisplayName } from '@youfoundation/js-lib/helpers';
 import { ThemeAttributeEditor } from './ThemeAttributeEditor';
 import { PhotoAttributeEditor } from './PhotoAttributeEditor';
@@ -27,11 +26,6 @@ import { ExperienceAttributeEditor } from './ExperienceAttributeEditor';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
-
-const profileInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 250, height: 250 },
-  { quality: 75, width: 600, height: 600 },
-];
 
 const AttributeFields = ({
   attribute,

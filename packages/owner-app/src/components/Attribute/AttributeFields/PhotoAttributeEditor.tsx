@@ -17,13 +17,17 @@ export const PhotoAttributeEditor = ({
     targetDrive
   );
 
+  const dataVal = attribute.data?.[MinimalProfileFields.ProfileImageKey];
+  const defaultValue =
+    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+
   return (
     <div className="mb-5">
       <Label htmlFor={`${attribute.fileId ?? 'new'}-profileImageKey`}>{t('Profile Image')}</Label>
       <ImageSelector
         id={`${attribute.fileId ?? 'new'}-profileImageKey`}
         name={MinimalProfileFields.ProfileImageKey}
-        defaultValue={imageBlob || undefined}
+        defaultValue={defaultValue}
         onChange={(e) =>
           onChange({
             target: {

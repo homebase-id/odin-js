@@ -7,18 +7,12 @@ import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import FaviconSelector from '../../Form/FaviconSelector';
 import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
-import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { lazy } from 'react';
 import { usePayloadBlob } from '../../../hooks/media/usePayloadBlob';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
-
-const headerInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 600, height: 600 },
-  { quality: 75, width: 1600, height: 1600 },
-  { quality: 75, width: 2600, height: 2600 },
-];
 
 const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 

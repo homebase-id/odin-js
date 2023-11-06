@@ -18,6 +18,7 @@ import {
   PayloadFile,
   ThumbnailFile,
   createThumbnails,
+  ThumbnailInstruction,
 } from '../../core/core';
 import {
   getBlobFromBytes,
@@ -227,13 +228,25 @@ const nameAttributeProcessing = (nameAttr: AttributeFile): ProcessedAttribute =>
   };
 };
 
+const profileInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 250, height: 250 },
+  { quality: 75, width: 600, height: 600 },
+];
+
+const headerInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 600, height: 600 },
+  { quality: 75, width: 1600, height: 1600 },
+  { quality: 75, width: 2600, height: 2600 },
+];
+
 // TODO: Fix that we don't need to fetch the existing Blob, if there's no update to it
 const getNewOrExistingThumbnails = async (
   dotYouClient: DotYouClient,
   attrFileId: string | undefined,
   dataKey: Blob | string | undefined,
   targetDrive: TargetDrive,
-  payloadKey: string
+  payloadKey: string,
+  thumbnailInstructions: ThumbnailInstruction[] = []
 ) => {
   if (!dataKey) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
 
@@ -251,7 +264,11 @@ const getNewOrExistingThumbnails = async (
   if (!payloadBytes) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
 
   const imageBlob = getBlobFromBytes(payloadBytes);
-  const { additionalThumbnails, tinyThumb } = await createThumbnails(imageBlob, payloadKey);
+  const { additionalThumbnails, tinyThumb } = await createThumbnails(
+    imageBlob,
+    payloadKey,
+    thumbnailInstructions
+  );
   return { additionalThumbnails, tinyThumb, blob: imageBlob };
 };
 
@@ -269,7 +286,8 @@ const photoAttributeProcessing = async (
     attr.fileId,
     imageData,
     targetDrive,
-    PHOTO_PAYLOAD_KEY
+    PHOTO_PAYLOAD_KEY,
+    profileInstructionThumbSizes
   );
   attr.data[imageFieldKey] = PHOTO_PAYLOAD_KEY;
 
@@ -325,7 +343,8 @@ const themeAttributeProcessing = async (
       attr.fileId,
       faviconImageData,
       targetDrive,
-      FAVICON_PAYLOAD_KEY
+      FAVICON_PAYLOAD_KEY,
+      []
     );
 
   if (faviconImageData) attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
@@ -342,7 +361,8 @@ const themeAttributeProcessing = async (
     attr.fileId,
     headerImageData,
     targetDrive,
-    HEADER_PAYLOAD_KEY
+    HEADER_PAYLOAD_KEY,
+    headerInstructionThumbSizes
   );
 
   attr.data[imageFieldKey] = HEADER_PAYLOAD_KEY;
