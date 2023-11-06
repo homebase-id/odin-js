@@ -1,7 +1,6 @@
-import { Label, t, ImageSelector } from '@youfoundation/common-app';
+import { Label, t, ImageSelector, usePayloadBlob } from '@youfoundation/common-app';
 import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { usePayloadBlob } from '../../../hooks/media/usePayloadBlob';
 
 export const PhotoAttributeEditor = ({
   attribute,

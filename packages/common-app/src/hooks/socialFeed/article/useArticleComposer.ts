@@ -1,6 +1,12 @@
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
-import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
+import {
+  PostFile,
+  Article,
+  ChannelDefinition,
+  BlogConfig,
+  NewMediaFile,
+} from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
@@ -31,6 +37,8 @@ export const useArticleComposer = ({
     channelId: channelKey,
     blogSlug: postKey,
   });
+
+  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined>(undefined);
 
   const {
     save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
@@ -127,6 +135,7 @@ export const useArticleComposer = ({
     const uploadResult = await savePost({
       postFile: toPostFile,
       channelId: targetChannel.channelId,
+      mediaFiles: primaryMediaFile ? [primaryMediaFile] : undefined,
     });
 
     // TODO: Move to component as it has page context?
@@ -187,10 +196,12 @@ export const useArticleComposer = ({
     postFile,
     isValidPost,
     isPublished,
+    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
+    setPrimaryMediaFile,
 
     // Status
     saveStatus: savePostStatus,

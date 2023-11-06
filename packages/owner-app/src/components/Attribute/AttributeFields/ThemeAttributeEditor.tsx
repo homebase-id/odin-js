@@ -1,4 +1,4 @@
-import { Label, t, Input, Select } from '@youfoundation/common-app';
+import { Label, t, Input, Select, usePayloadBlob } from '@youfoundation/common-app';
 import { ImageSelector } from '@youfoundation/common-app';
 import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
@@ -9,7 +9,6 @@ import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { lazy } from 'react';
-import { usePayloadBlob } from '../../../hooks/media/usePayloadBlob';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );

@@ -101,9 +101,10 @@ export const PostDetailCard = ({
         )}
       </div>
 
-      {post?.primaryMediaFile ? (
+      {postFile?.fileId && post?.primaryMediaFile ? (
         mediaFiles && mediaFiles.length > 1 ? (
           <MediaGallery
+            fileId={postFile.fileId}
             channelId={post.channelId}
             files={mediaFiles}
             className="my-4"

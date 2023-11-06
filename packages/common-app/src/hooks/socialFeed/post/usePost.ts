@@ -31,10 +31,12 @@ export const usePost = () => {
     postFile,
     channelId,
     mediaFiles,
+    onUpdate,
   }: {
     postFile: PostFile<PostContent>;
     channelId: string;
     mediaFiles?: NewMediaFile[];
+    onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<UploadResult>((resolve) => {
       const onVersionConflict = async () => {
@@ -60,7 +62,8 @@ export const usePost = () => {
         },
         channelId,
         mediaFiles,
-        onVersionConflict
+        onVersionConflict,
+        onUpdate
       ).then((result) => {
         if (result) resolve(result);
       });
@@ -161,14 +164,14 @@ export const usePost = () => {
     const post = await getPostByFileId(dotYouClient, channelId, fileId);
     const channelDrive = getChannelDrive(channelId);
     if (post) {
-      if (post.content.primaryMediaFile)
+      if (post.content.primaryMediaFile && post.content.primaryMediaFile.fileId)
         await deleteFile(dotYouClient, channelDrive, post.content.primaryMediaFile.fileId);
 
       const mediaPost = post as any as Media;
       if (mediaPost.mediaFiles) {
         await Promise.all(
           mediaPost.mediaFiles.map(async (file) => {
-            await deleteFile(dotYouClient, channelDrive, file.fileId);
+            if (file.fileId) await deleteFile(dotYouClient, channelDrive, file.fileId);
           })
         );
       }

@@ -617,7 +617,7 @@ const DemoDataBlog = ({
             previewThumbnail: previewThumbnail || undefined,
           };
 
-          await saveBlog({ blogFile: blogFile, channelId: channel.channelId });
+          await saveBlog({ postFile: blogFile, channelId: channel.channelId });
           console.log(blogContent.id);
         }
       })

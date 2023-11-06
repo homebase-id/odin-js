@@ -1,4 +1,10 @@
-import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib/public';
+import {
+  PostContent,
+  PostFile,
+  getChannelDrive,
+  Media,
+  MediaFile,
+} from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -28,10 +34,10 @@ export const EditPostDialog = ({
   const target = usePortal('modal-container');
   const {
     save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
-    removeFiles: { mutateAsync: removeFiles },
+    // removeFiles: { mutateAsync: removeFiles },
   } = usePost();
   const [postFile, setPostFile] = useState<PostFile<PostContent>>({ ...incomingPostFile });
-  const [toRemoveFileIds, setToRemoveFileIds] = useState<string[]>([]);
+  const [toRemoveFiles, setToRemoveFiles] = useState<MediaFile[]>([]);
 
   useEffect(() => {
     if (incomingPostFile) {
@@ -46,27 +52,29 @@ export const EditPostDialog = ({
   const doUpdate = async () => {
     const newPostFile = { ...postFile };
 
-    if (toRemoveFileIds?.length) {
-      // Update mediaFiles to remove the refs of those that are set to be removed
-      (newPostFile.content as Media).mediaFiles = (newPostFile.content as Media).mediaFiles?.filter(
-        (file) => !toRemoveFileIds.some((toRemove) => toRemove === file.fileId)
-      );
+    if (toRemoveFiles?.length) {
+      // TODO: Remove files
+      console.log('toRemoveFiles', toRemoveFiles);
+      // // Update mediaFiles to remove the refs of those that are set to be removed
+      // (newPostFile.content as Media).mediaFiles = (newPostFile.content as Media).mediaFiles?.filter(
+      //   (file) => !toRemoveFiles.some((toRemove) => toRemove === file.fileId)
+      // );
 
-      // Set first fileId as primary if primary is set to be removed
-      if (
-        toRemoveFileIds.some(
-          (toRemove) => toRemove === newPostFile.content.primaryMediaFile?.fileId
-        )
-      ) {
-        newPostFile.content.primaryMediaFile = (newPostFile.content as Media).mediaFiles?.[0];
-      }
+      // // Set first fileId as primary if primary is set to be removed
+      // if (
+      //   toRemoveFiles.some(
+      //     (toRemove) => toRemove === newPostFile.content.primaryMediaFile?.fileId
+      //   )
+      // ) {
+      //   newPostFile.content.primaryMediaFile = (newPostFile.content as Media).mediaFiles?.[0];
+      // }
 
-      await removeFiles({ files: toRemoveFileIds, channelId: incomingPostFile.content.channelId });
+      // await removeFiles({ files: toRemoveFiles, channelId: incomingPostFile.content.channelId });
     }
 
     await savePost({
       channelId: incomingPostFile.content.channelId,
-      blogFile: { ...newPostFile },
+      postFile: { ...newPostFile },
     });
   };
 
@@ -109,8 +117,8 @@ export const EditPostDialog = ({
                 : []
             }
             targetDrive={getChannelDrive(postFile.content.channelId)}
-            toRemoveFileIds={toRemoveFileIds}
-            setToRemoveFileIds={setToRemoveFileIds}
+            toRemoveFiles={toRemoveFiles}
+            setToRemoveFiles={setToRemoveFiles}
           />
           <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
             <ActionButton

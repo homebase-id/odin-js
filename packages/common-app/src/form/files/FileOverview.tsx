@@ -1,30 +1,23 @@
 import { useMemo } from 'react';
-import {
-  ActionButton,
-  AttachmentFile,
-  Triangle,
-  Image,
-  Trash,
-  Video,
-} from '@youfoundation/common-app';
+import { ActionButton, Triangle, Image, Trash, Video } from '@youfoundation/common-app';
 
-import { DEFAULT_PAYLOAD_KEY, ImageContentType, TargetDrive } from '@youfoundation/js-lib/core';
-import { MediaFile } from '@youfoundation/js-lib/public';
+import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
+import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const FileOverview = ({
   files,
   setFiles,
   className,
 }: {
-  files?: AttachmentFile[];
-  setFiles: (files: AttachmentFile[]) => void;
+  files?: NewMediaFile[];
+  setFiles: (files: NewMediaFile[]) => void;
   className?: string;
 }) => {
   if (!files || !files.length) {
     return null;
   }
 
-  const grabThumb = async (video: HTMLVideoElement, file: AttachmentFile, fileIndex: number) => {
+  const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;
     if ('thumbnail' in file) return;
 
@@ -116,22 +109,28 @@ export const FileOverview = ({
 
 export const ExistingFileOverview = ({
   mediaFiles,
-  toRemoveFileIds,
+  toRemoveFiles,
   targetDrive,
-  setToRemoveFileIds,
+  setToRemoveFiles,
   className,
 }: {
   mediaFiles?: MediaFile[];
-  toRemoveFileIds: string[];
+  toRemoveFiles: MediaFile[];
   targetDrive: TargetDrive;
-  setToRemoveFileIds: (mediaFileIds: string[]) => void;
+  setToRemoveFiles: (mediaFileIds: MediaFile[]) => void;
   className?: string;
 }) => {
   if (!mediaFiles) return null;
 
   const renderedFiles = useMemo(() => {
     return mediaFiles
-      .filter((file) => !toRemoveFileIds.some((toRemoveFileId) => toRemoveFileId === file.fileId))
+      .filter(
+        (file) =>
+          !toRemoveFiles.some(
+            (toRemoveFile) =>
+              toRemoveFile.fileId === file.fileId && toRemoveFile.fileKey === file.fileKey
+          )
+      )
       .map((image) => {
         return (
           <div key={image.fileId} className="relative w-1/2 p-[2px] md:w-1/3">
@@ -159,14 +158,14 @@ export const ExistingFileOverview = ({
               size="square"
               onClick={(e) => {
                 e.preventDefault();
-                setToRemoveFileIds([...toRemoveFileIds, image.fileId]);
+                setToRemoveFiles([...toRemoveFiles, image]);
                 return false;
               }}
             />
           </div>
         );
       });
-  }, [mediaFiles, toRemoveFileIds]);
+  }, [mediaFiles, toRemoveFiles]);
 
   return (
     <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>

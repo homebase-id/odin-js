@@ -2,6 +2,7 @@ import {
   BlogConfig,
   ChannelDefinition,
   EmbeddedPost,
+  NewMediaFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect } from 'react';
@@ -9,7 +10,6 @@ import { useRef, useState } from 'react';
 import {
   ActionButton,
   Arrow,
-  AttachmentFile,
   ChannelsDialog,
   EmbeddedPostContent,
   EmojiSelector,
@@ -46,7 +46,7 @@ const PostComposer = ({
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
-  const [files, setFiles] = useState<AttachmentFile[]>();
+  const [files, setFiles] = useState<NewMediaFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
@@ -88,7 +88,7 @@ const PostComposer = ({
         if (!base64) return;
 
         const bytes = base64ToUint8Array(base64);
-        const file: AttachmentFile = {
+        const file: NewMediaFile = {
           file: new Blob([bytes], { type: e.data.type }),
         };
 

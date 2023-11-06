@@ -41,35 +41,7 @@ export const usePostComposer = () => {
       return;
     }
 
-    const shouldSecureAttachments = !(
-      channel.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-      channel.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
-    );
-
     try {
-      // // Process files, if any
-      // let uploadResults: VideoUploadResult[] | undefined = undefined;
-      // if (mediaFiles?.length && channel?.acl) {
-      //   setPostState('processing');
-
-      //   uploadResults = await saveVideoFiles({
-      //     acl: shouldSecureAttachments
-      //       ? { requiredSecurityGroup: SecurityGroupType.Anonymous }
-      //       : channel.acl,
-      //     channelId: channel.channelId,
-      //     files: mediaFiles.filter((file) => file.file.type.startsWith('video/')),
-      //     onUpdate: (progress) => setProcessingProgress(progress),
-      //   });
-
-      //   setPostState('encrypting');
-      // }
-
-      // const videoFiles: MediaFile[] | undefined = uploadResults?.map((result) => {
-      //   return { type: result.type, fileId: result.fileId, fileKey: DEFAULT_PAYLOAD_KEY };
-      // });
-
-      // const imageFiles = mediaFiles?.filter((file) => file.file.type.startsWith('image/'));
-
       setPostState('uploading');
 
       // Upload post
@@ -95,6 +67,7 @@ export const usePostComposer = () => {
         postFile: postFile,
         channelId: channel.channelId,
         mediaFiles: mediaFiles,
+        onUpdate: (progress) => setProcessingProgress(progress),
       });
     } catch (ex) {
       setPostState('error');

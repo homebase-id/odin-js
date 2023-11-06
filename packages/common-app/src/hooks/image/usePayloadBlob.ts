@@ -1,13 +1,13 @@
 import { TargetDrive, getPayloadBytes } from '@youfoundation/js-lib/core';
-import { useAuth } from '../auth/useAuth';
 import { useQuery } from '@tanstack/react-query';
+import { useDotYouClient } from '../../..';
 
 export const usePayloadBlob = (
   fileId?: string,
   imageFileKey?: string,
   targetDrive?: TargetDrive
 ) => {
-  const dotYouClient = useAuth().getDotYouClient();
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchBlob = async (fileId: string, imageFileKey: string, targetDrive?: TargetDrive) => {
     if (!fileId || !imageFileKey || !targetDrive) return null;

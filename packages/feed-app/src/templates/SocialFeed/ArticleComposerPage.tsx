@@ -48,10 +48,12 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
+    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
+    setPrimaryMediaFile,
 
     // Status
     saveStatus,
@@ -207,6 +209,7 @@ export const ArticleComposerPage = () => {
             <InnerFieldEditors
               key={postFile.content.id}
               postFile={postFile}
+              primaryMediaFile={primaryMediaFile}
               channel={channel}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
@@ -215,13 +218,7 @@ export const ArticleComposerPage = () => {
                 } else if (e.target.name === 'caption') {
                   dirtyPostFile.content.caption = (e.target.value as string).trim();
                 } else if (e.target.name === 'primaryImageFileId') {
-                  const uploadResult = e.target.value as ImageUploadResult;
-                  dirtyPostFile.content.primaryMediaFile = {
-                    fileId: uploadResult.fileId,
-                    fileKey: DEFAULT_PAYLOAD_KEY,
-                    type: 'image',
-                  };
-                  dirtyPostFile.previewThumbnail = uploadResult.previewThumbnail;
+                  setPrimaryMediaFile({ file: e.target.value as Blob });
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.content.body = e.target.value as RichText;
                 }

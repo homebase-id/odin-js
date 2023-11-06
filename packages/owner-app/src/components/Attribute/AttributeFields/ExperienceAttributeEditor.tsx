@@ -1,7 +1,6 @@
-import { Label, t, ImageSelector, Input } from '@youfoundation/common-app';
+import { Label, t, ImageSelector, Input, usePayloadBlob } from '@youfoundation/common-app';
 import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
-import { usePayloadBlob } from '../../../hooks/media/usePayloadBlob';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
 
 export const ExperienceAttributeEditor = ({

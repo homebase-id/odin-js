@@ -4,28 +4,43 @@ import {
   Article,
   getChannelDrive,
   RichText,
+  NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { lazy, useState } from 'react';
-import { t, ErrorBoundary, Label, ActionButton, Arrow, Textarea } from '@youfoundation/common-app';
+import {
+  t,
+  ErrorBoundary,
+  Label,
+  ActionButton,
+  Arrow,
+  Textarea,
+  usePayloadBlob,
+} from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
-import { ImageUploadResult, SecurityGroupType } from '@youfoundation/js-lib/core';
-
 export const InnerFieldEditors = ({
   postFile,
   channel,
+  primaryMediaFile,
   onChange,
   disabled,
 }: {
   postFile: PostFile<Article>;
   channel: ChannelDefinition;
-  onChange: (e: { target: { name: string; value: string | ImageUploadResult | RichText } }) => void;
+  primaryMediaFile: NewMediaFile | undefined;
+  onChange: (e: { target: { name: string; value: string | Blob | RichText } }) => void;
   disabled?: boolean;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
+  const { data: imageBlob } = usePayloadBlob(
+    postFile.fileId,
+    postFile.content.primaryMediaFile?.fileId,
+    getChannelDrive(channel.channelId)
+  );
+
   return (
     <>
       <div className="grid grid-flow-row gap-1">
@@ -83,16 +98,9 @@ export const InnerFieldEditors = ({
                 <ImageSelector
                   id="post_image"
                   name="primaryImageFileId"
-                  defaultValue={postFile.content.primaryMediaFile?.fileId}
+                  defaultValue={primaryMediaFile?.file || imageBlob || undefined}
                   onChange={(e) =>
-                    e.target.value &&
-                    onChange(e as { target: { name: string; value: ImageUploadResult } })
-                  }
-                  targetDrive={getChannelDrive(channel.channelId)}
-                  acl={
-                    channel.acl
-                      ? { ...channel.acl }
-                      : { requiredSecurityGroup: SecurityGroupType.Anonymous }
+                    e.target.value && onChange(e as { target: { name: string; value: Blob } })
                   }
                   sizeClass={`${
                     !postFile.content.primaryMediaFile ? 'aspect-[16/9] md:aspect-[5/1]' : ''
