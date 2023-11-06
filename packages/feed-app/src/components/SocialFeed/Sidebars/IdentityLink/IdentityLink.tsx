@@ -22,7 +22,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
         <Image
           targetDrive={HomePageConfig.HomepageTargetDrive}
           fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.imageFileId}
-          fileKey={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+          fileKey={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
           previewThumbnail={data?.home?.headerPreviewThumbnail}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"

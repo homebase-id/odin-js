@@ -42,12 +42,12 @@ export const useContact = ({
     }
 
     // Direct fetch with odinId:
-    const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
     // TODO: Not sure if this is the best way yet... But it works for now
-    if (contactBookContact && (contactBookContact.source === 'contact' || !canSave))
+    const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
+    if (contactBookContact && contactBookContact.source === 'contact') {
       return contactBookContact;
-    else if (contactBookContact)
+    } else if (contactBookContact)
       console.log(`[${odinId}] Ignoring contact book record`, contactBookContact);
     let returnContact;
 

@@ -85,7 +85,7 @@ export const useBiography = () => {
               | string
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-            imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileId] as string,
+            imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
             id: attribute.id,
             priority: attribute.priority,
           };
@@ -122,7 +122,7 @@ export const useBiography = () => {
             | string
             | Record<string, unknown>[],
           link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-          imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileId] as string,
+          imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
           id: attribute.id,
           priority: attribute.priority,
         };

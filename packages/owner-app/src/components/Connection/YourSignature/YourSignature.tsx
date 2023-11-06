@@ -58,15 +58,15 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
   const filteredPhotoAttributes = filterAttributes(photoAttributes || []);
 
   const { data: imageUrl } = useImage(
-    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],
-    DEFAULT_PAYLOAD_KEY,
+    filteredPhotoAttributes?.[0]?.fileId,
+    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageKey],
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 
   const info: infoObject = {
     name: filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName],
     initials: getInitialsOfNameAttribute(filteredNameAttributes?.[0]),
-    imageFileId: filteredPhotoAttributes?.[0]?.data[MinimalProfileFields.ProfileImageId],
+    imageFileId: filteredPhotoAttributes?.[0]?.data[MinimalProfileFields.ProfileImageKey],
   };
 
   useEffect(() => {

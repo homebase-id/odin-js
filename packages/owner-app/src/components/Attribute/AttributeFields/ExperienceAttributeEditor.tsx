@@ -14,7 +14,7 @@ export const ExperienceAttributeEditor = ({
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
   const { data: imageBlob } = usePayloadBlob(
     attribute.fileId,
-    attribute.data?.[MinimalProfileFields.ProfileImageId],
+    attribute.data?.[MinimalProfileFields.ProfileImageKey],
     targetDrive
   );
 
@@ -56,7 +56,7 @@ export const ExperienceAttributeEditor = ({
         <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-image`}>{t('Image')}</Label>
         <ImageSelector
           id={`${attribute.fileId ?? 'new'}-experience-image`}
-          name={MinimalProfileFields.ExperienceImageFileId}
+          name={MinimalProfileFields.ExperienceImageFileKey}
           defaultValue={imageBlob || undefined}
           onChange={(e) =>
             onChange({

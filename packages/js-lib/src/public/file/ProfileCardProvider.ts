@@ -29,9 +29,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     ?.map((attr) => attr?.data?.[MinimalProfileFields.DisplayName] as string)
     .filter((fileId) => fileId !== undefined);
 
-  if (displayNames?.length) {
-    await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
-  }
+  if (displayNames?.length) await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
 };
 
 export const GetProfileCard = async (
@@ -88,7 +86,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
       profilePhotoFileIds[0].fileId as string,
-      profilePhotoFileIds[0].data[MinimalProfileFields.ProfileImageId],
+      profilePhotoFileIds[0].data[MinimalProfileFields.ProfileImageKey],
       { pixelWidth: 250, pixelHeight: 250 }
     );
     if (imageData) {
@@ -98,5 +96,33 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
         imageData.contentType
       );
     }
+  }
+};
+
+export const GetProfileImage = async (dotYouClient: DotYouClient): Promise<Blob | undefined> => {
+  try {
+    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+
+    const fetchProfileCard = async () => {
+      return await httpClient
+        .get(`/pub/image`, {
+          baseURL: dotYouClient.getRoot(),
+          withCredentials: false,
+          responseType: 'arraybuffer',
+        })
+        .then(
+          (response) =>
+            new Blob([new Uint8Array(Buffer.from(response.data, 'binary'))], {
+              type: (response.headers['Content-Type'] as string) || 'image/webp',
+            })
+        );
+    };
+
+    const promise = fetchProfileCard();
+
+    return await promise;
+  } catch (ex) {
+    console.warn(`Fetching 'profileimage' failed`);
+    return;
   }
 };

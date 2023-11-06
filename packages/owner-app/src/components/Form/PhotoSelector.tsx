@@ -61,8 +61,8 @@ const PhotoSelector = ({
               });
             }}
             key={attr.id}
-            value={attr.data[MinimalProfileFields.ProfileImageId]}
-            isActive={defaultValue === attr.data[MinimalProfileFields.ProfileImageId]}
+            value={attr.data[MinimalProfileFields.ProfileImageKey]}
+            isActive={defaultValue === attr.data[MinimalProfileFields.ProfileImageKey]}
           />
         );
       })}

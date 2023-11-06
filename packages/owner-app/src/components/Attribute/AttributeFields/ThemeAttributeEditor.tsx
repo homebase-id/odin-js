@@ -76,7 +76,7 @@ const ThemeSpecificFields = ({
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
   const { data: imageBlob } = usePayloadBlob(
     attribute.fileId,
-    attribute.data?.[HomePageThemeFields.HeaderImageId],
+    attribute.data?.[HomePageThemeFields.HeaderImageKey],
     targetDrive
   );
 
@@ -98,7 +98,7 @@ const ThemeSpecificFields = ({
             <Label htmlFor="headerImage">{t('Background photo')}</Label>
             <ImageSelector
               id="headerImage"
-              name={HomePageThemeFields.HeaderImageId}
+              name={HomePageThemeFields.HeaderImageKey}
               defaultValue={imageBlob || undefined}
               onChange={(e) =>
                 onChange({
@@ -109,7 +109,7 @@ const ThemeSpecificFields = ({
                 })
               }
               sizeClass={`${
-                !attribute.data?.[HomePageThemeFields.HeaderImageId]
+                !attribute.data?.[HomePageThemeFields.HeaderImageKey]
                   ? 'aspect-[16/9] md:aspect-[5/1]'
                   : ''
               }  w-full object-cover`}
@@ -175,7 +175,7 @@ const ThemeSpecificFields = ({
           <Label htmlFor="headerImage">{t('Background photo')}</Label>
           <ImageSelector
             id="headerImage"
-            name={HomePageThemeFields.HeaderImageId}
+            name={HomePageThemeFields.HeaderImageKey}
             defaultValue={imageBlob || undefined}
             onChange={(e) =>
               onChange({
@@ -186,7 +186,7 @@ const ThemeSpecificFields = ({
               })
             }
             sizeClass={`${
-              !attribute.data?.[HomePageThemeFields.HeaderImageId]
+              !attribute.data?.[HomePageThemeFields.HeaderImageKey]
                 ? 'aspect-[16/9] md:aspect-[5/1]'
                 : ''
             }  w-full object-cover`}

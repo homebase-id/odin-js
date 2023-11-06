@@ -15,7 +15,7 @@ const PreviewPage = () => {
       <div className="relative h-24">
         <Image
           fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
-          fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+          fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
           targetDrive={HomePageConfig.HomepageTargetDrive}
           className="absolute inset-0"
           fit="cover"

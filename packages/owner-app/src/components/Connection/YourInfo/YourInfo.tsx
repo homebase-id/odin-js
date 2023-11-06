@@ -8,7 +8,7 @@ import {
   PhoneFields,
   LocationFields,
 } from '@youfoundation/js-lib/profile';
-import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useEffect } from 'react';
 import { FallbackImg, t } from '@youfoundation/common-app';
@@ -20,7 +20,8 @@ import InfoBox from '../../ui/InfoBox/InfoBox';
 interface infoObject {
   name: string;
   initials: string;
-  imageFileId: string;
+  imageFileId: string | undefined;
+  imageFileKey: string | undefined;
   phone: string;
   city: string;
   country: string;
@@ -80,8 +81,8 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
   );
 
   const { data: imageUrl } = useImage(
-    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],
-    DEFAULT_PAYLOAD_KEY,
+    filteredPhotoAttributes?.[0]?.fileId,
+    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageKey],
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 
@@ -118,7 +119,8 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
   const info: infoObject = {
     name: filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName],
     initials: getInitialsOfNameAttribute(filteredNameAttributes?.[0]),
-    imageFileId: filteredPhotoAttributes?.[0]?.data[MinimalProfileFields.ProfileImageId],
+    imageFileId: filteredPhotoAttributes?.[0]?.fileId,
+    imageFileKey: filteredPhotoAttributes?.[0]?.data[MinimalProfileFields.ProfileImageKey],
     phone: filteredPhoneAttributes?.[0]?.data[PhoneFields.PhoneNumber],
     city: filteredLocationAttributes?.[0]?.data[LocationFields.City],
     country: filteredLocationAttributes?.[0]?.data[LocationFields.Country],

@@ -38,12 +38,12 @@ export interface ThemeWithTabsSettings extends DefaultTemplateSettings {
   themeId: '222' | '333';
   tabs?: 'true' | 'false';
   tabsOrder?: string[];
-  headerImageId?: string;
+  headerImageKey?: string;
 }
 
 export interface ThemeLinksSettings extends DefaultTemplateSettings {
   themeId: '444';
-  headerImageId?: string;
+  headerImageKey?: string;
 }
 
 export type TemplateSettings =
@@ -101,7 +101,7 @@ export const useSiteData = () => {
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
         profileImageFileId: photoAttr?.fileId,
-        profileImageFileKey: photoAttr?.data.profileImageId,
+        profileImageFileKey: photoAttr?.data.profileImageKey,
         profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
         status: statusAttr?.data.status,
       };
@@ -271,7 +271,7 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
         profileImageFileId: photoAttrHeader?.fileId,
-        profileImageFileKey: photoAttr?.data.profileImageId,
+        profileImageFileKey: photoAttr?.data.profileImageKey,
         profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
         status: statusAttr?.data.status,
       };

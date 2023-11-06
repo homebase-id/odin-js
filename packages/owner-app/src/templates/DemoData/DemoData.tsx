@@ -187,7 +187,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         acl: acl,
       };
 
-      anonymousPhotoAttribute.data[MinimalProfileFields.ProfileImageId] = new Blob(
+      anonymousPhotoAttribute.data[MinimalProfileFields.ProfileImageKey] = new Blob(
         [new Uint8Array(base64ToArrayBuffer(media.base64))],
         { type: 'image/webp' }
       );
@@ -481,7 +481,7 @@ const DemoDataHomeAndTheme = ({
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     };
 
-    newRootAttr.data[HomePageThemeFields.HeaderImageId] = new Blob(
+    newRootAttr.data[HomePageThemeFields.HeaderImageKey] = new Blob(
       [new Uint8Array(base64ToArrayBuffer(realmData.home.headerImage.base64))],
       { type: 'image/webp' }
     );

@@ -9,18 +9,13 @@ import {
   EmailFields,
 } from '@youfoundation/js-lib/profile';
 
-import {
-  ApiType,
-  DEFAULT_PAYLOAD_KEY,
-  DotYouClient,
-  ImageContentType,
-} from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
 import {
   getProfileAttributesOverTransit,
   getDecryptedImageDataOverTransit,
 } from '@youfoundation/js-lib/transit';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { GetFile } from '@youfoundation/js-lib/public';
+import { GetFile, GetProfileImage } from '@youfoundation/js-lib/public';
 import { RawContact, getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
 
 //Handles fetching and parsing of Contact Source data
@@ -82,7 +77,7 @@ export const queryRemoteAttributes = async (
             dotYouClient,
             odinId,
             photo.fileId as string,
-            photo.data[MinimalProfileFields.ProfileImageId]
+            photo.data[MinimalProfileFields.ProfileImageKey]
           )) || undefined
         : undefined,
     };
@@ -94,14 +89,14 @@ export const queryRemoteAttributes = async (
 export const queryConnectionPhotoData = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  profileImageId: string,
+  profileImageFileId: string,
   profileImageKey: string
 ) => {
   const imageData = await getDecryptedImageDataOverTransit(
     dotYouClient,
     odinId,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-    profileImageId,
+    profileImageFileId,
     profileImageKey
   );
 
@@ -120,16 +115,7 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
   const rawData = await GetFile(client, 'public.json');
 
   const nameAttr = rawData?.get('name')?.[0];
-  const photoRefAttr = rawData?.get('photo')?.[0];
-  const photoFile = rawData?.get(photoRefAttr?.payload?.data?.profileImageId)?.[0] ?? undefined;
-
-  const previewThumbnail = photoFile?.additionalThumbnails?.reduce(
-    (prevVal, curValue) => {
-      if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) return curValue;
-      return prevVal;
-    },
-    { ...photoFile.header.fileMetadata.appData.previewThumbnail, pixelWidth: 20, pixelHeight: 20 }
-  );
+  const imageData = await GetProfileImage(client);
 
   return {
     name:
@@ -140,12 +126,12 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
             surname: nameAttr?.payload.data[MinimalProfileFields.SurnameId],
           }
         : undefined,
-    image: previewThumbnail?.content
+    image: imageData
       ? {
-          pixelWidth: previewThumbnail.pixelWidth,
-          pixelHeight: previewThumbnail.pixelHeight,
-          contentType: (previewThumbnail.contentType as ImageContentType) || 'image/jpeg',
-          content: previewThumbnail.content.toString(),
+          content: uint8ArrayToBase64(new Uint8Array(await imageData.arrayBuffer())),
+          contentType: imageData.type as ImageContentType,
+          pixelWidth: 250,
+          pixelHeight: 250,
         }
       : undefined,
     source: 'public',

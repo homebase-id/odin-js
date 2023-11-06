@@ -260,7 +260,7 @@ const photoAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
 ): Promise<ProcessedAttribute> => {
-  const imageFieldKey = MinimalProfileFields.ProfileImageId;
+  const imageFieldKey = MinimalProfileFields.ProfileImageKey;
   const imageData = attr.data[imageFieldKey];
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
 
@@ -286,7 +286,7 @@ const experienceAttributeProcessing = async (
   dotYouClient: DotYouClient,
   attr: AttributeFile
 ): Promise<ProcessedAttribute> => {
-  const imageFieldKey = MinimalProfileFields.ExperienceImageFileId;
+  const imageFieldKey = MinimalProfileFields.ExperienceImageFileKey;
   const imageData = attr.data[imageFieldKey];
   const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
 
@@ -330,7 +330,7 @@ const themeAttributeProcessing = async (
 
   if (faviconImageData) attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
 
-  const imageFieldKey = HomePageThemeFields.HeaderImageId;
+  const imageFieldKey = HomePageThemeFields.HeaderImageKey;
   const headerImageData = attr.data[imageFieldKey];
 
   const {

@@ -145,7 +145,7 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     data: {
       themeId: HomePageTheme.VerticalPosts + '',
       isProtected: true,
-      headerImageId: new Blob([base64ToUint8Array(fallbackHeaderImage())], {
+      headerImageKey: new Blob([base64ToUint8Array(fallbackHeaderImage())], {
         type: 'image/svg+xml',
       }),
     },
@@ -210,7 +210,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       acl: ANONYMOUS_ACL,
     };
 
-    newPhotoAttr.data[MinimalProfileFields.ProfileImageId] = profileData.imageData;
+    newPhotoAttr.data[MinimalProfileFields.ProfileImageKey] = profileData.imageData;
 
     await saveAttribute(dotYouClient, newPhotoAttr);
   }

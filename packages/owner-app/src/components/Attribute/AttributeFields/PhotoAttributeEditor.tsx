@@ -13,16 +13,16 @@ export const PhotoAttributeEditor = ({
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
   const { data: imageBlob } = usePayloadBlob(
     attribute.fileId,
-    attribute.data?.[MinimalProfileFields.ProfileImageId],
+    attribute.data?.[MinimalProfileFields.ProfileImageKey],
     targetDrive
   );
 
   return (
     <div className="mb-5">
-      <Label htmlFor={`${attribute.fileId ?? 'new'}-profileImageId`}>{t('Profile Image')}</Label>
+      <Label htmlFor={`${attribute.fileId ?? 'new'}-profileImageKey`}>{t('Profile Image')}</Label>
       <ImageSelector
-        id={`${attribute.fileId ?? 'new'}-profileImageId`}
-        name={MinimalProfileFields.ProfileImageId}
+        id={`${attribute.fileId ?? 'new'}-profileImageKey`}
+        name={MinimalProfileFields.ProfileImageKey}
         defaultValue={imageBlob || undefined}
         onChange={(e) =>
           onChange({

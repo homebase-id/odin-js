@@ -18,7 +18,7 @@ import { useState } from 'react';
   /* <div className="relative">
 <div className="mx-auto flex min-h-[15rem] max-w-[1920px] flex-col justify-items-start">
   <Image
-    fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+    fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
     targetDrive={HomePageConfig.HomepageTargetDrive}
     className="mt-auto h-auto w-full"
   />
@@ -39,7 +39,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
         <div className="relative h-[27vh] min-h-[330px]">
           <Image
             fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
-            fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+            fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"

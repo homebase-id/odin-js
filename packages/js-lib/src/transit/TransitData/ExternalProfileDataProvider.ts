@@ -41,6 +41,7 @@ export const getProfileAttributesOverTransit = async (
             profileId: profileId,
             acl: dsr.serverMetadata?.accessControlList,
             aclPriority: dsr.priority,
+            fileId: dsr.fileId,
           };
         })
       )

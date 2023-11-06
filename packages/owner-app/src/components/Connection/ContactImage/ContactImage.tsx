@@ -3,7 +3,6 @@ import { useContact } from '../../../hooks/contacts/useContact';
 import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const getInitials = (
   fullName: string | undefined,
