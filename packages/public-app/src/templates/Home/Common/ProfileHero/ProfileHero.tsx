@@ -12,7 +12,6 @@ import {
   ThemeLinksSettings,
 } from '@youfoundation/common-app';
 import { useState } from 'react';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 // Component set to maximize the visibility of the hero image
 {

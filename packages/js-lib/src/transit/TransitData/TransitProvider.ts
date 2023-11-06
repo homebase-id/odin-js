@@ -11,6 +11,7 @@ import {
   encryptMetaData,
   buildDescriptor,
   buildFormData,
+  DEFAULT_PAYLOAD_KEY,
 } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
@@ -41,7 +42,6 @@ import {
 import { TransitInstructionSet, TransitUploadResult } from './TransitTypes';
 import { hasDebugFlag } from '../../helpers/BrowserUtil';
 import { parseBytesToObject } from '../../core/DriveData/File/DriveFileHelper';
-import { DEFAULT_PAYLOAD_KEY } from '../../../core';
 
 interface GetFileRequest {
   odinId: string;

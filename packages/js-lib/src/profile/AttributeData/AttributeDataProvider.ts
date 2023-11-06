@@ -328,7 +328,7 @@ const themeAttributeProcessing = async (
       FAVICON_PAYLOAD_KEY
     );
 
-  attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
+  if (faviconImageData) attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
 
   const imageFieldKey = HomePageThemeFields.HeaderImageId;
   const headerImageData = attr.data[imageFieldKey];

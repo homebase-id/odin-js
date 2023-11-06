@@ -136,16 +136,6 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
-  const headerImageFileId = (
-    await uploadImage(
-      dotYouClient,
-      HomePageConfig.HomepageTargetDrive,
-      ANONYMOUS_ACL,
-      new Blob([base64ToUint8Array(fallbackHeaderImage())], { type: 'image/svg+xml' }),
-      undefined
-    )
-  )?.fileId;
-
   const defaultThemeAttribute: AttributeFile = {
     id: getNewId(),
     profileId: HomePageConfig.DefaultDriveId,
@@ -155,7 +145,9 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     data: {
       themeId: HomePageTheme.VerticalPosts + '',
       isProtected: true,
-      headerImageId: headerImageFileId,
+      headerImageId: new Blob([base64ToUint8Array(fallbackHeaderImage())], {
+        type: 'image/svg+xml',
+      }),
     },
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
@@ -208,15 +200,6 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
   );
 
   if (!existingPhotoAttr && profileData.imageData) {
-    const mediaFileId = (
-      await uploadImage(
-        dotYouClient,
-        GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-        ANONYMOUS_ACL,
-        profileData.imageData
-      )
-    )?.fileId;
-
     const newPhotoAttr: AttributeFile = {
       id: defaultPhotoAttrId,
       profileId: BuiltInProfiles.StandardProfileId,
@@ -227,7 +210,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       acl: ANONYMOUS_ACL,
     };
 
-    newPhotoAttr.data[MinimalProfileFields.ProfileImageId] = mediaFileId?.toString();
+    newPhotoAttr.data[MinimalProfileFields.ProfileImageId] = profileData.imageData;
 
     await saveAttribute(dotYouClient, newPhotoAttr);
   }

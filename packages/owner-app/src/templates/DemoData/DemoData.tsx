@@ -1,12 +1,10 @@
 import { useAuth } from '../../hooks/auth/useAuth';
 import {
   SecurityGroupType,
-  TargetDrive,
   DrivePermissionType,
   AccessControlList,
   DotYouClient,
   queryBatch,
-  uploadImage,
   DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
@@ -24,7 +22,6 @@ import {
   AttributeFile,
   BuiltInAttributes,
   BuiltInProfiles,
-  GetTargetDriveFromProfileId,
   MinimalProfileFields,
   ProfileConfig,
   SocialFields,
@@ -103,51 +100,6 @@ const DemoData = () => {
 
 export default DemoData;
 
-const uploadMedia = async (
-  client: DotYouClient,
-  imageData: { id: string; base64: string },
-  targetDrive: TargetDrive,
-  tag?: string,
-  acl = {
-    requiredSecurityGroup: SecurityGroupType.Anonymous,
-  }
-) => {
-  const existingResults = await queryBatch(client, {
-    targetDrive: targetDrive,
-    clientUniqueIdAtLeastOne: [imageData.id],
-  });
-
-  if (existingResults?.searchResults?.length > 0) {
-    return existingResults.searchResults[0].fileId;
-  }
-
-  const imageArrayBuffer = base64ToArrayBuffer(imageData.base64);
-
-  // Image uploads
-  const newFileId = (
-    await uploadImage(
-      client,
-      targetDrive,
-      acl,
-      new Blob([new Uint8Array(imageArrayBuffer)], { type: 'image/webp' }),
-      undefined,
-      {
-        tag: tag || imageData.id,
-        uniqueId: imageData.id,
-      },
-      [
-        // Lots of thumbs as each picture in the DemoData is multi purpose
-        { quality: 85, width: 250, height: 250 },
-        { quality: 85, width: 600, height: 600 },
-        { quality: 75, width: 1600, height: 1600 },
-        { quality: 75, width: 2600, height: 2600 },
-      ]
-    )
-  )?.fileId;
-
-  return newFileId;
-};
-
 const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmData: RealmData }) => {
   const profileId = BuiltInProfiles.StandardProfileId.toString();
 
@@ -210,14 +162,6 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       acl: AccessControlList,
       priority = 2000
     ) => {
-      const mediaFileId = await uploadMedia(
-        client,
-        media,
-        GetTargetDriveFromProfileId(profileId),
-        undefined,
-        acl
-      );
-
       // Look for existing attribute with this id:
       const foundAttribute = await getAttribute(
         client,
@@ -243,7 +187,10 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         acl: acl,
       };
 
-      anonymousPhotoAttribute.data[MinimalProfileFields.ProfileImageId] = mediaFileId?.toString();
+      anonymousPhotoAttribute.data[MinimalProfileFields.ProfileImageId] = new Blob(
+        [new Uint8Array(base64ToArrayBuffer(media.base64))],
+        { type: 'image/webp' }
+      );
 
       savePhoto(anonymousPhotoAttribute);
       return true;
@@ -521,13 +468,6 @@ const DemoDataHomeAndTheme = ({
   const addTheme = async () => {
     if (hasThemeData) return;
 
-    // Create media
-    const mediaFileId = await uploadMedia(
-      client,
-      realmData.home.headerImage,
-      GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId.toString())
-    );
-
     // Create attribute
     const newRootAttr: AttributeFile = themeData?.[0] || {
       fileId: undefined,
@@ -541,7 +481,10 @@ const DemoDataHomeAndTheme = ({
       acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     };
 
-    newRootAttr.data[HomePageThemeFields.HeaderImageId] = mediaFileId?.toString();
+    newRootAttr.data[HomePageThemeFields.HeaderImageId] = new Blob(
+      [new Uint8Array(base64ToArrayBuffer(realmData.home.headerImage.base64))],
+      { type: 'image/webp' }
+    );
     newRootAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
     newRootAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
     // TODO: Save tag and leadText into status and shortBio attributes
@@ -620,22 +563,6 @@ const DemoDataBlog = ({
     );
   };
 
-  const createBlogMedia = async () => {
-    const channelsWhereToCreate = await getChannelDefinitions(client);
-
-    await Promise.all(
-      channelsWhereToCreate.map(async (channel) => {
-        const channelDrive = GetTargetDriveFromChannelId(channel.channelId);
-
-        for (let i = 0; i < demoImageArray.length; i++) {
-          await uploadMedia(client, demoImageArray[i], channelDrive, undefined, {
-            requiredSecurityGroup: SecurityGroupType.Anonymous,
-          });
-        }
-      })
-    );
-  };
-
   const createBlogDetailData = async () => {
     const imageIds = demoImageArray.map((data) => data.id);
     const channelsWhereToCreate = await getChannelDefinitions(client);
@@ -698,7 +625,7 @@ const DemoDataBlog = ({
   };
 
   const createBlogData = async () => {
-    await createBlogMedia();
+    // await createBlogMedia();
     await createBlogDetailData();
   };
 

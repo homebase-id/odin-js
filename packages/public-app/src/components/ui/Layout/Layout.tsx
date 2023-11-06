@@ -1,4 +1,4 @@
-import { FC, ReactNode, Suspense, lazy, useEffect } from 'react';
+import { FC, ReactNode, Suspense, lazy } from 'react';
 import { useTheme } from '../../../hooks/theme/useTheme';
 import { useAuth } from '../../../hooks/auth/useAuth';
 import { ScrollRestoration } from 'react-router-dom';
@@ -6,7 +6,6 @@ import { Helmet } from 'react-helmet-async';
 import { useImage } from '@youfoundation/common-app';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { HomePageConfig } from '@youfoundation/js-lib/public';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const faviconSvg = (emoji: string) =>
   `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${emoji}</text></svg>`;

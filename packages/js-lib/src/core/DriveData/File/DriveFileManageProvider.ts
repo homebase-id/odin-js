@@ -45,44 +45,6 @@ export const deleteFile = async (
     });
 };
 
-export const deleteThumbnail = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  width: number,
-  height: number,
-  systemFileType?: SystemFileType
-) => {
-  const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
-  });
-
-  const request = {
-    file: {
-      targetDrive: targetDrive,
-      fileId: fileId,
-    },
-    width,
-    height,
-  };
-
-  client
-    .post('/attachments/deletethumbnail', request)
-    .then((response) => {
-      if (response.status === 200) {
-        return true;
-      }
-
-      return false;
-    })
-    .catch((error) => {
-      console.error('[DotYouCore-js:deleteFile]', error);
-      throw error;
-    });
-};
-
 export const deletePayload = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -106,7 +68,7 @@ export const deletePayload = async (
   };
 
   client
-    .post('/attachments/deletepayload', request)
+    .post('/drive/files/deletepayload', request)
     .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[DotYouCore-js:deleteFile]', error);

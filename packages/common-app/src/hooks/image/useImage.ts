@@ -118,7 +118,7 @@ export const useImage = (
   return {
     fetch: useQuery({
       queryKey: [
-        'image',
+        'common-image',
         odinId || localHost,
         imageDrive?.alias,
         imageFileId,
@@ -138,7 +138,7 @@ export const useImage = (
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      enabled: !!imageFileId && imageFileId !== '',
+      enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
     }),
     save: useMutation({
       mutationFn: saveImageFile,

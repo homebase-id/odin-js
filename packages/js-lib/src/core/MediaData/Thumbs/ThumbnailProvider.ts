@@ -26,7 +26,7 @@ const getEmbeddedThumbOfThumbnailFile = async (
   return {
     pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
     pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-    contentType: thumbnailFile.payload.type,
+    contentType: thumbnailFile.payload.type as ImageContentType,
     content: uint8ArrayToBase64(new Uint8Array(await thumbnailFile.payload.arrayBuffer())),
   };
 };

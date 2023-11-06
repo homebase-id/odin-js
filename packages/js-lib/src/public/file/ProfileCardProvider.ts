@@ -1,10 +1,10 @@
-import { DEFAULT_PAYLOAD_KEY } from '../../../core';
 import { DotYouClient } from '../../core/DotYouClient';
 import { SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
-import { getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
+import { getAttributeVersions, BuiltInAttributes, AttributeFile } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 
 export interface ProfileCard {
@@ -81,15 +81,14 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
       (attr) =>
         attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
     )
-    ?.map((attr) => attr?.data?.[MinimalProfileFields.ProfileImageId] as string)
-    .filter((fileId) => fileId !== undefined);
+    ?.filter((dsr) => dsr && dsr.fileId !== undefined) as AttributeFile[];
 
   if (profilePhotoFileIds?.length) {
     const imageData = await getDecryptedImageData(
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-      profilePhotoFileIds[0],
-      DEFAULT_PAYLOAD_KEY,
+      profilePhotoFileIds[0].fileId as string,
+      profilePhotoFileIds[0].data[MinimalProfileFields.ProfileImageId],
       { pixelWidth: 250, pixelHeight: 250 }
     );
     if (imageData) {

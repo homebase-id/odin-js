@@ -190,7 +190,7 @@ export const pureAppend = async (
     overrideEncryption: true,
     headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
   });
-  const url = '/drive/files/attachments/upload';
+  const url = '/drive/files/uploadpayload';
 
   const config = {
     headers: {
