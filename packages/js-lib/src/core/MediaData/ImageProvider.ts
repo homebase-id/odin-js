@@ -120,7 +120,8 @@ export const removeImage = async (
 export const getDecryptedThumbnailMeta = (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  fileKey: string
 ): Promise<ThumbnailMeta | undefined> => {
   return getFileHeader(dotYouClient, targetDrive, fileId).then((header) => {
     if (!header || !header.fileMetadata.appData.previewThumbnail) return;
@@ -131,7 +132,8 @@ export const getDecryptedThumbnailMeta = (
 
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes: header.fileMetadata.thumbnails ?? [],
+      sizes:
+        header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
       contentType: previewThumbnail.contentType as ImageContentType,
       url: url,
     };

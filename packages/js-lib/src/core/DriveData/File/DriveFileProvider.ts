@@ -181,7 +181,7 @@ export const getPayloadBytes = async (
             )
           : await decryptBytesResponse(dotYouClient, response, keyHeader),
 
-        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
     })
     .catch((error) => {

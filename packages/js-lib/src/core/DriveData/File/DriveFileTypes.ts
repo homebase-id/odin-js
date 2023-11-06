@@ -14,7 +14,6 @@ export interface FileMetadata<T = string> {
   versionTag: string;
 
   payloads: PayloadDesriptor[];
-  thumbnails: ThumbSize[];
 }
 
 export interface ServerMetaData {
@@ -63,8 +62,6 @@ export interface AppFileMetaData<T = string> {
   content: T;
   previewThumbnail?: EmbeddedThumb;
   archivalStatus?: ArchivalStatus;
-  // contentIsComplete: boolean;
-  // additionalThumbnails?: ThumbSize[];
 }
 
 export interface ExternalFileIdentifier {
@@ -110,4 +107,5 @@ export interface PayloadDesriptor {
   contentType: ContentType;
   bytesWritten: number;
   lastModified: number;
+  thumbnails: ThumbSize[];
 }

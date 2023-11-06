@@ -75,7 +75,7 @@ export const OdinImage = ({
     data: tinyThumb,
     error: tinyError,
     isFetched: isTinyFetched,
-  } = useTinyThumb(dotYouClient, odinId, shouldLoadTiny ? fileId : undefined, targetDrive);
+  } = useTinyThumb(dotYouClient, odinId, shouldLoadTiny ? fileId : undefined, fileKey, targetDrive);
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
   const naturalSize: ImageSize | undefined = tinyThumb

@@ -7,12 +7,25 @@ export const useTinyThumb = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string,
+  imageFileKey?: string,
   imageDrive?: TargetDrive
 ) => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
-  const fetchImageData = async (odinId: string, imageFileId?: string, imageDrive?: TargetDrive) => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
+  const fetchImageData = async (
+    odinId: string,
+    imageFileId?: string,
+    imageFileKey?: string,
+    imageDrive?: TargetDrive
+  ) => {
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      imageFileKey === undefined ||
+      imageFileKey === '' ||
+      !imageDrive
+    )
+      return;
 
     if (odinId !== localHost)
       return (
@@ -20,21 +33,24 @@ export const useTinyThumb = (
           dotYouClient,
           odinId,
           imageDrive,
-          imageFileId
+          imageFileId,
+          imageFileKey
         )) || null
       );
 
-    return (await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId)) || null;
+    return (
+      (await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId, imageFileKey)) || null
+    );
   };
 
   return useQuery({
-    queryKey: ['tinyThumb', odinId || localHost, imageDrive?.alias, imageFileId],
-    queryFn: () => fetchImageData(odinId || localHost, imageFileId, imageDrive),
+    queryKey: ['tinyThumb', odinId || localHost, imageDrive?.alias, imageFileId, imageFileKey],
+    queryFn: () => fetchImageData(odinId || localHost, imageFileId, imageFileKey, imageDrive),
 
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 10, // 10min
     gcTime: Infinity,
-    enabled: !!imageFileId && imageFileId !== '',
+    enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
   });
 };
