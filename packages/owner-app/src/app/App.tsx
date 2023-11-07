@@ -14,7 +14,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
-const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
@@ -127,8 +126,6 @@ function App() {
             </RootRoute>
           }
         >
-          {/* TODO: Remove */}
-          <Route path="login/youauth" element={<YouAuthLogin />} />
           <Route path="youauth/consent" element={<YouAuthConsent />} />
 
           <Route path="setup" element={<Setup />} />

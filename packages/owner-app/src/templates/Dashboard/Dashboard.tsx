@@ -98,6 +98,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                     userDate: post.userDate,
                     permalink: '',
                     previewThumbnail: post.previewThumbnail,
+                    fileId: post.fileId as string,
                   }}
                 />
               </div>

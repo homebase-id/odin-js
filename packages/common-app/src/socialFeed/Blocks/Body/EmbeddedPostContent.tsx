@@ -84,10 +84,10 @@ export const EmbeddedPostContent = ({
           </div>
         </div>
 
-        {!shouldHideMedia && content.primaryMediaFile?.fileId ? (
+        {!shouldHideMedia ? (
           <PostMedia
             postFile={{
-              fileId: content.primaryMediaFile.fileId,
+              fileId: content.primaryMediaFile?.fileId || content.fileId,
               content,
               previewThumbnail: content.previewThumbnail,
               isEncrypted: isChannelPublic,

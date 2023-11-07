@@ -190,6 +190,7 @@ export const RepostButton = ({
 }) => {
   const [isRepostDialogOpen, setIsReposeDialogOpen] = useState(false);
 
+  if (!postFile.fileId) return null;
   return (
     <>
       <button
@@ -206,6 +207,7 @@ export const RepostButton = ({
         <RepostDialog
           embeddedPost={{
             ...postFile.content,
+            fileId: postFile.fileId,
             permalink,
             userDate: postFile.userDate,
             previewThumbnail: postFile.previewThumbnail,
