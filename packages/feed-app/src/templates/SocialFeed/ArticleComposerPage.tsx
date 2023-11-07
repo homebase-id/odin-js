@@ -17,7 +17,6 @@ import {
 import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { DEFAULT_PAYLOAD_KEY, ImageUploadResult } from '@youfoundation/js-lib/core';
 import {
   RichText,
   Article,
@@ -119,6 +118,8 @@ export const ArticleComposerPage = () => {
       </ActionButton>
     );
   };
+
+  console.log(postFile);
 
   return (
     <>

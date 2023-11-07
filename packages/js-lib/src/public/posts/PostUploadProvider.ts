@@ -108,12 +108,6 @@ export const savePost = async <T extends PostContent>(
   }
   file.content.primaryMediaFile = mediaFiles[0];
 
-  console.log({
-    thumbnails,
-    payloads,
-    previewThumbnail,
-  });
-
   return await uploadPost(
     dotYouClient,
     file,

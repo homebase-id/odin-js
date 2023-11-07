@@ -8,7 +8,13 @@ import {
   NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
+import {
+  HOME_ROOT_PATH,
+  getReadingTime,
+  useBlog,
+  useDotYouClient,
+  usePayloadBlob,
+} from '../../../..';
 import { usePost } from '../post/usePost';
 
 export const EMPTY_POST: Article = {
@@ -38,8 +44,6 @@ export const useArticleComposer = ({
     blogSlug: postKey,
   });
 
-  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined>(undefined);
-
   const {
     save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
     remove: {
@@ -62,6 +66,8 @@ export const useArticleComposer = ({
       type: 'Article',
     },
   });
+
+  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined>(undefined);
 
   const [channel, setChannel] = useState<ChannelDefinition>(
     serverData?.activeChannel && postFile.content.channelId === serverData.activeChannel.channelId
@@ -115,7 +121,6 @@ export const useArticleComposer = ({
     // Build postFile
     const toPostFile: PostFile<Article> = {
       ...dirtyPostFile,
-      versionTag: undefined, // VersionTag is set undefined so we always reset it to the latest
       userDate: new Date().getTime(), // Set current date as userDate of the post
       content: {
         ...dirtyPostFile.content,
@@ -152,7 +157,11 @@ export const useArticleComposer = ({
 
     if (uploadResult && !dirtyPostFile.fileId) {
       setPostFile((oldPostFile) => {
-        return { ...oldPostFile, fileId: uploadResult.file.fileId };
+        return {
+          ...oldPostFile,
+          fileId: uploadResult.file.fileId,
+          versionTag: uploadResult.newVersionTag,
+        };
       });
     }
   };
