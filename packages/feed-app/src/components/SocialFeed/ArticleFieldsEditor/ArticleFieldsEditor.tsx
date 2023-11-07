@@ -6,7 +6,7 @@ import {
   RichText,
   NewMediaFile,
 } from '@youfoundation/js-lib/public';
-import { lazy, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import {
   t,
   ErrorBoundary,
@@ -36,10 +36,15 @@ export const InnerFieldEditors = ({
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
   const { data: imageBlob } = usePayloadBlob(
-    postFile.fileId,
-    postFile.content.primaryMediaFile?.fileId,
+    postFile.content.primaryMediaFile?.fileId || postFile.fileId,
+    postFile.content.primaryMediaFile?.fileKey,
     getChannelDrive(channel.channelId)
   );
+
+  // TODO multi-payload: needs to be better.. we don't want to fetch and re-upload on each change...
+  useEffect(() => {
+    if (imageBlob) onChange({ target: { name: 'primaryImageFileId', value: imageBlob } });
+  }, [imageBlob]);
 
   return (
     <>

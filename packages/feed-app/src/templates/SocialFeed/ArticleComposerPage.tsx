@@ -119,8 +119,6 @@ export const ArticleComposerPage = () => {
     );
   };
 
-  console.log(postFile);
-
   return (
     <>
       <PageMeta
