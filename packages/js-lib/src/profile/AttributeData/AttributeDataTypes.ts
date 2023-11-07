@@ -1,5 +1,5 @@
 import {
-  PayloadDesriptor,
+  PayloadDescriptor,
   EmbeddedThumb,
   AccessControlList,
   SecurityGroupType,
@@ -22,7 +22,7 @@ export interface Attribute {
   type: string;
   priority: number;
   sectionId: string;
-  mediaPayloads?: PayloadDesriptor[];
+  mediaPayloads?: PayloadDescriptor[];
   previewThumbnail?: EmbeddedThumb;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;

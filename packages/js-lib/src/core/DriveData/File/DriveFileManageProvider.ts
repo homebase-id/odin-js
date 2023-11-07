@@ -51,7 +51,7 @@ export const deletePayload = async (
   fileId: string,
   fileKey: string,
   systemFileType?: SystemFileType
-) => {
+): Promise<{ newVersionTag: string }> => {
   const client = dotYouClient.createAxiosClient({
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
@@ -66,9 +66,9 @@ export const deletePayload = async (
     },
   };
 
-  client
+  return client
     .post('/drive/files/deletepayload', request)
-    .then((response) => response.status === 200)
+    .then((response) => response.data)
     .catch((error) => {
       console.error('[DotYouCore-js:deleteFile]', error);
       throw error;

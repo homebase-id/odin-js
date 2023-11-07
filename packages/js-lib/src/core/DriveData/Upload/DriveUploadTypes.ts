@@ -1,11 +1,11 @@
 import {
   TargetDrive,
-  ThumbSize,
   GlobalTransitIdFileIdentifier,
   EmbeddedThumb,
   ArchivalStatus,
   ExternalFileIdentifier,
   SystemFileType,
+  UploadPayloadDescriptor,
 } from '../File/DriveFileTypes';
 import { EncryptedKeyHeader } from '../Drive/DriveTypes';
 
@@ -21,7 +21,6 @@ export interface AppendInstructionSet {
     fileId: string;
     targetDrive: TargetDrive;
   };
-  thumbnails?: ThumbSize[];
   systemFileType?: SystemFileType;
 }
 
@@ -66,6 +65,10 @@ export interface UploadFileMetadata {
   appData: UploadAppFileMetaData;
   referencedFile?: GlobalTransitIdFileIdentifier;
   versionTag?: string;
+}
+
+export interface UploadManifest {
+  PayloadDescriptors?: UploadPayloadDescriptor[];
 }
 
 export interface AccessControlList {

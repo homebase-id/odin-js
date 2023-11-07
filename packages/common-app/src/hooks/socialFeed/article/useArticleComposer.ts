@@ -1,4 +1,3 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
 import {
   PostFile,
@@ -8,13 +7,7 @@ import {
   NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
-import {
-  HOME_ROOT_PATH,
-  getReadingTime,
-  useBlog,
-  useDotYouClient,
-  usePayloadBlob,
-} from '../../../..';
+import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
 
 export const EMPTY_POST: Article = {
@@ -56,6 +49,7 @@ export const useArticleComposer = ({
 
   const [postFile, setPostFile] = useState<PostFile<Article>>({
     userDate: new Date().getTime(),
+    isDraft: true,
     ...serverData?.activeBlog,
     content: {
       ...EMPTY_POST,
@@ -67,7 +61,7 @@ export const useArticleComposer = ({
     },
   });
 
-  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined>(undefined);
+  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined | null>(null);
 
   const [channel, setChannel] = useState<ChannelDefinition>(
     serverData?.activeChannel && postFile.content.channelId === serverData.activeChannel.channelId
@@ -89,9 +83,7 @@ export const useArticleComposer = ({
     }
   }, [serverData]);
 
-  const isPublished =
-    serverData?.activeBlog?.acl &&
-    serverData?.activeBlog?.acl?.requiredSecurityGroup !== SecurityGroupType.Owner;
+  const isPublished = !postFile.isDraft;
 
   const isValidPost = (postFile: PostFile<Article>) => {
     return (
@@ -130,17 +122,23 @@ export const useArticleComposer = ({
         readingTimeStats: getReadingTime(dirtyPostFile.content.body),
       },
       isDraft: !isPublish || isUnpublish,
-      acl:
-        targetChannel.acl && (isPublish || isPublished) && !isUnpublish
-          ? { ...targetChannel.acl }
-          : { requiredSecurityGroup: SecurityGroupType.Owner },
+      acl: targetChannel.acl,
+      // TODO: ACL is not changed, as it impacts the encrytped state...
+      // targetChannel.acl && (isPublish || isPublished) && !isUnpublish
+      // { ...targetChannel.acl }
+      // : { requiredSecurityGroup: SecurityGroupType.Owner },
     };
 
     // Save and process result
     const uploadResult = await savePost({
       postFile: toPostFile,
       channelId: targetChannel.channelId,
-      mediaFiles: primaryMediaFile ? [primaryMediaFile] : undefined,
+      mediaFiles:
+        primaryMediaFile !== null
+          ? primaryMediaFile === undefined
+            ? []
+            : [primaryMediaFile]
+          : undefined,
     });
 
     // TODO: Move to component as it has page context?

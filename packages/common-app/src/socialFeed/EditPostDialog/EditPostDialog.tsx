@@ -33,7 +33,7 @@ export const EditPostDialog = ({
 }) => {
   const target = usePortal('modal-container');
   const {
-    update: { mutateAsync: updatePost, error: updatePostError, status: updatePostStatus },
+    update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
   } = usePost();
   const [postFile, setPostFile] = useState<PostFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<MediaFile[]>(
@@ -56,6 +56,10 @@ export const EditPostDialog = ({
       );
     }
   }, [incomingPostFile]);
+
+  useEffect(() => {
+    if (updatePostStatus === 'success') onConfirm();
+  }, [updatePostStatus]);
 
   if (!isOpen) return null;
 
@@ -85,7 +89,6 @@ export const EditPostDialog = ({
             e.preventDefault();
             await doUpdate();
 
-            onConfirm();
             return false;
           }}
         >

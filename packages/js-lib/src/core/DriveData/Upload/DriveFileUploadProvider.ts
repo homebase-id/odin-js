@@ -129,16 +129,26 @@ export const uploadHeader = async (
 
 export const appendDataToFile = async (
   dotYouClient: DotYouClient,
+  encryptedKeyHeader: EncryptedKeyHeader | undefined,
   instructions: AppendInstructionSet,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  keyHeader: KeyHeader,
   onVersionConflict?: () => void
 ) => {
+  const keyHeader = encryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : undefined;
+
   const { systemFileType, ...strippedInstructions } = instructions;
 
+  const manifest = buildManifest(payloads, thumbnails);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+  };
+
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     undefined,
     payloads,
     thumbnails,

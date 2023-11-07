@@ -1,7 +1,12 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { uploadFile, uploadHeader } from '../../core/DriveData/Upload/DriveFileUploadProvider';
+import {
+  appendDataToFile,
+  uploadFile,
+  uploadHeader,
+} from '../../core/DriveData/Upload/DriveFileUploadProvider';
 import {
   AccessControlList,
+  AppendInstructionSet,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
@@ -9,7 +14,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY, pureAppend } from '../../core/DriveData/Upload/UploadHelpers';
 import { VideoContentType, uploadVideo } from '../../core/MediaData/VideoProvider';
 import {
   EmbeddedThumb,
@@ -46,7 +51,7 @@ export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: PostFile<T>,
   channelId: string,
-  newMediaFiles?: NewMediaFile[],
+  toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult> => {
@@ -56,6 +61,17 @@ export const savePost = async <T extends PostContent>(
     // Check if content.id exists and with which fileId
     file.fileId = (await getPost(dotYouClient, channelId, file.content.id))?.fileId ?? undefined;
   }
+
+  if (file.fileId) {
+    return await updatePost(dotYouClient, file, channelId, toSaveFiles);
+  } else {
+    if (toSaveFiles?.some((file) => 'fileKey' in file)) {
+      throw new Error(
+        'Cannot upload a new post with an existing media file. Use updatePost instead'
+      );
+    }
+  }
+  const newMediaFiles = toSaveFiles as NewMediaFile[];
 
   if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
   if (!file.acl) throw 'ACL is required to save a post';
@@ -255,6 +271,7 @@ const uploadPost = async <T extends PostContent>(
 const uploadPostHeader = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: PostFile<T>,
+  channelId: string,
   targetDrive: TargetDrive
 ) => {
   const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
@@ -273,6 +290,18 @@ const uploadPostHeader = async <T extends PostContent>(
     },
   };
 
+  const existingPostWithThisSlug = await getPostBySlug(
+    dotYouClient,
+    channelId,
+    file.content.slug ?? file.content.id
+  );
+
+  if (existingPostWithThisSlug && existingPostWithThisSlug?.content.id !== file.content.id) {
+    // There is clash with an existing slug
+    file.content.slug = `${file.content.slug}-${new Date().getTime()}`;
+  }
+  const uniqueId = file.content.slug ? toGuidId(file.content.slug) : file.content.id;
+
   const payloadJson: string = jsonStringify64({ ...file.content, fileId: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
@@ -285,11 +314,11 @@ const uploadPostHeader = async <T extends PostContent>(
   const isDraft = file.isDraft ?? false;
 
   const metadata: UploadFileMetadata = {
-    versionTag: header?.fileMetadata?.versionTag,
+    versionTag: file.versionTag,
     allowDistribution: !isDraft,
     appData: {
       tags: [file.content.id],
-      uniqueId: file.content.id,
+      uniqueId: uniqueId,
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
       content: content,
       previewThumbnail: file.previewThumbnail,
@@ -308,13 +337,6 @@ const uploadPostHeader = async <T extends PostContent>(
     // Append/update payload
   }
 
-  console.log(
-    'uploadHeader',
-    dotYouClient,
-    header?.sharedSecretEncryptedKeyHeader,
-    instructionSet,
-    metadata
-  );
   return await uploadHeader(
     dotYouClient,
     file.isEncrypted ? header?.sharedSecretEncryptedKeyHeader : undefined,
@@ -327,46 +349,107 @@ export const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: PostFile<T>,
   channelId: string,
-  mediaFiles: MediaFile[]
+  existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
 ): Promise<UploadResult> => {
-  const newMediaFiles = mediaFiles || (file.content as Media).mediaFiles;
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
+
+  if (!header) throw new Error('Cannot update a post that does not exist');
+  if (header?.fileMetadata.versionTag !== file.versionTag) throw new Error('Version conflict');
+  let runningVersionTag: string = file.versionTag;
+  const existingMediaFiles =
+    (existingAndNewMediaFiles?.filter((f) => 'fileKey' in f) as MediaFile[]) ||
+    (!existingAndNewMediaFiles
+      ? (file.content as Media).mediaFiles
+        ? (file.content as Media).mediaFiles
+        : file.content.primaryMediaFile
+        ? [file.content.primaryMediaFile]
+        : []
+      : []);
+
+  const newMediaFiles = existingAndNewMediaFiles?.filter(
+    (f) => 'file' in f && f.file instanceof Blob
+  ) as NewMediaFile[] | undefined;
 
   if (!file.fileId || !file.acl || !file.content.id)
     throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
 
   if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
 
-  const targetDrive = GetTargetDriveFromChannelId(channelId);
+  const oldMediaFiles =
+    (file.content as Media).mediaFiles ||
+    (file.content.primaryMediaFile ? [file.content.primaryMediaFile] : []);
 
-  // MediaFiles is only defined if it is updated
-  if (mediaFiles) {
-    // Discover deleted files:
-    const mediaFiles =
-      (file.content as Media).mediaFiles ||
-      (file.content.primaryMediaFile ? [file.content.primaryMediaFile] : []);
-    const deletedMediaFiles: MediaFile[] = [];
-    for (let i = 0; mediaFiles && i < mediaFiles?.length; i++) {
-      const mediaFile = mediaFiles[i];
-      if (!newMediaFiles?.find((f) => f.fileId === mediaFile.fileId)) {
-        deletedMediaFiles.push(mediaFile);
-      }
-    }
-
-    // Remove the payloads that are removed from the post
-    if (deletedMediaFiles.length) {
-      deletedMediaFiles.forEach(async (mediaFile) => {
-        await deletePayload(dotYouClient, targetDrive, file.fileId as string, mediaFile.fileKey);
-      });
+  // Discover deleted files:
+  const deletedMediaFiles: MediaFile[] = [];
+  for (let i = 0; oldMediaFiles && i < oldMediaFiles?.length; i++) {
+    const oldMediaFile = oldMediaFiles[i];
+    if (!existingMediaFiles?.find((f) => 'fileKey' in f && f.fileKey === oldMediaFile.fileKey)) {
+      deletedMediaFiles.push(oldMediaFile);
     }
   }
 
-  if (newMediaFiles?.length) {
+  // Remove the payloads that are removed from the post
+  if (deletedMediaFiles.length) {
+    for (let i = 0; i < deletedMediaFiles.length; i++) {
+      const mediaFile = deletedMediaFiles[i];
+      runningVersionTag = (
+        await deletePayload(dotYouClient, targetDrive, file.fileId as string, mediaFile.fileKey)
+      ).newVersionTag;
+    }
+  }
+
+  // Discover new files:
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
+    const newMediaFile = newMediaFiles[i];
+    const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${oldMediaFiles.length + i}`;
+    payloads.push({
+      payload: newMediaFile.file,
+      key: payloadKey,
+    });
+    const { additionalThumbnails } = await createThumbnails(newMediaFile.file, payloadKey);
+    thumbnails.push(...additionalThumbnails);
+    existingMediaFiles.push({
+      fileId: file.fileId,
+      fileKey: payloadKey,
+      type: 'image',
+    });
+  }
+
+  // Append new files:
+  if (payloads.length) {
+    const appendInstructionSet: AppendInstructionSet = {
+      targetFile: {
+        fileId: file.fileId as string,
+        targetDrive: targetDrive,
+      },
+    };
+
+    runningVersionTag = (
+      await appendDataToFile(
+        dotYouClient,
+        header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
+        appendInstructionSet,
+        payloads,
+        thumbnails
+      )
+    ).newVersionTag;
+  }
+
+  if (existingMediaFiles?.length)
     (file.content as Media).mediaFiles =
-      newMediaFiles && newMediaFiles.length > 1 ? newMediaFiles : undefined;
-  }
-  file.content.primaryMediaFile = newMediaFiles?.[0];
+      existingMediaFiles && existingMediaFiles.length > 1 ? existingMediaFiles : undefined;
+  file.content.primaryMediaFile = existingMediaFiles?.[0];
 
-  const result = await uploadPostHeader(dotYouClient, file, targetDrive);
+  const encrypt = !(
+    file.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+  );
+  file.isEncrypted = encrypt;
+  file.versionTag = runningVersionTag;
+  const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
   if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 
   return result;

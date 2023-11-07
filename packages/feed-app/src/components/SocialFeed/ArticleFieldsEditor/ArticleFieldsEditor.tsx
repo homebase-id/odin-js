@@ -41,11 +41,6 @@ export const InnerFieldEditors = ({
     getChannelDrive(channel.channelId)
   );
 
-  // TODO multi-payload: needs to be better.. we don't want to fetch and re-upload on each change...
-  useEffect(() => {
-    if (imageBlob) onChange({ target: { name: 'primaryImageFileId', value: imageBlob } });
-  }, [imageBlob]);
-
   return (
     <>
       <div className="grid grid-flow-row gap-1">

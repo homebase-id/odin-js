@@ -7,6 +7,7 @@ import {
   UploadInstructionSet,
   AppendInstructionSet,
   UploadResult,
+  UploadManifest,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -73,7 +74,7 @@ export const encryptMetaData = async (
 export const buildManifest = (
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined
-) => {
+): UploadManifest => {
   return {
     PayloadDescriptors: payloads?.map((payload) => ({
       payloadKey: payload.key,
@@ -118,7 +119,9 @@ export const buildFormData = async (
   keyHeader: KeyHeader | undefined
 ) => {
   const data = new FormData();
-  data.append('instructions', toBlob(instructionSet));
+  const instructionType =
+    'targetFile' in instructionSet ? 'payloadUploadInstructions' : 'instructions';
+  data.append(instructionType, toBlob(instructionSet));
   if (encryptedDescriptor) data.append('metaData', new Blob([encryptedDescriptor]));
 
   if (payloads) {
@@ -185,7 +188,7 @@ export const pureAppend = async (
   data: FormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void
-) => {
+): Promise<{ newVersionTag: string }> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
     headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },

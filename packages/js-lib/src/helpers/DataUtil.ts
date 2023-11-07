@@ -1,8 +1,7 @@
 import { Guid } from 'guid-typescript';
 
 import md5 from './md5/md5';
-import { AccessControlList, EncryptedKeyHeader, PayloadFile } from '../core/core';
-import { PayloadDesriptor } from '../../core';
+import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
 
 export const getRandom16ByteArray = (): Uint8Array => {
   return crypto.getRandomValues(new Uint8Array(16));
@@ -323,7 +322,7 @@ export const getBlobFromBytes = ({
   return new Blob([bytes], { type: contentType });
 };
 
-export const getLargestThumbOfPayload = (payload?: PayloadDesriptor) => {
+export const getLargestThumbOfPayload = (payload?: PayloadDescriptor) => {
   if (!payload?.thumbnails?.length) return;
   return payload.thumbnails?.reduce(
     (prev, curr) => {

@@ -13,7 +13,7 @@ export interface FileMetadata<T = string> {
   reactionPreview?: ReactionPreview;
   versionTag: string;
 
-  payloads: PayloadDesriptor[];
+  payloads: PayloadDescriptor[];
 }
 
 export interface ServerMetaData {
@@ -102,10 +102,19 @@ export interface TargetDrive {
   type: string;
 }
 
-export interface PayloadDesriptor {
+export interface PayloadDescriptor {
   key: string;
   contentType: ContentType;
   bytesWritten: number;
   lastModified: number;
   thumbnails: ThumbSize[];
+}
+
+export interface UploadPayloadDescriptor {
+  payloadKey: string;
+  thumbnails?: ThumbnailDescriptor[];
+}
+
+export interface ThumbnailDescriptor extends ThumbSize {
+  thumbnailKey: string;
 }
