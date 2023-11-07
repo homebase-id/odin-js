@@ -88,8 +88,8 @@ export const NetworkVisibilitySettings = () => {
               description={t(
                 'Everyone that visits your homepage will see an overview of your connections'
               )}
-              name="canViewConnections"
               id="anonymousVisitorsCanViewConnections"
+              name="canViewConnections"
               defaultChecked={
                 systemSettings?.anonymousVisitorsCanViewConnections === true &&
                 systemSettings?.authenticatedIdentitiesCanViewConnections === true &&
@@ -103,8 +103,8 @@ export const NetworkVisibilitySettings = () => {
               description={t(
                 'Authenticated people that visit your public site will see an overview of your connections'
               )}
-              name="canViewConnections"
               id="authenticatedIdentitiesCanViewConnections"
+              name="canViewConnections"
               defaultChecked={
                 systemSettings?.anonymousVisitorsCanViewConnections === false &&
                 systemSettings?.authenticatedIdentitiesCanViewConnections === true &&
@@ -118,12 +118,25 @@ export const NetworkVisibilitySettings = () => {
               description={t(
                 'Connected people that visit your public site will see an overview of your connections'
               )}
-              name="canViewConnections"
               id="connectedIdentitiesCanViewConnections"
+              name="canViewConnections"
               defaultChecked={
                 systemSettings?.anonymousVisitorsCanViewConnections === false &&
                 systemSettings?.authenticatedIdentitiesCanViewConnections === false &&
                 systemSettings?.allConnectedIdentitiesCanViewConnections === true
+              }
+              onClick={handleCanViewConnectionsChange}
+            />
+
+            <RadioOption
+              label={t('Nobody')}
+              description={t('Only you will see an overview of your connections')}
+              id="nobodyCanViewConnections"
+              name="canViewConnections"
+              defaultChecked={
+                systemSettings?.anonymousVisitorsCanViewConnections === false &&
+                systemSettings?.authenticatedIdentitiesCanViewConnections === false &&
+                systemSettings?.allConnectedIdentitiesCanViewConnections === false
               }
               onClick={handleCanViewConnectionsChange}
             />
@@ -179,6 +192,18 @@ export const NetworkVisibilitySettings = () => {
                 systemSettings?.anonymousVisitorsCanViewWhoIFollow === false &&
                 systemSettings?.authenticatedIdentitiesCanViewWhoIFollow === false &&
                 systemSettings?.allConnectedIdentitiesCanViewWhoIFollow === true
+              }
+              onClick={handleCanViewWhoIFollowChange}
+            />
+            <RadioOption
+              label={t('Nobody')}
+              description={t('Only you will see an overview of who you follow')}
+              id="nobodyCanViewWhoIFollow"
+              name="canViewWhoIFollow"
+              defaultChecked={
+                systemSettings?.anonymousVisitorsCanViewWhoIFollow === false &&
+                systemSettings?.authenticatedIdentitiesCanViewWhoIFollow === false &&
+                systemSettings?.allConnectedIdentitiesCanViewWhoIFollow === false
               }
               onClick={handleCanViewWhoIFollowChange}
             />
