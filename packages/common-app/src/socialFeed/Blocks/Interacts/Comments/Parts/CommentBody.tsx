@@ -44,11 +44,12 @@ export const CommentBody = ({
           ) : (
             <p className="whitespace-pre-wrap">{body}</p>
           )}
-          {content.hasAttachment && context ? (
+          {content.mediaPayloadKey && context ? (
             <CommentMedia
               postAuthorOdinId={context.authorOdinId}
               targetDrive={sourceTargetDrive}
               fileId={commentFileId}
+              fileKey={content.mediaPayloadKey}
             />
           ) : null}
         </>

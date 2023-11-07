@@ -152,7 +152,7 @@ export interface ReactionContext {
 export interface ReactionContent {
   body: string;
   bodyAsRichText?: RichText;
-  hasAttachment?: boolean;
+  mediaPayloadKey?: string;
 }
 
 export interface ReactionFile {

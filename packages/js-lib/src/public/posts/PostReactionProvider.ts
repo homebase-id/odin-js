@@ -3,10 +3,8 @@ import { getRandom16ByteArray } from '../../helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
-  ImageContentType,
   UploadFileMetadata,
   SecurityGroupType,
-  TransitOptions,
   ScheduleOptions,
   SendContents,
   UploadInstructionSet,
@@ -45,6 +43,9 @@ import {
   ReactionVm,
 } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { EmbeddedThumb, PayloadFile } from '../../../core';
+
+const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
@@ -56,29 +57,24 @@ export const saveComment = async (
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
   let additionalThumbnails: ThumbnailFile[] | undefined;
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  let previewThumbnail: EmbeddedThumb | undefined;
+
   if (comment.content.attachment) {
     const imageFile = comment.content.attachment;
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      imageFile,
+      COMMENT_MEDIA_PAYLOAD,
+      [{ height: 250, width: 250, quality: 100 }]
+    );
 
-    if (imageFile.type === 'image/gif') {
-      additionalThumbnails = [
-        {
-          payload: imageFile,
-          pixelHeight: 100,
-          pixelWidth: 100,
-          key: DEFAULT_PAYLOAD_KEY,
-        },
-      ];
-    } else {
-      const { additionalThumbnails: thumbs } = await createThumbnails(
-        imageFile,
-        DEFAULT_PAYLOAD_KEY,
-        [{ height: 250, width: 250, quality: 100 }]
-      );
-      additionalThumbnails = thumbs;
-    }
+    thumbnails.push(...additionalThumbnails);
+    payloads.push({ payload: imageFile, key: COMMENT_MEDIA_PAYLOAD });
+    previewThumbnail = tinyThumb;
+
     delete comment.content.attachment;
-
-    comment.content.hasAttachment = true;
+    comment.content.mediaPayloadKey = COMMENT_MEDIA_PAYLOAD;
   }
 
   const payloadJson: string = jsonStringify64(comment.content);
@@ -100,7 +96,7 @@ export const saveComment = async (
       uniqueId: comment.id ?? getNewId(),
       fileType: ReactionConfig.CommentFileType,
       content: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: undefined,
+      previewThumbnail: previewThumbnail,
       userDate: comment.date ?? new Date().getTime(),
     },
     isEncrypted: encrypt,
@@ -109,21 +105,25 @@ export const saveComment = async (
     },
   };
 
-  if (isLocal) {
-    const transitOptions: TransitOptions = {
-      useGlobalTransitId: true, // Needed to support having a reference to this file over transit
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      sendContents: SendContents.All,
-    };
+  if (!shouldEmbedContent)
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
 
+  if (isLocal) {
     const instructionSet: UploadInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
         overwriteFileId: comment.fileId || undefined,
         drive: targetDrive,
       },
-      transitOptions: transitOptions,
+      transitOptions: {
+        useGlobalTransitId: true, // Needed to support having a reference to this file over transit
+        recipients: [],
+        schedule: ScheduleOptions.SendLater,
+        sendContents: SendContents.All,
+      },
       systemFileType: 'Comment',
     };
 
@@ -132,15 +132,8 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      shouldEmbedContent
-        ? undefined
-        : [
-            {
-              payload: new Blob([payloadBytes], { type: 'application/json' }),
-              key: DEFAULT_PAYLOAD_KEY,
-            },
-          ],
-      additionalThumbnails,
+      payloads,
+      thumbnails,
       encrypt
     );
     if (!result) throw new Error(`Upload failed`);
@@ -167,15 +160,8 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      shouldEmbedContent
-        ? undefined
-        : [
-            {
-              payload: new Blob([payloadBytes], { type: 'application/json' }),
-              key: DEFAULT_PAYLOAD_KEY,
-            },
-          ],
-      additionalThumbnails,
+      payloads,
+      thumbnails,
       encrypt
     );
 
@@ -321,8 +307,6 @@ const parseReactions = (
           console.error('[DotYouCore-js] parse failed for', reaction);
           return;
         }
-
-        return;
       })
       .filter(Boolean) as { emoji: string; count: number }[],
     totalCount: reactions.reduce((prevVal, curVal) => {

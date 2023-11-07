@@ -10,11 +10,9 @@ import {
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
-import { VideoUploadResult } from '../../core/MediaData/MediaTypes';
 import { VideoContentType, uploadVideo } from '../../core/MediaData/VideoProvider';
 import {
   EmbeddedThumb,
-  PayloadDesriptor,
   PayloadFile,
   TargetDrive,
   ThumbnailFile,
@@ -233,6 +231,7 @@ const uploadPost = async <T extends PostContent>(
       userDate: file.userDate,
       dataType: postTypeToDataType(file.content.type),
     },
+    senderOdinId: file.content.authorOdinId,
     isEncrypted: encrypt,
     accessControlList: file.acl,
   };

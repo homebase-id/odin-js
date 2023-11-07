@@ -130,7 +130,8 @@ const MAX_CHAR_FOR_SUMMARY = 280;
 
 export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
   const { authorOdinId, content } = commentData;
-  const { body } = content;
+  const { body, mediaPayloadKey } = content;
+  const hasMedia = !!mediaPayloadKey;
 
   return (
     <>
@@ -146,7 +147,10 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
                   {t('Encrypted')}
                 </span>
               ) : (
-                <>{ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}</>
+                <>
+                  {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}{' '}
+                  {hasMedia ? <span className="italic">{t('Click to view image')}</span> : null}
+                </>
               )}
             </p>
           </div>

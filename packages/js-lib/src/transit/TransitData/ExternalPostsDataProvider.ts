@@ -57,7 +57,6 @@ export const getSocialFeed = async (
   };
 
   const result = await queryBatch(dotYouClient, queryParams, ro);
-
   // Parse results and do getPayload (In most cases, data should be there in content, and nothing in actual payload);
   const allPostFiles = (
     await Promise.all(

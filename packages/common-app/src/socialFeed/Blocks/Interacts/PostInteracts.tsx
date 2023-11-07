@@ -311,7 +311,6 @@ const CommentTeaserList = ({
   if (!reactionPreview?.comments.length) return null;
 
   const allEncrypted = reactionPreview.comments.every((comment) => comment.isEncrypted);
-
   return (
     <div className="mb-5">
       <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20"></hr>

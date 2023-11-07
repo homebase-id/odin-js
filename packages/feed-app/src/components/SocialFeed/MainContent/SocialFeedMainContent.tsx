@@ -34,6 +34,8 @@ const SocialFeedMainContent = () => {
     [posts]
   );
 
+  console.log({ flattenedPosts });
+
   const parentRef = useRef<HTMLDivElement>(null);
   const parentOffsetRef = useRef(0);
 
