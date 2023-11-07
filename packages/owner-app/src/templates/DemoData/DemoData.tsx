@@ -485,9 +485,10 @@ const DemoDataHomeAndTheme = ({
       [new Uint8Array(base64ToArrayBuffer(realmData.home.headerImage.base64))],
       { type: 'image/webp' }
     );
-    newRootAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
-    newRootAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
+
     // TODO: Save tag and leadText into status and shortBio attributes
+    // StatusAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
+    // ShortBioAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
 
     saveRoot(newRootAttr);
 

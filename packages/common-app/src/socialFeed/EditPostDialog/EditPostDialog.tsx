@@ -53,7 +53,7 @@ export const EditPostDialog = ({
     const newPostFile = { ...postFile };
 
     if (toRemoveFiles?.length) {
-      // TODO: Remove files
+      // TODO multi-payload: Remove files
       console.log('toRemoveFiles', toRemoveFiles);
       // // Update mediaFiles to remove the refs of those that are set to be removed
       // (newPostFile.content as Media).mediaFiles = (newPostFile.content as Media).mediaFiles?.filter(

@@ -239,7 +239,7 @@ const headerInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 2600, height: 2600 },
 ];
 
-// TODO: Fix that we don't need to fetch the existing Blob, if there's no update to it
+// TODO multi-payload: Fix that we don't need to fetch the existing Blob, if there's no update to it
 const getNewOrExistingThumbnails = async (
   dotYouClient: DotYouClient,
   attrFileId: string | undefined,

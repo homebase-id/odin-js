@@ -54,7 +54,6 @@ export const getDecryptedImageUrlOverTransit = async (
   isProbablyEncrypted?: boolean,
   systemFileType?: SystemFileType
 ): Promise<string> => {
-  // TODO: Decide to use direct urls or not
   const getDirectImageUrl = async () => {
     return `https://${odinId}/api/guest/v1/drive/files/${
       size ? 'thumb' : 'payload'

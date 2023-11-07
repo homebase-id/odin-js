@@ -57,7 +57,6 @@ export const getDecryptedVideoUrlOverTransit = async (
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
-  // TODO: Decide to use direct urls or not
   const meta = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
     systemFileType,
   });

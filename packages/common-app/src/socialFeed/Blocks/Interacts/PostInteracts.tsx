@@ -79,8 +79,8 @@ export const PostInteracts = ({
     authorOdinId: authorOdinId,
     channelId: postFile.content.channelId,
     target: {
-      globalTransitId: postFile.globalTransitId, // TODO: remove 'unknown' fallback
-      fileId: postFile.fileId, // TODO: remove 'unknown' fallback
+      globalTransitId: postFile.globalTransitId,
+      fileId: postFile.fileId,
       isEncrypted: postFile.isEncrypted || false,
     },
   };

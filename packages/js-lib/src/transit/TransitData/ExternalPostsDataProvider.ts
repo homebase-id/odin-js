@@ -68,7 +68,6 @@ export const getSocialFeed = async (
     )
   ).filter(Boolean) as PostFileVm<PostContent>[];
 
-  // TODO: Could optimize by combining both feed and own querybatch into a single querybatchcollection...
   if (ownOption) {
     const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(

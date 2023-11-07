@@ -23,10 +23,8 @@ import { isImportable } from './useExport';
 export const useImport = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
-  const clearAllFilesOnDrive = async (drive: TargetDrive) => {
-    // TODO: Fix, as this doesn't work anymore, purging works, but unqiueIds will keep conflicting with new uploads...
-    return await purgeAllFiles(dotYouClient, drive);
-  };
+  const clearAllFilesOnDrive = async (drive: TargetDrive) =>
+    await purgeAllFiles(dotYouClient, drive);
 
   const importUnencrypted = async ({
     drive,

@@ -128,8 +128,6 @@ export const useContact = ({
 
         // Update single attribute
         const previousContact = queryClient.getQueryData(['contact', odinId ?? id]);
-        // TODO: fix, can't be set as the incoming new isn't the refresh data
-        queryClient.setQueryData(['contact', odinId ?? id], newContact);
 
         return { previousContact, newContact };
       },

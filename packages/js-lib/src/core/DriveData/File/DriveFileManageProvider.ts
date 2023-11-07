@@ -49,8 +49,7 @@ export const deletePayload = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  width: number,
-  height: number,
+  fileKey: string,
   systemFileType?: SystemFileType
 ) => {
   const client = dotYouClient.createAxiosClient({
@@ -60,7 +59,7 @@ export const deletePayload = async (
   });
 
   const request = {
-    key: '', // TODO: Add key (reference to a key for multiple payloads in a single file)
+    key: fileKey,
     file: {
       targetDrive: targetDrive,
       fileId: fileId,
