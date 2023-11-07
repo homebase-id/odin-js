@@ -29,13 +29,14 @@ export const useImage = (
   const checkIfWeHaveLargerCachedImage = (
     odinId: string | undefined,
     imageFileId: string,
+    imageFileKey: string,
     imageDrive: TargetDrive,
     size?: ImageSize
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId],
+        queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId, imageFileKey],
         exact: false,
       })
       .filter((query) => query.state.status !== 'error');
@@ -88,7 +89,13 @@ export const useImage = (
     )
       return;
 
-    const cachedEntry = checkIfWeHaveLargerCachedImage(odinId, imageFileId, imageDrive, size);
+    const cachedEntry = checkIfWeHaveLargerCachedImage(
+      odinId,
+      imageFileId,
+      imageFileKey,
+      imageDrive,
+      size
+    );
     if (cachedEntry) {
       const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
       if (cachedData) return cachedData;
@@ -151,11 +158,16 @@ export const useImage = (
       gcTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '',
     }),
-    getFromCache: (odinId: string | undefined, imageFileId: string, imageDrive: TargetDrive) => {
+    getFromCache: (
+      odinId: string | undefined,
+      imageFileId: string,
+      imageFileKey: string,
+      imageDrive: TargetDrive
+    ) => {
       const cachedEntries = queryClient
         .getQueryCache()
         .findAll({
-          queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId],
+          queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId, imageFileKey],
           exact: false,
         })
         .filter((query) => query.state.status === 'success');

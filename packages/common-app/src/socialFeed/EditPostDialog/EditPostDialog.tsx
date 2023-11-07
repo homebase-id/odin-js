@@ -78,6 +78,8 @@ export const EditPostDialog = ({
     });
   };
 
+  if (!postFile?.fileId) return null;
+
   const dialog = (
     <>
       <ErrorNotification error={savePostError} />
@@ -109,6 +111,7 @@ export const EditPostDialog = ({
           />
           <ExistingFileOverview
             className="mt-2"
+            fileId={postFile.fileId}
             mediaFiles={
               (postFile.content as Media).mediaFiles?.length
                 ? (postFile.content as Media).mediaFiles

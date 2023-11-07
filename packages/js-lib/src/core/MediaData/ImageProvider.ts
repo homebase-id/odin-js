@@ -1,9 +1,8 @@
-import { createThumbnails } from './Thumbs/ThumbnailProvider';
+import { createThumbnails, tinyThumbSize } from './Thumbs/ThumbnailProvider';
 import {
   uint8ArrayToBase64,
   getNewId,
   jsonStringify64,
-  base64ToUint8Array,
   stringifyToQueryParams,
   getRandom16ByteArray,
 } from '../../helpers/DataUtil';
@@ -14,7 +13,6 @@ import {
   AccessControlList,
   SecurityGroupType,
   UploadInstructionSet,
-  EmbeddedThumb,
   getFileHeader,
   UploadFileMetadata,
   uploadFile,
@@ -128,13 +126,27 @@ export const getDecryptedThumbnailMeta = (
   fileId: string,
   fileKey: string
 ): Promise<ThumbnailMeta | undefined> => {
-  return getFileHeader(dotYouClient, targetDrive, fileId).then((header) => {
-    if (!header || !header.fileMetadata.appData.previewThumbnail) return;
+  return getFileHeader(dotYouClient, targetDrive, fileId).then(async (header) => {
+    if (!header?.fileMetadata.appData.previewThumbnail) return;
 
     const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-    const bytes = base64ToUint8Array(previewThumbnail.content);
-    const url = `data:${previewThumbnail.contentType};base64,${uint8ArrayToBase64(bytes)}`;
 
+    let url: string | undefined;
+    if (
+      header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
+        .length > 1
+    ) {
+      url = await getDecryptedImageUrl(
+        dotYouClient,
+        targetDrive,
+        fileId,
+        fileKey,
+        { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+        header.fileMetadata.isEncrypted
+      );
+    } else {
+      url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+    }
     return {
       naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
       sizes:

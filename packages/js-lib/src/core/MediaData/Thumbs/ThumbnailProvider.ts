@@ -10,7 +10,7 @@ export const baseThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 1600, height: 1600 },
 ];
 
-const tinyThumbSize: ThumbnailInstruction = {
+export const tinyThumbSize: ThumbnailInstruction = {
   quality: 10,
   width: 20,
   height: 20,

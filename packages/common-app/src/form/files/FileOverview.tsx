@@ -109,12 +109,14 @@ export const FileOverview = ({
 
 export const ExistingFileOverview = ({
   mediaFiles,
+  fileId,
   toRemoveFiles,
   targetDrive,
   setToRemoveFiles,
   className,
 }: {
   mediaFiles?: MediaFile[];
+  fileId: string;
   toRemoveFiles: MediaFile[];
   targetDrive: TargetDrive;
   setToRemoveFiles: (mediaFileIds: MediaFile[]) => void;
@@ -133,10 +135,10 @@ export const ExistingFileOverview = ({
       )
       .map((image) => {
         return (
-          <div key={image.fileId} className="relative w-1/2 p-[2px] md:w-1/3">
+          <div key={image.fileId + image.fileKey} className="relative w-1/2 p-[2px] md:w-1/3">
             {image.type === 'video' ? (
               <Video
-                fileId={image.fileId}
+                fileId={image.fileId || fileId}
                 fileKey={image.fileKey}
                 targetDrive={targetDrive}
                 className="aspect-square h-full w-full"
@@ -144,7 +146,7 @@ export const ExistingFileOverview = ({
               />
             ) : (
               <Image
-                fileId={image.fileId}
+                fileId={image.fileId || fileId}
                 fileKey={image.fileKey}
                 targetDrive={targetDrive}
                 className="aspect-square h-full w-full"

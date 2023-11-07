@@ -65,7 +65,7 @@ export const OdinImage = ({
 
   const { getFromCache } = useImage(dotYouClient);
   const cachedImage = useMemo(
-    () => (fileId ? getFromCache(odinId, fileId, targetDrive) : undefined),
+    () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
     [fileId]
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;

@@ -5,12 +5,9 @@ import {
   ThumbnailMeta,
   ImageSize,
   ImageContentType,
+  tinyThumbSize,
 } from '../../core/core';
-import {
-  base64ToUint8Array,
-  stringifyToQueryParams,
-  uint8ArrayToBase64,
-} from '../../helpers/DataUtil';
+import { stringifyToQueryParams, uint8ArrayToBase64 } from '../../helpers/DataUtil';
 import {
   getFileHeaderOverTransit,
   getThumbBytesOverTransit,
@@ -24,23 +21,38 @@ export const getDecryptedThumbnailMetaOverTransit = async (
   fileId: string,
   fileKey: string
 ): Promise<ThumbnailMeta | undefined> => {
-  return getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId).then((header) => {
-    if (!header?.fileMetadata.appData.previewThumbnail) {
-      return;
+  return getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId).then(
+    async (header) => {
+      if (!header?.fileMetadata.appData.previewThumbnail) return;
+
+      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+
+      let url: string | undefined;
+      if (
+        header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
+          .length > 1
+      ) {
+        url = await getDecryptedImageUrlOverTransit(
+          dotYouClient,
+          odinId,
+          targetDrive,
+          fileId,
+          fileKey,
+          { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+          header.fileMetadata.isEncrypted
+        );
+      } else {
+        url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+      }
+      return {
+        naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+        sizes:
+          header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
+        url: url,
+        contentType: previewThumbnail.contentType as ImageContentType,
+      };
     }
-
-    const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-    const bytes = base64ToUint8Array(previewThumbnail.content);
-    const url = `data:${previewThumbnail.contentType};base64,${uint8ArrayToBase64(bytes)}`;
-
-    return {
-      naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes:
-        header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
-      url: url,
-      contentType: previewThumbnail.contentType as ImageContentType,
-    };
-  });
+  );
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control

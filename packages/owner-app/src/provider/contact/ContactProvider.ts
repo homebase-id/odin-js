@@ -40,8 +40,6 @@ export const saveContact = async (
     contact.id = existingContact?.id ?? getNewId();
     contact.fileId = existingContact?.fileId ?? undefined;
     contact.versionTag = existingContact?.versionTag || contact.versionTag;
-
-    // TODO multi-payload: Should we try and keep existing images
   }
 
   const payloads: PayloadFile[] = [];
@@ -98,7 +96,7 @@ export const saveContact = async (
       tags: tags,
       fileType: ContactConfig.ContactFileType,
       content: shouldEmbedContent ? payloadJson : null,
-      // Having the odinId MD5 hashed as unique id, should avoid having duplicates getting created, enforced server-side;
+      // Having the odinId MD5 hashed as unique id, avoids having duplicates getting created, enforced server-side;
       uniqueId: contact.odinId ? toGuidId(contact.odinId) : contact.id,
       previewThumbnail: previewThumb,
     },
