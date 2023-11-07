@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { uploadFile } from '../../core/DriveData/Upload/DriveFileUploadProvider';
+import { uploadFile, uploadHeader } from '../../core/DriveData/Upload/DriveFileUploadProvider';
 import {
   AccessControlList,
   ScheduleOptions,
@@ -17,6 +17,8 @@ import {
   TargetDrive,
   ThumbnailFile,
   createThumbnails,
+  deletePayload,
+  getFileHeader,
 } from '../../core/core';
 import {
   getNewId,
@@ -105,6 +107,12 @@ export const savePost = async <T extends PostContent>(
       mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined;
   }
   file.content.primaryMediaFile = mediaFiles[0];
+
+  console.log({
+    thumbnails,
+    payloads,
+    previewThumbnail,
+  });
 
   return await uploadPost(
     dotYouClient,
@@ -246,6 +254,126 @@ const uploadPost = async <T extends PostContent>(
     onVersionConflict
   );
   if (!result) throw new Error(`Upload failed`);
+
+  return result;
+};
+
+const uploadPostHeader = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  file: PostFile<T>,
+  targetDrive: TargetDrive
+) => {
+  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
+
+  const instructionSet: UploadInstructionSet = {
+    transferIv: getRandom16ByteArray(),
+    storageOptions: {
+      overwriteFileId: file?.fileId ?? '',
+      drive: targetDrive,
+    },
+    transitOptions: {
+      useGlobalTransitId: true,
+      recipients: [],
+      schedule: ScheduleOptions.SendLater,
+      sendContents: SendContents.All, // TODO: Should this be header only?
+    },
+  };
+
+  const payloadJson: string = jsonStringify64({ ...file.content, fileId: undefined });
+  const payloadBytes = stringToUint8Array(payloadJson);
+
+  // Set max of 3kb for content so enough room is left for metadata
+  const shouldEmbedContent = payloadBytes.length < 3000;
+  const content = shouldEmbedContent
+    ? payloadJson
+    : jsonStringify64({ channelId: file.content.channelId });
+
+  const isDraft = file.isDraft ?? false;
+
+  const metadata: UploadFileMetadata = {
+    versionTag: header?.fileMetadata?.versionTag,
+    allowDistribution: !isDraft,
+    appData: {
+      tags: [file.content.id],
+      uniqueId: file.content.id,
+      fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
+      content: content,
+      previewThumbnail: file.previewThumbnail,
+      userDate: file.userDate,
+      dataType: postTypeToDataType(file.content.type),
+    },
+    senderOdinId: file.content.authorOdinId,
+    isEncrypted: file.isEncrypted ?? false,
+    accessControlList: file.acl,
+  };
+
+  if (!shouldEmbedContent) {
+    throw new Error(
+      `[DotYouCore-js] PostProvider: Payloads are not supported for post updates ATM`
+    );
+    // Append/update payload
+  }
+
+  console.log(
+    'uploadHeader',
+    dotYouClient,
+    header?.sharedSecretEncryptedKeyHeader,
+    instructionSet,
+    metadata
+  );
+  return await uploadHeader(
+    dotYouClient,
+    file.isEncrypted ? header?.sharedSecretEncryptedKeyHeader : undefined,
+    instructionSet,
+    metadata
+  );
+};
+
+export const updatePost = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  file: PostFile<T>,
+  channelId: string,
+  mediaFiles: MediaFile[]
+): Promise<UploadResult> => {
+  const newMediaFiles = mediaFiles || (file.content as Media).mediaFiles;
+
+  if (!file.fileId || !file.acl || !file.content.id)
+    throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
+
+  if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
+
+  const targetDrive = GetTargetDriveFromChannelId(channelId);
+
+  // MediaFiles is only defined if it is updated
+  if (mediaFiles) {
+    // Discover deleted files:
+    const mediaFiles =
+      (file.content as Media).mediaFiles ||
+      (file.content.primaryMediaFile ? [file.content.primaryMediaFile] : []);
+    const deletedMediaFiles: MediaFile[] = [];
+    for (let i = 0; mediaFiles && i < mediaFiles?.length; i++) {
+      const mediaFile = mediaFiles[i];
+      if (!newMediaFiles?.find((f) => f.fileId === mediaFile.fileId)) {
+        deletedMediaFiles.push(mediaFile);
+      }
+    }
+
+    // Remove the payloads that are removed from the post
+    if (deletedMediaFiles.length) {
+      deletedMediaFiles.forEach(async (mediaFile) => {
+        await deletePayload(dotYouClient, targetDrive, file.fileId as string, mediaFile.fileKey);
+      });
+    }
+  }
+
+  if (newMediaFiles?.length) {
+    (file.content as Media).mediaFiles =
+      newMediaFiles && newMediaFiles.length > 1 ? newMediaFiles : undefined;
+  }
+  file.content.primaryMediaFile = newMediaFiles?.[0];
+
+  const result = await uploadPostHeader(dotYouClient, file, targetDrive);
+  if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 
   return result;
 };

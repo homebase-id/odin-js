@@ -118,6 +118,10 @@ export const PostImageDetailCard = ({
                     mediaFileIds?.length === 1 ? postFile.previewThumbnail : undefined
                   }
                   probablyEncrypted={postFile.isEncrypted}
+                  key={
+                    (currentMediaFile?.fileId || postFile.fileId || '') +
+                    (currentMediaFile?.fileKey || currIndex)
+                  }
                 />
               ) : (
                 <Video

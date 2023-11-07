@@ -33,48 +33,39 @@ export const EditPostDialog = ({
 }) => {
   const target = usePortal('modal-container');
   const {
-    save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
-    // removeFiles: { mutateAsync: removeFiles },
+    update: { mutateAsync: updatePost, error: updatePostError, status: updatePostStatus },
   } = usePost();
   const [postFile, setPostFile] = useState<PostFile<PostContent>>({ ...incomingPostFile });
-  const [toRemoveFiles, setToRemoveFiles] = useState<MediaFile[]>([]);
+  const [newMediaFiles, setNewMediaFiles] = useState<MediaFile[]>(
+    (postFile.content as Media).mediaFiles?.length
+      ? ((postFile.content as Media).mediaFiles as MediaFile[])
+      : postFile.content.primaryMediaFile
+      ? [postFile.content.primaryMediaFile]
+      : []
+  );
 
   useEffect(() => {
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
+      setNewMediaFiles(
+        (incomingPostFile.content as Media).mediaFiles?.length
+          ? ((incomingPostFile.content as Media).mediaFiles as MediaFile[])
+          : incomingPostFile.content.primaryMediaFile
+          ? [incomingPostFile.content.primaryMediaFile]
+          : []
+      );
     }
   }, [incomingPostFile]);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   const doUpdate = async () => {
     const newPostFile = { ...postFile };
 
-    if (toRemoveFiles?.length) {
-      // TODO multi-payload: Remove files
-      console.log('toRemoveFiles', toRemoveFiles);
-      // // Update mediaFiles to remove the refs of those that are set to be removed
-      // (newPostFile.content as Media).mediaFiles = (newPostFile.content as Media).mediaFiles?.filter(
-      //   (file) => !toRemoveFiles.some((toRemove) => toRemove === file.fileId)
-      // );
-
-      // // Set first fileId as primary if primary is set to be removed
-      // if (
-      //   toRemoveFiles.some(
-      //     (toRemove) => toRemove === newPostFile.content.primaryMediaFile?.fileId
-      //   )
-      // ) {
-      //   newPostFile.content.primaryMediaFile = (newPostFile.content as Media).mediaFiles?.[0];
-      // }
-
-      // await removeFiles({ files: toRemoveFiles, channelId: incomingPostFile.content.channelId });
-    }
-
-    await savePost({
+    await updatePost({
       channelId: incomingPostFile.content.channelId,
       postFile: { ...newPostFile },
+      mediaFiles: newMediaFiles,
     });
   };
 
@@ -82,7 +73,7 @@ export const EditPostDialog = ({
 
   const dialog = (
     <>
-      <ErrorNotification error={savePostError} />
+      <ErrorNotification error={updatePostError} />
       <DialogWrapper
         title={<div className="flex flex-row items-center">{t('Edit Post')}</div>}
         onClose={onCancel}
@@ -112,16 +103,9 @@ export const EditPostDialog = ({
           <ExistingFileOverview
             className="mt-2"
             fileId={postFile.fileId}
-            mediaFiles={
-              (postFile.content as Media).mediaFiles?.length
-                ? (postFile.content as Media).mediaFiles
-                : postFile.content.primaryMediaFile
-                ? [postFile.content.primaryMediaFile]
-                : []
-            }
+            mediaFiles={newMediaFiles}
             targetDrive={getChannelDrive(postFile.content.channelId)}
-            toRemoveFiles={toRemoveFiles}
-            setToRemoveFiles={setToRemoveFiles}
+            setMediaFiles={setNewMediaFiles}
           />
           <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
             <ActionButton
@@ -129,7 +113,7 @@ export const EditPostDialog = ({
                 postFile.content.caption?.length ? '' : 'pointer-events-none opacity-20 grayscale'
               }`}
               icon={Save}
-              state={savePostStatus}
+              state={updatePostStatus}
             >
               {t('Save')}
             </ActionButton>

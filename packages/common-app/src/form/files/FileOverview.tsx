@@ -108,66 +108,60 @@ export const FileOverview = ({
 };
 
 export const ExistingFileOverview = ({
-  mediaFiles,
   fileId,
-  toRemoveFiles,
+  mediaFiles,
   targetDrive,
-  setToRemoveFiles,
+  setMediaFiles,
   className,
 }: {
   mediaFiles?: MediaFile[];
   fileId: string;
-  toRemoveFiles: MediaFile[];
   targetDrive: TargetDrive;
-  setToRemoveFiles: (mediaFileIds: MediaFile[]) => void;
+  setMediaFiles: (mediaFileIds: MediaFile[]) => void;
   className?: string;
 }) => {
   if (!mediaFiles) return null;
 
   const renderedFiles = useMemo(() => {
-    return mediaFiles
-      .filter(
-        (file) =>
-          !toRemoveFiles.some(
-            (toRemoveFile) =>
-              toRemoveFile.fileId === file.fileId && toRemoveFile.fileKey === file.fileKey
-          )
-      )
-      .map((image) => {
-        return (
-          <div key={image.fileId + image.fileKey} className="relative w-1/2 p-[2px] md:w-1/3">
-            {image.type === 'video' ? (
-              <Video
-                fileId={image.fileId || fileId}
-                fileKey={image.fileKey}
-                targetDrive={targetDrive}
-                className="aspect-square h-full w-full"
-                directFileSizeLimit={10 * 1024}
-              />
-            ) : (
-              <Image
-                fileId={image.fileId || fileId}
-                fileKey={image.fileKey}
-                targetDrive={targetDrive}
-                className="aspect-square h-full w-full"
-                fit="cover"
-              />
-            )}
-            <ActionButton
-              className="absolute bottom-3 right-3"
-              icon={Trash}
-              type="remove"
-              size="square"
-              onClick={(e) => {
-                e.preventDefault();
-                setToRemoveFiles([...toRemoveFiles, image]);
-                return false;
-              }}
+    return mediaFiles.map((image) => {
+      return (
+        <div key={image.fileId + image.fileKey} className="relative w-1/2 p-[2px] md:w-1/3">
+          {image.type === 'video' ? (
+            <Video
+              fileId={image.fileId || fileId}
+              fileKey={image.fileKey}
+              targetDrive={targetDrive}
+              className="aspect-square h-full w-full"
+              directFileSizeLimit={10 * 1024}
             />
-          </div>
-        );
-      });
-  }, [mediaFiles, toRemoveFiles]);
+          ) : (
+            <Image
+              fileId={image.fileId || fileId}
+              fileKey={image.fileKey}
+              targetDrive={targetDrive}
+              className="aspect-square h-full w-full"
+              fit="cover"
+            />
+          )}
+          <ActionButton
+            className="absolute bottom-3 right-3"
+            icon={Trash}
+            type="remove"
+            size="square"
+            onClick={(e) => {
+              e.preventDefault();
+              setMediaFiles(
+                mediaFiles.filter(
+                  (file) => file.fileId !== image.fileId || file.fileKey !== image.fileKey
+                )
+              );
+              return false;
+            }}
+          />
+        </div>
+      );
+    });
+  }, [mediaFiles]);
 
   return (
     <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>

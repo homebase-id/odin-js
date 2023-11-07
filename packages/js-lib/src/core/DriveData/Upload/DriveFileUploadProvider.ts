@@ -100,6 +100,9 @@ export const uploadHeader = async (
     : undefined;
 
   const { systemFileType, ...strippedInstructions } = instructions;
+  if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
+
+  strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, keyHeader);

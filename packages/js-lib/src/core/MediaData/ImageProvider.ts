@@ -5,6 +5,7 @@ import {
   jsonStringify64,
   stringifyToQueryParams,
   getRandom16ByteArray,
+  getLargestThumbOfPayload,
 } from '../../helpers/DataUtil';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
@@ -132,6 +133,10 @@ export const getDecryptedThumbnailMeta = (
     const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
 
     let url: string | undefined;
+    const naturalSize = {
+      width: previewThumbnail.pixelWidth,
+      height: previewThumbnail.pixelHeight,
+    };
     if (
       header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
         .length > 1
@@ -144,11 +149,18 @@ export const getDecryptedThumbnailMeta = (
         { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
         header.fileMetadata.isEncrypted
       );
+
+      const correspondingPayload = header.fileMetadata.payloads.find(
+        (payload) => payload.key === fileKey
+      );
+      const largestThumb = getLargestThumbOfPayload(correspondingPayload);
+      naturalSize.width = largestThumb?.pixelWidth || naturalSize.width;
+      naturalSize.height = largestThumb?.pixelHeight || naturalSize.height;
     } else {
       url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }
     return {
-      naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
+      naturalSize: naturalSize,
       sizes:
         header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
       contentType: previewThumbnail.contentType as ImageContentType,
