@@ -178,6 +178,11 @@ export const usePost = () => {
                     ? [
                         {
                           ...newPost.postFile,
+                          content: {
+                            ...newPost.postFile.content,
+                            mediaFiles: newPost.mediaFiles,
+                            primaryMediaFile: newPost.mediaFiles?.[0],
+                          },
                           odinId: window.location.hostname,
                         },
                       ]

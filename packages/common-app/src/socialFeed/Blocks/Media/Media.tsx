@@ -24,7 +24,7 @@ export const PostMedia = ({
   className?: string;
 }) => {
   const { content: post, previewThumbnail } = postFile;
-  const mediaFileIds = (post as Media).mediaFiles;
+  const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (
@@ -40,14 +40,14 @@ export const PostMedia = ({
     return <div className={`${className || ''}`}></div>;
   }
 
-  if (mediaFileIds && mediaFileIds.length > 1)
+  if (mediaFiles && mediaFiles.length > 1)
     return (
       <MediaGallery
         odinId={odinId}
         fileId={postFile.fileId}
         globalTransitId={postFile.globalTransitId}
         channelId={post.channelId}
-        files={mediaFileIds}
+        files={mediaFiles}
         className={`${className || ''}`}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postFile.isEncrypted}

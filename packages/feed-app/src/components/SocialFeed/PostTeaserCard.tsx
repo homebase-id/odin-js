@@ -1,4 +1,4 @@
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { Media, PostContent, PostFile } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,
@@ -10,11 +10,14 @@ import {
   useSocialChannel,
   ErrorBoundary,
   PostBody,
+  t,
+  LoadingBlock,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
+
 interface PostTeaserCardProps {
   className?: string;
   postFile: PostFile<PostContent>;
@@ -84,6 +87,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             }}
             className="mb-4"
           />
+          <MediaStillUploading postFile={postFile} />
           <PostInteracts
             authorOdinId={odinId || window.location.hostname}
             postFile={postFile}
@@ -99,6 +103,37 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
         </FakeAnchor>
       </ErrorBoundary>
     </div>
+  );
+};
+
+const MediaStillUploading = ({ postFile }: { postFile: PostFile<PostContent> }) => {
+  if (postFile.fileId) return null;
+  if (!postFile.content.primaryMediaFile) return null;
+
+  const mediaFiles = (postFile.content as Media).mediaFiles || [postFile.content.primaryMediaFile];
+
+  return (
+    <>
+      <div className="relative grid grid-cols-2 gap-2">
+        {mediaFiles
+          ?.slice(0, 4)
+          ?.map((_media, index) => (
+            <LoadingBlock key={index} className="aspect-square h-full w-full" />
+          ))}
+        <div className="absolute inset-0 flex animate-pulse items-center justify-center">
+          <p>{t('Your media is being processed')}</p>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export const NewPostTeaserCard: FC<PostTeaserCardProps> = (props) => {
+  return (
+    <PostTeaserCard
+      {...props}
+      className={`${props.className} pointer-events-none bg-slate-100 dark:bg-slate-600`}
+    />
   );
 };
 

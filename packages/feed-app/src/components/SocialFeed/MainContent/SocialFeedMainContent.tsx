@@ -1,12 +1,12 @@
 import { PostContent } from '@youfoundation/js-lib/public';
-import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
+import { useMemo, useEffect, useRef, useLayoutEffect, FC } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
-import PostTeaserCard from '../PostTeaserCard';
+import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
 import { useSocialFeed } from '@youfoundation/common-app';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
 
@@ -116,6 +116,13 @@ const SocialFeedMainContent = () => {
                   }
 
                   const post = flattenedPosts[virtualRow.index];
+                  const postTeaserCardProps = {
+                    key: post.fileId || post.content.id,
+                    postFile: post,
+                    odinId: post.odinId,
+                    className: 'bg-background shadow-sm',
+                    showSummary: true,
+                  };
                   return (
                     <div
                       key={virtualRow.key}
@@ -123,17 +130,11 @@ const SocialFeedMainContent = () => {
                       ref={virtualizer.measureElement}
                       className="py-2"
                     >
-                      <PostTeaserCard
-                        key={post.fileId || post.content.id}
-                        postFile={post}
-                        odinId={post.odinId}
-                        className={`${
-                          !post.fileId
-                            ? 'overflow-hidden bg-slate-100 dark:bg-slate-600'
-                            : 'bg-background shadow-sm'
-                        }`}
-                        showSummary={true}
-                      />
+                      {post.fileId ? (
+                        <PostTeaserCard {...postTeaserCardProps} />
+                      ) : (
+                        <NewPostTeaserCard {...postTeaserCardProps} />
+                      )}
                     </div>
                   );
                 })}
