@@ -208,6 +208,7 @@ export const RepostButton = ({
           embeddedPost={{
             ...postFile.content,
             fileId: postFile.fileId,
+            globalTransitId: postFile.globalTransitId,
             permalink,
             userDate: postFile.userDate,
             previewThumbnail: postFile.previewThumbnail,

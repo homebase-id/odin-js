@@ -30,7 +30,8 @@ export const getDecryptedThumbnailMetaOverTransit = async (
   targetDrive: TargetDrive,
   fileId: string,
   globalTransitId: string | undefined,
-  fileKey: string
+  fileKey: string,
+  systemFileType: SystemFileType | undefined
 ): Promise<ThumbnailMeta | undefined> => {
   return (
     globalTransitId
@@ -38,9 +39,12 @@ export const getDecryptedThumbnailMetaOverTransit = async (
           dotYouClient,
           odinId,
           targetDrive,
-          globalTransitId
+          globalTransitId,
+          {
+            systemFileType,
+          }
         )
-      : getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId)
+      : getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, { systemFileType })
   ).then(async (header) => {
     if (!header?.fileMetadata.appData.previewThumbnail) return;
 
@@ -62,7 +66,8 @@ export const getDecryptedThumbnailMetaOverTransit = async (
         header.fileId || fileId,
         fileKey,
         { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
-        header.fileMetadata.isEncrypted
+        header.fileMetadata.isEncrypted,
+        systemFileType
       );
 
       const correspondingPayload = header.fileMetadata.payloads.find(

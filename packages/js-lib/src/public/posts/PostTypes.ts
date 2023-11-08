@@ -92,6 +92,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
   previewThumbnail?: EmbeddedThumb;
   fileId: string;
+  globalTransitId: string | undefined;
   userDate: number;
 }
 

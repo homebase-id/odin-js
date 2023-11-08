@@ -88,6 +88,7 @@ export const EmbeddedPostContent = ({
           <PostMedia
             postFile={{
               fileId: content.primaryMediaFile?.fileId || content.fileId,
+              globalTransitId: content.globalTransitId,
               content,
               previewThumbnail: content.previewThumbnail,
               isEncrypted: isChannelPublic,

@@ -99,6 +99,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                     permalink: '',
                     previewThumbnail: post.previewThumbnail,
                     fileId: post.fileId as string,
+                    globalTransitId: post.globalTransitId,
                   }}
                 />
               </div>

@@ -5,6 +5,7 @@ import {
   TargetDrive,
   DotYouClient,
   getDecryptedImageUrl,
+  SystemFileType,
 } from '@youfoundation/js-lib/core';
 import {
   getDecryptedImageUrlOverTransit,
@@ -16,6 +17,38 @@ interface ImageData {
   naturalSize?: ImageSize;
 }
 
+export const useImageCache = (dotYouClient: DotYouClient) => {
+  const localHost = dotYouClient.getIdentity() || window.location.hostname;
+  const queryClient = useQueryClient();
+
+  return {
+    getFromCache: (
+      odinId: string | undefined,
+      imageFileId: string,
+      imageGlobalTransitId: string | undefined,
+      imageFileKey: string,
+      imageDrive: TargetDrive
+    ) => {
+      const cachedEntries = queryClient
+        .getQueryCache()
+        .findAll({
+          queryKey: [
+            'image',
+            odinId || localHost,
+            imageDrive?.alias,
+            imageGlobalTransitId || imageFileId,
+            imageFileKey,
+          ],
+          exact: false,
+        })
+        .filter((query) => query.state.status === 'success');
+
+      if (cachedEntries?.length)
+        return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
+    },
+  };
+};
+
 export const useImage = (
   dotYouClient: DotYouClient,
   odinId?: string,
@@ -25,7 +58,8 @@ export const useImage = (
   imageDrive?: TargetDrive,
   size?: ImageSize,
   probablyEncrypted?: boolean,
-  naturalSize?: ImageSize
+  naturalSize?: ImageSize,
+  systemFileType?: SystemFileType
 ) => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
   const queryClient = useQueryClient();
@@ -126,7 +160,8 @@ export const useImage = (
                   imageGlobalTransitId,
                   imageFileKey,
                   size,
-                  probablyEncrypted
+                  probablyEncrypted,
+                  systemFileType
                 )
               : await getDecryptedImageUrlOverTransit(
                   dotYouClient,
@@ -135,7 +170,8 @@ export const useImage = (
                   imageFileId,
                   imageFileKey,
                   size,
-                  probablyEncrypted
+                  probablyEncrypted,
+                  systemFileType
                 )
             : await getDecryptedImageUrl(
                 dotYouClient,
@@ -143,7 +179,8 @@ export const useImage = (
                 imageFileId,
                 imageFileKey,
                 size,
-                probablyEncrypted
+                probablyEncrypted,
+                systemFileType
               ),
         naturalSize: naturalSize,
       };
@@ -182,29 +219,5 @@ export const useImage = (
       gcTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '',
     }),
-    getFromCache: (
-      odinId: string | undefined,
-      imageFileId: string,
-      imageGlobalTransitId: string | undefined,
-      imageFileKey: string,
-      imageDrive: TargetDrive
-    ) => {
-      const cachedEntries = queryClient
-        .getQueryCache()
-        .findAll({
-          queryKey: [
-            'image',
-            odinId || localHost,
-            imageDrive?.alias,
-            imageGlobalTransitId || imageFileId,
-            imageFileKey,
-          ],
-          exact: false,
-        })
-        .filter((query) => query.state.status === 'success');
-
-      if (cachedEntries?.length)
-        return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
-    },
   };
 };

@@ -1,7 +1,7 @@
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { useCommentMedia } from '../../../../../hooks';
-import { t } from '../../../../../helpers';
+import { useDotYouClient } from '../../../../../hooks';
 import { useMemo } from 'react';
+import { OdinImage } from '@youfoundation/ui-lib';
 
 export const CommentMedia = ({
   postAuthorOdinId,
@@ -14,24 +14,19 @@ export const CommentMedia = ({
   fileId?: string;
   fileKey?: string;
 }) => {
-  const { data: imageUrl } = useCommentMedia({
-    odinId: postAuthorOdinId,
-    targetDrive,
-    fileId,
-    fileKey,
-  }).fetch;
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
-  if (!imageUrl?.length)
-    return (
-      <div className="text-foreground my-1 flex h-10 animate-pulse flex-row items-center justify-center bg-white text-sm text-opacity-50">
-        {t('loading')}
-      </div>
-    );
-
+  if (!targetDrive) return null;
   return (
-    <>
-      <img src={imageUrl} className="my-1" />
-    </>
+    <OdinImage
+      odinId={postAuthorOdinId}
+      dotYouClient={dotYouClient}
+      fileId={fileId}
+      targetDrive={targetDrive}
+      fileKey={fileKey}
+      className="my-1 max-w-[250px]"
+      systemFileType="Comment"
+    />
   );
 };
 

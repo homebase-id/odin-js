@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useImage } from '../../hooks/image/useImage';
+import { useImage, useImageCache } from '../../hooks/image/useImage';
 import { useTinyThumb } from '../../hooks/image/useTinyThumb';
 import Loader from '../ui/Icons/Loader/Loader';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
-import { TargetDrive, EmbeddedThumb, ImageSize, DotYouClient } from '@youfoundation/js-lib/core';
+import {
+  TargetDrive,
+  EmbeddedThumb,
+  ImageSize,
+  DotYouClient,
+  SystemFileType,
+} from '@youfoundation/js-lib/core';
 
 import '../../app/app.css';
 import LoadingBlock from '../ui/LoadingBlock/LoadingBlock';
@@ -19,6 +25,7 @@ interface OdinImageSource {
 
   avoidPayload?: boolean;
   explicitSize?: ImageSize | 'full';
+  systemFileType?: SystemFileType;
 }
 
 export interface OdinImageSourceWithFileId extends OdinImageSource {
@@ -263,6 +270,7 @@ const useOdinImage = (props: UseOdinImageProps) => {
     probablyEncrypted,
     wrapperRef,
     previewImgRef,
+    systemFileType,
   } = props;
   const globalTransitId = 'globalTransitId' in props ? props.globalTransitId : undefined;
 
@@ -280,7 +288,7 @@ const useOdinImage = (props: UseOdinImageProps) => {
     return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
   }, [previewThumbnail]);
 
-  const { getFromCache } = useImage(dotYouClient);
+  const { getFromCache } = useImageCache(dotYouClient);
   const cachedImage = useMemo(
     () =>
       fileId && fileKey
@@ -302,7 +310,8 @@ const useOdinImage = (props: UseOdinImageProps) => {
     shouldLoadTiny ? fileId : undefined,
     globalTransitId,
     fileKey,
-    targetDrive
+    targetDrive,
+    systemFileType
   );
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
@@ -327,7 +336,8 @@ const useOdinImage = (props: UseOdinImageProps) => {
       ? { pixelHeight: 200, pixelWidth: 200 }
       : undefined,
     probablyEncrypted,
-    naturalSize
+    naturalSize,
+    systemFileType
   ).fetch;
 
   const calculateSize = () => {

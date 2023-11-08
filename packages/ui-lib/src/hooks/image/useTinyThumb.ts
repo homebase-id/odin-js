@@ -1,6 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { TargetDrive, DotYouClient, getDecryptedThumbnailMeta } from '@youfoundation/js-lib/core';
+import {
+  TargetDrive,
+  DotYouClient,
+  getDecryptedThumbnailMeta,
+  SystemFileType,
+} from '@youfoundation/js-lib/core';
 import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
 
 export const useTinyThumb = (
@@ -9,7 +14,8 @@ export const useTinyThumb = (
   imageFileId?: string,
   imageGlobalTransitId?: string,
   imageFileKey?: string,
-  imageDrive?: TargetDrive
+  imageDrive?: TargetDrive,
+  systemFileType?: SystemFileType
 ) => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
@@ -18,7 +24,8 @@ export const useTinyThumb = (
     imageFileId?: string,
     imageGlobalTransitId?: string,
     imageFileKey?: string,
-    imageDrive?: TargetDrive
+    imageDrive?: TargetDrive,
+    systemFileType?: SystemFileType
   ) => {
     if (
       imageFileId === undefined ||
@@ -37,12 +44,19 @@ export const useTinyThumb = (
           imageDrive,
           imageFileId,
           imageGlobalTransitId,
-          imageFileKey
+          imageFileKey,
+          systemFileType
         )) || null
       );
 
     return (
-      (await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId, imageFileKey)) || null
+      (await getDecryptedThumbnailMeta(
+        dotYouClient,
+        imageDrive,
+        imageFileId,
+        imageFileKey,
+        systemFileType
+      )) || null
     );
   };
 
@@ -60,7 +74,8 @@ export const useTinyThumb = (
         imageFileId,
         imageGlobalTransitId,
         imageFileKey,
-        imageDrive
+        imageDrive,
+        systemFileType
       ),
 
     refetchOnMount: false,

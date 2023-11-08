@@ -125,48 +125,52 @@ export const getDecryptedThumbnailMeta = (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  fileKey: string
+  fileKey: string,
+  systemFileType: SystemFileType | undefined
 ): Promise<ThumbnailMeta | undefined> => {
-  return getFileHeader(dotYouClient, targetDrive, fileId).then(async (header) => {
-    if (!header?.fileMetadata.appData.previewThumbnail) return;
+  return getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType }).then(
+    async (header) => {
+      if (!header?.fileMetadata.appData.previewThumbnail) return;
 
-    const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
 
-    let url: string | undefined;
-    const naturalSize = {
-      width: previewThumbnail.pixelWidth,
-      height: previewThumbnail.pixelHeight,
-    };
-    if (
-      header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
-        .length > 1
-    ) {
-      url = await getDecryptedImageUrl(
-        dotYouClient,
-        targetDrive,
-        fileId,
-        fileKey,
-        { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
-        header.fileMetadata.isEncrypted
-      );
+      let url: string | undefined;
+      const naturalSize = {
+        width: previewThumbnail.pixelWidth,
+        height: previewThumbnail.pixelHeight,
+      };
+      if (
+        header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
+          .length > 1
+      ) {
+        url = await getDecryptedImageUrl(
+          dotYouClient,
+          targetDrive,
+          fileId,
+          fileKey,
+          { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+          header.fileMetadata.isEncrypted,
+          systemFileType
+        );
 
-      const correspondingPayload = header.fileMetadata.payloads.find(
-        (payload) => payload.key === fileKey
-      );
-      const largestThumb = getLargestThumbOfPayload(correspondingPayload);
-      naturalSize.width = largestThumb?.pixelWidth || naturalSize.width;
-      naturalSize.height = largestThumb?.pixelHeight || naturalSize.height;
-    } else {
-      url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+        const correspondingPayload = header.fileMetadata.payloads.find(
+          (payload) => payload.key === fileKey
+        );
+        const largestThumb = getLargestThumbOfPayload(correspondingPayload);
+        naturalSize.width = largestThumb?.pixelWidth || naturalSize.width;
+        naturalSize.height = largestThumb?.pixelHeight || naturalSize.height;
+      } else {
+        url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+      }
+      return {
+        naturalSize: naturalSize,
+        sizes:
+          header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
+        contentType: previewThumbnail.contentType as ImageContentType,
+        url: url,
+      };
     }
-    return {
-      naturalSize: naturalSize,
-      sizes:
-        header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
-      contentType: previewThumbnail.contentType as ImageContentType,
-      url: url,
-    };
-  });
+  );
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
