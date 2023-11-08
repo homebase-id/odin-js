@@ -74,11 +74,9 @@ export const useAttribute = ({
   };
 
   const removeData = async (attribute: AttributeFile) => {
-    if (attribute.fileId) {
+    if (attribute.fileId)
       return await removeAttribute(dotYouClient, attribute.profileId, attribute.fileId);
-    } else {
-      console.error('No FileId provided for removeData');
-    }
+    else console.error('No FileId provided for removeData');
   };
 
   return {

@@ -46,23 +46,27 @@ export const useLinks = () => {
     };
 
     const fetchDynamicData = async () => {
-      const linkAttributes = await getAttributeVersions(
-        dotYouClient,
-        BuiltInProfiles.StandardProfileId,
-        undefined,
-        [BuiltInAttributes.Link]
-      );
+      try {
+        const linkAttributes = await getAttributeVersions(
+          dotYouClient,
+          BuiltInProfiles.StandardProfileId,
+          undefined,
+          [BuiltInAttributes.Link]
+        );
 
-      return linkAttributes
-        ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
-        .map((attribute) => {
-          return {
-            text: attribute.data[LinkFields.LinkText] as string,
-            target: attribute.data[LinkFields.LinkTarget] as string,
-            id: attribute.id,
-            priority: attribute.priority,
-          };
-        });
+        return linkAttributes
+          ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
+          .map((attribute) => {
+            return {
+              text: attribute.data[LinkFields.LinkText] as string,
+              target: attribute.data[LinkFields.LinkTarget] as string,
+              id: attribute.id,
+              priority: attribute.priority,
+            };
+          });
+      } catch (e) {
+        console.error('failed to fetch dynamic data');
+      }
     };
 
     const returnData = (await fetchStaticData()) ?? (await fetchDynamicData());

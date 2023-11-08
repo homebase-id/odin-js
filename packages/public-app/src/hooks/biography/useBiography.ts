@@ -99,39 +99,43 @@ export const useBiography = () => {
     };
 
     const fetchDynamicData = async (): Promise<BiographyData | undefined> => {
-      const shortBiographyAttributes = (
-        await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
-          BuiltInAttributes.ShortBio,
-        ])
-      )?.map((attribute) => {
-        return {
-          body: attribute.data[MinimalProfileFields.ShortBioId] as string,
-          id: attribute.id,
-          priority: attribute.priority,
-        };
-      });
+      try {
+        const shortBiographyAttributes = (
+          await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+            BuiltInAttributes.ShortBio,
+          ])
+        )?.map((attribute) => {
+          return {
+            body: attribute.data[MinimalProfileFields.ShortBioId] as string,
+            id: attribute.id,
+            priority: attribute.priority,
+          };
+        });
 
-      const longBiographyAttributes = (
-        await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
-          BuiltInAttributes.Experience,
-        ])
-      )?.map((attribute) => {
-        return {
-          title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
-          body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
-            | string
-            | Record<string, unknown>[],
-          link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-          imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
-          id: attribute.id,
-          priority: attribute.priority,
-        };
-      });
+        const longBiographyAttributes = (
+          await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+            BuiltInAttributes.Experience,
+          ])
+        )?.map((attribute) => {
+          return {
+            title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
+            body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
+              | string
+              | Record<string, unknown>[],
+            link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
+            imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            id: attribute.id,
+            priority: attribute.priority,
+          };
+        });
 
-      return {
-        shortBio: shortBiographyAttributes?.[0],
-        experience: longBiographyAttributes || [],
-      };
+        return {
+          shortBio: shortBiographyAttributes?.[0],
+          experience: longBiographyAttributes || [],
+        };
+      } catch (e) {
+        console.error('failed to fetch dynamic data');
+      }
     };
 
     const returnData = (await fetchStaticData()) ?? (await fetchDynamicData());
