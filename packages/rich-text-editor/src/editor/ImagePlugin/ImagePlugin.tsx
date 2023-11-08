@@ -7,7 +7,7 @@ import {
 } from '@udecode/plate-core';
 import { Value, insertNodes, removeNodes, TElement } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
-import { DEFAULT_PAYLOAD_KEY, SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
+import { SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { ImageIcon, Pencil, Trash, t, useImage } from '@youfoundation/common-app';
 import { Image } from '@youfoundation/common-app';
@@ -83,7 +83,7 @@ export const ImageToolbarButton = ({ targetDrive, ...props }: ImageToolbarButton
             });
 
             if (uploadResult)
-              insertImage(editor, uploadResult.fileId, DEFAULT_PAYLOAD_KEY, targetDrive);
+              insertImage(editor, uploadResult.fileId, uploadResult.fileKey, targetDrive);
           }
 
           setIsActive(false);
@@ -123,7 +123,7 @@ export const ImageElementBlock = <V extends Value = Value>(
             <Image
               targetDrive={element.targetDrive}
               fileId={element.fileId}
-              fileKey={DEFAULT_PAYLOAD_KEY}
+              fileKey={element.fileKey}
               className={` ${''}`}
             />
             <ActionButton

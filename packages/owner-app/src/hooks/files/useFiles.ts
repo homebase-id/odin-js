@@ -1,8 +1,9 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   decryptJsonContent,
   decryptKeyHeader,
   DEFAULT_PAYLOAD_KEY,
+  deleteFile,
   DriveSearchResult,
   getContentFromHeaderOrPayload,
   getPayloadBytes,
@@ -23,6 +24,7 @@ export const useFiles = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
+  const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchFiles = async ({
@@ -97,6 +99,8 @@ export const useFiles = ({
     return url;
   };
 
+  const removeFile = async (fileId: string) => await deleteFile(dotYouClient, targetDrive, fileId);
+
   return {
     fetch: useInfiniteQuery({
       queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
@@ -106,9 +110,16 @@ export const useFiles = ({
         lastPage?.searchResults?.length >= pageSize ? lastPage?.cursorState : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
       enabled: !!targetDrive,
     }),
     fetchFile: fetchFile,
+    deleteFile: useMutation({
+      mutationFn: removeFile,
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
+        });
+      },
+    }),
   };
 };
