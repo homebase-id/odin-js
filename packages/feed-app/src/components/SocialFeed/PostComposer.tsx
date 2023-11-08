@@ -51,8 +51,7 @@ const PostComposer = ({
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
-  const isPosting =
-    postState === 'processing' || postState === 'uploading' || postState === 'encrypting';
+  const isPosting = postState === 'uploading' || postState === 'encrypting';
 
   const doPost = async () => {
     if (isPosting) return;

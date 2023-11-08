@@ -35,8 +35,9 @@ export const CommentMedia = ({
   );
 };
 
-export const CommentMediaPreview = ({ attachment: file }: { attachment: File }) => {
-  const imageUrl = useMemo(() => URL.createObjectURL(file), [file]);
+export const CommentMediaPreview = ({ attachment: file }: { attachment: File | undefined }) => {
+  const imageUrl = useMemo(() => file && URL.createObjectURL(file), [file]);
+  if (!file) return null;
 
   return (
     <>
