@@ -21,9 +21,8 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
     context: ReactionContext;
     pageParam?: string;
   }): Promise<UseCommentsVal> => {
-    if (!context.authorOdinId || !context.channelId || !context.target.globalTransitId) {
+    if (!context.authorOdinId || !context.channelId || !context.target.globalTransitId)
       return { comments: [] as ReactionFile[], cursorState: undefined };
-    }
 
     const response = await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
     setTimeout(() => {

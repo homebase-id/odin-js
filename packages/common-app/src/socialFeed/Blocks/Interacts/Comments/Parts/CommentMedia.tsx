@@ -1,6 +1,7 @@
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { useCommentMedia } from '../../../../../hooks';
 import { t } from '../../../../../helpers';
+import { useMemo } from 'react';
 
 export const CommentMedia = ({
   postAuthorOdinId,
@@ -13,7 +14,6 @@ export const CommentMedia = ({
   fileId?: string;
   fileKey?: string;
 }) => {
-  // console.log({ odinId: postAuthorOdinId, targetDrive, fileId });
   const { data: imageUrl } = useCommentMedia({
     odinId: postAuthorOdinId,
     targetDrive,
@@ -31,6 +31,16 @@ export const CommentMedia = ({
   return (
     <>
       <img src={imageUrl} className="my-1" />
+    </>
+  );
+};
+
+export const CommentMediaPreview = ({ attachment: file }: { attachment: File }) => {
+  const imageUrl = useMemo(() => URL.createObjectURL(file), [file]);
+
+  return (
+    <>
+      <img src={imageUrl} className="my-1 max-w-[250px]" />
     </>
   );
 };

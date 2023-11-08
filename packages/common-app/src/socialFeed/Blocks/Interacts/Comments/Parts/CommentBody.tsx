@@ -1,11 +1,12 @@
 import {
   GetTargetDriveFromChannelId,
+  RawReactionContent,
   ReactionContent,
   ReactionContext,
 } from '@youfoundation/js-lib/public';
 import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
-import { CommentMedia } from './CommentMedia';
+import { CommentMedia, CommentMediaPreview } from './CommentMedia';
 import { ActionButtonState } from '../../../../../ui';
 
 export const CommentBody = ({
@@ -19,7 +20,7 @@ export const CommentBody = ({
 }: {
   context?: ReactionContext;
   commentFileId?: string;
-  content: ReactionContent;
+  content: RawReactionContent | ReactionContent;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;
@@ -51,6 +52,8 @@ export const CommentBody = ({
               fileId={commentFileId}
               fileKey={content.mediaPayloadKey}
             />
+          ) : (content as RawReactionContent)?.attachment ? (
+            <CommentMediaPreview attachment={(content as RawReactionContent)?.attachment} />
           ) : null}
         </>
       )}

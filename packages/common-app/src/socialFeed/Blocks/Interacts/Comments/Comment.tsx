@@ -12,6 +12,7 @@ import {
   CommentReactionPreview,
   ReactionContext,
   ReactionFile,
+  ReactionVm,
 } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
@@ -23,7 +24,7 @@ import { CommentThread } from './Parts/CommentThread';
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: ReactionFile;
+  commentData: ReactionFile | ReactionVm;
   isThread: boolean;
   onReply?: () => void;
 }
