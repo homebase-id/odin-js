@@ -66,9 +66,9 @@ const FileBrowser = ({
       }
     >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {driveData?.pages?.[currentPage - 1]?.searchResults.map((file) => {
-          return <File key={file.fileId} file={file} targetDrive={targetDrive} />;
-        })}
+        {driveData?.pages?.[currentPage - 1]?.searchResults.map((file) => (
+          <File key={file.fileId} file={file} targetDrive={targetDrive} />
+        ))}
       </div>
     </Section>
   );
