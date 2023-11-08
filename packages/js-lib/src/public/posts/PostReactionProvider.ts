@@ -24,12 +24,6 @@ import {
   getNewId,
   tryJsonParse,
 } from '../../helpers/DataUtil';
-import {
-  deleteFileOverTransit,
-  getContentFromHeaderOrPayloadOverTransit,
-  queryBatchOverTransit,
-  uploadFileOverTransit,
-} from '../../transit/TransitData/TransitProvider';
 import { TransitInstructionSet, TransitUploadResult } from '../../transit/TransitData/TransitTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import {
@@ -44,6 +38,10 @@ import {
 } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import { EmbeddedThumb, PayloadFile } from '../../../core';
+import { uploadFileOverTransit } from '../../transit/TransitData/Upload/TransitUploadProvider';
+import { deleteFileOverTransit } from '../../transit/TransitData/File/TransitFileManageProvider';
+import { queryBatchOverTransit } from '../../transit/TransitData/Query/TransitDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from '../../transit/TransitData/File/TransitFileProvider';
 
 const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 

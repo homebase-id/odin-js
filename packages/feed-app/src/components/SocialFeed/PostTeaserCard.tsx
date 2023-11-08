@@ -73,6 +73,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
               <PostBody post={post} odinId={odinId} />
             </div>
           </div>
+          {postFile.fileId}
           <DoubleClickHeartForMedia
             odinId={odinId}
             postFile={postFile}

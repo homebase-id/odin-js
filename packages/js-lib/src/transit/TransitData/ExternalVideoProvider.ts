@@ -6,8 +6,7 @@ import {
   TargetDrive,
 } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/helpers';
-
-import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './TransitProvider';
+import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './File/TransitFileProvider';
 
 export const getDecryptedVideoChunkOverTransit = async (
   dotYouClient: DotYouClient,

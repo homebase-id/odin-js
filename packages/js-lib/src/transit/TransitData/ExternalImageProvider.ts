@@ -14,9 +14,9 @@ import {
 } from '../../helpers/DataUtil';
 import {
   getFileHeaderOverTransit,
-  getThumbBytesOverTransit,
   getPayloadBytesOverTransit,
-} from './TransitProvider';
+  getThumbBytesOverTransit,
+} from './File/TransitFileProvider';
 
 export const getDecryptedThumbnailMetaOverTransit = async (
   dotYouClient: DotYouClient,

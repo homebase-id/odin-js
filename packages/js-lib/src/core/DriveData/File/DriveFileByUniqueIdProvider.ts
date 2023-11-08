@@ -11,7 +11,6 @@ import {
 import { TargetDrive, SystemFileType, ContentType, ImageContentType } from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
-import { DEFAULT_PAYLOAD_KEY } from '../Upload/UploadHelpers';
 
 interface GetFileByUniqueIdRequest {
   alias: string;
@@ -139,6 +138,7 @@ export const getPayloadBytesByUniqueId = async (
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
+  assertIfDefined('Key', key);
 
   const { keyHeader, chunkStart, chunkEnd } = options;
   const decrypt = options?.decrypt ?? true;
@@ -148,7 +148,7 @@ export const getPayloadBytesByUniqueId = async (
   const request: GetFileByUniqueIdPayloadRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
-    key: DEFAULT_PAYLOAD_KEY,
+    key,
   };
 
   const config: AxiosRequestConfig = {
@@ -187,7 +187,7 @@ export const getPayloadBytesByUniqueId = async (
             )
           : await decryptBytesResponse(dotYouClient, response, keyHeader),
 
-        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
     })
     .catch((error) => {
@@ -209,6 +209,7 @@ export const getThumbBytesByUniqueId = async (
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
+  assertIfDefined('Key', key);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 

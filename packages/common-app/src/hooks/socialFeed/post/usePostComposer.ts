@@ -19,7 +19,7 @@ import {
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
-import { makeGrid, useDotYouClient } from '../../../..';
+import { useDotYouClient } from '../../../..';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<

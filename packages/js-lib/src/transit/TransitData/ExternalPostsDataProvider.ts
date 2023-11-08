@@ -16,11 +16,9 @@ import {
   getRecentPosts,
   getChannelDrive,
 } from '../../public/public';
-import {
-  getContentFromHeaderOrPayloadOverTransit,
-  getDrivesByTypeOverTransit,
-  queryBatchOverTransit,
-} from './TransitProvider';
+import { getDrivesByTypeOverTransit } from './Drive/TransitDriveProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
+import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 
