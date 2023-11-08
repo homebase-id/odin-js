@@ -153,7 +153,7 @@ export const useArticleComposer = ({
       );
     }
 
-    if (uploadResult && !dirtyPostFile.fileId) {
+    if (uploadResult)
       setPostFile((oldPostFile) => {
         return {
           ...oldPostFile,
@@ -161,7 +161,6 @@ export const useArticleComposer = ({
           versionTag: uploadResult.newVersionTag,
         };
       });
-    }
   };
 
   const doRemovePost = async () => {

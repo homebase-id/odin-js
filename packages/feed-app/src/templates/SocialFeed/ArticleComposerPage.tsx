@@ -217,7 +217,9 @@ export const ArticleComposerPage = () => {
                 } else if (e.target.name === 'caption') {
                   dirtyPostFile.content.caption = (e.target.value as string).trim();
                 } else if (e.target.name === 'primaryImageFileId') {
-                  setPrimaryMediaFile({ file: e.target.value as Blob });
+                  setPrimaryMediaFile(
+                    e.target.value ? { file: e.target.value as Blob } : undefined
+                  );
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.content.body = e.target.value as RichText;
                 }

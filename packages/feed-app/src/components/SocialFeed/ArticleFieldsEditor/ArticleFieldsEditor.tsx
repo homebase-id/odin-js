@@ -6,7 +6,7 @@ import {
   RichText,
   NewMediaFile,
 } from '@youfoundation/js-lib/public';
-import { lazy, useEffect, useState } from 'react';
+import { lazy, useState } from 'react';
 import {
   t,
   ErrorBoundary,
@@ -30,8 +30,8 @@ export const InnerFieldEditors = ({
 }: {
   postFile: PostFile<Article>;
   channel: ChannelDefinition;
-  primaryMediaFile: NewMediaFile | undefined;
-  onChange: (e: { target: { name: string; value: string | Blob | RichText } }) => void;
+  primaryMediaFile: NewMediaFile | undefined | null;
+  onChange: (e: { target: { name: string; value: string | Blob | RichText | undefined } }) => void;
   disabled?: boolean;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
@@ -98,9 +98,15 @@ export const InnerFieldEditors = ({
                 <ImageSelector
                   id="post_image"
                   name="primaryImageFileId"
-                  defaultValue={primaryMediaFile?.file || imageBlob || undefined}
+                  defaultValue={
+                    primaryMediaFile === null
+                      ? imageBlob || undefined
+                      : primaryMediaFile === undefined
+                      ? undefined
+                      : primaryMediaFile?.file || imageBlob || undefined
+                  }
                   onChange={(e) =>
-                    e.target.value && onChange(e as { target: { name: string; value: Blob } })
+                    onChange(e as { target: { name: string; value: Blob | undefined } })
                   }
                   sizeClass={`${
                     !postFile.content.primaryMediaFile ? 'aspect-[16/9] md:aspect-[5/1]' : ''

@@ -236,7 +236,6 @@ const uploadPost = async <T extends PostContent>(
   }
 
   const isDraft = file.isDraft ?? false;
-
   const metadata: UploadFileMetadata = {
     versionTag: file?.versionTag,
     allowDistribution: !isDraft,
@@ -399,9 +398,14 @@ export const updatePost = async <T extends PostContent>(
     }
   }
 
+  if (oldMediaFiles.length === deletedMediaFiles.length) {
+    file.previewThumbnail = undefined;
+  }
+
   // Discover new files:
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
+  let previewThumbnail: EmbeddedThumb | undefined;
   for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
     const newMediaFile = newMediaFiles[i];
     const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${oldMediaFiles.length + i}`;
@@ -409,13 +413,17 @@ export const updatePost = async <T extends PostContent>(
       payload: newMediaFile.file,
       key: payloadKey,
     });
-    const { additionalThumbnails } = await createThumbnails(newMediaFile.file, payloadKey);
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      newMediaFile.file,
+      payloadKey
+    );
     thumbnails.push(...additionalThumbnails);
     existingMediaFiles.push({
       fileId: file.fileId,
       fileKey: payloadKey,
       type: 'image',
     });
+    previewThumbnail = previewThumbnail || tinyThumb;
   }
 
   // Append new files:
@@ -442,6 +450,7 @@ export const updatePost = async <T extends PostContent>(
     (file.content as Media).mediaFiles =
       existingMediaFiles && existingMediaFiles.length > 1 ? existingMediaFiles : undefined;
   file.content.primaryMediaFile = existingMediaFiles?.[0];
+  file.previewThumbnail = file.previewThumbnail || previewThumbnail;
 
   const encrypt = !(
     file.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||

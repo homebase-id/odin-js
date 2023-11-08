@@ -24,40 +24,38 @@ export function FixedToolbarButtons({ mediaDrive }: { mediaDrive?: TargetDrive }
   return (
     <div className="w-full overflow-hidden">
       <div
-        className="flex flex-wrap"
+        className={`flex flex-wrap ${readOnly ? 'pointer-events-none cursor-not-allowed' : ''}`}
         style={{
           transform: 'translateX(calc(-1px))',
         }}
       >
-        {!readOnly && (
-          <>
-            <ToolbarGroup noSeparator>
-              <InsertDropdownMenu />
-              <TurnIntoDropdownMenu />
-            </ToolbarGroup>
+        <>
+          <ToolbarGroup noSeparator>
+            <InsertDropdownMenu />
+            <TurnIntoDropdownMenu />
+          </ToolbarGroup>
 
-            <ToolbarGroup>
-              <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={MARK_BOLD}>
-                <Bold className="h-5 w-5" />
-              </MarkToolbarButton>
-              <MarkToolbarButton tooltip="Italic (⌘+I)" nodeType={MARK_ITALIC}>
-                <Italic className="h-5 w-5" />
-              </MarkToolbarButton>
-              <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={MARK_UNDERLINE}>
-                <Underline className="h-5 w-5" />
-              </MarkToolbarButton>
+          <ToolbarGroup>
+            <MarkToolbarButton tooltip="Bold (⌘+B)" nodeType={MARK_BOLD}>
+              <Bold className="h-5 w-5" />
+            </MarkToolbarButton>
+            <MarkToolbarButton tooltip="Italic (⌘+I)" nodeType={MARK_ITALIC}>
+              <Italic className="h-5 w-5" />
+            </MarkToolbarButton>
+            <MarkToolbarButton tooltip="Underline (⌘+U)" nodeType={MARK_UNDERLINE}>
+              <Underline className="h-5 w-5" />
+            </MarkToolbarButton>
 
-              <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={MARK_STRIKETHROUGH}>
-                <Icons.strikethrough />
-              </MarkToolbarButton>
-              <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={MARK_CODE}>
-                <Icons.code />
-              </MarkToolbarButton>
-              <LinkToolbarButton />
-              {mediaDrive ? <ImageToolbarButton targetDrive={mediaDrive} /> : null}
-            </ToolbarGroup>
-          </>
-        )}
+            <MarkToolbarButton tooltip="Strikethrough (⌘+⇧+M)" nodeType={MARK_STRIKETHROUGH}>
+              <Icons.strikethrough />
+            </MarkToolbarButton>
+            <MarkToolbarButton tooltip="Code (⌘+E)" nodeType={MARK_CODE}>
+              <Icons.code />
+            </MarkToolbarButton>
+            <LinkToolbarButton />
+            {mediaDrive ? <ImageToolbarButton targetDrive={mediaDrive} /> : null}
+          </ToolbarGroup>
+        </>
       </div>
     </div>
   );

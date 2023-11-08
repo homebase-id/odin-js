@@ -19,7 +19,7 @@ import {
   MediaGallery,
   EmbeddedPostContent,
 } from '../../..';
-import { DEFAULT_PAYLOAD_KEY, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -44,7 +44,7 @@ export const PostDetailCard = ({
 }) => {
   const post = postFile?.content;
   const mediaFiles = (post as Media)?.mediaFiles;
-
+  console.log(postFile);
   return (
     <div
       className={`bg-background rounded-lg border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
@@ -127,7 +127,7 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId}
-                fileKey={DEFAULT_PAYLOAD_KEY}
+                fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
                 previewThumbnail={postFile?.previewThumbnail}
@@ -137,7 +137,7 @@ export const PostDetailCard = ({
               <Video
                 targetDrive={getChannelDrive(post.channelId)}
                 fileId={post.primaryMediaFile.fileId}
-                fileKey={DEFAULT_PAYLOAD_KEY}
+                fileKey={post.primaryMediaFile.fileKey}
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
                 probablyEncrypted={postFile?.isEncrypted}
