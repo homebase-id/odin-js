@@ -219,7 +219,7 @@ export const getFileHeaderBytesOverTransitByGlobalTransitId = async (
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
-  options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
+  options?: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<DriveSearchResult> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('OdinId', odinId);

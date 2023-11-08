@@ -6,7 +6,10 @@ import {
   DotYouClient,
   getDecryptedImageUrl,
 } from '@youfoundation/js-lib/core';
-import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
+import {
+  getDecryptedImageUrlOverTransit,
+  getDecryptedImageUrlOverTransitByGlobalTransitId,
+} from '@youfoundation/js-lib/transit';
 
 interface ImageData {
   url: string;
@@ -17,6 +20,7 @@ export const useImage = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string | undefined,
+  imageGlobalTransitId?: string | undefined,
   imageFileKey?: string | undefined,
   imageDrive?: TargetDrive,
   size?: ImageSize,
@@ -29,6 +33,7 @@ export const useImage = (
   const checkIfWeHaveLargerCachedImage = (
     odinId: string | undefined,
     imageFileId: string,
+    imageGlobalTransitId: string | undefined,
     imageFileKey: string,
     imageDrive: TargetDrive,
     size?: ImageSize
@@ -36,7 +41,13 @@ export const useImage = (
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId, imageFileKey],
+        queryKey: [
+          'image',
+          odinId || localHost,
+          imageDrive?.alias,
+          imageGlobalTransitId || imageFileId,
+          imageFileKey,
+        ],
         exact: false,
       })
       .filter((query) => query.state.status !== 'error');
@@ -74,6 +85,7 @@ export const useImage = (
   const fetchImageData = async (
     odinId: string,
     imageFileId: string | undefined,
+    imageGlobalTransitId: string | undefined,
     imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
@@ -92,6 +104,7 @@ export const useImage = (
     const cachedEntry = checkIfWeHaveLargerCachedImage(
       odinId,
       imageFileId,
+      imageGlobalTransitId,
       imageFileKey,
       imageDrive,
       size
@@ -105,15 +118,25 @@ export const useImage = (
       return {
         url:
           odinId !== localHost
-            ? await getDecryptedImageUrlOverTransit(
-                dotYouClient,
-                odinId,
-                imageDrive,
-                imageFileId,
-                imageFileKey,
-                size,
-                probablyEncrypted
-              )
+            ? imageGlobalTransitId
+              ? await getDecryptedImageUrlOverTransitByGlobalTransitId(
+                  dotYouClient,
+                  odinId,
+                  imageDrive,
+                  imageGlobalTransitId,
+                  imageFileKey,
+                  size,
+                  probablyEncrypted
+                )
+              : await getDecryptedImageUrlOverTransit(
+                  dotYouClient,
+                  odinId,
+                  imageDrive,
+                  imageFileId,
+                  imageFileKey,
+                  size,
+                  probablyEncrypted
+                )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
@@ -135,7 +158,7 @@ export const useImage = (
         'image',
         odinId || localHost,
         imageDrive?.alias,
-        imageFileId,
+        imageGlobalTransitId || imageFileId,
         imageFileKey,
         // Rounding the cache key of the size so close enough sizes will be cached together
         size
@@ -146,6 +169,7 @@ export const useImage = (
         fetchImageData(
           odinId || localHost,
           imageFileId,
+          imageGlobalTransitId,
           imageFileKey,
           imageDrive,
           size,
@@ -161,13 +185,20 @@ export const useImage = (
     getFromCache: (
       odinId: string | undefined,
       imageFileId: string,
+      imageGlobalTransitId: string | undefined,
       imageFileKey: string,
       imageDrive: TargetDrive
     ) => {
       const cachedEntries = queryClient
         .getQueryCache()
         .findAll({
-          queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId, imageFileKey],
+          queryKey: [
+            'image',
+            odinId || localHost,
+            imageDrive?.alias,
+            imageGlobalTransitId || imageFileId,
+            imageFileKey,
+          ],
           exact: false,
         })
         .filter((query) => query.state.status === 'success');

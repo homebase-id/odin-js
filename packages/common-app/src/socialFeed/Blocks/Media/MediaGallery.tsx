@@ -7,6 +7,7 @@ interface MediaGalleryProps {
   odinId?: string;
   files: MediaFile[];
   fileId: string;
+  globalTransitId?: string;
   channelId: string;
   className?: string;
   maxVisible?: number;
@@ -22,6 +23,7 @@ export const MediaGallery = ({
   odinId,
   files,
   fileId,
+  globalTransitId,
   channelId,
   className,
   maxVisible = 4,
@@ -72,6 +74,7 @@ export const MediaGallery = ({
                     odinId={odinId}
                     className={`h-full w-auto`}
                     fileId={file.fileId || fileId}
+                    globalTransitId={globalTransitId}
                     fileKey={file.fileKey}
                     targetDrive={targetDrive}
                     fit="cover"

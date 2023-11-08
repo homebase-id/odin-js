@@ -7,6 +7,7 @@ export const useTinyThumb = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string,
+  imageGlobalTransitId?: string,
   imageFileKey?: string,
   imageDrive?: TargetDrive
 ) => {
@@ -15,6 +16,7 @@ export const useTinyThumb = (
   const fetchImageData = async (
     odinId: string,
     imageFileId?: string,
+    imageGlobalTransitId?: string,
     imageFileKey?: string,
     imageDrive?: TargetDrive
   ) => {
@@ -34,6 +36,7 @@ export const useTinyThumb = (
           odinId,
           imageDrive,
           imageFileId,
+          imageGlobalTransitId,
           imageFileKey
         )) || null
       );
@@ -44,8 +47,21 @@ export const useTinyThumb = (
   };
 
   return useQuery({
-    queryKey: ['tinyThumb', odinId || localHost, imageDrive?.alias, imageFileId, imageFileKey],
-    queryFn: () => fetchImageData(odinId || localHost, imageFileId, imageFileKey, imageDrive),
+    queryKey: [
+      'tinyThumb',
+      odinId || localHost,
+      imageDrive?.alias,
+      imageGlobalTransitId || imageFileId,
+      imageFileKey,
+    ],
+    queryFn: () =>
+      fetchImageData(
+        odinId || localHost,
+        imageFileId,
+        imageGlobalTransitId,
+        imageFileKey,
+        imageDrive
+      ),
 
     refetchOnMount: false,
     refetchOnWindowFocus: false,

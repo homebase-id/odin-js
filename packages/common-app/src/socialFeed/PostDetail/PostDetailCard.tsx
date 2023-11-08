@@ -104,6 +104,7 @@ export const PostDetailCard = ({
         mediaFiles && mediaFiles.length > 1 ? (
           <MediaGallery
             fileId={postFile.fileId}
+            globalTransitId={postFile.globalTransitId}
             channelId={post.channelId}
             files={mediaFiles}
             className="my-4"
@@ -126,6 +127,7 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId}
+                globalTransitId={postFile.globalTransitId}
                 fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
@@ -136,6 +138,7 @@ export const PostDetailCard = ({
               <Video
                 targetDrive={getChannelDrive(post.channelId)}
                 fileId={post.primaryMediaFile.fileId}
+                globalTransitId={postFile.globalTransitId}
                 fileKey={post.primaryMediaFile.fileKey}
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}

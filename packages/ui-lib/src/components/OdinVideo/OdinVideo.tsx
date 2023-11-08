@@ -24,6 +24,7 @@ export interface OdinVideoProps {
   odinId?: string;
   targetDrive: TargetDrive;
   fileId: string | undefined;
+  globalTransitId?: string;
   fileKey: string | undefined;
   className?: string;
   probablyEncrypted?: boolean;

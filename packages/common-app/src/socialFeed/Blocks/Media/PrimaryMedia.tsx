@@ -1,11 +1,12 @@
-import { getChannelDrive, MediaFile, PostContent } from '@youfoundation/js-lib/public';
-import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { getChannelDrive, MediaFile } from '@youfoundation/js-lib/public';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
 
 export const PrimaryMedia = ({
   odinId,
   primaryMediaFile,
   fileId,
+  globalTransitId,
   channelId,
   className,
   fit,
@@ -17,6 +18,7 @@ export const PrimaryMedia = ({
   odinId?: string;
   primaryMediaFile: MediaFile;
   fileId: string;
+  globalTransitId?: string;
   channelId: string;
   className?: string;
   fit?: 'cover' | 'contain';
@@ -36,6 +38,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
+          globalTransitId={globalTransitId}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           previewThumbnail={previewThumbnail}
@@ -47,6 +50,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
+          globalTransitId={globalTransitId}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
@@ -59,6 +63,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
+          globalTransitId={globalTransitId}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}

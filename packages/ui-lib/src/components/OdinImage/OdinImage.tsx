@@ -23,10 +23,7 @@ interface OdinImageSource {
 
 export interface OdinImageSourceWithFileId extends OdinImageSource {
   fileId: string | undefined;
-}
-
-export interface OdinImageSourceWithGlobalTransitId extends OdinImageSource {
-  globalTransitId: string | undefined;
+  globalTransitId?: string | undefined;
 }
 
 interface OdinImageEvents {
@@ -42,18 +39,14 @@ interface OdinImageElement {
   title?: string;
 }
 
-export type OdinImageProps = (OdinImageSourceWithFileId | OdinImageSourceWithGlobalTransitId) &
-  OdinImageElement &
-  OdinImageEvents;
+export type OdinImageProps = OdinImageSourceWithFileId & OdinImageElement & OdinImageEvents;
 
 interface UseOdingImageInternalProps {
   wrapperRef: React.RefObject<HTMLPictureElement>;
   previewImgRef: React.RefObject<HTMLImageElement>;
 }
 
-type UseOdinImageProps = UseOdingImageInternalProps &
-  OdinImageEvents &
-  (OdinImageSourceWithFileId | OdinImageSourceWithGlobalTransitId);
+type UseOdinImageProps = UseOdingImageInternalProps & OdinImageEvents & OdinImageSourceWithFileId;
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
 
@@ -86,6 +79,7 @@ export const OdinImage = ({
     finalUrl,
   } = useOdinImage({
     ...props,
+    odinId,
     wrapperRef,
     previewImgRef,
   });
@@ -105,6 +99,7 @@ export const OdinImage = ({
       data-fileid={(props as any).fileId}
       data-globaltransitid={(props as any).globalTransitId}
       data-filekey={props.fileKey}
+      data-not={weDontHaveAnything ? 'true' : 'false'}
     >
       {weDontHaveSourceProps ? null : weDontHaveAnything ? (
         <LoadingBlock className="aspect-square h-full w-full" />
@@ -257,6 +252,7 @@ const FinalImage = ({
 const useOdinImage = (props: UseOdinImageProps) => {
   const {
     dotYouClient,
+    fileId,
     fileKey,
     targetDrive,
     avoidPayload,
@@ -268,7 +264,6 @@ const useOdinImage = (props: UseOdinImageProps) => {
     wrapperRef,
     previewImgRef,
   } = props;
-  const fileId = 'fileId' in props ? props.fileId : undefined;
   const globalTransitId = 'globalTransitId' in props ? props.globalTransitId : undefined;
 
   const [isInView, setIsInView] = useState(false);
@@ -287,17 +282,28 @@ const useOdinImage = (props: UseOdinImageProps) => {
 
   const { getFromCache } = useImage(dotYouClient);
   const cachedImage = useMemo(
-    () => (fileId && fileKey ? getFromCache(odinId, fileId, fileKey, targetDrive) : undefined),
+    () =>
+      fileId && fileKey
+        ? getFromCache(odinId, fileId, globalTransitId, fileKey, targetDrive)
+        : undefined,
     [fileId]
   );
   const skipTiny = !!previewThumbnail || !!cachedImage;
 
   const shouldLoadTiny = !skipTiny && isInView;
+
   const {
     data: tinyThumb,
     error: tinyError,
     isFetched: isTinyFetched,
-  } = useTinyThumb(dotYouClient, odinId, shouldLoadTiny ? fileId : undefined, fileKey, targetDrive);
+  } = useTinyThumb(
+    dotYouClient,
+    odinId,
+    shouldLoadTiny ? fileId : undefined,
+    globalTransitId,
+    fileKey,
+    targetDrive
+  );
   const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
 
   const naturalSize: ImageSize | undefined = tinyThumb
@@ -312,6 +318,7 @@ const useOdinImage = (props: UseOdinImageProps) => {
     dotYouClient,
     odinId,
     loadSize !== undefined ? fileId : undefined,
+    loadSize !== undefined ? globalTransitId : undefined,
     fileKey,
     targetDrive,
     loadSize !== 'full'

@@ -110,6 +110,7 @@ export const PostImageDetailCard = ({
                   odinId={odinId}
                   className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
                   fileId={currentMediaFile?.fileId || postFile.fileId}
+                  globalTransitId={postFile.globalTransitId}
                   fileKey={currentMediaFile?.fileKey}
                   targetDrive={getChannelDrive(post.channelId)}
                   alt="post"
@@ -126,6 +127,7 @@ export const PostImageDetailCard = ({
               ) : (
                 <Video
                   fileId={currentMediaFile?.fileId || postFile.fileId}
+                  globalTransitId={postFile.globalTransitId}
                   fileKey={currentMediaFile?.fileKey}
                   className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
                   targetDrive={getChannelDrive(post.channelId)}
