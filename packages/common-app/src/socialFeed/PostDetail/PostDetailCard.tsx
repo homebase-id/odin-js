@@ -44,7 +44,6 @@ export const PostDetailCard = ({
 }) => {
   const post = postFile?.content;
   const mediaFiles = (post as Media)?.mediaFiles;
-  console.log(postFile);
   return (
     <div
       className={`bg-background rounded-lg border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
