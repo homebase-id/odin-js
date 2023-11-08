@@ -256,7 +256,9 @@ const dsrToPostFile = async <T extends PostContent>(
 
     const file: PostFileVm<T> = {
       fileId: dsr.fileId,
-      odinId: odinId,
+      // odinId: odinId,
+      // TODO multi-payload: Fix this, senderOdin is rendered empty after an update
+      odinId: content.authorOdinId || odinId,
       versionTag: dsr.fileMetadata.versionTag,
       globalTransitId: dsr.fileMetadata.globalTransitId,
       acl: dsr.serverMetadata?.accessControlList,
