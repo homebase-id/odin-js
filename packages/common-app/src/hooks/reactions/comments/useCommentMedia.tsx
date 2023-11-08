@@ -27,9 +27,7 @@ export const useCommentMedia = ({
     fileId: string | undefined;
     fileKey: string | undefined;
   }) => {
-    if (!odinId || !targetDrive || !fileId || !fileKey) {
-      return '';
-    }
+    if (!odinId || !targetDrive || !fileId || !fileKey) return null;
 
     const isLocal = odinId === dotYouClient.getIdentity();
 

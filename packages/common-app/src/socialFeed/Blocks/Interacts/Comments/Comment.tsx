@@ -149,8 +149,10 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
                 </span>
               ) : (
                 <>
-                  {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}{' '}
-                  {hasMedia ? <span className="italic">{t('Click to view image')}</span> : null}
+                  {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}
+                  {hasMedia ? (
+                    <span className="italic lowercase">{t('Click to view image')}</span>
+                  ) : null}
                 </>
               )}
             </p>
