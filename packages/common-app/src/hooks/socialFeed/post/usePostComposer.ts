@@ -1,12 +1,5 @@
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
-  ImageUploadResult,
-  VideoUploadResult,
-  SecurityGroupType,
-  EmbeddedThumb,
-  DEFAULT_PAYLOAD_KEY,
-} from '@youfoundation/js-lib/core';
-import {
-  MediaFile,
   Tweet,
   Media,
   PostFile,
@@ -22,9 +15,7 @@ import { usePost } from './usePost';
 import { useDotYouClient } from '../../../..';
 
 export const usePostComposer = () => {
-  const [postState, setPostState] = useState<
-    'processing' | 'uploading' | 'encrypting' | 'error' | undefined
-  >();
+  const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
   const [processingProgress, setProcessingProgress] = useState<number>(0);
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;

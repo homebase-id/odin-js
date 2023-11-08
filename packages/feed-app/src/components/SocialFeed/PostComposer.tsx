@@ -189,11 +189,7 @@ const PostComposer = ({
               caption?.length || files?.length || !!embeddedPost
                 ? ''
                 : 'pointer-events-none hidden opacity-20 grayscale md:flex'
-            } ${
-              postState === 'processing' || postState === 'uploading'
-                ? 'pointer-events-none animate-pulse'
-                : ''
-            }`}
+            } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
           >
             {t('Post')}
@@ -290,19 +286,18 @@ const ProgressIndicator = ({
   processingProgress,
   files,
 }: {
-  postState: 'processing' | 'uploading' | 'encrypting' | 'error' | undefined;
+  postState: 'uploading' | 'encrypting' | 'error' | undefined;
   processingProgress: number;
   files: number;
 }) => {
   if (!postState) return null;
 
   let progressText = '';
-  if (postState === 'processing')
-    if (processingProgress < 0.5)
+  if (postState === 'uploading')
+    if (processingProgress < 1)
       if (files > 1) progressText = t('Generating thumbnails');
       else progressText = t('Generating thumbnail');
-    else progressText = t('Uploading media');
-  else progressText = t(postState);
+    else progressText = t(postState);
 
   return (
     <div className="mt-2 flex flex-row-reverse">
