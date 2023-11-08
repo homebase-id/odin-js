@@ -70,7 +70,7 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
         ...entries.map((entry) => {
           return {
             ...entry.payload,
-            acl: entry.header.serverMetadata.accessControlList,
+            acl: entry.header.serverMetadata?.accessControlList,
           } as ChannelDefinition;
         }),
       ];

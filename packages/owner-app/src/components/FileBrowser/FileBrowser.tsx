@@ -6,7 +6,12 @@ import Section from '../ui/Sections/Section';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
-import { DriveSearchResult, SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  SecurityGroupType,
+  SystemFileType,
+  TargetDrive,
+} from '@youfoundation/js-lib/core';
 import { BlogConfig, HomePageConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
 
@@ -162,8 +167,21 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
       </div>
       <div className="mt-auto">
         <p className="flex flex-row items-center text-sm">
-          <AclIcon acl={file.serverMetadata.accessControlList} className="mr-1 h-4 w-4" />
-          <AclSummary acl={file.serverMetadata.accessControlList} />
+          <AclIcon
+            acl={
+              file.serverMetadata?.accessControlList || {
+                requiredSecurityGroup: SecurityGroupType.Owner,
+              }
+            }
+            className="mr-1 h-4 w-4"
+          />
+          <AclSummary
+            acl={
+              file.serverMetadata?.accessControlList || {
+                requiredSecurityGroup: SecurityGroupType.Owner,
+              }
+            }
+          />
         </p>
         {getLabelFromFileType(fileType)}
         <p className="mt-2 text-xs leading-tight">

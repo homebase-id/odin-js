@@ -134,8 +134,8 @@ export const useExport = () => {
           contentType: dsr.fileMetadata.contentType,
           senderOdinId: dsr.fileMetadata.senderOdinId,
           isEncrypted: dsr.fileMetadata.isEncrypted,
-          allowDistribution: dsr.serverMetadata.allowDistribution,
-          accessControlList: dsr.serverMetadata.accessControlList,
+          allowDistribution: dsr.serverMetadata?.allowDistribution,
+          accessControlList: dsr.serverMetadata?.accessControlList,
           appData: {
             ...dsr.fileMetadata.appData,
             content: undefined,

@@ -50,7 +50,7 @@ export interface DriveSearchResult<T = string> {
 
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   fileMetadata: FileMetadata<T>;
-  serverMetadata: ServerMetaData;
+  serverMetadata: ServerMetaData | undefined;
 
   priority: number;
 

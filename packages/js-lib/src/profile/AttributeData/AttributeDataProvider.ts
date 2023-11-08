@@ -196,7 +196,9 @@ export const dsrToAttributeFile = async (
       ...attrPayload,
       fileId: attrPayload.fileId ?? dsr.fileId,
       versionTag: dsr.fileMetadata.versionTag,
-      acl: dsr.serverMetadata?.accessControlList,
+      acl: dsr.serverMetadata?.accessControlList || {
+        requiredSecurityGroup: SecurityGroupType.Owner,
+      },
       aclPriority: dsr.priority,
       previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
       mediaPayloads: mediaPayloads,
