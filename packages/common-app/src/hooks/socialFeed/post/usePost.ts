@@ -3,7 +3,6 @@ import {
   PostFile,
   PostContent,
   savePost as savePostFile,
-  updatePost as updatePostFile,
   getPost,
   NewMediaFile,
   MediaFile,
@@ -28,7 +27,7 @@ export const usePost = () => {
   }: {
     postFile: PostFile<PostContent>;
     channelId: string;
-    mediaFiles?: NewMediaFile[];
+    mediaFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[];
     onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<UploadResult>((resolve) => {
@@ -60,37 +59,6 @@ export const usePost = () => {
       ).then((result) => {
         if (result) resolve(result);
       });
-    });
-  };
-
-  const updatePost = async ({
-    postFile,
-    channelId,
-    mediaFiles,
-    onUpdate,
-  }: {
-    postFile: PostFile<PostContent>;
-    channelId: string;
-    mediaFiles: MediaFile[];
-    onUpdate?: (progress: number) => void;
-  }) => {
-    return new Promise<UploadResult>((resolve) => {
-      updatePostFile(
-        dotYouClient,
-        {
-          ...postFile,
-          content: {
-            ...postFile.content,
-            captionAsRichText: getRichTextFromString(postFile.content.caption.trim()),
-          },
-        },
-        channelId,
-        mediaFiles
-      )
-        .then((result) => {
-          if (result) resolve(result);
-        })
-        .catch((err) => console.error(err));
     });
   };
 
@@ -210,7 +178,7 @@ export const usePost = () => {
     }),
 
     update: useMutation({
-      mutationFn: updatePost,
+      mutationFn: savePost,
       onSuccess: (_data, variables) => {
         if (variables.postFile.content.slug) {
           queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.slug] });
