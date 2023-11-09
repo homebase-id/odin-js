@@ -74,7 +74,7 @@ export const getChannelDefinitions = async (
         );
         if (!definition) return null;
 
-        definition.acl = dsr.serverMetadata.accessControlList;
+        definition.acl = dsr.serverMetadata?.accessControlList;
         return definition;
       }
     })
@@ -228,7 +228,7 @@ const getChannelDefinitionInternal = async (
 
       if (!definition) return undefined;
 
-      definition.acl = dsr.serverMetadata.accessControlList;
+      definition.acl = dsr.serverMetadata?.accessControlList;
 
       return {
         fileId: dsr.fileId,
