@@ -31,13 +31,19 @@ export const useChannels = ({
   const queryClient = useQueryClient();
 
   const fetchChannelData = async () => {
-    const fetchDynamicData = async () =>
-      (await getChannelDefinitions(dotYouClient))?.map((channel) => {
-        return {
-          ...channel,
-          template: parseChannelTemplate(channel?.templateId),
-        } as ChannelDefinitionVm;
-      });
+    const fetchDynamicData = async () => {
+      try {
+        return (await getChannelDefinitions(dotYouClient))?.map((channel) => {
+          return {
+            ...channel,
+            template: parseChannelTemplate(channel?.templateId),
+          } as ChannelDefinitionVm;
+        });
+      } catch (ex) {
+        console.error('Fetching dynamic channel data failed');
+        return;
+      }
+    };
 
     const returnData = isOwner
       ? await fetchDynamicData()
