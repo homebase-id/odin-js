@@ -74,37 +74,40 @@ export const getRecentPosts = async <T extends PostContent>(
   includeDrafts: true | 'only' | false,
   cursorState: Record<string, string> | undefined = undefined,
   pageSize = 10,
-  channels?: ChannelDefinition[]
+  channels?: ChannelDefinition[],
+  includeHiddenChannels = false
 ): Promise<MultiRequestCursoredResult<PostFile<T>[]>> => {
   const chnls = channels || (await getChannelDefinitions(dotYouClient));
   const allCursors: Record<string, string> = {};
 
-  const queries = chnls.map((chnl) => {
-    const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
-    const params: FileQueryParams = {
-      targetDrive: targetDrive,
-      dataType: type ? [postTypeToDataType(type)] : undefined,
-      fileType:
-        includeDrafts === 'only'
-          ? [BlogConfig.DraftPostFileType]
-          : [
-              BlogConfig.PostFileType,
-              ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
-            ],
-    };
+  const queries = chnls
+    ?.filter((chnl) => includeHiddenChannels || chnl.showOnHomePage)
+    .map((chnl) => {
+      const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
+      const params: FileQueryParams = {
+        targetDrive: targetDrive,
+        dataType: type ? [postTypeToDataType(type)] : undefined,
+        fileType:
+          includeDrafts === 'only'
+            ? [BlogConfig.DraftPostFileType]
+            : [
+                BlogConfig.PostFileType,
+                ...(includeDrafts === true ? [BlogConfig.DraftPostFileType] : []),
+              ],
+      };
 
-    const ro: GetBatchQueryResultOptions = {
-      maxRecords: pageSize,
-      cursorState: cursorState?.[chnl.channelId],
-      includeMetadataHeader: true,
-    };
+      const ro: GetBatchQueryResultOptions = {
+        maxRecords: pageSize,
+        cursorState: cursorState?.[chnl.channelId],
+        includeMetadataHeader: true,
+      };
 
-    return {
-      name: chnl.channelId,
-      queryParams: params,
-      resultOptions: ro,
-    };
-  });
+      return {
+        name: chnl.channelId,
+        queryParams: params,
+        resultOptions: ro,
+      };
+    });
 
   const response = await queryBatchCollection(dotYouClient, queries);
   const postsPerChannel = await Promise.all(

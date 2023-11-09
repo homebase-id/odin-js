@@ -73,7 +73,8 @@ export const getSocialFeed = async (
       false,
       ownOption.ownCursorState,
       pageSize,
-      ownOption.ownChannels
+      ownOption.ownChannels,
+      true // include hidden channels
     );
 
     const postsOfOwn = resultOfOwn.results

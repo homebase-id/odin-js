@@ -548,6 +548,7 @@ const DemoDataBlog = ({
         name: name,
         slug: slugify(name),
         description: description,
+        showOnHomePage: false,
         templateId: undefined,
         acl: { requiredSecurityGroup: SecurityGroupType.Connected },
       };

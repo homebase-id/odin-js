@@ -96,26 +96,28 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
     name: string;
     queryParams: FileQueryParams;
     resultOptions?: GetBatchQueryResultOptions | undefined;
-  }[] = channels.map((chnl) => {
-    const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
-    const params: FileQueryParams = {
-      targetDrive: targetDrive,
-      dataType: undefined,
-      fileType: [BlogConfig.PostFileType],
-    };
+  }[] = channels
+    .filter((chnl) => chnl.showOnHomePage)
+    .map((chnl) => {
+      const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
+      const params: FileQueryParams = {
+        targetDrive: targetDrive,
+        dataType: undefined,
+        fileType: [BlogConfig.PostFileType],
+      };
 
-    const ro: GetBatchQueryResultOptions = {
-      maxRecords: pageSize,
-      cursorState: undefined,
-      includeMetadataHeader: true,
-    };
+      const ro: GetBatchQueryResultOptions = {
+        maxRecords: pageSize,
+        cursorState: undefined,
+        includeMetadataHeader: true,
+      };
 
-    return {
-      name: chnl.channelId,
-      queryParams: params,
-      resultOptions: ro,
-    };
-  });
+      return {
+        name: chnl.channelId,
+        queryParams: params,
+        resultOptions: ro,
+      };
+    });
 
   const response = await queryBatchCachedCollection(dotYouClient, queries);
   const postsPerChannel = await Promise.all(

@@ -7,6 +7,7 @@ export interface ChannelDefinition {
   name: string;
   slug: string;
   description: string;
+  showOnHomePage: boolean;
   templateId?: number;
   acl?: AccessControlList;
 }
@@ -27,6 +28,7 @@ export class BlogConfig {
     channelId: toGuidId('public_channel_drive'),
     name: 'Public Posts',
     slug: 'public-posts',
+    showOnHomePage: true,
     description: '',
     templateId: undefined,
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
