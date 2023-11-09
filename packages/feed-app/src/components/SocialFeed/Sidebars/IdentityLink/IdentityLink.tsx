@@ -9,7 +9,6 @@ import {
   useDotYouClient,
 } from '@youfoundation/common-app';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const IdentityLink = ({ className }: { className?: string }) => {
   const { data } = useSiteData();

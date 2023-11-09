@@ -3,13 +3,9 @@ import { useBiography } from '../../../../hooks/biography/useBiography';
 import { Arrow, FallbackImg, RichTextRenderer, t, Image } from '@youfoundation/common-app';
 import { useMemo, useState } from 'react';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
-
-  console.log(bioData?.experience);
-
   return (
     <div className={className ?? ''}>
       <div className="-mx-2 flex max-w-6xl flex-col lg:flex-row xl:-mx-4">

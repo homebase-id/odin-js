@@ -54,7 +54,6 @@ export const saveComment = async (
   const isLocal = comment.context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
-  let additionalThumbnails: ThumbnailFile[] | undefined;
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   let previewThumbnail: EmbeddedThumb | undefined;

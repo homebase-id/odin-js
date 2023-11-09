@@ -1,6 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';

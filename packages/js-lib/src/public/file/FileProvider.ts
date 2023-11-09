@@ -1,10 +1,4 @@
-import {
-  DEFAULT_PAYLOAD_KEY,
-  EmbeddedThumb,
-  PayloadDescriptor,
-  getContentFromHeaderOrPayload,
-} from '../..';
-import { PayloadFile } from '../../../core';
+import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import {
