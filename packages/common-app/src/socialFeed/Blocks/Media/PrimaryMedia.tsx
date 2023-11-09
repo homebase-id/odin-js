@@ -31,6 +31,9 @@ export const PrimaryMedia = ({
     onClick && onClick(e);
   };
 
+  // If the primary media fileId is set, then the media isn't stored on the postFile itself
+  const correctedGlobalTransitId = primaryMediaFile?.fileId ? undefined : globalTransitId;
+
   return (
     <div onClick={doNavigate}>
       {primaryMediaFile?.type === 'image' ? (
@@ -38,7 +41,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
-          globalTransitId={globalTransitId}
+          globalTransitId={correctedGlobalTransitId}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           previewThumbnail={previewThumbnail}
@@ -50,7 +53,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
-          globalTransitId={globalTransitId}
+          globalTransitId={correctedGlobalTransitId}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
@@ -63,7 +66,7 @@ export const PrimaryMedia = ({
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
-          globalTransitId={globalTransitId}
+          globalTransitId={correctedGlobalTransitId}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}

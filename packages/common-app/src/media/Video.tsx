@@ -39,7 +39,6 @@ export const VideoClickToLoad = ({
   const dotYouClient = useDotYouClient().getDotYouClient();
   const [loadVideo, setLoadVideo] = useState(false);
   const [shouldFallback, setShouldFallback] = useState(false);
-
   return (
     <div
       className={`bg-page-background relative overflow-hidden ${props.className || ''}`}
