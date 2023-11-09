@@ -75,6 +75,8 @@ export const EmbeddedPostContent = ({
               <PostBody
                 post={{ ...content, embeddedPost: undefined }}
                 odinId={content.authorOdinId}
+                fileId={content.fileId}
+                globalTransitId={content.globalTransitId}
               />
 
               {shouldHideMedia && content.primaryMediaFile ? (

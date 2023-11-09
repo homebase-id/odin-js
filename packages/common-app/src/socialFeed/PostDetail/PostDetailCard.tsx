@@ -174,7 +174,15 @@ export const PostDetailCard = ({
             <RichTextRenderer
               odinId={odinId}
               body={(post as Article)?.body}
-              imageDrive={getChannelDrive(post.channelId)}
+              options={
+                postFile && postFile.fileId
+                  ? {
+                      imageDrive: getChannelDrive(post.channelId),
+                      defaultFileId: postFile.fileId,
+                      defaultGlobalTransitId: postFile.globalTransitId,
+                    }
+                  : undefined
+              }
             />
           </div>
         )

@@ -19,7 +19,7 @@ const VerticalPosts = ({ className }: { className?: string }) => {
 
   return (
     <div className={className ?? ''}>
-      <div className="grid max-w-6xl grid-cols-1 gap-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-5 xl:grid-cols-6">
         <ChannelSidebar
           className="lg:order-2 lg:col-span-2"
           setChannelId={(newId) => setMobileChannelId(newId)}

@@ -14,7 +14,7 @@ import {
   UploadInstructionSet,
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { DEFAULT_PAYLOAD_KEY, pureAppend } from '../../core/DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import { VideoContentType, uploadVideo } from '../../core/MediaData/VideoProvider';
 import {
   EmbeddedThumb,
@@ -344,7 +344,7 @@ const uploadPostHeader = async <T extends PostContent>(
   );
 };
 
-export const updatePost = async <T extends PostContent>(
+const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: PostFile<T>,
   channelId: string,
@@ -398,6 +398,7 @@ export const updatePost = async <T extends PostContent>(
     }
   }
 
+  // When all media is removed from the post, remove the preview thumbnail
   if (oldMediaFiles.length === deletedMediaFiles.length) {
     file.previewThumbnail = undefined;
   }
@@ -462,4 +463,53 @@ export const updatePost = async <T extends PostContent>(
   if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 
   return result;
+};
+
+export const appendPostMedia = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  file: Blob
+) => {
+  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+  if (!header) throw new Error('Cannot append to a file that does not exist');
+
+  const appendInstructionSet: AppendInstructionSet = {
+    targetFile: {
+      fileId: fileId,
+      targetDrive: targetDrive,
+    },
+  };
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${header.fileMetadata.payloads.length + 1}`;
+  payloads.push({
+    payload: file,
+    key: payloadKey,
+  });
+
+  const { additionalThumbnails } = await createThumbnails(file, payloadKey);
+  thumbnails.push(...additionalThumbnails);
+
+  const response = await appendDataToFile(
+    dotYouClient,
+    header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
+    appendInstructionSet,
+    payloads,
+    thumbnails
+  );
+
+  return { ...response, fileKey: payloadKey };
+};
+
+export const removePostMedia = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileId: string,
+  fileKey: string
+) => {
+  const response = await deletePayload(dotYouClient, targetDrive, fileId as string, fileKey);
+  return response;
 };

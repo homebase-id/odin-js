@@ -4,15 +4,17 @@ import { ActionLink, Image } from '@youfoundation/common-app';
 
 export const RichTextRenderer = ({
   body,
-  imageDrive,
   odinId,
   options,
   className,
 }: {
   body: string | Record<string, unknown>[] | undefined;
-  imageDrive?: TargetDrive;
   odinId?: string;
-  options?: unknown;
+  options?: {
+    imageDrive: TargetDrive;
+    defaultFileId: string;
+    defaultGlobalTransitId?: string;
+  };
   className?: string;
 }) => {
   if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
@@ -130,11 +132,12 @@ export const RichTextRenderer = ({
           </a>
         );
       case 'local_image':
-        if (attributes && 'fileId' in attributes && imageDrive) {
+        if (attributes && options) {
           return (
             <Image
-              targetDrive={imageDrive}
-              fileId={attributes.fileId as string}
+              targetDrive={options.imageDrive}
+              fileId={(attributes.fileId as string) || options.defaultFileId}
+              globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
               fileKey={attributes.fileKey as string}
               className="my-4 max-w-md"
               odinId={odinId}

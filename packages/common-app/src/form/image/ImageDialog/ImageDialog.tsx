@@ -22,7 +22,7 @@ export const ImageDialog = ({
 
   isOpen: boolean;
 
-  onConfirm: (uploadResult: Blob | undefined) => void;
+  onConfirm: (uploadResult: Blob | undefined) => void | Promise<void>;
   onCancel: () => void;
 }) => {
   const target = usePortal('modal-container');
@@ -35,7 +35,7 @@ export const ImageDialog = ({
     setIsGettingData(true);
     const imageData = (await GetCroppedData(cropperRef)) ?? unCroppedImageData;
 
-    onConfirm(imageData);
+    await onConfirm(imageData);
     setIsGettingData(false);
   };
 

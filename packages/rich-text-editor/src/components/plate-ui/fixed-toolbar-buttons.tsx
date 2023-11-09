@@ -13,12 +13,11 @@ import { InsertDropdownMenu } from './insert-dropdown-menu';
 import { MarkToolbarButton } from './mark-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
-import { ImageToolbarButton } from '../../editor/ImagePlugin/ImagePlugin';
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { ImageToolbarButton, MediaOptions } from '../../editor/ImagePlugin/ImagePlugin';
 import { Bold, Italic, Underline } from '@youfoundation/common-app';
 import { LinkToolbarButton } from './link-toolbar-button';
 
-export function FixedToolbarButtons({ mediaDrive }: { mediaDrive?: TargetDrive }) {
+export function FixedToolbarButtons({ mediaOptions }: { mediaOptions: MediaOptions | undefined }) {
   const readOnly = useEditorReadOnly();
 
   return (
@@ -53,7 +52,7 @@ export function FixedToolbarButtons({ mediaDrive }: { mediaDrive?: TargetDrive }
               <Icons.code />
             </MarkToolbarButton>
             <LinkToolbarButton />
-            {mediaDrive ? <ImageToolbarButton targetDrive={mediaDrive} /> : null}
+            {mediaOptions ? <ImageToolbarButton mediaOptions={mediaOptions} /> : null}
           </ToolbarGroup>
         </>
       </div>

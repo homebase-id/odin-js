@@ -46,18 +46,21 @@ export const getDecryptedThumbnailMetaOverTransit = async (
         )
       : getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, { systemFileType })
   ).then(async (header) => {
-    if (!header?.fileMetadata.appData.previewThumbnail) return;
+    if (!header) return;
 
     const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
 
     let url: string | undefined;
+    let contentType: ImageContentType | undefined =
+      previewThumbnail?.contentType as ImageContentType;
     const naturalSize = {
-      width: previewThumbnail.pixelWidth,
-      height: previewThumbnail.pixelHeight,
+      width: previewThumbnail?.pixelWidth || 0,
+      height: previewThumbnail?.pixelHeight || 0,
     };
     if (
       header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
-        .length > 1
+        .length > 1 ||
+      !previewThumbnail
     ) {
       url = await getDecryptedImageUrlOverTransit(
         dotYouClient,
@@ -76,6 +79,8 @@ export const getDecryptedThumbnailMetaOverTransit = async (
       const largestThumb = getLargestThumbOfPayload(correspondingPayload);
       naturalSize.width = largestThumb?.pixelWidth || naturalSize.width;
       naturalSize.height = largestThumb?.pixelHeight || naturalSize.height;
+      if (largestThumb && 'contentType' in largestThumb)
+        contentType = largestThumb.contentType as ImageContentType;
     } else {
       url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
     }
@@ -84,7 +89,7 @@ export const getDecryptedThumbnailMetaOverTransit = async (
       sizes:
         header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
       url: url,
-      contentType: previewThumbnail.contentType as ImageContentType,
+      contentType: contentType,
     };
   });
 };

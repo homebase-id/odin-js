@@ -5,6 +5,8 @@ import {
   getChannelDrive,
   RichText,
   NewMediaFile,
+  appendPostMedia,
+  removePostMedia,
 } from '@youfoundation/js-lib/public';
 import { lazy, useState } from 'react';
 import {
@@ -15,6 +17,7 @@ import {
   Arrow,
   Textarea,
   usePayloadBlob,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
@@ -26,12 +29,14 @@ export const InnerFieldEditors = ({
   channel,
   primaryMediaFile,
   onChange,
+  updateVersionTag,
   disabled,
 }: {
   postFile: PostFile<Article>;
   channel: ChannelDefinition;
   primaryMediaFile: NewMediaFile | undefined | null;
   onChange: (e: { target: { name: string; value: string | Blob | RichText | undefined } }) => void;
+  updateVersionTag: (versionTag: string) => void;
   disabled?: boolean;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
@@ -40,6 +45,9 @@ export const InnerFieldEditors = ({
     postFile.content.primaryMediaFile?.fileKey,
     getChannelDrive(channel.channelId)
   );
+
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const targetDrive = getChannelDrive(channel.channelId);
 
   return (
     <>
@@ -125,7 +133,46 @@ export const InnerFieldEditors = ({
             <RichTextEditor
               defaultValue={(postFile.content as Article)?.body}
               placeholder={t('Start writing...')}
-              mediaDrive={getChannelDrive(channel.channelId)}
+              mediaOptions={
+                postFile.fileId
+                  ? {
+                      fileId: postFile.fileId,
+                      mediaDrive: targetDrive,
+                      onAppend: async (file) => {
+                        const result = await appendPostMedia(
+                          dotYouClient,
+                          targetDrive,
+                          postFile.fileId as string,
+                          file
+                        );
+                        if (!result) return null;
+                        updateVersionTag(result.newVersionTag);
+
+                        return { fileId: postFile.fileId as string, fileKey: result.fileKey };
+                      },
+                      onRemove: async ({
+                        fileId,
+                        fileKey,
+                      }: {
+                        fileId: string;
+                        fileKey: string;
+                      }) => {
+                        const result = await removePostMedia(
+                          dotYouClient,
+                          targetDrive,
+                          fileId,
+                          fileKey
+                        );
+                        if (!result) return null;
+
+                        updateVersionTag(result.newVersionTag);
+                        console.log('removePostMedia', result);
+
+                        return result;
+                      },
+                    }
+                  : undefined
+              }
               name="body"
               onChange={onChange}
               className="min-h-[50vh]"

@@ -73,7 +73,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 ) : null}
               </div>
 
-              <PostBody post={post} odinId={odinId} />
+              <PostBody
+                post={post}
+                odinId={odinId}
+                fileId={postFile.fileId}
+                globalTransitId={postFile.globalTransitId}
+              />
             </div>
           </div>
           <DoubleClickHeartForMedia

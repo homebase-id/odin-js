@@ -210,6 +210,7 @@ export const ArticleComposerPage = () => {
               postFile={postFile}
               primaryMediaFile={primaryMediaFile}
               channel={channel}
+              updateVersionTag={(versionTag) => setPostFile({ ...postFile, versionTag })}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
@@ -224,7 +225,10 @@ export const ArticleComposerPage = () => {
                   dirtyPostFile.content.body = e.target.value as RichText;
                 }
 
-                setPostFile(dirtyPostFile);
+                setPostFile((oldPostFile) => ({
+                  ...dirtyPostFile,
+                  versionTag: oldPostFile.versionTag,
+                }));
                 debouncedSave();
               }}
               disabled={isPublished}

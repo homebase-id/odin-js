@@ -59,18 +59,17 @@ import { KbdLeaf } from '../components/plate-ui/kbd-leaf';
 import { FixedToolbar } from '../components/plate-ui/fixed-toolbar';
 import { FixedToolbarButtons } from '../components/plate-ui/fixed-toolbar-buttons';
 
-import { TargetDrive } from '@youfoundation/js-lib/core';
 import { RichText } from '@youfoundation/js-lib/public';
 import { useDarkMode } from '@youfoundation/common-app';
 
-import { createImagePlugin, ELEMENT_IMAGE } from './ImagePlugin/ImagePlugin';
+import { createImagePlugin, ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';
 import { useState, useEffect } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
 
 export const RichTextEditor = ({
   defaultValue,
   placeholder,
-  mediaDrive,
+  mediaOptions,
   name,
   onChange,
   className,
@@ -80,7 +79,7 @@ export const RichTextEditor = ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
-  mediaDrive?: TargetDrive;
+  mediaOptions?: MediaOptions;
   name: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
@@ -158,7 +157,7 @@ export const RichTextEditor = ({
       }),
       createDeserializeHtmlPlugin(),
       createDeserializeMdPlugin(),
-      createImagePlugin(),
+      createImagePlugin({ options: mediaOptions }),
     ],
     {
       components: {
@@ -242,7 +241,7 @@ export const RichTextEditor = ({
           key={disabled ? 'disabled' : undefined}
         >
           <FixedToolbar>
-            <FixedToolbarButtons mediaDrive={mediaDrive} />
+            <FixedToolbarButtons mediaOptions={mediaOptions} />
           </FixedToolbar>
 
           <PlateContent placeholder={placeholder} />

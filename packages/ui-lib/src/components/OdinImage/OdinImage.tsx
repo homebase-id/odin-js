@@ -243,7 +243,7 @@ const FinalImage = ({
       src={finalUrl}
       alt={alt}
       // Setting the aspect ratio sets the figure element to be the same size as the image while the image is still loading
-      style={{ aspectRatio: `${width ?? 1}/${height ?? 1}` }}
+      style={width && height ? { aspectRatio: `${width}/${height}` } : undefined}
       className={`${
         fit === 'cover' ? 'absolute inset-0' : 'relative'
       } ${imgClassNames} transition-opacity duration-300 ${isFinal ? 'opacity-100' : 'opacity-0'}`}
