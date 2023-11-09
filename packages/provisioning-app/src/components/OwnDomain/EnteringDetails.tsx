@@ -67,7 +67,7 @@ const EnteringDetails = ({ domain, setDomain, email, setEmail, setProvisionState
             placeholder={t('your.domain.here')}
             defaultValue={domain}
             onKeyDown={(e) => e.key.match(validDomainRegEx) && e.preventDefault()}
-            onChange={(e) => setDomain(e.target.value)}
+            onChange={(e) => setDomain(e.target.value.toLowerCase())}
           />
         </div>
 
@@ -87,7 +87,7 @@ const EnteringDetails = ({ domain, setDomain, email, setEmail, setProvisionState
             required
             placeholder={t('someone@example.com')}
             defaultValue={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.toLowerCase())}
           />
         </div>
 

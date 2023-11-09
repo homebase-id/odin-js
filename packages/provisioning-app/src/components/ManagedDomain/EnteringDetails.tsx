@@ -134,7 +134,7 @@ const EnteringDetails = ({
                   name={`prefix${index}`}
                   defaultValue={prefixes[index] || ''}
                   placeholder={label}
-                  onChange={(e) => onPrefixChange(index, e.target.value)}
+                  onChange={(e) => onPrefixChange(index, e.target.value.toLowerCase())}
                 />
               </div>
             ))}
@@ -171,7 +171,7 @@ const EnteringDetails = ({
               type="email"
               required
               placeholder={t('someone@example.com')}
-              debouncedOnChange={(e) => setEmail(e.target.value)}
+              debouncedOnChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
           </div>
           <div className="mt-5 flex flex-row-reverse">
