@@ -1,3 +1,4 @@
+import { DEFAULT_PAYLOAD_KEY } from '../../../core';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { TargetDrive } from '../../core/core';
 import { ProfileConfig, BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
@@ -67,6 +68,7 @@ const linkFileQueryParam: FileQueryParams = {
 
 export const BASE_RESULT_OPTIONS = {
   includeHeaderContent: true,
+  payloadKeys: [DEFAULT_PAYLOAD_KEY],
   excludePreviewThumbnail: false,
 };
 

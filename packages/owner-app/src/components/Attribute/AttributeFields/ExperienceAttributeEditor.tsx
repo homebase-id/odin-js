@@ -13,7 +13,7 @@ export const ExperienceAttributeEditor = ({
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
   const { data: imageBlob } = usePayloadBlob(
     attribute.fileId,
-    attribute.data?.[MinimalProfileFields.ProfileImageKey],
+    attribute.data?.[MinimalProfileFields.ExperienceImageFileKey],
     targetDrive
   );
 

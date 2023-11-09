@@ -9,6 +9,7 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
+import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 
 type ShortBioData = {
   id: string;
@@ -20,6 +21,7 @@ type ExperienceData = {
   title: string;
   link?: string;
   imageFileId?: string;
+  imageFileKey?: string;
   body: string | Record<string, unknown>[];
   id: string;
   priority: number;
@@ -49,9 +51,12 @@ export const useBiography = () => {
             let attribute: Attribute | undefined = entry.payload as Attribute;
             if (
               !attribute &&
-              entry.header.fileMetadata.payloads.length !== 0 &&
+              entry.header.fileMetadata.payloads.filter(
+                (payload: PayloadDescriptor) => payload.contentType === 'application/json'
+              ).length !== 0 &&
               entry.header.fileMetadata.appData.uniqueId
             ) {
+              console.warn(entry, 'fetching attribute, not enough data in static file');
               // Fetch attribute if it is not included in the static data
               attribute = await getAttribute(
                 dotYouClient,
@@ -78,14 +83,15 @@ export const useBiography = () => {
         .get('long-bio')
         ?.map((entry) => {
           const attribute = entry.payload as Attribute;
-
+          console.log({ exp: attribute, entry });
           return {
             title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
             body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
               | string
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-            imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            imageFileId: entry.header.fileId,
             id: attribute.id,
             priority: attribute.priority,
           };
@@ -123,7 +129,8 @@ export const useBiography = () => {
               | string
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-            imageFileId: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            imageFileId: attribute.fileId,
             id: attribute.id,
             priority: attribute.priority,
           };

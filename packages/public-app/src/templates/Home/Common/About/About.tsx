@@ -8,6 +8,8 @@ import { DEFAULT_PAYLOAD_KEY } from '@youfoundation/js-lib/core';
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
 
+  console.log(bioData?.experience);
+
   return (
     <div className={className ?? ''}>
       <div className="-mx-2 flex max-w-6xl flex-col lg:flex-row xl:-mx-4">
@@ -23,6 +25,7 @@ const About = ({ className }: { className?: string }) => {
                   body={experienceItem.body}
                   link={experienceItem.link}
                   imageFileId={experienceItem.imageFileId}
+                  imageFileKey={experienceItem.imageFileKey}
                   key={experienceItem.id}
                   className="my-5"
                 />
@@ -40,12 +43,14 @@ const ExperienceBlock = ({
   body,
   link,
   imageFileId,
+  imageFileKey,
   className,
 }: {
   title: string;
   body: string | Record<string, unknown>[];
   link?: string;
   imageFileId?: string;
+  imageFileKey?: string;
   className: string;
 }) => {
   const domain = link ? new URL(link).hostname : undefined;
@@ -58,7 +63,7 @@ const ExperienceBlock = ({
         <Image
           targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
           fileId={imageFileId}
-          fileKey={DEFAULT_PAYLOAD_KEY}
+          fileKey={imageFileKey}
           fit="contain"
           className="relative aspect-square w-1/6 flex-shrink-0 flex-grow-0"
         />
