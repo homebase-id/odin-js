@@ -88,7 +88,7 @@ export const useImage = (
       .filter((query) => query.state.status !== 'error');
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
-      const sizeParts = (entry.queryKey[4] as string)?.split('x');
+      const sizeParts = (entry.queryKey[5] as string)?.split('x');
       const size = sizeParts
         ? { pixelHeight: parseInt(sizeParts[0]), pixelWidth: parseInt(sizeParts[1]) }
         : undefined;

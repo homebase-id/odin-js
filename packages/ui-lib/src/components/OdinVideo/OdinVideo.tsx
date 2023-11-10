@@ -36,13 +36,13 @@ export interface OdinVideoProps {
   lastModified: number | undefined;
 }
 
-interface OndinChunkedProps extends OdinVideoProps {
+interface OdinChunkedProps extends OdinVideoProps {
   videoMetaData: SegmentedVideoMetadata;
   videoRef: React.RefObject<HTMLVideoElement>;
   onFatalError?: () => void;
 }
 
-interface OndinDirectProps extends OdinVideoProps {
+interface OdinDirectProps extends OdinVideoProps {
   videoMetaData: PlainVideoMetadata | SegmentedVideoMetadata;
   videoRef: React.RefObject<HTMLVideoElement>;
   onFatalError?: () => void;
@@ -129,7 +129,7 @@ const ChunkedSource = ({
   videoMetaData,
   videoRef,
   onFatalError,
-}: OndinChunkedProps) => {
+}: OdinChunkedProps) => {
   const activeObjectUrl = useRef<string>();
 
   const { getChunk } = useVideo(dotYouClient, odinId, fileId, fileKey, targetDrive);
@@ -338,7 +338,7 @@ const DirectSource = ({
   directFileSizeLimit,
   videoRef,
   onFatalError,
-}: OndinDirectProps) => {
+}: OdinDirectProps) => {
   const { data: videoUrl } = useVideoUrl(
     dotYouClient,
     odinId,
