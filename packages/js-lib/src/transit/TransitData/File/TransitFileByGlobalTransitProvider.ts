@@ -83,6 +83,7 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefined('Key', key);
@@ -160,6 +161,13 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('GlobalTransitId', globalTransitId);
+  assertIfDefined('Key', key);
+  assertIfDefined('Width', width);
+  assertIfDefined('Height', height);
+
   const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetThumbRequest = {
@@ -227,9 +235,10 @@ export const getFileHeaderBytesOverTransitByGlobalTransitId = async (
   globalTransitId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<DriveSearchResult> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
-  assertIfDefined('OdinId', odinId);
   assertIfDefined('GlobalTransitId', globalTransitId);
+
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 

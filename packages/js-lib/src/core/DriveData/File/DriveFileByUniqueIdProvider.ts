@@ -55,6 +55,7 @@ export const getFileHeaderBytesByUniqueId = async (
   uniqueId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<DriveSearchResult | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
@@ -134,13 +135,15 @@ export const getPayloadBytesByUniqueId = async (
     chunkStart?: number;
     chunkEnd?: number;
     decrypt?: boolean;
+    lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd } = options;
+  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -163,7 +166,8 @@ export const getPayloadBytesByUniqueId = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/query/specialized/cuid/payload?' + stringifyToQueryParams(request as any),
+      '/drive/query/specialized/cuid/payload?' +
+        stringifyToQueryParams({ ...request, lastModified }),
       config
     )
     .then(async (response) => {
@@ -202,17 +206,22 @@ export const getThumbBytesByUniqueId = async (
   targetDrive: TargetDrive,
   uniqueId: string,
   key: string,
-  keyHeader: KeyHeader | undefined,
   width: number,
   height: number,
-  systemFileType?: SystemFileType
+  options: {
+    keyHeader: KeyHeader | undefined;
+    systemFileType?: SystemFileType;
+    lastModified?: number;
+  }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
   assertIfDefined('Key', key);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
+  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetFileThumbByUniqueIdRequest = {
     ...targetDrive,
@@ -225,7 +234,7 @@ export const getThumbBytesByUniqueId = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height }),
+      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {

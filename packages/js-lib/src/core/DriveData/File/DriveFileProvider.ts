@@ -37,6 +37,10 @@ export const getFileHeader = async <T = string>(
   fileId: string,
   options?: { systemFileType?: SystemFileType }
 ): Promise<DriveSearchResult<T> | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('FileId', fileId);
+
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
     decrypt: true,
@@ -58,8 +62,10 @@ export const getFileHeaderBytes = async (
   fileId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ) => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
+
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -136,6 +142,7 @@ export const getPayloadBytes = async (
     lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
@@ -205,6 +212,7 @@ export const getThumbBytes = async (
   height: number,
   options: { keyHeader?: KeyHeader; systemFileType?: SystemFileType; lastModified?: number }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
