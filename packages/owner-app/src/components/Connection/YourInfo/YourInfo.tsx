@@ -10,28 +10,15 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useEffect } from 'react';
 import { FallbackImg, t } from '@youfoundation/common-app';
 import { useImage } from '../../../hooks/media/useImage';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { LoadingBlock, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
 import InfoBox from '../../ui/InfoBox/InfoBox';
 
-interface infoObject {
-  name: string;
-  initials: string;
-  imageFileId: string | undefined;
-  imageFileKey: string | undefined;
-  phone: string;
-  city: string;
-  country: string;
-  birthday: string;
-}
-
 interface YourInfoProps {
   circleGrants?: string[];
   className?: string;
-  onChange?: ({ name, initials, phone, city, country, birthday }: infoObject) => void;
 }
 
 const filterAttributesWithCircleGrants = (attributes: AttributeFile[], circleGrants: string[]) => {
@@ -55,12 +42,8 @@ const filterAttributesWithCircleGrants = (attributes: AttributeFile[], circleGra
     );
 };
 
-const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
-  const {
-    data: nameAttributes,
-    isLoading: nameAttributesLoading,
-    isFetchedAfterMount: isFetchedAfterMount,
-  } = useAttributeVersions({
+const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
+  const { data: nameAttributes, isLoading: nameAttributesLoading } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId.toString(),
     type: BuiltInAttributes.Name,
   }).fetchVersions;
@@ -116,21 +99,12 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
     circleGrants || []
   );
 
-  const info: infoObject = {
-    name: filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName],
-    initials: getInitialsOfNameAttribute(filteredNameAttributes?.[0]),
-    imageFileId: filteredPhotoAttributes?.[0]?.fileId,
-    imageFileKey: filteredPhotoAttributes?.[0]?.data[MinimalProfileFields.ProfileImageKey],
-    phone: filteredPhoneAttributes?.[0]?.data[PhoneFields.PhoneNumber],
-    city: filteredLocationAttributes?.[0]?.data[LocationFields.City],
-    country: filteredLocationAttributes?.[0]?.data[LocationFields.Country],
-    birthday: filteredBirtydayAttributes?.[0]?.data[BirthdayFields.Date],
-  };
-
-  useEffect(() => {
-    if (filteredNameAttributes?.length && onChange && typeof onChange === 'function')
-      onChange(info);
-  }, [isFetchedAfterMount]);
+  const name = filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName];
+  const initials = getInitialsOfNameAttribute(filteredNameAttributes?.[0]);
+  const phone = filteredPhoneAttributes?.[0]?.data[PhoneFields.PhoneNumber];
+  const city = filteredLocationAttributes?.[0]?.data[LocationFields.City];
+  const country = filteredLocationAttributes?.[0]?.data[LocationFields.Country];
+  const birthday = filteredBirtydayAttributes?.[0]?.data[BirthdayFields.Date];
 
   return (
     <div className={`relative border border-slate-100 dark:border-slate-800 ${className ?? ''}`}>
@@ -140,7 +114,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
             <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
-              initials={info.initials}
+              initials={initials}
               className="aspect-square h-[8rem] w-[8rem] sm:text-4xl"
             />
           ) : (
@@ -151,7 +125,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
           {nameAttributesLoading ? (
             <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
-            <h2 className="mb-4 text-lg">{info.name ?? window.location.host}</h2>
+            <h2 className="mb-4 text-lg">{name ?? window.location.host}</h2>
           )}
           {phoneAttributesLoading ? (
             <LoadingBlock className="h-6 w-full max-w-xs" />
@@ -160,11 +134,7 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
               <IconFrame className="mr-2">
                 <Phone className="h-3 w-3" />
               </IconFrame>{' '}
-              {info.phone ? (
-                info.phone
-              ) : (
-                <span className="font-light text-slate-400">{t('unknown')}</span>
-              )}
+              {phone ? phone : <span className="font-light text-slate-400">{t('unknown')}</span>}
             </div>
           )}
           {locationAttributesLoading ? (
@@ -174,13 +144,13 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
               <IconFrame className="mr-2">
                 <House className="h-3 w-3" />
               </IconFrame>{' '}
-              {!info.city && !info.country ? (
+              {!city && !country ? (
                 <span className="font-light text-slate-400">{t('unknown')}</span>
               ) : (
                 <>
-                  {info.city}
-                  {info.city && ', '}
-                  {info.country}
+                  {city}
+                  {city && ', '}
+                  {country}
                 </>
               )}
             </div>
@@ -192,8 +162,8 @@ const YourInfo = ({ circleGrants, className, onChange }: YourInfoProps) => {
               <IconFrame className="mr-2">
                 <Cake className="h-3 w-3" />
               </IconFrame>{' '}
-              {info.birthday ? (
-                info.birthday
+              {birthday ? (
+                birthday
               ) : (
                 <span className="font-light text-slate-400">{t('unknown')}</span>
               )}
