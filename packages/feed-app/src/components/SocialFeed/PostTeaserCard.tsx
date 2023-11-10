@@ -78,6 +78,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 odinId={odinId}
                 fileId={postFile.fileId}
                 globalTransitId={postFile.globalTransitId}
+                lastModified={postFile.lastModified}
               />
             </div>
           </div>

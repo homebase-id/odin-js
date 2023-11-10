@@ -14,6 +14,7 @@ export const RichTextRenderer = ({
     imageDrive: TargetDrive;
     defaultFileId: string;
     defaultGlobalTransitId?: string;
+    lastModified: number | undefined;
   };
   className?: string;
 }) => {
@@ -138,6 +139,7 @@ export const RichTextRenderer = ({
               targetDrive={options.imageDrive}
               fileId={(attributes.fileId as string) || options.defaultFileId}
               globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
+              lastModified={options.lastModified}
               fileKey={attributes.fileKey as string}
               className="my-4 max-w-md"
               odinId={odinId}

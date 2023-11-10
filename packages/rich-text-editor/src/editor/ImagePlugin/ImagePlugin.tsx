@@ -121,6 +121,7 @@ export const ImageElementBlock = <V extends Value = Value>(
               fileId={options.fileId}
               fileKey={element.fileKey}
               targetDrive={options.mediaDrive}
+              lastModified={new Date().getTime()}
               className={` ${''}`}
             />
             <ActionButton

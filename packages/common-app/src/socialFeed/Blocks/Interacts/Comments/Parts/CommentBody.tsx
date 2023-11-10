@@ -12,6 +12,7 @@ import { ActionButtonState } from '../../../../../ui';
 export const CommentBody = ({
   context,
   commentFileId,
+  commentLastModifed,
   content,
   isEdit,
   onUpdate,
@@ -20,6 +21,7 @@ export const CommentBody = ({
 }: {
   context?: ReactionContext;
   commentFileId?: string;
+  commentLastModifed?: number;
   content: RawReactionContent | ReactionContent;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
@@ -51,6 +53,7 @@ export const CommentBody = ({
               targetDrive={sourceTargetDrive}
               fileId={commentFileId}
               fileKey={content.mediaPayloadKey}
+              lastModified={commentLastModifed}
             />
           ) : (content as RawReactionContent)?.attachment ? (
             <CommentMediaPreview attachment={(content as RawReactionContent)?.attachment} />

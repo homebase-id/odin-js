@@ -142,6 +142,7 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
                 targetDrive={targetDrive}
                 fileId={file.fileId}
                 fileKey={firstPayload.key}
+                lastModified={file.fileMetadata.updated}
                 fit="contain"
                 position="center"
                 className="m-auto"

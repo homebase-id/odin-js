@@ -83,6 +83,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 hideEmbeddedPostMedia={hideEmbeddedPostMedia}
                 fileId={postFile.fileId}
                 globalTransitId={postFile.globalTransitId}
+                lastModified={postFile.lastModified}
               />
             </div>
             <PostInteracts

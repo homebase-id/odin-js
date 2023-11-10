@@ -14,6 +14,7 @@ export const PostMedia = ({
   postFile: {
     fileId: string;
     globalTransitId?: string;
+    lastModified: number | undefined;
     content: PostContent;
     previewThumbnail?: EmbeddedThumb;
     isEncrypted?: boolean;
@@ -46,6 +47,7 @@ export const PostMedia = ({
         odinId={odinId}
         fileId={postFile.fileId}
         globalTransitId={postFile.globalTransitId}
+        lastModified={postFile.lastModified}
         channelId={post.channelId}
         files={mediaFiles}
         className={`${className || ''}`}
@@ -63,6 +65,7 @@ export const PostMedia = ({
         channelId={post.channelId}
         fileId={postFile.fileId}
         globalTransitId={postFile.globalTransitId}
+        lastModified={postFile.lastModified}
         odinId={odinId}
         className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}

@@ -133,13 +133,14 @@ export const getPayloadBytes = async (
     chunkStart?: number;
     chunkEnd?: number;
     decrypt?: boolean;
+    lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd } = options;
+  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -160,7 +161,10 @@ export const getPayloadBytes = async (
     range: rangeHeader,
   };
   return client
-    .get<ArrayBuffer>('/drive/files/payload?' + stringifyToQueryParams(request as any), config)
+    .get<ArrayBuffer>(
+      '/drive/files/payload?' + stringifyToQueryParams({ ...request, lastModified }),
+      config
+    )
     .then(async (response) => {
       if (!response.data) return null;
       return {
@@ -199,7 +203,7 @@ export const getThumbBytes = async (
   key: string,
   width: number,
   height: number,
-  options: { keyHeader?: KeyHeader; systemFileType?: SystemFileType }
+  options: { keyHeader?: KeyHeader; systemFileType?: SystemFileType; lastModified?: number }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -207,7 +211,7 @@ export const getThumbBytes = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetFileThumbRequest = {
@@ -221,7 +225,7 @@ export const getThumbBytes = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height }),
+      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {

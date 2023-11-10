@@ -209,6 +209,7 @@ export const RepostButton = ({
             ...postFile.content,
             fileId: postFile.fileId,
             globalTransitId: postFile.globalTransitId,
+            lastModified: postFile.lastModified,
             permalink,
             userDate: postFile.userDate,
             previewThumbnail: postFile.previewThumbnail,

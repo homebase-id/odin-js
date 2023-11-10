@@ -151,11 +151,13 @@ export const parseContact = (contact: RawContact): ContactVm => {
       ? `data:${contact.image.contentType};base64,${contact.image.content}`
       : `https://${contact.odinId}/pub/image`;
 
-  const { id, name, location, phone, birthday, hasImage, odinId, source } = contact;
+  const { id, name, location, phone, birthday, hasImage, odinId, source, lastModified } = contact;
 
   return {
     id,
     name,
+    lastModified,
+
     location,
     phone,
     birthday,

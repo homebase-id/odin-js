@@ -39,6 +39,7 @@ export const getContactByUniqueId = async (
     // Set fileId for future replace
     contact.fileId = dsr.fileId;
     contact.versionTag = dsr.fileMetadata.versionTag;
+    contact.lastModified = dsr.fileMetadata.updated;
     contact.hasImage =
       dsr.fileMetadata.payloads.filter((payload) => payload.contentType !== 'application/json')
         .length >= 1;
@@ -85,6 +86,7 @@ export const getContacts = async (
           // Set fileId for future replace
           contact.fileId = dsr.fileId;
           contact.versionTag = dsr.fileMetadata.versionTag;
+          contact.lastModified = dsr.fileMetadata.updated;
           contact.hasImage = dsr.fileMetadata.payloads.length === 2;
 
           return contact;

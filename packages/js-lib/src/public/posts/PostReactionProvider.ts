@@ -282,6 +282,7 @@ const dsrToComment = async (
     date: dsr.fileMetadata.created,
     updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
     isEncrypted: dsr.fileMetadata.isEncrypted,
+    lastModified: dsr.fileMetadata.updated,
   };
 };
 

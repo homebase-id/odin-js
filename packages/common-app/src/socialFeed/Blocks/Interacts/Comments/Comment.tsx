@@ -95,6 +95,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
               context={context}
               content={content}
               commentFileId={fileId}
+              commentLastModifed={commentData.lastModified}
               isEdit={isEdit}
               onCancel={() => setIsEdit(false)}
               onUpdate={doUpdate}

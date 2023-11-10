@@ -22,6 +22,7 @@ type ExperienceData = {
   link?: string;
   imageFileId?: string;
   imageFileKey?: string;
+  lastModified: number | undefined;
   body: string | Record<string, unknown>[];
   id: string;
   priority: number;
@@ -83,7 +84,7 @@ export const useBiography = () => {
         .get('long-bio')
         ?.map((entry) => {
           const attribute = entry.payload as Attribute;
-          console.log({ exp: attribute, entry });
+
           return {
             title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
             body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
@@ -91,6 +92,7 @@ export const useBiography = () => {
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
             imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            lastModified: attribute.lastModified,
             imageFileId: entry.header.fileId,
             id: attribute.id,
             priority: attribute.priority,
@@ -130,6 +132,7 @@ export const useBiography = () => {
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
             imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            lastModified: attribute.lastModified,
             imageFileId: attribute.fileId,
             id: attribute.id,
             priority: attribute.priority,

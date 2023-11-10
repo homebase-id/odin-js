@@ -113,6 +113,7 @@ export const PostImageDetailCard = ({
                   globalTransitId={postFile.globalTransitId}
                   fileKey={currentMediaFile?.fileKey}
                   targetDrive={getChannelDrive(post.channelId)}
+                  lastModified={postFile.lastModified}
                   alt="post"
                   fit="contain"
                   previewThumbnail={
@@ -128,6 +129,7 @@ export const PostImageDetailCard = ({
                 <Video
                   fileId={currentMediaFile?.fileId || postFile.fileId}
                   globalTransitId={postFile.globalTransitId}
+                  lastModified={postFile.lastModified}
                   fileKey={currentMediaFile?.fileKey}
                   className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
                   targetDrive={getChannelDrive(post.channelId)}

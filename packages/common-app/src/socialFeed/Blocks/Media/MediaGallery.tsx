@@ -8,6 +8,7 @@ interface MediaGalleryProps {
   files: MediaFile[];
   fileId: string;
   globalTransitId?: string;
+  lastModified: number | undefined;
   channelId: string;
   className?: string;
   maxVisible?: number;
@@ -24,6 +25,7 @@ export const MediaGallery = ({
   files,
   fileId,
   globalTransitId,
+  lastModified,
   channelId,
   className,
   maxVisible = 4,
@@ -76,6 +78,7 @@ export const MediaGallery = ({
                     fileId={file.fileId || fileId}
                     globalTransitId={file.fileId ? undefined : globalTransitId}
                     fileKey={file.fileKey}
+                    lastModified={lastModified}
                     targetDrive={targetDrive}
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}

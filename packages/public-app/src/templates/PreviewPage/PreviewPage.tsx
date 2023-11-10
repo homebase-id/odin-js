@@ -15,6 +15,7 @@ const PreviewPage = () => {
         <Image
           fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
           fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
+          lastModified={(home?.templateSettings as ThemeLinksSettings)?.imageLastModified}
           targetDrive={HomePageConfig.HomepageTargetDrive}
           className="absolute inset-0"
           fit="cover"
@@ -31,6 +32,7 @@ const PreviewPage = () => {
               fileId={owner?.profileImageFileId}
               fileKey={owner?.profileImageFileKey}
               previewThumbnail={owner?.profileImagePreviewThumbnail}
+              lastModified={owner?.profileImageLastModified}
               targetDrive={targetDrive}
               className="h-full w-full"
               fit="cover"

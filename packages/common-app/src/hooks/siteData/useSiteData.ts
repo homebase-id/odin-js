@@ -19,6 +19,7 @@ import { EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core'
 
 interface DefaultTemplateSettings {
   imageFileId: string;
+  imageLastModified: number;
   colors: {
     name: string;
     id: string;
@@ -59,6 +60,7 @@ type OwnerSiteData = {
   profileImageFileId?: string;
   profileImageFileKey?: string;
   profileImagePreviewThumbnail?: EmbeddedThumb;
+  profileImageLastModified?: number;
   status?: string;
 };
 
@@ -103,6 +105,7 @@ export const useSiteData = () => {
         profileImageFileId: photoAttr?.fileId,
         profileImageFileKey: photoAttr?.data.profileImageKey,
         profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
+        profileImageLastModified: photoAttr?.lastModified,
         status: statusAttr?.data.status,
       };
     };
@@ -131,6 +134,7 @@ export const useSiteData = () => {
         templateSettings: {
           ...themeAttribute?.data,
           imageFileId: themeAttribute?.fileId,
+          imageLastModified: themeAttribute?.lastModified,
         } as TemplateSettings,
         headerPreviewThumbnail: themeAttribute?.previewThumbnail,
       };
@@ -273,6 +277,7 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         profileImageFileId: photoAttrHeader?.fileId,
         profileImageFileKey: photoAttr?.data.profileImageKey,
         profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
+        profileImageLastModified: photoAttrHeader?.fileMetadata.updated,
         status: statusAttr?.data.status,
       };
     }
@@ -312,6 +317,7 @@ const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>): HomeSiteData
         templateSettings: {
           ...themeAttribute?.data,
           imageFileId: entry?.header?.fileId,
+          imageLastModified: entry?.header?.fileMetadata.updated,
         } as TemplateSettings,
         headerPreviewThumbnail: themeAttribute?.previewThumbnail,
       };

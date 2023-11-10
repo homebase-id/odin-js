@@ -70,7 +70,8 @@ export const getDecryptedThumbnailMetaOverTransit = async (
         fileKey,
         { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
         header.fileMetadata.isEncrypted,
-        systemFileType
+        systemFileType,
+        header.fileMetadata.updated
       );
 
       const correspondingPayload = header.fileMetadata.payloads.find(
@@ -103,7 +104,8 @@ export const getDecryptedImageUrlOverTransitByGlobalTransitId = async (
   key: string,
   size?: ImageSize,
   isProbablyEncrypted?: boolean,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<string> => {
   const getDirectImageUrl = async (fileId: string) => {
     return `https://${odinId}/api/guest/v1/drive/files/${
@@ -120,6 +122,7 @@ export const getDecryptedImageUrlOverTransitByGlobalTransitId = async (
       xfst: systemFileType || 'Standard',
       iac: true,
       ...(size ? { payloadKey: key } : { key: key }),
+      lastModified,
     })}`;
   };
 
@@ -155,7 +158,8 @@ export const getDecryptedImageUrlOverTransitByGlobalTransitId = async (
     globalTransitId,
     key,
     size,
-    systemFileType
+    systemFileType,
+    lastModified
   ).then((data) => {
     if (!data) return '';
     const url = `data:${data.contentType};base64,${uint8ArrayToBase64(
@@ -174,7 +178,8 @@ export const getDecryptedImageUrlOverTransit = async (
   key: string,
   size?: ImageSize,
   isProbablyEncrypted?: boolean,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
     return `https://${odinId}/api/guest/v1/drive/files/${
@@ -191,6 +196,7 @@ export const getDecryptedImageUrlOverTransit = async (
       xfst: systemFileType || 'Standard',
       iac: true,
       ...(size ? { payloadKey: key } : { key: key }),
+      lastModified,
     })}`;
   };
 
@@ -220,7 +226,8 @@ export const getDecryptedImageUrlOverTransit = async (
     fileId,
     key,
     size,
-    systemFileType
+    systemFileType,
+    lastModified
   ).then((data) => {
     if (!data) return '';
     const url = `data:${data.contentType};base64,${uint8ArrayToBase64(
@@ -237,7 +244,8 @@ export const getDecryptedImageDataOverTransitByGlobalTransitId = async (
   globalTransitId: string,
   key: string,
   size?: ImageSize,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
@@ -252,10 +260,9 @@ export const getDecryptedImageDataOverTransitByGlobalTransitId = async (
         targetDrive,
         globalTransitId,
         key,
-        undefined,
         size.pixelWidth,
         size.pixelHeight,
-        systemFileType
+        { systemFileType, lastModified }
       );
       if (thumbData)
         return {
@@ -275,6 +282,7 @@ export const getDecryptedImageDataOverTransitByGlobalTransitId = async (
     key,
     {
       systemFileType,
+      lastModified,
     }
   );
 
@@ -293,7 +301,8 @@ export const getDecryptedImageDataOverTransit = async (
   fileId: string,
   key: string,
   size?: ImageSize,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
@@ -308,10 +317,9 @@ export const getDecryptedImageDataOverTransit = async (
         targetDrive,
         fileId,
         key,
-        undefined,
         size.pixelWidth,
         size.pixelHeight,
-        systemFileType
+        { systemFileType, lastModified }
       );
       if (thumbData)
         return {
@@ -331,6 +339,7 @@ export const getDecryptedImageDataOverTransit = async (
     key,
     {
       systemFileType,
+      lastModified,
     }
   );
 

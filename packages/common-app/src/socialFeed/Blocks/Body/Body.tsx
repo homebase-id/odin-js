@@ -12,12 +12,14 @@ export const PostBody = ({
   hideEmbeddedPostMedia,
   fileId,
   globalTransitId,
+  lastModified,
 }: {
   post: PostContent;
   odinId?: string;
   hideEmbeddedPostMedia?: boolean;
   fileId: string | undefined;
   globalTransitId: string | undefined;
+  lastModified: number | undefined;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -38,6 +40,7 @@ export const PostBody = ({
                           imageDrive: getChannelDrive(post.channelId),
                           defaultFileId: fileId,
                           defaultGlobalTransitId: globalTransitId,
+                          lastModified: lastModified,
                         }
                       : undefined
                   }

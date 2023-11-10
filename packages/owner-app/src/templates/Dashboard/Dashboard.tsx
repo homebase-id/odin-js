@@ -96,6 +96,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                   content={{
                     ...post.content,
                     userDate: post.userDate,
+                    lastModified: post.lastModified,
                     permalink: '',
                     previewThumbnail: post.previewThumbnail,
                     fileId: post.fileId as string,

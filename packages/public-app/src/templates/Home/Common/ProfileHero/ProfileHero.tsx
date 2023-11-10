@@ -40,6 +40,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
           <Image
             fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
             fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
+            lastModified={(home?.templateSettings as ThemeLinksSettings)?.imageLastModified}
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"
@@ -56,6 +57,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
                   fileKey={owner?.profileImageFileKey}
                   targetDrive={targetDrive}
                   previewThumbnail={owner?.profileImagePreviewThumbnail}
+                  lastModified={owner?.profileImageLastModified}
                   className="h-full w-full"
                   fit="cover"
                 />
@@ -105,6 +107,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
           targetDrive={targetDrive}
           fileId={owner.profileImageFileId}
           fileKey={owner.profileImageFileKey}
+          lastModified={owner.profileImageLastModified}
           onClose={() => setIsImageLightboxOpen(false)}
         />
       ) : null}

@@ -74,6 +74,7 @@ export const getPayloadBytesOverTransit = async (
     chunkStart?: number;
     chunkEnd?: number;
     decrypt?: boolean;
+    lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('OdinId', odinId);
@@ -81,7 +82,7 @@ export const getPayloadBytesOverTransit = async (
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd } = options;
+  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -104,7 +105,10 @@ export const getPayloadBytesOverTransit = async (
   };
 
   return client
-    .get<ArrayBuffer>('/transit/query/payload?' + stringifyToQueryParams(request as any), config)
+    .get<ArrayBuffer>(
+      '/transit/query/payload?' + stringifyToQueryParams({ ...request, lastModified }),
+      config
+    )
     .then(async (response) => {
       if (!response.data) return null;
       return {
@@ -142,10 +146,13 @@ export const getThumbBytesOverTransit = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  keyHeader: KeyHeader | undefined,
   width: number,
   height: number,
-  systemFileType?: SystemFileType
+  options: {
+    keyHeader?: KeyHeader;
+    systemFileType?: SystemFileType;
+    lastModified?: number;
+  }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('OdinId', odinId);
   assertIfDefined('TargetDrive', targetDrive);
@@ -153,6 +160,8 @@ export const getThumbBytesOverTransit = async (
   assertIfDefined('Key', key);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
+
+  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetThumbRequest = {
@@ -168,7 +177,7 @@ export const getThumbBytesOverTransit = async (
 
   return client
     .get<ArrayBuffer>(
-      '/transit/query/thumb?' + stringifyToQueryParams({ ...request, width, height }),
+      '/transit/query/thumb?' + stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
 

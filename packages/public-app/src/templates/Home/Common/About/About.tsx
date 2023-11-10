@@ -22,6 +22,7 @@ const About = ({ className }: { className?: string }) => {
                   link={experienceItem.link}
                   imageFileId={experienceItem.imageFileId}
                   imageFileKey={experienceItem.imageFileKey}
+                  lastModified={experienceItem.lastModified}
                   key={experienceItem.id}
                   className="my-5"
                 />
@@ -40,6 +41,7 @@ const ExperienceBlock = ({
   link,
   imageFileId,
   imageFileKey,
+  lastModified,
   className,
 }: {
   title: string;
@@ -47,6 +49,7 @@ const ExperienceBlock = ({
   link?: string;
   imageFileId?: string;
   imageFileKey?: string;
+  lastModified: number | undefined;
   className: string;
 }) => {
   const domain = link ? new URL(link).hostname : undefined;
@@ -60,6 +63,7 @@ const ExperienceBlock = ({
           targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
           fileId={imageFileId}
           fileKey={imageFileKey}
+          lastModified={lastModified}
           fit="contain"
           className="relative aspect-square w-1/6 flex-shrink-0 flex-grow-0"
         />

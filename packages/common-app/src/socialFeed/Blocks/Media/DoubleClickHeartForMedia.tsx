@@ -59,7 +59,7 @@ export const DoubleClickHeartForMedia = ({
       {postFile.fileId ? (
         <PostMedia
           odinId={odinId}
-          postFile={{ ...postFile, fileId: postFile.fileId }}
+          postFile={{ ...postFile, fileId: postFile.fileId, lastModified: postFile.lastModified }}
           showFallback={showFallback}
           forceAspectRatio={forceAspectRatio}
           className={`cursor-pointer ${className || ''}`}

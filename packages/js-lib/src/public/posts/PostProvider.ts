@@ -231,6 +231,7 @@ export const dsrToPostFile = async <T extends PostContent>(
       reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
       isEncrypted: dsr.fileMetadata.isEncrypted,
       isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
+      lastModified: dsr.fileMetadata.updated,
     };
 
     return file;

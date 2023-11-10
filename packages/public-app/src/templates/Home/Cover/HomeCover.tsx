@@ -34,6 +34,7 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
                 fileId={owner.profileImageFileId}
                 fileKey={owner.profileImageFileKey}
                 previewThumbnail={owner?.profileImagePreviewThumbnail}
+                lastModified={owner?.profileImageLastModified}
                 targetDrive={targetDrive}
                 className="w-full"
               />

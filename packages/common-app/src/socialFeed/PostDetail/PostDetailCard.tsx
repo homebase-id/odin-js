@@ -105,6 +105,7 @@ export const PostDetailCard = ({
           <MediaGallery
             fileId={postFile.fileId}
             globalTransitId={postFile.globalTransitId}
+            lastModified={postFile.lastModified}
             channelId={post.channelId}
             files={mediaFiles}
             className="my-4"
@@ -128,6 +129,7 @@ export const PostDetailCard = ({
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId}
                 globalTransitId={postFile.globalTransitId}
+                lastModified={postFile.lastModified}
                 fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
@@ -139,6 +141,7 @@ export const PostDetailCard = ({
                 targetDrive={getChannelDrive(post.channelId)}
                 fileId={post.primaryMediaFile.fileId}
                 globalTransitId={postFile.globalTransitId}
+                lastModified={postFile.lastModified}
                 fileKey={post.primaryMediaFile.fileKey}
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
@@ -180,6 +183,7 @@ export const PostDetailCard = ({
                       imageDrive: getChannelDrive(post.channelId),
                       defaultFileId: postFile.fileId,
                       defaultGlobalTransitId: postFile.globalTransitId,
+                      lastModified: postFile.lastModified,
                     }
                   : undefined
               }

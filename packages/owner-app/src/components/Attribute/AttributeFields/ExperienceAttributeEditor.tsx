@@ -17,6 +17,10 @@ export const ExperienceAttributeEditor = ({
     targetDrive
   );
 
+  const dataVal = attribute.data?.[MinimalProfileFields.ExperienceImageFileKey];
+  const defaultValue =
+    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+
   return (
     <>
       <div className="mb-5">
@@ -56,7 +60,7 @@ export const ExperienceAttributeEditor = ({
         <ImageSelector
           id={`${attribute.fileId ?? 'new'}-experience-image`}
           name={MinimalProfileFields.ExperienceImageFileKey}
-          defaultValue={imageBlob || undefined}
+          defaultValue={defaultValue}
           onChange={(e) =>
             onChange({
               target: {

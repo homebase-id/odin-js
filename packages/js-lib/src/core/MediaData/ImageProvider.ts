@@ -153,7 +153,8 @@ export const getDecryptedThumbnailMeta = (
           fileKey,
           { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
           header.fileMetadata.isEncrypted,
-          systemFileType
+          systemFileType,
+          header.fileMetadata.updated
         );
 
         const correspondingPayload = header.fileMetadata.payloads.find(
@@ -189,7 +190,8 @@ export const getDecryptedImageUrl = async (
   key: string,
   size?: ImageSize,
   isProbablyEncrypted?: boolean,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
@@ -205,6 +207,7 @@ export const getDecryptedImageUrl = async (
         : {}),
       xfst: systemFileType || 'Standard',
       ...(size ? { payloadKey: key } : { key: key }),
+      lastModified,
     })}`;
 
     if (ss) return await encryptUrl(directUrl, ss);
@@ -226,16 +229,20 @@ export const getDecryptedImageUrl = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getDecryptedImageData(dotYouClient, targetDrive, fileId, key, size, systemFileType).then(
-    (data) => {
-      if (!data) return '';
-      const url = `data:${data.contentType};base64,${uint8ArrayToBase64(
-        new Uint8Array(data.bytes)
-      )}`;
+  return getDecryptedImageData(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    key,
+    size,
+    systemFileType,
+    lastModified
+  ).then((data) => {
+    if (!data) return '';
+    const url = `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
 
-      return url;
-    }
-  );
+    return url;
+  });
 };
 
 export const getDecryptedImageData = async (
@@ -244,7 +251,8 @@ export const getDecryptedImageData = async (
   fileId: string,
   key: string,
   size?: ImageSize,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
@@ -260,7 +268,7 @@ export const getDecryptedImageData = async (
         key,
         size.pixelWidth,
         size.pixelHeight,
-        { systemFileType }
+        { systemFileType, lastModified }
       );
       if (thumbBytes) return thumbBytes;
     } catch (ex) {
@@ -268,7 +276,10 @@ export const getDecryptedImageData = async (
     }
   }
 
-  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, { systemFileType });
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
+    systemFileType,
+    lastModified,
+  });
   if (!payload) return null;
   return {
     bytes: payload.bytes,

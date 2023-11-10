@@ -10,13 +10,14 @@ export const ImageLightbox = ({
   fileId,
   fileKey,
   previewThumbnail,
+  lastModified,
   onClose,
 }: {
   targetDrive: TargetDrive;
   fileId: string;
   fileKey: string;
   previewThumbnail?: EmbeddedThumb;
-
+  lastModified: number | undefined;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
@@ -65,6 +66,7 @@ export const ImageLightbox = ({
             alt="post"
             fit="contain"
             previewThumbnail={previewThumbnail}
+            lastModified={lastModified}
             explicitSize={'full'}
           />
         </div>

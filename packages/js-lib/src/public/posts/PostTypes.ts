@@ -86,6 +86,7 @@ export interface PostFile<T extends PostContent> {
   };
   isEncrypted?: boolean;
   isDraft?: boolean;
+  lastModified?: number;
 }
 
 export type RichText = Record<string, unknown>[];
@@ -95,6 +96,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   previewThumbnail?: EmbeddedThumb;
   fileId: string;
   globalTransitId: string | undefined;
+  lastModified: number | undefined;
   userDate: number;
 }
 
@@ -166,6 +168,7 @@ export interface ReactionFile {
   fileId?: string;
   id?: string;
   threadId?: string;
+  lastModified?: number;
 
   isEncrypted?: boolean;
 

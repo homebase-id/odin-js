@@ -33,6 +33,7 @@ export interface OdinVideoProps {
   autoPlay?: boolean;
   poster?: string;
   directFileSizeLimit?: number;
+  lastModified: number | undefined;
 }
 
 interface OndinChunkedProps extends OdinVideoProps {

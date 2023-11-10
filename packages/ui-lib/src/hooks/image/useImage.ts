@@ -59,7 +59,8 @@ export const useImage = (
   size?: ImageSize,
   probablyEncrypted?: boolean,
   naturalSize?: ImageSize,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ) => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
   const queryClient = useQueryClient();
@@ -161,7 +162,8 @@ export const useImage = (
                   imageFileKey,
                   size,
                   probablyEncrypted,
-                  systemFileType
+                  systemFileType,
+                  lastModified
                 )
               : await getDecryptedImageUrlOverTransit(
                   dotYouClient,
@@ -171,7 +173,8 @@ export const useImage = (
                   imageFileKey,
                   size,
                   probablyEncrypted,
-                  systemFileType
+                  systemFileType,
+                  lastModified
                 )
             : await getDecryptedImageUrl(
                 dotYouClient,
@@ -180,7 +183,8 @@ export const useImage = (
                 imageFileKey,
                 size,
                 probablyEncrypted,
-                systemFileType
+                systemFileType,
+                lastModified
               ),
         naturalSize: naturalSize,
       };

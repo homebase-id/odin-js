@@ -131,6 +131,7 @@ export const ExistingFileOverview = ({
               fileId={image.fileId || fileId}
               fileKey={image.fileKey}
               targetDrive={targetDrive}
+              lastModified={new Date().getTime()}
               className="aspect-square h-full w-full"
               directFileSizeLimit={10 * 1024}
             />
@@ -139,6 +140,7 @@ export const ExistingFileOverview = ({
               fileId={image.fileId || fileId}
               fileKey={image.fileKey}
               targetDrive={targetDrive}
+              lastModified={new Date().getTime()}
               className="aspect-square h-full w-full"
               fit="cover"
             />

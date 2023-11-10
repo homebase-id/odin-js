@@ -80,13 +80,14 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
     chunkStart?: number;
     chunkEnd?: number;
     decrypt?: boolean;
+    lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd } = options;
+  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -110,7 +111,8 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
 
   return client
     .get<ArrayBuffer>(
-      '/transit/query/payload_byglobaltransitid?' + stringifyToQueryParams(request as any),
+      '/transit/query/payload_byglobaltransitid?' +
+        stringifyToQueryParams({ ...request, lastModified }),
       config
     )
     .then(async (response) => {
@@ -150,11 +152,15 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   key: string,
-  keyHeader: KeyHeader | undefined,
   width: number,
   height: number,
-  systemFileType?: SystemFileType
+  options: {
+    keyHeader?: KeyHeader;
+    systemFileType?: SystemFileType;
+    lastModified?: number;
+  }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetThumbRequest = {
     odinId: odinId,
@@ -170,7 +176,7 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
   return client
     .get<ArrayBuffer>(
       '/transit/query/thumb_byglobaltransitid?' +
-        stringifyToQueryParams({ ...request, width, height }),
+        stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {

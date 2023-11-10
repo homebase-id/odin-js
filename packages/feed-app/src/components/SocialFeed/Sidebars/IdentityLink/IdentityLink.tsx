@@ -22,6 +22,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
           targetDrive={HomePageConfig.HomepageTargetDrive}
           fileId={(data?.home?.templateSettings as ThemeLinksSettings)?.imageFileId}
           fileKey={(data?.home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
+          lastModified={(data?.home?.templateSettings as ThemeLinksSettings)?.imageLastModified}
           previewThumbnail={data?.home?.headerPreviewThumbnail}
           fit="cover"
           className="absolute left-0 right-0 top-0 h-[5rem]"
@@ -34,6 +35,7 @@ const IdentityLink = ({ className }: { className?: string }) => {
               targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
               fileId={data?.owner.profileImageFileId}
               fileKey={data?.owner.profileImageFileKey}
+              lastModified={data?.owner.profileImageLastModified}
               previewThumbnail={data?.owner.profileImagePreviewThumbnail}
               className="m-auto aspect-square max-h-[7rem] w-full max-w-[7rem] rounded-full border-2 border-neutral-200"
               fit="cover"

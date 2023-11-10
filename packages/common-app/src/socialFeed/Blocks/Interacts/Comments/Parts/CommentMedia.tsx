@@ -8,11 +8,13 @@ export const CommentMedia = ({
   targetDrive,
   fileId,
   fileKey,
+  lastModified,
 }: {
   postAuthorOdinId?: string;
   targetDrive?: TargetDrive;
   fileId?: string;
   fileKey?: string;
+  lastModified?: number;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
@@ -24,6 +26,7 @@ export const CommentMedia = ({
       fileId={fileId}
       targetDrive={targetDrive}
       fileKey={fileKey}
+      lastModified={lastModified}
       className="my-1 max-w-[250px]"
       systemFileType="Comment"
     />

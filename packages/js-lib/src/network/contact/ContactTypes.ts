@@ -22,6 +22,7 @@ export interface ContactFile {
   odinId?: string;
   id?: string;
   fileId?: string;
+  lastModified?: number;
   versionTag?: string;
   source: 'contact' | 'public' | 'user';
 
@@ -40,6 +41,7 @@ export interface RawContact extends ContactFile {
 export interface ContactVm {
   id?: string;
   fileId?: string;
+  lastModified?: number;
 
   name?: { displayName: string; givenName?: string; additionalName?: string; surname?: string };
   location?: { city?: string; country?: string };

@@ -26,6 +26,7 @@ interface OdinImageSource {
   avoidPayload?: boolean;
   explicitSize?: ImageSize | 'full';
   systemFileType?: SystemFileType;
+  lastModified: number | undefined;
 }
 
 export interface OdinImageSourceWithFileId extends OdinImageSource {
@@ -90,6 +91,10 @@ export const OdinImage = ({
     wrapperRef,
     previewImgRef,
   });
+
+  if (!props.lastModified && props.fileId) {
+    console.warn('NO lastmodified', props.fileId, props.globalTransitId);
+  }
 
   return (
     <figure
@@ -271,6 +276,7 @@ const useOdinImage = (props: UseOdinImageProps) => {
     wrapperRef,
     previewImgRef,
     systemFileType,
+    lastModified,
   } = props;
   const globalTransitId = 'globalTransitId' in props ? props.globalTransitId : undefined;
 
@@ -337,7 +343,8 @@ const useOdinImage = (props: UseOdinImageProps) => {
       : undefined,
     probablyEncrypted,
     naturalSize,
-    systemFileType
+    systemFileType,
+    lastModified
   ).fetch;
 
   const calculateSize = () => {

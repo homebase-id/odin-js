@@ -55,6 +55,7 @@ const ContactImage = ({
           fileId={contactData?.fileId}
           fileKey={CONTACT_PROFILE_IMAGE_KEY}
           targetDrive={ContactConfig.ContactTargetDrive}
+          lastModified={contactData?.lastModified}
           fit="cover"
           className="h-full w-full"
         />

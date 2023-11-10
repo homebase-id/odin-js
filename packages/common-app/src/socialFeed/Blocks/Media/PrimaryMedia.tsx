@@ -7,6 +7,7 @@ export const PrimaryMedia = ({
   primaryMediaFile,
   fileId,
   globalTransitId,
+  lastModified,
   channelId,
   className,
   fit,
@@ -19,6 +20,7 @@ export const PrimaryMedia = ({
   primaryMediaFile: MediaFile;
   fileId: string;
   globalTransitId?: string;
+  lastModified: number | undefined;
   channelId: string;
   className?: string;
   fit?: 'cover' | 'contain';
@@ -42,6 +44,7 @@ export const PrimaryMedia = ({
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
           globalTransitId={correctedGlobalTransitId}
+          lastModified={lastModified}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           previewThumbnail={previewThumbnail}
@@ -54,6 +57,7 @@ export const PrimaryMedia = ({
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
           globalTransitId={correctedGlobalTransitId}
+          lastModified={lastModified}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
@@ -67,6 +71,7 @@ export const PrimaryMedia = ({
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
           globalTransitId={correctedGlobalTransitId}
+          lastModified={lastModified}
           fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
