@@ -92,7 +92,7 @@ export const useBiography = () => {
               | Record<string, unknown>[],
             link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
             imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
-            lastModified: attribute.lastModified,
+            lastModified: entry.header.fileMetadata.updated,
             imageFileId: entry.header.fileId,
             id: attribute.id,
             priority: attribute.priority,
