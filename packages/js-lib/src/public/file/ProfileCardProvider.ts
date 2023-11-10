@@ -73,20 +73,26 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
     [BuiltInAttributes.Photo]
   );
 
-  const profilePhotoFileIds = profilePhotoAttributes
-    ?.filter(
-      (attr) =>
-        attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
-    )
-    ?.filter((dsr) => dsr && dsr.fileId !== undefined) as AttributeFile[];
+  const publicProfilePhotoAttr = profilePhotoAttributes?.find(
+    (attr) =>
+      attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase() &&
+      attr.fileId !== undefined
+  ) as AttributeFile;
 
-  if (profilePhotoFileIds?.length) {
+  if (publicProfilePhotoAttr) {
+    const size = { pixelWidth: 250, pixelHeight: 250 };
+    const fileKey = publicProfilePhotoAttr.data[MinimalProfileFields.ProfileImageKey];
+
+    const payloadIsAnSvg =
+      publicProfilePhotoAttr.mediaPayloads?.find((payload) => payload.key === fileKey)
+        ?.contentType === 'image/svg+xml';
+
     const imageData = await getDecryptedImageData(
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-      profilePhotoFileIds[0].fileId as string,
-      profilePhotoFileIds[0].data[MinimalProfileFields.ProfileImageKey],
-      { pixelWidth: 250, pixelHeight: 250 }
+      publicProfilePhotoAttr.fileId as string,
+      fileKey,
+      payloadIsAnSvg ? undefined : size
     );
     if (imageData) {
       await publishProfileImageFile(

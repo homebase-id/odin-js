@@ -92,9 +92,8 @@ export const OdinImage = ({
     previewImgRef,
   });
 
-  if (!props.lastModified && props.fileId) {
-    console.warn('NO lastmodified', props.fileId, props.globalTransitId);
-  }
+  if (!props.lastModified && props.fileId)
+    console.warn('[OdinImage] No lastmodified', props.fileId, props.globalTransitId);
 
   return (
     <figure
