@@ -31,6 +31,13 @@ const FaviconSelector = ({
     targetDrive
   );
 
+  const dataVal: any =
+    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
+      ? valueObject.fileId
+      : undefined;
+  const defaultFaviconImageValue =
+    dataVal && dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
 
@@ -65,7 +72,7 @@ const FaviconSelector = ({
         <ImageSelector
           {...props}
           label=""
-          defaultValue={imageBlob || undefined}
+          defaultValue={defaultFaviconImageValue}
           onChange={(e) =>
             onChange({
               target: {

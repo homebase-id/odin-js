@@ -268,7 +268,8 @@ const photoAttributeProcessing = async (attr: AttributeFile): Promise<ProcessedA
     PHOTO_PAYLOAD_KEY,
     profileInstructionThumbSizes
   );
-  attr.data[imageFieldKey] = PHOTO_PAYLOAD_KEY;
+
+  attr.data[imageFieldKey] = imageData ? PHOTO_PAYLOAD_KEY : undefined;
 
   return {
     attr,
@@ -288,7 +289,7 @@ const experienceAttributeProcessing = async (attr: AttributeFile): Promise<Proce
     EXPERIENCE_PAYLOAD_KEY
   );
 
-  attr.data[imageFieldKey] = EXPERIENCE_PAYLOAD_KEY;
+  attr.data[imageFieldKey] = imageData ? EXPERIENCE_PAYLOAD_KEY : undefined;
 
   return {
     attr,
@@ -319,14 +320,9 @@ const themeAttributeProcessing = async (attr: AttributeFile): Promise<ProcessedA
     additionalThumbnails: headerThumbnails,
     blob: headerBlob,
     tinyThumb: headerTiny,
-  } = await getNewThumbnails(
-    headerImageData,
+  } = await getNewThumbnails(headerImageData, HEADER_PAYLOAD_KEY, headerInstructionThumbSizes);
 
-    HEADER_PAYLOAD_KEY,
-    headerInstructionThumbSizes
-  );
-
-  attr.data[imageFieldKey] = HEADER_PAYLOAD_KEY;
+  attr.data[imageFieldKey] = headerImageData ? HEADER_PAYLOAD_KEY : undefined;
 
   return {
     attr,
@@ -402,6 +398,7 @@ export const saveAttribute = async (
     previewThumbnail: undefined,
     typeDefinition: undefined,
     aclPriority: undefined,
+    mediaPayloads: undefined,
   } as Attribute);
   const payloadBytes = stringToUint8Array(payloadJson);
 
@@ -422,7 +419,7 @@ export const saveAttribute = async (
       groupId: attr.sectionId,
       fileType: AttributeConfig.AttributeFileType,
       content: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: previewThumb,
+      previewThumbnail: previewThumb || attr.previewThumbnail,
     },
     isEncrypted: encrypt,
     accessControlList: attr.acl,
@@ -435,7 +432,6 @@ export const saveAttribute = async (
       : undefined;
 
     if (pureHeader) {
-      console.log({ payloads, metadata });
       if (payloads.length)
         runningVersionTag = (
           await appendDataToFile(
@@ -462,7 +458,7 @@ export const saveAttribute = async (
         transitOptions: null,
       };
 
-      metadata.versionTag = runningVersionTag;
+      metadata.versionTag = runningVersionTag || metadata.versionTag;
       const result = await uploadHeader(dotYouClient, keyHeader, appendInstructions, metadata);
       if (result) {
         attr.versionTag = result.newVersionTag;

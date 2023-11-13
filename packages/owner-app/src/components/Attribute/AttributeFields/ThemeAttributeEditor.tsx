@@ -74,6 +74,10 @@ const ThemeSpecificFields = ({
     targetDrive
   );
 
+  const dataVal = attribute.data?.[HomePageThemeFields.HeaderImageKey];
+  const defaultValue =
+    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+
   const theme =
     themeId === HomePageTheme.VerticalPosts.toString()
       ? 'Vertical'
@@ -93,7 +97,7 @@ const ThemeSpecificFields = ({
             <ImageSelector
               id="headerImage"
               name={HomePageThemeFields.HeaderImageKey}
-              defaultValue={imageBlob || undefined}
+              defaultValue={defaultValue}
               onChange={(e) =>
                 onChange({
                   target: {

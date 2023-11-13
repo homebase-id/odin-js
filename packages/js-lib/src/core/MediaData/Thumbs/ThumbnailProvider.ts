@@ -52,7 +52,7 @@ export const createThumbnails = async (
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(vectorThumb.thumb, vectorThumb.naturalSize),
       naturalSize: vectorThumb.naturalSize,
-      additionalThumbnails: [],
+      additionalThumbnails: [vectorThumb.thumb],
     };
   }
 
