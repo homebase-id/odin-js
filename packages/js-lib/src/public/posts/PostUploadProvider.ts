@@ -336,10 +336,24 @@ const uploadPostHeader = async <T extends PostContent>(
   };
 
   if (!shouldEmbedContent) {
-    throw new Error(
-      `[DotYouCore-js] PostProvider: Payloads are not supported for post updates ATM`
-    );
     // Append/update payload
+    await appendDataToFile(
+      dotYouClient,
+      file.isEncrypted ? header?.sharedSecretEncryptedKeyHeader : undefined,
+      {
+        targetFile: {
+          fileId: file.fileId as string,
+          targetDrive: targetDrive,
+        },
+      },
+      [
+        {
+          key: DEFAULT_PAYLOAD_KEY,
+          payload: new Blob([payloadBytes], { type: 'application/json' }),
+        },
+      ],
+      undefined
+    );
   }
 
   return await uploadHeader(
