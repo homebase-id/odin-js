@@ -2,9 +2,11 @@ import { ActionButton, SubtleMessage, t, Toast } from '@youfoundation/common-app
 import { Bell } from '@youfoundation/common-app';
 import { useNotifications } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 
 const Notifications = () => {
   const { notifications: notificationList } = useNotifications();
+  const { isEnabled, enableOnThisDevice } = usePushNotifications();
 
   return (
     <>
@@ -12,8 +14,8 @@ const Notifications = () => {
         title={t('Notifications')}
         icon={Bell}
         actions={
-          Notification.permission === 'granted' ? null : (
-            <ActionButton onClick={async () => await Notification.requestPermission()}>
+          isEnabled ? null : (
+            <ActionButton onClick={enableOnThisDevice}>
               {t('Enable push notifications')}
             </ActionButton>
           )
