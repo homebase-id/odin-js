@@ -22,6 +22,7 @@ export const ThemeAttributeEditor = (props: {
   }) => void;
 }) => {
   const { attribute, onChange } = props;
+
   return (
     <div className="flex flex-col gap-5">
       <div>

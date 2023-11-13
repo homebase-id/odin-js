@@ -13,15 +13,15 @@ import {
   uploadFile,
   deleteFile,
   getFileHeader,
-  getPayloadBytes,
   EmbeddedThumb,
   PayloadFile,
   ThumbnailFile,
   createThumbnails,
   ThumbnailInstruction,
+  uploadHeader,
+  appendDataToFile,
 } from '../../core/core';
 import {
-  getBlobFromBytes,
   getDisplayNameOfNameAttribute,
   getNewId,
   getRandom16ByteArray,
@@ -242,53 +242,29 @@ const headerInstructionThumbSizes: ThumbnailInstruction[] = [
   { quality: 75, width: 2600, height: 2600 },
 ];
 
-// TODO multi-payload: Fix that we don't need to fetch the existing Blob, if there's no update to it
-const getNewOrExistingThumbnails = async (
-  dotYouClient: DotYouClient,
-  attrFileId: string | undefined,
+const getNewThumbnails = async (
   dataKey: Blob | string | undefined,
-  targetDrive: TargetDrive,
   payloadKey: string,
   thumbnailInstructions: ThumbnailInstruction[] = []
 ) => {
-  if (!dataKey) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
-
-  const newData = dataKey instanceof Blob;
-
-  if (newData) {
-    const { additionalThumbnails, tinyThumb } = await createThumbnails(dataKey, payloadKey);
+  if (dataKey && dataKey instanceof Blob) {
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      dataKey,
+      payloadKey,
+      thumbnailInstructions
+    );
     return { additionalThumbnails, tinyThumb, blob: dataKey };
   }
-
-  if (!attrFileId) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
-
-  const payloadBytes = await getPayloadBytes(dotYouClient, targetDrive, attrFileId, payloadKey, {});
-
-  if (!payloadBytes) return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
-
-  const imageBlob = getBlobFromBytes(payloadBytes);
-  const { additionalThumbnails, tinyThumb } = await createThumbnails(
-    imageBlob,
-    payloadKey,
-    thumbnailInstructions
-  );
-  return { additionalThumbnails, tinyThumb, blob: imageBlob };
+  return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
 };
 
 const PHOTO_PAYLOAD_KEY = 'prfl_key';
-const photoAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<ProcessedAttribute> => {
+const photoAttributeProcessing = async (attr: AttributeFile): Promise<ProcessedAttribute> => {
   const imageFieldKey = MinimalProfileFields.ProfileImageKey;
   const imageData = attr.data[imageFieldKey];
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
 
-  const { additionalThumbnails, blob, tinyThumb } = await getNewOrExistingThumbnails(
-    dotYouClient,
-    attr.fileId,
+  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
     imageData,
-    targetDrive,
     PHOTO_PAYLOAD_KEY,
     profileInstructionThumbSizes
   );
@@ -303,19 +279,12 @@ const photoAttributeProcessing = async (
 };
 
 const EXPERIENCE_PAYLOAD_KEY = 'xprnc_key';
-const experienceAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<ProcessedAttribute> => {
+const experienceAttributeProcessing = async (attr: AttributeFile): Promise<ProcessedAttribute> => {
   const imageFieldKey = MinimalProfileFields.ExperienceImageFileKey;
   const imageData = attr.data[imageFieldKey];
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
 
-  const { additionalThumbnails, blob, tinyThumb } = await getNewOrExistingThumbnails(
-    dotYouClient,
-    attr.fileId,
+  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
     imageData,
-    targetDrive,
     EXPERIENCE_PAYLOAD_KEY
   );
 
@@ -331,24 +300,15 @@ const experienceAttributeProcessing = async (
 
 const FAVICON_PAYLOAD_KEY = 'fvcn_key';
 const HEADER_PAYLOAD_KEY = 'headr_key';
-const themeAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<ProcessedAttribute> => {
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
-
+const themeAttributeProcessing = async (attr: AttributeFile): Promise<ProcessedAttribute> => {
   const faviconFieldKey = HomePageThemeFields.Favicon;
   const faviconImageData = attr?.data[faviconFieldKey]?.fileId;
 
-  const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } =
-    await getNewOrExistingThumbnails(
-      dotYouClient,
-      attr.fileId,
-      faviconImageData,
-      targetDrive,
-      FAVICON_PAYLOAD_KEY,
-      []
-    );
+  const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } = await getNewThumbnails(
+    faviconImageData,
+    FAVICON_PAYLOAD_KEY,
+    []
+  );
 
   if (faviconImageData) attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
 
@@ -359,11 +319,9 @@ const themeAttributeProcessing = async (
     additionalThumbnails: headerThumbnails,
     blob: headerBlob,
     tinyThumb: headerTiny,
-  } = await getNewOrExistingThumbnails(
-    dotYouClient,
-    attr.fileId,
+  } = await getNewThumbnails(
     headerImageData,
-    targetDrive,
+
     HEADER_PAYLOAD_KEY,
     headerInstructionThumbSizes
   );
@@ -381,19 +339,19 @@ const themeAttributeProcessing = async (
   };
 };
 
-const processAttribute = async (dotYouClient: DotYouClient, attribute: AttributeFile) => {
+const processAttribute = async (attribute: AttributeFile) => {
   switch (attribute.type) {
     case BuiltInAttributes.Name:
       return nameAttributeProcessing(attribute);
 
     case BuiltInAttributes.Photo:
-      return await photoAttributeProcessing(dotYouClient, attribute);
+      return await photoAttributeProcessing(attribute);
 
     case HomePageAttributes.Theme:
-      return await themeAttributeProcessing(dotYouClient, attribute);
+      return await themeAttributeProcessing(attribute);
 
     case BuiltInAttributes.Experience:
-      return await experienceAttributeProcessing(dotYouClient, attribute);
+      return await experienceAttributeProcessing(attribute);
 
     default:
       return {
@@ -410,33 +368,29 @@ export const saveAttribute = async (
   toSaveAttribute: AttributeFile,
   onVersionConflict?: () => void
 ): Promise<AttributeFile | undefined> => {
+  let runningVersionTag = toSaveAttribute.versionTag;
+  const targetDrive = GetTargetDriveFromProfileId(toSaveAttribute.profileId);
   // Process Attribute
-  const { attr, payloads, thumbnails, previewThumb } = await processAttribute(
-    dotYouClient,
-    toSaveAttribute
-  );
+  const { attr, payloads, thumbnails, previewThumb } = await processAttribute(toSaveAttribute);
 
   // If a new attribute
-  if (!attr.id) {
-    attr.id = getNewId();
-  } else if (!attr.fileId) {
+  if (!attr.id) attr.id = getNewId();
+  else if (!attr.fileId)
     attr.fileId = (await getAttribute(dotYouClient, attr.profileId, attr.id))?.fileId ?? undefined;
-  }
 
   const encrypt = !(
     attr.acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
     attr.acl.requiredSecurityGroup === SecurityGroupType.Authenticated
   );
 
-  if (!attr.id || !attr.profileId || !attr.type || !attr.sectionId) {
+  if (!attr.id || !attr.profileId || !attr.type || !attr.sectionId)
     throw 'Attribute is missing id, profileId, sectionId, or type';
-  }
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
       overwriteFileId: attr?.fileId ?? '',
-      drive: GetTargetDriveFromProfileId(attr.profileId),
+      drive: targetDrive,
     },
     transitOptions: null,
   };
@@ -453,6 +407,12 @@ export const saveAttribute = async (
 
   // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
+  if (!shouldEmbedContent)
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
+
   const metadata: UploadFileMetadata = {
     versionTag: attr.versionTag,
     allowDistribution: false,
@@ -468,11 +428,48 @@ export const saveAttribute = async (
     accessControlList: attr.acl,
   };
 
-  if (!shouldEmbedContent) {
-    payloads.push({
-      payload: new Blob([payloadBytes], { type: 'application/json' }),
-      key: DEFAULT_PAYLOAD_KEY,
-    });
+  if (attr.fileId) {
+    const pureHeader = await getFileHeader(dotYouClient, targetDrive, attr.fileId);
+    const keyHeader = pureHeader?.fileMetadata.isEncrypted
+      ? pureHeader.sharedSecretEncryptedKeyHeader
+      : undefined;
+
+    if (pureHeader) {
+      console.log({ payloads, metadata });
+      if (payloads.length)
+        runningVersionTag = (
+          await appendDataToFile(
+            dotYouClient,
+            keyHeader,
+            {
+              targetFile: {
+                fileId: attr.fileId,
+                targetDrive: targetDrive,
+              },
+            },
+            payloads,
+            thumbnails
+          )
+        ).newVersionTag;
+
+      // Only save update header
+      const appendInstructions: UploadInstructionSet = {
+        transferIv: getRandom16ByteArray(),
+        storageOptions: {
+          overwriteFileId: pureHeader.fileId,
+          drive: targetDrive,
+        },
+        transitOptions: null,
+      };
+
+      metadata.versionTag = runningVersionTag;
+      const result = await uploadHeader(dotYouClient, keyHeader, appendInstructions, metadata);
+      if (result) {
+        attr.versionTag = result.newVersionTag;
+        attr.fileId = result.file.fileId;
+        return attr;
+      }
+    }
   }
 
   const result = await uploadFile(
