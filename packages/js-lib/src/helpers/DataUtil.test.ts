@@ -16,6 +16,7 @@ import {
   mergeByteArrays,
   stringifyToQueryParams,
   stringifyArrayToQueryParams,
+  tryJsonParse,
 } from './DataUtil';
 import { SecurityGroupType } from '../core/core';
 
@@ -222,4 +223,11 @@ test('Stringify complex QueryParams arrays', () => {
   ).toEqual(
     '[0].test=test&[0].123=abc&[1].test=test&[1].deeperLevelArray=testDeeper&[1].deeperLevelArray=even%20further%20down'
   );
+});
+
+test('JSON.parse', () => {
+  expect(tryJsonParse('{"test":"test"}')).toEqual({ test: 'test' });
+
+  const objectwithArray = { test: 'test', deeperLevelArray: ['testDeeper', 'even further down'] };
+  expect(tryJsonParse(JSON.stringify(objectwithArray))).toEqual(objectwithArray);
 });

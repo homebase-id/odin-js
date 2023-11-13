@@ -2,49 +2,55 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
   getDecryptedImageUrl,
-  ImageContentType,
   removeImage,
   SecurityGroupType,
   TargetDrive,
   uploadImage,
 } from '@youfoundation/js-lib/core';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const defaultDrive: TargetDrive = BlogConfig.PublicChannelDrive;
 
-const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
+export const useImage = (imageFileId?: string, imageFileKey?: string, imageDrive?: TargetDrive) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
 
-  const fetchImageData = async (imageFileId: string, imageDrive?: TargetDrive) => {
+  const fetchImageData = async (
+    imageFileId: string,
+    imageFileKey: string,
+    imageDrive?: TargetDrive
+  ) => {
+    console.log({ imageFileId, imageFileKey });
     try {
-      return await getDecryptedImageUrl(dotYouClient, imageDrive ?? defaultDrive, imageFileId);
+      return await getDecryptedImageUrl(
+        dotYouClient,
+        imageDrive ?? defaultDrive,
+        imageFileId,
+        imageFileKey
+      );
     } catch (ex) {
       throw new Error('failed to get imageData');
     }
   };
 
   const saveImage = async ({
-    bytes,
-    type,
+    image,
     targetDrive = defaultDrive,
     acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
     fileId = undefined,
     versionTag = undefined,
   }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
+    image: Blob;
     targetDrive: TargetDrive;
     acl?: AccessControlList;
     fileId?: string;
     versionTag?: string;
   }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
+    return await uploadImage(dotYouClient, targetDrive, acl, image, undefined, {
       fileId: fileId,
       versionTag: versionTag,
-      type: type,
     });
   };
 
@@ -59,33 +65,29 @@ const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   };
 
   return {
-    fetch: useQuery(
-      ['image', imageFileId, imageDrive?.alias],
-      () => fetchImageData(imageFileId as string, imageDrive),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!imageFileId,
-      }
-    ),
-    save: useMutation(saveImage, {
+    fetch: useQuery({
+      queryKey: ['image', imageFileId, imageDrive?.alias],
+      queryFn: () => fetchImageData(imageFileId as string, imageFileKey as string, imageDrive),
+
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!imageFileId && !!imageFileKey,
+    }),
+    save: useMutation({
+      mutationFn: saveImage,
       onSuccess: (_data, variables) => {
         // Boom baby!
         if (variables.fileId) {
-          queryClient.invalidateQueries([
-            'image',
-            variables.fileId,
-            variables.targetDrive ?? defaultDrive,
-          ]);
+          queryClient.invalidateQueries({
+            queryKey: ['image', variables.fileId, variables.targetDrive ?? defaultDrive],
+          });
         } else {
-          queryClient.removeQueries(['image']);
+          queryClient.invalidateQueries({ queryKey: ['image'], exact: false });
         }
       },
     }),
-    remove: useMutation(removeImageInternal),
+    remove: useMutation({ mutationFn: removeImageInternal }),
     // The remove mutation doesn't force invalidate the cache anymore, as removing an image always corresponds to removing the refrence as well.
   };
 };
-
-export default useImage;

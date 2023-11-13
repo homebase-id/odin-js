@@ -160,7 +160,7 @@ interface PostTeaserProps {
 
 const PostTeaser: FC<PostTeaserProps> = ({
   className,
-  postFile: { content: blog, previewThumbnail, payloadIsEncrypted },
+  postFile: { content: blog, previewThumbnail, isEncrypted, lastModified },
   linkRoot,
 }) => {
   return (
@@ -172,18 +172,22 @@ const PostTeaser: FC<PostTeaserProps> = ({
               <Image
                 className="h-full w-full object-cover object-center"
                 fileId={blog.primaryMediaFile.fileId}
+                fileKey={blog.primaryMediaFile.fileKey}
+                lastModified={lastModified}
                 targetDrive={getChannelDrive(blog.channelId)}
                 alt="blog"
                 fit="cover"
                 previewThumbnail={previewThumbnail}
-                probablyEncrypted={payloadIsEncrypted}
+                probablyEncrypted={isEncrypted}
               />
             ) : (
               <Video
                 targetDrive={getChannelDrive(blog.channelId)}
                 fileId={blog.primaryMediaFile.fileId}
+                fileKey={blog.primaryMediaFile.fileKey}
+                lastModified={lastModified}
                 className={className}
-                probablyEncrypted={payloadIsEncrypted}
+                probablyEncrypted={isEncrypted}
                 previewThumbnail={previewThumbnail}
               />
             )

@@ -38,16 +38,19 @@ export const useProfiles = (disabled?: boolean) => {
   };
 
   return {
-    fetchProfiles: useQuery(['profiles'], fetchAll, {
+    fetchProfiles: useQuery({
+      queryKey: ['profiles'],
+      queryFn: fetchAll,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       retry: false,
       staleTime: 60000,
       enabled: !disabled,
     }),
-    saveProfile: useMutation(saveProfile, {
+    saveProfile: useMutation({
+      mutationFn: saveProfile,
       onMutate: async (newProfile) => {
-        await queryClient.cancelQueries(['profiles']);
+        await queryClient.cancelQueries({ queryKey: ['profiles'] });
 
         const previousProfiles: ProfileDefinitionVm[] | undefined = queryClient.getQueryData([
           'profiles',
@@ -68,12 +71,13 @@ export const useProfiles = (disabled?: boolean) => {
         queryClient.setQueryData(['profiles'], context?.previousProfiles);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['profiles']);
+        queryClient.invalidateQueries({ queryKey: ['profiles'] });
       },
     }),
-    removeProfile: useMutation(removeProfile, {
+    removeProfile: useMutation({
+      mutationFn: removeProfile,
       onMutate: async (profileId) => {
-        await queryClient.cancelQueries(['profiles']);
+        await queryClient.cancelQueries({ queryKey: ['profiles'] });
 
         const previousProfiles: ProfileDefinitionVm[] | undefined = queryClient.getQueryData([
           'profiles',
@@ -90,7 +94,7 @@ export const useProfiles = (disabled?: boolean) => {
         queryClient.setQueryData(['profiles'], context?.previousProfiles);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['profiles']);
+        queryClient.invalidateQueries({ queryKey: ['profiles'] });
       },
     }),
   };

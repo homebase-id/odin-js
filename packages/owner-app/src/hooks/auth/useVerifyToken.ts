@@ -3,14 +3,14 @@ import { hasValidToken } from '../../provider/auth/AuthenticationProvider';
 
 const MINUTE_IN_MS = 60000;
 
-const useVerifyToken = () => {
+export const useVerifyToken = () => {
   const fetchData = async () => {
     return await hasValidToken();
   };
-  return useQuery(['verifyToken'], fetchData, {
+  return useQuery({
+    queryKey: ['verifyToken'],
+    queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });
 };
-
-export default useVerifyToken;

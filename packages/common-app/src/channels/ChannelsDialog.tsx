@@ -7,6 +7,7 @@ import {
   AclWizard,
   ActionButton,
   ChannelDefinitionVm,
+  CheckboxToggle,
   Pencil,
   Textarea,
   Trash,
@@ -109,6 +110,7 @@ export const ChannelItem = ({
   const [newSlug, setNewSlug] = useState(chnl?.slug);
   const [newDescription, setNewDescription] = useState(chnl?.description);
   const [newTemplateId, setNewTemplateId] = useState(chnl?.templateId);
+  const [newShowOnHomePage, setNewShowOnHomePage] = useState(chnl?.showOnHomePage);
   const [newAcl, setNewAcl] = useState(
     chnl?.acl ?? { requiredSecurityGroup: SecurityGroupType.Anonymous }
   );
@@ -164,6 +166,7 @@ export const ChannelItem = ({
                     name: newName ?? '',
                     slug: newSlug ?? '',
                     description: newDescription ?? '',
+                    showOnHomePage: newShowOnHomePage ?? false,
                     templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
                     acl: newAcl,
                   });
@@ -191,6 +194,16 @@ export const ChannelItem = ({
                     id="description"
                     defaultValue={chnl?.description}
                     onChange={(e) => setNewDescription(e.target.value)}
+                  />
+                </div>
+                <div className="mb-5 flex flex-row items-center gap-5">
+                  <Label htmlFor="showOnHomepage" className="mb-0">
+                    {t('Include posts from this channel on your feed')}
+                  </Label>
+                  <CheckboxToggle
+                    id="showOnHomepage"
+                    defaultChecked={chnl?.showOnHomePage}
+                    onChange={(e) => setNewShowOnHomePage(e.target.checked)}
                   />
                 </div>
                 <div className="mb-5">

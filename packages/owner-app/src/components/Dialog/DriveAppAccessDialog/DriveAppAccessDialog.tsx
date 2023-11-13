@@ -6,8 +6,8 @@ import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import DrivePermissionFlagEditor from '../../Form/DrivePermissionFlagEditor';
 import { DialogWrapper } from '@youfoundation/common-app';
-import useApp from '../../../hooks/apps/useApp';
-import useApps from '../../../hooks/apps/useApps';
+import { useApp } from '../../../hooks/apps/useApp';
+import { useApps } from '../../../hooks/apps/useApps';
 import { PermissionUpdateRequest } from '../../../provider/app/AppManagementProviderTypes';
 import AppMembershipView from '../../PermissionViews/AppPermissionView/AppPermissionView';
 

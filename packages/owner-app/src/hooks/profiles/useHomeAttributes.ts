@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAttributes } from '@youfoundation/js-lib/profile';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 import { AttributeDefinitions } from './AttributeDefinitions';
 
-const useHomeAttributes = () => {
+export const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchTheme = async () => {
@@ -26,12 +26,13 @@ const useHomeAttributes = () => {
   };
 
   return {
-    fetchTheme: useQuery(
-      ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
-      fetchTheme,
-      { refetchOnMount: false, refetchOnWindowFocus: false, staleTime: Infinity, retry: 1 }
-    ),
+    fetchTheme: useQuery({
+      queryKey: ['attributes', HomePageConfig.DefaultDriveId, HomePageAttributes.Theme],
+      queryFn: fetchTheme,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      retry: 1,
+    }),
   };
 };
-
-export default useHomeAttributes;

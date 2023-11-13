@@ -1,33 +1,45 @@
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { useCommentMedia } from '../../../../../hooks';
-import { t } from '../../../../../helpers';
+import { useDotYouClient } from '../../../../../hooks';
+import { useMemo } from 'react';
+import { OdinImage } from '@youfoundation/ui-lib';
 
 export const CommentMedia = ({
   postAuthorOdinId,
   targetDrive,
   fileId,
+  fileKey,
+  lastModified,
 }: {
   postAuthorOdinId?: string;
   targetDrive?: TargetDrive;
   fileId?: string;
+  fileKey?: string;
+  lastModified?: number;
 }) => {
-  // console.log({ odinId: postAuthorOdinId, targetDrive, fileId });
-  const { data: imageUrl } = useCommentMedia({
-    odinId: postAuthorOdinId,
-    targetDrive,
-    fileId,
-  }).fetch;
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
-  if (!imageUrl?.length)
-    return (
-      <div className="text-foreground my-1 flex h-10 animate-pulse flex-row items-center justify-center bg-white text-sm text-opacity-50">
-        {t('loading')}
-      </div>
-    );
+  if (!targetDrive) return null;
+  return (
+    <OdinImage
+      odinId={postAuthorOdinId}
+      dotYouClient={dotYouClient}
+      fileId={fileId}
+      targetDrive={targetDrive}
+      fileKey={fileKey}
+      lastModified={lastModified}
+      className="my-1 max-w-[250px]"
+      systemFileType="Comment"
+    />
+  );
+};
+
+export const CommentMediaPreview = ({ attachment: file }: { attachment: File | undefined }) => {
+  const imageUrl = useMemo(() => file && URL.createObjectURL(file), [file]);
+  if (!file) return null;
 
   return (
     <>
-      <img src={imageUrl} className="my-1" />
+      <img src={imageUrl} className="my-1 max-w-[250px]" />
     </>
   );
 };

@@ -44,7 +44,6 @@ export const PostDetailCard = ({
 }) => {
   const post = postFile?.content;
   const mediaFiles = (post as Media)?.mediaFiles;
-
   return (
     <div
       className={`bg-background rounded-lg border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
@@ -101,15 +100,18 @@ export const PostDetailCard = ({
         )}
       </div>
 
-      {post?.primaryMediaFile ? (
+      {postFile?.fileId && post?.primaryMediaFile ? (
         mediaFiles && mediaFiles.length > 1 ? (
           <MediaGallery
+            fileId={postFile.fileId}
+            globalTransitId={postFile.globalTransitId}
+            lastModified={postFile.lastModified}
             channelId={post.channelId}
             files={mediaFiles}
             className="my-4"
             maxVisible={4}
             odinId={odinId}
-            probablyEncrypted={postFile?.payloadIsEncrypted}
+            probablyEncrypted={postFile?.isEncrypted}
             onClick={
               onNavigate
                 ? (e, index) => {
@@ -126,18 +128,24 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId}
+                globalTransitId={postFile.globalTransitId}
+                lastModified={postFile.lastModified}
+                fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
                 previewThumbnail={postFile?.previewThumbnail}
-                probablyEncrypted={postFile?.payloadIsEncrypted}
+                probablyEncrypted={postFile?.isEncrypted}
               />
             ) : (
               <Video
                 targetDrive={getChannelDrive(post.channelId)}
                 fileId={post.primaryMediaFile.fileId}
+                globalTransitId={postFile.globalTransitId}
+                lastModified={postFile.lastModified}
+                fileKey={post.primaryMediaFile.fileKey}
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
-                probablyEncrypted={postFile?.payloadIsEncrypted}
+                probablyEncrypted={postFile?.isEncrypted}
                 previewThumbnail={postFile?.previewThumbnail}
               />
             )}
@@ -169,7 +177,16 @@ export const PostDetailCard = ({
             <RichTextRenderer
               odinId={odinId}
               body={(post as Article)?.body}
-              imageDrive={getChannelDrive(post.channelId)}
+              options={
+                postFile && postFile.fileId
+                  ? {
+                      imageDrive: getChannelDrive(post.channelId),
+                      defaultFileId: postFile.fileId,
+                      defaultGlobalTransitId: postFile.globalTransitId,
+                      lastModified: postFile.lastModified,
+                    }
+                  : undefined
+              }
             />
           </div>
         )

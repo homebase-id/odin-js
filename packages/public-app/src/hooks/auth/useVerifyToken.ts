@@ -17,17 +17,17 @@ const hasSharedSecret = (isOwner?: boolean) => {
   }
 };
 
-const useVerifyToken = (isOwner?: boolean) => {
+export const useVerifyToken = (isOwner?: boolean) => {
   const fetchData = async () => {
     if (!hasSharedSecret(isOwner)) return false;
 
     if (isOwner) return await hasValidOwnerToken();
     else return await hasValidYouAuthToken();
   };
-  return useQuery(['verifyToken'], fetchData, {
+  return useQuery({
+    queryKey: ['verifyToken'],
+    queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });
 };
-
-export default useVerifyToken;

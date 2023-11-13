@@ -1,14 +1,14 @@
-import { hasDebugFlag } from '../../helpers/BrowserUtil';
-import { DotYouClient } from '../DotYouClient';
-import { ThumbnailFile } from './DriveFileTypes';
-import { KeyHeader, EncryptedKeyHeader } from './DriveTypes';
+import { hasDebugFlag } from '../../../helpers/BrowserUtil';
+import { DotYouClient } from '../../DotYouClient';
+import { PayloadFile, ThumbnailFile } from '../File/DriveFileTypes';
+import { KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,
   UploadResult,
   AppendInstructionSet,
 } from './DriveUploadTypes';
-import { encryptWithKeyheader, decryptKeyHeader, encryptWithSharedSecret } from './SecurityHelpers';
+import { decryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
   encryptMetaData,
@@ -16,6 +16,7 @@ import {
   buildFormData,
   pureUpload,
   pureAppend,
+  buildManifest,
 } from './UploadHelpers';
 
 const isDebug = hasDebugFlag();
@@ -25,7 +26,7 @@ export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | Blob | File | undefined,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => void
@@ -36,13 +37,16 @@ export const uploadFile = async (
       metadata,
     });
 
+  // Force isEncrypted on the metadata to match the encrypt flag
+  metadata.isEncrypted = encrypt;
+
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadUsingKeyHeader(
     dotYouClient,
     keyHeader,
     instructions,
     metadata,
-    payload,
+    payloads,
     thumbnails,
     onVersionConflict
   );
@@ -53,43 +57,36 @@ const uploadUsingKeyHeader = async (
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | File | Blob | undefined,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
-  // Rebuild instructions without the systemFileType
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildManifest(payloads, thumbnails);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
   };
 
   // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     keyHeader,
     instructions,
-    encryptedMetaData
+    metadata
   );
 
-  const processedPayload =
-    metadata.appData.contentIsComplete || !payload
-      ? undefined
-      : keyHeader
-      ? await encryptWithKeyheader(payload, keyHeader)
-      : payload;
-
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     encryptedDescriptor,
-    processedPayload,
+    payloads,
     thumbnails,
     keyHeader
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType, onVersionConflict);
+  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
 };
 
 export const uploadHeader = async (
@@ -102,24 +99,18 @@ export const uploadHeader = async (
     ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
     : undefined;
 
-  // Rebuild instructions without the systemFileType
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
-  };
+  const { systemFileType, ...strippedInstructions } = instructions;
+  if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
+
+  strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
-  const strippedMetaData: UploadFileMetadata = {
-    ...encryptedMetaData,
-    appData: { ...encryptedMetaData.appData, additionalThumbnails: undefined },
-  };
 
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
-      fileMetadata: strippedMetaData,
+      fileMetadata: encryptedMetaData,
     },
     instructions.transferIv
   );
@@ -133,35 +124,36 @@ export const uploadHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType);
+  return await pureUpload(dotYouClient, data, systemFileType);
 };
 
 export const appendDataToFile = async (
   dotYouClient: DotYouClient,
+  encryptedKeyHeader: EncryptedKeyHeader | undefined,
   instructions: AppendInstructionSet,
-  payload: Uint8Array | File | undefined,
+  payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  keyHeader: KeyHeader,
   onVersionConflict?: () => void
 ) => {
-  const strippedInstructions: AppendInstructionSet = {
-    targetFile: instructions.targetFile,
-    thumbnails: instructions.thumbnails,
+  const keyHeader = encryptedKeyHeader
+    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : undefined;
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildManifest(payloads, thumbnails);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
   };
 
-  const processedPayload = !payload
-    ? undefined
-    : keyHeader
-    ? await encryptWithKeyheader(payload, keyHeader)
-    : payload;
-
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     undefined,
-    processedPayload,
+    payloads,
     thumbnails,
     keyHeader
   );
 
-  return await pureAppend(dotYouClient, data, instructions.systemFileType, onVersionConflict);
+  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);
 };

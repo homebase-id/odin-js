@@ -1,11 +1,11 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
   queryBatchCollection,
-  getPayload,
+  getContentFromHeaderOrPayload,
   ensureDrive,
   UploadInstructionSet,
   UploadFileMetadata,
@@ -15,7 +15,12 @@ import {
   queryBatch,
   TargetDrive,
 } from '../../core/core';
-import { getNewId, jsonStringify64, stringToUint8Array } from '../../helpers/helpers';
+import {
+  getNewId,
+  getRandom16ByteArray,
+  jsonStringify64,
+  stringToUint8Array,
+} from '../../helpers/helpers';
 import { ProfileConfig } from './ProfileConfig';
 import { ProfileDefinition, ProfileSection } from './ProfileTypes';
 
@@ -56,7 +61,7 @@ export const getProfileDefinitions = async (
         const profileDrive = GetTargetDriveFromProfileId(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await getPayload<ProfileDefinition>(
+        const definition = await getContentFromHeaderOrPayload<ProfileDefinition>(
           dotYouClient,
           profileDrive,
           dsr,
@@ -120,27 +125,39 @@ export const saveProfileDefinition = async (
   const payloadJson: string = jsonStringify64(definition);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
 
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       uniqueId: definition.profileId,
       tags: [definition.profileId],
       fileType: ProfileConfig.ProfileDefinitionFileType,
       dataType: undefined,
-      contentIsComplete: shouldEmbedContent,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
   };
 
   //reshape the definition to group attributes by their type
-  await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  await uploadFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
+    undefined,
+    encrypt
+  );
   return;
 };
 
@@ -176,27 +193,39 @@ export const saveProfileSection = async (
   const payloadJson: string = jsonStringify64(profileSection);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
 
   // Note: we tag it with the profile id AND also a tag indicating it is a definition
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       tags: [profileId, profileSection.sectionId],
       groupId: profileId,
       fileType: ProfileConfig.ProfileSectionFileType,
       dataType: undefined,
-      contentIsComplete: shouldEmbedContent,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
   };
 
-  await uploadFile(dotYouClient, instructionSet, metadata, payloadBytes, undefined, encrypt);
+  await uploadFile(
+    dotYouClient,
+    instructionSet,
+    metadata,
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
+    undefined,
+    encrypt
+  );
 };
 
 export const removeProfileSection = async (
@@ -246,7 +275,7 @@ export const getProfileSections = async (
       await Promise.all(
         response.searchResults.map(
           async (dsr) =>
-            await getPayload<ProfileSection>(
+            await getContentFromHeaderOrPayload<ProfileSection>(
               dotYouClient,
               targetDrive,
               dsr,
@@ -294,7 +323,7 @@ const getProfileDefinitionInternal = async (
       );
     }
     const dsr = response.searchResults[0];
-    const definition = await getPayload<ProfileDefinition>(
+    const definition = await getContentFromHeaderOrPayload<ProfileDefinition>(
       dotYouClient,
       targetDrive,
       dsr,
@@ -335,7 +364,7 @@ const getProfileSectionInternal = async (
       );
     }
     const dsr = response.searchResults[0];
-    const definition = await getPayload<ProfileSection>(
+    const definition = await getContentFromHeaderOrPayload<ProfileSection>(
       dotYouClient,
       targetDrive,
       dsr,

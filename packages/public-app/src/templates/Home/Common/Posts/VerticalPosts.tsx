@@ -8,7 +8,7 @@ import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import ChannelTeaser from '../ChannelTeaser/ChannelTeaser';
 import { LoadingBlock } from '@youfoundation/common-app';
-import useAuth from '../../../../hooks/auth/useAuth';
+import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
 
@@ -19,7 +19,7 @@ const VerticalPosts = ({ className }: { className?: string }) => {
 
   return (
     <div className={className ?? ''}>
-      <div className="grid max-w-6xl grid-cols-1 gap-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="grid max-w-7xl grid-cols-1 gap-4 lg:grid-cols-5 xl:grid-cols-6">
         <ChannelSidebar
           className="lg:order-2 lg:col-span-2"
           setChannelId={(newId) => setMobileChannelId(newId)}
@@ -137,7 +137,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
               <div
                 className="absolute left-0 top-0 grid w-full grid-flow-row"
                 style={{
-                  transform: `translateY(${items[0].start - virtualizer.options.scrollMargin}px)`,
+                  transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
                 }}
               >
                 {items.map((virtualRow) => {
@@ -214,7 +214,7 @@ const combinePosts = (
     }
   }, [] as PostFile<PostContent>[]);
 
-  combinedPosts.sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime);
+  combinedPosts.sort((a, b) => b.userDate - a.userDate);
 
   return combinedPosts;
 };

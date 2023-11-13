@@ -4,24 +4,25 @@ import { ActionLink, Image } from '@youfoundation/common-app';
 
 export const RichTextRenderer = ({
   body,
-  imageDrive,
   odinId,
   options,
   className,
 }: {
   body: string | Record<string, unknown>[] | undefined;
-  imageDrive?: TargetDrive;
   odinId?: string;
-  options?: unknown;
+  options?: {
+    imageDrive: TargetDrive;
+    defaultFileId: string;
+    defaultGlobalTransitId?: string;
+    lastModified: number | undefined;
+  };
   className?: string;
 }) => {
-  if (!body || typeof body === 'string') {
-    return <p className={className}>{body}</p>;
-  }
+  if (!body || typeof body === 'string') return <p className={className}>{body}</p>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const render = (node: any): ReactNode => {
-    if ('text' in node) {
+    if ('text' in node && (!('type' in node) || node.type === 'text')) {
       return renderLeaf(node, node.text, {});
     } else {
       const { type, ...attributes } = node;
@@ -116,6 +117,7 @@ export const RichTextRenderer = ({
       case 'li':
         return <li {...attributes}>{children}</li>;
       case 'a':
+        // TODO: expand with check for attributes?.odinId, and if so check if it is a contact, and if we have a name for them...
         return (
           <a
             href={(attributes?.url as string) ?? ''}
@@ -124,18 +126,21 @@ export const RichTextRenderer = ({
               (attributes?.url as string)?.startsWith(window.location.origin) ? '_self' : '_blank'
             }
             rel="noopener noreferrer"
-            className="text-primary hover:underline"
+            className="text-primary hover:underline break-all"
             onClick={(e) => e.stopPropagation()}
           >
-            {children ?? attributes?.url + ''}
+            {children ?? (attributes?.text || attributes?.url) + ''}
           </a>
         );
       case 'local_image':
-        if (attributes && 'fileId' in attributes && imageDrive) {
+        if (attributes && options) {
           return (
             <Image
-              targetDrive={imageDrive}
-              fileId={attributes.fileId as string}
+              targetDrive={options.imageDrive}
+              fileId={(attributes.fileId as string) || options.defaultFileId}
+              globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
+              lastModified={options.lastModified}
+              fileKey={attributes.fileKey as string}
               className="my-4 max-w-md"
               odinId={odinId}
             />
@@ -147,7 +152,7 @@ export const RichTextRenderer = ({
           return (
             <div className="flex">
               <ActionLink
-                className="my-2 w-auto rounded-md px-3 py-2 text-left"
+                className="break-all my-2 w-auto rounded-md px-3 py-2 text-left"
                 href={attributes.linkTarget as string}
                 type="secondary"
               >

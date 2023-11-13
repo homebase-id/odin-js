@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useVerifyToken from './useVerifyToken';
+import { useVerifyToken } from './useVerifyToken';
 import { getEccPublicKey, logout as logoutYouauth } from '../../provider/AuthenticationProvider';
 import { HOME_ROOT_PATH, logoutOwner } from '@youfoundation/common-app';
 import {
@@ -23,9 +23,10 @@ import {
   cbcDecrypt,
   base64ToUint8Array,
   byteArrayToString,
+  tryJsonParse,
 } from '@youfoundation/js-lib/helpers';
 
-const useAuth = () => {
+export const useAuth = () => {
   const { getDotYouClient, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
     useDotYouClient();
 
@@ -108,7 +109,6 @@ export const useYouAuthAuthorization = () => {
     delete rawEccKey.ext;
     const eccPk64 = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawEccKey)));
 
-    // TODO: returnUrl needs to be passed in the state, so it can be used in the callback
     const finalUrl = `/authorization-code-callback`;
     const state = { finalUrl: finalUrl, eccPk64: eccPk64, returnUrl };
     const pk = await getEccPublicKey();
@@ -146,7 +146,11 @@ export const useYouAuthAuthorization = () => {
       exchangedSecret
     );
 
-    const { identity, ss64, returnUrl } = JSON.parse(byteArrayToString(data));
+    const { identity, ss64, returnUrl } = tryJsonParse<{
+      identity: string;
+      ss64: string;
+      returnUrl: string;
+    }>(byteArrayToString(data));
 
     // Store the sharedSecret to the localStorage
     window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
@@ -159,5 +163,3 @@ export const useYouAuthAuthorization = () => {
 
   return { getAuthorizationParameters, finalizeAuthorization };
 };
-
-export default useAuth;

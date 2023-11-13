@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 
-const useFocusedEditing = () => {
+export const useFocusedEditing = () => {
   const [searchParams] = useSearchParams();
 
   const checkReturnTo = (state?: string) => {
@@ -25,5 +25,3 @@ const useFocusedEditing = () => {
 
   return checkReturnTo;
 };
-
-export default useFocusedEditing;

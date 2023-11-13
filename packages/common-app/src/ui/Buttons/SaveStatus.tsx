@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { t } from '@youfoundation/common-app';
+import { ActionButtonState, t } from '@youfoundation/common-app';
 
 import { Alert } from '@youfoundation/common-app';
 import { format } from '../../helpers/timeago';
@@ -10,7 +10,7 @@ export const SaveStatus = ({
   error,
 }: {
   className: string;
-  state: 'error' | 'idle' | 'loading' | 'success';
+  state: ActionButtonState;
   error?: unknown;
 }) => {
   const [lastSave, setLastSave] = useState<Date>();
@@ -32,7 +32,7 @@ export const SaveStatus = ({
     };
   }, [now]);
 
-  if (state === 'loading') {
+  if (state === 'loading' || state === 'pending') {
     return <p className={`${className} text-sm`}>Saving...</p>;
   }
 

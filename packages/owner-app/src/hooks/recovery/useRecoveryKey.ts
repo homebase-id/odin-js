@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { getRecoveryKey } from '../../provider/auth/RecoveryProvider';
 
-const useRecoveryKey = () => {
+export const useRecoveryKey = () => {
   const { getDotYouClient } = useAuth();
   const dotYouClient = getDotYouClient();
 
@@ -11,11 +11,14 @@ const useRecoveryKey = () => {
   };
 
   return {
-    fetchKey: useQuery(['recoveryKey'], fetchKey, {
-      cacheTime: Infinity, // Recovery key can only be fetch once at the moment.. If it fails, you're screwed
+    fetchKey: useQuery({
+      queryKey: ['recoveryKey'],
+      queryFn: fetchKey,
+      gcTime: Infinity, // Recovery key can only be fetch once at the moment.. If it fails, you're screwed
       staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     }),
   };
 };
-
-export default useRecoveryKey;

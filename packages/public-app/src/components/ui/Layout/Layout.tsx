@@ -1,6 +1,6 @@
-import { FC, ReactNode, Suspense, lazy, useEffect } from 'react';
-import useTheme from '../../../hooks/theme/useTheme';
-import useAuth from '../../../hooks/auth/useAuth';
+import { FC, ReactNode, Suspense, lazy } from 'react';
+import { useTheme } from '../../../hooks/theme/useTheme';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { ScrollRestoration } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useImage } from '@youfoundation/common-app';
@@ -37,9 +37,10 @@ const Layout: FC<LayoutProps> = ({ children }) => {
 };
 
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
-  const { colors, favicon } = useTheme();
+  const { colors, favicon, imageFileId } = useTheme();
   const { data: imageData } = useImage(
     undefined,
+    imageFileId,
     favicon && 'fileId' in favicon ? favicon.fileId : undefined,
     GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
     undefined

@@ -9,7 +9,7 @@ import {
 } from '@youfoundation/common-app';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { Article } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
@@ -40,11 +40,10 @@ const PostDetail = () => {
 
   const post = postData?.activeBlog.content;
   const channel = postData?.activeChannel;
-
   return (
     <>
       <Helmet>
-        <title>{post?.caption ?? ''} | Homebase</title>
+        <title>{post?.caption || channel?.name || ''} | Homebase</title>
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"

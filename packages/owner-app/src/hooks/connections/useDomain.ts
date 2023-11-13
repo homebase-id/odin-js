@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   disconnectFromDomain,
   getDomainClients,
@@ -8,7 +8,7 @@ import {
   revokeDomainAccess,
 } from '../../provider/network/domainNetwork/DomainProvider';
 
-const useDomain = ({ domain }: { domain?: string }) => {
+export const useDomain = ({ domain }: { domain?: string }) => {
   const queryClient = useQueryClient();
 
   const dotYouClient = useAuth().getDotYouClient();
@@ -38,42 +38,46 @@ const useDomain = ({ domain }: { domain?: string }) => {
   };
 
   return {
-    fetch: useQuery(['domainInfo', domain], () => fetchSingle({ domain: domain as string }), {
+    fetch: useQuery({
+      queryKey: ['domainInfo', domain],
+      queryFn: () => fetchSingle({ domain: domain as string }),
       refetchOnWindowFocus: false,
       enabled: !!domain,
     }),
 
-    fetchClients: useQuery(
-      ['domainClients', domain],
-      () => fetchClients({ domain: domain as string }),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!domain,
-      }
-    ),
+    fetchClients: useQuery({
+      queryKey: ['domainClients', domain],
+      queryFn: () => fetchClients({ domain: domain as string }),
 
-    revokeDomain: useMutation(revokeDomain, {
+      refetchOnWindowFocus: false,
+      enabled: !!domain,
+    }),
+
+    revokeDomain: useMutation({
+      mutationFn: revokeDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['domainInfo', param.domain]);
+        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    restoreDomain: useMutation(restoreDomain, {
+    restoreDomain: useMutation({
+      mutationFn: restoreDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['domainInfo', param.domain]);
+        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
       },
     }),
 
-    disconnect: useMutation(removeDomain, {
+    disconnect: useMutation({
+      mutationFn: removeDomain,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['activeDomains']);
-        queryClient.invalidateQueries(['domainInfo', param.domain]);
+        queryClient.invalidateQueries({ queryKey: ['activeDomains'] });
+        queryClient.invalidateQueries({ queryKey: ['domainInfo', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -81,5 +85,3 @@ const useDomain = ({ domain }: { domain?: string }) => {
     }),
   };
 };
-
-export default useDomain;

@@ -1,13 +1,13 @@
 import {
   TargetDrive,
-  ThumbSize,
   GlobalTransitIdFileIdentifier,
   EmbeddedThumb,
   ArchivalStatus,
   ExternalFileIdentifier,
   SystemFileType,
-} from './DriveFileTypes';
-import { EncryptedKeyHeader } from './DriveTypes';
+  UploadPayloadDescriptor,
+} from '../File/DriveFileTypes';
+import { EncryptedKeyHeader } from '../Drive/DriveTypes';
 
 export interface UploadInstructionSet {
   transferIv: Uint8Array;
@@ -21,7 +21,6 @@ export interface AppendInstructionSet {
     fileId: string;
     targetDrive: TargetDrive;
   };
-  thumbnails?: ThumbSize[];
   systemFileType?: SystemFileType;
 }
 
@@ -60,13 +59,16 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
   allowDistribution: boolean;
-  contentType: string;
   senderOdinId?: string;
-  payloadIsEncrypted: boolean;
+  isEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
   referencedFile?: GlobalTransitIdFileIdentifier;
   versionTag?: string;
+}
+
+export interface UploadManifest {
+  PayloadDescriptors?: UploadPayloadDescriptor[];
 }
 
 export interface AccessControlList {
@@ -83,18 +85,15 @@ export enum SecurityGroupType {
 }
 
 export interface UploadAppFileMetaData {
-  tags: string[] | null;
-  groupId?: string;
   uniqueId?: string;
+  tags: string[] | null;
   fileType?: number;
   dataType?: number;
   userDate?: number;
-  contentIsComplete: boolean;
-  jsonContent: string | null;
-  previewThumbnail?: EmbeddedThumb;
-  additionalThumbnails?: ThumbSize[];
+  groupId?: string;
   archivalStatus?: ArchivalStatus;
-  alias?: string;
+  content: string | null;
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export interface UploadResult {
@@ -107,12 +106,12 @@ export interface UploadResult {
 }
 
 export enum TransferStatus {
-  AwaitingTransferKey = 1,
-  TransferKeyCreated = 3,
-  DeliveredToInbox = 5,
-  DeliveredToTargetDrive = 7,
-  PendingRetry = 8,
-  TotalRejectionClientShouldRetry = 9,
-  FileDoesNotAllowDistribution = 11,
-  RecipientReturnedAccessDenied = 13,
+  AwaitingTransferKey = 'awaitingtransferkey',
+  TransferKeyCreated = 'transferkeycreated',
+  DeliveredToInbox = 'deliveredtoinbox',
+  DeliveredToTargetDrive = 'deliveredtotargetdrive',
+  PendingRetry = 'pendingretry',
+  TotalRejectionClientShouldRetry = 'totalrejectionclientshouldretry',
+  FileDoesNotAllowDistribution = 'filedoesnotallowdistribution',
+  RecipientReturnedAccessDenied = 'recipientreturnedaccessdenied',
 }

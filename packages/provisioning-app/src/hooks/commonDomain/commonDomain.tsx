@@ -1,12 +1,21 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios, { AxiosError } from 'axios';
 
+export type DnsRecordStatus =
+  | 'unknown'
+  | 'success'
+  | 'domainOrRecordNotFound'
+  | 'incorrectValue'
+  | 'multipleRecordsNotSupported'
+  | 'aaaaRecordsNotSupported'
+  | 'noAuthorativeNameServer';
+
 export interface DnsRecord {
   type: string;
   name: string;
   value: string;
   description: string;
-  status: 'unknown' | 'success' | 'domainOrRecordNotFound' | 'incorrectValue';
+  status: DnsRecordStatus;
   statusText: string;
 }
 
@@ -15,9 +24,8 @@ export type DnsConfig = Array<DnsRecord>;
 //
 
 export function hasInvalidDnsRecords(dnsConfig: DnsConfig | undefined): boolean {
-  if (!dnsConfig) {
-    return true;
-  }
+  if (!dnsConfig) return true;
+
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
   const fallbackARecord = dnsConfig.find((record) => record.type === 'A');
   const subRecords = dnsConfig.filter((record) => !!record.name);
@@ -74,16 +82,14 @@ export const useCanConnectToDomain = (domain: string, port: number) => {
   };
 
   return {
-    fetchCanConnectToDomain: useQuery<boolean, AxiosError>(
-      ['can-connect-to-domain', domain, port],
-      () => canConnectToDomain(domain, port),
-      {
-        enabled: !!domain,
-        refetchInterval: (success) => (!success ? 1000 : false),
-        refetchOnWindowFocus: false,
-        retry: false,
-      }
-    ),
+    fetchCanConnectToDomain: useQuery<boolean, AxiosError>({
+      queryKey: ['can-connect-to-domain', domain, port],
+      queryFn: () => canConnectToDomain(domain, port),
+      enabled: !!domain,
+      refetchInterval: (success) => (!success ? 1000 : false),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }),
   };
 };
 
@@ -103,17 +109,15 @@ export const useDomainHasValidCertificate = (domain: string, enabled: boolean) =
   };
 
   return {
-    fetchDomainHasValidCertificate: useQuery<boolean, AxiosError>(
-      ['has-valid-certificate', domain],
-      () => domainHasValidCertificate(domain),
-      {
-        enabled,
-        initialData: false,
-        refetchInterval: (success) => (!success ? 1000 : false),
-        refetchOnWindowFocus: false,
-        retry: false,
-      }
-    ),
+    fetchDomainHasValidCertificate: useQuery<boolean, AxiosError>({
+      queryKey: ['has-valid-certificate', domain],
+      queryFn: () => domainHasValidCertificate(domain),
+      enabled,
+      initialData: false,
+      refetchInterval: (success) => (!success ? 1000 : false),
+      refetchOnWindowFocus: false,
+      retry: false,
+    }),
   };
 };
 
@@ -143,6 +147,8 @@ export const useCreateIdentity = () => {
   };
 
   return {
-    createIdentity: useMutation<string, AxiosError, CreateIdentityKey>(createIdentity),
+    createIdentity: useMutation<string, AxiosError, CreateIdentityKey>({
+      mutationFn: createIdentity,
+    }),
   };
 };

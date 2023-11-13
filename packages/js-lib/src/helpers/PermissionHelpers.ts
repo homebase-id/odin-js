@@ -1,4 +1,4 @@
-import { DrivePermissionType, PermissionedDrive } from '../core/DriveData/DriveTypes';
+import { DrivePermissionType, PermissionedDrive } from '../core/DriveData/Drive/DriveTypes';
 import { DriveGrant } from '../network/network';
 import { AppPermissionType } from '../network/permission/PermissionTypes';
 

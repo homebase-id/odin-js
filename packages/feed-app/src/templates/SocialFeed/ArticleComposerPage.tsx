@@ -17,7 +17,6 @@ import {
 import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ImageUploadResult } from '@youfoundation/js-lib/core';
 import {
   RichText,
   Article,
@@ -48,10 +47,12 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
+    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
+    setPrimaryMediaFile,
 
     // Status
     saveStatus,
@@ -207,7 +208,9 @@ export const ArticleComposerPage = () => {
             <InnerFieldEditors
               key={postFile.content.id}
               postFile={postFile}
+              primaryMediaFile={primaryMediaFile}
               channel={channel}
+              updateVersionTag={(versionTag) => setPostFile({ ...postFile, versionTag })}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
@@ -215,17 +218,17 @@ export const ArticleComposerPage = () => {
                 } else if (e.target.name === 'caption') {
                   dirtyPostFile.content.caption = (e.target.value as string).trim();
                 } else if (e.target.name === 'primaryImageFileId') {
-                  const uploadResult = e.target.value as ImageUploadResult;
-                  dirtyPostFile.content.primaryMediaFile = {
-                    fileId: uploadResult.fileId,
-                    type: 'image',
-                  };
-                  dirtyPostFile.previewThumbnail = uploadResult.previewThumbnail;
+                  setPrimaryMediaFile(
+                    e.target.value ? { file: e.target.value as Blob } : undefined
+                  );
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.content.body = e.target.value as RichText;
                 }
 
-                setPostFile(dirtyPostFile);
+                setPostFile((oldPostFile) => ({
+                  ...dirtyPostFile,
+                  versionTag: oldPostFile.versionTag,
+                }));
                 debouncedSave();
               }}
               disabled={isPublished}

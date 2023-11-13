@@ -1,13 +1,13 @@
 import { PostImageDetailCard, t, useBlog } from '@youfoundation/common-app';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import LoginDialog from '../../../components/Dialog/LoginDialog/LoginDialog';
 
 const PostImageDetail = () => {
   const { channelKey, postKey, attachmentKey } = useParams();
-  const { data: blogData } = useBlog(
+  const { data: postData } = useBlog(
     channelKey && postKey
       ? {
           channelSlug: channelKey,
@@ -28,16 +28,19 @@ const PostImageDetail = () => {
     return paths.join('/');
   }, [window.location.pathname]);
 
+  const post = postData?.activeBlog.content;
+  const channel = postData?.activeChannel;
+
   return (
     <>
       <Helmet>
-        <title>{blogData?.activeBlog.content.caption ?? ''} | Homebase</title>
-        <meta name="og:title" content={blogData?.activeBlog.content.caption ?? ''} />
+        <title>{post?.caption || channel?.name || ''} | Homebase</title>
+        <meta name="og:title" content={postData?.activeBlog.content.caption ?? ''} />
       </Helmet>
       <div className="fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">
         <PostImageDetailCard
-          channel={blogData?.activeChannel}
-          postFile={blogData?.activeBlog}
+          channel={postData?.activeChannel}
+          postFile={postData?.activeBlog}
           attachmentKey={attachmentKey}
           onClose={() => navigate(state?.referrer || -1, { preventScrollReset: true })}
           navigate={(path: string) =>

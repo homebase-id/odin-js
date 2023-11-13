@@ -25,7 +25,6 @@ const handleIntersections: IntersectionObserverCallback = (entries) => {
 const getIntersectionObserver = () => {
   if (observer === undefined) {
     observer = new IntersectionObserver(handleIntersections, {
-      rootMargin: '100px',
       threshold: 0.15,
     });
   }
@@ -41,9 +40,7 @@ export const useIntersection = (
     const target = elem?.current;
     const observer = getIntersectionObserver();
 
-    if (!target) {
-      return;
-    }
+    if (!target) return;
 
     listenerCallbacks.set(target, callback);
     cleanupSettings.set(target, !keepObserving);

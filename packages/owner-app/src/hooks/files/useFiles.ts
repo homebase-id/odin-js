@@ -1,25 +1,30 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  decryptJsonContent,
+  decryptKeyHeader,
+  DEFAULT_PAYLOAD_KEY,
+  deleteFile,
   DriveSearchResult,
-  getPayload,
+  getContentFromHeaderOrPayload,
   getPayloadBytes,
   queryBatch,
   SystemFileType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import useAuth from '../auth/useAuth';
-import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { useAuth } from '../auth/useAuth';
+import { jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const includeMetadataHeader = true;
 const pageSize = 300;
 
-const useFiles = ({
+export const useFiles = ({
   targetDrive,
   systemFileType,
 }: {
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
+  const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchFiles = async ({
@@ -37,49 +42,53 @@ const useFiles = ({
     return reponse;
   };
 
-  const fetchFile = async (result: DriveSearchResult, payloadOnly?: boolean) => {
-    if (result.fileMetadata.contentType !== 'application/json' && payloadOnly) {
-      const payload = await getPayloadBytes(
-        dotYouClient,
-        targetDrive,
-        result.fileId,
-        result.fileMetadata.payloadIsEncrypted ? result.sharedSecretEncryptedKeyHeader : undefined
-      );
+  const fetchFile = async (result: DriveSearchResult, payloadKey?: string) => {
+    if (result.fileMetadata.contentType !== 'application/json' && payloadKey) {
+      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
+        keyHeader: result.fileMetadata.isEncrypted
+          ? result.sharedSecretEncryptedKeyHeader
+          : undefined,
+      });
       if (!payload) return null;
 
       return window.URL.createObjectURL(
-        new Blob([payload.bytes], { type: `${result.fileMetadata.contentType};charset=utf-8` })
+        new Blob([payload.bytes], {
+          type: `${result.fileMetadata.payloads.find((payload) => payload.key === payloadKey)
+            ?.contentType};charset=utf-8`,
+        })
       );
     }
+
+    const decryptedJsonContent =
+      result.fileMetadata.appData.content && result.fileMetadata.isEncrypted
+        ? await decryptJsonContent(
+            result.fileMetadata,
+            await decryptKeyHeader(dotYouClient, result.sharedSecretEncryptedKeyHeader)
+          )
+        : result.fileMetadata.appData.content;
 
     const exportable = {
       fileId: result.fileId,
       fileMetadata: {
-        globalTransitId: result.fileMetadata.globalTransitId,
-        contentType: result.fileMetadata.contentType,
-        senderOdinId: result.fileMetadata.senderOdinId,
-        payloadIsEncrypted: result.fileMetadata.payloadIsEncrypted,
-        allowDistribution: result.serverMetadata.allowDistribution,
-        accessControlList: result.serverMetadata.accessControlList,
+        ...result.fileMetadata,
         appData: {
           ...result.fileMetadata.appData,
-          jsonContent: undefined,
-          previewThumbnail: undefined,
-          additionalThumbnails: undefined,
-          contentIsComplete: undefined,
+          content: tryJsonParse(decryptedJsonContent),
         },
       },
       payload:
         result.fileMetadata.contentType === 'application/json'
-          ? await getPayload(dotYouClient, targetDrive, result, includeMetadataHeader)
-          : await getPayloadBytes(
+          ? await getContentFromHeaderOrPayload(
               dotYouClient,
               targetDrive,
-              result.fileId,
-              result.fileMetadata.payloadIsEncrypted
+              result,
+              includeMetadataHeader
+            )
+          : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
+              keyHeader: result.fileMetadata.isEncrypted
                 ? result.sharedSecretEncryptedKeyHeader
-                : undefined
-            ),
+                : undefined,
+            }),
     };
 
     const stringified = jsonStringify64(exportable);
@@ -90,21 +99,27 @@ const useFiles = ({
     return url;
   };
 
+  const removeFile = async (fileId: string) => await deleteFile(dotYouClient, targetDrive, fileId);
+
   return {
-    fetch: useInfiniteQuery(
-      ['files', systemFileType || 'Standard', targetDrive.alias],
-      ({ pageParam }) => fetchFiles({ targetDrive, pageParam }),
-      {
-        getNextPageParam: (lastPage) =>
-          (lastPage?.searchResults?.length >= pageSize && lastPage?.cursorState) || undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!targetDrive,
-      }
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetchFiles({ targetDrive, pageParam }),
+      getNextPageParam: (lastPage) =>
+        lastPage?.searchResults?.length >= pageSize ? lastPage?.cursorState : undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!targetDrive,
+    }),
     fetchFile: fetchFile,
+    deleteFile: useMutation({
+      mutationFn: removeFile,
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
+        });
+      },
+    }),
   };
 };
-
-export default useFiles;

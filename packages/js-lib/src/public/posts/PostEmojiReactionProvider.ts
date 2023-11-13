@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { tryJsonParse } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { ReactionVm, ReactionContext, EmojiReactionSummary, ReactionFile } from './PostTypes';
 
@@ -45,9 +46,7 @@ export const saveEmojiReaction = async (
     const url = emojiRootTransit + '/add';
     return client
       .post(url, { odinId: emoji.context.authorOdinId, request: data })
-      .then((response) => {
-        return { ...response.data, status: response.data?.status?.toLowerCase() };
-      })
+      .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
       .catch(dotYouClient.handleErrorResponse);
   }
 };
@@ -116,7 +115,7 @@ export const getReactionSummary = async (
             .map((reaction) => {
               try {
                 return {
-                  emoji: JSON.parse(reaction.reactionContent).emoji as string,
+                  emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
                   count: reaction.count,
                 };
               } catch (ex) {
@@ -142,7 +141,7 @@ export const getReactionSummary = async (
             .map((reaction) => {
               try {
                 return {
-                  emoji: JSON.parse(reaction.reactionContent).emoji as string,
+                  emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
                   count: reaction.count,
                 };
               } catch (ex) {
@@ -189,7 +188,7 @@ export const getReactions = async (
           reactions: response.data.reactions.map((reaction) => {
             return {
               authorOdinId: reaction.odinId,
-              content: { body: JSON.parse(reaction.reactionContent).emoji },
+              content: { body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji },
             };
           }),
           cursor: response.data.cursor,
@@ -205,7 +204,7 @@ export const getReactions = async (
           reactions: response.data.reactions.map((reaction) => {
             return {
               authorOdinId: reaction.odinId,
-              content: { body: JSON.parse(reaction.reactionContent).emoji },
+              content: { body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji },
             };
           }),
           cursor: response.data.cursor,
@@ -241,7 +240,9 @@ export const getMyReactions = async (
     return client
       .post<string[]>(url, data)
       .then((response) => {
-        return response.data?.map((emojiString) => JSON.parse(emojiString).emoji);
+        return response.data?.map(
+          (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji
+        );
       })
       .catch(dotYouClient.handleErrorResponse);
   } else {
@@ -249,7 +250,9 @@ export const getMyReactions = async (
     return client
       .post<string[]>(url, { odinId: context.authorOdinId, ...data })
       .then((response) => {
-        return response.data?.map((emojiString) => JSON.parse(emojiString).emoji);
+        return response.data?.map(
+          (emojiString) => tryJsonParse<{ emoji: string }>(emojiString).emoji
+        );
       })
       .catch(dotYouClient.handleErrorResponse);
   }

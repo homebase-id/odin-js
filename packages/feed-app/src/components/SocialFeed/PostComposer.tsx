@@ -2,15 +2,14 @@ import {
   BlogConfig,
   ChannelDefinition,
   EmbeddedPost,
+  NewMediaFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect } from 'react';
 import { useRef, useState } from 'react';
 import {
   ActionButton,
-  ActionLink,
   Arrow,
-  AttachmentFile,
   ChannelsDialog,
   EmbeddedPostContent,
   EmojiSelector,
@@ -42,18 +41,17 @@ const PostComposer = ({
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
-  const { savePost, postState, error } = usePostComposer();
+  const { savePost, postState, processingProgress, error } = usePostComposer();
   const selectRef = useRef<HTMLSelectElement>(null);
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
-  const [files, setFiles] = useState<AttachmentFile[]>();
+  const [files, setFiles] = useState<NewMediaFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
-  const isPosting =
-    postState === 'processing' || postState === 'uploading' || postState === 'encrypting';
+  const isPosting = postState === 'uploading' || postState === 'encrypting';
 
   const doPost = async () => {
     if (isPosting) return;
@@ -89,13 +87,8 @@ const PostComposer = ({
         if (!base64) return;
 
         const bytes = base64ToUint8Array(base64);
-        const file: AttachmentFile = {
-          file: {
-            name: e.data.note,
-            type: e.data.type,
-            bytes: bytes,
-            size: bytes.length,
-          },
+        const file: NewMediaFile = {
+          file: new Blob([bytes], { type: e.data.type }),
         };
 
         setFiles([...(files ?? []), file]);
@@ -135,23 +128,17 @@ const PostComposer = ({
               return false;
             }}
             key={stateIndex}
-            supportEmojiShortcut={true}
           />
         </div>
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />
         {embeddedPost ? (
           <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
         ) : null}
-        {postState ? (
-          <div className="flex flex-row-reverse">
-            {['processing', 'encrypting', 'uploading'].includes(postState) ? (
-              <span className="animate-pulse text-sm text-foreground text-opacity-40">
-                {t(postState)}
-              </span>
-            ) : null}
-            {postState === 'error' ? t('Error') : ''}
-          </div>
-        ) : null}
+        <ProgressIndicator
+          postState={postState}
+          processingProgress={processingProgress}
+          files={files?.length || 0}
+        />
 
         <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
           {!embeddedPost ? (
@@ -167,29 +154,26 @@ const PostComposer = ({
                 />
               </div>
 
-              <ActionLink
-                type="mute"
-                className={`px-2 py-1 text-foreground hover:text-opacity-70`}
-                size="square"
-                href={`/owner/feed/new?caption=${caption}&channel=${channel.channelId}`}
-                title="Convert into an article"
-              >
-                <Article className="h-4 w-4" />
-              </ActionLink>
               <EmojiSelector
                 className="text-foreground hover:text-opacity-70"
                 size="square"
                 onInput={(val) => setCaption((oldVal) => `${oldVal} ${val}`)}
               />
               <ActionGroup
+                size="square"
+                type="mute"
                 options={[
                   {
                     label: t('Who can react'),
                     icon: reactAccess && reactAccess !== true ? Lock : Globe,
                     onClick: () => setIsReactAccessEditorOpen(true),
                   },
+                  {
+                    label: t('Convert to an article'),
+                    href: `/owner/feed/new?caption=${caption}&channel=${channel.channelId}`,
+                    icon: Article,
+                  },
                 ]}
-                type="mute"
               />
             </>
           ) : null}
@@ -204,11 +188,7 @@ const PostComposer = ({
               caption?.length || files?.length || !!embeddedPost
                 ? ''
                 : 'pointer-events-none hidden opacity-20 grayscale md:flex'
-            } ${
-              postState === 'processing' || postState === 'uploading'
-                ? 'pointer-events-none animate-pulse'
-                : ''
-            }`}
+            } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
           >
             {t('Post')}
@@ -299,5 +279,36 @@ export const ChannelSelector = React.forwardRef(
     );
   }
 );
+
+const ProgressIndicator = ({
+  postState,
+  processingProgress,
+  files,
+}: {
+  postState: 'uploading' | 'encrypting' | 'error' | undefined;
+  processingProgress: number;
+  files: number;
+}) => {
+  if (!postState) return null;
+
+  let progressText = '';
+  if (postState === 'uploading')
+    if (processingProgress < 1)
+      if (files > 1) progressText = t('Generating thumbnails');
+      else progressText = t('Generating thumbnail');
+    else progressText = t(postState);
+
+  return (
+    <div className="mt-2 flex flex-row-reverse">
+      {postState === 'error' ? (
+        t('Error')
+      ) : (
+        <span className="animate-pulse text-sm text-foreground text-opacity-40">
+          {progressText}
+        </span>
+      )}
+    </div>
+  );
+};
 
 export default PostComposer;

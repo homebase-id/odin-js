@@ -39,9 +39,7 @@ export const purgeAllFiles = async (
       searchResults.push(...response.searchResults);
       cursorState = response.cursorState;
 
-      if (response.searchResults.length < pageSize) {
-        break;
-      }
+      if (response.searchResults.length < pageSize) break;
     }
 
     return searchResults;

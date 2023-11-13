@@ -1,7 +1,7 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Arrow, CloseEye, Eye, t } from '@youfoundation/common-app';
-import useAuth from '../../hooks/auth/useAuth';
+import { useAuth } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';

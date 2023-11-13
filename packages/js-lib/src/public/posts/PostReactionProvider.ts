@@ -1,16 +1,13 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+import { getRandom16ByteArray } from '../../helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
-  ImageContentType,
   UploadFileMetadata,
   SecurityGroupType,
-  TransitOptions,
   ScheduleOptions,
   SendContents,
   UploadInstructionSet,
-  UploadResult,
   uploadFile,
   TransferStatus,
   deleteFile,
@@ -18,16 +15,15 @@ import {
   queryBatch,
   DriveSearchResult,
   TargetDrive,
-  getPayload,
+  getContentFromHeaderOrPayload,
   ReactionPreview,
 } from '../../core/core';
-import { jsonStringify64, stringToUint8Array, getNewId } from '../../helpers/DataUtil';
 import {
-  deleteFileOverTransit,
-  getPayloadOverTransit,
-  queryBatchOverTransit,
-  uploadFileOverTransit,
-} from '../../transit/TransitData/TransitProvider';
+  jsonStringify64,
+  stringToUint8Array,
+  getNewId,
+  tryJsonParse,
+} from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from '../../transit/TransitData/TransitTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import {
@@ -40,6 +36,14 @@ import {
   ReactionFile,
   ReactionVm,
 } from './PostTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { EmbeddedThumb, PayloadFile } from '../../../core';
+import { uploadFileOverTransit } from '../../transit/TransitData/Upload/TransitUploadProvider';
+import { deleteFileOverTransit } from '../../transit/TransitData/File/TransitFileManageProvider';
+import { queryBatchOverTransit } from '../../transit/TransitData/Query/TransitDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from '../../transit/TransitData/File/TransitFileProvider';
+
+const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
@@ -50,43 +54,35 @@ export const saveComment = async (
   const isLocal = comment.context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
-  let additionalThumbnails: ThumbnailFile[] | undefined;
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  let previewThumbnail: EmbeddedThumb | undefined;
+
   if (comment.content.attachment) {
     const imageFile = comment.content.attachment;
-    const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      imageFile,
+      COMMENT_MEDIA_PAYLOAD,
+      [{ height: 250, width: 250, quality: 100 }]
+    );
 
-    if (imageFile.type === 'image/gif') {
-      additionalThumbnails = [
-        {
-          contentType: 'image/gif',
-          payload: imageBytes,
-          pixelHeight: 100,
-          pixelWidth: 100,
-        },
-      ];
-    } else {
-      const { additionalThumbnails: thumbs } = await createThumbnails(
-        imageBytes,
-        imageFile.type as ImageContentType,
-        [{ height: 250, width: 250, quality: 100 }]
-      );
-      additionalThumbnails = thumbs;
-    }
+    thumbnails.push(...additionalThumbnails);
+    payloads.push({ payload: imageFile, key: COMMENT_MEDIA_PAYLOAD });
+    previewThumbnail = tinyThumb;
+
     delete comment.content.attachment;
-
-    comment.content.hasAttachment = true;
+    comment.content.mediaPayloadKey = COMMENT_MEDIA_PAYLOAD;
   }
 
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metadata
+  // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     // allowDistribution: true, // Disable
     versionTag: comment.versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     senderOdinId: comment.authorOdinId,
     referencedFile: {
       targetDrive,
@@ -95,40 +91,36 @@ export const saveComment = async (
     appData: {
       tags: [],
       uniqueId: comment.id ?? getNewId(),
-      contentIsComplete: shouldEmbedContent,
       fileType: ReactionConfig.CommentFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: undefined,
+      content: shouldEmbedContent ? payloadJson : null,
+      previewThumbnail: previewThumbnail,
       userDate: comment.date ?? new Date().getTime(),
-      additionalThumbnails: additionalThumbnails?.map((thumb) => {
-        return {
-          pixelHeight: thumb.pixelHeight,
-          pixelWidth: thumb.pixelWidth,
-          contentType: thumb.contentType,
-        };
-      }),
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: {
       requiredSecurityGroup: encrypt ? SecurityGroupType.Connected : SecurityGroupType.Anonymous,
     },
   };
 
-  if (isLocal) {
-    const transitOptions: TransitOptions = {
-      useGlobalTransitId: true, // Needed to support having a reference to this file over transit
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      sendContents: SendContents.All,
-    };
+  if (!shouldEmbedContent)
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
 
+  if (isLocal) {
     const instructionSet: UploadInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
         overwriteFileId: comment.fileId || undefined,
         drive: targetDrive,
       },
-      transitOptions: transitOptions,
+      transitOptions: {
+        useGlobalTransitId: true, // Needed to support having a reference to this file over transit
+        recipients: [],
+        schedule: ScheduleOptions.SendLater,
+        sendContents: SendContents.All,
+      },
       systemFileType: 'Comment',
     };
 
@@ -137,8 +129,8 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      payloadBytes,
-      additionalThumbnails,
+      payloads,
+      thumbnails,
       encrypt
     );
     if (!result) throw new Error(`Upload failed`);
@@ -165,8 +157,8 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      payloadBytes,
-      additionalThumbnails,
+      payloads,
+      thumbnails,
       encrypt
     );
 
@@ -234,7 +226,7 @@ export const getComments = async (
   const ro = {
     maxRecords: pageSize,
     cursorState: cursorState,
-    includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
+    includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   };
 
   const result = isLocal
@@ -270,8 +262,12 @@ const dsrToComment = async (
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 
   const contentData = isLocal
-    ? await getPayload<RawReactionContent>(dotYouClient, ...params)
-    : await getPayloadOverTransit<RawReactionContent>(dotYouClient, odinId, ...params);
+    ? await getContentFromHeaderOrPayload<RawReactionContent>(dotYouClient, ...params)
+    : await getContentFromHeaderOrPayloadOverTransit<RawReactionContent>(
+        dotYouClient,
+        odinId,
+        ...params
+      );
 
   if (!contentData) return null;
 
@@ -285,7 +281,8 @@ const dsrToComment = async (
     content: { ...contentData },
     date: dsr.fileMetadata.created,
     updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
-    payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+    isEncrypted: dsr.fileMetadata.isEncrypted,
+    lastModified: dsr.fileMetadata.updated,
   };
 };
 
@@ -301,15 +298,13 @@ const parseReactions = (
       .map((reaction) => {
         try {
           return {
-            emoji: JSON.parse(reaction.reactionContent).emoji as string,
+            emoji: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
             count: parseInt(reaction.count),
           };
         } catch (ex) {
           console.error('[DotYouCore-js] parse failed for', reaction);
           return;
         }
-
-        return;
       })
       .filter(Boolean) as { emoji: string; count: number }[],
     totalCount: reactions.reduce((prevVal, curVal) => {
@@ -330,10 +325,10 @@ export const parseReactionPreview = (
               return {
                 authorOdinId: commentPreview.odinId,
                 content:
-                  commentPreview.isEncrypted && !commentPreview.jsonContent.length
+                  commentPreview.isEncrypted && !commentPreview.content.length
                     ? { body: '' }
-                    : JSON.parse(commentPreview.jsonContent),
-                payloadIsEncrypted: commentPreview.isEncrypted,
+                    : tryJsonParse(commentPreview.content),
+                isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };
             } catch (ex) {

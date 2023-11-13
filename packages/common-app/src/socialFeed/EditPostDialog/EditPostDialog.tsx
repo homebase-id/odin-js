@@ -1,4 +1,10 @@
-import { PostContent, PostFile, getChannelDrive, Media } from '@youfoundation/js-lib/public';
+import {
+  PostContent,
+  PostFile,
+  getChannelDrive,
+  Media,
+  MediaFile,
+} from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -27,52 +33,51 @@ export const EditPostDialog = ({
 }) => {
   const target = usePortal('modal-container');
   const {
-    save: { mutateAsync: savePost, error: savePostError, status: savePostStatus },
-    removeFiles: { mutateAsync: removeFiles },
+    update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
   } = usePost();
   const [postFile, setPostFile] = useState<PostFile<PostContent>>({ ...incomingPostFile });
-  const [toRemoveFileIds, setToRemoveFileIds] = useState<string[]>([]);
+  const [newMediaFiles, setNewMediaFiles] = useState<MediaFile[]>(
+    (postFile.content as Media).mediaFiles?.length
+      ? ((postFile.content as Media).mediaFiles as MediaFile[])
+      : postFile.content.primaryMediaFile
+      ? [postFile.content.primaryMediaFile]
+      : []
+  );
 
   useEffect(() => {
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
+      setNewMediaFiles(
+        (incomingPostFile.content as Media).mediaFiles?.length
+          ? ((incomingPostFile.content as Media).mediaFiles as MediaFile[])
+          : incomingPostFile.content.primaryMediaFile
+          ? [incomingPostFile.content.primaryMediaFile]
+          : []
+      );
     }
   }, [incomingPostFile]);
 
-  if (!isOpen) {
-    return null;
-  }
+  useEffect(() => {
+    if (updatePostStatus === 'success') onConfirm();
+  }, [updatePostStatus]);
+
+  if (!isOpen) return null;
 
   const doUpdate = async () => {
     const newPostFile = { ...postFile };
 
-    if (toRemoveFileIds?.length) {
-      // Update mediaFiles to remove the refs of those that are set to be removed
-      (newPostFile.content as Media).mediaFiles = (newPostFile.content as Media).mediaFiles?.filter(
-        (file) => !toRemoveFileIds.some((toRemove) => toRemove === file.fileId)
-      );
-
-      // Set first fileId as primary if primary is set to be removed
-      if (
-        toRemoveFileIds.some(
-          (toRemove) => toRemove === newPostFile.content.primaryMediaFile?.fileId
-        )
-      ) {
-        newPostFile.content.primaryMediaFile = (newPostFile.content as Media).mediaFiles?.[0];
-      }
-
-      await removeFiles({ files: toRemoveFileIds, channelId: incomingPostFile.content.channelId });
-    }
-
-    await savePost({
+    await updatePost({
       channelId: incomingPostFile.content.channelId,
-      blogFile: { ...newPostFile },
+      postFile: { ...newPostFile },
+      mediaFiles: newMediaFiles,
     });
   };
 
+  if (!postFile?.fileId) return null;
+
   const dialog = (
     <>
-      <ErrorNotification error={savePostError} />
+      <ErrorNotification error={updatePostError} />
       <DialogWrapper
         title={<div className="flex flex-row items-center">{t('Edit Post')}</div>}
         onClose={onCancel}
@@ -84,7 +89,6 @@ export const EditPostDialog = ({
             e.preventDefault();
             await doUpdate();
 
-            onConfirm();
             return false;
           }}
         >
@@ -96,35 +100,15 @@ export const EditPostDialog = ({
                 content: { ...postFile.content, caption: newCaption },
               })
             }
-            supportEmojiShortcut={true}
             placeholder={t("What's up?")}
             className={`w-full resize-none rounded-md border bg-transparent p-2`}
           />
-          {/* <textarea
-              defaultValue={postFile.content.caption}
-              onChange={(e) =>
-                setPostFile({
-                  ...postFile,
-                  content: { ...postFile.content, caption: e.target.value },
-                })
-              }
-              placeholder={t("What's up?")}
-              className={`w-full resize-none rounded-sm border bg-transparent p-2 ${
-                postFile.content.caption?.length ? '' : 'h-[2.5rem]'
-              }`}
-            /> */}
           <ExistingFileOverview
             className="mt-2"
-            mediaFiles={
-              (postFile.content as Media).mediaFiles?.length
-                ? (postFile.content as Media).mediaFiles
-                : postFile.content.primaryMediaFile
-                ? [postFile.content.primaryMediaFile]
-                : []
-            }
+            fileId={postFile.fileId}
+            mediaFiles={newMediaFiles}
             targetDrive={getChannelDrive(postFile.content.channelId)}
-            toRemoveFileIds={toRemoveFileIds}
-            setToRemoveFileIds={setToRemoveFileIds}
+            setMediaFiles={setNewMediaFiles}
           />
           <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
             <ActionButton
@@ -132,7 +116,7 @@ export const EditPostDialog = ({
                 postFile.content.caption?.length ? '' : 'pointer-events-none opacity-20 grayscale'
               }`}
               icon={Save}
-              state={savePostStatus}
+              state={updatePostStatus}
             >
               {t('Save')}
             </ActionButton>

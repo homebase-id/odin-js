@@ -34,7 +34,7 @@ export const DoubleClickHeartForMedia = ({
     target: {
       globalTransitId: postFile.globalTransitId ?? 'unknown',
       fileId: postFile.fileId ?? 'unknown',
-      isEncrypted: postFile.payloadIsEncrypted || false,
+      isEncrypted: postFile.isEncrypted || false,
     },
   };
 
@@ -56,14 +56,16 @@ export const DoubleClickHeartForMedia = ({
 
   return (
     <span ref={wrapperRef} onClick={(e) => e.stopPropagation()}>
-      <PostMedia
-        odinId={odinId}
-        postFile={postFile}
-        showFallback={showFallback}
-        forceAspectRatio={forceAspectRatio}
-        className={`cursor-pointer ${className || ''}`}
-        {...bind}
-      />
+      {postFile.fileId ? (
+        <PostMedia
+          odinId={odinId}
+          postFile={{ ...postFile, fileId: postFile.fileId, lastModified: postFile.lastModified }}
+          showFallback={showFallback}
+          forceAspectRatio={forceAspectRatio}
+          className={`cursor-pointer ${className || ''}`}
+          {...bind}
+        />
+      ) : null}
       <ErrorNotification error={postEmojiError} />
     </span>
   );

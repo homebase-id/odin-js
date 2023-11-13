@@ -11,7 +11,7 @@ import {
 import Links from '../../../components/ui/Layout/Links/Links';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import ConnectLink from '../../../components/ConnectionActions/ConnectLink/ConnectLink';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 
 const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings }) => {
   const { owner } = useSiteData().data ?? {};
@@ -29,10 +29,12 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
       <div className="container mx-auto px-5 py-5">
         <div className="flex flex-col lg:flex-row lg:gap-5">
           <div className="mx-auto mb-12 min-w-[15rem] md:max-w-[30rem] lg:w-1/2 lg:max-w-[35rem]">
-            {owner?.profileImageId && targetDrive ? (
+            {owner?.profileImageFileId && owner?.profileImageFileKey && targetDrive ? (
               <Image
-                fileId={owner?.profileImageId}
+                fileId={owner.profileImageFileId}
+                fileKey={owner.profileImageFileKey}
                 previewThumbnail={owner?.profileImagePreviewThumbnail}
+                lastModified={owner?.profileImageLastModified}
                 targetDrive={targetDrive}
                 className="w-full"
               />

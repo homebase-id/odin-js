@@ -1,9 +1,14 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import {
+  ApiType,
+  DotYouClient,
+  assertIfDotYouClientIsOwner,
+  assertIfDotYouClientIsOwnerOrApp,
+} from '../../core/DotYouClient';
 import {
   NumberCursoredResult,
   PagedResult,
   PagingOptions,
-} from '../../core/DriveData/DriveQueryTypes';
+} from '../../core/DriveData/Query/DriveQueryTypes';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
 import { ConnectionInfo, OdinIdRequest, DotYouProfile } from './CircleDataTypes';
 
@@ -50,6 +55,7 @@ export const getBlockedConnections = (
   dotYouClient: DotYouClient,
   params: PagingOptions
 ): Promise<PagedResult<DotYouProfile>> => {
+  assertIfDotYouClientIsOwner(dotYouClient);
   const client = dotYouClient.createAxiosClient();
   const url = root + '/blocked?' + stringifyToQueryParams(params as any);
   return client
@@ -64,6 +70,8 @@ export const getConnectionInfo = (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<ConnectionInfo | undefined> => {
+  assertIfDotYouClientIsOwnerOrApp(dotYouClient);
+
   const client = dotYouClient.createAxiosClient();
   const url = root + `/status`;
 

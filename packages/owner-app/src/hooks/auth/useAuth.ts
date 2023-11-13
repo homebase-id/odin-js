@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import useVerifyToken from './useVerifyToken';
+import { useVerifyToken } from './useVerifyToken';
 import {
   authenticate as authenticateOwner,
   isPasswordSet as isPasswordSetOwner,
@@ -26,7 +26,7 @@ export const RECOVERY_PATH = '/owner/account-recovery';
 export const RETURN_URL_PARAM = 'returnUrl';
 export const HOME_PATH = '/owner';
 
-const useAuth = () => {
+export const useAuth = () => {
   const { getDotYouClient, getApiType, getSharedSecret, hasSharedSecret } = useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
@@ -41,6 +41,13 @@ const useAuth = () => {
 
     if (!response) return false;
 
+    // Cleanup the public items: (There might have been a public login already in place)
+    // This will corrupt the publicly logged in state when the owner logs out...
+    // TODO: Find a better way to handle this
+    window.localStorage.removeItem(HOME_SHARED_SECRET);
+    window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
+
+    // Store the owner items:
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     setAuthenticationState('authenticated');
 
@@ -119,5 +126,3 @@ const useAuth = () => {
     isAuthenticated: authenticationState !== 'anonymous',
   };
 };
-
-export default useAuth;

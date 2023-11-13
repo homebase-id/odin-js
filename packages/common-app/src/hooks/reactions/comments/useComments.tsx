@@ -21,35 +21,38 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
     context: ReactionContext;
     pageParam?: string;
   }): Promise<UseCommentsVal> => {
-    if (!context.authorOdinId || !context.channelId || !context.target.globalTransitId) {
+    if (!context.authorOdinId || !context.channelId || !context.target.globalTransitId)
       return { comments: [] as ReactionFile[], cursorState: undefined };
-    }
 
-    return await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
+    const response = await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
+    setTimeout(() => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          'comments-summary',
+          context.authorOdinId,
+          context.channelId,
+          context.target.globalTransitId,
+        ],
+      });
+    }, 100);
+    return response;
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['comments', context.authorOdinId, context.channelId, context.target.globalTransitId],
-      ({ pageParam }) => fetch({ context, pageParam }),
-      {
-        getNextPageParam: (lastPage) =>
-          (lastPage && lastPage.comments?.length >= PAGE_SIZE && lastPage.cursorState) ?? undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        onError: (er) => {
-          console.log(er);
-        },
-        onSuccess: () => {
-          queryClient.invalidateQueries([
-            'comments-summary',
-            context.authorOdinId,
-            context.channelId,
-            context.target.globalTransitId,
-          ]);
-        },
-        enabled: !!context.authorOdinId && !!context.channelId && !!context.target.globalTransitId,
-      }
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: [
+        'comments',
+        context.authorOdinId,
+        context.channelId,
+        context.target.globalTransitId,
+      ],
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetch({ context, pageParam }),
+      getNextPageParam: (lastPage) =>
+        lastPage && lastPage.comments?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!context.authorOdinId && !!context.channelId && !!context.target.globalTransitId,
+    }),
   };
 };

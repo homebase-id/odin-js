@@ -29,23 +29,23 @@ export const useFollowingInfinite = ({ pageSize = 30 }: useFollowingInfiniteProp
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['following'],
-      ({ pageParam }) => fetchFollowingInternal({ pageParam }),
-      {
-        getNextPageParam: (lastPage) =>
-          (lastPage?.results?.length &&
-            lastPage?.results?.length >= pageSize &&
-            lastPage?.cursorState) ||
-          undefined,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-      }
-    ),
-    follow: useMutation(createOrUpdateFollowInternal, {
+    fetch: useInfiniteQuery({
+      queryKey: ['following'],
+      queryFn: ({ pageParam }) => fetchFollowingInternal({ pageParam }),
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage) =>
+        (lastPage?.results?.length &&
+          lastPage?.results?.length >= pageSize &&
+          lastPage?.cursorState) ||
+        undefined,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+    }),
+    follow: useMutation({
+      mutationFn: createOrUpdateFollowInternal,
       onSuccess: () => {
-        queryClient.invalidateQueries(['following']);
+        queryClient.invalidateQueries({ queryKey: ['following'] });
       },
       onError: (ex) => {
         console.error(ex);

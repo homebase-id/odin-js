@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   ConnectionRequest,
   acceptConnectionRequest,
@@ -9,7 +9,7 @@ import {
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
 
-const usePendingConnection = ({ odinId }: { odinId?: string }) => {
+export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
@@ -40,17 +40,17 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    fetch: useQuery(
-      ['pendingConnection', odinId],
-      () => getPendingConnectionInfo({ odinId: odinId as string }),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!odinId,
-      }
-    ),
-    acceptRequest: useMutation(acceptRequest, {
+    fetch: useQuery({
+      queryKey: ['pendingConnection', odinId],
+      queryFn: () => getPendingConnectionInfo({ odinId: odinId as string }),
+
+      refetchOnWindowFocus: false,
+      enabled: !!odinId,
+    }),
+    acceptRequest: useMutation({
+      mutationFn: acceptRequest,
       onMutate: async (newRequest) => {
-        await queryClient.cancelQueries(['activeConnections']);
+        await queryClient.cancelQueries({ queryKey: ['activeConnections'] });
 
         const previousConnections: ConnectionRequest[] | undefined = queryClient.getQueryData([
           'activeConnections',
@@ -73,17 +73,18 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
         queryClient.setQueryData(['activeConnections'], context?.previousConnections);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries(['pendingConnections']);
-        queryClient.invalidateQueries(['pendingConnection', data?.senderOdinId]);
-        queryClient.invalidateQueries(['activeConnections']);
-        queryClient.invalidateQueries(['connectionInfo', data?.senderOdinId]);
+        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['pendingConnection', data?.senderOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', data?.senderOdinId] });
       },
     }),
-    ignoreRequest: useMutation(ignoreRequest, {
+    ignoreRequest: useMutation({
+      mutationFn: ignoreRequest,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['pendingConnections']);
-        queryClient.invalidateQueries(['pendingConnection', param.senderOdinId]);
-        queryClient.invalidateQueries(['connectionInfo', param.senderOdinId]);
+        queryClient.invalidateQueries({ queryKey: ['pendingConnections'] });
+        queryClient.invalidateQueries({ queryKey: ['pendingConnection', param.senderOdinId] });
+        queryClient.invalidateQueries({ queryKey: ['connectionInfo', param.senderOdinId] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -91,5 +92,3 @@ const usePendingConnection = ({ odinId }: { odinId?: string }) => {
     }),
   };
 };
-
-export default usePendingConnection;

@@ -1,29 +1,24 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { decryptKeyHeader, decryptJsonContent } from '../../core/DriveData/SecurityHelpers';
 import {
   CursoredResult,
-  FileMetadata,
-  EncryptedKeyHeader,
-  getPayload,
   FileQueryParams,
   GetBatchQueryResultOptions,
   queryBatch,
+  DriveSearchResult,
+  TargetDrive,
 } from '../../core/core';
 import {
   ChannelDefinition,
   PostContent,
   PostFile,
-  GetTargetDriveFromChannelId,
   BlogConfig,
   parseReactionPreview,
   getRecentPosts,
   getChannelDrive,
 } from '../../public/public';
-import {
-  getPayloadOverTransit,
-  getDrivesByTypeOverTransit,
-  queryBatchOverTransit,
-} from './TransitProvider';
+import { getDrivesByTypeOverTransit } from './Drive/TransitDriveProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
+import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 
@@ -34,48 +29,6 @@ export interface PostFileVm<T extends PostContent> extends PostFile<T> {
 export interface RecentsFromConnectionsReturn extends CursoredResult<PostFileVm<PostContent>[]> {
   ownerCursorState?: Record<string, string>;
 }
-
-const getSocialFeedPostPayload = async (
-  odinId: string,
-  dotYouClient: DotYouClient,
-  fileId: string,
-  fileMetadata: FileMetadata,
-  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader,
-  includesJsonContent: boolean
-) => {
-  const isLocal = odinId === window.location.hostname;
-
-  const getPayloadParams = [
-    // targetDrive,
-    { fileId, fileMetadata, sharedSecretEncryptedKeyHeader },
-    includesJsonContent,
-  ] as const;
-
-  if (!includesJsonContent) {
-    // Shouldn't ever happen..
-    console.error('[DotYouCore-js] Missing content');
-  }
-
-  // Get and parse Json Content
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
-    : undefined;
-
-  const contentFromHeader = await decryptJsonContent<PostContent>(fileMetadata, keyheader);
-  if (fileMetadata.appData.contentIsComplete) return contentFromHeader;
-
-  // Content isn't complete, we fetch the payload from the source drive with the drive baesd on the channelId in the post:
-  const targetDrive =
-    GetTargetDriveFromChannelId(contentFromHeader.channelId) || BlogConfig.PublicChannelDrive;
-  return isLocal
-    ? await getPayload<PostContent>(dotYouClient, targetDrive, ...getPayloadParams)
-    : await getPayloadOverTransit<PostContent>(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        ...getPayloadParams
-      );
-};
 
 export const getSocialFeed = async (
   dotYouClient: DotYouClient,
@@ -102,34 +55,16 @@ export const getSocialFeed = async (
   };
 
   const result = await queryBatch(dotYouClient, queryParams, ro);
+  // Parse results and do getPayload (In most cases, data should be there in content, and nothing in actual payload);
+  const allPostFiles = (
+    await Promise.all(
+      result.searchResults.map(async (dsr) => {
+        const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
+        return dsrToPostFile(dotYouClient, odinId, dsr, feedDrive, result.includeMetadataHeader);
+      })
+    )
+  ).filter(Boolean) as PostFileVm<PostContent>[];
 
-  // Parse results and do getPayload (In most cases, data should be there in jsonContent, and nothing in actual payload);
-  const allPostFiles = await Promise.all(
-    result.searchResults.map(async (dsr) => {
-      const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
-
-      return {
-        fileId: dsr.fileId,
-        globalTransitId: dsr.fileMetadata.globalTransitId,
-        acl: dsr.serverMetadata?.accessControlList,
-        content: await getSocialFeedPostPayload(
-          odinId,
-          dotYouClient,
-          dsr.fileId,
-          dsr.fileMetadata,
-          dsr.sharedSecretEncryptedKeyHeader,
-          result.includeMetadataHeader
-        ),
-        odinId: odinId,
-        previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-        reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
-        additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
-        payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-      } as PostFileVm<PostContent>;
-    })
-  );
-
-  // TODO: Could optimize by combining both feed and own querybatch into a single querybatchcollection...
   if (ownOption) {
     const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(
@@ -138,7 +73,8 @@ export const getSocialFeed = async (
       false,
       ownOption.ownCursorState,
       pageSize,
-      ownOption.ownChannels
+      ownOption.ownChannels,
+      true // include hidden channels
     );
 
     const postsOfOwn = resultOfOwn.results
@@ -148,9 +84,7 @@ export const getSocialFeed = async (
       });
 
     return {
-      results: [...allPostFiles, ...postsOfOwn]
-        .sort((a, b) => b.content.dateUnixTime - a.content.dateUnixTime)
-        .slice(0, pageSize),
+      results: [...allPostFiles, ...postsOfOwn].sort((a, b) => b.userDate - a.userDate),
       cursorState: result.cursorState,
       ownerCursorState: resultOfOwn.cursorState,
     };
@@ -226,24 +160,10 @@ export const getRecentsOverTransit = async (
   const posts = (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
-        return {
-          fileId: dsr.fileId,
-          globalTransitId: dsr.fileMetadata.globalTransitId,
-          acl: dsr.serverMetadata?.accessControlList,
-          content: await getPayloadOverTransit<PostContent>(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            dsr,
-            result.includeMetadataHeader
-          ),
-          odinId: odinId,
-          previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-          additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
-        } as PostFileVm<PostContent>;
+        return dsrToPostFile(dotYouClient, odinId, dsr, targetDrive, result.includeMetadataHeader);
       })
     )
-  ).filter((item) => !!item);
+  ).filter(Boolean) as PostFileVm<PostContent>[];
 
   return { cursorState: result.cursorState, results: posts };
 };
@@ -272,7 +192,7 @@ export const getChannelOverTransit = async (
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
       return (
-        (await getPayloadOverTransit<ChannelDefinition>(
+        (await getContentFromHeaderOrPayloadOverTransit<ChannelDefinition>(
           dotYouClient,
           odinId,
           targetDrive,
@@ -311,23 +231,50 @@ export const getPostOverTransit = async (
       console.warn(`Found more than one file with id [${postId}].  Using first entry.`);
     }
 
-    const dsr = response.searchResults[0];
-    return {
-      fileId: dsr.fileId,
-      globalTransitId: dsr.fileMetadata.globalTransitId,
-      acl: dsr.serverMetadata?.accessControlList,
-      content: await getPayloadOverTransit<PostContent>(
-        dotYouClient,
-        odinId,
-        targetDrive,
-        dsr,
-        response.includeMetadataHeader
-      ),
-      odinId: odinId,
-      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-      additionalThumbnails: dsr.fileMetadata.appData.additionalThumbnails,
-    } as PostFileVm<PostContent>;
+    return dsrToPostFile(dotYouClient, odinId, response.searchResults[0], targetDrive, true);
   }
 
   return;
+};
+
+const dsrToPostFile = async <T extends PostContent>(
+  dotYouClient: DotYouClient,
+  odinId: string,
+  dsr: DriveSearchResult,
+  targetDrive: TargetDrive,
+  includeMetadataHeader: boolean
+): Promise<PostFileVm<T> | undefined> => {
+  try {
+    const content = await getContentFromHeaderOrPayloadOverTransit<T>(
+      dotYouClient,
+      odinId,
+      targetDrive,
+      dsr,
+      includeMetadataHeader
+    );
+
+    if (!content) return undefined;
+
+    const file: PostFileVm<T> = {
+      fileId: dsr.fileId,
+      // odinId: odinId,
+      // TODO multi-payload: Fix this, senderOdin is rendered empty after an update
+      odinId: content.authorOdinId || odinId,
+      versionTag: dsr.fileMetadata.versionTag,
+      globalTransitId: dsr.fileMetadata.globalTransitId,
+      lastModified: dsr.fileMetadata.updated,
+      acl: dsr.serverMetadata?.accessControlList,
+      userDate: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
+      content: content,
+      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+      reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
+      isEncrypted: dsr.fileMetadata.isEncrypted,
+      isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
+    };
+
+    return file;
+  } catch (ex) {
+    console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
+    return undefined;
+  }
 };

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert, Arrow, Textarea, t, useCheckIdentity } from '@youfoundation/common-app';
-import useConnection from '../../../hooks/connections/useConnection';
-import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -136,8 +136,15 @@ const OutgoingConnectionDialog = ({
                   className={invalid ? 'border-red-500 dark:border-red-500' : ''}
                 />
                 {invalid ? (
-                  <p className="text-red-500">
+                  <p className="mt-1 text-red-500">
                     {t(`We can't seem to find that identity, please confirm it is correct`)}
+                    <small className="block text-sm text-foreground">
+                      (
+                      {t(
+                        'If this is a new identity, it can take a while for it to exists across the internet'
+                      )}
+                      )
+                    </small>
                   </p>
                 ) : null}
               </div>

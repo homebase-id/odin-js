@@ -1,11 +1,16 @@
-import { useSiteData, useExternalOdinId } from '../../../..';
+import { useSiteData, useExternalOdinId, useIsConnected, useDotYouClient } from '../../../..';
 
 export const AuthorName = ({ odinId }: { odinId?: string }) => {
-  if (!odinId || odinId === window.location.hostname) {
-    return <OwnerName />;
-  }
+  if (!odinId || odinId === window.location.hostname) return <OwnerName />;
+
+  const identity = useDotYouClient().getIdentity();
+  const isConnected = useIsConnected(odinId).data;
+
   return (
-    <a href={`https://${odinId}`} className="hover:underline">
+    <a
+      href={`https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`}
+      className="hover:underline"
+    >
       <ConnectionName odinId={odinId} />
     </a>
   );

@@ -1,5 +1,5 @@
-import { AccessControlList, SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
-import { TargetDrive, EmbeddedThumb } from '../../core/core';
+import { AccessControlList, SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
+import { TargetDrive, EmbeddedThumb, ThumbnailFile } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
 export interface ChannelDefinition {
@@ -7,6 +7,7 @@ export interface ChannelDefinition {
   name: string;
   slug: string;
   description: string;
+  showOnHomePage: boolean;
   templateId?: number;
   acl?: AccessControlList;
 }
@@ -27,6 +28,7 @@ export class BlogConfig {
     channelId: toGuidId('public_channel_drive'),
     name: 'Public Posts',
     slug: 'public-posts',
+    showOnHomePage: true,
     description: '',
     templateId: undefined,
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
@@ -59,8 +61,15 @@ export const postTypeToDataType = (type: PostType): number => {
 };
 
 export interface MediaFile {
-  fileId: string;
+  // When undefined.. It's the fileId of the postFile itself
+  fileId: string | undefined;
+  fileKey: string;
   type: 'video' | 'image';
+}
+
+export interface NewMediaFile {
+  file: File | Blob;
+  thumbnail?: ThumbnailFile;
 }
 
 export interface PostFile<T extends PostContent> {
@@ -68,14 +77,16 @@ export interface PostFile<T extends PostContent> {
   versionTag?: string;
   globalTransitId?: string;
   acl?: AccessControlList;
+  userDate: number;
   content: T;
   previewThumbnail?: EmbeddedThumb;
   reactionPreview?: {
     reactions: EmojiReactionSummary;
     comments: CommentsReactionSummary;
   };
-  payloadIsEncrypted?: boolean;
+  isEncrypted?: boolean;
   isDraft?: boolean;
+  lastModified?: number;
 }
 
 export type RichText = Record<string, unknown>[];
@@ -83,6 +94,10 @@ export type RichText = Record<string, unknown>[];
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
   previewThumbnail?: EmbeddedThumb;
+  fileId: string;
+  globalTransitId: string | undefined;
+  lastModified: number | undefined;
+  userDate: number;
 }
 
 export type ReactAccess = 'emoji' | 'comment' | boolean;
@@ -96,7 +111,6 @@ export interface PostContent {
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
-  dateUnixTime: number;
   primaryMediaFile?: MediaFile;
   type: 'Article' | 'Media' | 'Tweet';
 
@@ -143,7 +157,7 @@ export interface ReactionContext {
 export interface ReactionContent {
   body: string;
   bodyAsRichText?: RichText;
-  hasAttachment?: boolean;
+  mediaPayloadKey?: string;
 }
 
 export interface ReactionFile {
@@ -154,8 +168,9 @@ export interface ReactionFile {
   fileId?: string;
   id?: string;
   threadId?: string;
+  lastModified?: number;
 
-  payloadIsEncrypted?: boolean;
+  isEncrypted?: boolean;
 
   authorOdinId: string;
   date?: number;

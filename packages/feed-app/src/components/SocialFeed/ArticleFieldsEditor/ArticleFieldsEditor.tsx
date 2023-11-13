@@ -4,28 +4,51 @@ import {
   Article,
   getChannelDrive,
   RichText,
+  NewMediaFile,
+  appendPostMedia,
+  removePostMedia,
 } from '@youfoundation/js-lib/public';
 import { lazy, useState } from 'react';
-import { t, ErrorBoundary, Label, ActionButton, Arrow, Textarea } from '@youfoundation/common-app';
+import {
+  t,
+  ErrorBoundary,
+  Label,
+  ActionButton,
+  Arrow,
+  Textarea,
+  usePayloadBlob,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
-import { ImageUploadResult, SecurityGroupType } from '@youfoundation/js-lib/core';
-
 export const InnerFieldEditors = ({
   postFile,
   channel,
+  primaryMediaFile,
   onChange,
+  updateVersionTag,
   disabled,
 }: {
   postFile: PostFile<Article>;
   channel: ChannelDefinition;
-  onChange: (e: { target: { name: string; value: string | ImageUploadResult | RichText } }) => void;
+  primaryMediaFile: NewMediaFile | undefined | null;
+  onChange: (e: { target: { name: string; value: string | Blob | RichText | undefined } }) => void;
+  updateVersionTag: (versionTag: string) => void;
   disabled?: boolean;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
+  const { data: imageBlob } = usePayloadBlob(
+    postFile.content.primaryMediaFile?.fileId || postFile.fileId,
+    postFile.content.primaryMediaFile?.fileKey,
+    getChannelDrive(channel.channelId)
+  );
+
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const targetDrive = getChannelDrive(channel.channelId);
+
   return (
     <>
       <div className="grid grid-flow-row gap-1">
@@ -83,16 +106,15 @@ export const InnerFieldEditors = ({
                 <ImageSelector
                   id="post_image"
                   name="primaryImageFileId"
-                  defaultValue={postFile.content.primaryMediaFile?.fileId}
-                  onChange={(e) =>
-                    e.target.value &&
-                    onChange(e as { target: { name: string; value: ImageUploadResult } })
+                  defaultValue={
+                    primaryMediaFile === null
+                      ? imageBlob || undefined
+                      : primaryMediaFile === undefined
+                      ? undefined
+                      : primaryMediaFile?.file || imageBlob || undefined
                   }
-                  targetDrive={getChannelDrive(channel.channelId)}
-                  acl={
-                    channel.acl
-                      ? { ...channel.acl }
-                      : { requiredSecurityGroup: SecurityGroupType.Anonymous }
+                  onChange={(e) =>
+                    onChange(e as { target: { name: string; value: Blob | undefined } })
                   }
                   sizeClass={`${
                     !postFile.content.primaryMediaFile ? 'aspect-[16/9] md:aspect-[5/1]' : ''
@@ -111,7 +133,46 @@ export const InnerFieldEditors = ({
             <RichTextEditor
               defaultValue={(postFile.content as Article)?.body}
               placeholder={t('Start writing...')}
-              mediaDrive={getChannelDrive(channel.channelId)}
+              mediaOptions={
+                postFile.fileId
+                  ? {
+                      fileId: postFile.fileId,
+                      mediaDrive: targetDrive,
+                      onAppend: async (file) => {
+                        const result = await appendPostMedia(
+                          dotYouClient,
+                          targetDrive,
+                          postFile.fileId as string,
+                          file
+                        );
+                        if (!result) return null;
+                        updateVersionTag(result.newVersionTag);
+
+                        return { fileId: postFile.fileId as string, fileKey: result.fileKey };
+                      },
+                      onRemove: async ({
+                        fileId,
+                        fileKey,
+                      }: {
+                        fileId: string;
+                        fileKey: string;
+                      }) => {
+                        const result = await removePostMedia(
+                          dotYouClient,
+                          targetDrive,
+                          fileId,
+                          fileKey
+                        );
+                        if (!result) return null;
+
+                        updateVersionTag(result.newVersionTag);
+                        console.log('removePostMedia', result);
+
+                        return result;
+                      },
+                    }
+                  : undefined
+              }
               name="body"
               onChange={onChange}
               className="min-h-[50vh]"

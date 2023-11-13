@@ -5,10 +5,10 @@ import { Crop, ImageCropper, Trash } from '@youfoundation/common-app';
 
 interface ImageUploadAndCropProps {
   expectedAspectRatio?: number;
-  onChange?: (imageData: { bytes: Uint8Array; type: ImageContentType } | undefined) => void;
+  onChange?: (imageData: Blob | undefined) => void;
   maxWidth?: number;
   maxHeight?: number;
-  defaultValue?: { bytes: Uint8Array; type: ImageContentType };
+  defaultValue?: Blob;
   disableClear?: boolean;
   autoSave?: boolean;
 }
@@ -26,13 +26,9 @@ const ImageUploadAndCrop = forwardRef<CropperRef, ImageUploadAndCropProps>(
     },
     cropperRef
   ) => {
-    const [rawImageData, setRawImageData] = useState<
-      { bytes: Uint8Array; type: ImageContentType } | undefined
-    >(defaultValue);
+    const [rawImageData, setRawImageData] = useState<Blob | undefined>(defaultValue);
     const uploadedImageUrl = useMemo(() => {
-      return rawImageData?.bytes && rawImageData?.type
-        ? URL.createObjectURL(new Blob([rawImageData.bytes], { type: rawImageData.type }))
-        : undefined;
+      return rawImageData ? URL.createObjectURL(rawImageData) : undefined;
     }, [rawImageData]);
     const [croppedImageUrl, setCroppedImageUrl] = useState<string>();
     const [isCropping, setIsCropping] = useState(false);
@@ -65,21 +61,16 @@ const ImageUploadAndCrop = forwardRef<CropperRef, ImageUploadAndCropProps>(
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
-            const imageBytes = new Uint8Array(await file.arrayBuffer());
 
             if (maxWidth && maxHeight) {
               if (file.type === 'image/svg+xml') {
-                setRawImageData({ bytes: imageBytes, type: 'image/svg+xml' });
+                setRawImageData(file);
               } else {
-                const imageBlob = new Blob([imageBytes], { type: file.type });
-
-                const resizedData = await fromBlob(imageBlob, 100, maxWidth, maxHeight, 'webp');
-                const resizedBytes = new Uint8Array(await resizedData.blob.arrayBuffer());
-
-                setRawImageData({ bytes: resizedBytes, type: 'image/webp' });
+                const resizedData = await fromBlob(file, 100, maxWidth, maxHeight, 'webp');
+                setRawImageData(resizedData.blob);
               }
             } else {
-              setRawImageData({ bytes: imageBytes, type: file.type as ImageContentType });
+              setRawImageData(file);
             }
 
             e.target.value = null as unknown as string;

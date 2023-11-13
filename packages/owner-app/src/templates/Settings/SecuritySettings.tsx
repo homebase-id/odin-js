@@ -1,7 +1,7 @@
 import { t, Alert, ActionButton, Label, Input } from '@youfoundation/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
-import useAuth from '../../hooks/auth/useAuth';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 export const SecuritySettings = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');

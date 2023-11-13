@@ -14,7 +14,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
-const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
@@ -46,7 +45,6 @@ const AppDetails = lazy(() => import('../templates/Apps/AppDetails/AppDetails'))
 
 const Website = lazy(() => import('../templates/Website/Website'));
 const Following = lazy(() => import('../templates/Follow/Follow'));
-const FollowNew = lazy(() => import('../templates/Follow/FollowNew'));
 
 const Drives = lazy(() => import('../templates/Drives/Drives/Drives'));
 const DriveDetails = lazy(() => import('../templates/Drives/DriveDetails/DriveDetails'));
@@ -71,13 +69,14 @@ const ArticleComposerPage = lazy(() =>
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import LoadingDetailPage from '../components/ui/Loaders/LoadingDetailPage/LoadingDetailPage';
-import useAuth, {
+import {
+  useAuth,
   FIRSTRUN_PATH,
   LOGIN_PATH,
   RECOVERY_PATH,
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
-import useIsConfigured from '../hooks/configure/useIsConfigured';
+import { useIsConfigured } from '../hooks/configure/useIsConfigured';
 import { useTransitProcessor, ErrorBoundary, t } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
@@ -127,8 +126,6 @@ function App() {
             </RootRoute>
           }
         >
-          {/* TODO: Remove */}
-          <Route path="login/youauth" element={<YouAuthLogin />} />
           <Route path="youauth/consent" element={<YouAuthConsent />} />
 
           <Route path="setup" element={<Setup />} />
@@ -146,7 +143,6 @@ function App() {
             }
           >
             <Route path="appreg" element={<RegisterAppClient />} />
-            <Route path="follow/:toFollowKey" element={<FollowNew />}></Route>
           </Route>
 
           <Route
@@ -176,6 +172,7 @@ function App() {
             <Route path="public-profile" element={<PublicProfileDetails />}></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
+            <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>
             <Route path="circles" element={<Circles />}></Route>
             <Route path="circles/:circleKey" element={<CircleDetails />}></Route>
 
@@ -188,7 +185,9 @@ function App() {
 
             <Route path="follow" element={<Following />}></Route>
             <Route path="follow/followers" element={<Following />}></Route>
+            <Route path="follow/followers/:followerKey" element={<Following />}></Route>
             <Route path="follow/following" element={<Following />}></Route>
+            <Route path="follow/following/:toFollowKey" element={<Following />}></Route>
 
             <Route path="drives" element={<Drives />}></Route>
             <Route path="drives/:driveKey" element={<DriveDetails />}></Route>

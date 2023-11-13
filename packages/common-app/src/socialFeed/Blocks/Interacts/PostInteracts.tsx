@@ -79,9 +79,9 @@ export const PostInteracts = ({
     authorOdinId: authorOdinId,
     channelId: postFile.content.channelId,
     target: {
-      globalTransitId: postFile.globalTransitId, // TODO: remove 'unknown' fallback
-      fileId: postFile.fileId, // TODO: remove 'unknown' fallback
-      isEncrypted: postFile.payloadIsEncrypted || false,
+      globalTransitId: postFile.globalTransitId,
+      fileId: postFile.fileId,
+      isEncrypted: postFile.isEncrypted || false,
     },
   };
 
@@ -190,6 +190,7 @@ export const RepostButton = ({
 }) => {
   const [isRepostDialogOpen, setIsReposeDialogOpen] = useState(false);
 
+  if (!postFile.fileId) return null;
   return (
     <>
       <button
@@ -206,7 +207,11 @@ export const RepostButton = ({
         <RepostDialog
           embeddedPost={{
             ...postFile.content,
+            fileId: postFile.fileId,
+            globalTransitId: postFile.globalTransitId,
+            lastModified: postFile.lastModified,
             permalink,
+            userDate: postFile.userDate,
             previewThumbnail: postFile.previewThumbnail,
           }}
           isOpen={isRepostDialogOpen}
@@ -305,17 +310,20 @@ const CommentTeaserList = ({
   reactionPreview?: CommentsReactionSummary;
   onExpand: () => void;
 }) => {
-  if (!reactionPreview?.comments.length) {
-    return null;
-  }
+  if (!reactionPreview?.comments.length) return null;
 
-  const allEncrypted = reactionPreview.comments.every((comment) => comment.payloadIsEncrypted);
-
+  const allEncrypted = reactionPreview.comments.every((comment) => comment.isEncrypted);
   return (
     <div className="mb-5">
       <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20"></hr>
 
-      <div className="flex cursor-pointer flex-col gap-[0.2rem]" onClick={() => onExpand()}>
+      <div
+        className="flex cursor-pointer flex-col gap-[0.2rem]"
+        onClick={(e) => {
+          e.stopPropagation();
+          onExpand();
+        }}
+      >
         {reactionPreview.comments.slice(0, 3).map((comment, index) => (
           <CommentTeaser commentData={comment} key={index} />
         ))}

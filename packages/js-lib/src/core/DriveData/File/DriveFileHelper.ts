@@ -1,0 +1,50 @@
+import {
+  byteArrayToString,
+  roundToLargerMultipleOf16,
+  roundToSmallerMultipleOf16,
+  tryJsonParse,
+} from '../../../helpers/DataUtil';
+import { DotYouClient } from '../../DotYouClient';
+import { EncryptedKeyHeader } from '../Drive/DriveTypes';
+import { decryptKeyHeader, decryptJsonContent } from '../SecurityHelpers';
+import { getFileHeader, getPayloadAsJson } from './DriveFileProvider';
+import { TargetDrive, SystemFileType, ContentType, FileMetadata } from './DriveFileTypes';
+
+/// Helper methods:
+export const getCacheKey = (targetDrive: TargetDrive, id: string, decrypt: boolean) =>
+  `${targetDrive.alias}-${targetDrive.type}+${id}+${decrypt}`;
+
+export const getAxiosClient = (dotYouClient: DotYouClient, systemFileType?: SystemFileType) =>
+  dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
+
+export const parseBytesToObject = <T>(
+  data: {
+    bytes: Uint8Array;
+    contentType: ContentType;
+  } | null
+) => {
+  if (!data) return null;
+  const json = byteArrayToString(new Uint8Array(data.bytes));
+  return tryJsonParse<T>(json);
+};
+
+export const getRangeHeader = (chunkStart?: number, chunkEnd?: number) => {
+  let startOffset = 0;
+  let updatedChunkEnd: number | undefined, updatedChunkStart: number | undefined;
+  if (chunkStart !== undefined) {
+    updatedChunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
+    startOffset = Math.abs(chunkStart - updatedChunkStart);
+    updatedChunkEnd = chunkEnd !== undefined ? roundToLargerMultipleOf16(chunkEnd) : undefined;
+
+    return {
+      startOffset,
+      updatedChunkStart,
+      rangeHeader: `bytes=${updatedChunkStart}-${updatedChunkEnd || ''}`,
+    };
+  }
+  return { startOffset, updatedChunkStart, rangeHeader: undefined };
+};

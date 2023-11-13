@@ -1,6 +1,11 @@
 import { Suspense } from 'react';
-import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
-import { ActionGroupOptionProps, Lock } from '@youfoundation/common-app';
+import {
+  ChannelDefinition,
+  EmbeddedPost,
+  PostContent,
+  PostFile,
+} from '@youfoundation/js-lib/public';
+import { ActionGroupOptionProps, Lock, useIsConnected } from '@youfoundation/common-app';
 
 import {
   ChannelDefinitionVm,
@@ -15,17 +20,17 @@ import { OwnerActions } from './OwnerActions';
 interface PostMetaWithPostFileProps {
   odinId?: string;
   postFile: PostFile<PostContent>;
-  postContent?: PostContent;
+  embeddedPost?: undefined;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
 }
 
-interface PostMetaWithPostContentProps {
+interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
   postFile?: PostFile<PostContent>;
-  postContent: PostContent;
+  embeddedPost: EmbeddedPost;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
   size?: 'text-xs' | 'text-sm';
@@ -35,15 +40,15 @@ interface PostMetaWithPostContentProps {
 export const PostMeta = ({
   odinId,
   postFile,
-  postContent,
+  embeddedPost,
   channel,
   className,
   size = 'text-xs',
   excludeContextMenu,
-}: PostMetaWithPostFileProps | PostMetaWithPostContentProps) => {
-  const { isOwner } = useDotYouClient();
+}: PostMetaWithPostFileProps | PostMetaWithEmbeddedPostContentProps) => {
+  const { isOwner, getIdentity } = useDotYouClient();
   const now = new Date();
-  const date = new Date(postFile?.content.dateUnixTime || postContent?.dateUnixTime || now);
+  const date = new Date(postFile?.userDate || embeddedPost?.userDate || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   const format: Intl.DateTimeFormatOptions = {
     month: 'short',
@@ -52,6 +57,15 @@ export const PostMeta = ({
     hour: 'numeric',
     minute: 'numeric',
   };
+  const identity = getIdentity();
+  const isAuthor = odinId === identity;
+
+  const isConnected = useIsConnected(odinId).data;
+  const channelLink = channel
+    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}${
+        isConnected && identity ? '?youauth-logon=' + identity : ''
+      }`
+    : undefined;
 
   return (
     <div
@@ -63,17 +77,15 @@ export const PostMeta = ({
       {channel ? (
         <a
           className="text-primary ml-1 flex flex-row items-center gap-1 border-l pl-1 hover:underline dark:border-slate-500"
-          href={`${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}`}
+          href={channelLink}
           onClick={(e) => e.stopPropagation()}
         >
-          {postFile?.payloadIsEncrypted ? <Lock className="h-3 w-3" /> : null}
+          {postFile?.isEncrypted ? <Lock className="h-3 w-3" /> : null}
           {channel?.name ? `${channel?.name}` : ''}
         </a>
       ) : null}
 
-      {/* There is only a odinId when on the feed and displaying external data */}
-      {excludeContextMenu || !postFile ? null : isOwner &&
-        (!odinId || odinId === window.location.hostname) ? (
+      {excludeContextMenu || !postFile ? null : (!odinId && isOwner) || isAuthor ? (
         <Suspense>
           <OwnerActions postFile={postFile} />
         </Suspense>
@@ -91,7 +103,7 @@ const ExternalActions = ({ odinId }: { odinId: string }) => {
     {
       icon: UserX,
       label: `${t('Edit what I follow from')} "${odinId}"`,
-      href: `https://${identity}/owner/follow/${odinId}`,
+      href: `https://${identity}/owner/follow/following/${odinId}`,
     },
   ];
 

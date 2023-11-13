@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ActionLink, HOME_ROOT_PATH, ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 
 import { Feed } from '@youfoundation/common-app';
-import useFollowDetail from '../../../hooks/follow/useFollowDetail';
+import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
 
 const FollowLink = ({
@@ -34,7 +34,7 @@ const FollowLink = ({
         className={`w-auto ${className ?? ''}`}
         href={
           identity
-            ? `https://${identity}/owner/follow/${window.location.hostname}` +
+            ? `https://${identity}/owner/follow/following/${window.location.hostname}` +
               (channel ? `?chnl=${channel.channelId}` : '')
             : undefined
         }
@@ -52,7 +52,7 @@ const FollowLink = ({
         isOpen={isLoginOpen}
         onCancel={() => setIsLoginOpen(false)}
         returnPath={`${HOME_ROOT_PATH}action?targetPath=${
-          `/owner/follow/${window.location.hostname}` +
+          `/owner/follow/following/${window.location.hostname}` +
           (channel ? `?chnl=${channel.channelId}` : '')
         }`}
       >

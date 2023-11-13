@@ -5,10 +5,10 @@ import {
   removeProfileSection,
   saveProfileSection,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
-import useAttributes from './useAttributes';
+import { useAuth } from '../auth/useAuth';
+import { useAttributes } from './useAttributes';
 
-const useProfileSections = ({ profileId }: { profileId?: string }) => {
+export const useProfileSections = ({ profileId }: { profileId?: string }) => {
   const queryClient = useQueryClient();
   const { mutateAsync: removeAttributes } = useAttributes({}).removeAttributes;
   const dotYouClient = useAuth().getDotYouClient();
@@ -46,16 +46,16 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
   };
 
   return {
-    fetchAll: useQuery(
-      ['profileSections', profileId],
-      () => fetchSections({ profileId: profileId as string }),
-      {
-        refetchOnWindowFocus: false,
-      }
-    ),
-    save: useMutation(saveSection, {
+    fetchAll: useQuery({
+      queryKey: ['profileSections', profileId],
+      queryFn: () => fetchSections({ profileId: profileId as string }),
+
+      refetchOnWindowFocus: false,
+    }),
+    save: useMutation({
+      mutationFn: saveSection,
       onMutate: async ({ profileId, profileSection: newSection }) => {
-        await queryClient.cancelQueries(['profileSections', profileId]);
+        await queryClient.cancelQueries({ queryKey: ['profileSections', profileId] });
 
         const previousSections: ProfileSection[] | undefined = queryClient.getQueryData([
           'profileSections',
@@ -75,12 +75,13 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
         queryClient.setQueryData(['profileSections', newData.profileId], context?.previousSections);
       },
       onSettled: (data) => {
-        queryClient.invalidateQueries(['profileSections', data?.profileId]);
+        queryClient.invalidateQueries({ queryKey: ['profileSections', data?.profileId] });
       },
     }),
-    remove: useMutation(removeSection, {
+    remove: useMutation({
+      mutationFn: removeSection,
       onMutate: async ({ profileId, profileSection: toRemoveSection }) => {
-        await queryClient.cancelQueries(['profileSections', profileId]);
+        await queryClient.cancelQueries({ queryKey: ['profileSections', profileId] });
 
         const previousSections: ProfileSection[] | undefined = queryClient.getQueryData([
           'profileSections',
@@ -100,10 +101,8 @@ const useProfileSections = ({ profileId }: { profileId?: string }) => {
         queryClient.setQueryData(['profileSections', newData.profileId], context?.previousSections);
       },
       onSettled: (data, err, variables) => {
-        queryClient.invalidateQueries(['profileSections', variables.profileId]);
+        queryClient.invalidateQueries({ queryKey: ['profileSections', variables.profileId] });
       },
     }),
   };
 };
-
-export default useProfileSections;

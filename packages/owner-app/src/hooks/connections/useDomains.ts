@@ -33,16 +33,13 @@ export const useDomains = (
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['activeDomains', activePageSize, activePage],
-      ({ pageParam }) => fetchDomains({ pageSize: activePageSize, cursor: pageParam }),
-      {
-        getNextPageParam: (lastPage) =>
-          (lastPage.results?.length >= activePageSize && lastPage.cursor) ?? undefined,
-        refetchOnWindowFocus: false,
-        keepPreviousData: true,
-        onError: (err) => console.error(err),
-      }
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: ['activeDomains', activePageSize, activePage],
+      queryFn: ({ pageParam }) => fetchDomains({ pageSize: activePageSize, cursor: pageParam }),
+      initialPageParam: undefined as number | undefined,
+      getNextPageParam: (lastPage) =>
+        lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
+      refetchOnWindowFocus: false,
+    }),
   };
 };

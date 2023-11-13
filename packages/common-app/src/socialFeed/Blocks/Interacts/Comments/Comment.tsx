@@ -12,6 +12,7 @@ import {
   CommentReactionPreview,
   ReactionContext,
   ReactionFile,
+  ReactionVm,
 } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
@@ -23,7 +24,7 @@ import { CommentThread } from './Parts/CommentThread';
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: ReactionFile;
+  commentData: ReactionFile | ReactionVm;
   isThread: boolean;
   onReply?: () => void;
 }
@@ -41,7 +42,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
   const [isEdit, setIsEdit] = useState(false);
 
   const {
-    saveComment: { mutateAsync: postComment, error: postCommentError },
+    saveComment: { mutateAsync: postComment, error: postCommentError, status: postState },
     removeComment: { mutateAsync: removeComment, error: removeCommentError },
   } = useReaction();
 
@@ -51,7 +52,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
     target: {
       fileId: commentData.fileId,
       globalTransitId: commentData.globalTransitId,
-      isEncrypted: commentData.payloadIsEncrypted || false,
+      isEncrypted: commentData.isEncrypted || false,
     },
   };
 
@@ -79,7 +80,11 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
           <div className="flex-shrink-0">
             <AuthorImage odinId={authorOdinId} size="xs" />
           </div>
-          <div className="ml-2 rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-20">
+          <div
+            className={`ml-2 rounded-lg bg-gray-500 bg-opacity-10 px-2 py-1 dark:bg-gray-300 dark:bg-opacity-20 ${
+              isEdit ? 'flex-grow' : ''
+            }`}
+          >
             <CommentHead
               authorOdinId={authorOdinId}
               setIsEdit={setIsEdit}
@@ -90,8 +95,11 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
               context={context}
               content={content}
               commentFileId={fileId}
+              commentLastModifed={commentData.lastModified}
               isEdit={isEdit}
+              onCancel={() => setIsEdit(false)}
               onUpdate={doUpdate}
+              updateState={postState}
             />
           </div>
         </div>
@@ -124,7 +132,8 @@ const MAX_CHAR_FOR_SUMMARY = 280;
 
 export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
   const { authorOdinId, content } = commentData;
-  const { body } = content;
+  const { body, mediaPayloadKey } = content;
+  const hasMedia = !!mediaPayloadKey;
 
   return (
     <>
@@ -135,12 +144,17 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
               <span className="text-foreground font-bold text-opacity-70">
                 <AuthorName odinId={authorOdinId} />
               </span>{' '}
-              {commentData.payloadIsEncrypted && body === '' ? (
+              {commentData.isEncrypted && body === '' ? (
                 <span className="ml-2 h-3 w-20 rounded bg-slate-200 text-slate-200 dark:bg-slate-700 dark:text-slate-700">
                   {t('Encrypted')}
                 </span>
               ) : (
-                <>{ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}</>
+                <>
+                  {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}
+                  {hasMedia ? (
+                    <span className="italic lowercase">{t('Click to view image')}</span>
+                  ) : null}
+                </>
               )}
             </p>
           </div>

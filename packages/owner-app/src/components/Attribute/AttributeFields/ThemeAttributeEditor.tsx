@@ -1,4 +1,4 @@
-import { Label, t, Input, Select } from '@youfoundation/common-app';
+import { Label, t, Input, Select, usePayloadBlob } from '@youfoundation/common-app';
 import { ImageSelector } from '@youfoundation/common-app';
 import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
@@ -7,17 +7,11 @@ import ColorThemeSelector from '../../Form/ColorThemeSelector';
 import FaviconSelector from '../../Form/FaviconSelector';
 import Order from '../../Form/Order';
 import ThemeSelector from '../../Form/ThemeSelector';
-import { EmbeddedThumb, ThumbnailInstruction } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { lazy } from 'react';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
-
-const headerInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 600, height: 600 },
-  { quality: 75, width: 1600, height: 1600 },
-  { quality: 75, width: 2600, height: 2600 },
-];
 
 const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 
@@ -28,11 +22,13 @@ export const ThemeAttributeEditor = (props: {
   }) => void;
 }) => {
   const { attribute, onChange } = props;
+
   return (
     <div className="flex flex-col gap-5">
       <div>
         <Label htmlFor={HomePageThemeFields.Favicon}>{t('Favicon')}</Label>
         <FaviconSelector
+          attribute={attribute}
           name={HomePageThemeFields.Favicon}
           defaultValue={attribute.data?.[HomePageThemeFields.Favicon] ?? ''}
           acl={attribute.acl}
@@ -68,11 +64,19 @@ const ThemeSpecificFields = ({
   onChange,
 }: {
   attribute: AttributeVm;
-  onChange: (e: {
-    target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
-  }) => void;
+  onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
+  const targetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId);
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
+  const { data: imageBlob } = usePayloadBlob(
+    attribute.fileId,
+    attribute.data?.[HomePageThemeFields.HeaderImageKey],
+    targetDrive
+  );
+
+  const dataVal = attribute.data?.[HomePageThemeFields.HeaderImageKey];
+  const defaultValue =
+    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
 
   const theme =
     themeId === HomePageTheme.VerticalPosts.toString()
@@ -92,25 +96,21 @@ const ThemeSpecificFields = ({
             <Label htmlFor="headerImage">{t('Background photo')}</Label>
             <ImageSelector
               id="headerImage"
-              name={HomePageThemeFields.HeaderImageId}
-              defaultValue={attribute.data?.[HomePageThemeFields.HeaderImageId] ?? ''}
+              name={HomePageThemeFields.HeaderImageKey}
+              defaultValue={defaultValue}
               onChange={(e) =>
                 onChange({
                   target: {
                     name: e.target.name,
-                    value: e.target.value?.fileId,
-                    previewThumbnail: e.target.value?.previewThumbnail,
+                    value: e.target.value,
                   },
                 })
               }
-              acl={attribute.acl}
-              targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
               sizeClass={`${
-                !attribute.data?.[HomePageThemeFields.HeaderImageId]
+                !attribute.data?.[HomePageThemeFields.HeaderImageKey]
                   ? 'aspect-[16/9] md:aspect-[5/1]'
                   : ''
               }  w-full object-cover`}
-              thumbInstructions={headerInstructionThumbSizes}
             />
           </div>
           <div>
@@ -173,19 +173,21 @@ const ThemeSpecificFields = ({
           <Label htmlFor="headerImage">{t('Background photo')}</Label>
           <ImageSelector
             id="headerImage"
-            name={HomePageThemeFields.HeaderImageId}
-            defaultValue={attribute.data?.[HomePageThemeFields.HeaderImageId] ?? ''}
+            name={HomePageThemeFields.HeaderImageKey}
+            defaultValue={imageBlob || undefined}
             onChange={(e) =>
-              onChange({ target: { name: e.target.name, value: e.target.value?.fileId } })
+              onChange({
+                target: {
+                  name: e.target.name,
+                  value: e.target.value,
+                },
+              })
             }
-            acl={attribute.acl}
-            targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
             sizeClass={`${
-              !attribute.data?.[HomePageThemeFields.HeaderImageId]
+              !attribute.data?.[HomePageThemeFields.HeaderImageKey]
                 ? 'aspect-[16/9] md:aspect-[5/1]'
                 : ''
             }  w-full object-cover`}
-            thumbInstructions={headerInstructionThumbSizes}
           />
         </div>
       );

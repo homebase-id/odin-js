@@ -1,6 +1,6 @@
 import { FC, ReactNode, useEffect, useState } from 'react';
 import { t, useSiteData } from '@youfoundation/common-app';
-import useLinks from '../../../../hooks/links/useLinks';
+import { useLinks } from '../../../../hooks/links/useLinks';
 import {
   Clipboard as ClipboardIcon,
   Discord,

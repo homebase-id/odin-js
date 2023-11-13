@@ -8,10 +8,10 @@ import {
   useFetchManagedDomainsApexes,
   useFetchIsManagedDomainAvailable,
   ManagedDomainApex,
+  ManagedDomainProvisionState,
 } from '../../hooks/managedDomain/useManagedDomain';
 import { Arrow, Exclamation, Loader } from '@youfoundation/common-app';
 import { domainFromPrefixAndApex, validDomainLabelRegEx } from '../../helpers/common';
-import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
 import CreateManagedDomain from './CreateManagedDomain';
 import { debounce } from 'lodash-es';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
@@ -134,7 +134,7 @@ const EnteringDetails = ({
                   name={`prefix${index}`}
                   defaultValue={prefixes[index] || ''}
                   placeholder={label}
-                  onChange={(e) => onPrefixChange(index, e.target.value)}
+                  onChange={(e) => onPrefixChange(index, e.target.value.toLowerCase())}
                 />
               </div>
             ))}
@@ -171,7 +171,7 @@ const EnteringDetails = ({
               type="email"
               required
               placeholder={t('someone@example.com')}
-              debouncedOnChange={(e) => setEmail(e.target.value)}
+              debouncedOnChange={(e) => setEmail(e.target.value.toLowerCase())}
             />
           </div>
           <div className="mt-5 flex flex-row-reverse">

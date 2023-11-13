@@ -1,9 +1,10 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { FileQueryParams } from '../../core/DriveData/DriveTypes';
-import { queryBatchOverTransit, getPayloadOverTransit } from './TransitProvider';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { AttributeFile, AttributeConfig } from '../../profile/profile';
+import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
+import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
 
 export const getProfileAttributesOverTransit = async (
   dotYouClient: DotYouClient,
@@ -25,13 +26,14 @@ export const getProfileAttributesOverTransit = async (
     let attributes = (
       await Promise.all(
         result.searchResults.map(async (dsr) => {
-          const attrPayLoad: AttributeFile | null = await getPayloadOverTransit<AttributeFile>(
-            dotYouClient,
-            odinId,
-            targetDrive,
-            dsr,
-            result.includeMetadataHeader
-          );
+          const attrPayLoad: AttributeFile | null =
+            await getContentFromHeaderOrPayloadOverTransit<AttributeFile>(
+              dotYouClient,
+              odinId,
+              targetDrive,
+              dsr,
+              result.includeMetadataHeader
+            );
 
           if (!attrPayLoad) return undefined;
 
@@ -40,6 +42,7 @@ export const getProfileAttributesOverTransit = async (
             profileId: profileId,
             acl: dsr.serverMetadata?.accessControlList,
             aclPriority: dsr.priority,
+            fileId: dsr.fileId,
           };
         })
       )

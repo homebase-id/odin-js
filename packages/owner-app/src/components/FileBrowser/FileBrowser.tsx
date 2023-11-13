@@ -1,12 +1,17 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useEffect, useState } from 'react';
-import { AclIcon, AclSummary, t } from '@youfoundation/common-app';
-import useFiles from '../../hooks/files/useFiles';
+import { AclIcon, AclSummary, Trash, t } from '@youfoundation/common-app';
+import { useFiles } from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
-import { DriveSearchResult, SystemFileType, TargetDrive } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  SecurityGroupType,
+  SystemFileType,
+  TargetDrive,
+} from '@youfoundation/js-lib/core';
 import { BlogConfig, HomePageConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
 
@@ -65,10 +70,10 @@ const FileBrowser = ({
         />
       }
     >
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-5 lg:grid-cols-5">
-        {driveData?.pages?.[currentPage - 1]?.searchResults.map((file) => {
-          return <File key={file.fileId} file={file} targetDrive={targetDrive} />;
-        })}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        {driveData?.pages?.[currentPage - 1]?.searchResults.map((file) => (
+          <File key={file.fileId} file={file} targetDrive={targetDrive} />
+        ))}
       </div>
     </Section>
   );
@@ -76,11 +81,16 @@ const FileBrowser = ({
 
 const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSearchResult }) => {
   const fileType = file.fileMetadata.appData.fileType;
-  const contentType = file.fileMetadata.contentType;
-  const isImage = ['image/webp', 'image/jpeg'].includes(contentType);
-  const contentTypeExtension = contentType.split('/')[1];
+  const firstPayload = file.fileMetadata.payloads?.[0];
+  const contentType = firstPayload?.contentType;
+  const isImage = ['image/webp', 'image/jpeg', 'image/svg+xml', 'image/gif'].includes(contentType);
+  const contentTypeExtension = (contentType || 'application/json').split('/')[1];
 
   const fetchFile = useFiles({ targetDrive }).fetchFile;
+  const { mutate: deleteFile } = useFiles({
+    targetDrive,
+    systemFileType: file.fileSystemType,
+  }).deleteFile;
 
   const doDownload = (url: string) => {
     // Dirty hack for easy download
@@ -103,40 +113,76 @@ const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSear
         }}
         size="square"
         type="secondary"
-        className="absolute left-2 top-2"
+        className="absolute left-2 top-2 z-10"
+      />
+
+      <ActionButton
+        icon={Trash}
+        onClick={() => deleteFile(file.fileId)}
+        size="square"
+        type="mute"
+        className="absolute right-2 top-8 z-10"
+        confirmOptions={{
+          title: t('Delete file'),
+          buttonText: t('Delete'),
+          trickQuestion: {
+            question: t(
+              'Are you sure you want to delete this file? This action cannot be undone (type "yes" to confirm)'
+            ),
+            answer: 'yes',
+          },
+        }}
       />
 
       <div className="px-4 py-2 lg:px-5">
         {isImage ? (
           <div className="relative">
-            <Image
-              targetDrive={targetDrive}
-              fileId={file.fileId}
-              fit="contain"
-              className="aspect-square h-full w-full"
-            />
+            <div className="flex aspect-square overflow-hidden">
+              <Image
+                targetDrive={targetDrive}
+                fileId={file.fileId}
+                fileKey={firstPayload.key}
+                lastModified={file.fileMetadata.updated}
+                fit="contain"
+                position="center"
+                className="m-auto"
+              />
+            </div>
             <div
               className="absolute inset-0 flex cursor-pointer flex-row items-center justify-center bg-slate-200 bg-opacity-50 p-2 opacity-0 hover:opacity-100"
-              onClick={async () => doDownload((await fetchFile(file, true)) || '')}
+              onClick={async () => doDownload((await fetchFile(file, firstPayload.key)) || '')}
             >
               <ActionButton
                 icon={Download}
-                onClick={async () => doDownload((await fetchFile(file, true)) || '')}
+                onClick={async () => doDownload((await fetchFile(file, firstPayload.key)) || '')}
                 size="square"
                 type="mute"
               />
             </div>
           </div>
         ) : (
-          <div className="p-2">
-            <FileIcon className="mx-auto h-auto w-full max-w-[2rem] opacity-50" />
+          <div className="flex aspect-square overflow-hidden p-2">
+            <FileIcon className="m-auto h-auto w-full max-w-[2rem] opacity-50" />
           </div>
         )}
       </div>
       <div className="mt-auto">
         <p className="flex flex-row items-center text-sm">
-          <AclIcon acl={file.serverMetadata.accessControlList} className="mr-1 h-4 w-4" />
-          <AclSummary acl={file.serverMetadata.accessControlList} />
+          <AclIcon
+            acl={
+              file.serverMetadata?.accessControlList || {
+                requiredSecurityGroup: SecurityGroupType.Owner,
+              }
+            }
+            className="mr-1 h-4 w-4"
+          />
+          <AclSummary
+            acl={
+              file.serverMetadata?.accessControlList || {
+                requiredSecurityGroup: SecurityGroupType.Owner,
+              }
+            }
+          />
         </p>
         {getLabelFromFileType(fileType)}
         <p className="mt-2 text-xs leading-tight">

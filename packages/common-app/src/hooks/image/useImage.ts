@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
   getDecryptedImageUrl,
-  ImageContentType,
   ImageSize,
   removeImage,
   SecurityGroupType,
@@ -21,7 +20,8 @@ export interface ImageData {
 
 export const useImage = (
   odinId?: string,
-  imageFileId?: string | undefined,
+  imageFileId?: string,
+  imageFileKey?: string,
   imageDrive?: TargetDrive,
   size?: ImageSize,
   probablyEncrypted?: boolean,
@@ -34,14 +34,20 @@ export const useImage = (
   const fetchImageData = async (
     odinId: string,
     imageFileId: string | undefined,
+    imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
     probablyEncrypted?: boolean,
     naturalSize?: ImageSize
   ): Promise<ImageData | undefined> => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) {
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      !imageDrive ||
+      imageFileKey === undefined ||
+      imageFileKey === ''
+    )
       return;
-    }
 
     const fetchDataPromise = async () => {
       return {
@@ -52,12 +58,14 @@ export const useImage = (
                 odinId,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size
               )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size,
                 probablyEncrypted
               ),
@@ -69,16 +77,14 @@ export const useImage = (
   };
 
   const saveImageFile = async ({
-    bytes,
-    type,
+    image,
     targetDrive,
     acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
     fileId = undefined,
     versionTag = undefined,
     thumbInstructions,
   }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
+    image: Blob;
     targetDrive: TargetDrive;
     acl?: AccessControlList;
     fileId?: string;
@@ -89,12 +95,11 @@ export const useImage = (
       dotYouClient,
       targetDrive,
       acl,
-      bytes,
+      image,
       undefined,
       {
         fileId,
         versionTag,
-        type,
       },
       thumbInstructions
     );
@@ -111,45 +116,43 @@ export const useImage = (
   };
 
   return {
-    fetch: useQuery(
-      [
-        'image',
+    fetch: useQuery({
+      queryKey: [
+        'common-image',
         odinId || localHost,
         imageDrive?.alias,
         imageFileId,
+        imageFileKey,
         `${size?.pixelHeight}x${size?.pixelWidth}`,
       ],
-      () =>
+      queryFn: () =>
         fetchImageData(
           odinId || localHost,
           imageFileId,
+          imageFileKey,
           imageDrive,
           size,
           probablyEncrypted,
           naturalSize
         ),
-      {
-        refetchOnMount: true,
-        refetchOnWindowFocus: false,
-        staleTime: Infinity,
-        enabled: !!imageFileId && imageFileId !== '',
-      }
-    ),
-    save: useMutation(saveImageFile, {
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      staleTime: Infinity,
+      enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
+    }),
+    save: useMutation({
+      mutationFn: saveImageFile,
       onSuccess: (_data, variables) => {
         // Boom baby!
         if (variables.fileId) {
-          queryClient.invalidateQueries([
-            'image',
-            localHost,
-            variables.targetDrive.alias,
-            variables.fileId,
-          ]);
+          queryClient.invalidateQueries({
+            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
+          });
         } else {
-          queryClient.removeQueries(['image']);
+          queryClient.invalidateQueries({ queryKey: ['image'], exact: false });
         }
       },
     }),
-    remove: useMutation(removeImageFile),
+    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

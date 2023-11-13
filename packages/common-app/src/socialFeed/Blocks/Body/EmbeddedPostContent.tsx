@@ -34,7 +34,7 @@ export const EmbeddedPostContent = ({
 
   // Hide media if we can't get channel info, when there's no channel we can't get the media either
   useEffect(() => {
-    if (externalChannelStatus !== 'loading' && internalChannelStatus !== 'loading' && !channel)
+    if (externalChannelStatus !== 'pending' && internalChannelStatus !== 'pending' && !channel)
       setShouldHideMedia(true);
   }, [externalChannel, internalChannel, externalChannelStatus, internalChannelStatus]);
 
@@ -64,7 +64,7 @@ export const EmbeddedPostContent = ({
                   </h2>
                   <span className="hidden px-2 leading-4 md:block lg:hidden xl:block">·</span>
                   <PostMeta
-                    postContent={content}
+                    embeddedPost={content}
                     odinId={content.authorOdinId}
                     excludeContextMenu={true}
                     channel={channel || undefined}
@@ -75,6 +75,9 @@ export const EmbeddedPostContent = ({
               <PostBody
                 post={{ ...content, embeddedPost: undefined }}
                 odinId={content.authorOdinId}
+                fileId={content.fileId}
+                globalTransitId={content.globalTransitId}
+                lastModified={content.lastModified}
               />
 
               {shouldHideMedia && content.primaryMediaFile ? (
@@ -87,9 +90,12 @@ export const EmbeddedPostContent = ({
         {!shouldHideMedia ? (
           <PostMedia
             postFile={{
+              fileId: content.primaryMediaFile?.fileId || content.fileId,
+              globalTransitId: content.globalTransitId,
+              lastModified: content.lastModified,
               content,
               previewThumbnail: content.previewThumbnail,
-              payloadIsEncrypted: isChannelPublic,
+              isEncrypted: isChannelPublic,
             }}
             odinId={content.authorOdinId}
           />

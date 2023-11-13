@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDarkMode, Toaster, Sidenav } from '@youfoundation/common-app';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 
 interface LayoutProps {
   children?: ReactNode;

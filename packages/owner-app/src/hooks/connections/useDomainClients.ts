@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   getDomainClients,
   removeDomainClient,
 } from '../../provider/network/domainNetwork/DomainProvider';
 
-const useDomainClients = ({ domain }: { domain?: string }) => {
+export const useDomainClients = ({ domain }: { domain?: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
@@ -26,14 +26,17 @@ const useDomainClients = ({ domain }: { domain?: string }) => {
   };
 
   return {
-    fetch: useQuery(['domainClients', domain], () => fetchClients({ domain: domain as string }), {
+    fetch: useQuery({
+      queryKey: ['domainClients', domain],
+      queryFn: () => fetchClients({ domain: domain as string }),
       refetchOnWindowFocus: false,
       enabled: !!domain,
     }),
 
-    removeClient: useMutation(removeClient, {
+    removeClient: useMutation({
+      mutationFn: removeClient,
       onSuccess: (data, param) => {
-        queryClient.invalidateQueries(['domainClients', param.domain]);
+        queryClient.invalidateQueries({ queryKey: ['domainClients', param.domain] });
       },
       onError: (ex) => {
         console.error(ex);
@@ -41,5 +44,3 @@ const useDomainClients = ({ domain }: { domain?: string }) => {
     }),
   };
 };
-
-export default useDomainClients;

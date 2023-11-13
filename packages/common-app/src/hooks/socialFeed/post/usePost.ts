@@ -2,153 +2,64 @@ import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query
 import {
   PostFile,
   PostContent,
-  getChannelDrive,
-  removePost,
   savePost as savePostFile,
   getPost,
+  NewMediaFile,
+  MediaFile,
   Media,
+  getChannelDrive,
   getPostByFileId,
+  removePost,
 } from '@youfoundation/js-lib/public';
-import { getRichTextFromString, useDotYouClient, useStaticFiles } from '@youfoundation/common-app';
-import {
-  AccessControlList,
-  ImageContentType,
-  ImageUploadResult,
-  MultiRequestCursoredResult,
-  ThumbnailFile,
-  UploadResult,
-  VideoContentType,
-  VideoUploadResult,
-  deleteFile,
-  uploadImage,
-  uploadVideo,
-} from '@youfoundation/js-lib/core';
-import { segmentVideoFile } from '@youfoundation/js-lib/helpers';
+import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
+import { MultiRequestCursoredResult, UploadResult, deleteFile } from '@youfoundation/js-lib/core';
 import { PostFileVm } from '@youfoundation/js-lib/transit';
-
-export interface FileLike {
-  name: string;
-  bytes: Uint8Array;
-  size: number;
-  type: 'image/jpeg' | 'image/png' | 'video/mp4';
-}
-
-export interface AttachmentFile {
-  file: File | FileLike;
-  thumbnail?: ThumbnailFile;
-}
 
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
   const savePost = async ({
-    blogFile,
+    postFile,
     channelId,
+    mediaFiles,
+    onUpdate,
   }: {
-    blogFile: PostFile<PostContent>;
+    postFile: PostFile<PostContent>;
     channelId: string;
+    mediaFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[];
+    onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<UploadResult>((resolve) => {
       const onVersionConflict = async () => {
-        const serverPost = await getPost(dotYouClient, channelId, blogFile.content.id);
+        const serverPost = await getPost(dotYouClient, channelId, postFile.content.id);
         if (!serverPost) return;
 
-        const newPost = { ...serverPost, content: { ...serverPost.content, ...blogFile.content } };
-        savePostFile(dotYouClient, newPost, channelId, onVersionConflict).then((result) => {
-          if (result) resolve(result);
-        });
+        const newPost = { ...serverPost, content: { ...serverPost.content, ...postFile.content } };
+        savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
+          (result) => {
+            if (result) resolve(result);
+          }
+        );
       };
 
       savePostFile(
         dotYouClient,
         {
-          ...blogFile,
+          ...postFile,
           content: {
-            ...blogFile.content,
-            captionAsRichText: getRichTextFromString(blogFile.content.caption.trim()),
+            ...postFile.content,
+            captionAsRichText: getRichTextFromString(postFile.content.caption.trim()),
           },
         },
         channelId,
-        onVersionConflict
+        mediaFiles,
+        onVersionConflict,
+        onUpdate
       ).then((result) => {
         if (result) resolve(result);
       });
     });
-  };
-
-  const saveFiles = async ({
-    files,
-    acl,
-    channelId,
-  }: {
-    files: AttachmentFile[];
-    acl: AccessControlList;
-    channelId: string;
-  }): Promise<(ImageUploadResult | VideoUploadResult)[]> => {
-    const targetDrive = getChannelDrive(channelId);
-
-    const imageUploadResults = await Promise.all(
-      files.map(async (file) => {
-        if (file.file.type === 'video/mp4') {
-          // if video is tiny enough (less than 10MB), don't segment just upload
-          if (file.file.size < 10000000 || 'bytes' in file.file)
-            return await uploadVideo(
-              dotYouClient,
-              targetDrive,
-              acl,
-              'bytes' in file.file ? file.file.bytes : file.file,
-              { isSegmented: false, mimeType: file.file.type, fileSize: file.file.size },
-              {
-                type: file.file.type as VideoContentType,
-                thumb: 'thumbnail' in file ? file.thumbnail : undefined,
-              }
-            );
-
-          const { bytes: processedBytes, metadata } = await segmentVideoFile(file.file);
-
-          return await uploadVideo(dotYouClient, targetDrive, acl, processedBytes, metadata, {
-            type: file.file.type as VideoContentType,
-            thumb: 'thumbnail' in file ? file.thumbnail : undefined,
-          });
-        } else {
-          return await uploadImage(
-            dotYouClient,
-            targetDrive,
-            acl,
-            'bytes' in file.file ? file.file.bytes : file.file,
-            undefined,
-            {
-              type: file.file.type as ImageContentType,
-            },
-            [
-              { quality: 85, width: 600, height: 600 },
-              { quality: 99, width: 1600, height: 1600, type: 'jpeg' },
-            ]
-          );
-        }
-      })
-    );
-
-    return imageUploadResults.filter(Boolean) as (ImageUploadResult | VideoUploadResult)[];
-  };
-
-  const removeFiles = async ({
-    files,
-
-    channelId,
-  }: {
-    files: string[];
-
-    channelId: string;
-  }) => {
-    const targetDrive = getChannelDrive(channelId);
-
-    await Promise.all(
-      files.map(async (fileId) => {
-        return await deleteFile(dotYouClient, targetDrive, fileId);
-      })
-    );
   };
 
   // slug property is need to clear the cache later, but not for the actual removeData
@@ -165,14 +76,14 @@ export const usePost = () => {
     const post = await getPostByFileId(dotYouClient, channelId, fileId);
     const channelDrive = getChannelDrive(channelId);
     if (post) {
-      if (post.content.primaryMediaFile)
+      if (post.content.primaryMediaFile && post.content.primaryMediaFile.fileId)
         await deleteFile(dotYouClient, channelDrive, post.content.primaryMediaFile.fileId);
 
       const mediaPost = post as any as Media;
       if (mediaPost.mediaFiles) {
         await Promise.all(
           mediaPost.mediaFiles.map(async (file) => {
-            await deleteFile(dotYouClient, channelDrive, file.fileId);
+            if (file.fileId) await deleteFile(dotYouClient, channelDrive, file.fileId);
           })
         );
       }
@@ -182,20 +93,23 @@ export const usePost = () => {
   };
 
   return {
-    save: useMutation(savePost, {
+    save: useMutation({
+      mutationFn: savePost,
       onSuccess: (_data, variables) => {
-        if (variables.blogFile.content.slug) {
-          queryClient.invalidateQueries(['blog', variables.blogFile.content.slug]);
+        if (variables.postFile.content.slug) {
+          queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.slug] });
         } else {
-          queryClient.invalidateQueries(['blog']);
+          queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
-        queryClient.invalidateQueries(['blog', variables.blogFile.fileId]);
-        queryClient.invalidateQueries(['blog', variables.blogFile.content.id]);
-        queryClient.invalidateQueries(['blog', variables.blogFile.content.id?.replaceAll('-', '')]);
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.id] });
+        queryClient.invalidateQueries({
+          queryKey: ['blog', variables.postFile.content.id?.replaceAll('-', '')],
+        });
 
-        queryClient.removeQueries(['blogs']);
+        queryClient.removeQueries({ queryKey: ['blogs'] });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
@@ -205,7 +119,7 @@ export const usePost = () => {
         if (previousFeed) {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
-            post.content.id === variables.blogFile.content.id
+            post.content.id === variables.postFile.content.id
               ? { ...post, versionTag: _data.newVersionTag }
               : post
           );
@@ -214,7 +128,7 @@ export const usePost = () => {
         }
       },
       onMutate: async (newPost) => {
-        await queryClient.cancelQueries(['social-feeds']);
+        await queryClient.cancelQueries({ queryKey: ['social-feeds'] });
 
         // Update section attributes
         const previousFeed:
@@ -231,7 +145,12 @@ export const usePost = () => {
                   ...(index === 0
                     ? [
                         {
-                          ...newPost.blogFile,
+                          ...newPost.postFile,
+                          content: {
+                            ...newPost.postFile.content,
+                            mediaFiles: newPost.mediaFiles,
+                            primaryMediaFile: newPost.mediaFiles?.[0],
+                          },
                           odinId: window.location.hostname,
                         },
                       ]
@@ -254,21 +173,62 @@ export const usePost = () => {
         queryClient.setQueryData(['social-feeds'], context?.previousFeed);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['social-feeds']);
+        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
       },
     }),
-    saveFiles: useMutation(saveFiles),
-    removeFiles: useMutation(removeFiles),
-    remove: useMutation(removeData, {
+
+    update: useMutation({
+      mutationFn: savePost,
       onSuccess: (_data, variables) => {
-        queryClient.invalidateQueries(['social-feeds']);
+        if (variables.postFile.content.slug) {
+          queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.slug] });
+        } else {
+          queryClient.invalidateQueries({ queryKey: ['blog'] });
+        }
+
+        // Too many invalidates, but during article creation, the slug is not known
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
+        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.id] });
+        queryClient.invalidateQueries({
+          queryKey: ['blog', variables.postFile.content.id?.replaceAll('-', '')],
+        });
+
+        queryClient.removeQueries({ queryKey: ['blogs'] });
+
+        // Update versionTag of post in social feeds cache
+        const previousFeed:
+          | InfiniteData<MultiRequestCursoredResult<PostFileVm<PostContent>[]>>
+          | undefined = queryClient.getQueryData(['social-feeds']);
+
+        if (previousFeed) {
+          const newFeed = { ...previousFeed };
+          newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
+            post.content.id === variables.postFile.content.id
+              ? { ...post, versionTag: _data.newVersionTag }
+              : post
+          );
+
+          queryClient.setQueryData(['social-feeds'], newFeed);
+        }
+      },
+      onError: (err, _newCircle, context) => {
+        console.error(err);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+      },
+    }),
+    remove: useMutation({
+      mutationFn: removeData,
+      onSuccess: (_data, variables) => {
+        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
 
         if (variables && variables.slug) {
-          queryClient.invalidateQueries(['blog', variables.slug]);
+          queryClient.invalidateQueries({ queryKey: ['blog', variables.slug] });
         } else {
-          queryClient.invalidateQueries(['blog']);
+          queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
-        queryClient.invalidateQueries(['blogs']);
+        queryClient.invalidateQueries({ queryKey: ['blogs'] });
       },
     }),
   };

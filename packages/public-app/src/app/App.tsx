@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import { ErrorBoundary, HOME_ROOT_PATH, PREVIEW_ROOT } from '@youfoundation/common-app';
-import useAuth from '../hooks/auth/useAuth';
+import { useAuth } from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
 
@@ -103,7 +103,8 @@ function App() {
 }
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
-  const { isOwner } = useAuth();
+  const { isOwner, isAuthenticated } = useAuth();
+  const [searchParams] = useSearchParams();
   const { data: siteData, isFetched: siteDataFetched } = useSiteData();
 
   if (siteData && siteDataFetched && !siteData.home?.templateSettings?.themeId) {
@@ -123,6 +124,10 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
       </div>
     );
   }
+
+  // Remove the youauth-logon param from the url if we are alrady logged on
+  if ((isAuthenticated || isOwner) && searchParams.has('youauth-logon'))
+    window.history.replaceState(null, '', window.location.pathname);
 
   return <>{children}</>;
 };

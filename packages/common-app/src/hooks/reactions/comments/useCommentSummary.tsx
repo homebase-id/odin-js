@@ -44,17 +44,12 @@ export const useCommentSummary = ({
   };
 
   return {
-    fetch: useQuery(
-      ['comments-summary', authorOdinId, channelId, postGlobalTransitId],
-      () => fetch({ authorOdinId, channelId, postGlobalTransitId, reactionPreview }),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        onError: (er) => {
-          console.log(er);
-        },
-        enabled: !!authorOdinId && !!channelId && !!postGlobalTransitId,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['comments-summary', authorOdinId, channelId, postGlobalTransitId],
+      queryFn: () => fetch({ authorOdinId, channelId, postGlobalTransitId, reactionPreview }),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!authorOdinId && !!channelId && !!postGlobalTransitId,
+    }),
   };
 };

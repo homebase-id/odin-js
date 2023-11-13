@@ -1,12 +1,12 @@
 import {
-  uint8ArrayToBase64,
   getNewId,
   jsonStringify64,
   stringifyToQueryParams,
+  getRandom16ByteArray,
+  tryJsonParse,
 } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
-import { decryptJsonContent, decryptKeyHeader } from '../DriveData/SecurityHelpers';
-import { getRandom16ByteArray } from '../DriveData/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
 import {
   TargetDrive,
@@ -15,7 +15,6 @@ import {
   ThumbnailFile,
   SecurityGroupType,
   UploadInstructionSet,
-  EmbeddedThumb,
   UploadFileMetadata,
   uploadFile,
   SystemFileType,
@@ -31,7 +30,7 @@ export const uploadVideo = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  file: Uint8Array | Blob | File,
+  file: Blob | File,
   fileMetadata?: PlainVideoMetadata | SegmentedVideoMetadata,
   uploadMeta?: {
     tag?: string | undefined | string[];
@@ -45,9 +44,7 @@ export const uploadVideo = async (
     thumb?: ThumbnailFile;
   }
 ): Promise<VideoUploadResult | undefined> => {
-  if (!targetDrive) {
-    throw 'Missing target drive';
-  }
+  if (!targetDrive) throw 'Missing target drive';
 
   const encrypt = !(
     acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -63,82 +60,68 @@ export const uploadVideo = async (
     transitOptions: uploadMeta?.transitOptions || null,
   };
 
-  const { naturalSize, tinyThumb, additionalThumbnails } = uploadMeta?.thumb
-    ? await createThumbnails(uploadMeta.thumb.payload, uploadMeta.thumb.contentType, [
+  const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
+    ? await createThumbnails(uploadMeta.thumb.payload, DEFAULT_PAYLOAD_KEY, [
         { quality: 100, width: 250, height: 250 },
       ])
-    : { naturalSize: undefined, tinyThumb: undefined, additionalThumbnails: undefined };
-
-  const previewThumbnail: EmbeddedThumb | undefined =
-    naturalSize && tinyThumb
-      ? {
-          pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-          contentType: tinyThumb.contentType,
-          content: uint8ArrayToBase64(tinyThumb.payload),
-        }
-      : undefined;
-
-  const additionalThumbs = additionalThumbnails?.map((thumb) => {
-    return {
-      pixelHeight: thumb.pixelHeight,
-      pixelWidth: thumb.pixelWidth,
-      contentType: thumb.contentType,
-    };
-  });
+    : { tinyThumb: undefined, additionalThumbnails: undefined };
 
   const metadata: UploadFileMetadata = {
     versionTag: uploadMeta?.versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
-    contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
       tags: uploadMeta?.tag
         ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
-      contentIsComplete: false,
       fileType: 0,
-      jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
+      content: null,
       userDate: uploadMeta?.userDate,
-      previewThumbnail,
-      additionalThumbnails: additionalThumbs,
+      previewThumbnail: tinyThumb,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: acl,
   };
-
-  console.log('uploading video', additionalThumbnails);
 
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
-    file,
+    [
+      {
+        payload: file,
+        key: DEFAULT_PAYLOAD_KEY,
+        descriptorContent: fileMetadata ? jsonStringify64(fileMetadata) : undefined,
+      },
+    ],
     additionalThumbnails,
     encrypt
   );
   if (!result) throw new Error(`Upload failed`);
 
-  return { fileId: result.file.fileId, previewThumbnail, type: 'video' };
+  return {
+    fileId: result.file.fileId,
+    fileKey: DEFAULT_PAYLOAD_KEY,
+    previewThumbnail: tinyThumb,
+    type: 'video',
+  };
 };
 
 export const getDecryptedVideoChunk = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  _globalTransitId: string | undefined, // Kept for compatibility with ...overTransit signature
+  key: string,
   chunkStart?: number,
   chunkEnd?: number,
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
-  const payload = await getPayloadBytes(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    undefined,
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     chunkStart,
-    chunkEnd
-  );
+    chunkEnd,
+  });
 
   return payload?.bytes || null;
 };
@@ -147,26 +130,24 @@ export const getDecryptedVideoMetadata = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  fileKey: string | undefined,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
+  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
   if (!fileHeader) return undefined;
-  const fileMetadata = fileHeader.fileMetadata;
 
-  const keyheader = fileMetadata.payloadIsEncrypted
-    ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
-    : undefined;
+  const descriptor = fileHeader.fileMetadata.payloads.find((p) => p.key === fileKey)
+    ?.descriptorContent;
+  if (!descriptor) return undefined;
 
-  return await decryptJsonContent<PlainVideoMetadata | SegmentedVideoMetadata>(
-    fileMetadata,
-    keyheader
-  );
+  return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
 };
 
 export const getDecryptedVideoUrl = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
@@ -174,6 +155,7 @@ export const getDecryptedVideoUrl = async (
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
+      key,
       xfst: systemFileType || 'Standard',
     })}`;
 
@@ -189,22 +171,18 @@ export const getDecryptedVideoUrl = async (
     return await getDirectImageUrl();
   }
 
-  const meta = await getFileHeader(dotYouClient, targetDrive, fileId, systemFileType);
-  if (!meta?.fileMetadata.payloadIsEncrypted) {
+  const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
+  if (!meta?.fileMetadata.isEncrypted) {
     return await getDirectImageUrl();
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
   // We limit download to 10MB to avoid memory issues
-  return getPayloadBytes(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    undefined,
+  return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
-    fileSizeLimit ? 0 : undefined,
-    fileSizeLimit
-  ).then((data) => {
+    chunkStart: fileSizeLimit ? 0 : undefined,
+    chunkEnd: fileSizeLimit,
+  }).then((data) => {
     if (!data) return '';
     const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
     return url;

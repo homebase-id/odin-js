@@ -34,10 +34,11 @@ export const useDrafts = () => {
   };
 
   return {
-    fetch: useQuery(['drafts'], () => fetch(), { enabled: !!channels }),
-    remove: useMutation(remove, {
+    fetch: useQuery({ queryKey: ['drafts'], queryFn: () => fetch(), enabled: !!channels }),
+    remove: useMutation({
+      mutationFn: remove,
       onMutate: async (toRemoveDetails) => {
-        await queryClient.cancelQueries(['drafts']);
+        await queryClient.cancelQueries({ queryKey: ['drafts'] });
 
         // Updates
         const previousDrafts: PostFile<Article>[] | undefined = queryClient.getQueryData([
@@ -57,7 +58,7 @@ export const useDrafts = () => {
         queryClient.setQueryData(['drafts'], context?.previousDrafts);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['drafts']);
+        queryClient.invalidateQueries({ queryKey: ['drafts'] });
       },
     }),
   };

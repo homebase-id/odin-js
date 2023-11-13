@@ -1,19 +1,19 @@
-import { AccessControlList } from './DriveUploadTypes';
+import { AccessControlList } from '../Upload/DriveUploadTypes';
 
 export type SystemFileType = 'Standard' | 'Comment';
 
-export interface FileMetadata {
+export interface FileMetadata<T = string> {
   created: number;
   globalTransitId?: string;
   updated: number;
   contentType: string;
-  payloadIsEncrypted: boolean;
+  isEncrypted: boolean;
   senderOdinId: string;
-  payloadSize: number;
-  originalRecipientList: string[];
-  appData: AppFileMetaData;
+  appData: AppFileMetaData<T>;
   reactionPreview?: ReactionPreview;
   versionTag: string;
+
+  payloads: PayloadDescriptor[];
 }
 
 export interface ServerMetaData {
@@ -27,18 +27,24 @@ export interface ImageSize {
   pixelWidth: number;
 }
 
-export interface ThumbSize extends ImageSize {
-  contentType: ImageContentType;
-}
+export type ThumbSize = ImageSize;
 
 // Thumb that gets embedded; E.g: previewThumbnail
 export interface EmbeddedThumb extends ThumbSize {
+  contentType: ContentType;
   content: string;
 }
 
 // Thumb that gets appended; E.g: additionalThumbnails
 export interface ThumbnailFile extends ThumbSize {
-  payload: Uint8Array;
+  key: string;
+  payload: File | Blob;
+}
+
+export interface PayloadFile {
+  key: string;
+  payload: File | Blob;
+  descriptorContent?: string;
 }
 
 type None = 0;
@@ -47,17 +53,15 @@ type Removed = 2;
 
 export type ArchivalStatus = None | Archived | Removed | number;
 
-export interface AppFileMetaData {
+export interface AppFileMetaData<T = string> {
   fileType: number;
   dataType: number;
   groupId?: string;
   userDate?: number;
   tags: string[] | null;
   uniqueId?: string;
-  contentIsComplete: boolean;
-  jsonContent: string;
+  content: T;
   previewThumbnail?: EmbeddedThumb;
-  additionalThumbnails?: ThumbSize[];
   archivalStatus?: ArchivalStatus;
 }
 
@@ -78,6 +82,8 @@ export type ImageContentType =
   | 'image/gif'
   | 'image/svg+xml';
 
+export type ContentType = ImageContentType | string;
+
 export interface ReactionPreview {
   comments: {
     created: number;
@@ -85,7 +91,7 @@ export interface ReactionPreview {
     fileId: string;
     isEncrypted: boolean;
     odinId: string;
-    jsonContent: string;
+    content: string;
     reactions: { key: string; count: string; reactionContent: string }[];
   }[];
   reactions: Record<string, { key: string; count: string; reactionContent: string }>;
@@ -95,4 +101,23 @@ export interface ReactionPreview {
 export interface TargetDrive {
   alias: string;
   type: string;
+}
+
+export interface PayloadDescriptor {
+  key: string;
+  descriptorContent: string | undefined;
+  contentType: ContentType;
+  bytesWritten: number;
+  lastModified: number;
+  thumbnails: ThumbSize[];
+}
+
+export interface UploadPayloadDescriptor {
+  payloadKey: string;
+  descriptorContent: string | undefined;
+  thumbnails?: ThumbnailDescriptor[];
+}
+
+export interface ThumbnailDescriptor extends ThumbSize {
+  thumbnailKey: string;
 }

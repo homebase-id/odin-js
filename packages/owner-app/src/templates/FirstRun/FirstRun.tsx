@@ -1,7 +1,7 @@
 import { FormEventHandler, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 
-import useAuth from '../../hooks/auth/useAuth';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';

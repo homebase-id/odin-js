@@ -1,5 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { FileQueryParams } from '../../core/DriveData/DriveTypes';
+import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { SecurityGroupType } from '../../core/core';
 import { getChannelDefinitions, getChannelDrive } from '../posts/PostDefinitionProvider';
 import { BlogConfig } from '../posts/PostTypes';

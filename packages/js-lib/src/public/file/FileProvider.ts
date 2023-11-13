@@ -1,22 +1,26 @@
-import { EmbeddedThumb } from '../..';
+import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
-import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/DriveTypes';
-import { base64ToUint8Array, byteArrayToString, uint8ArrayToBase64 } from '../../helpers/helpers';
+import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  tryJsonParse,
+  uint8ArrayToBase64,
+} from '../../helpers/helpers';
 
 export interface ResponseEntry {
   additionalThumbnails?: EmbeddedThumb[];
   header: DriveSearchResult;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload: Record<string, any>;
+  payload: Record<string, any> | undefined;
 }
 
 export type QueryParamsSection = {
   name: string;
   queryParams: FileQueryParams;
   resultOptions: {
-    includeAdditionalThumbnails: boolean;
-    includeJsonContent: boolean;
-    includePayload: boolean;
+    includeHeaderContent: boolean;
+    payloadKeys: string[];
     excludePreviewThumbnail: boolean;
   };
 };
@@ -135,21 +139,29 @@ const convertFileToResponseEntry = async (file: any) => {
   let parsedObj = undefined;
 
   try {
-    // Checking if there is actual content in jsonContent as could be excluded from the static file
     if (
-      file.header.fileMetadata.appData.contentIsComplete &&
-      file.header.fileMetadata.appData.jsonContent.length !== 0
+      file.header.fileMetadata.payloads.filter(
+        (payload: any) => payload.contentType === 'application/json'
+      ).length === 0 &&
+      file.header.fileMetadata.appData.content.length !== 0
     ) {
-      parsedObj = JSON.parse(file.header.fileMetadata.appData.jsonContent);
-    } else if (file.payload) {
-      const bytes = base64ToUint8Array(file.payload);
+      parsedObj = tryJsonParse(file.header.fileMetadata.appData.content);
+    } else if (file.payloads.length) {
+      const matchingPayload = file.payloads.find(
+        (payload: PayloadDescriptor) =>
+          payload.contentType === 'application/json' && payload.key === DEFAULT_PAYLOAD_KEY
+      );
+
+      const bytes = base64ToUint8Array(matchingPayload.data);
       const json = byteArrayToString(bytes);
 
-      parsedObj = JSON.parse(json);
+      parsedObj = tryJsonParse(json);
     }
   } catch (ex) {
     console.warn(ex);
   }
+
+  delete file.payloads;
 
   return {
     ...file,

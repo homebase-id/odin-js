@@ -2,7 +2,7 @@ import { ApiType, DotYouClient, DrivePermissionType } from '@youfoundation/js-li
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useVerifyToken from './useVerifyToken';
+import { useVerifyToken } from './useVerifyToken';
 import {
   logout as logoutYouauth,
   finalizeAuthentication as finalizeAuthenticationYouAuth,
@@ -52,7 +52,7 @@ export const drives = [
     p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
 ];
-export const appName = 'Odin - Feed';
+export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
 
 export const APP_SHARED_SECRET = 'APSS';
@@ -63,7 +63,7 @@ const hasSharedSecret = () => {
   return !!raw;
 };
 
-const useAuth = () => {
+export const useAuth = () => {
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret() ? 'unknown' : 'anonymous');
@@ -192,5 +192,3 @@ export const useYouAuthAuthorization = () => {
 
   return { getAuthorizationParameters, finalizeAuthorization };
 };
-
-export default useAuth;

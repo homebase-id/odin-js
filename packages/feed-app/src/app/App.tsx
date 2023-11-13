@@ -25,7 +25,7 @@ const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
-import useAuth from '../hooks/auth/useAuth';
+import { useAuth } from '../hooks/auth/useAuth';
 
 export const ROOT_PATH = '';
 const AUTH_PATH = ROOT_PATH + '/auth';

@@ -41,7 +41,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
               }
               to={item.path}
               key={item.key || item.path}
-              end
+              // end
             >
               {item.title}
             </NavLink>

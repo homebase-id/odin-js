@@ -6,6 +6,7 @@ module.exports = {
     '../common-app/src/**/*.{js,jsx,ts,tsx}',
     '../feed-app/src/**/*.{js,jsx,ts,tsx}',
     '../rich-text-editor/src/**/*.{js,jsx,ts,tsx}',
+    '../ui-lib/src/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {

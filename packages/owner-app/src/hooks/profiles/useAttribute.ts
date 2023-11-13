@@ -6,7 +6,7 @@ import {
   saveAttribute,
   removeAttribute,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
@@ -22,7 +22,13 @@ const getListItemCacheKey = (newAttrVm: Attribute) => {
   ];
 };
 
-const useAttribute = ({ profileId, attributeId }: { profileId?: string; attributeId?: string }) => {
+export const useAttribute = ({
+  profileId,
+  attributeId,
+}: {
+  profileId?: string;
+  attributeId?: string;
+}) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
@@ -68,25 +74,23 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
   };
 
   const removeData = async (attribute: AttributeFile) => {
-    if (attribute.fileId) {
+    if (attribute.fileId)
       return await removeAttribute(dotYouClient, attribute.profileId, attribute.fileId);
-    } else {
-      console.error('No FileId provided for removeData');
-    }
+    else console.error('No FileId provided for removeData');
   };
 
   return {
-    fetch: useQuery(
-      ['attribute', profileId, attributeId],
-      () => fetchData(profileId, attributeId),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!profileId && !!attributeId,
-      }
-    ),
-    save: useMutation(saveData, {
+    fetch: useQuery({
+      queryKey: ['attribute', profileId, attributeId],
+      queryFn: () => fetchData(profileId, attributeId),
+
+      refetchOnWindowFocus: false,
+      enabled: !!profileId && !!attributeId,
+    }),
+    save: useMutation({
+      mutationFn: saveData,
       onMutate: async (newAttr) => {
-        await queryClient.cancelQueries(['attribute', newAttr.profileId, newAttr.id]);
+        await queryClient.cancelQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
 
         let typeDefinition = Object.values(AttributeDefinitions).find((def) => {
           return def.type.toString() === newAttr.type;
@@ -144,30 +148,31 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
         if (!newAttr) return;
 
         if (newAttr.id) {
-          queryClient.invalidateQueries(['attribute', newAttr.profileId, newAttr.id]);
+          queryClient.invalidateQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
         } else {
-          queryClient.invalidateQueries(['attribute']);
+          queryClient.invalidateQueries({ queryKey: ['attribute'] });
         }
 
-        queryClient.invalidateQueries(['siteData']);
-        queryClient.invalidateQueries(getListItemCacheKey(newAttr));
+        queryClient.invalidateQueries({ queryKey: ['siteData'] });
+        queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
         if (!_variables.fileId) {
-          queryClient.invalidateQueries(['attributes']);
+          queryClient.invalidateQueries({ queryKey: ['attributes'] });
         }
-        queryClient.invalidateQueries(['attributeVersions', newAttr.profileId, newAttr.type]);
+        queryClient.invalidateQueries({
+          queryKey: ['attributeVersions', newAttr.profileId, newAttr.type],
+        });
       },
       onSuccess: () => {
         publishStaticFiles();
       },
     }),
-    remove: useMutation(removeData, {
+    remove: useMutation({
+      mutationFn: removeData,
       onMutate: async (toRemoveAttr) => {
-        await queryClient.cancelQueries([
-          'attributes',
-          toRemoveAttr.profileId,
-          toRemoveAttr.sectionId,
-        ]);
+        await queryClient.cancelQueries({
+          queryKey: ['attributes', toRemoveAttr.profileId, toRemoveAttr.sectionId],
+        });
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(toRemoveAttr);
@@ -187,8 +192,8 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
       onSettled: (_data, _err, variables) => {
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
-          queryClient.invalidateQueries(['siteData']);
-          queryClient.invalidateQueries(getListItemCacheKey(variables));
+          queryClient.invalidateQueries({ queryKey: ['siteData'] });
+          queryClient.invalidateQueries({ queryKey: getListItemCacheKey(variables) });
 
           publishStaticFiles();
         }, 1000);
@@ -196,5 +201,3 @@ const useAttribute = ({ profileId, attributeId }: { profileId?: string; attribut
     }),
   };
 };
-
-export default useAttribute;

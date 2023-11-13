@@ -2,16 +2,17 @@ import { useMutation } from '@tanstack/react-query';
 import {
   AccessControlList,
   DriveDefinition,
-  getPayload,
+  getContentFromHeaderOrPayload,
   getPayloadBytes,
   queryBatch,
   QueryBatchResponse,
   AppFileMetaData,
   TargetDrive,
   DriveSearchResult,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
 const includeMetadataHeader = true;
 const pageSize = 10;
@@ -30,7 +31,7 @@ export interface importableFile {
   fileMetadata: {
     contentType: string;
     senderOdinId: string;
-    payloadIsEncrypted: boolean;
+    isEncrypted: boolean;
     accessControlList: AccessControlList;
     allowDistribution: boolean;
     appData: AppFileMetaData;
@@ -71,7 +72,7 @@ export const isImportable = (obj: unknown): obj is importable => {
   return true;
 };
 
-const useExport = () => {
+export const useExport = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const getAllFilesOnDrive = async (drive: TargetDrive) => {
@@ -109,16 +110,18 @@ const useExport = () => {
 
     const getPayloadForDsr = async (dsr: DriveSearchResult) => {
       if (dsr.fileMetadata.contentType === 'application/json') {
-        return await getPayload(dotYouClient, targetDrive, dsr, includeMetadataHeader);
+        return await getContentFromHeaderOrPayload(
+          dotYouClient,
+          targetDrive,
+          dsr,
+          includeMetadataHeader
+        );
       } else {
         return (
           (
-            await getPayloadBytes(
-              dotYouClient,
-              targetDrive,
-              dsr.fileId,
-              dsr.sharedSecretEncryptedKeyHeader
-            )
+            await getPayloadBytes(dotYouClient, targetDrive, dsr.fileId, DEFAULT_PAYLOAD_KEY, {
+              keyHeader: dsr.sharedSecretEncryptedKeyHeader,
+            })
           )?.bytes || null
         );
       }
@@ -130,12 +133,12 @@ const useExport = () => {
         fileMetadata: {
           contentType: dsr.fileMetadata.contentType,
           senderOdinId: dsr.fileMetadata.senderOdinId,
-          payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-          allowDistribution: dsr.serverMetadata.allowDistribution,
-          accessControlList: dsr.serverMetadata.accessControlList,
+          isEncrypted: dsr.fileMetadata.isEncrypted,
+          allowDistribution: dsr.serverMetadata?.allowDistribution,
+          accessControlList: dsr.serverMetadata?.accessControlList,
           appData: {
             ...dsr.fileMetadata.appData,
-            jsonContent: undefined,
+            content: undefined,
             previewThumbnail: undefined,
             additionalThumbnails: undefined,
             contentIsComplete: undefined,
@@ -163,8 +166,6 @@ const useExport = () => {
   };
 
   return {
-    exportUnencrypted: useMutation(exportUnencrypted),
+    exportUnencrypted: useMutation({ mutationFn: exportUnencrypted }),
   };
 };
-
-export default useExport;

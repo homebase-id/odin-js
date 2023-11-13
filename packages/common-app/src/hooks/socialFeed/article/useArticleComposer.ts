@@ -1,6 +1,11 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
-import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
+import {
+  PostFile,
+  Article,
+  ChannelDefinition,
+  BlogConfig,
+  NewMediaFile,
+} from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
@@ -10,7 +15,6 @@ export const EMPTY_POST: Article = {
   authorOdinId: '',
   channelId: BlogConfig.PublicChannel.channelId,
   slug: '',
-  dateUnixTime: 0,
   type: 'Article',
   caption: '',
   body: '',
@@ -44,6 +48,8 @@ export const useArticleComposer = ({
   } = usePost();
 
   const [postFile, setPostFile] = useState<PostFile<Article>>({
+    userDate: new Date().getTime(),
+    isDraft: true,
     ...serverData?.activeBlog,
     content: {
       ...EMPTY_POST,
@@ -54,6 +60,8 @@ export const useArticleComposer = ({
       type: 'Article',
     },
   });
+
+  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined | null>(null);
 
   const [channel, setChannel] = useState<ChannelDefinition>(
     serverData?.activeChannel && postFile.content.channelId === serverData.activeChannel.channelId
@@ -75,9 +83,7 @@ export const useArticleComposer = ({
     }
   }, [serverData]);
 
-  const isPublished =
-    serverData?.activeBlog?.acl &&
-    serverData?.activeBlog?.acl?.requiredSecurityGroup !== SecurityGroupType.Owner;
+  const isPublished = !postFile.isDraft;
 
   const isValidPost = (postFile: PostFile<Article>) => {
     return (
@@ -107,26 +113,32 @@ export const useArticleComposer = ({
     // Build postFile
     const toPostFile: PostFile<Article> = {
       ...dirtyPostFile,
-      versionTag: undefined, // VersionTag is set undefined so we always reset it to the latest
+      userDate: new Date().getTime(), // Set current date as userDate of the post
       content: {
         ...dirtyPostFile.content,
-        dateUnixTime: new Date().getTime(), // Set current date as userDate of the post
         id: dirtyPostFile.content.id ?? getNewId(), // Generate new id if there is none
         slug: slugify(dirtyPostFile.content.caption), // Reset slug to match caption each time
         channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed
         readingTimeStats: getReadingTime(dirtyPostFile.content.body),
       },
       isDraft: !isPublish || isUnpublish,
-      acl:
-        targetChannel.acl && (isPublish || isPublished) && !isUnpublish
-          ? { ...targetChannel.acl }
-          : { requiredSecurityGroup: SecurityGroupType.Owner },
+      acl: targetChannel.acl,
+      // TODO: ACL is not changed, as it impacts the encrytped state...
+      // targetChannel.acl && (isPublish || isPublished) && !isUnpublish
+      // { ...targetChannel.acl }
+      // : { requiredSecurityGroup: SecurityGroupType.Owner },
     };
 
     // Save and process result
     const uploadResult = await savePost({
-      blogFile: toPostFile,
+      postFile: toPostFile,
       channelId: targetChannel.channelId,
+      mediaFiles:
+        primaryMediaFile !== null
+          ? primaryMediaFile === undefined
+            ? []
+            : [primaryMediaFile]
+          : undefined,
     });
 
     // TODO: Move to component as it has page context?
@@ -141,11 +153,14 @@ export const useArticleComposer = ({
       );
     }
 
-    if (uploadResult && !dirtyPostFile.fileId) {
+    if (uploadResult)
       setPostFile((oldPostFile) => {
-        return { ...oldPostFile, fileId: uploadResult.file.fileId };
+        return {
+          ...oldPostFile,
+          fileId: uploadResult.file.fileId,
+          versionTag: uploadResult.newVersionTag,
+        };
       });
-    }
   };
 
   const doRemovePost = async () => {
@@ -187,10 +202,12 @@ export const useArticleComposer = ({
     postFile,
     isValidPost,
     isPublished,
+    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
+    setPrimaryMediaFile,
 
     // Status
     saveStatus: savePostStatus,

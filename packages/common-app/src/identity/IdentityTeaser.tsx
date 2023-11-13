@@ -14,7 +14,8 @@ export const IdentityTeaser = ({
   isBorderLess?: boolean;
   children?: ReactNode;
 }) => {
-  const { isOwner, getIdentity } = useDotYouClient();
+  const { getIdentity, getDotYouClient } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
   const identity = getIdentity();
   const [isInView, setIsInView] = useState(false);
   const wrapperRef = useRef<HTMLAnchorElement>(null);
@@ -24,11 +25,13 @@ export const IdentityTeaser = ({
     odinId: isInView ? odinId : undefined,
   }).fetch;
 
-  const { data: isConnected } = useIsConnected(isInView && isOwner ? odinId : undefined);
+  // isLocal when both the logged in user and the api host is the same
+  const isLocal = identity === dotYouClient.getIdentity();
+  const { data: isConnected } = useIsConnected(isInView && isLocal ? odinId : undefined);
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const imageSizeClass = size === 'sm' ? 'h-10 w-10 mr-2' : 'h-16 w-16 mr-4';
-  const link = `https://${odinId}${isConnected ? '?youauth-logon=' + identity : ''}`;
+  const link = `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`;
 
   return (
     <a

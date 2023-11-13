@@ -8,7 +8,7 @@ import {
   OwnerName,
   useSiteData,
 } from '@youfoundation/common-app';
-import useAuth from '../../../../hooks/auth/useAuth';
+import { useAuth } from '../../../../hooks/auth/useAuth';
 
 const Header = () => {
   const { isOwner } = useAuth();
@@ -22,17 +22,19 @@ const Header = () => {
         }`}
       >
         <Link className="title-font flex items-center font-medium" to={HOME_ROOT_PATH}>
-          {owner?.profileImageId ? (
+          {owner?.profileImageFileKey ? (
             <AuthorImage className="h-8 w-8 rounded-full lg:h-[3rem] lg:w-[3rem]" />
           ) : null}
           <span className={`ml-3 hidden text-xl font-normal sm:block`}>
             <OwnerName />
           </span>
         </Link>
-        <nav className="ml-auto flex flex-wrap items-center justify-center text-base">
-          <DarkModeToggle className="mr-2" />
-          <ProfileNav />
-        </nav>
+        {isOwner ? null : (
+          <nav className="ml-auto flex flex-wrap items-center justify-center text-base">
+            <DarkModeToggle className="mr-2" />
+            <ProfileNav />
+          </nav>
+        )}
       </div>
     </header>
   );

@@ -1,5 +1,10 @@
 import { isLocalStorageAvailable } from '../../helpers/BrowserUtil';
-import { base64ToUint8Array, byteArrayToString, uint8ArrayToBase64 } from '../../helpers/DataUtil';
+import {
+  base64ToUint8Array,
+  byteArrayToString,
+  tryJsonParse,
+  uint8ArrayToBase64,
+} from '../../helpers/DataUtil';
 
 const STORAGE_KEY = 'ecc-pk';
 const keyParams: EcKeyGenParams = {
@@ -56,7 +61,7 @@ export const getEccSharedSecret = async (
 };
 
 export const importRemotePublicEccKey = async (publicKey: string) => {
-  const publicKeyJWK = JSON.parse(byteArrayToString(base64ToUint8Array(publicKey)));
+  const publicKeyJWK = tryJsonParse<any>(byteArrayToString(base64ToUint8Array(publicKey)));
   return await crypto.subtle.importKey(
     'jwk',
     publicKeyJWK,

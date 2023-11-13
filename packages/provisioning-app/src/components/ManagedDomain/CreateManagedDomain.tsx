@@ -1,8 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { domainFromPrefixAndApex } from '../../helpers/common';
 import { t } from '../../helpers/i18n/dictionary';
-import ManagedDomainProvisionState from '../../hooks/managedDomain/ManagedDomainProvisionState';
-import { useCreateManagedDomain } from '../../hooks/managedDomain/useManagedDomain';
+import {
+  ManagedDomainProvisionState,
+  useCreateManagedDomain,
+} from '../../hooks/managedDomain/useManagedDomain';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { Arrow, ArrowLeft } from '@youfoundation/common-app';
@@ -23,7 +25,7 @@ const CreateManagedDomain = ({
       status: createManagedDomainStatus,
       mutate: createManagedDomain,
       error: createManagedDomainError,
-      isLoading,
+      isPending,
     },
   } = useCreateManagedDomain();
 
@@ -57,7 +59,7 @@ const CreateManagedDomain = ({
           <ActionButton
             className="h-[2.66rem]"
             icon={Arrow}
-            isDisabled={isLoading}
+            isDisabled={isPending}
             onClick={() => doCreateManagedDomain()}
           >
             {t('Create my identity')}
@@ -65,7 +67,7 @@ const CreateManagedDomain = ({
           <ActionButton
             className="mr-auto h-[2.66rem]"
             icon={ArrowLeft}
-            isDisabled={isLoading}
+            isDisabled={isPending}
             onClick={() => doCancel()}
             type="secondary"
           >

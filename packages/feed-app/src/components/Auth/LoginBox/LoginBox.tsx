@@ -7,7 +7,9 @@ import { ROOT_PATH } from '../../../app/App';
 
 const useParams = (returnUrl: string) => {
   const { getAuthorizationParameters } = useYouAuthAuthorization();
-  return useQuery(['params'], () => getAuthorizationParameters(returnUrl), {
+  return useQuery({
+    queryKey: ['params'],
+    queryFn: () => getAuthorizationParameters(returnUrl),
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

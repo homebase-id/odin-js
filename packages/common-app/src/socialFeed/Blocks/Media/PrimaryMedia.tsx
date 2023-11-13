@@ -1,10 +1,14 @@
-import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
+import { getChannelDrive, MediaFile } from '@youfoundation/js-lib/public';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
 
 export const PrimaryMedia = ({
   odinId,
-  post,
+  primaryMediaFile,
+  fileId,
+  globalTransitId,
+  lastModified,
+  channelId,
   className,
   fit,
   previewThumbnail,
@@ -13,7 +17,11 @@ export const PrimaryMedia = ({
   clickToLoad,
 }: {
   odinId?: string;
-  post: PostContent;
+  primaryMediaFile: MediaFile;
+  fileId: string;
+  globalTransitId?: string;
+  lastModified: number | undefined;
+  channelId: string;
   className?: string;
   fit?: 'cover' | 'contain';
   previewThumbnail?: EmbeddedThumb;
@@ -25,13 +33,19 @@ export const PrimaryMedia = ({
     onClick && onClick(e);
   };
 
+  // If the primary media fileId is set, then the media isn't stored on the postFile itself
+  const correctedGlobalTransitId = primaryMediaFile?.fileId ? undefined : globalTransitId;
+
   return (
     <div onClick={doNavigate}>
-      {post.primaryMediaFile?.type === 'image' ? (
+      {primaryMediaFile?.type === 'image' ? (
         <Image
           odinId={odinId}
-          targetDrive={getChannelDrive(post.channelId)}
-          fileId={post.primaryMediaFile?.fileId}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={primaryMediaFile?.fileId || fileId}
+          globalTransitId={correctedGlobalTransitId}
+          lastModified={lastModified}
+          fileKey={primaryMediaFile?.fileKey}
           className={className}
           previewThumbnail={previewThumbnail}
           fit={fit}
@@ -40,8 +54,11 @@ export const PrimaryMedia = ({
       ) : clickToLoad ? (
         <VideoClickToLoad
           odinId={odinId}
-          targetDrive={getChannelDrive(post.channelId)}
-          fileId={post.primaryMediaFile?.fileId}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={primaryMediaFile?.fileId || fileId}
+          globalTransitId={correctedGlobalTransitId}
+          lastModified={lastModified}
+          fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
           previewThumbnail={previewThumbnail}
@@ -51,8 +68,11 @@ export const PrimaryMedia = ({
       ) : (
         <Video
           odinId={odinId}
-          targetDrive={getChannelDrive(post.channelId)}
-          fileId={post.primaryMediaFile?.fileId}
+          targetDrive={getChannelDrive(channelId)}
+          fileId={primaryMediaFile?.fileId || fileId}
+          globalTransitId={correctedGlobalTransitId}
+          lastModified={lastModified}
+          fileKey={primaryMediaFile?.fileKey}
           className={className}
           probablyEncrypted={probablyEncrypted}
         />

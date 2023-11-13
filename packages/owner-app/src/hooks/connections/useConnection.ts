@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
 
 export const useConnection = ({ odinId }: { odinId?: string }) => {
@@ -10,11 +10,11 @@ export const useConnection = ({ odinId }: { odinId?: string }) => {
   };
 
   return {
-    fetch: useQuery(['connectionInfo', odinId], () => doGetConnectionInfo(odinId as string), {
+    fetch: useQuery({
+      queryKey: ['connectionInfo', odinId],
+      queryFn: () => doGetConnectionInfo(odinId as string),
       refetchOnWindowFocus: false,
       enabled: !!odinId,
     }),
   };
 };
-
-export default useConnection;

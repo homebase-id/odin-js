@@ -52,10 +52,12 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     if (postFile) return { activeBlog: postFile, activeChannel: channel };
   };
 
-  return useQuery(['blog', blogSlug, channelSlug || channelId], () => fetchBlog({ blogSlug }), {
+  return useQuery({
+    queryKey: ['blog', blogSlug, channelSlug || channelId],
+    queryFn: () => fetchBlog({ blogSlug }),
     refetchOnMount: false,
     enabled: channelFetched && !!blogSlug,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     staleTime: isOwner ? 0 : 10 * 60 * 1000,
   });
 };

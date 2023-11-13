@@ -4,7 +4,7 @@ import {
   getProfileAttributes,
   removeAttribute,
 } from '@youfoundation/js-lib/profile';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
 import { AccessControlList } from '@youfoundation/js-lib/core';
 
@@ -18,7 +18,13 @@ export interface NewAttributeVm extends Omit<AttributeFile, 'acl'> {
   isNew: true;
 }
 
-const useAttributes = ({ profileId, sectionId }: { profileId?: string; sectionId?: string }) => {
+export const useAttributes = ({
+  profileId,
+  sectionId,
+}: {
+  profileId?: string;
+  sectionId?: string;
+}) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
@@ -66,23 +72,22 @@ const useAttributes = ({ profileId, sectionId }: { profileId?: string; sectionId
   };
 
   return {
-    fetch: useQuery(
-      ['attributes', profileId, sectionId],
-      () => fetchData(profileId as string, sectionId as string),
-      {
-        refetchOnWindowFocus: false,
-        enabled: !!profileId && !!sectionId,
-      }
-    ),
-    removeAttributes: useMutation(removeAttributes, {
+    fetch: useQuery({
+      queryKey: ['attributes', profileId, sectionId],
+      queryFn: () => fetchData(profileId as string, sectionId as string),
+      refetchOnWindowFocus: false,
+      enabled: !!profileId && !!sectionId,
+    }),
+    removeAttributes: useMutation({
+      mutationFn: removeAttributes,
       onError: (err) => {
         console.error(err);
       },
       onSettled: (data, err, variables) => {
-        queryClient.invalidateQueries(['attributes', variables.profileId, variables.sectionId]);
+        queryClient.invalidateQueries({
+          queryKey: ['attributes', variables.profileId, variables.sectionId],
+        });
       },
     }),
   };
 };
-
-export default useAttributes;

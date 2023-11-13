@@ -1,21 +1,27 @@
-import { DotYouClient } from '../DotYouClient';
+import { DotYouClient } from '../../DotYouClient';
 
-import { TransitInstructionSet } from '../../transit/TransitData/TransitTypes';
-import { KeyHeader } from './DriveTypes';
+import { TransitInstructionSet } from '../../../transit/TransitData/TransitTypes';
+import { KeyHeader } from '../Drive/DriveTypes';
 import {
   UploadFileMetadata,
   UploadInstructionSet,
   AppendInstructionSet,
   UploadResult,
+  UploadManifest,
 } from './DriveUploadTypes';
-import { encryptWithKeyheader, encryptWithSharedSecret, encryptKeyHeader } from './SecurityHelpers';
+import {
+  encryptWithKeyheader,
+  encryptWithSharedSecret,
+  encryptKeyHeader,
+} from '../SecurityHelpers';
 import {
   jsonStringify64,
   mergeByteArrays,
   uint8ArrayToBase64,
   stringToUint8Array,
-} from '../../helpers/DataUtil';
-import { ThumbnailFile, SystemFileType } from './DriveFileTypes';
+  getRandom16ByteArray,
+} from '../../../helpers/DataUtil';
+import { ThumbnailFile, SystemFileType, PayloadFile } from '../File/DriveFileTypes';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -50,17 +56,14 @@ export const encryptMetaData = async (
   metadata: UploadFileMetadata,
   keyHeader: KeyHeader | undefined
 ) => {
-  return keyHeader && metadata.appData.jsonContent
+  return keyHeader && metadata.appData.content
     ? {
         ...metadata,
         appData: {
           ...metadata.appData,
-          jsonContent: metadata.appData.jsonContent
+          content: metadata.appData.content
             ? uint8ArrayToBase64(
-                await encryptWithKeyheader(
-                  stringToUint8Array(metadata.appData.jsonContent),
-                  keyHeader
-                )
+                await encryptWithKeyheader(stringToUint8Array(metadata.appData.content), keyHeader)
               )
             : null,
         },
@@ -68,11 +71,30 @@ export const encryptMetaData = async (
     : metadata;
 };
 
+export const buildManifest = (
+  payloads: PayloadFile[] | undefined,
+  thumbnails: ThumbnailFile[] | undefined
+): UploadManifest => {
+  return {
+    PayloadDescriptors: payloads?.map((payload) => ({
+      payloadKey: payload.key,
+      descriptorContent: payload.descriptorContent,
+      thumbnails: thumbnails
+        ?.filter((thumb) => thumb.key === payload.key)
+        .map((thumb) => ({
+          thumbnailKey: thumb.key + thumb.pixelWidth,
+          pixelWidth: thumb.pixelWidth,
+          pixelHeight: thumb.pixelHeight,
+        })),
+    })),
+  };
+};
+
 export const buildDescriptor = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet | TransitInstructionSet,
-  encryptedMetaData: UploadFileMetadata
+  metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
   return await encryptWithSharedSecret(
     dotYouClient,
@@ -82,47 +104,48 @@ export const buildDescriptor = async (
         keyHeader ?? EMPTY_KEY_HEADER,
         instructions.transferIv
       ),
-      fileMetadata: encryptedMetaData,
+      fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
     instructions.transferIv
   );
 };
 
+export const DEFAULT_PAYLOAD_KEY = 'dflt_key';
+
 export const buildFormData = async (
   instructionSet: UploadInstructionSet | TransitInstructionSet | AppendInstructionSet,
   encryptedDescriptor: Uint8Array | undefined,
-  payload: Uint8Array | Blob | File | undefined,
+  payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   keyHeader: KeyHeader | undefined
 ) => {
   const data = new FormData();
-  data.append('instructions', toBlob(instructionSet));
+  const instructionType =
+    'targetFile' in instructionSet ? 'payloadUploadInstructions' : 'instructions';
+  data.append(instructionType, toBlob(instructionSet));
   if (encryptedDescriptor) data.append('metaData', new Blob([encryptedDescriptor]));
 
-  if (!payload) {
-    data.append('payload', new Blob([]));
-  } else {
-    data.append(
-      'payload',
-      payload instanceof File || payload instanceof Blob ? payload : new Blob([payload])
-    );
+  if (payloads) {
+    for (let i = 0; i < payloads.length; i++) {
+      const payload = payloads[i];
+
+      const encryptedPayload = keyHeader
+        ? await encryptWithKeyheader(payload.payload, keyHeader)
+        : payload.payload;
+
+      data.append('payload', encryptedPayload, payload.key);
+    }
   }
 
   if (thumbnails) {
     for (let i = 0; i < thumbnails.length; i++) {
       const thumb = thumbnails[i];
-      const filename = `${thumb.pixelWidth}x${thumb.pixelHeight}`;
 
-      const thumbnailBytes = keyHeader
+      const encryptedThumb = keyHeader
         ? await encryptWithKeyheader(thumb.payload, keyHeader)
         : thumb.payload;
-      data.append(
-        'thumbnail',
-        new Blob([thumbnailBytes], {
-          type: thumb.contentType,
-        }),
-        filename
-      );
+
+      data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);
     }
   }
 
@@ -166,12 +189,12 @@ export const pureAppend = async (
   data: FormData,
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void
-) => {
+): Promise<{ newVersionTag: string }> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
     headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
   });
-  const url = '/drive/files/attachments/upload';
+  const url = '/drive/files/uploadpayload';
 
   const config = {
     headers: {
@@ -200,8 +223,4 @@ export const GenerateKeyHeader = (): KeyHeader => {
     iv: getRandom16ByteArray(),
     aesKey: getRandom16ByteArray(),
   };
-};
-
-export const getRandom16ByteArray = (): Uint8Array => {
-  return crypto.getRandomValues(new Uint8Array(16));
 };

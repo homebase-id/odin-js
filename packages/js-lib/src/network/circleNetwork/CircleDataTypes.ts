@@ -1,4 +1,4 @@
-import { PermissionedDrive, PermissionSet } from '../../core/DriveData/DriveTypes';
+import { PermissionedDrive, PermissionSet } from '../../core/DriveData/Drive/DriveTypes';
 
 export interface ConnectionRequestHeader {
   recipient: string;

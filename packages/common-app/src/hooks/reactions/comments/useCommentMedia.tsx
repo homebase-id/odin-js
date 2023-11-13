@@ -7,10 +7,12 @@ export const useCommentMedia = ({
   odinId,
   targetDrive,
   fileId,
+  fileKey,
 }: {
-  odinId?: string;
-  targetDrive?: TargetDrive;
-  fileId?: string;
+  odinId: string | undefined;
+  targetDrive: TargetDrive | undefined;
+  fileId: string | undefined;
+  fileKey: string | undefined;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
@@ -18,14 +20,14 @@ export const useCommentMedia = ({
     odinId,
     targetDrive,
     fileId,
+    fileKey,
   }: {
-    odinId?: string;
-    targetDrive?: TargetDrive;
-    fileId?: string;
+    odinId: string | undefined;
+    targetDrive: TargetDrive | undefined;
+    fileId: string | undefined;
+    fileKey: string | undefined;
   }) => {
-    if (!odinId || !targetDrive || !fileId) {
-      return '';
-    }
+    if (!odinId || !targetDrive || !fileId || !fileKey) return null;
 
     const isLocal = odinId === dotYouClient.getIdentity();
 
@@ -34,6 +36,7 @@ export const useCommentMedia = ({
           dotYouClient,
           targetDrive,
           fileId,
+          fileKey,
           {
             pixelWidth: 250,
             pixelHeight: 250,
@@ -46,6 +49,7 @@ export const useCommentMedia = ({
           odinId,
           targetDrive,
           fileId,
+          fileKey,
           {
             pixelWidth: 250,
             pixelHeight: 250,
@@ -56,17 +60,12 @@ export const useCommentMedia = ({
   };
 
   return {
-    fetch: useQuery(
-      ['comment-media', odinId, targetDrive?.alias, fileId],
-      () => fetch({ odinId, targetDrive, fileId }),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        onError: (er) => {
-          console.log(er);
-        },
-        enabled: !!odinId && !!targetDrive && !!fileId,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['comment-media', odinId, targetDrive?.alias, fileId],
+      queryFn: () => fetch({ odinId, targetDrive, fileId, fileKey }),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      enabled: !!odinId && !!targetDrive && !!fileId,
+    }),
   };
 };

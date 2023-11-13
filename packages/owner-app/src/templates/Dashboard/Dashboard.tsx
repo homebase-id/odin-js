@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
-import useApps from '../../hooks/apps/useApps';
+import { useApps } from '../../hooks/apps/useApps';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
   usePendingConnections,
@@ -16,19 +16,19 @@ import { useSocialFeed } from '@youfoundation/common-app';
 
 const About = {
   circles: (
-    <p>
+    <>
       Circles are groups of members that share the same permissions. You can name them based on
       which social circle your connections belong (eg: family, friends, co-workers, ...). Or
       anything else that works for you
-    </p>
+    </>
   ),
   apps: (
-    <p>
+    <>
       Apps are applications that have been granted access to one or more of your drives. They are
       able to access that information on your behalf so do make sure when registering new apps on
       your identity that they don&apos;t request any drive access that you don&apos;t feel
       comfortable with.
-    </p>
+    </>
   ),
 };
 
@@ -95,8 +95,12 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                 <EmbeddedPostContent
                   content={{
                     ...post.content,
+                    userDate: post.userDate,
+                    lastModified: post.lastModified,
                     permalink: '',
                     previewThumbnail: post.previewThumbnail,
+                    fileId: post.fileId as string,
+                    globalTransitId: post.globalTransitId,
                   }}
                 />
               </div>

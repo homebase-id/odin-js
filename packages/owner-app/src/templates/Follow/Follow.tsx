@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import { useMatch } from 'react-router-dom';
+import { useRef } from 'react';
+import { useMatch, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import IdentityIFollowEditDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityIFollowEditDialog';
 import {
   ActionGroup,
@@ -14,7 +14,7 @@ import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import useIdentityIFollow from '../../hooks/follow/useIdentityIFollow';
+import { useIdentityIFollow } from '../../hooks/follow/useIdentityIFollow';
 import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -22,7 +22,7 @@ import Submenu from '../../components/SubMenu/SubMenu';
 import { useConnectionActions } from '../../hooks/connections/useConnectionActions';
 
 const Follow = () => {
-  const followersMatch = useMatch({ path: 'owner/follow/followers' });
+  const followersMatch = useMatch({ path: 'owner/follow/followers/*' });
 
   return (
     <>
@@ -47,6 +47,9 @@ const Follow = () => {
 };
 
 const Following = () => {
+  const navigate = useNavigate();
+  const { toFollowKey } = useParams();
+
   const {
     fetch: { data: followingPages, isLoading: isFollowingLoading, hasNextPage, fetchNextPage },
   } = useFollowingInfinite({ pageSize: 10 });
@@ -60,21 +63,38 @@ const Following = () => {
     true
   );
 
+  const [searchParams] = useSearchParams();
+  const channelsFromQueryString = searchParams.get('chnl')?.split(',') || undefined;
+
   return (
     <>
-      {isFollowingLoading ? (
-        <></>
-      ) : following?.length ? (
+      {isFollowingLoading ? null : following?.length ? (
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {following.map((odinId) => {
             if (!odinId) return null;
-            return <FollowingIdentity odinId={odinId} key={odinId} />;
+            return (
+              <FollowingIdentity
+                odinId={odinId}
+                key={odinId}
+                onEdit={() => navigate(`/owner/follow/following/${odinId}`)}
+              />
+            );
           })}
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
         <SubtleMessage>{t("You're not following anyone")}</SubtleMessage>
       )}
+
+      {toFollowKey ? (
+        <IdentityIFollowEditDialog
+          odinId={toFollowKey}
+          isOpen={!!toFollowKey}
+          onConfirm={() => navigate(`/owner/follow/following`)}
+          onCancel={() => navigate(`/owner/follow/following`)}
+          defaultValues={toFollowKey ? channelsFromQueryString : undefined}
+        />
+      ) : null}
     </>
   );
 };
@@ -96,6 +116,9 @@ const Followers = () => {
     true
   );
 
+  const { followerKey } = useParams();
+  const navigate = useNavigate();
+
   return (
     <>
       {isFollowersLoading ? (
@@ -104,20 +127,33 @@ const Followers = () => {
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {followers.map((odinId) => {
             if (!odinId) return null;
-            return <FollowIdentity odinId={odinId} key={odinId} />;
+            return (
+              <FollowIdentity
+                odinId={odinId}
+                key={odinId}
+                onEdit={() => navigate(`/owner/follow/followers/${odinId}`)}
+              />
+            );
           })}
           <div ref={loadMoreRef} key="load-more" className="h-1 w-full"></div>
         </div>
       ) : (
         <SubtleMessage>{t("You don't have any followers")}</SubtleMessage>
       )}
+      {followerKey ? (
+        <IdentityThatFollowsDialog
+          odinId={followerKey}
+          isOpen={!!followerKey}
+          onConfirm={() => navigate(`/owner/follow/followers`)}
+          onCancel={() => navigate(`/owner/follow/followers`)}
+        />
+      ) : null}
     </>
   );
 };
 
-const FollowIdentity = ({ odinId }: { odinId: string }) => {
+const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: block } = useConnectionActions().block;
-  const [isShowDetails, setIsDetails] = useState(false);
 
   return (
     <>
@@ -130,7 +166,7 @@ const FollowIdentity = ({ odinId }: { odinId: string }) => {
               onClick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setIsDetails(true);
+                onEdit();
               },
               icon: Eye,
               label: t('Details'),
@@ -157,21 +193,12 @@ const FollowIdentity = ({ odinId }: { odinId: string }) => {
           ...
         </ActionGroup>
       </IdentityTeaser>
-      {isShowDetails ? (
-        <IdentityThatFollowsDialog
-          odinId={odinId}
-          isOpen={isShowDetails}
-          onConfirm={() => setIsDetails(false)}
-          onCancel={() => setIsDetails(false)}
-        />
-      ) : null}
     </>
   );
 };
 
-const FollowingIdentity = ({ odinId }: { odinId: string }) => {
+const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: unfollow } = useIdentityIFollow({ odinId }).unfollow;
-  const [isEdit, setIsEdit] = useState(false);
 
   return (
     <>
@@ -184,7 +211,7 @@ const FollowingIdentity = ({ odinId }: { odinId: string }) => {
               onClick: (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setIsEdit(true);
+                onEdit();
               },
               icon: Pencil,
               label: t('Edit'),
@@ -209,14 +236,6 @@ const FollowingIdentity = ({ odinId }: { odinId: string }) => {
           ...
         </ActionGroup>
       </IdentityTeaser>
-      {isEdit ? (
-        <IdentityIFollowEditDialog
-          odinId={odinId}
-          isOpen={isEdit}
-          onConfirm={() => setIsEdit(false)}
-          onCancel={() => setIsEdit(false)}
-        />
-      ) : null}
     </>
   );
 };

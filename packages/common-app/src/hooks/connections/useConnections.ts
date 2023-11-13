@@ -27,17 +27,15 @@ export const usePendingConnections = ({
   };
 
   return {
-    fetch: useQuery(
-      ['pendingConnections', pendingPageSize, pendingPage],
-      () => fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
-      {
-        refetchOnWindowFocus: false,
-        refetchOnMount: false,
-        keepPreviousData: true,
-        onError: (err) => console.error(err),
-        enabled: !!pendingPage,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['pendingConnections', pendingPageSize, pendingPage],
+      queryFn: () =>
+        fetchPendingConnections({ pageSize: pendingPageSize, pageNumber: pendingPage }),
+
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      enabled: !!pendingPage,
+    }),
   };
 };
 
@@ -57,16 +55,12 @@ export const useSentConnections = ({
   };
 
   return {
-    fetch: useQuery(
-      ['sentRequests', sentPageSize, sentPage],
-      () => fetchSentRequests({ pageSize: sentPageSize, pageNumber: sentPage }),
-      {
-        refetchOnWindowFocus: false,
-        keepPreviousData: true,
-        onError: (err) => console.error(err),
-        enabled: !!sentPage,
-      }
-    ),
+    fetch: useQuery({
+      queryKey: ['sentRequests', sentPageSize, sentPage],
+      queryFn: () => fetchSentRequests({ pageSize: sentPageSize, pageNumber: sentPage }),
+      refetchOnWindowFocus: false,
+      enabled: !!sentPage,
+    }),
   };
 };
 
@@ -101,16 +95,13 @@ export const useActiveConnections = (
   };
 
   return {
-    fetch: useInfiniteQuery(
-      ['activeConnections', activePageSize, activePage],
-      ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
-      {
-        getNextPageParam: (lastPage) =>
-          (lastPage.results?.length >= activePageSize && lastPage.cursor) ?? undefined,
-        refetchOnWindowFocus: false,
-        keepPreviousData: true,
-        onError: (err) => console.error(err),
-      }
-    ),
+    fetch: useInfiniteQuery({
+      queryKey: ['activeConnections', activePageSize, activePage],
+      initialPageParam: undefined as number | undefined,
+      queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
+      getNextPageParam: (lastPage) =>
+        lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
+      refetchOnWindowFocus: false,
+    }),
   };
 };

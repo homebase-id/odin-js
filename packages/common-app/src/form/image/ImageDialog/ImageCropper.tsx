@@ -3,12 +3,11 @@ import './cropper.css';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { t, useDebounce } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import { ImageContentType } from '@youfoundation/js-lib/core';
 
 interface ImageCropperProps {
   imageUrl: string;
   expectedAspectRatio?: number;
-  onChange?: (imageData: { bytes: Uint8Array; type: ImageContentType } | undefined) => void;
+  onChange?: (imageData: Blob | undefined) => void;
 }
 
 export interface CropperRef extends HTMLImageElement {
@@ -19,7 +18,7 @@ const OUTPUT_MIME_TYPE = 'image/webp';
 
 export const GetCroppedData = (
   cropperRef: React.RefObject<CropperRef>
-): Promise<{ bytes: Uint8Array; type: ImageContentType } | undefined> => {
+): Promise<Blob | undefined> => {
   return new Promise((resolve) => {
     const imageElement = cropperRef?.current;
     const cropper = imageElement?.cropper;
@@ -32,10 +31,7 @@ export const GetCroppedData = (
     cropper.getCroppedCanvas().toBlob((blob) => {
       if (!blob) return;
 
-      new Blob([blob], { type: OUTPUT_MIME_TYPE }).arrayBuffer().then((buffer) => {
-        const contentByteArray = new Uint8Array(buffer);
-        resolve({ bytes: contentByteArray, type: OUTPUT_MIME_TYPE });
-      });
+      resolve(blob);
     }, OUTPUT_MIME_TYPE);
   });
 };

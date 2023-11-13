@@ -28,29 +28,24 @@ export const useEmojiSummary = ({
   };
 
   return {
-    fetch: useQuery(
-      [
+    fetch: useQuery({
+      queryKey: [
         'emojis-summary',
         context.authorOdinId,
         context.channelId,
         context.target.fileId,
         context.target.globalTransitId,
       ],
-      () => fetch(context),
-      {
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        staleTime: 1000 * 30, // 30 seconds
-        cacheTime: Infinity,
-        onError: (er) => {
-          console.log(er);
-        },
-        initialData: reactionPreview,
-        enabled:
-          !!context.authorOdinId &&
-          !!context.channelId &&
-          (!!context.target.globalTransitId || !!context.target.fileId),
-      }
-    ),
+      queryFn: () => fetch(context),
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 30, // 30 seconds
+      gcTime: Infinity,
+      initialData: reactionPreview,
+      enabled:
+        !!context.authorOdinId &&
+        !!context.channelId &&
+        (!!context.target.globalTransitId || !!context.target.fileId),
+    }),
   };
 };

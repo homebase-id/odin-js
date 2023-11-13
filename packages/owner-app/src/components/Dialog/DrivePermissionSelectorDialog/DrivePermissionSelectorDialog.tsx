@@ -4,7 +4,7 @@ import { t, ActionButton, ActionButtonState, Arrow } from '@youfoundation/common
 import { usePortal } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
-import useDrives from '../../../hooks/drives/useDrives';
+import { useDrives } from '../../../hooks/drives/useDrives';
 import DrivePermissionSelector from '../../Form/DrivePermissionSelector';
 import { DriveGrant } from '@youfoundation/js-lib/network';
 

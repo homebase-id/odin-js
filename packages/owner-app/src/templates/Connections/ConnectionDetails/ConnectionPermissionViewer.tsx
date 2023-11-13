@@ -13,7 +13,7 @@ import {
 import AppMembershipView from '../../../components/PermissionViews/AppPermissionView/AppPermissionView';
 import DrivePermissionView from '../../../components/PermissionViews/DrivePermissionView/DrivePermissionView';
 import Section from '../../../components/ui/Sections/Section';
-import useApps from '../../../hooks/apps/useApps';
+import { useApps } from '../../../hooks/apps/useApps';
 import { AccessGrant } from '@youfoundation/js-lib/network';
 
 export const ConnectionPermissionViewer = ({
@@ -45,20 +45,22 @@ export const ConnectionPermissionViewer = ({
 
   const driveGrantsWithPermissionTree = getUniqueDrivesWithHighestPermission(grantedDrives)?.map(
     (drive) => {
-      const viaCircles = grantedCircles?.filter((circle) =>
-        circle.driveGrants?.some(
-          (driveGrant) =>
-            driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
-            driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
-        )
+      const viaCircles = grantedCircles?.filter(
+        (circle) =>
+          circle.driveGrants?.some(
+            (driveGrant) =>
+              driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
+              driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
+          )
       );
 
-      const viaApps = grantedApps?.filter((app) =>
-        app.circleMemberPermissionSetGrantRequest.drives?.some(
-          (driveGrant) =>
-            driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
-            driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
-        )
+      const viaApps = grantedApps?.filter(
+        (app) =>
+          app.circleMemberPermissionSetGrantRequest.drives?.some(
+            (driveGrant) =>
+              driveGrant.permissionedDrive.drive.alias === drive.permissionedDrive.drive.alias &&
+              driveGrant.permissionedDrive.drive.type === drive.permissionedDrive.drive.type
+          )
       );
 
       const circleNames = viaCircles?.map((circle) => circle.name) ?? [];

@@ -1,5 +1,5 @@
 import { Label, Input, Select, ActionButton, Times, t, Plus } from '@youfoundation/common-app';
-import useAuth from '../../hooks/auth/useAuth';
+import { useAuth } from '../../hooks/auth/useAuth';
 import { useRef, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';

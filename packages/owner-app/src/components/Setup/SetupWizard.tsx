@@ -45,11 +45,10 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
     const dataToUse = { ...data };
 
     // Set fallback image:
-    if (!data.profile.imageData || !data.profile.imageData.bytes)
-      dataToUse.profile.imageData = {
-        bytes: base64ToUint8Array(fallbackProfileImage(initials)),
+    if (!data.profile.imageData)
+      dataToUse.profile.imageData = new Blob([base64ToUint8Array(fallbackProfileImage(initials))], {
         type: 'image/svg+xml',
-      };
+      });
 
     // Set fallback name:
     if (!data.profile.givenName && !data.profile.surname) {
@@ -85,7 +84,7 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
           <div className="flex flex-row">
             <div className="mx-auto sm:max-w-[15rem]">
               <div className="relative">
-                {!data.profile['imageData']?.bytes ? (
+                {!data.profile['imageData'] ? (
                   <div className="flex aspect-square w-full bg-slate-100 dark:bg-slate-700">
                     {initials?.length ? (
                       <span className="m-auto text-[95px] font-light">

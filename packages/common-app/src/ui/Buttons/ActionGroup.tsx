@@ -59,7 +59,7 @@ export const ActionGroup = ({
       <div
         className={`absolute ${horizontalSpace === 'left' ? 'right-0' : 'left-0'} ${
           verticalSpace === 'top' ? 'bottom-[100%]' : 'top-[100%]'
-        } z-10 w-[12rem] ${
+        } z-20 w-[12rem] ${
           isOpen ? 'max-h-[15rem] border' : 'max-h-0'
         } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
       >

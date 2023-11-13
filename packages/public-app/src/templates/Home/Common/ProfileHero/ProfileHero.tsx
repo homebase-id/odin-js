@@ -18,7 +18,7 @@ import { useState } from 'react';
   /* <div className="relative">
 <div className="mx-auto flex min-h-[15rem] max-w-[1920px] flex-col justify-items-start">
   <Image
-    fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+    fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
     targetDrive={HomePageConfig.HomepageTargetDrive}
     className="mt-auto h-auto w-full"
   />
@@ -31,14 +31,16 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
 
   const targetDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 
-  const showProfileImage = owner?.profileImageId && targetDrive;
+  const showProfileImage = owner?.profileImageFileKey && targetDrive;
 
   return (
     <>
       <section className="bg-background">
         <div className="relative h-[27vh] min-h-[330px]">
           <Image
-            fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageId}
+            fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
+            fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
+            lastModified={(home?.templateSettings as ThemeLinksSettings)?.imageLastModified}
             targetDrive={HomePageConfig.HomepageTargetDrive}
             className="absolute inset-0"
             fit="cover"
@@ -51,9 +53,11 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
                 className="absolute bottom-[-4.5rem] block h-60 w-60 cursor-pointer overflow-hidden rounded-full border-4 border-page-background bg-background md:bottom-[-7.5rem]"
               >
                 <Image
-                  fileId={owner?.profileImageId}
+                  fileId={owner?.profileImageFileId}
+                  fileKey={owner?.profileImageFileKey}
                   targetDrive={targetDrive}
                   previewThumbnail={owner?.profileImagePreviewThumbnail}
+                  lastModified={owner?.profileImageLastModified}
                   className="h-full w-full"
                   fit="cover"
                 />
@@ -98,10 +102,12 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
           </div>
         </div>
       </section>
-      {isImageLightboxOpen && owner?.profileImageId ? (
+      {isImageLightboxOpen && owner?.profileImageFileKey && owner.profileImageFileId ? (
         <ImageLightbox
           targetDrive={targetDrive}
-          fileId={owner.profileImageId}
+          fileId={owner.profileImageFileId}
+          fileKey={owner.profileImageFileKey}
+          lastModified={owner.profileImageLastModified}
           onClose={() => setIsImageLightboxOpen(false)}
         />
       ) : null}

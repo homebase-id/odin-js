@@ -1,7 +1,7 @@
 import { DriveDefinition } from '@youfoundation/js-lib/core';
 import { Link } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
-import useDrive from '../../../hooks/drives/useDrive';
+import { useDrive } from '../../../hooks/drives/useDrive';
 import { Arrow } from '@youfoundation/common-app';
 import { HardDrive } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';

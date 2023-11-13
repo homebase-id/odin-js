@@ -1,7 +1,7 @@
 import { SubtleMessage, t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PostChannelTeaser } from '../PostChannelTeaser/PostChannelTeaser';
-import useAuth from '../../../../hooks/auth/useAuth';
+import { useAuth } from '../../../../hooks/auth/useAuth';
 
 const HorizontalPosts = () => {
   const { isAuthenticated, isOwner } = useAuth();

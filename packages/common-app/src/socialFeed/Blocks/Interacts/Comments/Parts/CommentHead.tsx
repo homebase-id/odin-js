@@ -14,12 +14,13 @@ export const CommentHead = ({
   commentBody: string;
   onRemove?: () => void;
 }) => {
-  const { isOwner } = useDotYouClient();
+  const { getIdentity } = useDotYouClient();
+  const isAuthor = authorOdinId === getIdentity();
 
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row justify-space-between">
       <AuthorName odinId={authorOdinId} />
-      {isOwner && setIsEdit && onRemove ? (
+      {isAuthor && setIsEdit && onRemove ? (
         <ActionGroup
           options={[
             { label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil },

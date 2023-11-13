@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import useCheckInvitationCode from '../../hooks/invitationCode/useCheckInvitationCode';
+import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { t } from '../../helpers/i18n/dictionary';
 import { Loader } from '@youfoundation/common-app';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
@@ -77,7 +77,7 @@ const InvitationCodeCheck = () => {
                   className="flex-grow justify-center text-center"
                   type="primary"
                   state={
-                    (status === 'loading' || status === 'error') && invitationCode
+                    (status === 'pending' || status === 'error') && invitationCode
                       ? status
                       : undefined
                   }

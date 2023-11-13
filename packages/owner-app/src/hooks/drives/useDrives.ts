@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { DriveDefinition, getDrives } from '@youfoundation/js-lib/core';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 
-const useDrives = () => {
+export const useDrives = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchAll = async (): Promise<DriveDefinition[]> => {
@@ -12,10 +12,10 @@ const useDrives = () => {
   };
 
   return {
-    fetch: useQuery(['drives'], () => fetchAll(), {
+    fetch: useQuery({
+      queryKey: ['drives'],
+      queryFn: () => fetchAll(),
       refetchOnWindowFocus: false,
     }),
   };
 };
-
-export default useDrives;

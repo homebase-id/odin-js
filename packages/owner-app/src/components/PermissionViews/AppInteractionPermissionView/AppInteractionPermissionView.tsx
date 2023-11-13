@@ -1,5 +1,5 @@
 import AppPermissionView from '../AppPermissionView/AppPermissionView';
-import useApps from '../../../hooks/apps/useApps';
+import { useApps } from '../../../hooks/apps/useApps';
 import { ReactNode } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 

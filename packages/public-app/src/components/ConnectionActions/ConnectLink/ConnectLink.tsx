@@ -6,7 +6,7 @@ import {
   t,
   useSecurityContext,
 } from '@youfoundation/common-app';
-import useAuth from '../../../hooks/auth/useAuth';
+import { useAuth } from '../../../hooks/auth/useAuth';
 import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Persons } from '@youfoundation/common-app';
 
@@ -28,13 +28,12 @@ const ConnectLink = ({ className }: { className: string }) => {
           identity
             ? alreadyConnected
               ? `https://${getIdentity()}/owner/connections/${window.location.host}`
-              : `https://${getIdentity()}/owner/connections/${
-                  window.location.host
-                }?connect-dialog=true`
+              : `https://${getIdentity()}/owner/connections/${window.location.host}/connect`
             : undefined
         }
         onClick={!identity ? () => setIsLogin(true) : undefined}
         icon={alreadyConnected ? Check : Persons}
+        type={alreadyConnected ? 'secondary' : 'primary'}
       >
         {alreadyConnected ? t('Connected') : t('Connect')}
       </ActionLink>
@@ -43,7 +42,7 @@ const ConnectLink = ({ className }: { className: string }) => {
         isOpen={isLogin}
         onCancel={() => setIsLogin(false)}
         title={t('Login required')}
-        returnPath={`${HOME_ROOT_PATH}action?targetPath=${`/owner/connections/${window.location.host}?connect-dialog=true`}`}
+        returnPath={`${HOME_ROOT_PATH}action?targetPath=${`/owner/connections/${window.location.host}/connect`}`}
       >
         {t('You need to login before you can connect')}
       </LoginDialog>

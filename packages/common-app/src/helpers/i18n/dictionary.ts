@@ -16,7 +16,8 @@ const enLocale = [
   ['coverpage', 'Cover Page'],
   ['verticalposts', 'Social Vertical Posts'],
   ['horizontalposts', 'Social Horizontal Posts'],
-  ['related blogs', 'Related blogs'],
+  ['uploading', 'Uploading'],
+  ['encrypting blogs', 'Encrypting'],
 
   // PermssionTypes
   ['readandwrite', 'Read & Write'],

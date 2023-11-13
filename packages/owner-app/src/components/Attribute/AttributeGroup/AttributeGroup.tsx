@@ -6,7 +6,7 @@ import {
   AttributeDefinition,
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
-import useAttributeOrderer, { attributeGroup } from '../../../hooks/profiles/useAttributeOrderer';
+import { useAttributeOrderer, attributeGroup } from '../../../hooks/profiles/useAttributeOrderer';
 import { AttributeVm, NewAttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';

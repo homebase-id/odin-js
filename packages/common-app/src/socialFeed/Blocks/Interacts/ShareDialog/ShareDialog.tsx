@@ -33,7 +33,7 @@ export const ShareDialog = ({
         <span className="">
           {t('Share')}{' '}
           {title ? (
-            <small className="block text-sm text-slate-400">&quot;{title}&quot;</small>
+            <small className="block text-sm text-slate-400 break-words">&quot;{title}&quot;</small>
           ) : null}
         </span>
       }

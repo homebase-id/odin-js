@@ -9,12 +9,13 @@ import {
   ErrorNotification,
   Persons,
   ActionGroup,
+  useDotYouClient,
 } from '@youfoundation/common-app';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import useConnection from '../../../hooks/connections/useConnection';
-import useContact from '../../../hooks/contacts/useContact';
-import { useState } from 'react';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useContact } from '../../../hooks/contacts/useContact';
+import { useEffect, useState } from 'react';
 import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialogs/OutgoingConnectionDialog';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 
@@ -26,10 +27,18 @@ export const IdentityPageMetaAndActions = ({
   setIsEditPermissionActive: (newState: boolean) => void;
 }) => {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(
-    params.get('connect-dialog') === 'true'
-  );
+  const { action } = useParams();
+  const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(action === 'connect');
+  const { getIdentity } = useDotYouClient();
+
+  useEffect(() => {
+    if (action === 'connect' && !isSentConnectionOpen) {
+      const paths = window.location.pathname.split('/');
+      paths.pop();
+      navigate(paths.join('/'));
+    } else if (action !== 'connect' && isSentConnectionOpen)
+      navigate(`${window.location.pathname}/connect`);
+  }, [isSentConnectionOpen]);
 
   // Connection data:
   const {
@@ -99,11 +108,13 @@ export const IdentityPageMetaAndActions = ({
       </>
     ) : null;
 
+  const isConnected = connectionInfo?.status === 'connected';
+  const identity = getIdentity();
   const actionGroupOptions: ActionGroupOptionProps[] = [
     {
       icon: House,
       label: t('Open homepage'),
-      href: `https://${odinId}`,
+      href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
     },
   ];
 

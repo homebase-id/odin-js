@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1-alpha.42",
+  "version": "0.0.1-alpha.46",
   "name": "@youfoundation/ui-lib",
   "author": "YouFoundation",
   "description": "UI-Lib for DotYouCore",
@@ -37,7 +37,7 @@
     "@youfoundation/js-lib": "*"
   },
   "peerDependencies": {
-    "@tanstack/react-query": "^4.28.0",
+    "@tanstack/react-query": "^5.4.3",
     "react": "^18.2.0"
   },
   "devDependencies": {

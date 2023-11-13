@@ -21,7 +21,9 @@ export const useSocialChannel = ({ odinId, channelId }: useSocialChannelProps) =
   };
 
   return {
-    fetch: useQuery(['channel', odinId, channelId], () => fetch({ odinId, channelId }), {
+    fetch: useQuery({
+      queryKey: ['channel', odinId, channelId],
+      queryFn: () => fetch({ odinId, channelId }),
       enabled: !!odinId && !!channelId,
       refetchOnMount: false,
       refetchOnWindowFocus: false,

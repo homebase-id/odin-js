@@ -5,7 +5,7 @@ import {
   Media,
   getChannelDrive,
 } from '@youfoundation/js-lib/public';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Loader,
   Video,
@@ -44,7 +44,7 @@ export const PostImageDetailCard = ({
   login?: () => void;
   rootUrl: string;
 }) => {
-  const [currIndex, setCurrIndex] = useState(attachmentKey ? parseInt(attachmentKey) : 0);
+  const currIndex = attachmentKey ? parseInt(attachmentKey) : 0;
   const post = postFile?.content;
 
   const mediaFileIds =
@@ -64,13 +64,10 @@ export const PostImageDetailCard = ({
       return;
     }
 
-    setCurrIndex(newIndex);
     navigate(`${rootUrl}/${newIndex}`);
   };
 
-  const doClose = () => {
-    onClose();
-  };
+  const doClose = onClose;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -92,9 +89,7 @@ export const PostImageDetailCard = ({
 
     window.addEventListener('keydown', handleKeyDown);
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currIndex]);
 
   const currentMediaFile = mediaFileIds?.[currIndex];
@@ -114,25 +109,35 @@ export const PostImageDetailCard = ({
                 <Image
                   odinId={odinId}
                   className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
-                  fileId={currentMediaFile?.fileId}
+                  fileId={currentMediaFile?.fileId || postFile.fileId}
+                  globalTransitId={postFile.globalTransitId}
+                  fileKey={currentMediaFile?.fileKey}
                   targetDrive={getChannelDrive(post.channelId)}
+                  lastModified={postFile.lastModified}
                   alt="post"
                   fit="contain"
                   previewThumbnail={
                     mediaFileIds?.length === 1 ? postFile.previewThumbnail : undefined
                   }
-                  probablyEncrypted={postFile.payloadIsEncrypted}
+                  probablyEncrypted={postFile.isEncrypted}
+                  key={
+                    (currentMediaFile?.fileId || postFile.fileId || '') +
+                    (currentMediaFile?.fileKey || currIndex)
+                  }
                 />
               ) : (
                 <Video
-                  fileId={currentMediaFile?.fileId}
+                  fileId={currentMediaFile?.fileId || postFile.fileId}
+                  globalTransitId={postFile.globalTransitId}
+                  lastModified={postFile.lastModified}
+                  fileKey={currentMediaFile?.fileKey}
                   className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={
                     mediaFileIds?.length === 1 ? postFile.previewThumbnail : undefined
                   }
                   odinId={odinId}
-                  probablyEncrypted={postFile.payloadIsEncrypted}
+                  probablyEncrypted={postFile.isEncrypted}
                 />
               )}
             </div>

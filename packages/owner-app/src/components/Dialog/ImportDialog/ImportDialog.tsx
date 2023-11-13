@@ -1,16 +1,16 @@
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { byteArrayToString } from '@youfoundation/js-lib/helpers';
+import { byteArrayToString, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { t } from '@youfoundation/common-app';
-import useDrive from '../../../hooks/drives/useDrive';
+import { useDrive } from '../../../hooks/drives/useDrive';
 import { importable, isImportable } from '../../../hooks/drives/useExport';
 import { usePortal } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import useImport from '../../../hooks/drives/useImport';
+import { useImport } from '../../../hooks/drives/useImport';
 
 const ImportDialog = ({
   title,
@@ -81,7 +81,7 @@ const ImportDialog = ({
             if (file) {
               const arrayBuffer = await file.arrayBuffer();
               const contents = byteArrayToString(new Uint8Array(arrayBuffer));
-              const dataObject = JSON.parse(contents);
+              const dataObject = tryJsonParse(contents);
 
               if (!isImportable(dataObject)) {
                 setErrorMessage(t('The file provided is not in the right JSON format'));

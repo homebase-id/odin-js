@@ -1,7 +1,7 @@
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useCircle } from '@youfoundation/common-app';
+import { t, useCircle, useDotYouClient } from '@youfoundation/common-app';
 import { Arrow } from '@youfoundation/common-app';
 import { Circles } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
@@ -24,10 +24,10 @@ export const CirclePermissionView = ({
   const { data: members, isLoading: membersLoading } = useCircle({
     circleId: !hideMembers ? circleDef?.id : undefined,
   }).fetchMembers;
+  const { getIdentity } = useDotYouClient();
+  const odinId = getIdentity() || undefined;
 
-  if (!circleDef) {
-    return <></>;
-  }
+  if (!circleDef) return null;
 
   const LinkWrapper = ({ children, className }: { children: ReactNode; className: string }) =>
     onClick ? (
@@ -36,7 +36,7 @@ export const CirclePermissionView = ({
       </a>
     ) : (
       <Link
-        to={`/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
+        to={`https://${odinId}/owner/circles/${encodeURIComponent(circleDef.id || '')}`}
         className={`hover:text-slate-700 hover:underline dark:hover:text-slate-400 ${
           className ?? ''
         }`}

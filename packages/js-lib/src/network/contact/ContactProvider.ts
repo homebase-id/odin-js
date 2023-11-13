@@ -1,10 +1,12 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getPayload } from '../../core/DriveData/DriveFileProvider';
-import { queryBatch } from '../../core/DriveData/DriveQueryProvider';
-import { CursoredResult } from '../../core/DriveData/DriveQueryTypes';
-import { DriveSearchResult } from '../../core/DriveData/DriveTypes';
+import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
+import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
+import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
+import { DriveSearchResult } from '../../core/DriveData/Drive/DriveTypes';
 import { toGuidId } from '../../helpers/DataUtil';
 import { ContactConfig, ContactFile } from './ContactTypes';
+
+export const CONTACT_PROFILE_IMAGE_KEY = 'prfl_pic';
 
 export const getContactByOdinId = async (
   dotYouClient: DotYouClient,
@@ -26,7 +28,7 @@ export const getContactByUniqueId = async (
       console.warn('UniqueId [' + uniqueId + '] in contacts has more than one file. Using latest');
 
     const dsr: DriveSearchResult = response.searchResults[0];
-    const contact: ContactFile | null = await getPayload<ContactFile>(
+    const contact: ContactFile | null = await getContentFromHeaderOrPayload<ContactFile>(
       dotYouClient,
       ContactConfig.ContactTargetDrive,
       dsr,
@@ -37,6 +39,10 @@ export const getContactByUniqueId = async (
     // Set fileId for future replace
     contact.fileId = dsr.fileId;
     contact.versionTag = dsr.fileMetadata.versionTag;
+    contact.lastModified = dsr.fileMetadata.updated;
+    contact.hasImage =
+      dsr.fileMetadata.payloads.filter((payload) => payload.contentType !== 'application/json')
+        .length >= 1;
 
     return contact;
   } catch (ex) {
@@ -68,7 +74,7 @@ export const getContacts = async (
       await Promise.all(
         response.searchResults.map(async (result) => {
           const dsr: DriveSearchResult = result;
-          const contact: ContactFile | null = await getPayload<ContactFile>(
+          const contact: ContactFile | null = await getContentFromHeaderOrPayload<ContactFile>(
             dotYouClient,
             ContactConfig.ContactTargetDrive,
             dsr,
@@ -80,6 +86,8 @@ export const getContacts = async (
           // Set fileId for future replace
           contact.fileId = dsr.fileId;
           contact.versionTag = dsr.fileMetadata.versionTag;
+          contact.lastModified = dsr.fileMetadata.updated;
+          contact.hasImage = dsr.fileMetadata.payloads.length === 2;
 
           return contact;
         })

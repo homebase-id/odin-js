@@ -4,7 +4,7 @@ import {
   ServerMetaData,
   ArchivalStatus,
   SystemFileType,
-} from './DriveFileTypes';
+} from '../File/DriveFileTypes';
 
 export interface PermissionedDrive {
   drive: TargetDrive;
@@ -43,13 +43,19 @@ export interface DriveDefinition {
   ownerOnly: boolean;
 }
 
-export interface DriveSearchResult {
+export interface DriveSearchResult<T = string> {
   fileId: string;
   fileState: 'active';
+  fileSystemType: SystemFileType;
+
   sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
-  fileMetadata: FileMetadata;
-  serverMetadata: ServerMetaData;
+  fileMetadata: FileMetadata<T>;
+  serverMetadata: ServerMetaData | undefined;
+
   priority: number;
+
+  // payloads: [];
+  // fileByteCount: number;
 }
 
 export interface QueryParams {
@@ -59,9 +65,8 @@ export interface QueryParams {
   tag?: string | undefined;
   userDate?: TimeRange;
 
-  //specifies if the DriveSearchResult.jsonContent field should be parsed as JSON
+  //specifies if the DriveSearchResult.content field should be parsed as JSON
   includeMetadataHeader?: boolean;
-  includePayload?: boolean;
   pageNumber: number;
   pageSize: number;
 }
@@ -84,7 +89,7 @@ export interface FileQueryParams {
 
 export interface GetModifiedResultOptions {
   maxRecords: number;
-  includeJsonContent?: boolean;
+  includeHeaderContent?: boolean;
   excludePreviewThumbnail?: boolean;
   maxDate?: number | undefined;
   cursor?: number | undefined;
@@ -99,7 +104,7 @@ export interface GetBatchQueryResultOptions {
 }
 
 export interface QueryModifiedResponse {
-  includeJsonContent: boolean;
+  includeHeaderContent: boolean;
   cursor: number;
   searchResults: DriveSearchResult[];
 }

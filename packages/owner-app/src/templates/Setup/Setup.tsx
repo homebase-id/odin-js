@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { HOME_PATH, RETURN_URL_PARAM } from '../../hooks/auth/useAuth';
-import useInit from '../../hooks/configure/useInit';
-import useIsConfigured from '../../hooks/configure/useIsConfigured';
+import { useInit } from '../../hooks/configure/useInit';
+import { useIsConfigured } from '../../hooks/configure/useIsConfigured';
 import { DomainHighlighter, ErrorNotification } from '@youfoundation/common-app';
 import ShowRecoveryKey from '../../components/Recovery/ShowRecoveryKey';
 import { ProfileSetupData, SocialSetupData } from '../../provider/setup/SetupProvider';
@@ -76,7 +76,7 @@ export const Setup = () => {
       <MinimalLayout noShadedBg={true}>
         <div className="min-h-screen">
           <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col p-5">
-            {initWithDataStatus === 'loading' || initWithDataStatus === 'success' ? (
+            {initWithDataStatus === 'pending' || initWithDataStatus === 'success' ? (
               <LoadingPage />
             ) : (
               <>

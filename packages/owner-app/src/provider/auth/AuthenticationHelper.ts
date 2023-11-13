@@ -1,5 +1,5 @@
-import { getRandom16ByteArray } from '@youfoundation/js-lib/core';
 import {
+  getRandom16ByteArray,
   base64ToUint8Array,
   cbcEncrypt,
   stringToUint8Array,

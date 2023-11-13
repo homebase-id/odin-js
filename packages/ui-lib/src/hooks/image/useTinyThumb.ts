@@ -1,18 +1,40 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { TargetDrive, DotYouClient, getDecryptedThumbnailMeta } from '@youfoundation/js-lib/core';
+import {
+  TargetDrive,
+  DotYouClient,
+  getDecryptedThumbnailMeta,
+  SystemFileType,
+} from '@youfoundation/js-lib/core';
 import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
 
-const useTinyThumb = (
+export const useTinyThumb = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string,
-  imageDrive?: TargetDrive
+  imageGlobalTransitId?: string,
+  imageFileKey?: string,
+  imageDrive?: TargetDrive,
+  systemFileType?: SystemFileType
 ) => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
 
-  const fetchImageData = async (odinId: string, imageFileId?: string, imageDrive?: TargetDrive) => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
+  const fetchImageData = async (
+    odinId: string,
+    imageFileId?: string,
+    imageGlobalTransitId?: string,
+    imageFileKey?: string,
+    imageDrive?: TargetDrive,
+    systemFileType?: SystemFileType
+  ) => {
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      imageFileKey === undefined ||
+      imageFileKey === '' ||
+      !imageDrive
+    )
+      return;
 
     if (odinId !== localHost)
       return (
@@ -20,27 +42,46 @@ const useTinyThumb = (
           dotYouClient,
           odinId,
           imageDrive,
-          imageFileId
+          imageFileId,
+          imageGlobalTransitId,
+          imageFileKey,
+          systemFileType
         )) || null
       );
 
-    return (await getDecryptedThumbnailMeta(dotYouClient, imageDrive, imageFileId)) || null;
+    return (
+      (await getDecryptedThumbnailMeta(
+        dotYouClient,
+        imageDrive,
+        imageFileId,
+        imageFileKey,
+        systemFileType
+      )) || null
+    );
   };
 
-  return useQuery(
-    ['tinyThumb', odinId || localHost, imageFileId, imageDrive?.alias],
-    () => fetchImageData(odinId || localHost, imageFileId, imageDrive),
-    {
-      refetchOnMount: true,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 10, // 10min
-      cacheTime: Infinity,
-      enabled: !!imageFileId && imageFileId !== '',
-      onError: (error) => {
-        console.error(error);
-      },
-    }
-  );
-};
+  return useQuery({
+    queryKey: [
+      'tinyThumb',
+      odinId || localHost,
+      imageDrive?.alias,
+      imageGlobalTransitId || imageFileId,
+      imageFileKey,
+    ],
+    queryFn: () =>
+      fetchImageData(
+        odinId || localHost,
+        imageFileId,
+        imageGlobalTransitId,
+        imageFileKey,
+        imageDrive,
+        systemFileType
+      ),
 
-export default useTinyThumb;
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 10, // 10min
+    gcTime: Infinity,
+    enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
+  });
+};

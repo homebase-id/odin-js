@@ -1,4 +1,4 @@
-import { DotYouClient } from '../DotYouClient';
+import { DotYouClient } from '../../DotYouClient';
 import {
   FileQueryParams,
   GetModifiedResultOptions,
@@ -6,9 +6,9 @@ import {
   GetBatchQueryResultOptions,
   QueryBatchResponse,
   QueryBatchCollectionResponse,
-} from './DriveTypes';
-import { SystemFileType } from './DriveFileTypes';
-import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../helpers/DataUtil';
+} from '../Drive/DriveTypes';
+import { SystemFileType } from '../File/DriveFileTypes';
+import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../../helpers/DataUtil';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -23,7 +23,7 @@ interface GetBatchRequest {
 export const DEFAULT_QUERY_MODIFIED_RESULT_OPTION = {
   cursor: undefined,
   maxRecords: 10,
-  includeJsonContent: true,
+  includeHeaderContent: true,
   excludePreviewThumbnail: false,
 };
 

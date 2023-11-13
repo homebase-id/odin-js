@@ -1,9 +1,9 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { SecurityGroupType } from '../../core/DriveData/DriveUploadTypes';
+import { SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
-import { getAttributeVersions, BuiltInAttributes } from '../../profile/profile';
+import { getAttributeVersions, BuiltInAttributes, AttributeFile } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 
 export interface ProfileCard {
@@ -28,9 +28,7 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
     ?.map((attr) => attr?.data?.[MinimalProfileFields.DisplayName] as string)
     .filter((fileId) => fileId !== undefined);
 
-  if (displayNames?.length) {
-    await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
-  }
+  if (displayNames?.length) await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
 };
 
 export const GetProfileCard = async (
@@ -75,20 +73,26 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
     [BuiltInAttributes.Photo]
   );
 
-  const profilePhotoFileIds = profilePhotoAttributes
-    ?.filter(
-      (attr) =>
-        attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
-    )
-    ?.map((attr) => attr?.data?.[MinimalProfileFields.ProfileImageId] as string)
-    .filter((fileId) => fileId !== undefined);
+  const publicProfilePhotoAttr = profilePhotoAttributes?.find(
+    (attr) =>
+      attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase() &&
+      attr.fileId !== undefined
+  ) as AttributeFile;
 
-  if (profilePhotoFileIds?.length) {
+  if (publicProfilePhotoAttr) {
+    const size = { pixelWidth: 250, pixelHeight: 250 };
+    const fileKey = publicProfilePhotoAttr.data[MinimalProfileFields.ProfileImageKey];
+
+    const payloadIsAnSvg =
+      publicProfilePhotoAttr.mediaPayloads?.find((payload) => payload.key === fileKey)
+        ?.contentType === 'image/svg+xml';
+
     const imageData = await getDecryptedImageData(
       dotYouClient,
       GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-      profilePhotoFileIds[0],
-      { pixelWidth: 250, pixelHeight: 250 }
+      publicProfilePhotoAttr.fileId as string,
+      fileKey,
+      payloadIsAnSvg ? undefined : size
     );
     if (imageData) {
       await publishProfileImageFile(
@@ -97,5 +101,33 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
         imageData.contentType
       );
     }
+  }
+};
+
+export const GetProfileImage = async (dotYouClient: DotYouClient): Promise<Blob | undefined> => {
+  try {
+    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
+
+    const fetchProfileCard = async () => {
+      return await httpClient
+        .get(`/pub/image`, {
+          baseURL: dotYouClient.getRoot(),
+          withCredentials: false,
+          responseType: 'arraybuffer',
+        })
+        .then(
+          (response) =>
+            new Blob([new Uint8Array(Buffer.from(response.data, 'binary'))], {
+              type: (response.headers['Content-Type'] as string) || 'image/webp',
+            })
+        );
+    };
+
+    const promise = fetchProfileCard();
+
+    return await promise;
+  } catch (ex) {
+    console.warn(`Fetching 'profileimage' failed`);
+    return;
   }
 };

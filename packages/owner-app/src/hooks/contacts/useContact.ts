@@ -4,7 +4,7 @@ import {
   fetchConnectionInfo,
   fetchDataFromPublic,
 } from '../../provider/contact/ContactSourceProvider';
-import useAuth from '../auth/useAuth';
+import { useAuth } from '../auth/useAuth';
 import {
   ContactFile,
   ContactVm,
@@ -13,7 +13,7 @@ import {
   getContactByUniqueId,
 } from '@youfoundation/js-lib/network';
 
-const useContact = ({
+export const useContact = ({
   odinId,
   id,
   canSave = true,
@@ -42,12 +42,12 @@ const useContact = ({
     }
 
     // Direct fetch with odinId:
-    const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
     // TODO: Not sure if this is the best way yet... But it works for now
-    if (contactBookContact && (contactBookContact.source === 'contact' || !canSave))
+    const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
+    if (contactBookContact && contactBookContact.source === 'contact') {
       return contactBookContact;
-    else if (contactBookContact)
+    } else if (contactBookContact)
       console.log(`[${odinId}] Ignoring contact book record`, contactBookContact);
     let returnContact;
 
@@ -85,13 +85,11 @@ const useContact = ({
       return;
     }
 
-    let newContact: ContactFile | undefined;
-
     const connectionInfo = (await fetchConnectionInfo(dotYouClient, contact.odinId)) ?? undefined;
-    newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
+    const newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
 
     if (newContact) {
-      newContact = await saveContact(dotYouClient, {
+      await saveContact(dotYouClient, {
         ...newContact,
         odinId: contact.odinId,
         versionTag: contact.versionTag,
@@ -101,7 +99,7 @@ const useContact = ({
     } else {
       const publicContact = await fetchDataFromPublic(contact.odinId);
       if (!publicContact) return;
-      newContact = await saveContact(dotYouClient, {
+      await saveContact(dotYouClient, {
         ...publicContact,
         odinId: contact.odinId,
         versionTag: contact.versionTag,
@@ -110,29 +108,26 @@ const useContact = ({
   };
 
   return {
-    fetch: useQuery(
-      ['contact', odinId ?? id, canSave],
-      () =>
+    fetch: useQuery({
+      queryKey: ['contact', odinId ?? id, canSave],
+      queryFn: () =>
         fetchSingle({
           odinId: odinId as string, // Defined as otherwise query would not be triggered
           id: id as string, // Defined as otherwise query would not be triggered
           canSave: canSave,
         }),
-      {
-        refetchOnWindowFocus: false,
-        onError: (err) => console.error(err),
-        retry: false,
-        enabled: !!odinId || !!id,
-      }
-    ),
-    refresh: useMutation(refresh, {
+      refetchOnWindowFocus: false,
+
+      retry: false,
+      enabled: !!odinId || !!id,
+    }),
+    refresh: useMutation({
+      mutationFn: refresh,
       onMutate: async (newContact) => {
-        await queryClient.cancelQueries(['contact', odinId ?? id]);
+        await queryClient.cancelQueries({ queryKey: ['contact', odinId ?? id] });
 
         // Update single attribute
         const previousContact = queryClient.getQueryData(['contact', odinId ?? id]);
-        // TODO: fix, can't be set as the incoming new isn't the refresh data
-        queryClient.setQueryData(['contact', odinId ?? id], newContact);
 
         return { previousContact, newContact };
       },
@@ -143,8 +138,8 @@ const useContact = ({
         queryClient.setQueryData(['contact', odinId ?? id], context?.previousContact);
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['contact', odinId]);
-        queryClient.invalidateQueries(['contact', id]);
+        queryClient.invalidateQueries({ queryKey: ['contact', odinId] });
+        queryClient.invalidateQueries({ queryKey: ['contact', id] });
       },
     }),
   };
@@ -152,24 +147,24 @@ const useContact = ({
 
 export const parseContact = (contact: RawContact): ContactVm => {
   const imageUrl =
-    contact.image && !contact.imageFileId
+    contact.image && !contact.hasImage
       ? `data:${contact.image.contentType};base64,${contact.image.content}`
       : `https://${contact.odinId}/pub/image`;
 
-  const { id, name, location, phone, birthday, imageFileId, odinId, source } = contact;
+  const { id, name, location, phone, birthday, hasImage, odinId, source, lastModified } = contact;
 
   return {
     id,
     name,
+    lastModified,
+
     location,
     phone,
     birthday,
-    imageFileId,
+    hasImage,
 
     imageUrl,
     odinId,
     source,
   };
 };
-
-export default useContact;

@@ -136,17 +136,6 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
-  const headerImageFileId = (
-    await uploadImage(
-      dotYouClient,
-      HomePageConfig.HomepageTargetDrive,
-      ANONYMOUS_ACL,
-      base64ToUint8Array(fallbackHeaderImage()),
-      undefined,
-      { type: 'image/svg+xml' }
-    )
-  )?.fileId;
-
   const defaultThemeAttribute: AttributeFile = {
     id: getNewId(),
     profileId: HomePageConfig.DefaultDriveId,
@@ -156,7 +145,9 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     data: {
       themeId: HomePageTheme.VerticalPosts + '',
       isProtected: true,
-      headerImageId: headerImageFileId,
+      headerImageKey: new Blob([base64ToUint8Array(fallbackHeaderImage())], {
+        type: 'image/svg+xml',
+      }),
     },
     acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
   };
@@ -184,10 +175,7 @@ export interface ProfileSetupData {
   surname: string;
   city?: string;
   country?: string;
-  imageData?: {
-    bytes: Uint8Array;
-    type: ImageContentType;
-  };
+  imageData?: Blob;
 }
 
 export interface SocialSetupData {
@@ -212,17 +200,6 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
   );
 
   if (!existingPhotoAttr && profileData.imageData) {
-    const mediaFileId = (
-      await uploadImage(
-        dotYouClient,
-        GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-        ANONYMOUS_ACL,
-        profileData.imageData.bytes,
-        undefined,
-        { type: profileData.imageData?.type as ImageContentType }
-      )
-    )?.fileId;
-
     const newPhotoAttr: AttributeFile = {
       id: defaultPhotoAttrId,
       profileId: BuiltInProfiles.StandardProfileId,
@@ -233,7 +210,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       acl: ANONYMOUS_ACL,
     };
 
-    newPhotoAttr.data[MinimalProfileFields.ProfileImageId] = mediaFileId?.toString();
+    newPhotoAttr.data[MinimalProfileFields.ProfileImageKey] = profileData.imageData;
 
     await saveAttribute(dotYouClient, newPhotoAttr);
   }

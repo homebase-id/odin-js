@@ -2,7 +2,7 @@ import { FC, ReactNode } from 'react';
 
 import { Check, Exclamation, IconProps, Loader } from '@youfoundation/common-app';
 import { config } from '../../../app/config';
-export type ActionButtonState = 'loading' | 'success' | 'error' | 'idle';
+export type ActionButtonState = 'loading' | 'pending' | 'success' | 'error' | 'idle';
 
 export interface ActionButtonProps {
   children?: ReactNode;
@@ -28,7 +28,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   isDisabled,
 }) => {
   const Icon = (props: { className: string }) => {
-    if (state === 'loading') return <Loader {...props} />;
+    if (state === 'loading' || state === 'pending') return <Loader {...props} />;
     if (state === 'success') return <Check {...props} />;
     if (state === 'error') return <Exclamation {...props} />;
 
@@ -60,7 +60,7 @@ const ActionButton: FC<ActionButtonProps> = ({
       ? 'p-2'
       : 'px-3 py-2';
 
-  const stateClasses = state === 'loading' ? 'animate-pulse' : '';
+  const stateClasses = state === 'loading' || state === 'pending' ? 'animate-pulse' : '';
 
   return (
     <>
@@ -70,7 +70,7 @@ const ActionButton: FC<ActionButtonProps> = ({
         } flex flex-row ${
           className && className.indexOf('rounded-') !== -1 ? '' : 'rounded-md'
         } text-left ${widthClasses} ${sizeClasses} ${colorClasses} ${stateClasses} ${className}`}
-        disabled={isDisabled || state === 'loading'}
+        disabled={isDisabled || state === 'loading' || state === 'pending'}
         onClick={onClick}
         title={title}
       >

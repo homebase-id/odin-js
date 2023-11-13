@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert, Arrow, t, useFollowingInfinite } from '@youfoundation/common-app';
-import useFocusedEditing from '../../../hooks/focusedEditing/useFocusedEditing';
+import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -11,9 +11,9 @@ import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import usePendingConnection from '../../../hooks/connections/usePendingConnection';
-import useConnection from '../../../hooks/connections/useConnection';
-import useContact from '../../../hooks/contacts/useContact';
+import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
+import { useConnection } from '../../../hooks/connections/useConnection';
+import { useContact } from '../../../hooks/contacts/useContact';
 
 const IncomingConnectionDialog = ({
   confirmText,
@@ -38,6 +38,7 @@ const IncomingConnectionDialog = ({
 
   const { data: contactData } = useContact({
     odinId: senderOdinId,
+    canSave: false,
   }).fetch;
   const {
     fetch: { data: pendingConnection },
@@ -50,8 +51,6 @@ const IncomingConnectionDialog = ({
 
   const [doubleChecked, setDoubleChecked] = useState(false);
 
-  const [name, setName] = useState<string>(window.location.hostname);
-  const [photoFileId, setPhotoFileId] = useState<string>();
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 

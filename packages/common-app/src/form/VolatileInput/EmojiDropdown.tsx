@@ -23,8 +23,8 @@ export const EmojiDropdown = ({
 
   useEffect(() => {
     (async () => {
-      if (!query) return;
-      setEmojis((await database.getEmojiBySearchQuery(query)) as NativeEmoji[]);
+      if (!query || !query.startsWith(':')) return;
+      setEmojis((await database.getEmojiBySearchQuery(query.slice(1))) as NativeEmoji[]);
       setActiveIndex(0);
     })();
   }, [query]);
@@ -51,7 +51,7 @@ export const EmojiDropdown = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  if (!query) return null;
+  if (!query || !query.startsWith(':')) return null;
 
   const dialog = (
     <div

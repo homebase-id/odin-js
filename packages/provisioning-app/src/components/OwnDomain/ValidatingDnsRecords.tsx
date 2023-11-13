@@ -1,9 +1,11 @@
 import DnsSettingsView from '../DnsSettingsView/DnsSettingsView';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
-import { useFetchOwnDomainDnsConfig } from '../../hooks/ownDomain/useOwnDomain';
+import {
+  OwnDomainProvisionState,
+  useFetchOwnDomainDnsConfig,
+} from '../../hooks/ownDomain/useOwnDomain';
 import { hasInvalidDnsRecords } from '../../hooks/commonDomain/commonDomain';
-import OwnDomainProvisionState from '../../hooks/ownDomain/OwnDomainProvisionState';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
 import { useMemo } from 'react';
 import { Alert, Arrow } from '@youfoundation/common-app';
@@ -43,7 +45,7 @@ const ValidatingDnsRecords = ({ domain, setProvisionState }: Props) => {
       {activeDnsConfig ? (
         <DnsSettingsView domain={domain} dnsConfig={activeDnsConfig} showStatus={showStatus} />
       ) : null}
-      {dnsConfig && !statePending && hasInvalid && showStatus ? (
+      {dnsConfig && hasInvalid && showStatus ? (
         <Alert type="info" className="mt-5">
           {t(
             'Sometimes it can take hours for DNS changes to propagate, please try again later if you just set them up. Otherwise, please inspect your DNS configuration for any incorrect settings.'

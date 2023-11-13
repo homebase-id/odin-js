@@ -10,7 +10,7 @@ const hasSharedSecret = () => {
   return !!raw;
 };
 
-const useVerifyToken = (dotYouClient: DotYouClient) => {
+export const useVerifyToken = (dotYouClient: DotYouClient) => {
   const fetchData = async () => {
     if (!hasSharedSecret()) {
       return false;
@@ -18,10 +18,10 @@ const useVerifyToken = (dotYouClient: DotYouClient) => {
 
     return await hasValidYouAuthToken(dotYouClient);
   };
-  return useQuery(['verifyToken'], fetchData, {
+  return useQuery({
+    queryKey: ['verifyToken'],
+    queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
   });
 };
-
-export default useVerifyToken;

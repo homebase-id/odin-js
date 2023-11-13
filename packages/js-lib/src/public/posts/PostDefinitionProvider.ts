@@ -1,11 +1,11 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import { getRandom16ByteArray } from '../../core/DriveData/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
   GetBatchQueryResultOptions,
   queryBatchCollection,
-  getPayload,
+  getContentFromHeaderOrPayload,
   UploadResult,
   SecurityGroupType,
   ensureDrive,
@@ -18,7 +18,12 @@ import {
   TargetDrive,
   queryBatch,
 } from '../../core/core';
-import { jsonStringify64, stringToUint8Array, toGuidId } from '../../helpers/helpers';
+import {
+  getRandom16ByteArray,
+  jsonStringify64,
+  stringToUint8Array,
+  toGuidId,
+} from '../../helpers/helpers';
 import { ChannelDefinition, BlogConfig } from './PostTypes';
 
 export const getChannelDefinitions = async (
@@ -62,13 +67,15 @@ export const getChannelDefinitions = async (
         const channelDrive = getChannelDrive(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await getPayload<ChannelDefinition>(
+        const definition = await getContentFromHeaderOrPayload<ChannelDefinition>(
           dotYouClient,
           channelDrive,
           dsr,
           response.includeMetadataHeader
         );
+        if (!definition) return null;
 
+        definition.acl = dsr.serverMetadata?.accessControlList;
         return definition;
       }
     })
@@ -137,22 +144,20 @@ export const saveChannelDefinition = async (
     },
   };
 
-  const payloadJson: string = jsonStringify64(definition);
+  const payloadJson: string = jsonStringify64({ ...definition, acl: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: true,
-    contentType: 'application/json',
     appData: {
       tags: [definition.channelId],
-      contentIsComplete: shouldEmbedContent,
       fileType: BlogConfig.ChannelDefinitionFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : null,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: definition.acl,
   };
 
@@ -160,7 +165,14 @@ export const saveChannelDefinition = async (
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt
   );
@@ -213,7 +225,7 @@ const getChannelDefinitionInternal = async (
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      const definition = await getPayload<ChannelDefinition>(
+      const definition = await getContentFromHeaderOrPayload<ChannelDefinition>(
         dotYouClient,
         targetDrive,
         dsr,
@@ -221,6 +233,8 @@ const getChannelDefinitionInternal = async (
       );
 
       if (!definition) return undefined;
+
+      definition.acl = dsr.serverMetadata?.accessControlList;
 
       return {
         fileId: dsr.fileId,

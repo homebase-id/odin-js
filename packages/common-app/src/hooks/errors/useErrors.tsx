@@ -96,9 +96,11 @@ export const useErrors = () => {
   const queryClient = useQueryClient();
 
   return {
-    fetch: useQuery(['errors'], () => [] as Error[], {
-      onError: (error) => console.log('onError', error),
-      cacheTime: Infinity,
+    fetch: useQuery({
+      queryKey: ['errors'],
+      queryFn: () => [] as Error[],
+
+      gcTime: Infinity,
       staleTime: Infinity,
     }),
     add: (error: unknown) => {
