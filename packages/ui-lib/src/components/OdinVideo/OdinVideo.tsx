@@ -49,7 +49,8 @@ interface OdinDirectProps extends OdinVideoProps {
 }
 
 export const OdinVideo = (videoProps: OdinVideoProps) => {
-  const { dotYouClient, odinId, targetDrive, fileId, fileKey, className } = videoProps;
+  const { dotYouClient, odinId, targetDrive, fileId, globalTransitId, fileKey, className } =
+    videoProps;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isInView, setIsInView] = useState(false);
@@ -64,7 +65,14 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   }, [videoProps.skipChunkedPlayback]);
   const {
     fetchMetadata: { data: videoMetaData },
-  } = useVideo(dotYouClient, odinId, isInView ? fileId : undefined, fileKey, targetDrive);
+  } = useVideo(
+    dotYouClient,
+    odinId,
+    isInView ? fileId : undefined,
+    globalTransitId,
+    fileKey,
+    targetDrive
+  );
 
   useEffect(() => {
     if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
@@ -96,6 +104,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       poster={!shouldFallback ? videoProps.poster : undefined}
       data-odinid={odinId}
       data-fileid={fileId}
+      data-globaltransitid={globalTransitId}
       data-filekey={fileKey}
     >
       {isChunkedPlayback ? (
@@ -125,6 +134,7 @@ const ChunkedSource = ({
   odinId,
   targetDrive,
   fileId,
+  globalTransitId,
   fileKey,
   videoMetaData,
   videoRef,
@@ -132,7 +142,14 @@ const ChunkedSource = ({
 }: OdinChunkedProps) => {
   const activeObjectUrl = useRef<string>();
 
-  const { getChunk } = useVideo(dotYouClient, odinId, fileId, fileKey, targetDrive);
+  const { getChunk } = useVideo(
+    dotYouClient,
+    odinId,
+    fileId,
+    globalTransitId,
+    fileKey,
+    targetDrive
+  );
 
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
   const fileLength = videoMetaData.fileSize;
@@ -333,6 +350,7 @@ const DirectSource = ({
   odinId,
   targetDrive,
   fileId,
+  globalTransitId,
   fileKey,
   videoMetaData,
   directFileSizeLimit,
@@ -343,6 +361,7 @@ const DirectSource = ({
     dotYouClient,
     odinId,
     fileId,
+    globalTransitId,
     fileKey,
     targetDrive,
     directFileSizeLimit

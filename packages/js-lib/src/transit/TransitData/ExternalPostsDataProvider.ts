@@ -262,6 +262,7 @@ const dsrToPostFile = async <T extends PostContent>(
       odinId: content.authorOdinId || odinId,
       versionTag: dsr.fileMetadata.versionTag,
       globalTransitId: dsr.fileMetadata.globalTransitId,
+      lastModified: dsr.fileMetadata.updated,
       acl: dsr.serverMetadata?.accessControlList,
       userDate: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
       content: content,

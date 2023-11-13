@@ -5,7 +5,6 @@ import {
   uploadHeader,
 } from '../../core/DriveData/Upload/DriveFileUploadProvider';
 import {
-  AccessControlList,
   AppendInstructionSet,
   ScheduleOptions,
   SecurityGroupType,
@@ -15,7 +14,6 @@ import {
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
-import { VideoContentType, uploadVideo } from '../../core/MediaData/VideoProvider';
 import {
   EmbeddedThumb,
   PayloadFile,
@@ -90,13 +88,25 @@ export const savePost = async <T extends PostContent>(
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
+    const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     const newMediaFile = newMediaFiles[i];
     if (newMediaFile.file.type.startsWith('video/')) {
-      const mediaFile = await uploadVideoFile(dotYouClient, newMediaFile, targetDrive, file.acl);
-      mediaFiles.push(mediaFile.mediaFile);
-      if (!previewThumbnail) previewThumbnail = mediaFile.tinyThumb;
+      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
+        newMediaFile,
+        payloadKey
+      );
+
+      thumbnails.push(...additionalThumbnails);
+      payloads.push(payload);
+
+      mediaFiles.push({
+        fileId: undefined,
+        fileKey: payloadKey,
+        type: 'video',
+      });
+
+      if (!previewThumbnail) previewThumbnail = tinyThumb;
     } else {
-      const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${i}`;
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
         payloadKey
@@ -136,45 +146,41 @@ export const savePost = async <T extends PostContent>(
   );
 };
 
-const uploadVideoFile = async (
-  dotYouClient: DotYouClient,
+const processVideoFile = async (
   videoFile: NewMediaFile,
-  targetDrive: TargetDrive,
-  acl: AccessControlList
-): Promise<{ mediaFile: MediaFile; tinyThumb: EmbeddedThumb | undefined }> => {
-  const uploadResult = await (async () => {
-    // if (file.file.type === 'video/mp4') {
-    // if video is tiny enough (less than 10MB), don't segment just upload
-    if (videoFile.file.size < 10000000 || 'bytes' in videoFile.file)
-      return await uploadVideo(
-        dotYouClient,
-        targetDrive,
-        acl,
-        videoFile.file,
-        { isSegmented: false, mimeType: videoFile.file.type, fileSize: videoFile.file.size },
-        {
-          type: videoFile.file.type as VideoContentType,
-          thumb: 'thumbnail' in videoFile ? videoFile.thumbnail : undefined,
-        }
-      );
+  payloadKey: string
+): Promise<{
+  payload: PayloadFile;
+  tinyThumb: EmbeddedThumb | undefined;
+  additionalThumbnails: ThumbnailFile[];
+}> => {
+  const { tinyThumb, additionalThumbnails } =
+    'thumbnail' in videoFile && videoFile.thumbnail?.payload
+      ? await createThumbnails(videoFile.thumbnail.payload, payloadKey, [
+          { quality: 100, width: 250, height: 250 },
+        ])
+      : { tinyThumb: undefined, additionalThumbnails: [] };
 
-    const { data: segmentedVideoData, metadata } = await segmentVideoFile(videoFile.file);
+  if (videoFile.file.size < 10000000 || 'bytes' in videoFile.file) {
+    return {
+      tinyThumb,
+      additionalThumbnails,
+      payload: {
+        payload: videoFile.file,
+        key: payloadKey,
+      },
+    };
+  }
 
-    return await uploadVideo(dotYouClient, targetDrive, acl, segmentedVideoData, metadata, {
-      type: videoFile.file.type as VideoContentType,
-      thumb: 'thumbnail' in videoFile ? videoFile.thumbnail : undefined,
-    });
-  })();
-
-  if (!uploadResult) throw new Error(`[DotYouCore-js] PostProvider: Video Upload failed`);
-
+  const { data: segmentedVideoData, metadata } = await segmentVideoFile(videoFile.file);
   return {
-    mediaFile: {
-      fileId: uploadResult.fileId,
-      fileKey: uploadResult.fileKey,
-      type: uploadResult.type,
+    tinyThumb,
+    additionalThumbnails,
+    payload: {
+      payload: segmentedVideoData,
+      descriptorContent: jsonStringify64(metadata),
+      key: payloadKey,
     },
-    tinyThumb: uploadResult.previewThumbnail,
   };
 };
 

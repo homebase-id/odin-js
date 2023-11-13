@@ -44,6 +44,7 @@ export interface ThumbnailFile extends ThumbSize {
 export interface PayloadFile {
   key: string;
   payload: File | Blob;
+  descriptorContent?: string;
 }
 
 type None = 0;
@@ -104,6 +105,7 @@ export interface TargetDrive {
 
 export interface PayloadDescriptor {
   key: string;
+  descriptorContent: string | undefined;
   contentType: ContentType;
   bytesWritten: number;
   lastModified: number;
@@ -112,6 +114,7 @@ export interface PayloadDescriptor {
 
 export interface UploadPayloadDescriptor {
   payloadKey: string;
+  descriptorContent: string | undefined;
   thumbnails?: ThumbnailDescriptor[];
 }
 

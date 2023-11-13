@@ -3,6 +3,7 @@ import {
   jsonStringify64,
   stringifyToQueryParams,
   getRandom16ByteArray,
+  tryJsonParse,
 } from '../../helpers/DataUtil';
 import { DotYouClient } from '../DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
@@ -74,7 +75,7 @@ export const uploadVideo = async (
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       fileType: 0,
-      content: fileMetadata ? jsonStringify64(fileMetadata) : null,
+      content: null,
       userDate: uploadMeta?.userDate,
       previewThumbnail: tinyThumb,
     },
@@ -82,13 +83,17 @@ export const uploadVideo = async (
     accessControlList: acl,
   };
 
-  console.log('uploading video', additionalThumbnails);
-
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
-    [{ payload: file, key: DEFAULT_PAYLOAD_KEY }],
+    [
+      {
+        payload: file,
+        key: DEFAULT_PAYLOAD_KEY,
+        descriptorContent: fileMetadata ? jsonStringify64(fileMetadata) : undefined,
+      },
+    ],
     additionalThumbnails,
     encrypt
   );
@@ -106,6 +111,7 @@ export const getDecryptedVideoChunk = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  _globalTransitId: string | undefined, // Kept for compatibility with ...overTransit signature
   key: string,
   chunkStart?: number,
   chunkEnd?: number,
@@ -124,16 +130,17 @@ export const getDecryptedVideoMetadata = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  fileKey: string | undefined,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeader<PlainVideoMetadata | SegmentedVideoMetadata>(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    { systemFileType }
-  );
+  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
   if (!fileHeader) return undefined;
-  return fileHeader.fileMetadata.appData.content;
+
+  const descriptor = fileHeader.fileMetadata.payloads.find((p) => p.key === fileKey)
+    ?.descriptorContent;
+  if (!descriptor) return undefined;
+
+  return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
 };
 
 export const getDecryptedVideoUrl = async (
@@ -148,6 +155,7 @@ export const getDecryptedVideoUrl = async (
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams({
       ...targetDrive,
       fileId,
+      key,
       xfst: systemFileType || 'Standard',
     })}`;
 

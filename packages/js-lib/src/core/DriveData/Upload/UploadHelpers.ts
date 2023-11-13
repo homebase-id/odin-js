@@ -78,6 +78,7 @@ export const buildManifest = (
   return {
     PayloadDescriptors: payloads?.map((payload) => ({
       payloadKey: payload.key,
+      descriptorContent: payload.descriptorContent,
       thumbnails: thumbnails
         ?.filter((thumb) => thumb.key === payload.key)
         .map((thumb) => ({
