@@ -53,9 +53,6 @@ export interface DriveSearchResult<T = string> {
   serverMetadata: ServerMetaData | undefined;
 
   priority: number;
-
-  // payloads: [];
-  // fileByteCount: number;
 }
 
 export interface QueryParams {
@@ -65,7 +62,6 @@ export interface QueryParams {
   tag?: string | undefined;
   userDate?: TimeRange;
 
-  //specifies if the DriveSearchResult.content field should be parsed as JSON
   includeMetadataHeader?: boolean;
   pageNumber: number;
   pageSize: number;

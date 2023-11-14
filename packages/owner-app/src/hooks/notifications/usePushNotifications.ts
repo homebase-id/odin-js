@@ -2,8 +2,13 @@ import { useDotYouClient } from '@youfoundation/common-app';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import {
   GetApplicationServerKey,
+  GetCurrentDeviceDetails,
+  GetRegisteredDevices,
   RegisterNewDevice,
-} from '../../provider/notifications/pushProvider';
+  RemoveAllRegisteredDevice,
+  RemoveRegisteredDevice,
+} from '../../provider/notifications/PushProvider';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const usePushNotifications = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -29,6 +34,7 @@ export const usePushNotifications = () => {
 
         const options = {
           userVisibleOnly: true,
+          // applicationServerKey: getPublicKey(),
           applicationServerKey: publicKey,
         };
 
@@ -42,5 +48,50 @@ export const usePushNotifications = () => {
         );
       });
     },
+  };
+};
+
+export const usePushNotificationClients = () => {
+  const queryClient = useQueryClient();
+  const dotYouClient = useDotYouClient().getDotYouClient();
+
+  const getCurrentClient = async () => {
+    return await GetCurrentDeviceDetails(dotYouClient);
+  };
+
+  const removeCurrentDevice = async () => {
+    return await RemoveRegisteredDevice(dotYouClient);
+  };
+
+  const getNotificationClients = async () => {
+    return await GetRegisteredDevices(dotYouClient);
+  };
+
+  const removeAllClients = async () => {
+    return await RemoveAllRegisteredDevice(dotYouClient);
+  };
+
+  return {
+    fetch: useQuery({
+      queryKey: ['notification-clients'],
+      queryFn: () => getNotificationClients(),
+    }),
+    removeAll: useMutation({
+      mutationFn: () => removeAllClients(),
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
+      },
+    }),
+
+    fetchCurrent: useQuery({
+      queryKey: ['notification-clients', 'current'],
+      queryFn: () => getCurrentClient(),
+    }),
+    removeCurrent: useMutation({
+      mutationFn: () => removeCurrentDevice(),
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['notification-clients'], exact: false });
+      },
+    }),
   };
 };

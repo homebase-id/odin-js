@@ -1,12 +1,15 @@
-import { ActionButton, SubtleMessage, t, Toast } from '@youfoundation/common-app';
+import { ActionButton, Check, SubtleMessage, t, Toast } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { useNotifications } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
+import { useState } from 'react';
+import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 
 const Notifications = () => {
   const { notifications: notificationList } = useNotifications();
   const { isEnabled, enableOnThisDevice } = usePushNotifications();
+  const [isDialogOpen, setDialogOpen] = useState(false);
 
   return (
     <>
@@ -14,7 +17,11 @@ const Notifications = () => {
         title={t('Notifications')}
         icon={Bell}
         actions={
-          isEnabled ? null : (
+          isEnabled ? (
+            <ActionButton type="secondary" icon={Check} onClick={() => setDialogOpen(true)}>
+              {t('Push Notifications Enabled')}
+            </ActionButton>
+          ) : (
             <ActionButton onClick={enableOnThisDevice}>
               {t('Enable push notifications')}
             </ActionButton>
@@ -30,6 +37,7 @@ const Notifications = () => {
       ) : (
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}
+      <PushNotificationsDialog isOpen={isDialogOpen} onClose={() => setDialogOpen(false)} />
     </>
   );
 };
