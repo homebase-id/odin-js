@@ -47,7 +47,7 @@ export const useAttribute = ({
     attribute: NewDriveSearchResult<Attribute> | DriveSearchResult<Attribute>
   ) => {
     return new Promise<NewDriveSearchResult<Attribute> | DriveSearchResult<Attribute>>(
-      (resolve) => {
+      (resolve, reject) => {
         const onVersionConflict = async () => {
           const serverAttr = await getAttribute(
             dotYouClient,
@@ -57,9 +57,13 @@ export const useAttribute = ({
           if (!serverAttr) return;
 
           const newAttr = { ...attribute, ...serverAttr };
-          saveAttribute(dotYouClient, newAttr, onVersionConflict).then((result) => {
-            if (result) resolve(result);
-          });
+          saveAttribute(dotYouClient, newAttr, onVersionConflict)
+            .then((result) => {
+              if (result) resolve(result);
+            })
+            .catch((err) => {
+              reject(err);
+            });
         };
 
         // Don't edit original attribute as it will be used for caching decisions in onSettled
@@ -74,7 +78,7 @@ export const useAttribute = ({
             if (result) resolve(result);
           })
           .catch((err) => {
-            console.error(err);
+            reject(err);
           });
       }
     );

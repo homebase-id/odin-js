@@ -425,11 +425,14 @@ export const saveAttribute = async (
   };
 
   if (toSaveAttribute.fileId) {
+    const wasEncrypted =
+      'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
+    if (wasEncrypted !== encrypt) {
+      throw new Error('ATM we cannot change encryption status of an attribute');
+    }
+
     const keyHeader =
-      'isEncrypted' in toSaveAttribute.fileMetadata &&
-      toSaveAttribute.fileMetadata.isEncrypted &&
-      encrypt &&
-      'sharedSecretEncryptedKeyHeader' in toSaveAttribute
+      wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
         ? toSaveAttribute.sharedSecretEncryptedKeyHeader
         : undefined;
 
