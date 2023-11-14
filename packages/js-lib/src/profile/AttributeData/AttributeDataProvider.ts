@@ -180,7 +180,7 @@ export const dsrToAttributeFile = async (
   includeMetadataHeader: boolean
 ): Promise<AttributeFile | undefined> => {
   try {
-    const attrPayload = await getContentFromHeaderOrPayload<AttributeFile>(
+    const attrPayload = await getContentFromHeaderOrPayload<Attribute>(
       dotYouClient,
       targetDrive,
       dsr,
@@ -194,7 +194,7 @@ export const dsrToAttributeFile = async (
 
     return {
       ...attrPayload,
-      fileId: attrPayload.fileId ?? dsr.fileId,
+      fileId: dsr.fileId,
       lastModified: dsr.fileMetadata.updated,
       versionTag: dsr.fileMetadata.versionTag,
       acl: dsr.serverMetadata?.accessControlList || {

@@ -276,7 +276,7 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         surName: nameAttr?.data.surname,
         profileImageFileId: photoAttrHeader?.fileId,
         profileImageFileKey: photoAttr?.data.profileImageKey,
-        profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
+        profileImagePreviewThumbnail: photoAttrHeader?.fileMetadata.appData.previewThumbnail,
         profileImageLastModified: photoAttrHeader?.fileMetadata.updated,
         status: statusAttr?.data.status,
       };
@@ -319,7 +319,7 @@ const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>): HomeSiteData
           imageFileId: entry?.header?.fileId,
           imageLastModified: entry?.header?.fileMetadata.updated,
         } as TemplateSettings,
-        headerPreviewThumbnail: themeAttribute?.previewThumbnail,
+        headerPreviewThumbnail: entry?.header?.fileMetadata.appData.previewThumbnail,
       };
     }
   }

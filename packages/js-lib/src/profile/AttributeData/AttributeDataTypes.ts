@@ -10,6 +10,9 @@ export interface AttributeFile extends Attribute {
   versionTag?: string;
   acl: AccessControlList;
   aclPriority?: number;
+  lastModified?: number;
+  mediaPayloads?: PayloadDescriptor[];
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export interface AttributeDisplayHash {
@@ -22,9 +25,6 @@ export interface Attribute {
   type: string;
   priority: number;
   sectionId: string;
-  mediaPayloads?: PayloadDescriptor[];
-  previewThumbnail?: EmbeddedThumb;
-  lastModified?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>;
 }
