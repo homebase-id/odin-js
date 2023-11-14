@@ -42,6 +42,7 @@ const RegisterApp = () => {
   const name = searchParams.get('n');
   const origin = searchParams.get('o') || undefined;
   const returnUrl = searchParams.get('return');
+  const cancelUrl = searchParams.get('cancel');
 
   const p = searchParams.get('p');
   const permissionSet = p ? permissionParamToPermissionSet(p) : undefined;
@@ -72,9 +73,7 @@ const RegisterApp = () => {
   };
 
   const doCancel = () =>
-    (window.location.href = returnUrl
-      ? `${returnUrl.split('?')[0]}?error=cancelled-by-user`
-      : '/owner');
+    (window.location.href = cancelUrl ? `${cancelUrl}?error=cancelled-by-user` : '/owner');
 
   return (
     <>
