@@ -3,15 +3,17 @@ import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundatio
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 
 export const PhotoAttributeEditor = ({
+  fileId,
   attribute,
   onChange,
 }: {
+  fileId?: string;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
   const { data: imageBlob } = usePayloadBlob(
-    attribute.fileId,
+    fileId,
     attribute.data?.[MinimalProfileFields.ProfileImageKey],
     targetDrive
   );
@@ -22,9 +24,9 @@ export const PhotoAttributeEditor = ({
 
   return (
     <div className="mb-5">
-      <Label htmlFor={`${attribute.fileId ?? 'new'}-profileImageKey`}>{t('Profile Image')}</Label>
+      <Label htmlFor={`${fileId ?? 'new'}-profileImageKey`}>{t('Profile Image')}</Label>
       <ImageSelector
-        id={`${attribute.fileId ?? 'new'}-profileImageKey`}
+        id={`${fileId ?? 'new'}-profileImageKey`}
         name={MinimalProfileFields.ProfileImageKey}
         defaultValue={defaultValue}
         onChange={(e) =>

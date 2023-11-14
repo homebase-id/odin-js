@@ -7,19 +7,22 @@ import {
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
 import { useAttributeOrderer, attributeGroup } from '../../../hooks/profiles/useAttributeOrderer';
-import { AttributeVm, NewAttributeVm } from '../../../hooks/profiles/useAttributes';
+import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 const AttributeGroup = ({
   attributes,
   groupTitle,
   groupedAttributes,
 }: {
-  attributes: AttributeVm[];
+  attributes: DriveSearchResult<AttributeVm>[];
   groupTitle: string;
   groupedAttributes?: attributeGroup[];
 }) => {
+  const firstAttrVm = attributes[0].fileMetadata.appData.content;
+
   const { profileKey, sectionKey, typeKey } = useParams();
   const [isActive, setIsActive] = useState(
     attributes.length === 1 || slugify(groupTitle) === typeKey
@@ -39,7 +42,7 @@ const AttributeGroup = ({
     if (!isActive) {
       if (profileKey) {
         navigate(
-          `/owner/profile/${profileKey}/${sectionKey ?? attributes[0].sectionId}/${slugify(
+          `/owner/profile/${profileKey}/${sectionKey ?? firstAttrVm.sectionId}/${slugify(
             groupTitle
           )}`,
           {
@@ -53,7 +56,7 @@ const AttributeGroup = ({
 
   const close = () => {
     if (profileKey)
-      navigate(`/owner/profile/${profileKey}/${sectionKey ?? attributes[0].sectionId}`, {
+      navigate(`/owner/profile/${profileKey}/${sectionKey ?? firstAttrVm.sectionId}`, {
         replace: true,
       });
 
@@ -70,10 +73,10 @@ const AttributeGroup = ({
             className="mb-2 mt-5"
           />
           <AddAnotherButton
-            profileId={attributes[0].profileId}
-            sectionId={attributes[0].sectionId}
-            type={attributes[0].type}
-            priority={attributes[0].priority + 10}
+            profileId={firstAttrVm.profileId}
+            sectionId={firstAttrVm.sectionId}
+            type={firstAttrVm.type}
+            priority={firstAttrVm.priority + 10}
           />
         </div>
       </>
@@ -102,13 +105,16 @@ const AttributeGroup = ({
       >
         {/* Sort again, as order of the attributes takes the ACL into account, which the user can't "change" */}
         {attributes
-          .sort((a, b) => a.priority - b.priority)
+          .sort(
+            (a, b) =>
+              a.fileMetadata.appData.content.priority - b.fileMetadata.appData.content.priority
+          )
           .map((attr, index) => {
             return (
-              <React.Fragment key={attr.id ?? 'pending'}>
+              <React.Fragment key={attr.fileMetadata.appData.content.id ?? 'pending'}>
                 <span
-                  key={attr.id ?? 'pending'}
-                  title={attr.id ?? 'pending'}
+                  key={attr.fileMetadata.appData.content.id ?? 'pending'}
+                  title={attr.fileMetadata.appData.content.id ?? 'pending'}
                   className={`z-0 ${
                     !isActive && index !== 0
                       ? `absolute left-0 right-0 top-0 max-h-full overflow-hidden rounded-lg border-b border-gray-200 border-opacity-80 bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900`
@@ -120,14 +126,13 @@ const AttributeGroup = ({
                     attribute={attr}
                     className={`${!isActive ? 'pointer-events-none my-0' : 'mb-2 mt-0'}`}
                     reorderAttr={reorderAttr}
-                    // title={!isActive ? `${groupTitle} (${attributes.length})` : undefined}
                   />
                 </span>
                 {isActive && (
                   <AddAnotherButton
-                    profileId={attributes[0].profileId}
-                    sectionId={attributes[0].sectionId}
-                    type={attributes[0].type}
+                    profileId={firstAttrVm.profileId}
+                    sectionId={firstAttrVm.sectionId}
+                    type={firstAttrVm.type}
                     priority={attr.priority + 10}
                   />
                 )}
@@ -153,18 +158,22 @@ const AddAnotherButton = ({
   const [isActive, setIsActive] = useState(false);
   const newAttr = useMemo(() => {
     return {
-      id: getNewId(),
-      type: type,
-      sectionId: sectionId,
-      priority: priority,
-      isNew: true,
-      data: {},
-      typeDefinition: Object.values(AttributeDefinitions).find(
-        (curr) => curr.type === type
-      ) as AttributeDefinition,
-      profileId: profileId,
-      acl: undefined,
-    } as NewAttributeVm;
+      fileMetadata: {
+        appData: {
+          content: {
+            id: getNewId(),
+            type: type,
+            sectionId: sectionId,
+            priority: priority,
+            data: {},
+            typeDefinition: Object.values(AttributeDefinitions).find(
+              (curr) => curr.type === type
+            ) as AttributeDefinition,
+            profileId: profileId,
+          },
+        },
+      },
+    } as NewDriveSearchResult<AttributeVm>;
   }, [type, profileId, sectionId, priority]);
 
   if (isActive)

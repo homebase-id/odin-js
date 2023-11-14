@@ -1,19 +1,4 @@
-import {
-  PayloadDescriptor,
-  EmbeddedThumb,
-  AccessControlList,
-  SecurityGroupType,
-} from '../../core/core';
-
-export interface AttributeFile extends Attribute {
-  fileId?: string;
-  versionTag?: string;
-  acl: AccessControlList;
-  aclPriority?: number;
-  lastModified?: number;
-  mediaPayloads?: PayloadDescriptor[];
-  previewThumbnail?: EmbeddedThumb;
-}
+import { AccessControlList, SecurityGroupType } from '../../core/core';
 
 export interface AttributeDisplayHash {
   [attributeType: string]: Attribute;

@@ -4,15 +4,17 @@ import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
 
 export const ExperienceAttributeEditor = ({
+  fileId,
   attribute,
   onChange,
 }: {
+  fileId?: string;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
   const { data: imageBlob } = usePayloadBlob(
-    attribute.fileId,
+    fileId,
     attribute.data?.[MinimalProfileFields.ExperienceImageFileKey],
     targetDrive
   );
@@ -24,9 +26,9 @@ export const ExperienceAttributeEditor = ({
   return (
     <>
       <div className="mb-5">
-        <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-title`}>{t('Title')}</Label>
+        <Label htmlFor={`${fileId ?? 'new'}-experience-title`}>{t('Title')}</Label>
         <Input
-          id={`${attribute.fileId ?? 'new'}-experience-title`}
+          id={`${fileId ?? 'new'}-experience-title`}
           name={MinimalProfileFields.ExperienceTitleId}
           defaultValue={attribute.data?.[MinimalProfileFields.ExperienceTitleId] ?? ''}
           onChange={onChange}
@@ -34,11 +36,9 @@ export const ExperienceAttributeEditor = ({
         />
       </div>
       <div className="mb-5">
-        <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-description`}>
-          {t('Description')}
-        </Label>
+        <Label htmlFor={`${fileId ?? 'new'}-experience-description`}>{t('Description')}</Label>
         <RichTextEditor
-          uniqueId={attribute.fileId}
+          uniqueId={fileId}
           name={MinimalProfileFields.ExperienceDecriptionId}
           defaultValue={attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] ?? ''}
           onChange={onChange}
@@ -46,9 +46,9 @@ export const ExperienceAttributeEditor = ({
         />
       </div>
       <div className="mb-5">
-        <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-link`}>{t('Link')}</Label>
+        <Label htmlFor={`${fileId ?? 'new'}-experience-link`}>{t('Link')}</Label>
         <Input
-          id={`${attribute.fileId ?? 'new'}-experience-link`}
+          id={`${fileId ?? 'new'}-experience-link`}
           name={MinimalProfileFields.ExperienceLinkId}
           defaultValue={attribute.data?.[MinimalProfileFields.ExperienceLinkId] ?? ''}
           onChange={onChange}
@@ -56,9 +56,9 @@ export const ExperienceAttributeEditor = ({
         />
       </div>
       <div className="mb-5">
-        <Label htmlFor={`${attribute.fileId ?? 'new'}-experience-image`}>{t('Image')}</Label>
+        <Label htmlFor={`${fileId ?? 'new'}-experience-image`}>{t('Image')}</Label>
         <ImageSelector
-          id={`${attribute.fileId ?? 'new'}-experience-image`}
+          id={`${fileId ?? 'new'}-experience-image`}
           name={MinimalProfileFields.ExperienceImageFileKey}
           defaultValue={defaultValue}
           onChange={(e) =>

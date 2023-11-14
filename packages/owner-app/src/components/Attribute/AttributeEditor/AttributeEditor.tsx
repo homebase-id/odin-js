@@ -10,7 +10,7 @@ import {
   useDebounce,
 } from '@youfoundation/common-app';
 import { useAttribute } from '../../../hooks/profiles/useAttribute';
-import { AttributeVm, NewAttributeVm } from '../../../hooks/profiles/useAttributes';
+import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { ActionButton } from '@youfoundation/common-app';
 
 import Section from '../../ui/Sections/Section';
@@ -18,43 +18,65 @@ import AttributeFields from '../AttributeFields/AttributeFields';
 import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
-import { EmbeddedThumb, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  EmbeddedThumb,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 
 const AttributeEditor = ({
-  attribute,
+  attribute: attributeDsr,
   className,
   reorderAttr,
   title,
   onCancel,
   onSave: onManualSave,
 }: {
-  attribute: AttributeVm | NewAttributeVm;
+  attribute: DriveSearchResult<AttributeVm> | NewDriveSearchResult<AttributeVm>;
   className?: string;
-  reorderAttr?: (attr: AttributeVm, dir: 1 | -1) => Promise<number | undefined>;
+  reorderAttr?: (attr: DriveSearchResult<AttributeVm>, dir: 1 | -1) => Promise<number | undefined>;
   title?: string;
   onCancel?: () => void;
   onSave?: () => void;
 }) => {
-  const isNewAttribute = 'isNew' in attribute && attribute.isNew;
+  const attribute = attributeDsr.fileMetadata.appData.content;
+
+  const isNewAttribute = !attributeDsr.fileId;
   const {
     save: { data: updatedAttr, mutate: saveAttr, status: saveStatus, error: saveError },
     remove: { mutate: removeAttr },
   } = useAttribute({});
 
   // Local state of the changes
-  const [latestAttr, setLatestAttr] = useState<AttributeVm>({
-    acl: { requiredSecurityGroup: SecurityGroupType.Owner },
-    ...attribute,
-    ...(updatedAttr || {}),
+  const [latestAttr, setLatestAttr] = useState<NewDriveSearchResult<AttributeVm>>({
+    ...attributeDsr,
+    ...updatedAttr,
+    serverMetadata: {
+      accessControlList: updatedAttr?.serverMetadata?.accessControlList ||
+        attributeDsr?.serverMetadata?.accessControlList || {
+          requiredSecurityGroup: SecurityGroupType.Owner,
+        },
+    },
+    fileMetadata: {
+      ...attributeDsr.fileMetadata,
+      ...updatedAttr?.fileMetadata,
+      appData: {
+        ...attributeDsr.fileMetadata.appData,
+        ...updatedAttr?.fileMetadata.appData,
+        content: {
+          ...attributeDsr.fileMetadata.appData.content,
+          ...updatedAttr?.fileMetadata.appData.content,
+        },
+      },
+    },
   });
 
-  const [isAclEdit, setIsAclEdit] = useState(!attribute.acl);
+  const [isAclEdit, setIsAclEdit] = useState(!attributeDsr.serverMetadata?.accessControlList);
   const [isFadeOut, setIsFadeOut] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
-  const doManualSave = (dirtyAttr: AttributeVm) => {
-    delete (dirtyAttr as any).isNew;
-
+  const doManualSave = (dirtyAttr: NewDriveSearchResult<AttributeVm>) => {
     saveAttr({ ...dirtyAttr });
     if (onManualSave) onManualSave();
   };
@@ -64,8 +86,10 @@ const AttributeEditor = ({
     target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
   }) => {
     const dirtyAttr = { ...latestAttr };
-    dirtyAttr.data[e.target.name] = e.target.value;
-    dirtyAttr.previewThumbnail = e.target.previewThumbnail;
+    dirtyAttr.fileMetadata.appData.content.data[e.target.name] = e.target.value;
+    if (e.target.previewThumbnail)
+      dirtyAttr.fileMetadata.appData.previewThumbnail = e.target.previewThumbnail;
+
     setLatestAttr(dirtyAttr);
 
     if (!isNewAttribute) debouncedSave();
@@ -73,10 +97,14 @@ const AttributeEditor = ({
 
   const reorder = async (dir: 1 | -1) => {
     if (isNewAttribute) return;
-    const newPriority = reorderAttr && (await reorderAttr(attribute as AttributeVm, dir));
+    const newPriority =
+      reorderAttr && (await reorderAttr(attributeDsr as DriveSearchResult<AttributeVm>, dir));
     if (!newPriority) return;
 
-    saveAttr({ ...latestAttr, priority: newPriority });
+    const newAttr = { ...latestAttr };
+    newAttr.fileMetadata.appData.content.priority = newPriority;
+
+    saveAttr(newAttr);
   };
 
   useEffect(() => {
@@ -89,13 +117,29 @@ const AttributeEditor = ({
   // Sync the latest attribute with data from server
   useEffect(
     () =>
-      'acl' in attribute
-        ? setLatestAttr({
-            ...(attribute as AttributeVm),
-            ...(updatedAttr || {}),
-          })
-        : undefined,
-    [attribute, updatedAttr]
+      setLatestAttr({
+        ...attributeDsr,
+        ...updatedAttr,
+        serverMetadata: {
+          accessControlList: updatedAttr?.serverMetadata?.accessControlList ||
+            attributeDsr?.serverMetadata?.accessControlList || {
+              requiredSecurityGroup: SecurityGroupType.Owner,
+            },
+        },
+        fileMetadata: {
+          ...attributeDsr.fileMetadata,
+          ...updatedAttr?.fileMetadata,
+          appData: {
+            ...attributeDsr.fileMetadata.appData,
+            ...updatedAttr?.fileMetadata.appData,
+            content: {
+              ...attributeDsr.fileMetadata.appData.content,
+              ...updatedAttr?.fileMetadata.appData.content,
+            },
+          },
+        },
+      }),
+    [attributeDsr, updatedAttr]
   );
 
   const actions: ActionGroupOptionProps[] = [];
@@ -139,10 +183,9 @@ const AttributeEditor = ({
           'attribute. This action cannot be undone.'
         )}`,
       },
-      onClick: () => removeAttr(latestAttr),
+      onClick: () => removeAttr(latestAttr as DriveSearchResult<AttributeVm>), // latestAttr is not new, so it's a DriveSearchResult
     });
   }
-
   return (
     <Section
       ref={sectionRef}
@@ -150,15 +193,35 @@ const AttributeEditor = ({
         <>
           <span className="flex flex-row">
             <button
-              title={latestAttr.acl?.requiredSecurityGroup}
+              title={latestAttr.serverMetadata?.accessControlList?.requiredSecurityGroup}
               className={`mr-2 inline-block`}
               onClick={() => setIsAclEdit(true)}
             >
-              <AclIcon className="h-5 w-5" acl={latestAttr.acl} />
+              <AclIcon
+                className="h-5 w-5"
+                acl={
+                  latestAttr.serverMetadata?.accessControlList || {
+                    requiredSecurityGroup: SecurityGroupType.Owner,
+                  }
+                }
+              />
             </button>
-            <span onClick={() => setIsAclEdit(true)} data-type={latestAttr?.type}>
-              {title ?? latestAttr.typeDefinition.name}{' '}
-              <small className="block text-xs">{<AclSummary acl={latestAttr.acl} />}</small>
+            <span
+              onClick={() => setIsAclEdit(true)}
+              data-type={latestAttr?.fileMetadata?.appData?.content?.type}
+            >
+              {title ?? latestAttr?.fileMetadata?.appData?.content.typeDefinition.name}{' '}
+              <small className="block text-xs">
+                {
+                  <AclSummary
+                    acl={
+                      latestAttr.serverMetadata?.accessControlList || {
+                        requiredSecurityGroup: SecurityGroupType.Owner,
+                      }
+                    }
+                  />
+                }
+              </small>
             </span>
           </span>
         </>
@@ -189,10 +252,20 @@ const AttributeEditor = ({
     >
       {isAclEdit ? (
         <AclWizard
-          acl={latestAttr.acl}
+          acl={
+            latestAttr.serverMetadata?.accessControlList || {
+              requiredSecurityGroup: SecurityGroupType.Owner,
+            }
+          }
           onConfirm={(newAcl) => {
             setIsAclEdit(false);
-            const dirtyAttr = { ...latestAttr, acl: newAcl };
+            const dirtyAttr: NewDriveSearchResult<AttributeVm> = {
+              ...latestAttr,
+              serverMetadata: {
+                ...latestAttr.serverMetadata,
+                accessControlList: newAcl,
+              },
+            };
 
             if (isNewAttribute) setLatestAttr(dirtyAttr);
             else doManualSave(dirtyAttr);
@@ -204,12 +277,24 @@ const AttributeEditor = ({
         />
       ) : (
         <>
-          <AttributeFields attribute={latestAttr} onChange={changeHandler} />
+          <AttributeFields
+            fileId={latestAttr.fileId}
+            attribute={latestAttr.fileMetadata.appData.content}
+            onChange={changeHandler}
+          />
           <SaveStatus className="mt-2 text-right sm:mt-0" state={saveStatus} error={saveError} />
           {isNewAttribute ? (
             <div className="flex flex-row justify-end pb-2">
               <p className="text-slate-500">
-                {t('Accessible by: ')} <AclSummary acl={latestAttr?.acl} maxLength={Infinity} />
+                {t('Accessible by: ')}{' '}
+                <AclSummary
+                  acl={
+                    latestAttr.serverMetadata?.accessControlList || {
+                      requiredSecurityGroup: SecurityGroupType.Owner,
+                    }
+                  }
+                  maxLength={Infinity}
+                />
               </p>
             </div>
           ) : null}

@@ -9,6 +9,7 @@ import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
+import { NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 const getAllowedAttributes = (sectionId: string) => {
   if (sectionId === BuiltInProfiles.PersonalInfoSectionId)
@@ -43,7 +44,7 @@ const AttributeCreator = ({
   newPriority: number;
   excludedTypes?: string[];
 }) => {
-  const [attribute, setAttribute] = useState<AttributeVm>();
+  const [attribute, setAttribute] = useState<NewDriveSearchResult<AttributeVm>>();
   const [isActive, setIsActive] = useState(false);
   const alloweddAttributes = getAllowedAttributes(sectionId);
 
@@ -53,16 +54,20 @@ const AttributeCreator = ({
     ) as AttributeDefinition;
 
     setAttribute({
-      id: getNewId(),
-      type: typeId,
-      sectionId: sectionId,
-      priority: newPriority,
-      isNew: true,
-      data: {},
-      typeDefinition: targetObj,
-      profileId: profileId,
-      acl: undefined,
-    } as unknown as AttributeVm);
+      fileMetaData: {
+        appData: {
+          content: {
+            id: getNewId(),
+            type: typeId,
+            sectionId: sectionId,
+            priority: newPriority,
+            data: {},
+            typeDefinition: targetObj,
+            profileId: profileId,
+          },
+        },
+      },
+    } as unknown as NewDriveSearchResult<AttributeVm>);
   };
 
   const discard = () => {

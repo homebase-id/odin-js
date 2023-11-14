@@ -25,10 +25,6 @@ const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
 
 const Notifications = lazy(() => import('../templates/Notifications/Notifications'));
 
-const PublicProfileDetails = lazy(
-  () => import('../templates/Profiles/PublicProfileDetails/PublicProfileDetails')
-);
-
 const Profile = lazy(() => import('../templates/Profiles/Profiles/Profiles'));
 const ProfileDetails = lazy(() => import('../templates/Profiles/ProfileDetails/ProfileDetails'));
 const Connections = lazy(() => import('../templates/Connections/Connections/Connections'));
@@ -169,7 +165,6 @@ function App() {
               path="profile/:profileKey/:sectionKey/:typeKey"
               element={<ProfileDetails />}
             ></Route>
-            <Route path="public-profile" element={<PublicProfileDetails />}></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
             <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>

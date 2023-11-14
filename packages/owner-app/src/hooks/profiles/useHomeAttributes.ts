@@ -4,6 +4,7 @@ import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public
 import { useAuth } from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 import { AttributeDefinitions } from './AttributeDefinitions';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
@@ -19,8 +20,19 @@ export const useHomeAttributes = () => {
     ).map((attr) => {
       return {
         ...attr,
-        typeDefinition: AttributeDefinitions.Theme,
-      } as AttributeVm;
+        fileMetadata: {
+          ...attr.fileMetadata,
+          appData: {
+            ...attr.fileMetadata.appData,
+            content: {
+              ...attr.fileMetadata.appData.content,
+              typeDefinition: Object.values(AttributeDefinitions).find((def) => {
+                return def.type === attr.fileMetadata.appData.content.type;
+              }),
+            },
+          },
+        },
+      } as DriveSearchResult<AttributeVm>;
     });
     return foundThemeAttributes;
   };

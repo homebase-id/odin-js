@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Attribute,
-  AttributeFile,
   getAttribute,
   saveAttribute,
   removeAttribute,
@@ -10,7 +9,7 @@ import { useAuth } from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
@@ -44,38 +43,50 @@ export const useAttribute = ({
     return foundAttribute || null;
   };
 
-  const saveData = async (attribute: AttributeFile) => {
-    // We're saving, so it's not new anymore
-    if (attribute.data?.isNew) delete attribute.data.isNew;
+  const saveData = async (
+    attribute: NewDriveSearchResult<Attribute> | DriveSearchResult<Attribute>
+  ) => {
+    return new Promise<NewDriveSearchResult<Attribute> | DriveSearchResult<Attribute>>(
+      (resolve) => {
+        const onVersionConflict = async () => {
+          const serverAttr = await getAttribute(
+            dotYouClient,
+            attribute.fileMetadata.appData.content.profileId,
+            attribute.fileMetadata.appData.content.id
+          );
+          if (!serverAttr) return;
 
-    return new Promise<AttributeFile>((resolve) => {
-      const onVersionConflict = async () => {
-        const serverAttr = await getAttribute(dotYouClient, attribute.profileId, attribute.id);
-        if (!serverAttr) return;
+          const newAttr = { ...attribute, ...serverAttr };
+          saveAttribute(dotYouClient, newAttr, onVersionConflict).then((result) => {
+            if (result) resolve(result);
+          });
+        };
 
-        const newAttr = { ...attribute, ...serverAttr };
-        saveAttribute(dotYouClient, newAttr, onVersionConflict).then((result) => {
-          if (result) resolve(result);
-        });
-      };
-
-      // Don't edit original attribute as it will be used for caching decisions in onSettled
-      saveAttribute(
-        dotYouClient,
-        {
-          ...attribute,
-          acl: attribute.acl ?? { requiredSecurityGroup: SecurityGroupType.Owner },
-        },
-        onVersionConflict
-      ).then((result) => {
-        if (result) resolve(result);
-      });
-    });
+        // Don't edit original attribute as it will be used for caching decisions in onSettled
+        saveAttribute(
+          dotYouClient,
+          {
+            ...attribute,
+          },
+          onVersionConflict
+        )
+          .then((result) => {
+            if (result) resolve(result);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    );
   };
 
-  const removeData = async (attribute: AttributeFile) => {
+  const removeData = async (attribute: DriveSearchResult<Attribute>) => {
     if (attribute.fileId)
-      return await removeAttribute(dotYouClient, attribute.profileId, attribute.fileId);
+      return await removeAttribute(
+        dotYouClient,
+        attribute.fileMetadata.appData.content.profileId,
+        attribute.fileId
+      );
     else console.error('No FileId provided for removeData');
   };
 
@@ -89,7 +100,8 @@ export const useAttribute = ({
     }),
     save: useMutation({
       mutationFn: saveData,
-      onMutate: async (newAttr) => {
+      onMutate: async (newDsr) => {
+        const newAttr = newDsr.fileMetadata.appData.content;
         await queryClient.cancelQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
 
         let typeDefinition = Object.values(AttributeDefinitions).find((def) => {
@@ -112,23 +124,39 @@ export const useAttribute = ({
           typeDefinition,
         };
 
+        const updatedDsr: NewDriveSearchResult<AttributeVm> = {
+          ...newDsr,
+          fileMetadata: {
+            ...newDsr.fileMetadata,
+            appData: {
+              ...newDsr.fileMetadata.appData,
+              content: newAttrVm,
+            },
+          },
+        };
+
         // Update single attribute
         const singleItemCacheKey = ['attribute', newAttrVm.profileId, newAttrVm.id];
         const previousAttr = queryClient.getQueryData(singleItemCacheKey);
-        queryClient.setQueryData(singleItemCacheKey, newAttrVm);
+        queryClient.setQueryData(singleItemCacheKey, updatedDsr);
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(newAttrVm);
-        const previousAttributes: AttributeVm[] | undefined =
+        const previousAttributes: DriveSearchResult<AttributeVm>[] | undefined =
           queryClient.getQueryData(listItemCacheKey);
 
         // if new attribute can't be found in existing list, then it's a new one, so can't update but need to add
         // Sorting happens here, as it otherwise happens within the provider
         const newAttributes = (
-          previousAttributes?.some((attr) => attr.id === newAttrVm.id)
-            ? previousAttributes?.map((attr) => (attr.id === newAttrVm.id ? newAttrVm : attr))
-            : [newAttrVm, ...(previousAttributes ?? [])]
-        )?.sort((a, b) => a.priority - b.priority);
+          previousAttributes?.some((attr) => attr.fileMetadata.appData.content.id === newAttrVm.id)
+            ? previousAttributes?.map((attr) =>
+                attr.fileMetadata.appData.content.id === newAttrVm.id ? updatedDsr : attr
+              )
+            : [updatedDsr, ...(previousAttributes ?? [])]
+        )?.sort(
+          (a, b) =>
+            a.fileMetadata.appData.content.priority - b.fileMetadata.appData.content.priority
+        );
 
         queryClient.setQueryData(listItemCacheKey, newAttributes);
 
@@ -139,14 +167,17 @@ export const useAttribute = ({
 
         // Revert local caches to what they were
         queryClient.setQueryData(
-          ['attribute', newAttr.profileId, context?.newAttr.id],
+          ['attribute', newAttr.fileMetadata.appData.content.profileId, context?.newAttr.id],
           context?.previousAttr
         );
-        queryClient.setQueryData(getListItemCacheKey(newAttr), context?.previousAttributes);
+        queryClient.setQueryData(
+          getListItemCacheKey(newAttr.fileMetadata.appData.content),
+          context?.previousAttributes
+        );
       },
-      onSettled: (newAttr, _error, _variables) => {
-        if (!newAttr) return;
-
+      onSettled: (newDsr, _error, _variables) => {
+        if (!newDsr) return;
+        const newAttr = newDsr.fileMetadata.appData.content;
         if (newAttr.id) {
           queryClient.invalidateQueries({ queryKey: ['attribute', newAttr.profileId, newAttr.id] });
         } else {
@@ -169,31 +200,38 @@ export const useAttribute = ({
     }),
     remove: useMutation({
       mutationFn: removeData,
-      onMutate: async (toRemoveAttr) => {
+      onMutate: async (toRemoveDsr) => {
+        const toRemoveAttr = toRemoveDsr.fileMetadata.appData.content;
+
         await queryClient.cancelQueries({
           queryKey: ['attributes', toRemoveAttr.profileId, toRemoveAttr.sectionId],
         });
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(toRemoveAttr);
-        const previousAttributes: AttributeVm[] | undefined =
+        const previousAttributes: DriveSearchResult<Attribute>[] | undefined =
           queryClient.getQueryData(listItemCacheKey);
-        const updatedAttributes = previousAttributes?.filter((attr) => attr.id !== toRemoveAttr.id);
+
+        const updatedAttributes = previousAttributes?.filter(
+          (attr) => attr.fileMetadata.appData.content.id !== toRemoveAttr.id
+        );
         queryClient.setQueryData(listItemCacheKey, updatedAttributes);
 
         return { toRemoveAttr, previousAttributes };
       },
-      onError: (err, toRemoveAttr, context) => {
+      onError: (err, toRemoveDsr, context) => {
         console.error(err);
+        const toRemoveAttr = toRemoveDsr.fileMetadata.appData.content;
 
         // Revert local caches to what they were
         queryClient.setQueryData(getListItemCacheKey(toRemoveAttr), context?.previousAttributes);
       },
       onSettled: (_data, _err, variables) => {
+        const newAttr = variables.fileMetadata.appData.content;
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ['siteData'] });
-          queryClient.invalidateQueries({ queryKey: getListItemCacheKey(variables) });
+          queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
           publishStaticFiles();
         }, 1000);

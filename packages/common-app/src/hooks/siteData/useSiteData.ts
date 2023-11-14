@@ -5,7 +5,6 @@ import {
   BuiltInProfiles,
   Attribute,
   AttributeConfig,
-  AttributeFile,
   dsrToAttributeFile,
   GetTargetDriveFromProfileId,
 } from '@youfoundation/js-lib/profile';
@@ -15,7 +14,7 @@ import {
   HomePageConfig,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
-import { EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
 
 interface DefaultTemplateSettings {
   imageFileId: string;
@@ -86,33 +85,41 @@ export const useSiteData = () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
     const parseOwnerData = async (
-      nameAndPhotoAndStatusAttr?: AttributeFile[]
+      nameAndPhotoAndStatusAttr?: DriveSearchResult<Attribute>[]
     ): Promise<OwnerSiteData> => {
-      const nameAttr = nameAndPhotoAndStatusAttr?.find(
-        (attr) => attr.type === BuiltInAttributes.Name
+      const nameDsr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Name
       );
-      const photoAttr = nameAndPhotoAndStatusAttr?.find(
-        (attr) => attr.type === BuiltInAttributes.Photo
+      const nameAttr = nameDsr?.fileMetadata.appData.content;
+
+      const photoDsr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Photo
       );
-      const statusAttr = nameAndPhotoAndStatusAttr?.find(
-        (attr) => attr.type === BuiltInAttributes.Status
+      const photoAttr = photoDsr?.fileMetadata.appData.content;
+
+      const statusDsr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Status
       );
+      const statusAttr = statusDsr?.fileMetadata.appData.content;
 
       return {
         displayName: nameAttr?.data.displayName ?? window.location.hostname,
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
-        profileImageFileId: photoAttr?.fileId,
+        profileImageFileId: photoDsr?.fileId,
         profileImageFileKey: photoAttr?.data.profileImageKey,
-        profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
-        profileImageLastModified: photoAttr?.lastModified,
+        profileImagePreviewThumbnail: photoDsr?.fileMetadata?.appData?.previewThumbnail,
+        profileImageLastModified: photoDsr?.fileMetadata.updated,
         status: statusAttr?.data.status,
       };
     };
 
-    const parseSocialData = async (socialAttributes?: AttributeFile[]): Promise<SocialSiteData> => {
+    const parseSocialData = async (
+      socialAttributes?: DriveSearchResult<Attribute>[]
+    ): Promise<SocialSiteData> => {
       return socialAttributes
-        ?.map((attr) => {
+        ?.map((dsr) => {
+          const attr = dsr.fileMetadata.appData.content;
           const value = Object.values(attr?.data)?.[0];
 
           return {
@@ -125,18 +132,20 @@ export const useSiteData = () => {
         .filter((attr) => attr !== undefined) as SocialSiteData;
     };
 
-    const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]): Promise<HomeSiteData> => {
+    const parseHomeData = async (
+      homeAndThemeAttr?: DriveSearchResult<Attribute>[]
+    ): Promise<HomeSiteData> => {
       const themeAttribute = homeAndThemeAttr?.find(
-        (attr) => attr.type === HomePageAttributes.Theme
+        (attr) => attr.fileMetadata.appData.content.type === HomePageAttributes.Theme
       );
 
       return {
         templateSettings: {
-          ...themeAttribute?.data,
+          ...themeAttribute?.fileMetadata.appData.content?.data,
           imageFileId: themeAttribute?.fileId,
-          imageLastModified: themeAttribute?.lastModified,
+          imageLastModified: themeAttribute?.fileMetadata.updated,
         } as TemplateSettings,
-        headerPreviewThumbnail: themeAttribute?.previewThumbnail,
+        headerPreviewThumbnail: themeAttribute?.fileMetadata.appData.previewThumbnail,
       };
     };
 
@@ -225,7 +234,7 @@ export const useSiteData = () => {
       return {
         owner: await parseOwnerData(getHighestPrioAttributesFromMultiTypes(ownerAttr)),
         social: await parseSocialData(
-          socialAttr.filter((attr) => attr !== undefined) as AttributeFile[]
+          socialAttr.filter((attr) => attr !== undefined) as DriveSearchResult<Attribute>[]
         ),
         home: await parseHomeData(getHighestPrioAttributesFromMultiTypes(homeAttr)),
       } as SiteData;

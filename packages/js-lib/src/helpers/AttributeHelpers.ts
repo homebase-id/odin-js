@@ -1,4 +1,5 @@
-import { AttributeFile, LocationFields, MinimalProfileFields } from '../profile/profile';
+import { DriveSearchResult } from '../../core';
+import { Attribute, LocationFields, MinimalProfileFields } from '../profile/profile';
 import { PostContent, PostFile } from '../public/public';
 import { getNewId } from './DataUtil';
 
@@ -38,7 +39,7 @@ export const generateDisplayLocation = (
   return allLocation.join(' ');
 };
 
-export const getDisplayLocationFromLocationAttribute = (attr: AttributeFile) => {
+export const getDisplayLocationFromLocationAttribute = (attr: Attribute) => {
   if (!attr) return '';
 
   return attr.data?.[LocationFields.DisplayLocation]
@@ -64,7 +65,7 @@ export const generateDisplayName = (first: string, last: string) => {
   }
 };
 
-export const getDisplayNameOfNameAttribute = (attr: AttributeFile) => {
+export const getDisplayNameOfNameAttribute = (attr: Attribute) => {
   if (!attr) return '';
 
   const trimmedExplicit = attr.data?.[MinimalProfileFields.ExplicitDisplayName]?.trim();
@@ -77,7 +78,7 @@ export const getDisplayNameOfNameAttribute = (attr: AttributeFile) => {
       );
 };
 
-export const getInitialsOfNameAttribute = (attr: AttributeFile) => {
+export const getInitialsOfNameAttribute = (attr: Attribute) => {
   if (!attr) return '';
 
   return (

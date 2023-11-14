@@ -97,6 +97,8 @@ export const uploadHeader = async (
 ): Promise<UploadResult | void> => {
   const keyHeader = encryptedKeyHeader
     ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
+    : metadata.isEncrypted
+    ? GenerateKeyHeader()
     : undefined;
 
   const { systemFileType, ...strippedInstructions } = instructions;

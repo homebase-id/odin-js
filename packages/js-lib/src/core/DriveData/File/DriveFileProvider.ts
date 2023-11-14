@@ -256,7 +256,7 @@ export const getContentFromHeaderOrPayload = async <T>(
   dsr: {
     fileId: string;
     fileMetadata: FileMetadata;
-    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader | undefined;
   },
   includesJsonContent: boolean,
   systemFileType?: SystemFileType
@@ -265,8 +265,10 @@ export const getContentFromHeaderOrPayload = async <T>(
   const contentIsComplete =
     fileMetadata.payloads.filter((payload) => payload.contentType === 'application/json').length ===
     0;
+  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+
   const keyHeader = fileMetadata.isEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
+    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
     : undefined;
 
   if (contentIsComplete) {

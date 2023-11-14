@@ -4,6 +4,7 @@ import {
   ServerMetaData,
   ArchivalStatus,
   SystemFileType,
+  EmbeddedThumb,
 } from '../File/DriveFileTypes';
 
 export interface PermissionedDrive {
@@ -48,14 +49,34 @@ export interface DriveSearchResult<T = string> {
   fileState: 'active';
   fileSystemType: SystemFileType;
 
-  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   fileMetadata: FileMetadata<T>;
+  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
   serverMetadata: ServerMetaData | undefined;
 
   priority: number;
 
   // payloads: [];
   // fileByteCount: number;
+}
+
+export interface NewDriveSearchResult<T = string> {
+  fileId?: string;
+
+  fileSystemType?: SystemFileType;
+
+  fileMetadata: NewFileMetadata<T>;
+  serverMetadata: Omit<ServerMetaData, 'doNotIndex' | 'allowDistribution'> | undefined;
+}
+
+export interface NewFileMetadata<T = string> {
+  contentType?: string;
+  appData: NewAppFileMetaData<T>;
+  versionTag?: string;
+}
+
+export interface NewAppFileMetaData<T = string> {
+  content: T;
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export interface QueryParams {

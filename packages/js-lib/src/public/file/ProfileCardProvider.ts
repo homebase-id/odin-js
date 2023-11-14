@@ -1,9 +1,10 @@
+import { DriveSearchResult } from '../../../core';
 import { DotYouClient } from '../../core/DotYouClient';
 import { SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
-import { getAttributeVersions, BuiltInAttributes, AttributeFile } from '../../profile/profile';
+import { getAttributeVersions, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 
 export interface ProfileCard {
@@ -23,9 +24,13 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
   const displayNames = profileNameAttributes
     ?.filter(
       (attr) =>
-        attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase()
     )
-    ?.map((attr) => attr?.data?.[MinimalProfileFields.DisplayName] as string)
+    ?.map(
+      (attr) =>
+        attr?.fileMetadata?.appData?.content?.data?.[MinimalProfileFields.DisplayName] as string
+    )
     .filter((fileId) => fileId !== undefined);
 
   if (displayNames?.length) await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
@@ -75,16 +80,19 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
 
   const publicProfilePhotoAttr = profilePhotoAttributes?.find(
     (attr) =>
-      attr.acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase() &&
-      attr.fileId !== undefined
-  ) as AttributeFile;
+      attr.serverMetadata?.accessControlList?.requiredSecurityGroup.toLowerCase() ===
+        SecurityGroupType.Anonymous.toLowerCase() && attr.fileId !== undefined
+  ) as DriveSearchResult<Attribute> | undefined;
 
   if (publicProfilePhotoAttr) {
     const size = { pixelWidth: 250, pixelHeight: 250 };
-    const fileKey = publicProfilePhotoAttr.data[MinimalProfileFields.ProfileImageKey];
+    const fileKey =
+      publicProfilePhotoAttr.fileMetadata.appData.content.data[
+        MinimalProfileFields.ProfileImageKey
+      ];
 
     const payloadIsAnSvg =
-      publicProfilePhotoAttr.mediaPayloads?.find((payload) => payload.key === fileKey)
+      publicProfilePhotoAttr.fileMetadata.payloads?.find((payload) => payload.key === fileKey)
         ?.contentType === 'image/svg+xml';
 
     const imageData = await getDecryptedImageData(

@@ -56,28 +56,35 @@ export const queryRemoteAttributes = async (
       (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Photo))?.[0],
     ]);
 
+    const nameAttr = name.fileMetadata.appData.content;
+    const phoneAttr = phone.fileMetadata.appData.content;
+    const emailAttr = email.fileMetadata.appData.content;
+    const birthdayAttr = birthday.fileMetadata.appData.content;
+    const locationAttr = location.fileMetadata.appData.content;
+    const photoAttr = photo.fileMetadata.appData.content;
+
     return {
       source: 'public',
       odinId,
       name: {
-        displayName: name?.data?.[MinimalProfileFields.DisplayName],
-        additionalName: name?.data?.[MinimalProfileFields.AdditionalName],
-        givenName: name?.data?.[MinimalProfileFields.GivenNameId],
-        surname: name?.data?.[MinimalProfileFields.SurnameId],
+        displayName: nameAttr?.data?.[MinimalProfileFields.DisplayName],
+        additionalName: nameAttr?.data?.[MinimalProfileFields.AdditionalName],
+        givenName: nameAttr?.data?.[MinimalProfileFields.GivenNameId],
+        surname: nameAttr?.data?.[MinimalProfileFields.SurnameId],
       },
       location: {
-        city: location?.data?.[LocationFields.City],
-        country: location?.data?.[LocationFields.Country],
+        city: locationAttr?.data?.[LocationFields.City],
+        country: locationAttr?.data?.[LocationFields.Country],
       },
-      phone: { number: phone?.data?.[PhoneFields.PhoneNumber] },
-      email: { email: email?.data?.[EmailFields.Email] },
-      birthday: { date: birthday?.data?.[BirthdayFields.Date] },
+      phone: { number: phoneAttr?.data?.[PhoneFields.PhoneNumber] },
+      email: { email: emailAttr?.data?.[EmailFields.Email] },
+      birthday: { date: birthdayAttr?.data?.[BirthdayFields.Date] },
       image: photo
         ? (await queryConnectionPhotoData(
             dotYouClient,
             odinId,
             photo.fileId as string,
-            photo.data[MinimalProfileFields.ProfileImageKey]
+            photoAttr.data[MinimalProfileFields.ProfileImageKey]
           )) || undefined
         : undefined,
     };

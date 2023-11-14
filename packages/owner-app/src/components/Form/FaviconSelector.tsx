@@ -1,18 +1,17 @@
 import { Block, EmojiSelector, t, ImageSelector, usePayloadBlob } from '@youfoundation/common-app';
-import { AccessControlList, TargetDrive } from '@youfoundation/js-lib/core';
+import { TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 
 interface FaviconSelectorProps {
-  attribute: { fileId?: string };
+  fileId?: string;
   name?: string;
   defaultValue: unknown;
-  acl: AccessControlList;
   targetDrive: TargetDrive;
   onChange: (event: { target: { name: string; value: unknown | undefined } }) => void;
 }
 
 const FaviconSelector = ({
-  attribute,
+  fileId,
   onChange,
   defaultValue,
   targetDrive,
@@ -24,7 +23,7 @@ const FaviconSelector = ({
     | undefined;
 
   const { data: imageBlob } = usePayloadBlob(
-    attribute.fileId,
+    fileId,
     valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
       ? valueObject.fileId
       : undefined,
