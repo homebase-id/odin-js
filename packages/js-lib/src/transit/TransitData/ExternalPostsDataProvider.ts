@@ -59,7 +59,7 @@ export const getSocialFeed = async (
   const allPostFiles = (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
-        const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
+        const odinId = dsr.fileMetadata.senderOdinId;
         return dsrToPostFile(dotYouClient, odinId, dsr, feedDrive, result.includeMetadataHeader);
       })
     )
@@ -257,9 +257,7 @@ const dsrToPostFile = async <T extends PostContent>(
 
     const file: PostFileVm<T> = {
       fileId: dsr.fileId,
-      // odinId: odinId,
-      // TODO multi-payload: Fix this, senderOdin is rendered empty after an update
-      odinId: content.authorOdinId || odinId,
+      odinId: odinId,
       versionTag: dsr.fileMetadata.versionTag,
       globalTransitId: dsr.fileMetadata.globalTransitId,
       lastModified: dsr.fileMetadata.updated,
