@@ -17,6 +17,8 @@ import {
   TargetDrive,
   getContentFromHeaderOrPayload,
   ReactionPreview,
+  PayloadFile,
+  EmbeddedThumb,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -37,7 +39,6 @@ import {
   ReactionVm,
 } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
-import { EmbeddedThumb, PayloadFile } from '../../../core';
 import { uploadFileOverTransit } from '../../transit/TransitData/Upload/TransitUploadProvider';
 import { deleteFileOverTransit } from '../../transit/TransitData/File/TransitFileManageProvider';
 import { queryBatchOverTransit } from '../../transit/TransitData/Query/TransitDriveQueryProvider';
