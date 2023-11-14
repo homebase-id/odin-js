@@ -18,6 +18,8 @@ import {
   pureAppend,
   buildManifest,
 } from './UploadHelpers';
+import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
+import { ThumbnailInstruction } from '../../core';
 
 const isDebug = hasDebugFlag();
 
@@ -158,4 +160,62 @@ export const appendDataToFile = async (
   );
 
   return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);
+};
+
+export const reUploadFile = async (
+  dotYouClient: DotYouClient,
+  instructions: UploadInstructionSet,
+  metadata: UploadFileMetadata,
+  encrypt: boolean
+) => {
+  const targetDrive = instructions.storageOptions?.drive;
+  const fileId = instructions.storageOptions?.overwriteFileId;
+  if (!targetDrive) throw new Error('storageOptions.drive is required');
+  if (!fileId) throw new Error('storageOptions.overwriteFileId is required');
+
+  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  const existingPayloads = header?.fileMetadata.payloads;
+  for (let i = 0; existingPayloads && i < existingPayloads.length; i++) {
+    const existingPayload = existingPayloads[i];
+    const payloadData = await getPayloadBytes(
+      dotYouClient,
+      targetDrive,
+      fileId,
+      existingPayload.key,
+      { decrypt: true }
+    );
+    if (!payloadData) continue;
+
+    payloads.push({
+      key: existingPayload.key,
+      payload: new Blob([payloadData.bytes], { type: existingPayload.contentType }),
+    });
+
+    const existingThumbnails = existingPayload.thumbnails;
+    for (let j = 0; j < existingThumbnails.length; j++) {
+      const existingThumbnail = existingThumbnails[j];
+      const thumbnailData = await getThumbBytes(
+        dotYouClient,
+        targetDrive,
+        fileId,
+        existingPayload.key,
+        existingThumbnail.pixelWidth,
+        existingThumbnail.pixelHeight,
+        {}
+      );
+      if (thumbnailData)
+        thumbnails.push({
+          key: existingPayload.key,
+          payload: new Blob([thumbnailData.bytes], { type: existingThumbnail.contentType }),
+          pixelWidth: existingThumbnail.pixelWidth,
+          pixelHeight: existingThumbnail.pixelHeight,
+        });
+    }
+  }
+
+  return await uploadFile(dotYouClient, instructions, metadata, payloads, thumbnails, encrypt);
 };

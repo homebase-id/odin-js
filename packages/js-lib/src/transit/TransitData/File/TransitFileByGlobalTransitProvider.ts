@@ -152,7 +152,7 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
   odinId: string,
   targetDrive: TargetDrive,
   globalTransitId: string,
-  key: string,
+  payloadKey: string,
   width: number,
   height: number,
   options: {
@@ -164,7 +164,7 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
-  assertIfDefined('Key', key);
+  assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
@@ -174,7 +174,7 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
     odinId: odinId,
     ...targetDrive,
     globalTransitId,
-    payloadKey: key,
+    payloadKey: payloadKey,
   };
 
   const config: AxiosRequestConfig = {

@@ -21,6 +21,7 @@ import {
   uploadHeader,
   appendDataToFile,
   NewDriveSearchResult,
+  reUploadFile,
 } from '../../core/core';
 import {
   getDisplayNameOfNameAttribute,
@@ -427,8 +428,22 @@ export const saveAttribute = async (
   if (toSaveAttribute.fileId) {
     const wasEncrypted =
       'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
+
+    // When switching between encrypted and unencrypted, we need to re-upload the full file
     if (wasEncrypted !== encrypt) {
-      throw new Error('ATM we cannot change encryption status of an attribute');
+      const result = await reUploadFile(dotYouClient, instructionSet, metadata, encrypt);
+      if (result)
+        return {
+          ...toSaveAttribute,
+          fileId: result.file.fileId,
+          fileMetadata: {
+            ...toSaveAttribute.fileMetadata,
+            versionTag: result.newVersionTag,
+            isEncrypted: encrypt,
+          },
+        } as DriveSearchResult<Attribute>;
+
+      throw new Error('We failed to change encryption status of an attribute');
     }
 
     const keyHeader =

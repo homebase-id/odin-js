@@ -109,15 +109,19 @@ export interface PayloadDescriptor {
   contentType: ContentType;
   bytesWritten: number;
   lastModified: number;
-  thumbnails: ThumbSize[];
+  thumbnails: ThumbnailDescriptor[];
+}
+
+export interface ThumbnailDescriptor extends ThumbSize {
+  contentType: ContentType;
 }
 
 export interface UploadPayloadDescriptor {
   payloadKey: string;
   descriptorContent: string | undefined;
-  thumbnails?: ThumbnailDescriptor[];
+  thumbnails?: UploadThumbnailDescriptor[];
 }
 
-export interface ThumbnailDescriptor extends ThumbSize {
+export interface UploadThumbnailDescriptor extends ThumbSize {
   thumbnailKey: string;
 }

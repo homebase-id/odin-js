@@ -7,22 +7,24 @@ import {
   decryptBytesResponse,
 } from '../../../core/DriveData/SecurityHelpers';
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
-import {
-  TargetDrive,
-  DriveSearchResult,
-  FileMetadata,
-  EncryptedKeyHeader,
-  KeyHeader,
-  SystemFileType,
-  ImageContentType,
-  ContentType,
-} from '../../../core/core';
 import { assertIfDefined, tryJsonParse, stringifyToQueryParams } from '../../../helpers/DataUtil';
 import {
   getAxiosClient,
   getRangeHeader,
   parseBytesToObject,
 } from '../../../core/DriveData/File/DriveFileHelper';
+import {
+  DriveSearchResult,
+  EncryptedKeyHeader,
+  KeyHeader,
+} from '../../../core/DriveData/Drive/DriveTypes';
+import {
+  ContentType,
+  FileMetadata,
+  ImageContentType,
+  SystemFileType,
+  TargetDrive,
+} from '../../../core/DriveData/File/DriveFileTypes';
 
 interface GetFileRequest {
   odinId: string;
@@ -145,7 +147,7 @@ export const getThumbBytesOverTransit = async (
   odinId: string,
   targetDrive: TargetDrive,
   fileId: string,
-  key: string,
+  payloadKey: string,
   width: number,
   height: number,
   options: {
@@ -157,7 +159,7 @@ export const getThumbBytesOverTransit = async (
   assertIfDefined('OdinId', odinId);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
-  assertIfDefined('Key', key);
+  assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
@@ -167,7 +169,7 @@ export const getThumbBytesOverTransit = async (
   const request: GetThumbRequest = {
     odinId: odinId,
     ...targetDrive,
-    payloadKey: key,
+    payloadKey: payloadKey,
     fileId,
   };
 

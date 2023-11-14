@@ -205,7 +205,7 @@ export const getThumbBytesByUniqueId = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   uniqueId: string,
-  key: string,
+  payloadKey: string,
   width: number,
   height: number,
   options: {
@@ -217,7 +217,7 @@ export const getThumbBytesByUniqueId = async (
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
-  assertIfDefined('Key', key);
+  assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
@@ -226,7 +226,7 @@ export const getThumbBytesByUniqueId = async (
   const request: GetFileThumbByUniqueIdRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
-    payloadKey: key,
+    payloadKey: payloadKey,
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
