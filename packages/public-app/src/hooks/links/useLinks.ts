@@ -25,21 +25,22 @@ export const useLinks = () => {
     const fetchStaticData = async () => {
       const fileData = await GetFile(dotYouClient, 'sitedata.json');
       if (fileData.has('link')) {
-        const linkAttributes = fileData
-          .get('link')
-          ?.sort((attrA, attrB) => attrB.payload?.priority - attrA.payload?.priority)
-          .map((entry) => {
-            const attribute = entry.payload as Attribute;
-            if (!attribute.data) return undefined;
+        const linkAttributes = (
+          fileData
+            .get('link')
+            ?.map((entry) => {
+              const attribute = entry.payload as Attribute;
+              if (!attribute.data) return undefined;
 
-            return {
-              text: attribute.data[LinkFields.LinkText] as string,
-              target: attribute.data[LinkFields.LinkTarget] as string,
-              id: attribute.id,
-              priority: attribute.priority,
-            };
-          })
-          .filter(Boolean) as LinkData[];
+              return {
+                text: attribute.data[LinkFields.LinkText] as string,
+                target: attribute.data[LinkFields.LinkTarget] as string,
+                id: attribute.id,
+                priority: attribute.priority,
+              };
+            })
+            .filter(Boolean) as LinkData[]
+        ).sort((attrA, attrB) => attrB.priority - attrA.priority);
 
         return linkAttributes;
       }
@@ -55,15 +56,17 @@ export const useLinks = () => {
         );
 
         return linkAttributes
-          ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
-          .map((attribute) => {
+          ?.map((dsr) => {
+            const attr = dsr.fileMetadata.appData.content;
+
             return {
-              text: attribute.data[LinkFields.LinkText] as string,
-              target: attribute.data[LinkFields.LinkTarget] as string,
-              id: attribute.id,
-              priority: attribute.priority,
+              text: attr.data[LinkFields.LinkText] as string,
+              target: attr.data[LinkFields.LinkTarget] as string,
+              id: attr.id,
+              priority: attr.priority,
             };
-          });
+          })
+          .sort((attrA, attrB) => attrA.priority - attrB.priority);
       } catch (e) {
         console.error('failed to fetch dynamic data');
       }

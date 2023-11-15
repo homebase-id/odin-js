@@ -109,7 +109,7 @@ export const useExport = () => {
     const searchResults = await getAllFilesOnDrive(targetDrive);
 
     const getPayloadForDsr = async (dsr: DriveSearchResult) => {
-      if (dsr.fileMetadata.contentType === 'application/json') {
+      if (dsr.fileMetadata.appData.content) {
         return await getContentFromHeaderOrPayload(
           dotYouClient,
           targetDrive,
@@ -131,7 +131,6 @@ export const useExport = () => {
       return {
         fileId: dsr.fileId,
         fileMetadata: {
-          contentType: dsr.fileMetadata.contentType,
           senderOdinId: dsr.fileMetadata.senderOdinId,
           isEncrypted: dsr.fileMetadata.isEncrypted,
           allowDistribution: dsr.serverMetadata?.allowDistribution,

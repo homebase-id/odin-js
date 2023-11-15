@@ -207,7 +207,7 @@ export const getThumbBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  key: string,
+  payloadKey: string,
   width: number,
   height: number,
   options: { keyHeader?: KeyHeader; systemFileType?: SystemFileType; lastModified?: number }
@@ -215,7 +215,7 @@ export const getThumbBytes = async (
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
-  assertIfDefined('Key', key);
+  assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
@@ -225,7 +225,7 @@ export const getThumbBytes = async (
   const request: GetFileThumbRequest = {
     ...targetDrive,
     fileId,
-    payloadKey: key,
+    payloadKey: payloadKey,
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
@@ -256,7 +256,7 @@ export const getContentFromHeaderOrPayload = async <T>(
   dsr: {
     fileId: string;
     fileMetadata: FileMetadata;
-    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
+    sharedSecretEncryptedKeyHeader: EncryptedKeyHeader | undefined;
   },
   includesJsonContent: boolean,
   systemFileType?: SystemFileType
@@ -265,8 +265,10 @@ export const getContentFromHeaderOrPayload = async <T>(
   const contentIsComplete =
     fileMetadata.payloads.filter((payload) => payload.contentType === 'application/json').length ===
     0;
+  if (fileMetadata.isEncrypted && !sharedSecretEncryptedKeyHeader) return null;
+
   const keyHeader = fileMetadata.isEncrypted
-    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader)
+    ? await decryptKeyHeader(dotYouClient, sharedSecretEncryptedKeyHeader as EncryptedKeyHeader)
     : undefined;
 
   if (contentIsComplete) {

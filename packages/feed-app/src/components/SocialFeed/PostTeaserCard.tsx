@@ -1,4 +1,4 @@
-import { Media, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { Media, PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,
@@ -15,19 +15,23 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
 
 interface PostTeaserCardProps {
   className?: string;
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
   odinId?: string;
   showSummary?: boolean;
 }
 
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
   const { getDotYouClient } = useAuth();
-  const { content: post } = postFile;
+  const post = postFile.fileMetadata.appData.content;
   const isExternal = odinId !== getDotYouClient().getIdentity();
   const navigate = useNavigate();
 
@@ -77,8 +81,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 post={post}
                 odinId={odinId}
                 fileId={postFile.fileId}
-                globalTransitId={postFile.globalTransitId}
-                lastModified={postFile.lastModified}
+                globalTransitId={postFile.fileMetadata.globalTransitId}
+                lastModified={postFile.fileMetadata.updated}
               />
             </div>
           </div>
@@ -112,11 +116,13 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   );
 };
 
-const MediaStillUploading = ({ postFile }: { postFile: PostFile<PostContent> }) => {
+const MediaStillUploading = ({ postFile }: { postFile: NewDriveSearchResult<PostContent> }) => {
   if (postFile.fileId) return null;
-  if (!postFile.content.primaryMediaFile) return null;
+  if (!postFile.fileMetadata.appData.content.primaryMediaFile) return null;
 
-  const mediaFiles = (postFile.content as Media).mediaFiles || [postFile.content.primaryMediaFile];
+  const mediaFiles = (postFile.fileMetadata.appData.content as Media).mediaFiles || [
+    postFile.fileMetadata.appData.content.primaryMediaFile,
+  ];
 
   return (
     <>

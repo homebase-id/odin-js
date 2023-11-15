@@ -59,7 +59,7 @@ import { KbdLeaf } from '../components/plate-ui/kbd-leaf';
 import { FixedToolbar } from '../components/plate-ui/fixed-toolbar';
 import { FixedToolbarButtons } from '../components/plate-ui/fixed-toolbar-buttons';
 
-import { RichText } from '@youfoundation/js-lib/public';
+import { RichText } from '@youfoundation/js-lib/core';
 import { useDarkMode } from '@youfoundation/common-app';
 
 import { createImagePlugin, ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';

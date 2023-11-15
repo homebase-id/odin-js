@@ -1,6 +1,5 @@
-import { DEFAULT_PAYLOAD_KEY } from '../../../core';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { TargetDrive } from '../../core/core';
+import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '../../core/core';
 import { ProfileConfig, BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { AttributeConfig, BuiltInAttributes } from '../../profile/profile';
 import { HomePageConfig, HomePageAttributes } from '../home/HomeTypes';

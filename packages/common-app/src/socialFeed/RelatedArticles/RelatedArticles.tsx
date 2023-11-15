@@ -1,13 +1,14 @@
-import { ChannelDefinition, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
 import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { PostTeaser } from '../PostListItem/PostTeaser';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const RelatedArticles = ({
   blog,
   channel,
 }: {
-  blog: PostFile<PostContent>;
+  blog: DriveSearchResult<PostContent>;
   channel: ChannelDefinitionVm | ChannelDefinition | undefined;
 }) => {
   const { data: blogPosts } = useBlogPostsInfinite(
@@ -19,7 +20,10 @@ export const RelatedArticles = ({
   const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
   const filteredBlogPosts = flattenedPosts
     .slice(0, 4)
-    .filter((relatedBlog) => relatedBlog.content.id !== blog.content.id)
+    .filter(
+      (relatedBlog) =>
+        relatedBlog.fileMetadata.appData.content.id !== blog.fileMetadata.appData.content.id
+    )
     .slice(0, 3);
 
   if (!filteredBlogPosts?.length) return null;
@@ -35,7 +39,7 @@ export const RelatedArticles = ({
             return (
               <PostTeaser
                 postFile={postFile}
-                key={postFile.content.id}
+                key={postFile.fileMetadata.appData.content.id}
                 className={`p-1 sm:w-1/2 md:w-1/3`}
                 forceAspectRatio={true}
               />

@@ -1,7 +1,8 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { EmojiReactionSummary, ReactionFile } from '../../core/DriveData/File/DriveFileTypes';
 import { tryJsonParse } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { ReactionVm, ReactionContext, EmojiReactionSummary, ReactionFile } from './PostTypes';
+import { ReactionVm, ReactionContext } from './PostTypes';
 
 interface ServerReactionsSummary {
   reactions: { reactionContent: string; count: number }[];

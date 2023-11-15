@@ -59,11 +59,13 @@ export const useBiography = () => {
             ) {
               console.warn(entry, 'fetching attribute, not enough data in static file');
               // Fetch attribute if it is not included in the static data
-              attribute = await getAttribute(
-                dotYouClient,
-                BuiltInProfiles.StandardProfileId,
-                entry.header.fileMetadata.appData.uniqueId
-              );
+              attribute = (
+                await getAttribute(
+                  dotYouClient,
+                  BuiltInProfiles.StandardProfileId,
+                  entry.header.fileMetadata.appData.uniqueId
+                )
+              )?.fileMetadata.appData.content;
             }
 
             if (!attribute) return undefined;
@@ -112,11 +114,12 @@ export const useBiography = () => {
           await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
             BuiltInAttributes.ShortBio,
           ])
-        )?.map((attribute) => {
+        )?.map((dsr) => {
+          const attr = dsr.fileMetadata.appData.content;
           return {
-            body: attribute.data[MinimalProfileFields.ShortBioId] as string,
-            id: attribute.id,
-            priority: attribute.priority,
+            body: attr.data[MinimalProfileFields.ShortBioId] as string,
+            id: attr.id,
+            priority: attr.priority,
           };
         });
 
@@ -124,18 +127,19 @@ export const useBiography = () => {
           await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
             BuiltInAttributes.Experience,
           ])
-        )?.map((attribute) => {
+        )?.map((dsr) => {
+          const attr = dsr.fileMetadata.appData.content;
           return {
-            title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
-            body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
+            title: attr.data[MinimalProfileFields.ExperienceTitleId] as string,
+            body: attr.data[MinimalProfileFields.ExperienceDecriptionId] as
               | string
               | Record<string, unknown>[],
-            link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-            imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
-            lastModified: attribute.lastModified,
-            imageFileId: attribute.fileId,
-            id: attribute.id,
-            priority: attribute.priority,
+            link: attr.data[MinimalProfileFields.ExperienceLinkId] as string,
+            imageFileKey: attr.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            lastModified: dsr.fileMetadata.updated,
+            imageFileId: dsr.fileId,
+            id: attr.id,
+            priority: attr.priority,
           };
         });
 

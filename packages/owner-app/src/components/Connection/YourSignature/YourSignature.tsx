@@ -3,25 +3,25 @@ import {
   BuiltInAttributes,
   MinimalProfileFields,
   GetTargetDriveFromProfileId,
-  AttributeFile,
+  Attribute,
 } from '@youfoundation/js-lib/profile';
 import { useImage } from '../../../hooks/media/useImage';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { FallbackImg, LoadingBlock } from '@youfoundation/common-app';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
 
 interface YourSignatureProps {
   className?: string;
 }
 
-const filterAttributes = (attributes: AttributeFile[]) => {
+const filterAttributes = (attributes: DriveSearchResult<Attribute>[]) => {
   return attributes
     ?.filter(
       (attr) =>
-        attr.data !== undefined &&
-        Object.keys(attr.data)?.length !== 0 &&
-        attr.acl.requiredSecurityGroup === SecurityGroupType.Anonymous
+        attr.fileMetadata.appData.content.data !== undefined &&
+        Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup === SecurityGroupType.Anonymous
     )
     ?.sort((attrA, attrB) => attrA.priority - attrB.priority);
 };
@@ -43,12 +43,19 @@ const YourSignature = ({ className }: YourSignatureProps) => {
 
   const { data: imageUrl } = useImage(
     filteredPhotoAttributes?.[0]?.fileId,
-    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageKey],
+    filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
+      MinimalProfileFields.ProfileImageKey
+    ],
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 
-  const name = filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName];
-  const initials = getInitialsOfNameAttribute(filteredNameAttributes?.[0]);
+  const name =
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content.data[
+      MinimalProfileFields.DisplayName
+    ];
+  const initials = getInitialsOfNameAttribute(
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content
+  );
 
   return (
     <div className={`${className ?? ''}`}>

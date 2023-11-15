@@ -6,6 +6,7 @@ import {
   DotYouClient,
   queryBatch,
   DEFAULT_PAYLOAD_KEY,
+  NewDriveSearchResult,
 } from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
 import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
@@ -19,7 +20,7 @@ import { useCircle } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import {
-  AttributeFile,
+  Attribute,
   BuiltInAttributes,
   BuiltInProfiles,
   MinimalProfileFields,
@@ -35,7 +36,6 @@ import {
   getChannelDefinitions,
   GetTargetDriveFromChannelId,
   Article,
-  PostFile,
   PostContent,
   HomePageThemeFields,
 } from '@youfoundation/js-lib/public';
@@ -104,13 +104,14 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
   const profileId = BuiltInProfiles.StandardProfileId.toString();
 
   const {
-    fetch: { data: nameAttr, isFetched: isNameFetched },
+    fetch: { data: nameDsr, isFetched: isNameFetched },
     save: { mutate: saveName },
   } = useAttribute({
     profileId: profileId,
     attributeId: realmData.name.id,
   });
 
+  const nameAttr = nameDsr?.fileMetadata.appData.content;
   const isNameSet =
     attrHasData(nameAttr) && nameAttr?.data[MinimalProfileFields.SurnameId] === realmData.name.last;
 
@@ -120,21 +121,29 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
     }
 
     //set an attribute for the standard profile
-    const newNameAttr: AttributeFile = {
-      fileId: nameAttr?.fileId || undefined,
-      versionTag: nameAttr?.versionTag || undefined,
-      id: realmData.name.id,
-      profileId: profileId,
-      type: BuiltInAttributes.Name,
-      priority: 1000,
-      sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
-      data: {},
-      acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+    const newNameAttr: NewDriveSearchResult<Attribute> = {
+      fileId: nameDsr?.fileId || undefined,
+      fileMetadata: {
+        ...nameDsr?.fileMetadata,
+        appData: {
+          content: {
+            id: realmData.name.id,
+            profileId: profileId,
+            type: BuiltInAttributes.Name,
+            priority: 1000,
+            sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
+            data: {},
+          },
+        },
+      },
+      serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous } },
     };
 
-    newNameAttr.data[MinimalProfileFields.GivenNameId] = realmData.name.first;
-    newNameAttr.data[MinimalProfileFields.SurnameId] = realmData.name.last;
-    newNameAttr.data[
+    newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.GivenNameId] =
+      realmData.name.first;
+    newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.SurnameId] =
+      realmData.name.last;
+    newNameAttr.fileMetadata.appData.content.data[
       MinimalProfileFields.DisplayName
     ] = `${realmData.name.first} ${realmData.name.last}`;
 
@@ -144,12 +153,13 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
   };
 
   const {
-    fetch: { data: photoAttr, isFetched: isPhotoFetched },
+    fetch: { data: photoDsr, isFetched: isPhotoFetched },
     save: { mutate: savePhoto },
   } = useAttribute({
     profileId: profileId,
     attributeId: realmData.photo?.[0].id,
   });
+  const photoAttr = photoDsr?.fileMetadata.appData.content;
 
   const addPhoto = async () => {
     if (attrHasData(photoAttr)) {
@@ -175,22 +185,27 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       }
 
       // Create attribute
-      const anonymousPhotoAttribute: AttributeFile = {
+      const anonymousPhotoAttribute: NewDriveSearchResult<Attribute> = {
         fileId: foundAttribute?.fileId || undefined,
-        versionTag: foundAttribute?.versionTag || undefined,
-        id: id,
-        profileId: profileId,
-        type: BuiltInAttributes.Photo,
-        priority: priority,
-        sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
-        data: {},
-        acl: acl,
+        fileMetadata: {
+          ...foundAttribute?.fileMetadata,
+          appData: {
+            content: {
+              id: id,
+              profileId: profileId,
+              type: BuiltInAttributes.Photo,
+              priority: priority,
+              sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
+              data: {},
+            },
+          },
+        },
+        serverMetadata: { accessControlList: acl },
       };
 
-      anonymousPhotoAttribute.data[MinimalProfileFields.ProfileImageKey] = new Blob(
-        [new Uint8Array(base64ToArrayBuffer(media.base64))],
-        { type: 'image/webp' }
-      );
+      anonymousPhotoAttribute.fileMetadata.appData.content.data[
+        MinimalProfileFields.ProfileImageKey
+      ] = new Blob([new Uint8Array(base64ToArrayBuffer(media.base64))], { type: 'image/webp' });
 
       savePhoto(anonymousPhotoAttribute);
       return true;
@@ -206,12 +221,13 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
   };
 
   const {
-    fetch: { data: socialAttr, isFetched: isSocialFetched },
+    fetch: { data: socialDsr, isFetched: isSocialFetched },
     save: { mutate: saveSocial },
   } = useAttribute({
     profileId: profileId,
     attributeId: 'socials' in realmData ? realmData.socials?.[0]?.id : undefined,
   });
+  const socialAttr = socialDsr?.fileMetadata.appData.content;
 
   const addSocials = async () => {
     if (attrHasData(socialAttr)) {
@@ -237,19 +253,27 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       }
 
       // Create attribute:
-      const socialAttribute: AttributeFile = {
-        fileId: foundAttribute?.fileId || undefined,
-        versionTag: foundAttribute?.versionTag || undefined,
-        id: id,
-        profileId: profileId,
-        type: type,
-        priority: priority,
-        sectionId: BuiltInProfiles.ExternalLinksSectionId.toString(),
-        data: {},
-        acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+      const socialAttribute: NewDriveSearchResult<Attribute> = {
+        ...foundAttribute,
+        fileMetadata: {
+          ...foundAttribute?.fileMetadata,
+          appData: {
+            content: {
+              id: id,
+              profileId: profileId,
+              type: type,
+              priority: priority,
+              sectionId: BuiltInProfiles.ExternalLinksSectionId.toString(),
+              data: {},
+            },
+          },
+        },
+        serverMetadata: {
+          accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+        },
       };
 
-      socialAttribute.data[dataField] = value;
+      socialAttribute.fileMetadata.appData.content.data[dataField] = value;
 
       saveSocial(socialAttribute);
 
@@ -328,22 +352,28 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       }
 
       //set an attribute for the standard profile
-      const bioAttr: AttributeFile = {
-        fileId: undefined,
-        versionTag: undefined,
+      const bioAttr: Attribute = {
         id: id,
         profileId: profileId,
         type: BuiltInAttributes.Experience,
         priority: priority,
         sectionId: BuiltInProfiles.PersonalInfoSectionId.toString(),
         data: {},
-        acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
       };
 
       bioAttr.data[MinimalProfileFields.ExperienceTitleId] = title;
       bioAttr.data[MinimalProfileFields.ExperienceDecriptionId] = body;
 
-      saveBio(bioAttr);
+      saveBio({
+        fileMetadata: {
+          appData: {
+            content: bioAttr,
+          },
+        },
+        serverMetadata: {
+          accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+        },
+      });
 
       return true;
     };
@@ -449,14 +479,12 @@ const DemoDataHomeAndTheme = ({
   client: DotYouClient;
   realmData: RealmData;
 }) => {
-  if (!('home' in realmData)) {
-    return null;
-  }
+  if (!('home' in realmData)) return null;
 
-  const { data: themeData } = useHomeAttributes().fetchTheme;
+  const { data: themeDsr } = useHomeAttributes().fetchTheme;
+  const themeAttr = themeDsr?.[0]?.fileMetadata.appData.content;
   const hasThemeData =
-    themeData?.length &&
-    themeData[0].data[HomePageThemeFields.TagLineId] === realmData.home.tagLine;
+    themeAttr && themeAttr.data[HomePageThemeFields.TagLineId] === realmData.home.tagLine;
 
   const {
     save: { mutate: saveRoot },
@@ -469,19 +497,16 @@ const DemoDataHomeAndTheme = ({
     if (hasThemeData) return;
 
     // Create attribute
-    const newRootAttr: AttributeFile = themeData?.[0] || {
-      fileId: undefined,
-      versionTag: undefined,
+    const newThemeAttr: Attribute = themeAttr || {
       id: getNewId(),
       profileId: HomePageConfig.DefaultDriveId.toString(),
       type: HomePageAttributes.Theme.toString(),
       priority: 1000,
       sectionId: HomePageConfig.AttributeSectionNotApplicable.toString(),
       data: {},
-      acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
     };
 
-    newRootAttr.data[HomePageThemeFields.HeaderImageKey] = new Blob(
+    newThemeAttr.data[HomePageThemeFields.HeaderImageKey] = new Blob(
       [new Uint8Array(base64ToArrayBuffer(realmData.home.headerImage.base64))],
       { type: 'image/webp' }
     );
@@ -490,7 +515,16 @@ const DemoDataHomeAndTheme = ({
     // StatusAttr.data[HomePageThemeFields.TagLineId] = realmData.home.tagLine;
     // ShortBioAttr.data[HomePageThemeFields.LeadTextId] = realmData.home.lead;
 
-    saveRoot(newRootAttr);
+    saveRoot({
+      fileMetadata: {
+        appData: {
+          content: newThemeAttr,
+        },
+      },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+      },
+    });
 
     return true;
   };
@@ -606,17 +640,21 @@ const DemoDataBlog = ({
             body: randomAbstract + ' and then some', //Note: this can be html
           };
 
-          const blogFile: PostFile<PostContent> = {
-            fileId: undefined,
-            userDate: new Date().getTime(),
-            versionTag: undefined,
-            acl: channel.acl
-              ? {
-                  ...channel.acl,
-                }
-              : { requiredSecurityGroup: SecurityGroupType.Anonymous },
-            content: blogContent,
-            previewThumbnail: previewThumbnail || undefined,
+          const blogFile: NewDriveSearchResult<PostContent> = {
+            fileMetadata: {
+              appData: {
+                userDate: new Date().getTime(),
+                content: blogContent,
+                previewThumbnail: previewThumbnail || undefined,
+              },
+            },
+            serverMetadata: {
+              accessControlList: channel.acl
+                ? {
+                    ...channel.acl,
+                  }
+                : { requiredSecurityGroup: SecurityGroupType.Anonymous },
+            },
           };
 
           await saveBlog({ postFile: blogFile, channelId: channel.channelId });

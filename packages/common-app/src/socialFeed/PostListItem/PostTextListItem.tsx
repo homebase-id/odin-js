@@ -1,9 +1,10 @@
-import { PostFile, Article } from '@youfoundation/js-lib/public';
+import { Article } from '@youfoundation/js-lib/public';
 import { ellipsisAtMaxChar } from '../../helpers';
 import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostMeta } from '../Blocks/Meta/Meta';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const PostTextListItem = ({
   draft,
@@ -11,11 +12,12 @@ export const PostTextListItem = ({
   linkRoot,
   className,
 }: {
-  draft: PostFile<Article>;
+  draft: DriveSearchResult<Article>;
   channel?: ChannelDefinitionVm;
   linkRoot: string;
   className?: string;
 }) => {
+  const content = draft.fileMetadata.appData.content;
   return (
     <>
       <div
@@ -24,7 +26,7 @@ export const PostTextListItem = ({
         } p-3 hover:shadow-md hover:dark:shadow-slate-600`}
         key={draft.fileId}
       >
-        <FakeAnchor href={`${linkRoot}/${channel?.slug ?? 'public-posts'}/${draft.content.id}`}>
+        <FakeAnchor href={`${linkRoot}/${channel?.slug ?? 'public-posts'}/${content.id}`}>
           <div className="flex flex-col">
             <div className="flex flex-grow flex-col px-4 py-3">
               <div className="text-foreground mb-1 flex flex-col text-opacity-60 md:flex-row md:flex-wrap md:items-center">
@@ -34,11 +36,9 @@ export const PostTextListItem = ({
                 <span className="hidden px-2 leading-4 md:block">·</span>
                 {channel && draft ? <PostMeta postFile={draft} channel={channel} /> : null}
               </div>
-              <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>
-                {draft.content.caption}
-              </h1>
+              <h1 className={`text-foreground mb-1 text-lg text-opacity-80`}>{content.caption}</h1>
               <div className="text-foreground leading-relaxed text-opacity-70">
-                {ellipsisAtMaxChar(draft.content.abstract, 280)}
+                {ellipsisAtMaxChar(content.abstract, 280)}
               </div>
             </div>
           </div>

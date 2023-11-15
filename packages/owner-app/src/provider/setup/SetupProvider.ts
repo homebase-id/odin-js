@@ -1,9 +1,4 @@
-import {
-  DotYouClient,
-  ImageContentType,
-  SecurityGroupType,
-  uploadImage,
-} from '@youfoundation/js-lib/core';
+import { DotYouClient, NewDriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
   HomePageConfig,
   HomePageAttributes,
@@ -21,15 +16,14 @@ import {
   saveProfileSection,
   getAttributes,
   saveAttribute,
-  AttributeFile,
   BuiltInAttributes,
-  GetTargetDriveFromProfileId,
   LocationFields,
   MinimalProfileFields,
   getAttribute,
   LinkFields,
   SocialFields,
   getAttributeVersions,
+  Attribute,
 } from '@youfoundation/js-lib/profile';
 import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
 
@@ -93,17 +87,25 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     await saveProfileSection(dotYouClient, initialWallet.profileId, initialCreditCardSection);
   }
 
-  const defaultShortBioAttribute: AttributeFile = {
-    id: getNewId(),
-    profileId: BuiltInProfiles.StandardProfileId,
-    type: BuiltInAttributes.ShortBio,
-    priority: 10000,
-    sectionId: BuiltInProfiles.AboutSectionId,
-    data: {
-      short_bio:
-        'Born in a serene town that instilled values of compassion and integrity, embodies the essence of a true global citizen.',
+  const defaultShortBioAttribute: NewDriveSearchResult<Attribute> = {
+    fileMetadata: {
+      appData: {
+        content: {
+          id: getNewId(),
+          profileId: BuiltInProfiles.StandardProfileId,
+          type: BuiltInAttributes.ShortBio,
+          priority: 10000,
+          sectionId: BuiltInProfiles.AboutSectionId,
+          data: {
+            short_bio:
+              'Born in a serene town that instilled values of compassion and integrity, embodies the essence of a true global citizen.',
+          },
+        },
+      },
     },
-    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+    serverMetadata: {
+      accessControlList: ANONYMOUS_ACL,
+    },
   };
 
   const shortBioAttr = await getAttributes(
@@ -115,14 +117,22 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 
   if (!shortBioAttr?.length) await saveAttribute(dotYouClient, defaultShortBioAttribute);
 
-  const defaultStatusAttribute: AttributeFile = {
-    id: getNewId(),
-    profileId: BuiltInProfiles.StandardProfileId,
-    type: BuiltInAttributes.Status,
-    priority: 10000,
-    sectionId: BuiltInProfiles.PersonalInfoSectionId,
-    data: { status: 'New Identity Owner' },
-    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+  const defaultStatusAttribute: NewDriveSearchResult<Attribute> = {
+    fileMetadata: {
+      appData: {
+        content: {
+          id: getNewId(),
+          profileId: BuiltInProfiles.StandardProfileId,
+          type: BuiltInAttributes.Status,
+          priority: 10000,
+          sectionId: BuiltInProfiles.PersonalInfoSectionId,
+          data: { status: 'New Identity Owner' },
+        },
+      },
+    },
+    serverMetadata: {
+      accessControlList: ANONYMOUS_ACL,
+    },
   };
 
   const statusAttr = await getAttributes(
@@ -136,20 +146,26 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
-  const defaultThemeAttribute: AttributeFile = {
-    id: getNewId(),
-    profileId: HomePageConfig.DefaultDriveId,
-    type: HomePageAttributes.Theme,
-    priority: 1000,
-    sectionId: HomePageConfig.AttributeSectionNotApplicable,
-    data: {
-      themeId: HomePageTheme.VerticalPosts + '',
-      isProtected: true,
-      headerImageKey: new Blob([base64ToUint8Array(fallbackHeaderImage())], {
-        type: 'image/svg+xml',
-      }),
+  const defaultThemeAttribute: NewDriveSearchResult<Attribute> = {
+    fileMetadata: {
+      appData: {
+        content: {
+          id: getNewId(),
+          profileId: HomePageConfig.DefaultDriveId,
+          type: HomePageAttributes.Theme,
+          priority: 1000,
+          sectionId: HomePageConfig.AttributeSectionNotApplicable,
+          data: {
+            themeId: HomePageTheme.VerticalPosts + '',
+            isProtected: true,
+            headerImageKey: new Blob([base64ToUint8Array(fallbackHeaderImage())], {
+              type: 'image/svg+xml',
+            }),
+          },
+        },
+      },
     },
-    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+    serverMetadata: { accessControlList: ANONYMOUS_ACL },
   };
 
   const themeDef = await getAttributes(
@@ -200,17 +216,24 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
   );
 
   if (!existingPhotoAttr && profileData.imageData) {
-    const newPhotoAttr: AttributeFile = {
-      id: defaultPhotoAttrId,
-      profileId: BuiltInProfiles.StandardProfileId,
-      type: BuiltInAttributes.Photo,
-      priority: 9000, // a High Prio, so new ones get a better one
-      sectionId: BuiltInProfiles.PersonalInfoSectionId,
-      data: {},
-      acl: ANONYMOUS_ACL,
+    const newPhotoAttr: NewDriveSearchResult<Attribute> = {
+      fileMetadata: {
+        appData: {
+          content: {
+            id: defaultPhotoAttrId,
+            profileId: BuiltInProfiles.StandardProfileId,
+            type: BuiltInAttributes.Photo,
+            priority: 9000, // a High Prio, so new ones get a better one
+            sectionId: BuiltInProfiles.PersonalInfoSectionId,
+            data: {},
+          },
+        },
+      },
+      serverMetadata: { accessControlList: ANONYMOUS_ACL },
     };
 
-    newPhotoAttr.data[MinimalProfileFields.ProfileImageKey] = profileData.imageData;
+    newPhotoAttr.fileMetadata.appData.content.data[MinimalProfileFields.ProfileImageKey] =
+      profileData.imageData;
 
     await saveAttribute(dotYouClient, newPhotoAttr);
   }
@@ -224,19 +247,27 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
   );
 
   if (!existingNameAttr) {
-    const newNameAttr: AttributeFile = {
-      id: defaultNameAttrId,
-      profileId: BuiltInProfiles.StandardProfileId,
-      type: BuiltInAttributes.Name,
-      priority: 2000,
-      sectionId: BuiltInProfiles.PersonalInfoSectionId,
-      data: {},
-      acl: ANONYMOUS_ACL,
+    const newNameAttr: NewDriveSearchResult<Attribute> = {
+      fileMetadata: {
+        appData: {
+          content: {
+            id: defaultNameAttrId,
+            profileId: BuiltInProfiles.StandardProfileId,
+            type: BuiltInAttributes.Name,
+            priority: 2000,
+            sectionId: BuiltInProfiles.PersonalInfoSectionId,
+            data: {},
+          },
+        },
+      },
+      serverMetadata: { accessControlList: ANONYMOUS_ACL },
     };
 
-    newNameAttr.data[MinimalProfileFields.GivenNameId] = profileData.givenName;
-    newNameAttr.data[MinimalProfileFields.SurnameId] = profileData.surname;
-    newNameAttr.data[
+    newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.GivenNameId] =
+      profileData.givenName;
+    newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.SurnameId] =
+      profileData.surname;
+    newNameAttr.fileMetadata.appData.content.data[
       MinimalProfileFields.DisplayName
     ] = `${profileData.givenName} ${profileData.surname}`;
 
@@ -253,18 +284,26 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
     );
 
     if (!existingLocationAttr) {
-      const newLocationAttr: AttributeFile = {
-        id: defaultLocationAttrId,
-        profileId: BuiltInProfiles.StandardProfileId,
-        type: BuiltInAttributes.Address,
-        priority: 3000,
-        sectionId: BuiltInProfiles.PersonalInfoSectionId,
-        data: {},
-        acl: ANONYMOUS_ACL,
+      const newLocationAttr: NewDriveSearchResult<Attribute> = {
+        fileMetadata: {
+          appData: {
+            content: {
+              id: defaultLocationAttrId,
+              profileId: BuiltInProfiles.StandardProfileId,
+              type: BuiltInAttributes.Address,
+              priority: 3000,
+              sectionId: BuiltInProfiles.PersonalInfoSectionId,
+              data: {},
+            },
+          },
+        },
+        serverMetadata: { accessControlList: ANONYMOUS_ACL },
       };
 
-      newLocationAttr.data[LocationFields.City] = profileData.city ?? '';
-      newLocationAttr.data[LocationFields.Country] = profileData.country ?? '';
+      newLocationAttr.fileMetadata.appData.content.data[LocationFields.City] =
+        profileData.city ?? '';
+      newLocationAttr.fileMetadata.appData.content.data[LocationFields.Country] =
+        profileData.country ?? '';
 
       await saveAttribute(dotYouClient, newLocationAttr);
     }
@@ -283,17 +322,23 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
 
     if (!foundAttributesOfType?.length) {
       // Create attribute:
-      const socialAttribute: AttributeFile = {
-        id: getNewId(),
-        profileId: BuiltInProfiles.StandardProfileId,
-        type: type,
-        priority: priority,
-        sectionId: BuiltInProfiles.ExternalLinksSectionId.toString(),
-        data: {},
-        acl: ANONYMOUS_ACL,
+      const socialAttribute: NewDriveSearchResult<Attribute> = {
+        fileMetadata: {
+          appData: {
+            content: {
+              id: getNewId(),
+              profileId: BuiltInProfiles.StandardProfileId,
+              type: type,
+              priority: priority,
+              sectionId: BuiltInProfiles.ExternalLinksSectionId.toString(),
+              data: {},
+            },
+          },
+        },
+        serverMetadata: { accessControlList: ANONYMOUS_ACL },
       };
 
-      socialAttribute.data[dataField] = value;
+      socialAttribute.fileMetadata.appData.content.data[dataField] = value;
 
       await saveAttribute(dotYouClient, socialAttribute);
     }
@@ -352,18 +397,24 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
   if (socialData.other)
     await Promise.all(
       socialData.other.map(async (link, index) => {
-        const linkAttribute: AttributeFile = {
-          id: getNewId(),
-          profileId: BuiltInProfiles.StandardProfileId,
-          type: BuiltInAttributes.Link,
-          priority: 10000 + index * 1000,
-          sectionId: BuiltInProfiles.ExternalLinksSectionId.toString(),
-          data: {},
-          acl: ANONYMOUS_ACL,
+        const linkAttribute: NewDriveSearchResult<Attribute> = {
+          fileMetadata: {
+            appData: {
+              content: {
+                id: getNewId(),
+                profileId: BuiltInProfiles.StandardProfileId,
+                type: BuiltInAttributes.Link,
+                priority: 10000 + index * 1000,
+                sectionId: BuiltInProfiles.ExternalLinksSectionId.toString(),
+                data: {},
+              },
+            },
+          },
+          serverMetadata: { accessControlList: ANONYMOUS_ACL },
         };
 
-        linkAttribute.data[LinkFields.LinkText] = link.text;
-        linkAttribute.data[LinkFields.LinkTarget] = link.target;
+        linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkText] = link.text;
+        linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkTarget] = link.target;
 
         return await saveAttribute(dotYouClient, linkAttribute);
       })

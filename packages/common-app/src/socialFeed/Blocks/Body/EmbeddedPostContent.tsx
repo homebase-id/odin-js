@@ -89,7 +89,7 @@ export const EmbeddedPostContent = ({
 
         {!shouldHideMedia ? (
           <PostMedia
-            postFile={{
+            postInfo={{
               fileId: content.primaryMediaFile?.fileId || content.fileId,
               globalTransitId: content.globalTransitId,
               lastModified: content.lastModified,

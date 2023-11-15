@@ -8,7 +8,7 @@ import { LoadingBlock } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
 import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
 import { useSocialFeed } from '@youfoundation/common-app';
-import { PostFileVm } from '@youfoundation/js-lib/transit';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
@@ -26,10 +26,12 @@ const SocialFeedMainContent = () => {
   // Flatten all pages, sorted descending and slice on the max number expected
   const flattenedPosts = useMemo(
     () =>
-      flattenInfinteData<PostFileVm<PostContent>>(
+      flattenInfinteData<DriveSearchResult<PostContent>>(
         posts,
         PAGE_SIZE,
-        (a, b) => b.userDate - a.userDate
+        (a, b) =>
+          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
       ),
     [posts]
   );
@@ -117,9 +119,9 @@ const SocialFeedMainContent = () => {
 
                   const post = flattenedPosts[virtualRow.index];
                   const postTeaserCardProps = {
-                    key: post.fileId || post.content.id,
+                    key: post.fileId || post.fileMetadata.appData.content.id,
                     postFile: post,
-                    odinId: post.odinId,
+                    odinId: post.fileMetadata.senderOdinId,
                     className: 'bg-background shadow-sm',
                     showSummary: true,
                   };

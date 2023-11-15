@@ -1,8 +1,6 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  EmojiReactionSummary,
   ReactionContext,
-  ReactionFile,
   ReactionVm,
   removeComment,
   removeEmojiReaction,
@@ -13,6 +11,7 @@ import {
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 import { useDotYouClient } from '../../..';
+import { EmojiReactionSummary, ReactionFile } from '@youfoundation/js-lib/core';
 
 export const useReaction = () => {
   const queryClient = useQueryClient();

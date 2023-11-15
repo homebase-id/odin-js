@@ -8,7 +8,7 @@ import {
   slugify,
 } from './AttributeHelpers';
 import { LocationFields, MinimalProfileFields } from '../profile/ProfileData/ProfileConfig';
-import { AttributeFile } from '../profile/AttributeData/AttributeDataTypes';
+import { Attribute } from '../profile/AttributeData/AttributeDataTypes';
 
 test('Slugify', () => {
   expect(slugify('test')).toEqual('test');
@@ -50,7 +50,7 @@ const _buildLocationAttribute = (
   attr.data[LocationFields.City] = city;
   attr.data[LocationFields.Country] = country;
 
-  return attr as AttributeFile;
+  return attr as Attribute;
 };
 test('Generate Display Location from Attribute', () => {
   expect(getDisplayLocationFromLocationAttribute(_buildLocationAttribute())).toEqual('');
@@ -91,7 +91,7 @@ const _buildNameAttribute = (
   attr.data[MinimalProfileFields.GivenNameId] = givenNameId;
   attr.data[MinimalProfileFields.SurnameId] = surnameId;
 
-  return attr as AttributeFile;
+  return attr as Attribute;
 };
 
 test('Generate Display Name from Attribute', () => {

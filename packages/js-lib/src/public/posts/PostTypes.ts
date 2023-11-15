@@ -1,5 +1,12 @@
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
-import { TargetDrive, EmbeddedThumb, ThumbnailFile } from '../../core/core';
+import {
+  TargetDrive,
+  EmbeddedThumb,
+  ThumbnailFile,
+  RichText,
+  ReactionFile,
+  ReactionContent,
+} from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
 export interface ChannelDefinition {
@@ -72,24 +79,8 @@ export interface NewMediaFile {
   thumbnail?: ThumbnailFile;
 }
 
-export interface PostFile<T extends PostContent> {
-  fileId?: string;
-  versionTag?: string;
-  globalTransitId?: string;
-  acl?: AccessControlList;
-  userDate: number;
-  content: T;
-  previewThumbnail?: EmbeddedThumb;
-  reactionPreview?: {
-    reactions: EmojiReactionSummary;
-    comments: CommentsReactionSummary;
-  };
-  isEncrypted?: boolean;
-  isDraft?: boolean;
-  lastModified?: number;
-}
-
-export type RichText = Record<string, unknown>[];
+// export type PostFile<T extends PostContent> = DriveSearchResult<T>;
+// export type NewPostFile<T extends PostContent> = NewDriveSearchResult<T>;
 
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
@@ -150,47 +141,7 @@ export interface Tweet extends PostContent {
 export interface ReactionContext {
   authorOdinId: string;
   channelId: string;
-  // Target: Post or Comment details
   target: { fileId: string; globalTransitId: string; isEncrypted: boolean };
-}
-
-export interface ReactionContent {
-  body: string;
-  bodyAsRichText?: RichText;
-  mediaPayloadKey?: string;
-}
-
-export interface ReactionFile {
-  globalTransitId?: string;
-
-  versionTag?: string;
-
-  fileId?: string;
-  id?: string;
-  threadId?: string;
-  lastModified?: number;
-
-  isEncrypted?: boolean;
-
-  authorOdinId: string;
-  date?: number;
-  updated?: number;
-
-  content: ReactionContent;
-}
-
-export interface CommentReactionPreview extends ReactionFile {
-  reactions: EmojiReactionSummary;
-}
-
-export interface EmojiReactionSummary {
-  reactions: { emoji: string; count: number }[];
-  totalCount: number;
-}
-
-export interface CommentsReactionSummary {
-  comments: CommentReactionPreview[];
-  totalCount: number;
 }
 
 export interface ReactionVm extends Omit<ReactionFile, 'content'> {

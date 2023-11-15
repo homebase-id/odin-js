@@ -1,10 +1,11 @@
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { moveElementInArray } from '../../templates/DemoData/helpers';
 import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';
 
 export type attributeGroup = {
   name: string;
-  attributes: AttributeVm[];
+  attributes: DriveSearchResult<AttributeVm>[];
   priority: number;
 };
 
@@ -12,19 +13,35 @@ export const useAttributeOrderer = ({
   attributes,
   groupedAttributes,
 }: {
-  attributes: AttributeVm[];
+  attributes: DriveSearchResult<AttributeVm>[];
   groupedAttributes: attributeGroup[];
 }) => {
   const { mutateAsync: saveAttribute } = useAttribute({}).save;
 
-  const respreadAttributes = async (orderedAttributes: AttributeVm[], minPrio: number) =>
+  const respreadAttributes = async (
+    orderedAttributes: DriveSearchResult<AttributeVm>[],
+    minPrio: number
+  ) =>
     await Promise.all(
       orderedAttributes.map(
-        async (attr, index) => await saveAttribute({ ...attr, priority: minPrio + index * 1000 })
+        async (attr, index) =>
+          await saveAttribute({
+            ...attr,
+            fileMetadata: {
+              ...attr.fileMetadata,
+              appData: {
+                ...attr.fileMetadata.appData,
+                content: {
+                  ...attr.fileMetadata.appData.content,
+                  priority: minPrio + index * 1000,
+                },
+              },
+            },
+          })
       )
     );
 
-  const reorderAttr = async (attr: AttributeVm, dir: -1 | 1) => {
+  const reorderAttr = async (attr: DriveSearchResult<AttributeVm>, dir: -1 | 1) => {
     // Calculate new priority
     const currentPos = attributes.indexOf(attr);
     const toBecomePos = currentPos + dir;
@@ -33,8 +50,10 @@ export const useAttributeOrderer = ({
       return attr.priority;
     }
 
-    const beforeAttr = attributes[dir === -1 ? toBecomePos - 1 : toBecomePos];
-    const afterAttr = attributes[dir === -1 ? toBecomePos : toBecomePos + 1];
+    const beforeAttr =
+      attributes[dir === -1 ? toBecomePos - 1 : toBecomePos]?.fileMetadata?.appData?.content;
+    const afterAttr =
+      attributes[dir === -1 ? toBecomePos : toBecomePos + 1]?.fileMetadata?.appData?.content;
 
     // Force new priority to stay within existing priority bounds
     const minPriority = Math.min(...attributes.map((attr) => attr.priority));
@@ -49,11 +68,17 @@ export const useAttributeOrderer = ({
 
     // Validate if new priority has no conflicts
     const updatedAttributes = [...attributes];
-    updatedAttributes[currentPos] = { ...updatedAttributes[currentPos], priority: newPriority };
+    updatedAttributes[currentPos] = { ...updatedAttributes[currentPos] };
+    updatedAttributes[currentPos].fileMetadata.appData.content.priority = newPriority;
 
     if (
       updatedAttributes.some((attr) =>
-        updatedAttributes.some((item) => item.priority === attr.priority && item.id !== attr.id)
+        updatedAttributes.some(
+          (item) =>
+            item.fileMetadata.appData.content.priority ===
+              attr.fileMetadata.appData.content.priority &&
+            item.fileMetadata.appData.content.id !== attr.fileMetadata.appData.content.id
+        )
       )
     ) {
       // there is a priority conflict, going to spread evenly and save

@@ -4,14 +4,14 @@ import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 
 export const PostMedia = ({
   odinId,
-  postFile,
+  postInfo,
   showFallback,
   forceAspectRatio,
   onClick,
   className,
 }: {
   odinId?: string;
-  postFile: {
+  postInfo: {
     fileId: string;
     globalTransitId?: string;
     lastModified: number | undefined;
@@ -24,7 +24,7 @@ export const PostMedia = ({
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
   className?: string;
 }) => {
-  const { content: post, previewThumbnail } = postFile;
+  const { content: post, previewThumbnail } = postInfo;
   const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
@@ -45,14 +45,14 @@ export const PostMedia = ({
     return (
       <MediaGallery
         odinId={odinId}
-        fileId={postFile.fileId}
-        globalTransitId={postFile.globalTransitId}
-        lastModified={postFile.lastModified}
+        fileId={postInfo.fileId}
+        globalTransitId={postInfo.globalTransitId}
+        lastModified={postInfo.lastModified}
         channelId={post.channelId}
         files={mediaFiles}
         className={`${className || ''}`}
         previewThumbnail={previewThumbnail}
-        probablyEncrypted={postFile.isEncrypted}
+        probablyEncrypted={postInfo.isEncrypted}
         onClick={onClick}
       />
     );
@@ -63,13 +63,13 @@ export const PostMedia = ({
         fit="contain"
         primaryMediaFile={post.primaryMediaFile}
         channelId={post.channelId}
-        fileId={postFile.fileId}
-        globalTransitId={postFile.globalTransitId}
-        lastModified={postFile.lastModified}
+        fileId={postInfo.fileId}
+        globalTransitId={postInfo.globalTransitId}
+        lastModified={postInfo.lastModified}
         odinId={odinId}
         className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
-        probablyEncrypted={postFile.isEncrypted}
+        probablyEncrypted={postInfo.isEncrypted}
         onClick={onClick ? (e) => onClick(e, 0) : undefined}
         clickToLoad={true}
       />

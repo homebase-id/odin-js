@@ -16,22 +16,22 @@ const RichTextEditor = lazy(() =>
 const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 
 export const ThemeAttributeEditor = (props: {
+  fileId?: string;
   attribute: AttributeVm;
   onChange: (e: {
     target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
   }) => void;
 }) => {
-  const { attribute, onChange } = props;
+  const { fileId, attribute, onChange } = props;
 
   return (
     <div className="flex flex-col gap-5">
       <div>
         <Label htmlFor={HomePageThemeFields.Favicon}>{t('Favicon')}</Label>
         <FaviconSelector
-          attribute={attribute}
+          fileId={fileId}
           name={HomePageThemeFields.Favicon}
           defaultValue={attribute.data?.[HomePageThemeFields.Favicon] ?? ''}
-          acl={attribute.acl}
           onChange={(e) => onChange({ target: { name: e.target.name, value: e.target.value } })}
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
         />
@@ -48,7 +48,7 @@ export const ThemeAttributeEditor = (props: {
       <div>
         <Label htmlFor={HomePageThemeFields.ThemeId}>{t('Theme')}</Label>
         <ThemeSelector
-          id={attribute.fileId || attribute.id}
+          id={fileId || attribute.id}
           name={HomePageThemeFields.ThemeId}
           defaultValue={attribute.data?.[HomePageThemeFields.ThemeId] ?? ''}
           onChange={onChange}
@@ -60,19 +60,23 @@ export const ThemeAttributeEditor = (props: {
 };
 
 const ThemeSpecificFields = ({
+  fileId,
   attribute,
   onChange,
 }: {
+  fileId?: string;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId);
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
   const { data: imageBlob } = usePayloadBlob(
-    attribute.fileId,
+    fileId,
     attribute.data?.[HomePageThemeFields.HeaderImageKey],
     targetDrive
   );
+
+  console.log(fileId);
 
   const dataVal = attribute.data?.[HomePageThemeFields.HeaderImageKey];
   const defaultValue =

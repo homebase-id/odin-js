@@ -1,5 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { Article, PostFile } from '@youfoundation/js-lib/public';
+import { Article } from '@youfoundation/js-lib/public';
 import {
   ActionButton,
   ActionLink,
@@ -17,6 +17,7 @@ import { t } from '@youfoundation/common-app';
 
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const ArticlesPage = () => {
   return (
@@ -58,7 +59,9 @@ const DraftsView = () => {
         {drafts ? (
           <div className="-m-3">
             {drafts.map((draft, index) => {
-              const channel = channels?.find((chnl) => chnl.channelId === draft.content.channelId);
+              const channel = channels?.find(
+                (chnl) => chnl.channelId === draft.fileMetadata.appData.content.channelId
+              );
               return (
                 <PostTextListItem
                   draft={draft}
@@ -90,9 +93,9 @@ const PublishedArticlesView = () => {
     pageSize: PAGE_SIZE,
   });
 
-  const flattenedPosts = flattenInfinteData<PostFile<Article>>(
+  const flattenedPosts = flattenInfinteData<DriveSearchResult<Article>>(
     articleData as InfiniteData<{
-      results: PostFile<Article>[];
+      results: DriveSearchResult<Article>[];
       cursorState: unknown;
     }>,
     PAGE_SIZE
@@ -117,7 +120,7 @@ const PublishedArticlesView = () => {
             ) : (
               flattenedPosts.map((draft, index) => {
                 const channel = channels?.find(
-                  (chnl) => chnl.channelId === draft.content.channelId
+                  (chnl) => chnl.channelId === draft.fileMetadata.appData.content.channelId
                 );
                 return (
                   <PostTextListItem

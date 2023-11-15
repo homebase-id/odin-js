@@ -15,6 +15,8 @@ import {
 } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
+  DriveSearchResult,
+  NewDriveSearchResult,
   EmbeddedThumb,
   PayloadFile,
   TargetDrive,
@@ -35,7 +37,6 @@ import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { getPost, getPostBySlug } from './PostProvider';
 import {
   PostContent,
-  PostFile,
   NewMediaFile,
   MediaFile,
   BlogConfig,
@@ -47,21 +48,25 @@ const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: PostFile<T>,
+  file: DriveSearchResult<T> | NewDriveSearchResult<T>,
   channelId: string,
   toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult> => {
-  if (!file.content.id) {
-    file.content.id = file.content.slug ? toGuidId(file.content.slug) : getNewId();
+  if (!file.fileMetadata.appData.content.id) {
+    file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
+      ? toGuidId(file.fileMetadata.appData.content.slug)
+      : getNewId();
   } else if (!file.fileId) {
-    // Check if content.id exists and with which fileId
-    file.fileId = (await getPost(dotYouClient, channelId, file.content.id))?.fileId ?? undefined;
+    // Check if fileMetadata.appData.content.id exists and with which fileId
+    file.fileId =
+      (await getPost(dotYouClient, channelId, file.fileMetadata.appData.content.id))?.fileId ??
+      undefined;
   }
 
   if (file.fileId) {
-    return await updatePost(dotYouClient, file, channelId, toSaveFiles);
+    return await updatePost(dotYouClient, file as DriveSearchResult<T>, channelId, toSaveFiles);
   } else {
     if (toSaveFiles?.some((file) => 'fileKey' in file)) {
       throw new Error(
@@ -71,12 +76,13 @@ export const savePost = async <T extends PostContent>(
   }
   const newMediaFiles = toSaveFiles as NewMediaFile[];
 
-  if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
-  if (!file.acl) throw 'ACL is required to save a post';
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
+  if (!file.serverMetadata?.accessControlList) throw 'ACL is required to save a post';
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
-  if (file.content.embeddedPost) {
-    delete (file.content.embeddedPost as any)['embeddedPost'];
+  if (file.fileMetadata.appData.content.embeddedPost) {
+    delete (file.fileMetadata.appData.content.embeddedPost as any)['embeddedPost'];
   }
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -129,10 +135,10 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (mediaFiles?.length) {
-    (file.content as Media).mediaFiles =
+    (file.fileMetadata.appData.content as Media).mediaFiles =
       mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined;
   }
-  file.content.primaryMediaFile = mediaFiles[0];
+  file.fileMetadata.appData.content.primaryMediaFile = mediaFiles[0];
 
   return await uploadPost(
     dotYouClient,
@@ -186,7 +192,7 @@ const processVideoFile = async (
 
 const uploadPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: PostFile<T>,
+  file: DriveSearchResult<T> | NewDriveSearchResult<T>,
   payloads: PayloadFile[],
   thumbnails: ThumbnailFile[],
   previewThumbnail: EmbeddedThumb | undefined,
@@ -195,8 +201,9 @@ const uploadPost = async <T extends PostContent>(
   onVersionConflict?: () => void
 ) => {
   const encrypt = !(
-    file.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    file.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
   );
 
   const instructionSet: UploadInstructionSet = {
@@ -216,23 +223,31 @@ const uploadPost = async <T extends PostContent>(
   const existingPostWithThisSlug = await getPostBySlug(
     dotYouClient,
     channelId,
-    file.content.slug ?? file.content.id
+    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
   );
 
-  if (existingPostWithThisSlug && existingPostWithThisSlug?.content.id !== file.content.id) {
+  if (
+    existingPostWithThisSlug &&
+    existingPostWithThisSlug?.fileMetadata.appData.content.id !==
+      file.fileMetadata.appData.content.id
+  ) {
     // There is clash with an existing slug
-    file.content.slug = `${file.content.slug}-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
-  const uniqueId = file.content.slug ? toGuidId(file.content.slug) : file.content.id;
+  const uniqueId = file.fileMetadata.appData.content.slug
+    ? toGuidId(file.fileMetadata.appData.content.slug)
+    : file.fileMetadata.appData.content.id;
 
-  const payloadJson: string = jsonStringify64({ ...file.content, fileId: undefined });
+  const payloadJson: string = jsonStringify64({ ...file.fileMetadata.appData.content });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const content = shouldEmbedContent
     ? payloadJson
-    : jsonStringify64({ channelId: file.content.channelId }); // If the full payload can't be embedded into the header file, at least pass the channelId so when getting, the location is known
+    : jsonStringify64({ channelId: file.fileMetadata.appData.content.channelId }); // If the full payload can't be embedded into the header file, at least pass the channelId so when getting, the location is known
 
   if (!shouldEmbedContent) {
     payloads.push({
@@ -241,22 +256,22 @@ const uploadPost = async <T extends PostContent>(
     });
   }
 
-  const isDraft = file.isDraft ?? false;
+  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType ?? false;
   const metadata: UploadFileMetadata = {
-    versionTag: file?.versionTag,
+    versionTag: file?.fileMetadata.versionTag ?? undefined,
     allowDistribution: !isDraft,
     appData: {
-      tags: [file.content.id],
+      tags: [file.fileMetadata.appData.content.id],
       uniqueId: uniqueId,
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
       content: content,
       previewThumbnail: previewThumbnail,
-      userDate: file.userDate,
-      dataType: postTypeToDataType(file.content.type),
+      userDate: file.fileMetadata.appData.userDate,
+      dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.content.authorOdinId,
+    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
     isEncrypted: encrypt,
-    accessControlList: file.acl,
+    accessControlList: file.serverMetadata?.accessControlList,
   };
 
   const result = await uploadFile(
@@ -275,12 +290,10 @@ const uploadPost = async <T extends PostContent>(
 
 const uploadPostHeader = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: PostFile<T>,
+  file: DriveSearchResult<T>,
   channelId: string,
   targetDrive: TargetDrive
 ) => {
-  const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
-
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
@@ -298,48 +311,58 @@ const uploadPostHeader = async <T extends PostContent>(
   const existingPostWithThisSlug = await getPostBySlug(
     dotYouClient,
     channelId,
-    file.content.slug ?? file.content.id
+    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
   );
 
-  if (existingPostWithThisSlug && existingPostWithThisSlug?.content.id !== file.content.id) {
+  if (
+    existingPostWithThisSlug &&
+    existingPostWithThisSlug?.fileMetadata.appData.content.id !==
+      file.fileMetadata.appData.content.id
+  ) {
     // There is clash with an existing slug
-    file.content.slug = `${file.content.slug}-${new Date().getTime()}`;
+    file.fileMetadata.appData.content.slug = `${
+      file.fileMetadata.appData.content.slug
+    }-${new Date().getTime()}`;
   }
-  const uniqueId = file.content.slug ? toGuidId(file.content.slug) : file.content.id;
+  const uniqueId = file.fileMetadata.appData.content.slug
+    ? toGuidId(file.fileMetadata.appData.content.slug)
+    : file.fileMetadata.appData.content.id;
 
-  const payloadJson: string = jsonStringify64({ ...file.content, fileId: undefined });
+  const payloadJson: string = jsonStringify64({
+    ...file.fileMetadata.appData.content,
+    fileId: undefined,
+  });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const content = shouldEmbedContent
     ? payloadJson
-    : jsonStringify64({ channelId: file.content.channelId });
+    : jsonStringify64({ channelId: file.fileMetadata.appData.content.channelId });
 
-  const isDraft = file.isDraft ?? false;
-
+  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType ?? false;
   const metadata: UploadFileMetadata = {
-    versionTag: file.versionTag,
+    versionTag: file.fileMetadata.versionTag ?? undefined,
     allowDistribution: !isDraft,
     appData: {
-      tags: [file.content.id],
+      tags: [file.fileMetadata.appData.content.id],
       uniqueId: uniqueId,
       fileType: isDraft ? BlogConfig.DraftPostFileType : BlogConfig.PostFileType,
       content: content,
-      previewThumbnail: file.previewThumbnail,
-      userDate: file.userDate,
-      dataType: postTypeToDataType(file.content.type),
+      previewThumbnail: file.fileMetadata.appData.previewThumbnail,
+      userDate: file.fileMetadata.appData.userDate,
+      dataType: postTypeToDataType(file.fileMetadata.appData.content.type),
     },
-    senderOdinId: file.content.authorOdinId,
-    isEncrypted: file.isEncrypted ?? false,
-    accessControlList: file.acl,
+    senderOdinId: file.fileMetadata.appData.content.authorOdinId,
+    isEncrypted: file.fileMetadata.isEncrypted ?? false,
+    accessControlList: file.serverMetadata?.accessControlList,
   };
 
   if (!shouldEmbedContent) {
     // Append/update payload
     await appendDataToFile(
       dotYouClient,
-      file.isEncrypted ? header?.sharedSecretEncryptedKeyHeader : undefined,
+      file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
       {
         targetFile: {
           fileId: file.fileId as string,
@@ -358,7 +381,7 @@ const uploadPostHeader = async <T extends PostContent>(
 
   return await uploadHeader(
     dotYouClient,
-    file.isEncrypted ? header?.sharedSecretEncryptedKeyHeader : undefined,
+    file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
     instructionSet,
     metadata
   );
@@ -366,7 +389,7 @@ const uploadPostHeader = async <T extends PostContent>(
 
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: PostFile<T>,
+  file: DriveSearchResult<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
 ): Promise<UploadResult> => {
@@ -374,15 +397,16 @@ const updatePost = async <T extends PostContent>(
   const header = await getFileHeader(dotYouClient, targetDrive, file.fileId as string);
 
   if (!header) throw new Error('Cannot update a post that does not exist');
-  if (header?.fileMetadata.versionTag !== file.versionTag) throw new Error('Version conflict');
-  let runningVersionTag: string = file.versionTag;
+  if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
+    throw new Error('Version conflict');
+  let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
     (existingAndNewMediaFiles?.filter((f) => 'fileKey' in f) as MediaFile[]) ||
     (!existingAndNewMediaFiles
-      ? (file.content as Media).mediaFiles
-        ? (file.content as Media).mediaFiles
-        : file.content.primaryMediaFile
-        ? [file.content.primaryMediaFile]
+      ? (file.fileMetadata.appData.content as Media).mediaFiles
+        ? (file.fileMetadata.appData.content as Media).mediaFiles
+        : file.fileMetadata.appData.content.primaryMediaFile
+        ? [file.fileMetadata.appData.content.primaryMediaFile]
         : []
       : []);
 
@@ -390,14 +414,21 @@ const updatePost = async <T extends PostContent>(
     (f) => 'file' in f && f.file instanceof Blob
   ) as NewMediaFile[] | undefined;
 
-  if (!file.fileId || !file.acl || !file.content.id)
+  if (
+    !file.fileId ||
+    !file.serverMetadata?.accessControlList ||
+    !file.fileMetadata.appData.content.id
+  )
     throw new Error(`[DotYouCore-js] PostProvider: fileId is required to update a post`);
 
-  if (!file.content.authorOdinId) file.content.authorOdinId = dotYouClient.getIdentity();
+  if (!file.fileMetadata.appData.content.authorOdinId)
+    file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
   const oldMediaFiles =
-    (file.content as Media).mediaFiles ||
-    (file.content.primaryMediaFile ? [file.content.primaryMediaFile] : []);
+    (file.fileMetadata.appData.content as Media).mediaFiles ||
+    (file.fileMetadata.appData.content.primaryMediaFile
+      ? [file.fileMetadata.appData.content.primaryMediaFile]
+      : []);
 
   // Discover deleted files:
   const deletedMediaFiles: MediaFile[] = [];
@@ -419,9 +450,8 @@ const updatePost = async <T extends PostContent>(
   }
 
   // When all media is removed from the post, remove the preview thumbnail
-  if (oldMediaFiles.length === deletedMediaFiles.length) {
-    file.previewThumbnail = undefined;
-  }
+  if (oldMediaFiles.length === deletedMediaFiles.length)
+    file.fileMetadata.appData.previewThumbnail = undefined;
 
   // Discover new files:
   const payloads: PayloadFile[] = [];
@@ -468,17 +498,18 @@ const updatePost = async <T extends PostContent>(
   }
 
   if (existingMediaFiles?.length)
-    (file.content as Media).mediaFiles =
+    (file.fileMetadata.appData.content as Media).mediaFiles =
       existingMediaFiles && existingMediaFiles.length > 1 ? existingMediaFiles : undefined;
-  file.content.primaryMediaFile = existingMediaFiles?.[0];
-  file.previewThumbnail = file.previewThumbnail || previewThumbnail;
+  file.fileMetadata.appData.content.primaryMediaFile = existingMediaFiles?.[0];
+  file.fileMetadata.appData.previewThumbnail =
+    file.fileMetadata.appData.previewThumbnail || previewThumbnail;
 
   const encrypt = !(
-    file.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    file.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
+    file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Authenticated
   );
-  file.isEncrypted = encrypt;
-  file.versionTag = runningVersionTag;
+  file.fileMetadata.isEncrypted = encrypt;
+  file.fileMetadata.versionTag = runningVersionTag;
   const result = await uploadPostHeader(dotYouClient, file, channelId, targetDrive);
   if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 

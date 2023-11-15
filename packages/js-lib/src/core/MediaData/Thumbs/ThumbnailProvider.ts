@@ -1,6 +1,5 @@
-import { EmbeddedThumb } from '../../../../core';
 import { uint8ArrayToBase64 } from '../../../helpers/DataUtil';
-import { ImageContentType, ImageSize, ThumbnailFile } from '../../core';
+import { ImageContentType, ImageSize, ThumbnailFile, EmbeddedThumb } from '../../core';
 import { ThumbnailInstruction } from '../MediaTypes';
 import { fromBlob } from './ImageResizer';
 

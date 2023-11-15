@@ -1,10 +1,5 @@
 import { Suspense } from 'react';
-import {
-  ChannelDefinition,
-  EmbeddedPost,
-  PostContent,
-  PostFile,
-} from '@youfoundation/js-lib/public';
+import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
 import { ActionGroupOptionProps, Lock, useIsConnected } from '@youfoundation/common-app';
 
 import {
@@ -16,10 +11,11 @@ import {
   UserX,
 } from '@youfoundation/common-app';
 import { OwnerActions } from './OwnerActions';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
   embeddedPost?: undefined;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
@@ -29,7 +25,7 @@ interface PostMetaWithPostFileProps {
 
 interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
-  postFile?: PostFile<PostContent>;
+  postFile?: DriveSearchResult<PostContent>;
   embeddedPost: EmbeddedPost;
   channel?: ChannelDefinitionVm | ChannelDefinition;
   className?: string;
@@ -48,7 +44,7 @@ export const PostMeta = ({
 }: PostMetaWithPostFileProps | PostMetaWithEmbeddedPostContentProps) => {
   const { isOwner, getIdentity } = useDotYouClient();
   const now = new Date();
-  const date = new Date(postFile?.userDate || embeddedPost?.userDate || now);
+  const date = new Date(postFile?.fileMetadata.appData.userDate || embeddedPost?.userDate || now);
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   const format: Intl.DateTimeFormatOptions = {
     month: 'short',
@@ -80,7 +76,7 @@ export const PostMeta = ({
           href={channelLink}
           onClick={(e) => e.stopPropagation()}
         >
-          {postFile?.isEncrypted ? <Lock className="h-3 w-3" /> : null}
+          {postFile?.fileMetadata.isEncrypted ? <Lock className="h-3 w-3" /> : null}
           {channel?.name ? `${channel?.name}` : ''}
         </a>
       ) : null}

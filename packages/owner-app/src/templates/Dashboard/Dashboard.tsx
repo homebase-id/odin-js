@@ -94,13 +94,13 @@ const FeedTeaser = ({ className }: { className?: string }) => {
               >
                 <EmbeddedPostContent
                   content={{
-                    ...post.content,
-                    userDate: post.userDate,
-                    lastModified: post.lastModified,
+                    ...post.fileMetadata.appData.content,
+                    userDate: post.fileMetadata.appData.userDate || post.fileMetadata.created,
+                    lastModified: post.fileMetadata.updated,
                     permalink: '',
-                    previewThumbnail: post.previewThumbnail,
+                    previewThumbnail: post.fileMetadata.appData.previewThumbnail,
                     fileId: post.fileId as string,
-                    globalTransitId: post.globalTransitId,
+                    globalTransitId: post.fileMetadata.globalTransitId,
                   }}
                 />
               </div>

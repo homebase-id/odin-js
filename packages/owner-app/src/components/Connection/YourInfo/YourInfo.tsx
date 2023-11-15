@@ -3,12 +3,12 @@ import {
   BuiltInAttributes,
   MinimalProfileFields,
   GetTargetDriveFromProfileId,
-  AttributeFile,
   BirthdayFields,
   PhoneFields,
   LocationFields,
+  Attribute,
 } from '@youfoundation/js-lib/profile';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { FallbackImg, t } from '@youfoundation/common-app';
 import { useImage } from '../../../hooks/media/useImage';
@@ -21,18 +21,21 @@ interface YourInfoProps {
   className?: string;
 }
 
-const filterAttributesWithCircleGrants = (attributes: AttributeFile[], circleGrants: string[]) => {
+const filterAttributesWithCircleGrants = (
+  attributes: DriveSearchResult<Attribute>[],
+  circleGrants: string[]
+) => {
   return attributes
     ?.filter(
       (attr) =>
-        attr.data !== undefined &&
-        Object.keys(attr.data)?.length !== 0 &&
-        attr.acl.requiredSecurityGroup !== SecurityGroupType.Owner
+        attr.fileMetadata.appData.content.data !== undefined &&
+        Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup !== SecurityGroupType.Owner
     )
     ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
     ?.filter((attr) =>
-      attr.acl?.circleIdList?.length
-        ? attr.acl.circleIdList.some(
+      attr.serverMetadata?.accessControlList?.circleIdList?.length
+        ? attr.serverMetadata?.accessControlList.circleIdList.some(
             (allowedCircleId) =>
               circleGrants?.some((circleGrantId) =>
                 stringGuidsEqual(circleGrantId, allowedCircleId)
@@ -65,7 +68,9 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
 
   const { data: imageUrl } = useImage(
     filteredPhotoAttributes?.[0]?.fileId,
-    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageKey],
+    filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
+      MinimalProfileFields.ProfileImageKey
+    ],
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 
@@ -99,12 +104,21 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
     circleGrants || []
   );
 
-  const name = filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName];
-  const initials = getInitialsOfNameAttribute(filteredNameAttributes?.[0]);
-  const phone = filteredPhoneAttributes?.[0]?.data[PhoneFields.PhoneNumber];
-  const city = filteredLocationAttributes?.[0]?.data[LocationFields.City];
-  const country = filteredLocationAttributes?.[0]?.data[LocationFields.Country];
-  const birthday = filteredBirtydayAttributes?.[0]?.data[BirthdayFields.Date];
+  const name =
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content.data[
+      MinimalProfileFields.DisplayName
+    ];
+  const initials = getInitialsOfNameAttribute(
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content
+  );
+  const phone =
+    filteredPhoneAttributes?.[0]?.fileMetadata.appData.content.data[PhoneFields.PhoneNumber];
+  const city =
+    filteredLocationAttributes?.[0]?.fileMetadata.appData.content.data[LocationFields.City];
+  const country =
+    filteredLocationAttributes?.[0]?.fileMetadata.appData.content.data[LocationFields.Country];
+  const birthday =
+    filteredBirtydayAttributes?.[0]?.fileMetadata.appData.content.data[BirthdayFields.Date];
 
   return (
     <div className={`relative border border-slate-100 dark:border-slate-800 ${className ?? ''}`}>

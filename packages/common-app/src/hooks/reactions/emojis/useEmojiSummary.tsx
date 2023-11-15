@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  getReactionSummary,
-  EmojiReactionSummary,
-  ReactionContext,
-} from '@youfoundation/js-lib/public';
+import { getReactionSummary, ReactionContext } from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../../..';
+import { EmojiReactionSummary } from '@youfoundation/js-lib/core';
 
 export const useEmojiSummary = ({
   context,

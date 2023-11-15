@@ -1,21 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AttributeFile,
-  getProfileAttributes,
-  removeAttribute,
-} from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttributes, removeAttribute } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
-import { AccessControlList } from '@youfoundation/js-lib/core';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
-export interface AttributeVm extends AttributeFile {
+export interface AttributeVm extends Attribute {
   typeDefinition: AttributeDefinition;
-}
-
-export interface NewAttributeVm extends Omit<AttributeFile, 'acl'> {
-  typeDefinition: AttributeDefinition;
-  acl?: AccessControlList;
-  isNew: true;
 }
 
 export const useAttributes = ({
@@ -30,9 +20,7 @@ export const useAttributes = ({
   const queryClient = useQueryClient();
 
   const fetchData = async (profileId: string, sectionId: string) => {
-    if (!profileId || !sectionId) {
-      return;
-    }
+    if (!profileId || !sectionId) return;
 
     const foundAttributes = await getProfileAttributes(
       dotYouClient,
@@ -44,10 +32,19 @@ export const useAttributes = ({
     return foundAttributes.map((attr) => {
       return {
         ...attr,
-        typeDefinition: Object.values(AttributeDefinitions).find((def) => {
-          return def.type === attr.type;
-        }),
-      } as AttributeVm;
+        fileMetadata: {
+          ...attr.fileMetadata,
+          appData: {
+            ...attr.fileMetadata.appData,
+            content: {
+              ...attr.fileMetadata.appData.content,
+              typeDefinition: Object.values(AttributeDefinitions).find((def) => {
+                return def.type === attr.fileMetadata.appData.content.type;
+              }),
+            },
+          },
+        },
+      } as DriveSearchResult<AttributeVm>;
     });
   };
 
