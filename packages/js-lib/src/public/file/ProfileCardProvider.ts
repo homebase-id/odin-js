@@ -1,5 +1,5 @@
-import { DriveSearchResult } from '../../../core';
 import { DotYouClient } from '../../core/DotYouClient';
+import { DriveSearchResult } from '../../core/DriveData/Drive/DriveTypes';
 import { SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
 import { getDecryptedImageData } from '../../core/MediaData/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
