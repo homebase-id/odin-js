@@ -1,0 +1,181 @@
+import { ApiType, DotYouClient, DrivePermissionType } from '@youfoundation/js-lib/core';
+import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useVerifyToken } from './useVerifyToken';
+import {
+  logout as logoutYouauth,
+  finalizeAuthentication as finalizeAuthenticationYouAuth,
+  getRegistrationParams,
+  preAuth as preauthApps,
+  retrieveIdentity,
+  saveIdentity,
+  createEccPair,
+  YouAuthorizationParams,
+  saveEccKey,
+  retrieveEccKey,
+  throwAwayTheECCKey,
+} from '@youfoundation/js-lib/auth';
+import { ROOT_PATH } from '../../app/App';
+import { AppPermissionType } from '@youfoundation/js-lib/network';
+
+export const drives = [
+  {
+    a: '9ff813aff2d61e2f9b9db189e72d1a11',
+    t: '66ea8355ae4155c39b5a719166b510e3',
+    n: 'Chat',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
+  {
+    // Standard profile Info
+    a: '8f12d8c4933813d378488d91ed23b64c',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+  {
+    // Contacts
+    a: '2612429d1c3f037282b8d42fb2cc0499',
+    t: '70e92f0f94d05f5c7dcd36466094f3a5',
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+];
+export const appName = 'Homebase - Chat';
+export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
+
+export const APP_SHARED_SECRET = 'APSS';
+export const APP_AUTH_TOKEN = 'BX0900';
+
+const hasSharedSecret = () => {
+  const raw = window.localStorage.getItem(APP_SHARED_SECRET);
+  return !!raw;
+};
+
+export const useAuth = () => {
+  const [authenticationState, setAuthenticationState] = useState<
+    'unknown' | 'anonymous' | 'authenticated'
+  >(hasSharedSecret() ? 'unknown' : 'anonymous');
+  const navigate = useNavigate();
+
+  const logout = async (): Promise<void> => {
+    await logoutYouauth(getDotYouClient());
+
+    localStorage.removeItem(APP_SHARED_SECRET);
+    localStorage.removeItem(APP_AUTH_TOKEN);
+    setAuthenticationState('anonymous');
+
+    navigate('/');
+    window.location.reload();
+  };
+
+  const preauth = async (): Promise<void> => {
+    await preauthApps(getDotYouClient());
+  };
+
+  const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
+
+  const getSharedSecret = () => {
+    const raw = window.localStorage.getItem(APP_SHARED_SECRET);
+    if (raw) return base64ToUint8Array(raw);
+  };
+
+  const getDotYouClient = () => {
+    const headers: Record<string, string> = {};
+    const authToken = getAppAuthToken();
+    if (authToken) {
+      headers['bx0900'] = authToken;
+    }
+
+    return new DotYouClient({
+      sharedSecret: getSharedSecret(),
+      api: ApiType.App,
+      identity: retrieveIdentity(),
+      headers: headers,
+    });
+  };
+
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
+
+  useEffect(() => {
+    if (isFetchedAfterMount && hasValidToken !== undefined) {
+      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
+
+      if (!hasValidToken) {
+        setAuthenticationState('anonymous');
+        if (window.localStorage.getItem(APP_SHARED_SECRET)) {
+          console.log('Token is invalid, logging out..');
+          // Auth state was presumed logged in, but not allowed.. Will attempt reload page?
+          //  (Browsers may ignore, as it's not a reload on user request)
+          logout();
+        }
+      }
+    }
+  }, [hasValidToken]);
+
+  return {
+    logout,
+    preauth,
+    getDotYouClient,
+    getSharedSecret,
+    getIdentity: retrieveIdentity,
+    isAuthenticated: authenticationState !== 'anonymous',
+  };
+};
+
+export const useYouAuthAuthorization = () => {
+  const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
+    const eccKey = await createEccPair();
+
+    // Persist key for usage on finalize
+    await saveEccKey(eccKey);
+
+    const finalizeUrl = `${window.location.origin}${ROOT_PATH}/auth/finalize`;
+    return getRegistrationParams(
+      finalizeUrl,
+      appName,
+      appId,
+      [
+        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+      ],
+      undefined,
+      drives,
+      undefined,
+      eccKey.publicKey,
+      window.location.host,
+      undefined,
+      returnUrl
+    );
+  };
+
+  const finalizeAuthorization = async (identity: string, publicKey: string, salt: string) => {
+    try {
+      const privateKey = await retrieveEccKey();
+      if (!privateKey) throw new Error('Failed to retrieve key');
+
+      const { clientAuthToken, sharedSecret } = await finalizeAuthenticationYouAuth(
+        identity,
+        privateKey,
+        publicKey,
+        salt
+      );
+
+      if (identity) saveIdentity(identity);
+      localStorage.setItem(APP_SHARED_SECRET, sharedSecret);
+      localStorage.setItem(APP_AUTH_TOKEN, clientAuthToken);
+
+      throwAwayTheECCKey();
+    } catch (ex) {
+      console.error(ex);
+      return false;
+    }
+
+    return true;
+  };
+
+  return { getAuthorizationParameters, finalizeAuthorization };
+};

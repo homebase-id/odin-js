@@ -13,7 +13,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
-const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
@@ -73,7 +72,7 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { useTransitProcessor, ErrorBoundary, t } from '@youfoundation/common-app';
+import { useTransitProcessor, ErrorBoundary, t, NotFound } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 
