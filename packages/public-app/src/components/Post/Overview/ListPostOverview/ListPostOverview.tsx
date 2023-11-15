@@ -1,13 +1,14 @@
 import { PostTeaser, t } from '@youfoundation/common-app';
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../Dialog/LoginDialog/LoginDialog';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const ListPostOverview = ({
   blogPosts,
   showChannel,
 }: {
-  blogPosts: PostFile<PostContent>[];
+  blogPosts: DriveSearchResult<PostContent>[];
   showChannel?: boolean;
 }) => {
   const [isLogin, setIsLogin] = useState(false);
@@ -18,7 +19,7 @@ const ListPostOverview = ({
         {blogPosts?.map((postFile) => {
           return (
             <PostTeaser
-              key={postFile.content.id}
+              key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
               className="my-4"
               hideImageWhenNone={true}

@@ -1,5 +1,5 @@
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Label, SubtleMessage, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { Select } from '@youfoundation/common-app';
@@ -11,6 +11,7 @@ import { LoadingBlock } from '@youfoundation/common-app';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 
@@ -83,7 +84,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     isFetchingNextPage,
     isFetchedAfterMount: isPostsLoaded,
   } = useBlogPostsInfinite({ pageSize: PAGE_SIZE, channelId: channelId });
-  const flattenedPosts = flattenInfinteData<PostFile<PostContent>>(blogPosts, PAGE_SIZE);
+  const flattenedPosts = flattenInfinteData<DriveSearchResult<PostContent>>(blogPosts, PAGE_SIZE);
 
   const parentRef = useRef<HTMLDivElement>(null);
   const parentOffsetRef = useRef(0);
@@ -200,21 +201,29 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
 };
 
 const combinePosts = (
-  staticPosts?: PostFile<PostContent>[],
-  flattenedPosts?: PostFile<PostContent>[]
+  staticPosts?: DriveSearchResult<PostContent>[],
+  flattenedPosts?: DriveSearchResult<PostContent>[]
 ) => {
   const combinedPosts = [
     ...(staticPosts ? staticPosts : []),
     ...(flattenedPosts ? flattenedPosts : []),
   ].reduce((uniquePosts, post) => {
-    if (uniquePosts.some((unique) => unique.content.id === post.content.id)) {
+    if (
+      uniquePosts.some(
+        (unique) => unique.fileMetadata.appData.content.id === post.fileMetadata.appData.content.id
+      )
+    ) {
       return uniquePosts;
     } else {
       return [...uniquePosts, post];
     }
-  }, [] as PostFile<PostContent>[]);
+  }, [] as DriveSearchResult<PostContent>[]);
 
-  combinedPosts.sort((a, b) => b.userDate - a.userDate);
+  combinedPosts.sort(
+    (a, b) =>
+      (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+      (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+  );
 
   return combinedPosts;
 };

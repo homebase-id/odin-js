@@ -5,13 +5,13 @@ import {
   SystemFileType,
   QueryBatchCollectionResponse,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
+  DriveSearchResult,
 } from '@youfoundation/js-lib/core';
 import { stringifyArrayToQueryParams } from '@youfoundation/js-lib/helpers';
 import {
   PostType,
   BlogConfig,
   GetTargetDriveFromChannelId,
-  PostFile,
   dsrToPostFile,
   PostContent,
   ChannelDefinition,
@@ -28,7 +28,9 @@ export const getCachedPosts = async (
   const posts =
     cachedData.postsPerChannel
       .find((data) => data.channelId === channelId)
-      ?.posts.filter((post) => (postType ? post?.content?.type === postType : true)) ?? [];
+      ?.posts.filter((post) =>
+        postType ? post?.fileMetadata.appData.content?.type === postType : true
+      ) ?? [];
   if (!posts.length) return null;
 
   return { results: posts, cursorState: cachedData.allCursors[channelId] };
@@ -48,8 +50,12 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
 
   const sortedPosts = postsPerChannel
     .flatMap((chnl) => chnl?.posts)
-    .filter((post) => (postType ? post?.content?.type === postType : true))
-    .sort((a, b) => b.userDate - a.userDate);
+    .filter((post) => (postType ? post?.fileMetadata.appData.content?.type === postType : true))
+    .sort(
+      (a, b) =>
+        (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+        (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+    );
 
   return { results: sortedPosts, cursorState: allCursors };
 };
@@ -124,14 +130,14 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
     response.results.map(async (result) => {
       const targetDrive = GetTargetDriveFromChannelId(result.name);
 
-      const posts: PostFile<PostContent>[] = (
+      const posts: DriveSearchResult<PostContent>[] = (
         await Promise.all(
           result.searchResults.map(
             async (dsr) =>
               await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
           )
         )
-      ).filter((post) => !!post) as PostFile<PostContent>[];
+      ).filter((post) => !!post) as DriveSearchResult<PostContent>[];
 
       allCursors[result.name] = result.cursorState;
 

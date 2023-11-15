@@ -98,7 +98,9 @@ const PostPreview = ({
               className="left-2 top-2 rounded-full p-3 lg:fixed"
               size="square"
             />
-            <h2 className="ml-2 text-lg lg:hidden">{(externalPost || localPost)?.content.type}</h2>
+            <h2 className="ml-2 text-lg lg:hidden">
+              {(externalPost || localPost)?.fileMetadata.appData.content.type}
+            </h2>
           </div>
 
           <PostDetailCard

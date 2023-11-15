@@ -1,13 +1,14 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
+  BlogConfig,
   getPosts,
   getRecentPosts,
   PostContent,
-  PostFile,
   PostType,
 } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '../../..';
 import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 type useBlogPostsInfiniteProps = {
   channelId?: string;
@@ -17,7 +18,7 @@ type useBlogPostsInfiniteProps = {
 };
 
 export type useBlogPostsInfiniteReturn = {
-  results: PostFile<PostContent>[];
+  results: DriveSearchResult<PostContent>[];
   cursorState: string | Record<string, string>;
 };
 
@@ -68,7 +69,9 @@ export const useBlogPostsInfinite = ({
           ));
 
     return {
-      results: response.results.filter((file) => !file.isDraft),
+      results: response.results.filter(
+        (file) => file.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType
+      ),
       cursorState: response.cursorState,
     };
   };

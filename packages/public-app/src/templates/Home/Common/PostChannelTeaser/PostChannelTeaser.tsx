@@ -1,4 +1,4 @@
-import { getChannelDrive, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { getChannelDrive, PostContent } from '@youfoundation/js-lib/public';
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import { t } from '@youfoundation/common-app';
 import { ActionLink } from '@youfoundation/common-app';
 
 import './PostChannelTeaser.css';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 interface PostChannelTeaserProps {
   className?: string;
@@ -154,15 +155,16 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
 
 interface PostTeaserProps {
   className: string;
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
   linkRoot: string;
 }
 
-const PostTeaser: FC<PostTeaserProps> = ({
-  className,
-  postFile: { content: blog, previewThumbnail, isEncrypted, lastModified },
-  linkRoot,
-}) => {
+const PostTeaser: FC<PostTeaserProps> = ({ className, postFile, linkRoot }) => {
+  const blog = postFile.fileMetadata.appData.content;
+  const previewThumbnail = postFile.fileMetadata.appData.previewThumbnail;
+  const isEncrypted = postFile.fileMetadata.isEncrypted;
+  const lastModified = postFile.fileMetadata.updated;
+
   return (
     <div className={`mb-0 h-full flex-shrink-0 flex-grow-0 p-1 ${className}`}>
       <Link to={linkRoot + (blog.slug ?? '#')} className="flex flex-col">

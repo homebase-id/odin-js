@@ -1,4 +1,4 @@
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { t } from '@youfoundation/common-app';
@@ -8,11 +8,14 @@ import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoun
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { EditPostDialog } from '@youfoundation/common-app';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
-export const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) => {
+export const OwnerActions = ({ postFile }: { postFile: DriveSearchResult<PostContent> }) => {
+  const postContent = postFile.fileMetadata.appData.content;
+
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { mutateAsync: removePost, error: removePostError } = usePost().remove;
-  const { data: channel } = useChannel({ channelId: postFile.content.channelId }).fetch;
+  const { data: channel } = useChannel({ channelId: postContent.channelId }).fetch;
 
   const navigate = useNavigate();
   return (
@@ -25,11 +28,11 @@ export const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) 
         options={[
           {
             icon: Pencil,
-            label: t(postFile.content.type === 'Article' ? 'Edit Article' : 'Edit post'),
+            label: t(postContent.type === 'Article' ? 'Edit Article' : 'Edit post'),
             onClick: (e) => {
               e.stopPropagation();
-              if (postFile.content.type === 'Article') {
-                const targetUrl = `/owner/feed/edit/${channel?.slug}/${postFile.content.id}`;
+              if (postContent.type === 'Article') {
+                const targetUrl = `/owner/feed/edit/${channel?.slug}/${postContent.id}`;
                 if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
                 else window.location.href = targetUrl;
               } else {
@@ -41,10 +44,10 @@ export const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) 
             ? ([
                 {
                   icon: Trash,
-                  label: t(postFile.content.type === 'Article' ? 'Remove Article' : 'Remove post'),
+                  label: t(postContent.type === 'Article' ? 'Remove Article' : 'Remove post'),
                   confirmOptions: {
                     title: `${t('Remove')} "${
-                      postFile.content.caption.substring(0, 50) || t('Untitled')
+                      postContent.caption.substring(0, 50) || t('Untitled')
                     }"`,
                     buttonText: 'Permanently remove',
                     body: t(
@@ -54,9 +57,9 @@ export const OwnerActions = ({ postFile }: { postFile: PostFile<PostContent> }) 
                   onClick: async (e) => {
                     e.stopPropagation();
                     await removePost({
-                      channelId: postFile.content.channelId,
+                      channelId: postContent.channelId,
                       fileId: postFile.fileId ?? '',
-                      slug: postFile.content.slug,
+                      slug: postContent.slug,
                     });
 
                     // setTimeout(() => {

@@ -28,14 +28,14 @@ const PostImageDetail = () => {
     return paths.join('/');
   }, [window.location.pathname]);
 
-  const post = postData?.activeBlog.content;
+  const post = postData?.activeBlog.fileMetadata.appData.content;
   const channel = postData?.activeChannel;
 
   return (
     <>
       <Helmet>
         <title>{post?.caption || channel?.name || ''} | Homebase</title>
-        <meta name="og:title" content={postData?.activeBlog.content.caption ?? ''} />
+        <meta name="og:title" content={post?.caption ?? ''} />
       </Helmet>
       <div className="fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">
         <PostImageDetailCard

@@ -77,6 +77,8 @@ export interface NewFileMetadata<T = string> {
 export interface NewAppFileMetaData<T = string> {
   content: T;
   previewThumbnail?: EmbeddedThumb;
+  fileType?: number;
+  userDate?: number;
 }
 
 export interface QueryParams {

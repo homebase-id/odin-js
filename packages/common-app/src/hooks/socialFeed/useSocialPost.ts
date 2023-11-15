@@ -21,7 +21,7 @@ export const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps)
     ]);
     for (let i = 0; socialFeedCache && i < socialFeedCache.pages.length; i++) {
       const page = socialFeedCache.pages[i];
-      const post = page.results.find((x) => x.content.id === postId);
+      const post = page.results.find((x) => x.fileMetadata.appData.content.id === postId);
       if (post) return post;
     }
 

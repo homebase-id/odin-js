@@ -5,7 +5,8 @@ import {
   ErrorNotification,
   useDoubleTap,
 } from '@youfoundation/common-app';
-import { PostFile, PostContent, ReactionContext } from '@youfoundation/js-lib/public';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import React from 'react';
 import { useRef } from 'react';
 
@@ -18,7 +19,7 @@ export const DoubleClickHeartForMedia = ({
   className,
 }: {
   odinId?: string;
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
   onClick: (e: React.MouseEvent, index: number) => void;
@@ -28,13 +29,14 @@ export const DoubleClickHeartForMedia = ({
   const { mutateAsync: postEmoji, error: postEmojiError } = useReaction().saveEmoji;
   const { getIdentity } = useDotYouClient();
 
+  const postContent = postFile.fileMetadata.appData.content;
   const reactionContext: ReactionContext = {
     authorOdinId: odinId || window.location.hostname,
-    channelId: postFile.content.channelId,
+    channelId: postContent.channelId,
     target: {
-      globalTransitId: postFile.globalTransitId ?? 'unknown',
+      globalTransitId: postFile.fileMetadata.globalTransitId ?? 'unknown',
       fileId: postFile.fileId ?? 'unknown',
-      isEncrypted: postFile.isEncrypted || false,
+      isEncrypted: postFile.fileMetadata.isEncrypted || false,
     },
   };
 
@@ -59,7 +61,15 @@ export const DoubleClickHeartForMedia = ({
       {postFile.fileId ? (
         <PostMedia
           odinId={odinId}
-          postFile={{ ...postFile, fileId: postFile.fileId, lastModified: postFile.lastModified }}
+          postInfo={{
+            fileId: postFile.fileId,
+            globalTransitId: postFile.fileMetadata.globalTransitId,
+            lastModified: postFile.fileMetadata.updated,
+            previewThumbnail: postFile.fileMetadata.appData.previewThumbnail,
+            isEncrypted: postFile.fileMetadata.isEncrypted,
+
+            content: postContent,
+          }}
           showFallback={showFallback}
           forceAspectRatio={forceAspectRatio}
           className={`cursor-pointer ${className || ''}`}

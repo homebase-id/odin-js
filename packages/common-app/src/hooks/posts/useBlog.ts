@@ -1,8 +1,9 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPost, getPostBySlug, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { getPost, getPostBySlug, PostContent } from '@youfoundation/js-lib/public';
 
 import { useBlogPostsInfiniteReturn } from './useBlogPostsInfinite';
 import { useChannel, useDotYouClient } from '@youfoundation/common-app';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 type useBlogProps = {
   channelId?: string;
@@ -27,8 +28,8 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     if (infinite) return infinite.pages.flatMap((page) => page.results);
 
     return (
-      queryClient.getQueryData<PostFile<PostContent>[]>(['blog-recents', channelId]) ||
-      queryClient.getQueryData<PostFile<PostContent>[]>(['blog-recents', undefined])
+      queryClient.getQueryData<DriveSearchResult<PostContent>[]>(['blog-recents', channelId]) ||
+      queryClient.getQueryData<DriveSearchResult<PostContent>[]>(['blog-recents', undefined])
     );
   };
 
@@ -40,7 +41,9 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     const cachedBlogs = getCachedBlogs(channel.channelId);
     if (cachedBlogs) {
       const foundBlog = cachedBlogs.find(
-        (blog) => blog.content?.slug === blogSlug || blog.content.id === blogSlug
+        (blog) =>
+          blog.fileMetadata.appData.content?.slug === blogSlug ||
+          blog.fileMetadata.appData.content.id === blogSlug
       );
       if (foundBlog) return { activeBlog: foundBlog, activeChannel: channel };
     }

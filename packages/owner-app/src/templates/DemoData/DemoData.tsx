@@ -36,7 +36,6 @@ import {
   getChannelDefinitions,
   GetTargetDriveFromChannelId,
   Article,
-  PostFile,
   PostContent,
   HomePageThemeFields,
 } from '@youfoundation/js-lib/public';
@@ -641,17 +640,21 @@ const DemoDataBlog = ({
             body: randomAbstract + ' and then some', //Note: this can be html
           };
 
-          const blogFile: PostFile<PostContent> = {
-            fileId: undefined,
-            userDate: new Date().getTime(),
-            versionTag: undefined,
-            acl: channel.acl
-              ? {
-                  ...channel.acl,
-                }
-              : { requiredSecurityGroup: SecurityGroupType.Anonymous },
-            content: blogContent,
-            previewThumbnail: previewThumbnail || undefined,
+          const blogFile: NewDriveSearchResult<PostContent> = {
+            fileMetadata: {
+              appData: {
+                userDate: new Date().getTime(),
+                content: blogContent,
+                previewThumbnail: previewThumbnail || undefined,
+              },
+            },
+            serverMetadata: {
+              accessControlList: channel.acl
+                ? {
+                    ...channel.acl,
+                  }
+                : { requiredSecurityGroup: SecurityGroupType.Anonymous },
+            },
           };
 
           await saveBlog({ postFile: blogFile, channelId: channel.channelId });

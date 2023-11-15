@@ -1,6 +1,5 @@
 import {
   ChannelDefinition,
-  PostFile,
   PostContent,
   Media,
   Article,
@@ -19,7 +18,7 @@ import {
   MediaGallery,
   EmbeddedPostContent,
 } from '../../..';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -34,7 +33,7 @@ export const PostDetailCard = ({
 }: {
   odinId?: string;
   channel?: ChannelDefinition;
-  postFile?: PostFile<PostContent>;
+  postFile?: DriveSearchResult<PostContent>;
   showAuthorDetail?: boolean;
   className?: string;
   isAuthenticated: boolean;
@@ -42,7 +41,7 @@ export const PostDetailCard = ({
   onNavigate?: (path: string) => void;
   login?: () => void;
 }) => {
-  const post = postFile?.content;
+  const post = postFile?.fileMetadata.appData.content;
   const mediaFiles = (post as Media)?.mediaFiles;
   return (
     <div
@@ -104,14 +103,14 @@ export const PostDetailCard = ({
         mediaFiles && mediaFiles.length > 1 ? (
           <MediaGallery
             fileId={postFile.fileId}
-            globalTransitId={postFile.globalTransitId}
-            lastModified={postFile.lastModified}
+            globalTransitId={postFile.fileMetadata.globalTransitId}
+            lastModified={postFile.fileMetadata.updated}
             channelId={post.channelId}
             files={mediaFiles}
             className="my-4"
             maxVisible={4}
             odinId={odinId}
-            probablyEncrypted={postFile?.isEncrypted}
+            probablyEncrypted={postFile?.fileMetadata.isEncrypted}
             onClick={
               onNavigate
                 ? (e, index) => {
@@ -128,25 +127,25 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className="rounded object-cover object-center"
                 fileId={post.primaryMediaFile.fileId}
-                globalTransitId={postFile.globalTransitId}
-                lastModified={postFile.lastModified}
+                globalTransitId={postFile.fileMetadata.globalTransitId}
+                lastModified={postFile.fileMetadata.updated}
                 fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
-                previewThumbnail={postFile?.previewThumbnail}
-                probablyEncrypted={postFile?.isEncrypted}
+                previewThumbnail={postFile?.fileMetadata.appData.previewThumbnail}
+                probablyEncrypted={postFile?.fileMetadata.isEncrypted}
               />
             ) : (
               <Video
                 targetDrive={getChannelDrive(post.channelId)}
                 fileId={post.primaryMediaFile.fileId}
-                globalTransitId={postFile.globalTransitId}
-                lastModified={postFile.lastModified}
+                globalTransitId={postFile.fileMetadata.globalTransitId}
+                lastModified={postFile.fileMetadata.updated}
                 fileKey={post.primaryMediaFile.fileKey}
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
-                probablyEncrypted={postFile?.isEncrypted}
-                previewThumbnail={postFile?.previewThumbnail}
+                probablyEncrypted={postFile?.fileMetadata.isEncrypted}
+                previewThumbnail={postFile?.fileMetadata.appData.previewThumbnail}
               />
             )}
           </div>
@@ -182,8 +181,8 @@ export const PostDetailCard = ({
                   ? {
                       imageDrive: getChannelDrive(post.channelId),
                       defaultFileId: postFile.fileId,
-                      defaultGlobalTransitId: postFile.globalTransitId,
-                      lastModified: postFile.lastModified,
+                      defaultGlobalTransitId: postFile.fileMetadata.globalTransitId,
+                      lastModified: postFile.fileMetadata.updated,
                     }
                   : undefined
               }

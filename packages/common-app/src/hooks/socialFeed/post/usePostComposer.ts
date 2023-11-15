@@ -1,8 +1,7 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { NewDriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
   Tweet,
   Media,
-  PostFile,
   ChannelDefinition,
   BlogConfig,
   EmbeddedPost,
@@ -37,21 +36,28 @@ export const usePostComposer = () => {
 
       // Upload post
       const postId = getNewId();
-      const postFile: PostFile<Tweet | Media> = {
-        userDate: new Date().getTime(),
-        content: {
-          authorOdinId: dotYouClient.getIdentity(),
-          type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
-          caption: caption?.trim() || '',
-          id: postId,
-          slug: postId,
-          channelId: channel.channelId || BlogConfig.PublicChannel.channelId,
-          reactAccess: reactAccess,
+      const postFile: NewDriveSearchResult<Tweet | Media> = {
+        fileMetadata: {
+          appData: {
+            userDate: new Date().getTime(),
+            content: {
+              authorOdinId: dotYouClient.getIdentity(),
+              type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
+              caption: caption?.trim() || '',
+              id: postId,
+              slug: postId,
+              channelId: channel.channelId || BlogConfig.PublicChannel.channelId,
+              reactAccess: reactAccess,
 
-          embeddedPost: embeddedPost,
+              embeddedPost: embeddedPost,
+            },
+          },
         },
-
-        acl: channel.acl ? { ...channel.acl } : { requiredSecurityGroup: SecurityGroupType.Owner },
+        serverMetadata: {
+          accessControlList: channel.acl
+            ? { ...channel.acl }
+            : { requiredSecurityGroup: SecurityGroupType.Owner },
+        },
       };
 
       await savePostFile({

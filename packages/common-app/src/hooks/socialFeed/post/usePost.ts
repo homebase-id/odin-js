@@ -1,6 +1,5 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  PostFile,
   PostContent,
   savePost as savePostFile,
   getPost,
@@ -12,8 +11,13 @@ import {
   removePost,
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
-import { MultiRequestCursoredResult, UploadResult, deleteFile } from '@youfoundation/js-lib/core';
-import { PostFileVm } from '@youfoundation/js-lib/transit';
+import {
+  DriveSearchResult,
+  MultiRequestCursoredResult,
+  NewDriveSearchResult,
+  UploadResult,
+  deleteFile,
+} from '@youfoundation/js-lib/core';
 
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -25,40 +29,49 @@ export const usePost = () => {
     mediaFiles,
     onUpdate,
   }: {
-    postFile: PostFile<PostContent>;
+    postFile: NewDriveSearchResult<PostContent> | DriveSearchResult<PostContent>;
     channelId: string;
     mediaFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[];
     onUpdate?: (progress: number) => void;
   }) => {
-    return new Promise<UploadResult>((resolve) => {
+    return new Promise<UploadResult>((resolve, reject) => {
       const onVersionConflict = async () => {
-        const serverPost = await getPost(dotYouClient, channelId, postFile.content.id);
+        const serverPost = await getPost<PostContent>(
+          dotYouClient,
+          channelId,
+          postFile.fileMetadata.appData.content.id
+        );
         if (!serverPost) return;
 
-        const newPost = { ...serverPost, content: { ...serverPost.content, ...postFile.content } };
+        const newPost: DriveSearchResult<PostContent> = {
+          ...serverPost,
+          fileMetadata: {
+            ...serverPost.fileMetadata,
+            appData: {
+              ...serverPost.fileMetadata.appData,
+              content: {
+                ...serverPost.fileMetadata.appData.content,
+                ...postFile.fileMetadata.appData.content,
+              },
+            },
+          },
+        };
         savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
           (result) => {
+            console.log(result, result.newVersionTag);
             if (result) resolve(result);
           }
         );
       };
 
-      savePostFile(
-        dotYouClient,
-        {
-          ...postFile,
-          content: {
-            ...postFile.content,
-            captionAsRichText: getRichTextFromString(postFile.content.caption.trim()),
-          },
-        },
-        channelId,
-        mediaFiles,
-        onVersionConflict,
-        onUpdate
-      ).then((result) => {
-        if (result) resolve(result);
-      });
+      postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
+        postFile.fileMetadata.appData.content.caption.trim()
+      );
+      savePostFile(dotYouClient, postFile, channelId, mediaFiles, onVersionConflict, onUpdate)
+        .then((result) => {
+          if (result) resolve(result);
+        })
+        .catch((err) => reject(err));
     });
   };
 
@@ -76,8 +89,15 @@ export const usePost = () => {
     const post = await getPostByFileId(dotYouClient, channelId, fileId);
     const channelDrive = getChannelDrive(channelId);
     if (post) {
-      if (post.content.primaryMediaFile && post.content.primaryMediaFile.fileId)
-        await deleteFile(dotYouClient, channelDrive, post.content.primaryMediaFile.fileId);
+      if (
+        post.fileMetadata.appData.content.primaryMediaFile &&
+        post.fileMetadata.appData.content.primaryMediaFile.fileId
+      )
+        await deleteFile(
+          dotYouClient,
+          channelDrive,
+          post.fileMetadata.appData.content.primaryMediaFile.fileId
+        );
 
       const mediaPost = post as any as Media;
       if (mediaPost.mediaFiles) {
@@ -96,31 +116,45 @@ export const usePost = () => {
     save: useMutation({
       mutationFn: savePost,
       onSuccess: (_data, variables) => {
-        if (variables.postFile.content.slug) {
-          queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.slug] });
+        if (variables.postFile.fileMetadata.appData.content.slug) {
+          queryClient.invalidateQueries({
+            queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+          });
         } else {
           queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
         queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
-        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.id] });
         queryClient.invalidateQueries({
-          queryKey: ['blog', variables.postFile.content.id?.replaceAll('-', '')],
+          queryKey: ['blog', variables.postFile.fileMetadata.appData.content.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'blog',
+            variables.postFile.fileMetadata.appData.content.id?.replaceAll('-', ''),
+          ],
         });
 
         queryClient.removeQueries({ queryKey: ['blogs'] });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<PostFileVm<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
-            post.content.id === variables.postFile.content.id
-              ? { ...post, versionTag: _data.newVersionTag }
+            post.fileMetadata.appData.content.id ===
+            variables.postFile.fileMetadata.appData.content.id
+              ? {
+                  ...post,
+                  fileMetadata: {
+                    ...post.fileMetadata,
+                    versionTag: _data.newVersionTag,
+                  },
+                }
               : post
           );
 
@@ -132,31 +166,35 @@ export const usePost = () => {
 
         // Update section attributes
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<PostFileVm<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
-          const newFeed = {
+          const newPostFile: DriveSearchResult<PostContent> = {
+            ...newPost.postFile,
+            fileMetadata: {
+              ...newPost.postFile.fileMetadata,
+              appData: {
+                ...newPost.postFile.fileMetadata.appData,
+                content: {
+                  ...newPost.postFile.fileMetadata.appData.content,
+
+                  primaryMediaFile: newPost.mediaFiles?.[0] as MediaFile,
+                },
+              },
+            },
+          } as DriveSearchResult<PostContent>;
+          (newPostFile.fileMetadata.appData.content as Media).mediaFiles =
+            newPost.mediaFiles as MediaFile[];
+
+          const newFeed: InfiniteData<
+            MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>
+          > = {
             ...previousFeed,
             pages: previousFeed.pages.map((page, index) => {
               return {
                 ...page,
-                results: [
-                  ...(index === 0
-                    ? [
-                        {
-                          ...newPost.postFile,
-                          content: {
-                            ...newPost.postFile.content,
-                            mediaFiles: newPost.mediaFiles,
-                            primaryMediaFile: newPost.mediaFiles?.[0],
-                          },
-                          odinId: window.location.hostname,
-                        },
-                      ]
-                    : []),
-                  ...page.results,
-                ],
+                results: [...(index === 0 ? [newPostFile] : []), ...page.results],
               };
             }),
           };
@@ -180,31 +218,45 @@ export const usePost = () => {
     update: useMutation({
       mutationFn: savePost,
       onSuccess: (_data, variables) => {
-        if (variables.postFile.content.slug) {
-          queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.slug] });
+        if (variables.postFile.fileMetadata.appData.content.slug) {
+          queryClient.invalidateQueries({
+            queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+          });
         } else {
           queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
 
         // Too many invalidates, but during article creation, the slug is not known
         queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.fileId] });
-        queryClient.invalidateQueries({ queryKey: ['blog', variables.postFile.content.id] });
         queryClient.invalidateQueries({
-          queryKey: ['blog', variables.postFile.content.id?.replaceAll('-', '')],
+          queryKey: ['blog', variables.postFile.fileMetadata.appData.content.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [
+            'blog',
+            variables.postFile.fileMetadata.appData.content.id?.replaceAll('-', ''),
+          ],
         });
 
         queryClient.removeQueries({ queryKey: ['blogs'] });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<PostFileVm<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
           const newFeed = { ...previousFeed };
           newFeed.pages[0].results = newFeed.pages[0].results.map((post) =>
-            post.content.id === variables.postFile.content.id
-              ? { ...post, versionTag: _data.newVersionTag }
+            post.fileMetadata.appData.content.id ===
+            variables.postFile.fileMetadata.appData.content.id
+              ? {
+                  ...post,
+                  fileMetadata: {
+                    ...post.fileMetadata,
+                    versionTag: _data.newVersionTag,
+                  },
+                }
               : post
           );
 

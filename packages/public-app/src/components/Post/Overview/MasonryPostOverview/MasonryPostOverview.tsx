@@ -1,14 +1,15 @@
 import { PostTeaser } from '@youfoundation/common-app';
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { useCallback, useEffect, useState } from 'react';
 
-const MasonryPostOverview = ({ blogPosts }: { blogPosts: PostFile<PostContent>[] }) => {
+const MasonryPostOverview = ({ blogPosts }: { blogPosts: DriveSearchResult<PostContent>[] }) => {
   const [cols, setCols] = useState(1);
 
   /// Function to reorder the array to make it fit in the masonry layout which by
   ///  default is ordered from top to bottom, instead of left to right
   ///  credit: https://github.com/jessekorzan/masonry-css-js/blob/master/src/App.js
-  const reorder = (arr: PostFile<PostContent>[], columns: number) => {
+  const reorder = (arr: DriveSearchResult<PostContent>[], columns: number) => {
     const cols = columns;
     const out = [];
     let col = 0;
@@ -44,7 +45,7 @@ const MasonryPostOverview = ({ blogPosts }: { blogPosts: PostFile<PostContent>[]
         return (
           <PostTeaser
             className="break-inside-avoid py-2"
-            key={postFile.content.id}
+            key={postFile.fileMetadata.appData.content.id}
             postFile={postFile}
             hideImageWhenNone={true}
             hideEmbeddedPostMedia={true}

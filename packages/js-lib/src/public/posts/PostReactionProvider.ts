@@ -19,6 +19,9 @@ import {
   ReactionPreview,
   PayloadFile,
   EmbeddedThumb,
+  ParsedReactionPreview,
+  ReactionFile,
+  CommentReactionPreview,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -28,16 +31,7 @@ import {
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from '../../transit/TransitData/TransitTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import {
-  CommentReactionPreview,
-  CommentsReactionSummary,
-  EmojiReactionSummary,
-  RawReactionContent,
-  ReactionConfig,
-  ReactionContext,
-  ReactionFile,
-  ReactionVm,
-} from './PostTypes';
+import { RawReactionContent, ReactionConfig, ReactionContext, ReactionVm } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import { uploadFileOverTransit } from '../../transit/TransitData/Upload/TransitUploadProvider';
 import { deleteFileOverTransit } from '../../transit/TransitData/File/TransitFileManageProvider';
@@ -315,12 +309,15 @@ const parseReactions = (
 };
 
 export const parseReactionPreview = (
-  reactionPreview: ReactionPreview | undefined
-): { comments: CommentsReactionSummary; reactions: EmojiReactionSummary } | undefined => {
+  reactionPreview: ReactionPreview | ParsedReactionPreview | undefined
+): ParsedReactionPreview | ReactionPreview => {
   if (reactionPreview) {
+    if ('count' in reactionPreview.reactions) return reactionPreview as ParsedReactionPreview;
+
+    const rawReactionPreview = reactionPreview as ReactionPreview;
     return {
       comments: {
-        comments: reactionPreview.comments
+        comments: rawReactionPreview.comments
           .map((commentPreview) => {
             try {
               return {
@@ -342,7 +339,7 @@ export const parseReactionPreview = (
             }
           })
           .filter(Boolean) as CommentReactionPreview[],
-        totalCount: reactionPreview.totalCommentCount || reactionPreview.comments.length || 0,
+        totalCount: rawReactionPreview.totalCommentCount || rawReactionPreview.comments.length || 0,
       },
       reactions: parseReactions(Object.values(reactionPreview.reactions)),
     };

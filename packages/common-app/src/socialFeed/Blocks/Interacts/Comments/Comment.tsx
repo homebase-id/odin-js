@@ -8,18 +8,14 @@ import {
   useReaction,
 } from '@youfoundation/common-app';
 
-import {
-  CommentReactionPreview,
-  ReactionContext,
-  ReactionFile,
-  ReactionVm,
-} from '@youfoundation/js-lib/public';
+import { ReactionContext, ReactionVm } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
+import { CommentReactionPreview, ReactionFile } from '@youfoundation/js-lib/core';
 
 export interface CommentProps {
   context: ReactionContext;

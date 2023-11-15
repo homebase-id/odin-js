@@ -4,7 +4,6 @@ import {
   BlogConfig,
   PostContent,
   ChannelDefinition,
-  PostFile,
   PostType,
   postTypeToDataType,
 } from './PostTypes';
@@ -33,7 +32,7 @@ export const getPosts = async <T extends PostContent>(
   includeDrafts: true | 'only' | false,
   cursorState: string | undefined = undefined,
   pageSize = 10
-): Promise<CursoredResult<PostFile<T>[]>> => {
+): Promise<CursoredResult<DriveSearchResult<T>[]>> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     targetDrive: targetDrive,
@@ -55,14 +54,14 @@ export const getPosts = async <T extends PostContent>(
 
   const response = await queryBatch(dotYouClient, params, ro);
 
-  const posts: PostFile<T>[] = (
+  const posts: DriveSearchResult<T>[] = (
     await Promise.all(
       response.searchResults.map(
         async (dsr) =>
           await dsrToPostFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader)
       )
     )
-  ).filter((post) => !!post) as PostFile<T>[];
+  ).filter((post) => !!post) as DriveSearchResult<T>[];
 
   return { cursorState: response.cursorState, results: posts };
 };
@@ -76,7 +75,7 @@ export const getRecentPosts = async <T extends PostContent>(
   pageSize = 10,
   channels?: ChannelDefinition[],
   includeHiddenChannels = false
-): Promise<MultiRequestCursoredResult<PostFile<T>[]>> => {
+): Promise<MultiRequestCursoredResult<DriveSearchResult<T>[]>> => {
   const chnls = channels || (await getChannelDefinitions(dotYouClient));
   const allCursors: Record<string, string> = {};
 
@@ -114,14 +113,14 @@ export const getRecentPosts = async <T extends PostContent>(
     response.results.map(async (result) => {
       const targetDrive = GetTargetDriveFromChannelId(result.name);
 
-      const posts: PostFile<T>[] = (
+      const posts: DriveSearchResult<T>[] = (
         await Promise.all(
           result.searchResults.map(
             async (dsr) =>
               await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
           )
         )
-      ).filter((post) => !!post) as PostFile<T>[];
+      ).filter((post) => !!post) as DriveSearchResult<T>[];
 
       allCursors[result.name] = result.cursorState;
       return { posts, cursorState: result.cursorState };
@@ -130,7 +129,11 @@ export const getRecentPosts = async <T extends PostContent>(
 
   const sortedPosts = postsPerChannel
     .flatMap((chnl) => chnl?.posts)
-    .sort((a, b) => b.userDate - a.userDate);
+    .sort(
+      (a, b) =>
+        (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+        (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+    );
 
   return { results: sortedPosts, cursorState: allCursors };
 };
@@ -139,7 +142,7 @@ export const getPostByFileId = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   fileId: string
-): Promise<PostFile<T> | undefined> => {
+): Promise<DriveSearchResult<T> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
   if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
@@ -150,7 +153,7 @@ export const getPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   id: string
-): Promise<PostFile<T> | undefined> => {
+): Promise<DriveSearchResult<T> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     tagsMatchAtLeastOne: [id],
@@ -176,7 +179,7 @@ export const getPostBySlug = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   postSlug: string
-): Promise<PostFile<T> | undefined> => {
+): Promise<DriveSearchResult<T> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     clientUniqueIdAtLeastOne: [toGuidId(postSlug)],
@@ -209,29 +212,27 @@ export const dsrToPostFile = async <T extends PostContent>(
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<PostFile<T> | undefined> => {
+): Promise<DriveSearchResult<T> | undefined> => {
   try {
-    const content = await getContentFromHeaderOrPayload<T>(
+    const postContent = await getContentFromHeaderOrPayload<T>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
 
-    if (!content) return undefined;
+    if (!postContent) return undefined;
 
-    const file: PostFile<T> = {
-      fileId: dsr.fileId,
-      versionTag: dsr.fileMetadata.versionTag,
-      globalTransitId: dsr.fileMetadata.globalTransitId,
-      acl: dsr.serverMetadata?.accessControlList,
-      userDate: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
-      content: content,
-      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-      reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
-      isEncrypted: dsr.fileMetadata.isEncrypted,
-      isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
-      lastModified: dsr.fileMetadata.updated,
+    const file: DriveSearchResult<T> = {
+      ...dsr,
+      fileMetadata: {
+        ...dsr.fileMetadata,
+        reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
+        appData: {
+          ...dsr.fileMetadata.appData,
+          content: postContent,
+        },
+      },
     };
 
     return file;
