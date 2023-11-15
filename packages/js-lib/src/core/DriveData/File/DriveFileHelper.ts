@@ -5,10 +5,7 @@ import {
   tryJsonParse,
 } from '../../../helpers/DataUtil';
 import { DotYouClient } from '../../DotYouClient';
-import { EncryptedKeyHeader } from '../Drive/DriveTypes';
-import { decryptKeyHeader, decryptJsonContent } from '../SecurityHelpers';
-import { getFileHeader, getPayloadAsJson } from './DriveFileProvider';
-import { TargetDrive, SystemFileType, ContentType, FileMetadata } from './DriveFileTypes';
+import { TargetDrive, SystemFileType, ContentType } from './DriveFileTypes';
 
 /// Helper methods:
 export const getCacheKey = (targetDrive: TargetDrive, id: string, decrypt: boolean) =>

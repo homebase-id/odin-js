@@ -19,7 +19,6 @@ import {
   buildManifest,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
-import { ThumbnailInstruction } from '../../core';
 
 const isDebug = hasDebugFlag();
 
