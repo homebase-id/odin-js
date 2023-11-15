@@ -43,7 +43,7 @@ export const useFiles = ({
   };
 
   const fetchFile = async (result: DriveSearchResult, payloadKey?: string) => {
-    if (result.fileMetadata.contentType !== 'application/json' && payloadKey) {
+    if (payloadKey) {
       const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
         keyHeader: result.fileMetadata.isEncrypted
           ? result.sharedSecretEncryptedKeyHeader
@@ -77,7 +77,8 @@ export const useFiles = ({
         },
       },
       payload:
-        result.fileMetadata.contentType === 'application/json'
+        result.fileMetadata.payloads.length === 0 ||
+        result.fileMetadata.payloads.some((payload) => payload.contentType === 'application/json')
           ? await getContentFromHeaderOrPayload(
               dotYouClient,
               targetDrive,
