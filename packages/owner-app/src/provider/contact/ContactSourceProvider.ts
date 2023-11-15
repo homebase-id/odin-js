@@ -56,12 +56,12 @@ export const queryRemoteAttributes = async (
       (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Photo))?.[0],
     ]);
 
-    const nameAttr = name.fileMetadata.appData.content;
-    const phoneAttr = phone.fileMetadata.appData.content;
-    const emailAttr = email.fileMetadata.appData.content;
-    const birthdayAttr = birthday.fileMetadata.appData.content;
-    const locationAttr = location.fileMetadata.appData.content;
-    const photoAttr = photo.fileMetadata.appData.content;
+    const nameAttr = name?.fileMetadata.appData.content;
+    const phoneAttr = phone?.fileMetadata.appData.content;
+    const emailAttr = email?.fileMetadata.appData.content;
+    const birthdayAttr = birthday?.fileMetadata.appData.content;
+    const locationAttr = location?.fileMetadata.appData.content;
+    const photoAttr = photo?.fileMetadata.appData.content;
 
     return {
       source: 'public',
