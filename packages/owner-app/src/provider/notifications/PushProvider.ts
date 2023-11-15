@@ -1,14 +1,19 @@
 import { getBrowser, getOperatingSystem } from '@youfoundation/js-lib/auth';
-import { DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 
-const base64ToBase64url = (base64: string) => {
-  return base64.replaceAll(/\+/g, '-').replaceAll(/\//g, '_').replaceAll(/=/g, '');
-};
-export const GetApplicationServerKey = async (dotYouClient: DotYouClient) => {
-  const APPLICATION_PUBLIC_KEY_BASE64 =
-    'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
+export const GetApplicationServerKey = async () => {
+  const dotYouClient = new DotYouClient({ api: ApiType.Guest });
+  const client = dotYouClient.createAxiosClient();
+  return await client
+    .get<string>('/public/keys/notifications_pk', {
+      validateStatus: () => true,
+    })
+    .then((response) => response.data);
 
-  return base64ToBase64url(APPLICATION_PUBLIC_KEY_BASE64);
+  // const APPLICATION_PUBLIC_KEY_BASE64 =
+  //   'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U';
+
+  // return base64ToBase64url(APPLICATION_PUBLIC_KEY_BASE64);
 };
 
 export const RegisterNewDevice = async (

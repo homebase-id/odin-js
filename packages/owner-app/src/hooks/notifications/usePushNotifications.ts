@@ -1,5 +1,4 @@
 import { useDotYouClient } from '@youfoundation/common-app';
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import {
   GetApplicationServerKey,
   GetCurrentDeviceDetails,
@@ -13,16 +12,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 export const usePushNotifications = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const getPublicKey = async (): Promise<string> => {
-    const dotYouClient = new DotYouClient({ api: ApiType.Guest });
-    const client = dotYouClient.createAxiosClient();
-    return await client
-      .get('/public/keys/offline', {
-        validateStatus: () => true,
-      })
-      .then((response) => response.data.publicKey);
-  };
-
   // Register the push Application Server
   // Use serviceWorker.ready to ensure that you can subscribe for push
 
@@ -30,11 +19,10 @@ export const usePushNotifications = () => {
     isEnabled: Notification.permission === 'granted',
     enableOnThisDevice: () => {
       navigator.serviceWorker.ready.then(async (serviceWorkerRegistration) => {
-        const publicKey = await GetApplicationServerKey(dotYouClient);
-
+        const publicKey = await GetApplicationServerKey();
+        console.log(publicKey);
         const options = {
           userVisibleOnly: true,
-          // applicationServerKey: getPublicKey(),
           applicationServerKey: publicKey,
         };
 
