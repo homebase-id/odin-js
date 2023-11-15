@@ -54,7 +54,7 @@ const YourSignature = ({ className }: YourSignatureProps) => {
       MinimalProfileFields.DisplayName
     ];
   const initials = getInitialsOfNameAttribute(
-    filteredNameAttributes?.[0].fileMetadata.appData.content
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content
   );
 
   return (
