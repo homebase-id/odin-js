@@ -1,11 +1,9 @@
-import { DriveSearchResult, NewDriveSearchResult } from '../../../core';
 import { AccessControlList, SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
 import {
   TargetDrive,
   EmbeddedThumb,
   ThumbnailFile,
   RichText,
-  ParsedReactionPreview,
   ReactionFile,
   ReactionContent,
 } from '../../core/core';
