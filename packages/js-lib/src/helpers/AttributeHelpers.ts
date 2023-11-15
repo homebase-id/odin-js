@@ -1,4 +1,3 @@
-import { DriveSearchResult } from '../../core';
 import { Attribute, LocationFields, MinimalProfileFields } from '../profile/profile';
 import { PostContent, PostFile } from '../public/public';
 import { getNewId } from './DataUtil';
