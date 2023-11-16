@@ -5,9 +5,12 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('push', function (event) {
-  const promiseChain = self.registration.showNotification('You have a new notification', {
-    icon: `/owner/odin-logo.svg`,
-  });
+  const promiseChain = self.registration.showNotification(
+    event.data.text() || 'You have a new notification',
+    {
+      icon: `/owner/odin-logo.svg`,
+    }
+  );
 
   event.waitUntil(promiseChain);
 });
