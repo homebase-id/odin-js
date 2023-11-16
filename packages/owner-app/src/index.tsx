@@ -12,6 +12,6 @@ root.render(
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(
-    import.meta.env.MODE === 'production' ? '/owner/service-worker.js' : '/owner/dev-sw.js?dev-sw'
+    import.meta.env.MODE === 'production' ? '/owner/sw.js' : '/owner/dev-sw.js?dev-sw'
   );
 }
