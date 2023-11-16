@@ -16,15 +16,9 @@ export const stringToUint8Array = (str: string): Uint8Array => {
   return new TextEncoder().encode(str);
 };
 
-export const base64ToUint8Array = (base64UrlData: string): Uint8Array => {
-  const padding = '='.repeat((4 - (base64UrlData.length % 4)) % 4);
-  const base64 = (base64UrlData + padding)
-    .replaceAll(/-/g, '+')
-    .replaceAll(/_/g, '/')
-    .replaceAll(/ /g, '+');
-
+export const base64ToUint8Array = (base64: string): Uint8Array => {
   // base64 could have been urlDecoded, which would have replaced + with space
-  const binary_string = atob(base64); // TODO: Deprecated for Node.js
+  const binary_string = atob(base64.replaceAll(' ', '+')); // TODO: Deprecated for Node.js
   const len = binary_string.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
