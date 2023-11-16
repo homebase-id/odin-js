@@ -88,13 +88,12 @@ export const useImport = () => {
                 overwriteFileId: overwriteFileId,
                 drive: targetDrive,
               },
-              transitOptions: null,
             };
 
             const payloadJson =
               file.fileMetadata.contentType === 'application/json'
                 ? jsonStringify64(file.payload)
-                : null;
+                : undefined;
 
             const payloadBytes = payloadJson
               ? stringToUint8Array(payloadJson)
@@ -108,7 +107,7 @@ export const useImport = () => {
               accessControlList: file.fileMetadata.accessControlList,
               appData: {
                 ...file.fileMetadata.appData,
-                content: shouldEmbedContent ? payloadJson : null,
+                content: shouldEmbedContent ? payloadJson : undefined,
               },
             };
 

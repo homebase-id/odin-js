@@ -54,10 +54,10 @@ export const uploadVideo = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: uploadMeta?.fileId ?? null,
+      overwriteFileId: uploadMeta?.fileId,
       drive: targetDrive,
     },
-    transitOptions: uploadMeta?.transitOptions || null,
+    transitOptions: uploadMeta?.transitOptions,
   };
 
   const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
@@ -75,7 +75,6 @@ export const uploadVideo = async (
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
       fileType: 0,
-      content: null,
       userDate: uploadMeta?.userDate,
       previewThumbnail: tinyThumb,
     },

@@ -87,7 +87,7 @@ export const saveComment = async (
       tags: [],
       uniqueId: comment.id ?? getNewId(),
       fileType: ReactionConfig.CommentFileType,
-      content: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
       previewThumbnail: previewThumbnail,
       userDate: comment.date ?? new Date().getTime(),
     },

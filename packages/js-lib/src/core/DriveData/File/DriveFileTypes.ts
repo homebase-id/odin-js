@@ -68,7 +68,7 @@ export interface AppFileMetaData<T = string> {
   dataType: number;
   groupId?: string;
   userDate?: number;
-  tags: string[] | null;
+  tags?: string[];
   uniqueId?: string;
   content: T;
   previewThumbnail?: EmbeddedThumb;

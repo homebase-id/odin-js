@@ -11,7 +11,7 @@ import {
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import Layout, { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
 const About = lazy(() => import('../templates/About/About'));
 const Auth = lazy(() => import('../templates/Auth/Auth'));
@@ -53,9 +53,9 @@ function App() {
             path=""
             element={
               <RootRoute>
-                <Layout>
+                <NoLayout>
                   <Outlet />
-                </Layout>
+                </NoLayout>
               </RootRoute>
             }
           >

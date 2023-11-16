@@ -11,9 +11,9 @@ import {
 } from '../File/DriveFileTypes';
 
 export interface UploadInstructionSet {
-  transferIv: Uint8Array;
   storageOptions: StorageOptions | null;
-  transitOptions: TransitOptions | null;
+  transitOptions?: TransitOptions;
+  transferIv?: Uint8Array;
   systemFileType?: SystemFileType;
 }
 
@@ -27,8 +27,8 @@ export interface AppendInstructionSet {
 
 export interface StorageOptions {
   drive: TargetDrive;
-  overwriteFileId?: string | null;
-  expiresTimestamp?: number | null;
+  overwriteFileId?: string;
+  expiresTimestamp?: number;
   storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
@@ -74,13 +74,13 @@ export interface UploadManifest {
 
 export interface UploadAppFileMetaData {
   uniqueId?: string;
-  tags: string[] | null;
+  tags?: string[];
   fileType?: number;
   dataType?: number;
   userDate?: number;
   groupId?: string;
   archivalStatus?: ArchivalStatus;
-  content: string | null;
+  content?: string;
   previewThumbnail?: EmbeddedThumb;
 }
 
