@@ -1,6 +1,7 @@
 import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
-import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
+import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
+import { DriveSearchResult } from '../../core/DriveData/File/DriveFileTypes';
 import {
   base64ToUint8Array,
   byteArrayToString,

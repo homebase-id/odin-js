@@ -1,7 +1,6 @@
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { DotYouClient } from '../../DotYouClient';
-import { PayloadFile, ThumbnailFile } from '../File/DriveFileTypes';
-import { KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
+import { PayloadFile, ThumbnailFile, KeyHeader, EncryptedKeyHeader } from '../File/DriveFileTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,

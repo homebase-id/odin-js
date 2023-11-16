@@ -6,8 +6,9 @@ import {
   ExternalFileIdentifier,
   SystemFileType,
   UploadPayloadDescriptor,
+  AccessControlList,
+  EncryptedKeyHeader,
 } from '../File/DriveFileTypes';
-import { EncryptedKeyHeader } from '../Drive/DriveTypes';
 
 export interface UploadInstructionSet {
   transferIv: Uint8Array;
@@ -69,19 +70,6 @@ export interface UploadFileMetadata {
 
 export interface UploadManifest {
   PayloadDescriptors?: UploadPayloadDescriptor[];
-}
-
-export interface AccessControlList {
-  requiredSecurityGroup: SecurityGroupType;
-  circleIdList?: string[] | null;
-  odinIdList?: string[] | null;
-}
-
-export enum SecurityGroupType {
-  Anonymous = 'anonymous',
-  Authenticated = 'authenticated',
-  Connected = 'connected',
-  Owner = 'owner',
 }
 
 export interface UploadAppFileMetaData {

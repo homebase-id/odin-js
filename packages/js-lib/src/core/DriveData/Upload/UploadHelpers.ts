@@ -1,7 +1,6 @@
 import { DotYouClient } from '../../DotYouClient';
 
 import { TransitInstructionSet } from '../../../transit/TransitData/TransitTypes';
-import { KeyHeader } from '../Drive/DriveTypes';
 import {
   UploadFileMetadata,
   UploadInstructionSet,
@@ -21,7 +20,7 @@ import {
   stringToUint8Array,
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
-import { ThumbnailFile, SystemFileType, PayloadFile } from '../File/DriveFileTypes';
+import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),

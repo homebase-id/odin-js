@@ -1,14 +1,21 @@
 import { AxiosRequestConfig } from 'axios';
 
 import { DotYouClient } from '../../DotYouClient';
-import { DriveSearchResult, KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
 import {
   decryptKeyHeader,
   decryptJsonContent,
   decryptChunkedBytesResponse,
   decryptBytesResponse,
 } from '../SecurityHelpers';
-import { TargetDrive, SystemFileType, ContentType, ImageContentType } from './DriveFileTypes';
+import {
+  TargetDrive,
+  SystemFileType,
+  ContentType,
+  ImageContentType,
+  DriveSearchResult,
+  EncryptedKeyHeader,
+  KeyHeader,
+} from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
 

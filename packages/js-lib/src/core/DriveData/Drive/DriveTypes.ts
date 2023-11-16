@@ -1,10 +1,8 @@
 import {
   TargetDrive,
-  FileMetadata,
-  ServerMetaData,
   ArchivalStatus,
   SystemFileType,
-  EmbeddedThumb,
+  DriveSearchResult,
 } from '../File/DriveFileTypes';
 
 export interface PermissionedDrive {
@@ -23,18 +21,6 @@ export interface PermissionSet {
   keys: number[];
 }
 
-export interface EncryptedKeyHeader {
-  encryptionVersion: number;
-  type: number; //value is always 11
-  iv: Uint8Array;
-  encryptedAesKey: Uint8Array;
-}
-
-export interface KeyHeader {
-  iv: Uint8Array;
-  aesKey: Uint8Array;
-}
-
 export interface DriveDefinition {
   name: string;
   targetDriveInfo: TargetDrive;
@@ -42,43 +28,6 @@ export interface DriveDefinition {
   allowAnonymousReads: boolean;
   allowSubscriptions: boolean;
   ownerOnly: boolean;
-}
-
-export interface DriveSearchResult<T = string> {
-  fileId: string;
-  fileState: 'active';
-  fileSystemType: SystemFileType;
-
-  fileMetadata: FileMetadata<T>;
-  sharedSecretEncryptedKeyHeader: EncryptedKeyHeader;
-  serverMetadata: ServerMetaData | undefined;
-
-  priority: number;
-
-  // payloads: [];
-  // fileByteCount: number;
-}
-
-export interface NewDriveSearchResult<T = string> {
-  fileId?: string;
-
-  fileSystemType?: SystemFileType;
-
-  fileMetadata: NewFileMetadata<T>;
-  serverMetadata: Omit<ServerMetaData, 'doNotIndex' | 'allowDistribution'> | undefined;
-}
-
-export interface NewFileMetadata<T = string> {
-  contentType?: string;
-  appData: NewAppFileMetaData<T>;
-  versionTag?: string;
-}
-
-export interface NewAppFileMetaData<T = string> {
-  content: T;
-  previewThumbnail?: EmbeddedThumb;
-  fileType?: number;
-  userDate?: number;
 }
 
 export interface QueryParams {

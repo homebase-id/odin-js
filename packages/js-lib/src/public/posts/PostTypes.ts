@@ -1,4 +1,4 @@
-import { AccessControlList, SecurityGroupType } from '../../core/DriveData/Upload/DriveUploadTypes';
+import { AccessControlList, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import {
   TargetDrive,
   EmbeddedThumb,

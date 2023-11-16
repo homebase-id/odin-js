@@ -2,10 +2,10 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { Attribute, AttributeConfig } from '../../profile/profile';
-import { DriveSearchResult, FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
+import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
 import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
-import { TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
+import { DriveSearchResult, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 
 export const getProfileAttributesOverTransit = async (
   dotYouClient: DotYouClient,

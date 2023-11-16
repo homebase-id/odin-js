@@ -1,7 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { EncryptedKeyHeader, KeyHeader } from './Drive/DriveTypes';
 import { streamToByteArray } from './Upload/UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
@@ -11,7 +10,7 @@ import {
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
 } from '../../helpers/DataUtil';
-import { FileMetadata } from './File/DriveFileTypes';
+import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -20,9 +19,8 @@ export const encryptKeyHeader = async (
   transferIv: Uint8Array
 ): Promise<EncryptedKeyHeader> => {
   const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    throw new Error('attempting to encrypt but missing the shared secret');
-  }
+  if (!ss) throw new Error('attempting to encrypt but missing the shared secret');
+
   const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
   const cipher = await cbcEncrypt(new Uint8Array(combined), transferIv, ss);
 

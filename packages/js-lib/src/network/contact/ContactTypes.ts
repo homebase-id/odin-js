@@ -1,4 +1,4 @@
-import { TargetDrive, ThumbSize, ImageContentType } from '../../core/DriveData/File/DriveFileTypes';
+import { TargetDrive, ImageSize, ImageContentType } from '../../core/DriveData/File/DriveFileTypes';
 
 export class ContactConfig {
   static readonly ContactFileType: number = 100;
@@ -10,7 +10,7 @@ export class ContactConfig {
   };
 }
 
-export interface ContactDataImage extends ThumbSize {
+export interface ContactDataImage extends ImageSize {
   contentType: ImageContentType;
   content: string;
   url?: string;

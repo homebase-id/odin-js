@@ -17,7 +17,7 @@ import {
   DriveSearchResult,
   EncryptedKeyHeader,
   KeyHeader,
-} from '../../../core/DriveData/Drive/DriveTypes';
+} from '../../../core/DriveData/File/DriveFileTypes';
 import {
   ContentType,
   FileMetadata,

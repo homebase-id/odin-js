@@ -13,6 +13,7 @@ export * from './DriveData/File/DriveFileManageProvider';
 export * from './DriveData/File/DriveFileProvider';
 export * from './DriveData/File/DriveFileByUniqueIdProvider';
 export * from './DriveData/File/DriveFileTypes';
+export * from './DriveData/File/DriveFileReactionTypes';
 
 export * from './DriveData/Query/DriveQueryProvider';
 export * from './DriveData/Query/DriveQueryTypes';

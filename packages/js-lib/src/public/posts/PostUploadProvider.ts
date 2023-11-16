@@ -7,12 +7,12 @@ import {
 import {
   AppendInstructionSet,
   ScheduleOptions,
-  SecurityGroupType,
   SendContents,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
 } from '../../core/DriveData/Upload/DriveUploadTypes';
+import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   DriveSearchResult,
