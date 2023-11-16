@@ -2,22 +2,26 @@ import { ActionButton, Check, SubtleMessage, t, Toast } from '@youfoundation/com
 import { Bell } from '@youfoundation/common-app';
 import { useNotifications } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
+import {
+  usePushNotificationClients,
+  usePushNotifications,
+} from '../../hooks/notifications/usePushNotifications';
 import { useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 
 const Notifications = () => {
   const { notifications: notificationList } = useNotifications();
   const { isEnabled, enableOnThisDevice } = usePushNotifications();
+  const { data: current } = usePushNotificationClients().fetchCurrent;
   const [isDialogOpen, setDialogOpen] = useState(false);
-
+  console.log({ Subscription: current });
   return (
     <>
       <PageMeta
         title={t('Notifications')}
         icon={Bell}
         actions={
-          isEnabled ? (
+          isEnabled && current ? (
             <ActionButton type="secondary" icon={Check} onClick={() => setDialogOpen(true)}>
               {t('Push Notifications Enabled')}
             </ActionButton>
