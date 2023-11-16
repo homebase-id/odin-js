@@ -119,7 +119,6 @@ export const saveProfileDefinition = async (
       overwriteFileId: fileId?.toString(),
       drive: targetDrive,
     },
-    transitOptions: null,
   };
 
   const payloadJson: string = jsonStringify64(definition);
@@ -136,7 +135,7 @@ export const saveProfileDefinition = async (
       tags: [definition.profileId],
       fileType: ProfileConfig.ProfileDefinitionFileType,
       dataType: undefined,
-      content: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
@@ -187,7 +186,6 @@ export const saveProfileSection = async (
       overwriteFileId: fileId ?? undefined,
       drive: targetDrive,
     },
-    transitOptions: null,
   };
 
   const payloadJson: string = jsonStringify64(profileSection);
@@ -205,7 +203,7 @@ export const saveProfileSection = async (
       groupId: profileId,
       fileType: ProfileConfig.ProfileSectionFileType,
       dataType: undefined,
-      content: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: encrypt,
     accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },

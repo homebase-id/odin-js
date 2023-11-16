@@ -1,7 +1,6 @@
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { DotYouClient } from '../../DotYouClient';
-import { PayloadFile, ThumbnailFile } from '../File/DriveFileTypes';
-import { KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
+import { PayloadFile, ThumbnailFile, KeyHeader, EncryptedKeyHeader } from '../File/DriveFileTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,
@@ -19,6 +18,7 @@ import {
   buildManifest,
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
+import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 
 const isDebug = hasDebugFlag();
 
@@ -115,7 +115,7 @@ export const uploadHeader = async (
     {
       fileMetadata: encryptedMetaData,
     },
-    instructions.transferIv
+    instructions.transferIv || getRandom16ByteArray()
   );
 
   const data = await buildFormData(

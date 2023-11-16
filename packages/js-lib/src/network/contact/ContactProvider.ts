@@ -2,7 +2,7 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
 import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
-import { DriveSearchResult } from '../../core/DriveData/Drive/DriveTypes';
+import { DriveSearchResult } from '../../core/DriveData/File/DriveFileTypes';
 import { toGuidId } from '../../helpers/DataUtil';
 import { ContactConfig, ContactFile } from './ContactTypes';
 

@@ -155,7 +155,7 @@ export const saveChannelDefinition = async (
     appData: {
       tags: [definition.channelId],
       fileType: BlogConfig.ChannelDefinitionFileType,
-      content: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: encrypt,
     accessControlList: definition.acl,

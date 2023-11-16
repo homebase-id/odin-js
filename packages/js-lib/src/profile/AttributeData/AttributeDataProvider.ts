@@ -396,7 +396,6 @@ export const saveAttribute = async (
       overwriteFileId: toSaveAttribute?.fileId ?? '',
       drive: targetDrive,
     },
-    transitOptions: null,
   };
 
   const payloadJson: string = jsonStringify64(attrContent);
@@ -418,7 +417,7 @@ export const saveAttribute = async (
       tags: [attrContent.type, attrContent.sectionId, attrContent.profileId, attrContent.id],
       groupId: attrContent.sectionId,
       fileType: AttributeConfig.AttributeFileType,
-      content: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
       previewThumbnail: previewThumb || toSaveAttribute.fileMetadata.appData.previewThumbnail,
     },
     isEncrypted: encrypt,
@@ -474,7 +473,6 @@ export const saveAttribute = async (
         overwriteFileId: toSaveAttribute.fileId,
         drive: targetDrive,
       },
-      transitOptions: null,
     };
 
     metadata.versionTag = runningVersionTag || metadata.versionTag;

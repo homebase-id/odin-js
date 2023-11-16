@@ -13,7 +13,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
-const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const About = lazy(() => import('../templates/About/About'));
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -30,7 +29,7 @@ import { useAuth } from '../hooks/auth/useAuth';
 export const ROOT_PATH = '';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
-import { ErrorBoundary } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 

@@ -6,13 +6,14 @@ import {
   ExternalFileIdentifier,
   SystemFileType,
   UploadPayloadDescriptor,
+  AccessControlList,
+  EncryptedKeyHeader,
 } from '../File/DriveFileTypes';
-import { EncryptedKeyHeader } from '../Drive/DriveTypes';
 
 export interface UploadInstructionSet {
-  transferIv: Uint8Array;
   storageOptions: StorageOptions | null;
-  transitOptions: TransitOptions | null;
+  transitOptions?: TransitOptions;
+  transferIv?: Uint8Array;
   systemFileType?: SystemFileType;
 }
 
@@ -26,8 +27,8 @@ export interface AppendInstructionSet {
 
 export interface StorageOptions {
   drive: TargetDrive;
-  overwriteFileId?: string | null;
-  expiresTimestamp?: number | null;
+  overwriteFileId?: string;
+  expiresTimestamp?: number;
   storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
@@ -71,28 +72,15 @@ export interface UploadManifest {
   PayloadDescriptors?: UploadPayloadDescriptor[];
 }
 
-export interface AccessControlList {
-  requiredSecurityGroup: SecurityGroupType;
-  circleIdList?: string[] | null;
-  odinIdList?: string[] | null;
-}
-
-export enum SecurityGroupType {
-  Anonymous = 'anonymous',
-  Authenticated = 'authenticated',
-  Connected = 'connected',
-  Owner = 'owner',
-}
-
 export interface UploadAppFileMetaData {
   uniqueId?: string;
-  tags: string[] | null;
+  tags?: string[];
   fileType?: number;
   dataType?: number;
   userDate?: number;
   groupId?: string;
   archivalStatus?: ArchivalStatus;
-  content: string | null;
+  content?: string;
   previewThumbnail?: EmbeddedThumb;
 }
 

@@ -1,9 +1,14 @@
 import { AxiosRequestConfig } from 'axios';
-import { ContentType, SystemFileType } from './DriveFileTypes';
+import {
+  ContentType,
+  DriveSearchResult,
+  EncryptedKeyHeader,
+  KeyHeader,
+  SystemFileType,
+} from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
 
 import { DotYouClient } from '../../DotYouClient';
-import { DriveSearchResult, KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
 import {
   decryptKeyHeader,
   decryptJsonContent,

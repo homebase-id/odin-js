@@ -73,7 +73,6 @@ export const saveContact = async (
       overwriteFileId: contact?.fileId ?? '',
       drive: ContactConfig.ContactTargetDrive,
     },
-    transitOptions: null,
   };
 
   const payloadJson: string = jsonStringify64({
@@ -95,7 +94,7 @@ export const saveContact = async (
     appData: {
       tags: tags,
       fileType: ContactConfig.ContactFileType,
-      content: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
       // Having the odinId MD5 hashed as unique id, avoids having duplicates getting created, enforced server-side;
       uniqueId: contact.odinId ? toGuidId(contact.odinId) : contact.id,
       previewThumbnail: previewThumb,
