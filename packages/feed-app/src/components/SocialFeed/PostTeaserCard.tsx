@@ -32,7 +32,7 @@ interface PostTeaserCardProps {
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
   const { getDotYouClient } = useAuth();
   const post = postFile.fileMetadata.appData.content;
-  const isExternal = odinId !== getDotYouClient().getIdentity();
+  const isExternal = odinId && odinId !== getDotYouClient().getIdentity();
   const navigate = useNavigate();
 
   const { data: externalChannel } = useSocialChannel({
