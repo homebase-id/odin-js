@@ -11,6 +11,7 @@ import {
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
   queryBatch,
+  sendCommand,
   uploadFile,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -50,22 +51,8 @@ enum DeliveryStatus {
 }
 
 export interface ChatMessage {
-  // sender: string
-
-  /// FileId of the message. Set on the server. Could be used as a uniqueId
-  // fileId: string
-
   /// ClientUniqueId. Set by the device
   id: string;
-
-  /// Timestamp when the message was created
-  // receivedTimestamp: number;
-
-  /// Timestamp when the message was updated
-  // updatedTimestamp: number;
-
-  /// GlobalTransitId of the payload. Same across all the recipients
-  // globalTransitId: string;
 
   /// GroupId of the payload.
   conversationId: string;
@@ -226,5 +213,26 @@ export const uploadConversation = async (
     undefined,
     undefined,
     onVersionConflict
+  );
+};
+
+export const requestConversationCommand = async (
+  dotYouClient: DotYouClient,
+  conversation: Conversation
+) => {
+  return await sendCommand(
+    dotYouClient,
+    {
+      code: 100,
+      globalTransitIdList: [],
+      jsonMessage: jsonStringify64({
+        conversationId: conversation.conversationId,
+        title: conversation.title,
+      }),
+      recipients: (conversation as GroupConversation).recipients || [
+        (conversation as SingleConversation).recipient,
+      ],
+    },
+    ChatDrive
   );
 };

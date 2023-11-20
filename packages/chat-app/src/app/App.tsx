@@ -11,7 +11,7 @@ import {
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import Layout, { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
+import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
 const About = lazy(() => import('../templates/About/About'));
 const Auth = lazy(() => import('../templates/Auth/Auth'));
@@ -60,6 +60,7 @@ function App() {
             }
           >
             <Route index={true} element={<ConversationsOverivew />} />
+            <Route path={':conversationKey'} element={<ConversationsOverivew />} />
           </Route>
 
           <Route

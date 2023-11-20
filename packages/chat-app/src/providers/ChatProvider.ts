@@ -84,29 +84,27 @@ export const uploadChatMessage = async (
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
+  const distribute = messageContent.recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
       drive: ChatDrive,
       overwriteFileId: message.fileId,
     },
-    transitOptions:
-      messageContent.recipients?.length > 0
-        ? {
-            recipients: messageContent.recipients,
-            schedule: ScheduleOptions.SendNowAwaitResponse,
-            sendContents: SendContents.All,
-            useGlobalTransitId: true,
-          }
-        : undefined,
+    transitOptions: distribute
+      ? {
+          recipients: [...messageContent.recipients],
+          schedule: ScheduleOptions.SendNowAwaitResponse,
+          sendContents: SendContents.All,
+          useGlobalTransitId: true,
+        }
+      : undefined,
   };
 
-  messageContent.recipients = [];
-  const payloadJson: string = jsonStringify64({ ...messageContent });
-
+  const payloadJson: string = jsonStringify64({ ...messageContent, recipients: undefined });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
-    allowDistribution: false,
+    allowDistribution: distribute,
     appData: {
       uniqueId: messageContent.id,
       groupId: messageContent.conversationId,
@@ -115,7 +113,7 @@ export const uploadChatMessage = async (
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Owner,
+      requiredSecurityGroup: SecurityGroupType.Connected,
     },
   };
 

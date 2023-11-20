@@ -5,7 +5,10 @@ export const useDarkMode = () => {
   const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const localPreference = localStorage.getItem(LOCALSTORAGE_KEY);
 
-  const finalChoice = localPreference !== undefined ? localPreference === '1' : prefersDarkMode;
+  const finalChoice =
+    localPreference !== undefined && localPreference !== null
+      ? localPreference === '1'
+      : prefersDarkMode;
 
   const setDocumentClass = (isDarkMode: boolean) => {
     if (isDarkMode) {

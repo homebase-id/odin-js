@@ -34,3 +34,6 @@ export * from './MediaData/Thumbs/ImageResizer';
 export * from './MediaData/Thumbs/ThumbnailProvider';
 export * from './MediaData/ImageProvider';
 export * from './MediaData/VideoProvider';
+
+// CommandData
+export * from './CommandData/CommandProvider';

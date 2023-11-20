@@ -5,3 +5,7 @@
 .dark select option {
   background-color: black;
 }
+
+.dark {
+  color-scheme: dark;
+}
