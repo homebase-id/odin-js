@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useDotYouClient, useMostSpace, usePortal } from '../../hooks';
-import { useQuery } from '@tanstack/react-query';
-import { ContactFile, getContacts } from '@youfoundation/js-lib/network';
+import { useAllContacts, useMostSpace, usePortal } from '../../hooks';
 
 export const MentionDropdown = ({
   query,
@@ -15,7 +13,7 @@ export const MentionDropdown = ({
 }) => {
   const target = usePortal('emoji-container');
   const enabled = !!(query && query.startsWith('@'));
-  const { data: mentionTargets } = useMentionTargets(enabled);
+  const { data: mentionTargets } = useAllContacts(enabled);
 
   const slicedQuery = query?.slice(1);
   const identities = useMemo(
@@ -104,36 +102,4 @@ export const MentionDropdown = ({
   );
 
   return createPortal(dialog, target);
-};
-
-const CHUNKSIZE = 200;
-const useMentionTargets = (enabled: boolean) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-
-  const fetchMentionTargets = async () => {
-    // self invoking function that fetches the contacts in blocks of a CHUNKSIZE untill there are no more contacts to fetch
-    const internalGetContacts = async (
-      cursor: string | undefined,
-      limit: number
-    ): Promise<ContactFile[]> => {
-      const contacts = await getContacts(dotYouClient, cursor, limit);
-      if (contacts?.cursorState && contacts.results.length >= limit) {
-        const nextContacts = await internalGetContacts(contacts.cursorState, limit);
-        return contacts.results.concat(nextContacts);
-      }
-      return contacts.results;
-    };
-
-    return internalGetContacts(undefined, CHUNKSIZE);
-  };
-
-  return useQuery({
-    queryKey: ['mention-targets'],
-    queryFn: fetchMentionTargets,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    gcTime: Infinity,
-    staleTime: Infinity,
-    enabled,
-  });
 };

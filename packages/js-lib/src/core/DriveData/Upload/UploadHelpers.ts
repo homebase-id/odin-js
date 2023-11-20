@@ -95,7 +95,9 @@ export const buildDescriptor = async (
   instructions: UploadInstructionSet | TransitInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<Uint8Array> => {
-  const transferIv = instructions.transferIv ?? getRandom16ByteArray();
+  if (!instructions.transferIv) {
+    throw new Error('Transfer IV is required');
+  }
 
   return await encryptWithSharedSecret(
     dotYouClient,
@@ -103,11 +105,11 @@ export const buildDescriptor = async (
       encryptedKeyHeader: await encryptKeyHeader(
         dotYouClient,
         keyHeader ?? EMPTY_KEY_HEADER,
-        transferIv
+        instructions.transferIv
       ),
       fileMetadata: await encryptMetaData(metadata, keyHeader),
     },
-    transferIv
+    instructions.transferIv
   );
 };
 

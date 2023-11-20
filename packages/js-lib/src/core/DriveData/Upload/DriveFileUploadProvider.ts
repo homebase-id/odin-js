@@ -68,13 +68,14 @@ const uploadUsingKeyHeader = async (
   const instructionsWithManifest = {
     ...strippedInstructions,
     manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
   };
 
   // Build package
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     keyHeader,
-    instructions,
+    instructionsWithManifest,
     metadata
   );
 
@@ -106,6 +107,7 @@ export const uploadHeader = async (
   if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
 
   strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
+  strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
@@ -115,7 +117,7 @@ export const uploadHeader = async (
     {
       fileMetadata: encryptedMetaData,
     },
-    instructions.transferIv || getRandom16ByteArray()
+    strippedInstructions.transferIv
   );
 
   const data = await buildFormData(

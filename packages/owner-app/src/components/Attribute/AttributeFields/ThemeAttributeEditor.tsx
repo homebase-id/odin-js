@@ -76,8 +76,6 @@ const ThemeSpecificFields = ({
     targetDrive
   );
 
-  console.log(fileId);
-
   const dataVal = attribute.data?.[HomePageThemeFields.HeaderImageKey];
   const defaultValue =
     dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;

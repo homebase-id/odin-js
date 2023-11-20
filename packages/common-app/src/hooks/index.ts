@@ -5,6 +5,7 @@ export * from './circles/useCircle';
 export * from './circles/useCircles';
 export * from './clickedOutsideTrigger/useClickedOutsideTrigger';
 export * from './connections/useConnections';
+export * from './connections/useAllContacts';
 export * from './connections/useExternalOdinId';
 export * from './connections/useIsConnected';
 export * from './darkMode/useDarkMode';
