@@ -3,7 +3,9 @@ import {
   ConnectionImage,
   ConnectionName,
   Input,
+  MagnifyingGlass,
   SubtleMessage,
+  Times,
   t,
   useAllContacts,
 } from '@youfoundation/common-app';
@@ -148,6 +150,7 @@ const SearchConversation = ({
   activeConversationId: string | undefined;
   conversations: DriveSearchResult<Conversation>[];
 }) => {
+  const [stateIndex, setStateIndex] = useState(0);
   const [query, setQuery] = useState<string | undefined>(undefined);
   const isActive = !!(query && query.length > 1);
   useEffect(() => {
@@ -179,8 +182,22 @@ const SearchConversation = ({
     <>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="flex flex-row gap-1 px-5 pb-5">
-          <Input onChange={(e) => setQuery(e.target.value)} />
-          <ActionButton type="secondary">{t('Search')}</ActionButton>
+          <Input
+            onChange={(e) => setQuery(e.target.value)}
+            key={stateIndex}
+            defaultValue={query}
+            placeholder={t('Search or start a new chat')}
+          />
+          <ActionButton
+            type="secondary"
+            icon={isActive ? Times : MagnifyingGlass}
+            onClick={() => {
+              if (!isActive) return null;
+
+              setQuery('');
+              setStateIndex(stateIndex + 1);
+            }}
+          />
         </div>
       </form>
       <div>
