@@ -178,6 +178,26 @@ const SearchConversation = ({
       ]
     : [];
 
+  // Remove duplicates from results, if there is a duplicate prefer the conversation
+  const uniqueResults = results.filter((result, index, self) => {
+    const isConversation = 'fileMetadata' in result;
+    const odinId = isConversation
+      ? (result.fileMetadata.appData.content as SingleConversation).recipient
+      : result.odinId;
+
+    const isDuplicate =
+      self.findIndex((r) => {
+        const rIsConversation = 'fileMetadata' in r;
+        const rOdinId = rIsConversation
+          ? (r.fileMetadata.appData.content as SingleConversation).recipient
+          : r.odinId;
+
+        return rOdinId === odinId;
+      }) !== index;
+
+    return !isDuplicate || (isDuplicate && isConversation);
+  });
+
   return (
     <>
       <form onSubmit={(e) => e.preventDefault()}>
@@ -202,8 +222,8 @@ const SearchConversation = ({
       </form>
       <div>
         {isActive ? (
-          results?.length ? (
-            results.map((result) => (
+          uniqueResults?.length ? (
+            uniqueResults.map((result) => (
               <SearchResult
                 result={result}
                 onOpen={(id) => openConversation(id)}
@@ -235,24 +255,36 @@ const SearchResult = (props: {
   const { onOpen, isActive } = props;
   const result: DriveSearchResult<Conversation> = props.result as DriveSearchResult<Conversation>;
 
-  const { odinId, onClick } = React.useMemo(() => {
+  const { odinId, conversationId, onClick } = React.useMemo(() => {
     const groupConversation = (result as DriveSearchResult<Conversation>).fileMetadata.appData
       .content as GroupConversation;
     if (groupConversation.recipients?.length)
       return {
         odinId: groupConversation.recipients.join(', '),
+        conversationId: groupConversation.conversationId,
         onClick: () => onOpen(groupConversation.conversationId),
       };
 
     const conversation = (result as DriveSearchResult<Conversation>).fileMetadata.appData
       .content as SingleConversation;
     if (conversation)
-      return { odinId: conversation.recipient, onClick: () => onOpen(conversation.conversationId) };
+      return {
+        odinId: conversation.recipient,
+        conversationId: conversation.conversationId,
+        onClick: () => onOpen(conversation.conversationId),
+      };
 
     return { odinId: undefined, onClick: undefined };
   }, [result]);
 
-  return <InnerConversationItem odinId={odinId} onClick={onClick} isActive={isActive} />;
+  return (
+    <InnerConversationItem
+      odinId={odinId}
+      conversationId={conversationId}
+      onClick={onClick}
+      isActive={isActive}
+    />
+  );
 };
 
 const NewConversationSearchResult = ({
