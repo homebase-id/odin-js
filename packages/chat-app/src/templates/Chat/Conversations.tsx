@@ -6,6 +6,7 @@ import {
   MagnifyingGlass,
   SubtleMessage,
   Times,
+  ellipsisAtMaxChar,
   t,
   useAllContacts,
 } from '@youfoundation/common-app';
@@ -124,17 +125,12 @@ const InnerConversationItem = ({
         size="sm"
       />
       <p className="w-full text-lg">
-        <span>
-          <ConnectionName odinId={odinId} />
-        </span>
-
-        {lastMessage && lastMessageContent ? (
-          <small className="block leading-none">
-            {lastMessage?.fileMetadata?.appData?.content?.message?.text}
-          </small>
-        ) : (
-          <small className="block leading-none">{odinId}</small>
-        )}
+        <ConnectionName odinId={odinId} />
+        <small className="block leading-tight text-foreground/80">
+          {lastMessage && lastMessageContent
+            ? ellipsisAtMaxChar(lastMessageContent.message?.text, 35)
+            : odinId}
+        </small>
       </p>
       {lastMessage ? (
         <div className="ml-auto flex flex-col items-end justify-between">
