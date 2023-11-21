@@ -140,7 +140,7 @@ export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
   const oneHourAgo = new Date();
   oneHourAgo.setHours(oneHourAgo.getHours() - 1);
   if (date > oneHourAgo)
-    return <Wrapper>{format(date).replaceAll('ago', '').replaceAll('Just', '')}</Wrapper>;
+    return <Wrapper>{format(date).replaceAll('ago', '').replaceAll('just', '')}</Wrapper>;
 
   // if date is not today
   const today = new Date();
