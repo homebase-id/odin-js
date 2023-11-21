@@ -14,6 +14,7 @@ import {
   updateChatMessage,
   uploadChatMessage,
 } from '../../providers/ChatProvider';
+import { NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const useChatMessage = () => {
   const { getIdentity, getDotYouClient } = useDotYouClient();
@@ -24,10 +25,12 @@ export const useChatMessage = () => {
   const sendMessage = async ({
     conversationId,
     recipients,
+    files,
     message,
   }: {
     conversationId: string;
     recipients: string[];
+    files?: NewMediaFile[];
     message: string;
   }): Promise<NewDriveSearchResult<ChatMessage> | null> => {
     const newChatId = getNewId();
@@ -54,7 +57,7 @@ export const useChatMessage = () => {
       },
     };
 
-    const uploadResult = await uploadChatMessage(dotYouClient, newChat);
+    const uploadResult = await uploadChatMessage(dotYouClient, newChat, files);
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
     newChat.fileId = uploadResult.file.fileId;

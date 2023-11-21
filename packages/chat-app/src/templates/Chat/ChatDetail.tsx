@@ -4,6 +4,7 @@ import {
   ConnectionName,
   EmojiSelector,
   ErrorNotification,
+  FileOverview,
   FileSelector,
   ImageIcon,
   SubtleCheck,
@@ -13,6 +14,7 @@ import {
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
+  ChatDrive,
   Conversation,
   GroupConversation,
   SingleConversation,
@@ -23,6 +25,9 @@ import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { format } from '@youfoundation/common-app/src/helpers/timeago';
 import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
+import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { OdinImage } from '@youfoundation/ui-lib';
+import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -102,8 +107,10 @@ const ChatMessageItem = ({
     if (conversation && authorOdinId) markAsRead({ conversation, message: msg });
   }, []);
 
+  const hasMedia = !!msg.fileMetadata.payloads?.length;
+
   return (
-    <div className={`flex gap-2 ${authorOdinId ? 'flex-row' : 'flex-row-reverse text-right'}`}>
+    <div className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse text-right' : 'flex-row'}`}>
       {isGroupChat && !messageFromMe ? (
         <ConnectionImage
           odinId={authorOdinId}
@@ -112,18 +119,119 @@ const ChatMessageItem = ({
         />
       ) : null}
 
-      <div
-        className={`flex flex-col rounded-lg px-2 py-1 md:flex-row ${
-          messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
-        }`}
-      >
-        {isGroupChat && authorOdinId ? <ConnectionName odinId={authorOdinId} /> : null}
-        <p>{content.message}</p>
-        <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
-          <ChatDeliveryIndicator msg={msg} />
-          <ChatSentTimeIndicator msg={msg} />
-        </div>
+      {hasMedia ? (
+        <ChatMediaMessageBody
+          msg={msg}
+          authorOdinId={authorOdinId}
+          isGroupChat={isGroupChat}
+          messageFromMe={messageFromMe}
+        />
+      ) : (
+        <ChatTextMessageBody
+          msg={msg}
+          authorOdinId={authorOdinId}
+          isGroupChat={isGroupChat}
+          messageFromMe={messageFromMe}
+        />
+      )}
+    </div>
+  );
+};
+
+const ChatTextMessageBody = ({
+  msg,
+
+  isGroupChat,
+  messageFromMe,
+  authorOdinId,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+
+  isGroupChat: boolean;
+  messageFromMe: boolean;
+  authorOdinId: string;
+}) => {
+  const content = msg.fileMetadata.appData.content;
+  return (
+    <div
+      className={`flex flex-col rounded-lg px-2 py-1 md:flex-row ${
+        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
+      }`}
+    >
+      {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
+      <p>{content.message}</p>
+      <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
+        <ChatDeliveryIndicator msg={msg} />
+        <ChatSentTimeIndicator msg={msg} />
       </div>
+    </div>
+  );
+};
+
+const ChatMediaMessageBody = ({
+  msg,
+
+  isGroupChat,
+  messageFromMe,
+
+  authorOdinId,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+
+  isGroupChat: boolean;
+  messageFromMe: boolean;
+
+  authorOdinId: string;
+}) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const content = msg.fileMetadata.appData.content;
+
+  const hasACaption = !!content.message;
+  const ChatFooter = ({ className }: { className?: string }) => (
+    <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
+      <ChatDeliveryIndicator msg={msg} />
+      <ChatSentTimeIndicator msg={msg} />
+    </div>
+  );
+
+  return (
+    <div
+      className={`rounded-lg ${
+        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
+      }`}
+    >
+      {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
+      <div className="relative overflow-hidden rounded-lg">
+        {msg.fileMetadata.payloads?.map((payload) => {
+          const largestThumb = getLargestThumbOfPayload(payload);
+          return (
+            <div
+              key={msg.fileId}
+              className="relative h-[300px]"
+              style={
+                largestThumb
+                  ? { aspectRatio: `${largestThumb.pixelWidth}/${largestThumb.pixelHeight}` }
+                  : undefined
+              }
+            >
+              <OdinImage
+                dotYouClient={dotYouClient}
+                fileId={msg.fileId}
+                fileKey={payload.key}
+                lastModified={payload.lastModified || msg.fileMetadata.updated}
+                targetDrive={ChatDrive}
+              />
+            </div>
+          );
+        })}
+        {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 z-10 px-2 py-1" /> : null}
+      </div>
+      {hasACaption ? (
+        <div className="flex flex-col px-2 py-2 md:flex-row md:justify-between">
+          <p>{content.message}</p>
+          <ChatFooter />
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -207,6 +315,7 @@ export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
 const ChatComposer = ({ conversation }: { conversation: Conversation | undefined }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
+  const [files, setFiles] = useState<NewMediaFile[]>();
 
   const {
     mutate: sendMessage,
@@ -215,10 +324,11 @@ const ChatComposer = ({ conversation }: { conversation: Conversation | undefined
     error: sendMessageError,
   } = useChatMessage().send;
   const doSend = () => {
-    if (!message || !conversation) return;
+    if ((!message && !files) || !conversation) return;
     sendMessage({
       conversationId: conversation.conversationId,
-      message: message,
+      message: message || '',
+      files,
       recipients: (conversation as GroupConversation).recipients || [
         (conversation as SingleConversation).recipient,
       ],
@@ -230,6 +340,7 @@ const ChatComposer = ({ conversation }: { conversation: Conversation | undefined
     if (sendMessageState === 'success') {
       setMessage('');
       setStateIndex((oldIndex) => oldIndex + 1);
+      setFiles([]);
       resetState();
     }
   }, [sendMessageState]);
@@ -237,34 +348,38 @@ const ChatComposer = ({ conversation }: { conversation: Conversation | undefined
   return (
     <>
       <ErrorNotification error={sendMessageError} />
-      <div className="flex flex-shrink-0 flex-row gap-2 bg-page-background px-5 py-3">
-        <div className="my-auto flex flex-row items-center gap-1">
-          <EmojiSelector
-            size="none"
-            className="px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-            onInput={(val) => setMessage((oldVal) => `${oldVal} ${val}`)}
+      <div className="bg-page-background">
+        <FileOverview files={files} setFiles={setFiles} className="mt-2" />
+        <div className="flex flex-shrink-0 flex-row gap-2  px-5 py-3">
+          <div className="my-auto flex flex-row items-center gap-1">
+            <EmojiSelector
+              size="none"
+              className="px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
+              onInput={(val) => setMessage((oldVal) => `${oldVal} ${val}`)}
+            />
+            <FileSelector
+              onChange={(files) => setFiles(files.map((file) => ({ file })))}
+              className="text-foreground text-opacity-30 hover:text-opacity-100"
+            >
+              <ImageIcon className="h-5 w-5" />
+            </FileSelector>
+          </div>
+
+          <VolatileInput
+            key={stateIndex}
+            placeholder="Your message"
+            defaultValue={message}
+            className="rounded-md border bg-background p-2 dark:border-slate-800"
+            onChange={setMessage}
+            onSubmit={(val) => {
+              setMessage(val);
+              doSend();
+            }}
           />
-          <FileSelector
-            // onChange={(newFiles) => setAttachment(newFiles?.[0])}
-            className="text-foreground text-opacity-30 hover:text-opacity-100"
-          >
-            <ImageIcon className="h-5 w-5" />
-          </FileSelector>
+          <ActionButton type="secondary" onClick={doSend} state={sendMessageState}>
+            {t('Send')}
+          </ActionButton>
         </div>
-        <VolatileInput
-          key={stateIndex}
-          placeholder="Your message"
-          defaultValue={message}
-          className="rounded-md border bg-background p-2 dark:border-slate-800"
-          onChange={setMessage}
-          onSubmit={(val) => {
-            setMessage(val);
-            doSend();
-          }}
-        />
-        <ActionButton type="secondary" onClick={doSend} state={sendMessageState}>
-          {t('Send')}
-        </ActionButton>
       </div>
     </>
   );

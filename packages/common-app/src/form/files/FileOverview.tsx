@@ -13,9 +13,7 @@ export const FileOverview = ({
   setFiles: (files: NewMediaFile[]) => void;
   className?: string;
 }) => {
-  if (!files || !files.length) {
-    return null;
-  }
+  if (!files || !files.length) return null;
 
   const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;

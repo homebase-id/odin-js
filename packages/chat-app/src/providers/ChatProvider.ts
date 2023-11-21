@@ -1,17 +1,21 @@
 import {
   DotYouClient,
   DriveSearchResult,
+  EmbeddedThumb,
   FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
   KeyHeader,
   NewDriveSearchResult,
+  PayloadFile,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
   TargetDrive,
+  ThumbnailFile,
   UploadFileMetadata,
   UploadInstructionSet,
+  createThumbnails,
   getContentFromHeaderOrPayload,
   queryBatch,
   sendCommand,
@@ -25,6 +29,7 @@ import {
   SingleConversation,
 } from './ConversationProvider';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { NewMediaFile } from '@youfoundation/js-lib/dist';
 
 export enum ChatDeliveryStatus {
   // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
@@ -85,6 +90,8 @@ export interface ChatMessage {
   /// List of recipients of the message that it is intended to be sent to.
   recipients: string[];
 }
+
+const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,
@@ -150,6 +157,7 @@ export const dsrToMessage = async (
 export const uploadChatMessage = async (
   dotYouClient: DotYouClient,
   message: NewDriveSearchResult<ChatMessage>,
+  files: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
@@ -170,7 +178,7 @@ export const uploadChatMessage = async (
       : undefined,
   };
 
-  const payloadJson: string = jsonStringify64({ ...messageContent, recipients: undefined });
+  const jsonContent: string = jsonStringify64({ ...messageContent, recipients: undefined });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -178,7 +186,7 @@ export const uploadChatMessage = async (
       uniqueId: messageContent.id,
       groupId: messageContent.conversationId,
       fileType: messageContent.messageType,
-      content: payloadJson,
+      content: jsonContent,
     },
     isEncrypted: true,
     accessControlList: message.serverMetadata?.accessControlList || {
@@ -186,12 +194,39 @@ export const uploadChatMessage = async (
     },
   };
 
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  let previewThumbnail: EmbeddedThumb | undefined;
+
+  for (let i = 0; files && i < files?.length; i++) {
+    const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
+    const newMediaFile = files[i];
+    if (newMediaFile.file.type.startsWith('video/')) {
+      throw new Error('Video is not supported yet');
+    } else {
+      const { additionalThumbnails, tinyThumb } = await createThumbnails(
+        newMediaFile.file,
+        payloadKey
+      );
+
+      thumbnails.push(...additionalThumbnails);
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.file,
+      });
+
+      if (!previewThumbnail) previewThumbnail = tinyThumb;
+    }
+  }
+
+  uploadMetadata.appData.previewThumbnail = previewThumbnail;
+
   return await uploadFile(
     dotYouClient,
     uploadInstructions,
     uploadMetadata,
-    undefined,
-    undefined,
+    payloads,
+    thumbnails,
     undefined,
     onVersionConflict
   );
