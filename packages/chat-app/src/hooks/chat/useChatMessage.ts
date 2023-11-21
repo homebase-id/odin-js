@@ -1,12 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
-import {
-  ChatDeliveryStatus,
-  ChatMessage,
-  ChatMessageContent,
-  Conversation,
-  MessageType,
-} from '../../providers/ConversationProvider';
+import { Conversation } from '../../providers/ConversationProvider';
+import { ChatDeliveryStatus, ChatMessage, MessageType } from '../../providers/ChatProvider';
 import {
   DriveSearchResult,
   NewDriveSearchResult,
@@ -33,7 +28,7 @@ export const useChatMessage = () => {
   }: {
     conversationId: string;
     recipients: string[];
-    message: ChatMessageContent;
+    message: string;
   }): Promise<NewDriveSearchResult<ChatMessage> | null> => {
     const newChatId = getNewId();
     if (!recipients?.length) return null;
@@ -65,7 +60,6 @@ export const useChatMessage = () => {
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
 
-    console.log({ uploadResult });
     const deliveredToInboxes = recipients.map(
       (recipient) =>
         uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
@@ -73,7 +67,6 @@ export const useChatMessage = () => {
 
     if (deliveredToInboxes.every((delivered) => delivered)) {
       newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
-      console.log('Should update the chat message to delivered', newChat);
       await updateChatMessage(dotYouClient, newChat, uploadResult.keyHeader);
     }
 

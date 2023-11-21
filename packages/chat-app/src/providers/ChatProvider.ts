@@ -20,12 +20,71 @@ import {
 } from '@youfoundation/js-lib/core';
 import {
   ChatDrive,
-  ChatMessage,
   Conversation,
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+
+export enum ChatDeliveryStatus {
+  // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
+  // Sending = 15, // Sending is covered by the upload state of the hook
+
+  Sent = 20, // when delivered to your identity
+  Delivered = 30, // when delivered to the recipient inbox
+  Read = 40, // when the recipient has read the message
+  Failed = 50, // when the message failed to send to the recipient
+}
+
+export enum MessageType {
+  Text = 0,
+  Image = 1,
+  Video = 2,
+  Audio = 3,
+  File = 4,
+  Location = 5,
+  Sticker = 6,
+  Contact = 7,
+  Custom = 8,
+}
+
+export interface ChatMessage {
+  /// ClientUniqueId. Set by the device
+  id: string;
+
+  /// GroupId of the payload.
+  conversationId: string;
+
+  // /// ReplyId used to get the replyId of the message
+  // replyId: string;
+
+  /// Type of the message. It's the fileType from the server
+  messageType: MessageType;
+
+  /// FileState of the Message
+  /// [FileState.active] shows the message is active
+  /// [FileState.deleted] shows the message is deleted. It's soft deleted
+  // fileState: FileState => archivalStatus
+
+  /// Content of the message
+  message: string;
+
+  // reactions: string;
+
+  /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
+  deliveryStatus: ChatDeliveryStatus;
+
+  /// List of tags for the message
+  /// Could be used to assign tags to the message
+  /// E.g Could be a replyId
+  // tags: string[];
+
+  // It's stupid.. I know, the senderOdinId contains it as well.. Until you update your local file..
+  authorOdinId: string;
+
+  /// List of recipients of the message that it is intended to be sent to.
+  recipients: string[];
+}
 
 export const getChatMessages = async (
   dotYouClient: DotYouClient,

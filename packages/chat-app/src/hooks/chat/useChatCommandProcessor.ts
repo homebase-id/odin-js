@@ -6,7 +6,6 @@ import {
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
 import {
-  ChatDeliveryStatus,
   ChatDrive,
   JOIN_CONVERSATION_COMMAND,
   JoinConversationRequest,
@@ -16,6 +15,7 @@ import { useDotYouClient } from '@youfoundation/common-app';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { ReceivedCommand } from '@youfoundation/js-lib/dist/core/CommandData/CommandTypes';
 import {
+  ChatDeliveryStatus,
   MARK_CHAT_READ_COMMAND,
   MarkAsReadRequest,
   getChatMessages,

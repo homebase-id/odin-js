@@ -128,7 +128,7 @@ const InnerConversationItem = ({
         <ConnectionName odinId={odinId} />
         <small className="block leading-tight text-foreground/80">
           {lastMessage && lastMessageContent
-            ? ellipsisAtMaxChar(lastMessageContent.message?.text, 35)
+            ? ellipsisAtMaxChar(lastMessageContent.message, 35)
             : odinId}
         </small>
       </p>

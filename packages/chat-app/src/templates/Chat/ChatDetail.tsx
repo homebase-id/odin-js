@@ -14,16 +14,15 @@ import {
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   Conversation,
-  ChatMessage,
   GroupConversation,
   SingleConversation,
-  ChatDeliveryStatus,
 } from '../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { format } from '@youfoundation/common-app/src/helpers/timeago';
+import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -119,7 +118,7 @@ const ChatMessageItem = ({
         }`}
       >
         {isGroupChat && authorOdinId ? <ConnectionName odinId={authorOdinId} /> : null}
-        <p>{content.message.text}</p>
+        <p>{content.message}</p>
         <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
           <ChatDeliveryIndicator msg={msg} />
           <ChatSentTimeIndicator msg={msg} />
@@ -219,7 +218,7 @@ const ChatComposer = ({ conversation }: { conversation: Conversation | undefined
     if (!message || !conversation) return;
     sendMessage({
       conversationId: conversation.conversationId,
-      message: { text: message },
+      message: message,
       recipients: (conversation as GroupConversation).recipients || [
         (conversation as SingleConversation).recipient,
       ],
