@@ -6,6 +6,7 @@ import {
   ErrorNotification,
   FileSelector,
   ImageIcon,
+  SubtleCheck,
   VolatileInput,
   t,
   useDotYouClient,
@@ -16,11 +17,13 @@ import {
   ChatMessage,
   GroupConversation,
   SingleConversation,
+  ChatDeliveryStatus,
 } from '../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
+import { format } from '@youfoundation/common-app/src/helpers/timeago';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -88,9 +91,12 @@ const ChatMessageItem = ({
   const identity = useDotYouClient().getIdentity();
   const content = msg.fileMetadata.appData.content;
   const authorOdinId =
-    (content.authorOdinId !== identity ? content.authorOdinId : msg.fileMetadata.senderOdinId) ||
-    msg.fileMetadata.senderOdinId;
+    (msg.fileMetadata.senderOdinId?.length && msg.fileMetadata.senderOdinId) ||
+    content.authorOdinId !== identity
+      ? content.authorOdinId
+      : msg.fileMetadata.senderOdinId;
 
+  const messageFromMe = !authorOdinId || authorOdinId === identity;
   const { mutate: markAsRead } = useChatMessage().markAsRead;
 
   useEffect(() => {
@@ -99,7 +105,7 @@ const ChatMessageItem = ({
 
   return (
     <div className={`flex gap-2 ${authorOdinId ? 'flex-row' : 'flex-row-reverse text-right'}`}>
-      {isGroupChat && authorOdinId ? (
+      {isGroupChat && !messageFromMe ? (
         <ConnectionImage
           odinId={authorOdinId}
           className="border border-neutral-200 dark:border-neutral-800"
@@ -108,14 +114,93 @@ const ChatMessageItem = ({
       ) : null}
 
       <div
-        className={`rounded-lg px-2 py-1 ${
-          authorOdinId ? 'bg-gray-500/10  dark:bg-gray-300/20' : 'bg-primary/10 dark:bg-primary/30'
+        className={`flex flex-col rounded-lg px-2 py-1 md:flex-row ${
+          messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
         }`}
       >
         {isGroupChat && authorOdinId ? <ConnectionName odinId={authorOdinId} /> : null}
-        {content.deliveryStatus}
         <p>{content.message.text}</p>
+        <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
+          <ChatDeliveryIndicator msg={msg} />
+          <ChatSentTimeIndicator msg={msg} />
+        </div>
       </div>
+    </div>
+  );
+};
+
+export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <p className="text-sm text-foreground/50">{children}</p>
+  );
+
+  const date = new Date(msg.fileMetadata.created);
+  if (!date) return <Wrapper>{t('Unknown')}</Wrapper>;
+
+  const oneHourAgo = new Date();
+  oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+  if (date > oneHourAgo)
+    return <Wrapper>{format(date).replaceAll('ago', '').replaceAll('Just', '')}</Wrapper>;
+
+  // if date is not today
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (date >= today) {
+    const timeFormat: Intl.DateTimeFormatOptions = {
+      hour: 'numeric',
+      minute: 'numeric',
+    };
+    return <Wrapper>{date.toLocaleTimeString(undefined, timeFormat)}</Wrapper>;
+  }
+
+  // if date is this week
+  const thisWeek = new Date();
+  thisWeek.setDate(thisWeek.getDate() - thisWeek.getDay());
+  if (date >= thisWeek) {
+    const weekdayFormat: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+    };
+    return <Wrapper>{date.toLocaleDateString(undefined, weekdayFormat)}</Wrapper>;
+  }
+
+  const now = new Date();
+  const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
+  const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
+  const dateTimeFormat: Intl.DateTimeFormatOptions = {
+    month: yearsAgo !== 0 || monthsAgo !== 0 ? 'short' : undefined,
+    day: 'numeric',
+    weekday: 'short',
+    year: yearsAgo !== 0 ? 'numeric' : undefined,
+    hour: 'numeric',
+    minute: 'numeric',
+  };
+  return <Wrapper>{date.toLocaleDateString(undefined, dateTimeFormat)}</Wrapper>;
+};
+
+export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+  const identity = useDotYouClient().getIdentity();
+  const content = msg.fileMetadata.appData.content;
+  const authorOdinId =
+    (msg.fileMetadata.senderOdinId?.length && msg.fileMetadata.senderOdinId) ||
+    content.authorOdinId !== identity
+      ? content.authorOdinId
+      : msg.fileMetadata.senderOdinId;
+
+  const messageFromMe = !authorOdinId || authorOdinId === identity;
+
+  if (!messageFromMe) return null;
+
+  const isDelivered = content.deliveryStatus >= ChatDeliveryStatus.Delivered;
+  const isRead = content.deliveryStatus === ChatDeliveryStatus.Read;
+
+  return (
+    <div
+      className={`${isDelivered ? '-ml-2' : ''} flex flex-row drop-shadow-md ${
+        isRead ? 'text-blue-600 ' : 'text-foreground/60'
+      }`}
+    >
+      {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-4 w-4" /> : null}
+      <SubtleCheck className="h-4 w-4" />
     </div>
   );
 };

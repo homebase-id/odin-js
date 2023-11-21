@@ -21,6 +21,7 @@ import { ContactFile } from '@youfoundation/js-lib/network';
 import React from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
+import { ChatDeliveryIndicator, ChatSentTimeIndicator } from './ChatDetail';
 
 export const ConversationsList = ({
   openConversation,
@@ -108,10 +109,12 @@ const InnerConversationItem = ({
     ?.filter(Boolean)
     .slice(0, 1)?.[0];
 
+  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+
   return (
     <div
       onClick={onClick}
-      className={`flex cursor-pointer flex-row items-center gap-3 px-5 py-2 ${
+      className={`flex w-full cursor-pointer flex-row items-center gap-3 px-5 py-2 ${
         isActive ? 'bg-slate-200 dark:bg-slate-800' : ''
       }`}
     >
@@ -120,21 +123,25 @@ const InnerConversationItem = ({
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
-      <p className="text-lg">
+      <p className="w-full text-lg">
         <span>
           <ConnectionName odinId={odinId} />
         </span>
 
-        {/* TODO: Add latest message with fallback to odinId*/}
-        {lastMessage ? (
+        {lastMessage && lastMessageContent ? (
           <small className="block leading-none">
-            {/* <ConnectionName odinId={lastMessage?.fileMetadata?.senderOdinId} />:{' '} */}
             {lastMessage?.fileMetadata?.appData?.content?.message?.text}
           </small>
         ) : (
           <small className="block leading-none">{odinId}</small>
         )}
       </p>
+      {lastMessage ? (
+        <div className="ml-auto flex flex-col items-end justify-between">
+          <ChatSentTimeIndicator msg={lastMessage} />
+          <ChatDeliveryIndicator msg={lastMessage} />
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -100,6 +100,8 @@ export const useChatMessage = () => {
     //  without breaking the state that you are editing a message that you received...
     // [TEMP] Currently fixed with an authorOdinId on the chat message itself...
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+    message.fileMetadata.appData.content.authorOdinId =
+      message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.authorOdinId;
     await updateChatMessage(dotYouClient, message);
   };
 
