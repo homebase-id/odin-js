@@ -2,14 +2,14 @@ import { OwnerName, useDotYouClient, useSiteData } from '@youfoundation/common-a
 import { OdinImage } from '@youfoundation/ui-lib';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useChatTransitProcessor } from '../../hooks/chat/useChatTransitProcessor';
-import { useJoinConversation } from '../../hooks/chat/useJoinConversation';
+import { useChatCommandProcessor } from '../../hooks/chat/useChatCommandProcessor';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ConversationsList } from './Conversations';
 import { ChatDetail } from './ChatDetail';
 
 const ConversationsOverview = () => {
   useChatTransitProcessor(true);
-  useJoinConversation();
+  useChatCommandProcessor();
 
   const { conversationKey } = useParams();
   const navigate = useNavigate();

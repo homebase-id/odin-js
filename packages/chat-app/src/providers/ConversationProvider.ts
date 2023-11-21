@@ -41,13 +41,14 @@ export interface ChatMessageContent {
   payload?: string; // base64 encoded bytes?
 }
 
-enum DeliveryStatus {
-  NotSent = 10,
-  Sending = 15,
-  Sent = 20,
-  Delivered = 30,
-  Read = 40,
-  Failed = 50,
+export enum ChatDeliveryStatus {
+  // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
+  // Sending = 15, // Sending is covered by the upload state of the hook
+
+  Sent = 20, // when delivered to your identity
+  Delivered = 30, // when delivered to the recipient inbox
+  Read = 40, // when the recipient has read the message
+  Failed = 50, // when the message failed to send to the recipient
 }
 
 export interface ChatMessage {
@@ -74,12 +75,15 @@ export interface ChatMessage {
   // reactions: string;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
-  // deliveryStatus?: DeliveryStatus;
+  deliveryStatus: ChatDeliveryStatus;
 
   /// List of tags for the message
   /// Could be used to assign tags to the message
   /// E.g Could be a replyId
   // tags: string[];
+
+  // It's stupid.. I know, the senderOdinId contains it as well.. Until you update your local file..
+  authorOdinId: string;
 
   /// List of recipients of the message that it is intended to be sent to.
   recipients: string[];
@@ -104,6 +108,9 @@ export interface GroupConversation extends BaseConversation {
 }
 
 export type Conversation = SingleConversation | GroupConversation;
+
+const JOIN_GROUP_CONVERSATION_COMMAND = 110;
+const DELETE_CHAT_COMMAND = 180;
 
 export const getConversations = async (
   dotYouClient: DotYouClient,
@@ -216,19 +223,27 @@ export const uploadConversation = async (
   );
 };
 
+export const JOIN_CONVERSATION_COMMAND = 100;
+export interface JoinConversationRequest {
+  conversationId: string;
+  title: string;
+}
+
 export const requestConversationCommand = async (
   dotYouClient: DotYouClient,
   conversation: Conversation
 ) => {
+  const request: JoinConversationRequest = {
+    conversationId: conversation.conversationId,
+    title: conversation.title,
+  };
+
   return await sendCommand(
     dotYouClient,
     {
-      code: 100,
+      code: JOIN_CONVERSATION_COMMAND,
       globalTransitIdList: [],
-      jsonMessage: jsonStringify64({
-        conversationId: conversation.conversationId,
-        title: conversation.title,
-      }),
+      jsonMessage: jsonStringify64(request),
       recipients: (conversation as GroupConversation).recipients || [
         (conversation as SingleConversation).recipient,
       ],

@@ -8,6 +8,7 @@ import {
   UploadPayloadDescriptor,
   AccessControlList,
   EncryptedKeyHeader,
+  KeyHeader,
 } from '../File/DriveFileTypes';
 
 export interface UploadInstructionSet {
@@ -85,8 +86,7 @@ export interface UploadAppFileMetaData {
 }
 
 export interface UploadResult {
-  encryptedPayload: Uint8Array;
-  encryptedKeyHeader: Uint8Array;
+  keyHeader: KeyHeader | undefined;
   file: ExternalFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferStatus };

@@ -28,29 +28,30 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 };
 
 export const useChatTransitProcessor = (isEnabled = true) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
   useInboxProcessor(isEnabled);
 
-  // The Websocket subscription only works when running in the owner context
-  useEffect(() => {
-    preAuth(dotYouClient);
-  }, []);
+  // const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const handler = (notification: TypedConnectionNotification) => {
-    if (notification.notificationType === 'transitFileReceived') {
-      console.log(
-        '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
-      );
+  // // The Websocket subscription only works when running in the owner context
+  // useEffect(() => {
+  //   preAuth(dotYouClient);
+  // }, []);
 
-      Notify({
-        command: 'processInbox',
-        data: JSON.stringify({
-          targetDrive: notification.externalFileIdentifier.targetDrive,
-          batchSize: 1,
-        }),
-      });
-    }
-  };
+  // const handler = (notification: TypedConnectionNotification) => {
+  //   if (notification.notificationType === 'transitFileReceived') {
+  //     console.log(
+  //       '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
+  //     );
 
-  useNotificationSubscriber(isEnabled ? handler : undefined, ['transitFileReceived']);
+  //     Notify({
+  //       command: 'processInbox',
+  //       data: JSON.stringify({
+  //         targetDrive: notification.externalFileIdentifier.targetDrive,
+  //         batchSize: 1,
+  //       }),
+  //     });
+  //   }
+  // };
+
+  // useNotificationSubscriber(isEnabled ? handler : undefined, ['transitFileReceived']);
 };

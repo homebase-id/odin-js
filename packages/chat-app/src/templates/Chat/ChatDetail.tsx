@@ -8,6 +8,7 @@ import {
   ImageIcon,
   VolatileInput,
   t,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
@@ -34,17 +35,13 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
-      <ChatHistory conversationId={conversation?.fileMetadata.appData.content?.conversationId} />
+      <ChatHistory conversation={conversation?.fileMetadata.appData.content} />
       <ChatComposer conversation={conversation?.fileMetadata.appData.content} />
     </div>
   );
 };
 
-const ChatHeader = ({
-  conversation,
-}: {
-  conversation: Conversation | GroupConversation | undefined;
-}) => {
+const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }) => {
   const recipients = (conversation as SingleConversation)?.recipient;
 
   return (
@@ -59,28 +56,46 @@ const ChatHeader = ({
   );
 };
 
-const ChatHistory = ({ conversationId }: { conversationId: string | undefined }) => {
-  const { data: messages } = useChatMessages({ conversationId }).all;
+const ChatHistory = ({ conversation }: { conversation: Conversation | undefined }) => {
+  const { data: messages } = useChatMessages({ conversationId: conversation?.conversationId }).all;
   const flattenedMsgs = messages?.pages.flatMap((page) => page.searchResults) || [];
 
   return (
     <div className="flex h-full flex-grow flex-col-reverse gap-2 overflow-auto p-5">
       {flattenedMsgs?.map((msg) =>
-        msg ? <ChatMessageItem key={msg.fileId} msg={msg} isGroupChat={false} /> : null
+        msg ? (
+          <ChatMessageItem
+            key={msg.fileId}
+            conversation={conversation}
+            msg={msg}
+            isGroupChat={false}
+          />
+        ) : null
       )}
     </div>
   );
 };
 
 const ChatMessageItem = ({
+  conversation,
   msg,
   isGroupChat,
 }: {
+  conversation: Conversation | undefined;
   msg: DriveSearchResult<ChatMessage>;
   isGroupChat: boolean;
 }) => {
+  const identity = useDotYouClient().getIdentity();
   const content = msg.fileMetadata.appData.content;
-  const authorOdinId = msg.fileMetadata.senderOdinId;
+  const authorOdinId =
+    (content.authorOdinId !== identity ? content.authorOdinId : msg.fileMetadata.senderOdinId) ||
+    msg.fileMetadata.senderOdinId;
+
+  const { mutate: markAsRead } = useChatMessage().markAsRead;
+
+  useEffect(() => {
+    if (conversation && authorOdinId) markAsRead({ conversation, message: msg });
+  }, []);
 
   return (
     <div className={`flex gap-2 ${authorOdinId ? 'flex-row' : 'flex-row-reverse text-right'}`}>
@@ -98,17 +113,14 @@ const ChatMessageItem = ({
         }`}
       >
         {isGroupChat && authorOdinId ? <ConnectionName odinId={authorOdinId} /> : null}
+        {content.deliveryStatus}
         <p>{content.message.text}</p>
       </div>
     </div>
   );
 };
 
-const ChatComposer = ({
-  conversation,
-}: {
-  conversation: Conversation | GroupConversation | undefined;
-}) => {
+const ChatComposer = ({ conversation }: { conversation: Conversation | undefined }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
 
