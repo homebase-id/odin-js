@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import { BlogConfig, ChannelTemplate, PostContent } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 import {
+  AclIcon,
   HOME_ROOT_PATH,
-  Lock,
   SubtleMessage,
   t,
   useBlogPostsInfinite,
@@ -19,7 +19,7 @@ import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingBlock } from '@youfoundation/common-app';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {
@@ -84,12 +84,13 @@ const PostOverview = () => {
                 className="text-sm"
               />
 
-              <h1 className="text-4xl">{activeChannel?.name}</h1>
-              <p className="my-2 max-w-md text-foreground text-opacity-80">
-                {activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
-                activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated ? (
-                  <Lock className="inline h-3 w-3" />
+              <h1 className="text-4xl">
+                {activeChannel?.name}{' '}
+                {activeChannel?.acl ? (
+                  <AclIcon acl={activeChannel?.acl} className="inline h-3 w-3" />
                 ) : null}{' '}
+              </h1>
+              <p className="my-2 max-w-md text-foreground text-opacity-80">
                 {activeChannel?.description}
               </p>
             </div>
