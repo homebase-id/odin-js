@@ -27,6 +27,8 @@ import {
   Article,
   Lock,
   ActionGroup,
+  AclSummary,
+  AclIcon,
 } from '@youfoundation/common-app';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
@@ -99,6 +101,8 @@ const PostComposer = ({
     return () => window.removeEventListener('message', messageListener);
   }, []);
 
+  const canPost = caption?.length || files?.length || !!embeddedPost;
+
   return (
     <div className={`${className ?? ''}`}>
       <form
@@ -134,12 +138,12 @@ const PostComposer = ({
         {embeddedPost ? (
           <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
         ) : null}
+
         <ProgressIndicator
           postState={postState}
           processingProgress={processingProgress}
           files={files?.length || 0}
         />
-
         <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
           {!embeddedPost ? (
             <>
@@ -185,13 +189,19 @@ const PostComposer = ({
           />
           <ActionButton
             className={`w-full md:w-auto ${
-              caption?.length || files?.length || !!embeddedPost
-                ? ''
-                : 'pointer-events-none hidden opacity-20 grayscale md:flex'
+              canPost ? '' : 'pointer-events-none hidden opacity-20 grayscale md:flex'
             } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
           >
-            {t('Post')}
+            {channel.acl && canPost ? <AclIcon className="mr-3 h-4 w-4" acl={channel.acl} /> : null}
+            <span className="flex flex-col">
+              {t('Post')}{' '}
+              {channel.acl && canPost ? (
+                <small className="flex flex-row items-center gap-1 leading-none">
+                  <AclSummary acl={channel.acl} />{' '}
+                </small>
+              ) : null}
+            </span>
           </ActionButton>
         </div>
       </form>
