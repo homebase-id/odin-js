@@ -19,7 +19,7 @@ import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingBlock } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {
@@ -66,6 +66,10 @@ const PostOverview = () => {
       (a.fileMetadata.appData.userDate || a.fileMetadata.updated)
   );
 
+  const encrypted =
+    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
+    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
+
   return (
     <>
       <Helmet>
@@ -84,7 +88,7 @@ const PostOverview = () => {
                 className="text-sm"
               />
 
-              <h1 className="text-4xl">
+              <h1 className="text-4xl" title={encrypted ? t('Encrypted') : t('Unencrypted')}>
                 {activeChannel?.name}{' '}
                 {activeChannel?.acl ? (
                   <AclIcon acl={activeChannel?.acl} className="inline h-3 w-3" />
