@@ -1,13 +1,41 @@
 import { useDotYouClient } from '@youfoundation/common-app';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { getChatMessages } from '../../providers/ChatProvider';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import {
+  ChatDeliveryStatus,
+  ChatMessage,
+  getChatMessages,
+  requestMarkAsRead,
+} from '../../providers/ChatProvider';
+import { Conversation } from '../../providers/ConversationProvider';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 100;
-export const useChatMessages = ({ conversationId }: { conversationId: string | undefined }) => {
+export const useChatMessages = (props?: { conversationId: string | undefined }) => {
+  const { conversationId } = props || { conversationId: undefined };
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchMessages = async (conversationId: string, cursorState: string | undefined) => {
     return await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
+  };
+
+  const markAsRead = async ({
+    conversation,
+    messages,
+  }: {
+    conversation: Conversation;
+    messages: DriveSearchResult<ChatMessage>[];
+  }) => {
+    // => Much nicer solution: Handle with a last read time on the conversation file;
+    const messagesToMarkAsRead = messages
+      .filter(
+        (msg) =>
+          msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
+          msg.fileMetadata.senderOdinId &&
+          msg.fileMetadata.globalTransitId
+      )
+      .map((msg) => msg.fileMetadata.globalTransitId) as string[];
+
+    await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
   };
 
   return {
@@ -18,6 +46,15 @@ export const useChatMessages = ({ conversationId }: { conversationId: string | u
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       enabled: !!conversationId,
+    }),
+    markAsRead: useMutation({
+      mutationFn: markAsRead,
+      // onMutate: async ({ conversation, recipients, message }) => {
+      //   // TODO: Optimistic update of the chat messages append the new message to the list
+      // },
+      // onSettled: async (_data, _error, variables) => {
+      //   queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
+      // },
     }),
   };
 };

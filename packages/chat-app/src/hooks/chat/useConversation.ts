@@ -4,9 +4,15 @@ import {
   Conversation,
   getConversation,
   requestConversationCommand,
+  updateConversation,
   uploadConversation,
 } from '../../providers/ConversationProvider';
-import { DotYouClient, NewDriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  DotYouClient,
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
@@ -49,6 +55,14 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return uploadResult;
   };
 
+  const updateExistingConversation = async ({
+    conversation,
+  }: {
+    conversation: DriveSearchResult<Conversation>;
+  }) => {
+    return await updateConversation(dotYouClient, conversation);
+  };
+
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
@@ -62,6 +76,21 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['conversation', _data?.newConversationId] });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
+    }),
+    update: useMutation({
+      mutationFn: updateExistingConversation,
+      onMutate: async () => {
+        // TODO: Optimistic update of the conversations, append the new conversation
+      },
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'conversation',
+            variables.conversation.fileMetadata.appData.content.conversationId,
+          ],
+        });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
     }),

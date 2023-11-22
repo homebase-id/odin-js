@@ -13,6 +13,7 @@ import {
   queryBatch,
   sendCommand,
   uploadFile,
+  uploadHeader,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
@@ -28,6 +29,8 @@ interface BaseConversation {
   conversationId: string;
   title: string;
   imgId?: string;
+  lastReadTime?: number;
+
   unread: boolean;
   unreadCount: number;
   // messageType: MessageType;
@@ -155,6 +158,42 @@ export const uploadConversation = async (
     undefined,
     undefined,
     onVersionConflict
+  );
+};
+
+export const updateConversation = async (
+  dotYouClient: DotYouClient,
+  conversation: DriveSearchResult<Conversation>
+) => {
+  const uploadInstructions: UploadInstructionSet = {
+    storageOptions: {
+      drive: ChatDrive,
+      overwriteFileId: conversation.fileId,
+    },
+  };
+
+  const conversationContent = conversation.fileMetadata.appData.content;
+  const payloadJson: string = jsonStringify64({ ...conversationContent });
+
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: conversation?.fileMetadata.versionTag,
+    allowDistribution: false,
+    appData: {
+      uniqueId: conversationContent.conversationId,
+      fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
+      content: payloadJson,
+    },
+    isEncrypted: true,
+    accessControlList: conversation.serverMetadata?.accessControlList || {
+      requiredSecurityGroup: SecurityGroupType.Owner,
+    },
+  };
+
+  return await uploadHeader(
+    dotYouClient,
+    conversation.sharedSecretEncryptedKeyHeader,
+    uploadInstructions,
+    uploadMetadata
   );
 };
 

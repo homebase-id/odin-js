@@ -178,7 +178,7 @@ export const uploadChatMessage = async (
       : undefined,
   };
 
-  const jsonContent: string = jsonStringify64({ ...messageContent, recipients: undefined });
+  const jsonContent: string = jsonStringify64({ ...messageContent });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
@@ -238,7 +238,7 @@ export const updateChatMessage = async (
   keyHeader?: KeyHeader
 ) => {
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = false; //messageContent.recipients?.length > 0;
+  const distribute = messageContent.recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -255,7 +255,7 @@ export const updateChatMessage = async (
       : undefined,
   };
 
-  const payloadJson: string = jsonStringify64({ ...messageContent, recipients: undefined });
+  const payloadJson: string = jsonStringify64({ ...messageContent });
   const uploadMetadata: UploadFileMetadata = {
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,

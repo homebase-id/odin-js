@@ -19,7 +19,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
@@ -28,6 +28,7 @@ import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
+import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -42,7 +43,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
-      <ChatHistory conversation={conversation?.fileMetadata.appData.content} />
+      <ChatHistory conversation={conversation || undefined} />
       <ChatComposer conversation={conversation?.fileMetadata.appData.content} />
     </div>
   );
@@ -63,50 +64,44 @@ const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }
   );
 };
 
-const ChatHistory = ({ conversation }: { conversation: Conversation | undefined }) => {
-  const { data: messages } = useChatMessages({ conversationId: conversation?.conversationId }).all;
-  const flattenedMsgs = messages?.pages.flatMap((page) => page.searchResults) || [];
+const ChatHistory = ({
+  conversation,
+}: {
+  conversation: DriveSearchResult<Conversation> | undefined;
+}) => {
+  const conversationContent = conversation?.fileMetadata.appData.content;
+  const {
+    all: { data: messages },
+  } = useChatMessages({ conversationId: conversationContent?.conversationId });
+  const flattenedMsgs = useMemo(
+    () =>
+      (messages?.pages.flatMap((page) => page.searchResults).filter(Boolean) ||
+        []) as DriveSearchResult<ChatMessage>[],
+    [messages]
+  );
+
+  useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
 
   return (
     <div className="flex h-full flex-grow flex-col-reverse gap-2 overflow-auto p-5">
       {flattenedMsgs?.map((msg) =>
-        msg ? (
-          <ChatMessageItem
-            key={msg.fileId}
-            conversation={conversation}
-            msg={msg}
-            isGroupChat={false}
-          />
-        ) : null
+        msg ? <ChatMessageItem key={msg.fileId} msg={msg} isGroupChat={false} /> : null
       )}
     </div>
   );
 };
 
 const ChatMessageItem = ({
-  conversation,
   msg,
   isGroupChat,
 }: {
-  conversation: Conversation | undefined;
   msg: DriveSearchResult<ChatMessage>;
   isGroupChat: boolean;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const content = msg.fileMetadata.appData.content;
-  const authorOdinId =
-    (msg.fileMetadata.senderOdinId?.length && msg.fileMetadata.senderOdinId) ||
-    content.authorOdinId !== identity
-      ? content.authorOdinId
-      : msg.fileMetadata.senderOdinId;
+  const authorOdinId = msg.fileMetadata.senderOdinId;
 
   const messageFromMe = !authorOdinId || authorOdinId === identity;
-  const { mutate: markAsRead } = useChatMessage().markAsRead;
-
-  useEffect(() => {
-    if (conversation && authorOdinId) markAsRead({ conversation, message: msg });
-  }, []);
-
   const hasMedia = !!msg.fileMetadata.payloads?.length;
 
   return (
@@ -159,7 +154,8 @@ const ChatTextMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      <p>{content.message}</p>
+      {content.deliveryStatus}
+      <p className="whitespace-pre-wrap">{content.message}</p>
       <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
@@ -228,7 +224,7 @@ const ChatMediaMessageBody = ({
       </div>
       {hasACaption ? (
         <div className="flex flex-col px-2 py-2 md:flex-row md:justify-between">
-          <p>{content.message}</p>
+          <p className="whitespace-pre-wrap">{content.message}</p>
           <ChatFooter />
         </div>
       ) : null}
@@ -287,12 +283,7 @@ export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
 export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const identity = useDotYouClient().getIdentity();
   const content = msg.fileMetadata.appData.content;
-  const authorOdinId =
-    (msg.fileMetadata.senderOdinId?.length && msg.fileMetadata.senderOdinId) ||
-    content.authorOdinId !== identity
-      ? content.authorOdinId
-      : msg.fileMetadata.senderOdinId;
-
+  const authorOdinId = msg.fileMetadata.senderOdinId;
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;

@@ -1,19 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
-import { Conversation } from '../../providers/ConversationProvider';
 import { ChatDeliveryStatus, ChatMessage, MessageType } from '../../providers/ChatProvider';
 import {
-  DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
   TransferStatus,
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
-import {
-  requestMarkAsRead,
-  updateChatMessage,
-  uploadChatMessage,
-} from '../../providers/ChatProvider';
+import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const useChatMessage = () => {
@@ -76,31 +70,6 @@ export const useChatMessage = () => {
     return newChat;
   };
 
-  const markAsRead = async ({
-    conversation,
-    message,
-  }: {
-    conversation: Conversation;
-    message: DriveSearchResult<ChatMessage>;
-  }) => {
-    if (
-      !message.fileMetadata.globalTransitId ||
-      message.fileMetadata.appData.content.deliveryStatus === ChatDeliveryStatus.Read ||
-      !message.fileMetadata.senderOdinId
-    )
-      return null;
-
-    await requestMarkAsRead(dotYouClient, conversation, [message.fileMetadata.globalTransitId]);
-
-    // TODO: Should we update the local file as well? And can we,
-    //  without breaking the state that you are editing a message that you received...
-    // [TEMP] Currently fixed with an authorOdinId on the chat message itself...
-    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
-    message.fileMetadata.appData.content.authorOdinId =
-      message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.authorOdinId;
-    await updateChatMessage(dotYouClient, message);
-  };
-
   return {
     send: useMutation({
       mutationFn: sendMessage,
@@ -110,15 +79,6 @@ export const useChatMessage = () => {
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
       },
-    }),
-    markAsRead: useMutation({
-      mutationFn: markAsRead,
-      // onMutate: async ({ conversation, recipients, message }) => {
-      //   // TODO: Optimistic update of the chat messages append the new message to the list
-      // },
-      // onSettled: async (_data, _error, variables) => {
-      //   queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
-      // },
     }),
   };
 };
