@@ -61,7 +61,7 @@ export interface ChatMessage {
   conversationId: string;
 
   // /// ReplyId used to get the replyId of the message
-  // replyId: string;
+  // replyId: string; => Better to use the groupId?
 
   /// Type of the message. It's the fileType from the server
   messageType: MessageType;
@@ -83,9 +83,6 @@ export interface ChatMessage {
   /// Could be used to assign tags to the message
   /// E.g Could be a replyId
   // tags: string[];
-
-  // It's stupid.. I know, the senderOdinId contains it as well.. Until you update your local file..
-  authorOdinId: string;
 
   /// List of recipients of the message that it is intended to be sent to.
   recipients: string[];

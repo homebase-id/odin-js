@@ -127,9 +127,16 @@ const InnerConversationItem = ({
       <p className="w-full text-lg">
         <ConnectionName odinId={odinId} />
         <small className="block leading-tight text-foreground/80">
-          {lastMessage && lastMessageContent
-            ? ellipsisAtMaxChar(lastMessageContent.message, 35)
-            : odinId}
+          {lastMessage && lastMessageContent ? (
+            lastMessageContent.message ? (
+              ellipsisAtMaxChar(lastMessageContent.message, 35)
+            ) : (
+              //TODO: Add preview thumbnail of the actual media
+              <>📷 {t('Media')}</>
+            )
+          ) : (
+            odinId
+          )}
         </small>
       </p>
       {lastMessage ? (

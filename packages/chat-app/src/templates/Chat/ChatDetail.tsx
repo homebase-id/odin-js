@@ -14,7 +14,6 @@ import {
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
-  ChatDrive,
   Conversation,
   GroupConversation,
   SingleConversation,
@@ -26,9 +25,8 @@ import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { format } from '@youfoundation/common-app/src/helpers/timeago';
 import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
-import { OdinImage } from '@youfoundation/ui-lib';
-import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
+import { ChatMedia } from './ChatMedia';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -149,12 +147,11 @@ const ChatTextMessageBody = ({
   const content = msg.fileMetadata.appData.content;
   return (
     <div
-      className={`flex flex-col rounded-lg px-2 py-1 md:flex-row ${
+      className={`flex w-auto max-w-md flex-col rounded-lg px-2 py-1 md:flex-row ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      {content.deliveryStatus}
       <p className="whitespace-pre-wrap">{content.message}</p>
       <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
         <ChatDeliveryIndicator msg={msg} />
@@ -179,7 +176,6 @@ const ChatMediaMessageBody = ({
 
   authorOdinId: string;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
   const content = msg.fileMetadata.appData.content;
 
   const hasACaption = !!content.message;
@@ -192,34 +188,13 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`rounded-lg ${
+      className={`w-full max-w-md rounded-lg ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
       <div className="relative overflow-hidden rounded-lg">
-        {msg.fileMetadata.payloads?.map((payload) => {
-          const largestThumb = getLargestThumbOfPayload(payload);
-          return (
-            <div
-              key={msg.fileId}
-              className="relative h-[300px]"
-              style={
-                largestThumb
-                  ? { aspectRatio: `${largestThumb.pixelWidth}/${largestThumb.pixelHeight}` }
-                  : undefined
-              }
-            >
-              <OdinImage
-                dotYouClient={dotYouClient}
-                fileId={msg.fileId}
-                fileKey={payload.key}
-                lastModified={payload.lastModified || msg.fileMetadata.updated}
-                targetDrive={ChatDrive}
-              />
-            </div>
-          );
-        })}
+        <ChatMedia msg={msg} />
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 z-10 px-2 py-1" /> : null}
       </div>
       {hasACaption ? (

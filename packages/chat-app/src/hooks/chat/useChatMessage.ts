@@ -11,9 +11,8 @@ import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvid
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const useChatMessage = () => {
-  const { getIdentity, getDotYouClient } = useDotYouClient();
+  const { getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
-  const identity = getIdentity();
   const queryClient = useQueryClient();
 
   const sendMessage = async ({
@@ -40,7 +39,6 @@ export const useChatMessage = () => {
             recipients: recipients,
             messageType: MessageType.Text,
             deliveryStatus: ChatDeliveryStatus.Sent,
-            authorOdinId: identity || '',
           },
         },
       },

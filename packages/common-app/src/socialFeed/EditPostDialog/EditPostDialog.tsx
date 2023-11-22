@@ -107,7 +107,7 @@ export const EditPostDialog = ({
           <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
             <ActionButton
               className={`m-2 ${
-                postFile.fileMetadata.appData.content.caption?.length
+                postFile.fileMetadata.appData.content.caption?.length || newMediaFiles.length
                   ? ''
                   : 'pointer-events-none opacity-20 grayscale'
               }`}

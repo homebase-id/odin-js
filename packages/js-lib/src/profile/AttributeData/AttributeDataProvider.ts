@@ -460,6 +460,7 @@ export const saveAttribute = async (
               fileId: toSaveAttribute.fileId,
               targetDrive: targetDrive,
             },
+            versionTag: runningVersionTag,
           },
           payloads,
           thumbnails

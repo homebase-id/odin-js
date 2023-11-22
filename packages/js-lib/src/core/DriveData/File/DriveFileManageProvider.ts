@@ -50,6 +50,7 @@ export const deletePayload = async (
   targetDrive: TargetDrive,
   fileId: string,
   fileKey: string,
+  versionTag: string,
   systemFileType?: SystemFileType
 ): Promise<{ newVersionTag: string }> => {
   const client = dotYouClient.createAxiosClient({
@@ -64,6 +65,7 @@ export const deletePayload = async (
       targetDrive: targetDrive,
       fileId: fileId,
     },
+    versionTag: versionTag,
   };
 
   return client

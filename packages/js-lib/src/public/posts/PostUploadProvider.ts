@@ -358,27 +358,32 @@ const uploadPostHeader = async <T extends PostContent>(
     accessControlList: file.serverMetadata?.accessControlList,
   };
 
+  let runningVersionTag;
   if (!shouldEmbedContent) {
     // Append/update payload
-    await appendDataToFile(
-      dotYouClient,
-      file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-      {
-        targetFile: {
-          fileId: file.fileId as string,
-          targetDrive: targetDrive,
-        },
-      },
-      [
+    runningVersionTag = (
+      await appendDataToFile(
+        dotYouClient,
+        file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
         {
-          key: DEFAULT_PAYLOAD_KEY,
-          payload: new Blob([payloadBytes], { type: 'application/json' }),
+          targetFile: {
+            fileId: file.fileId as string,
+            targetDrive: targetDrive,
+          },
+          versionTag: file.fileMetadata.versionTag,
         },
-      ],
-      undefined
-    );
+        [
+          {
+            key: DEFAULT_PAYLOAD_KEY,
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+          },
+        ],
+        undefined
+      )
+    ).newVersionTag;
   }
 
+  if (runningVersionTag) metadata.versionTag = runningVersionTag;
   return await uploadHeader(
     dotYouClient,
     file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
@@ -444,7 +449,13 @@ const updatePost = async <T extends PostContent>(
     for (let i = 0; i < deletedMediaFiles.length; i++) {
       const mediaFile = deletedMediaFiles[i];
       runningVersionTag = (
-        await deletePayload(dotYouClient, targetDrive, file.fileId as string, mediaFile.fileKey)
+        await deletePayload(
+          dotYouClient,
+          targetDrive,
+          file.fileId as string,
+          mediaFile.fileKey,
+          file.fileMetadata.versionTag
+        )
       ).newVersionTag;
     }
   }
@@ -484,6 +495,7 @@ const updatePost = async <T extends PostContent>(
         fileId: file.fileId as string,
         targetDrive: targetDrive,
       },
+      versionTag: runningVersionTag,
     };
 
     runningVersionTag = (
@@ -530,6 +542,7 @@ export const appendPostMedia = async (
       fileId: fileId,
       targetDrive: targetDrive,
     },
+    versionTag: header.fileMetadata.versionTag,
   };
 
   const payloads: PayloadFile[] = [];
@@ -559,8 +572,15 @@ export const removePostMedia = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  fileKey: string
+  fileKey: string,
+  versionTag: string
 ) => {
-  const response = await deletePayload(dotYouClient, targetDrive, fileId as string, fileKey);
+  const response = await deletePayload(
+    dotYouClient,
+    targetDrive,
+    fileId as string,
+    fileKey,
+    versionTag
+  );
   return response;
 };

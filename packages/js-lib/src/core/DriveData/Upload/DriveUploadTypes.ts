@@ -23,6 +23,7 @@ export interface AppendInstructionSet {
     fileId: string;
     targetDrive: TargetDrive;
   };
+  versionTag: string | undefined;
   systemFileType?: SystemFileType;
 }
 

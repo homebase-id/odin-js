@@ -55,7 +55,7 @@ export const getSocialFeed = async (
   const allPostFiles = (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
-        const odinId = dsr.fileMetadata.senderOdinId;
+        const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
         return dsrToPostFile(dotYouClient, odinId, dsr, feedDrive, result.includeMetadataHeader);
       })
     )
@@ -262,6 +262,7 @@ const dsrToPostFile = async <T extends PostContent>(
           ...dsr.fileMetadata.appData,
           content: postContent,
         },
+        senderOdinId: postContent.authorOdinId || dsr.fileMetadata.senderOdinId,
       },
     };
 
