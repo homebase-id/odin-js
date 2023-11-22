@@ -12,7 +12,7 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const countExcludedFromView = payloads.length - maxVisible;
 
   return (
-    <div className={`${isGallery ? 'grid grid-cols-2' : ''}`}>
+    <div className={`${isGallery ? 'grid grid-cols-2 gap-1' : ''}`}>
       {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => {
         return (
           <div
