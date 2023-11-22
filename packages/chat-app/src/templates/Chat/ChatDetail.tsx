@@ -1,5 +1,8 @@
 import {
   ActionButton,
+  ArrowDown,
+  Check,
+  ChevronDown,
   ConnectionImage,
   ConnectionName,
   EmojiSelector,
@@ -110,7 +113,11 @@ const ChatMessageItem = ({
   return (
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
-      <div className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse text-right' : 'flex-row'}`}>
+      <div
+        className={`flex gap-2 ${
+          messageFromMe ? 'flex-row-reverse text-right' : 'flex-row'
+        } group relative`}
+      >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
             odinId={authorOdinId}
@@ -139,6 +146,16 @@ const ChatMessageItem = ({
   );
 };
 
+const ContextMenu = () => {
+  return (
+    <div className="pointer-events-none absolute right-1 top-[0.125rem] z-20 flex flex-col justify-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100">
+      <button className="rounded-full bg-background/20 p-2">
+        <ChevronDown className="h-3 w-3" />
+      </button>
+    </div>
+  );
+};
+
 const ChatTextMessageBody = ({
   msg,
 
@@ -159,7 +176,7 @@ const ChatTextMessageBody = ({
 
   return (
     <div
-      className={`flex w-auto max-w-md flex-col rounded-lg px-2 py-1 md:flex-row ${
+      className={`relative flex w-auto max-w-md flex-col rounded-lg px-2 py-1 md:flex-row ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -173,6 +190,7 @@ const ChatTextMessageBody = ({
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>
+      <ContextMenu />
     </div>
   );
 };
@@ -196,10 +214,13 @@ const ChatMediaMessageBody = ({
 
   const hasACaption = !!content.message;
   const ChatFooter = ({ className }: { className?: string }) => (
-    <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
-      <ChatDeliveryIndicator msg={msg} />
-      <ChatSentTimeIndicator msg={msg} />
-    </div>
+    <>
+      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
+        <ChatDeliveryIndicator msg={msg} />
+        <ChatSentTimeIndicator msg={msg} />
+      </div>
+      <ContextMenu />
+    </>
   );
 
   return (
