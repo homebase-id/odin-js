@@ -10,16 +10,25 @@ import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { getNewId } from '@youfoundation/js-lib/helpers';
 
-const defaultThemeAttribute: AttributeVm = {
-  profileId: HomePageConfig.DefaultDriveId,
-  type: HomePageAttributes.Theme,
-  priority: 1000,
-  sectionId: HomePageConfig.AttributeSectionNotApplicable,
-  data: { isNew: true, isProtected: true },
-  acl: undefined,
-  typeDefinition: AttributeDefinitions.Theme,
-} as unknown as AttributeVm;
+const defaultThemeAttribute: DriveSearchResult<AttributeVm> = {
+  fileMetadata: {
+    appData: {
+      content: {
+        id: getNewId(),
+        profileId: HomePageConfig.DefaultDriveId,
+        type: HomePageAttributes.Theme,
+        priority: 1000,
+        sectionId: HomePageConfig.AttributeSectionNotApplicable,
+        data: { isProtected: true },
+
+        typeDefinition: AttributeDefinitions.Theme,
+      },
+    },
+  },
+} as unknown as DriveSearchResult<AttributeVm>;
 
 const Website = () => {
   const { data: themeData, isLoading: themeIsLoading } = useHomeAttributes().fetchTheme;

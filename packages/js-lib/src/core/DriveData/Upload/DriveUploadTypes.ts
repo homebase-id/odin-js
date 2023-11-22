@@ -1,18 +1,20 @@
 import {
   TargetDrive,
-  ThumbSize,
   GlobalTransitIdFileIdentifier,
   EmbeddedThumb,
   ArchivalStatus,
   ExternalFileIdentifier,
   SystemFileType,
+  UploadPayloadDescriptor,
+  AccessControlList,
+  EncryptedKeyHeader,
+  KeyHeader,
 } from '../File/DriveFileTypes';
-import { EncryptedKeyHeader } from '../Drive/DriveTypes';
 
 export interface UploadInstructionSet {
-  transferIv: Uint8Array;
   storageOptions: StorageOptions | null;
-  transitOptions: TransitOptions | null;
+  transitOptions?: TransitOptions;
+  transferIv?: Uint8Array;
   systemFileType?: SystemFileType;
 }
 
@@ -21,14 +23,13 @@ export interface AppendInstructionSet {
     fileId: string;
     targetDrive: TargetDrive;
   };
-  thumbnails?: ThumbSize[];
   systemFileType?: SystemFileType;
 }
 
 export interface StorageOptions {
   drive: TargetDrive;
-  overwriteFileId?: string | null;
-  expiresTimestamp?: number | null;
+  overwriteFileId?: string;
+  expiresTimestamp?: number;
   storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
@@ -60,45 +61,32 @@ export interface UploadFileDescriptor {
 
 export interface UploadFileMetadata {
   allowDistribution: boolean;
-  contentType: string;
   senderOdinId?: string;
-  payloadIsEncrypted: boolean;
+  isEncrypted: boolean;
   accessControlList?: AccessControlList;
   appData: UploadAppFileMetaData;
   referencedFile?: GlobalTransitIdFileIdentifier;
   versionTag?: string;
 }
 
-export interface AccessControlList {
-  requiredSecurityGroup: SecurityGroupType;
-  circleIdList?: string[] | null;
-  odinIdList?: string[] | null;
-}
-
-export enum SecurityGroupType {
-  Anonymous = 'anonymous',
-  Authenticated = 'authenticated',
-  Connected = 'connected',
-  Owner = 'owner',
+export interface UploadManifest {
+  PayloadDescriptors?: UploadPayloadDescriptor[];
 }
 
 export interface UploadAppFileMetaData {
-  tags: string[] | null;
-  groupId?: string;
   uniqueId?: string;
+  tags?: string[];
   fileType?: number;
   dataType?: number;
   userDate?: number;
-  contentIsComplete: boolean;
-  jsonContent: string | null;
-  previewThumbnail?: EmbeddedThumb;
-  additionalThumbnails?: ThumbSize[];
+  groupId?: string;
   archivalStatus?: ArchivalStatus;
+  content?: string;
+  previewThumbnail?: EmbeddedThumb;
 }
 
 export interface UploadResult {
-  encryptedPayload: Uint8Array;
-  encryptedKeyHeader: Uint8Array;
+  keyHeader: KeyHeader | undefined;
   file: ExternalFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
   recipientStatus: { [key: string]: TransferStatus };

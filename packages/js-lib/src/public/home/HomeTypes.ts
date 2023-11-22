@@ -36,7 +36,7 @@ export class HomePageThemeFields {
   static readonly ThemeId: string = 'themeId';
 
   // Social Classic / Content Producer
-  static readonly HeaderImageId: string = 'headerImageId';
+  static readonly HeaderImageKey: string = 'headerImageKey';
   static readonly Tabs: string = 'tabs';
   static readonly TabsOrder: string = 'tabsOrder';
 

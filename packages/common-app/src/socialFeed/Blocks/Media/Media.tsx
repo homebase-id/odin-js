@@ -4,26 +4,28 @@ import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 
 export const PostMedia = ({
   odinId,
-  postFile,
+  postInfo,
   showFallback,
   forceAspectRatio,
   onClick,
   className,
 }: {
   odinId?: string;
-  postFile: {
+  postInfo: {
+    fileId: string;
+    globalTransitId?: string;
+    lastModified: number | undefined;
     content: PostContent;
     previewThumbnail?: EmbeddedThumb;
-    payloadIsEncrypted?: boolean;
+    isEncrypted?: boolean;
   };
   showFallback?: boolean;
   forceAspectRatio?: boolean;
   onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void;
   className?: string;
 }) => {
-  const { content: post, previewThumbnail } = postFile;
-  const mediaFileIds = (post as Media).mediaFiles;
-
+  const { content: post, previewThumbnail } = postInfo;
+  const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (
@@ -39,15 +41,18 @@ export const PostMedia = ({
     return <div className={`${className || ''}`}></div>;
   }
 
-  if (mediaFileIds && mediaFileIds.length > 1)
+  if (mediaFiles && mediaFiles.length > 1)
     return (
       <MediaGallery
         odinId={odinId}
+        fileId={postInfo.fileId}
+        globalTransitId={postInfo.globalTransitId}
+        lastModified={postInfo.lastModified}
         channelId={post.channelId}
-        files={mediaFileIds}
+        files={mediaFiles}
         className={`${className || ''}`}
         previewThumbnail={previewThumbnail}
-        probablyEncrypted={postFile.payloadIsEncrypted}
+        probablyEncrypted={postInfo.isEncrypted}
         onClick={onClick}
       />
     );
@@ -56,11 +61,15 @@ export const PostMedia = ({
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
         fit="contain"
-        post={post}
+        primaryMediaFile={post.primaryMediaFile}
+        channelId={post.channelId}
+        fileId={postInfo.fileId}
+        globalTransitId={postInfo.globalTransitId}
+        lastModified={postInfo.lastModified}
         odinId={odinId}
         className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
-        probablyEncrypted={postFile.payloadIsEncrypted}
+        probablyEncrypted={postInfo.isEncrypted}
         onClick={onClick ? (e) => onClick(e, 0) : undefined}
         clickToLoad={true}
       />

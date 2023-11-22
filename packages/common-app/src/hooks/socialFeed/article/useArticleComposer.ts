@@ -1,9 +1,13 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
 import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
-import { PostFile, Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
+import { Article, ChannelDefinition, BlogConfig, NewMediaFile } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
+import {
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -42,21 +46,36 @@ export const useArticleComposer = ({
     },
   } = usePost();
 
-  const [postFile, setPostFile] = useState<PostFile<Article>>({
-    userDate: new Date().getTime(),
+  const [postFile, setPostFile] = useState<
+    NewDriveSearchResult<Article> | DriveSearchResult<Article>
+  >({
     ...serverData?.activeBlog,
-    content: {
-      ...EMPTY_POST,
-      caption: caption ?? EMPTY_POST.caption,
-      authorOdinId: dotYouClient.getIdentity(),
-      id: getNewId(),
-      ...serverData?.activeBlog?.content,
-      type: 'Article',
+    fileMetadata: {
+      ...serverData?.activeBlog.fileMetadata,
+      appData: {
+        fileType: BlogConfig.DraftPostFileType,
+        userDate: new Date().getTime(),
+        content: {
+          ...EMPTY_POST,
+          caption: caption ?? EMPTY_POST.caption,
+          authorOdinId: dotYouClient.getIdentity(),
+          id: getNewId(),
+          ...serverData?.activeBlog?.fileMetadata.appData.content,
+          type: 'Article',
+        },
+      },
+    },
+    serverMetadata: {
+      accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+      ...serverData?.activeBlog.serverMetadata,
     },
   });
 
+  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined | null>(null);
+
   const [channel, setChannel] = useState<ChannelDefinition>(
-    serverData?.activeChannel && postFile.content.channelId === serverData.activeChannel.channelId
+    serverData?.activeChannel &&
+      postFile.fileMetadata.appData.content.channelId === serverData.activeChannel.channelId
       ? serverData.activeChannel
       : BlogConfig.PublicChannel
   );
@@ -66,33 +85,38 @@ export const useArticleComposer = ({
     if (serverData && serverData.activeBlog && (!postFile.fileId || savePostStatus === 'success')) {
       setPostFile({
         ...serverData.activeBlog,
-        content: {
-          ...EMPTY_POST,
-          ...serverData.activeBlog?.content,
-          type: 'Article',
+        fileMetadata: {
+          ...serverData.activeBlog.fileMetadata,
+          appData: {
+            ...serverData.activeBlog.fileMetadata.appData,
+            content: {
+              ...EMPTY_POST,
+              ...serverData.activeBlog?.fileMetadata.appData.content,
+              type: 'Article',
+            },
+          },
         },
       });
     }
   }, [serverData]);
 
-  const isPublished =
-    serverData?.activeBlog?.acl &&
-    serverData?.activeBlog?.acl?.requiredSecurityGroup !== SecurityGroupType.Owner;
+  const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
 
-  const isValidPost = (postFile: PostFile<Article>) => {
+  const isValidPost = (postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>) => {
+    const postContent = postFile.fileMetadata.appData.content;
     return (
-      !postFile.content.caption?.length &&
-      postFile.content.caption.length <= 1 &&
-      !postFile.content.abstract?.length &&
-      postFile.content.abstract.length <= 1 &&
-      !postFile.content.body?.length &&
-      postFile.content.body.length === 0 &&
-      !postFile.content.primaryMediaFile
+      !postContent.caption?.length &&
+      postContent.caption.length <= 1 &&
+      !postContent.abstract?.length &&
+      postContent.abstract.length <= 1 &&
+      !postContent.body?.length &&
+      postContent.body.length === 0 &&
+      !postContent.primaryMediaFile
     );
   };
 
   const doSave = async (
-    dirtyPostFile: PostFile<Article> = postFile,
+    dirtyPostFile: DriveSearchResult<Article> | NewDriveSearchResult<Article> = postFile,
     action: 'save' | 'publish' | 'draft' = 'save',
     explicitTargetChannel?: ChannelDefinition
   ) => {
@@ -105,46 +129,67 @@ export const useArticleComposer = ({
     const targetChannel = explicitTargetChannel || channel;
 
     // Build postFile
-    const toPostFile: PostFile<Article> = {
+    const toPostFile: NewDriveSearchResult<Article> = {
       ...dirtyPostFile,
-      versionTag: undefined, // VersionTag is set undefined so we always reset it to the latest
-      userDate: new Date().getTime(), // Set current date as userDate of the post
-      content: {
-        ...dirtyPostFile.content,
-        id: dirtyPostFile.content.id ?? getNewId(), // Generate new id if there is none
-        slug: slugify(dirtyPostFile.content.caption), // Reset slug to match caption each time
-        channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed
-        readingTimeStats: getReadingTime(dirtyPostFile.content.body),
+      fileMetadata: {
+        ...dirtyPostFile.fileMetadata,
+
+        appData: {
+          fileType: !isPublish || isUnpublish ? BlogConfig.DraftPostFileType : undefined,
+          userDate: new Date().getTime(),
+          content: {
+            ...dirtyPostFile.fileMetadata.appData.content,
+            id: dirtyPostFile.fileMetadata.appData.content.id ?? getNewId(), // Generate new id if there is none
+            slug: slugify(dirtyPostFile.fileMetadata.appData.content.caption), // Reset slug to match caption each time
+            channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed
+            readingTimeStats: getReadingTime(dirtyPostFile.fileMetadata.appData.content.body),
+          },
+        },
       },
-      isDraft: !isPublish || isUnpublish,
-      acl:
-        targetChannel.acl && (isPublish || isPublished) && !isUnpublish
-          ? { ...targetChannel.acl }
-          : { requiredSecurityGroup: SecurityGroupType.Owner },
+
+      serverMetadata: {
+        accessControlList: targetChannel.acl || { requiredSecurityGroup: SecurityGroupType.Owner },
+      },
+      // TODO: ACL is not changed, as it impacts the encrytped state...
+      // targetChannel.acl && (isPublish || isPublished) && !isUnpublish
+      // { ...targetChannel.acl }
+      // : { requiredSecurityGroup: SecurityGroupType.Owner },
     };
 
     // Save and process result
     const uploadResult = await savePost({
-      blogFile: toPostFile,
+      postFile: toPostFile,
       channelId: targetChannel.channelId,
+      mediaFiles:
+        primaryMediaFile !== null
+          ? primaryMediaFile === undefined
+            ? []
+            : [primaryMediaFile]
+          : undefined,
     });
+
+    if (uploadResult)
+      setPostFile((oldPostFile) => {
+        return {
+          ...oldPostFile,
+          fileId: uploadResult.file.fileId,
+          fileMetadata: {
+            ...oldPostFile.fileMetadata,
+            versionTag: uploadResult.newVersionTag,
+          },
+        };
+      });
 
     // TODO: Move to component as it has page context?
     if (isPublish) {
-      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.slug}/${toPostFile.content.slug}`;
+      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
     } else {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(
         null,
-        toPostFile.content.caption,
-        `/owner/feed/edit/${targetChannel.slug}/${toPostFile.content.id}`
+        toPostFile.fileMetadata.appData.content.caption,
+        `/owner/feed/edit/${targetChannel.slug}/${toPostFile.fileMetadata.appData.content.id}`
       );
-    }
-
-    if (uploadResult && !dirtyPostFile.fileId) {
-      setPostFile((oldPostFile) => {
-        return { ...oldPostFile, fileId: uploadResult.file.fileId };
-      });
     }
   };
 
@@ -153,8 +198,8 @@ export const useArticleComposer = ({
 
     await removePost({
       fileId: postFile.fileId,
-      channelId: postFile.content.channelId,
-      slug: postFile.content.slug,
+      channelId: postFile.fileMetadata.appData.content.channelId,
+      slug: postFile.fileMetadata.appData.content.slug,
     });
   };
 
@@ -162,11 +207,11 @@ export const useArticleComposer = ({
     setChannel(newChannelDefinition);
 
     // Clear fileId and contentId (as they can clash with what exists, or cause a fail to overwrite during upload)
-    const dataToMove = {
+    const dataToMove: NewDriveSearchResult<Article> = {
       ...postFile,
-      fileId: undefined,
-      content: { ...postFile.content, id: getNewId() },
     };
+    dataToMove.fileId = undefined;
+    dataToMove.fileMetadata.appData.content.id = getNewId();
 
     // Files needs to get removed and saved again
     await doRemovePost();
@@ -187,10 +232,12 @@ export const useArticleComposer = ({
     postFile,
     isValidPost,
     isPublished,
+    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
+    setPrimaryMediaFile,
 
     // Status
     saveStatus: savePostStatus,

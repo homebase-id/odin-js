@@ -10,10 +10,16 @@ export const PostBody = ({
   post,
   odinId,
   hideEmbeddedPostMedia,
+  fileId,
+  globalTransitId,
+  lastModified,
 }: {
   post: PostContent;
   odinId?: string;
   hideEmbeddedPostMedia?: boolean;
+  fileId: string | undefined;
+  globalTransitId: string | undefined;
+  lastModified: number | undefined;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -28,7 +34,16 @@ export const PostBody = ({
               <div className="rich-text-content leading-relaxed">
                 <RichTextRenderer
                   body={(post as Article)?.body}
-                  imageDrive={getChannelDrive(post.channelId)}
+                  options={
+                    fileId
+                      ? {
+                          imageDrive: getChannelDrive(post.channelId),
+                          defaultFileId: fileId,
+                          defaultGlobalTransitId: globalTransitId,
+                          lastModified: lastModified,
+                        }
+                      : undefined
+                  }
                   odinId={odinId}
                 />
               </div>

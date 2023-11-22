@@ -10,25 +10,19 @@ import {
 import {
   ChannelDefinition,
   PostContent,
-  PostFile,
   BlogConfig,
   parseReactionPreview,
   getRecentPosts,
   getChannelDrive,
 } from '../../public/public';
-import {
-  getContentFromHeaderOrPayloadOverTransit,
-  getDrivesByTypeOverTransit,
-  queryBatchOverTransit,
-} from './TransitProvider';
+import { getDrivesByTypeOverTransit } from './Drive/TransitDriveProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
+import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 
-export interface PostFileVm<T extends PostContent> extends PostFile<T> {
-  odinId: string;
-}
-
-export interface RecentsFromConnectionsReturn extends CursoredResult<PostFileVm<PostContent>[]> {
+export interface RecentsFromConnectionsReturn
+  extends CursoredResult<DriveSearchResult<PostContent>[]> {
   ownerCursorState?: Record<string, string>;
 }
 
@@ -57,37 +51,38 @@ export const getSocialFeed = async (
   };
 
   const result = await queryBatch(dotYouClient, queryParams, ro);
-
-  // Parse results and do getPayload (In most cases, data should be there in jsonContent, and nothing in actual payload);
+  // Parse results and do getPayload (In most cases, data should be there in content, and nothing in actual payload);
   const allPostFiles = (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
-        const odinId = dsr.fileMetadata.senderOdinId || window.location.hostname;
+        const odinId = dsr.fileMetadata.senderOdinId;
         return dsrToPostFile(dotYouClient, odinId, dsr, feedDrive, result.includeMetadataHeader);
       })
     )
-  ).filter(Boolean) as PostFileVm<PostContent>[];
+  ).filter(Boolean) as DriveSearchResult<PostContent>[];
 
-  // TODO: Could optimize by combining both feed and own querybatch into a single querybatchcollection...
   if (ownOption) {
-    const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
+    // const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
     const resultOfOwn = await getRecentPosts(
       dotYouClient,
       undefined,
       false,
       ownOption.ownCursorState,
       pageSize,
-      ownOption.ownChannels
+      ownOption.ownChannels,
+      true // include hidden channels
     );
 
-    const postsOfOwn = resultOfOwn.results
-      .filter((file) => !file.isDraft)
-      .map((postFile) => {
-        return { ...postFile, odinId: ownerDotYou } as PostFileVm<PostContent>;
-      });
+    const postsOfOwn = resultOfOwn.results.filter(
+      (file) => file.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType
+    );
 
     return {
-      results: [...allPostFiles, ...postsOfOwn].sort((a, b) => b.userDate - a.userDate),
+      results: [...allPostFiles, ...postsOfOwn].sort(
+        (a, b) =>
+          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+      ),
       cursorState: result.cursorState,
       ownerCursorState: resultOfOwn.cursorState,
     };
@@ -144,7 +139,7 @@ export const getRecentsOverTransit = async (
   maxRecords = 10,
   cursorState?: string,
   channelId?: string
-): Promise<CursoredResult<PostFileVm<PostContent>[]>> => {
+): Promise<CursoredResult<DriveSearchResult<PostContent>[]>> => {
   const targetDrive = channelId ? getChannelDrive(channelId) : BlogConfig.PublicChannelDrive;
 
   const queryParams: FileQueryParams = {
@@ -166,7 +161,7 @@ export const getRecentsOverTransit = async (
         return dsrToPostFile(dotYouClient, odinId, dsr, targetDrive, result.includeMetadataHeader);
       })
     )
-  ).filter(Boolean) as PostFileVm<PostContent>[];
+  ).filter(Boolean) as DriveSearchResult<PostContent>[];
 
   return { cursorState: result.cursorState, results: posts };
 };
@@ -246,9 +241,9 @@ const dsrToPostFile = async <T extends PostContent>(
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<PostFileVm<T> | undefined> => {
+): Promise<DriveSearchResult<T> | undefined> => {
   try {
-    const content = await getContentFromHeaderOrPayloadOverTransit<T>(
+    const postContent = await getContentFromHeaderOrPayloadOverTransit<T>(
       dotYouClient,
       odinId,
       targetDrive,
@@ -256,20 +251,18 @@ const dsrToPostFile = async <T extends PostContent>(
       includeMetadataHeader
     );
 
-    if (!content) return undefined;
+    if (!postContent) return undefined;
 
-    const file: PostFileVm<T> = {
-      fileId: dsr.fileId,
-      odinId: odinId,
-      versionTag: dsr.fileMetadata.versionTag,
-      globalTransitId: dsr.fileMetadata.globalTransitId,
-      acl: dsr.serverMetadata?.accessControlList,
-      userDate: dsr.fileMetadata.appData.userDate || dsr.fileMetadata.created,
-      content: content,
-      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
-      reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
-      payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-      isDraft: dsr.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType,
+    const file: DriveSearchResult<T> = {
+      ...dsr,
+      fileMetadata: {
+        ...dsr.fileMetadata,
+        reactionPreview: parseReactionPreview(dsr.fileMetadata.reactionPreview),
+        appData: {
+          ...dsr.fileMetadata.appData,
+          content: postContent,
+        },
+      },
     };
 
     return file;

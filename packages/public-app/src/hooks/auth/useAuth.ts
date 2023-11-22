@@ -109,7 +109,6 @@ export const useYouAuthAuthorization = () => {
     delete rawEccKey.ext;
     const eccPk64 = uint8ArrayToBase64(stringToUint8Array(JSON.stringify(rawEccKey)));
 
-    // TODO: returnUrl needs to be passed in the state, so it can be used in the callback
     const finalUrl = `/authorization-code-callback`;
     const state = { finalUrl: finalUrl, eccPk64: eccPk64, returnUrl };
     const pk = await getEccPublicKey();

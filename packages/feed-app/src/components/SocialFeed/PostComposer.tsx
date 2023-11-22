@@ -2,6 +2,7 @@ import {
   BlogConfig,
   ChannelDefinition,
   EmbeddedPost,
+  NewMediaFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect } from 'react';
@@ -9,7 +10,6 @@ import { useRef, useState } from 'react';
 import {
   ActionButton,
   Arrow,
-  AttachmentFile,
   ChannelsDialog,
   EmbeddedPostContent,
   EmojiSelector,
@@ -27,6 +27,8 @@ import {
   Article,
   Lock,
   ActionGroup,
+  AclSummary,
+  AclIcon,
 } from '@youfoundation/common-app';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 
@@ -46,13 +48,12 @@ const PostComposer = ({
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
-  const [files, setFiles] = useState<AttachmentFile[]>();
+  const [files, setFiles] = useState<NewMediaFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
   const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
-  const isPosting =
-    postState === 'processing' || postState === 'uploading' || postState === 'encrypting';
+  const isPosting = postState === 'uploading' || postState === 'encrypting';
 
   const doPost = async () => {
     if (isPosting) return;
@@ -88,13 +89,8 @@ const PostComposer = ({
         if (!base64) return;
 
         const bytes = base64ToUint8Array(base64);
-        const file: AttachmentFile = {
-          file: {
-            name: e.data.note,
-            type: e.data.type,
-            bytes: bytes,
-            size: bytes.length,
-          },
+        const file: NewMediaFile = {
+          file: new Blob([bytes], { type: e.data.type }),
         };
 
         setFiles([...(files ?? []), file]);
@@ -104,6 +100,8 @@ const PostComposer = ({
     window.addEventListener('message', messageListener);
     return () => window.removeEventListener('message', messageListener);
   }, []);
+
+  const canPost = caption?.length || files?.length || !!embeddedPost;
 
   return (
     <div className={`${className ?? ''}`}>
@@ -140,12 +138,12 @@ const PostComposer = ({
         {embeddedPost ? (
           <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
         ) : null}
+
         <ProgressIndicator
           postState={postState}
           processingProgress={processingProgress}
           files={files?.length || 0}
         />
-
         <div className="mt-3 flex flex-row flex-wrap items-center gap-2 py-2 md:flex-nowrap">
           {!embeddedPost ? (
             <>
@@ -191,17 +189,19 @@ const PostComposer = ({
           />
           <ActionButton
             className={`w-full md:w-auto ${
-              caption?.length || files?.length || !!embeddedPost
-                ? ''
-                : 'pointer-events-none hidden opacity-20 grayscale md:flex'
-            } ${
-              postState === 'processing' || postState === 'uploading'
-                ? 'pointer-events-none animate-pulse'
-                : ''
-            }`}
+              canPost ? '' : 'pointer-events-none hidden opacity-20 grayscale md:flex'
+            } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
           >
-            {t('Post')}
+            {channel.acl && canPost ? <AclIcon className="mr-3 h-4 w-4" acl={channel.acl} /> : null}
+            <span className="flex flex-col">
+              {t('Post')}{' '}
+              {channel.acl && canPost ? (
+                <small className="flex flex-row items-center gap-1 leading-none">
+                  <AclSummary acl={channel.acl} />{' '}
+                </small>
+              ) : null}
+            </span>
           </ActionButton>
         </div>
       </form>
@@ -295,19 +295,18 @@ const ProgressIndicator = ({
   processingProgress,
   files,
 }: {
-  postState: 'processing' | 'uploading' | 'encrypting' | 'error' | undefined;
+  postState: 'uploading' | 'encrypting' | 'error' | undefined;
   processingProgress: number;
   files: number;
 }) => {
   if (!postState) return null;
 
   let progressText = '';
-  if (postState === 'processing')
-    if (processingProgress < 0.5)
+  if (postState === 'uploading')
+    if (processingProgress < 1)
       if (files > 1) progressText = t('Generating thumbnails');
       else progressText = t('Generating thumbnail');
-    else progressText = t('Uploading media');
-  else progressText = t(postState);
+    else progressText = t(postState);
 
   return (
     <div className="mt-2 flex flex-row-reverse">

@@ -13,8 +13,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
-const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
-const YouAuthLogin = lazy(() => import('../templates/YouAuthLogin/YouAuthLogin'));
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
@@ -25,10 +23,6 @@ const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountR
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
 
 const Notifications = lazy(() => import('../templates/Notifications/Notifications'));
-
-const PublicProfileDetails = lazy(
-  () => import('../templates/Profiles/PublicProfileDetails/PublicProfileDetails')
-);
 
 const Profile = lazy(() => import('../templates/Profiles/Profiles/Profiles'));
 const ProfileDetails = lazy(() => import('../templates/Profiles/ProfileDetails/ProfileDetails'));
@@ -78,7 +72,7 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { useTransitProcessor, ErrorBoundary, t } from '@youfoundation/common-app';
+import { useTransitProcessor, ErrorBoundary, t, NotFound } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 
@@ -127,8 +121,6 @@ function App() {
             </RootRoute>
           }
         >
-          {/* TODO: Remove */}
-          <Route path="login/youauth" element={<YouAuthLogin />} />
           <Route path="youauth/consent" element={<YouAuthConsent />} />
 
           <Route path="setup" element={<Setup />} />
@@ -172,7 +164,6 @@ function App() {
               path="profile/:profileKey/:sectionKey/:typeKey"
               element={<ProfileDetails />}
             ></Route>
-            <Route path="public-profile" element={<PublicProfileDetails />}></Route>
             <Route path="connections" element={<Connections />}></Route>
             <Route path="connections/:odinId" element={<ConnectionDetails />}></Route>
             <Route path="connections/:odinId/:action" element={<ConnectionDetails />}></Route>

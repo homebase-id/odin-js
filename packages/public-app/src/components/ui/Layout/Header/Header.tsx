@@ -22,7 +22,7 @@ const Header = () => {
         }`}
       >
         <Link className="title-font flex items-center font-medium" to={HOME_ROOT_PATH}>
-          {owner?.profileImageId ? (
+          {owner?.profileImageFileKey ? (
             <AuthorImage className="h-8 w-8 rounded-full lg:h-[3rem] lg:w-[3rem]" />
           ) : null}
           <span className={`ml-3 hidden text-xl font-normal sm:block`}>

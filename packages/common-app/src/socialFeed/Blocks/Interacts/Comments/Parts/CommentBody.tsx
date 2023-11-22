@@ -1,16 +1,18 @@
 import {
   GetTargetDriveFromChannelId,
-  ReactionContent,
+  RawReactionContent,
   ReactionContext,
 } from '@youfoundation/js-lib/public';
 import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
-import { CommentMedia } from './CommentMedia';
+import { CommentMedia, CommentMediaPreview } from './CommentMedia';
 import { ActionButtonState } from '../../../../../ui';
+import { ReactionContent } from '@youfoundation/js-lib/core';
 
 export const CommentBody = ({
   context,
   commentFileId,
+  commentLastModifed,
   content,
   isEdit,
   onUpdate,
@@ -19,7 +21,8 @@ export const CommentBody = ({
 }: {
   context?: ReactionContext;
   commentFileId?: string;
-  content: ReactionContent;
+  commentLastModifed?: number;
+  content: RawReactionContent | ReactionContent;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;
@@ -44,12 +47,16 @@ export const CommentBody = ({
           ) : (
             <p className="whitespace-pre-wrap">{body}</p>
           )}
-          {content.hasAttachment && context ? (
+          {content.mediaPayloadKey && context ? (
             <CommentMedia
               postAuthorOdinId={context.authorOdinId}
               targetDrive={sourceTargetDrive}
               fileId={commentFileId}
+              fileKey={content.mediaPayloadKey}
+              lastModified={commentLastModifed}
             />
+          ) : (content as RawReactionContent)?.attachment ? (
+            <CommentMediaPreview attachment={(content as RawReactionContent)?.attachment} />
           ) : null}
         </>
       )}

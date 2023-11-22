@@ -6,6 +6,7 @@ export * from './DomainHighlighter/DomainHighlighter';
 export * from './ErrorBoundary/ErrorBoundary';
 export * from './LoadingBlock/LoadingBlock';
 export * from './Pager/Pager';
+export * from './NotFound/NotFound';
 
 export * from './Buttons/ActionButton';
 export * from './Buttons/ActionButtonWithOptions';
@@ -69,6 +70,7 @@ export * from './Icons/Loader';
 export * from './Icons/Lock';
 export * from './Icons/Logo';
 export * from './Icons/Lol';
+export * from './Icons/MagnifyingGlass';
 export * from './Icons/Minecraft';
 export * from './Icons/Moon';
 export * from './Icons/OpenLock';

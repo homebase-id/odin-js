@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   FileQueryParams,
   queryBatch,
@@ -11,13 +12,18 @@ import {
   UploadFileMetadata,
   uploadFile,
   deleteFile,
-  AccessControlList,
-  getDecryptedImageData,
   getFileHeader,
-  uploadImage,
+  EmbeddedThumb,
+  PayloadFile,
+  ThumbnailFile,
+  createThumbnails,
+  ThumbnailInstruction,
+  uploadHeader,
+  appendDataToFile,
+  NewDriveSearchResult,
+  reUploadFile,
 } from '../../core/core';
 import {
-  aclEqual,
   getDisplayNameOfNameAttribute,
   getNewId,
   getRandom16ByteArray,
@@ -27,10 +33,11 @@ import {
 import { HomePageAttributes, HomePageThemeFields } from '../../public/public';
 import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
-import { AttributeFile, Attribute } from './AttributeDataTypes';
+import { Attribute } from './AttributeDataTypes';
 
-const sortAttrs = (a: AttributeFile, b: AttributeFile) =>
-  (a.aclPriority || 0) - (b.aclPriority || 0) || a.priority - b.priority;
+const sortAttrs = (a: DriveSearchResult<Attribute>, b: DriveSearchResult<Attribute>) =>
+  (a.priority || 0) - (b.priority || 0) ||
+  a.fileMetadata.appData.content.priority - b.fileMetadata.appData.content.priority;
 
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
 export const getProfileAttributes = async (
@@ -38,7 +45,7 @@ export const getProfileAttributes = async (
   profileId: string,
   sectionId: string | undefined,
   pageSize: number
-): Promise<AttributeFile[]> => {
+): Promise<DriveSearchResult<Attribute>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -48,16 +55,16 @@ export const getProfileAttributes = async (
 
   const result = await queryBatch(dotYouClient, qp, {
     maxRecords: pageSize,
-    includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
+    includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   });
 
-  let attributes: AttributeFile[] = (
+  let attributes: DriveSearchResult<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as AttributeFile[];
+  ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -69,7 +76,7 @@ export const getAttributeVersions = async (
   profileId: string,
   sectionId: string | undefined,
   tags: string[]
-): Promise<AttributeFile[] | undefined> => {
+): Promise<DriveSearchResult<Attribute>[] | undefined> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -83,13 +90,13 @@ export const getAttributeVersions = async (
     includeMetadataHeader: true,
   });
 
-  let attributes: AttributeFile[] = (
+  let attributes: DriveSearchResult<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as AttributeFile[];
+  ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -99,10 +106,10 @@ export const getAttributeByFileId = async (
   dotYouClient: DotYouClient,
   profileId: string,
   fileId: string
-): Promise<AttributeFile | undefined> => {
+): Promise<DriveSearchResult<Attribute> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-  if (!header) return;
+  if (!header) return null;
   return dsrToAttributeFile(dotYouClient, header, targetDrive, true);
 };
 
@@ -110,7 +117,7 @@ export const getAttribute = async (
   dotYouClient: DotYouClient,
   profileId: string,
   id: string
-): Promise<AttributeFile | undefined> => {
+): Promise<DriveSearchResult<Attribute> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -125,10 +132,7 @@ export const getAttribute = async (
 
   const result = await queryBatch(dotYouClient, qp, ro);
 
-  if (result.searchResults.length == 0) {
-    return;
-  }
-
+  if (result.searchResults.length == 0) return null;
   if (result.searchResults.length > 1) {
     console.warn(
       `Attribute Id [${id}] in profile [${profileId}] has more than one file. Using latest`
@@ -144,7 +148,7 @@ export const getAttributes = async (
   profileId: string,
   tags: string[] | undefined,
   pageSize: number
-): Promise<AttributeFile[]> => {
+): Promise<DriveSearchResult<Attribute>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -157,13 +161,13 @@ export const getAttributes = async (
     includeMetadataHeader: true,
   });
 
-  let attributes: AttributeFile[] = (
+  let attributes: DriveSearchResult<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as AttributeFile[];
+  ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -174,209 +178,337 @@ export const dsrToAttributeFile = async (
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<AttributeFile | undefined> => {
+): Promise<DriveSearchResult<Attribute> | null> => {
   try {
-    const attrPayload = await getContentFromHeaderOrPayload<AttributeFile>(
+    const attrContent = await getContentFromHeaderOrPayload<Attribute>(
       dotYouClient,
       targetDrive,
       dsr,
       includeMetadataHeader
     );
-    if (!attrPayload) return undefined;
-    return {
-      ...attrPayload,
-      fileId: attrPayload.fileId ?? dsr.fileId,
-      versionTag: dsr.fileMetadata.versionTag,
-      acl: dsr.serverMetadata?.accessControlList,
-      aclPriority: dsr.priority,
-      previewThumbnail: dsr.fileMetadata.appData.previewThumbnail,
+    if (!attrContent) return null;
+
+    const attributeFile: DriveSearchResult<Attribute> = {
+      ...dsr,
+      fileMetadata: {
+        ...dsr.fileMetadata,
+        appData: {
+          ...dsr.fileMetadata.appData,
+          content: attrContent,
+        },
+      },
     };
+
+    return attributeFile;
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
-    return undefined;
+    return null;
   }
 };
 
 // Attribute Processors:
 // Helpers:
-const nameAttributeProcessing = (nameAttr: AttributeFile): AttributeFile => {
-  const newData = { ...nameAttr.data };
-  newData[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
-
-  return { ...nameAttr, data: newData };
+type ProcessedAttribute = {
+  attr: Attribute;
+  payloads: PayloadFile[];
+  thumbnails?: ThumbnailFile[] | undefined;
+  previewThumb?: EmbeddedThumb | undefined;
 };
 
-const confirmDependencyAcl = async (
-  dotYouClient: DotYouClient,
-  targetAcl: AccessControlList,
-  targetDrive: TargetDrive,
-  fileId: string
+const nameAttributeProcessing = (nameAttr: Attribute): ProcessedAttribute => {
+  const newAttr = { ...nameAttr };
+  nameAttr.data[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
+
+  return {
+    attr: newAttr,
+    payloads: [],
+    thumbnails: [],
+    previewThumb: undefined,
+  };
+};
+
+const profileInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 250, height: 250 },
+  { quality: 75, width: 600, height: 600 },
+];
+
+const headerInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 600, height: 600 },
+  { quality: 75, width: 1600, height: 1600 },
+  { quality: 75, width: 2600, height: 2600 },
+];
+
+const getNewThumbnails = async (
+  dataKey: Blob | string | undefined,
+  payloadKey: string,
+  thumbnailInstructions: ThumbnailInstruction[] = []
 ) => {
-  if (fileId) {
-    const imageFileMeta = await getFileHeader(dotYouClient, targetDrive, fileId);
-
-    if (imageFileMeta && !aclEqual(targetAcl, imageFileMeta.serverMetadata.accessControlList)) {
-      // Not what it should be, going to reupload it in full
-      const imageData = await getDecryptedImageData(dotYouClient, targetDrive, fileId);
-      if (imageData) {
-        await uploadImage(
-          dotYouClient,
-          targetDrive,
-          targetAcl,
-          new Uint8Array(imageData.bytes),
-          undefined,
-          {
-            fileId,
-            versionTag: imageFileMeta.fileMetadata.versionTag,
-            type: imageData.contentType,
-          }
-        );
-      }
-    }
+  if (dataKey && dataKey instanceof Blob) {
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      dataKey,
+      payloadKey,
+      thumbnailInstructions
+    );
+    return { additionalThumbnails, tinyThumb, blob: dataKey };
   }
+  return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
 };
 
-const photoAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<AttributeFile> => {
-  const imageFieldKey = MinimalProfileFields.ProfileImageId;
-  const imageFileId = attr.data[imageFieldKey];
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+const PHOTO_PAYLOAD_KEY = 'prfl_key';
+const photoAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
+  const imageFieldKey = MinimalProfileFields.ProfileImageKey;
+  const imageData = attr.data[imageFieldKey];
 
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
+    imageData,
+    PHOTO_PAYLOAD_KEY,
+    profileInstructionThumbSizes
+  );
 
-  return attr;
+  attr.data[imageFieldKey] = imageData ? PHOTO_PAYLOAD_KEY : undefined;
+
+  return {
+    attr,
+    thumbnails: additionalThumbnails,
+    previewThumb: tinyThumb,
+    payloads: blob ? [{ payload: blob, key: PHOTO_PAYLOAD_KEY }] : [],
+  };
 };
 
-const experienceAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<AttributeFile> => {
-  const imageFieldKey = MinimalProfileFields.ExperienceImageFileId;
-  const imageFileId = attr.data[imageFieldKey];
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
+const EXPERIENCE_PAYLOAD_KEY = 'xprnc_key';
+const experienceAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
+  const imageFieldKey = MinimalProfileFields.ExperienceImageFileKey;
+  const imageData = attr.data[imageFieldKey];
 
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
+    imageData,
+    EXPERIENCE_PAYLOAD_KEY
+  );
 
-  return attr;
+  attr.data[imageFieldKey] = imageData ? EXPERIENCE_PAYLOAD_KEY : undefined;
+
+  return {
+    attr: attr,
+    thumbnails: additionalThumbnails,
+    previewThumb: tinyThumb,
+    payloads: blob ? [{ payload: blob, key: EXPERIENCE_PAYLOAD_KEY }] : [],
+  };
 };
 
-const themeAttributeProcessing = async (
-  dotYouClient: DotYouClient,
-  attr: AttributeFile
-): Promise<AttributeFile> => {
+const FAVICON_PAYLOAD_KEY = 'fvcn_key';
+const HEADER_PAYLOAD_KEY = 'headr_key';
+const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
   const faviconFieldKey = HomePageThemeFields.Favicon;
-  const faviconFileId = attr?.data[faviconFieldKey]?.fileId;
-  if (!faviconFileId) return attr;
+  const faviconImageData = attr.data[faviconFieldKey]?.fileId;
 
-  const targetDrive = GetTargetDriveFromProfileId(attr.profileId);
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, faviconFileId);
+  const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } = await getNewThumbnails(
+    faviconImageData,
+    FAVICON_PAYLOAD_KEY,
+    []
+  );
 
-  const imageFieldKey = HomePageThemeFields.HeaderImageId;
-  const imageFileId = attr.data[imageFieldKey];
+  if (faviconImageData) attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
 
-  await confirmDependencyAcl(dotYouClient, attr.acl, targetDrive, imageFileId);
+  const imageFieldKey = HomePageThemeFields.HeaderImageKey;
+  const headerImageData = attr.data[imageFieldKey];
 
-  return attr;
+  const {
+    additionalThumbnails: headerThumbnails,
+    blob: headerBlob,
+    tinyThumb: headerTiny,
+  } = await getNewThumbnails(headerImageData, HEADER_PAYLOAD_KEY, headerInstructionThumbSizes);
+
+  attr.data[imageFieldKey] = headerImageData ? HEADER_PAYLOAD_KEY : undefined;
+
+  return {
+    attr,
+    thumbnails: [...faviconThumbnails, ...headerThumbnails],
+    previewThumb: headerTiny,
+    payloads: [
+      ...(faviconBlob ? [{ payload: faviconBlob, key: FAVICON_PAYLOAD_KEY }] : []),
+      ...(headerBlob ? [{ payload: headerBlob, key: HEADER_PAYLOAD_KEY }] : []),
+    ],
+  };
 };
 
-const processAttribute = async (dotYouClient: DotYouClient, attribute: AttributeFile) => {
+const processAttribute = async (attribute: Attribute) => {
   switch (attribute.type) {
     case BuiltInAttributes.Name:
       return nameAttributeProcessing(attribute);
 
     case BuiltInAttributes.Photo:
-      return await photoAttributeProcessing(dotYouClient, attribute);
+      return await photoAttributeProcessing(attribute);
 
     case HomePageAttributes.Theme:
-      return await themeAttributeProcessing(dotYouClient, attribute);
+      return await themeAttributeProcessing(attribute);
 
     case BuiltInAttributes.Experience:
-      return await experienceAttributeProcessing(dotYouClient, attribute);
+      return await experienceAttributeProcessing(attribute);
 
     default:
-      return attribute;
+      return {
+        attr: attribute,
+        payloads: [],
+        thumbnails: [],
+        previewThumb: undefined,
+      } as ProcessedAttribute;
   }
 };
 
 export const saveAttribute = async (
   dotYouClient: DotYouClient,
-  toSaveAttribute: AttributeFile,
+  toSaveAttribute: DriveSearchResult<Attribute> | NewDriveSearchResult<Attribute>,
   onVersionConflict?: () => void
-): Promise<AttributeFile | undefined> => {
+): Promise<DriveSearchResult<Attribute> | NewDriveSearchResult<Attribute> | undefined> => {
+  let runningVersionTag = toSaveAttribute.fileMetadata.versionTag;
+  const targetDrive = GetTargetDriveFromProfileId(
+    toSaveAttribute.fileMetadata.appData.content.profileId
+  );
   // Process Attribute
-  const attr = await processAttribute(dotYouClient, toSaveAttribute);
+  const {
+    attr: attrContent,
+    payloads,
+    thumbnails,
+    previewThumb,
+  } = await processAttribute(toSaveAttribute.fileMetadata.appData.content);
+  toSaveAttribute.fileMetadata.appData.content = attrContent;
 
   // If a new attribute
-  if (!attr.id) {
-    attr.id = getNewId();
-  } else if (!attr.fileId) {
-    attr.fileId = (await getAttribute(dotYouClient, attr.profileId, attr.id))?.fileId ?? undefined;
-  }
+  if (!attrContent.id) attrContent.id = getNewId();
+  else if (!toSaveAttribute.fileId)
+    toSaveAttribute.fileId =
+      (await getAttribute(dotYouClient, attrContent.profileId, attrContent.id))?.fileId ??
+      undefined;
 
   const encrypt = !(
-    attr.acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    attr.acl.requiredSecurityGroup === SecurityGroupType.Authenticated
+    toSaveAttribute.serverMetadata?.accessControlList.requiredSecurityGroup ===
+      SecurityGroupType.Anonymous ||
+    toSaveAttribute.serverMetadata?.accessControlList.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
   );
 
-  if (!attr.id || !attr.profileId || !attr.type || !attr.sectionId) {
+  if (!attrContent.id || !attrContent.profileId || !attrContent.type || !attrContent.sectionId)
     throw 'Attribute is missing id, profileId, sectionId, or type';
-  }
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: attr?.fileId ?? '',
-      drive: GetTargetDriveFromProfileId(attr.profileId),
+      overwriteFileId: toSaveAttribute?.fileId ?? '',
+      drive: targetDrive,
     },
-    transitOptions: null,
   };
 
-  const payloadJson: string = jsonStringify64({
-    ...attr,
-    acl: undefined,
-    fileId: undefined,
-    previewThumbnail: undefined,
-    typeDefinition: undefined,
-    aclPriority: undefined,
-  } as Attribute);
+  const payloadJson: string = jsonStringify64(attrContent);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
+  if (!shouldEmbedContent)
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
+
   const metadata: UploadFileMetadata = {
-    versionTag: attr.versionTag,
+    versionTag: toSaveAttribute.fileMetadata.versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
-      uniqueId: attr.id,
-      tags: [attr.type, attr.sectionId, attr.profileId, attr.id],
-      groupId: attr.sectionId,
+      uniqueId: attrContent.id,
+      tags: [attrContent.type, attrContent.sectionId, attrContent.profileId, attrContent.id],
+      groupId: attrContent.sectionId,
       fileType: AttributeConfig.AttributeFileType,
-      contentIsComplete: shouldEmbedContent,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: attr.previewThumbnail,
+      content: shouldEmbedContent ? payloadJson : undefined,
+      previewThumbnail: previewThumb || toSaveAttribute.fileMetadata.appData.previewThumbnail,
     },
-    payloadIsEncrypted: encrypt,
-    accessControlList: attr.acl,
+    isEncrypted: encrypt,
+    accessControlList: toSaveAttribute.serverMetadata?.accessControlList,
   };
+
+  if (toSaveAttribute.fileId) {
+    const wasEncrypted =
+      'isEncrypted' in toSaveAttribute.fileMetadata && toSaveAttribute.fileMetadata.isEncrypted;
+
+    // When switching between encrypted and unencrypted, we need to re-upload the full file
+    if (wasEncrypted !== encrypt) {
+      const result = await reUploadFile(dotYouClient, instructionSet, metadata, encrypt);
+      if (result)
+        return {
+          ...toSaveAttribute,
+          fileId: result.file.fileId,
+          fileMetadata: {
+            ...toSaveAttribute.fileMetadata,
+            versionTag: result.newVersionTag,
+            isEncrypted: encrypt,
+          },
+        } as DriveSearchResult<Attribute>;
+
+      throw new Error('We failed to change encryption status of an attribute');
+    }
+
+    const keyHeader =
+      wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
+        ? toSaveAttribute.sharedSecretEncryptedKeyHeader
+        : undefined;
+
+    if (payloads.length)
+      runningVersionTag = (
+        await appendDataToFile(
+          dotYouClient,
+          keyHeader,
+          {
+            targetFile: {
+              fileId: toSaveAttribute.fileId,
+              targetDrive: targetDrive,
+            },
+          },
+          payloads,
+          thumbnails
+        )
+      ).newVersionTag;
+
+    // Only save update header
+    const appendInstructions: UploadInstructionSet = {
+      transferIv: getRandom16ByteArray(),
+      storageOptions: {
+        overwriteFileId: toSaveAttribute.fileId,
+        drive: targetDrive,
+      },
+    };
+
+    metadata.versionTag = runningVersionTag || metadata.versionTag;
+    const result = await uploadHeader(dotYouClient, keyHeader, appendInstructions, metadata);
+    if (result) {
+      return {
+        ...toSaveAttribute,
+        fileId: result.file.fileId,
+        fileMetadata: {
+          ...toSaveAttribute.fileMetadata,
+          versionTag: result.newVersionTag,
+        },
+      } as NewDriveSearchResult<Attribute>;
+    }
+  }
 
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
-    undefined,
+    payloads,
+    thumbnails,
     encrypt,
     onVersionConflict
   );
   if (!result) return;
 
   //update server-side info
-  attr.fileId = result.file.fileId;
-  attr.versionTag = result.newVersionTag;
-  return attr;
+  return {
+    ...toSaveAttribute,
+    fileId: result.file.fileId,
+    fileMetadata: {
+      ...toSaveAttribute.fileMetadata,
+      versionTag: result.newVersionTag,
+    },
+  } as NewDriveSearchResult<Attribute>;
 };
 
 export const removeAttribute = async (
@@ -385,28 +517,5 @@ export const removeAttribute = async (
   attributeFileId: string
 ): Promise<void> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
-  try {
-    const attr: AttributeFile | undefined = await getAttributeByFileId(
-      dotYouClient,
-      profileId,
-      attributeFileId
-    );
-
-    const mediaFileIds = [
-      attr?.data?.[HomePageThemeFields.Favicon]?.fileId,
-      attr?.data?.[HomePageThemeFields.HeaderImageId],
-      attr?.data?.[MinimalProfileFields.ProfileImageId],
-      attr?.data?.[MinimalProfileFields.ExperienceImageFileId],
-    ];
-
-    await Promise.all(
-      mediaFileIds.map(async (fileId) => {
-        if (fileId) await deleteFile(dotYouClient, targetDrive, fileId);
-      })
-    );
-  } catch (ex) {
-    console.error('failed to remove linked files from');
-  }
-
   deleteFile(dotYouClient, targetDrive, attributeFileId);
 };

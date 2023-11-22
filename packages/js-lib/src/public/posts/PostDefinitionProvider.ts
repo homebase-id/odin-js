@@ -1,4 +1,5 @@
 import { DotYouClient } from '../../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -146,19 +147,17 @@ export const saveChannelDefinition = async (
   const payloadJson: string = jsonStringify64({ ...definition, acl: undefined });
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metedata
+  // Set max of 3kb for content so enough room is left for metedata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: true,
-    contentType: 'application/json',
     appData: {
       tags: [definition.channelId],
-      contentIsComplete: shouldEmbedContent,
       fileType: BlogConfig.ChannelDefinitionFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
+      content: shouldEmbedContent ? payloadJson : undefined,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: definition.acl,
   };
 
@@ -166,7 +165,14 @@ export const saveChannelDefinition = async (
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
+    shouldEmbedContent
+      ? undefined
+      : [
+          {
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            key: DEFAULT_PAYLOAD_KEY,
+          },
+        ],
     undefined,
     encrypt
   );

@@ -1,4 +1,4 @@
-import { PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import {
   ErrorBoundary,
@@ -12,11 +12,11 @@ import { useChannel } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 interface PostTeaserProps {
   className?: string;
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
   hideImageWhenNone?: boolean;
   showChannel?: boolean;
   forceAspectRatio?: boolean;
@@ -35,7 +35,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   hideEmbeddedPostMedia,
   login,
 }) => {
-  const { content: post } = postFile;
+  const post = postFile.fileMetadata.appData.content;
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
   const { isOwner, getIdentity } = useDotYouClient();
   const navigate = useNavigate();
@@ -78,7 +78,13 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 ) : null}
               </div>
 
-              <PostBody post={post} hideEmbeddedPostMedia={hideEmbeddedPostMedia} />
+              <PostBody
+                post={post}
+                hideEmbeddedPostMedia={hideEmbeddedPostMedia}
+                fileId={postFile.fileId}
+                globalTransitId={postFile.fileMetadata.globalTransitId}
+                lastModified={postFile.fileMetadata.updated}
+              />
             </div>
             <PostInteracts
               authorOdinId={window.location.hostname}

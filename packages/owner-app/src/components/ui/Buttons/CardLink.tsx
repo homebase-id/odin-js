@@ -25,7 +25,11 @@ const CardLink = ({
         className ?? ''
       } ${isDisabled ? 'opacity-50' : ''}`}
     >
-      <div className="flex flex-row items-center bg-slate-100 p-4 dark:bg-slate-900 dark:text-slate-200">
+      <div
+        className={`flex flex-row ${
+          description || children ? '' : 'flex-grow'
+        } items-center bg-slate-100 p-4 dark:bg-slate-900 dark:text-slate-200`}
+      >
         <h2 className="flex flex-grow text-xl">{title}</h2>
         {icon && icon({ className: 'w-4 h-4 ml-auto' })}
       </div>

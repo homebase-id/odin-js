@@ -8,13 +8,16 @@ import { ButtonColors } from '../../ui/Buttons/ColorConfig';
 export const ImageLightbox = ({
   targetDrive,
   fileId,
+  fileKey,
   previewThumbnail,
+  lastModified,
   onClose,
 }: {
   targetDrive: TargetDrive;
   fileId: string;
+  fileKey: string;
   previewThumbnail?: EmbeddedThumb;
-
+  lastModified: number | undefined;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
@@ -58,10 +61,12 @@ export const ImageLightbox = ({
           <Image
             className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
             fileId={fileId}
+            fileKey={fileKey}
             targetDrive={targetDrive}
             alt="post"
             fit="contain"
             previewThumbnail={previewThumbnail}
+            lastModified={lastModified}
             explicitSize={'full'}
           />
         </div>

@@ -44,6 +44,7 @@ const DnsSettingsView = ({
             dnsConfig={dnsConfig}
             domain={domain}
             showStatus={showStatus}
+            yourDomain={domain}
             className="mb-10"
           />
         ) : (
@@ -52,6 +53,7 @@ const DnsSettingsView = ({
             domain={domain}
             subdomain={subdomain}
             showStatus={showStatus}
+            yourDomain={domain}
             className="mb-10"
           />
         )}
@@ -117,11 +119,13 @@ const ApexInfoBlock = ({
   dnsConfig,
   domain,
   showStatus,
+  yourDomain,
   className,
 }: {
   dnsConfig: DnsRecord[];
   domain: string;
   showStatus: boolean;
+  yourDomain: string;
   className: string;
 }) => {
   const aliasARecord = dnsConfig.find((record) => record.type === 'ALIAS');
@@ -135,7 +139,10 @@ const ApexInfoBlock = ({
 
   return (
     <div className={`${className} flex flex-col gap-4`}>
-      <p className="text-2xl">{t('Point your domain to Homebase')}</p>
+      <p className="text-2xl">
+        Point your domain <span className="rounded-md bg-slate-100 px-2">{yourDomain}</span> to
+        Homebase
+      </p>
       {aliasARecord ? (
         <>
           <p>
@@ -183,12 +190,14 @@ const SubdomainInfoBlock = ({
   dnsConfig,
   domain,
   subdomain,
+  yourDomain,
   showStatus,
   className,
 }: {
   dnsConfig: DnsRecord[];
   domain: string;
   subdomain?: string;
+  yourDomain: string;
   showStatus: boolean;
   className: string;
 }) => {
@@ -201,8 +210,10 @@ const SubdomainInfoBlock = ({
 
   return (
     <div className={`${className} flex flex-col gap-4`}>
-      <p className="text-2xl">Point your domain to Homebase</p>
-
+      <p className="text-2xl">
+        Point your domain <span className="rounded-md bg-slate-100 px-2">{yourDomain}</span> to
+        Homebase
+      </p>
       {aliasARecord ? (
         <>
           <RecordView
@@ -231,7 +242,13 @@ const SubdomainInfoBlock = ({
           isSidePanel={false}
           size="2xlarge"
         >
-          <ApexInfoBlock dnsConfig={dnsConfig} domain={domain} showStatus={false} className="" />
+          <ApexInfoBlock
+            dnsConfig={dnsConfig}
+            domain={domain}
+            yourDomain={yourDomain}
+            showStatus={false}
+            className=""
+          />
         </DialogWrapper>
       ) : null}
     </div>

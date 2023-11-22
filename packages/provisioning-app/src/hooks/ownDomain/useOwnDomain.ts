@@ -76,7 +76,7 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
 export const useApexDomain = (domain?: string) => {
   const getApexDomain = async (domain?: string) => {
     if (!domain) return null;
-    const response = await axios.get(`${root}/registration/lookup-zone-apex/${domain}`);
+    const response = await axios.get<string>(`${root}/registration/lookup-zone-apex/${domain}`);
     return response.data;
   };
 

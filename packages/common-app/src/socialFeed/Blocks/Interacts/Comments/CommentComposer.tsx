@@ -52,7 +52,7 @@ export const CommentComposer = ({
     try {
       await postComment({
         authorOdinId: odinId,
-        content: { body: commentBody, attachment, hasAttachment: !!attachment },
+        content: { body: commentBody, attachment },
         context,
         threadId: replyThreadId,
       });

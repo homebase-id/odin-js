@@ -15,7 +15,8 @@ export const useDotYouClient = () => {
   const _app = window.location.pathname.startsWith(OWNER_ROOT)
     ? 'owner'
     : window.location.hostname === 'dev.dotyou.cloud' ||
-      window.location.hostname === 'feed.homebase.id'
+      window.location.hostname === 'feed.homebase.id' ||
+      window.location.hostname === 'chat.homebase.id'
     ? 'apps'
     : 'home';
 

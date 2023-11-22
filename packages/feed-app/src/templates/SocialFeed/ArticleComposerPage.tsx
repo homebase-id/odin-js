@@ -17,18 +17,12 @@ import {
 import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { ImageUploadResult } from '@youfoundation/js-lib/core';
-import {
-  RichText,
-  Article,
-  ChannelDefinition,
-  PostFile,
-  ReactAccess,
-} from '@youfoundation/js-lib/public';
+import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
 import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
 
 export const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
@@ -48,10 +42,12 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
+    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
+    setPrimaryMediaFile,
 
     // Status
     saveStatus,
@@ -95,7 +91,9 @@ export const ArticleComposerPage = () => {
     return (
       <ActionButton
         className={`m-2 md:w-auto ${
-          isValidPost(postFile) || !postFile.content.caption || !postFile.content.caption.length
+          isValidPost(postFile) ||
+          !postFile.fileMetadata.appData.content.caption ||
+          !postFile.fileMetadata.appData.content.caption.length
             ? 'pointer-events-none opacity-20 grayscale'
             : ''
         } ${className ?? ''}`}
@@ -123,13 +121,13 @@ export const ArticleComposerPage = () => {
       <PageMeta
         title={
           <div className="flex-col">
-            {postFile?.content?.caption || t('New article')}
+            {postFile?.fileMetadata.appData.content?.caption || t('New article')}
             <small className="text-sm text-gray-400">
               <SaveStatus state={saveStatus} className="text-sm" />
             </small>
           </div>
         }
-        browserTitle={postFile?.content?.caption || t('New article')}
+        browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
           { title: t('Articles'), href: '/owner/feed/articles' },
@@ -157,7 +155,7 @@ export const ArticleComposerPage = () => {
                         confirmOptions: {
                           title: t('Remove'),
                           body: `${t('Are you sure you want to remove')} "${
-                            postFile?.content?.caption || t('New article')
+                            postFile?.fileMetadata.appData.content?.caption || t('New article')
                           }"`,
                           buttonText: t('Remove'),
                         },
@@ -179,7 +177,7 @@ export const ArticleComposerPage = () => {
                 confirmOptions={{
                   title: t('Discard draft'),
                   body: `${t('Are you sure you want to discard')} "${
-                    postFile.content.caption || t('Untitled')
+                    postFile.fileMetadata.appData.content.caption || t('Untitled')
                   }"`,
                   buttonText: t('Discard'),
                   type: 'info',
@@ -205,27 +203,44 @@ export const ArticleComposerPage = () => {
             onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
             <InnerFieldEditors
-              key={postFile.content.id}
+              key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
+              primaryMediaFile={primaryMediaFile}
               channel={channel}
+              updateVersionTag={(versionTag) =>
+                setPostFile({
+                  ...postFile,
+                  fileMetadata: {
+                    ...postFile.fileMetadata,
+                    versionTag,
+                  },
+                })
+              }
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
-                  dirtyPostFile.content.abstract = (e.target.value as string).trim();
+                  dirtyPostFile.fileMetadata.appData.content.abstract = (
+                    e.target.value as string
+                  ).trim();
                 } else if (e.target.name === 'caption') {
-                  dirtyPostFile.content.caption = (e.target.value as string).trim();
+                  dirtyPostFile.fileMetadata.appData.content.caption = (
+                    e.target.value as string
+                  ).trim();
                 } else if (e.target.name === 'primaryImageFileId') {
-                  const uploadResult = e.target.value as ImageUploadResult;
-                  dirtyPostFile.content.primaryMediaFile = {
-                    fileId: uploadResult.fileId,
-                    type: 'image',
-                  };
-                  dirtyPostFile.previewThumbnail = uploadResult.previewThumbnail;
+                  setPrimaryMediaFile(
+                    e.target.value ? { file: e.target.value as Blob } : undefined
+                  );
                 } else if (e.target.name === 'body') {
-                  dirtyPostFile.content.body = e.target.value as RichText;
+                  dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
                 }
 
-                setPostFile(dirtyPostFile);
+                setPostFile((oldPostFile) => ({
+                  ...dirtyPostFile,
+                  fileMetadata: {
+                    ...dirtyPostFile.fileMetadata,
+                    versionTag: oldPostFile.fileMetadata.versionTag,
+                  },
+                }));
                 debouncedSave();
               }}
               disabled={isPublished}
@@ -248,7 +263,7 @@ export const ArticleComposerPage = () => {
 
           if (newReactAccess !== undefined) {
             const dirtyPostFile = { ...postFile };
-            dirtyPostFile.content.reactAccess =
+            dirtyPostFile.fileMetadata.appData.content.reactAccess =
               newReactAccess !== true ? newReactAccess : undefined;
 
             setPostFile(dirtyPostFile);
@@ -288,7 +303,7 @@ const OptionsDialog = ({
   onConfirm,
 }: {
   isPublished?: boolean;
-  postFile: PostFile<Article>;
+  postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
 
   isOpen: boolean;
   onCancel: () => void;
@@ -300,7 +315,7 @@ const OptionsDialog = ({
   const target = usePortal('modal-container');
 
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
-    postFile.content.reactAccess
+    postFile.fileMetadata.appData.content.reactAccess
   );
   const [newChannel, setNewChannel] = useState<ChannelDefinition | undefined>();
 
@@ -315,8 +330,8 @@ const OptionsDialog = ({
             id="reactAccess"
             name="reactAccess"
             defaultValue={
-              postFile.content.reactAccess !== undefined
-                ? postFile.content.reactAccess
+              postFile.fileMetadata.appData.content.reactAccess !== undefined
+                ? postFile.fileMetadata.appData.content.reactAccess
                   ? 'true'
                   : 'false'
                 : undefined
@@ -337,7 +352,7 @@ const OptionsDialog = ({
           ) : null}
           <ChannelSelector
             className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
-            defaultValue={postFile.content?.channelId}
+            defaultValue={postFile.fileMetadata.appData.content?.channelId}
             onChange={setNewChannel}
             disabled={isPublished}
             excludeMore={true}

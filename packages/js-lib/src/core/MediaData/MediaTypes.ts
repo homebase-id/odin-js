@@ -1,9 +1,9 @@
 import { TransitOptions } from '../DriveData/Upload/DriveUploadTypes';
-import { ThumbSize, ImageContentType, ArchivalStatus, EmbeddedThumb } from '../core';
+import { ImageSize, ImageContentType, ArchivalStatus, EmbeddedThumb } from '../core';
 
 export type ThumbnailMeta = {
   naturalSize: { width: number; height: number };
-  sizes?: ThumbSize[];
+  sizes?: ImageSize[];
   url: string;
   contentType?: ImageContentType;
 };
@@ -13,7 +13,6 @@ export interface MediaUploadMeta {
   uniqueId?: string;
   fileId?: string;
   versionTag?: string;
-  type?: ImageContentType;
   transitOptions?: TransitOptions;
   allowDistribution?: boolean;
   userDate?: number;
@@ -22,6 +21,7 @@ export interface MediaUploadMeta {
 
 export interface MediaUploadResult {
   fileId: string;
+  fileKey: string;
   previewThumbnail?: EmbeddedThumb;
 }
 

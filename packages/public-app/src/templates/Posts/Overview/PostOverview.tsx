@@ -1,11 +1,11 @@
 import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'react-router-dom';
-import { BlogConfig, ChannelTemplate, PostContent, PostFile } from '@youfoundation/js-lib/public';
+import { BlogConfig, ChannelTemplate, PostContent } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 import {
+  AclIcon,
   HOME_ROOT_PATH,
-  Lock,
   SubtleMessage,
   t,
   useBlogPostsInfinite,
@@ -19,7 +19,7 @@ import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingBlock } from '@youfoundation/common-app';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {
@@ -58,11 +58,17 @@ const PostOverview = () => {
       : ListPostOverview
     : ListPostOverview;
 
-  const blogPosts = flattenInfinteData<PostFile<PostContent>>(
+  const blogPosts = flattenInfinteData<DriveSearchResult<PostContent>>(
     data,
     PAGE_SIZE,
-    (a, b) => b.userDate - a.userDate
+    (a, b) =>
+      (b.fileMetadata.appData.userDate || b.fileMetadata.updated) -
+      (a.fileMetadata.appData.userDate || a.fileMetadata.updated)
   );
+
+  const encrypted =
+    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
+    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
 
   return (
     <>
@@ -82,12 +88,13 @@ const PostOverview = () => {
                 className="text-sm"
               />
 
-              <h1 className="text-4xl">{activeChannel?.name}</h1>
-              <p className="my-2 max-w-md text-foreground text-opacity-80">
-                {activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
-                activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated ? (
-                  <Lock className="inline h-3 w-3" />
+              <h1 className="text-4xl" title={encrypted ? t('Encrypted') : t('Unencrypted')}>
+                {activeChannel?.name}{' '}
+                {activeChannel?.acl ? (
+                  <AclIcon acl={activeChannel?.acl} className="inline h-3 w-3" />
                 ) : null}{' '}
+              </h1>
+              <p className="my-2 max-w-md text-foreground text-opacity-80">
                 {activeChannel?.description}
               </p>
             </div>

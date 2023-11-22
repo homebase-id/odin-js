@@ -1,7 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { EncryptedKeyHeader, KeyHeader } from './Drive/DriveTypes';
 import { streamToByteArray } from './Upload/UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
@@ -11,7 +10,7 @@ import {
   splitSharedSecretEncryptedKeyHeader,
   mergeByteArrays,
 } from '../../helpers/DataUtil';
-import { FileMetadata } from './File/DriveFileTypes';
+import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -20,9 +19,8 @@ export const encryptKeyHeader = async (
   transferIv: Uint8Array
 ): Promise<EncryptedKeyHeader> => {
   const ss = dotYouClient.getSharedSecret();
-  if (!ss) {
-    throw new Error('attempting to encrypt but missing the shared secret');
-  }
+  if (!ss) throw new Error('attempting to encrypt but missing the shared secret');
+
   const combined = [...Array.from(keyHeader.iv), ...Array.from(keyHeader.aesKey)];
   const cipher = await cbcEncrypt(new Uint8Array(combined), transferIv, ss);
 
@@ -34,10 +32,13 @@ export const encryptKeyHeader = async (
   };
 };
 
-export const encryptWithKeyheader = async (
-  content: Uint8Array | File | Blob,
+export const encryptWithKeyheader = async <
+  T extends Blob | Uint8Array,
+  R = T extends Blob ? Blob : Uint8Array,
+>(
+  content: T,
   keyHeader: KeyHeader
-): Promise<Uint8Array> => {
+): Promise<R> => {
   if (content instanceof File || content instanceof Blob) {
     const encryptedStream = await streamEncryptWithCbc(
       content.stream(),
@@ -45,11 +46,13 @@ export const encryptWithKeyheader = async (
       keyHeader.iv
     );
 
-    return streamToByteArray(encryptedStream, content.type);
+    return new Blob([await streamToByteArray(encryptedStream, content.type)], {
+      type: content.type,
+    }) as R;
   }
 
   const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
-  return cipher;
+  return cipher as R;
 };
 
 export const encryptWithSharedSecret = async (
@@ -75,13 +78,13 @@ export const decryptJsonContent = async (
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
 ): Promise<string> => {
-  if (!keyheader) return fileMetaData.appData.jsonContent;
+  if (!keyheader || !fileMetaData.appData.content) return fileMetaData.appData.content;
 
   try {
-    const cipher = base64ToUint8Array(fileMetaData.appData.jsonContent);
+    const cipher = base64ToUint8Array(fileMetaData.appData.content);
     return byteArrayToString(await decryptUsingKeyHeader(cipher, keyheader));
   } catch (err) {
-    console.error('[DotYouCore-js]', 'Json Content Decryption failed');
+    console.error('[DotYouCore-js]', 'Json Content Decryption failed', err);
     return '';
   }
 };

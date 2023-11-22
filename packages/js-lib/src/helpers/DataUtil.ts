@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 
 import md5 from './md5/md5';
-import { AccessControlList, EncryptedKeyHeader } from '../core/core';
+import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
 
 export const getRandom16ByteArray = (): Uint8Array => {
   return crypto.getRandomValues(new Uint8Array(16));
@@ -304,4 +304,30 @@ export const tryJsonParse = <T>(json: string): T => {
       return {} as T;
     }
   }
+};
+
+export const getDataUriFromBlob = async (blob: Blob) => {
+  if (!blob) return '';
+
+  return `data:${blob.type};base64,${uint8ArrayToBase64(new Uint8Array(await blob.arrayBuffer()))}`;
+};
+
+export const getBlobFromBytes = ({
+  bytes,
+  contentType,
+}: {
+  bytes: Uint8Array;
+  contentType: string;
+}) => {
+  return new Blob([bytes], { type: contentType });
+};
+
+export const getLargestThumbOfPayload = (payload?: PayloadDescriptor) => {
+  if (!payload?.thumbnails?.length) return;
+  return payload.thumbnails?.reduce(
+    (prev, curr) => {
+      return prev.pixelHeight * prev.pixelWidth > curr.pixelHeight * curr.pixelWidth ? prev : curr;
+    },
+    payload?.thumbnails?.[0]
+  );
 };

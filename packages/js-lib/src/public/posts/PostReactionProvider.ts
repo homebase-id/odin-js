@@ -3,10 +3,8 @@ import { getRandom16ByteArray } from '../../helpers/DataUtil';
 import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
-  ImageContentType,
   UploadFileMetadata,
   SecurityGroupType,
-  TransitOptions,
   ScheduleOptions,
   SendContents,
   UploadInstructionSet,
@@ -19,6 +17,11 @@ import {
   TargetDrive,
   getContentFromHeaderOrPayload,
   ReactionPreview,
+  PayloadFile,
+  EmbeddedThumb,
+  ParsedReactionPreview,
+  ReactionFile,
+  CommentReactionPreview,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -26,24 +29,16 @@ import {
   getNewId,
   tryJsonParse,
 } from '../../helpers/DataUtil';
-import {
-  deleteFileOverTransit,
-  getContentFromHeaderOrPayloadOverTransit,
-  queryBatchOverTransit,
-  uploadFileOverTransit,
-} from '../../transit/TransitData/TransitProvider';
 import { TransitInstructionSet, TransitUploadResult } from '../../transit/TransitData/TransitTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import {
-  CommentReactionPreview,
-  CommentsReactionSummary,
-  EmojiReactionSummary,
-  RawReactionContent,
-  ReactionConfig,
-  ReactionContext,
-  ReactionFile,
-  ReactionVm,
-} from './PostTypes';
+import { RawReactionContent, ReactionConfig, ReactionContext, ReactionVm } from './PostTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { uploadFileOverTransit } from '../../transit/TransitData/Upload/TransitUploadProvider';
+import { deleteFileOverTransit } from '../../transit/TransitData/File/TransitFileManageProvider';
+import { queryBatchOverTransit } from '../../transit/TransitData/Query/TransitDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverTransit } from '../../transit/TransitData/File/TransitFileProvider';
+
+const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
@@ -54,43 +49,35 @@ export const saveComment = async (
   const isLocal = comment.context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
 
-  let additionalThumbnails: ThumbnailFile[] | undefined;
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  let previewThumbnail: EmbeddedThumb | undefined;
+
   if (comment.content.attachment) {
     const imageFile = comment.content.attachment;
-    const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      imageFile,
+      COMMENT_MEDIA_PAYLOAD,
+      [{ height: 250, width: 250, quality: 100 }]
+    );
 
-    if (imageFile.type === 'image/gif') {
-      additionalThumbnails = [
-        {
-          contentType: 'image/gif',
-          payload: imageBytes,
-          pixelHeight: 100,
-          pixelWidth: 100,
-        },
-      ];
-    } else {
-      const { additionalThumbnails: thumbs } = await createThumbnails(
-        imageBytes,
-        imageFile.type as ImageContentType,
-        [{ height: 250, width: 250, quality: 100 }]
-      );
-      additionalThumbnails = thumbs;
-    }
+    thumbnails.push(...additionalThumbnails);
+    payloads.push({ payload: imageFile, key: COMMENT_MEDIA_PAYLOAD });
+    previewThumbnail = tinyThumb;
+
     delete comment.content.attachment;
-
-    comment.content.hasAttachment = true;
+    comment.content.mediaPayloadKey = COMMENT_MEDIA_PAYLOAD;
   }
 
   const payloadJson: string = jsonStringify64(comment.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
-  // Set max of 3kb for jsonContent so enough room is left for metadata
+  // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     // allowDistribution: true, // Disable
     versionTag: comment.versionTag,
     allowDistribution: false,
-    contentType: 'application/json',
     senderOdinId: comment.authorOdinId,
     referencedFile: {
       targetDrive,
@@ -99,40 +86,36 @@ export const saveComment = async (
     appData: {
       tags: [],
       uniqueId: comment.id ?? getNewId(),
-      contentIsComplete: shouldEmbedContent,
       fileType: ReactionConfig.CommentFileType,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
-      previewThumbnail: undefined,
+      content: shouldEmbedContent ? payloadJson : undefined,
+      previewThumbnail: previewThumbnail,
       userDate: comment.date ?? new Date().getTime(),
-      additionalThumbnails: additionalThumbnails?.map((thumb) => {
-        return {
-          pixelHeight: thumb.pixelHeight,
-          pixelWidth: thumb.pixelWidth,
-          contentType: thumb.contentType,
-        };
-      }),
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: {
       requiredSecurityGroup: encrypt ? SecurityGroupType.Connected : SecurityGroupType.Anonymous,
     },
   };
 
-  if (isLocal) {
-    const transitOptions: TransitOptions = {
-      useGlobalTransitId: true, // Needed to support having a reference to this file over transit
-      recipients: [],
-      schedule: ScheduleOptions.SendLater,
-      sendContents: SendContents.All,
-    };
+  if (!shouldEmbedContent)
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
 
+  if (isLocal) {
     const instructionSet: UploadInstructionSet = {
       transferIv: getRandom16ByteArray(),
       storageOptions: {
         overwriteFileId: comment.fileId || undefined,
         drive: targetDrive,
       },
-      transitOptions: transitOptions,
+      transitOptions: {
+        useGlobalTransitId: true, // Needed to support having a reference to this file over transit
+        recipients: [],
+        schedule: ScheduleOptions.SendLater,
+        sendContents: SendContents.All,
+      },
       systemFileType: 'Comment',
     };
 
@@ -141,8 +124,8 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      payloadBytes,
-      additionalThumbnails,
+      payloads,
+      thumbnails,
       encrypt
     );
     if (!result) throw new Error(`Upload failed`);
@@ -169,8 +152,8 @@ export const saveComment = async (
       dotYouClient,
       instructionSet,
       metadata,
-      payloadBytes,
-      additionalThumbnails,
+      payloads,
+      thumbnails,
       encrypt
     );
 
@@ -238,7 +221,7 @@ export const getComments = async (
   const ro = {
     maxRecords: pageSize,
     cursorState: cursorState,
-    includeMetadataHeader: true, // Set to true to allow jsonContent to be there, and we don't need extra calls to get the header with jsonContent
+    includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   };
 
   const result = isLocal
@@ -293,7 +276,8 @@ const dsrToComment = async (
     content: { ...contentData },
     date: dsr.fileMetadata.created,
     updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
-    payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
+    isEncrypted: dsr.fileMetadata.isEncrypted,
+    lastModified: dsr.fileMetadata.updated,
   };
 };
 
@@ -316,8 +300,6 @@ const parseReactions = (
           console.error('[DotYouCore-js] parse failed for', reaction);
           return;
         }
-
-        return;
       })
       .filter(Boolean) as { emoji: string; count: number }[],
     totalCount: reactions.reduce((prevVal, curVal) => {
@@ -327,21 +309,24 @@ const parseReactions = (
 };
 
 export const parseReactionPreview = (
-  reactionPreview: ReactionPreview | undefined
-): { comments: CommentsReactionSummary; reactions: EmojiReactionSummary } | undefined => {
+  reactionPreview: ReactionPreview | ParsedReactionPreview | undefined
+): ParsedReactionPreview | ReactionPreview => {
   if (reactionPreview) {
+    if ('count' in reactionPreview.reactions) return reactionPreview as ParsedReactionPreview;
+
+    const rawReactionPreview = reactionPreview as ReactionPreview;
     return {
       comments: {
-        comments: reactionPreview.comments
+        comments: rawReactionPreview.comments
           .map((commentPreview) => {
             try {
               return {
                 authorOdinId: commentPreview.odinId,
                 content:
-                  commentPreview.isEncrypted && !commentPreview.jsonContent.length
+                  commentPreview.isEncrypted && !commentPreview.content.length
                     ? { body: '' }
-                    : tryJsonParse(commentPreview.jsonContent),
-                payloadIsEncrypted: commentPreview.isEncrypted,
+                    : tryJsonParse(commentPreview.content),
+                isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };
             } catch (ex) {
@@ -354,7 +339,7 @@ export const parseReactionPreview = (
             }
           })
           .filter(Boolean) as CommentReactionPreview[],
-        totalCount: reactionPreview.totalCommentCount || reactionPreview.comments.length || 0,
+        totalCount: rawReactionPreview.totalCommentCount || rawReactionPreview.comments.length || 0,
       },
       reactions: parseReactions(Object.values(reactionPreview.reactions)),
     };

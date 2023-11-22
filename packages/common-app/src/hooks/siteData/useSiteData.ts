@@ -5,7 +5,6 @@ import {
   BuiltInProfiles,
   Attribute,
   AttributeConfig,
-  AttributeFile,
   dsrToAttributeFile,
   GetTargetDriveFromProfileId,
 } from '@youfoundation/js-lib/profile';
@@ -15,9 +14,11 @@ import {
   HomePageConfig,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
-import { EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
 
 interface DefaultTemplateSettings {
+  imageFileId: string;
+  imageLastModified: number;
   colors: {
     name: string;
     id: string;
@@ -37,12 +38,12 @@ export interface ThemeWithTabsSettings extends DefaultTemplateSettings {
   themeId: '222' | '333';
   tabs?: 'true' | 'false';
   tabsOrder?: string[];
-  headerImageId?: string;
+  headerImageKey?: string;
 }
 
 export interface ThemeLinksSettings extends DefaultTemplateSettings {
   themeId: '444';
-  headerImageId?: string;
+  headerImageKey?: string;
 }
 
 export type TemplateSettings =
@@ -55,8 +56,10 @@ type OwnerSiteData = {
   displayName?: string;
   firstName?: string;
   surName?: string;
-  profileImageId?: string;
+  profileImageFileId?: string;
+  profileImageFileKey?: string;
   profileImagePreviewThumbnail?: EmbeddedThumb;
+  profileImageLastModified?: number;
   status?: string;
 };
 
@@ -82,31 +85,41 @@ export const useSiteData = () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
     const parseOwnerData = async (
-      nameAndPhotoAndStatusAttr?: AttributeFile[]
+      nameAndPhotoAndStatusAttr?: DriveSearchResult<Attribute>[]
     ): Promise<OwnerSiteData> => {
-      const nameAttr = nameAndPhotoAndStatusAttr?.find(
-        (attr) => attr.type === BuiltInAttributes.Name
+      const nameDsr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Name
       );
-      const photoAttr = nameAndPhotoAndStatusAttr?.find(
-        (attr) => attr.type === BuiltInAttributes.Photo
+      const nameAttr = nameDsr?.fileMetadata.appData.content;
+
+      const photoDsr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Photo
       );
-      const statusAttr = nameAndPhotoAndStatusAttr?.find(
-        (attr) => attr.type === BuiltInAttributes.Status
+      const photoAttr = photoDsr?.fileMetadata.appData.content;
+
+      const statusDsr = nameAndPhotoAndStatusAttr?.find(
+        (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Status
       );
+      const statusAttr = statusDsr?.fileMetadata.appData.content;
 
       return {
         displayName: nameAttr?.data.displayName ?? window.location.hostname,
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
-        profileImageId: photoAttr?.data.profileImageId,
-        profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
+        profileImageFileId: photoDsr?.fileId,
+        profileImageFileKey: photoAttr?.data.profileImageKey,
+        profileImagePreviewThumbnail: photoDsr?.fileMetadata?.appData?.previewThumbnail,
+        profileImageLastModified: photoDsr?.fileMetadata.updated,
         status: statusAttr?.data.status,
       };
     };
 
-    const parseSocialData = async (socialAttributes?: AttributeFile[]): Promise<SocialSiteData> => {
+    const parseSocialData = async (
+      socialAttributes?: DriveSearchResult<Attribute>[]
+    ): Promise<SocialSiteData> => {
       return socialAttributes
-        ?.map((attr) => {
+        ?.map((dsr) => {
+          const attr = dsr.fileMetadata.appData.content;
           const value = Object.values(attr?.data)?.[0];
 
           return {
@@ -119,14 +132,20 @@ export const useSiteData = () => {
         .filter((attr) => attr !== undefined) as SocialSiteData;
     };
 
-    const parseHomeData = async (homeAndThemeAttr?: AttributeFile[]): Promise<HomeSiteData> => {
+    const parseHomeData = async (
+      homeAndThemeAttr?: DriveSearchResult<Attribute>[]
+    ): Promise<HomeSiteData> => {
       const themeAttribute = homeAndThemeAttr?.find(
-        (attr) => attr.type === HomePageAttributes.Theme
+        (attr) => attr.fileMetadata.appData.content.type === HomePageAttributes.Theme
       );
 
       return {
-        templateSettings: themeAttribute?.data as TemplateSettings,
-        headerPreviewThumbnail: themeAttribute?.previewThumbnail,
+        templateSettings: {
+          ...themeAttribute?.fileMetadata.appData.content?.data,
+          imageFileId: themeAttribute?.fileId,
+          imageLastModified: themeAttribute?.fileMetadata.updated,
+        } as TemplateSettings,
+        headerPreviewThumbnail: themeAttribute?.fileMetadata.appData.previewThumbnail,
       };
     };
 
@@ -215,7 +234,7 @@ export const useSiteData = () => {
       return {
         owner: await parseOwnerData(getHighestPrioAttributesFromMultiTypes(ownerAttr)),
         social: await parseSocialData(
-          socialAttr.filter((attr) => attr !== undefined) as AttributeFile[]
+          socialAttr.filter((attr) => attr !== undefined) as DriveSearchResult<Attribute>[]
         ),
         home: await parseHomeData(getHighestPrioAttributesFromMultiTypes(homeAttr)),
       } as SiteData;
@@ -255,6 +274,7 @@ export const useSiteData = () => {
 const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteData | undefined => {
   if (fileData.has('name') && fileData.has('photo')) {
     const nameAttr = fileData.get('name')?.[0]?.payload as Attribute;
+    const photoAttrHeader = fileData.get('photo')?.[0]?.header;
     const photoAttr = fileData.get('photo')?.[0]?.payload as Attribute;
     const statusAttr = fileData.get('status')?.[0]?.payload as Attribute;
 
@@ -263,8 +283,10 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
         displayName: nameAttr?.data.displayName,
         firstName: nameAttr?.data.givenName,
         surName: nameAttr?.data.surname,
-        profileImageId: photoAttr?.data.profileImageId,
-        profileImagePreviewThumbnail: photoAttr?.previewThumbnail,
+        profileImageFileId: photoAttrHeader?.fileId,
+        profileImageFileKey: photoAttr?.data.profileImageKey,
+        profileImagePreviewThumbnail: photoAttrHeader?.fileMetadata.appData.previewThumbnail,
+        profileImageLastModified: photoAttrHeader?.fileMetadata.updated,
         status: statusAttr?.data.status,
       };
     }
@@ -277,31 +299,36 @@ const getSocialDataStatic = (
   if (fileData.has('socials')) {
     const fileBasedResponse = fileData
       .get('socials')
-      ?.sort((a, b) => (a?.payload.priority ?? 0) - (b?.payload.priority ?? 0))
+      ?.sort((a, b) => (a?.payload?.priority ?? 0) - (b?.payload?.priority ?? 0))
       ?.map((entry) => {
-        const value = Object.values(entry.payload.data)?.[0];
+        if (!entry.payload?.data) return null;
+        const value = Object.values(entry.payload?.data)?.[0];
 
         return {
-          type: Object.keys(entry.payload.data)?.[0],
+          type: Object.keys(entry.payload?.data)?.[0],
           username: typeof value === 'string' ? value : '',
-          priority: entry.payload.priority,
+          priority: entry.payload?.priority,
         };
-      });
+      })
+      ?.filter(Boolean) as SocialSiteData | undefined;
 
-    if (fileBasedResponse?.length) {
-      return fileBasedResponse;
-    }
+    if (fileBasedResponse?.length) return fileBasedResponse;
   }
 };
 
 const getHomeDataStatic = (fileData: Map<string, ResponseEntry[]>): HomeSiteData | undefined => {
   // File based response if available
   if (fileData.has('theme')) {
-    const themeAttribute = fileData.get('theme')?.[0]?.payload as Attribute;
+    const entry = fileData.get('theme')?.[0];
+    const themeAttribute = entry?.payload as Attribute;
     if (themeAttribute) {
       return {
-        templateSettings: themeAttribute?.data as TemplateSettings,
-        headerPreviewThumbnail: themeAttribute?.previewThumbnail,
+        templateSettings: {
+          ...themeAttribute?.data,
+          imageFileId: entry?.header?.fileId,
+          imageLastModified: entry?.header?.fileMetadata.updated,
+        } as TemplateSettings,
+        headerPreviewThumbnail: entry?.header?.fileMetadata.appData.previewThumbnail,
       };
     }
   }

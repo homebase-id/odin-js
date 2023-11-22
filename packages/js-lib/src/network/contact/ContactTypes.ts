@@ -1,4 +1,4 @@
-import { TargetDrive, ThumbSize } from '../../core/DriveData/File/DriveFileTypes';
+import { TargetDrive, ImageSize, ImageContentType } from '../../core/DriveData/File/DriveFileTypes';
 
 export class ContactConfig {
   static readonly ContactFileType: number = 100;
@@ -10,7 +10,8 @@ export class ContactConfig {
   };
 }
 
-export interface ContactDataImage extends ThumbSize {
+export interface ContactDataImage extends ImageSize {
+  contentType: ImageContentType;
   content: string;
   url?: string;
 }
@@ -20,6 +21,7 @@ export interface ContactFile {
   odinId?: string;
   id?: string;
   fileId?: string;
+  lastModified?: number;
   versionTag?: string;
   source: 'contact' | 'public' | 'user';
 
@@ -29,7 +31,7 @@ export interface ContactFile {
   phone?: { number: string };
   email?: { email: string };
   birthday?: { date: string };
-  imageFileId?: string;
+  hasImage?: boolean;
 }
 export interface RawContact extends ContactFile {
   image?: ContactDataImage;
@@ -37,13 +39,15 @@ export interface RawContact extends ContactFile {
 
 export interface ContactVm {
   id?: string;
+  fileId?: string;
+  lastModified?: number;
 
   name?: { displayName: string; givenName?: string; additionalName?: string; surname?: string };
   location?: { city?: string; country?: string };
   phone?: { number: string };
   email?: { email: string };
   birthday?: { date: string };
-  imageFileId?: string;
+  hasImage?: boolean;
   imageUrl?: string;
 
   odinId?: string;

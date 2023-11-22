@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
   getDecryptedImageUrl,
-  ImageContentType,
   removeImage,
   SecurityGroupType,
   TargetDrive,
@@ -13,38 +12,45 @@ import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const defaultDrive: TargetDrive = BlogConfig.PublicChannelDrive;
 
-export const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
+export const useImage = (imageFileId?: string, imageFileKey?: string, imageDrive?: TargetDrive) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
 
-  const fetchImageData = async (imageFileId: string, imageDrive?: TargetDrive) => {
+  const fetchImageData = async (
+    imageFileId: string,
+    imageFileKey: string,
+    imageDrive?: TargetDrive
+  ) => {
+    console.log({ imageFileId, imageFileKey });
     try {
-      return await getDecryptedImageUrl(dotYouClient, imageDrive ?? defaultDrive, imageFileId);
+      return await getDecryptedImageUrl(
+        dotYouClient,
+        imageDrive ?? defaultDrive,
+        imageFileId,
+        imageFileKey
+      );
     } catch (ex) {
       throw new Error('failed to get imageData');
     }
   };
 
   const saveImage = async ({
-    bytes,
-    type,
+    image,
     targetDrive = defaultDrive,
     acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
     fileId = undefined,
     versionTag = undefined,
   }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
+    image: Blob;
     targetDrive: TargetDrive;
     acl?: AccessControlList;
     fileId?: string;
     versionTag?: string;
   }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
+    return await uploadImage(dotYouClient, targetDrive, acl, image, undefined, {
       fileId: fileId,
       versionTag: versionTag,
-      type: type,
     });
   };
 
@@ -61,12 +67,12 @@ export const useImage = (imageFileId?: string, imageDrive?: TargetDrive) => {
   return {
     fetch: useQuery({
       queryKey: ['image', imageFileId, imageDrive?.alias],
-      queryFn: () => fetchImageData(imageFileId as string, imageDrive),
+      queryFn: () => fetchImageData(imageFileId as string, imageFileKey as string, imageDrive),
 
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
-      enabled: !!imageFileId,
+      enabled: !!imageFileId && !!imageFileKey,
     }),
     save: useMutation({
       mutationFn: saveImage,

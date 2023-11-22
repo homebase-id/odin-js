@@ -1,5 +1,5 @@
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { TargetDrive } from '../../core/core';
+import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '../../core/core';
 import { ProfileConfig, BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { AttributeConfig, BuiltInAttributes } from '../../profile/profile';
 import { HomePageConfig, HomePageAttributes } from '../home/HomeTypes';
@@ -66,9 +66,8 @@ const linkFileQueryParam: FileQueryParams = {
 };
 
 export const BASE_RESULT_OPTIONS = {
-  includeAdditionalThumbnails: false,
-  includeJsonContent: true,
-  includePayload: false,
+  includeHeaderContent: true,
+  payloadKeys: [DEFAULT_PAYLOAD_KEY],
   excludePreviewThumbnail: false,
 };
 

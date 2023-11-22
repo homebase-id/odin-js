@@ -1,6 +1,6 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
-import { AttributeFile } from '@youfoundation/js-lib/profile';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { Attribute } from '@youfoundation/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
   return Object.keys(obj)
@@ -47,7 +47,7 @@ export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {
     return str;
   }
 
-  if (str.length < maxChar) {
+  if (str.length <= maxChar) {
     return str;
   }
 
@@ -61,29 +61,40 @@ export const pascalCase = (str: string) => {
 
 // TODO: Simplify this function
 export const getHighestPrioAttributesFromMultiTypes = (
-  attributes?: (AttributeFile | undefined)[]
+  attributes?: (DriveSearchResult<Attribute> | null)[]
 ) => {
   if (!attributes) return undefined;
 
-  return (attributes?.filter((attr) => !!attr) as AttributeFile[])?.reduce(
+  return (attributes?.filter((attr) => !!attr) as DriveSearchResult<Attribute>[])?.reduce(
     (highestPrioArr, attr) => {
-      const highAttr = highestPrioArr.find((highAttr) => highAttr.type === attr.type);
-      if (!attr.data) return highestPrioArr;
+      const highAttr = highestPrioArr.find(
+        (highAttr) =>
+          highAttr.fileMetadata.appData.content.type === attr.fileMetadata.appData.content.type
+      );
+      if (!attr.fileMetadata.appData.content.data) return highestPrioArr;
 
       if (highAttr) {
         if (
-          (highAttr.aclPriority || 0) < (attr.aclPriority || 0) ||
-          ((highAttr.aclPriority || 0) === (attr.aclPriority || 0) &&
-            highAttr.priority < attr.priority)
+          (highAttr.priority || 0) < (attr.priority || 0) ||
+          ((highAttr.priority || 0) === (attr.priority || 0) &&
+            highAttr.fileMetadata.appData.content.priority <
+              attr.fileMetadata.appData.content.priority)
         ) {
           return highestPrioArr;
         } else {
-          return [...highestPrioArr.filter((highPrio) => highPrio.type !== attr.type), attr];
+          return [
+            ...highestPrioArr.filter(
+              (highPrio) =>
+                highPrio.fileMetadata.appData.content.type !==
+                attr.fileMetadata.appData.content.type
+            ),
+            attr,
+          ];
         }
       } else {
         return [...highestPrioArr, attr];
       }
     },
-    [] as AttributeFile[]
+    [] as DriveSearchResult<Attribute>[]
   );
 };

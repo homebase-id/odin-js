@@ -1,12 +1,11 @@
-import { createThumbnails } from './Thumbs/ThumbnailProvider';
-import { decryptKeyHeader, decryptJsonContent } from '../DriveData/SecurityHelpers';
+import { createThumbnails, tinyThumbSize } from './Thumbs/ThumbnailProvider';
 import {
   uint8ArrayToBase64,
   getNewId,
   jsonStringify64,
-  base64ToUint8Array,
   stringifyToQueryParams,
   getRandom16ByteArray,
+  getLargestThumbOfPayload,
 } from '../../helpers/DataUtil';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { encryptUrl } from '../InterceptionEncryptionUtil';
@@ -15,7 +14,6 @@ import {
   AccessControlList,
   SecurityGroupType,
   UploadInstructionSet,
-  EmbeddedThumb,
   getFileHeader,
   UploadFileMetadata,
   uploadFile,
@@ -34,20 +32,19 @@ import {
   MediaConfig,
   ThumbnailMeta,
 } from './MediaTypes';
+import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   acl: AccessControlList,
-  imageData: Uint8Array | File,
+  imageData: Blob | File,
   fileMetadata?: ImageMetadata,
   uploadMeta?: MediaUploadMeta,
   thumbsToGenerate?: ThumbnailInstruction[],
   onUpdate?: (progress: number) => void
 ): Promise<ImageUploadResult | undefined> => {
-  if (!targetDrive) {
-    throw 'Missing target drive';
-  }
+  if (!targetDrive) throw 'Missing target drive';
 
   const encrypt = !(
     acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -57,32 +54,17 @@ export const uploadImage = async (
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
     storageOptions: {
-      overwriteFileId: uploadMeta?.fileId ?? null,
+      overwriteFileId: uploadMeta?.fileId,
       drive: targetDrive,
     },
-    transitOptions: uploadMeta?.transitOptions || null,
+    transitOptions: uploadMeta?.transitOptions,
   };
 
-  const { naturalSize, tinyThumb, additionalThumbnails } = await createThumbnails(
-    imageData instanceof File ? new Uint8Array(await imageData.arrayBuffer()) : imageData,
-    uploadMeta?.type,
+  const { tinyThumb, additionalThumbnails } = await createThumbnails(
+    imageData,
+    DEFAULT_PAYLOAD_KEY,
     thumbsToGenerate
   );
-
-  const previewThumbnail: EmbeddedThumb = {
-    pixelWidth: naturalSize.pixelWidth, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-    pixelHeight: naturalSize.pixelHeight, // on the previewThumb we use the full pixelWidth & -height so the max size can be used
-    contentType: tinyThumb.contentType,
-    content: uint8ArrayToBase64(tinyThumb.payload),
-  };
-
-  const additionalThumbs = additionalThumbnails.map((thumb) => {
-    return {
-      pixelHeight: thumb.pixelHeight,
-      pixelWidth: thumb.pixelWidth,
-      contentType: thumb.contentType,
-    };
-  });
 
   onUpdate?.(0.5);
 
@@ -97,21 +79,18 @@ export const uploadImage = async (
   const metadata: UploadFileMetadata = {
     versionTag: versionTag,
     allowDistribution: uploadMeta?.allowDistribution || false,
-    contentType: uploadMeta?.type ?? 'image/webp',
     appData: {
       tags: uploadMeta?.tag
         ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
         : [],
       uniqueId: uploadMeta?.uniqueId ?? getNewId(),
-      contentIsComplete: false,
       fileType: MediaConfig.MediaFileType,
-      jsonContent: fileMetadata ? jsonStringify64(fileMetadata) : null,
-      previewThumbnail: previewThumbnail,
-      additionalThumbnails: additionalThumbs,
+      content: fileMetadata ? jsonStringify64(fileMetadata) : undefined,
+      previewThumbnail: tinyThumb,
       userDate: uploadMeta?.userDate,
       archivalStatus: uploadMeta?.archivalStatus,
     },
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
     accessControlList: acl,
   };
 
@@ -119,14 +98,19 @@ export const uploadImage = async (
     dotYouClient,
     instructionSet,
     metadata,
-    imageData,
+    [{ payload: imageData, key: DEFAULT_PAYLOAD_KEY }],
     additionalThumbnails,
     encrypt
   );
   if (!result) throw new Error(`Upload failed`);
 
   onUpdate?.(0.5);
-  return { fileId: result.file.fileId, previewThumbnail, type: 'image' };
+  return {
+    fileId: result.file.fileId,
+    fileKey: DEFAULT_PAYLOAD_KEY,
+    previewThumbnail: tinyThumb,
+    type: 'image',
+  };
 };
 
 export const removeImage = async (
@@ -140,24 +124,59 @@ export const removeImage = async (
 export const getDecryptedThumbnailMeta = (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
-  fileId: string
+  fileId: string,
+  fileKey: string,
+  systemFileType: SystemFileType | undefined
 ): Promise<ThumbnailMeta | undefined> => {
-  //it seems these will be fine for images but for video and audio we must stream decrypt
-  return getFileHeader(dotYouClient, targetDrive, fileId).then((header) => {
-    if (!header || !header.fileMetadata.appData.previewThumbnail) {
-      return;
+  return getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType }).then(
+    async (header) => {
+      if (!header) return;
+
+      const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
+
+      let url: string | undefined;
+      let contentType: ImageContentType | undefined =
+        previewThumbnail?.contentType as ImageContentType;
+      const naturalSize = {
+        width: previewThumbnail?.pixelWidth || 0,
+        height: previewThumbnail?.pixelHeight || 0,
+      };
+      if (
+        header.fileMetadata.payloads.filter((payload) => payload.contentType.startsWith('image'))
+          .length > 1 ||
+        !previewThumbnail
+      ) {
+        url = await getDecryptedImageUrl(
+          dotYouClient,
+          targetDrive,
+          fileId,
+          fileKey,
+          { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+          header.fileMetadata.isEncrypted,
+          systemFileType,
+          header.fileMetadata.updated
+        );
+
+        const correspondingPayload = header.fileMetadata.payloads.find(
+          (payload) => payload.key === fileKey
+        );
+        const largestThumb = getLargestThumbOfPayload(correspondingPayload);
+        naturalSize.width = largestThumb?.pixelWidth || naturalSize.width;
+        naturalSize.height = largestThumb?.pixelHeight || naturalSize.height;
+        if (largestThumb && 'contentType' in largestThumb)
+          contentType = largestThumb.contentType as ImageContentType;
+      } else {
+        url = `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
+      }
+      return {
+        naturalSize: naturalSize,
+        sizes:
+          header.fileMetadata.payloads.find((payload) => payload.key === fileKey)?.thumbnails ?? [],
+        contentType: contentType,
+        url: url,
+      };
     }
-
-    const previewThumbnail = header.fileMetadata.appData.previewThumbnail;
-    const bytes = base64ToUint8Array(previewThumbnail.content);
-    const url = `data:${previewThumbnail.contentType};base64,${uint8ArrayToBase64(bytes)}`;
-
-    return {
-      naturalSize: { width: previewThumbnail.pixelWidth, height: previewThumbnail.pixelHeight },
-      sizes: header.fileMetadata.appData.additionalThumbnails ?? [],
-      url: url,
-    };
-  });
+  );
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
@@ -168,9 +187,11 @@ export const getDecryptedImageUrl = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   size?: ImageSize,
   isProbablyEncrypted?: boolean,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<string> => {
   const getDirectImageUrl = async () => {
     const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
@@ -185,12 +206,11 @@ export const getDecryptedImageUrl = async (
           }
         : {}),
       xfst: systemFileType || 'Standard',
+      ...(size ? { payloadKey: key } : { key: key }),
+      lastModified,
     })}`;
 
-    if (ss) {
-      return await encryptUrl(directUrl, ss);
-    }
-
+    if (ss) return await encryptUrl(directUrl, ss);
     return directUrl;
   };
 
@@ -205,30 +225,34 @@ export const getDecryptedImageUrl = async (
   //   and the CAT is passed via a header that we can't set on a direct url
   if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
     const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
-    if (!meta?.fileMetadata.payloadIsEncrypted) {
-      return await getDirectImageUrl();
-    }
+    if (!meta?.fileMetadata.isEncrypted) return await getDirectImageUrl();
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getDecryptedImageData(dotYouClient, targetDrive, fileId, size, systemFileType).then(
-    (data) => {
-      if (!data) return '';
-      const url = `data:${data.contentType};base64,${uint8ArrayToBase64(
-        new Uint8Array(data.bytes)
-      )}`;
+  return getDecryptedImageData(
+    dotYouClient,
+    targetDrive,
+    fileId,
+    key,
+    size,
+    systemFileType,
+    lastModified
+  ).then((data) => {
+    if (!data) return '';
+    const url = `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
 
-      return url;
-    }
-  );
+    return url;
+  });
 };
 
 export const getDecryptedImageData = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
+  key: string,
   size?: ImageSize,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ): Promise<{
   pixelHeight?: number;
   pixelWidth?: number;
@@ -241,9 +265,10 @@ export const getDecryptedImageData = async (
         dotYouClient,
         targetDrive,
         fileId,
+        key,
         size.pixelWidth,
         size.pixelHeight,
-        { systemFileType }
+        { systemFileType, lastModified }
       );
       if (thumbBytes) return thumbBytes;
     } catch (ex) {
@@ -251,7 +276,10 @@ export const getDecryptedImageData = async (
     }
   }
 
-  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, { systemFileType });
+  const payload = await getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
+    systemFileType,
+    lastModified,
+  });
   if (!payload) return null;
   return {
     bytes: payload.bytes,
@@ -270,5 +298,5 @@ export const getDecryptedImageMetadata = async (
   });
   if (!fileHeader) return null;
 
-  return fileHeader.fileMetadata.appData.jsonContent;
+  return fileHeader.fileMetadata.appData.content;
 };

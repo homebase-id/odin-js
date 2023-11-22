@@ -6,10 +6,9 @@ import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-
 
 const About = ({ className }: { className?: string }) => {
   const { data: bioData } = useBiography();
-
   return (
     <div className={className ?? ''}>
-      <div className="-mx-2 flex max-w-6xl flex-col lg:flex-row xl:-mx-4">
+      <div className="-mx-2 flex max-w-7xl flex-col lg:flex-row xl:-mx-4">
         <div className="px-2 py-2 lg:w-2/3 xl:px-4">
           {bioData?.shortBio && (
             <RichTextRenderer className="pb-10 leading-relaxed" body={bioData.shortBio.body} />
@@ -22,6 +21,8 @@ const About = ({ className }: { className?: string }) => {
                   body={experienceItem.body}
                   link={experienceItem.link}
                   imageFileId={experienceItem.imageFileId}
+                  imageFileKey={experienceItem.imageFileKey}
+                  lastModified={experienceItem.lastModified}
                   key={experienceItem.id}
                   className="my-5"
                 />
@@ -39,12 +40,16 @@ const ExperienceBlock = ({
   body,
   link,
   imageFileId,
+  imageFileKey,
+  lastModified,
   className,
 }: {
   title: string;
   body: string | Record<string, unknown>[];
   link?: string;
   imageFileId?: string;
+  imageFileKey?: string;
+  lastModified: number | undefined;
   className: string;
 }) => {
   const domain = link ? new URL(link).hostname : undefined;
@@ -57,6 +62,8 @@ const ExperienceBlock = ({
         <Image
           targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
           fileId={imageFileId}
+          fileKey={imageFileKey}
+          lastModified={lastModified}
           fit="contain"
           className="relative aspect-square w-1/6 flex-shrink-0 flex-grow-0"
         />

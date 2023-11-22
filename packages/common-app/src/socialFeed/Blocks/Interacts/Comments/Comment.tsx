@@ -8,22 +8,19 @@ import {
   useReaction,
 } from '@youfoundation/common-app';
 
-import {
-  CommentReactionPreview,
-  ReactionContext,
-  ReactionFile,
-} from '@youfoundation/js-lib/public';
+import { ReactionContext, ReactionVm } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
+import { CommentReactionPreview, ReactionFile } from '@youfoundation/js-lib/core';
 
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: ReactionFile;
+  commentData: ReactionFile | ReactionVm;
   isThread: boolean;
   onReply?: () => void;
 }
@@ -51,7 +48,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
     target: {
       fileId: commentData.fileId,
       globalTransitId: commentData.globalTransitId,
-      isEncrypted: commentData.payloadIsEncrypted || false,
+      isEncrypted: commentData.isEncrypted || false,
     },
   };
 
@@ -94,6 +91,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
               context={context}
               content={content}
               commentFileId={fileId}
+              commentLastModifed={commentData.lastModified}
               isEdit={isEdit}
               onCancel={() => setIsEdit(false)}
               onUpdate={doUpdate}
@@ -130,7 +128,8 @@ const MAX_CHAR_FOR_SUMMARY = 280;
 
 export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
   const { authorOdinId, content } = commentData;
-  const { body } = content;
+  const { body, mediaPayloadKey } = content;
+  const hasMedia = !!mediaPayloadKey;
 
   return (
     <>
@@ -141,12 +140,17 @@ export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPre
               <span className="text-foreground font-bold text-opacity-70">
                 <AuthorName odinId={authorOdinId} />
               </span>{' '}
-              {commentData.payloadIsEncrypted && body === '' ? (
+              {commentData.isEncrypted && body === '' ? (
                 <span className="ml-2 h-3 w-20 rounded bg-slate-200 text-slate-200 dark:bg-slate-700 dark:text-slate-700">
                   {t('Encrypted')}
                 </span>
               ) : (
-                <>{ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}</>
+                <>
+                  {ellipsisAtMaxChar(body, MAX_CHAR_FOR_SUMMARY)}
+                  {hasMedia ? (
+                    <span className="italic lowercase">{t('Click to view image')}</span>
+                  ) : null}
+                </>
               )}
             </p>
           </div>

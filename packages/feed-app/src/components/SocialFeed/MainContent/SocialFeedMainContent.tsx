@@ -1,14 +1,14 @@
 import { PostContent } from '@youfoundation/js-lib/public';
-import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
+import { useMemo, useEffect, useRef, useLayoutEffect, FC } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { flattenInfinteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { LoadingBlock } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
-import PostTeaserCard from '../PostTeaserCard';
+import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
 import { useSocialFeed } from '@youfoundation/common-app';
-import { PostFileVm } from '@youfoundation/js-lib/transit';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
@@ -26,10 +26,12 @@ const SocialFeedMainContent = () => {
   // Flatten all pages, sorted descending and slice on the max number expected
   const flattenedPosts = useMemo(
     () =>
-      flattenInfinteData<PostFileVm<PostContent>>(
+      flattenInfinteData<DriveSearchResult<PostContent>>(
         posts,
         PAGE_SIZE,
-        (a, b) => b.userDate - a.userDate
+        (a, b) =>
+          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
       ),
     [posts]
   );
@@ -116,6 +118,13 @@ const SocialFeedMainContent = () => {
                   }
 
                   const post = flattenedPosts[virtualRow.index];
+                  const postTeaserCardProps = {
+                    key: post.fileId || post.fileMetadata.appData.content.id,
+                    postFile: post,
+                    odinId: post.fileMetadata.senderOdinId,
+                    className: 'bg-background shadow-sm',
+                    showSummary: true,
+                  };
                   return (
                     <div
                       key={virtualRow.key}
@@ -123,17 +132,11 @@ const SocialFeedMainContent = () => {
                       ref={virtualizer.measureElement}
                       className="py-2"
                     >
-                      <PostTeaserCard
-                        key={post.fileId || post.content.id}
-                        postFile={post}
-                        odinId={post.odinId}
-                        className={`${
-                          !post.fileId
-                            ? 'overflow-hidden bg-slate-100 dark:bg-slate-600'
-                            : 'bg-background shadow-sm'
-                        }`}
-                        showSummary={true}
-                      />
+                      {post.fileId ? (
+                        <PostTeaserCard {...postTeaserCardProps} />
+                      ) : (
+                        <NewPostTeaserCard {...postTeaserCardProps} />
+                      )}
                     </div>
                   );
                 })}

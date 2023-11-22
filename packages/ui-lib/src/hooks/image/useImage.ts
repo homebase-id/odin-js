@@ -1,31 +1,66 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   ImageSize,
   TargetDrive,
   DotYouClient,
   getDecryptedImageUrl,
-  SecurityGroupType,
-  ImageContentType,
-  AccessControlList,
-  uploadImage,
-  removeImage,
+  SystemFileType,
 } from '@youfoundation/js-lib/core';
-import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
+import {
+  getDecryptedImageUrlOverTransit,
+  getDecryptedImageUrlOverTransitByGlobalTransitId,
+} from '@youfoundation/js-lib/transit';
 
 interface ImageData {
   url: string;
   naturalSize?: ImageSize;
 }
 
+export const useImageCache = (dotYouClient: DotYouClient) => {
+  const localHost = dotYouClient.getIdentity() || window.location.hostname;
+  const queryClient = useQueryClient();
+
+  return {
+    getFromCache: (
+      odinId: string | undefined,
+      imageFileId: string,
+      imageGlobalTransitId: string | undefined,
+      imageFileKey: string,
+      imageDrive: TargetDrive
+    ) => {
+      const cachedEntries = queryClient
+        .getQueryCache()
+        .findAll({
+          queryKey: [
+            'image',
+            odinId || localHost,
+            imageDrive?.alias,
+            imageGlobalTransitId || imageFileId,
+            imageFileKey,
+          ],
+          exact: false,
+        })
+        .filter((query) => query.state.status === 'success');
+
+      if (cachedEntries?.length)
+        return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
+    },
+  };
+};
+
 export const useImage = (
   dotYouClient: DotYouClient,
   odinId?: string,
   imageFileId?: string | undefined,
+  imageGlobalTransitId?: string | undefined,
+  imageFileKey?: string | undefined,
   imageDrive?: TargetDrive,
   size?: ImageSize,
   probablyEncrypted?: boolean,
-  naturalSize?: ImageSize
+  naturalSize?: ImageSize,
+  systemFileType?: SystemFileType,
+  lastModified?: number
 ) => {
   const localHost = dotYouClient.getIdentity() || window.location.hostname;
   const queryClient = useQueryClient();
@@ -33,19 +68,27 @@ export const useImage = (
   const checkIfWeHaveLargerCachedImage = (
     odinId: string | undefined,
     imageFileId: string,
+    imageGlobalTransitId: string | undefined,
+    imageFileKey: string,
     imageDrive: TargetDrive,
     size?: ImageSize
   ) => {
     const cachedEntries = queryClient
       .getQueryCache()
       .findAll({
-        queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId],
+        queryKey: [
+          'image',
+          odinId || localHost,
+          imageDrive?.alias,
+          imageGlobalTransitId || imageFileId,
+          imageFileKey,
+        ],
         exact: false,
       })
       .filter((query) => query.state.status !== 'error');
 
     const cachedEntriesWithSize = cachedEntries.map((entry) => {
-      const sizeParts = (entry.queryKey[4] as string)?.split('x');
+      const sizeParts = (entry.queryKey[5] as string)?.split('x');
       const size = sizeParts
         ? { pixelHeight: parseInt(sizeParts[0]), pixelWidth: parseInt(sizeParts[1]) }
         : undefined;
@@ -77,14 +120,30 @@ export const useImage = (
   const fetchImageData = async (
     odinId: string,
     imageFileId: string | undefined,
+    imageGlobalTransitId: string | undefined,
+    imageFileKey: string | undefined,
     imageDrive?: TargetDrive,
     size?: ImageSize,
     probablyEncrypted?: boolean,
     naturalSize?: ImageSize
   ): Promise<ImageData | undefined> => {
-    if (imageFileId === undefined || imageFileId === '' || !imageDrive) return;
+    if (
+      imageFileId === undefined ||
+      imageFileId === '' ||
+      !imageDrive ||
+      imageFileKey === undefined ||
+      imageFileKey === ''
+    )
+      return;
 
-    const cachedEntry = checkIfWeHaveLargerCachedImage(odinId, imageFileId, imageDrive, size);
+    const cachedEntry = checkIfWeHaveLargerCachedImage(
+      odinId,
+      imageFileId,
+      imageGlobalTransitId,
+      imageFileKey,
+      imageDrive,
+      size
+    );
     if (cachedEntry) {
       const cachedData = queryClient.getQueryData<ImageData | undefined>(cachedEntry.queryKey);
       if (cachedData) return cachedData;
@@ -94,20 +153,38 @@ export const useImage = (
       return {
         url:
           odinId !== localHost
-            ? await getDecryptedImageUrlOverTransit(
-                dotYouClient,
-                odinId,
-                imageDrive,
-                imageFileId,
-                size,
-                probablyEncrypted
-              )
+            ? imageGlobalTransitId
+              ? await getDecryptedImageUrlOverTransitByGlobalTransitId(
+                  dotYouClient,
+                  odinId,
+                  imageDrive,
+                  imageGlobalTransitId,
+                  imageFileKey,
+                  size,
+                  probablyEncrypted,
+                  systemFileType,
+                  lastModified
+                )
+              : await getDecryptedImageUrlOverTransit(
+                  dotYouClient,
+                  odinId,
+                  imageDrive,
+                  imageFileId,
+                  imageFileKey,
+                  size,
+                  probablyEncrypted,
+                  systemFileType,
+                  lastModified
+                )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
+                imageFileKey,
                 size,
-                probablyEncrypted
+                probablyEncrypted,
+                systemFileType,
+                lastModified
               ),
         naturalSize: naturalSize,
       };
@@ -116,45 +193,14 @@ export const useImage = (
     return await fetchDataPromise();
   };
 
-  const saveImageFile = async ({
-    bytes,
-    type,
-    targetDrive,
-    acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
-    fileId = undefined,
-    versionTag = undefined,
-  }: {
-    bytes: Uint8Array;
-    type: ImageContentType;
-    targetDrive: TargetDrive;
-    acl?: AccessControlList;
-    fileId?: string;
-    versionTag?: string;
-  }) => {
-    return await uploadImage(dotYouClient, targetDrive, acl, bytes, undefined, {
-      fileId,
-      versionTag,
-      type,
-    });
-  };
-
-  const removeImageFile = async ({
-    targetDrive,
-    fileId,
-  }: {
-    targetDrive: TargetDrive;
-    fileId: string;
-  }) => {
-    return await removeImage(dotYouClient, fileId, targetDrive);
-  };
-
   return {
     fetch: useQuery({
       queryKey: [
         'image',
         odinId || localHost,
         imageDrive?.alias,
-        imageFileId,
+        imageGlobalTransitId || imageFileId,
+        imageFileKey,
         // Rounding the cache key of the size so close enough sizes will be cached together
         size
           ? `${Math.round(size.pixelHeight / 25) * 25}x${Math.round(size?.pixelWidth / 25) * 25}`
@@ -164,6 +210,8 @@ export const useImage = (
         fetchImageData(
           odinId || localHost,
           imageFileId,
+          imageGlobalTransitId,
+          imageFileKey,
           imageDrive,
           size,
           probablyEncrypted,
@@ -175,31 +223,5 @@ export const useImage = (
       gcTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '',
     }),
-    getFromCache: (odinId: string | undefined, imageFileId: string, imageDrive: TargetDrive) => {
-      const cachedEntries = queryClient
-        .getQueryCache()
-        .findAll({
-          queryKey: ['image', odinId || localHost, imageDrive?.alias, imageFileId],
-          exact: false,
-        })
-        .filter((query) => query.state.status === 'success');
-
-      if (cachedEntries?.length)
-        return queryClient.getQueryData<ImageData | undefined>(cachedEntries[0].queryKey);
-    },
-    save: useMutation({
-      mutationFn: saveImageFile,
-      onSuccess: (_data, variables) => {
-        // Boom baby!
-        if (variables.fileId) {
-          queryClient.invalidateQueries({
-            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
-          });
-        } else {
-          queryClient.removeQueries({ queryKey: ['image'] });
-        }
-      },
-    }),
-    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

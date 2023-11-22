@@ -1,30 +1,21 @@
 import { useMemo } from 'react';
-import {
-  ActionButton,
-  AttachmentFile,
-  Triangle,
-  Image,
-  Trash,
-  Video,
-} from '@youfoundation/common-app';
+import { ActionButton, Triangle, Image, Trash, Video } from '@youfoundation/common-app';
 
-import { ImageContentType, TargetDrive } from '@youfoundation/js-lib/core';
-import { MediaFile } from '@youfoundation/js-lib/public';
+import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
+import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const FileOverview = ({
   files,
   setFiles,
   className,
 }: {
-  files?: AttachmentFile[];
-  setFiles: (files: AttachmentFile[]) => void;
+  files?: NewMediaFile[];
+  setFiles: (files: NewMediaFile[]) => void;
   className?: string;
 }) => {
-  if (!files || !files.length) {
-    return null;
-  }
+  if (!files || !files.length) return null;
 
-  const grabThumb = async (video: HTMLVideoElement, file: AttachmentFile, fileIndex: number) => {
+  const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;
     if ('thumbnail' in file) return;
 
@@ -40,16 +31,14 @@ export const FileOverview = ({
       const url = window.URL.createObjectURL(blob);
       console.log(url);
 
-      const payload = await blob.arrayBuffer().then((buffer) => new Uint8Array(buffer));
-
       const newFiles = [...files];
       newFiles[fileIndex] = {
         ...file,
         thumbnail: {
-          payload: payload,
-          contentType: blob.type as ImageContentType,
+          payload: blob,
           pixelHeight: video.videoHeight,
           pixelWidth: video.videoWidth,
+          key: DEFAULT_PAYLOAD_KEY,
         },
       };
 
@@ -61,9 +50,7 @@ export const FileOverview = ({
     return files.map((currFile, index) => {
       const url =
         'bytes' in currFile.file
-          ? window.URL.createObjectURL(
-              new Blob([currFile.file.bytes], { type: currFile.file.type })
-            )
+          ? window.URL.createObjectURL(currFile.file)
           : URL.createObjectURL(currFile.file);
 
       if (currFile.file.type === 'video/mp4') {
@@ -119,58 +106,62 @@ export const FileOverview = ({
 };
 
 export const ExistingFileOverview = ({
+  fileId,
   mediaFiles,
-  toRemoveFileIds,
   targetDrive,
-  setToRemoveFileIds,
+  setMediaFiles,
   className,
 }: {
   mediaFiles?: MediaFile[];
-  toRemoveFileIds: string[];
+  fileId: string;
   targetDrive: TargetDrive;
-  setToRemoveFileIds: (mediaFileIds: string[]) => void;
+  setMediaFiles: (mediaFileIds: MediaFile[]) => void;
   className?: string;
 }) => {
-  if (!mediaFiles) {
-    return null;
-  }
+  if (!mediaFiles) return null;
 
   const renderedFiles = useMemo(() => {
-    return mediaFiles
-      .filter((file) => !toRemoveFileIds.some((toRemoveFileId) => toRemoveFileId === file.fileId))
-      .map((image) => {
-        return (
-          <div key={image.fileId} className="relative w-1/2 p-[2px] md:w-1/3">
-            {image.type === 'video' ? (
-              <Video
-                fileId={image.fileId}
-                targetDrive={targetDrive}
-                className="aspect-square h-full w-full"
-                directFileSizeLimit={10 * 1024}
-              />
-            ) : (
-              <Image
-                fileId={image.fileId}
-                targetDrive={targetDrive}
-                className="aspect-square h-full w-full"
-                fit="cover"
-              />
-            )}
-            <ActionButton
-              className="absolute bottom-3 right-3"
-              icon={Trash}
-              type="remove"
-              size="square"
-              onClick={(e) => {
-                e.preventDefault();
-                setToRemoveFileIds([...toRemoveFileIds, image.fileId]);
-                return false;
-              }}
+    return mediaFiles.map((image) => {
+      return (
+        <div key={image.fileId + image.fileKey} className="relative w-1/2 p-[2px] md:w-1/3">
+          {image.type === 'video' ? (
+            <Video
+              fileId={image.fileId || fileId}
+              fileKey={image.fileKey}
+              targetDrive={targetDrive}
+              lastModified={new Date().getTime()}
+              className="aspect-square h-full w-full"
+              directFileSizeLimit={10 * 1024}
             />
-          </div>
-        );
-      });
-  }, [mediaFiles, toRemoveFileIds]);
+          ) : (
+            <Image
+              fileId={image.fileId || fileId}
+              fileKey={image.fileKey}
+              targetDrive={targetDrive}
+              lastModified={new Date().getTime()}
+              className="aspect-square h-full w-full"
+              fit="cover"
+            />
+          )}
+          <ActionButton
+            className="absolute bottom-3 right-3"
+            icon={Trash}
+            type="remove"
+            size="square"
+            onClick={(e) => {
+              e.preventDefault();
+              setMediaFiles(
+                mediaFiles.filter(
+                  (file) => file.fileId !== image.fileId || file.fileKey !== image.fileKey
+                )
+              );
+              return false;
+            }}
+          />
+        </div>
+      );
+    });
+  }, [mediaFiles]);
 
   return (
     <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>

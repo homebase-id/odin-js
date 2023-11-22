@@ -9,6 +9,7 @@ import {
   AppFileMetaData,
   TargetDrive,
   DriveSearchResult,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { useAuth } from '../auth/useAuth';
@@ -30,7 +31,7 @@ export interface importableFile {
   fileMetadata: {
     contentType: string;
     senderOdinId: string;
-    payloadIsEncrypted: boolean;
+    isEncrypted: boolean;
     accessControlList: AccessControlList;
     allowDistribution: boolean;
     appData: AppFileMetaData;
@@ -108,7 +109,7 @@ export const useExport = () => {
     const searchResults = await getAllFilesOnDrive(targetDrive);
 
     const getPayloadForDsr = async (dsr: DriveSearchResult) => {
-      if (dsr.fileMetadata.contentType === 'application/json') {
+      if (dsr.fileMetadata.appData.content) {
         return await getContentFromHeaderOrPayload(
           dotYouClient,
           targetDrive,
@@ -118,7 +119,7 @@ export const useExport = () => {
       } else {
         return (
           (
-            await getPayloadBytes(dotYouClient, targetDrive, dsr.fileId, {
+            await getPayloadBytes(dotYouClient, targetDrive, dsr.fileId, DEFAULT_PAYLOAD_KEY, {
               keyHeader: dsr.sharedSecretEncryptedKeyHeader,
             })
           )?.bytes || null
@@ -130,14 +131,13 @@ export const useExport = () => {
       return {
         fileId: dsr.fileId,
         fileMetadata: {
-          contentType: dsr.fileMetadata.contentType,
           senderOdinId: dsr.fileMetadata.senderOdinId,
-          payloadIsEncrypted: dsr.fileMetadata.payloadIsEncrypted,
-          allowDistribution: dsr.serverMetadata.allowDistribution,
-          accessControlList: dsr.serverMetadata.accessControlList,
+          isEncrypted: dsr.fileMetadata.isEncrypted,
+          allowDistribution: dsr.serverMetadata?.allowDistribution,
+          accessControlList: dsr.serverMetadata?.accessControlList,
           appData: {
             ...dsr.fileMetadata.appData,
-            jsonContent: undefined,
+            content: undefined,
             previewThumbnail: undefined,
             additionalThumbnails: undefined,
             contentIsComplete: undefined,

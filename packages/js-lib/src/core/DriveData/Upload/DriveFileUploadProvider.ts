@@ -1,18 +1,13 @@
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { DotYouClient } from '../../DotYouClient';
-import { ThumbnailFile } from '../File/DriveFileTypes';
-import { KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
+import { PayloadFile, ThumbnailFile, KeyHeader, EncryptedKeyHeader } from '../File/DriveFileTypes';
 import {
   UploadInstructionSet,
   UploadFileMetadata,
   UploadResult,
   AppendInstructionSet,
 } from './DriveUploadTypes';
-import {
-  encryptWithKeyheader,
-  decryptKeyHeader,
-  encryptWithSharedSecret,
-} from '../SecurityHelpers';
+import { decryptKeyHeader, encryptWithSharedSecret } from '../SecurityHelpers';
 import {
   GenerateKeyHeader,
   encryptMetaData,
@@ -20,7 +15,10 @@ import {
   buildFormData,
   pureUpload,
   pureAppend,
+  buildManifest,
 } from './UploadHelpers';
+import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
+import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 
 const isDebug = hasDebugFlag();
 
@@ -29,7 +27,7 @@ export const uploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | Blob | File | undefined,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true,
   onVersionConflict?: () => void
@@ -40,8 +38,8 @@ export const uploadFile = async (
       metadata,
     });
 
-  // Force payloadIsEncrypted on the metadata to match the encrypt flag
-  metadata.payloadIsEncrypted = encrypt;
+  // Force isEncrypted on the metadata to match the encrypt flag
+  metadata.isEncrypted = encrypt;
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
   return uploadUsingKeyHeader(
@@ -49,7 +47,7 @@ export const uploadFile = async (
     keyHeader,
     instructions,
     metadata,
-    payload,
+    payloads,
     thumbnails,
     onVersionConflict
   );
@@ -60,75 +58,72 @@ const uploadUsingKeyHeader = async (
   keyHeader: KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  payload: Uint8Array | File | Blob | undefined,
+  payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
-  // Rebuild instructions without the systemFileType
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildManifest(payloads, thumbnails);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
   };
 
   // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     keyHeader,
-    instructions,
-    encryptedMetaData
+    instructionsWithManifest,
+    metadata
   );
 
-  const processedPayload =
-    metadata.appData.contentIsComplete || !payload
-      ? undefined
-      : keyHeader
-      ? await encryptWithKeyheader(payload, keyHeader)
-      : payload;
-
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     encryptedDescriptor,
-    processedPayload,
+    payloads,
     thumbnails,
     keyHeader
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType, onVersionConflict);
+  const uploadResult = await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+
+  if (!uploadResult) return;
+  uploadResult.keyHeader = keyHeader;
+  return uploadResult;
 };
 
 export const uploadHeader = async (
   dotYouClient: DotYouClient,
-  encryptedKeyHeader: EncryptedKeyHeader | undefined,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<UploadResult | void> => {
-  const keyHeader = encryptedKeyHeader
-    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
-    : undefined;
+  const decryptedKeyHeader =
+    keyHeader && 'encryptionVersion' in keyHeader
+      ? await decryptKeyHeader(dotYouClient, keyHeader)
+      : keyHeader;
 
-  // Rebuild instructions without the systemFileType
-  const strippedInstructions: UploadInstructionSet = {
-    storageOptions: instructions.storageOptions,
-    transferIv: instructions.transferIv,
-    transitOptions: instructions.transitOptions,
-  };
+  const finalKeyHeader =
+    decryptedKeyHeader || (metadata.isEncrypted ? GenerateKeyHeader() : undefined);
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+  if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
+
+  strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
+  strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
   // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
-  const strippedMetaData: UploadFileMetadata = {
-    ...encryptedMetaData,
-    appData: { ...encryptedMetaData.appData, additionalThumbnails: undefined },
-  };
+  const encryptedMetaData = await encryptMetaData(metadata, finalKeyHeader);
 
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
-      fileMetadata: strippedMetaData,
+      fileMetadata: encryptedMetaData,
     },
-    instructions.transferIv
+    strippedInstructions.transferIv
   );
 
   const data = await buildFormData(
@@ -140,35 +135,95 @@ export const uploadHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, instructions.systemFileType);
+  return await pureUpload(dotYouClient, data, systemFileType);
 };
 
 export const appendDataToFile = async (
   dotYouClient: DotYouClient,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: AppendInstructionSet,
-  payload: Uint8Array | File | undefined,
+  payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  keyHeader: KeyHeader,
   onVersionConflict?: () => void
 ) => {
-  const strippedInstructions: AppendInstructionSet = {
-    targetFile: instructions.targetFile,
-    thumbnails: instructions.thumbnails,
+  const decryptedKeyHeader =
+    keyHeader && 'encryptionVersion' in keyHeader
+      ? await decryptKeyHeader(dotYouClient, keyHeader)
+      : keyHeader;
+
+  const { systemFileType, ...strippedInstructions } = instructions;
+
+  const manifest = buildManifest(payloads, thumbnails);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
   };
 
-  const processedPayload = !payload
-    ? undefined
-    : keyHeader
-    ? await encryptWithKeyheader(payload, keyHeader)
-    : payload;
-
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     undefined,
-    processedPayload,
+    payloads,
     thumbnails,
-    keyHeader
+    decryptedKeyHeader
   );
 
-  return await pureAppend(dotYouClient, data, instructions.systemFileType, onVersionConflict);
+  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);
+};
+
+export const reUploadFile = async (
+  dotYouClient: DotYouClient,
+  instructions: UploadInstructionSet,
+  metadata: UploadFileMetadata,
+  encrypt: boolean
+) => {
+  const targetDrive = instructions.storageOptions?.drive;
+  const fileId = instructions.storageOptions?.overwriteFileId;
+  if (!targetDrive) throw new Error('storageOptions.drive is required');
+  if (!fileId) throw new Error('storageOptions.overwriteFileId is required');
+
+  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+
+  const existingPayloads = header?.fileMetadata.payloads;
+  for (let i = 0; existingPayloads && i < existingPayloads.length; i++) {
+    const existingPayload = existingPayloads[i];
+    const payloadData = await getPayloadBytes(
+      dotYouClient,
+      targetDrive,
+      fileId,
+      existingPayload.key,
+      { decrypt: true }
+    );
+    if (!payloadData) continue;
+
+    payloads.push({
+      key: existingPayload.key,
+      payload: new Blob([payloadData.bytes], { type: existingPayload.contentType }),
+    });
+
+    const existingThumbnails = existingPayload.thumbnails;
+    for (let j = 0; j < existingThumbnails.length; j++) {
+      const existingThumbnail = existingThumbnails[j];
+      const thumbnailData = await getThumbBytes(
+        dotYouClient,
+        targetDrive,
+        fileId,
+        existingPayload.key,
+        existingThumbnail.pixelWidth,
+        existingThumbnail.pixelHeight,
+        {}
+      );
+      if (thumbnailData)
+        thumbnails.push({
+          key: existingPayload.key,
+          payload: new Blob([thumbnailData.bytes], { type: existingThumbnail.contentType }),
+          pixelWidth: existingThumbnail.pixelWidth,
+          pixelHeight: existingThumbnail.pixelHeight,
+        });
+    }
+  }
+
+  return await uploadFile(dotYouClient, instructions, metadata, payloads, thumbnails, encrypt);
 };

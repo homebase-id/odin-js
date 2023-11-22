@@ -8,6 +8,7 @@ import {
   UploadInstructionSet,
   UploadFileMetadata,
   uploadFile,
+  DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import {
   base64ToUint8Array,
@@ -22,10 +23,8 @@ import { isImportable } from './useExport';
 export const useImport = () => {
   const dotYouClient = useAuth().getDotYouClient();
 
-  const clearAllFilesOnDrive = async (drive: TargetDrive) => {
-    // TODO: Fix, as this doesn't work anymore, purging works, but unqiueIds will keep conflicting with new uploads...
-    return await purgeAllFiles(dotYouClient, drive);
-  };
+  const clearAllFilesOnDrive = async (drive: TargetDrive) =>
+    await purgeAllFiles(dotYouClient, drive);
 
   const importUnencrypted = async ({
     drive,
@@ -72,13 +71,14 @@ export const useImport = () => {
               dotYouClient,
               targetDrive,
               file.fileMetadata.accessControlList,
-              base64ToUint8Array(file.payload.toString()),
+              new Blob([base64ToUint8Array(file.payload.toString())], {
+                type: file.fileMetadata.contentType,
+              }),
               undefined,
               {
                 tag: file.fileMetadata.appData.tags || [],
                 fileId: overwriteFileId,
                 versionTag: versionTag,
-                type: file.fileMetadata.contentType as ImageContentType,
               }
             );
           } else {
@@ -88,13 +88,12 @@ export const useImport = () => {
                 overwriteFileId: overwriteFileId,
                 drive: targetDrive,
               },
-              transitOptions: null,
             };
 
             const payloadJson =
               file.fileMetadata.contentType === 'application/json'
                 ? jsonStringify64(file.payload)
-                : null;
+                : undefined;
 
             const payloadBytes = payloadJson
               ? stringToUint8Array(payloadJson)
@@ -103,14 +102,12 @@ export const useImport = () => {
             const shouldEmbedContent = payloadBytes.length < 3000;
             const metadata: UploadFileMetadata = {
               allowDistribution: file.fileMetadata.allowDistribution,
-              contentType: file.fileMetadata.contentType,
               senderOdinId: file.fileMetadata.senderOdinId,
-              payloadIsEncrypted: file.fileMetadata.payloadIsEncrypted,
+              isEncrypted: file.fileMetadata.isEncrypted,
               accessControlList: file.fileMetadata.accessControlList,
               appData: {
                 ...file.fileMetadata.appData,
-                contentIsComplete: shouldEmbedContent,
-                jsonContent: shouldEmbedContent ? payloadJson : null,
+                content: shouldEmbedContent ? payloadJson : undefined,
               },
             };
 
@@ -118,9 +115,14 @@ export const useImport = () => {
               dotYouClient,
               instructionSet,
               metadata,
-              payloadBytes,
+              [
+                {
+                  payload: new Blob([payloadBytes], { type: file.fileMetadata.contentType }),
+                  key: DEFAULT_PAYLOAD_KEY,
+                },
+              ],
               undefined,
-              file.fileMetadata.payloadIsEncrypted
+              file.fileMetadata.isEncrypted
             );
           }
         } catch (ex) {

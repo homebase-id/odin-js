@@ -1,20 +1,41 @@
-import { Block, EmojiSelector, t, ImageSelector } from '@youfoundation/common-app';
-import { AccessControlList, TargetDrive } from '@youfoundation/js-lib/core';
+import { Block, EmojiSelector, t, ImageSelector, usePayloadBlob } from '@youfoundation/common-app';
+import { TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 
 interface FaviconSelectorProps {
+  fileId?: string;
   name?: string;
   defaultValue: unknown;
-  acl: AccessControlList;
   targetDrive: TargetDrive;
   onChange: (event: { target: { name: string; value: unknown | undefined } }) => void;
 }
 
-const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorProps) => {
+const FaviconSelector = ({
+  fileId,
+  onChange,
+  defaultValue,
+  targetDrive,
+  ...props
+}: FaviconSelectorProps) => {
   const valueObject: { fileId: string } | { emoji: string } | undefined = defaultValue as
     | { fileId: string }
     | { emoji: string }
     | undefined;
+
+  const { data: imageBlob } = usePayloadBlob(
+    fileId,
+    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
+      ? valueObject.fileId
+      : undefined,
+    targetDrive
+  );
+
+  const dataVal: any =
+    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
+      ? valueObject.fileId
+      : undefined;
+  const defaultFaviconImageValue =
+    dataVal && dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
 
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
@@ -50,19 +71,19 @@ const FaviconSelector = ({ onChange, defaultValue, ...props }: FaviconSelectorPr
         <ImageSelector
           {...props}
           label=""
-          defaultValue={valueObject && 'fileId' in valueObject ? valueObject.fileId : undefined}
-          onChange={(e) => {
+          defaultValue={defaultFaviconImageValue}
+          onChange={(e) =>
             onChange({
               target: {
                 name: e.target.name,
-                value: e.target.value?.fileId
+                value: e.target.value
                   ? {
-                      fileId: e.target.value.fileId,
+                      fileId: e.target.value,
                     }
                   : undefined,
               },
-            });
-          }}
+            })
+          }
           maxHeight={512}
           maxWidth={512}
           expectedAspectRatio={1}

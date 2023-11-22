@@ -2,9 +2,11 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
 import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
-import { DriveSearchResult } from '../../core/DriveData/Drive/DriveTypes';
+import { DriveSearchResult } from '../../core/DriveData/File/DriveFileTypes';
 import { toGuidId } from '../../helpers/DataUtil';
 import { ContactConfig, ContactFile } from './ContactTypes';
+
+export const CONTACT_PROFILE_IMAGE_KEY = 'prfl_pic';
 
 export const getContactByOdinId = async (
   dotYouClient: DotYouClient,
@@ -37,6 +39,10 @@ export const getContactByUniqueId = async (
     // Set fileId for future replace
     contact.fileId = dsr.fileId;
     contact.versionTag = dsr.fileMetadata.versionTag;
+    contact.lastModified = dsr.fileMetadata.updated;
+    contact.hasImage =
+      dsr.fileMetadata.payloads.filter((payload) => payload.contentType !== 'application/json')
+        .length >= 1;
 
     return contact;
   } catch (ex) {
@@ -80,6 +86,8 @@ export const getContacts = async (
           // Set fileId for future replace
           contact.fileId = dsr.fileId;
           contact.versionTag = dsr.fileMetadata.versionTag;
+          contact.lastModified = dsr.fileMetadata.updated;
+          contact.hasImage = dsr.fileMetadata.payloads.length === 2;
 
           return contact;
         })

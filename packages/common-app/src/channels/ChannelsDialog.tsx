@@ -7,6 +7,7 @@ import {
   AclWizard,
   ActionButton,
   ChannelDefinitionVm,
+  CheckboxToggle,
   Pencil,
   Textarea,
   Trash,
@@ -20,8 +21,8 @@ import { Label } from '@youfoundation/common-app';
 import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import { ChannelTemplate } from '@youfoundation/js-lib/public';
-import { slugify } from '@youfoundation/js-lib/helpers';
+import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
+import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsDialog = ({
   isOpen,
@@ -109,6 +110,7 @@ export const ChannelItem = ({
   const [newSlug, setNewSlug] = useState(chnl?.slug);
   const [newDescription, setNewDescription] = useState(chnl?.description);
   const [newTemplateId, setNewTemplateId] = useState(chnl?.templateId);
+  const [newShowOnHomePage, setNewShowOnHomePage] = useState(chnl?.showOnHomePage);
   const [newAcl, setNewAcl] = useState(
     chnl?.acl ?? { requiredSecurityGroup: SecurityGroupType.Anonymous }
   );
@@ -164,6 +166,7 @@ export const ChannelItem = ({
                     name: newName ?? '',
                     slug: newSlug ?? '',
                     description: newDescription ?? '',
+                    showOnHomePage: newShowOnHomePage ?? false,
                     templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
                     acl: newAcl,
                   });
@@ -193,6 +196,16 @@ export const ChannelItem = ({
                     onChange={(e) => setNewDescription(e.target.value)}
                   />
                 </div>
+                <div className="mb-5 flex flex-row items-center gap-5">
+                  <Label htmlFor="showOnHomepage" className="mb-0">
+                    {t('Include posts from this channel on your feed')}
+                  </Label>
+                  <CheckboxToggle
+                    id="showOnHomepage"
+                    defaultChecked={chnl?.showOnHomePage}
+                    onChange={(e) => setNewShowOnHomePage(e.target.checked)}
+                  />
+                </div>
                 <div className="mb-5">
                   <Label htmlFor="template">{t('Template')}</Label>
                   <ChannelTemplateSelector
@@ -218,7 +231,7 @@ export const ChannelItem = ({
                   >
                     {t('Cancel')}
                   </ActionButton>
-                  {chnl ? (
+                  {chnl && !stringGuidsEqual(chnl.channelId, BlogConfig.PublicChannel.channelId) ? (
                     <ActionButton
                       className="m-2 mr-auto"
                       state={removeStatus}

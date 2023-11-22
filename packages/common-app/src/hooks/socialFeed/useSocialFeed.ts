@@ -31,11 +31,12 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
     pageParam,
   }: {
     pageParam?: { cursorState?: string; ownerCursorState?: Record<string, string> };
-  }) =>
-    await getSocialFeed(dotYouClient, pageSize, pageParam?.cursorState, {
+  }) => {
+    return await getSocialFeed(dotYouClient, pageSize, pageParam?.cursorState, {
       ownCursorState: pageParam?.ownerCursorState,
       ownChannels,
     });
+  };
 
   return {
     fetchAll: useInfiniteQuery({

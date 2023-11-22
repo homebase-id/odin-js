@@ -38,7 +38,7 @@ const PostDetail = () => {
     );
   }
 
-  const post = postData?.activeBlog.content;
+  const post = postData?.activeBlog.fileMetadata.appData.content;
   const channel = postData?.activeChannel;
   return (
     <>
@@ -47,9 +47,7 @@ const PostDetail = () => {
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"
-          content={
-            post?.type === 'Article' ? (postData?.activeBlog.content as Article).abstract ?? '' : ''
-          }
+          content={post?.type === 'Article' ? (post as Article).abstract ?? '' : ''}
         />
       </Helmet>
 
@@ -74,8 +72,8 @@ const PostDetail = () => {
         </div>
       </section>
       <div className="container mx-auto sm:px-5">
-        {postData?.activeBlog?.content?.type === 'Article' && (
-          <RelatedArticles blog={postData?.activeBlog} channel={channel} />
+        {postData?.activeBlog.fileMetadata.appData.content.type === 'Article' && (
+          <RelatedArticles blog={postData.activeBlog} channel={channel} />
         )}
       </div>
 

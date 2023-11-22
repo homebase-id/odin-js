@@ -38,6 +38,7 @@ const IncomingConnectionDialog = ({
 
   const { data: contactData } = useContact({
     odinId: senderOdinId,
+    canSave: false,
   }).fetch;
   const {
     fetch: { data: pendingConnection },
@@ -50,8 +51,6 @@ const IncomingConnectionDialog = ({
 
   const [doubleChecked, setDoubleChecked] = useState(false);
 
-  const [name, setName] = useState<string>(window.location.hostname);
-  const [photoFileId, setPhotoFileId] = useState<string>();
   const [circleGrants, setCircleGrants] = useState<string[]>([]);
   const [shouldFollow, setShouldFollow] = useState(true);
 

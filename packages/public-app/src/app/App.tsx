@@ -14,14 +14,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
-import { ErrorBoundary, HOME_ROOT_PATH, PREVIEW_ROOT } from '@youfoundation/common-app';
+import { ErrorBoundary, HOME_ROOT_PATH, NotFound, PREVIEW_ROOT } from '@youfoundation/common-app';
 import { useAuth } from '../hooks/auth/useAuth';
 import Header from '../components/ui/Layout/Header/Header';
 import Footer from '../components/ui/Layout/Footer/Footer';
 
 import { t, useSiteData } from '@youfoundation/common-app';
 
-const NotFound = lazy(() => import('../templates/NotFound/NotFound'));
 const Home = lazy(() => import('../templates/Home/Home'));
 const PostOverview = lazy(() => import('../templates/Posts/Overview/PostOverview'));
 const PostDetail = lazy(() => import('../templates/Posts/Detail/PostDetail'));

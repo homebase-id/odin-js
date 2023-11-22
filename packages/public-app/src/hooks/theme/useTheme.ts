@@ -6,6 +6,7 @@ interface TemplateSettings {
   isTabs: boolean;
   tabsOrder: string[];
   colors: { light: Record<string, string>; dark: Record<string, string> };
+  imageFileId?: string;
   favicon?: { fileId: string } | { emoji: string } | undefined;
 }
 
@@ -58,6 +59,7 @@ export const useTheme = () => {
       ? templateSettings.colors
       : DEFAULT_SETTINGS.colors;
   const favicon = templateSettings.favicon;
+  const imageFileId = templateSettings.imageFileId;
 
-  return { themeId, isTabs, tabsOrder, colors, favicon } as TemplateSettings;
+  return { themeId, isTabs, tabsOrder, colors, imageFileId, favicon } as TemplateSettings;
 };

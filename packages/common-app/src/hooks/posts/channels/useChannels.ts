@@ -39,9 +39,8 @@ export const useChannels = ({
             template: parseChannelTemplate(channel?.templateId),
           } as ChannelDefinitionVm;
         });
-      } catch (ex) {
-        console.error('Fetching dynamic channel data failed');
-        return;
+      } catch (e) {
+        ('failed to fetch dynamic data');
       }
     };
 

@@ -1,9 +1,15 @@
 import { getNewId, slugify } from '@youfoundation/js-lib/helpers';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAttributes } from '../../../hooks/profiles/useAttributes';
-import { ActionButton, ActionGroup, Pencil, useProfiles } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ActionGroup,
+  ErrorBoundary,
+  Pencil,
+  useProfiles,
+} from '@youfoundation/common-app';
 
 import AttributeCreator from '../../../components/Attribute/AttributeCreator/AttributeCreator';
 import Section from '../../../components/ui/Sections/Section';
@@ -252,20 +258,26 @@ const ProfileSectionEditor = ({
   }
 
   // Find unique types
-  const types: string[] = attributes.reduce((prevVal, curVal) => {
-    if (prevVal.indexOf(curVal.type) !== -1) {
-      return prevVal;
-    }
-    return [...prevVal, curVal.type];
-  }, [] as string[]);
+  const types: string[] = attributes
+    .map((dsr) => dsr.fileMetadata.appData.content)
+    .reduce((prevVal, curVal) => {
+      if (prevVal.indexOf(curVal.type) !== -1) {
+        return prevVal;
+      }
+      return [...prevVal, curVal.type];
+    }, [] as string[]);
 
   // Find matching attributes for those types
   const groupedAttributes = types.map((currType) => {
-    const matchingAttributes = attributes.filter((attr) => attr.type === currType);
-    const lowestPrio = Math.min(...matchingAttributes.map((attr) => attr.priority));
+    const matchingAttributes = attributes.filter(
+      (attr) => attr.fileMetadata.appData.content.type === currType
+    );
+    const lowestPrio = Math.min(
+      ...matchingAttributes.map((attr) => attr.fileMetadata.appData.content.priority)
+    );
 
     return {
-      name: matchingAttributes[0]?.typeDefinition?.name,
+      name: matchingAttributes[0]?.fileMetadata.appData.content.typeDefinition?.name,
       attributes: matchingAttributes,
       priority: lowestPrio,
     };
@@ -309,12 +321,16 @@ const ProfileSectionEditor = ({
       {attributes.length ? (
         groupedAttributes.map((attrGroup) => {
           return (
-            <AttributeGroup
-              groupTitle={attrGroup.name}
-              attributes={attrGroup.attributes}
-              key={attrGroup.name}
-              groupedAttributes={groupedAttributes}
-            />
+            <React.Fragment key={attrGroup.name}>
+              <ErrorBoundary>
+                <AttributeGroup
+                  groupTitle={attrGroup.name}
+                  attributes={attrGroup.attributes}
+                  key={attrGroup.name}
+                  groupedAttributes={groupedAttributes}
+                />
+              </ErrorBoundary>
+            </React.Fragment>
           );
         })
       ) : (

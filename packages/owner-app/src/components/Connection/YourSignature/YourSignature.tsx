@@ -3,54 +3,38 @@ import {
   BuiltInAttributes,
   MinimalProfileFields,
   GetTargetDriveFromProfileId,
-  AttributeFile,
+  Attribute,
 } from '@youfoundation/js-lib/profile';
-import { useEffect } from 'react';
 import { useImage } from '../../../hooks/media/useImage';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { FallbackImg, LoadingBlock } from '@youfoundation/common-app';
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
-
-interface infoObject {
-  name: string;
-  initials: string;
-  imageFileId: string;
-}
 
 interface YourSignatureProps {
   className?: string;
-  onChange?: ({ name, imageFileId }: infoObject) => void;
 }
 
-const filterAttributes = (attributes: AttributeFile[]) => {
+const filterAttributes = (attributes: DriveSearchResult<Attribute>[]) => {
   return attributes
     ?.filter(
       (attr) =>
-        attr.data !== undefined &&
-        Object.keys(attr.data)?.length !== 0 &&
-        attr.acl.requiredSecurityGroup === SecurityGroupType.Anonymous
+        attr.fileMetadata.appData.content.data !== undefined &&
+        Object.keys(attr.fileMetadata.appData.content.data)?.length !== 0 &&
+        attr.serverMetadata?.accessControlList.requiredSecurityGroup === SecurityGroupType.Anonymous
     )
     ?.sort((attrA, attrB) => attrA.priority - attrB.priority);
 };
 
-const YourSignature = ({ className, onChange }: YourSignatureProps) => {
-  const {
-    data: nameAttributes,
-    isLoading: nameAttributesLoading,
-    isFetchedAfterMount: isNameFetchedAfterMount,
-  } = useAttributeVersions({
+const YourSignature = ({ className }: YourSignatureProps) => {
+  const { data: nameAttributes, isLoading: nameAttributesLoading } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId.toString(),
     type: BuiltInAttributes.Name,
   }).fetchVersions;
 
   const filteredNameAttributes = filterAttributes(nameAttributes || []);
 
-  const {
-    data: photoAttributes,
-    isLoading: photoAttributesLoading,
-    isFetchedAfterMount: isPhotoFetchedAfterMount,
-  } = useAttributeVersions({
+  const { data: photoAttributes, isLoading: photoAttributesLoading } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId.toString(),
     type: BuiltInAttributes.Photo,
   }).fetchVersions;
@@ -58,21 +42,20 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
   const filteredPhotoAttributes = filterAttributes(photoAttributes || []);
 
   const { data: imageUrl } = useImage(
-    filteredPhotoAttributes?.[0]?.data?.[MinimalProfileFields.ProfileImageId],
+    filteredPhotoAttributes?.[0]?.fileId,
+    filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
+      MinimalProfileFields.ProfileImageKey
+    ],
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
   ).fetch;
 
-  const info: infoObject = {
-    name: filteredNameAttributes?.[0]?.data[MinimalProfileFields.DisplayName],
-    initials: getInitialsOfNameAttribute(filteredNameAttributes?.[0]),
-    imageFileId: filteredPhotoAttributes?.[0]?.data[MinimalProfileFields.ProfileImageId],
-  };
-
-  useEffect(() => {
-    if (filteredNameAttributes?.length && onChange) {
-      onChange(info);
-    }
-  }, [isNameFetchedAfterMount, isPhotoFetchedAfterMount]);
+  const name =
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content.data[
+      MinimalProfileFields.DisplayName
+    ];
+  const initials = getInitialsOfNameAttribute(
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content
+  );
 
   return (
     <div className={`${className ?? ''}`}>
@@ -82,7 +65,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
             <LoadingBlock className={`aspect-square`} />
           ) : !imageUrl ? (
             <FallbackImg
-              initials={info.initials}
+              initials={initials}
               className="aspect-square h-[3rem] w-[3rem] sm:text-4xl"
             />
           ) : (
@@ -94,7 +77,7 @@ const YourSignature = ({ className, onChange }: YourSignatureProps) => {
             <LoadingBlock className="h-6 w-full max-w-xs" />
           ) : (
             <h2 className="text-lg leading-tight">
-              {info.name}
+              {name}
               <small className="block text-slate-400 dark:text-slate-600">
                 {window.location.hostname}
               </small>

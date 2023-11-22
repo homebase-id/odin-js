@@ -11,6 +11,7 @@ import {
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import {
+  HOME_ROOT_PATH,
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
@@ -71,7 +72,7 @@ export const useAuth = () => {
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
 
-    window.location.href = LOGIN_PATH;
+    window.location.href = HOME_ROOT_PATH;
   };
 
   /// Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute

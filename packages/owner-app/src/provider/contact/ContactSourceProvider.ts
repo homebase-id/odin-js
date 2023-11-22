@@ -9,13 +9,13 @@ import {
   EmailFields,
 } from '@youfoundation/js-lib/profile';
 
-import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
 import {
   getProfileAttributesOverTransit,
   getDecryptedImageDataOverTransit,
 } from '@youfoundation/js-lib/transit';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { GetFile } from '@youfoundation/js-lib/public';
+import { GetFile, GetProfileImage } from '@youfoundation/js-lib/public';
 import { RawContact, getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
 
 //Handles fetching and parsing of Contact Source data
@@ -56,27 +56,35 @@ export const queryRemoteAttributes = async (
       (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Photo))?.[0],
     ]);
 
+    const nameAttr = name?.fileMetadata.appData.content;
+    const phoneAttr = phone?.fileMetadata.appData.content;
+    const emailAttr = email?.fileMetadata.appData.content;
+    const birthdayAttr = birthday?.fileMetadata.appData.content;
+    const locationAttr = location?.fileMetadata.appData.content;
+    const photoAttr = photo?.fileMetadata.appData.content;
+
     return {
       source: 'public',
       odinId,
       name: {
-        displayName: name?.data?.[MinimalProfileFields.DisplayName],
-        additionalName: name?.data?.[MinimalProfileFields.AdditionalName],
-        givenName: name?.data?.[MinimalProfileFields.GivenNameId],
-        surname: name?.data?.[MinimalProfileFields.SurnameId],
+        displayName: nameAttr?.data?.[MinimalProfileFields.DisplayName],
+        additionalName: nameAttr?.data?.[MinimalProfileFields.AdditionalName],
+        givenName: nameAttr?.data?.[MinimalProfileFields.GivenNameId],
+        surname: nameAttr?.data?.[MinimalProfileFields.SurnameId],
       },
       location: {
-        city: location?.data?.[LocationFields.City],
-        country: location?.data?.[LocationFields.Country],
+        city: locationAttr?.data?.[LocationFields.City],
+        country: locationAttr?.data?.[LocationFields.Country],
       },
-      phone: { number: phone?.data?.[PhoneFields.PhoneNumber] },
-      email: { email: email?.data?.[EmailFields.Email] },
-      birthday: { date: birthday?.data?.[BirthdayFields.Date] },
+      phone: { number: phoneAttr?.data?.[PhoneFields.PhoneNumber] },
+      email: { email: emailAttr?.data?.[EmailFields.Email] },
+      birthday: { date: birthdayAttr?.data?.[BirthdayFields.Date] },
       image: photo
         ? (await queryConnectionPhotoData(
             dotYouClient,
             odinId,
-            photo.data[MinimalProfileFields.ProfileImageId]
+            photo.fileId as string,
+            photoAttr.data[MinimalProfileFields.ProfileImageKey]
           )) || undefined
         : undefined,
     };
@@ -88,13 +96,15 @@ export const queryRemoteAttributes = async (
 export const queryConnectionPhotoData = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  profileImageId: string
+  profileImageFileId: string,
+  profileImageKey: string
 ) => {
   const imageData = await getDecryptedImageDataOverTransit(
     dotYouClient,
     odinId,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),
-    profileImageId
+    profileImageFileId,
+    profileImageKey
   );
 
   if (!imageData) return null;
@@ -112,34 +122,23 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
   const rawData = await GetFile(client, 'public.json');
 
   const nameAttr = rawData?.get('name')?.[0];
-  const photoRefAttr = rawData?.get('photo')?.[0];
-  const photoFile = rawData?.get(photoRefAttr?.payload?.data?.profileImageId)?.[0] ?? undefined;
-
-  const previewThumbnail = photoFile?.additionalThumbnails?.reduce(
-    (prevVal, curValue) => {
-      if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) {
-        return curValue;
-      }
-      return prevVal;
-    },
-    { ...photoFile.header.fileMetadata.appData.previewThumbnail, pixelWidth: 20, pixelHeight: 20 }
-  );
+  const imageData = await GetProfileImage(client);
 
   return {
     name:
-      nameAttr?.payload.data.givenName || nameAttr?.payload.data.surname
+      nameAttr?.payload?.data.givenName || nameAttr?.payload?.data.surname
         ? {
             displayName: nameAttr?.payload.data[MinimalProfileFields.DisplayName],
             givenName: nameAttr?.payload.data[MinimalProfileFields.GivenNameId],
             surname: nameAttr?.payload.data[MinimalProfileFields.SurnameId],
           }
         : undefined,
-    image: previewThumbnail?.content
+    image: imageData
       ? {
-          pixelWidth: previewThumbnail.pixelWidth,
-          pixelHeight: previewThumbnail.pixelHeight,
-          contentType: previewThumbnail.contentType || 'image/jpeg',
-          content: previewThumbnail.content.toString(),
+          content: uint8ArrayToBase64(new Uint8Array(await imageData.arrayBuffer())),
+          contentType: imageData.type as ImageContentType,
+          pixelWidth: 250,
+          pixelHeight: 250,
         }
       : undefined,
     source: 'public',

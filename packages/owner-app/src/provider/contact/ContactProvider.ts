@@ -1,16 +1,20 @@
 import {
   UploadFileMetadata,
   UploadInstructionSet,
-  SecurityGroupType,
   DotYouClient,
-  uploadImage,
   uploadFile,
+  DEFAULT_PAYLOAD_KEY,
+  createThumbnails,
+  ThumbnailFile,
+  PayloadFile,
+  EmbeddedThumb,
 } from '@youfoundation/js-lib/core';
 import {
   RawContact,
   ContactFile,
   getContactByUniqueId,
   ContactConfig,
+  CONTACT_PROFILE_IMAGE_KEY,
 } from '@youfoundation/js-lib/network';
 import {
   base64ToUint8Array,
@@ -26,6 +30,8 @@ export const saveContact = async (
   dotYouClient: DotYouClient,
   contact: RawContact
 ): Promise<ContactFile> => {
+  console.log('Saving contact', { ...contact });
+
   if (contact.id) contact.fileId = (await getContactByUniqueId(dotYouClient, contact.id))?.fileId;
 
   if (!contact.fileId && contact.odinId) {
@@ -34,28 +40,29 @@ export const saveContact = async (
     contact.id = existingContact?.id ?? getNewId();
     contact.fileId = existingContact?.fileId ?? undefined;
     contact.versionTag = existingContact?.versionTag || contact.versionTag;
-
-    // If we have an existing image, we don't want to remove it
-    if (existingContact?.imageFileId)
-      contact.imageFileId = existingContact?.imageFileId ?? undefined;
   }
 
-  // Save raw image:
+  const payloads: PayloadFile[] = [];
+  const thumbnails: ThumbnailFile[] = [];
+  let previewThumb: EmbeddedThumb | undefined = undefined;
+
+  // Append image:
   if (contact.image?.content) {
-    contact.imageFileId = (
-      await uploadImage(
-        dotYouClient,
-        ContactConfig.ContactTargetDrive,
-        { requiredSecurityGroup: SecurityGroupType.Owner },
-        base64ToUint8Array(contact.image.content),
-        undefined,
-        {
-          fileId: contact.imageFileId,
-          type: contact.image.contentType,
-        }
-      )
-    )?.fileId;
-    contact.image = undefined;
+    const imageBlob = new Blob([base64ToUint8Array(contact.image.content)], {
+      type: contact.image.contentType,
+    });
+
+    const { tinyThumb, additionalThumbnails } = await createThumbnails(
+      imageBlob,
+      CONTACT_PROFILE_IMAGE_KEY
+    );
+    previewThumb = tinyThumb;
+    thumbnails.push(...additionalThumbnails);
+
+    payloads.push({
+      key: CONTACT_PROFILE_IMAGE_KEY,
+      payload: imageBlob,
+    });
   }
 
   const encrypt = true;
@@ -66,11 +73,11 @@ export const saveContact = async (
       overwriteFileId: contact?.fileId ?? '',
       drive: ContactConfig.ContactTargetDrive,
     },
-    transitOptions: null,
   };
 
   const payloadJson: string = jsonStringify64({
     ...contact,
+    image: undefined,
     fileId: undefined,
     versionTag: undefined,
   });
@@ -84,25 +91,31 @@ export const saveContact = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     allowDistribution: false,
-    contentType: 'application/json',
     appData: {
       tags: tags,
       fileType: ContactConfig.ContactFileType,
-      contentIsComplete: shouldEmbedContent,
-      jsonContent: shouldEmbedContent ? payloadJson : null,
-      // Having the odinId MD5 hashed as unique id, should avoid having duplicates getting created, enforced servers side;
+      content: shouldEmbedContent ? payloadJson : undefined,
+      // Having the odinId MD5 hashed as unique id, avoids having duplicates getting created, enforced server-side;
       uniqueId: contact.odinId ? toGuidId(contact.odinId) : contact.id,
+      previewThumbnail: previewThumb,
     },
     versionTag: contact.versionTag,
-    payloadIsEncrypted: encrypt,
+    isEncrypted: encrypt,
   };
+
+  if (!shouldEmbedContent) {
+    payloads.push({
+      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      key: DEFAULT_PAYLOAD_KEY,
+    });
+  }
 
   const result = await uploadFile(
     dotYouClient,
     instructionSet,
     metadata,
-    payloadBytes,
-    undefined,
+    payloads,
+    thumbnails,
     encrypt
   );
   if (!result) throw new Error('Failed to upload contact');

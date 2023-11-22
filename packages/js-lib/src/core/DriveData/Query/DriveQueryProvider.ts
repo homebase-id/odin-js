@@ -23,7 +23,7 @@ interface GetBatchRequest {
 export const DEFAULT_QUERY_MODIFIED_RESULT_OPTION = {
   cursor: undefined,
   maxRecords: 10,
-  includeJsonContent: true,
+  includeHeaderContent: true,
   excludePreviewThumbnail: false,
 };
 

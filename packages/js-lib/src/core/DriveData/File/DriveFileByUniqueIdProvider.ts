@@ -1,14 +1,21 @@
 import { AxiosRequestConfig } from 'axios';
 
 import { DotYouClient } from '../../DotYouClient';
-import { DriveSearchResult, KeyHeader, EncryptedKeyHeader } from '../Drive/DriveTypes';
 import {
   decryptKeyHeader,
   decryptJsonContent,
   decryptChunkedBytesResponse,
   decryptBytesResponse,
 } from '../SecurityHelpers';
-import { TargetDrive, SystemFileType, ContentType, ImageContentType } from './DriveFileTypes';
+import {
+  TargetDrive,
+  SystemFileType,
+  ContentType,
+  ImageContentType,
+  DriveSearchResult,
+  EncryptedKeyHeader,
+  KeyHeader,
+} from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
 
@@ -16,6 +23,13 @@ interface GetFileByUniqueIdRequest {
   alias: string;
   type: string;
   clientUniqueId: string;
+}
+
+interface GetFileByUniqueIdPayloadRequest extends GetFileByUniqueIdRequest {
+  key: string;
+}
+interface GetFileThumbByUniqueIdRequest extends GetFileByUniqueIdRequest {
+  payloadKey: string;
 }
 
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
@@ -35,8 +49,8 @@ export const getFileHeaderByUniqueId = async <T = string>(
   if (!fileHeader) return null;
 
   const typedFileHeader = fileHeader as DriveSearchResult<T>;
-  typedFileHeader.fileMetadata.appData.jsonContent = tryJsonParse<T>(
-    fileHeader.fileMetadata.appData.jsonContent
+  typedFileHeader.fileMetadata.appData.content = tryJsonParse<T>(
+    fileHeader.fileMetadata.appData.content
   );
 
   return typedFileHeader;
@@ -48,6 +62,7 @@ export const getFileHeaderBytesByUniqueId = async (
   uniqueId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
 ): Promise<DriveSearchResult | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
 
@@ -74,11 +89,11 @@ export const getFileHeaderBytesByUniqueId = async (
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
-        const keyheader = fileHeader.fileMetadata.payloadIsEncrypted
+        const keyheader = fileHeader.fileMetadata.isEncrypted
           ? await decryptKeyHeader(dotYouClient, fileHeader.sharedSecretEncryptedKeyHeader)
           : undefined;
 
-        fileHeader.fileMetadata.appData.jsonContent = await decryptJsonContent(
+        fileHeader.fileMetadata.appData.content = await decryptJsonContent(
           fileHeader.fileMetadata,
           keyheader
         );
@@ -102,13 +117,14 @@ export const getPayloadAsJsonByUniqueId = async <T>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   uniqueId: string,
+  key: string,
   options: {
     keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
   const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
-  return getPayloadBytesByUniqueId(dotYouClient, targetDrive, uniqueId, {
+  return getPayloadBytesByUniqueId(dotYouClient, targetDrive, uniqueId, key, {
     keyHeader,
     systemFileType,
     decrypt: true,
@@ -119,25 +135,30 @@ export const getPayloadBytesByUniqueId = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   uniqueId: string,
+  key: string,
   options: {
     keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
     decrypt?: boolean;
+    lastModified?: number;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
+  assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd } = options;
+  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
   const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileByUniqueIdRequest = {
+  const request: GetFileByUniqueIdPayloadRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
+    key,
   };
 
   const config: AxiosRequestConfig = {
@@ -152,7 +173,8 @@ export const getPayloadBytesByUniqueId = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/query/specialized/cuid/payload?' + stringifyToQueryParams(request as any),
+      '/drive/query/specialized/cuid/payload?' +
+        stringifyToQueryParams({ ...request, lastModified }),
       config
     )
     .then(async (response) => {
@@ -176,7 +198,7 @@ export const getPayloadBytesByUniqueId = async (
             )
           : await decryptBytesResponse(dotYouClient, response, keyHeader),
 
-        contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
+        contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
     })
     .catch((error) => {
@@ -190,20 +212,28 @@ export const getThumbBytesByUniqueId = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   uniqueId: string,
-  keyHeader: KeyHeader | undefined,
+  payloadKey: string,
   width: number,
   height: number,
-  systemFileType?: SystemFileType
+  options: {
+    keyHeader: KeyHeader | undefined;
+    systemFileType?: SystemFileType;
+    lastModified?: number;
+  }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
+  assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
+  assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
+  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
-  const request: GetFileByUniqueIdRequest = {
+  const request: GetFileThumbByUniqueIdRequest = {
     ...targetDrive,
     clientUniqueId: uniqueId,
+    payloadKey: payloadKey,
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
@@ -211,7 +241,7 @@ export const getThumbBytesByUniqueId = async (
 
   return client
     .get<ArrayBuffer>(
-      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height }),
+      '/drive/files/thumb?' + stringifyToQueryParams({ ...request, width, height, lastModified }),
       config
     )
     .then(async (response) => {

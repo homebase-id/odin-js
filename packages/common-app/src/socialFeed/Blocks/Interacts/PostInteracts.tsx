@@ -1,10 +1,4 @@
-import {
-  PostFile,
-  PostContent,
-  ReactionContext,
-  EmojiReactionSummary,
-  CommentsReactionSummary,
-} from '@youfoundation/js-lib/public';
+import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import { Suspense, useState } from 'react';
 import {
   Bubble,
@@ -27,6 +21,12 @@ import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
+import {
+  CommentsReactionSummary,
+  DriveSearchResult,
+  EmojiReactionSummary,
+  ParsedReactionPreview,
+} from '@youfoundation/js-lib/core';
 
 export const PostInteracts = ({
   authorOdinId,
@@ -42,7 +42,7 @@ export const PostInteracts = ({
   login,
 }: {
   authorOdinId: string;
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
 
   isAuthenticated?: boolean;
   isOwner?: boolean;
@@ -57,36 +57,38 @@ export const PostInteracts = ({
   const [hasIntentToReact, setHasIntentToReact] = useState(false);
   const toggleable = !defaultExpanded && allowExpand;
 
+  const postContent = postFile.fileMetadata.appData.content;
+
   const postDisabledEmoji =
-    postFile.content.reactAccess !== undefined &&
-    (postFile.content.reactAccess === false || postFile.content.reactAccess === 'comment');
+    postContent.reactAccess !== undefined &&
+    (postContent.reactAccess === false || postContent.reactAccess === 'comment');
   const postDisabledComment =
-    postFile.content.reactAccess !== undefined &&
-    (postFile.content.reactAccess === false || postFile.content.reactAccess === 'emoji');
+    postContent.reactAccess !== undefined &&
+    (postContent.reactAccess === false || postContent.reactAccess === 'emoji');
 
   const { data: canReact } = useCanReact({
     authorOdinId,
-    channelId: postFile.content.channelId,
-    postContent: postFile.content,
+    channelId: postContent.channelId,
+    postContent: postContent,
     isEnabled: !!isExpanded || !!hasIntentToReact,
     isAuthenticated: isAuthenticated ?? false,
     isOwner: isOwner ?? false,
   });
 
-  if (!postFile.globalTransitId || !postFile.fileId) return null;
+  if (!postFile.fileMetadata.globalTransitId || !postFile.fileId) return null;
 
   const reactionContext: ReactionContext = {
     authorOdinId: authorOdinId,
-    channelId: postFile.content.channelId,
+    channelId: postContent.channelId,
     target: {
-      globalTransitId: postFile.globalTransitId, // TODO: remove 'unknown' fallback
-      fileId: postFile.fileId, // TODO: remove 'unknown' fallback
-      isEncrypted: postFile.payloadIsEncrypted || false,
+      globalTransitId: postFile.fileMetadata.globalTransitId,
+      fileId: postFile.fileId,
+      isEncrypted: postFile.fileMetadata.isEncrypted || false,
     },
   };
 
-  const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postFile.content.channelId}/${
-    postFile.content.slug ?? postFile.content.id
+  const permalink = `https://${authorOdinId}${HOME_ROOT_PATH}posts/${postContent.channelId}/${
+    postContent.slug ?? postContent.id
   }`;
 
   return (
@@ -103,14 +105,16 @@ export const PostInteracts = ({
         ) : null}
         <EmojiSummary
           context={reactionContext}
-          reactionPreview={postFile.reactionPreview?.reactions}
+          reactionPreview={
+            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.reactions
+          }
           className="ml-2"
         />
         <div
           className="ml-auto flex flex-row items-center gap-2 font-semibold"
           onClick={(e) => e.stopPropagation()}
         >
-          {isPublic ? <ShareButton permalink={permalink} title={postFile.content.caption} /> : null}
+          {isPublic ? <ShareButton permalink={permalink} title={postContent.caption} /> : null}
           {isOwner && isPublic ? <RepostButton postFile={postFile} permalink={permalink} /> : null}
           {!postDisabledComment ? (
             <button
@@ -130,7 +134,9 @@ export const PostInteracts = ({
           {!showSummary ? (
             <CommentSummary
               context={reactionContext}
-              reactionPreview={postFile.reactionPreview?.comments}
+              reactionPreview={
+                (postFile.fileMetadata.reactionPreview as ParsedReactionPreview)?.comments
+              }
               onToggle={() => toggleable && setIsExpanded(!isExpanded)}
             />
           ) : null}
@@ -148,7 +154,9 @@ export const PostInteracts = ({
         </div>
       ) : showSummary ? (
         <CommentTeaserList
-          reactionPreview={postFile.reactionPreview?.comments}
+          reactionPreview={
+            (postFile.fileMetadata.reactionPreview as ParsedReactionPreview).comments
+          }
           onExpand={() => setIsExpanded(true)}
         />
       ) : null}
@@ -185,11 +193,13 @@ export const RepostButton = ({
   postFile,
   permalink,
 }: {
-  postFile: PostFile<PostContent>;
+  postFile: DriveSearchResult<PostContent>;
   permalink: string;
 }) => {
   const [isRepostDialogOpen, setIsReposeDialogOpen] = useState(false);
+  const postContent = postFile.fileMetadata.appData.content;
 
+  if (!postFile.fileId) return null;
   return (
     <>
       <button
@@ -205,10 +215,13 @@ export const RepostButton = ({
       {isRepostDialogOpen ? (
         <RepostDialog
           embeddedPost={{
-            ...postFile.content,
+            ...postContent,
+            fileId: postFile.fileId,
+            globalTransitId: postFile.fileMetadata.globalTransitId,
+            lastModified: postFile.fileMetadata.updated,
             permalink,
-            userDate: postFile.userDate,
-            previewThumbnail: postFile.previewThumbnail,
+            userDate: postFile.fileMetadata.appData.userDate ?? postFile.fileMetadata.created,
+            previewThumbnail: postFile.fileMetadata.appData.previewThumbnail,
           }}
           isOpen={isRepostDialogOpen}
           onClose={() => setIsReposeDialogOpen(false)}
@@ -306,10 +319,9 @@ const CommentTeaserList = ({
   reactionPreview?: CommentsReactionSummary;
   onExpand: () => void;
 }) => {
-  if (!reactionPreview?.comments.length) return null;
+  if (!reactionPreview?.comments?.length) return null;
 
-  const allEncrypted = reactionPreview.comments.every((comment) => comment.payloadIsEncrypted);
-
+  const allEncrypted = reactionPreview.comments.every((comment) => comment.isEncrypted);
   return (
     <div className="mb-5">
       <hr className="mb-4 dark:border-t-gray-300 dark:border-opacity-20"></hr>
