@@ -61,6 +61,8 @@ function App() {
           >
             <Route index={true} element={<ChatHome />} />
             <Route path={':conversationKey'} element={<ChatHome />} />
+            <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
+            <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
           </Route>
 
           <Route

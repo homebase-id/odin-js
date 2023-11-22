@@ -5,3 +5,4 @@ export * from './DomainUtil';
 export * from './VideoSegmenter';
 export * from './AttributeHelpers';
 export * from './PermissionHelpers';
+export * from './ImageMerger';

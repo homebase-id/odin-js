@@ -43,6 +43,7 @@ import {
   postTypeToDataType,
   Media,
 } from './PostTypes';
+import { makeGrid } from '../../helpers/ImageMerger';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -90,7 +91,7 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const mediaFiles: MediaFile[] = [];
-  let previewThumbnail: EmbeddedThumb | undefined;
+  const previewThumbnails: EmbeddedThumb[] = [];
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
@@ -111,7 +112,7 @@ export const savePost = async <T extends PostContent>(
         type: 'video',
       });
 
-      if (!previewThumbnail) previewThumbnail = tinyThumb;
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
@@ -129,7 +130,8 @@ export const savePost = async <T extends PostContent>(
         fileKey: payloadKey,
         type: 'image',
       });
-      if (!previewThumbnail) previewThumbnail = tinyThumb;
+
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
     }
     onUpdate?.((i + 1) / newMediaFiles.length);
   }
@@ -139,6 +141,9 @@ export const savePost = async <T extends PostContent>(
       mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined;
   }
   file.fileMetadata.appData.content.primaryMediaFile = mediaFiles[0];
+
+  const previewThumbnail: EmbeddedThumb | undefined =
+    previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
   return await uploadPost(
     dotYouClient,

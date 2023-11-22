@@ -29,7 +29,10 @@ import {
   SingleConversation,
 } from './ConversationProvider';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
-import { NewMediaFile } from '@youfoundation/js-lib/dist';
+import { makeGrid } from '@youfoundation/js-lib/helpers';
+import { NewMediaFile } from '@youfoundation/js-lib/public';
+
+export const ChatMessageFileType = 7878;
 
 export enum ChatDeliveryStatus {
   // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
@@ -182,7 +185,7 @@ export const uploadChatMessage = async (
     appData: {
       uniqueId: messageContent.id,
       groupId: messageContent.conversationId,
-      fileType: messageContent.messageType,
+      fileType: ChatMessageFileType,
       content: jsonContent,
     },
     isEncrypted: true,
@@ -193,7 +196,7 @@ export const uploadChatMessage = async (
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
-  let previewThumbnail: EmbeddedThumb | undefined;
+  const previewThumbnails: EmbeddedThumb[] = [];
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
@@ -203,7 +206,11 @@ export const uploadChatMessage = async (
     } else {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
-        payloadKey
+        payloadKey,
+        [
+          { quality: 75, width: 250, height: 250 },
+          { quality: 75, width: 1600, height: 1600 },
+        ]
       );
 
       thumbnails.push(...additionalThumbnails);
@@ -212,11 +219,12 @@ export const uploadChatMessage = async (
         payload: newMediaFile.file,
       });
 
-      if (!previewThumbnail) previewThumbnail = tinyThumb;
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
     }
   }
 
-  uploadMetadata.appData.previewThumbnail = previewThumbnail;
+  uploadMetadata.appData.previewThumbnail =
+    previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
   return await uploadFile(
     dotYouClient,
@@ -259,7 +267,7 @@ export const updateChatMessage = async (
     appData: {
       uniqueId: messageContent.id,
       groupId: messageContent.conversationId,
-      fileType: messageContent.messageType,
+      fileType: ChatMessageFileType,
       content: payloadJson,
     },
     senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,

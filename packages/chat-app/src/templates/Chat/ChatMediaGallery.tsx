@@ -1,0 +1,120 @@
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { ChatMessage } from '../../providers/ChatProvider';
+import {
+  ActionButton,
+  Arrow,
+  ArrowLeft,
+  Times,
+  useDotYouClient,
+  usePortal,
+} from '@youfoundation/common-app';
+import { ChatDrive } from '../../providers/ConversationProvider';
+import { OdinImage } from '@youfoundation/ui-lib';
+import { useNavigate, useParams } from 'react-router-dom';
+
+export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+  const target = usePortal('modal-container');
+  const dotYouClient = useDotYouClient().getDotYouClient();
+
+  const navigate = useNavigate();
+  const { mediaKey } = useParams();
+
+  if (!mediaKey) return null;
+
+  const paths = window.location.pathname.split('/');
+  const onClose = () => {
+    paths.pop();
+    paths.pop();
+    navigate(paths.join('/'));
+  };
+
+  const allkeys = msg.fileMetadata.payloads.map((p) => p.key);
+  const nextKey = allkeys[allkeys.indexOf(mediaKey) + 1];
+  const prevKey = allkeys[allkeys.indexOf(mediaKey) - 1];
+
+  const goNext = (e: MouseEvent | KeyboardEvent) => {
+    e.stopPropagation();
+    paths.pop();
+    if (nextKey) navigate([...paths, nextKey].join('/'));
+  };
+
+  const goPrev = (e: MouseEvent | KeyboardEvent) => {
+    e.stopPropagation();
+    paths.pop();
+    if (prevKey) navigate([...paths, prevKey].join('/'));
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      e.stopPropagation();
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+
+        goPrev(e);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+
+        goNext(e);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mediaKey]);
+
+  const dialog = (
+    <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
+      <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
+      <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
+        <div className="relative flex h-full min-h-screen flex-col lg:flex-row">
+          <OdinImage
+            className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
+            dotYouClient={dotYouClient}
+            fileId={msg.fileId}
+            fileKey={mediaKey}
+            targetDrive={ChatDrive}
+            alt="post"
+            fit="contain"
+            lastModified={msg.fileMetadata.updated}
+          />
+
+          {onClose ? (
+            <button
+              onClick={onClose}
+              className={`absolute left-4 top-4 rounded-full border border-primary/50 bg-background p-3 text-foreground hover:brightness-90 hover:filter dark:border-primary/50`}
+            >
+              <Times className="h-4 w-4" />
+            </button>
+          ) : null}
+
+          {prevKey ? (
+            <ActionButton
+              icon={ArrowLeft}
+              onClick={(e) => goPrev(e.nativeEvent)}
+              className="absolute left-2 top-[calc(50%-1.25rem)] rounded-full p-3"
+              size="square"
+              type="secondary"
+            />
+          ) : null}
+          {nextKey ? (
+            <ActionButton
+              icon={Arrow}
+              onClick={(e) => goNext(e.nativeEvent)}
+              className="absolute right-2 top-[calc(50%-1.25rem)] rounded-full p-3"
+              size="square"
+              type="secondary"
+            />
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(dialog, target);
+};

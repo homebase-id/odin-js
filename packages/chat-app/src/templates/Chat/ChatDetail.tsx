@@ -27,6 +27,8 @@ import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMedia } from './ChatMedia';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ChatMediaGallery } from './ChatMediaGallery';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -102,32 +104,38 @@ const ChatMessageItem = ({
   const messageFromMe = !authorOdinId || authorOdinId === identity;
   const hasMedia = !!msg.fileMetadata.payloads?.length;
 
-  return (
-    <div className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse text-right' : 'flex-row'}`}>
-      {isGroupChat && !messageFromMe ? (
-        <ConnectionImage
-          odinId={authorOdinId}
-          className="border border-neutral-200 dark:border-neutral-800"
-          size="sm"
-        />
-      ) : null}
+  const { chatMessageKey, mediaKey } = useParams();
+  const isDetail = msg.fileMetadata.appData.content.id === chatMessageKey && mediaKey;
 
-      {hasMedia ? (
-        <ChatMediaMessageBody
-          msg={msg}
-          authorOdinId={authorOdinId}
-          isGroupChat={isGroupChat}
-          messageFromMe={messageFromMe}
-        />
-      ) : (
-        <ChatTextMessageBody
-          msg={msg}
-          authorOdinId={authorOdinId}
-          isGroupChat={isGroupChat}
-          messageFromMe={messageFromMe}
-        />
-      )}
-    </div>
+  return (
+    <>
+      {isDetail ? <ChatMediaGallery msg={msg} /> : null}
+      <div className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse text-right' : 'flex-row'}`}>
+        {isGroupChat && !messageFromMe ? (
+          <ConnectionImage
+            odinId={authorOdinId}
+            className="border border-neutral-200 dark:border-neutral-800"
+            size="sm"
+          />
+        ) : null}
+
+        {hasMedia ? (
+          <ChatMediaMessageBody
+            msg={msg}
+            authorOdinId={authorOdinId}
+            isGroupChat={isGroupChat}
+            messageFromMe={messageFromMe}
+          />
+        ) : (
+          <ChatTextMessageBody
+            msg={msg}
+            authorOdinId={authorOdinId}
+            isGroupChat={isGroupChat}
+            messageFromMe={messageFromMe}
+          />
+        )}
+      </div>
+    </>
   );
 };
 
