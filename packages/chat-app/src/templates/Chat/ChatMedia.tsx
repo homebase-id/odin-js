@@ -16,10 +16,13 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   return (
     <div className={`${isGallery ? 'grid grid-cols-2 gap-1' : ''}`}>
       {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => {
+        const isColSpan2 = payloads.length === 3 && index === 2;
         return (
           <div
             key={payload.key}
-            className={`relative h-full w-full ${isGallery ? 'aspect-square' : ''} `}
+            className={`relative h-full w-full ${
+              isGallery ? (isColSpan2 ? 'aspect-[2/1]' : 'aspect-square') : ''
+            } ${isColSpan2 ? 'col-span-2' : ''}`}
           >
             <MediaItem
               fileId={msg.fileId}
