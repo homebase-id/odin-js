@@ -9,3 +9,7 @@
 .dark {
   color-scheme: dark;
 }
+
+.dark iframe {
+  color-scheme: auto;
+}

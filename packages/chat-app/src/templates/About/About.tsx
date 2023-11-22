@@ -10,7 +10,7 @@ const About = () => {
     <NoLayout noShadedBg={true}>
       <section className="relative flex min-h-screen items-center justify-center">
         <div className="absolute inset-0 flex flex-col">
-          <div className="flex flex-row items-center border-b px-5 py-3">
+          <div className="flex flex-row items-center border-b px-5 py-3 dark:border-b-slate-800">
             <Logo className="my-auto mr-2 h-10 w-10" />{' '}
             <h1 className="mr-auto text-2xl">Homebase Chat</h1>
             <LoginNav />
