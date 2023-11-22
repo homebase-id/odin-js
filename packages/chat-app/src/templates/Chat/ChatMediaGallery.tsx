@@ -68,6 +68,8 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [mediaKey]);
 
+  // TODO: Added previewThumbnail of the grid
+
   const dialog = (
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>

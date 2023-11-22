@@ -49,6 +49,7 @@ export const getAbsoluteOffsetToParent = (
   relativeOffset: number,
   rootNode: Node
 ): number => {
+  if (!elem) return 0;
   if (elem.nodeType === 3) {
     // It's a text node
     const currentOffset = getTextLengthFromPreviousSiblings(elem) + relativeOffset;

@@ -47,9 +47,6 @@ export interface GroupConversation extends BaseConversation {
 
 export type Conversation = SingleConversation | GroupConversation;
 
-const JOIN_GROUP_CONVERSATION_COMMAND = 110;
-const DELETE_CHAT_COMMAND = 180;
-
 export const getConversations = async (
   dotYouClient: DotYouClient,
   cursorState: string | undefined,
@@ -198,6 +195,9 @@ export const updateConversation = async (
 };
 
 export const JOIN_CONVERSATION_COMMAND = 100;
+// const JOIN_GROUP_CONVERSATION_COMMAND = 110;
+// const DELETE_CHAT_COMMAND = 180;
+
 export interface JoinConversationRequest {
   conversationId: string;
   title: string;

@@ -153,14 +153,22 @@ const ChatTextMessageBody = ({
   authorOdinId: string;
 }) => {
   const content = msg.fileMetadata.appData.content;
+  const isEmojiOnly =
+    Array.from(content.message).length === 1 && content.message.match(/\p{Emoji}/u);
+  const showBackground = !isEmojiOnly;
+
   return (
     <div
       className={`flex w-auto max-w-md flex-col rounded-lg px-2 py-1 md:flex-row ${
-        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
+        showBackground
+          ? messageFromMe
+            ? 'bg-primary/10 dark:bg-primary/30'
+            : 'bg-gray-500/10  dark:bg-gray-300/20'
+          : ''
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      <p className="whitespace-pre-wrap">{content.message}</p>
+      <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>{content.message}</p>
       <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
@@ -329,7 +337,7 @@ const ChatComposer = ({ conversation }: { conversation: Conversation | undefined
             <EmojiSelector
               size="none"
               className="px-1 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-              onInput={(val) => setMessage((oldVal) => `${oldVal} ${val}`)}
+              onInput={(val) => setMessage((oldVal) => (oldVal ? `${oldVal} ${val}` : val))}
             />
             <FileSelector
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
