@@ -22,7 +22,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation,
     messages,
   }: {
-    conversation: Conversation;
+    conversation: DriveSearchResult<Conversation>;
     messages: DriveSearchResult<ChatMessage>[];
   }) => {
     // => Much nicer solution: Handle with a last read time on the conversation file;

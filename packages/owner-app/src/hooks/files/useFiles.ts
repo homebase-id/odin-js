@@ -76,20 +76,20 @@ export const useFiles = ({
           content: tryJsonParse(decryptedJsonContent),
         },
       },
-      payload:
-        result.fileMetadata.payloads.length === 0 ||
-        result.fileMetadata.payloads.some((payload) => payload.contentType === 'application/json')
-          ? await getContentFromHeaderOrPayload(
-              dotYouClient,
-              targetDrive,
-              result,
-              includeMetadataHeader
-            )
-          : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
-              keyHeader: result.fileMetadata.isEncrypted
-                ? result.sharedSecretEncryptedKeyHeader
-                : undefined,
-            }),
+      defaultPayload: result.fileMetadata.payloads.some(
+        (payload) => payload.contentType === 'application/json'
+      )
+        ? await getContentFromHeaderOrPayload(
+            dotYouClient,
+            targetDrive,
+            result,
+            includeMetadataHeader
+          )
+        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
+            keyHeader: result.fileMetadata.isEncrypted
+              ? result.sharedSecretEncryptedKeyHeader
+              : undefined,
+          }),
     };
 
     const stringified = jsonStringify64(exportable);

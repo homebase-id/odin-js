@@ -26,13 +26,13 @@ export const ChatDrive: TargetDrive = {
 };
 
 interface BaseConversation {
-  conversationId: string;
+  // conversationId: string;
   title: string;
-  imgId?: string;
+  // imgId?: string;
   lastReadTime?: number;
 
-  unread: boolean;
-  unreadCount: number;
+  // unread: boolean;
+  // unreadCount: number;
   // messageType: MessageType;
   // message: ChatMessage;
 }
@@ -137,7 +137,7 @@ export const uploadConversation = async (
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
     appData: {
-      uniqueId: conversationContent.conversationId,
+      uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
       content: payloadJson,
     },
@@ -176,7 +176,7 @@ export const updateConversation = async (
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
     appData: {
-      uniqueId: conversationContent.conversationId,
+      uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
       content: payloadJson,
     },
@@ -205,10 +205,11 @@ export interface JoinConversationRequest {
 
 export const requestConversationCommand = async (
   dotYouClient: DotYouClient,
-  conversation: Conversation
+  conversation: Conversation,
+  conversationId: string
 ) => {
   const request: JoinConversationRequest = {
-    conversationId: conversation.conversationId,
+    conversationId: conversationId,
     title: conversation.title,
   };
 

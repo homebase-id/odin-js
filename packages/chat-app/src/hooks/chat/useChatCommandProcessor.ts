@@ -70,12 +70,10 @@ const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCom
     await uploadConversation(dotYouClient, {
       fileMetadata: {
         appData: {
+          uniqueId: joinConversationRequest.conversationId,
           content: {
-            conversationId: joinConversationRequest.conversationId,
             title: joinConversationRequest.title,
             recipient: command.sender,
-            unread: false,
-            unreadCount: 0,
           },
         },
       },

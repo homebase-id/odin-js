@@ -45,7 +45,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
       <ChatHistory conversation={conversation || undefined} />
-      <ChatComposer conversation={conversation?.fileMetadata.appData.content} />
+      <ChatComposer conversation={conversation || undefined} />
     </div>
   );
 };
@@ -70,10 +70,9 @@ const ChatHistory = ({
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
 }) => {
-  const conversationContent = conversation?.fileMetadata.appData.content;
   const {
     all: { data: messages },
-  } = useChatMessages({ conversationId: conversationContent?.conversationId });
+  } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
   const flattenedMsgs = useMemo(
     () =>
       (messages?.pages.flatMap((page) => page.searchResults).filter(Boolean) ||
@@ -295,7 +294,11 @@ export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
   );
 };
 
-const ChatComposer = ({ conversation }: { conversation: Conversation | undefined }) => {
+const ChatComposer = ({
+  conversation,
+}: {
+  conversation: DriveSearchResult<Conversation> | undefined;
+}) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
   const [files, setFiles] = useState<NewMediaFile[]>();
@@ -306,14 +309,17 @@ const ChatComposer = ({ conversation }: { conversation: Conversation | undefined
     reset: resetState,
     error: sendMessageError,
   } = useChatMessage().send;
+
+  const conversationContent = conversation?.fileMetadata.appData.content;
   const doSend = () => {
-    if ((!message && !files) || !conversation) return;
+    if ((!message && !files) || !conversationContent || !conversation.fileMetadata.appData.uniqueId)
+      return;
     sendMessage({
-      conversationId: conversation.conversationId,
+      conversationId: conversation.fileMetadata.appData.uniqueId as string,
       message: message || '',
       files,
-      recipients: (conversation as GroupConversation).recipients || [
-        (conversation as SingleConversation).recipient,
+      recipients: (conversationContent as GroupConversation).recipients || [
+        (conversationContent as SingleConversation).recipient,
       ],
     });
   };

@@ -56,12 +56,8 @@ export const ConversationsList = ({
             <ConversationItem
               key={conversation.fileId}
               conversation={conversation}
-              onClick={() =>
-                openConversation(conversation.fileMetadata.appData.content.conversationId)
-              }
-              isActive={
-                activeConversationId === conversation.fileMetadata.appData.content.conversationId
-              }
+              onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
+              isActive={activeConversationId === conversation.fileMetadata.appData.uniqueId}
             />
           ))}
         </div>
@@ -87,7 +83,7 @@ const ConversationItem = ({
     <InnerConversationItem
       onClick={onClick}
       odinId={singleContent.recipient}
-      conversationId={singleContent.conversationId}
+      conversationId={conversation.fileMetadata.appData.uniqueId}
       isActive={isActive}
     />
   );
@@ -239,8 +235,7 @@ const SearchConversation = ({
                 onOpen={(id) => openConversation(id)}
                 isActive={
                   activeConversationId ===
-                  (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.content
-                    ?.conversationId
+                  (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
                 }
                 key={result.fileId}
               />
@@ -265,14 +260,12 @@ const SearchResult = (props: {
   const { onOpen, isActive } = props;
   const result: DriveSearchResult<Conversation> = props.result as DriveSearchResult<Conversation>;
 
-  const { odinId, conversationId, onClick } = React.useMemo(() => {
+  const { odinId } = React.useMemo(() => {
     const groupConversation = (result as DriveSearchResult<Conversation>).fileMetadata.appData
       .content as GroupConversation;
     if (groupConversation.recipients?.length)
       return {
         odinId: groupConversation.recipients.join(', '),
-        conversationId: groupConversation.conversationId,
-        onClick: () => onOpen(groupConversation.conversationId),
       };
 
     const conversation = (result as DriveSearchResult<Conversation>).fileMetadata.appData
@@ -280,18 +273,17 @@ const SearchResult = (props: {
     if (conversation)
       return {
         odinId: conversation.recipient,
-        conversationId: conversation.conversationId,
-        onClick: () => onOpen(conversation.conversationId),
       };
 
     return { odinId: undefined, onClick: undefined };
   }, [result]);
 
+  const conversationId = result.fileMetadata.appData.uniqueId as string;
   return (
     <InnerConversationItem
       odinId={odinId}
       conversationId={conversationId}
-      onClick={onClick}
+      onClick={() => onOpen(conversationId)}
       isActive={isActive}
     />
   );

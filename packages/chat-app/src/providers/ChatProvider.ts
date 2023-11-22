@@ -281,22 +281,23 @@ export interface MarkAsReadRequest {
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: Conversation,
+  conversation: DriveSearchResult<Conversation>,
   chatGlobalTransitIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
-    conversationId: conversation.conversationId,
+    conversationId: conversation.fileMetadata.appData.uniqueId as string,
     messageIds: chatGlobalTransitIds,
   };
 
+  const conversationContent = conversation.fileMetadata.appData.content;
   return await sendCommand(
     dotYouClient,
     {
       code: MARK_CHAT_READ_COMMAND,
       globalTransitIdList: [],
       jsonMessage: jsonStringify64(request),
-      recipients: (conversation as GroupConversation).recipients || [
-        (conversation as SingleConversation).recipient,
+      recipients: (conversationContent as GroupConversation).recipients || [
+        (conversationContent as SingleConversation).recipient,
       ],
     },
     ChatDrive

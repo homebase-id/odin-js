@@ -30,12 +30,10 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     const newConversation: NewDriveSearchResult<Conversation> = {
       fileMetadata: {
         appData: {
+          uniqueId: newConversationId,
           content: {
-            conversationId: newConversationId,
             recipient: odinId,
             title: odinId,
-            unread: false,
-            unreadCount: 0,
           },
         },
       },
@@ -51,7 +49,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       ...(await uploadConversation(dotYouClient, newConversation)),
     };
 
-    await requestConversationCommand(dotYouClient, newConversation.fileMetadata.appData.content);
+    await requestConversationCommand(
+      dotYouClient,
+      newConversation.fileMetadata.appData.content,
+      newConversationId
+    );
     return uploadResult;
   };
 
@@ -86,10 +88,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'conversation',
-            variables.conversation.fileMetadata.appData.content.conversationId,
-          ],
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },

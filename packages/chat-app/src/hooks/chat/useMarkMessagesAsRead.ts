@@ -35,7 +35,7 @@ export const useMarkMessagesAsRead = ({
 
     isTriggeredOnce.current = true;
     markAsRead({
-      conversation: conversation.fileMetadata.appData.content,
+      conversation: conversation,
       messages: unreadMessages,
     });
   }, [messages]);
