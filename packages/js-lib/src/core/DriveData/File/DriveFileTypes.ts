@@ -167,4 +167,6 @@ export interface NewAppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   fileType?: number;
   userDate?: number;
+  uniqueId?: string;
+  groupId?: string;
 }

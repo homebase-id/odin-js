@@ -27,8 +27,9 @@ import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMedia } from './ChatMedia';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ChatMediaGallery } from './ChatMediaGallery';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -105,7 +106,7 @@ const ChatMessageItem = ({
   const hasMedia = !!msg.fileMetadata.payloads?.length;
 
   const { chatMessageKey, mediaKey } = useParams();
-  const isDetail = msg.fileMetadata.appData.content.id === chatMessageKey && mediaKey;
+  const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
   return (
     <>

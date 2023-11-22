@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { useChatMessages } from './useChatMessages';
@@ -15,12 +16,13 @@ export const useMarkMessagesAsRead = ({
   const {
     markAsRead: { mutate: markAsRead, status: markAsReadStatus },
   } = useChatMessages();
+  const isTriggeredOnce = useRef(false);
 
   const { mutate: updateConversation } = useConversation().update;
   const [pendingReadTime, setPendingReadTime] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    if (!conversation || !messages) return;
+    if (!conversation || !messages || isTriggeredOnce.current) return;
 
     setPendingReadTime(new Date());
     const unreadMessages = messages.filter(
@@ -31,11 +33,11 @@ export const useMarkMessagesAsRead = ({
 
     if (!unreadMessages.length) return;
 
+    isTriggeredOnce.current = true;
     markAsRead({
       conversation: conversation.fileMetadata.appData.content,
       messages: unreadMessages,
     });
-    console.log(unreadMessages);
   }, [messages]);
 
   useEffect(() => {

@@ -26,7 +26,7 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
               fileLastModified={msg.fileMetadata.updated}
               payload={payload}
               fit={isGallery ? 'cover' : 'contain'}
-              onClick={() => navigate(`${msg.fileMetadata.appData.content.id}/${payload.key}`)}
+              onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)}
             >
               {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                 <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">

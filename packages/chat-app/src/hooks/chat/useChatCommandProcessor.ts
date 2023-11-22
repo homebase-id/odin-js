@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import {
   DotYouClient,
   SecurityGroupType,
@@ -7,8 +8,11 @@ import {
 import { useEffect } from 'react';
 import {
   ChatDrive,
+  GroupConversation,
   JOIN_CONVERSATION_COMMAND,
   JoinConversationRequest,
+  SingleConversation,
+  getConversation,
   uploadConversation,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient } from '@youfoundation/common-app';
@@ -24,9 +28,12 @@ import {
 
 export const useChatCommandProcessor = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const isProcessing = useRef(false);
 
   useEffect(() => {
     (async () => {
+      if (isProcessing.current) return;
+      isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
 
       const completedCommands = await Promise.all(
@@ -51,6 +58,8 @@ export const useChatCommandProcessor = () => {
           ChatDrive,
           completedCommands.filter(Boolean) as string[]
         );
+
+      isProcessing.current = false;
     })();
   }, []);
 };
@@ -92,6 +101,18 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
   const conversationId = markAsReadRequest.conversationId;
   const chatGlobalTransIds = markAsReadRequest.messageIds;
 
+  if (!conversationId || !chatGlobalTransIds) return null;
+
+  const conversation = await getConversation(dotYouClient, conversationId);
+  if (!conversation) return null;
+  const conversationContent = conversation.fileMetadata.appData.content;
+  const recipients = (conversationContent as GroupConversation).recipients || [
+    (conversationContent as SingleConversation).recipient,
+  ];
+  if (!recipients.filter(Boolean)?.length) {
+    return null;
+  }
+
   // It's a hack... Needs to change
   const getChatMessageByGlobalTransitId = async (globalTransitId: string) => {
     const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
@@ -107,7 +128,7 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
 
       chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
       try {
-        const updateResult = await updateChatMessage(dotYouClient, chatMessage);
+        const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);
         return !!updateResult;
       } catch (ex) {
         return false;

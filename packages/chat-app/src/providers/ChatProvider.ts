@@ -57,17 +57,11 @@ export enum MessageType {
 }
 
 export interface ChatMessage {
-  /// ClientUniqueId. Set by the device
-  id: string;
-
-  /// GroupId of the payload.
-  conversationId: string;
-
   // /// ReplyId used to get the replyId of the message
-  // replyId: string; => Better to use the groupId?
+  // replyId: string; => Better to use the groupId (unless that would break finding the messages of a conversation)...
 
-  /// Type of the message. It's the fileType from the server
-  messageType: MessageType;
+  /// Type of the message
+  // messageType: MessageType;
 
   /// FileState of the Message
   /// [FileState.active] shows the message is active
@@ -81,14 +75,6 @@ export interface ChatMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
-
-  /// List of tags for the message
-  /// Could be used to assign tags to the message
-  /// E.g Could be a replyId
-  // tags: string[];
-
-  /// List of recipients of the message that it is intended to be sent to.
-  recipients: string[];
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
@@ -157,11 +143,12 @@ export const dsrToMessage = async (
 export const uploadChatMessage = async (
   dotYouClient: DotYouClient,
   message: NewDriveSearchResult<ChatMessage>,
+  recipients: string[],
   files: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = messageContent.recipients?.length > 0;
+  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -170,7 +157,7 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...messageContent.recipients],
+          recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
@@ -183,8 +170,8 @@ export const uploadChatMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
     appData: {
-      uniqueId: messageContent.id,
-      groupId: messageContent.conversationId,
+      uniqueId: message.fileMetadata.appData.uniqueId,
+      groupId: message.fileMetadata.appData.groupId,
       fileType: ChatMessageFileType,
       content: jsonContent,
     },
@@ -240,10 +227,11 @@ export const uploadChatMessage = async (
 export const updateChatMessage = async (
   dotYouClient: DotYouClient,
   message: DriveSearchResult<ChatMessage> | NewDriveSearchResult<ChatMessage>,
+  recipients: string[],
   keyHeader?: KeyHeader
 ) => {
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = messageContent.recipients?.length > 0;
+  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -252,7 +240,7 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...messageContent.recipients],
+          recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
@@ -265,8 +253,8 @@ export const updateChatMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
     appData: {
-      uniqueId: messageContent.id,
-      groupId: messageContent.conversationId,
+      uniqueId: message.fileMetadata.appData.uniqueId,
+      groupId: message.fileMetadata.appData.groupId,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },
