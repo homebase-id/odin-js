@@ -282,7 +282,8 @@ export const getQueryBatchCursorFromTime = (fromUnixTimeInMs: number, toUnixTime
 
 export const tryJsonParse = <T>(json: string): T => {
   try {
-    if (!json || !json?.length) return {} as T;
+    if (typeof json === 'object') return json as T;
+    if (!json || !json.length) return {} as T;
     const o = JSON.parse(json);
     return o;
   } catch (ex) {
