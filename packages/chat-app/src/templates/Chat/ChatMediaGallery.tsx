@@ -25,9 +25,10 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
 
   const paths = window.location.pathname.split('/');
   const onClose = () => {
-    paths.pop();
-    paths.pop();
-    navigate(paths.join('/'));
+    const toPaths = [...paths];
+    toPaths.pop();
+    toPaths.pop();
+    navigate(toPaths.join('/'));
   };
 
   const allkeys = msg.fileMetadata.payloads.map((p) => p.key);
@@ -36,14 +37,22 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
 
   const goNext = (e: MouseEvent | KeyboardEvent) => {
     e.stopPropagation();
-    paths.pop();
-    if (nextKey) navigate([...paths, nextKey].join('/'));
+
+    if (nextKey) {
+      const toPaths = [...paths];
+      toPaths.pop();
+      navigate([...toPaths, nextKey].join('/'));
+    }
   };
 
   const goPrev = (e: MouseEvent | KeyboardEvent) => {
     e.stopPropagation();
-    paths.pop();
-    if (prevKey) navigate([...paths, prevKey].join('/'));
+
+    if (prevKey) {
+      const toPaths = [...paths];
+      toPaths.pop();
+      navigate([...toPaths, prevKey].join('/'));
+    }
   };
 
   useEffect(() => {
@@ -66,7 +75,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mediaKey]);
+  }, [msg, mediaKey]);
 
   // TODO: Added previewThumbnail of the grid
 
