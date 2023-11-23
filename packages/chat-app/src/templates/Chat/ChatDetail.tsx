@@ -1,7 +1,6 @@
 import {
   ActionButton,
-  ArrowDown,
-  Check,
+  ActionGroup,
   ChevronDown,
   ConnectionImage,
   ConnectionName,
@@ -11,6 +10,7 @@ import {
   FileSelector,
   ImageIcon,
   SubtleCheck,
+  Times,
   VolatileInput,
   t,
   useDotYouClient,
@@ -34,8 +34,22 @@ import { useParams } from 'react-router-dom';
 import { ChatMediaGallery } from './ChatMediaGallery';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
+interface ChatActions {
+  doReply: (msg: DriveSearchResult<ChatMessage>) => void;
+  doDelete: (msgId: string) => void;
+}
+
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
+  const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
+
+  const chatActions: ChatActions = {
+    doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
+    doDelete: (msgId: string) => {
+      console.log('delete', msgId);
+      //
+    },
+  };
 
   if (!conversationId)
     return (
@@ -47,8 +61,12 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
-      <ChatHistory conversation={conversation || undefined} />
-      <ChatComposer conversation={conversation || undefined} />
+      <ChatHistory conversation={conversation || undefined} chatActions={chatActions} />
+      <ChatComposer
+        conversation={conversation || undefined}
+        replyMsg={replyMsg}
+        clearReplyMsg={() => setReplyMsg(undefined)}
+      />
     </div>
   );
 };
@@ -70,8 +88,10 @@ const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }
 
 const ChatHistory = ({
   conversation,
+  chatActions,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
+  chatActions: ChatActions;
 }) => {
   const {
     all: { data: messages },
@@ -88,7 +108,14 @@ const ChatHistory = ({
   return (
     <div className="flex h-full flex-grow flex-col-reverse gap-2 overflow-auto p-5">
       {flattenedMsgs?.map((msg) =>
-        msg ? <ChatMessageItem key={msg.fileId} msg={msg} isGroupChat={false} /> : null
+        msg ? (
+          <ChatMessageItem
+            key={msg.fileId}
+            msg={msg}
+            isGroupChat={false}
+            chatActions={chatActions}
+          />
+        ) : null
       )}
     </div>
   );
@@ -97,9 +124,11 @@ const ChatHistory = ({
 const ChatMessageItem = ({
   msg,
   isGroupChat,
+  chatActions,
 }: {
   msg: DriveSearchResult<ChatMessage>;
-  isGroupChat: boolean;
+  isGroupChat?: boolean;
+  chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
@@ -114,9 +143,7 @@ const ChatMessageItem = ({
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
       <div
-        className={`flex gap-2 ${
-          messageFromMe ? 'flex-row-reverse text-right' : 'flex-row'
-        } group relative`}
+        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative`}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -132,6 +159,7 @@ const ChatMessageItem = ({
             authorOdinId={authorOdinId}
             isGroupChat={isGroupChat}
             messageFromMe={messageFromMe}
+            chatActions={chatActions}
           />
         ) : (
           <ChatTextMessageBody
@@ -139,6 +167,7 @@ const ChatMessageItem = ({
             authorOdinId={authorOdinId}
             isGroupChat={isGroupChat}
             messageFromMe={messageFromMe}
+            chatActions={chatActions}
           />
         )}
       </div>
@@ -146,13 +175,40 @@ const ChatMessageItem = ({
   );
 };
 
-const ContextMenu = () => {
+const ContextMenu = ({
+  msg,
+  chatActions,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+  chatActions?: ChatActions;
+}) => {
+  if (!chatActions) return null;
   return (
-    <div className="pointer-events-none absolute right-1 top-[0.125rem] z-20 flex flex-col justify-center opacity-0 group-hover:pointer-events-auto group-hover:opacity-100">
-      <button className="rounded-full bg-background/20 p-2">
+    <ActionGroup
+      options={[
+        {
+          label: t('Reply'),
+          onClick: () => chatActions.doReply(msg),
+        },
+        {
+          label: t('Delete'),
+          confirmOptions: {
+            title: t('Delete message'),
+            body: t('Are you sure you want to delete this message?'),
+            buttonText: t('Delete'),
+          },
+          onClick: () => chatActions.doDelete(msg.fileMetadata.appData.uniqueId as string),
+        },
+      ]}
+      className="absolute right-1 top-[0.125rem] z-20 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+      type={'mute'}
+      size="square"
+    >
+      <>
         <ChevronDown className="h-3 w-3" />
-      </button>
-    </div>
+        <span className="sr-only ml-1">{t('More')}</span>
+      </>
+    </ActionGroup>
   );
 };
 
@@ -162,12 +218,14 @@ const ChatTextMessageBody = ({
   isGroupChat,
   messageFromMe,
   authorOdinId,
+  chatActions,
 }: {
   msg: DriveSearchResult<ChatMessage>;
 
-  isGroupChat: boolean;
+  isGroupChat?: boolean;
   messageFromMe: boolean;
   authorOdinId: string;
+  chatActions?: ChatActions;
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
@@ -185,12 +243,15 @@ const ChatTextMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>{content.message}</p>
+      <div className="flex flex-col gap-2">
+        {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
+        <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>{content.message}</p>
+      </div>
       <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>
-      <ContextMenu />
+      <ContextMenu chatActions={chatActions} msg={msg} />
     </div>
   );
 };
@@ -202,13 +263,16 @@ const ChatMediaMessageBody = ({
   messageFromMe,
 
   authorOdinId,
+  chatActions,
 }: {
   msg: DriveSearchResult<ChatMessage>;
 
-  isGroupChat: boolean;
+  isGroupChat?: boolean;
   messageFromMe: boolean;
 
   authorOdinId: string;
+
+  chatActions?: ChatActions;
 }) => {
   const content = msg.fileMetadata.appData.content;
 
@@ -219,7 +283,7 @@ const ChatMediaMessageBody = ({
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>
-      <ContextMenu />
+      <ContextMenu chatActions={chatActions} msg={msg} />
     </>
   );
 
@@ -230,7 +294,7 @@ const ChatMediaMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative">
         <ChatMedia msg={msg} />
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 z-10 px-2 py-1" /> : null}
       </div>
@@ -246,7 +310,7 @@ const ChatMediaMessageBody = ({
 
 export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <p className="text-sm text-foreground/50">{children}</p>
+    <p className="select-none text-sm text-foreground/50">{children}</p>
   );
 
   const date = new Date(msg.fileMetadata.created);
@@ -317,8 +381,12 @@ export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
 
 const ChatComposer = ({
   conversation,
+  replyMsg,
+  clearReplyMsg,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
+  replyMsg: DriveSearchResult<ChatMessage> | undefined;
+  clearReplyMsg: () => void;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
@@ -338,6 +406,7 @@ const ChatComposer = ({
     sendMessage({
       conversationId: conversation.fileMetadata.appData.uniqueId as string,
       message: message || '',
+      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
       recipients: (conversationContent as GroupConversation).recipients || [
         (conversationContent as SingleConversation).recipient,
@@ -351,16 +420,26 @@ const ChatComposer = ({
       setMessage('');
       setStateIndex((oldIndex) => oldIndex + 1);
       setFiles([]);
+      clearReplyMsg();
       resetState();
     }
   }, [sendMessageState]);
+
+  useEffect(() => {
+    if (replyMsg) setFiles([]);
+  }, [replyMsg]);
+
+  useEffect(() => {
+    if (files?.length) clearReplyMsg();
+  }, [files]);
 
   return (
     <>
       <ErrorNotification error={sendMessageError} />
       <div className="bg-page-background">
         <FileOverview files={files} setFiles={setFiles} className="mt-2" />
-        <div className="flex flex-shrink-0 flex-row gap-2  px-5 py-3">
+        {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
+        <div className="flex flex-shrink-0 flex-row gap-2 px-5 py-3">
           <div className="my-auto flex flex-row items-center gap-1">
             <EmojiSelector
               size="none"
@@ -392,5 +471,59 @@ const ChatComposer = ({
         </div>
       </div>
     </>
+  );
+};
+
+const MessageForReply = ({
+  msg,
+  onClear,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+  onClear: () => void;
+}) => {
+  return (
+    <div className="flex flex-row gap-2 px-5 py-3">
+      <EmbeddedMessage msg={msg} />
+      <ActionButton icon={Times} type="mute" onClick={onClear}></ActionButton>
+    </div>
+  );
+};
+
+const EmbeddedMessageWithId = ({ msgId, className }: { msgId: string; className?: string }) => {
+  const { data: msg } = useChatMessage({ messageId: msgId }).get;
+  if (!msg) return null;
+
+  return <EmbeddedMessage msg={msg} className={className} />;
+};
+
+const EmbeddedMessage = ({
+  msg,
+  className,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={`w-full flex-grow rounded-lg border-l-2 border-l-primary bg-primary/10 px-4 py-2 ${
+        className || ''
+      }`}
+    >
+      <p className="font-semibold">
+        {msg.fileMetadata.senderOdinId ? (
+          <ConnectionName odinId={msg.fileMetadata.senderOdinId} />
+        ) : (
+          t('You')
+        )}
+      </p>
+
+      <p className="text-foreground">
+        {msg.fileMetadata.appData.content.message ? (
+          msg.fileMetadata.appData.content.message
+        ) : (
+          <>📷 {t('Media')}</>
+        )}
+      </p>
+    </div>
   );
 };

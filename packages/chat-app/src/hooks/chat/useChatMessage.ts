@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
-import { ChatDeliveryStatus, ChatMessage } from '../../providers/ChatProvider';
+import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
   NewDriveSearchResult,
   SecurityGroupType,
@@ -10,19 +10,26 @@ import { getNewId } from '@youfoundation/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 
-export const useChatMessage = () => {
+export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const { getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
 
+  const getMessageByUniqueId = async (messageId: string) => {
+    // TODO: Improve by fetching the message from the cache on conversations first
+    return await getChatMessage(dotYouClient, messageId);
+  };
+
   const sendMessage = async ({
     conversationId,
     recipients,
+    replyId,
     files,
     message,
   }: {
     conversationId: string;
     recipients: string[];
+    replyId?: string;
     files?: NewMediaFile[];
     message: string;
   }): Promise<NewDriveSearchResult<ChatMessage> | null> => {
@@ -37,6 +44,7 @@ export const useChatMessage = () => {
           content: {
             message: message,
             deliveryStatus: ChatDeliveryStatus.Sent,
+            replyId: replyId,
           },
         },
       },
@@ -67,6 +75,11 @@ export const useChatMessage = () => {
   };
 
   return {
+    get: useQuery({
+      queryKey: ['chat-message', props?.messageId],
+      queryFn: () => getMessageByUniqueId(props?.messageId as string),
+      enabled: !!props?.messageId,
+    }),
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ conversationId, recipients, message }) => {

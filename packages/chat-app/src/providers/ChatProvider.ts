@@ -17,6 +17,7 @@ import {
   UploadInstructionSet,
   createThumbnails,
   getContentFromHeaderOrPayload,
+  getFileHeaderByUniqueId,
   queryBatch,
   sendCommand,
   uploadFile,
@@ -58,7 +59,7 @@ export enum MessageType {
 
 export interface ChatMessage {
   // /// ReplyId used to get the replyId of the message
-  // replyId: string; => Better to use the groupId (unless that would break finding the messages of a conversation)...
+  replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
 
   /// Type of the message
   // messageType: MessageType;
@@ -105,6 +106,17 @@ export const getChatMessages = async (
       )
     ),
   };
+};
+
+export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: string) => {
+  const fileHeader = await getFileHeaderByUniqueId<ChatMessage>(
+    dotYouClient,
+    ChatDrive,
+    chatMessageId
+  );
+  if (!fileHeader) return null;
+
+  return fileHeader;
 };
 
 export const dsrToMessage = async (
