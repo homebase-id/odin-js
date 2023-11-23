@@ -23,6 +23,7 @@ import React from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { ChatDeliveryIndicator, ChatSentTimeIndicator } from './ChatDetail';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const ConversationsList = ({
   openConversation,
@@ -57,7 +58,10 @@ export const ConversationsList = ({
               key={conversation.fileId}
               conversation={conversation}
               onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
-              isActive={activeConversationId === conversation.fileMetadata.appData.uniqueId}
+              isActive={stringGuidsEqual(
+                activeConversationId,
+                conversation.fileMetadata.appData.uniqueId
+              )}
             />
           ))}
         </div>

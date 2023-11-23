@@ -302,15 +302,19 @@ export const requestMarkAsRead = async (
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
+  const recipients = (conversationContent as GroupConversation).recipients || [
+    (conversationContent as SingleConversation).recipient,
+  ];
+  if (!recipients?.filter(Boolean)?.length)
+    throw new Error('No recipients found in the conversation');
+
   return await sendCommand(
     dotYouClient,
     {
       code: MARK_CHAT_READ_COMMAND,
       globalTransitIdList: [],
       jsonMessage: jsonStringify64(request),
-      recipients: (conversationContent as GroupConversation).recipients || [
-        (conversationContent as SingleConversation).recipient,
-      ],
+      recipients: recipients,
     },
     ChatDrive
   );

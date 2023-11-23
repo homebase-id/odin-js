@@ -49,6 +49,9 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
+      onError: (error) => {
+        console.error('Error marking chat as read', { error });
+      },
       // onMutate: async ({ conversation, recipients, message }) => {
       //   // TODO: Optimistic update of the chat messages append the new message to the list
       // },
