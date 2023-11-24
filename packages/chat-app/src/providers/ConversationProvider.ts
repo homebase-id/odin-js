@@ -195,11 +195,15 @@ export const updateConversation = async (
 };
 
 export const JOIN_CONVERSATION_COMMAND = 100;
-// const JOIN_GROUP_CONVERSATION_COMMAND = 110;
+export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
 
 export interface JoinConversationRequest {
   conversationId: string;
   title: string;
+}
+
+export interface JoinGroupConversationRequest extends JoinConversationRequest {
+  recipients: string[];
 }
 
 export const requestConversationCommand = async (
@@ -207,20 +211,26 @@ export const requestConversationCommand = async (
   conversation: Conversation,
   conversationId: string
 ) => {
-  const request: JoinConversationRequest = {
+  const recipients = (conversation as GroupConversation).recipients || [
+    (conversation as SingleConversation).recipient,
+  ];
+
+  if (!recipients || recipients.length === 0)
+    throw new Error('No recipients found for conversation');
+
+  const request: JoinConversationRequest | JoinGroupConversationRequest = {
     conversationId: conversationId,
     title: conversation.title,
+    recipients: recipients.length > 1 ? recipients : undefined,
   };
 
   return await sendCommand(
     dotYouClient,
     {
-      code: JOIN_CONVERSATION_COMMAND,
+      code: recipients.length > 1 ? JOIN_GROUP_CONVERSATION_COMMAND : JOIN_CONVERSATION_COMMAND,
       globalTransitIdList: [],
       jsonMessage: jsonStringify64(request),
-      recipients: (conversation as GroupConversation).recipients || [
-        (conversation as SingleConversation).recipient,
-      ],
+      recipients,
     },
     ChatDrive
   );

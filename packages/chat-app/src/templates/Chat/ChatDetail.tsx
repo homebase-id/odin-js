@@ -11,6 +11,7 @@ import {
   FileOverview,
   FileSelector,
   ImageIcon,
+  Persons,
   SubtleCheck,
   Times,
   VolatileInput,
@@ -70,16 +71,22 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 };
 
 const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }) => {
-  const recipients = (conversation as SingleConversation)?.recipient;
+  const recipient = (conversation as SingleConversation)?.recipient;
 
   return (
     <div className="flex flex-row items-center gap-2 bg-page-background p-5 ">
-      <ConnectionImage
-        odinId={recipients}
-        className="border border-neutral-200 dark:border-neutral-800"
-        size="sm"
-      />
-      <ConnectionName odinId={recipients} />
+      {recipient ? (
+        <ConnectionImage
+          odinId={recipient}
+          className="border border-neutral-200 dark:border-neutral-800"
+          size="sm"
+        />
+      ) : (
+        <div className="rounded-full bg-primary/20 p-3">
+          <Persons className="h-5 w-5" />
+        </div>
+      )}
+      {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}
     </div>
   );
 };
@@ -116,6 +123,9 @@ const ChatHistory = ({
     },
   };
 
+  const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
+    ?.recipients;
+
   return (
     <>
       <ErrorNotification error={deleteMessagesError} />
@@ -125,7 +135,7 @@ const ChatHistory = ({
             <ChatMessageItem
               key={msg.fileId}
               msg={msg}
-              isGroupChat={false}
+              isGroupChat={isGroupChat}
               chatActions={chatActions}
             />
           ) : null
@@ -264,7 +274,7 @@ const ChatTextMessageBody = ({
 
   return (
     <div
-      className={`relative flex w-auto max-w-md flex-col rounded-lg px-2 py-1 md:flex-row ${
+      className={`relative w-auto max-w-md rounded-lg px-2 py-1  ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -273,21 +283,23 @@ const ChatTextMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      {isDeleted ? (
-        <MessageDeletedInnerBody />
-      ) : (
-        <div className="flex flex-col gap-2">
-          {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-          <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>
-            {content.message}
-          </p>
+      <div className="flex flex-col md:flex-row">
+        {isDeleted ? (
+          <MessageDeletedInnerBody />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
+            <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>
+              {content.message}
+            </p>
+          </div>
+        )}
+        <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
+          <ChatDeliveryIndicator msg={msg} />
+          <ChatSentTimeIndicator msg={msg} />
         </div>
-      )}
-      <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
-        <ChatDeliveryIndicator msg={msg} />
-        <ChatSentTimeIndicator msg={msg} />
+        {!isDeleted ? <ContextMenu chatActions={chatActions} msg={msg} /> : null}
       </div>
-      {!isDeleted ? <ContextMenu chatActions={chatActions} msg={msg} /> : null}
     </div>
   );
 };

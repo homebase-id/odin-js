@@ -10,7 +10,9 @@ import {
   ChatDrive,
   GroupConversation,
   JOIN_CONVERSATION_COMMAND,
+  JOIN_GROUP_CONVERSATION_COMMAND,
   JoinConversationRequest,
+  JoinGroupConversationRequest,
   SingleConversation,
   getConversation,
   uploadConversation,
@@ -27,7 +29,10 @@ import {
 } from '../../providers/ChatProvider';
 
 export const useChatCommandProcessor = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getDotYouClient, getIdentity } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
+  const identity = getIdentity();
+
   const isProcessing = useRef(false);
 
   useEffect(() => {
@@ -41,11 +46,15 @@ export const useChatCommandProcessor = () => {
           .filter(
             (command) =>
               command.clientCode === JOIN_CONVERSATION_COMMAND ||
-              command.clientCode === MARK_CHAT_READ_COMMAND
+              command.clientCode === MARK_CHAT_READ_COMMAND ||
+              command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
           )
           .map(async (command) => {
             if (command.clientCode === JOIN_CONVERSATION_COMMAND)
               return joinConversation(dotYouClient, command);
+
+            if ((command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND, identity))
+              return joinGroupConversation(dotYouClient, command, identity);
 
             if (command.clientCode === MARK_CHAT_READ_COMMAND)
               return markChatAsRead(dotYouClient, command);
@@ -74,6 +83,51 @@ const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCom
           content: {
             title: joinConversationRequest.title,
             recipient: command.sender,
+          },
+        },
+      },
+      serverMetadata: {
+        accessControlList: {
+          requiredSecurityGroup: SecurityGroupType.Connected,
+        },
+      },
+    });
+  } catch (ex: any) {
+    if (ex?.response?.data?.errorCode === 4105) return command.id;
+
+    console.error(ex);
+    return null;
+  }
+
+  return command.id;
+};
+
+const joinGroupConversation = async (
+  dotYouClient: DotYouClient,
+  command: ReceivedCommand,
+  identity: string
+) => {
+  const joinConversationRequest = tryJsonParse<JoinGroupConversationRequest>(
+    command.clientJsonMessage
+  );
+
+  if (!joinConversationRequest.recipients) return command.id;
+
+  const recipients = joinConversationRequest.recipients.filter(
+    (recipient) => recipient !== identity
+  );
+  recipients.push(command.sender);
+
+  console.log('join', recipients);
+
+  try {
+    await uploadConversation(dotYouClient, {
+      fileMetadata: {
+        appData: {
+          uniqueId: joinConversationRequest.conversationId,
+          content: {
+            title: joinConversationRequest.title,
+            recipients: recipients,
           },
         },
       },

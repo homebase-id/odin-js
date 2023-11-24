@@ -30,7 +30,7 @@ const ConversationsOverview = () => {
 
   return (
     <div className="flex h-screen w-full flex-row overflow-hidden">
-      <div className="h-screen w-full max-w-xs flex-shrink-0 border-r bg-page-background dark:border-r-slate-800">
+      <div className="flex h-screen w-full max-w-xs flex-shrink-0 flex-col border-r bg-page-background dark:border-r-slate-800">
         {isCreateNew ? (
           <NewConversation />
         ) : isCreateNewGroup ? (

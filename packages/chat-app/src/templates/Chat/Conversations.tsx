@@ -4,6 +4,7 @@ import {
   ConnectionName,
   Input,
   MagnifyingGlass,
+  Persons,
   SubtleMessage,
   Times,
   ellipsisAtMaxChar,
@@ -89,7 +90,15 @@ const ConversationItem = ({
   isActive: boolean;
 }) => {
   const groupContent = conversation.fileMetadata.appData.content as GroupConversation;
-  if ('recipients' in groupContent) return <>Group conversation</>;
+  if ('recipients' in groupContent)
+    return (
+      <InnerGroupConversationItem
+        onClick={onClick}
+        title={groupContent.title}
+        conversationId={conversation.fileMetadata.appData.uniqueId}
+        isActive={isActive}
+      />
+    );
 
   const singleContent = conversation.fileMetadata.appData.content as SingleConversation;
   return (
@@ -99,6 +108,60 @@ const ConversationItem = ({
       conversationId={conversation.fileMetadata.appData.uniqueId}
       isActive={isActive}
     />
+  );
+};
+
+export const InnerGroupConversationItem = ({
+  onClick,
+  title,
+  conversationId,
+  isActive,
+}: {
+  onClick: (() => void) | undefined;
+  title: string | undefined;
+  conversationId?: string;
+  isActive: boolean;
+}) => {
+  const { data } = useChatMessages({ conversationId }).all;
+  const lastMessage = data?.pages
+    .flatMap((page) => page.searchResults)
+    ?.filter(Boolean)
+    .slice(0, 1)?.[0];
+
+  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+
+  return (
+    <div
+      onClick={onClick}
+      className={`flex w-full cursor-pointer flex-row items-center gap-3 px-5 py-2 ${
+        isActive ? 'bg-slate-200 dark:bg-slate-800' : ''
+      }`}
+    >
+      <div className="rounded-full bg-primary/20 p-4">
+        <Persons className="h-4 w-4" />
+      </div>
+      <div className="w-full text-lg">
+        {ellipsisAtMaxChar(title, 35)}
+        <small className="block leading-tight text-foreground/80">
+          {lastMessage && lastMessageContent ? (
+            lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
+              <MessageDeletedInnerBody />
+            ) : lastMessageContent.message ? (
+              <p>{ellipsisAtMaxChar(lastMessageContent.message, 35)}</p>
+            ) : (
+              //TODO: Add preview thumbnail of the actual media
+              <p>📷 {t('Media')}</p>
+            )
+          ) : null}
+        </small>
+      </div>
+      {lastMessage ? (
+        <div className="ml-auto flex flex-col items-end justify-between">
+          <ChatSentTimeIndicator msg={lastMessage} />
+          <ChatDeliveryIndicator msg={lastMessage} />
+        </div>
+      ) : null}
+    </div>
   );
 };
 
@@ -336,7 +399,7 @@ export const NewConversationSearchResult = ({
   const onClick = async () => {
     if (!odinId) return;
     try {
-      const result = await createNew({ odinId });
+      const result = await createNew({ recipients: [odinId] });
       onOpen(result.newConversationId);
     } catch (e) {
       console.error(e);

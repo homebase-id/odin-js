@@ -55,9 +55,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return null;
   };
 
-  const createConversation = async ({ odinId }: { odinId: string }) => {
+  const createConversation = async ({ recipients }: { recipients: string[] }) => {
     // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
-    const existingConversation = await getExistinConversationsForRecipient([odinId]);
+    const existingConversation = await getExistinConversationsForRecipient(recipients);
     if (existingConversation)
       return {
         ...existingConversation,
@@ -71,8 +71,14 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         appData: {
           uniqueId: newConversationId,
           content: {
-            recipient: odinId,
-            title: odinId,
+            ...(recipients.length > 1
+              ? {
+                  recipients: recipients,
+                }
+              : {
+                  recipient: recipients[0],
+                }),
+            title: recipients.join(', '),
           },
         },
       },
@@ -112,7 +118,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     create: useMutation({
       mutationFn: createConversation,
-      onMutate: async ({ odinId }) => {
+      onMutate: async ({ recipients }) => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
