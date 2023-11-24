@@ -20,36 +20,37 @@
     "auth.js",
     "auth.d.ts"
   ],
-  "main": "./dist/core.js",
-  "module": "./dist/core.mjs",
+  "type": "module",
+  "main": "./dist/core.cjs",
+  "module": "./dist/core.js",
   "exports": {
     "./core": {
-      "import": "./dist/core.mjs",
-      "require": "./dist/core.js"
+      "import": "./dist/core.js",
+      "require": "./dist/core.cjs"
     },
     "./helpers": {
-      "import": "./dist/helpers.mjs",
-      "require": "./dist/helpers.js"
+      "import": "./dist/helpers.js",
+      "require": "./dist/helpers.cjs"
     },
     "./network": {
-      "import": "./dist/network.mjs",
-      "require": "./dist/network.js"
+      "import": "./dist/network.js",
+      "require": "./dist/network.cjs"
     },
     "./profile": {
-      "import": "./dist/profile.mjs",
-      "require": "./dist/profile.js"
+      "import": "./dist/profile.js",
+      "require": "./dist/profile.cjs"
     },
     "./public": {
-      "import": "./dist/public.mjs",
-      "require": "./dist/public.js"
+      "import": "./dist/public.js",
+      "require": "./dist/public.cjs"
     },
     "./transit": {
-      "import": "./dist/transit.mjs",
-      "require": "./dist/transit.js"
+      "import": "./dist/transit.js",
+      "require": "./dist/transit.cjs"
     },
     "./auth": {
-      "import": "./dist/auth.mjs",
-      "require": "./dist/auth.js"
+      "import": "./dist/auth.js",
+      "require": "./dist/auth.cjs"
     }
   },
   "types": "index.d.ts",
@@ -74,7 +75,7 @@
     "mp4box": "^0.5.2"
   },
   "devDependencies": {
-    "vitest": "^0.34.5"
+    "vitest": "^0.34.6"
   },
   "peerDependencies": {
     "axios": "^1.5.1"

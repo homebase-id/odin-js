@@ -261,7 +261,7 @@ const uploadPost = async <T extends PostContent>(
     });
   }
 
-  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType ?? false;
+  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
   const metadata: UploadFileMetadata = {
     versionTag: file?.fileMetadata.versionTag ?? undefined,
     allowDistribution: !isDraft,
@@ -345,7 +345,7 @@ const uploadPostHeader = async <T extends PostContent>(
     ? payloadJson
     : jsonStringify64({ channelId: file.fileMetadata.appData.content.channelId });
 
-  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType ?? false;
+  const isDraft = file.fileMetadata.appData.fileType === BlogConfig.DraftPostFileType;
   const metadata: UploadFileMetadata = {
     versionTag: file.fileMetadata.versionTag ?? undefined,
     allowDistribution: !isDraft,
