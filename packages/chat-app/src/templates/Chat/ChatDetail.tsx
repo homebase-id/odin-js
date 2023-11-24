@@ -2,6 +2,7 @@ import {
   ActionButton,
   ActionGroup,
   ActionGroupOptionProps,
+  Block,
   ChevronDown,
   ConnectionImage,
   ConnectionName,
@@ -27,7 +28,11 @@ import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessage } from '../../hooks/chat/useChatMessage';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { format } from '@youfoundation/common-app/src/helpers/timeago';
-import { ChatMessage, ChatDeliveryStatus } from '../../providers/ChatProvider';
+import {
+  ChatMessage,
+  ChatDeliveryStatus,
+  ChatDeletedArchivalStaus,
+} from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMedia } from './ChatMedia';
@@ -148,6 +153,8 @@ const ChatMessageItem = ({
   const { chatMessageKey, mediaKey } = useParams();
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
+  const isDeleted = msg.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+
   return (
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
@@ -162,7 +169,7 @@ const ChatMessageItem = ({
           />
         ) : null}
 
-        {hasMedia ? (
+        {hasMedia && !isDeleted ? (
           <ChatMediaMessageBody
             msg={msg}
             authorOdinId={authorOdinId}
@@ -177,6 +184,7 @@ const ChatMessageItem = ({
             isGroupChat={isGroupChat}
             messageFromMe={messageFromMe}
             chatActions={chatActions}
+            isDeleted={isDeleted}
           />
         )}
       </div>
@@ -239,6 +247,7 @@ const ChatTextMessageBody = ({
   messageFromMe,
   authorOdinId,
   chatActions,
+  isDeleted,
 }: {
   msg: DriveSearchResult<ChatMessage>;
 
@@ -246,6 +255,7 @@ const ChatTextMessageBody = ({
   messageFromMe: boolean;
   authorOdinId: string;
   chatActions?: ChatActions;
+  isDeleted: boolean;
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
@@ -263,16 +273,30 @@ const ChatTextMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
-      <div className="flex flex-col gap-2">
-        {msg.fileMetadata.appData.archivalStatus}
-        {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-        <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>{content.message}</p>
-      </div>
+      {isDeleted ? (
+        <MessageDeletedInnerBody />
+      ) : (
+        <div className="flex flex-col gap-2">
+          {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
+          <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>
+            {content.message}
+          </p>
+        </div>
+      )}
       <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>
       <ContextMenu chatActions={chatActions} msg={msg} />
+    </div>
+  );
+};
+
+export const MessageDeletedInnerBody = () => {
+  return (
+    <div className="flex select-none flex-row items-center gap-2 text-foreground/50">
+      <Block className="h-4 w-4" />
+      <p>{t('This message was deleted')}</p>
     </div>
   );
 };

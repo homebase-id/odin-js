@@ -22,8 +22,13 @@ import { ContactFile } from '@youfoundation/js-lib/network';
 import React from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
-import { ChatDeliveryIndicator, ChatSentTimeIndicator } from './ChatDetail';
+import {
+  ChatDeliveryIndicator,
+  ChatSentTimeIndicator,
+  MessageDeletedInnerBody,
+} from './ChatDetail';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { ChatDeletedArchivalStaus } from '../../providers/ChatProvider';
 
 export const ConversationsList = ({
   openConversation,
@@ -124,21 +129,23 @@ const InnerConversationItem = ({
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
-      <p className="w-full text-lg">
+      <div className="w-full text-lg">
         <ConnectionName odinId={odinId} />
         <small className="block leading-tight text-foreground/80">
           {lastMessage && lastMessageContent ? (
-            lastMessageContent.message ? (
-              ellipsisAtMaxChar(lastMessageContent.message, 35)
+            lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
+              <MessageDeletedInnerBody />
+            ) : lastMessageContent.message ? (
+              <p>{ellipsisAtMaxChar(lastMessageContent.message, 35)}</p>
             ) : (
               //TODO: Add preview thumbnail of the actual media
-              <>📷 {t('Media')}</>
+              <p>📷 {t('Media')}</p>
             )
           ) : (
             odinId
           )}
         </small>
-      </p>
+      </div>
       {lastMessage ? (
         <div className="ml-auto flex flex-col items-end justify-between">
           <ChatSentTimeIndicator msg={lastMessage} />

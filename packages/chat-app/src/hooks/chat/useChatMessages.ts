@@ -6,6 +6,7 @@ import {
   ChatMessage,
   getChatMessages,
   requestMarkAsRead,
+  softDeleteChatMessage,
   updateChatMessage,
 } from '../../providers/ChatProvider';
 import {
@@ -61,8 +62,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 
     return await Promise.all(
       messages.map(async (msg) => {
-        msg.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
-        await updateChatMessage(dotYouClient, msg, deleteForEveryone ? recipients : []);
+        await softDeleteChatMessage(dotYouClient, msg, recipients, deleteForEveryone);
       })
     );
   };
