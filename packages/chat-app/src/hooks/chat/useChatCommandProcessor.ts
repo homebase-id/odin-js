@@ -111,14 +111,10 @@ const joinGroupConversation = async (
     command.clientJsonMessage
   );
 
-  if (!joinConversationRequest.recipients) return command.id;
-
   const recipients = joinConversationRequest.recipients.filter(
     (recipient) => recipient !== identity
   );
   recipients.push(command.sender);
-
-  console.log('join', recipients);
 
   try {
     await uploadConversation(dotYouClient, {
