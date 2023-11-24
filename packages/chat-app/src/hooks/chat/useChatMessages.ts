@@ -1,18 +1,25 @@
 import { useDotYouClient } from '@youfoundation/common-app';
-import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  ChatDeletedArchivalStaus,
   ChatDeliveryStatus,
   ChatMessage,
   getChatMessages,
   requestMarkAsRead,
+  updateChatMessage,
 } from '../../providers/ChatProvider';
-import { Conversation } from '../../providers/ConversationProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import {
+  Conversation,
+  GroupConversation,
+  SingleConversation,
+} from '../../providers/ConversationProvider';
+import { DriveSearchResult, deleteFile } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
   const { conversationId } = props || { conversationId: undefined };
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const queryClient = useQueryClient();
 
   const fetchMessages = async (conversationId: string, cursorState: string | undefined) => {
     return await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
@@ -38,6 +45,28 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
   };
 
+  const removeMessage = async ({
+    conversation,
+    messages,
+    deleteForEveryone,
+  }: {
+    conversation: DriveSearchResult<Conversation>;
+    messages: DriveSearchResult<ChatMessage>[];
+    deleteForEveryone?: boolean;
+  }) => {
+    const conversationContent = conversation.fileMetadata.appData.content;
+    const recipients = (conversationContent as GroupConversation).recipients || [
+      (conversationContent as SingleConversation).recipient,
+    ];
+
+    return await Promise.all(
+      messages.map(async (msg) => {
+        msg.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
+        await updateChatMessage(dotYouClient, msg, deleteForEveryone ? recipients : []);
+      })
+    );
+  };
+
   return {
     all: useInfiniteQuery({
       queryKey: ['chat', conversationId],
@@ -58,6 +87,17 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       // onSettled: async (_data, _error, variables) => {
       //   queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
       // },
+    }),
+    delete: useMutation({
+      mutationFn: removeMessage,
+      onMutate: async ({ conversation, messages }) => {
+        // TODO: Optimistic update of the chat messages delete the new message from the list
+      },
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+        });
+      },
     }),
   };
 };

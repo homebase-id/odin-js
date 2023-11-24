@@ -196,7 +196,6 @@ export const updateConversation = async (
 
 export const JOIN_CONVERSATION_COMMAND = 100;
 // const JOIN_GROUP_CONVERSATION_COMMAND = 110;
-// const DELETE_CHAT_COMMAND = 180;
 
 export interface JoinConversationRequest {
   conversationId: string;

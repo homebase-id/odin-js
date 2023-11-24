@@ -107,9 +107,7 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
   const recipients = (conversationContent as GroupConversation).recipients || [
     (conversationContent as SingleConversation).recipient,
   ];
-  if (!recipients.filter(Boolean)?.length) {
-    return null;
-  }
+  if (!recipients.filter(Boolean)?.length) return null;
 
   // It's a hack... Needs to change
   const getChatMessageByGlobalTransitId = async (globalTransitId: string) => {
@@ -136,3 +134,37 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
 
   if (updateSuccess.every((success) => success)) return command.id;
 };
+
+// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
+// const deleteMessage = async (dotYouClient: DotYouClient, command: ReceivedCommand) => {
+//   const deleteRequest = tryJsonParse<DeleteRequest>(command.clientJsonMessage);
+//   console.log({ deleteRequest });
+//   const conversationId = deleteRequest.conversationId;
+//   const chatGlobalTransIds = deleteRequest.messageIds;
+
+//   if (!conversationId || !chatGlobalTransIds) return null;
+
+//   const getChatMessageByGlobalTransitId = async (globalTransitId: string) => {
+//     const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
+//     return allChatMessages?.searchResults?.find(
+//       (chat) => chat?.fileMetadata.globalTransitId === globalTransitId
+//     );
+//   };
+
+//   const chatMessages = await Promise.all(chatGlobalTransIds.map(getChatMessageByGlobalTransitId));
+
+//   const updateSuccess = await Promise.all(
+//     chatMessages.map(async (chatMessage) => {
+//       if (!chatMessage) return false;
+
+//       chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+//       try {
+//         return await deleteChatMessage(dotYouClient, chatMessage.fileId);
+//       } catch (ex) {
+//         return false;
+//       }
+//     })
+//   );
+
+//   if (updateSuccess.every((success) => success)) return command.id;
+// };

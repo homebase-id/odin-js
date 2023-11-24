@@ -1,6 +1,7 @@
 import {
   ActionButton,
   ActionGroup,
+  ActionGroupOptionProps,
   ChevronDown,
   ConnectionImage,
   ConnectionName,
@@ -36,20 +37,12 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 interface ChatActions {
   doReply: (msg: DriveSearchResult<ChatMessage>) => void;
-  doDelete: (msgId: string) => void;
+  doDelete: (msg: DriveSearchResult<ChatMessage>) => void;
 }
 
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
   const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
-
-  const chatActions: ChatActions = {
-    doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
-    doDelete: (msgId: string) => {
-      console.log('delete', msgId);
-      //
-    },
-  };
 
   if (!conversationId)
     return (
@@ -61,7 +54,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
-      <ChatHistory conversation={conversation || undefined} chatActions={chatActions} />
+      <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
       <ChatComposer
         conversation={conversation || undefined}
         replyMsg={replyMsg}
@@ -88,13 +81,14 @@ const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }
 
 const ChatHistory = ({
   conversation,
-  chatActions,
+  setReplyMsg,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
-  chatActions: ChatActions;
+  setReplyMsg: (msg: DriveSearchResult<ChatMessage>) => void;
 }) => {
   const {
     all: { data: messages },
+    delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
   const flattenedMsgs = useMemo(
     () =>
@@ -105,19 +99,34 @@ const ChatHistory = ({
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
 
+  const chatActions: ChatActions = {
+    doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
+    doDelete: async (msg: DriveSearchResult<ChatMessage>) => {
+      if (!conversation || !msg) return;
+      await deleteMessages({
+        conversation: conversation,
+        messages: [msg],
+        deleteForEveryone: true,
+      });
+    },
+  };
+
   return (
-    <div className="flex h-full flex-grow flex-col-reverse gap-2 overflow-auto p-5">
-      {flattenedMsgs?.map((msg) =>
-        msg ? (
-          <ChatMessageItem
-            key={msg.fileId}
-            msg={msg}
-            isGroupChat={false}
-            chatActions={chatActions}
-          />
-        ) : null
-      )}
-    </div>
+    <>
+      <ErrorNotification error={deleteMessagesError} />
+      <div className="flex h-full flex-grow flex-col-reverse gap-2 overflow-auto p-5">
+        {flattenedMsgs?.map((msg) =>
+          msg ? (
+            <ChatMessageItem
+              key={msg.fileId}
+              msg={msg}
+              isGroupChat={false}
+              chatActions={chatActions}
+            />
+          ) : null
+        )}
+      </div>
+    </>
   );
 };
 
@@ -183,6 +192,25 @@ const ContextMenu = ({
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;
+
+  const identity = useDotYouClient().getIdentity();
+  const authorOdinId = msg.fileMetadata.senderOdinId;
+
+  const messageFromMe = !authorOdinId || authorOdinId === identity;
+
+  const optionalOptions: ActionGroupOptionProps[] = [];
+  if (messageFromMe) {
+    optionalOptions.push({
+      label: t('Delete'),
+      confirmOptions: {
+        title: t('Delete message'),
+        body: t('Are you sure you want to delete this message?'),
+        buttonText: t('Delete'),
+      },
+      onClick: () => chatActions.doDelete(msg),
+    });
+  }
+
   return (
     <ActionGroup
       options={[
@@ -190,15 +218,7 @@ const ContextMenu = ({
           label: t('Reply'),
           onClick: () => chatActions.doReply(msg),
         },
-        {
-          label: t('Delete'),
-          confirmOptions: {
-            title: t('Delete message'),
-            body: t('Are you sure you want to delete this message?'),
-            buttonText: t('Delete'),
-          },
-          onClick: () => chatActions.doDelete(msg.fileMetadata.appData.uniqueId as string),
-        },
+        ...optionalOptions,
       ]}
       className="absolute right-1 top-[0.125rem] z-20 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
       type={'mute'}
@@ -244,6 +264,7 @@ const ChatTextMessageBody = ({
     >
       {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
       <div className="flex flex-col gap-2">
+        {msg.fileMetadata.appData.archivalStatus}
         {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
         <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>{content.message}</p>
       </div>

@@ -1,4 +1,5 @@
 import {
+  AppFileMetaData,
   DotYouClient,
   DriveSearchResult,
   EmbeddedThumb,
@@ -34,6 +35,7 @@ import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const ChatMessageFileType = 7878;
+export const ChatDeletedArchivalStaus = 2;
 
 export enum ChatDeliveryStatus {
   // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
@@ -267,6 +269,7 @@ export const updateChatMessage = async (
     appData: {
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
+      archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },
@@ -319,3 +322,39 @@ export const requestMarkAsRead = async (
     ChatDrive
   );
 };
+
+// export const DELETE_CHAT_COMMAND = 180;
+// export interface DeleteRequest {
+//   conversationId: string;
+//   messageIds: string[];
+// }
+
+// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
+// export const requestDelete = async (
+//   dotYouClient: DotYouClient,
+//   conversation: DriveSearchResult<Conversation>,
+//   chatGlobalTransitIds: string[]
+// ) => {
+//   const request: DeleteRequest = {
+//     conversationId: conversation.fileMetadata.appData.uniqueId as string,
+//     messageIds: chatGlobalTransitIds,
+//   };
+
+//   const conversationContent = conversation.fileMetadata.appData.content;
+//   const recipients = (conversationContent as GroupConversation).recipients || [
+//     (conversationContent as SingleConversation).recipient,
+//   ];
+//   if (!recipients?.filter(Boolean)?.length)
+//     throw new Error('No recipients found in the conversation');
+
+//   return await sendCommand(
+//     dotYouClient,
+//     {
+//       code: DELETE_CHAT_COMMAND,
+//       globalTransitIdList: [],
+//       jsonMessage: jsonStringify64(request),
+//       recipients: recipients,
+//     },
+//     ChatDrive
+//   );
+// };
