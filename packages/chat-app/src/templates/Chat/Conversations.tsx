@@ -49,7 +49,11 @@ export const ConversationsList = ({
     <div className="flex flex-grow flex-col ">
       <SearchConversation
         setIsSearchActive={setIsSearchActive}
-        openConversation={openConversation}
+        isSearchActive={isSearchActive}
+        openConversation={(id) => {
+          setIsSearchActive(false);
+          openConversation(id);
+        }}
         conversations={flatConversations}
         activeConversationId={activeConversationId}
       />
@@ -98,7 +102,7 @@ const ConversationItem = ({
   );
 };
 
-const InnerConversationItem = ({
+export const InnerConversationItem = ({
   onClick,
   odinId,
   conversationId,
@@ -157,11 +161,13 @@ const InnerConversationItem = ({
 };
 
 const SearchConversation = ({
+  isSearchActive,
   setIsSearchActive,
   openConversation,
   activeConversationId,
   conversations,
 }: {
+  isSearchActive: boolean;
   setIsSearchActive: (isActive: boolean) => void;
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
@@ -175,45 +181,44 @@ const SearchConversation = ({
     else setIsSearchActive(false);
   }, [query]);
 
+  useEffect(() => {
+    if (!isSearchActive) {
+      setQuery(undefined);
+      setStateIndex(stateIndex + 1);
+    }
+  }, [isSearchActive]);
+
   const { data: contacts } = useAllContacts(isActive);
 
-  const results = query
-    ? [
-        ...(conversations?.filter((conversation) => {
+  const conversationResults =
+    query && conversations
+      ? conversations.filter((conversation) => {
           const content = conversation.fileMetadata.appData.content;
           return (
             (content as GroupConversation).recipients?.some((recipient) =>
               recipient.includes(query)
             ) || (content as SingleConversation).recipient?.includes(query)
           );
-        }) || []),
-        ...(contacts?.filter(
+        })
+      : [];
+
+  const contactResults =
+    query && contacts
+      ? contacts.filter(
           (contact) =>
             contact.odinId &&
             (contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
-        ) || []),
-      ]
-    : [];
+        )
+      : [];
 
-  // Remove duplicates from results, if there is a duplicate prefer the conversation
-  const uniqueResults = results.filter((result, index, self) => {
-    const isConversation = 'fileMetadata' in result;
-    const odinId = isConversation
-      ? (result.fileMetadata.appData.content as SingleConversation).recipient
-      : result.odinId;
-
-    const isDuplicate =
-      self.findIndex((r) => {
-        const rIsConversation = 'fileMetadata' in r;
-        const rOdinId = rIsConversation
-          ? (r.fileMetadata.appData.content as SingleConversation).recipient
-          : r.odinId;
-
-        return rOdinId === odinId;
-      }) !== index;
-
-    return !isDuplicate || (isDuplicate && isConversation);
-  });
+  const contactsWithoutAConversation = contactResults.filter(
+    (contact) =>
+      contact.odinId &&
+      !conversationResults.some((conversation) => {
+        const content = conversation.fileMetadata.appData.content;
+        return (content as SingleConversation).recipient === contact.odinId;
+      })
+  );
 
   return (
     <>
@@ -239,20 +244,36 @@ const SearchConversation = ({
       </form>
       <div>
         {isActive ? (
-          uniqueResults?.length ? (
-            uniqueResults.map((result) => (
-              <SearchResult
-                result={result}
-                onOpen={(id) => openConversation(id)}
-                isActive={
-                  activeConversationId ===
-                  (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
-                }
-                key={result.fileId}
-              />
-            ))
-          ) : (
+          !conversationResults?.length && !contactsWithoutAConversation?.length ? (
             <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
+          ) : (
+            <>
+              {conversationResults?.length ? (
+                <p className="px-5 font-semibold">{t('Chats')}</p>
+              ) : null}
+              {conversationResults.map((result) => (
+                <ChatAndConversationResult
+                  result={result}
+                  onOpen={(id) => openConversation(id)}
+                  isActive={
+                    activeConversationId ===
+                    (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
+                  }
+                  key={result.fileId}
+                />
+              ))}
+              {contactsWithoutAConversation?.length ? (
+                <p className="px-5 font-semibold">{t('Contacts')}</p>
+              ) : null}
+              {contactsWithoutAConversation.map((result) => (
+                <ChatAndConversationResult
+                  result={result}
+                  onOpen={(id) => openConversation(id)}
+                  isActive={false}
+                  key={result.fileId}
+                />
+              ))}
+            </>
           )
         ) : null}
       </div>
@@ -260,7 +281,7 @@ const SearchConversation = ({
   );
 };
 
-const SearchResult = (props: {
+const ChatAndConversationResult = (props: {
   result: DriveSearchResult<Conversation> | ContactFile;
   onOpen: (conversationId: string) => void;
   isActive: boolean;
@@ -300,7 +321,7 @@ const SearchResult = (props: {
   );
 };
 
-const NewConversationSearchResult = ({
+export const NewConversationSearchResult = ({
   result,
   onOpen,
 }: {

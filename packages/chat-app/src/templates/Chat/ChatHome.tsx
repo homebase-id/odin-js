@@ -1,11 +1,19 @@
-import { OwnerName, useDotYouClient, useSiteData } from '@youfoundation/common-app';
+import {
+  ActionLink,
+  OwnerName,
+  Plus,
+  useDotYouClient,
+  useSiteData,
+} from '@youfoundation/common-app';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { useChatTransitProcessor } from '../../hooks/chat/useChatTransitProcessor';
 import { useChatCommandProcessor } from '../../hooks/chat/useChatCommandProcessor';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useMatch } from 'react-router-dom';
 import { ConversationsList } from './Conversations';
 import { ChatDetail } from './ChatDetail';
+import { NewConversation } from './NewConversation';
+import { NewConversationGroup } from './NewConversationGroup';
 
 const ConversationsOverview = () => {
   useChatTransitProcessor(true);
@@ -14,14 +22,28 @@ const ConversationsOverview = () => {
   const { conversationKey } = useParams();
   const navigate = useNavigate();
 
+  const newChatMatch = useMatch({ path: '/new' });
+  const isCreateNew = !!newChatMatch;
+
+  const newGroupChatMatch = useMatch({ path: '/new-group' });
+  const isCreateNewGroup = !!newGroupChatMatch;
+
   return (
     <div className="flex h-screen w-full flex-row overflow-hidden">
       <div className="h-screen w-full max-w-xs flex-shrink-0 border-r bg-page-background dark:border-r-slate-800">
-        <ProfileHeader />
-        <ConversationsList
-          activeConversationId={conversationKey}
-          openConversation={(newId) => navigate(`/${newId}`)}
-        />
+        {isCreateNew ? (
+          <NewConversation />
+        ) : isCreateNewGroup ? (
+          <NewConversationGroup />
+        ) : (
+          <>
+            <ProfileHeader />
+            <ConversationsList
+              activeConversationId={conversationKey}
+              openConversation={(newId) => navigate(`/${newId}`)}
+            />
+          </>
+        )}
       </div>
       <div className="h-screen w-full flex-grow bg-background">
         <ChatDetail conversationId={conversationKey} />
@@ -50,6 +72,9 @@ const ProfileHeader = () => {
         odinId={odinId}
       />
       <OwnerName />
+      <div className="ml-auto">
+        <ActionLink href="/new" icon={Plus} type="mute" />
+      </div>
     </div>
   );
 };

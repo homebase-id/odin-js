@@ -2,7 +2,7 @@ import { useDotYouClient } from '@youfoundation/common-app';
 import { getConversations } from '../../providers/ConversationProvider';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 500;
 export const useConversations = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 

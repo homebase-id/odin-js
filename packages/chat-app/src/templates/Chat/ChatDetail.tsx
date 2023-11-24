@@ -287,7 +287,7 @@ const ChatTextMessageBody = ({
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>
-      <ContextMenu chatActions={chatActions} msg={msg} />
+      {!isDeleted ? <ContextMenu chatActions={chatActions} msg={msg} /> : null}
     </div>
   );
 };

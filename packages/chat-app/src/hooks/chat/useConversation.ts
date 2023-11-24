@@ -1,7 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
   Conversation,
+  GroupConversation,
+  SingleConversation,
   getConversation,
   requestConversationCommand,
   updateConversation,
@@ -14,17 +16,54 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
+import { useConversations } from './useConversations';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
+  // Already get the conversations in the cache, so we can use that on `getExistinConversationsForRecipient`
+  useConversations().all;
+
   const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
     return await getConversation(dotYouClient, conversationId);
   };
 
+  const getExistinConversationsForRecipient = async (
+    recipients: string[]
+  ): Promise<null | DriveSearchResult<Conversation>> => {
+    const allConversationsInCache = await queryClient.fetchQuery<
+      InfiniteData<{ searchResults: DriveSearchResult<Conversation>[] }>
+    >({ queryKey: ['conversations'] });
+
+    for (const page of allConversationsInCache?.pages || []) {
+      const matchedConversation = page.searchResults.find((conversation) => {
+        const conversationContent = conversation.fileMetadata.appData.content;
+        const conversationRecipients = (conversationContent as GroupConversation).recipients || [
+          (conversationContent as SingleConversation).recipient,
+        ];
+
+        return (
+          conversationRecipients.length === recipients.length &&
+          conversationRecipients.every((recipient) => recipients.includes(recipient))
+        );
+      });
+      if (matchedConversation) return matchedConversation;
+    }
+
+    return null;
+  };
+
   const createConversation = async ({ odinId }: { odinId: string }) => {
+    // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
+    const existingConversation = await getExistinConversationsForRecipient([odinId]);
+    if (existingConversation)
+      return {
+        ...existingConversation,
+        newConversationId: existingConversation.fileMetadata.appData.uniqueId as string,
+      };
+
     const newConversationId = getNewId();
 
     const newConversation: NewDriveSearchResult<Conversation> = {
