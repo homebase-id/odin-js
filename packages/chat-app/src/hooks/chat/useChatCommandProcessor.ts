@@ -40,25 +40,30 @@ export const useChatCommandProcessor = () => {
       if (isProcessing.current) return;
       isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
-      const completedCommands = await Promise.all(
-        commands.receivedCommands
-          .filter(
-            (command) =>
-              command.clientCode === JOIN_CONVERSATION_COMMAND ||
-              command.clientCode === MARK_CHAT_READ_COMMAND ||
-              command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
-          )
-          .map(async (command) => {
-            if (command.clientCode === JOIN_CONVERSATION_COMMAND)
-              return joinConversation(dotYouClient, command);
-
-            if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
-              return joinGroupConversation(dotYouClient, command, identity);
-
-            if (command.clientCode === MARK_CHAT_READ_COMMAND)
-              return markChatAsRead(dotYouClient, command);
-          })
+      const filteredCommands = commands.receivedCommands.filter(
+        (command) =>
+          command.clientCode === JOIN_CONVERSATION_COMMAND ||
+          command.clientCode === MARK_CHAT_READ_COMMAND ||
+          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
       );
+
+      const completedCommands: string[] = [];
+      // Can't use Promise.all, as we need to wait for the previous command to complete as commands can target the same conversation
+      for (let i = 0; i < filteredCommands.length; i++) {
+        const command = filteredCommands[i];
+
+        let completedCommand: string | null = null;
+        if (command.clientCode === JOIN_CONVERSATION_COMMAND)
+          completedCommand = await joinConversation(dotYouClient, command);
+
+        if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
+          completedCommand = await joinGroupConversation(dotYouClient, command, identity);
+
+        if (command.clientCode === MARK_CHAT_READ_COMMAND)
+          completedCommand = await markChatAsRead(dotYouClient, command);
+
+        if (completedCommand) completedCommands.push(completedCommand);
+      }
 
       if (completedCommands.length > 0)
         await markCommandComplete(
@@ -207,38 +212,6 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
   );
 
   if (updateSuccess.every((success) => success)) return command.id;
+
+  return null;
 };
-
-// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
-// const deleteMessage = async (dotYouClient: DotYouClient, command: ReceivedCommand) => {
-//   const deleteRequest = tryJsonParse<DeleteRequest>(command.clientJsonMessage);
-//   console.log({ deleteRequest });
-//   const conversationId = deleteRequest.conversationId;
-//   const chatGlobalTransIds = deleteRequest.messageIds;
-
-//   if (!conversationId || !chatGlobalTransIds) return null;
-
-//   const getChatMessageByGlobalTransitId = async (globalTransitId: string) => {
-//     const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-//     return allChatMessages?.searchResults?.find(
-//       (chat) => chat?.fileMetadata.globalTransitId === globalTransitId
-//     );
-//   };
-
-//   const chatMessages = await Promise.all(chatGlobalTransIds.map(getChatMessageByGlobalTransitId));
-
-//   const updateSuccess = await Promise.all(
-//     chatMessages.map(async (chatMessage) => {
-//       if (!chatMessage) return false;
-
-//       chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
-//       try {
-//         return await deleteChatMessage(dotYouClient, chatMessage.fileId);
-//       } catch (ex) {
-//         return false;
-//       }
-//     })
-//   );
-
-//   if (updateSuccess.every((success) => success)) return command.id;
-// };
