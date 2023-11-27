@@ -39,7 +39,7 @@ export const ChatHome = () => {
       {RUNNING_AS_APP || isRoot ? (
         <div
           className={`flex h-screen w-full ${
-            RUNNING_AS_APP ? 'max-w-xs' : ''
+            RUNNING_AS_APP ? 'max-w-sm' : ''
           } flex-shrink-0 flex-col border-r bg-page-background dark:border-r-slate-800`}
         >
           {isCreateNew ? (

@@ -44,6 +44,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChatMediaGallery } from './ChatMediaGallery';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CHAT_ROOT, RUNNING_AS_APP } from './ChatHome';
+import { ChatMessageInfo } from './ChatMessageInfo';
 
 interface ChatActions {
   doReply: (msg: DriveSearchResult<ChatMessage>) => void;
@@ -170,9 +171,6 @@ const ChatHistory = ({
     },
   };
 
-  const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
-    ?.recipients;
-
   return (
     <>
       <ErrorNotification error={deleteMessagesError} />
@@ -182,7 +180,7 @@ const ChatHistory = ({
             <ChatMessageItem
               key={msg.fileId}
               msg={msg}
-              isGroupChat={isGroupChat}
+              conversation={conversation}
               chatActions={chatActions}
             />
           ) : null
@@ -194,11 +192,11 @@ const ChatHistory = ({
 
 const ChatMessageItem = ({
   msg,
-  isGroupChat,
+  conversation,
   chatActions,
 }: {
   msg: DriveSearchResult<ChatMessage>;
-  isGroupChat?: boolean;
+  conversation?: DriveSearchResult<Conversation>;
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -211,6 +209,9 @@ const ChatMessageItem = ({
   const isDetail = stringGuidsEqual(msg.fileMetadata.appData.uniqueId, chatMessageKey) && mediaKey;
 
   const isDeleted = msg.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus;
+
+  const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
+    ?.recipients;
 
   return (
     <>
@@ -229,6 +230,7 @@ const ChatMessageItem = ({
         {hasMedia && !isDeleted ? (
           <ChatMediaMessageBody
             msg={msg}
+            conversation={conversation}
             authorOdinId={authorOdinId}
             isGroupChat={isGroupChat}
             messageFromMe={messageFromMe}
@@ -237,6 +239,7 @@ const ChatMessageItem = ({
         ) : (
           <ChatTextMessageBody
             msg={msg}
+            conversation={conversation}
             authorOdinId={authorOdinId}
             isGroupChat={isGroupChat}
             messageFromMe={messageFromMe}
@@ -251,12 +254,15 @@ const ChatMessageItem = ({
 
 const ContextMenu = ({
   msg,
+  conversation,
   chatActions,
 }: {
   msg: DriveSearchResult<ChatMessage>;
+  conversation?: DriveSearchResult<Conversation>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;
+  const [showMessageInfo, setShowMessageInfo] = useState(false);
 
   const identity = useDotYouClient().getIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;
@@ -274,31 +280,46 @@ const ContextMenu = ({
       },
       onClick: () => chatActions.doDelete(msg),
     });
+    if (conversation)
+      optionalOptions.push({
+        label: t('Message info'),
+        onClick: () => setShowMessageInfo(true),
+      });
   }
 
   return (
-    <ActionGroup
-      options={[
-        {
-          label: t('Reply'),
-          onClick: () => chatActions.doReply(msg),
-        },
-        ...optionalOptions,
-      ]}
-      className="absolute right-1 top-[0.125rem] z-20 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
-      type={'mute'}
-      size="square"
-    >
-      <>
-        <ChevronDown className="h-3 w-3" />
-        <span className="sr-only ml-1">{t('More')}</span>
-      </>
-    </ActionGroup>
+    <>
+      {showMessageInfo && conversation ? (
+        <ChatMessageInfo
+          msg={msg}
+          conversation={conversation}
+          onClose={() => setShowMessageInfo(false)}
+        />
+      ) : null}
+      <ActionGroup
+        options={[
+          {
+            label: t('Reply'),
+            onClick: () => chatActions.doReply(msg),
+          },
+          ...optionalOptions,
+        ]}
+        className="absolute right-1 top-[0.125rem] z-20 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+        type={'mute'}
+        size="square"
+      >
+        <>
+          <ChevronDown className="h-3 w-3" />
+          <span className="sr-only ml-1">{t('More')}</span>
+        </>
+      </ActionGroup>
+    </>
   );
 };
 
 const ChatTextMessageBody = ({
   msg,
+  conversation,
 
   isGroupChat,
   messageFromMe,
@@ -307,6 +328,7 @@ const ChatTextMessageBody = ({
   isDeleted,
 }: {
   msg: DriveSearchResult<ChatMessage>;
+  conversation?: DriveSearchResult<Conversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -328,7 +350,11 @@ const ChatTextMessageBody = ({
           : ''
       }`}
     >
-      {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
+      {isGroupChat && !messageFromMe ? (
+        <p className="font-semibold">
+          <ConnectionName odinId={authorOdinId} />
+        </p>
+      ) : null}
       <div className="flex flex-col md:flex-row">
         {isDeleted ? (
           <MessageDeletedInnerBody />
@@ -344,7 +370,9 @@ const ChatTextMessageBody = ({
           <ChatDeliveryIndicator msg={msg} />
           <ChatSentTimeIndicator msg={msg} />
         </div>
-        {!isDeleted ? <ContextMenu chatActions={chatActions} msg={msg} /> : null}
+        {!isDeleted ? (
+          <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
+        ) : null}
       </div>
     </div>
   );
@@ -361,6 +389,7 @@ export const MessageDeletedInnerBody = () => {
 
 const ChatMediaMessageBody = ({
   msg,
+  conversation,
 
   isGroupChat,
   messageFromMe,
@@ -369,6 +398,7 @@ const ChatMediaMessageBody = ({
   chatActions,
 }: {
   msg: DriveSearchResult<ChatMessage>;
+  conversation?: DriveSearchResult<Conversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -386,7 +416,7 @@ const ChatMediaMessageBody = ({
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>
-      <ContextMenu chatActions={chatActions} msg={msg} />
+      <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
     </>
   );
 
@@ -396,7 +426,11 @@ const ChatMediaMessageBody = ({
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
       }`}
     >
-      {isGroupChat && !messageFromMe ? <ConnectionName odinId={authorOdinId} /> : null}
+      {isGroupChat && !messageFromMe ? (
+        <p className="font-semibold">
+          <ConnectionName odinId={authorOdinId} />
+        </p>
+      ) : null}
       <div className="relative">
         <ChatMedia msg={msg} />
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 z-10 px-2 py-1" /> : null}
@@ -466,9 +500,12 @@ export const ChatDeliveryIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
   const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   if (!messageFromMe) return null;
+  return <InnerDeliveryIndicator state={content.deliveryStatus} />;
+};
 
-  const isDelivered = content.deliveryStatus >= ChatDeliveryStatus.Delivered;
-  const isRead = content.deliveryStatus === ChatDeliveryStatus.Read;
+export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }) => {
+  const isDelivered = state && state >= ChatDeliveryStatus.Delivered;
+  const isRead = state === ChatDeliveryStatus.Read;
 
   return (
     <div

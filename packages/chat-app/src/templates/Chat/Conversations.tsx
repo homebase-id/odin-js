@@ -140,20 +140,20 @@ export const InnerGroupConversationItem = ({
       <div className="rounded-full bg-primary/20 p-4">
         <Persons className="h-4 w-4" />
       </div>
-      <div className="w-full text-lg">
-        {ellipsisAtMaxChar(title, 35)}
-        <small className="block leading-tight text-foreground/80">
+      <div className="w-full">
+        <p className="font-semibold">{ellipsisAtMaxChar(title, 40)}</p>
+        <div className="leading-tight text-foreground/80">
           {lastMessage && lastMessageContent ? (
             lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
               <MessageDeletedInnerBody />
             ) : lastMessageContent.message ? (
-              <p>{ellipsisAtMaxChar(lastMessageContent.message, 35)}</p>
+              <p>{ellipsisAtMaxChar(lastMessageContent.message, 40)}</p>
             ) : (
               //TODO: Add preview thumbnail of the actual media
               <p>📷 {t('Media')}</p>
             )
           ) : null}
-        </small>
+        </div>
       </div>
       {lastMessage ? (
         <div className="ml-auto flex flex-col items-end justify-between">
@@ -196,14 +196,16 @@ export const InnerConversationItem = ({
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
-      <div className="w-full text-lg">
-        <ConnectionName odinId={odinId} />
-        <small className="block leading-tight text-foreground/80">
+      <div className="w-full">
+        <p className="font-semibold">
+          <ConnectionName odinId={odinId} />
+        </p>
+        <div className="block leading-tight text-foreground/80">
           {lastMessage && lastMessageContent ? (
             lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
               <MessageDeletedInnerBody />
             ) : lastMessageContent.message ? (
-              <p>{ellipsisAtMaxChar(lastMessageContent.message, 35)}</p>
+              <p>{ellipsisAtMaxChar(lastMessageContent.message, 40)}</p>
             ) : (
               //TODO: Add preview thumbnail of the actual media
               <p>📷 {t('Media')}</p>
@@ -211,7 +213,7 @@ export const InnerConversationItem = ({
           ) : (
             odinId
           )}
-        </small>
+        </div>
       </div>
       {lastMessage ? (
         <div className="ml-auto flex flex-col items-end justify-between">
@@ -294,7 +296,7 @@ const SearchConversation = ({
             placeholder={t('Search or start a new chat')}
           />
           <ActionButton
-            type="secondary"
+            type="mute"
             icon={isActive ? Times : MagnifyingGlass}
             onClick={() => {
               if (!isActive) return null;
