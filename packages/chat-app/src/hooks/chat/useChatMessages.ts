@@ -1,20 +1,18 @@
 import { useDotYouClient } from '@youfoundation/common-app';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  ChatDeletedArchivalStaus,
   ChatDeliveryStatus,
   ChatMessage,
   getChatMessages,
   requestMarkAsRead,
   softDeleteChatMessage,
-  updateChatMessage,
 } from '../../providers/ChatProvider';
 import {
   Conversation,
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
-import { DriveSearchResult, deleteFile } from '@youfoundation/js-lib/core';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {

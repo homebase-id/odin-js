@@ -40,7 +40,6 @@ export const useChatCommandProcessor = () => {
       if (isProcessing.current) return;
       isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
-
       const completedCommands = await Promise.all(
         commands.receivedCommands
           .filter(
@@ -53,7 +52,7 @@ export const useChatCommandProcessor = () => {
             if (command.clientCode === JOIN_CONVERSATION_COMMAND)
               return joinConversation(dotYouClient, command);
 
-            if ((command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND, identity))
+            if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
               return joinGroupConversation(dotYouClient, command, identity);
 
             if (command.clientCode === MARK_CHAT_READ_COMMAND)
@@ -111,9 +110,10 @@ const joinGroupConversation = async (
     command.clientJsonMessage
   );
 
-  const recipients = joinConversationRequest.recipients.filter(
+  const recipients = joinConversationRequest?.recipients?.filter(
     (recipient) => recipient !== identity
   );
+  if (!recipients?.length) return command.id;
   recipients.push(command.sender);
 
   try {
@@ -145,7 +145,6 @@ const joinGroupConversation = async (
 
 const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedCommand) => {
   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
-
   const conversationId = markAsReadRequest.conversationId;
   const chatGlobalTransIds = markAsReadRequest.messageIds;
 
@@ -159,7 +158,7 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
   ];
   if (!recipients.filter(Boolean)?.length) return null;
 
-  // It's a hack... Needs to change
+  // It's a hack... This needs to change
   const getChatMessageByGlobalTransitId = async (globalTransitId: string) => {
     const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
     return allChatMessages?.searchResults?.find(
@@ -169,17 +168,42 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
 
   const chatMessages = await Promise.all(chatGlobalTransIds.map(getChatMessageByGlobalTransitId));
   const updateSuccess = await Promise.all(
-    chatMessages.map(async (chatMessage) => {
-      if (!chatMessage) return false;
+    chatMessages
+      // Only update messages from the current user
+      .filter(
+        (chatMessage) =>
+          !chatMessage?.fileMetadata.senderOdinId || chatMessage?.fileMetadata.senderOdinId === ''
+      )
+      .map(async (chatMessage) => {
+        if (!chatMessage) return false;
 
-      chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
-      try {
-        const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);
-        return !!updateResult;
-      } catch (ex) {
-        return false;
-      }
-    })
+        chatMessage.fileMetadata.appData.content.deliveryDetails = {
+          ...chatMessage.fileMetadata.appData.content.deliveryDetails,
+        };
+        chatMessage.fileMetadata.appData.content.deliveryDetails[command.sender] =
+          ChatDeliveryStatus.Read;
+
+        // Single recipient conversation
+        if (recipients.length === 1)
+          chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+
+        const keys = Object.keys(chatMessage.fileMetadata.appData.content.deliveryDetails);
+        const allRead = keys.every(
+          (key) =>
+            chatMessage.fileMetadata.appData.content.deliveryDetails[key] ===
+            ChatDeliveryStatus.Read
+        );
+        if (recipients.length === keys.length && allRead) {
+          chatMessage.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Read;
+        }
+        try {
+          const updateResult = await updateChatMessage(dotYouClient, chatMessage, recipients);
+          return !!updateResult;
+        } catch (ex) {
+          console.error(ex);
+          return false;
+        }
+      })
   );
 
   if (updateSuccess.every((success) => success)) return command.id;

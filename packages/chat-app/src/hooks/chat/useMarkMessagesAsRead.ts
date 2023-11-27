@@ -32,7 +32,6 @@ export const useMarkMessagesAsRead = ({
     );
 
     if (!unreadMessages.length) return;
-
     isTriggeredOnce.current = true;
     markAsRead({
       conversation: conversation,

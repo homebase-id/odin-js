@@ -79,6 +79,7 @@ export interface ChatMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
+  deliveryDetails: Record<string, ChatDeliveryStatus>;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
@@ -340,6 +341,13 @@ export const requestMarkAsRead = async (
   ];
   if (!recipients?.filter(Boolean)?.length)
     throw new Error('No recipients found in the conversation');
+
+  console.log({
+    code: MARK_CHAT_READ_COMMAND,
+    globalTransitIdList: [],
+    jsonMessage: jsonStringify64(request),
+    recipients: recipients,
+  });
 
   return await sendCommand(
     dotYouClient,
