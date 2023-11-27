@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../providers/ChatProvider';
+import { ChatMessage } from '../../../providers/ChatProvider';
 import {
   ConnectionImage,
   ConnectionName,
@@ -12,8 +12,8 @@ import {
   Conversation,
   GroupConversation,
   SingleConversation,
-} from '../../providers/ConversationProvider';
-import { InnerDeliveryIndicator } from './ChatDetail';
+} from '../../../providers/ConversationProvider';
+import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 
 export const ChatMessageInfo = ({
   msg,

@@ -191,7 +191,7 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
         const keys = Object.keys(chatMessage.fileMetadata.appData.content.deliveryDetails);
         const allRead = keys.every(
           (key) =>
-            chatMessage.fileMetadata.appData.content.deliveryDetails[key] ===
+            chatMessage.fileMetadata.appData.content.deliveryDetails?.[key] ===
             ChatDeliveryStatus.Read
         );
         if (recipients.length === keys.length && allRead) {

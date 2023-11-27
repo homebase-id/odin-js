@@ -20,16 +20,14 @@ import {
 } from '../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { ContactFile } from '@youfoundation/js-lib/network';
-import React from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
-import {
-  ChatDeliveryIndicator,
-  ChatSentTimeIndicator,
-  MessageDeletedInnerBody,
-} from './ChatDetail';
+
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChatDeletedArchivalStaus } from '../../providers/ChatProvider';
+import { ChatDeliveryIndicator } from '../../components/Chat/Detail/ChatDeliveryIndicator';
+import { MessageDeletedInnerBody } from '../../components/Chat/Detail/ChatMessageItem';
+import { ChatSentTimeIndicator } from '../../components/Chat/Detail/ChatSentTimeIndicator';
 
 export const ConversationsList = ({
   openConversation,

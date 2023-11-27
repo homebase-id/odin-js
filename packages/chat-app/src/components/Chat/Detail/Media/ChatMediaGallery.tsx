@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { ChatMessage } from '../../providers/ChatProvider';
+import { ChatMessage } from '../../../../providers/ChatProvider';
 import {
   ActionButton,
   Arrow,
@@ -10,7 +10,7 @@ import {
   useDotYouClient,
   usePortal,
 } from '@youfoundation/common-app';
-import { ChatDrive } from '../../providers/ConversationProvider';
+import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 

@@ -1,7 +1,7 @@
 import { DriveSearchResult, PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinImage } from '@youfoundation/ui-lib';
-import { ChatMessage } from '../../providers/ChatProvider';
-import { ChatDrive } from '../../providers/ConversationProvider';
+import { ChatMessage } from '../../../../providers/ChatProvider';
+import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
 import { Triangle, useDotYouClient } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
