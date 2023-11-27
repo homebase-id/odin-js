@@ -123,6 +123,18 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return fileHeader;
 };
 
+// It's a hack... This needs to change to a better way of getting the message
+export const getChatMessageByGlobalTransitId = async (
+  dotYouClient: DotYouClient,
+  conversationId: string,
+  messageGlobalTransitId: string
+) => {
+  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
+  return allChatMessages?.searchResults?.find(
+    (chat) => chat?.fileMetadata.globalTransitId === messageGlobalTransitId
+  );
+};
+
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: DriveSearchResult,

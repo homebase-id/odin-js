@@ -24,7 +24,7 @@ import {
   ChatDeliveryStatus,
   MARK_CHAT_READ_COMMAND,
   MarkAsReadRequest,
-  getChatMessages,
+  getChatMessageByGlobalTransitId,
   updateChatMessage,
 } from '../../providers/ChatProvider';
 
@@ -163,15 +163,11 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
   ];
   if (!recipients.filter(Boolean)?.length) return null;
 
-  // It's a hack... This needs to change
-  const getChatMessageByGlobalTransitId = async (globalTransitId: string) => {
-    const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-    return allChatMessages?.searchResults?.find(
-      (chat) => chat?.fileMetadata.globalTransitId === globalTransitId
-    );
-  };
-
-  const chatMessages = await Promise.all(chatGlobalTransIds.map(getChatMessageByGlobalTransitId));
+  const chatMessages = await Promise.all(
+    chatGlobalTransIds.map((msgId) =>
+      getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId)
+    )
+  );
   const updateSuccess = await Promise.all(
     chatMessages
       // Only update messages from the current user
