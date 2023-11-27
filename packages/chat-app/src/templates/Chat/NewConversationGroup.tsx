@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { InnerConversationItem } from './Conversations';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConversation } from '../../hooks/chat/useConversation';
+import { CHAT_ROOT } from './ChatHome';
 
 export const NewConversationGroup = () => {
   const [query, setQuery] = useState<string | undefined>(undefined);
@@ -35,7 +36,7 @@ export const NewConversationGroup = () => {
     if (!recipients?.length) return;
     try {
       const result = await createNew({ recipients: recipients });
-      navigate('/' + result.newConversationId);
+      navigate(`${CHAT_ROOT}/${result.newConversationId}`);
     } catch (e) {
       console.error(e);
     }
@@ -45,7 +46,7 @@ export const NewConversationGroup = () => {
     <>
       <div className="flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Group')}</h2>
-        <ActionButton onClick={() => navigate('/')} icon={Times} type="mute" />
+        <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
       </div>
       {newRecipients?.length ? (
         <div className="flex flex-col gap-2 bg-primary/10 p-5">

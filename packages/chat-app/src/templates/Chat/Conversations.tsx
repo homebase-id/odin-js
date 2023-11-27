@@ -312,7 +312,7 @@ const SearchConversation = ({
           ) : (
             <>
               {conversationResults?.length ? (
-                <p className="px-5 font-semibold">{t('Chats')}</p>
+                <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
               ) : null}
               {conversationResults.map((result) => (
                 <ChatAndConversationResult
@@ -326,7 +326,7 @@ const SearchConversation = ({
                 />
               ))}
               {contactsWithoutAConversation?.length ? (
-                <p className="px-5 font-semibold">{t('Contacts')}</p>
+                <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
               ) : null}
               {contactsWithoutAConversation.map((result) => (
                 <ChatAndConversationResult
@@ -355,28 +355,22 @@ const ChatAndConversationResult = (props: {
   const { onOpen, isActive } = props;
   const result: DriveSearchResult<Conversation> = props.result as DriveSearchResult<Conversation>;
 
-  const { odinId } = React.useMemo(() => {
-    const groupConversation = (result as DriveSearchResult<Conversation>).fileMetadata.appData
-      .content as GroupConversation;
-    if (groupConversation.recipients?.length)
-      return {
-        odinId: groupConversation.recipients.join(', '),
-      };
-
-    const conversation = (result as DriveSearchResult<Conversation>).fileMetadata.appData
-      .content as SingleConversation;
-    if (conversation)
-      return {
-        odinId: conversation.recipient,
-      };
-
-    return { odinId: undefined, onClick: undefined };
-  }, [result]);
-
   const conversationId = result.fileMetadata.appData.uniqueId as string;
+
+  const isGroupChat = (result.fileMetadata.appData.content as GroupConversation).recipients?.length;
+  if (isGroupChat)
+    return (
+      <InnerGroupConversationItem
+        title={(result.fileMetadata.appData.content as GroupConversation).title}
+        conversationId={conversationId}
+        onClick={() => onOpen(conversationId)}
+        isActive={isActive}
+      />
+    );
+
   return (
     <InnerConversationItem
-      odinId={odinId}
+      odinId={(result.fileMetadata.appData.content as SingleConversation).recipient}
       conversationId={conversationId}
       onClick={() => onOpen(conversationId)}
       isActive={isActive}

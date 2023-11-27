@@ -15,7 +15,10 @@ import { ChatDetail } from './ChatDetail';
 import { NewConversation } from './NewConversation';
 import { NewConversationGroup } from './NewConversationGroup';
 
-const ConversationsOverview = () => {
+export const RUNNING_AS_APP = !window.location.pathname.startsWith('/owner');
+export const CHAT_ROOT = RUNNING_AS_APP ? '' : '/owner/chat';
+
+export const ChatHome = () => {
   useChatTransitProcessor(true);
   useChatCommandProcessor();
 
@@ -28,23 +31,32 @@ const ConversationsOverview = () => {
   const newGroupChatMatch = useMatch({ path: '/new-group' });
   const isCreateNewGroup = !!newGroupChatMatch;
 
+  const rootChatMatch = useMatch({ path: CHAT_ROOT });
+  const isRoot = !!rootChatMatch;
+
   return (
     <div className="flex h-screen w-full flex-row overflow-hidden">
-      <div className="flex h-screen w-full max-w-xs flex-shrink-0 flex-col border-r bg-page-background dark:border-r-slate-800">
-        {isCreateNew ? (
-          <NewConversation />
-        ) : isCreateNewGroup ? (
-          <NewConversationGroup />
-        ) : (
-          <>
-            <ProfileHeader />
-            <ConversationsList
-              activeConversationId={conversationKey}
-              openConversation={(newId) => navigate(`/${newId}`)}
-            />
-          </>
-        )}
-      </div>
+      {RUNNING_AS_APP || isRoot ? (
+        <div
+          className={`flex h-screen w-full ${
+            RUNNING_AS_APP ? 'max-w-xs' : ''
+          } flex-shrink-0 flex-col border-r bg-page-background dark:border-r-slate-800`}
+        >
+          {isCreateNew ? (
+            <NewConversation />
+          ) : isCreateNewGroup ? (
+            <NewConversationGroup />
+          ) : (
+            <>
+              <ProfileHeader />
+              <ConversationsList
+                activeConversationId={conversationKey}
+                openConversation={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
+              />
+            </>
+          )}
+        </div>
+      ) : null}
       <div className="h-screen w-full flex-grow bg-background">
         <ChatDetail conversationId={conversationKey} />
       </div>
@@ -73,10 +85,8 @@ const ProfileHeader = () => {
       />
       <OwnerName />
       <div className="ml-auto">
-        <ActionLink href="/new" icon={Plus} type="mute" />
+        <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="mute" />
       </div>
     </div>
   );
 };
-
-export default ConversationsOverview;

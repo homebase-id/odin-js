@@ -5,6 +5,7 @@ import {
   ActionLink,
   Block,
   ChevronDown,
+  ChevronLeft,
   ConnectionImage,
   ConnectionName,
   EmojiSelector,
@@ -39,9 +40,10 @@ import {
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMedia } from './ChatMedia';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ChatMediaGallery } from './ChatMediaGallery';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { CHAT_ROOT, RUNNING_AS_APP } from './ChatHome';
 
 interface ChatActions {
   doReply: (msg: DriveSearchResult<ChatMessage>) => void;
@@ -75,9 +77,13 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 
 const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }) => {
   const recipient = (conversation as SingleConversation)?.recipient;
+  const navigate = useNavigate();
 
   return (
-    <div className="flex flex-row items-center gap-2 bg-page-background p-5 ">
+    <div className="flex flex-row items-center gap-2 bg-page-background p-5">
+      {!RUNNING_AS_APP ? (
+        <ActionButton icon={ChevronLeft} type="mute" onClick={() => navigate(CHAT_ROOT)} />
+      ) : null}
       {recipient ? (
         <ConnectionImage
           odinId={recipient}

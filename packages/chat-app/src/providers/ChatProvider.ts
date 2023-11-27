@@ -79,7 +79,7 @@ export interface ChatMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
-  deliveryDetails: Record<string, ChatDeliveryStatus>;
+  deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';

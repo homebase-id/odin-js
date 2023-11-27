@@ -11,7 +11,7 @@ import {
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
+import Layout, { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
 const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthConsent'));
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
@@ -59,6 +59,10 @@ const ChannelsPage = lazy(() =>
 );
 const ArticleComposerPage = lazy(() =>
   import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticleComposerPage }))
+);
+
+const ChatHome = lazy(() =>
+  import('@youfoundation/chat-app').then((chatApp) => ({ default: chatApp.ChatHome }))
 );
 
 import '@youfoundation/ui-lib/dist/style.css';
@@ -204,6 +208,22 @@ function App() {
               <Route path="channels" element={<ChannelsPage />} />
               <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
             </Route>
+          </Route>
+          {/* Chat: */}
+          <Route
+            path="chat"
+            element={
+              <Layout noPadding={true}>
+                <Outlet />
+              </Layout>
+            }
+          >
+            <Route index={true} element={<ChatHome />} />
+            <Route path={':conversationKey'} element={<ChatHome />} />
+            <Route path={'new'} element={<ChatHome />} />
+            <Route path={'new-group'} element={<ChatHome />} />
+            <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
+            <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
           </Route>
 
           <Route

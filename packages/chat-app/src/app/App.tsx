@@ -17,7 +17,9 @@ const About = lazy(() => import('../templates/About/About'));
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
-const ChatHome = lazy(() => import('../templates/Chat/ChatHome'));
+const ChatHome = lazy(() =>
+  import('../templates/Chat/ChatHome').then((chatApp) => ({ default: chatApp.ChatHome }))
+);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';

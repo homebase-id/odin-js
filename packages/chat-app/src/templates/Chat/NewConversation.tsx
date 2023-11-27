@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ActionButton, Input, Persons, Times, t, useAllContacts } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { NewConversationSearchResult } from './Conversations';
+import { CHAT_ROOT } from './ChatHome';
 
 export const NewConversation = () => {
   const [query, setQuery] = useState<string | undefined>(undefined);
@@ -21,7 +22,7 @@ export const NewConversation = () => {
     <>
       <div className=" flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Conversation')}</h2>
-        <ActionButton onClick={() => navigate('/')} icon={Times} type="mute" />
+        <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
       </div>
       <form onSubmit={(e) => e.preventDefault()} className="w-full">
         <div className="flex w-full flex-row items-center p-5">
@@ -37,7 +38,7 @@ export const NewConversation = () => {
         <button
           onClick={(e) => {
             e.preventDefault();
-            navigate('/new-group');
+            navigate(`${CHAT_ROOT}/new-group`);
           }}
           className="flex w-full flex-row items-center gap-3 px-5 py-2 hover:bg-primary/20"
         >
@@ -50,7 +51,7 @@ export const NewConversation = () => {
           <NewConversationSearchResult
             key={result.fileId}
             result={result}
-            onOpen={(newId) => navigate(`/${newId}`)}
+            onOpen={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
           />
         ))}
       </div>

@@ -28,7 +28,7 @@ const SharedStyleTag = () => (
 const SHADED_BG = 'bg-page-background text-foreground';
 const NOT_SHADED_BG = 'bg-white dark:bg-black text-foreground';
 
-const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
+const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
   const { logout } = useAuth();
@@ -47,7 +47,9 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       <div className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         <Sidenav logout={logout} />
         <div className={`flex min-h-screen w-full flex-col`}>
-          <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
+          <div className={`min-h-full ${noPadding ? '' : 'px-2 py-4 sm:px-10 sm:py-8'}`}>
+            {children}
+          </div>
         </div>
         <Toaster />
       </div>
