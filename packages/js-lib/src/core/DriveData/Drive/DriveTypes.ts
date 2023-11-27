@@ -3,6 +3,7 @@ import {
   ArchivalStatus,
   SystemFileType,
   DriveSearchResult,
+  DeletedDriveSearchResult,
 } from '../File/DriveFileTypes';
 
 export interface PermissionedDrive {
@@ -78,7 +79,7 @@ export interface GetBatchQueryResultOptions {
 export interface QueryModifiedResponse {
   includeHeaderContent: boolean;
   cursor: number;
-  searchResults: DriveSearchResult[];
+  searchResults: (DriveSearchResult | DeletedDriveSearchResult)[];
 }
 
 export interface QueryBatchResponse {
