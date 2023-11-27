@@ -73,7 +73,7 @@ export const getConnectionInfo = (
   assertIfDotYouClientIsOwnerOrApp(dotYouClient);
 
   const client = dotYouClient.createAxiosClient();
-  const url = root + `/status`;
+  const url = root + '/status';
 
   const data: OdinIdRequest = { odinId: odinId };
 

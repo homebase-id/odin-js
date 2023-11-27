@@ -2,6 +2,7 @@ import {
   ActionButton,
   ActionGroup,
   ActionGroupOptionProps,
+  ActionLink,
   Block,
   ChevronDown,
   ConnectionImage,
@@ -17,6 +18,7 @@ import {
   VolatileInput,
   t,
   useDotYouClient,
+  useIsConnected,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
@@ -60,6 +62,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
+      <GroupChatConnectedState conversation={conversation || undefined} />
       <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
       <ChatComposer
         conversation={conversation || undefined}
@@ -87,6 +90,44 @@ const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }
         </div>
       )}
       {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}
+    </div>
+  );
+};
+
+const GroupChatConnectedState = ({
+  conversation,
+}: {
+  conversation: DriveSearchResult<Conversation> | undefined;
+}) => {
+  if (!conversation) return null;
+  const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;
+  if (!recipients || recipients.length <= 1) return null;
+
+  return (
+    <div className="border-t empty:hidden dark:border-t-slate-800">
+      {recipients.map((recipient) => {
+        return <RecipientConnectedState recipient={recipient} key={recipient} />;
+      })}
+    </div>
+  );
+};
+
+const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
+  const isConnected = useIsConnected(recipient);
+  const identity = useDotYouClient().getIdentity();
+
+  if (isConnected) return null;
+  return (
+    <div className="flex w-full flex-row items-center justify-between bg-page-background p-2">
+      <p>
+        {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
+        <a href={`https://${recipient}`} className="underline">
+          {recipient}
+        </a>
+      </p>
+      <ActionLink href={`https://${identity}/owner/connections/${recipient}/connect`}>
+        {t('Connect')}
+      </ActionLink>
     </div>
   );
 };
