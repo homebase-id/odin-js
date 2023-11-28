@@ -72,7 +72,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               }}
             />
             <div className="p-4">
-              <div className="text-foreground flex flex-row text-opacity-40">
+              <div className="text-foreground/60 flex flex-row">
                 {channel && post ? (
                   <PostMeta postFile={postFile} channel={showChannel ? channel : undefined} />
                 ) : null}
