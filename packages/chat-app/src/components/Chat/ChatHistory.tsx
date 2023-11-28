@@ -6,12 +6,13 @@ import { ChatMessage } from '../../providers/ChatProvider';
 import { Conversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useVirtualizer, Virtualizer } from '@tanstack/react-virtual';
 import { useRef, useEffect, useLayoutEffect } from 'react';
 
 // Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
 // and https://github.com/TanStack/virtual/discussions/195
+
 export const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -52,12 +53,11 @@ export const ChatHistory = ({
   };
 
   const count = flattenedMsgs?.length + 1;
-  const reverseIndex = useCallback((index: number) => count - 1 - index, [count]);
 
+  // Scrolls to bottom on first load
   if (virtualizerRef.current && count !== virtualizerRef.current.options.count) {
     const delta = count - virtualizerRef.current.options.count;
     const nextOffset = virtualizerRef.current.scrollOffset + delta * itemSize;
-
     virtualizerRef.current.scrollOffset = nextOffset;
     virtualizerRef.current.scrollToOffset(nextOffset, { align: 'start' });
   }
@@ -66,12 +66,27 @@ export const ChatHistory = ({
     getScrollElement: () => scrollRef.current,
     count,
     estimateSize: () => itemSize,
-    getItemKey: useCallback(
-      (index: number) => flattenedMsgs[reverseIndex(index)]?.fileId || 'loader',
-      [flattenedMsgs, reverseIndex]
-    ),
-    overscan: 2,
-    // scrollMargin: 50,
+    // Custom scroll handler to support inverted rendering with flex-col-reverse
+    observeElementOffset: (instance, cb) => {
+      const element = instance.scrollElement;
+      if (!element) {
+        return;
+      }
+
+      const handler = () => {
+        const maxScrollTop = element.scrollHeight - element.offsetHeight;
+        cb(Math.abs(element['scrollTop'] - maxScrollTop));
+      };
+      handler();
+
+      element.addEventListener('scroll', handler, {
+        passive: true,
+      });
+
+      return () => {
+        element.removeEventListener('scroll', handler);
+      };
+    },
   });
 
   useIsomorphicLayoutEffect(() => {
@@ -80,7 +95,7 @@ export const ChatHistory = ({
 
   const items = virtualizer.getVirtualItems();
 
-  const [paddingTop, paddingBottom] =
+  const [paddingBottom, paddingTop] =
     items.length > 0
       ? [
           Math.max(0, items[0].start - virtualizer.options.scrollMargin),
@@ -89,10 +104,11 @@ export const ChatHistory = ({
       : [0, 0];
 
   useEffect(() => {
-    const [firstItem] = [...virtualizer.getVirtualItems()];
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
 
-    if (!firstItem) return;
-    if (firstItem.index === 0 && hasMoreMessages && !isFetchingNextPage) fetchNextPage();
+    if (!lastItem) return;
+    if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
+      fetchNextPage();
   }, [
     hasMoreMessages,
     fetchNextPage,
@@ -104,17 +120,21 @@ export const ChatHistory = ({
   return (
     <>
       <ErrorNotification error={deleteMessagesError} />
-      <div className="h-full w-full flex-grow overflow-auto p-5" ref={scrollRef}>
+      <div
+        className="h-full w-full flex-grow overflow-auto p-5"
+        ref={scrollRef}
+        key={conversation?.fileId}
+      >
         <div
-          className="w-full"
+          className="flex w-full flex-col-reverse"
           style={{
             overflowAnchor: 'none',
-            paddingTop,
             paddingBottom,
+            paddingTop,
           }}
         >
           {items.map((item) => {
-            const isLoaderRow = item.index === 0;
+            const isLoaderRow = item.index > flattenedMsgs.length - 1;
             if (isLoaderRow) {
               return (
                 <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
@@ -127,16 +147,16 @@ export const ChatHistory = ({
               );
             }
 
-            const index = reverseIndex(item.index);
-            const msg = flattenedMsgs[index];
+            const index = count - 1 - item.index;
+            const msg = flattenedMsgs[item.index];
 
             return (
               <div
                 key={item.key}
                 data-index={item.index}
-                data-reverse-index={index}
+                data-alternate-index={index}
                 ref={virtualizer.measureElement}
-                className="pb-2"
+                className="py-1"
               >
                 <ChatMessageItem
                   key={msg.fileId}
