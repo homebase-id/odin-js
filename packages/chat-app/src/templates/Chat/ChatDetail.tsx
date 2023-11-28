@@ -41,6 +41,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
       <ChatHistory
         conversation={conversation || undefined}
         setReplyMsg={setReplyMsg}
+        // Setting a key to reset the scroll positions when the conversation changes
         key={conversationId}
       />
       <ChatComposer
