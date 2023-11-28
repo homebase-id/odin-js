@@ -10,6 +10,8 @@ import { useCallback, useMemo } from 'react';
 import { useVirtualizer, Virtualizer } from '@tanstack/react-virtual';
 import { useRef, useEffect, useLayoutEffect } from 'react';
 
+// Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
+// and https://github.com/TanStack/virtual/discussions/195
 export const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
