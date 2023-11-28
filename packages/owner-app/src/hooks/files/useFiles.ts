@@ -34,12 +34,12 @@ export const useFiles = ({
     targetDrive: TargetDrive;
     pageParam: string | undefined;
   }) => {
-    const reponse = await queryBatch(
+    const response = await queryBatch(
       dotYouClient,
-      { targetDrive, systemFileType },
+      { targetDrive, systemFileType, fileState: [0, 1] },
       { cursorState: pageParam, maxRecords: pageSize, includeMetadataHeader: includeMetadataHeader }
     );
-    return reponse;
+    return response;
   };
 
   const fetchFile = async (result: DriveSearchResult, payloadKey?: string) => {

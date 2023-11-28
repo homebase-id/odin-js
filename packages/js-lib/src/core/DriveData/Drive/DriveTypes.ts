@@ -89,6 +89,13 @@ export interface QueryBatchResponse {
   searchResults: DriveSearchResult[];
 }
 
+export interface QueryBatchResponseWithDeletedResults {
+  cursorState: string;
+  queryTime: number;
+  includeMetadataHeader: boolean;
+  searchResults: (DriveSearchResult | DeletedDriveSearchResult)[];
+}
+
 export interface QueryBatchResponseResult extends QueryBatchResponse {
   name: string;
 }
