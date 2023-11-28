@@ -38,7 +38,11 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
       <GroupChatConnectedState conversation={conversation || undefined} />
-      <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
+      <ChatHistory
+        conversation={conversation || undefined}
+        setReplyMsg={setReplyMsg}
+        key={conversationId}
+      />
       <ChatComposer
         conversation={conversation || undefined}
         replyMsg={replyMsg}
