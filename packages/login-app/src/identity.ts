@@ -64,7 +64,8 @@ export const storeIdentityAndAuthorize = (identity: string, params?: URLSearchPa
     window.location != window.parent.location ? document.referrer : document.location.href;
 
   // Point to owner login if the identity is the same as the host we're on
-  if (stripIdentity(parentUrl) === identity)
+  // But don't do this if it's an app running on the owner host
+  if (stripIdentity(parentUrl) === identity && !window.location.pathname.includes('anonymous-apps'))
     window.top.location.href = `https://${identity}/owner/login?returnUrl=/owner`;
   else
     window.top.location.href = `https://${identity}/api/owner/v1/youauth/authorize?${params?.toString()}`;
