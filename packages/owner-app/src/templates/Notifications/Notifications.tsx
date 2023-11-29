@@ -11,25 +11,27 @@ import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDi
 
 const Notifications = () => {
   const { notifications: notificationList } = useNotifications();
-  const { isEnabled, enableOnThisDevice } = usePushNotifications();
+  const { isSupported, isEnabled, enableOnThisDevice } = usePushNotifications();
   const { data: current } = usePushNotificationClients().fetchCurrent;
   const [isDialogOpen, setDialogOpen] = useState(false);
-  console.log({ Subscription: current });
+
   return (
     <>
       <PageMeta
         title={t('Notifications')}
         icon={Bell}
         actions={
-          isEnabled && current ? (
-            <ActionButton type="secondary" icon={Check} onClick={() => setDialogOpen(true)}>
-              {t('Push Notifications Enabled')}
-            </ActionButton>
-          ) : (
-            <ActionButton onClick={enableOnThisDevice}>
-              {t('Enable push notifications')}
-            </ActionButton>
-          )
+          isSupported ? (
+            isEnabled && current ? (
+              <ActionButton type="secondary" icon={Check} onClick={() => setDialogOpen(true)}>
+                {t('Push Notifications Enabled')}
+              </ActionButton>
+            ) : (
+              <ActionButton onClick={enableOnThisDevice}>
+                {t('Enable push notifications')}
+              </ActionButton>
+            )
+          ) : null
         }
       />
       {notificationList?.length ? (

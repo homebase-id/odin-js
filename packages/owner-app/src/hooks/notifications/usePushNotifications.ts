@@ -15,6 +15,8 @@ export const usePushNotifications = () => {
   // Register the push Application Server
   // Use serviceWorker.ready to ensure that you can subscribe for push
   return {
+    isSupported:
+      'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window,
     isEnabled: Notification.permission === 'granted',
     enableOnThisDevice: async () => {
       await Notification.requestPermission();
