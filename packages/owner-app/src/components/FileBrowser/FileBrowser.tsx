@@ -7,6 +7,7 @@ import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
 import {
+  DeletedDriveSearchResult,
   DriveSearchResult,
   SecurityGroupType,
   SystemFileType,
@@ -79,7 +80,13 @@ const FileBrowser = ({
   );
 };
 
-const File = ({ targetDrive, file }: { targetDrive: TargetDrive; file: DriveSearchResult }) => {
+const File = ({
+  targetDrive,
+  file,
+}: {
+  targetDrive: TargetDrive;
+  file: DriveSearchResult | DeletedDriveSearchResult;
+}) => {
   const fileType = file.fileMetadata.appData.fileType;
   const firstPayload = file.fileMetadata.payloads?.[0];
   const contentType = firstPayload?.contentType;
