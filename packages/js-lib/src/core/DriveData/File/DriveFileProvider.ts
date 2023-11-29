@@ -178,6 +178,7 @@ export const getPayloadBytes = async (
     ...config.headers,
     range: rangeHeader,
   };
+
   return client
     .get<ArrayBuffer>(
       '/drive/files/payload?' + stringifyToQueryParams({ ...request, lastModified }),

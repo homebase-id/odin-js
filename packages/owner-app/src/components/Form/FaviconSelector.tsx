@@ -4,6 +4,7 @@ import { ReactNode, useState } from 'react';
 
 interface FaviconSelectorProps {
   fileId?: string;
+  lastModified: number | undefined;
   name?: string;
   defaultValue: unknown;
   targetDrive: TargetDrive;
@@ -15,6 +16,7 @@ const FaviconSelector = ({
   onChange,
   defaultValue,
   targetDrive,
+  lastModified,
   ...props
 }: FaviconSelectorProps) => {
   const valueObject: { fileId: string } | { emoji: string } | undefined = defaultValue as
@@ -27,7 +29,8 @@ const FaviconSelector = ({
     valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
       ? valueObject.fileId
       : undefined,
-    targetDrive
+    targetDrive,
+    lastModified
   );
 
   const dataVal: any =

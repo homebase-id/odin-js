@@ -17,6 +17,7 @@ const DEFAULT_TABS_ORDER = ['Posts', 'Links', 'About', 'Connections'];
 
 export const ThemeAttributeEditor = (props: {
   fileId?: string;
+  lastModified: number | undefined;
   attribute: AttributeVm;
   onChange: (e: {
     target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
@@ -31,6 +32,7 @@ export const ThemeAttributeEditor = (props: {
         <FaviconSelector
           fileId={fileId}
           name={HomePageThemeFields.Favicon}
+          lastModified={props.lastModified}
           defaultValue={attribute.data?.[HomePageThemeFields.Favicon] ?? ''}
           onChange={(e) => onChange({ target: { name: e.target.name, value: e.target.value } })}
           targetDrive={GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId)}
@@ -61,10 +63,12 @@ export const ThemeAttributeEditor = (props: {
 
 const ThemeSpecificFields = ({
   fileId,
+  lastModified,
   attribute,
   onChange,
 }: {
   fileId?: string;
+  lastModified: number | undefined;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
@@ -73,7 +77,8 @@ const ThemeSpecificFields = ({
   const { data: imageBlob } = usePayloadBlob(
     fileId,
     attribute.data?.[HomePageThemeFields.HeaderImageKey],
-    targetDrive
+    targetDrive,
+    lastModified
   );
 
   const dataVal = attribute.data?.[HomePageThemeFields.HeaderImageKey];
