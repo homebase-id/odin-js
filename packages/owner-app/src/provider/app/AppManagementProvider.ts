@@ -97,6 +97,13 @@ export const RegisterApp = async (
       ...driveGrant,
       permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
     })),
+    circleMemberPermissionGrant: {
+      ...request.circleMemberPermissionGrant,
+      drives: request.circleMemberPermissionGrant?.drives?.map((driveGrant) => ({
+        ...driveGrant,
+        permissionedDrive: getPermissionNumberFromDrivePermission(driveGrant.permissionedDrive),
+      })),
+    },
   });
 
   console.log('RegisterApp returning response');

@@ -32,7 +32,8 @@ interface PostTeaserCardProps {
 const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, showSummary }) => {
   const { getDotYouClient } = useAuth();
   const post = postFile.fileMetadata.appData.content;
-  const isExternal = odinId && odinId !== getDotYouClient().getIdentity();
+  const identity = getDotYouClient().getIdentity();
+  const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 
   const { data: externalChannel } = useSocialChannel({
@@ -44,7 +45,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   }).fetch;
 
   const channel = externalChannel || internalChannel;
-  const postPath = `preview/${odinId}/${channel?.channelId}/${post.id}`;
+  const postPath = `preview/${isExternal ? odinId : identity}/${channel?.channelId}/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
   return (

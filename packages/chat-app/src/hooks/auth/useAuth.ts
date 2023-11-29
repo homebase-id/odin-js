@@ -44,6 +44,15 @@ export const drives = [
     p: DrivePermissionType.Read,
   },
 ];
+const circleDrives = [
+  {
+    a: '9ff813aff2d61e2f9b9db189e72d1a11',
+    t: '66ea8355ae4155c39b5a719166b510e3',
+    n: '',
+    d: '',
+    p: DrivePermissionType.Write,
+  },
+];
 export const appName = 'Homebase - Chat';
 export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
@@ -144,7 +153,7 @@ export const useYouAuthAuthorization = () => {
       ],
       undefined,
       drives,
-      undefined,
+      circleDrives,
       eccKey.publicKey,
       window.location.host,
       undefined,

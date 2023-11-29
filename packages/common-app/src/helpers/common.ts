@@ -1,9 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import {
-  AccessControlList,
-  DriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { Attribute } from '@youfoundation/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
@@ -51,7 +47,7 @@ export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {
     return str;
   }
 
-  if (str.length < maxChar) {
+  if (str.length <= maxChar) {
     return str;
   }
 

@@ -43,6 +43,7 @@ import {
   postTypeToDataType,
   Media,
 } from './PostTypes';
+import { makeGrid } from '../../helpers/ImageMerger';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -90,7 +91,7 @@ export const savePost = async <T extends PostContent>(
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   const mediaFiles: MediaFile[] = [];
-  let previewThumbnail: EmbeddedThumb | undefined;
+  const previewThumbnails: EmbeddedThumb[] = [];
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
@@ -111,7 +112,7 @@ export const savePost = async <T extends PostContent>(
         type: 'video',
       });
 
-      if (!previewThumbnail) previewThumbnail = tinyThumb;
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
@@ -129,7 +130,8 @@ export const savePost = async <T extends PostContent>(
         fileKey: payloadKey,
         type: 'image',
       });
-      if (!previewThumbnail) previewThumbnail = tinyThumb;
+
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
     }
     onUpdate?.((i + 1) / newMediaFiles.length);
   }
@@ -139,6 +141,9 @@ export const savePost = async <T extends PostContent>(
       mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined;
   }
   file.fileMetadata.appData.content.primaryMediaFile = mediaFiles[0];
+
+  const previewThumbnail: EmbeddedThumb | undefined =
+    previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
   return await uploadPost(
     dotYouClient,
@@ -358,27 +363,32 @@ const uploadPostHeader = async <T extends PostContent>(
     accessControlList: file.serverMetadata?.accessControlList,
   };
 
+  let runningVersionTag;
   if (!shouldEmbedContent) {
     // Append/update payload
-    await appendDataToFile(
-      dotYouClient,
-      file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
-      {
-        targetFile: {
-          fileId: file.fileId as string,
-          targetDrive: targetDrive,
-        },
-      },
-      [
+    runningVersionTag = (
+      await appendDataToFile(
+        dotYouClient,
+        file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
         {
-          key: DEFAULT_PAYLOAD_KEY,
-          payload: new Blob([payloadBytes], { type: 'application/json' }),
+          targetFile: {
+            fileId: file.fileId as string,
+            targetDrive: targetDrive,
+          },
+          versionTag: file.fileMetadata.versionTag,
         },
-      ],
-      undefined
-    );
+        [
+          {
+            key: DEFAULT_PAYLOAD_KEY,
+            payload: new Blob([payloadBytes], { type: 'application/json' }),
+          },
+        ],
+        undefined
+      )
+    ).newVersionTag;
   }
 
+  if (runningVersionTag) metadata.versionTag = runningVersionTag;
   return await uploadHeader(
     dotYouClient,
     file.fileMetadata.isEncrypted ? file.sharedSecretEncryptedKeyHeader : undefined,
@@ -444,7 +454,13 @@ const updatePost = async <T extends PostContent>(
     for (let i = 0; i < deletedMediaFiles.length; i++) {
       const mediaFile = deletedMediaFiles[i];
       runningVersionTag = (
-        await deletePayload(dotYouClient, targetDrive, file.fileId as string, mediaFile.fileKey)
+        await deletePayload(
+          dotYouClient,
+          targetDrive,
+          file.fileId as string,
+          mediaFile.fileKey,
+          file.fileMetadata.versionTag
+        )
       ).newVersionTag;
     }
   }
@@ -484,6 +500,7 @@ const updatePost = async <T extends PostContent>(
         fileId: file.fileId as string,
         targetDrive: targetDrive,
       },
+      versionTag: runningVersionTag,
     };
 
     runningVersionTag = (
@@ -530,6 +547,7 @@ export const appendPostMedia = async (
       fileId: fileId,
       targetDrive: targetDrive,
     },
+    versionTag: header.fileMetadata.versionTag,
   };
 
   const payloads: PayloadFile[] = [];
@@ -559,8 +577,15 @@ export const removePostMedia = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  fileKey: string
+  fileKey: string,
+  versionTag: string
 ) => {
-  const response = await deletePayload(dotYouClient, targetDrive, fileId as string, fileKey);
+  const response = await deletePayload(
+    dotYouClient,
+    targetDrive,
+    fileId as string,
+    fileKey,
+    versionTag
+  );
   return response;
 };

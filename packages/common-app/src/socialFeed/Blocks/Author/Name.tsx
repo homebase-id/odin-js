@@ -22,10 +22,12 @@ export const OwnerName = () => {
   return <>{owner?.displayName}</>;
 };
 
-export const ConnectionName = ({ odinId }: { odinId: string }) => {
+export const ConnectionName = ({ odinId }: { odinId: string | undefined }) => {
   const { data: connectionDetails } = useExternalOdinId({
     odinId: odinId,
   }).fetch;
+
+  if (!odinId) return null;
 
   const fullName = connectionDetails?.name;
 

@@ -126,7 +126,7 @@ export const RichTextRenderer = ({
               (attributes?.url as string)?.startsWith(window.location.origin) ? '_self' : '_blank'
             }
             rel="noopener noreferrer"
-            className="text-primary hover:underline break-all"
+            className="text-primary hover:underline break-words"
             onClick={(e) => e.stopPropagation()}
           >
             {children ?? (attributes?.text || attributes?.url) + ''}
@@ -152,7 +152,7 @@ export const RichTextRenderer = ({
           return (
             <div className="flex">
               <ActionLink
-                className="break-all my-2 w-auto rounded-md px-3 py-2 text-left"
+                className="break-words my-2 w-auto rounded-md px-3 py-2 text-left"
                 href={attributes.linkTarget as string}
                 type="secondary"
               >

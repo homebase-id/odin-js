@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark iframe {
+  color-scheme: auto;
+}

@@ -70,6 +70,7 @@ export * from './Icons/Loader';
 export * from './Icons/Lock';
 export * from './Icons/Logo';
 export * from './Icons/Lol';
+export * from './Icons/MagnifyingGlass';
 export * from './Icons/Minecraft';
 export * from './Icons/Moon';
 export * from './Icons/OpenLock';

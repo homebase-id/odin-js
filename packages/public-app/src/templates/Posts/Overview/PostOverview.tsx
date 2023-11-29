@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import { BlogConfig, ChannelTemplate, PostContent } from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 import {
+  AclIcon,
   HOME_ROOT_PATH,
-  Lock,
   SubtleMessage,
   t,
   useBlogPostsInfinite,
@@ -66,6 +66,10 @@ const PostOverview = () => {
       (a.fileMetadata.appData.userDate || a.fileMetadata.updated)
   );
 
+  const encrypted =
+    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
+    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
+
   return (
     <>
       <Helmet>
@@ -84,12 +88,13 @@ const PostOverview = () => {
                 className="text-sm"
               />
 
-              <h1 className="text-4xl">{activeChannel?.name}</h1>
-              <p className="my-2 max-w-md text-foreground text-opacity-80">
-                {activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
-                activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated ? (
-                  <Lock className="inline h-3 w-3" />
+              <h1 className="text-4xl" title={encrypted ? t('Encrypted') : t('Unencrypted')}>
+                {activeChannel?.name}{' '}
+                {activeChannel?.acl ? (
+                  <AclIcon acl={activeChannel?.acl} className="inline h-3 w-3" />
                 ) : null}{' '}
+              </h1>
+              <p className="my-2 max-w-md text-foreground text-opacity-80">
                 {activeChannel?.description}
               </p>
             </div>

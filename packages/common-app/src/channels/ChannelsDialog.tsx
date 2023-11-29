@@ -21,8 +21,8 @@ import { Label } from '@youfoundation/common-app';
 import { DialogWrapper, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import { ChannelTemplate } from '@youfoundation/js-lib/public';
-import { slugify } from '@youfoundation/js-lib/helpers';
+import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
+import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsDialog = ({
   isOpen,
@@ -231,7 +231,7 @@ export const ChannelItem = ({
                   >
                     {t('Cancel')}
                   </ActionButton>
-                  {chnl ? (
+                  {chnl && !stringGuidsEqual(chnl.channelId, BlogConfig.PublicChannel.channelId) ? (
                     <ActionButton
                       className="m-2 mr-auto"
                       state={removeStatus}

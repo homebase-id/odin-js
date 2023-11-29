@@ -5,3 +5,10 @@
 .dark select option {
   background-color: black;
 }
+
+.dark {
+  color-scheme: dark;
+}
+.dark iframe {
+  color-scheme: auto;
+}

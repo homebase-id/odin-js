@@ -37,6 +37,7 @@ export interface QueryParams {
   tag?: string | undefined;
   userDate?: TimeRange;
 
+  //specifies if the DriveSearchResult.content field should be parsed as JSON
   includeMetadataHeader?: boolean;
   pageNumber: number;
   pageSize: number;

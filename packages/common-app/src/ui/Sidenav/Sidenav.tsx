@@ -108,7 +108,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             </div>
 
             <div className={`py-3`}>
-              <NavItem icon={AddressBook} label={'Contacts'} to={'/owner/connections'} />
+              <NavItem icon={AddressBook} label={'Connections'} to={'/owner/connections'} />
               {isLow ? null : (
                 <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
               )}

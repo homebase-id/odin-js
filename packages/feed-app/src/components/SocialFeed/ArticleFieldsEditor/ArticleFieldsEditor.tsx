@@ -158,11 +158,14 @@ export const InnerFieldEditors = ({
                         fileId: string;
                         fileKey: string;
                       }) => {
+                        if (!postFile.fileMetadata.versionTag) return null;
+
                         const result = await removePostMedia(
                           dotYouClient,
                           targetDrive,
                           fileId,
-                          fileKey
+                          fileKey,
+                          postFile.fileMetadata.versionTag
                         );
                         if (!result) return null;
 

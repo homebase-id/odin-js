@@ -68,13 +68,14 @@ const uploadUsingKeyHeader = async (
   const instructionsWithManifest = {
     ...strippedInstructions,
     manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
   };
 
   // Build package
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     keyHeader,
-    instructions,
+    instructionsWithManifest,
     metadata
   );
 
@@ -87,35 +88,42 @@ const uploadUsingKeyHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+  const uploadResult = await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+
+  if (!uploadResult) return;
+  uploadResult.keyHeader = keyHeader;
+  return uploadResult;
 };
 
 export const uploadHeader = async (
   dotYouClient: DotYouClient,
-  encryptedKeyHeader: EncryptedKeyHeader | undefined,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata
 ): Promise<UploadResult | void> => {
-  const keyHeader = encryptedKeyHeader
-    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
-    : metadata.isEncrypted
-    ? GenerateKeyHeader()
-    : undefined;
+  const decryptedKeyHeader =
+    keyHeader && 'encryptionVersion' in keyHeader
+      ? await decryptKeyHeader(dotYouClient, keyHeader)
+      : keyHeader;
+
+  const finalKeyHeader =
+    decryptedKeyHeader || (metadata.isEncrypted ? GenerateKeyHeader() : undefined);
 
   const { systemFileType, ...strippedInstructions } = instructions;
   if (!strippedInstructions.storageOptions) throw new Error('storageOptions is required');
 
   strippedInstructions.storageOptions.storageIntent = 'metadataOnly';
+  strippedInstructions.transferIv = instructions.transferIv || getRandom16ByteArray();
 
   // Build package
-  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
+  const encryptedMetaData = await encryptMetaData(metadata, finalKeyHeader);
 
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
       fileMetadata: encryptedMetaData,
     },
-    instructions.transferIv || getRandom16ByteArray()
+    strippedInstructions.transferIv
   );
 
   const data = await buildFormData(
@@ -132,15 +140,16 @@ export const uploadHeader = async (
 
 export const appendDataToFile = async (
   dotYouClient: DotYouClient,
-  encryptedKeyHeader: EncryptedKeyHeader | undefined,
+  keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: AppendInstructionSet,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
-  const keyHeader = encryptedKeyHeader
-    ? await decryptKeyHeader(dotYouClient, encryptedKeyHeader)
-    : undefined;
+  const decryptedKeyHeader =
+    keyHeader && 'encryptionVersion' in keyHeader
+      ? await decryptKeyHeader(dotYouClient, keyHeader)
+      : keyHeader;
 
   const { systemFileType, ...strippedInstructions } = instructions;
 
@@ -155,7 +164,7 @@ export const appendDataToFile = async (
     undefined,
     payloads,
     thumbnails,
-    keyHeader
+    decryptedKeyHeader
   );
 
   return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);

@@ -57,13 +57,8 @@ const AppDetails = () => {
   const [isPermissionEditOpen, setIsPermissionEditOpen] = useState(false);
   const [isDrivesEditOpen, setIsDrivesEditOpen] = useState(false);
 
-  if (appLoading) {
-    <>Loading</>;
-  }
-
-  if (!app || !decodedAppKey) {
-    return <>{t('No matching app found')}</>;
-  }
+  if (appLoading) <>Loading</>;
+  if (!app || !decodedAppKey) return <>{t('No matching app found')}</>;
 
   return (
     <>

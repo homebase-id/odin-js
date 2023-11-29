@@ -11,13 +11,13 @@ import {
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import Layout, { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
+import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
 const About = lazy(() => import('../templates/About/About'));
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
-const ConversationsOverivew = lazy(() => import('../templates/Conversations/Conversations'));
+const ChatHome = lazy(() => import('../templates/Chat/ChatHome'));
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -59,7 +59,10 @@ function App() {
               </RootRoute>
             }
           >
-            <Route index={true} element={<ConversationsOverivew />} />
+            <Route index={true} element={<ChatHome />} />
+            <Route path={':conversationKey'} element={<ChatHome />} />
+            <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
+            <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
           </Route>
 
           <Route

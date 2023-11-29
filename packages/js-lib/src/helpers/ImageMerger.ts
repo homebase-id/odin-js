@@ -1,5 +1,5 @@
-import { base64ToUint8Array, uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { base64ToUint8Array, uint8ArrayToBase64 } from './DataUtil';
+import { EmbeddedThumb } from '../core/DriveData/File/DriveFileTypes';
 
 const GRID_PIXEL_SIZE = 40;
 const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;

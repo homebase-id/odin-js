@@ -3,7 +3,9 @@ import { NativeEmoji } from 'emoji-picker-element/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMostSpace, usePortal } from '../../hooks';
-const database = new Database();
+const database = new Database({
+  dataSource: '/emoji-data.json',
+});
 
 export const EmojiDropdown = ({
   query,

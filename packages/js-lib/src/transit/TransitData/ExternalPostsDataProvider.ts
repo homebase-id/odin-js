@@ -262,6 +262,7 @@ const dsrToPostFile = async <T extends PostContent>(
           ...dsr.fileMetadata.appData,
           content: postContent,
         },
+        senderOdinId: postContent.authorOdinId || dsr.fileMetadata.senderOdinId,
       },
     };
 
