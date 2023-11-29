@@ -24,8 +24,6 @@ export const ChatHistory = ({
   setReplyMsg: (msg: DriveSearchResult<ChatMessage>) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const virtualizerRef = useRef<Virtualizer<HTMLDivElement, Element> | null>(null);
-  const itemSize = 120;
 
   const {
     all: { data: messages, hasNextPage: hasMoreMessages, fetchNextPage, isFetchingNextPage },
@@ -38,7 +36,7 @@ export const ChatHistory = ({
     [messages]
   );
 
-  useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
+  // useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
 
   const chatActions: ChatActions = {
     doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
@@ -53,45 +51,44 @@ export const ChatHistory = ({
   };
 
   const count = flattenedMsgs?.length + 1;
-
-  // Scrolls to bottom on first load
-  if (virtualizerRef.current && count !== virtualizerRef.current.options.count) {
-    const delta = count - virtualizerRef.current.options.count;
-    const nextOffset = virtualizerRef.current.scrollOffset + delta * itemSize;
-    virtualizerRef.current.scrollOffset = nextOffset;
-    virtualizerRef.current.scrollToOffset(nextOffset, { align: 'start' });
-  }
+  // // Scrolls to bottom on first load
+  // if (virtualizerRef.current && count !== virtualizerRef.current.options.count) {
+  //   const delta = count - virtualizerRef.current.options.count;
+  //   const nextOffset = virtualizerRef.current.scrollOffset + delta * itemSize;
+  //   virtualizerRef.current.scrollOffset = nextOffset;
+  //   virtualizerRef.current.scrollToOffset(nextOffset, { align: 'start' });
+  // }
 
   const virtualizer = useVirtualizer({
     getScrollElement: () => scrollRef.current,
     count,
-    estimateSize: () => itemSize,
+    estimateSize: () => 300,
     // Custom scroll handler to support inverted rendering with flex-col-reverse
     observeElementOffset: (instance, cb) => {
       const element = instance.scrollElement;
-      if (!element) {
-        return;
-      }
+      if (!element) return;
 
       const handler = () => {
         const maxScrollTop = element.scrollHeight - element.offsetHeight;
+        console.log('callback', Math.abs(element['scrollTop'] - maxScrollTop));
         cb(Math.abs(element['scrollTop'] - maxScrollTop));
       };
-      handler();
+      // Start scroll is always 0
+      cb(0);
 
       element.addEventListener('scroll', handler, {
         passive: true,
       });
 
-      return () => {
-        element.removeEventListener('scroll', handler);
-      };
+      return () => element.removeEventListener('scroll', handler);
     },
+    overscan: 2,
+    getItemKey: (index) => flattenedMsgs[index]?.fileId || 'loader',
   });
 
-  useIsomorphicLayoutEffect(() => {
-    virtualizerRef.current = virtualizer;
-  });
+  // useIsomorphicLayoutEffect(() => {
+  //   virtualizerRef.current = virtualizer;
+  // });
 
   const items = virtualizer.getVirtualItems();
 
@@ -103,36 +100,40 @@ export const ChatHistory = ({
         ]
       : [0, 0];
 
-  useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+  // useEffect(() => {
+  //   const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
 
-    if (!lastItem) return;
-    if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
-      fetchNextPage();
-  }, [
-    hasMoreMessages,
-    fetchNextPage,
-    flattenedMsgs?.length,
-    isFetchingNextPage,
-    virtualizer.getVirtualItems(),
-  ]);
+  //   if (!lastItem) return;
+  //   if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
+  //     fetchNextPage();
+  // }, [
+  //   hasMoreMessages,
+  //   fetchNextPage,
+  //   flattenedMsgs?.length,
+  //   isFetchingNextPage,
+  //   virtualizer.getVirtualItems(),
+  // ]);
 
   return (
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className="h-full w-full flex-grow overflow-auto p-5"
+        className="flex h-full w-full flex-grow flex-col-reverse overflow-auto p-5"
         ref={scrollRef}
         key={conversation?.fileId}
       >
         <div
-          className="flex w-full flex-col-reverse"
-          style={{
-            overflowAnchor: 'none',
-            paddingBottom,
-            paddingTop,
-          }}
+          className="flex h-full w-full flex-col-reverse"
+          style={
+            {
+              // height: virtualizer.getTotalSize(),
+              // overflowAnchor: 'none',
+              //   paddingBottom,
+              //   paddingTop,
+            }
+          }
         >
+          <div className="flex-shrink-0" style={{ height: paddingBottom }}></div>
           {items.map((item) => {
             const isLoaderRow = item.index > flattenedMsgs.length - 1;
             if (isLoaderRow) {
@@ -147,16 +148,13 @@ export const ChatHistory = ({
               );
             }
 
-            const index = count - 1 - item.index;
             const msg = flattenedMsgs[item.index];
-
             return (
               <div
                 key={item.key}
                 data-index={item.index}
-                data-alternate-index={index}
                 ref={virtualizer.measureElement}
-                className="py-1"
+                className="flex-shrink-0 py-1"
               >
                 <ChatMessageItem
                   key={msg.fileId}
@@ -167,6 +165,7 @@ export const ChatHistory = ({
               </div>
             );
           })}
+          <div className="flex-shrink-0" style={{ height: paddingTop }}></div>
         </div>
       </div>
     </>
