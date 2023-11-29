@@ -35,6 +35,7 @@ export * from './Icons/Check';
 export * from './Icons/Circles';
 export * from './Icons/PaperPlane';
 export * from './Icons/Clipboard';
+export * from './Icons/Chevron';
 export * from './Icons/Cloud';
 export * from './Icons/Cog';
 export * from './Icons/Collapse';

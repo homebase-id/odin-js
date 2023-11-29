@@ -6,6 +6,7 @@ import {
   GetBatchQueryResultOptions,
   QueryBatchResponse,
   QueryBatchCollectionResponse,
+  QueryBatchResponseWithDeletedResults,
 } from '../Drive/DriveTypes';
 import { SystemFileType } from '../File/DriveFileTypes';
 import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../../helpers/DataUtil';
@@ -73,12 +74,24 @@ export const queryModified = async (
   });
 };
 
-export const queryBatch = async (
+type QueryBatchParamsWithoutFileState = Omit<FileQueryParams, 'fileState'>;
+interface QueryBatchParamsWithFileState extends Omit<FileQueryParams, 'fileState'> {
+  fileState: (0 | 1)[];
+}
+export const queryBatch = async <
+  T extends QueryBatchParamsWithFileState | QueryBatchParamsWithoutFileState,
+  R = T extends QueryBatchParamsWithFileState
+    ? QueryBatchResponseWithDeletedResults
+    : QueryBatchResponse,
+>(
   dotYouClient: DotYouClient,
-  params: FileQueryParams,
+  params: T,
   ro?: GetBatchQueryResultOptions
-): Promise<QueryBatchResponse> => {
-  const strippedQueryParams: FileQueryParams = { ...params, fileState: params.fileState || [1] };
+): Promise<R> => {
+  const strippedQueryParams: FileQueryParams = {
+    ...params,
+    fileState: 'fileState' in params ? params.fileState : [1],
+  };
   delete strippedQueryParams.systemFileType;
 
   const client = dotYouClient.createAxiosClient({
@@ -101,9 +114,9 @@ export const queryBatch = async (
     const getUrl = '/drive/query/batch?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryBatchResponse>('/drive/query/batch', request);
+      return client.post<R>('/drive/query/batch', request);
     } else {
-      return client.get<QueryBatchResponse>(getUrl);
+      return client.get<R>(getUrl);
     }
   })();
 

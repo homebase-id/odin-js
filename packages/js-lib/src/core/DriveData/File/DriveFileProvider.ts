@@ -53,10 +53,16 @@ export const getFileHeader = async <T = string>(
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader = fileHeader as DriveSearchResult<T>;
-  typedFileHeader.fileMetadata.appData.content = tryJsonParse<T>(
-    fileHeader.fileMetadata.appData.content
-  );
+  const typedFileHeader: DriveSearchResult<T> = {
+    ...fileHeader,
+    fileMetadata: {
+      ...fileHeader.fileMetadata,
+      appData: {
+        ...fileHeader.fileMetadata.appData,
+        content: tryJsonParse<T>(fileHeader.fileMetadata.appData.content),
+      },
+    },
+  };
 
   return typedFileHeader;
 };
@@ -172,6 +178,7 @@ export const getPayloadBytes = async (
     ...config.headers,
     range: rangeHeader,
   };
+
   return client
     .get<ArrayBuffer>(
       '/drive/files/payload?' + stringifyToQueryParams({ ...request, lastModified }),

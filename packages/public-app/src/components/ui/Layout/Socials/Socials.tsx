@@ -20,6 +20,7 @@ const Socials = ({
             key={index}
           >
             {getLinkIcon(handle.type)({ className: 'w-5 h-5' })}
+            <span className="sr-only">{handle.type}</span>
           </a>
         ))}
     </span>

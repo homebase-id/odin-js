@@ -27,13 +27,16 @@ export interface AppAuthorizationParams {
 }
 
 //checks if the authentication token (stored in a cookie) is valid
-export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean> => {
+export const hasValidToken = async (dotYouClient: DotYouClient): Promise<boolean | null> => {
   const client = dotYouClient.createAxiosClient();
 
-  const response = await client
-    .get('/auth/verifytoken')
-    .catch((_error) => ({ status: 400, data: false }));
+  const response = await client.get('/auth/verifytoken').catch((_error) => {
+    return { status: _error?.response?.status || 404 };
+  });
 
+  // TODO: Enable this when the backend is fixed... The backend needs to be updated to keep sending the cors host header, to allow the front-end to read the response..
+  // Else: it's a network error which is the exact same when the backend isn't reacahble
+  // if (response.status === 404) return null;
   return response.status === 200;
 };
 

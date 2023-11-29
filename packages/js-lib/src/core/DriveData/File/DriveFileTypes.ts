@@ -135,9 +135,9 @@ export interface EncryptedKeyHeader {
   encryptedAesKey: Uint8Array;
 }
 
-export interface DriveSearchResult<T = string> {
+interface BaseDriveSearchResult<T = string> {
   fileId: string;
-  fileState: 'active';
+
   fileSystemType: SystemFileType;
 
   fileMetadata: FileMetadata<T>;
@@ -145,6 +145,14 @@ export interface DriveSearchResult<T = string> {
   serverMetadata: ServerMetaData | undefined;
 
   priority: number;
+}
+
+export interface DriveSearchResult<T = string> extends BaseDriveSearchResult<T> {
+  fileState: 'active';
+}
+
+export interface DeletedDriveSearchResult<T = string> extends BaseDriveSearchResult<T> {
+  fileState: 'deleted';
 }
 
 export interface NewDriveSearchResult<T = string> {
@@ -167,4 +175,6 @@ export interface NewAppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   fileType?: number;
   userDate?: number;
+  uniqueId?: string;
+  groupId?: string;
 }

@@ -1,7 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
   Conversation,
+  GroupConversation,
+  SingleConversation,
   getConversation,
   requestConversationCommand,
   updateConversation,
@@ -14,28 +16,69 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
+import { useConversations } from './useConversations';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
+  // Already get the conversations in the cache, so we can use that on `getExistinConversationsForRecipient`
+  useConversations().all;
+
   const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
     return await getConversation(dotYouClient, conversationId);
   };
 
-  const createConversation = async ({ odinId }: { odinId: string }) => {
+  const getExistinConversationsForRecipient = async (
+    recipients: string[]
+  ): Promise<null | DriveSearchResult<Conversation>> => {
+    const allConversationsInCache = await queryClient.fetchQuery<
+      InfiniteData<{ searchResults: DriveSearchResult<Conversation>[] }>
+    >({ queryKey: ['conversations'] });
+
+    for (const page of allConversationsInCache?.pages || []) {
+      const matchedConversation = page.searchResults.find((conversation) => {
+        const conversationContent = conversation.fileMetadata.appData.content;
+        const conversationRecipients = (conversationContent as GroupConversation).recipients || [
+          (conversationContent as SingleConversation).recipient,
+        ];
+
+        return (
+          conversationRecipients.length === recipients.length &&
+          conversationRecipients.every((recipient) => recipients.includes(recipient))
+        );
+      });
+      if (matchedConversation) return matchedConversation;
+    }
+
+    return null;
+  };
+
+  const createConversation = async ({ recipients }: { recipients: string[] }) => {
+    // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
+    const existingConversation = await getExistinConversationsForRecipient(recipients);
+    if (existingConversation)
+      return {
+        ...existingConversation,
+        newConversationId: existingConversation.fileMetadata.appData.uniqueId as string,
+      };
+
     const newConversationId = getNewId();
 
     const newConversation: NewDriveSearchResult<Conversation> = {
       fileMetadata: {
         appData: {
+          uniqueId: newConversationId,
           content: {
-            conversationId: newConversationId,
-            recipient: odinId,
-            title: odinId,
-            unread: false,
-            unreadCount: 0,
+            ...(recipients.length > 1
+              ? {
+                  recipients: recipients,
+                }
+              : {
+                  recipient: recipients[0],
+                }),
+            title: recipients.join(', '),
           },
         },
       },
@@ -51,7 +94,13 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       ...(await uploadConversation(dotYouClient, newConversation)),
     };
 
-    await requestConversationCommand(dotYouClient, newConversation.fileMetadata.appData.content);
+    // TODO: Move this to only be called after a first message is sent
+    //  ATM, a conversation is started, and the recipient is added to the conversation directly after a contact is "clicked"
+    await requestConversationCommand(
+      dotYouClient,
+      newConversation.fileMetadata.appData.content,
+      newConversationId
+    );
     return uploadResult;
   };
 
@@ -71,7 +120,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     create: useMutation({
       mutationFn: createConversation,
-      onMutate: async ({ odinId }) => {
+      onMutate: async ({ recipients }) => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
@@ -86,10 +135,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
-          queryKey: [
-            'conversation',
-            variables.conversation.fileMetadata.appData.content.conversationId,
-          ],
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },

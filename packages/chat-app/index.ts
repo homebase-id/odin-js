@@ -1,1 +1,1 @@
-export * from './src/templates/Conversations/Conversations';
+export * from './src/templates/Chat/ChatHome';

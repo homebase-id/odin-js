@@ -29,10 +29,12 @@ const RichTextEditor = lazy(() =>
 
 const AttributeFields = ({
   fileId,
+  lastModified,
   attribute,
   onChange,
 }: {
   fileId: string | undefined;
+  lastModified: number | undefined;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
@@ -113,7 +115,14 @@ const AttributeFields = ({
       );
       break;
     case BuiltInAttributes.Photo:
-      return <PhotoAttributeEditor attribute={attribute} onChange={onChange} fileId={fileId} />;
+      return (
+        <PhotoAttributeEditor
+          attribute={attribute}
+          onChange={onChange}
+          fileId={fileId}
+          lastModified={lastModified}
+        />
+      );
       break;
     case BuiltInAttributes.InstagramUsername:
     case BuiltInAttributes.TiktokUsername:
@@ -148,7 +157,12 @@ const AttributeFields = ({
       break;
     case BuiltInAttributes.Experience:
       return (
-        <ExperienceAttributeEditor attribute={attribute} onChange={onChange} fileId={fileId} />
+        <ExperienceAttributeEditor
+          attribute={attribute}
+          onChange={onChange}
+          fileId={fileId}
+          lastModified={lastModified}
+        />
       );
       break;
     case BuiltInAttributes.ShortBio:
@@ -247,7 +261,14 @@ const AttributeFields = ({
       );
       break;
     case HomePageAttributes.Theme:
-      return <ThemeAttributeEditor attribute={attribute} onChange={onChange} fileId={fileId} />;
+      return (
+        <ThemeAttributeEditor
+          attribute={attribute}
+          onChange={onChange}
+          fileId={fileId}
+          lastModified={lastModified}
+        />
+      );
       break;
     default:
       return (

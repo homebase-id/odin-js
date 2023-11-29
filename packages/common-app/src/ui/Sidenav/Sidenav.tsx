@@ -2,6 +2,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import {
+  ChatBubble,
   Cloud,
   HOME_ROOT_PATH,
   House,
@@ -105,6 +106,7 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
               <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
               <NavItem icon={Article} label={'Articles'} to="/owner/feed/articles" />
               {isLow ? null : <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />}
+              <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" />
             </div>
 
             <div className={`py-3`}>

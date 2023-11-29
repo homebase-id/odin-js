@@ -1,4 +1,5 @@
 import {
+  AppFileMetaData,
   DotYouClient,
   DriveSearchResult,
   EmbeddedThumb,
@@ -16,7 +17,9 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   createThumbnails,
+  deletePayload,
   getContentFromHeaderOrPayload,
+  getFileHeaderByUniqueId,
   queryBatch,
   sendCommand,
   uploadFile,
@@ -33,6 +36,7 @@ import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 
 export const ChatMessageFileType = 7878;
+export const ChatDeletedArchivalStaus = 2;
 
 export enum ChatDeliveryStatus {
   // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
@@ -57,17 +61,11 @@ export enum MessageType {
 }
 
 export interface ChatMessage {
-  /// ClientUniqueId. Set by the device
-  id: string;
-
-  /// GroupId of the payload.
-  conversationId: string;
-
   // /// ReplyId used to get the replyId of the message
-  // replyId: string; => Better to use the groupId?
+  replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
 
-  /// Type of the message. It's the fileType from the server
-  messageType: MessageType;
+  /// Type of the message
+  // messageType: MessageType;
 
   /// FileState of the Message
   /// [FileState.active] shows the message is active
@@ -81,14 +79,7 @@ export interface ChatMessage {
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
-
-  /// List of tags for the message
-  /// Could be used to assign tags to the message
-  /// E.g Could be a replyId
-  // tags: string[];
-
-  /// List of recipients of the message that it is intended to be sent to.
-  recipients: string[];
+  deliveryDetails?: Record<string, ChatDeliveryStatus>;
 }
 
 const CHAT_MESSAGE_PAYLOAD_KEY = 'chat_web';
@@ -119,6 +110,29 @@ export const getChatMessages = async (
       )
     ),
   };
+};
+
+export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: string) => {
+  const fileHeader = await getFileHeaderByUniqueId<ChatMessage>(
+    dotYouClient,
+    ChatDrive,
+    chatMessageId
+  );
+  if (!fileHeader) return null;
+
+  return fileHeader;
+};
+
+// It's a hack... This needs to change to a better way of getting the message
+export const getChatMessageByGlobalTransitId = async (
+  dotYouClient: DotYouClient,
+  conversationId: string,
+  messageGlobalTransitId: string
+) => {
+  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
+  return allChatMessages?.searchResults?.find(
+    (chat) => chat?.fileMetadata.globalTransitId === messageGlobalTransitId
+  );
 };
 
 export const dsrToMessage = async (
@@ -157,11 +171,12 @@ export const dsrToMessage = async (
 export const uploadChatMessage = async (
   dotYouClient: DotYouClient,
   message: NewDriveSearchResult<ChatMessage>,
+  recipients: string[],
   files: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = messageContent.recipients?.length > 0;
+  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -170,7 +185,7 @@ export const uploadChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...messageContent.recipients],
+          recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
@@ -183,8 +198,8 @@ export const uploadChatMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
     appData: {
-      uniqueId: messageContent.id,
-      groupId: messageContent.conversationId,
+      uniqueId: message.fileMetadata.appData.uniqueId,
+      groupId: message.fileMetadata.appData.groupId,
       fileType: ChatMessageFileType,
       content: jsonContent,
     },
@@ -240,10 +255,11 @@ export const uploadChatMessage = async (
 export const updateChatMessage = async (
   dotYouClient: DotYouClient,
   message: DriveSearchResult<ChatMessage> | NewDriveSearchResult<ChatMessage>,
+  recipients: string[],
   keyHeader?: KeyHeader
 ) => {
   const messageContent = message.fileMetadata.appData.content;
-  const distribute = messageContent.recipients?.length > 0;
+  const distribute = recipients?.length > 0;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -252,7 +268,7 @@ export const updateChatMessage = async (
     },
     transitOptions: distribute
       ? {
-          recipients: [...messageContent.recipients],
+          recipients: [...recipients],
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
@@ -265,8 +281,9 @@ export const updateChatMessage = async (
     versionTag: message?.fileMetadata.versionTag,
     allowDistribution: distribute,
     appData: {
-      uniqueId: messageContent.id,
-      groupId: messageContent.conversationId,
+      uniqueId: message.fileMetadata.appData.uniqueId,
+      groupId: message.fileMetadata.appData.groupId,
+      archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },
@@ -285,6 +302,35 @@ export const updateChatMessage = async (
   );
 };
 
+export const softDeleteChatMessage = async (
+  dotYouClient: DotYouClient,
+  message: DriveSearchResult<ChatMessage>,
+  recipients: string[],
+  deleteForEveryone?: boolean
+) => {
+  message.fileMetadata.appData.archivalStatus = ChatDeletedArchivalStaus;
+  let runningVersionTag = message.fileMetadata.versionTag;
+
+  for (let i = 0; i < message.fileMetadata.payloads.length; i++) {
+    const payload = message.fileMetadata.payloads[i];
+    // TODO: Should the payload be deleted for everyone? With "TransitOptions"
+    const deleteResult = await deletePayload(
+      dotYouClient,
+      ChatDrive,
+      message.fileId,
+      payload.key,
+      runningVersionTag
+    );
+
+    if (!deleteResult) throw new Error('Failed to delete payload');
+    runningVersionTag = deleteResult.newVersionTag;
+  }
+
+  message.fileMetadata.versionTag = runningVersionTag;
+  message.fileMetadata.appData.content.message = '';
+  return await updateChatMessage(dotYouClient, message, deleteForEveryone ? recipients : []);
+};
+
 export const MARK_CHAT_READ_COMMAND = 150;
 export interface MarkAsReadRequest {
   conversationId: string;
@@ -293,13 +339,27 @@ export interface MarkAsReadRequest {
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: Conversation,
+  conversation: DriveSearchResult<Conversation>,
   chatGlobalTransitIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
-    conversationId: conversation.conversationId,
+    conversationId: conversation.fileMetadata.appData.uniqueId as string,
     messageIds: chatGlobalTransitIds,
   };
+
+  const conversationContent = conversation.fileMetadata.appData.content;
+  const recipients = (conversationContent as GroupConversation).recipients || [
+    (conversationContent as SingleConversation).recipient,
+  ];
+  if (!recipients?.filter(Boolean)?.length)
+    throw new Error('No recipients found in the conversation');
+
+  console.log({
+    code: MARK_CHAT_READ_COMMAND,
+    globalTransitIdList: [],
+    jsonMessage: jsonStringify64(request),
+    recipients: recipients,
+  });
 
   return await sendCommand(
     dotYouClient,
@@ -307,10 +367,44 @@ export const requestMarkAsRead = async (
       code: MARK_CHAT_READ_COMMAND,
       globalTransitIdList: [],
       jsonMessage: jsonStringify64(request),
-      recipients: (conversation as GroupConversation).recipients || [
-        (conversation as SingleConversation).recipient,
-      ],
+      recipients: recipients,
     },
     ChatDrive
   );
 };
+
+// export const DELETE_CHAT_COMMAND = 180;
+// export interface DeleteRequest {
+//   conversationId: string;
+//   messageIds: string[];
+// }
+
+// Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
+// export const requestDelete = async (
+//   dotYouClient: DotYouClient,
+//   conversation: DriveSearchResult<Conversation>,
+//   chatGlobalTransitIds: string[]
+// ) => {
+//   const request: DeleteRequest = {
+//     conversationId: conversation.fileMetadata.appData.uniqueId as string,
+//     messageIds: chatGlobalTransitIds,
+//   };
+
+//   const conversationContent = conversation.fileMetadata.appData.content;
+//   const recipients = (conversationContent as GroupConversation).recipients || [
+//     (conversationContent as SingleConversation).recipient,
+//   ];
+//   if (!recipients?.filter(Boolean)?.length)
+//     throw new Error('No recipients found in the conversation');
+
+//   return await sendCommand(
+//     dotYouClient,
+//     {
+//       code: DELETE_CHAT_COMMAND,
+//       globalTransitIdList: [],
+//       jsonMessage: jsonStringify64(request),
+//       recipients: recipients,
+//     },
+//     ChatDrive
+//   );
+// };

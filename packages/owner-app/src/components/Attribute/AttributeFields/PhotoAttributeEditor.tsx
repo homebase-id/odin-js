@@ -4,10 +4,12 @@ import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 
 export const PhotoAttributeEditor = ({
   fileId,
+  lastModified,
   attribute,
   onChange,
 }: {
   fileId?: string;
+  lastModified: number | undefined;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
@@ -15,7 +17,8 @@ export const PhotoAttributeEditor = ({
   const { data: imageBlob } = usePayloadBlob(
     fileId,
     attribute.data?.[MinimalProfileFields.ProfileImageKey],
-    targetDrive
+    targetDrive,
+    lastModified
   );
 
   const dataVal = attribute.data?.[MinimalProfileFields.ProfileImageKey];

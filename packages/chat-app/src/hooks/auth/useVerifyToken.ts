@@ -16,7 +16,8 @@ export const useVerifyToken = (dotYouClient: DotYouClient) => {
       return false;
     }
 
-    return await hasValidYouAuthToken(dotYouClient);
+    // When hasValidYouAuthToken returns undefined, it means that it couldn't be checked.. so we assume it's valid, to avoid unnecessary logouts
+    return (await hasValidYouAuthToken(dotYouClient)) ?? true;
   };
   return useQuery({
     queryKey: ['verifyToken'],

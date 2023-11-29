@@ -26,13 +26,13 @@ export const ChatDrive: TargetDrive = {
 };
 
 interface BaseConversation {
-  conversationId: string;
+  // conversationId: string;
   title: string;
-  imgId?: string;
+  // imgId?: string;
   lastReadTime?: number;
 
-  unread: boolean;
-  unreadCount: number;
+  // unread: boolean;
+  // unreadCount: number;
   // messageType: MessageType;
   // message: ChatMessage;
 }
@@ -137,7 +137,7 @@ export const uploadConversation = async (
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
     appData: {
-      uniqueId: conversationContent.conversationId,
+      uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
       content: payloadJson,
     },
@@ -176,7 +176,7 @@ export const updateConversation = async (
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
     appData: {
-      uniqueId: conversationContent.conversationId,
+      uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
       content: payloadJson,
     },
@@ -195,32 +195,42 @@ export const updateConversation = async (
 };
 
 export const JOIN_CONVERSATION_COMMAND = 100;
-// const JOIN_GROUP_CONVERSATION_COMMAND = 110;
-// const DELETE_CHAT_COMMAND = 180;
+export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
 
 export interface JoinConversationRequest {
   conversationId: string;
   title: string;
 }
 
+export interface JoinGroupConversationRequest extends JoinConversationRequest {
+  recipients: string[];
+}
+
 export const requestConversationCommand = async (
   dotYouClient: DotYouClient,
-  conversation: Conversation
+  conversation: Conversation,
+  conversationId: string
 ) => {
-  const request: JoinConversationRequest = {
-    conversationId: conversation.conversationId,
+  const recipients = (conversation as GroupConversation).recipients || [
+    (conversation as SingleConversation).recipient,
+  ];
+
+  if (!recipients || recipients.length === 0)
+    throw new Error('No recipients found for conversation');
+
+  const request: JoinConversationRequest | JoinGroupConversationRequest = {
+    conversationId: conversationId,
     title: conversation.title,
+    recipients: recipients.length > 1 ? recipients : undefined,
   };
 
   return await sendCommand(
     dotYouClient,
     {
-      code: JOIN_CONVERSATION_COMMAND,
+      code: recipients.length > 1 ? JOIN_GROUP_CONVERSATION_COMMAND : JOIN_CONVERSATION_COMMAND,
       globalTransitIdList: [],
       jsonMessage: jsonStringify64(request),
-      recipients: (conversation as GroupConversation).recipients || [
-        (conversation as SingleConversation).recipient,
-      ],
+      recipients,
     },
     ChatDrive
   );

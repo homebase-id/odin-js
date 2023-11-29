@@ -37,7 +37,10 @@ export const ActionGroup = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={`relative ${className ?? ''}`} ref={wrapperRef}>
+    <div
+      className={`${className?.includes('absolute') ? '' : 'relative'} ${className ?? ''}`}
+      ref={wrapperRef}
+    >
       <ActionButton
         onClick={(e) => {
           e.preventDefault();

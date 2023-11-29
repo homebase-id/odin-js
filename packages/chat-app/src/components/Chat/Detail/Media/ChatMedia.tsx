@@ -1,7 +1,7 @@
 import { DriveSearchResult, PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinImage } from '@youfoundation/ui-lib';
-import { ChatMessage } from '../../providers/ChatProvider';
-import { ChatDrive } from '../../providers/ConversationProvider';
+import { ChatMessage } from '../../../../providers/ChatProvider';
+import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
 import { Triangle, useDotYouClient } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
@@ -14,19 +14,22 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const navigate = useNavigate();
 
   return (
-    <div className={`${isGallery ? 'grid grid-cols-2 gap-1' : ''}`}>
+    <div className={`overflow-hidden rounded-lg ${isGallery ? 'grid grid-cols-2 gap-1' : ''}`}>
       {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => {
+        const isColSpan2 = payloads.length === 3 && index === 2;
         return (
           <div
             key={payload.key}
-            className={`relative h-full w-full ${isGallery ? 'aspect-square' : ''} `}
+            className={`relative h-full w-full ${
+              isGallery ? (isColSpan2 ? 'aspect-[2/1]' : 'aspect-square') : ''
+            } ${isColSpan2 ? 'col-span-2' : ''}`}
           >
             <MediaItem
               fileId={msg.fileId}
               fileLastModified={msg.fileMetadata.updated}
               payload={payload}
               fit={isGallery ? 'cover' : 'contain'}
-              onClick={() => navigate(`${msg.fileMetadata.appData.content.id}/${payload.key}`)}
+              onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)}
             >
               {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                 <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">

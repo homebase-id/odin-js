@@ -60,7 +60,13 @@ export const createThumbnails = async (
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(gifThumb.thumb, gifThumb.naturalSize),
       naturalSize: gifThumb.naturalSize,
-      additionalThumbnails: [],
+      additionalThumbnails: [
+        {
+          key,
+          payload: image,
+          ...gifThumb.naturalSize,
+        },
+      ],
     };
   }
 

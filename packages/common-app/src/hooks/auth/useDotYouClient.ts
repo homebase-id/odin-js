@@ -1,6 +1,6 @@
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
 import { base64ToUint8Array, isLocalStorageAvailable } from '@youfoundation/js-lib/helpers';
-import { OWNER_ROOT, OwnerClient } from '../../core';
+import { OWNER_ROOT, OWNER_APPS_ROOT, OwnerClient } from '../../core';
 import { retrieveIdentity } from '@youfoundation/js-lib/auth';
 
 export const HOME_SHARED_SECRET = 'HSS';
@@ -11,12 +11,12 @@ export const APP_AUTH_TOKEN = 'BX0900';
 export const APP_SHARED_SECRET = 'APSS';
 
 export const useDotYouClient = () => {
-  // Only the feed will run as "apps";
   const _app = window.location.pathname.startsWith(OWNER_ROOT)
     ? 'owner'
     : window.location.hostname === 'dev.dotyou.cloud' ||
       window.location.hostname === 'feed.homebase.id' ||
-      window.location.hostname === 'chat.homebase.id'
+      window.location.hostname === 'chat.homebase.id' ||
+      window.location.pathname.startsWith(OWNER_APPS_ROOT)
     ? 'apps'
     : 'home';
 

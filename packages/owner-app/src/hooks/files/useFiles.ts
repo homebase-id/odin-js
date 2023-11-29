@@ -3,6 +3,7 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
   DEFAULT_PAYLOAD_KEY,
+  DeletedDriveSearchResult,
   deleteFile,
   DriveSearchResult,
   getContentFromHeaderOrPayload,
@@ -34,15 +35,18 @@ export const useFiles = ({
     targetDrive: TargetDrive;
     pageParam: string | undefined;
   }) => {
-    const reponse = await queryBatch(
+    const response = await queryBatch(
       dotYouClient,
-      { targetDrive, systemFileType },
+      { targetDrive, systemFileType, fileState: [0, 1] },
       { cursorState: pageParam, maxRecords: pageSize, includeMetadataHeader: includeMetadataHeader }
     );
-    return reponse;
+    return response;
   };
 
-  const fetchFile = async (result: DriveSearchResult, payloadKey?: string) => {
+  const fetchFile = async (
+    result: DriveSearchResult | DeletedDriveSearchResult,
+    payloadKey?: string
+  ) => {
     if (payloadKey) {
       const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
         keyHeader: result.fileMetadata.isEncrypted
@@ -76,20 +80,20 @@ export const useFiles = ({
           content: tryJsonParse(decryptedJsonContent),
         },
       },
-      payload:
-        result.fileMetadata.payloads.length === 0 ||
-        result.fileMetadata.payloads.some((payload) => payload.contentType === 'application/json')
-          ? await getContentFromHeaderOrPayload(
-              dotYouClient,
-              targetDrive,
-              result,
-              includeMetadataHeader
-            )
-          : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
-              keyHeader: result.fileMetadata.isEncrypted
-                ? result.sharedSecretEncryptedKeyHeader
-                : undefined,
-            }),
+      defaultPayload: result.fileMetadata.payloads.some(
+        (payload) => payload.contentType === 'application/json'
+      )
+        ? await getContentFromHeaderOrPayload(
+            dotYouClient,
+            targetDrive,
+            result,
+            includeMetadataHeader
+          )
+        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
+            keyHeader: result.fileMetadata.isEncrypted
+              ? result.sharedSecretEncryptedKeyHeader
+              : undefined,
+          }),
     };
 
     const stringified = jsonStringify64(exportable);

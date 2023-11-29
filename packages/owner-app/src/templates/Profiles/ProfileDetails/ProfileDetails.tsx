@@ -285,10 +285,10 @@ const ProfileSectionEditor = ({
   groupedAttributes.sort((a, b) => a.priority - b.priority);
 
   const highestPriority = attributes.reduce((prevValue, currValue) => {
-    if (prevValue > currValue.priority) {
+    if (prevValue > currValue.fileMetadata.appData.content.priority) {
       return prevValue;
     } else {
-      return currValue.priority;
+      return currValue.fileMetadata.appData.content.priority;
     }
   }, 0);
 

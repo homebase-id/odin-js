@@ -6,6 +6,7 @@
   "files": [
     "src"
   ],
+  "type": "module",
   "module": "./index.ts",
   "types": "./index.ts",
   "sideEffects": false,

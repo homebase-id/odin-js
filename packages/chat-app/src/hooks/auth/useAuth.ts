@@ -150,6 +150,7 @@ export const useYouAuthAuthorization = () => {
       [
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+        AppPermissionType.ReadConnections,
       ],
       undefined,
       drives,
