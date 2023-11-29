@@ -14,9 +14,13 @@ import { ConversationsList } from './Conversations';
 import { ChatDetail } from './ChatDetail';
 import { NewConversation } from './NewConversation';
 import { NewConversationGroup } from './NewConversationGroup';
+import { ROOT_PATH } from '../../app/App';
 
-export const RUNNING_AS_APP = !window.location.pathname.startsWith('/owner');
-export const CHAT_ROOT = RUNNING_AS_APP ? '' : '/owner/chat';
+export const RUNNING_AS_APP =
+  !window.location.pathname.startsWith('/owner') ||
+  window.location.pathname.startsWith('/apps/chat');
+
+export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {
   useChatTransitProcessor(true);
