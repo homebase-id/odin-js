@@ -2,6 +2,7 @@ import fs from 'fs';
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 const hostConfig = {
   host: 'dev.dotyou.cloud',
@@ -10,7 +11,25 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), spaFallbackWithDot()],
+  plugins: [
+    react(),
+    spaFallbackWithDot(),
+    VitePWA({
+      srcDir: 'src',
+      filename: 'sw.ts',
+      strategies: 'injectManifest',
+      injectRegister: false,
+      manifest: false,
+      injectManifest: {
+        injectionPoint: null,
+      },
+
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
+    }),
+  ],
   server: {
     ...hostConfig,
     https: {
