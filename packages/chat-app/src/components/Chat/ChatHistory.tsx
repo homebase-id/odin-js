@@ -6,9 +6,8 @@ import { ChatMessage } from '../../providers/ChatProvider';
 import { Conversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
-import { useCallback, useMemo } from 'react';
+import { useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
 import { useVirtualizer, Virtualizer } from '@tanstack/react-virtual';
-import { useRef, useEffect, useLayoutEffect } from 'react';
 
 // Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
 // and https://github.com/TanStack/virtual/discussions/195

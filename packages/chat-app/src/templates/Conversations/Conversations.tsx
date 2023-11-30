@@ -28,8 +28,6 @@ import { ChatDeletedArchivalStaus } from '../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../components/Chat/Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../components/Chat/Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../components/Chat/Detail/ChatSentTimeIndicator';
-import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT } from './ChatHome';
 
 export const ConversationsList = ({
   openConversation,
@@ -238,7 +236,6 @@ const SearchConversation = ({
   activeConversationId: string | undefined;
   conversations: DriveSearchResult<Conversation>[];
 }) => {
-  const navigate = useNavigate();
   const [stateIndex, setStateIndex] = useState(0);
   const [query, setQuery] = useState<string | undefined>(undefined);
   const isActive = !!(query && query.length > 1);
@@ -310,52 +307,37 @@ const SearchConversation = ({
       </form>
       <div>
         {isActive ? (
-          <>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(`${CHAT_ROOT}/new-group`);
-              }}
-              className="flex w-full flex-row items-center gap-3 px-5 py-2 hover:bg-primary/20"
-            >
-              <div className="rounded-full bg-primary/20 p-4">
-                <Persons className="h-4 w-4" />
-              </div>
-              {t('New group')}
-            </button>
-
-            {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
-              <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
-            ) : (
-              <>
-                {conversationResults?.length ? (
-                  <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
-                ) : null}
-                {conversationResults.map((result) => (
-                  <ChatAndConversationResult
-                    result={result}
-                    onOpen={(id) => openConversation(id)}
-                    isActive={
-                      activeConversationId ===
-                      (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
-                    }
-                    key={result.fileId}
-                  />
-                ))}
-                {contactsWithoutAConversation?.length ? (
-                  <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
-                ) : null}
-                {contactsWithoutAConversation.map((result) => (
-                  <ChatAndConversationResult
-                    result={result}
-                    onOpen={(id) => openConversation(id)}
-                    isActive={false}
-                    key={result.fileId}
-                  />
-                ))}
-              </>
-            )}
-          </>
+          !conversationResults?.length && !contactsWithoutAConversation?.length ? (
+            <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
+          ) : (
+            <>
+              {conversationResults?.length ? (
+                <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
+              ) : null}
+              {conversationResults.map((result) => (
+                <ChatAndConversationResult
+                  result={result}
+                  onOpen={(id) => openConversation(id)}
+                  isActive={
+                    activeConversationId ===
+                    (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
+                  }
+                  key={result.fileId}
+                />
+              ))}
+              {contactsWithoutAConversation?.length ? (
+                <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
+              ) : null}
+              {contactsWithoutAConversation.map((result) => (
+                <ChatAndConversationResult
+                  result={result}
+                  onOpen={(id) => openConversation(id)}
+                  isActive={false}
+                  key={result.fileId}
+                />
+              ))}
+            </>
+          )
         ) : null}
       </div>
     </>

@@ -38,16 +38,12 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
       <GroupChatConnectedState conversation={conversation || undefined} />
-      <ChatHistory
-        conversation={conversation || undefined}
-        setReplyMsg={setReplyMsg}
-        // Setting a key to reset the scroll positions when the conversation changes
-        key={conversationId}
-      />
+      <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
       <ChatComposer
         conversation={conversation || undefined}
         replyMsg={replyMsg}
         clearReplyMsg={() => setReplyMsg(undefined)}
+        key={conversationId}
       />
     </div>
   );
@@ -70,7 +66,7 @@ const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }
         />
       ) : (
         <div className="rounded-full bg-primary/20 p-3">
-          <Persons className="h-5 w-5" />
+          <Persons className="h-6 w-6" />
         </div>
       )}
       {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}

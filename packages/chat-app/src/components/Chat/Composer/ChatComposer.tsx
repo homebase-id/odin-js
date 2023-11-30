@@ -102,6 +102,7 @@ export const ChatComposer = ({
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
+            autoFocus={true}
             onSubmit={(val) => {
               setMessage(val);
               doSend();

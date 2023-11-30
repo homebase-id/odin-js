@@ -54,7 +54,7 @@ const AttributeCreator = ({
     ) as AttributeDefinition;
 
     setAttribute({
-      fileMetaData: {
+      fileMetadata: {
         appData: {
           content: {
             id: getNewId(),
@@ -67,7 +67,10 @@ const AttributeCreator = ({
           },
         },
       },
-    } as unknown as NewDriveSearchResult<AttributeVm>);
+      serverMetadata: {
+        accessControlList: undefined as any,
+      },
+    });
   };
 
   const discard = () => {

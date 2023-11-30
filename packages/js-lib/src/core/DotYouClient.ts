@@ -65,10 +65,6 @@ export class BaseDotYouClient {
       case ApiType.Guest:
         endpoint = '/api/guest/v1';
         break;
-
-      // case ApiType.YouAuth:
-      //   endpoint = '/api/youauth/v1';
-      //   break;
     }
 
     return this.getRoot() + endpoint;

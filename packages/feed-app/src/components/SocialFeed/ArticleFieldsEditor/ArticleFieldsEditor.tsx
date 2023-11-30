@@ -42,7 +42,8 @@ export const InnerFieldEditors = ({
   const { data: imageBlob } = usePayloadBlob(
     postFile.fileMetadata.appData.content.primaryMediaFile?.fileId || postFile.fileId,
     postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
-    getChannelDrive(channel.channelId)
+    getChannelDrive(channel.channelId),
+    (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated
   );
 
   const dotYouClient = useDotYouClient().getDotYouClient();
