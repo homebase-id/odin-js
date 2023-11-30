@@ -23,7 +23,7 @@ export default defineConfig({
     },
   },
   preview: { ...hostConfig },
-  // base: '/chat',
+  base: '/apps/chat',
   build: {
     rollupOptions: {
       onwarn(warning, warn) {

@@ -5,10 +5,12 @@ import { RichTextEditor } from '@youfoundation/rich-text-editor';
 
 export const ExperienceAttributeEditor = ({
   fileId,
+  lastModified,
   attribute,
   onChange,
 }: {
   fileId?: string;
+  lastModified: number | undefined;
   attribute: AttributeVm;
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
@@ -16,7 +18,8 @@ export const ExperienceAttributeEditor = ({
   const { data: imageBlob } = usePayloadBlob(
     fileId,
     attribute.data?.[MinimalProfileFields.ExperienceImageFileKey],
-    targetDrive
+    targetDrive,
+    lastModified
   );
 
   const dataVal = attribute.data?.[MinimalProfileFields.ExperienceImageFileKey];

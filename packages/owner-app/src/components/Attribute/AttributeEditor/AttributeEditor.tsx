@@ -279,6 +279,7 @@ const AttributeEditor = ({
         <>
           <AttributeFields
             fileId={latestAttr.fileId}
+            lastModified={(attributeDsr as DriveSearchResult<unknown>)?.fileMetadata?.updated}
             attribute={latestAttr.fileMetadata.appData.content}
             onChange={changeHandler}
           />

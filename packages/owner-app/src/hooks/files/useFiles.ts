@@ -3,6 +3,7 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
   DEFAULT_PAYLOAD_KEY,
+  DeletedDriveSearchResult,
   deleteFile,
   DriveSearchResult,
   getContentFromHeaderOrPayload,
@@ -42,7 +43,10 @@ export const useFiles = ({
     return response;
   };
 
-  const fetchFile = async (result: DriveSearchResult, payloadKey?: string) => {
+  const fetchFile = async (
+    result: DriveSearchResult | DeletedDriveSearchResult,
+    payloadKey?: string
+  ) => {
     if (payloadKey) {
       const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
         keyHeader: result.fileMetadata.isEncrypted
