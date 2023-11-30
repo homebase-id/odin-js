@@ -67,12 +67,9 @@ export const ChatHistory = ({
       const element = instance.scrollElement;
       if (!element) return;
 
-      const handler = () => {
-        const maxScrollTop = element.scrollHeight - element.offsetHeight;
-        console.log('callback', Math.abs(element['scrollTop'] - maxScrollTop));
-        cb(Math.abs(element['scrollTop'] - maxScrollTop));
-      };
-      // Start scroll is always 0
+      // Math.abs as the element.scrollTop will be negative with flex-col-reverse
+      const handler = () => cb(Math.abs(element.scrollTop));
+      // Start scroll is always 0, as flex-col-reverse starts at the bottom
       cb(0);
 
       element.addEventListener('scroll', handler, {
@@ -81,7 +78,7 @@ export const ChatHistory = ({
 
       return () => element.removeEventListener('scroll', handler);
     },
-    overscan: 2,
+    overscan: 0,
     getItemKey: (index) => flattenedMsgs[index]?.fileId || 'loader',
   });
 
@@ -121,17 +118,7 @@ export const ChatHistory = ({
         ref={scrollRef}
         key={conversation?.fileId}
       >
-        <div
-          className="flex h-full w-full flex-col-reverse"
-          style={
-            {
-              // height: virtualizer.getTotalSize(),
-              // overflowAnchor: 'none',
-              //   paddingBottom,
-              //   paddingTop,
-            }
-          }
-        >
+        <div className="flex h-full w-full flex-col-reverse">
           <div className="flex-shrink-0" style={{ height: paddingBottom }}></div>
           {items.map((item) => {
             const isLoaderRow = item.index > flattenedMsgs.length - 1;
