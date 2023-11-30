@@ -20,6 +20,7 @@ import {
 import { useDotYouClient } from '@youfoundation/common-app';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { ReceivedCommand } from '@youfoundation/js-lib/dist/core/CommandData/CommandTypes';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
   MARK_CHAT_READ_COMMAND,
@@ -78,6 +79,7 @@ export const useChatCommandProcessor = () => {
 };
 
 const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCommand) => {
+  const queryClient = useQueryClient();
   const joinConversationRequest = tryJsonParse<JoinConversationRequest>(command.clientJsonMessage);
   try {
     await uploadConversation(dotYouClient, {
@@ -96,6 +98,7 @@ const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCom
         },
       },
     });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 4105) return command.id;
 
@@ -111,6 +114,7 @@ const joinGroupConversation = async (
   command: ReceivedCommand,
   identity: string
 ) => {
+  const queryClient = useQueryClient();
   const joinConversationRequest = tryJsonParse<JoinGroupConversationRequest>(
     command.clientJsonMessage
   );
@@ -138,6 +142,7 @@ const joinGroupConversation = async (
         },
       },
     });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 4105) return command.id;
 

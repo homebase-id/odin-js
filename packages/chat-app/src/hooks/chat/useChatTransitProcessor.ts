@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Notify, TypedConnectionNotification } from '@youfoundation/js-lib/core';
 
 import { processInbox } from '@youfoundation/js-lib/transit';
@@ -6,6 +6,7 @@ import { ChatDrive } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
 import { useEffect } from 'react';
+import { ChatMessageFileType } from '../../providers/ChatProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -29,29 +30,45 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 
 export const useChatTransitProcessor = (isEnabled = true) => {
   useInboxProcessor(isEnabled);
+  const queryClient = useQueryClient();
 
-  // const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
-  // // The Websocket subscription only works when running in the owner context
-  // useEffect(() => {
-  //   preAuth(dotYouClient);
-  // }, []);
+  useEffect(() => {
+    preAuth(dotYouClient);
+  }, []);
 
-  // const handler = (notification: TypedConnectionNotification) => {
-  //   if (notification.notificationType === 'transitFileReceived') {
-  //     console.log(
-  //       '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
-  //     );
+  const handler = (notification: TypedConnectionNotification) => {
+    if (notification.notificationType === 'transitFileReceived') {
+      console.log(
+        '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
+      );
 
-  //     Notify({
-  //       command: 'processInbox',
-  //       data: JSON.stringify({
-  //         targetDrive: notification.externalFileIdentifier.targetDrive,
-  //         batchSize: 1,
-  //       }),
-  //     });
-  //   }
-  // };
+      Notify({
+        command: 'processInbox',
+        data: JSON.stringify({
+          targetDrive: notification.externalFileIdentifier.targetDrive,
+          batchSize: 1,
+        }),
+      });
+    }
 
-  // useNotificationSubscriber(isEnabled ? handler : undefined, ['transitFileReceived']);
+    if (
+      (notification.notificationType === 'fileAdded' ||
+        notification.notificationType === 'fileModified') &&
+      notification.targetDrive?.alias === ChatDrive.alias &&
+      notification.targetDrive?.type === ChatDrive.type
+    ) {
+      if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
+        const conversationId = notification.header.fileMetadata.appData.groupId;
+        queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
+      }
+    }
+  };
+
+  useNotificationSubscriber(
+    isEnabled ? handler : undefined,
+    ['transitFileReceived', 'fileAdded'],
+    [ChatDrive]
+  );
 };
