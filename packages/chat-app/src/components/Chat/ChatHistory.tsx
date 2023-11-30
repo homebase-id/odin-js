@@ -35,8 +35,7 @@ export const ChatHistory = ({
     [messages]
   );
 
-  // useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
-
+  useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
     doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
     doDelete: async (msg: DriveSearchResult<ChatMessage>) => {
@@ -50,14 +49,6 @@ export const ChatHistory = ({
   };
 
   const count = flattenedMsgs?.length + 1;
-  // // Scrolls to bottom on first load
-  // if (virtualizerRef.current && count !== virtualizerRef.current.options.count) {
-  //   const delta = count - virtualizerRef.current.options.count;
-  //   const nextOffset = virtualizerRef.current.scrollOffset + delta * itemSize;
-  //   virtualizerRef.current.scrollOffset = nextOffset;
-  //   virtualizerRef.current.scrollToOffset(nextOffset, { align: 'start' });
-  // }
-
   const virtualizer = useVirtualizer({
     getScrollElement: () => scrollRef.current,
     count,
@@ -82,10 +73,6 @@ export const ChatHistory = ({
     getItemKey: (index) => flattenedMsgs[index]?.fileId || 'loader',
   });
 
-  // useIsomorphicLayoutEffect(() => {
-  //   virtualizerRef.current = virtualizer;
-  // });
-
   const items = virtualizer.getVirtualItems();
 
   const [paddingBottom, paddingTop] =
@@ -96,19 +83,19 @@ export const ChatHistory = ({
         ]
       : [0, 0];
 
-  // useEffect(() => {
-  //   const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+  useEffect(() => {
+    const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
 
-  //   if (!lastItem) return;
-  //   if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
-  //     fetchNextPage();
-  // }, [
-  //   hasMoreMessages,
-  //   fetchNextPage,
-  //   flattenedMsgs?.length,
-  //   isFetchingNextPage,
-  //   virtualizer.getVirtualItems(),
-  // ]);
+    if (!lastItem) return;
+    if (lastItem.index >= flattenedMsgs?.length - 1 && hasMoreMessages && !isFetchingNextPage)
+      fetchNextPage();
+  }, [
+    hasMoreMessages,
+    fetchNextPage,
+    flattenedMsgs?.length,
+    isFetchingNextPage,
+    virtualizer.getVirtualItems(),
+  ]);
 
   return (
     <>
