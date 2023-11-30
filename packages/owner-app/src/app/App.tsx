@@ -47,6 +47,7 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
+const EccDebug = lazy(() => import('../templates/Debug/Ecc'));
 
 const SocialFeed = lazy(() =>
   import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.SocialFeed }))
@@ -194,6 +195,7 @@ function App() {
 
             <Route path="demo-data" element={<DemoData />}></Route>
             <Route path="debug" element={<Debug />}></Route>
+            <Route path="ecc-debug" element={<EccDebug />}></Route>
 
             {/* Feed: */}
             <Route path="feed">
