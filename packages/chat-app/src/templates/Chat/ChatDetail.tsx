@@ -43,6 +43,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
         conversation={conversation || undefined}
         replyMsg={replyMsg}
         clearReplyMsg={() => setReplyMsg(undefined)}
+        key={conversationId}
       />
     </div>
   );
@@ -65,7 +66,7 @@ const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }
         />
       ) : (
         <div className="rounded-full bg-primary/20 p-3">
-          <Persons className="h-5 w-5" />
+          <Persons className="h-6 w-6" />
         </div>
       )}
       {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}

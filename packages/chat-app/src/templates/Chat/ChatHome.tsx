@@ -1,6 +1,7 @@
 import {
+  ActionGroup,
   ActionLink,
-  OwnerName,
+  ChevronDown,
   Plus,
   useDotYouClient,
   useSiteData,
@@ -15,6 +16,7 @@ import { ChatDetail } from './ChatDetail';
 import { NewConversation } from './NewConversation';
 import { NewConversationGroup } from './NewConversationGroup';
 import { ROOT_PATH } from '../../app/App';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 export const RUNNING_AS_APP =
   !window.location.pathname.startsWith('/owner') ||
@@ -29,10 +31,10 @@ export const ChatHome = () => {
   const { conversationKey } = useParams();
   const navigate = useNavigate();
 
-  const newChatMatch = useMatch({ path: '/new' });
+  const newChatMatch = useMatch({ path: `${CHAT_ROOT}/new` });
   const isCreateNew = !!newChatMatch;
 
-  const newGroupChatMatch = useMatch({ path: '/new-group' });
+  const newGroupChatMatch = useMatch({ path: `${CHAT_ROOT}/new-group` });
   const isCreateNewGroup = !!newGroupChatMatch;
 
   const rootChatMatch = useMatch({ path: CHAT_ROOT });
@@ -74,6 +76,8 @@ const ProfileHeader = () => {
   const dotYouClient = getDotYouClient();
   const odinId = getIdentity() || undefined;
 
+  const { logout } = useAuth();
+
   return (
     <div className="flex flex-row items-center gap-2 p-5">
       <OdinImage
@@ -87,7 +91,23 @@ const ProfileHeader = () => {
         fit="cover"
         odinId={odinId}
       />
-      <OwnerName />
+      <ActionGroup
+        type="mute"
+        options={[
+          {
+            label: 'Open your owner profile',
+            href: '/owner',
+          },
+          {
+            label: 'Logout',
+            onClick: () => {
+              logout();
+            },
+          },
+        ]}
+      >
+        <ChevronDown className="h-4 w-4" />
+      </ActionGroup>
       <div className="ml-auto">
         <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="mute" />
       </div>

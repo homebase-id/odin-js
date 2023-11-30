@@ -68,7 +68,6 @@ export const useAuth = () => {
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret() ? 'unknown' : 'anonymous');
-  const navigate = useNavigate();
 
   const logout = async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
@@ -77,8 +76,7 @@ export const useAuth = () => {
     localStorage.removeItem(APP_AUTH_TOKEN);
     setAuthenticationState('anonymous');
 
-    navigate('/');
-    window.location.reload();
+    window.location.href = '/owner';
   };
 
   const preauth = async (): Promise<void> => {
