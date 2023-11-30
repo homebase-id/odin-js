@@ -6,8 +6,8 @@ import { ChatMessage } from '../../providers/ChatProvider';
 import { Conversation } from '../../providers/ConversationProvider';
 import { ChatMessageItem } from './Detail/ChatMessageItem';
 import { ChatActions } from './Detail/ContextMenu';
-import { useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
-import { useVirtualizer, Virtualizer } from '@tanstack/react-virtual';
+import { useMemo, useRef, useEffect, useLayoutEffect } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 // Following: https://codesandbox.io/p/devbox/frosty-morse-scvryz?file=%2Fpages%2Findex.js%3A175%2C23
 // and https://github.com/TanStack/virtual/discussions/195
@@ -69,19 +69,11 @@ export const ChatHistory = ({
 
       return () => element.removeEventListener('scroll', handler);
     },
-    overscan: 0,
+    overscan: 5,
     getItemKey: (index) => flattenedMsgs[index]?.fileId || 'loader',
   });
 
   const items = virtualizer.getVirtualItems();
-
-  const [paddingBottom, paddingTop] =
-    items.length > 0
-      ? [
-          Math.max(0, items[0].start - virtualizer.options.scrollMargin),
-          Math.max(0, virtualizer.getTotalSize() - items[items.length - 1].end),
-        ]
-      : [0, 0];
 
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
@@ -105,40 +97,50 @@ export const ChatHistory = ({
         ref={scrollRef}
         key={conversation?.fileId}
       >
-        <div className="flex h-full w-full flex-col-reverse">
-          <div className="flex-shrink-0" style={{ height: paddingBottom }}></div>
-          {items.map((item) => {
-            const isLoaderRow = item.index > flattenedMsgs.length - 1;
-            if (isLoaderRow) {
+        <div
+          className="relative w-full flex-shrink-0 overflow-hidden"
+          style={{
+            height: virtualizer.getTotalSize(),
+          }}
+        >
+          <div
+            className="absolute left-0 top-0 flex h-full w-full flex-col-reverse"
+            style={{
+              transform: `translateY(-${items[0]?.start ?? 0}px)`,
+            }}
+          >
+            {items.map((item) => {
+              const isLoaderRow = item.index > flattenedMsgs.length - 1;
+              if (isLoaderRow) {
+                return (
+                  <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
+                    {hasMoreMessages || isFetchingNextPage ? (
+                      <div className="animate-pulse" key={'loading'}>
+                        {t('Loading...')}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }
+
+              const msg = flattenedMsgs[item.index];
               return (
-                <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
-                  {hasMoreMessages || isFetchingNextPage ? (
-                    <div className="animate-pulse" key={'loading'}>
-                      {t('Loading...')}
-                    </div>
-                  ) : null}
+                <div
+                  key={item.key}
+                  data-index={item.index}
+                  ref={virtualizer.measureElement}
+                  className="flex-shrink-0 py-1"
+                >
+                  <ChatMessageItem
+                    key={msg.fileId}
+                    msg={msg}
+                    conversation={conversation}
+                    chatActions={chatActions}
+                  />
                 </div>
               );
-            }
-
-            const msg = flattenedMsgs[item.index];
-            return (
-              <div
-                key={item.key}
-                data-index={item.index}
-                ref={virtualizer.measureElement}
-                className="flex-shrink-0 py-1"
-              >
-                <ChatMessageItem
-                  key={msg.fileId}
-                  msg={msg}
-                  conversation={conversation}
-                  chatActions={chatActions}
-                />
-              </div>
-            );
-          })}
-          <div className="flex-shrink-0" style={{ height: paddingTop }}></div>
+            })}
+          </div>
         </div>
       </div>
     </>
