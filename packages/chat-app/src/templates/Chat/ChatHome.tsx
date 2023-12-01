@@ -3,9 +3,15 @@ import {
   ActionGroup,
   ActionLink,
   ChevronDown,
+  Grid,
+  House,
+  Moon,
+  Person,
   Plus,
+  Sun,
   Times,
   t,
+  useDarkMode,
   useDotYouClient,
   useSiteData,
 } from '@youfoundation/common-app';
@@ -99,6 +105,7 @@ const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | undefine
   const { getIdentity, getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
   const odinId = getIdentity() || undefined;
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const { logout } = useAuth();
 
@@ -121,13 +128,24 @@ const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | undefine
           {
             label: 'Open your owner profile',
             href: '/owner',
+            icon: House,
           },
           {
             label: 'Logout',
-            onClick: () => {
-              logout();
-            },
+            onClick: () => logout(),
+            icon: Person,
           },
+          isDarkMode
+            ? {
+                label: 'Light mode',
+                icon: Sun,
+                onClick: toggleDarkMode,
+              }
+            : {
+                label: 'Dark mode',
+                icon: Moon,
+                onClick: () => toggleDarkMode(),
+              },
         ]}
       >
         <ChevronDown className="h-4 w-4" />
