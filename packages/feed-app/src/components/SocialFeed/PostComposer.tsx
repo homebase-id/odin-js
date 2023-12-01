@@ -167,11 +167,17 @@ const PostComposer = ({
                 size="square"
                 type="mute"
                 options={[
-                  {
-                    label: t('Who can react'),
-                    icon: reactAccess && reactAccess !== true ? Lock : Globe,
-                    onClick: () => setIsReactAccessEditorOpen(true),
-                  },
+                  reactAccess === false
+                    ? {
+                        label: t('Enable reactions'),
+                        icon: Globe,
+                        onClick: () => setReactAccess(true),
+                      }
+                    : {
+                        label: t('Disable reactions'),
+                        icon: Lock,
+                        onClick: () => setReactAccess(false),
+                      },
                   {
                     label: t('Convert to an article'),
                     href: `/owner/feed/new?caption=${caption}&channel=${channel.channelId}`,
@@ -206,7 +212,7 @@ const PostComposer = ({
         </div>
       </form>
       {error ? <ErrorNotification error={error} /> : null}
-      <ReactAccessEditorDialog
+      {/* <ReactAccessEditorDialog
         isOpen={isReactAccessEditorOpen}
         onConfirm={(newReactAccess) => {
           setReactAccess(newReactAccess);
@@ -215,7 +221,7 @@ const PostComposer = ({
         onCancel={() => setIsReactAccessEditorOpen(false)}
         title={t('Edit react access')}
         defaultValue={reactAccess}
-      />
+      /> */}
     </div>
   );
 };

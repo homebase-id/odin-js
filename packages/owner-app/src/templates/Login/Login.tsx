@@ -85,6 +85,7 @@ const Login = () => {
                   <PasswordInput
                     name="password"
                     id="password"
+                    autoFocus
                     required
                     onChange={(e) => setPassword(e.target.value)}
                     defaultValue={password}
