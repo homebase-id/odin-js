@@ -34,7 +34,6 @@ export const useAuth = () => {
     'unknown' | 'anonymous' | 'authenticated'
   >(hasSharedSecret ? 'unknown' : 'anonymous');
   const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(isOwner);
-  const navigate = useNavigate();
 
   const logout = async (): Promise<void> => {
     try {
@@ -50,7 +49,7 @@ export const useAuth = () => {
       console.error('Really bad auth state', e);
     }
 
-    navigate(HOME_ROOT_PATH);
+    window.location.href = HOME_ROOT_PATH;
   };
 
   const getIdentity = () => {
