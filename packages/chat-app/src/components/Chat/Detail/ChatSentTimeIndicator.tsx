@@ -5,7 +5,7 @@ import { ChatMessage } from '../../../providers/ChatProvider';
 
 export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <p className="select-none text-sm text-foreground/50">{children}</p>
+    <p className="select-none text-sm text-foreground/70">{children}</p>
   );
 
   const date = new Date(msg.fileMetadata.created);

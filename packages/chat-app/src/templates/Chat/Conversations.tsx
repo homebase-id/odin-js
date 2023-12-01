@@ -149,7 +149,6 @@ export const InnerGroupConversationItem = ({
             ) : lastMessageContent.message ? (
               <p>{ellipsisAtMaxChar(lastMessageContent.message, 40)}</p>
             ) : (
-              //TODO: Add preview thumbnail of the actual media
               <p>📷 {t('Media')}</p>
             )
           ) : null}
@@ -207,7 +206,6 @@ export const InnerConversationItem = ({
             ) : lastMessageContent.message ? (
               <p>{ellipsisAtMaxChar(lastMessageContent.message, 40)}</p>
             ) : (
-              //TODO: Add preview thumbnail of the actual media
               <p>📷 {t('Media')}</p>
             )
           ) : (

@@ -209,7 +209,6 @@ export const VolatileInput = ({
       <MentionDropdown
         query={wordTillCaret}
         onInput={(link) => {
-          console.log('link', link);
           if (onChange && link && wordTillCaret) {
             setLastInsertedContent(link);
             onChange(`${divRef.current?.innerText.replace(wordTillCaret, link) || ''}`);

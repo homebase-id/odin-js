@@ -38,8 +38,8 @@ export const EmojiDropdown = ({
       if (event.key === 'ArrowDown') setActiveIndex((index) => index + 1);
       else if (event.key === 'ArrowUp') setActiveIndex((index) => index - 1);
       else if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey)
-        onInput(emojis?.[activeIndex].unicode);
-      else if (event.key === 'Tab') onInput(emojis?.[activeIndex].unicode);
+        onInput(`${emojis?.[activeIndex].unicode} `);
+      else if (event.key === 'Tab') onInput(`${emojis?.[activeIndex].unicode} `);
       else return;
 
       event.stopPropagation();
@@ -80,7 +80,7 @@ export const EmojiDropdown = ({
                 : 'hover:bg-indigo-200 dark:hover:bg-indigo-800'
             }`}
             onClick={() => {
-              onInput(emoji.unicode);
+              onInput(`${emoji.unicode} `);
               setEmojis([]);
             }}
           >

@@ -100,7 +100,8 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly = content.message.match(/^\p{Extended_Pictographic}/u);
-  const showBackground = !isEmojiOnly;
+  const isReply = !!content.replyId;
+  const showBackground = !isEmojiOnly || isReply;
 
   return (
     <div
@@ -121,9 +122,9 @@ const ChatTextMessageBody = ({
         {isDeleted ? (
           <MessageDeletedInnerBody />
         ) : (
-          <div className="flex flex-col gap-[2px]">
+          <div className="flex flex-col gap-1">
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-            <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>
+            <p className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}>
               {content.message}
             </p>
           </div>
@@ -174,7 +175,11 @@ const ChatMediaMessageBody = ({
   const hasACaption = !!content.message;
   const ChatFooter = ({ className }: { className?: string }) => (
     <>
-      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
+      <div
+        className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${hasACaption ? '' : 'invert'} ${
+          className || ''
+        }`}
+      >
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} />
       </div>

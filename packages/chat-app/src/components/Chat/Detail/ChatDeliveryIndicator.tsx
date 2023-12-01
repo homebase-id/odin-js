@@ -19,7 +19,7 @@ export const InnerDeliveryIndicator = ({ state }: { state?: ChatDeliveryStatus }
   return (
     <div
       className={`${isDelivered ? '-ml-2' : ''} flex flex-row drop-shadow-md ${
-        isRead ? 'text-blue-600 ' : 'text-foreground/60'
+        isRead ? 'text-blue-600 ' : 'text-foreground/50'
       }`}
     >
       {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-4 w-4" /> : null}
