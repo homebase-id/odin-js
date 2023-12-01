@@ -1,6 +1,6 @@
 import Cropper from 'react-cropper';
 import './cropper.css';
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { t, useDebounce } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 

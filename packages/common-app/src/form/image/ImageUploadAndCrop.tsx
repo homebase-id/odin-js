@@ -32,8 +32,6 @@ const ImageUploadAndCrop = ({
   const [isCropping, setIsCropping] = useState(false);
 
   const onRawLoad: React.ReactEventHandler<HTMLImageElement> = async (e) => {
-    onChange && onChange(rawImageData);
-
     const size = {
       height: e.currentTarget.naturalHeight,
       width: e.currentTarget.naturalWidth,
@@ -41,6 +39,7 @@ const ImageUploadAndCrop = ({
 
     if (expectedAspectRatio && size.width / size.height !== expectedAspectRatio)
       setIsCropping(true);
+    else onChange && onChange(rawImageData);
   };
 
   const reset = () => {

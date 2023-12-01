@@ -27,6 +27,7 @@ export const ImageDialog = ({
 }) => {
   const target = usePortal('modal-container');
   const [isGettingData, setIsGettingData] = useState(false);
+  const [uncroppedData, setUncroppedData] = useState<Blob>();
   const cropperRef = useRef<CropperRef>();
   if (!isOpen) return null;
 
@@ -35,7 +36,9 @@ export const ImageDialog = ({
     const imageData = await GetCroppedData(cropperRef);
 
     if (imageData) await onConfirm(imageData);
-    else console.error('No image data found');
+    else if (uncroppedData) await onConfirm(uncroppedData);
+    else console.error('No image data found', cropperRef);
+
     setIsGettingData(false);
   };
 
@@ -48,6 +51,7 @@ export const ImageDialog = ({
           maxHeight={maxHeight}
           maxWidth={maxWidth}
           onLoad={(ref) => (cropperRef.current = ref)}
+          onChange={(uncroppedData) => setUncroppedData(uncroppedData)}
           autoSave={false}
         />
 
