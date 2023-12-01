@@ -1,7 +1,7 @@
 import {
   ActionButton,
   ActionLink,
-  ChevronLeft,
+  Bars,
   ConnectionImage,
   ConnectionName,
   Persons,
@@ -18,12 +18,16 @@ import {
 import { useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { ChatMessage } from '../../providers/ChatProvider';
-import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT, RUNNING_AS_APP } from './ChatHome';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 
-export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
+export const ChatDetail = ({
+  conversationId,
+  toggleSidenav,
+}: {
+  conversationId: string | undefined;
+  toggleSidenav: () => void;
+}) => {
   const { data: conversation } = useConversation({ conversationId }).single;
   const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
 
@@ -36,7 +40,10 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
-      <ChatHeader conversation={conversation?.fileMetadata.appData.content} />
+      <ChatHeader
+        conversation={conversation?.fileMetadata.appData.content}
+        toggleSidenav={toggleSidenav}
+      />
       <GroupChatConnectedState conversation={conversation || undefined} />
       <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
       <ChatComposer
@@ -49,15 +56,20 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   );
 };
 
-const ChatHeader = ({ conversation }: { conversation: Conversation | undefined }) => {
+const ChatHeader = ({
+  conversation,
+  toggleSidenav,
+}: {
+  conversation: Conversation | undefined;
+  toggleSidenav: () => void;
+}) => {
   const recipient = (conversation as SingleConversation)?.recipient;
-  const navigate = useNavigate();
 
   return (
     <div className="flex flex-row items-center gap-2 bg-page-background p-5">
-      {!RUNNING_AS_APP ? (
-        <ActionButton icon={ChevronLeft} type="mute" onClick={() => navigate(CHAT_ROOT)} />
-      ) : null}
+      <ActionButton className="lg:hidden" type="mute" onClick={toggleSidenav}>
+        <Bars className="h-5 w-5" />
+      </ActionButton>
       {recipient ? (
         <ConnectionImage
           odinId={recipient}

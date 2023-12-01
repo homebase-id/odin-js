@@ -44,7 +44,7 @@ export const ActionLink: FC<ActionLinkProps> = ({
 
   const widthClasses =
     children && type !== 'mute'
-      ? `min-w-[6rem] ${className?.indexOf('w-') !== -1 ? '' : 'w-full sm:w-auto'}`
+      ? `${className?.indexOf('w-') !== -1 ? '' : 'w-full sm:w-auto'}`
       : '';
 
   const sizeClasses =

@@ -43,7 +43,7 @@ export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
   const dateTimeFormat: Intl.DateTimeFormatOptions = {
     month: yearsAgo !== 0 || monthsAgo !== 0 ? 'short' : undefined,
     day: 'numeric',
-    weekday: 'short',
+    // weekday: 'short',
     year: yearsAgo !== 0 ? 'numeric' : undefined,
     hour: 'numeric',
     minute: 'numeric',

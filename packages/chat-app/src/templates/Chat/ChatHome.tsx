@@ -1,8 +1,11 @@
 import {
+  ActionButton,
   ActionGroup,
   ActionLink,
   ChevronDown,
   Plus,
+  Times,
+  t,
   useDotYouClient,
   useSiteData,
 } from '@youfoundation/common-app';
@@ -17,18 +20,41 @@ import { NewConversation } from './NewConversation';
 import { NewConversationGroup } from './NewConversationGroup';
 import { ROOT_PATH } from '../../app/App';
 import { useAuth } from '../../hooks/auth/useAuth';
-
-export const RUNNING_AS_APP =
-  !window.location.pathname.startsWith('/owner') ||
-  window.location.pathname.startsWith('/apps/chat');
+import { useState } from 'react';
 
 export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {
+  const { conversationKey } = useParams();
+
+  const [isSidenavOpen, setIsSidenavOpen] = useState(false);
+
   useChatTransitProcessor(true);
   useChatCommandProcessor();
 
+  return (
+    <div className="flex h-screen w-full flex-row overflow-hidden">
+      <Aside isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
+
+      <div className="h-screen w-full flex-grow bg-background">
+        <ChatDetail
+          conversationId={conversationKey}
+          toggleSidenav={() => setIsSidenavOpen(!isSidenavOpen)}
+        />
+      </div>
+    </div>
+  );
+};
+
+const Aside = ({
+  isOpen,
+  setIsSidenavOpen,
+}: {
+  isOpen: boolean;
+  setIsSidenavOpen: (newIsOpen: boolean) => void;
+}) => {
   const { conversationKey } = useParams();
+
   const navigate = useNavigate();
 
   const newChatMatch = useMatch({ path: `${CHAT_ROOT}/new` });
@@ -40,37 +66,35 @@ export const ChatHome = () => {
   const rootChatMatch = useMatch({ path: CHAT_ROOT });
   const isRoot = !!rootChatMatch;
 
+  const isActive = isOpen || isCreateNew || isCreateNewGroup || isRoot;
+
   return (
-    <div className="flex h-screen w-full flex-row overflow-hidden">
-      {RUNNING_AS_APP || isRoot ? (
-        <div
-          className={`flex h-screen w-full ${
-            RUNNING_AS_APP ? 'max-w-sm' : ''
-          } flex-shrink-0 flex-col border-r bg-page-background dark:border-r-slate-800`}
-        >
-          {isCreateNew ? (
-            <NewConversation />
-          ) : isCreateNewGroup ? (
-            <NewConversationGroup />
-          ) : (
-            <>
-              <ProfileHeader />
-              <ConversationsList
-                activeConversationId={conversationKey}
-                openConversation={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
-              />
-            </>
-          )}
-        </div>
-      ) : null}
-      <div className="h-screen w-full flex-grow bg-background">
-        <ChatDetail conversationId={conversationKey} />
-      </div>
+    <div
+      className={`${
+        isActive ? 'translate-x-full' : 'translate-x-0'
+      } fixed bottom-0 left-[-100%] top-0 z-10 flex h-screen w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 lg:static lg:max-w-sm lg:translate-x-0`}
+    >
+      {isCreateNew ? (
+        <NewConversation />
+      ) : isCreateNewGroup ? (
+        <NewConversationGroup />
+      ) : (
+        <>
+          <ProfileHeader closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)} />
+          <ConversationsList
+            activeConversationId={conversationKey}
+            openConversation={(newId) => {
+              setIsSidenavOpen(false);
+              navigate(`${CHAT_ROOT}/${newId}`);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 };
 
-const ProfileHeader = () => {
+const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | undefined }) => {
   const { data } = useSiteData();
   const { getIdentity, getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
@@ -108,8 +132,15 @@ const ProfileHeader = () => {
       >
         <ChevronDown className="h-4 w-4" />
       </ActionGroup>
-      <div className="ml-auto">
-        <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="mute" />
+      <div className="ml-auto flex flex-row items-center gap-2">
+        <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary">
+          {t('New')}
+        </ActionLink>
+        {closeSideNav ? (
+          <ActionButton className="lg:hidden" type="mute" onClick={closeSideNav}>
+            <Times className="h-5 w-5" />
+          </ActionButton>
+        ) : null}
       </div>
     </div>
   );
