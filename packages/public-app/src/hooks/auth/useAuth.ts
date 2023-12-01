@@ -130,8 +130,6 @@ export const useYouAuthAuthorization = () => {
     salt: string,
     iv: string
   ) => {
-    console.log('Finalizing authentication', { encryptedData, remotePublicKey, salt, iv });
-
     try {
       const privateKey = await retrieveEccKey();
       if (!privateKey) throw new Error('Failed to retrieve key');
@@ -161,10 +159,12 @@ export const useYouAuthAuthorization = () => {
       // Redirect to the returnUrl; With a fallback to home
       window.location.href = returnUrl || '/';
     } catch (e) {
-      console.error('Failed to finalize authorization', e, remotePublicKey);
-      alert(
-        `Failed to finalize authorization, send this to us: ${new Date().toISOString()} ${remotePublicKey}`
-      );
+      console.error('Failed to finalize authorization', {
+        encryptedData,
+        remotePublicKey,
+        salt,
+        iv,
+      });
     }
   };
 
