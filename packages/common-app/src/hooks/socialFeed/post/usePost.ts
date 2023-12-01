@@ -207,11 +207,15 @@ export const usePost = () => {
       onError: (err, _newCircle, context) => {
         console.error(err);
 
-        // Revert local caches to what they were
+        // Revert local caches to what they were,
+
         queryClient.setQueryData(['social-feeds'], context?.previousFeed);
       },
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+        // Invalidate with a small delay to allow the server to update
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+        }, 1000);
       },
     }),
 

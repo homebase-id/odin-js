@@ -130,35 +130,42 @@ export const useYouAuthAuthorization = () => {
     salt: string,
     iv: string
   ) => {
-    console.log('Finalizing authentication', { encryptedData, remotePublicKey, salt, iv });
+    try {
+      const privateKey = await retrieveEccKey();
+      if (!privateKey) throw new Error('Failed to retrieve key');
+      const importedRemotePublicKey = await importRemotePublicEccKey(remotePublicKey);
 
-    const privateKey = await retrieveEccKey();
-    if (!privateKey) throw new Error('Failed to retrieve key');
-    const importedRemotePublicKey = await importRemotePublicEccKey(remotePublicKey);
+      const exchangedSecret = new Uint8Array(
+        await getEccSharedSecret(privateKey, importedRemotePublicKey, salt)
+      );
 
-    const exchangedSecret = new Uint8Array(
-      await getEccSharedSecret(privateKey, importedRemotePublicKey, salt)
-    );
+      const data = await cbcDecrypt(
+        base64ToUint8Array(encryptedData),
+        base64ToUint8Array(iv),
+        exchangedSecret
+      );
 
-    const data = await cbcDecrypt(
-      base64ToUint8Array(encryptedData),
-      base64ToUint8Array(iv),
-      exchangedSecret
-    );
+      const { identity, ss64, returnUrl } = tryJsonParse<{
+        identity: string;
+        ss64: string;
+        returnUrl: string;
+      }>(byteArrayToString(data));
 
-    const { identity, ss64, returnUrl } = tryJsonParse<{
-      identity: string;
-      ss64: string;
-      returnUrl: string;
-    }>(byteArrayToString(data));
-
-    // Store the sharedSecret to the localStorage
-    window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
-    // Store the identity to the localStorage
-    window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
-    console.log({ returnUrl });
-    // Redirect to the returnUrl; With a fallback to home
-    window.location.href = returnUrl || '/';
+      // Store the sharedSecret to the localStorage
+      window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
+      // Store the identity to the localStorage
+      window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
+      console.log({ returnUrl });
+      // Redirect to the returnUrl; With a fallback to home
+      window.location.href = returnUrl || '/';
+    } catch (e) {
+      console.error('Failed to finalize authorization', {
+        encryptedData,
+        remotePublicKey,
+        salt,
+        iv,
+      });
+    }
   };
 
   return { getAuthorizationParameters, finalizeAuthorization };
