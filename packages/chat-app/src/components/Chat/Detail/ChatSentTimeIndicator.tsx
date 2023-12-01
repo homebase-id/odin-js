@@ -3,9 +3,15 @@ import { format } from '@youfoundation/common-app/src/helpers/timeago';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 
-export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatSentTimeIndicator = ({
+  msg,
+  className,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+  className?: string;
+}) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <p className="select-none text-sm text-foreground/70">{children}</p>
+    <p className={`select-none text-sm text-foreground/70 ${className || ''}`}>{children}</p>
   );
 
   const date = new Date(msg.fileMetadata.created);

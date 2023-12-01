@@ -175,13 +175,9 @@ const ChatMediaMessageBody = ({
   const hasACaption = !!content.message;
   const ChatFooter = ({ className }: { className?: string }) => (
     <>
-      <div
-        className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${hasACaption ? '' : 'invert'} ${
-          className || ''
-        }`}
-      >
+      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2  ${className || ''}`}>
         <ChatDeliveryIndicator msg={msg} />
-        <ChatSentTimeIndicator msg={msg} />
+        <ChatSentTimeIndicator msg={msg} className={hasACaption ? undefined : 'invert'} />
       </div>
       <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
     </>
