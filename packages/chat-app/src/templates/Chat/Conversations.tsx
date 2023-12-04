@@ -1,6 +1,7 @@
 import {
   ActionButton,
   ConnectionImage,
+  ConnectionName,
   Input,
   MagnifyingGlass,
   Persons,
@@ -17,7 +18,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
@@ -159,7 +160,10 @@ export const SingleConversationItem = ({
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
-      <ConversationBody title={odinId} conversationId={conversationId} />
+      <ConversationBody
+        title={<ConnectionName odinId={odinId} />}
+        conversationId={conversationId}
+      />
     </div>
   );
 };
@@ -168,7 +172,7 @@ const ConversationBody = ({
   title,
   conversationId,
 }: {
-  title: string | undefined;
+  title: string | ReactNode | undefined;
   conversationId?: string;
 }) => {
   const { data } = useChatMessages({ conversationId }).all;
@@ -183,7 +187,9 @@ const ConversationBody = ({
     <>
       <div className="flex w-full flex-col gap-1">
         <div className="flex flex-row justify-between gap-2">
-          <p className="font-semibold">{ellipsisAtMaxChar(title, 25)}</p>
+          <p className="font-semibold">
+            {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
+          </p>
           {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} isShort={true} /> : null}
         </div>
         <div className="flex flex-row items-center gap-1">
