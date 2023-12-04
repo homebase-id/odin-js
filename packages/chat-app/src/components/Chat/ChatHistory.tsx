@@ -18,14 +18,22 @@ export const useIsomorphicLayoutEffect =
 export const ChatHistory = ({
   conversation,
   setReplyMsg,
+  setIsEmptyChat,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
   setReplyMsg: (msg: DriveSearchResult<ChatMessage>) => void;
+  setIsEmptyChat: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const {
-    all: { data: messages, hasNextPage: hasMoreMessages, fetchNextPage, isFetchingNextPage },
+    all: {
+      data: messages,
+      hasNextPage: hasMoreMessages,
+      fetchNextPage,
+      isFetchingNextPage,
+      isFetchedAfterMount,
+    },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
   const flattenedMsgs = useMemo(
@@ -34,6 +42,10 @@ export const ChatHistory = ({
         []) as DriveSearchResult<ChatMessage>[],
     [messages]
   );
+
+  useEffect(() => {
+    if (isFetchedAfterMount && flattenedMsgs.length === 0) setIsEmptyChat(true);
+  }, [isFetchedAfterMount, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {

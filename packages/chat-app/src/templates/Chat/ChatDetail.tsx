@@ -28,7 +28,10 @@ export const ChatDetail = ({
   conversationId: string | undefined;
   toggleSidenav: () => void;
 }) => {
+  const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
+
   const { data: conversation } = useConversation({ conversationId }).single;
+  const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
 
   if (!conversationId)
@@ -38,6 +41,10 @@ export const ChatDetail = ({
       </div>
     );
 
+  const onSend = async () => {
+    if (isEmptyChat && conversation) inviteRecipient({ conversation });
+  };
+
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
       <ChatHeader
@@ -45,11 +52,16 @@ export const ChatDetail = ({
         toggleSidenav={toggleSidenav}
       />
       <GroupChatConnectedState conversation={conversation || undefined} />
-      <ChatHistory conversation={conversation || undefined} setReplyMsg={setReplyMsg} />
+      <ChatHistory
+        conversation={conversation || undefined}
+        setReplyMsg={setReplyMsg}
+        setIsEmptyChat={setIsEmptyChat}
+      />
       <ChatComposer
         conversation={conversation || undefined}
         replyMsg={replyMsg}
         clearReplyMsg={() => setReplyMsg(undefined)}
+        onSend={onSend}
         key={conversationId}
       />
     </div>

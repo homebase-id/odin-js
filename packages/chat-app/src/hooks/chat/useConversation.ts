@@ -96,14 +96,19 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       ...(await uploadConversation(dotYouClient, newConversation)),
     };
 
-    // TODO: Move this to only be called after a first message is sent?
-    //  ATM, a conversation is started, and the recipient is added to the conversation directly after a contact is "clicked"
+    return uploadResult;
+  };
+
+  const sendJoinCommand = async ({
+    conversation,
+  }: {
+    conversation: DriveSearchResult<Conversation>;
+  }): Promise<void> => {
     await requestConversationCommand(
       dotYouClient,
-      newConversation.fileMetadata.appData.content,
-      newConversationId
+      conversation.fileMetadata.appData.content,
+      conversation.fileMetadata.appData.uniqueId as string
     );
-    return uploadResult;
   };
 
   const updateExistingConversation = async ({
@@ -129,6 +134,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         queryClient.invalidateQueries({ queryKey: ['conversation', _data?.newConversationId] });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
+    }),
+    inviteRecipient: useMutation({
+      mutationFn: sendJoinCommand,
     }),
     update: useMutation({
       mutationFn: updateExistingConversation,

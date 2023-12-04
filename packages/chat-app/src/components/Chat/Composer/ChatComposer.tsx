@@ -25,10 +25,12 @@ export const ChatComposer = ({
   conversation,
   replyMsg,
   clearReplyMsg,
+  onSend,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
   replyMsg: DriveSearchResult<ChatMessage> | undefined;
   clearReplyMsg: () => void;
+  onSend?: () => void;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
@@ -45,6 +47,7 @@ export const ChatComposer = ({
   const doSend = () => {
     if ((!message && !files) || !conversationContent || !conversation.fileMetadata.appData.uniqueId)
       return;
+
     sendMessage({
       conversationId: conversation.fileMetadata.appData.uniqueId as string,
       message: message || '',
@@ -54,6 +57,7 @@ export const ChatComposer = ({
         (conversationContent as SingleConversation).recipient,
       ],
     });
+    onSend && onSend();
   };
 
   // Reset state, when the message was sent successfully

@@ -67,12 +67,7 @@ export const NewConversationGroup = () => {
               />
             </div>
           ))}
-          <ActionButton
-            className="mt-7 w-full"
-            icon={Arrow}
-            onClick={doCreate}
-            state={createStatus}
-          >
+          <ActionButton className="w-full" icon={Arrow} onClick={doCreate} state={createStatus}>
             {t('Create')}
           </ActionButton>
         </div>
