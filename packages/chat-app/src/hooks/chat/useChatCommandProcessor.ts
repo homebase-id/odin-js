@@ -18,7 +18,7 @@ import {
 } from '../../providers/ConversationProvider';
 import { useDotYouClient } from '@youfoundation/common-app';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { ReceivedCommand } from '@youfoundation/js-lib/dist/core/CommandData/CommandTypes';
+import { ReceivedCommand } from '@youfoundation/js-lib/core';
 import { useQueryClient, QueryClient } from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
@@ -38,6 +38,7 @@ export const useChatCommandProcessor = () => {
 
   useEffect(() => {
     (async () => {
+      if (!identity) return;
       if (isProcessing.current) return;
       isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
@@ -53,21 +54,7 @@ export const useChatCommandProcessor = () => {
       for (let i = 0; i < filteredCommands.length; i++) {
         const command = filteredCommands[i];
 
-        let completedCommand: string | null = null;
-        if (command.clientCode === JOIN_CONVERSATION_COMMAND)
-          completedCommand = await joinConversation(dotYouClient, queryClient, command);
-
-        if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
-          completedCommand = await joinGroupConversation(
-            dotYouClient,
-            queryClient,
-            command,
-            identity
-          );
-
-        if (command.clientCode === MARK_CHAT_READ_COMMAND)
-          completedCommand = await markChatAsRead(dotYouClient, queryClient, command);
-
+        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
         if (completedCommand) completedCommands.push(completedCommand);
       }
 
@@ -81,6 +68,22 @@ export const useChatCommandProcessor = () => {
       isProcessing.current = false;
     })();
   }, []);
+};
+
+export const processCommand = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  command: ReceivedCommand,
+  identity: string
+) => {
+  if (command.clientCode === JOIN_CONVERSATION_COMMAND)
+    return await joinConversation(dotYouClient, queryClient, command);
+
+  if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
+    return await joinGroupConversation(dotYouClient, queryClient, command, identity);
+
+  if (command.clientCode === MARK_CHAT_READ_COMMAND)
+    return await markChatAsRead(dotYouClient, queryClient, command);
 };
 
 const joinConversation = async (

@@ -1,12 +1,23 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Notify, TypedConnectionNotification } from '@youfoundation/js-lib/core';
+import {
+  Notify,
+  ReceivedCommand,
+  TypedConnectionNotification,
+  markCommandComplete,
+} from '@youfoundation/js-lib/core';
 
 import { processInbox } from '@youfoundation/js-lib/transit';
-import { ChatDrive } from '../../providers/ConversationProvider';
+import {
+  ChatDrive,
+  JOIN_CONVERSATION_COMMAND,
+  JOIN_GROUP_CONVERSATION_COMMAND,
+} from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
 import { useEffect } from 'react';
-import { ChatMessageFileType } from '../../providers/ChatProvider';
+import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
+import { processCommand } from './useChatCommandProcessor';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 const MINUTE_IN_MS = 60000;
 
@@ -32,13 +43,14 @@ export const useChatTransitProcessor = (isEnabled = true) => {
   useInboxProcessor(isEnabled);
   const queryClient = useQueryClient();
 
+  const identity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   useEffect(() => {
     preAuth(dotYouClient);
   }, []);
 
-  const handler = (notification: TypedConnectionNotification) => {
+  const handler = async (notification: TypedConnectionNotification) => {
     if (notification.notificationType === 'transitFileReceived') {
       console.log(
         '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
@@ -62,6 +74,24 @@ export const useChatTransitProcessor = (isEnabled = true) => {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
+      } else if (
+        [
+          JOIN_CONVERSATION_COMMAND,
+          JOIN_GROUP_CONVERSATION_COMMAND,
+          MARK_CHAT_READ_COMMAND,
+        ].includes(notification.header.fileMetadata.appData.dataType) &&
+        identity
+      ) {
+        const command: ReceivedCommand = tryJsonParse<ReceivedCommand>(
+          notification.header.fileMetadata.appData.content
+        );
+        command.sender = notification.header.fileMetadata.senderOdinId;
+        command.clientCode = notification.header.fileMetadata.appData.dataType;
+        command.id = notification.header.fileId;
+
+        const processedCommand = await processCommand(dotYouClient, queryClient, command, identity);
+        if (processedCommand)
+          await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
       }
     }
   };

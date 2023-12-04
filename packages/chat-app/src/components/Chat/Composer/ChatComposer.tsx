@@ -108,7 +108,12 @@ export const ChatComposer = ({
               doSend();
             }}
           />
-          <ActionButton type="secondary" onClick={doSend} state={sendMessageState}>
+          <ActionButton
+            type="secondary"
+            onClick={doSend}
+            state={sendMessageState}
+            className="mt-auto"
+          >
             {t('Send')}
           </ActionButton>
         </div>

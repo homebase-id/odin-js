@@ -8,7 +8,7 @@ import {
   ClientFileNotification,
   ClientTransitNotification,
   ClientUnknownNotification,
-  Command,
+  WebsocketCommand,
   EstablishConnectionRequest,
   NotificationType,
   TypedConnectionNotification,
@@ -149,7 +149,7 @@ export const Subscribe = async (
   });
 };
 
-export const Notify = async (command: Command | EstablishConnectionRequest) => {
+export const Notify = async (command: WebsocketCommand | EstablishConnectionRequest) => {
   if (!webSocketClient) {
     throw new Error('No active client to notify');
   }
