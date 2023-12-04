@@ -117,12 +117,12 @@ const GroupChatConnectedState = ({
 };
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
-  const isConnected = useIsConnected(recipient);
+  const { data: isConnected } = useIsConnected(recipient);
   const identity = useDotYouClient().getIdentity();
 
   if (isConnected) return null;
   return (
-    <div className="flex w-full flex-row items-center justify-between bg-page-background p-2">
+    <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
       <p>
         {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
         <a href={`https://${recipient}`} className="underline">
