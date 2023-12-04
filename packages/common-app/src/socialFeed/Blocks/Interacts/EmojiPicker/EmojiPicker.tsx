@@ -32,7 +32,7 @@ export const EmojiPicker = ({ onInput }: { onInput: (val: EmojiDetail) => void }
 
     ref.current.addEventListener('emoji-click', handler);
     ref.current.skinToneEmoji = '👍';
-    ref.current.dataSource = '/emoji-data.json';
+    ref.current.dataSource = '/emoji/emoji-data.json';
 
     const style = document.createElement('style');
     style.textContent = `.favorites{display:none}`;

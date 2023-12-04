@@ -99,12 +99,13 @@ const ChatTextMessageBody = ({
   isDeleted: boolean;
 }) => {
   const content = msg.fileMetadata.appData.content;
-  const isEmojiOnly = content.message.match(/\p{Extended_Pictographic}/u);
-  const showBackground = !isEmojiOnly;
+  const isEmojiOnly = content.message.match(/^\p{Extended_Pictographic}/u);
+  const isReply = !!content.replyId;
+  const showBackground = !isEmojiOnly || isReply;
 
   return (
     <div
-      className={`relative w-auto max-w-md rounded-lg px-2 py-1  ${
+      className={`relative w-auto max-w-lg rounded-lg px-2 py-1  ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -117,18 +118,18 @@ const ChatTextMessageBody = ({
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
         {isDeleted ? (
           <MessageDeletedInnerBody />
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-            <p className={`whitespace-pre-wrap ${isEmojiOnly ? 'text-7xl' : ''}`}>
+            <p className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}>
               {content.message}
             </p>
           </div>
         )}
-        <div className="ml-2 mt-auto flex flex-row-reverse gap-2">
+        <div className="ml-auto mt-auto flex flex-shrink-0 flex-row-reverse gap-2">
           <ChatDeliveryIndicator msg={msg} />
           <ChatSentTimeIndicator msg={msg} />
         </div>
@@ -174,9 +175,9 @@ const ChatMediaMessageBody = ({
   const hasACaption = !!content.message;
   const ChatFooter = ({ className }: { className?: string }) => (
     <>
-      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
+      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2  ${className || ''}`}>
         <ChatDeliveryIndicator msg={msg} />
-        <ChatSentTimeIndicator msg={msg} />
+        <ChatSentTimeIndicator msg={msg} className={hasACaption ? undefined : 'invert'} />
       </div>
       <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
     </>

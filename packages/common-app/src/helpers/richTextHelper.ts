@@ -14,8 +14,7 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
     .map((part) => {
       if (!part || !part.length) return;
 
-      if (urlRegex.test(part))
-        return { type: 'a', url: part, text: part.replace(/https?:\/\//, '') };
+      if (urlRegex.test(part)) return { type: 'a', url: part, text: part };
       if (mentionRegex.test(part))
         return { type: 'a', url: `https://${part.slice(1)}`, text: part, odinId: part.slice(1) };
       else return { text: part };

@@ -37,3 +37,4 @@ export * from './MediaData/VideoProvider';
 
 // CommandData
 export * from './CommandData/CommandProvider';
+export * from './CommandData/CommandTypes';

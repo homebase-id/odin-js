@@ -3,9 +3,17 @@ import { format } from '@youfoundation/common-app/src/helpers/timeago';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 
-export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatSentTimeIndicator = ({
+  msg,
+  className,
+  isShort,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+  className?: string;
+  isShort?: boolean;
+}) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <p className="select-none text-sm text-foreground/50">{children}</p>
+    <p className={`select-none text-sm text-foreground/70 ${className || ''}`}>{children}</p>
   );
 
   const date = new Date(msg.fileMetadata.created);
@@ -39,14 +47,14 @@ export const ChatSentTimeIndicator = ({ msg }: { msg: DriveSearchResult<ChatMess
 
   const now = new Date();
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
-  const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
+  // const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
   const dateTimeFormat: Intl.DateTimeFormatOptions = {
-    month: yearsAgo !== 0 || monthsAgo !== 0 ? 'short' : undefined,
+    month: isShort ? 'numeric' : 'short',
     day: 'numeric',
-    weekday: 'short',
+    // weekday: 'short',
     year: yearsAgo !== 0 ? 'numeric' : undefined,
-    hour: 'numeric',
-    minute: 'numeric',
+    hour: isShort ? undefined : 'numeric',
+    minute: isShort ? undefined : 'numeric',
   };
   return <Wrapper>{date.toLocaleDateString(undefined, dateTimeFormat)}</Wrapper>;
 };

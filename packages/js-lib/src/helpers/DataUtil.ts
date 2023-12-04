@@ -123,9 +123,8 @@ export const splitSharedSecretEncryptedKeyHeader = (
 ): EncryptedKeyHeader => {
   const byteArray = base64ToUint8Array(sharedsecretencryptedheader64);
 
-  if (byteArray.length !== 68) {
+  if (byteArray.length !== 68)
     throw new Error("shared secret encrypted keyheader has an unexpected length, can't split");
-  }
 
   const iv = byteArray.slice(0, 16);
   const encryptedAesKey = byteArray.slice(16, 64);

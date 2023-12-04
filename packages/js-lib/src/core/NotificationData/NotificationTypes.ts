@@ -54,7 +54,7 @@ export type TypedConnectionNotification =
   | ClientConnectionNotification
   | ClientUnknownNotification;
 
-export interface Command {
+export interface WebsocketCommand {
   command: string;
   data: string;
 }

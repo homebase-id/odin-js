@@ -10,9 +10,7 @@ const Auth = () => {
   const isError = searchParams.get('state') === 'finalize-error';
 
   const { isAuthenticated } = useAuth();
-  if (isAuthenticated) {
-    <Navigate to="/" />;
-  }
+  if (isAuthenticated) <Navigate to="/" />;
 
   return (
     <>

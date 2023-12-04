@@ -25,10 +25,12 @@ export const ChatComposer = ({
   conversation,
   replyMsg,
   clearReplyMsg,
+  onSend,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
   replyMsg: DriveSearchResult<ChatMessage> | undefined;
   clearReplyMsg: () => void;
+  onSend?: () => void;
 }) => {
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
@@ -45,6 +47,7 @@ export const ChatComposer = ({
   const doSend = () => {
     if ((!message && !files) || !conversationContent || !conversation.fileMetadata.appData.uniqueId)
       return;
+
     sendMessage({
       conversationId: conversation.fileMetadata.appData.uniqueId as string,
       message: message || '',
@@ -54,6 +57,7 @@ export const ChatComposer = ({
         (conversationContent as SingleConversation).recipient,
       ],
     });
+    onSend && onSend();
   };
 
   // Reset state, when the message was sent successfully
@@ -79,7 +83,9 @@ export const ChatComposer = ({
     <>
       <ErrorNotification error={sendMessageError} />
       <div className="bg-page-background">
-        <FileOverview files={files} setFiles={setFiles} className="mt-2" />
+        <div className="max-h-[30vh] overflow-auto">
+          <FileOverview files={files} setFiles={setFiles} cols={8} />
+        </div>
         {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
         <div className="flex flex-shrink-0 flex-row gap-2 px-5 py-3">
           <div className="my-auto flex flex-row items-center gap-1">
@@ -102,12 +108,18 @@ export const ChatComposer = ({
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
+            autoFocus={true}
             onSubmit={(val) => {
               setMessage(val);
               doSend();
             }}
           />
-          <ActionButton type="secondary" onClick={doSend} state={sendMessageState}>
+          <ActionButton
+            type="secondary"
+            onClick={doSend}
+            state={sendMessageState}
+            className="mt-auto"
+          >
             {t('Send')}
           </ActionButton>
         </div>

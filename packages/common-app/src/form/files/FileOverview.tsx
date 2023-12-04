@@ -8,10 +8,12 @@ export const FileOverview = ({
   files,
   setFiles,
   className,
+  cols,
 }: {
   files?: NewMediaFile[];
   setFiles: (files: NewMediaFile[]) => void;
   className?: string;
+  cols?: 4 | 8;
 }) => {
   if (!files || !files.length) return null;
 
@@ -55,7 +57,7 @@ export const FileOverview = ({
 
       if (currFile.file.type === 'video/mp4') {
         return (
-          <div key={currFile.file.name} className="relative w-1/4 p-[2px] lg:w-1/3">
+          <div key={currFile.file.name} className="relative">
             <video
               src={url}
               onLoadedMetadata={(e) => (e.currentTarget.currentTime = 1)}
@@ -80,7 +82,7 @@ export const FileOverview = ({
       }
 
       return (
-        <div key={url} className="relative w-1/4 p-[2px] lg:w-1/3">
+        <div key={url} className="relative">
           <img
             src={url}
             onLoad={() => URL.revokeObjectURL(url)}
@@ -101,7 +103,11 @@ export const FileOverview = ({
   }, [files]);
 
   return (
-    <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>
+    <div
+      className={`gap-[2px] grid ${cols === 8 ? 'grid-cols-8' : 'grid-cols-4'} ${className ?? ''}`}
+    >
+      {renderedFiles}
+    </div>
   );
 };
 

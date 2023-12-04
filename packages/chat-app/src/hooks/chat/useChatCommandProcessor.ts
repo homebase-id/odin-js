@@ -1,11 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import {
   DotYouClient,
   SecurityGroupType,
   getCommands,
   markCommandComplete,
 } from '@youfoundation/js-lib/core';
-import { useEffect } from 'react';
 import {
   ChatDrive,
   GroupConversation,
@@ -19,7 +18,8 @@ import {
 } from '../../providers/ConversationProvider';
 import { useDotYouClient } from '@youfoundation/common-app';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { ReceivedCommand } from '@youfoundation/js-lib/dist/core/CommandData/CommandTypes';
+import { ReceivedCommand } from '@youfoundation/js-lib/core';
+import { useQueryClient, QueryClient } from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
   MARK_CHAT_READ_COMMAND,
@@ -32,11 +32,13 @@ export const useChatCommandProcessor = () => {
   const { getDotYouClient, getIdentity } = useDotYouClient();
   const dotYouClient = getDotYouClient();
   const identity = getIdentity();
+  const queryClient = useQueryClient();
 
   const isProcessing = useRef(false);
 
   useEffect(() => {
     (async () => {
+      if (!identity) return;
       if (isProcessing.current) return;
       isProcessing.current = true;
       const commands = await getCommands(dotYouClient, ChatDrive);
@@ -52,16 +54,7 @@ export const useChatCommandProcessor = () => {
       for (let i = 0; i < filteredCommands.length; i++) {
         const command = filteredCommands[i];
 
-        let completedCommand: string | null = null;
-        if (command.clientCode === JOIN_CONVERSATION_COMMAND)
-          completedCommand = await joinConversation(dotYouClient, command);
-
-        if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
-          completedCommand = await joinGroupConversation(dotYouClient, command, identity);
-
-        if (command.clientCode === MARK_CHAT_READ_COMMAND)
-          completedCommand = await markChatAsRead(dotYouClient, command);
-
+        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
         if (completedCommand) completedCommands.push(completedCommand);
       }
 
@@ -77,7 +70,27 @@ export const useChatCommandProcessor = () => {
   }, []);
 };
 
-const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCommand) => {
+export const processCommand = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  command: ReceivedCommand,
+  identity: string
+) => {
+  if (command.clientCode === JOIN_CONVERSATION_COMMAND)
+    return await joinConversation(dotYouClient, queryClient, command);
+
+  if (command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND && identity)
+    return await joinGroupConversation(dotYouClient, queryClient, command, identity);
+
+  if (command.clientCode === MARK_CHAT_READ_COMMAND)
+    return await markChatAsRead(dotYouClient, queryClient, command);
+};
+
+const joinConversation = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  command: ReceivedCommand
+) => {
   const joinConversationRequest = tryJsonParse<JoinConversationRequest>(command.clientJsonMessage);
   try {
     await uploadConversation(dotYouClient, {
@@ -96,6 +109,7 @@ const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCom
         },
       },
     });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 4105) return command.id;
 
@@ -108,6 +122,7 @@ const joinConversation = async (dotYouClient: DotYouClient, command: ReceivedCom
 
 const joinGroupConversation = async (
   dotYouClient: DotYouClient,
+  queryClient: QueryClient,
   command: ReceivedCommand,
   identity: string
 ) => {
@@ -138,6 +153,7 @@ const joinGroupConversation = async (
         },
       },
     });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 4105) return command.id;
 
@@ -148,7 +164,11 @@ const joinGroupConversation = async (
   return command.id;
 };
 
-const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedCommand) => {
+const markChatAsRead = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  command: ReceivedCommand
+) => {
   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
   const conversationId = markAsReadRequest.conversationId;
   const chatGlobalTransIds = markAsReadRequest.messageIds;
@@ -207,6 +227,7 @@ const markChatAsRead = async (dotYouClient: DotYouClient, command: ReceivedComma
       })
   );
 
+  queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
   if (updateSuccess.every((success) => success)) return command.id;
 
   return null;

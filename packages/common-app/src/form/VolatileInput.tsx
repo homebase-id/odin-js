@@ -18,6 +18,7 @@ export const VolatileInput = ({
   onChange,
   linksArePlain,
   className,
+  autoFocus,
 }: {
   onSubmit?: (val: string) => void;
   onPaste?: React.ClipboardEventHandler<HTMLDivElement>;
@@ -26,6 +27,7 @@ export const VolatileInput = ({
   onChange?: (val: string) => void;
   linksArePlain?: boolean;
   className?: string;
+  autoFocus?: boolean;
 }) => {
   const [wordTillCaret, setWordTillCaret] = useState<string>();
   const [lastInsertedContent, setLastInsertedContent] = useState<string>();
@@ -95,7 +97,7 @@ export const VolatileInput = ({
 
     const richTextData = getRichTextFromString(textContents);
     const innerHtml = richTextData?.map((part) =>
-      part.type === 'a' ? `<span class="text-primary">${part?.url}</span>` : part.text
+      part.type === 'a' ? `<span class="text-primary">${part?.text}</span>` : part.text
     );
 
     if (!innerHtml || !divRef.current) return;
@@ -114,11 +116,19 @@ export const VolatileInput = ({
 
     const caretPos = saveCaretPosition();
 
+    const insertingContent = defaultValue?.startsWith(divRef.current.innerText || '')
+      ? defaultValue?.slice(divRef.current.innerText?.length)
+      : defaultValue;
+
     divRef.current.innerText = defaultValue || '';
+
     restoreCaretPosition(
-      caretPos,
-      wordTillCaret ? -(wordTillCaret.length - (lastInsertedContent?.length || 1)) : undefined
+      { ...caretPos, absoluteOffset: caretPos.absoluteOffset },
+      wordTillCaret
+        ? -(wordTillCaret.length - (lastInsertedContent?.length || 1))
+        : insertingContent?.length
     );
+
     if (wordTillCaret) setWordTillCaret(undefined);
     if (lastInsertedContent) setLastInsertedContent(undefined);
   }, [defaultValue]);
@@ -165,6 +175,12 @@ export const VolatileInput = ({
   const selection = window.getSelection(),
     range = selection && selection.rangeCount ? selection.getRangeAt(0) : undefined,
     rect = range?.getClientRects()?.[0];
+
+  useEffect(() => {
+    if (autoFocus && divRef.current) {
+      divRef.current.focus();
+    }
+  }, [autoFocus]);
 
   return (
     <div className={`relative block w-full ${className || ''}`}>

@@ -43,7 +43,7 @@ export const MentionDropdown = ({
 
   useEffect(() => setActiveIndex(0), [query]);
 
-  const doInput = (odinId: string) => onInput(`@${odinId}`);
+  const doInput = (odinId: string) => onInput(`@${odinId} `);
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!identities || !identities.length) return;

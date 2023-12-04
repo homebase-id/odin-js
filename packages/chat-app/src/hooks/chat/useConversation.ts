@@ -15,22 +15,23 @@ import {
   NewDriveSearchResult,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
+  const identity = useDotYouClient().getIdentity();
 
-  // Already get the conversations in the cache, so we can use that on `getExistinConversationsForRecipient`
+  // Already get the conversations in the cache, so we can use that on `getExistingConversationsForRecipient`
   useConversations().all;
 
   const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
     return await getConversation(dotYouClient, conversationId);
   };
 
-  const getExistinConversationsForRecipient = async (
+  const getExistingConversationsForRecipient = async (
     recipients: string[]
   ): Promise<null | DriveSearchResult<Conversation>> => {
     const allConversationsInCache = await queryClient.fetchQuery<
@@ -55,16 +56,23 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return null;
   };
 
-  const createConversation = async ({ recipients }: { recipients: string[] }) => {
+  const createConversation = async ({
+    recipients,
+    title,
+  }: {
+    recipients: string[];
+    title?: string;
+  }) => {
     // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
-    const existingConversation = await getExistinConversationsForRecipient(recipients);
+    const existingConversation = await getExistingConversationsForRecipient(recipients);
     if (existingConversation)
       return {
         ...existingConversation,
         newConversationId: existingConversation.fileMetadata.appData.uniqueId as string,
       };
 
-    const newConversationId = getNewId();
+    const newConversationId =
+      recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
 
     const newConversation: NewDriveSearchResult<Conversation> = {
       fileMetadata: {
@@ -78,7 +86,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
               : {
                   recipient: recipients[0],
                 }),
-            title: recipients.join(', '),
+            title: title || recipients.join(', '),
           },
         },
       },
@@ -94,14 +102,19 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       ...(await uploadConversation(dotYouClient, newConversation)),
     };
 
-    // TODO: Move this to only be called after a first message is sent
-    //  ATM, a conversation is started, and the recipient is added to the conversation directly after a contact is "clicked"
+    return uploadResult;
+  };
+
+  const sendJoinCommand = async ({
+    conversation,
+  }: {
+    conversation: DriveSearchResult<Conversation>;
+  }): Promise<void> => {
     await requestConversationCommand(
       dotYouClient,
-      newConversation.fileMetadata.appData.content,
-      newConversationId
+      conversation.fileMetadata.appData.content,
+      conversation.fileMetadata.appData.uniqueId as string
     );
-    return uploadResult;
   };
 
   const updateExistingConversation = async ({
@@ -110,6 +123,29 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     conversation: DriveSearchResult<Conversation>;
   }) => {
     return await updateConversation(dotYouClient, conversation);
+  };
+
+  const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
+    // TODO: Clear the chat; Waiting on BE implementation of clear all files by groupId
+  };
+
+  const deleteChat = async ({
+    conversation,
+  }: {
+    conversation: DriveSearchResult<Conversation>;
+  }) => {
+    // TODO: Clear the chat; Waiting on BE implementation of clear all files by groupId
+
+    // We soft delete the conversation, so we can still see newly received messages
+    const newConversation: DriveSearchResult<Conversation> = {
+      ...conversation,
+      fileMetadata: {
+        ...conversation.fileMetadata,
+        appData: { ...conversation.fileMetadata.appData, archivalStatus: 2 },
+      },
+    };
+
+    return await updateConversation(dotYouClient, newConversation);
   };
 
   return {
@@ -128,9 +164,36 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
     }),
+    inviteRecipient: useMutation({
+      mutationFn: sendJoinCommand,
+    }),
     update: useMutation({
       mutationFn: updateExistingConversation,
       onMutate: async () => {
+        // TODO: Optimistic update of the conversations, append the new conversation
+      },
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+        });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
+    }),
+    clearChat: useMutation({
+      mutationFn: clearChat,
+      onMutate: async ({ conversation }) => {
+        // TODO: Optimistic update of the conversations, append the new conversation
+      },
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+        });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
+    }),
+    deleteChat: useMutation({
+      mutationFn: deleteChat,
+      onMutate: async ({ conversation }) => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
