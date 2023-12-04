@@ -83,7 +83,9 @@ export const ChatComposer = ({
     <>
       <ErrorNotification error={sendMessageError} />
       <div className="bg-page-background">
-        <FileOverview files={files} setFiles={setFiles} className="mt-2" />
+        <div className="max-h-[30vh] overflow-auto">
+          <FileOverview files={files} setFiles={setFiles} cols={8} />
+        </div>
         {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
         <div className="flex flex-shrink-0 flex-row gap-2 px-5 py-3">
           <div className="my-auto flex flex-row items-center gap-1">

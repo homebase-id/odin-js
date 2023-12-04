@@ -110,7 +110,7 @@ export const ChatHistory = ({
         key={conversation?.fileId}
       >
         <div
-          className="relative w-full flex-shrink-0 overflow-hidden"
+          className="relative w-full flex-shrink-0 flex-grow-0" //overflow-hidden => Might need this one again, to avoid a growing height
           style={{
             height: virtualizer.getTotalSize(),
           }}
