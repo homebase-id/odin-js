@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
+  ChatDrive,
   Conversation,
   GroupConversation,
   SingleConversation,
@@ -14,6 +15,7 @@ import {
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
@@ -56,7 +58,13 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return null;
   };
 
-  const createConversation = async ({ recipients }: { recipients: string[] }) => {
+  const createConversation = async ({
+    recipients,
+    title,
+  }: {
+    recipients: string[];
+    title?: string;
+  }) => {
     // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
     const existingConversation = await getExistingConversationsForRecipient(recipients);
     if (existingConversation)
@@ -80,7 +88,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
               : {
                   recipient: recipients[0],
                 }),
-            title: recipients.join(', '),
+            title: title || recipients.join(', '),
           },
         },
       },
@@ -119,6 +127,29 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return await updateConversation(dotYouClient, conversation);
   };
 
+  const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
+    // TODO: Clear the chat; Waiting on BE implementation of clear all files by groupId
+  };
+
+  const deleteChat = async ({
+    conversation,
+  }: {
+    conversation: DriveSearchResult<Conversation>;
+  }) => {
+    // TODO: Clear the chat; Waiting on BE implementation of clear all files by groupId
+
+    // We soft delete the conversation, so we can still see newly received messages
+    const newConversation: DriveSearchResult<Conversation> = {
+      ...conversation,
+      fileMetadata: {
+        ...conversation.fileMetadata,
+        appData: { ...conversation.fileMetadata.appData, archivalStatus: 2 },
+      },
+    };
+
+    return await updateConversation(dotYouClient, newConversation);
+  };
+
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
@@ -141,6 +172,30 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     update: useMutation({
       mutationFn: updateExistingConversation,
       onMutate: async () => {
+        // TODO: Optimistic update of the conversations, append the new conversation
+      },
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+        });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
+    }),
+    clearChat: useMutation({
+      mutationFn: clearChat,
+      onMutate: async ({ conversation }) => {
+        // TODO: Optimistic update of the conversations, append the new conversation
+      },
+      onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+        });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      },
+    }),
+    deleteChat: useMutation({
+      mutationFn: deleteChat,
+      onMutate: async ({ conversation }) => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { ActionButton, Input, Persons, Times, t, useAllContacts } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import { NewConversationSearchResult } from './Conversations';
-import { CHAT_ROOT } from './ChatHome';
+import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import { ConversationListItemWrapper } from '../Item/ConversationItem';
+import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 
 export const NewConversation = () => {
   const [query, setQuery] = useState<string | undefined>(undefined);
@@ -35,20 +36,19 @@ export const NewConversation = () => {
         </div>
       </form>
       <div>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
+        <ConversationListItemWrapper
+          onClick={() => {
             navigate(`${CHAT_ROOT}/new-group`);
           }}
-          className="flex w-full flex-row items-center gap-3 px-5 py-2 hover:bg-primary/20"
+          isActive={false}
         >
           <div className="rounded-full bg-primary/20 p-4">
             <Persons className="h-4 w-4" />
           </div>
           {t('New group')}
-        </button>
+        </ConversationListItemWrapper>
         {contactResults.map((result) => (
-          <NewConversationSearchResult
+          <NewConversationSearchItem
             key={result.fileId}
             result={result}
             onOpen={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}

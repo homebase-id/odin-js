@@ -1,9 +1,12 @@
 import {
   ActionButton,
+  ActionGroup,
   ActionLink,
   Bars,
+  ChevronDown,
   ConnectionImage,
   ConnectionName,
+  ErrorNotification,
   Persons,
   t,
   useDotYouClient,
@@ -20,6 +23,7 @@ import { useConversation } from '../../hooks/chat/useConversation';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
+import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 
 export const ChatDetail = ({
   conversationId,
@@ -47,10 +51,7 @@ export const ChatDetail = ({
 
   return (
     <div className="flex h-screen flex-grow flex-col overflow-hidden">
-      <ChatHeader
-        conversation={conversation?.fileMetadata.appData.content}
-        toggleSidenav={toggleSidenav}
-      />
+      <ChatHeader conversation={conversation || undefined} toggleSidenav={toggleSidenav} />
       <GroupChatConnectedState conversation={conversation || undefined} />
       <ChatHistory
         conversation={conversation || undefined}
@@ -69,32 +70,88 @@ export const ChatDetail = ({
 };
 
 const ChatHeader = ({
-  conversation,
+  conversation: conversationDsr,
   toggleSidenav,
 }: {
-  conversation: Conversation | undefined;
+  conversation: DriveSearchResult<Conversation> | undefined;
   toggleSidenav: () => void;
 }) => {
+  const conversation = conversationDsr?.fileMetadata.appData.content;
   const recipient = (conversation as SingleConversation)?.recipient;
+  const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
+
+  const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
+  const { mutate: deleteChat, error: deleteChatError } = useConversation().deleteChat;
 
   return (
-    <div className="flex flex-row items-center gap-2 bg-page-background p-5">
-      <ActionButton className="lg:hidden" type="mute" onClick={toggleSidenav}>
-        <Bars className="h-5 w-5" />
-      </ActionButton>
-      {recipient ? (
-        <ConnectionImage
-          odinId={recipient}
-          className="border border-neutral-200 dark:border-neutral-800"
-          size="sm"
-        />
-      ) : (
-        <div className="rounded-full bg-primary/20 p-3">
-          <Persons className="h-6 w-6" />
-        </div>
-      )}
-      {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}
-    </div>
+    <>
+      <ErrorNotification error={clearChatError || deleteChatError} />
+      <div className="flex flex-row items-center gap-2 bg-page-background p-5">
+        <ActionButton className="lg:hidden" type="mute" onClick={toggleSidenav}>
+          <Bars className="h-5 w-5" />
+        </ActionButton>
+
+        {recipient ? (
+          <ConnectionImage
+            odinId={recipient}
+            className="border border-neutral-200 dark:border-neutral-800"
+            size="sm"
+          />
+        ) : (
+          <div className="rounded-full bg-primary/20 p-3">
+            <Persons className="h-6 w-6" />
+          </div>
+        )}
+        {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}
+        {conversationDsr ? (
+          <ActionGroup
+            options={[
+              {
+                label: t('Chat info'),
+                onClick: () => setShowChatInfo(true),
+              },
+              {
+                label: t('Delete'),
+                confirmOptions: {
+                  title: t('Delete chat'),
+                  buttonText: t('Delete'),
+                  body: t('Are you sure you want to delete this chat? All messages will be lost.'),
+                },
+                onClick: () => {
+                  deleteChat({ conversation: conversationDsr });
+                },
+              },
+              {
+                label: t('Clear'),
+                confirmOptions: {
+                  title: t('Clear chat'),
+                  buttonText: t('Clear'),
+                  body: t(
+                    'Are you sure you want to clear all messages from this chat? All messages will be lost.'
+                  ),
+                },
+                onClick: () => {
+                  clearChat({ conversation: conversationDsr });
+                },
+              },
+              // {label: t('Mute'), onClick: () => {}},
+            ]}
+            className="ml-auto"
+            type={'mute'}
+            size="square"
+          >
+            <>
+              <ChevronDown className="h-4 w-4" />
+              <span className="sr-only ml-1">{t('More')}</span>
+            </>
+          </ActionGroup>
+        ) : null}
+      </div>
+
+      {showChatInfo && conversationDsr ? (
+        <ChatInfo conversation={conversationDsr} onClose={() => setShowChatInfo(false)} />
+      ) : null}
+    </>
   );
 };
 

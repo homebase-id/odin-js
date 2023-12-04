@@ -1,37 +1,35 @@
 import {
   ActionButton,
-  ConnectionImage,
-  ConnectionName,
   Input,
   MagnifyingGlass,
   Persons,
   SubtleMessage,
   Times,
-  ellipsisAtMaxChar,
   t,
   useAllContacts,
 } from '@youfoundation/common-app';
-import { useConversations } from '../../hooks/chat/useConversations';
+
+import { useEffect, useState } from 'react';
+import { ContactFile } from '@youfoundation/js-lib/network';
+
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useNavigate } from 'react-router-dom';
+import { useConversations } from '../../../../hooks/chat/useConversations';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   GroupConversation,
   SingleConversation,
-} from '../../providers/ConversationProvider';
-import { ReactNode, useEffect, useState } from 'react';
-import { ContactFile } from '@youfoundation/js-lib/network';
-import { useConversation } from '../../hooks/chat/useConversation';
-import { useChatMessages } from '../../hooks/chat/useChatMessages';
+} from '../../../../providers/ConversationProvider';
+import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
+import {
+  GroupConversationItem,
+  SingleConversationItem,
+  ConversationListItemWrapper,
+} from '../Item/ConversationItem';
+import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChatDeletedArchivalStaus } from '../../providers/ChatProvider';
-import { ChatDeliveryIndicator } from '../../components/Chat/Detail/ChatDeliveryIndicator';
-import { MessageDeletedInnerBody } from '../../components/Chat/Detail/ChatMessageItem';
-import { ChatSentTimeIndicator } from '../../components/Chat/Detail/ChatSentTimeIndicator';
-import { useNavigate } from 'react-router-dom';
-import { CHAT_ROOT } from './ChatHome';
-
-export const ConversationsList = ({
+export const ConversationsSidebar = ({
   openConversation,
   activeConversationId,
 }: {
@@ -48,34 +46,53 @@ export const ConversationsList = ({
 
   return (
     <div className="flex flex-grow flex-col ">
-      <SearchConversation
-        setIsSearchActive={setIsSearchActive}
-        isSearchActive={isSearchActive}
-        openConversation={(id) => {
-          setIsSearchActive(false);
-          openConversation(id);
-        }}
-        conversations={flatConversations}
-        activeConversationId={activeConversationId}
-      />
       {!isSearchActive ? (
-        <div className="flex-grow overflow-auto ">
-          {!flatConversations?.length ? (
-            <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
-          ) : null}
-          {flatConversations?.map((conversation) => (
-            <ConversationListItem
-              key={conversation.fileId}
-              conversation={conversation}
-              onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
-              isActive={stringGuidsEqual(
-                activeConversationId,
-                conversation.fileMetadata.appData.uniqueId
-              )}
-            />
-          ))}
-        </div>
+        <ConversationList
+          openConversation={(id) => openConversation(id)}
+          conversations={flatConversations}
+          activeConversationId={activeConversationId}
+        />
+      ) : (
+        <SearchConversation
+          setIsSearchActive={setIsSearchActive}
+          isSearchActive={isSearchActive}
+          openConversation={(id) => {
+            setIsSearchActive(false);
+            openConversation(id);
+          }}
+          conversations={flatConversations}
+          activeConversationId={activeConversationId}
+        />
+      )}
+    </div>
+  );
+};
+
+const ConversationList = ({
+  conversations,
+  openConversation,
+  activeConversationId,
+}: {
+  conversations: DriveSearchResult<Conversation>[];
+  openConversation: (id: string | undefined) => void;
+  activeConversationId: string | undefined;
+}) => {
+  return (
+    <div className="flex-grow overflow-auto ">
+      {!conversations?.length ? (
+        <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
       ) : null}
+      {conversations?.map((conversation) => (
+        <ConversationListItem
+          key={conversation.fileId}
+          conversation={conversation}
+          onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
+          isActive={stringGuidsEqual(
+            activeConversationId,
+            conversation.fileMetadata.appData.uniqueId
+          )}
+        />
+      ))}
     </div>
   );
 };
@@ -108,107 +125,6 @@ const ConversationListItem = ({
       conversationId={conversation.fileMetadata.appData.uniqueId}
       isActive={isActive}
     />
-  );
-};
-
-const GroupConversationItem = ({
-  onClick,
-  title,
-  conversationId,
-  isActive,
-}: {
-  onClick: (() => void) | undefined;
-  title: string | undefined;
-  conversationId?: string;
-  isActive: boolean;
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className={`flex w-full cursor-pointer flex-row items-center gap-3 px-5 py-2 ${
-        isActive ? 'bg-slate-200 dark:bg-slate-800' : ''
-      }`}
-    >
-      <div className="rounded-full bg-primary/20 p-4">
-        <Persons className="h-4 w-4" />
-      </div>
-      <ConversationBody title={title} conversationId={conversationId} />
-    </div>
-  );
-};
-
-export const SingleConversationItem = ({
-  onClick,
-  odinId,
-  conversationId,
-  isActive,
-}: {
-  onClick: (() => void) | undefined;
-  odinId: string | undefined;
-  conversationId?: string;
-  isActive: boolean;
-}) => {
-  return (
-    <div
-      onClick={onClick}
-      className={`flex w-full cursor-pointer flex-row items-center gap-3 px-5 py-2 ${
-        isActive ? 'bg-slate-200 dark:bg-slate-800' : ''
-      }`}
-    >
-      <ConnectionImage
-        odinId={odinId}
-        className="border border-neutral-200 dark:border-neutral-800"
-        size="sm"
-      />
-      <ConversationBody
-        title={<ConnectionName odinId={odinId} />}
-        conversationId={conversationId}
-      />
-    </div>
-  );
-};
-
-const ConversationBody = ({
-  title,
-  conversationId,
-}: {
-  title: string | ReactNode | undefined;
-  conversationId?: string;
-}) => {
-  const { data } = useChatMessages({ conversationId }).all;
-  const lastMessage = data?.pages
-    .flatMap((page) => page.searchResults)
-    ?.filter(Boolean)
-    .slice(0, 1)?.[0];
-
-  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
-
-  return (
-    <>
-      <div className="flex w-full flex-col gap-1">
-        <div className="flex flex-row justify-between gap-2">
-          <p className="font-semibold">
-            {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
-          </p>
-          {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} isShort={true} /> : null}
-        </div>
-        <div className="flex flex-row items-center gap-1">
-          {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
-
-          <div className="leading-tight text-foreground/80">
-            {lastMessage && lastMessageContent ? (
-              lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
-                <MessageDeletedInnerBody />
-              ) : lastMessageContent.message ? (
-                <p>{ellipsisAtMaxChar(lastMessageContent.message, 30)}</p>
-              ) : (
-                <p>📷 {t('Media')}</p>
-              )
-            ) : null}
-          </div>
-        </div>
-      </div>
-    </>
   );
 };
 
@@ -298,18 +214,17 @@ const SearchConversation = ({
       <div>
         {isActive ? (
           <>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
+            <ConversationListItemWrapper
+              onClick={() => {
                 navigate(`${CHAT_ROOT}/new-group`);
               }}
-              className="flex w-full flex-row items-center gap-3 px-5 py-2 hover:bg-primary/20"
+              isActive={false}
             >
               <div className="rounded-full bg-primary/20 p-4">
                 <Persons className="h-4 w-4" />
               </div>
               {t('New group')}
-            </button>
+            </ConversationListItemWrapper>
 
             {!conversationResults?.length && !contactsWithoutAConversation?.length ? (
               <SubtleMessage className="px-5">{t('No contacts found')}</SubtleMessage>
@@ -333,7 +248,7 @@ const SearchConversation = ({
                   <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
                 ) : null}
                 {contactsWithoutAConversation.map((result) => (
-                  <NewConversationSearchResult
+                  <NewConversationSearchItem
                     onOpen={(id) => openConversation(id)}
                     result={result as ContactFile}
                     key={result.fileId}
@@ -346,29 +261,4 @@ const SearchConversation = ({
       </div>
     </>
   );
-};
-
-export const NewConversationSearchResult = ({
-  result,
-  onOpen,
-}: {
-  result: ContactFile;
-  onOpen: (conversationId: string) => void;
-}) => {
-  const { mutateAsync: createNew } = useConversation().create;
-
-  const contactFile = result as ContactFile;
-  const odinId = contactFile.odinId;
-
-  const onClick = async () => {
-    if (!odinId) return;
-    try {
-      const result = await createNew({ recipients: [odinId] });
-      onOpen(result.newConversationId);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  return <SingleConversationItem odinId={odinId} isActive={false} onClick={onClick} />;
 };
