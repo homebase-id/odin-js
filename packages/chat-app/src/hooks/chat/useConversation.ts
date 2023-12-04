@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
-  ChatDrive,
   Conversation,
   GroupConversation,
   SingleConversation,
@@ -15,7 +14,6 @@ import {
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
-  deleteFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';

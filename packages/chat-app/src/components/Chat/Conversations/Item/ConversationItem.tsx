@@ -5,12 +5,14 @@ import {
   ellipsisAtMaxChar,
   t,
 } from '@youfoundation/common-app';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
-import { ChatDeletedArchivalStaus } from '../../../../providers/ChatProvider';
+import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
+import { useConversation } from '../../../../hooks/chat/useConversation';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const ListItemWrapper = ({
   onClick,
@@ -86,11 +88,24 @@ const ConversationBody = ({
   title: string | ReactNode | undefined;
   conversationId?: string;
 }) => {
+  const { data: conversation } = useConversation({ conversationId }).single;
   const { data } = useChatMessages({ conversationId }).all;
-  const lastMessage = data?.pages
-    .flatMap((page) => page.searchResults)
-    ?.filter(Boolean)
-    .slice(0, 1)?.[0];
+  const flatMessages = useMemo(
+    () =>
+      data?.pages
+        .flatMap((page) => page.searchResults)
+        ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
+    [data]
+  );
+  const lastMessage = flatMessages?.slice(0, 1)?.[0];
+
+  const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime;
+  const unreadCount =
+    flatMessages && lastReadTime
+      ? flatMessages.filter(
+          (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
+        ).length
+      : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
@@ -101,6 +116,7 @@ const ConversationBody = ({
           <p className="font-semibold">
             {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
           </p>
+
           {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} isShort={true} /> : null}
         </div>
         <div className="flex flex-row items-center gap-1">
@@ -117,6 +133,12 @@ const ConversationBody = ({
               )
             ) : null}
           </div>
+
+          {unreadCount ? (
+            <div className="ml-auto flex h-5 w-5 flex-row items-center justify-center rounded-full bg-primary text-xs">
+              {unreadCount}
+            </div>
+          ) : null}
         </div>
       </div>
     </>
