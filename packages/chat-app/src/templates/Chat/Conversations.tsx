@@ -64,7 +64,7 @@ export const ConversationsList = ({
             <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
           ) : null}
           {flatConversations?.map((conversation) => (
-            <ConversationItem
+            <ConversationListItem
               key={conversation.fileId}
               conversation={conversation}
               onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
@@ -80,7 +80,7 @@ export const ConversationsList = ({
   );
 };
 
-const ConversationItem = ({
+const ConversationListItem = ({
   conversation,
   onClick,
   isActive,
@@ -92,7 +92,7 @@ const ConversationItem = ({
   const groupContent = conversation.fileMetadata.appData.content as GroupConversation;
   if ('recipients' in groupContent)
     return (
-      <InnerGroupConversationItem
+      <GroupConversationItem
         onClick={onClick}
         title={groupContent.title}
         conversationId={conversation.fileMetadata.appData.uniqueId}
@@ -102,7 +102,7 @@ const ConversationItem = ({
 
   const singleContent = conversation.fileMetadata.appData.content as SingleConversation;
   return (
-    <InnerConversationItem
+    <SingleConversationItem
       onClick={onClick}
       odinId={singleContent.recipient}
       conversationId={conversation.fileMetadata.appData.uniqueId}
@@ -111,7 +111,7 @@ const ConversationItem = ({
   );
 };
 
-export const InnerGroupConversationItem = ({
+const GroupConversationItem = ({
   onClick,
   title,
   conversationId,
@@ -122,14 +122,6 @@ export const InnerGroupConversationItem = ({
   conversationId?: string;
   isActive: boolean;
 }) => {
-  const { data } = useChatMessages({ conversationId }).all;
-  const lastMessage = data?.pages
-    .flatMap((page) => page.searchResults)
-    ?.filter(Boolean)
-    .slice(0, 1)?.[0];
-
-  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
-
   return (
     <div
       onClick={onClick}
@@ -140,31 +132,12 @@ export const InnerGroupConversationItem = ({
       <div className="rounded-full bg-primary/20 p-4">
         <Persons className="h-4 w-4" />
       </div>
-      <div className="w-full">
-        <p className="font-semibold">{ellipsisAtMaxChar(title, 40)}</p>
-        <div className="leading-tight text-foreground/80">
-          {lastMessage && lastMessageContent ? (
-            lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
-              <MessageDeletedInnerBody />
-            ) : lastMessageContent.message ? (
-              <p>{ellipsisAtMaxChar(lastMessageContent.message, 40)}</p>
-            ) : (
-              <p>📷 {t('Media')}</p>
-            )
-          ) : null}
-        </div>
-      </div>
-      {lastMessage ? (
-        <div className="ml-auto flex flex-col items-end justify-between">
-          <ChatSentTimeIndicator msg={lastMessage} />
-          <ChatDeliveryIndicator msg={lastMessage} />
-        </div>
-      ) : null}
+      <ConversationBody title={title} conversationId={conversationId} />
     </div>
   );
 };
 
-export const InnerConversationItem = ({
+export const SingleConversationItem = ({
   onClick,
   odinId,
   conversationId,
@@ -175,14 +148,6 @@ export const InnerConversationItem = ({
   conversationId?: string;
   isActive: boolean;
 }) => {
-  const { data } = useChatMessages({ conversationId }).all;
-  const lastMessage = data?.pages
-    .flatMap((page) => page.searchResults)
-    ?.filter(Boolean)
-    .slice(0, 1)?.[0];
-
-  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
-
   return (
     <div
       onClick={onClick}
@@ -195,31 +160,50 @@ export const InnerConversationItem = ({
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
-      <div className="w-full">
-        <p className="font-semibold">
-          <ConnectionName odinId={odinId} />
-        </p>
-        <div className="block leading-tight text-foreground/80">
-          {lastMessage && lastMessageContent ? (
-            lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
-              <MessageDeletedInnerBody />
-            ) : lastMessageContent.message ? (
-              <p>{ellipsisAtMaxChar(lastMessageContent.message, 40)}</p>
-            ) : (
-              <p>📷 {t('Media')}</p>
-            )
-          ) : (
-            odinId
-          )}
+      <ConversationBody title={odinId} conversationId={conversationId} />
+    </div>
+  );
+};
+
+const ConversationBody = ({
+  title,
+  conversationId,
+}: {
+  title: string | undefined;
+  conversationId?: string;
+}) => {
+  const { data } = useChatMessages({ conversationId }).all;
+  const lastMessage = data?.pages
+    .flatMap((page) => page.searchResults)
+    ?.filter(Boolean)
+    .slice(0, 1)?.[0];
+
+  const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+
+  return (
+    <>
+      <div className="flex w-full flex-col gap-1">
+        <div className="flex flex-row justify-between gap-2">
+          <p className="font-semibold">{ellipsisAtMaxChar(title, 25)}</p>
+          {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} isShort={true} /> : null}
+        </div>
+        <div className="flex flex-row items-center gap-1">
+          {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
+
+          <div className="leading-tight text-foreground/80">
+            {lastMessage && lastMessageContent ? (
+              lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
+                <MessageDeletedInnerBody />
+              ) : lastMessageContent.message ? (
+                <p>{ellipsisAtMaxChar(lastMessageContent.message, 30)}</p>
+              ) : (
+                <p>📷 {t('Media')}</p>
+              )
+            ) : null}
+          </div>
         </div>
       </div>
-      {lastMessage ? (
-        <div className="ml-auto flex flex-col items-end justify-between">
-          <ChatSentTimeIndicator msg={lastMessage} />
-          <ChatDeliveryIndicator msg={lastMessage} />
-        </div>
-      ) : null}
-    </div>
+    </>
   );
 };
 
@@ -330,9 +314,9 @@ const SearchConversation = ({
                   <p className="mt-2 px-5 font-semibold">{t('Chats')}</p>
                 ) : null}
                 {conversationResults.map((result) => (
-                  <ChatAndConversationResult
-                    result={result}
-                    onOpen={(id) => openConversation(id)}
+                  <ConversationListItem
+                    conversation={result}
+                    onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
                     isActive={
                       activeConversationId ===
                       (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
@@ -344,10 +328,9 @@ const SearchConversation = ({
                   <p className="mt-2 px-5 font-semibold">{t('Contacts')}</p>
                 ) : null}
                 {contactsWithoutAConversation.map((result) => (
-                  <ChatAndConversationResult
-                    result={result}
+                  <NewConversationSearchResult
                     onOpen={(id) => openConversation(id)}
-                    isActive={false}
+                    result={result as ContactFile}
                     key={result.fileId}
                   />
                 ))}
@@ -357,40 +340,6 @@ const SearchConversation = ({
         ) : null}
       </div>
     </>
-  );
-};
-
-const ChatAndConversationResult = (props: {
-  result: DriveSearchResult<Conversation> | ContactFile;
-  onOpen: (conversationId: string) => void;
-  isActive: boolean;
-}) => {
-  if ('odinId' in props.result)
-    return <NewConversationSearchResult {...props} result={props.result as ContactFile} />;
-
-  const { onOpen, isActive } = props;
-  const result: DriveSearchResult<Conversation> = props.result as DriveSearchResult<Conversation>;
-
-  const conversationId = result.fileMetadata.appData.uniqueId as string;
-
-  const isGroupChat = (result.fileMetadata.appData.content as GroupConversation).recipients?.length;
-  if (isGroupChat)
-    return (
-      <InnerGroupConversationItem
-        title={(result.fileMetadata.appData.content as GroupConversation).title}
-        conversationId={conversationId}
-        onClick={() => onOpen(conversationId)}
-        isActive={isActive}
-      />
-    );
-
-  return (
-    <InnerConversationItem
-      odinId={(result.fileMetadata.appData.content as SingleConversation).recipient}
-      conversationId={conversationId}
-      onClick={() => onOpen(conversationId)}
-      isActive={isActive}
-    />
   );
 };
 
@@ -416,5 +365,5 @@ export const NewConversationSearchResult = ({
     }
   };
 
-  return <InnerConversationItem odinId={odinId} isActive={false} onClick={onClick} />;
+  return <SingleConversationItem odinId={odinId} isActive={false} onClick={onClick} />;
 };

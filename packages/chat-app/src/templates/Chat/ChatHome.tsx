@@ -3,7 +3,6 @@ import {
   ActionGroup,
   ActionLink,
   ChevronDown,
-  Grid,
   House,
   Moon,
   Person,

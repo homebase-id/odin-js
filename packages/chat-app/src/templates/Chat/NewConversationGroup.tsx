@@ -10,7 +10,7 @@ import {
   useAllContacts,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import { InnerConversationItem } from './Conversations';
+import { SingleConversationItem } from './Conversations';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { CHAT_ROOT } from './ChatHome';
@@ -90,7 +90,7 @@ export const NewConversationGroup = () => {
       </form>
       <div className="flex-grow overflow-auto">
         {contactResults.map((result) => (
-          <InnerConversationItem
+          <SingleConversationItem
             odinId={result.odinId as string}
             isActive={false}
             key={result.fileId}

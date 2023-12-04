@@ -94,7 +94,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       ...(await uploadConversation(dotYouClient, newConversation)),
     };
 
-    // TODO: Move this to only be called after a first message is sent
+    // TODO: Move this to only be called after a first message is sent?
     //  ATM, a conversation is started, and the recipient is added to the conversation directly after a contact is "clicked"
     await requestConversationCommand(
       dotYouClient,

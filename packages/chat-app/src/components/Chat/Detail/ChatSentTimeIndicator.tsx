@@ -6,9 +6,11 @@ import { ChatMessage } from '../../../providers/ChatProvider';
 export const ChatSentTimeIndicator = ({
   msg,
   className,
+  isShort,
 }: {
   msg: DriveSearchResult<ChatMessage>;
   className?: string;
+  isShort?: boolean;
 }) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <p className={`select-none text-sm text-foreground/70 ${className || ''}`}>{children}</p>
@@ -47,12 +49,12 @@ export const ChatSentTimeIndicator = ({
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
   // const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
   const dateTimeFormat: Intl.DateTimeFormatOptions = {
-    month: 'short',
+    month: isShort ? 'numeric' : 'short',
     day: 'numeric',
     // weekday: 'short',
     year: yearsAgo !== 0 ? 'numeric' : undefined,
-    hour: 'numeric',
-    minute: 'numeric',
+    hour: isShort ? undefined : 'numeric',
+    minute: isShort ? undefined : 'numeric',
   };
   return <Wrapper>{date.toLocaleDateString(undefined, dateTimeFormat)}</Wrapper>;
 };
