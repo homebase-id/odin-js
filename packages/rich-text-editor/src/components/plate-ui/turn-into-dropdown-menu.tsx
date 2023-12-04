@@ -80,7 +80,7 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
   let value: string = ELEMENT_PARAGRAPH;
   if (isCollapsed(editor?.selection)) {
     const entry = findNode<TElement>(editor!, {
-      match: (n) => isBlock(editor, n),
+      match: (n: any) => isBlock(editor, n),
     });
     if (entry) {
       value = items.find((item) => item.value === entry[0].type)?.value ?? ELEMENT_PARAGRAPH;
@@ -104,7 +104,7 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
         </ToolbarButton>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start" className="bg-background min-w-0">
+      <DropdownMenuContent align="start" className="min-w-0 bg-background">
         <DropdownMenuLabel>Turn into</DropdownMenuLabel>
 
         <DropdownMenuRadioGroup
