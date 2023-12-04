@@ -15,22 +15,23 @@ import {
   NewDriveSearchResult,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
+  const identity = useDotYouClient().getIdentity();
 
-  // Already get the conversations in the cache, so we can use that on `getExistinConversationsForRecipient`
+  // Already get the conversations in the cache, so we can use that on `getExistingConversationsForRecipient`
   useConversations().all;
 
   const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
     return await getConversation(dotYouClient, conversationId);
   };
 
-  const getExistinConversationsForRecipient = async (
+  const getExistingConversationsForRecipient = async (
     recipients: string[]
   ): Promise<null | DriveSearchResult<Conversation>> => {
     const allConversationsInCache = await queryClient.fetchQuery<
@@ -57,14 +58,15 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const createConversation = async ({ recipients }: { recipients: string[] }) => {
     // Check if there is already a conversations with this recipient.. If so.. Don't create a new one
-    const existingConversation = await getExistinConversationsForRecipient(recipients);
+    const existingConversation = await getExistingConversationsForRecipient(recipients);
     if (existingConversation)
       return {
         ...existingConversation,
         newConversationId: existingConversation.fileMetadata.appData.uniqueId as string,
       };
 
-    const newConversationId = getNewId();
+    const newConversationId =
+      recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
 
     const newConversation: NewDriveSearchResult<Conversation> = {
       fileMetadata: {

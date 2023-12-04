@@ -1,7 +1,6 @@
 import {
   ActionButton,
   ConnectionImage,
-  ConnectionName,
   Input,
   MagnifyingGlass,
   Persons,
