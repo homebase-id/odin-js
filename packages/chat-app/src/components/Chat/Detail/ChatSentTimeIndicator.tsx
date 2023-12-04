@@ -45,9 +45,9 @@ export const ChatSentTimeIndicator = ({
 
   const now = new Date();
   const yearsAgo = Math.abs(new Date(now.getTime() - date.getTime()).getUTCFullYear() - 1970);
-  const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
+  // const monthsAgo = Math.abs(now.getMonth() - date.getMonth());
   const dateTimeFormat: Intl.DateTimeFormatOptions = {
-    month: yearsAgo !== 0 || monthsAgo !== 0 ? 'short' : undefined,
+    month: 'short',
     day: 'numeric',
     // weekday: 'short',
     year: yearsAgo !== 0 ? 'numeric' : undefined,
