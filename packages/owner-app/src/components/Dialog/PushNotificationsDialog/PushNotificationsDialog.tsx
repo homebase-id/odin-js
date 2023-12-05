@@ -11,7 +11,7 @@ import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { usePushNotificationClients } from '../../../hooks/notifications/usePushNotifications';
-import { PushNotificationSubscription } from '../../../provider/notifications/PushProvider';
+import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
 
 const PushNotificationsDialog = ({
   isOpen,

@@ -31,9 +31,10 @@ import {
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
-import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { appId } from '../hooks/auth/useAuth';
 
 export const ChatMessageFileType = 7878;
 export const ChatDeletedArchivalStaus = 2;
@@ -189,6 +190,13 @@ export const uploadChatMessage = async (
           schedule: ScheduleOptions.SendNowAwaitResponse,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
+          useAppNotification: true,
+          appNotificationOptions: {
+            appId: appId,
+            groupId: message.fileMetadata.appData.groupId as string,
+            tagId: getNewId(),
+            silent: false,
+          },
         }
       : undefined,
   };

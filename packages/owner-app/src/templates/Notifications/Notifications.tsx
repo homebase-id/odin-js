@@ -1,17 +1,19 @@
 import { ActionButton, Check, SubtleMessage, t, Toast } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
-import { useNotifications } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
+  usePushNotificationClient,
   usePushNotificationClients,
   usePushNotifications,
 } from '../../hooks/notifications/usePushNotifications';
 import { useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
+import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
 
 const Notifications = () => {
-  const { notifications: notificationList } = useNotifications();
-  const { isSupported, isEnabled, enableOnThisDevice } = usePushNotifications();
+  // const { notifications: notificationList } = useNotifications();
+  const { data: notifications } = usePushNotifications().fetch;
+  const { isSupported, isEnabled, enableOnThisDevice } = usePushNotificationClient();
   const { data: current } = usePushNotificationClients().fetchCurrent;
   const [isDialogOpen, setDialogOpen] = useState(false);
 
@@ -34,10 +36,10 @@ const Notifications = () => {
           ) : null
         }
       />
-      {notificationList?.length ? (
+      {notifications?.results?.length ? (
         <div className="flex flex-col gap-3 px-2">
-          {notificationList.map((notification, index) => (
-            <Toast {...notification} key={index} type={undefined} />
+          {notifications?.results.map((notification, index) => (
+            <NotificationItem notification={notification} key={index} />
           ))}
         </div>
       ) : (
@@ -45,6 +47,16 @@ const Notifications = () => {
       )}
       <PushNotificationsDialog isOpen={isDialogOpen} onClose={() => setDialogOpen(false)} />
     </>
+  );
+};
+
+const NotificationItem = ({ notification }: { notification: PushNotification }) => {
+  // notification.
+  return (
+    <Toast
+      title={`A notification from ${notification.senderId}`}
+      body={`${notification.created}`}
+    />
   );
 };
 
