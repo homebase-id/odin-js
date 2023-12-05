@@ -1,22 +1,16 @@
-import { DotYouClient, NumberCursoredResult } from '@youfoundation/js-lib/core';
+import {
+  DotYouClient,
+  NumberCursoredResult,
+  PushNotificationOptions,
+} from '@youfoundation/js-lib/core';
 import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 
 export interface PushNotification {
   id: string;
   senderId: string;
   unread: boolean;
-  created: {
-    milliseconds: number;
-    seconds: number;
-  };
-  options: NotificationOptions;
-}
-
-export interface PushNotificationOptions {
-  appId: string;
-  groupId: string;
-  tagId: string;
-  silent: boolean;
+  created: number;
+  options: PushNotificationOptions;
 }
 
 export const AddNotification = async (

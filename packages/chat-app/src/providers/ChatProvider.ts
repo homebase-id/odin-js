@@ -193,7 +193,7 @@ export const uploadChatMessage = async (
           useAppNotification: true,
           appNotificationOptions: {
             appId: appId,
-            groupId: message.fileMetadata.appData.groupId as string,
+            typeId: message.fileMetadata.appData.groupId as string,
             tagId: getNewId(),
             silent: false,
           },

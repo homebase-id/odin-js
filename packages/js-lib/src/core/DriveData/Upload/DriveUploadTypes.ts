@@ -45,7 +45,7 @@ interface BaseTransitOptions {
 
 export interface PushNotificationOptions {
   appId: string;
-  groupId: string;
+  typeId: string;
   tagId: string;
   silent: boolean;
 }

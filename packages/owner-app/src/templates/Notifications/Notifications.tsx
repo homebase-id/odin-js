@@ -9,6 +9,8 @@ import {
 import { useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
+import { useApp } from '../../hooks/apps/useApp';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const Notifications = () => {
   // const { notifications: notificationList } = useNotifications();
@@ -50,11 +52,27 @@ const Notifications = () => {
   );
 };
 
+const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
+const dateTimeFormat: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  // weekday: 'short',
+  // year: yearsAgo !== 0 ? 'numeric' : undefined,
+  year: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+};
+
 const NotificationItem = ({ notification }: { notification: PushNotification }) => {
+  const { data: app } = useApp({ appId: notification.options.appId }).fetch;
+  const appName =
+    app?.name ??
+    (stringGuidsEqual(notification.options.appId, OWNER_APP_ID) ? 'Homebase' : 'Unknown');
+
   return (
     <Toast
-      title={`A notification from ${notification.senderId}`}
-      body={`${notification.created}`}
+      title={`[${appName}] A notification from ${notification.senderId}`}
+      body={`${new Date(notification.created).toLocaleDateString(undefined, dateTimeFormat)}`}
     />
   );
 };
