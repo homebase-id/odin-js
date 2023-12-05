@@ -39,7 +39,7 @@ const PushNotificationsDialog = ({
         <SubtleMessage>{t('No devices registered')}</SubtleMessage>
       ) : (
         <>
-          <div className="grid grid-flow-col gap-4">
+          <div className="grid grid-flow-row gap-4">
             {devices?.map((device) => (
               <DeviceView subscription={device} key={device.accessRegistrationId} />
             ))}

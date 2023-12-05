@@ -1,4 +1,4 @@
-import { ActionButton, Check, SubtleMessage, t, Toast } from '@youfoundation/common-app';
+import { ActionButton, Bubble, Cog, SubtleMessage, t, Toast } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
@@ -25,11 +25,11 @@ const Notifications = () => {
         actions={
           isSupported ? (
             isEnabled && current ? (
-              <ActionButton type="secondary" icon={Check} onClick={() => setDialogOpen(true)}>
-                {t('Push Notifications Enabled')}
+              <ActionButton type="secondary" icon={Cog} onClick={() => setDialogOpen(true)}>
+                {t('Push Settings')}
               </ActionButton>
             ) : (
-              <ActionButton onClick={enableOnThisDevice}>
+              <ActionButton onClick={enableOnThisDevice} icon={Bubble}>
                 {t('Enable push notifications')}
               </ActionButton>
             )
@@ -51,7 +51,6 @@ const Notifications = () => {
 };
 
 const NotificationItem = ({ notification }: { notification: PushNotification }) => {
-  // notification.
   return (
     <Toast
       title={`A notification from ${notification.senderId}`}

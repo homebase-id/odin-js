@@ -61,6 +61,7 @@ export const usePushNotifications = () => {
 
 export const usePushNotificationClient = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const queryClient = useQueryClient();
 
   return {
     isSupported:
@@ -80,7 +81,7 @@ export const usePushNotificationClient = () => {
         serviceWorkerRegistration.pushManager.subscribe(options).then(
           async (pushSubscription) => {
             await RegisterNewDevice(dotYouClient, pushSubscription);
-            alert('successfully registered');
+            queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
           },
           (error) => {
             console.error(error);
