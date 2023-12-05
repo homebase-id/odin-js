@@ -32,20 +32,6 @@ export default defineConfig({
         }
         warn(warning);
       },
-      external: [
-        'plate-core',
-        '@udecode/utils',
-        'prismjs',
-        '@viselect/vanilla',
-        'tabbable',
-        'copy-to-clipboard',
-        'remark-parse',
-        'unified',
-        'react-hotkeys-hook',
-        '@udecode/zustood',
-        'use-deep-compare',
-        '@floating-ui/react',
-      ],
     },
   },
 });
