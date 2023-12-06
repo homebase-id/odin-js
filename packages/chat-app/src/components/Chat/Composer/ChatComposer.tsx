@@ -107,10 +107,10 @@ export const ChatComposer = ({
             placeholder="Your message"
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
-            onChange={setMessage}
+            onChange={(val) => setMessage(val.trim())}
             autoFocus={true}
             onSubmit={(val) => {
-              setMessage(val);
+              setMessage(val.trim());
               doSend();
             }}
           />
