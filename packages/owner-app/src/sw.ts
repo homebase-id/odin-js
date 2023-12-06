@@ -36,7 +36,7 @@ const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
 const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
 
 const titleFormer = (payload: NotificationData) =>
-  `${payload.senderId} | ${payload.appDisplayName}`;
+  `${payload.senderId} | ${payload.appDisplayName || 'Homebase'}`;
 
 const bodyFormer = (payload: NotificationData, existingNotifications: Notification[]) => {
   if (payload.options.appId === OWNER_APP_ID) {
