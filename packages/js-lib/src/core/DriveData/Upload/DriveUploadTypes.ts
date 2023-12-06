@@ -48,6 +48,7 @@ export interface PushNotificationOptions {
   typeId: string;
   tagId: string;
   silent: boolean;
+  unEncryptedMessage?: string;
 }
 
 interface TransitOptionsWithoutNotifications extends BaseTransitOptions {
