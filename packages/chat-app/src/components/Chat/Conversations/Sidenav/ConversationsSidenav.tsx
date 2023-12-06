@@ -18,6 +18,8 @@ import { useConversations } from '../../../../hooks/chat/useConversations';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   Conversation,
+  ConversationWithYourself,
+  ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
 } from '../../../../providers/ConversationProvider';
@@ -82,6 +84,11 @@ const ConversationList = ({
       {!conversations?.length ? (
         <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
       ) : null}
+      <ConversationListItem
+        conversation={ConversationWithYourself}
+        onClick={() => openConversation(ConversationWithYourselfId)}
+        isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
+      />
       {conversations?.map((conversation) => (
         <ConversationListItem
           key={conversation.fileId}

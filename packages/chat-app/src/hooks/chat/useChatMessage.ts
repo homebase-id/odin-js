@@ -34,7 +34,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     message: string;
   }): Promise<NewDriveSearchResult<ChatMessage> | null> => {
     const newChatId = getNewId();
-    if (!recipients?.length) return null;
 
     const newChat: NewDriveSearchResult<ChatMessage> = {
       fileMetadata: {

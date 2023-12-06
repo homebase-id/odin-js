@@ -19,6 +19,31 @@ import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 
 export const ConversationFileType = 8888;
 export const GroupConversationFileType = 8890;
+export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
+
+export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
+  fileState: 'active',
+  fileId: '',
+  fileSystemType: 'Standard',
+  fileMetadata: {
+    created: 0,
+    updated: 0,
+    isEncrypted: false,
+    senderOdinId: '',
+    appData: {
+      uniqueId: ConversationWithYourselfId,
+      fileType: ConversationFileType,
+      dataType: 0,
+      content: {
+        title: 'Chat with yourself',
+      },
+    },
+    versionTag: '',
+    payloads: [],
+  },
+  serverMetadata: undefined,
+  priority: 0,
+} as any as DriveSearchResult<SingleConversation>;
 
 export const ChatDrive: TargetDrive = {
   alias: '9ff813aff2d61e2f9b9db189e72d1a11',
@@ -76,6 +101,8 @@ export const getConversations = async (
 };
 
 export const getConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
+  if (conversationId === ConversationWithYourselfId) return ConversationWithYourself;
+
   const conversationHeader = await getFileHeaderByUniqueId<Conversation>(
     dotYouClient,
     ChatDrive,
