@@ -6,11 +6,15 @@ import {
   usePushNotificationClients,
   usePushNotifications,
 } from '../../hooks/notifications/usePushNotifications';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+
+interface NotificationClickData {
+  notification: string;
+}
 
 const Notifications = () => {
   // const { notifications: notificationList } = useNotifications();
@@ -18,6 +22,15 @@ const Notifications = () => {
   const { isSupported, isEnabled, enableOnThisDevice } = usePushNotificationClient();
   const { data: current } = usePushNotificationClients().fetchCurrent;
   const [isDialogOpen, setDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const handleEvent = (event: MessageEvent<NotificationClickData>) => {
+      console.log('incoming message', event?.data.notification);
+    };
+
+    navigator.serviceWorker.addEventListener('message', handleEvent);
+    return () => navigator.serviceWorker.removeEventListener('message', handleEvent);
+  }, []);
 
   return (
     <>
@@ -64,6 +77,8 @@ const dateTimeFormat: Intl.DateTimeFormatOptions = {
 };
 
 const NotificationItem = ({ notification }: { notification: PushNotification }) => {
+  // const { mutate: markAsRead } = usePushNotifications().markAsRead;
+  const { mutate: remove } = usePushNotifications().remove;
   const { data: app } = useApp({ appId: notification.options.appId }).fetch;
   const appName =
     app?.name ??
@@ -71,8 +86,11 @@ const NotificationItem = ({ notification }: { notification: PushNotification }) 
 
   return (
     <Toast
-      title={`[${appName}] A notification from ${notification.senderId}`}
+      title={`${notification.unread ? '•' : ''} [${appName}] A notification from ${
+        notification.senderId
+      }`}
       body={`${new Date(notification.created).toLocaleDateString(undefined, dateTimeFormat)}`}
+      onDismiss={() => remove([notification.id])}
     />
   );
 };

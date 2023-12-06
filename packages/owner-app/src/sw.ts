@@ -68,7 +68,6 @@ const getTag = (payload: NotificationData) => {
 self.addEventListener('push', function (event) {
   try {
     const notificationBath: PushData = event.data?.json();
-    console.log('Push Received.', notificationBath);
 
     const promiseChain = Promise.all(
       notificationBath.payloads.map(async (payload) => {
@@ -107,10 +106,17 @@ self.addEventListener('push', function (event) {
   }
 });
 
-self.addEventListener('notificationclick', (event) => {
-  console.log(event.notification);
+self.addEventListener('message', (event) => {
+  console.log('sw: message', event);
+});
 
-  const examplePageURL = `/owner/notifications?notification=${event.notification}`;
+self.addEventListener('notificationclick', (event) => {
+  // console.log(event.notification);
+
+  event.notification.close();
+
+  const tagId = event.notification?.data?.options?.tagId;
+  const examplePageURL = `/owner/notifications${tagId ? `?notification=${tagId}` : ''}`;
   const urlToOpen = new URL(examplePageURL, self.location.origin).href;
 
   const promiseChain = self.clients
@@ -123,13 +129,14 @@ self.addEventListener('notificationclick', (event) => {
 
       for (let i = 0; i < windowClients.length; i++) {
         const windowClient = windowClients[i];
-        if (windowClient.url === urlToOpen) {
+        if (windowClient.url === urlToOpen.split('?')[0]) {
           matchingClient = windowClient;
           break;
         }
       }
 
       if (matchingClient) {
+        matchingClient.postMessage({ notification: tagId });
         return matchingClient.focus();
       } else {
         return self.clients.openWindow(urlToOpen);
