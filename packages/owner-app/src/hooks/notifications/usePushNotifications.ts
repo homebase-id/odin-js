@@ -31,8 +31,6 @@ export const usePushNotifications = () => {
     return await DeleteNotifications(dotYouClient, notificationIds);
   };
 
-  // Register the push Application Server
-  // Use serviceWorker.ready to ensure that you can subscribe for push
   return {
     fetch: useQuery({
       queryKey: ['push-notifications'],
@@ -67,28 +65,37 @@ export const usePushNotificationClient = () => {
     isSupported:
       'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window,
     isEnabled: Notification.permission === 'granted',
-    enableOnThisDevice: async () => {
-      await Notification.requestPermission();
-      console.log('Notification permission granted.');
-      await navigator.serviceWorker.ready.then(async (serviceWorkerRegistration) => {
-        const publicKey = await GetApplicationServerKey();
-        console.log(publicKey);
-        const options = {
-          userVisibleOnly: true,
-          applicationServerKey: publicKey,
-        };
+    enableOnThisDevice: useMutation({
+      mutationFn: async () => {
+        const permission = await Notification.requestPermission();
+        if (permission === 'denied' || permission === 'default')
+          throw new Error('Notification permission denied');
 
-        serviceWorkerRegistration.pushManager.subscribe(options).then(
-          async (pushSubscription) => {
-            await RegisterNewDevice(dotYouClient, pushSubscription);
-            queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
-          },
-          (error) => {
-            console.error(error);
-          }
-        );
-      });
-    },
+        console.log('Notification permission granted.');
+
+        await navigator.serviceWorker.ready.then(async (serviceWorkerRegistration) => {
+          console.log('Service Worker is ready :^)');
+          const publicKey = await GetApplicationServerKey();
+          const options = {
+            userVisibleOnly: true,
+            applicationServerKey: publicKey,
+          };
+
+          serviceWorkerRegistration.pushManager.subscribe(options).then(
+            async (pushSubscription) => {
+              console.log('Push registration success, sending to server...');
+              await RegisterNewDevice(dotYouClient, pushSubscription);
+
+              queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
+              queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
+            },
+            (error) => {
+              console.error(error);
+            }
+          );
+        });
+      },
+    }),
   };
 };
 

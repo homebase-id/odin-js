@@ -1,5 +1,12 @@
 import { ReactNode } from 'react';
-import { ActionButton, Exclamation, Times, t, useNotifications } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Exclamation,
+  OWNER_ROOT,
+  Times,
+  t,
+  useNotifications,
+} from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useErrors } from '@youfoundation/common-app';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
@@ -66,7 +73,12 @@ export const Toast = ({
   const onOpen = () => {
     if (!href) return;
 
-    navigate(href);
+    if (href.startsWith(OWNER_ROOT)) navigate(href);
+    else {
+      onDismiss && onDismiss();
+      window.location.href = href;
+    }
+
     onDismiss && onDismiss();
   };
 
