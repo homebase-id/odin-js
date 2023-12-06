@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { ActionButton, Exclamation, Times, t, useNotifications } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useErrors } from '@youfoundation/common-app';
+import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
 
 export const Toaster = () => {
   const { liveNotifications, dismiss } = useNotifications();
@@ -43,6 +44,7 @@ export const Toaster = () => {
 export const Toast = ({
   title,
   body,
+  timestamp,
   imgSrc,
   onDismiss,
   href,
@@ -50,6 +52,7 @@ export const Toast = ({
 }: {
   title: string;
   body?: string | ReactNode;
+  timestamp?: number;
   imgSrc?: string;
   onDismiss?: () => void;
   href?: string;
@@ -96,6 +99,11 @@ export const Toast = ({
         </p>
         {body ? (
           <p className={`max-h-12 overflow-hidden ${fadeAfter} after:right-0`}>{body}</p>
+        ) : null}
+        {timestamp ? (
+          <p className="text-foreground/80">
+            {formatToTimeAgoWithRelativeDetail(new Date(timestamp))}
+          </p>
         ) : null}
       </div>
       {onDismiss && (

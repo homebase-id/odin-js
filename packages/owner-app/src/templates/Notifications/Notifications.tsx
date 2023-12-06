@@ -16,6 +16,32 @@ interface NotificationClickData {
   notification: string;
 }
 
+const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
+const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
+
+const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
+const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
+const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
+
+const titleFormer = (payload: PushNotification, appName: string) => `${appName}`;
+
+const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: string) => {
+  if (payload.options.appId === OWNER_APP_ID) {
+    // Based on type, we show different messages
+    if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
+      return `${payload.senderId} started following you`;
+    } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
+      return `${payload.senderId} sent you a connection request`;
+    } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
+      return `${payload.senderId} accepted your connection request`;
+    }
+  } else if (payload.options.appId === CHAT_APP_ID) {
+    return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+  }
+
+  return `${payload.senderId} sent you a notification via ${appName}`;
+};
+
 const Notifications = () => {
   // const { notifications: notificationList } = useNotifications();
   const { data: notifications } = usePushNotifications().fetch;
@@ -65,17 +91,6 @@ const Notifications = () => {
   );
 };
 
-const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
-const dateTimeFormat: Intl.DateTimeFormatOptions = {
-  month: 'short',
-  day: 'numeric',
-  // weekday: 'short',
-  // year: yearsAgo !== 0 ? 'numeric' : undefined,
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-};
-
 const NotificationItem = ({ notification }: { notification: PushNotification }) => {
   // const { mutate: markAsRead } = usePushNotifications().markAsRead;
   const { mutate: remove } = usePushNotifications().remove;
@@ -86,10 +101,9 @@ const NotificationItem = ({ notification }: { notification: PushNotification }) 
 
   return (
     <Toast
-      title={`${notification.unread ? '•' : ''} [${appName}] A notification from ${
-        notification.senderId
-      }`}
-      body={`${new Date(notification.created).toLocaleDateString(undefined, dateTimeFormat)}`}
+      title={titleFormer(notification, appName)}
+      body={bodyFormer(notification, false, appName)}
+      timestamp={notification.created}
       onDismiss={() => remove([notification.id])}
     />
   );

@@ -35,6 +35,9 @@ const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
 const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
 
+const titleFormer = (payload: NotificationData) =>
+  `${payload.senderId} | ${payload.appDisplayName}`;
+
 const bodyFormer = (payload: NotificationData, existingNotifications: Notification[]) => {
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
@@ -76,7 +79,7 @@ self.addEventListener('push', function (event) {
         const tag = getTag(payload);
         const existingNotifications = await self.registration.getNotifications({ tag });
 
-        const title = `${payload.senderId} | ${payload.appDisplayName}`;
+        const title = titleFormer(payload);
         const body = bodyFormer(payload, existingNotifications);
 
         if (!title || !body || !tag) return;
