@@ -121,16 +121,16 @@ export const Sidenav = ({
                   <Pin className={'h-4 w-4 flex-shrink-0 hidden lg:block'} />
                   <Times className={'h-4 w-4 flex-shrink-0 block lg:hidden'} />
                 </button>
-              ) : (
+              ) : isOpen || isPeeking ? (
                 <button
                   className={`${navItemClassName} ${
-                    isOpen ? 'lg:bg-indigo-200 lg:dark:bg-indigo-700' : ''
+                    isOpen ? 'lg:bg-indigo-200 lg:dark:bg-indigo-700 xl:hidden' : ''
                   }`}
                   onClick={() => setIsPeeking(!isPeeking)}
                 >
                   <Times className={'h-4 w-4 flex-shrink-0'} />
                 </button>
-              )}
+              ) : null}
             </div>
 
             <div className="pb-3">
