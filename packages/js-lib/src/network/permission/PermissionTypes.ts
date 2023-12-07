@@ -21,4 +21,5 @@ export enum AppPermissionType {
   ReadMyFollowers = 130,
   SendDataToOtherIdentitiesOnMyBehalf = 210,
   ReceiveDataFromOtherIdentitiesOnMyBehalf = 305,
+  SendPushNotifications = 405,
 }

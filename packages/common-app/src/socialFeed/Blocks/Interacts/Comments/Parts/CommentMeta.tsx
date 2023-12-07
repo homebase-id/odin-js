@@ -1,6 +1,6 @@
 import { CanReactInfo, EmojiSummary, t } from '@youfoundation/common-app';
 import { ReactionContext } from '@youfoundation/js-lib/public';
-import { format } from '../../../../../helpers/timeago/format';
+import { formatToTimeAgo } from '../../../../../helpers/timeago/format';
 import { CommentLikeButton } from './CommentLikeButton';
 
 export const CommentMeta = ({
@@ -40,7 +40,7 @@ export const CommentMeta = ({
       ) : null}
       {created ? (
         <p className="mr-2">
-          {format(new Date(isEdited ? updated : created))}
+          {formatToTimeAgo(new Date(isEdited ? updated : created))}
           {isEdited ? <> - {t('Edited')}</> : null}
         </p>
       ) : null}

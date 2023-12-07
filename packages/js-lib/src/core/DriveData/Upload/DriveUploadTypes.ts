@@ -34,7 +34,7 @@ export interface StorageOptions {
   storageIntent?: 'metadataOnly'; // 'overwrite' is default
 }
 
-export interface TransitOptions {
+interface BaseTransitOptions {
   recipients: string[];
   isTransient?: boolean; // File is removed after it's received by all recipients
   useGlobalTransitId?: boolean | undefined;
@@ -42,6 +42,25 @@ export interface TransitOptions {
   sendContents: SendContents;
   remoteTargetDrive?: TargetDrive;
 }
+
+export interface PushNotificationOptions {
+  appId: string;
+  typeId: string;
+  tagId: string;
+  silent: boolean;
+  unEncryptedMessage?: string;
+}
+
+interface TransitOptionsWithoutNotifications extends BaseTransitOptions {
+  useAppNotification?: false;
+}
+
+interface TransitOptionsWithNotifications extends BaseTransitOptions {
+  useAppNotification: true;
+  appNotificationOptions: PushNotificationOptions;
+}
+
+export type TransitOptions = TransitOptionsWithoutNotifications | TransitOptionsWithNotifications;
 
 export enum SendContents {
   HeaderOnly = 0,

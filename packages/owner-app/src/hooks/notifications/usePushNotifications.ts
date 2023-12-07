@@ -6,40 +6,102 @@ import {
   RegisterNewDevice,
   RemoveAllRegisteredDevice,
   RemoveRegisteredDevice,
-} from '../../provider/notifications/PushProvider';
+} from '../../provider/notifications/PushClientProvider';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  DeleteNotifications,
+  GetNotifications,
+  MarkNotificationsAsRead,
+} from '../../provider/notifications/PushNotificationsProvider';
 
+const PAGE_SIZE = 50;
 export const usePushNotifications = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const queryClient = useQueryClient();
 
-  // Register the push Application Server
-  // Use serviceWorker.ready to ensure that you can subscribe for push
+  const getNotifications = async (cursor: number | undefined) => {
+    return await GetNotifications(dotYouClient, PAGE_SIZE, cursor);
+  };
+
+  const markAsRead = async (notificationIds: string[]) => {
+    return await MarkNotificationsAsRead(dotYouClient, notificationIds);
+  };
+
+  const removeNotifications = async (notificationIds: string[]) => {
+    return await DeleteNotifications(dotYouClient, notificationIds);
+  };
+
+  return {
+    fetch: useQuery({
+      queryKey: ['push-notifications'],
+      queryFn: () => getNotifications(undefined),
+    }),
+    markAsRead: useMutation({
+      mutationFn: markAsRead,
+      onMutate: async (_notificationIds) => {
+        // TODO
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
+      },
+    }),
+    remove: useMutation({
+      mutationFn: removeNotifications,
+      onMutate: async (notificationIds) => {
+        // TODO
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
+      },
+    }),
+  };
+};
+
+export const useUnreadPushNotificationsCount = () => {
+  const { data: notifications } = usePushNotifications().fetch;
+
+  return notifications?.results.filter((n) => n.unread).length ?? 0;
+};
+
+export const usePushNotificationClient = () => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const queryClient = useQueryClient();
+
   return {
     isSupported:
       'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window,
     isEnabled: Notification.permission === 'granted',
-    enableOnThisDevice: async () => {
-      await Notification.requestPermission();
-      console.log('Notification permission granted.');
-      await navigator.serviceWorker.ready.then(async (serviceWorkerRegistration) => {
-        const publicKey = await GetApplicationServerKey();
-        console.log(publicKey);
-        const options = {
-          userVisibleOnly: true,
-          applicationServerKey: publicKey,
-        };
+    enableOnThisDevice: useMutation({
+      mutationFn: async () => {
+        const permission = await Notification.requestPermission();
+        if (permission === 'denied' || permission === 'default')
+          throw new Error('Notification permission denied');
 
-        serviceWorkerRegistration.pushManager.subscribe(options).then(
-          async (pushSubscription) => {
-            await RegisterNewDevice(dotYouClient, pushSubscription);
-            alert('successfully registered');
-          },
-          (error) => {
-            console.error(error);
-          }
-        );
-      });
-    },
+        console.log('Notification permission granted.');
+
+        await navigator.serviceWorker.ready.then(async (serviceWorkerRegistration) => {
+          console.log('Service Worker is ready :^)');
+          const publicKey = await GetApplicationServerKey();
+          const options = {
+            userVisibleOnly: true,
+            applicationServerKey: publicKey,
+          };
+
+          serviceWorkerRegistration.pushManager.subscribe(options).then(
+            async (pushSubscription) => {
+              console.log('Push registration success, sending to server...');
+              await RegisterNewDevice(dotYouClient, pushSubscription);
+
+              queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
+              queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
+            },
+            (error) => {
+              console.error(error);
+            }
+          );
+        });
+      },
+    }),
   };
 };
 
@@ -74,10 +136,10 @@ export const usePushNotificationClients = () => {
         queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
       },
     }),
-
     fetchCurrent: useQuery({
       queryKey: ['notification-clients', 'current'],
       queryFn: () => getCurrentClient(),
+      retry: false,
     }),
     removeCurrent: useMutation({
       mutationFn: () => removeCurrentDevice(),

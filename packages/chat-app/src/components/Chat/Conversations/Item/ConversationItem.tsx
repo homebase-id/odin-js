@@ -117,7 +117,7 @@ const ConversationBody = ({
             {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
           </p>
 
-          {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} isShort={true} /> : null}
+          {lastMessage ? <ChatSentTimeIndicator msg={lastMessage} keepDetail={true} /> : null}
         </div>
         <div className="flex flex-row items-center gap-1">
           {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
