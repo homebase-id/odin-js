@@ -100,8 +100,7 @@ export const ConversationWithYourselfItem = ({
       <ConversationBody
         title={
           <>
-            <OwnerName />
-            <span className="ml-3 text-sm text-foreground/50">({t('you')})</span>
+            <OwnerName /> <span className="text-sm text-foreground/50">({t('you')})</span>
           </>
         }
         conversationId={ConversationWithYourselfId}

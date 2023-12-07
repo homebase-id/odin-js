@@ -14,7 +14,7 @@ import {
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
 import { processCommand } from './useChatCommandProcessor';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
@@ -41,13 +41,17 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 
 export const useChatTransitProcessor = (isEnabled = true) => {
   useInboxProcessor(isEnabled);
+  const [preAuthenticated, setIspreAuthenticated] = useState(false);
   const queryClient = useQueryClient();
 
   const identity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   useEffect(() => {
-    preAuth(dotYouClient);
+    (async () => {
+      await preAuth(dotYouClient);
+      setIspreAuthenticated(true);
+    })();
   }, []);
 
   const handler = async (notification: TypedConnectionNotification) => {
@@ -97,7 +101,7 @@ export const useChatTransitProcessor = (isEnabled = true) => {
   };
 
   useNotificationSubscriber(
-    isEnabled ? handler : undefined,
+    isEnabled && preAuthenticated ? handler : undefined,
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive]
   );
