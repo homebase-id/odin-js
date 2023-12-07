@@ -111,7 +111,7 @@ const joinConversation = async (
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   } catch (ex: any) {
-    if (ex?.response?.data?.errorCode === 4105) return command.id;
+    if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
     console.error(ex);
     return null;
@@ -155,7 +155,7 @@ const joinGroupConversation = async (
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   } catch (ex: any) {
-    if (ex?.response?.data?.errorCode === 4105) return command.id;
+    if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
     console.error(ex);
     return null;

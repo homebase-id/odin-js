@@ -177,7 +177,7 @@ export const pureUpload = async (
       return response.data;
     })
     .catch((error) => {
-      if (error.response?.data?.errorCode === 4160 && onVersionConflict) {
+      if (error.response?.data?.errorCode === 'versionTagMismatch' && onVersionConflict) {
         onVersionConflict();
         return;
       }
@@ -211,7 +211,7 @@ export const pureAppend = async (
       return response.data;
     })
     .catch((error) => {
-      if (error.response?.data?.errorCode === 4160 && onVersionConflict) {
+      if (error.response?.data?.errorCode === 'versionTagMismatch' && onVersionConflict) {
         onVersionConflict();
         return;
       }
