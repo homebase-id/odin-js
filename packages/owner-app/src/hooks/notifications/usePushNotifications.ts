@@ -70,7 +70,7 @@ export const usePushNotificationClient = () => {
   return {
     isSupported:
       'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window,
-    isEnabled: Notification.permission === 'granted',
+    isEnabled: 'Notification' in window && Notification.permission === 'granted',
     enableOnThisDevice: useMutation({
       mutationFn: async () => {
         const permission = await Notification.requestPermission();
