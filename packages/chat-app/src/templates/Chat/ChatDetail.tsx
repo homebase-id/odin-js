@@ -94,7 +94,7 @@ const ChatHeader = ({
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionButton className="lg:hidden" type="mute" onClick={toggleSidenav}>
+        <ActionButton className="md:hidden" type="mute" onClick={toggleSidenav}>
           <ChevronLeft className="h-4 w-4" />
         </ActionButton>
 

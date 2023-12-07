@@ -23,7 +23,7 @@ export const ChatHome = () => {
   useChatCommandProcessor();
 
   return (
-    <div className="flex h-screen w-full flex-row overflow-hidden">
+    <div className={`flex h-screen w-full flex-row overflow-hidden`}>
       <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
 
       <div className="h-screen w-full flex-grow bg-background">
@@ -61,11 +61,11 @@ const ChatSideNav = ({
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileToggle={!isOpen && !isRoot} logout={logout} />
+      <Sidenav disablePinning={true} hideMobileDrawer={!isOpen && !isRoot} logout={logout} />
       <div
         className={`${
           isActive ? 'translate-x-full' : 'translate-x-0'
-        } fixed bottom-0 left-[-100%] top-0 z-10 flex h-screen w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 lg:static lg:max-w-sm lg:translate-x-0`}
+        } fixed bottom-0 left-[-100%] top-0 z-10 flex h-screen w-full flex-shrink-0 flex-col border-r bg-page-background pb-14 transition-transform dark:border-r-slate-800 md:static md:max-w-xs md:translate-x-0 md:pb-0 lg:max-w-sm`}
       >
         {isCreateNew ? (
           <NewConversation />

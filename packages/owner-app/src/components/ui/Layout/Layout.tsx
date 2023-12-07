@@ -41,7 +41,9 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
   return (
     <>
       <SharedStyleTag />
-      <div className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
+      <div
+        className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
+      >
         <Sidenav logout={logout} />
         <div className={`flex min-h-screen w-full flex-col`}>
           <div className={`min-h-full ${noPadding ? '' : 'px-2 py-4 sm:px-10 sm:py-8'}`}>

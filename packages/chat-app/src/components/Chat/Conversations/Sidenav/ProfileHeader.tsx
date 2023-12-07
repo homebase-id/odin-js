@@ -18,7 +18,7 @@ export const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | u
   const odinId = getIdentity() || undefined;
 
   return (
-    <div className="flex flex-row items-center gap-2 p-2 pl-14 lg:p-5">
+    <div className="flex flex-row items-center gap-2 p-2 lg:p-5">
       <OdinImage
         dotYouClient={dotYouClient}
         targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}

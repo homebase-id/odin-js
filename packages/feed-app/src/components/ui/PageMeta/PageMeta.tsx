@@ -47,11 +47,7 @@ export const PageMeta = ({
           )}
           {title && (
             <>
-              <h1
-                className={`flex flex-row  text-2xl dark:text-white ${
-                  isOwner ? 'pl-12 sm:pl-4 xl:pl-0' : ''
-                } xl:text-4xl`}
-              >
+              <h1 className={`flex flex-row  text-2xl dark:text-white xl:text-4xl`}>
                 {icon &&
                   icon({
                     className: `h-8 w-8 my-auto mr-4 flex-shrink-0 ${
