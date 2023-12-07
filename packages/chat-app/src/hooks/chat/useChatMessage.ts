@@ -54,8 +54,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       },
     };
 
-    console.log('sending message to', recipients);
-
     const uploadResult = await uploadChatMessage(dotYouClient, newChat, recipients, files);
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
