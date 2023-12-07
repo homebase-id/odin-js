@@ -118,7 +118,7 @@ const ChatTextMessageBody = ({
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
-      <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
+      <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         {isDeleted ? (
           <MessageDeletedInnerBody />
         ) : (
