@@ -33,13 +33,10 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
   const uiSetting = searchParams.get('ui');
   const { logout } = useAuth();
 
-  if (uiSetting === 'none') {
-    return <NoLayout>{children}</NoLayout>;
-  }
+  if (uiSetting === 'none') return <NoLayout>{children}</NoLayout>;
 
-  if (uiSetting === 'minimal' || uiSetting === 'focus') {
+  if (uiSetting === 'minimal' || uiSetting === 'focus')
     return <MinimalLayout>{children}</MinimalLayout>;
-  }
 
   return (
     <>

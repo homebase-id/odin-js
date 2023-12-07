@@ -10,12 +10,13 @@ import { NewConversation } from '../../components/Chat/Conversations/Sidenav/New
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
 import { ProfileHeader } from '../../components/Chat/Conversations/Sidenav/ProfileHeader';
+import { Sidenav } from '@youfoundation/common-app';
+import { useAuth } from '../../hooks/auth/useAuth';
 
 export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {
   const { conversationKey } = useParams();
-
   const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
   useChatTransitProcessor(true);
@@ -23,7 +24,7 @@ export const ChatHome = () => {
 
   return (
     <div className="flex h-screen w-full flex-row overflow-hidden">
-      <Aside isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
+      <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
 
       <div className="h-screen w-full flex-grow bg-background">
         <ChatDetail
@@ -35,7 +36,7 @@ export const ChatHome = () => {
   );
 };
 
-const Aside = ({
+const ChatSideNav = ({
   isOpen,
   setIsSidenavOpen,
 }: {
@@ -43,6 +44,7 @@ const Aside = ({
   setIsSidenavOpen: (newIsOpen: boolean) => void;
 }) => {
   const { conversationKey } = useParams();
+  const { logout } = useAuth();
 
   const navigate = useNavigate();
 
@@ -58,27 +60,30 @@ const Aside = ({
   const isActive = isOpen || isCreateNew || isCreateNewGroup || isRoot;
 
   return (
-    <div
-      className={`${
-        isActive ? 'translate-x-full' : 'translate-x-0'
-      } fixed bottom-0 left-[-100%] top-0 z-10 flex h-screen w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 lg:static lg:max-w-sm lg:translate-x-0`}
-    >
-      {isCreateNew ? (
-        <NewConversation />
-      ) : isCreateNewGroup ? (
-        <NewConversationGroup />
-      ) : (
-        <>
-          <ProfileHeader closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)} />
-          <ConversationsSidebar
-            activeConversationId={conversationKey}
-            openConversation={(newId) => {
-              setIsSidenavOpen(false);
-              navigate(`${CHAT_ROOT}/${newId}`);
-            }}
-          />
-        </>
-      )}
-    </div>
+    <>
+      <Sidenav disablePinning={true} hideMobileToggle={!isOpen && !isRoot} logout={logout} />
+      <div
+        className={`${
+          isActive ? 'translate-x-full' : 'translate-x-0'
+        } fixed bottom-0 left-[-100%] top-0 z-10 flex h-screen w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 lg:static lg:max-w-sm lg:translate-x-0`}
+      >
+        {isCreateNew ? (
+          <NewConversation />
+        ) : isCreateNewGroup ? (
+          <NewConversationGroup />
+        ) : (
+          <>
+            <ProfileHeader closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)} />
+            <ConversationsSidebar
+              activeConversationId={conversationKey}
+              openConversation={(newId) => {
+                setIsSidenavOpen(false);
+                navigate(`${CHAT_ROOT}/${newId}`);
+              }}
+            />
+          </>
+        )}
+      </div>
+    </>
   );
 };

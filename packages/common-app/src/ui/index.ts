@@ -75,6 +75,7 @@ export * from './Icons/MagnifyingGlass';
 export * from './Icons/Minecraft';
 export * from './Icons/Moon';
 export * from './Icons/OpenLock';
+export * from './Icons/Pin';
 export * from './Icons/Pencil';
 export * from './Icons/Person';
 export * from './Icons/Persons';

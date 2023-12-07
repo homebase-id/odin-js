@@ -3,11 +3,13 @@ import { NavLink } from 'react-router-dom';
 
 import {
   ChatBubble,
+  Chevron,
   Cloud,
   HOME_ROOT_PATH,
   House,
   MiniDarkModeToggle,
   Persons,
+  Pin,
   ellipsisAtMaxChar,
   getVersion,
   t,
@@ -15,7 +17,7 @@ import {
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { useNotifications, OwnerImage } from '@youfoundation/common-app';
+import { OwnerImage } from '@youfoundation/common-app';
 import {
   Bars,
   Times,
@@ -48,49 +50,87 @@ const iconClassName = `${iconSize} flex-shrink-0`;
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
 
-export const Sidenav = ({ logout }: { logout: () => void }) => {
+export const Sidenav = ({
+  logout,
+  disablePinning,
+  hideMobileToggle,
+}: {
+  logout?: () => void;
+  disablePinning?: boolean;
+  hideMobileToggle?: boolean;
+}) => {
   const isDesktop = document.documentElement.clientWidth >= 1280;
-  const isLow = isDesktop && document.documentElement.clientHeight < 740;
+  const isTightHeight = isDesktop && document.documentElement.clientHeight < 740;
+
   const storedState = localStorage.getItem(STORAGE_KEY);
-  const overruledOpen = storedState ? storedState === '1' : undefined;
-  const [isOpen, setIsOpen] = useState(isDesktop ? overruledOpen : false);
+  const isPinned = storedState ? storedState === '1' : false;
+
+  const canPin = !disablePinning && isDesktop;
+
+  const [isOpen, setIsOpen] = useState(canPin ? isPinned : false);
   const [isHoverOpen, setIsHoverOpen] = useState(false);
+  const [isPeeking, setIsPeeking] = useState(false);
 
   useEffect(() => {
     // Only persist open/closed state on desktop
-    if (isDesktop) localStorage.setItem(STORAGE_KEY, isOpen ? '1' : '0');
+    if (canPin) localStorage.setItem(STORAGE_KEY, isOpen ? '1' : '0');
   }, [isOpen]);
 
   return (
     <>
-      <button
-        className={`absolute left-0 top-0 z-10 p-4 xl:hidden ${sidebarBg}`}
-        onClick={() => setIsOpen(true)}
-      >
-        <Bars className={`h-4 w-4`} />
-      </button>
+      {hideMobileToggle ? null : (
+        <button
+          className={`absolute left-0 top-0 z-20 p-4 lg:hidden ${sidebarBg}`}
+          onClick={() => setIsOpen(true)}
+        >
+          <Bars className={`h-4 w-4`} />
+        </button>
+      )}
+
       <aside
-        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-transform duration-300 xl:sticky xl:bottom-auto xl:min-h-screen xl:transition-all ${
+        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-transform duration-300 lg:sticky lg:bottom-auto lg:min-h-screen lg:transition-all ${
           isOpen
-            ? 'translate-x-0 xl:min-w-[20rem]'
-            : 'w-full translate-x-[-100%] xl:w-[4.3rem] xl:min-w-0 xl:translate-x-0'
+            ? 'translate-x-0 lg:min-w-[20rem]'
+            : 'w-full translate-x-[-100%] lg:w-[4.3rem] lg:min-w-0 lg:translate-x-0'
         }`}
-        onClick={() => !isDesktop && isOpen && setIsOpen(false)}
+        onClick={() => {
+          if (!isDesktop && isOpen) setIsOpen(false);
+          setIsPeeking(false);
+        }}
         onMouseEnter={() => setIsHoverOpen(true)}
         onMouseLeave={() => setIsHoverOpen(false)}
       >
         {/* Extra surrounding div to keep contents sticky as you scroll within the aside */}
         <div
           className={`${
-            isOpen ? 'overflow-y-auto xl:overflow-visible' : 'hover:sticky hover:w-[20rem]'
-          } static top-0 h-full w-full transition-all xl:sticky xl:h-auto xl:whitespace-nowrap ${sidebarBg}`}
+            isOpen
+              ? 'overflow-y-auto lg:overflow-visible'
+              : `xl:hover:sticky xl:hover:w-[20rem] ${isPeeking ? 'sticky w-[20rem]' : ''}`
+          } static top-0 h-full w-full transition-all lg:sticky lg:h-auto lg:whitespace-nowrap ${sidebarBg}`}
         >
-          <div className="flex flex-col overflow-auto px-3 pb-5 pt-3 xl:min-h-screen">
+          <div className="flex flex-col overflow-auto px-3 pb-5 pt-3 lg:min-h-screen">
             <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
               <IdentityNavItem />
-              <button className={navItemClassName} onClick={() => setIsOpen(!isOpen)}>
-                {isOpen ? <Times className={iconClassName} /> : <Bars className={iconClassName} />}
-              </button>
+              {canPin ? (
+                <button
+                  className={`${navItemClassName} ${
+                    isOpen ? 'lg:bg-indigo-200 lg:dark:bg-indigo-700' : ''
+                  }`}
+                  onClick={() => setIsOpen(!isOpen)}
+                >
+                  <Pin className={'h-4 w-4 flex-shrink-0 hidden lg:block'} />
+                  <Times className={'h-4 w-4 flex-shrink-0 block lg:hidden'} />
+                </button>
+              ) : (
+                <button
+                  className={`${navItemClassName} ${
+                    isOpen ? 'lg:bg-indigo-200 lg:dark:bg-indigo-700' : ''
+                  }`}
+                  onClick={() => setIsPeeking(!isPeeking)}
+                >
+                  <Times className={'h-4 w-4 flex-shrink-0'} />
+                </button>
+              )}
             </div>
 
             <div className="pb-3">
@@ -99,22 +139,24 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
             </div>
 
             <div className="py-3">
-              <ProfilesNavItem isOpen={isOpen || isHoverOpen} />
+              <ProfilesNavItem isOpen={isOpen || isHoverOpen || isPeeking} />
             </div>
 
             <div className="py-3">
               <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
               <NavItem icon={Article} label={'Articles'} to="/owner/feed/articles" />
-              {isLow ? null : <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />}
+              {isTightHeight ? null : (
+                <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
+              )}
               <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" />
             </div>
 
             <div className={`py-3`}>
               <NavItem icon={AddressBook} label={'Connections'} to={'/owner/connections'} />
-              {isLow ? null : (
+              {isTightHeight ? null : (
                 <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
               )}
-              {isLow ? null : (
+              {isTightHeight ? null : (
                 <NavItem
                   icon={Grid}
                   label={'Third party apps & services'}
@@ -124,8 +166,8 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
               <NavItem icon={Circles} label={'Circles'} to={'/owner/circles'} />
             </div>
 
-            <MoreItems isOpen={isOpen || isHoverOpen} logout={logout}>
-              {isLow ? (
+            <MoreItems isOpen={isOpen || isHoverOpen || isPeeking} logout={logout}>
+              {isTightHeight ? (
                 <>
                   <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
                   <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
@@ -138,15 +180,27 @@ export const Sidenav = ({ logout }: { logout: () => void }) => {
               ) : null}
             </MoreItems>
 
-            <div>
-              <p className={`${navItemClassName} opacity-40`}>
-                <span className={`text-center text-2xl`}>©</span>{' '}
-                <span className={`my-auto ml-3 ${!isOpen && 'hidden'}`}>
-                  2023 | v.
-                  {getVersion()}
-                </span>
-              </p>
-            </div>
+            {(canPin && isPinned) || isDesktop || isOpen ? (
+              <div>
+                <p className={`${navItemClassName} opacity-40`}>
+                  <span className={`text-center text-2xl`}>©</span>{' '}
+                  <span className={`my-auto ml-3 ${!(isOpen || isHoverOpen) && 'hidden'}`}>
+                    2023 | v.
+                    {getVersion()}
+                  </span>
+                </p>
+              </div>
+            ) : (
+              <button
+                className={`${navItemClassName} hidden lg:block xl:hidden`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsPeeking(!isPeeking);
+                }}
+              >
+                <Bars className={iconClassName} />
+              </button>
+            )}
           </div>
         </div>
       </aside>
@@ -160,7 +214,7 @@ const MoreItems = ({
   children,
 }: {
   isOpen: boolean;
-  logout: () => void;
+  logout?: () => void;
   children?: ReactNode;
 }) => {
   const wrapperRef = useRef(null);
@@ -196,10 +250,12 @@ const MoreItems = ({
         }`}
         onClick={() => setIsOpen(false)}
       >
-        <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
-          <Person className={`${iconClassName}`} />
-          <span className={`my-auto ml-3`}>Log out</span>
-        </button>
+        {logout ? (
+          <button onClick={() => logout()} className={`w-full ${navItemClassName}`}>
+            <Person className={`${iconClassName}`} />
+            <span className={`my-auto ml-3`}>Log out</span>
+          </button>
+        ) : null}
         <NavItem icon={Cog} label={'Settings'} to={'/owner/settings'} />
         <NavItem icon={Scissors} label={'Demo Data'} to={'/owner/demo-data'} />
         <hr className="border-b dark:border-slate-500" />
@@ -299,13 +355,11 @@ const ProfilesNavItem = ({ isOpen: isNavOpen }: { isOpen: boolean }) => {
   const { data: profiles, isFetching } = useProfiles().fetchProfiles;
 
   useEffect(() => {
-    if (!isNavOpen && isOpen) {
-      setIsOpen(false);
-    }
+    if (!isNavOpen && isOpen) setIsOpen(false);
   }, [isNavOpen]);
 
   // If no extra profiles we just show the defaults at the first level
-  if (isFetching || profiles?.length == 2) {
+  if (isFetching || !profiles || profiles.length <= 2) {
     const standardProfile = profiles?.find(
       (profile) => profile.profileId === BuiltInProfiles.StandardProfileId
     );

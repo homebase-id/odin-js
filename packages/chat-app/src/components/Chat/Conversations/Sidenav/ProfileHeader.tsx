@@ -1,22 +1,14 @@
 import {
   ActionButton,
-  ActionGroup,
   ActionLink,
-  ChevronDown,
-  House,
-  Moon,
-  Person,
   Plus,
-  Sun,
   Times,
   t,
-  useDarkMode,
   useDotYouClient,
   useSiteData,
 } from '@youfoundation/common-app';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-import { useAuth } from '../../../../hooks/auth/useAuth';
 import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
 
 export const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | undefined }) => {
@@ -24,12 +16,9 @@ export const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | u
   const { getIdentity, getDotYouClient } = useDotYouClient();
   const dotYouClient = getDotYouClient();
   const odinId = getIdentity() || undefined;
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
-
-  const { logout } = useAuth();
 
   return (
-    <div className="flex flex-row items-center gap-2 p-5">
+    <div className="flex flex-row items-center gap-2 p-2 pl-14 lg:p-5">
       <OdinImage
         dotYouClient={dotYouClient}
         targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
@@ -41,34 +30,16 @@ export const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | u
         fit="cover"
         odinId={odinId}
       />
-      <ActionGroup
+      {/* <ActionGroup
         type="mute"
         options={[
-          {
-            label: 'Open your owner profile',
-            href: '/owner',
-            icon: House,
-          },
           {
             label: 'Logout',
             onClick: () => logout(),
             icon: Person,
           },
-          isDarkMode
-            ? {
-                label: 'Light mode',
-                icon: Sun,
-                onClick: toggleDarkMode,
-              }
-            : {
-                label: 'Dark mode',
-                icon: Moon,
-                onClick: () => toggleDarkMode(),
-              },
         ]}
-      >
-        <ChevronDown className="h-4 w-4" />
-      </ActionGroup>
+      ><ChevronDown className="h-4 w-4" /></ActionGroup> */}
       <div className="ml-auto flex flex-row items-center gap-2">
         <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary">
           {t('New')}
