@@ -60,7 +60,7 @@ export const useChatTransitProcessor = (isEnabled = true) => {
         command: 'processInbox',
         data: JSON.stringify({
           targetDrive: notification.externalFileIdentifier.targetDrive,
-          batchSize: 1,
+          batchSize: 100,
         }),
       });
     }

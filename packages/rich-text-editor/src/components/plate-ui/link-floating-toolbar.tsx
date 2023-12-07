@@ -17,16 +17,16 @@ import { inputVariants } from './input';
 import { popoverVariants } from './popover';
 import { Separator } from './separator';
 
-const floatingOptions: UseVirtualFloatingOptions = {
-  placement: 'bottom-start',
-  middleware: [
-    offset(12),
-    flip({
-      padding: 12,
-      fallbackPlacements: ['bottom-end', 'top-start', 'top-end'],
-    }),
-  ],
-};
+// const floatingOptions: UseVirtualFloatingOptions = {
+//   placement: 'bottom-start',
+//   middleware: [
+//     offset(12),
+//     flip({
+//       padding: 12,
+//       fallbackPlacements: ['bottom-end', 'top-start', 'top-end'],
+//     }),
+//   ],
+// };
 
 export interface LinkFloatingToolbarProps {
   state?: LinkFloatingToolbarState;
@@ -36,7 +36,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const insertState = useFloatingLinkInsertState({
     ...state,
     floatingOptions: {
-      ...floatingOptions,
+      // ...floatingOptions,
       ...state?.floatingOptions,
     },
   });
@@ -50,7 +50,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const editState = useFloatingLinkEditState({
     ...state,
     floatingOptions: {
-      ...floatingOptions,
+      // ...floatingOptions,
       ...state?.floatingOptions,
     },
   });
@@ -66,7 +66,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
   const input = (
     <div className="flex w-[330px] flex-col">
       <div className="flex items-center">
-        <div className="text-muted-foreground flex items-center pl-3">
+        <div className="flex items-center pl-3 text-muted-foreground">
           <Icons.link className="h-4 w-4" />
         </div>
 
@@ -79,7 +79,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
       <Separator />
 
       <div className="flex items-center">
-        <div className="text-muted-foreground flex items-center pl-3">
+        <div className="flex items-center pl-3 text-muted-foreground">
           <Icons.text className="h-4 w-4" />
         </div>
         <input

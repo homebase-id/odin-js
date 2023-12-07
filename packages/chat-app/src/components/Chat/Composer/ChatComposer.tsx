@@ -8,6 +8,7 @@ import {
   ActionButton,
   t,
   Times,
+  PaperPlane,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { NewMediaFile } from '@youfoundation/js-lib/dist';
@@ -87,7 +88,7 @@ export const ChatComposer = ({
           <FileOverview files={files} setFiles={setFiles} cols={8} />
         </div>
         {replyMsg ? <MessageForReply msg={replyMsg} onClear={clearReplyMsg} /> : null}
-        <div className="flex flex-shrink-0 flex-row gap-2 px-5 py-3">
+        <div className="flex flex-shrink-0 flex-row gap-2 px-2 py-3 md:px-5">
           <div className="my-auto flex flex-row items-center gap-1">
             <EmojiSelector
               size="none"
@@ -107,21 +108,23 @@ export const ChatComposer = ({
             placeholder="Your message"
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
-            onChange={setMessage}
+            onChange={(val) => setMessage(val.trim())}
             autoFocus={true}
             onSubmit={(val) => {
-              setMessage(val);
+              setMessage(val.trim());
               doSend();
             }}
           />
-          <ActionButton
-            type="secondary"
-            onClick={doSend}
-            state={sendMessageState}
-            className="mt-auto"
-          >
-            {t('Send')}
-          </ActionButton>
+          <span className="my-auto hidden sm:block">
+            <ActionButton
+              type="mute"
+              onClick={doSend}
+              state={sendMessageState}
+              className="flex-shrink"
+              icon={PaperPlane}
+              size="square"
+            />
+          </span>
         </div>
       </div>
     </>

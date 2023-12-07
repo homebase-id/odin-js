@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActionButtonState, t } from '@youfoundation/common-app';
 
 import { Alert } from '@youfoundation/common-app';
-import { format } from '../../helpers/timeago';
+import { formatToTimeAgo } from '../../helpers/timeago';
 
 export const SaveStatus = ({
   className,
@@ -50,7 +50,7 @@ export const SaveStatus = ({
 
   return (
     <p className={`${className} text-sm text-slate-400`}>
-      {t('Last saved')} {format(lastSave)}
+      {t('Last saved')} {formatToTimeAgo(lastSave)}
     </p>
   );
 };

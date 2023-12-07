@@ -12,6 +12,7 @@ import {
   TElement,
   createDeserializeHtmlPlugin,
   PlateContent,
+  TDescendant,
 } from '@udecode/plate-common';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
 import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
@@ -199,7 +200,7 @@ export const RichTextEditor = ({
       ? ([
           {
             type: 'paragraph',
-            children: [{ text: defaultValue ?? '' }] as Record<string, unknown>[],
+            children: [{ text: defaultValue ?? '' }] as TDescendant[],
           },
         ] as TElement[])
       : undefined;
@@ -231,7 +232,7 @@ export const RichTextEditor = ({
           plugins={plugins}
           onChange={(newValue) => {
             const isActualChange = innerEditor?.operations.some(
-              (op) => 'set_selection' !== op.type
+              (op: any) => 'set_selection' !== op.type
             );
 
             if (isActualChange) onChange({ target: { name: name, value: newValue } });

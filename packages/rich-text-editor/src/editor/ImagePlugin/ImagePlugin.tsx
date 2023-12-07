@@ -103,7 +103,6 @@ export const ImageElementBlock = <V extends Value = Value>(
 
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
       setTimeout(() => {
-        console.log('removing node', element.fileId, element.fileKey);
         removeNodes(editor, { at: path });
       }, 1000);
     }

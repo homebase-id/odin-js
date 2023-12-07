@@ -11,16 +11,9 @@ import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { usePushNotificationClients } from '../../../hooks/notifications/usePushNotifications';
-import { PushNotificationSubscription } from '../../../provider/notifications/PushProvider';
+import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
 
-const PushNotificationsDialog = ({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-
-  onClose: () => void;
-}) => {
+const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const target = usePortal('modal-container');
   const { data: devices } = usePushNotificationClients().fetch;
   const {
@@ -33,13 +26,19 @@ const PushNotificationsDialog = ({
 
   if (!isOpen) return null;
   const dialog = (
-    <DialogWrapper title={t('Push Notifications')} onClose={onClose}>
+    <DialogWrapper title={t('Notification Settings')} onClose={onClose}>
       <ErrorNotification error={removeAllDevicesError} />
+      <p className="mb-5 text-xl">
+        {t('Registered devices:')}
+        <small className="block text-sm text-foreground/80">
+          {t('These devices will device specfici notification when they come in')}
+        </small>
+      </p>
       {!devices?.length ? (
         <SubtleMessage>{t('No devices registered')}</SubtleMessage>
       ) : (
         <>
-          <div className="grid grid-flow-col gap-4">
+          <div className="grid grid-flow-row gap-4">
             {devices?.map((device) => (
               <DeviceView subscription={device} key={device.accessRegistrationId} />
             ))}
@@ -86,7 +85,7 @@ const DeviceView = ({
         <div className="mr-2 flex flex-col">
           {subscription.friendlyName}
           <small className="block text-sm">
-            {t('Created')}: {new Date(subscription.subscriptionStartedDate).toLocaleDateString()}
+            {t('Since')}: {new Date(subscription.subscriptionStartedDate).toLocaleDateString()}
           </small>
         </div>
         {currentDevice?.accessRegistrationId === subscription.accessRegistrationId ? (

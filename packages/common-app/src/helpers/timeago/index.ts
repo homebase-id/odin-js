@@ -1,1 +1,1 @@
-export { format } from './format';
+export { formatToTimeAgo } from './format';

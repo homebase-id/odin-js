@@ -379,14 +379,15 @@ const WalletLink = () => {
 };
 
 const NotificationBell = () => {
-  const { hasUnread } = useNotifications();
+  // TODO: re-enable when notifications are better supported on the other api's
+  // const { hasUnread } = useNotifications();
 
   return (
     <NavItem
       label={t('Notifications')}
       to={'/owner/notifications'}
       icon={Bell}
-      unread={hasUnread}
+      // unread={hasUnread}
     />
   );
 };

@@ -57,7 +57,7 @@ export const FileOverview = ({
 
       if (currFile.file.type === 'video/mp4') {
         return (
-          <div key={currFile.file.name} className="relative">
+          <div key={(currFile.file as File).name} className="relative">
             <video
               src={url}
               onLoadedMetadata={(e) => (e.currentTarget.currentTime = 1)}
@@ -74,7 +74,11 @@ export const FileOverview = ({
               type="remove"
               size="square"
               onClick={() =>
-                setFiles([...files.filter((file) => file.file.name !== currFile.file.name)])
+                setFiles([
+                  ...files.filter(
+                    (file) => (file.file as File).name !== (currFile.file as File).name
+                  ),
+                ])
               }
             />
           </div>
@@ -94,7 +98,11 @@ export const FileOverview = ({
             type="remove"
             size="square"
             onClick={() =>
-              setFiles([...files.filter((file) => file.file.name !== currFile.file.name)])
+              setFiles([
+                ...files.filter(
+                  (file) => (file.file as File).name !== (currFile.file as File).name
+                ),
+              ])
             }
           />
         </div>

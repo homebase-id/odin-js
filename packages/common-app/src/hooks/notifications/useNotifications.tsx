@@ -4,12 +4,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 
-import {
-  DomainHighlighter,
-  t,
-  useNotificationSubscriber,
-  usePendingConnections,
-} from '@youfoundation/common-app';
+import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface Notification {
@@ -22,7 +17,7 @@ interface Notification {
 }
 
 export const useNotifications = () => {
-  const { data: pending } = usePendingConnections({ pageSize: 5, pageNumber: 1 }).fetch;
+  // const { data: pending } = usePendingConnections({ pageSize: 5, pageNumber: 1 }).fetch;
   const [liveNotifications, setLiveNotifications] = useState<Notification[]>([]);
   const queryClient = useQueryClient();
 
@@ -82,26 +77,26 @@ export const useNotifications = () => {
     'unknown',
   ]);
 
-  const notifications = pending?.results.map((connection) => {
-    return {
-      key: `incoming-${connection.senderOdinId}`,
-      title: t('Incoming connection request'),
-      body: (
-        <>
-          {`${t('You have a new connection request from')}`}{' '}
-          <DomainHighlighter>{connection.senderOdinId}</DomainHighlighter>
-        </>
-      ),
-      imgSrc: `https://${connection.senderOdinId}/pub/image`,
-      href: `/owner/connections/${connection.senderOdinId}`,
-      type: 'pending',
-    };
-  });
+  // const notifications = pending?.results.map((connection) => {
+  //   return {
+  //     key: `incoming-${connection.senderOdinId}`,
+  //     title: t('Incoming connection request'),
+  //     body: (
+  //       <>
+  //         {`${t('You have a new connection request from')}`}{' '}
+  //         <DomainHighlighter>{connection.senderOdinId}</DomainHighlighter>
+  //       </>
+  //     ),
+  //     imgSrc: `https://${connection.senderOdinId}/pub/image`,
+  //     href: `/owner/connections/${connection.senderOdinId}`,
+  //     type: 'pending',
+  //   };
+  // });
 
   return {
-    notifications,
+    // notifications,
     liveNotifications,
-    hasUnread: notifications?.length ? notifications.length > 0 : false,
+    // hasUnread: notifications?.length ? notifications.length > 0 : false,
     dismiss,
   };
 };
