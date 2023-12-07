@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 
 import {
   ChatBubble,
-  Chevron,
   Cloud,
   HOME_ROOT_PATH,
   House,
