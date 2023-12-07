@@ -7,6 +7,8 @@ import {
   ConnectionImage,
   ConnectionName,
   ErrorNotification,
+  OwnerImage,
+  OwnerName,
   Persons,
   t,
   useDotYouClient,
@@ -15,6 +17,7 @@ import {
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   Conversation,
+  ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
@@ -46,7 +49,8 @@ export const ChatDetail = ({
     );
 
   const onSend = async () => {
-    if (isEmptyChat && conversation) inviteRecipient({ conversation });
+    if (isEmptyChat && conversation && conversationId !== ConversationWithYourselfId)
+      inviteRecipient({ conversation });
   };
 
   return (
@@ -76,6 +80,8 @@ const ChatHeader = ({
   conversation: DriveSearchResult<Conversation> | undefined;
   toggleSidenav: () => void;
 }) => {
+  const withYourself =
+    conversationDsr?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   const conversation = conversationDsr?.fileMetadata.appData.content;
   const recipient = (conversation as SingleConversation)?.recipient;
   const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
@@ -97,13 +103,24 @@ const ChatHeader = ({
             className="border border-neutral-200 dark:border-neutral-800"
             size="sm"
           />
+        ) : withYourself ? (
+          <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
         ) : (
           <div className="rounded-full bg-primary/20 p-3">
             <Persons className="h-6 w-6" />
           </div>
         )}
-        {recipient ? <ConnectionName odinId={recipient} /> : conversation?.title}
-        {conversationDsr ? (
+        {recipient ? (
+          <ConnectionName odinId={recipient} />
+        ) : withYourself ? (
+          <>
+            <OwnerName />
+            <span className="text-sm text-foreground/50">({t('you')})</span>
+          </>
+        ) : (
+          conversation?.title
+        )}
+        {conversationDsr && !withYourself ? (
           <ActionGroup
             options={[
               {

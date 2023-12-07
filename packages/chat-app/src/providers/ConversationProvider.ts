@@ -34,9 +34,7 @@ export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
       uniqueId: ConversationWithYourselfId,
       fileType: ConversationFileType,
       dataType: 0,
-      content: {
-        title: 'Chat with yourself',
-      },
+      content: {},
     },
     versionTag: '',
     payloads: [],
@@ -51,15 +49,9 @@ export const ChatDrive: TargetDrive = {
 };
 
 interface BaseConversation {
-  // conversationId: string;
   title: string;
   // imgId?: string;
   lastReadTime?: number;
-
-  // unread: boolean;
-  // unreadCount: number;
-  // messageType: MessageType;
-  // message: ChatMessage;
 }
 
 export interface SingleConversation extends BaseConversation {

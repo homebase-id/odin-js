@@ -4,6 +4,8 @@ import {
   ConnectionName,
   ellipsisAtMaxChar,
   t,
+  OwnerImage,
+  OwnerName,
 } from '@youfoundation/common-app';
 import { ReactNode, useMemo } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
@@ -13,6 +15,7 @@ import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { useConversation } from '../../../../hooks/chat/useConversation';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
 
 const ListItemWrapper = ({
   onClick,
@@ -76,6 +79,32 @@ export const SingleConversationItem = ({
       <ConversationBody
         title={<ConnectionName odinId={odinId} />}
         conversationId={conversationId}
+      />
+    </ListItemWrapper>
+  );
+};
+
+export const ConversationWithYourselfItem = ({
+  onClick,
+  isActive,
+}: {
+  onClick: () => void;
+  isActive: boolean;
+}) => {
+  return (
+    <ListItemWrapper isActive={isActive} onClick={onClick}>
+      <OwnerImage
+        className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
+        size="sm"
+      />
+      <ConversationBody
+        title={
+          <>
+            <OwnerName />
+            <span className="ml-3 text-sm text-foreground/50">({t('you')})</span>
+          </>
+        }
+        conversationId={ConversationWithYourselfId}
       />
     </ListItemWrapper>
   );

@@ -18,7 +18,6 @@ import { useConversations } from '../../../../hooks/chat/useConversations';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   Conversation,
-  ConversationWithYourself,
   ConversationWithYourselfId,
   GroupConversation,
   SingleConversation,
@@ -28,6 +27,7 @@ import {
   GroupConversationItem,
   SingleConversationItem,
   ConversationListItemWrapper,
+  ConversationWithYourselfItem,
 } from '../Item/ConversationItem';
 import { NewConversationSearchItem } from '../Item/NewConversationSearchItem';
 
@@ -48,24 +48,23 @@ export const ConversationsSidebar = ({
 
   return (
     <div className="flex flex-grow flex-col ">
+      <SearchConversation
+        setIsSearchActive={setIsSearchActive}
+        isSearchActive={isSearchActive}
+        openConversation={(id) => {
+          setIsSearchActive(false);
+          openConversation(id);
+        }}
+        conversations={flatConversations}
+        activeConversationId={activeConversationId}
+      />
       {!isSearchActive ? (
         <ConversationList
           openConversation={(id) => openConversation(id)}
           conversations={flatConversations}
           activeConversationId={activeConversationId}
         />
-      ) : (
-        <SearchConversation
-          setIsSearchActive={setIsSearchActive}
-          isSearchActive={isSearchActive}
-          openConversation={(id) => {
-            setIsSearchActive(false);
-            openConversation(id);
-          }}
-          conversations={flatConversations}
-          activeConversationId={activeConversationId}
-        />
-      )}
+      ) : null}
     </div>
   );
 };
@@ -84,8 +83,7 @@ const ConversationList = ({
       {!conversations?.length ? (
         <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
       ) : null}
-      <ConversationListItem
-        conversation={ConversationWithYourself}
+      <ConversationListItemWithYourself
         onClick={() => openConversation(ConversationWithYourselfId)}
         isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
       />
@@ -102,6 +100,16 @@ const ConversationList = ({
       ))}
     </div>
   );
+};
+
+const ConversationListItemWithYourself = ({
+  onClick,
+  isActive,
+}: {
+  onClick: () => void;
+  isActive: boolean;
+}) => {
+  return <ConversationWithYourselfItem onClick={onClick} isActive={isActive} />;
 };
 
 const ConversationListItem = ({

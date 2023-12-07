@@ -27,9 +27,8 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   // Already get the conversations in the cache, so we can use that on `getExistingConversationsForRecipient`
   useConversations().all;
 
-  const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
-    return await getConversation(dotYouClient, conversationId);
-  };
+  const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) =>
+    await getConversation(dotYouClient, conversationId);
 
   const getExistingConversationsForRecipient = async (
     recipients: string[]
