@@ -99,7 +99,8 @@ const ChatTextMessageBody = ({
   isDeleted: boolean;
 }) => {
   const content = msg.fileMetadata.appData.content;
-  const isEmojiOnly = content.message.match(/^\p{Extended_Pictographic}/u);
+  const isEmojiOnly =
+    content.message.match(/^\p{Extended_Pictographic}/u) && !content.message.match(/[0-9a-zA-Z]/);
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
