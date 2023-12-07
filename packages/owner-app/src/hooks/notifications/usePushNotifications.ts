@@ -57,6 +57,12 @@ export const usePushNotifications = () => {
   };
 };
 
+export const useUnreadPushNotificationsCount = () => {
+  const { data: notifications } = usePushNotifications().fetch;
+
+  return notifications?.results.filter((n) => n.unread).length ?? 0;
+};
+
 export const usePushNotificationClient = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
