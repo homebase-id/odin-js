@@ -54,9 +54,9 @@ export const ChatComposer = ({
       message: message || '',
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
-      recipients: (conversationContent as GroupConversation).recipients || [
-        (conversationContent as SingleConversation).recipient,
-      ],
+      recipients:
+        (conversationContent as GroupConversation).recipients ||
+        [(conversationContent as SingleConversation).recipient].filter(Boolean),
     });
     onSend && onSend();
   };

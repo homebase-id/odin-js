@@ -19,10 +19,12 @@ export const useNotificationSubscriber = (
   const isConnected = useRef<boolean>(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const localHandler = (notification: TypedConnectionNotification) => {
-    if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
-    subscriber && subscriber(notification);
-  };
+  const localHandler = subscriber
+    ? (notification: TypedConnectionNotification) => {
+        if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
+        subscriber && subscriber(notification);
+      }
+    : undefined;
 
   useEffect(() => {
     if (
@@ -31,13 +33,13 @@ export const useNotificationSubscriber = (
     )
       return;
 
-    if (!isConnected.current) {
+    if (!isConnected.current && localHandler) {
       isConnected.current = true;
       Subscribe(dotYouClient, drives, localHandler);
     }
 
     return () => {
-      if (isConnected.current) {
+      if (isConnected.current && localHandler) {
         isConnected.current = false;
         try {
           Disconnect(localHandler);

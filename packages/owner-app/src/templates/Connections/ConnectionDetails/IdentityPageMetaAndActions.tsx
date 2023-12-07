@@ -158,7 +158,7 @@ export const IdentityPageMetaAndActions = ({
         title={
           <>
             <span className="flex flex-col">
-              <span className="block">
+              <span className="block leading-tight">
                 {`${
                   contactData?.name
                     ? contactData.name.displayName ??
@@ -166,7 +166,9 @@ export const IdentityPageMetaAndActions = ({
                     : odinId
                 }`}
               </span>
-              <small className="block text-sm">{`(${connectionInfo?.status || 'none'})`}</small>
+              <small className="block text-sm leading-none">{`(${
+                connectionInfo?.status || 'none'
+              })`}</small>
             </span>
           </>
         }

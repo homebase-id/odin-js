@@ -89,7 +89,7 @@ const YouAuthConsent = () => {
         <title>{t('Login')} | Homebase</title>
       </Helmet>
       <MinimalLayout noShadedBg={true}>
-        <section className="py-20">
+        <section className="flex min-h-screen flex-col justify-center md:min-h-0 md:py-20">
           <div className="container mx-auto p-5">
             <div className="max-w-[35rem] dark:text-white">
               {clientType === 'app' ? (
@@ -123,7 +123,7 @@ const YouAuthConsent = () => {
                 </div>
               ) : null}
 
-              <div className="mt-10 flex flex-row-reverse gap-2">
+              <div className="mt-8 flex flex-row-reverse gap-2">
                 {/* TODO: Check if this would be better with a normal XHR request... Having a form is pretty uncommon, and doesn't add anything in terms of security */}
                 <form action="/api/owner/v1/youauth/authorize" method="post" className="contents">
                   <input type="hidden" name="return_url" value={returnUrl} />
@@ -161,7 +161,7 @@ const ServiceDetails = ({ targetDomain }: { targetDomain: string }) => {
           fallbackSize="md"
         />
 
-        <h1 className="text-4xl ">
+        <h1 className="text-3xl md:text-4xl ">
           {t('Login to')} &quot;<DomainHighlighter>{targetDomain}</DomainHighlighter>
           &quot;
           <small className="block text-sm dark:text-white dark:text-opacity-80">
@@ -213,7 +213,7 @@ const AppDetails = ({
           fallbackSize="md"
         />
 
-        <h1 className="text-4xl ">
+        <h1 className="text-3xl md:text-4xl ">
           {t('Login to')}{' '}
           {!appRegistration ? (
             <>

@@ -24,7 +24,11 @@ const Layout: FC<LayoutProps> = ({ children }) => {
   return (
     <NoLayout>
       <ScrollRestoration />
-      <div className="relative flex flex-row bg-page-background text-foreground">
+      <div
+        className={`relative flex flex-row bg-page-background text-foreground ${
+          isOwner ? 'pb-14 md:pb-0' : ''
+        }`}
+      >
         {isOwner ? (
           <Suspense fallback={<></>}>
             <Sidenav logout={logout} />

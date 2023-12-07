@@ -160,19 +160,18 @@ const RadioOption = ({
   defaultChecked: boolean;
 }) => {
   return (
-    <div className="mb-5 flex flex-row">
-      <Label htmlFor={id} className="my-auto mr-2 flex flex-col">
-        {label}
-        <small className="text-sm text-gray-400">{description}</small>
-      </Label>
-
+    <div className="mb-5 flex flex-row gap-4">
       <RadioButton
-        className="ml-auto"
         name={name}
         id={id}
         defaultChecked={defaultChecked}
         onClick={onClick}
+        className="mt-2"
       />
+      <Label htmlFor={id} className="my-auto mr-2 flex flex-col">
+        {label}
+        <small className="text-sm text-gray-400">{description}</small>
+      </Label>
     </div>
   );
 };

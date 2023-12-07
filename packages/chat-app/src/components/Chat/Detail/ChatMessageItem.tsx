@@ -99,7 +99,8 @@ const ChatTextMessageBody = ({
   isDeleted: boolean;
 }) => {
   const content = msg.fileMetadata.appData.content;
-  const isEmojiOnly = content.message.match(/^\p{Extended_Pictographic}/u);
+  const isEmojiOnly =
+    content.message.match(/^\p{Extended_Pictographic}/u) && !content.message.match(/[0-9a-zA-Z]/);
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
@@ -118,7 +119,7 @@ const ChatTextMessageBody = ({
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
-      <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
+      <div className="flex flex-col md:flex-row md:flex-wrap md:gap-2">
         {isDeleted ? (
           <MessageDeletedInnerBody />
         ) : (

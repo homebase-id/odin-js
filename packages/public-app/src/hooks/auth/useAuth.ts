@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useVerifyToken } from './useVerifyToken';
 import { getEccPublicKey, logout as logoutYouauth } from '../../provider/AuthenticationProvider';
 import { HOME_ROOT_PATH, logoutOwner } from '@youfoundation/common-app';
