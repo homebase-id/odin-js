@@ -61,7 +61,11 @@ export const ConversationsSidebar = ({
       {!isSearchActive ? (
         <ConversationList
           openConversation={(id) => openConversation(id)}
-          conversations={flatConversations}
+          conversations={flatConversations.filter(
+            (chat) =>
+              chat.fileMetadata.appData.archivalStatus !== 2 ||
+              chat.fileMetadata.appData.uniqueId === activeConversationId
+          )}
           activeConversationId={activeConversationId}
         />
       ) : null}

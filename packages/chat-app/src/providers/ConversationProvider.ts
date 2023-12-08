@@ -195,6 +195,7 @@ export const updateConversation = async (
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
     appData: {
+      archivalStatus: conversation.fileMetadata.appData.archivalStatus,
       uniqueId: conversation.fileMetadata.appData.uniqueId,
       fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
       content: payloadJson,
