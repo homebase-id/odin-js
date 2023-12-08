@@ -52,6 +52,7 @@ export const Toast = ({
   title,
   body,
   timestamp,
+  groupCount,
   imgSrc,
   onDismiss,
   href,
@@ -60,6 +61,7 @@ export const Toast = ({
   title: string;
   body?: string | ReactNode;
   timestamp?: number;
+  groupCount?: number;
   imgSrc?: string;
   onDismiss?: () => void;
   href?: string;
@@ -115,6 +117,11 @@ export const Toast = ({
         {timestamp ? (
           <p className="text-foreground/80">
             {formatToTimeAgoWithRelativeDetail(new Date(timestamp))}
+          </p>
+        ) : null}
+        {groupCount ? (
+          <p className="text-primary">
+            {groupCount} {t('more')}
           </p>
         ) : null}
       </div>

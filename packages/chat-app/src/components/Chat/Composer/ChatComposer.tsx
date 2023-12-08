@@ -46,7 +46,11 @@ export const ChatComposer = ({
 
   const conversationContent = conversation?.fileMetadata.appData.content;
   const doSend = () => {
-    if ((!message && !files) || !conversationContent || !conversation.fileMetadata.appData.uniqueId)
+    if (
+      (!message?.trim() && !files) ||
+      !conversationContent ||
+      !conversation.fileMetadata.appData.uniqueId
+    )
       return;
 
     sendMessage({

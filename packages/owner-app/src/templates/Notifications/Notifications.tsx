@@ -88,6 +88,17 @@ const Notifications = () => {
     return () => navigator.serviceWorker.removeEventListener('message', handleEvent);
   }, []);
 
+  const groupedNotifications =
+    notifications?.results.reduce(
+      (acc, notification) => {
+        if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
+        else acc[notification.options.appId] = [notification];
+
+        return acc;
+      },
+      {} as { [key: string]: PushNotification[] }
+    ) || {};
+
   return (
     <>
       <PageMeta
@@ -111,8 +122,12 @@ const Notifications = () => {
       <ErrorNotification error={enableError} />
       {notifications?.results?.length ? (
         <div className="flex flex-col gap-3 px-2">
-          {notifications?.results.map((notification, index) => (
-            <NotificationItem notification={notification} key={index} />
+          {Object.keys(groupedNotifications).map((appId) => (
+            <NotificationGroup
+              appId={appId}
+              notifications={groupedNotifications[appId]}
+              key={appId}
+            />
           ))}
         </div>
       ) : (
@@ -123,22 +138,74 @@ const Notifications = () => {
   );
 };
 
-const NotificationItem = ({ notification }: { notification: PushNotification }) => {
-  // const { mutate: markAsRead } = usePushNotifications().markAsRead;
+const NotificationGroup = ({
+  appId,
+  notifications,
+}: {
+  appId: string;
+  notifications: PushNotification[];
+}) => {
+  const { data: app } = useApp({ appId: appId }).fetch;
+  const appName = app?.name ?? (stringGuidsEqual(appId, OWNER_APP_ID) ? 'Homebase' : 'Unknown');
+
   const { mutate: remove } = usePushNotifications().remove;
-  const { data: app } = useApp({ appId: notification.options.appId }).fetch;
-  const appName =
-    app?.name ??
-    (stringGuidsEqual(notification.options.appId, OWNER_APP_ID) ? 'Homebase' : 'Unknown');
+
+  const groupedByTypeNotifications =
+    notifications.reduce(
+      (acc, notification) => {
+        if (acc[notification.options.typeId]) acc[notification.options.typeId].push(notification);
+        else acc[notification.options.typeId] = [notification];
+
+        return acc;
+      },
+      {} as { [key: string]: PushNotification[] }
+    ) || {};
 
   return (
-    <Toast
-      title={titleFormer(appName)}
-      body={bodyFormer(notification, false, appName)}
-      timestamp={notification.created}
-      onDismiss={() => remove([notification.id])}
-      href={getTargetLink(notification)}
-    />
+    <>
+      {Object.keys(groupedByTypeNotifications).map((typeId) => {
+        const typeGroup = groupedByTypeNotifications[typeId];
+        const groupCount = typeGroup.length - 1;
+        const sliced = typeGroup.slice(0, 3);
+
+        return (
+          <div
+            key={typeId}
+            className="relative"
+            style={{
+              paddingBottom: `${sliced.length * 0.5}rem`,
+            }}
+          >
+            {sliced.map((notification, index) => (
+              <div
+                key={notification.id}
+                className={index === 0 ? 'relative z-10' : 'absolute w-full'}
+                style={
+                  index === 0
+                    ? undefined
+                    : {
+                        top: `${index * 0.5}rem`,
+                        bottom: `${index * -0.5}rem`,
+                        left: `${index * 0.25}rem`,
+                        zIndex: 5 - index,
+                        opacity: 1 - 0.3 * index,
+                      }
+                }
+              >
+                <Toast
+                  title={titleFormer(appName)}
+                  body={bodyFormer(notification, false, appName)}
+                  timestamp={notification.created}
+                  onDismiss={() => remove(typeGroup.map((n) => n.id))}
+                  href={getTargetLink(notification)}
+                  groupCount={groupCount}
+                />
+              </div>
+            ))}
+          </div>
+        );
+      })}
+    </>
   );
 };
 
