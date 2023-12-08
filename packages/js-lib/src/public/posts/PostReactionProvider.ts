@@ -183,14 +183,7 @@ export const removeComment = async (
   if (isLocal) {
     if (!commentFile.fileId) return;
 
-    return await deleteFile(
-      dotYouClient,
-      targetDrive,
-      commentFile.fileId,
-      false,
-      undefined,
-      'Comment'
-    );
+    return await deleteFile(dotYouClient, targetDrive, commentFile.fileId, undefined, 'Comment');
   } else {
     if (!commentFile.globalTransitId) return;
 

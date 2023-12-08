@@ -17,6 +17,7 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   createThumbnails,
+  deleteFilesByGroupId,
   deletePayload,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
@@ -111,6 +112,10 @@ export const getChatMessages = async (
       )
     ),
   };
+};
+
+export const deleteAllChatMessages = async (dotYouClient: DotYouClient, conversationId: string) => {
+  return await deleteFilesByGroupId(dotYouClient, ChatDrive, [conversationId]);
 };
 
 export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: string) => {

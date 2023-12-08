@@ -17,6 +17,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
+import { deleteAllChatMessages } from '../../providers/ChatProvider';
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
@@ -125,7 +126,10 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   };
 
   const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
-    // TODO: Clear the chat; Waiting on BE implementation of clear all files by groupId
+    return await deleteAllChatMessages(
+      dotYouClient,
+      conversation.fileMetadata.appData.uniqueId as string
+    );
   };
 
   const deleteChat = async ({
@@ -133,7 +137,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }: {
     conversation: DriveSearchResult<Conversation>;
   }) => {
-    // TODO: Clear the chat; Waiting on BE implementation of clear all files by groupId
+    const deletedResult = await deleteAllChatMessages(
+      dotYouClient,
+      conversation.fileMetadata.appData.uniqueId as string
+    );
+    if (!deletedResult) throw new Error('Failed to delete chat messages');
 
     // We soft delete the conversation, so we can still see newly received messages
     const newConversation: DriveSearchResult<Conversation> = {
@@ -187,7 +195,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         queryClient.invalidateQueries({
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        queryClient.invalidateQueries({
+          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+        });
       },
     }),
     deleteChat: useMutation({
@@ -199,7 +209,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         queryClient.invalidateQueries({
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        queryClient.invalidateQueries({
+          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+        });
       },
     }),
   };

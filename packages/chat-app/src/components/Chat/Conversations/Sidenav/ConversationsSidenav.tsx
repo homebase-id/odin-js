@@ -80,13 +80,13 @@ const ConversationList = ({
 }) => {
   return (
     <div className="flex-grow overflow-auto ">
-      {!conversations?.length ? (
-        <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
-      ) : null}
       <ConversationListItemWithYourself
         onClick={() => openConversation(ConversationWithYourselfId)}
         isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
       />
+      {!conversations?.length ? (
+        <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
+      ) : null}
       {conversations?.map((conversation) => (
         <ConversationListItem
           key={conversation.fileId}
