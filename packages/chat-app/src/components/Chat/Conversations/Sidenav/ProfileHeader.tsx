@@ -1,25 +1,11 @@
-import {
-  ActionButton,
-  ActionLink,
-  Plus,
-  Times,
-  t,
-  useDotYouClient,
-  useSiteData,
-} from '@youfoundation/common-app';
-import { OdinImage } from '@youfoundation/ui-lib';
-import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { ActionButton, ActionLink, Plus, Times, t } from '@youfoundation/common-app';
 import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
 
 export const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | undefined }) => {
-  const { data } = useSiteData();
-  const { getIdentity, getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
-  const odinId = getIdentity() || undefined;
-
   return (
     <div className="flex flex-row items-center gap-2 p-2 lg:p-5">
-      <OdinImage
+      <p className="text-2xl dark:text-white">Homebase Chat</p>
+      {/* <OdinImage
         dotYouClient={dotYouClient}
         targetDrive={GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId)}
         fileId={data?.owner.profileImageFileId}
@@ -29,7 +15,7 @@ export const ProfileHeader = ({ closeSideNav }: { closeSideNav: (() => void) | u
         className="aspect-square max-h-[2.5rem] w-full max-w-[2.5rem] rounded-full border border-neutral-200 dark:border-neutral-800"
         fit="cover"
         odinId={odinId}
-      />
+      /> */}
       {/* <ActionGroup
         type="mute"
         options={[
