@@ -51,7 +51,7 @@ export const ChatComposer = ({
 
     sendMessage({
       conversationId: conversation.fileMetadata.appData.uniqueId as string,
-      message: message || '',
+      message: message?.trim() || '',
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
       recipients:
@@ -108,10 +108,10 @@ export const ChatComposer = ({
             placeholder="Your message"
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
-            onChange={(val) => setMessage(val.trim())}
+            onChange={setMessage}
             autoFocus={true}
             onSubmit={(val) => {
-              setMessage(val.trim());
+              setMessage(val);
               doSend();
             }}
           />

@@ -123,7 +123,7 @@ export const VolatileInput = ({
     divRef.current.innerText = defaultValue || '';
 
     restoreCaretPosition(
-      { ...caretPos, absoluteOffset: caretPos.absoluteOffset },
+      caretPos,
       wordTillCaret
         ? -(wordTillCaret.length - (lastInsertedContent?.length || 1))
         : insertingContent?.length
