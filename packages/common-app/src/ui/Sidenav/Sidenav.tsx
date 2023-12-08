@@ -98,8 +98,8 @@ export const Sidenav = ({
           className={`${
             isOpen
               ? 'overflow-y-auto md:overflow-visible'
-              : `xl:hover:sticky xl:hover:w-[20rem] ${isPeeking ? 'sticky w-[20rem]' : ''}`
-          } static top-0 h-full w-full transition-all md:h-auto md:whitespace-nowrap ${sidebarBg}`}
+              : `md:sticky xl:hover:w-[20rem] ${isPeeking ? 'sticky w-[20rem]' : 'w-full'}`
+          } static top-0 h-full transition-all md:h-auto md:whitespace-nowrap ${sidebarBg}`}
         >
           <div className="flex flex-col overflow-auto px-3 pb-5 pt-3 md:min-h-screen">
             <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
@@ -183,7 +183,9 @@ export const Sidenav = ({
               <div>
                 <p className={`${navItemClassName} opacity-40 leading-none`}>
                   <span className={`text-center text-2xl px-[0.18rem]`}>©</span>
-                  <span className={`my-auto ml-3 ${!(canPin && isPinned) && 'hidden'}`}>
+                  <span
+                    className={`my-auto ml-3 max-w-[15rem] ${!(canPin && isPinned) && 'hidden'}`}
+                  >
                     2023 | v.
                     {getVersion()}
                   </span>
