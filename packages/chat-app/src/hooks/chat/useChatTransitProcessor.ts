@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  DriveSearchResult,
   Notify,
   ReceivedCommand,
   TypedConnectionNotification,
@@ -9,6 +10,7 @@ import {
 import { processInbox } from '@youfoundation/js-lib/transit';
 import {
   ChatDrive,
+  Conversation,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
 } from '../../providers/ConversationProvider';
@@ -18,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
 import { processCommand } from './useChatCommandProcessor';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { useConversation } from './useConversation';
 
 const MINUTE_IN_MS = 60000;
 
@@ -46,6 +49,11 @@ export const useChatTransitProcessor = (isEnabled = true) => {
 
   const identity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
+
+  // Added to ensure we have the conversation query available
+  const {
+    restoreChat: { mutate: restoreChat },
+  } = useConversation();
 
   useEffect(() => {
     (async () => {
@@ -78,6 +86,18 @@ export const useChatTransitProcessor = (isEnabled = true) => {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
+
+        // Check if the message is orphaned from a conversation
+        const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>({
+          queryKey: ['conversation', conversationId],
+        });
+
+        if (!conversation) {
+          console.error('Orphaned message received', notification.header.fileId, conversation);
+          // Can't handle this one ATM.. How to resolve?
+        } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
+          restoreChat({ conversation });
+        }
       } else if (
         [
           JOIN_CONVERSATION_COMMAND,

@@ -48,7 +48,7 @@ export const useNotificationSubscriber = (
         }
       }
     };
-  }, []);
+  }, [subscriber]);
 
   return;
 };

@@ -8,7 +8,6 @@ export const deleteFile = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  deleteLinkedFiles?: boolean,
   recipients?: string[],
   systemFileType?: SystemFileType
 ): Promise<boolean | void> => {
@@ -26,7 +25,6 @@ export const deleteFile = async (
       targetDrive: targetDrive,
       fileId: fileId,
     },
-    deleteLinkedFiles: deleteLinkedFiles ?? true,
     recipients: recipients,
   };
 
@@ -45,6 +43,82 @@ export const deleteFile = async (
     });
 };
 
+export const deleteFiles = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  fileIds: string[],
+  recipients?: string[],
+  systemFileType?: SystemFileType
+): Promise<boolean | void> => {
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('FileIds', fileIds);
+
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
+
+  const request = {
+    requests: fileIds.map((fileId) => ({
+      file: {
+        targetDrive: targetDrive,
+        fileId: fileId,
+      },
+      recipients: recipients,
+    })),
+  };
+
+  return client
+    .post('/drive/files/deletefileidbatch', request)
+    .then((response) => {
+      if (response.status === 200) return true;
+
+      return false;
+    })
+    .catch((error) => {
+      console.error('[DotYouCore-js:deleteFileByGroupId]', error);
+      throw error;
+    });
+};
+
+export const deleteFilesByGroupId = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  groupIds: string[],
+  recipients?: string[],
+  systemFileType?: SystemFileType
+): Promise<boolean | void> => {
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('GroupIds', groupIds);
+
+  const client = dotYouClient.createAxiosClient({
+    headers: {
+      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+    },
+  });
+
+  const request = {
+    requests: groupIds.map((groupId) => ({
+      targetDrive: targetDrive,
+      groupId: groupId,
+      recipients: recipients,
+    })),
+  };
+
+  return client
+    .post('/drive/files/deletegroupidbatch', request)
+    .then((response) => {
+      if (response.status === 200) return true;
+
+      return false;
+    })
+    .catch((error) => {
+      console.error('[DotYouCore-js:deleteFileByGroupId]', error);
+      throw error;
+    });
+};
+
 export const deletePayload = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
@@ -53,6 +127,10 @@ export const deletePayload = async (
   versionTag: string,
   systemFileType?: SystemFileType
 ): Promise<{ newVersionTag: string }> => {
+  assertIfDefined('TargetDrive', targetDrive);
+  assertIfDefined('FileId', fileId);
+  assertIfDefined('FileKey', fileKey);
+
   const client = dotYouClient.createAxiosClient({
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',

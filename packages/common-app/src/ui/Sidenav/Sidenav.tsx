@@ -49,6 +49,10 @@ const iconClassName = `${iconSize} flex-shrink-0`;
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
 
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
 export const Sidenav = ({
   logout,
   disablePinning,
@@ -69,6 +73,8 @@ export const Sidenav = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isHoverOpen, setIsHoverOpen] = useState(false);
   const [isPeeking, setIsPeeking] = useState(false);
+
+  const canTouch = isTouchDevice();
 
   useEffect(() => {
     // Only persist open/closed state on desktop
@@ -92,16 +98,14 @@ export const Sidenav = ({
         onMouseEnter={() => setIsHoverOpen(true)}
         onMouseLeave={() => setIsHoverOpen(false)}
       >
-        {/* Extra surrounding div to keep contents sticky as you scroll within the aside */}
-        {/* TODO: the xl:(hover:) should be replaced with detection for a touch input */}
         <div
           className={`${
             isOpen
-              ? 'overflow-y-auto md:overflow-visible'
-              : `xl:hover:sticky xl:hover:w-[20rem] ${isPeeking ? 'sticky w-[20rem]' : ''}`
-          } static top-0 h-full w-full transition-all md:h-auto md:whitespace-nowrap ${sidebarBg}`}
+              ? 'overflow-y-auto'
+              : `${canTouch ? '' : 'md:hover:w-[20rem]'} ${isPeeking ? 'w-[20rem]' : 'w-full'}`
+          } sticky top-0 h-full transition-all md:h-auto ${sidebarBg}`}
         >
-          <div className="flex flex-col overflow-auto px-3 pb-5 pt-3 md:min-h-screen">
+          <div className="flex flex-col px-3 pb-5 pt-3 md:min-h-screen md:whitespace-nowrap">
             <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
               <IdentityNavItem />
               {canPin ? (
@@ -179,27 +183,33 @@ export const Sidenav = ({
               ) : null}
             </MoreItems>
 
-            {isTightHeight ? null : (
+            {!isTightHeight ? (
               <div>
                 <p className={`${navItemClassName} opacity-40 leading-none`}>
                   <span className={`text-center text-2xl px-[0.18rem]`}>©</span>
-                  <span className={`my-auto ml-3 ${!(canPin && isPinned) && 'hidden'}`}>
+                  <span
+                    className={`my-auto ml-3 max-w-[15rem] ${
+                      !(canPin && isPinned) && !isOpen && 'hidden'
+                    }`}
+                  >
                     2023 | v.
                     {getVersion()}
                   </span>
                 </p>
               </div>
-            )}
+            ) : null}
 
-            <button
-              className={`${navItemClassName} hidden md:block xl:hidden`}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsPeeking(!isPeeking);
-              }}
-            >
-              <Bars className={iconClassName} />
-            </button>
+            {canTouch ? (
+              <button
+                className={`${navItemClassName} hidden md:block xl:hidden`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsPeeking(!isPeeking);
+                }}
+              >
+                <Bars className={iconClassName} />
+              </button>
+            ) : null}
           </div>
         </div>
       </aside>

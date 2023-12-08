@@ -19,17 +19,14 @@ export const usePushNotifications = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
-  const getNotifications = async (cursor: number | undefined) => {
-    return await GetNotifications(dotYouClient, PAGE_SIZE, cursor);
-  };
+  const getNotifications = async (cursor: number | undefined) =>
+    await GetNotifications(dotYouClient, PAGE_SIZE, cursor);
 
-  const markAsRead = async (notificationIds: string[]) => {
-    return await MarkNotificationsAsRead(dotYouClient, notificationIds);
-  };
+  const markAsRead = async (notificationIds: string[]) =>
+    await MarkNotificationsAsRead(dotYouClient, notificationIds);
 
-  const removeNotifications = async (notificationIds: string[]) => {
-    return await DeleteNotifications(dotYouClient, notificationIds);
-  };
+  const removeNotifications = async (notificationIds: string[]) =>
+    await DeleteNotifications(dotYouClient, notificationIds);
 
   return {
     fetch: useQuery({
