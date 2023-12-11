@@ -30,8 +30,17 @@ export const encryptData = async (data: string, iv: Uint8Array, ss: Uint8Array) 
 export const buildIvFromQueryString = async (querystring: string) => {
   const searchParams = new URLSearchParams(querystring);
 
-  const uniqueQueryKey =
-    searchParams.get('fileId') || (searchParams.has('alias') ? querystring : undefined);
+  const uniqueQueryKey = (() => {
+    // Check if it's a direct file request
+    if (searchParams.has('fileId'))
+      return `${searchParams.get('fileId')} ${
+        searchParams.get('key') || searchParams.get('payloadKey')
+      }-${searchParams.get('height')}x${searchParams.get('width')}`;
+    // Check if it's a query-batch/modifed request; Queries on a single drive (alias)
+    else if (searchParams.has('alias')) return querystring;
+    // undefined => and we'll use a random IV
+    else return undefined;
+  })();
 
   const hashedQueryKey =
     uniqueQueryKey && typeof crypto.subtle.digest !== 'undefined'
