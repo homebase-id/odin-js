@@ -61,7 +61,7 @@ const ChatSideNav = ({
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isOpen && !isRoot} logout={logout} />
+      {isOpen || isRoot ? <Sidenav disablePinning={true} logout={logout} /> : null}
       <div
         className={`${
           isActive ? 'translate-x-full' : 'translate-x-0'
