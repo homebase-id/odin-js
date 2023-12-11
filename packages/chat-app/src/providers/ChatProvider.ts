@@ -21,6 +21,7 @@ import {
   deletePayload,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
+  processVideoFile,
   queryBatch,
   sendCommand,
   uploadFile,
@@ -230,7 +231,15 @@ export const uploadChatMessage = async (
     const payloadKey = `${CHAT_MESSAGE_PAYLOAD_KEY}${i}`;
     const newMediaFile = files[i];
     if (newMediaFile.file.type.startsWith('video/')) {
-      throw new Error('Video is not supported yet');
+      const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
+        newMediaFile,
+        payloadKey
+      );
+
+      thumbnails.push(...additionalThumbnails);
+      payloads.push(payload);
+
+      if (tinyThumb) previewThumbnails.push(tinyThumb);
     } else {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
@@ -253,6 +262,8 @@ export const uploadChatMessage = async (
 
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
+
+  console.log(payloads, thumbnails, uploadMetadata, uploadInstructions);
 
   return await uploadFile(
     dotYouClient,

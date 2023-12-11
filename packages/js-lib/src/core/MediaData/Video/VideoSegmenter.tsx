@@ -1,5 +1,5 @@
-import { SegmentedVideoMetadata } from '../core/core';
-import { mergeByteArrays } from './helpers';
+import { SegmentedVideoMetadata } from '../../core';
+import { mergeByteArrays } from '../../../helpers/helpers';
 
 type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 const MB = 1024 * 1024;
@@ -153,7 +153,7 @@ export const segmentVideoFile = async (
           metadata.fileSize = finalBytes.length;
 
           resolve({
-            data: new Blob([finalBytes], { type: metadata.mimeType }),
+            data: new Blob([finalBytes], { type: 'video/mp4' }),
             metadata,
           });
           return;

@@ -32,6 +32,8 @@ export * from './NotificationData/NotificationTypes';
 export * from './MediaData/MediaTypes';
 export * from './MediaData/Thumbs/ImageResizer';
 export * from './MediaData/Thumbs/ThumbnailProvider';
+export * from './MediaData/Video/VideoProcessor';
+export * from './MediaData/Video/VideoSegmenter';
 export * from './MediaData/ImageProvider';
 export * from './MediaData/VideoProvider';
 

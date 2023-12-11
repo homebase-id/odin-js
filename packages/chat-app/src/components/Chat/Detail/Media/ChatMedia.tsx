@@ -66,7 +66,7 @@ const MediaItem = ({
 
   return (
     <div
-      className={`relative h-full w-full cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
+      className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
       style={
         largestThumb
           ? { aspectRatio: `${largestThumb.pixelWidth}/${largestThumb.pixelHeight}` }
@@ -81,15 +81,15 @@ const MediaItem = ({
         lastModified={payload.lastModified || fileLastModified}
         targetDrive={ChatDrive}
         avoidPayload={isVideo}
+        explicitSize={largestThumb ? largestThumb : undefined}
         fit={fit}
       />
-      {children ? (
-        <>{children}</>
-      ) : isVideo ? (
+      {isVideo ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <Triangle className="h-16 w-16 text-background" />
         </div>
       ) : null}
+      {children ? <>{children}</> : null}
     </div>
   );
 };
