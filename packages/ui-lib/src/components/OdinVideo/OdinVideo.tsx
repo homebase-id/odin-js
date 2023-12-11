@@ -176,7 +176,7 @@ const ChunkedSource = ({
       return {
         sequence: index,
         start: segment.offset,
-        end: nextOffset ? nextOffset.offset : fileLength,
+        end: nextOffset ? nextOffset.offset : undefined,
         samples: segment.samples,
         requested: false,
       };
@@ -277,6 +277,7 @@ const ChunkedSource = ({
       }
 
       if (haveAllSegments() || currentSegment.end === fileLength) {
+        console.debug('all segments fetched');
         innerMediaSource.endOfStream();
         videoRef.current?.removeEventListener('timeupdate', checkBuffer);
         return;

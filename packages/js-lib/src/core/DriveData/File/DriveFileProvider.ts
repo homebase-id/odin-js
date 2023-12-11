@@ -173,21 +173,11 @@ export const getPayloadBytes = async (
     responseType: 'arraybuffer',
   };
 
-  const { startOffset, updatedChunkStart, updatedChunkEnd, rangeHeader } = getRangeHeader(
-    chunkStart,
-    chunkEnd
-  );
+  const { startOffset, updatedChunkStart, rangeHeader } = getRangeHeader(chunkStart, chunkEnd);
   config.headers = {
     ...config.headers,
     range: rangeHeader,
   };
-
-  console.log({
-    updatedChunkStart,
-    updatedChunkEnd,
-    chunkStart,
-    chunkEnd,
-  });
 
   return client
     .get<ArrayBuffer>(
