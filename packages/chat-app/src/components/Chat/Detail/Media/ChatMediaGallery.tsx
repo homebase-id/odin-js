@@ -11,7 +11,7 @@ import {
   usePortal,
 } from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage, OdinVideo } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
@@ -83,17 +83,29 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
-        <div className="relative flex h-full min-h-screen flex-col lg:flex-row">
-          <OdinImage
-            className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
-            dotYouClient={dotYouClient}
-            fileId={msg.fileId}
-            fileKey={mediaKey}
-            targetDrive={ChatDrive}
-            alt="post"
-            fit="contain"
-            lastModified={msg.fileMetadata.updated}
-          />
+        <div className="relative flex h-full min-h-screen flex-row items-center justify-center">
+          {msg.fileMetadata.payloads.find((p) => p.key === mediaKey)?.contentType ===
+          'video/mp4' ? (
+            <OdinVideo
+              dotYouClient={dotYouClient}
+              fileId={msg.fileId}
+              fileKey={mediaKey}
+              targetDrive={ChatDrive}
+              lastModified={msg.fileMetadata.updated}
+              probablyEncrypted={true}
+            />
+          ) : (
+            <OdinImage
+              className={`m-auto h-auto max-h-[100dvh] w-auto max-w-full object-contain`}
+              dotYouClient={dotYouClient}
+              fileId={msg.fileId}
+              fileKey={mediaKey}
+              targetDrive={ChatDrive}
+              alt="post"
+              fit="contain"
+              lastModified={msg.fileMetadata.updated}
+            />
+          )}
 
           {onClose ? (
             <button

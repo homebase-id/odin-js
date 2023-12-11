@@ -56,9 +56,11 @@ const isTouchDevice = () => {
 export const Sidenav = ({
   logout,
   disablePinning,
+  hideMobileDrawer,
 }: {
   logout?: () => void;
   disablePinning?: boolean;
+  hideMobileDrawer?: boolean;
 }) => {
   const isMd = document.documentElement.clientWidth >= 768;
   const isXl = document.documentElement.clientWidth >= 1280;
@@ -81,7 +83,7 @@ export const Sidenav = ({
 
   return (
     <>
-      <MobileDrawer setIsOpen={setIsOpen} />
+      {hideMobileDrawer ? null : <MobileDrawer setIsOpen={setIsOpen} />}
 
       <aside
         className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-all duration-300 md:sticky md:bottom-auto md:min-h-[100dvh] ${

@@ -32,7 +32,6 @@ import {
   stringToUint8Array,
   toGuidId,
 } from '../../helpers/DataUtil';
-import { segmentVideoFile } from '../../helpers/VideoSegmenter';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { getPost, getPostBySlug } from './PostProvider';
 import {
@@ -44,6 +43,7 @@ import {
   Media,
 } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
+import { processVideoFile } from '../../core/MediaData/Video/VideoProcessor';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -155,44 +155,6 @@ export const savePost = async <T extends PostContent>(
     targetDrive,
     onVersionConflict
   );
-};
-
-const processVideoFile = async (
-  videoFile: NewMediaFile,
-  payloadKey: string
-): Promise<{
-  payload: PayloadFile;
-  tinyThumb: EmbeddedThumb | undefined;
-  additionalThumbnails: ThumbnailFile[];
-}> => {
-  const { tinyThumb, additionalThumbnails } =
-    'thumbnail' in videoFile && videoFile.thumbnail?.payload
-      ? await createThumbnails(videoFile.thumbnail.payload, payloadKey, [
-          { quality: 100, width: 250, height: 250 },
-        ])
-      : { tinyThumb: undefined, additionalThumbnails: [] };
-
-  if (videoFile.file.size < 10000000 || 'bytes' in videoFile.file) {
-    return {
-      tinyThumb,
-      additionalThumbnails,
-      payload: {
-        payload: videoFile.file,
-        key: payloadKey,
-      },
-    };
-  }
-
-  const { data: segmentedVideoData, metadata } = await segmentVideoFile(videoFile.file);
-  return {
-    tinyThumb,
-    additionalThumbnails,
-    payload: {
-      payload: segmentedVideoData,
-      descriptorContent: jsonStringify64(metadata),
-      key: payloadKey,
-    },
-  };
 };
 
 const uploadPost = async <T extends PostContent>(

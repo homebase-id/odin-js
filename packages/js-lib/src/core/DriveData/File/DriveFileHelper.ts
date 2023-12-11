@@ -35,11 +35,12 @@ export const getRangeHeader = (chunkStart?: number, chunkEnd?: number) => {
   if (chunkStart !== undefined) {
     updatedChunkStart = chunkStart === 0 ? 0 : roundToSmallerMultipleOf16(chunkStart - 16);
     startOffset = Math.abs(chunkStart - updatedChunkStart);
-    updatedChunkEnd = chunkEnd !== undefined ? roundToLargerMultipleOf16(chunkEnd) : undefined;
-
+    // End of range is inclusive, so we need to subtract 1
+    updatedChunkEnd = chunkEnd !== undefined ? roundToLargerMultipleOf16(chunkEnd) - 1 : undefined;
     return {
       startOffset,
       updatedChunkStart,
+      updatedChunkEnd,
       rangeHeader: `bytes=${updatedChunkStart}-${updatedChunkEnd || ''}`,
     };
   }
