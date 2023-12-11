@@ -126,7 +126,7 @@ export const PostDetailCard = ({
               <Image
                 odinId={odinId}
                 className="rounded object-cover object-center"
-                fileId={post.primaryMediaFile.fileId}
+                fileId={post.primaryMediaFile.fileId || postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
                 lastModified={postFile.fileMetadata.updated}
                 fileKey={post.primaryMediaFile.fileKey}
@@ -138,7 +138,7 @@ export const PostDetailCard = ({
             ) : (
               <Video
                 targetDrive={getChannelDrive(post.channelId)}
-                fileId={post.primaryMediaFile.fileId}
+                fileId={post.primaryMediaFile.fileId || postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
                 lastModified={postFile.fileMetadata.updated}
                 fileKey={post.primaryMediaFile.fileKey}
