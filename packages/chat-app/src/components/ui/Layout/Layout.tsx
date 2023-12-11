@@ -40,7 +40,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     <>
       <SharedStyleTag />
       <div
-        className={`relative flex min-h-screen w-full flex-col ${
+        className={`relative flex min-h-[100dvh] w-full flex-col ${
           noShadedBg ? NOT_SHADED_BG : SHADED_BG
         }`}
       >
@@ -55,7 +55,7 @@ export const MinimalLayout: FC<LayoutProps> = ({ children, noShadedBg, noPadding
   return (
     <>
       <SharedStyleTag />
-      <div className={`relative min-h-screen ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
+      <div className={`relative min-h-[100dvh] ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         <div className={`${noPadding ? '' : 'px-5 py-4 sm:px-10 sm:py-8'}`}>{children}</div>
       </div>
     </>
@@ -67,7 +67,7 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   return (
     <>
       <SharedStyleTag />
-      <div className={`relative min-h-screen ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
+      <div className={`relative min-h-[100dvh] ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         {children}
       </div>
     </>

@@ -26,7 +26,7 @@ export const LoginBox = () => {
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
   useEffect(() => {
-    if (isAutoAuthorize)
+    if (isAutoAuthorize && stringifiedAuthParams)
       window.location.href = `https://${window.location.hostname}${AUTHORIZE_PATH}?${stringifiedAuthParams}`;
   }, [authParams]);
 

@@ -86,7 +86,7 @@ export const Sidenav = ({
       {hideMobileDrawer ? null : <MobileDrawer setIsOpen={setIsOpen} />}
 
       <aside
-        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-all duration-300 md:sticky md:bottom-auto md:min-h-screen ${
+        className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-all duration-300 md:sticky md:bottom-auto md:min-h-[100dvh] ${
           (canPin && isPinned) || isOpen
             ? 'translate-y-0 md:min-w-[20rem]'
             : 'w-full translate-y-[+100%] md:translate-y-0 md:w-[4.3rem] md:min-w-0'
@@ -105,7 +105,7 @@ export const Sidenav = ({
               : `${canTouch ? '' : 'md:hover:w-[20rem]'} ${isPeeking ? 'w-[20rem]' : 'w-full'}`
           } sticky top-0 h-full transition-all md:h-auto ${sidebarBg}`}
         >
-          <div className="flex flex-col px-3 pb-5 pt-3 md:min-h-screen md:whitespace-nowrap">
+          <div className="flex flex-col px-3 pb-5 pt-3 md:min-h-[100dvh] md:whitespace-nowrap">
             <div className="flex flex-shrink-0 flex-row items-center justify-between overflow-hidden">
               <IdentityNavItem />
               {canPin ? (

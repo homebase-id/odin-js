@@ -55,7 +55,7 @@ export const ChatDetail = ({
   };
 
   return (
-    <div className="flex h-screen flex-grow flex-col overflow-hidden">
+    <div className="flex h-[100dvh] flex-grow flex-col overflow-hidden">
       <ChatHeader conversation={conversation || undefined} toggleSidenav={toggleSidenav} />
       <GroupChatConnectedState conversation={conversation || undefined} />
       <ChatHistory
