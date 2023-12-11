@@ -176,7 +176,7 @@ const ChunkedSource = ({
       return {
         sequence: index,
         start: segment.offset,
-        end: nextOffset ? nextOffset.offset - 1 : fileLength,
+        end: nextOffset ? nextOffset.offset : fileLength,
         samples: segment.samples,
         requested: false,
       };

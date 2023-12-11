@@ -83,7 +83,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
-        <div className="relative flex h-full min-h-screen flex-col lg:flex-row">
+        <div className="relative flex h-full min-h-screen flex-row items-center justify-center">
           {msg.fileMetadata.payloads.find((p) => p.key === mediaKey)?.contentType ===
           'video/mp4' ? (
             <OdinVideo
@@ -96,7 +96,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
             />
           ) : (
             <OdinImage
-              className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
+              className={`m-auto h-auto max-h-[100dvh] w-auto max-w-full object-contain`}
               dotYouClient={dotYouClient}
               fileId={msg.fileId}
               fileKey={mediaKey}
