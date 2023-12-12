@@ -40,7 +40,7 @@ interface GetThumbRequest extends GetFileRequest {
 
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
 
-export const getPayloadAsJsonOverTransit = async <T>(
+export const getPayloadAsJsonOverPeer = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -52,13 +52,13 @@ export const getPayloadAsJsonOverTransit = async <T>(
 ): Promise<T | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
 
-  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, key, {
+  return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,
   }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
-export const getPayloadBytesOverTransit = async (
+export const getPayloadBytesOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -130,12 +130,12 @@ export const getPayloadBytesOverTransit = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getPayloadBytesOverTransit]', error);
+      console.error('[DotYouCore-js:getPayloadBytesOverPeer]', error);
       return null;
     });
 };
 
-export const getThumbBytesOverTransit = async (
+export const getThumbBytesOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -189,7 +189,7 @@ export const getThumbBytesOverTransit = async (
     });
 };
 
-export const getFileHeaderOverTransit = async <T = string>(
+export const getFileHeaderOverPeer = async <T = string>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -197,16 +197,10 @@ export const getFileHeaderOverTransit = async <T = string>(
   options?: { systemFileType?: SystemFileType }
 ): Promise<DriveSearchResult<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
-  const fileHeader = await getFileHeaderBytesOverTransit(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    fileId,
-    {
-      decrypt: true,
-      systemFileType,
-    }
-  );
+  const fileHeader = await getFileHeaderBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, {
+    decrypt: true,
+    systemFileType,
+  });
   if (!fileHeader) return null;
 
   const typedFileHeader: DriveSearchResult<T> = {
@@ -223,7 +217,7 @@ export const getFileHeaderOverTransit = async <T = string>(
   return typedFileHeader;
 };
 
-export const getFileHeaderBytesOverTransit = async (
+export const getFileHeaderBytesOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -268,7 +262,7 @@ export const getFileHeaderBytesOverTransit = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getFileHeaderBytesOverTransit]', error);
+      console.error('[DotYouCore-js:getFileHeaderBytesOverPeer]', error);
       throw error;
     });
 
@@ -277,7 +271,7 @@ export const getFileHeaderBytesOverTransit = async (
   return promise;
 };
 
-export const getContentFromHeaderOrPayloadOverTransit = async <T>(
+export const getContentFromHeaderOrPayloadOverPeer = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -303,7 +297,7 @@ export const getContentFromHeaderOrPayloadOverTransit = async <T>(
       decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
     } else {
       // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
-      const fileHeader = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+      const fileHeader = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
         systemFileType,
       });
       if (!fileHeader) return null;
@@ -311,7 +305,7 @@ export const getContentFromHeaderOrPayloadOverTransit = async <T>(
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
-    return await getPayloadAsJsonOverTransit<T>(
+    return await getPayloadAsJsonOverPeer<T>(
       dotYouClient,
       odinId,
       targetDrive,

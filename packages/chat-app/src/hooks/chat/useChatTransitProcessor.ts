@@ -7,7 +7,7 @@ import {
   markCommandComplete,
 } from '@youfoundation/js-lib/core';
 
-import { processInbox } from '@youfoundation/js-lib/transit';
+import { processInbox } from '@youfoundation/js-lib/peer';
 import {
   ChatDrive,
   Conversation,

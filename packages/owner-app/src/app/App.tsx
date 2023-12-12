@@ -49,20 +49,24 @@ const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
 
 const SocialFeed = lazy(() =>
-  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.SocialFeed }))
+  import('@youfoundation/feed-app/src/templates/SocialFeed/SocialFeed').then((feedApp) => ({
+    default: feedApp.SocialFeed,
+  }))
 );
 const ArticlesPage = lazy(() =>
-  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticlesPage }))
+  import('@youfoundation/feed-app/src/templates/SocialFeed/ArticlesPage').then((feedApp) => ({
+    default: feedApp.ArticlesPage,
+  }))
 );
 const ChannelsPage = lazy(() =>
-  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ChannelsPage }))
+  import('@youfoundation/feed-app/src/templates/SocialFeed/ChannelsPage').then((feedApp) => ({
+    default: feedApp.ChannelsPage,
+  }))
 );
 const ArticleComposerPage = lazy(() =>
-  import('@youfoundation/feed-app').then((feedApp) => ({ default: feedApp.ArticleComposerPage }))
-);
-
-const ChatHome = lazy(() =>
-  import('@youfoundation/chat-app').then((chatApp) => ({ default: chatApp.ChatHome }))
+  import('@youfoundation/feed-app/src/templates/SocialFeed/ArticleComposerPage').then(
+    (feedApp) => ({ default: feedApp.ArticleComposerPage })
+  )
 );
 
 import '@youfoundation/ui-lib/dist/style.css';
@@ -208,22 +212,6 @@ function App() {
               <Route path="channels" element={<ChannelsPage />} />
               <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
             </Route>
-          </Route>
-          {/* Chat: */}
-          <Route
-            path="chat"
-            element={
-              <Layout noPadding={true}>
-                <Outlet />
-              </Layout>
-            }
-          >
-            <Route index={true} element={<ChatHome />} />
-            <Route path={':conversationKey'} element={<ChatHome />} />
-            <Route path={'new'} element={<ChatHome />} />
-            <Route path={'new-group'} element={<ChatHome />} />
-            <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
-            <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
           </Route>
 
           <Route

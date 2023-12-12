@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { getRandom16ByteArray } from '../../helpers/DataUtil';
-import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
+import { createThumbnails } from '../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
   UploadFileMetadata,
@@ -29,14 +29,14 @@ import {
   getNewId,
   tryJsonParse,
 } from '../../helpers/DataUtil';
-import { TransitInstructionSet, TransitUploadResult } from '../../transit/TransitData/TransitTypes';
+import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { RawReactionContent, ReactionConfig, ReactionContext, ReactionVm } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
-import { uploadFileOverTransit } from '../../transit/TransitData/Upload/TransitUploadProvider';
-import { deleteFileOverTransit } from '../../transit/TransitData/File/TransitFileManageProvider';
-import { queryBatchOverTransit } from '../../transit/TransitData/Query/TransitDriveQueryProvider';
-import { getContentFromHeaderOrPayloadOverTransit } from '../../transit/TransitData/File/TransitFileProvider';
+import { uploadFileOverPeer } from '../../peer/peerData/Upload/PeerUploadProvider';
+import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
+import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
 
 const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
@@ -148,7 +148,7 @@ export const saveComment = async (
       systemFileType: 'Comment',
     };
 
-    const result: TransitUploadResult = await uploadFileOverTransit(
+    const result: TransitUploadResult = await uploadFileOverPeer(
       dotYouClient,
       instructionSet,
       metadata,
@@ -187,7 +187,7 @@ export const removeComment = async (
   } else {
     if (!commentFile.globalTransitId) return;
 
-    return await deleteFileOverTransit(
+    return await deleteFileOverPeer(
       dotYouClient,
       targetDrive,
       commentFile.globalTransitId,
@@ -219,7 +219,7 @@ export const getComments = async (
 
   const result = isLocal
     ? await queryBatch(dotYouClient, qp, ro)
-    : await queryBatchOverTransit(dotYouClient, context.authorOdinId, qp, ro);
+    : await queryBatchOverPeer(dotYouClient, context.authorOdinId, qp, ro);
 
   const comments: ReactionFile[] = (
     await Promise.all(
@@ -251,7 +251,7 @@ const dsrToComment = async (
 
   const contentData = isLocal
     ? await getContentFromHeaderOrPayload<RawReactionContent>(dotYouClient, ...params)
-    : await getContentFromHeaderOrPayloadOverTransit<RawReactionContent>(
+    : await getContentFromHeaderOrPayloadOverPeer<RawReactionContent>(
         dotYouClient,
         odinId,
         ...params

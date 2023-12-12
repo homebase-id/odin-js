@@ -1,12 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import {
-  TargetDrive,
-  DotYouClient,
-  getDecryptedThumbnailMeta,
-  SystemFileType,
-} from '@youfoundation/js-lib/core';
-import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
+import { TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
+import { getDecryptedThumbnailMeta } from '@youfoundation/js-lib/media';
+import { getDecryptedThumbnailMetaOverPeer } from '@youfoundation/js-lib/peer';
 
 export const useTinyThumb = (
   dotYouClient: DotYouClient,
@@ -38,7 +34,7 @@ export const useTinyThumb = (
 
     if (odinId !== localHost)
       return (
-        (await getDecryptedThumbnailMetaOverTransit(
+        (await getDecryptedThumbnailMetaOverPeer(
           dotYouClient,
           odinId,
           imageDrive,

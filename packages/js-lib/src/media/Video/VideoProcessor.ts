@@ -1,5 +1,9 @@
-import { jsonStringify64 } from '../../../helpers/DataUtil';
-import { EmbeddedThumb, PayloadFile, ThumbnailFile } from '../../DriveData/File/DriveFileTypes';
+import { jsonStringify64 } from '../../helpers/DataUtil';
+import {
+  EmbeddedThumb,
+  PayloadFile,
+  ThumbnailFile,
+} from '../../core/DriveData/File/DriveFileTypes';
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
 import { segmentVideoFile } from './VideoSegmenter';
 

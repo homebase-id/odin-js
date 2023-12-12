@@ -1,25 +1,19 @@
-import { DotYouClient, assertIfDotYouClientIsOwner } from '../../../core/DotYouClient';
+import { DotYouClient } from '../../../core/DotYouClient';
 import {
   GenerateKeyHeader,
   buildDescriptor,
   buildFormData,
   buildManifest,
 } from '../../../core/DriveData/Upload/UploadHelpers';
-import {
-  KeyHeader,
-  UploadFileMetadata,
-  ThumbnailFile,
-  TransferStatus,
-  PayloadFile,
-} from '../../../core/core';
-import { TransitInstructionSet, TransitUploadResult } from '../TransitTypes';
+import { UploadFileMetadata, ThumbnailFile, TransferStatus, PayloadFile } from '../../../core/core';
+import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 
 const isDebug = hasDebugFlag();
 
 /// Upload methods
-export const uploadFileOverTransit = async (
+export const uploadFileOverPeer = async (
   dotYouClient: DotYouClient,
   instructions: TransitInstructionSet,
   metadata: UploadFileMetadata,
@@ -91,7 +85,7 @@ export const uploadFileOverTransit = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:uploadFileOverTransitUsingKeyHeader]', error);
+      console.error('[DotYouCore-js:uploadFileOverPeerUsingKeyHeader]', error);
       throw error;
     });
 

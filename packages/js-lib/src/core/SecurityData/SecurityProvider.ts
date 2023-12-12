@@ -42,7 +42,7 @@ export const getSecurityContext = async (dotYouClient: DotYouClient): Promise<Se
     });
 };
 
-export const getSecurityContextOverTransit = async (
+export const getSecurityContextOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string
 ): Promise<SecurityContex> => {

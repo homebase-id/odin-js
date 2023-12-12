@@ -28,15 +28,6 @@ export { DEFAULT_PAYLOAD_KEY } from './DriveData/Upload/UploadHelpers';
 export * from './NotificationData/NotificationProvider';
 export * from './NotificationData/NotificationTypes';
 
-// MediaData
-export * from './MediaData/MediaTypes';
-export * from './MediaData/Thumbs/ImageResizer';
-export * from './MediaData/Thumbs/ThumbnailProvider';
-export * from './MediaData/Video/VideoProcessor';
-export * from './MediaData/Video/VideoSegmenter';
-export * from './MediaData/ImageProvider';
-export * from './MediaData/VideoProvider';
-
 // CommandData
 export * from './CommandData/CommandProvider';
 export * from './CommandData/CommandTypes';

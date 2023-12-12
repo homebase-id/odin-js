@@ -16,12 +16,10 @@ import {
   ThumbnailFile,
   UploadFileMetadata,
   UploadInstructionSet,
-  createThumbnails,
   deleteFilesByGroupId,
   deletePayload,
   getContentFromHeaderOrPayload,
   getFileHeaderByUniqueId,
-  processVideoFile,
   queryBatch,
   sendCommand,
   uploadFile,
@@ -37,6 +35,7 @@ import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
+import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
 
 export const ChatMessageFileType = 7878;
 export const ChatDeletedArchivalStaus = 2;

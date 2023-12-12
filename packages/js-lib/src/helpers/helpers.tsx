@@ -3,7 +3,7 @@ export * from './DataUtil';
 export * from './HashUtil';
 export * from './BrowserUtil';
 export * from './DomainUtil';
-export * from '../core/MediaData/Video/VideoSegmenter';
+export * from '../media/Video/VideoSegmenter';
 export * from './AttributeHelpers';
 export * from './PermissionHelpers';
 export * from './ImageMerger';

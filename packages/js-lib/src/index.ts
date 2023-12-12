@@ -3,4 +3,4 @@ export * from './core/core';
 export * from './network/network';
 export * from './profile/profile';
 export * from './public/public';
-export * from './transit/transit';
+export * from './peer/peer';

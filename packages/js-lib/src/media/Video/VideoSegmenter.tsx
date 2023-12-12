@@ -1,5 +1,5 @@
-import { SegmentedVideoMetadata } from '../../core';
-import { mergeByteArrays } from '../../../helpers/helpers';
+import { mergeByteArrays } from '../../helpers/helpers';
+import { SegmentedVideoMetadata } from '../MediaTypes';
 
 type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 const MB = 1024 * 1024;

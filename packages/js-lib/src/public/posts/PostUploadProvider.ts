@@ -21,7 +21,6 @@ import {
   PayloadFile,
   TargetDrive,
   ThumbnailFile,
-  createThumbnails,
   deletePayload,
   getFileHeader,
 } from '../../core/core';
@@ -43,7 +42,8 @@ import {
   Media,
 } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
-import { processVideoFile } from '../../core/MediaData/Video/VideoProcessor';
+import { processVideoFile } from '../../media/Video/VideoProcessor';
+import { createThumbnails } from '../../media/media';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 

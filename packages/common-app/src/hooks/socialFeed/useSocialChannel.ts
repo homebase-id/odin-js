@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
-import { getChannelOverTransit } from '@youfoundation/js-lib/transit';
+import { getChannelOverPeer } from '@youfoundation/js-lib/peer';
 import { useDotYouClient } from '../../..';
 
 interface useSocialChannelProps {
@@ -17,7 +17,7 @@ export const useSocialChannel = ({ odinId, channelId }: useSocialChannelProps) =
     // Optimization to not fetch similar content, might break if the public channel is adapted by the user... Perhaps we should always keep the slug?
     if (channelId === BlogConfig.PublicChannel.channelId) return BlogConfig.PublicChannel;
 
-    return (await getChannelOverTransit(dotYouClient, odinId, channelId)) || null;
+    return (await getChannelOverPeer(dotYouClient, odinId, channelId)) || null;
   };
 
   return {

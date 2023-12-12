@@ -1,5 +1,5 @@
 {
-  "version": "0.0.2-alpha.15",
+  "version": "0.0.2-alpha.16",
   "name": "@youfoundation/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
@@ -7,6 +7,8 @@
     "dist",
     "core.js",
     "core.d.ts",
+    "media.js",
+    "media.d.ts",
     "helpers.js",
     "helpers.d.ts",
     "network.js",
@@ -15,8 +17,8 @@
     "profile.d.ts",
     "public.js",
     "public.d.ts",
-    "transit.js",
-    "transit.d.ts",
+    "peer.js",
+    "peer.d.ts",
     "auth.js",
     "auth.d.ts"
   ],
@@ -27,6 +29,10 @@
     "./core": {
       "import": "./dist/core.js",
       "require": "./dist/core.cjs"
+    },
+    "./media": {
+      "import": "./dist/media.js",
+      "require": "./dist/media.cjs"
     },
     "./helpers": {
       "import": "./dist/helpers.js",
@@ -44,9 +50,9 @@
       "import": "./dist/public.js",
       "require": "./dist/public.cjs"
     },
-    "./transit": {
-      "import": "./dist/transit.js",
-      "require": "./dist/transit.cjs"
+    "./peer": {
+      "import": "./dist/peer.js",
+      "require": "./dist/peer.cjs"
     },
     "./auth": {
       "import": "./dist/auth.js",

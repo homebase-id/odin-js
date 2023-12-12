@@ -4,11 +4,11 @@ import {
   DotYouClient,
   uploadFile,
   DEFAULT_PAYLOAD_KEY,
-  createThumbnails,
   ThumbnailFile,
   PayloadFile,
   EmbeddedThumb,
 } from '@youfoundation/js-lib/core';
+import { createThumbnails } from '@youfoundation/js-lib/media';
 import {
   RawContact,
   ContactFile,

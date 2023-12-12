@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../DotYouClient';
 
-import { TransitInstructionSet } from '../../../transit/TransitData/TransitTypes';
+import { TransitInstructionSet } from '../../../peer/peerData/PeerTypes';
 import {
   UploadFileMetadata,
   UploadInstructionSet,

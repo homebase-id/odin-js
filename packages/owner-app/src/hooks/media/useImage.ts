@@ -1,12 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AccessControlList,
-  getDecryptedImageUrl,
-  removeImage,
-  SecurityGroupType,
-  TargetDrive,
-  uploadImage,
-} from '@youfoundation/js-lib/core';
+import { AccessControlList, SecurityGroupType, TargetDrive } from '@youfoundation/js-lib/core';
+import { getDecryptedImageUrl, removeImage, uploadImage } from '@youfoundation/js-lib/media';
 import { useAuth } from '../auth/useAuth';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 

@@ -4,7 +4,7 @@ import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
-import { getSocialFeed } from '@youfoundation/js-lib/transit';
+import { getSocialFeed } from '@youfoundation/js-lib/peer';
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();

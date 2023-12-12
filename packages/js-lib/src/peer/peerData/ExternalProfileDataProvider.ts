@@ -3,11 +3,11 @@ import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { Attribute, AttributeConfig } from '../../profile/profile';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
-import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
+import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { DriveSearchResult, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 
-export const getProfileAttributesOverTransit = async (
+export const getProfileAttributesOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   attributeType?: string
@@ -21,13 +21,13 @@ export const getProfileAttributesOverTransit = async (
     tagsMatchAll: attributeType ? [attributeType] : undefined,
   };
   try {
-    const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams);
+    const result = await queryBatchOverPeer(dotYouClient, odinId, queryParams);
     if (!result) return [];
 
     let attributes: DriveSearchResult<Attribute>[] = (
       await Promise.all(
         result.searchResults.map(async (dsr) =>
-          dsrToAttributeFileOverTransit(
+          dsrToAttributeFileOverPeer(
             dotYouClient,
             odinId,
             dsr,
@@ -47,7 +47,7 @@ export const getProfileAttributesOverTransit = async (
   }
 };
 
-export const dsrToAttributeFileOverTransit = async (
+export const dsrToAttributeFileOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   dsr: DriveSearchResult,
@@ -55,7 +55,7 @@ export const dsrToAttributeFileOverTransit = async (
   includeMetadataHeader: boolean
 ): Promise<DriveSearchResult<Attribute> | null> => {
   try {
-    const attrContent = await getContentFromHeaderOrPayloadOverTransit<Attribute>(
+    const attrContent = await getContentFromHeaderOrPayloadOverPeer<Attribute>(
       dotYouClient,
       odinId,
       targetDrive,

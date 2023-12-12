@@ -11,9 +11,9 @@ import {
 
 import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/core';
 import {
-  getProfileAttributesOverTransit,
-  getDecryptedImageDataOverTransit,
-} from '@youfoundation/js-lib/transit';
+  getProfileAttributesOverPeer,
+  getDecryptedImageDataOverPeer,
+} from '@youfoundation/js-lib/peer';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { GetFile, GetProfileImage } from '@youfoundation/js-lib/public';
 import { RawContact, getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
@@ -44,16 +44,14 @@ export const queryRemoteAttributes = async (
 ): Promise<RawContact | undefined> => {
   try {
     const [name, phone, email, location, birthday, photo] = await Promise.all([
-      (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Name))?.[0],
+      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Name))?.[0],
       (
-        await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.PhoneNumber)
+        await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.PhoneNumber)
       )?.[0],
-      (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Email))?.[0],
-      (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Address))?.[0],
-      (
-        await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Birthday)
-      )?.[0],
-      (await getProfileAttributesOverTransit(dotYouClient, odinId, BuiltInAttributes.Photo))?.[0],
+      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Email))?.[0],
+      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Address))?.[0],
+      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Birthday))?.[0],
+      (await getProfileAttributesOverPeer(dotYouClient, odinId, BuiltInAttributes.Photo))?.[0],
     ]);
 
     const nameAttr = name?.fileMetadata.appData.content;
@@ -99,7 +97,7 @@ export const queryConnectionPhotoData = async (
   profileImageFileId: string,
   profileImageKey: string
 ) => {
-  const imageData = await getDecryptedImageDataOverTransit(
+  const imageData = await getDecryptedImageDataOverPeer(
     dotYouClient,
     odinId,
     GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId),

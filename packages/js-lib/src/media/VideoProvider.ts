@@ -4,10 +4,10 @@ import {
   stringifyToQueryParams,
   getRandom16ByteArray,
   tryJsonParse,
-} from '../../helpers/DataUtil';
-import { DotYouClient } from '../DotYouClient';
-import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
-import { encryptUrl } from '../InterceptionEncryptionUtil';
+} from '../helpers/DataUtil';
+import { DotYouClient } from '../core/DotYouClient';
+import { DEFAULT_PAYLOAD_KEY } from '../core/DriveData/Upload/UploadHelpers';
+import { encryptUrl } from '../core/InterceptionEncryptionUtil';
 import {
   TargetDrive,
   AccessControlList,
@@ -20,7 +20,7 @@ import {
   SystemFileType,
   getPayloadBytes,
   getFileHeader,
-} from '../core';
+} from '../core/core';
 import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 
@@ -110,7 +110,7 @@ export const getDecryptedVideoChunk = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  _globalTransitId: string | undefined, // Kept for compatibility with ...overTransit signature
+  _globalTransitId: string | undefined, // Kept for compatibility with ...OverPeer signature
   key: string,
   chunkStart?: number,
   chunkEnd?: number,

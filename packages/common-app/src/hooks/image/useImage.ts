@@ -1,15 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
-  getDecryptedImageUrl,
   ImageSize,
-  removeImage,
   SecurityGroupType,
   TargetDrive,
+} from '@youfoundation/js-lib/core';
+import {
+  getDecryptedImageUrl,
+  removeImage,
   ThumbnailInstruction,
   uploadImage,
-} from '@youfoundation/js-lib/core';
-import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
+} from '@youfoundation/js-lib/media';
+import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/peer';
 
 import { useDotYouClient } from '../../..';
 
@@ -53,7 +55,7 @@ export const useImage = (
       return {
         url:
           odinId !== localHost
-            ? await getDecryptedImageUrlOverTransit(
+            ? await getDecryptedImageUrlOverPeer(
                 dotYouClient,
                 odinId,
                 imageDrive,
