@@ -20,6 +20,7 @@ export const MentionDropdown = ({
     () =>
       slicedQuery && mentionTargets?.length
         ? (mentionTargets
+            ?.map((dsr) => dsr.fileMetadata.appData.content)
             ?.filter(
               (trgt) =>
                 trgt.name?.displayName &&

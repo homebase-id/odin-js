@@ -17,12 +17,14 @@ export interface ContactDataImage extends ImageSize {
 }
 
 export interface ContactFile {
+  // File metadata
+  // id?: string;
+  // fileId?: string;
+  // lastModified?: number;
+  // versionTag?: string;
+
   // Meta data
   odinId?: string;
-  id?: string;
-  fileId?: string;
-  lastModified?: number;
-  versionTag?: string;
   source: 'contact' | 'public' | 'user';
 
   // Contact data
@@ -31,7 +33,6 @@ export interface ContactFile {
   phone?: { number: string };
   email?: { email: string };
   birthday?: { date: string };
-  hasImage?: boolean;
 }
 export interface RawContact extends ContactFile {
   image?: ContactDataImage;
