@@ -1,4 +1,4 @@
-import { slugify, getNewId } from '@youfoundation/js-lib/helpers';
+import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Article, ChannelDefinition, BlogConfig, NewMediaFile } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
@@ -12,7 +12,7 @@ import {
 export const EMPTY_POST: Article = {
   id: '',
   authorOdinId: '',
-  channelId: BlogConfig.PublicChannel.channelId,
+  channelId: BlogConfig.PublicChannelId,
   slug: '',
   type: 'Article',
   caption: '',
@@ -73,11 +73,14 @@ export const useArticleComposer = ({
 
   const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined | null>(null);
 
-  const [channel, setChannel] = useState<ChannelDefinition>(
+  const [channel, setChannel] = useState<NewDriveSearchResult<ChannelDefinition>>(
     serverData?.activeChannel &&
-      postFile.fileMetadata.appData.content.channelId === serverData.activeChannel.channelId
+      stringGuidsEqual(
+        postFile.fileMetadata.appData.content.channelId,
+        serverData.activeChannel.fileMetadata.appData.uniqueId
+      )
       ? serverData.activeChannel
-      : BlogConfig.PublicChannel
+      : BlogConfig.PublicChannelNewDsr
   );
 
   // Update state when server data changes
@@ -118,7 +121,7 @@ export const useArticleComposer = ({
   const doSave = async (
     dirtyPostFile: DriveSearchResult<Article> | NewDriveSearchResult<Article> = postFile,
     action: 'save' | 'publish' | 'draft' = 'save',
-    explicitTargetChannel?: ChannelDefinition
+    explicitTargetChannel?: NewDriveSearchResult<ChannelDefinition>
   ) => {
     // Check if fully empty and if so don't save
     if (isValidPost(dirtyPostFile)) return;
@@ -141,14 +144,14 @@ export const useArticleComposer = ({
             ...dirtyPostFile.fileMetadata.appData.content,
             id: dirtyPostFile.fileMetadata.appData.content.id ?? getNewId(), // Generate new id if there is none
             slug: slugify(dirtyPostFile.fileMetadata.appData.content.caption), // Reset slug to match caption each time
-            channelId: targetChannel.channelId, // Always update channel to the one in state, shouldn't have changed
+            channelId: targetChannel.fileMetadata.appData.uniqueId as string, // Always update channel to the one in state, shouldn't have changed
             readingTimeStats: getReadingTime(dirtyPostFile.fileMetadata.appData.content.body),
           },
         },
       },
 
-      serverMetadata: {
-        accessControlList: targetChannel.acl || { requiredSecurityGroup: SecurityGroupType.Owner },
+      serverMetadata: targetChannel.serverMetadata || {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
       },
       // TODO: ACL is not changed, as it impacts the encrytped state...
       // targetChannel.acl && (isPublish || isPublished) && !isUnpublish
@@ -159,7 +162,7 @@ export const useArticleComposer = ({
     // Save and process result
     const uploadResult = await savePost({
       postFile: toPostFile,
-      channelId: targetChannel.channelId,
+      channelId: targetChannel.fileMetadata.appData.uniqueId as string,
       mediaFiles:
         primaryMediaFile !== null
           ? primaryMediaFile === undefined
@@ -182,13 +185,13 @@ export const useArticleComposer = ({
 
     // TODO: Move to component as it has page context?
     if (isPublish) {
-      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
+      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
     } else {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(
         null,
         toPostFile.fileMetadata.appData.content.caption,
-        `/owner/feed/edit/${targetChannel.slug}/${toPostFile.fileMetadata.appData.content.id}`
+        `/owner/feed/edit/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
       );
     }
   };
@@ -203,7 +206,7 @@ export const useArticleComposer = ({
     });
   };
 
-  const movePost = async (newChannelDefinition: ChannelDefinition) => {
+  const movePost = async (newChannelDefinition: NewDriveSearchResult<ChannelDefinition>) => {
     setChannel(newChannelDefinition);
 
     // Clear fileId and contentId (as they can clash with what exists, or cause a fail to overwrite during upload)

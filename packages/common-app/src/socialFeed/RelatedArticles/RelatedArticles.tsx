@@ -2,17 +2,17 @@ import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
 import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { PostTeaser } from '../PostListItem/PostTeaser';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const RelatedArticles = ({
   blog,
   channel,
 }: {
   blog: DriveSearchResult<PostContent>;
-  channel: ChannelDefinitionVm | ChannelDefinition | undefined;
+  channel: NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition> | undefined;
 }) => {
   const { data: blogPosts } = useBlogPostsInfinite(
-    channel ? { channelId: channel.channelId, postType: 'Article' } : {}
+    channel ? { channelId: channel.fileMetadata.appData.uniqueId, postType: 'Article' } : {}
   );
 
   if (!blogPosts) return null;
@@ -32,7 +32,8 @@ export const RelatedArticles = ({
     <section className="mt-10 bg-slate-50 pb-10 pt-16 dark:bg-slate-800 dark:bg-opacity-50">
       <div className="container mx-auto px-2 sm:px-5">
         <h2 className="mb-10 text-2xl ">
-          {t('Latest posts')} {channel && <small>| {channel.name}</small>}
+          {t('Latest posts')}{' '}
+          {channel && <small>| {channel.fileMetadata.appData.content.name}</small>}
         </h2>
         <div className="-m-1 flex flex-row flex-wrap">
           {filteredBlogPosts.map((postFile) => {

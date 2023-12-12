@@ -43,7 +43,9 @@ const PostDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{post?.caption || channel?.name || ''} | Homebase</title>
+        <title>
+          {post?.caption || channel?.fileMetadata.appData.content.name || ''} | Homebase
+        </title>
         <meta name="og:title" content={post?.caption ?? ''} />
         <meta
           name="og:description"
@@ -56,7 +58,10 @@ const PostDetail = () => {
           <Breadcrumbs
             levels={[
               { title: t('Posts') ?? '', href: `${HOME_ROOT_PATH}posts` },
-              { title: channel?.name ?? '', href: `${HOME_ROOT_PATH}posts/${channel?.slug}` },
+              {
+                title: channel?.fileMetadata.appData.content.name ?? '',
+                href: `${HOME_ROOT_PATH}posts/${channel?.fileMetadata.appData.content.slug}`,
+              },
               { title: post?.caption ?? '' },
             ]}
             className="text-sm"

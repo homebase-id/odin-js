@@ -16,8 +16,8 @@ const HorizontalPosts = () => {
       {channels.map((channel, index) => {
         return (
           <PostChannelTeaser
-            key={channel.channelId}
-            title={channel.name}
+            key={channel.fileMetadata.appData.uniqueId}
+            title={channel.fileMetadata.appData.content.name}
             channel={channel}
             fallback={
               index === 0 ? <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage> : null

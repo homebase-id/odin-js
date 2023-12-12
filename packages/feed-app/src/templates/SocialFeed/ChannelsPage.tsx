@@ -16,7 +16,7 @@ export const ChannelsPage = () => {
         <div className="px-2 sm:px-10">
           <div className="-m-2">
             {channels?.map((chnl) => (
-              <div className="p-2" key={chnl.channelId}>
+              <div className="p-2" key={chnl.fileId}>
                 <ChannelItem chnl={chnl} className="bg-background" />
               </div>
             ))}

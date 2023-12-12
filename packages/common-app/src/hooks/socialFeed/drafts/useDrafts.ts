@@ -18,7 +18,7 @@ export const useDrafts = () => {
       channels.map(async (channel) => {
         return await getPosts<Article>(
           dotYouClient,
-          channel.channelId,
+          channel.fileMetadata.appData.uniqueId as string,
           undefined,
           'only',
           undefined,

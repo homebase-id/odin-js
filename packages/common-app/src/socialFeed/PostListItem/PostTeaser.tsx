@@ -42,9 +42,9 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   const isAuthenticated = !!getIdentity();
   // Compared to PostTeaserCard, this one is always clickable as comments can't be loaded within;
   //   If there is any media linked and not an article, we load the blogImageDetailPage
-  const postPath = `${HOME_ROOT_PATH}posts/${channel ? channel.slug : 'public-posts'}/${
-    post.slug ?? post.id
-  }`;
+  const postPath = `${HOME_ROOT_PATH}posts/${
+    channel ? channel.fileMetadata.appData.content.slug : 'public-posts'
+  }/${post.slug ?? post.id}`;
   const targetPath = `${postPath}${
     post.type !== 'Article' && post.primaryMediaFile?.fileId ? '/0' : ''
   }`;
@@ -95,8 +95,10 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               isOwner={isOwner}
               isAuthenticated={isAuthenticated}
               isPublic={
-                channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-                channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+                channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                  SecurityGroupType.Anonymous ||
+                channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                  SecurityGroupType.Authenticated
               }
               login={login}
             />

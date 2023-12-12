@@ -11,17 +11,19 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
   const channelSections = channels
     ?.filter(
       (chnl) =>
-        chnl.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-        chnl.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+        chnl.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+          SecurityGroupType.Anonymous ||
+        chnl.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+          SecurityGroupType.Authenticated
     )
     .map((channel) => {
-      const channelDrive = getChannelDrive(channel.channelId);
+      const channelDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
       const blogOnChannelQuery: FileQueryParams = {
         targetDrive: channelDrive,
         fileType: [BlogConfig.ChannelDefinitionFileType],
       };
       return {
-        name: channel.channelId,
+        name: channel.fileMetadata.appData.uniqueId as string,
         queryParams: blogOnChannelQuery,
         resultOptions: BASE_RESULT_OPTIONS,
       };

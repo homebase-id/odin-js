@@ -73,16 +73,16 @@ export const getRecentPosts = async <T extends PostContent>(
   includeDrafts: true | 'only' | false,
   cursorState: Record<string, string> | undefined = undefined,
   pageSize = 10,
-  channels?: ChannelDefinition[],
+  channels?: DriveSearchResult<ChannelDefinition>[],
   includeHiddenChannels = false
 ): Promise<MultiRequestCursoredResult<DriveSearchResult<T>[]>> => {
   const chnls = channels || (await getChannelDefinitions(dotYouClient));
   const allCursors: Record<string, string> = {};
 
   const queries = chnls
-    ?.filter((chnl) => includeHiddenChannels || chnl.showOnHomePage)
+    ?.filter((chnl) => includeHiddenChannels || chnl.fileMetadata.appData.content.showOnHomePage)
     .map((chnl) => {
-      const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
+      const targetDrive = GetTargetDriveFromChannelId(chnl.fileMetadata.appData.uniqueId as string);
       const params: FileQueryParams = {
         targetDrive: targetDrive,
         dataType: type ? [postTypeToDataType(type)] : undefined,
@@ -97,12 +97,12 @@ export const getRecentPosts = async <T extends PostContent>(
 
       const ro: GetBatchQueryResultOptions = {
         maxRecords: pageSize,
-        cursorState: cursorState?.[chnl.channelId],
+        cursorState: cursorState?.[chnl.fileMetadata.appData.uniqueId as string],
         includeMetadataHeader: true,
       };
 
       return {
-        name: chnl.channelId,
+        name: chnl.fileMetadata.appData.uniqueId as string,
         queryParams: params,
         resultOptions: ro,
       };

@@ -31,6 +31,7 @@ import {
   AclIcon,
 } from '@youfoundation/common-app';
 import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PostComposer = ({
   onPost,
@@ -47,11 +48,12 @@ const PostComposer = ({
   const selectRef = useRef<HTMLSelectElement>(null);
 
   const [caption, setCaption] = useState<string>('');
-  const [channel, setChannel] = useState<ChannelDefinition>(BlogConfig.PublicChannel);
+  const [channel, setChannel] = useState<
+    DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>
+  >(BlogConfig.PublicChannelNewDsr);
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
-  const [isReactAccessEditorOpen, setIsReactAccessEditorOpen] = useState(false);
 
   const isPosting = postState === 'uploading' || postState === 'encrypting';
 
@@ -64,11 +66,11 @@ const PostComposer = ({
 
   const resetUi = () => {
     setCaption('');
-    setChannel(BlogConfig.PublicChannel);
+    setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
     setStateIndex((i) => i + 1);
 
-    if (selectRef.current) selectRef.current.value = BlogConfig.PublicChannel.channelId;
+    if (selectRef.current) selectRef.current.value = BlogConfig.PublicChannelId;
   };
 
   useEffect(() => {
@@ -180,7 +182,7 @@ const PostComposer = ({
                       },
                   {
                     label: t('Convert to an article'),
-                    href: `/owner/feed/new?caption=${caption}&channel=${channel.channelId}`,
+                    href: `/owner/feed/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
                     icon: Article,
                   },
                 ]}
@@ -189,7 +191,7 @@ const PostComposer = ({
           ) : null}
           <ChannelSelector
             className="ml-auto max-w-[35%] flex-shrink"
-            defaultValue={BlogConfig.PublicChannel.channelId}
+            defaultValue={BlogConfig.PublicChannelId}
             onChange={(channel) => channel && setChannel(channel)}
             ref={selectRef}
           />
@@ -199,12 +201,14 @@ const PostComposer = ({
             } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
           >
-            {channel.acl && canPost ? <AclIcon className="mr-3 h-4 w-4" acl={channel.acl} /> : null}
+            {channel.serverMetadata?.accessControlList && canPost ? (
+              <AclIcon className="mr-3 h-4 w-4" acl={channel.serverMetadata?.accessControlList} />
+            ) : null}
             <span className="flex flex-col">
               {t('Post')}{' '}
-              {channel.acl && canPost ? (
+              {channel.serverMetadata?.accessControlList && canPost ? (
                 <small className="flex flex-row items-center gap-1 leading-none">
-                  <AclSummary acl={channel.acl} />{' '}
+                  <AclSummary acl={channel.serverMetadata?.accessControlList} />{' '}
                 </small>
               ) : null}
             </span>
@@ -238,7 +242,7 @@ export const ChannelSelector = React.forwardRef(
     }: {
       className?: string;
       defaultValue?: string;
-      onChange: (channel: ChannelDefinition | undefined) => void;
+      onChange: (channel: DriveSearchResult<ChannelDefinition> | undefined) => void;
       disabled?: boolean;
       excludeMore?: boolean;
     },
@@ -271,17 +275,22 @@ export const ChannelSelector = React.forwardRef(
           onChange={(e) => {
             if (e.target.value === 'more') {
               setIsChnlMgmtOpen(true);
-              e.target.value = BlogConfig.PublicChannel.channelId;
+              e.target.value = BlogConfig.PublicChannelId;
             } else {
-              onChange(channels?.find((chnl) => chnl.channelId === e.target.value));
+              onChange(
+                channels?.find((chnl) => chnl.fileMetadata.appData.uniqueId === e.target.value)
+              );
             }
           }}
           ref={ref}
           disabled={disabled}
         >
           {channels.map((channel) => (
-            <option value={channel.channelId} key={channel.channelId}>
-              {channel.name}
+            <option
+              value={channel.fileMetadata.appData.uniqueId}
+              key={channel.fileMetadata.appData.uniqueId}
+            >
+              {channel.fileMetadata.appData.content.name}
             </option>
           ))}
           {!excludeMore ? (

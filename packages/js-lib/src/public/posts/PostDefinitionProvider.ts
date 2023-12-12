@@ -17,6 +17,8 @@ import {
   deleteFile,
   TargetDrive,
   queryBatch,
+  DriveSearchResult,
+  NewDriveSearchResult,
 } from '../../core/core';
 import {
   getRandom16ByteArray,
@@ -28,7 +30,7 @@ import { ChannelDefinition, BlogConfig } from './PostTypes';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
-): Promise<ChannelDefinition[]> => {
+): Promise<DriveSearchResult<ChannelDefinition>[]> => {
   const drives = await getDrivesByType(dotYouClient, BlogConfig.DriveType, 1, 1000);
   const channelHeaders = drives.results.map((drive) => {
     return {
@@ -67,68 +69,60 @@ export const getChannelDefinitions = async (
         const channelDrive = getChannelDrive(response.name);
         const dsr = response.searchResults[0];
 
-        const definition = await getContentFromHeaderOrPayload<ChannelDefinition>(
-          dotYouClient,
-          channelDrive,
-          dsr,
-          response.includeMetadataHeader
-        );
-        if (!definition) return null;
-
-        definition.acl = dsr.serverMetadata?.accessControlList;
-        return definition;
+        return dsrToChannelFile(dotYouClient, dsr, channelDrive, response.includeMetadataHeader);
       }
     })
   );
 
-  return definitions.filter((channel) => channel !== undefined) as ChannelDefinition[];
+  return definitions.filter(
+    (channel) => channel !== undefined
+  ) as DriveSearchResult<ChannelDefinition>[];
 };
 
 export const getChannelDefinition = async (
   dotYouClient: DotYouClient,
   channelId: string
-): Promise<ChannelDefinition | undefined> => {
-  const { definition } = (await getChannelDefinitionInternal(dotYouClient, channelId)) ?? {
-    definition: undefined,
-  };
-
-  return definition;
-};
+): Promise<DriveSearchResult<ChannelDefinition> | undefined> =>
+  await getChannelDefinitionInternal(dotYouClient, channelId);
 
 export const getChannelDefinitionBySlug = async (dotYouClient: DotYouClient, slug: string) => {
   const channels = await getChannelDefinitions(dotYouClient);
-  return channels.find((channel) => channel.slug === slug);
+  return channels.find((channel) => channel.fileMetadata.appData.content.slug === slug);
 };
 
 export const saveChannelDefinition = async (
   dotYouClient: DotYouClient,
-  definition: ChannelDefinition
+  definition: NewDriveSearchResult<ChannelDefinition>
 ): Promise<UploadResult> => {
   const channelMetadata = '';
+  const channelContent = definition.fileMetadata.appData.content;
 
-  if (!definition.channelId) {
-    definition.channelId = toGuidId(definition.name);
+  if (!definition.fileMetadata.appData.uniqueId) {
+    definition.fileMetadata.appData.uniqueId = toGuidId(channelContent.name);
   }
 
-  if (definition.channelId === BlogConfig.PublicChannel.channelId) {
+  if (definition.fileMetadata.appData.uniqueId === BlogConfig.PublicChannelId) {
     // Always keep the slug for the public channel
-    definition.slug = BlogConfig.PublicChannel.slug;
+    definition.fileMetadata.appData.content.slug = BlogConfig.PublicChannelSlug;
   }
 
   const encrypt = !(
-    definition.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    definition.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+    definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Anonymous ||
+    definition.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated
   );
 
-  const targetDrive = GetTargetDriveFromChannelId(definition.channelId);
-  await ensureDrive(dotYouClient, targetDrive, definition.name, channelMetadata, true, true);
+  const targetDrive = GetTargetDriveFromChannelId(definition.fileMetadata.appData.uniqueId);
+  console.log(targetDrive);
+  await ensureDrive(dotYouClient, targetDrive, channelContent.name, channelMetadata, true, true);
 
-  const { fileId, versionTag } = (await getChannelDefinitionInternal(
+  const existingChannelDef = await getChannelDefinitionInternal(
     dotYouClient,
-    definition.channelId
-  )) ?? {
-    fileId: undefined,
-  };
+    definition.fileMetadata.appData.uniqueId
+  );
+  const fileId = existingChannelDef?.fileId;
+  const versionTag = existingChannelDef?.fileMetadata.versionTag;
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),
@@ -144,7 +138,10 @@ export const saveChannelDefinition = async (
     },
   };
 
-  const payloadJson: string = jsonStringify64({ ...definition, acl: undefined });
+  const payloadJson: string = jsonStringify64({
+    ...definition.fileMetadata.appData.content,
+    acl: undefined,
+  });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metedata
@@ -153,12 +150,13 @@ export const saveChannelDefinition = async (
     versionTag: versionTag,
     allowDistribution: true,
     appData: {
-      tags: [definition.channelId],
+      uniqueId: definition.fileMetadata.appData.uniqueId,
+      tags: [definition.fileMetadata.appData.uniqueId],
       fileType: BlogConfig.ChannelDefinitionFileType,
       content: shouldEmbedContent ? payloadJson : undefined,
     },
     isEncrypted: encrypt,
-    accessControlList: definition.acl,
+    accessControlList: definition.serverMetadata?.accessControlList,
   };
 
   const result = await uploadFile(
@@ -182,7 +180,7 @@ export const saveChannelDefinition = async (
 };
 
 export const removeChannelDefinition = async (dotYouClient: DotYouClient, channelId: string) => {
-  if (channelId === BlogConfig.PublicChannel.channelId) {
+  if (channelId === BlogConfig.PublicChannelId) {
     throw new Error(`Remove Channel: can't remove default channel`);
   }
 
@@ -206,7 +204,7 @@ export const GetTargetDriveFromChannelId = (channelId: string): TargetDrive => {
 const getChannelDefinitionInternal = async (
   dotYouClient: DotYouClient,
   channelId: string
-): Promise<{ definition: ChannelDefinition; fileId: string; versionTag: string } | undefined> => {
+): Promise<DriveSearchResult<ChannelDefinition> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     targetDrive: targetDrive,
@@ -225,28 +223,42 @@ const getChannelDefinitionInternal = async (
 
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      const definition = await getContentFromHeaderOrPayload<ChannelDefinition>(
-        dotYouClient,
-        targetDrive,
-        dsr,
-        response.includeMetadataHeader
-      );
-
-      if (!definition) return undefined;
-
-      definition.acl = dsr.serverMetadata?.accessControlList;
-
-      return {
-        fileId: dsr.fileId,
-        versionTag: dsr.fileMetadata.versionTag,
-        definition: definition,
-      };
+      return dsrToChannelFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader);
     }
   } catch (ex) {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
   }
 
   return;
+};
+
+export const dsrToChannelFile = async (
+  dotYouClient: DotYouClient,
+  dsr: DriveSearchResult,
+  targetDrive: TargetDrive,
+  includeMetadataHeader: boolean
+): Promise<DriveSearchResult<ChannelDefinition> | undefined> => {
+  const definitionContent = await getContentFromHeaderOrPayload<ChannelDefinition>(
+    dotYouClient,
+    targetDrive,
+    dsr,
+    includeMetadataHeader
+  );
+  if (!definitionContent) return undefined;
+
+  const file: DriveSearchResult<ChannelDefinition> = {
+    ...dsr,
+    fileMetadata: {
+      ...dsr.fileMetadata,
+      appData: {
+        ...dsr.fileMetadata.appData,
+        uniqueId: dsr.fileMetadata.appData.uniqueId || (definitionContent as any).channelId,
+        content: definitionContent,
+      },
+    },
+  };
+
+  return file;
 };
 
 export const getChannelDrive = (channelId: string): TargetDrive => {

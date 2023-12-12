@@ -18,7 +18,11 @@ import {
   MediaGallery,
   EmbeddedPostContent,
 } from '../../..';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 
 export const PostDetailCard = ({
   odinId,
@@ -32,7 +36,7 @@ export const PostDetailCard = ({
   login,
 }: {
   odinId?: string;
-  channel?: ChannelDefinition;
+  channel?: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>;
   postFile?: DriveSearchResult<PostContent>;
   showAuthorDetail?: boolean;
   className?: string;
@@ -199,8 +203,10 @@ export const PostDetailCard = ({
           isOwner={isOwner}
           login={login}
           isPublic={
-            channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-            channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+              SecurityGroupType.Anonymous ||
+            channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+              SecurityGroupType.Authenticated
           }
         />
       ) : null}

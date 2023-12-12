@@ -1,4 +1,4 @@
-import { SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -55,7 +55,7 @@ export const ChannelsDialog = ({
     >
       <div className="-m-2">
         {channels?.map((chnl) => (
-          <div className="p-2" key={chnl.channelId}>
+          <div className="p-2" key={chnl.fileId}>
             <ChannelItem chnl={chnl} className="bg-slate-50 dark:bg-slate-900" />
           </div>
         ))}
@@ -89,15 +89,15 @@ export const ChannelsDialog = ({
 };
 
 export const ChannelItem = ({
-  chnl,
+  chnl: chnlDsr,
   onClose,
   className,
 }: {
-  chnl?: ChannelDefinitionVm;
+  chnl?: DriveSearchResult<ChannelDefinitionVm>;
   onClose?: () => void;
   className?: string;
 }) => {
-  const isNew = !chnl;
+  const isNew = !chnlDsr;
 
   const [isEdit, setIsEdit] = useState(false);
   const [isAclEdit, setIsAclEdit] = useState(isNew);
@@ -106,13 +106,17 @@ export const ChannelItem = ({
     remove: { mutateAsync: removeChannel, status: removeStatus },
   } = useChannel({});
 
+  const chnl = chnlDsr?.fileMetadata.appData.content;
+
   const [newName, setNewName] = useState(chnl?.name);
   const [newSlug, setNewSlug] = useState(chnl?.slug);
   const [newDescription, setNewDescription] = useState(chnl?.description);
   const [newTemplateId, setNewTemplateId] = useState(chnl?.templateId);
   const [newShowOnHomePage, setNewShowOnHomePage] = useState(chnl?.showOnHomePage);
   const [newAcl, setNewAcl] = useState(
-    chnl?.acl ?? { requiredSecurityGroup: SecurityGroupType.Anonymous }
+    chnlDsr?.serverMetadata?.accessControlList ?? {
+      requiredSecurityGroup: SecurityGroupType.Anonymous,
+    }
   );
 
   return (
@@ -161,14 +165,25 @@ export const ChannelItem = ({
                   e.stopPropagation();
 
                   await saveChannel({
-                    channelId: '',
-                    ...chnl,
-                    name: newName ?? '',
-                    slug: newSlug ?? '',
-                    description: newDescription ?? '',
-                    showOnHomePage: newShowOnHomePage ?? false,
-                    templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
-                    acl: newAcl,
+                    ...chnlDsr,
+                    fileMetadata: {
+                      ...chnlDsr?.fileMetadata,
+                      appData: {
+                        ...chnlDsr?.fileMetadata.appData,
+                        content: {
+                          ...chnlDsr?.fileMetadata.appData.content,
+                          name: newName ?? '',
+                          slug: newSlug ?? '',
+                          description: newDescription ?? '',
+                          showOnHomePage: newShowOnHomePage ?? false,
+                          templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
+                        },
+                      },
+                    },
+                    serverMetadata: {
+                      ...chnlDsr?.serverMetadata,
+                      accessControlList: newAcl,
+                    },
                   });
                   setIsEdit(false);
                   onClose && onClose();
@@ -231,7 +246,11 @@ export const ChannelItem = ({
                   >
                     {t('Cancel')}
                   </ActionButton>
-                  {chnl && !stringGuidsEqual(chnl.channelId, BlogConfig.PublicChannel.channelId) ? (
+                  {chnlDsr &&
+                  !stringGuidsEqual(
+                    chnlDsr.fileMetadata.appData.uniqueId,
+                    BlogConfig.PublicChannelId
+                  ) ? (
                     <ActionButton
                       className="m-2 mr-auto"
                       state={removeStatus}
@@ -240,7 +259,7 @@ export const ChannelItem = ({
                       onClick={async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        await removeChannel(chnl);
+                        await removeChannel(chnlDsr);
                         return false;
                       }}
                       confirmOptions={{

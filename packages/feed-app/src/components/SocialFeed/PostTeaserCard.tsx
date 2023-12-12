@@ -45,7 +45,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   }).fetch;
 
   const channel = externalChannel || internalChannel;
-  const postPath = `preview/${isExternal ? odinId : identity}/${channel?.channelId}/${post.id}`;
+  const postPath = `preview/${isExternal ? odinId : identity}/${channel?.fileMetadata.appData
+    .uniqueId}/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
   return (
@@ -107,8 +108,10 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
             isAuthenticated={true}
             isOwner={true}
             isPublic={
-              channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-              channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+              channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                SecurityGroupType.Anonymous ||
+              channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                SecurityGroupType.Authenticated
             }
           />
         </FakeAnchor>

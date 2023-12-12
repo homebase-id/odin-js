@@ -34,7 +34,9 @@ const PostImageDetail = () => {
   return (
     <>
       <Helmet>
-        <title>{post?.caption || channel?.name || ''} | Homebase</title>
+        <title>
+          {post?.caption || channel?.fileMetadata.appData.content.name || ''} | Homebase
+        </title>
         <meta name="og:title" content={post?.caption ?? ''} />
       </Helmet>
       <div className="fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm">

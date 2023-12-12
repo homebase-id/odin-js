@@ -32,7 +32,10 @@ export const OwnerActions = ({ postFile }: { postFile: DriveSearchResult<PostCon
             onClick: (e) => {
               e.stopPropagation();
               if (postContent.type === 'Article') {
-                const targetUrl = `/owner/feed/edit/${channel?.slug}/${postContent.id}`;
+                const targetUrl = `/owner/feed/edit/${
+                  channel?.fileMetadata.appData.content.slug ||
+                  channel?.fileMetadata.appData.uniqueId
+                }/${postContent.id}`;
                 if (window.location.pathname.startsWith('/owner')) navigate(targetUrl);
                 else window.location.href = targetUrl;
               } else {

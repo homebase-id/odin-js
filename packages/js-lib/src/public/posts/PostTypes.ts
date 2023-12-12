@@ -1,4 +1,3 @@
-import { AccessControlList, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import {
   TargetDrive,
   EmbeddedThumb,
@@ -6,17 +5,17 @@ import {
   RichText,
   ReactionFile,
   ReactionContent,
+  NewDriveSearchResult,
+  SecurityGroupType,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
 export interface ChannelDefinition {
-  channelId: string;
   name: string;
   slug: string;
   description: string;
   showOnHomePage: boolean;
   templateId?: number;
-  acl?: AccessControlList;
 }
 
 export enum ChannelTemplate {
@@ -31,18 +30,32 @@ export class BlogConfig {
   static readonly ChannelDefinitionFileType: number = 103;
   static readonly DriveType: string = '8f448716e34cedf9014145e043ca6612'; //toGuidId('channel_drive');
 
+  static readonly PublicChannelId = toGuidId('public_channel_drive');
+  static readonly PublicChannelSlug = 'public-posts';
   static readonly PublicChannel: ChannelDefinition = {
-    channelId: toGuidId('public_channel_drive'),
     name: 'Public Posts',
-    slug: 'public-posts',
+    slug: BlogConfig.PublicChannelSlug,
     showOnHomePage: true,
     description: '',
     templateId: undefined,
-    acl: { requiredSecurityGroup: SecurityGroupType.Anonymous },
+  };
+
+  static readonly PublicChannelNewDsr: NewDriveSearchResult<ChannelDefinition> = {
+    fileMetadata: {
+      appData: {
+        uniqueId: BlogConfig.PublicChannelId,
+        content: BlogConfig.PublicChannel,
+      },
+    },
+    serverMetadata: {
+      accessControlList: {
+        requiredSecurityGroup: SecurityGroupType.Anonymous,
+      },
+    },
   };
 
   static readonly PublicChannelDrive: TargetDrive = {
-    alias: BlogConfig.PublicChannel.channelId,
+    alias: BlogConfig.PublicChannelId,
     type: BlogConfig.DriveType,
   };
 

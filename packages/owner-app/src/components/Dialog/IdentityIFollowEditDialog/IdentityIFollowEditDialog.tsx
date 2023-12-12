@@ -54,7 +54,7 @@ const IdentityIFollowEditDialog = ({
   const [channelSelection, setChannelSelection] = useState<string[]>(
     identityIFollow?.channels
       ? identityIFollow.channels.map((chnl) => chnl.alias)
-      : socialChannels?.map((chnl) => chnl.channelId) || []
+      : socialChannels?.map((chnl) => chnl.fileMetadata.appData.uniqueId as string) || []
   );
 
   useEffect(() => {
@@ -70,7 +70,9 @@ const IdentityIFollowEditDialog = ({
       setChannelSelection(defaultValues);
     } else if (socialChannels) {
       // All channels
-      setChannelSelection(socialChannels.map((chnl) => chnl.channelId));
+      setChannelSelection(
+        socialChannels.map((chnl) => chnl.fileMetadata.appData.uniqueId as string)
+      );
     }
   }, [identityIFollowLoaded, socialChannels]);
 
@@ -115,24 +117,34 @@ const IdentityIFollowEditDialog = ({
           <ul className="my-5 grid grid-flow-row gap-4">
             {socialChannels?.map((chnl) => {
               const isChecked =
-                channelSelection?.some((selection) => chnl.channelId === selection) || false;
+                channelSelection?.some(
+                  (selection) => chnl.fileMetadata.appData.uniqueId === selection
+                ) || false;
 
               return (
                 <li
-                  key={chnl.channelId}
+                  key={chnl.fileMetadata.appData.uniqueId}
                   className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
                   onClick={() => {
                     if (isChecked)
                       setChannelSelection(
-                        channelSelection.filter((select) => select !== chnl.channelId)
+                        channelSelection.filter(
+                          (select) => select !== chnl.fileMetadata.appData.uniqueId
+                        )
                       );
-                    else setChannelSelection([...channelSelection, chnl.channelId]);
+                    else
+                      setChannelSelection([
+                        ...channelSelection,
+                        chnl.fileMetadata.appData.uniqueId as string,
+                      ]);
                   }}
                 >
                   <Quote className="mr-3 mt-1 h-6 w-6" />
                   <div>
-                    <h2>{chnl.name}</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-600">{chnl.description}</p>
+                    <h2>{chnl.fileMetadata.appData.content.name}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-600">
+                      {chnl.fileMetadata.appData.content.description}
+                    </p>
                   </div>
                   <CheckboxToggle
                     checked={isChecked}

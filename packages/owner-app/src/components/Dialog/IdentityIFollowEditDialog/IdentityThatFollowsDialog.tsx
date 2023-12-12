@@ -7,6 +7,7 @@ import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useFollower } from '../../../hooks/follow/useFollower';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const IdentityThatFollowsDialog = ({
   odinId,
@@ -37,9 +38,11 @@ const IdentityThatFollowsDialog = ({
       ? (follower.channels
           ?.map(
             (chnlRef) =>
-              allChannels?.find((chnl) => stringGuidsEqual(chnl.channelId, chnlRef.alias))
+              allChannels?.find((chnl) =>
+                stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, chnlRef.alias)
+              )
           )
-          .filter(Boolean) as ChannelDefinitionVm[])
+          .filter(Boolean) as DriveSearchResult<ChannelDefinitionVm>[])
       : allChannels;
 
   const dialog = (
@@ -55,13 +58,15 @@ const IdentityThatFollowsDialog = ({
         {channels?.map((chnl) => {
           return (
             <li
-              key={chnl.channelId}
+              key={chnl.fileId}
               className="flex cursor-pointer flex-row items-center rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
             >
               <Quote className="mr-3 mt-1 h-6 w-6" />
               <div>
-                <h2>{chnl.name}</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-600">{chnl.description}</p>
+                <h2>{chnl.fileMetadata.appData.content.name}</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-600">
+                  {chnl.fileMetadata.appData.content.description}
+                </p>
               </div>
             </li>
           );

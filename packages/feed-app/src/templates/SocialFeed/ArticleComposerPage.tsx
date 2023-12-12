@@ -309,7 +309,7 @@ const OptionsDialog = ({
   onCancel: () => void;
   onConfirm: (
     newReactAccess: ReactAccess | undefined,
-    newChannel: ChannelDefinition | undefined
+    newChannel: NewDriveSearchResult<ChannelDefinition> | undefined
   ) => void;
 }) => {
   const target = usePortal('modal-container');
@@ -317,7 +317,9 @@ const OptionsDialog = ({
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
     postFile.fileMetadata.appData.content.reactAccess
   );
-  const [newChannel, setNewChannel] = useState<ChannelDefinition | undefined>();
+  const [newChannel, setNewChannel] = useState<
+    NewDriveSearchResult<ChannelDefinition> | undefined
+  >();
 
   if (!isOpen) return null;
 

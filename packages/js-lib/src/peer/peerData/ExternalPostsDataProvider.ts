@@ -19,7 +19,7 @@ import { getDrivesByTypeOverPeer } from './Drive/PeerDriveProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
 
-const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
+const _internalChannelCache = new Map<string, Promise<DriveSearchResult<ChannelDefinition>[]>>();
 
 export interface RecentsFromConnectionsReturn
   extends CursoredResult<DriveSearchResult<PostContent>[]> {
@@ -32,7 +32,7 @@ export const getSocialFeed = async (
   cursorState?: string,
   ownOption?: {
     ownCursorState?: Record<string, string>;
-    ownChannels?: ChannelDefinition[];
+    ownChannels?: DriveSearchResult<ChannelDefinition>[];
   }
 ): Promise<RecentsFromConnectionsReturn> => {
   const feedDrive = BlogConfig.FeedDrive;
@@ -119,7 +119,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
           return definition;
         })
       )
-    ).filter((channel) => channel !== undefined) as ChannelDefinition[];
+    ).filter((channel) => channel !== undefined) as DriveSearchResult<ChannelDefinition>[];
   })();
 
   _internalChannelCache.set(cacheKey, promise);
@@ -164,7 +164,7 @@ export const getChannelOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   channelId: string
-): Promise<ChannelDefinition | undefined> => {
+): Promise<DriveSearchResult<ChannelDefinition> | undefined> => {
   const targetDrive = getChannelDrive(channelId);
 
   const queryParams: FileQueryParams = {
@@ -183,15 +183,27 @@ export const getChannelOverPeer = async (
   try {
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
-      return (
-        (await getContentFromHeaderOrPayloadOverPeer<ChannelDefinition>(
-          dotYouClient,
-          odinId,
-          targetDrive,
-          dsr,
-          response.includeMetadataHeader
-        )) || undefined
+      const definitionContent = await getContentFromHeaderOrPayloadOverPeer<ChannelDefinition>(
+        dotYouClient,
+        odinId,
+        targetDrive,
+        dsr,
+        response.includeMetadataHeader
       );
+
+      if (!definitionContent) return undefined;
+
+      const file: DriveSearchResult<ChannelDefinition> = {
+        ...dsr,
+        fileMetadata: {
+          ...dsr.fileMetadata,
+          appData: {
+            ...dsr.fileMetadata.appData,
+            content: definitionContent,
+          },
+        },
+      };
+      return file;
     }
   } catch (ex) {
     // Catch al, as targetDrive might be inaccesible (when it doesn't exist yet)
