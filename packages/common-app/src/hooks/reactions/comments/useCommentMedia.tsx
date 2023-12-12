@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { TargetDrive, getDecryptedImageUrl } from '@youfoundation/js-lib/core';
+import { TargetDrive } from '@youfoundation/js-lib/core';
+import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
 import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../../..';
 

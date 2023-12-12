@@ -16,8 +16,6 @@ import {
   EmbeddedThumb,
   PayloadFile,
   ThumbnailFile,
-  createThumbnails,
-  ThumbnailInstruction,
   uploadHeader,
   appendDataToFile,
   NewDriveSearchResult,
@@ -30,6 +28,8 @@ import {
   jsonStringify64,
   stringToUint8Array,
 } from '../../helpers/helpers';
+import { ThumbnailInstruction } from '../../media/MediaTypes';
+import { createThumbnails } from '../../media/Thumbs/ThumbnailProvider';
 import { HomePageAttributes, HomePageThemeFields } from '../../public/public';
 import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';

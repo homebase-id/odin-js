@@ -1,14 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AccessControlList,
-  getDecryptedImageUrl,
   ImageSize,
-  removeImage,
   SecurityGroupType,
   TargetDrive,
+} from '@youfoundation/js-lib/core';
+import {
+  getDecryptedImageUrl,
+  removeImage,
   ThumbnailInstruction,
   uploadImage,
-} from '@youfoundation/js-lib/core';
+} from '@youfoundation/js-lib/media';
 import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
 
 import { useDotYouClient } from '../../..';

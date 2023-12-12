@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { DotYouClient, TargetDrive } from '@youfoundation/js-lib/core';
 import {
-  DotYouClient,
   getDecryptedVideoChunk,
   getDecryptedVideoMetadata,
   getDecryptedVideoUrl,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
-  TargetDrive,
-} from '@youfoundation/js-lib/core';
+} from '@youfoundation/js-lib/media';
 import {
   getDecryptedVideoChunkOverTransit,
   getDecryptedVideoMetadataOverTransit,

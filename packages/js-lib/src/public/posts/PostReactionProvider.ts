@@ -1,6 +1,6 @@
 import { DotYouClient } from '../../core/DotYouClient';
 import { getRandom16ByteArray } from '../../helpers/DataUtil';
-import { createThumbnails } from '../../core/MediaData/Thumbs/ThumbnailProvider';
+import { createThumbnails } from '../../media/Thumbs/ThumbnailProvider';
 import {
   ThumbnailFile,
   UploadFileMetadata,

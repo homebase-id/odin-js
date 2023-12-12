@@ -6,9 +6,9 @@ import {
   stringifyToQueryParams,
   getRandom16ByteArray,
   getLargestThumbOfPayload,
-} from '../../helpers/DataUtil';
-import { ApiType, DotYouClient } from '../DotYouClient';
-import { encryptUrl } from '../InterceptionEncryptionUtil';
+} from '../helpers/DataUtil';
+import { ApiType, DotYouClient } from '../core/DotYouClient';
+import { encryptUrl } from '../core/InterceptionEncryptionUtil';
 import {
   TargetDrive,
   AccessControlList,
@@ -23,7 +23,7 @@ import {
   ImageContentType,
   getThumbBytes,
   getPayloadBytes,
-} from '../core';
+} from '../core/core';
 import {
   ImageMetadata,
   MediaUploadMeta,
@@ -32,7 +32,7 @@ import {
   MediaConfig,
   ThumbnailMeta,
 } from './MediaTypes';
-import { DEFAULT_PAYLOAD_KEY } from '../DriveData/Upload/UploadHelpers';
+import { DEFAULT_PAYLOAD_KEY } from '../core/DriveData/Upload/UploadHelpers';
 
 export const uploadImage = async (
   dotYouClient: DotYouClient,

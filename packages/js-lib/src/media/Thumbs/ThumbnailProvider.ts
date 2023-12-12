@@ -1,5 +1,5 @@
-import { uint8ArrayToBase64 } from '../../../helpers/DataUtil';
-import { ImageContentType, ImageSize, ThumbnailFile, EmbeddedThumb } from '../../core';
+import { uint8ArrayToBase64 } from '../../helpers/DataUtil';
+import { ImageContentType, ImageSize, ThumbnailFile, EmbeddedThumb } from '../../core/core';
 import { ThumbnailInstruction } from '../MediaTypes';
 import { fromBlob } from './ImageResizer';
 

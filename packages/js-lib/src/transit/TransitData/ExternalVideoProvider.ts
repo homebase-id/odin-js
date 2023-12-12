@@ -1,11 +1,7 @@
 import { DotYouClient } from '../../core/DotYouClient';
-import {
-  PlainVideoMetadata,
-  SegmentedVideoMetadata,
-  SystemFileType,
-  TargetDrive,
-} from '../../core/core';
+import { SystemFileType, TargetDrive } from '../../core/core';
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/helpers';
+import { PlainVideoMetadata, SegmentedVideoMetadata } from '../../media/media';
 import {
   getFileHeaderOverTransitByGlobalTransitId,
   getPayloadBytesOverTransitByGlobalTransitId,

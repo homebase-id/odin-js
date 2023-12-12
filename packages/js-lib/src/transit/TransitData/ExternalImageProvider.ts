@@ -1,17 +1,12 @@
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
-import {
-  TargetDrive,
-  SystemFileType,
-  ThumbnailMeta,
-  ImageSize,
-  ImageContentType,
-  tinyThumbSize,
-} from '../../core/core';
+import { TargetDrive, SystemFileType, ImageSize, ImageContentType } from '../../core/core';
 import {
   getLargestThumbOfPayload,
   stringifyToQueryParams,
   uint8ArrayToBase64,
 } from '../../helpers/DataUtil';
+import { ThumbnailMeta } from '../../media/MediaTypes';
+import { tinyThumbSize } from '../../media/media';
 import {
   getFileHeaderBytesOverTransitByGlobalTransitId,
   getFileHeaderOverTransitByGlobalTransitId,

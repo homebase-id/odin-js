@@ -13,6 +13,7 @@ export default defineConfig({
     lib: {
       entry: {
         core: path.resolve(__dirname, 'src/core/core.ts'),
+        media: path.resolve(__dirname, 'src/media/media.ts'),
         helpers: path.resolve(__dirname, 'src/helpers/helpers.tsx'),
         network: path.resolve(__dirname, 'src/network/network.ts'),
         profile: path.resolve(__dirname, 'src/profile/profile.ts'),

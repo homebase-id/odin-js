@@ -1,11 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import {
-  TargetDrive,
-  DotYouClient,
-  getDecryptedThumbnailMeta,
-  SystemFileType,
-} from '@youfoundation/js-lib/core';
+import { TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
+import { getDecryptedThumbnailMeta } from '@youfoundation/js-lib/media';
 import { getDecryptedThumbnailMetaOverTransit } from '@youfoundation/js-lib/transit';
 
 export const useTinyThumb = (

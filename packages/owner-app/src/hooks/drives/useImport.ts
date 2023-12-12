@@ -3,13 +3,12 @@ import {
   TargetDrive,
   ensureDrive,
   getFileHeader,
-  uploadImage,
-  ImageContentType,
   UploadInstructionSet,
   UploadFileMetadata,
   uploadFile,
   DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
+import { uploadImage } from '@youfoundation/js-lib/media';
 import {
   base64ToUint8Array,
   jsonStringify64,
