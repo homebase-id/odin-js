@@ -13,7 +13,7 @@ import { ApiType, DotYouClient, ImageContentType } from '@youfoundation/js-lib/c
 import {
   getProfileAttributesOverPeer,
   getDecryptedImageDataOverPeer,
-} from '@youfoundation/js-lib/transit';
+} from '@youfoundation/js-lib/peer';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import { GetFile, GetProfileImage } from '@youfoundation/js-lib/public';
 import { RawContact, getDetailedConnectionInfo } from '@youfoundation/js-lib/network';

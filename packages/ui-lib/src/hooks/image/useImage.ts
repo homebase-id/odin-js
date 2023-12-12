@@ -5,7 +5,7 @@ import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
 import {
   getDecryptedImageUrlOverPeer,
   getDecryptedImageUrlOverPeerByGlobalTransitId,
-} from '@youfoundation/js-lib/transit';
+} from '@youfoundation/js-lib/peer';
 
 interface ImageData {
   url: string;

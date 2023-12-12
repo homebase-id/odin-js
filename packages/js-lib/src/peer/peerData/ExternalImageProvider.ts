@@ -12,12 +12,12 @@ import {
   getFileHeaderOverPeerByGlobalTransitId,
   getPayloadBytesOverPeerByGlobalTransitId,
   getThumbBytesOverPeerByGlobalTransitId,
-} from '../transit';
+} from '../peer';
 import {
   getFileHeaderOverPeer,
   getPayloadBytesOverPeer,
   getThumbBytesOverPeer,
-} from './File/TransitFileProvider';
+} from './File/PeerFileProvider';
 
 export const getDecryptedThumbnailMetaOverPeer = async (
   dotYouClient: DotYouClient,

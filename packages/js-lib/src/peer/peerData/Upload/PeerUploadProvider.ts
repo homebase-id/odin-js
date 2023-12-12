@@ -12,7 +12,7 @@ import {
   TransferStatus,
   PayloadFile,
 } from '../../../core/core';
-import { TransitInstructionSet, TransitUploadResult } from '../TransitTypes';
+import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 
 const isDebug = hasDebugFlag();

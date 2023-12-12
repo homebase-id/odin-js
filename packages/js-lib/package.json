@@ -17,8 +17,8 @@
     "profile.d.ts",
     "public.js",
     "public.d.ts",
-    "transit.js",
-    "transit.d.ts",
+    "peer.js",
+    "peer.d.ts",
     "auth.js",
     "auth.d.ts"
   ],
@@ -50,9 +50,9 @@
       "import": "./dist/public.js",
       "require": "./dist/public.cjs"
     },
-    "./transit": {
-      "import": "./dist/transit.js",
-      "require": "./dist/transit.cjs"
+    "./peer": {
+      "import": "./dist/peer.js",
+      "require": "./dist/peer.cjs"
     },
     "./auth": {
       "import": "./dist/auth.js",

@@ -18,7 +18,7 @@ export default defineConfig({
         network: path.resolve(__dirname, 'src/network/network.ts'),
         profile: path.resolve(__dirname, 'src/profile/profile.ts'),
         public: path.resolve(__dirname, 'src/public/public.ts'),
-        transit: path.resolve(__dirname, 'src/transit/transit.ts'),
+        peer: path.resolve(__dirname, 'src/peer/peer.ts'),
 
         auth: path.resolve(__dirname, 'src/auth/auth.ts'),
       },

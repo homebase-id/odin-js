@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
-import { getChannelOverPeer } from '@youfoundation/js-lib/transit';
+import { getChannelOverPeer } from '@youfoundation/js-lib/peer';
 import { useDotYouClient } from '../../..';
 
 interface useSocialChannelProps {

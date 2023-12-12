@@ -13,7 +13,7 @@ import {
   getDecryptedVideoMetadataOverPeerByGlobalTransitId,
   getDecryptedVideoUrlOverPeer,
   getDecryptedVideoUrlOverPeerByGlobalTransitId,
-} from '@youfoundation/js-lib/transit';
+} from '@youfoundation/js-lib/peer';
 
 export const useVideo = (
   dotYouClient: DotYouClient,

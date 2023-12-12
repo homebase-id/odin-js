@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
-import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/transit';
+import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/peer';
 import { useDotYouClient } from '../../../..';
 
 export const useCommentMedia = ({

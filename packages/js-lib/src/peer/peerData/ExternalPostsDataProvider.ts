@@ -15,9 +15,9 @@ import {
   getRecentPosts,
   getChannelDrive,
 } from '../../public/public';
-import { getDrivesByTypeOverPeer } from './Drive/TransitDriveProvider';
-import { getContentFromHeaderOrPayloadOverPeer } from './File/TransitFileProvider';
-import { queryBatchOverPeer } from './Query/TransitDriveQueryProvider';
+import { getDrivesByTypeOverPeer } from './Drive/PeerDriveProvider';
+import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
+import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 

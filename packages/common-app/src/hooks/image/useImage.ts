@@ -11,7 +11,7 @@ import {
   ThumbnailInstruction,
   uploadImage,
 } from '@youfoundation/js-lib/media';
-import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/transit';
+import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/peer';
 
 import { useDotYouClient } from '../../..';
 

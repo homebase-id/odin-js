@@ -3,8 +3,8 @@ import { BuiltInProfiles } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
 import { Attribute, AttributeConfig } from '../../profile/profile';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { queryBatchOverPeer } from './Query/TransitDriveQueryProvider';
-import { getContentFromHeaderOrPayloadOverPeer } from './File/TransitFileProvider';
+import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
+import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { DriveSearchResult, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 
 export const getProfileAttributesOverPeer = async (

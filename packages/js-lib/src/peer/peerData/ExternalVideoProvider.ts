@@ -5,8 +5,8 @@ import { PlainVideoMetadata, SegmentedVideoMetadata } from '../../media/media';
 import {
   getFileHeaderOverPeerByGlobalTransitId,
   getPayloadBytesOverPeerByGlobalTransitId,
-} from '../transit';
-import { getFileHeaderOverPeer, getPayloadBytesOverPeer } from './File/TransitFileProvider';
+} from '../peer';
+import { getFileHeaderOverPeer, getPayloadBytesOverPeer } from './File/PeerFileProvider';
 
 export const getDecryptedVideoChunkOverPeer = async (
   dotYouClient: DotYouClient,
