@@ -8,11 +8,11 @@ import {
   SegmentedVideoMetadata,
 } from '@youfoundation/js-lib/media';
 import {
-  getDecryptedVideoChunkOverTransit,
-  getDecryptedVideoMetadataOverTransit,
-  getDecryptedVideoMetadataOverTransitByGlobalTransitId,
-  getDecryptedVideoUrlOverTransit,
-  getDecryptedVideoUrlOverTransitByGlobalTransitId,
+  getDecryptedVideoChunkOverPeer,
+  getDecryptedVideoMetadataOverPeer,
+  getDecryptedVideoMetadataOverPeerByGlobalTransitId,
+  getDecryptedVideoUrlOverPeer,
+  getDecryptedVideoUrlOverPeerByGlobalTransitId,
 } from '@youfoundation/js-lib/transit';
 
 export const useVideo = (
@@ -44,14 +44,14 @@ export const useVideo = (
     const fetchMetaPromise = async () => {
       return odinId !== localHost
         ? videoGlobalTransitId
-          ? await getDecryptedVideoMetadataOverTransitByGlobalTransitId(
+          ? await getDecryptedVideoMetadataOverPeerByGlobalTransitId(
               dotYouClient,
               odinId,
               videoDrive,
               videoGlobalTransitId,
               videoFileKey
             )
-          : await getDecryptedVideoMetadataOverTransit(
+          : await getDecryptedVideoMetadataOverPeer(
               dotYouClient,
               odinId,
               videoDrive,
@@ -90,7 +90,7 @@ export const useVideo = (
         chunkEnd,
       ] as const;
       return odinId && odinId !== localHost
-        ? getDecryptedVideoChunkOverTransit(dotYouClient, odinId, ...params)
+        ? getDecryptedVideoChunkOverPeer(dotYouClient, odinId, ...params)
         : getDecryptedVideoChunk(dotYouClient, ...params);
     },
   };
@@ -125,7 +125,7 @@ export const useVideoUrl = (
     const fetchMetaPromise = async () => {
       return odinId !== localHost
         ? videoGlobalTransitId
-          ? await getDecryptedVideoUrlOverTransitByGlobalTransitId(
+          ? await getDecryptedVideoUrlOverPeerByGlobalTransitId(
               dotYouClient,
               odinId,
               videoDrive,
@@ -134,7 +134,7 @@ export const useVideoUrl = (
               undefined,
               fileSizeLimit
             )
-          : await getDecryptedVideoUrlOverTransit(
+          : await getDecryptedVideoUrlOverPeer(
               dotYouClient,
               odinId,
               videoDrive,

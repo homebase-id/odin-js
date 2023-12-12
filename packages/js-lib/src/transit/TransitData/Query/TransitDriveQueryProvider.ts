@@ -12,7 +12,7 @@ interface TransitQueryBatchRequest {
   odinId: string;
 }
 
-export const queryBatchOverTransit = async (
+export const queryBatchOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   params: FileQueryParams,

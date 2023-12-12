@@ -110,7 +110,7 @@ export const getDecryptedVideoChunk = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  _globalTransitId: string | undefined, // Kept for compatibility with ...overTransit signature
+  _globalTransitId: string | undefined, // Kept for compatibility with ...OverPeer signature
   key: string,
   chunkStart?: number,
   chunkEnd?: number,

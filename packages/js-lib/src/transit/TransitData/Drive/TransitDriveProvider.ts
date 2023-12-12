@@ -3,7 +3,7 @@ import { TargetDrive, SystemFileType, PagedResult, DriveDefinition } from '../..
 
 /// Drive methods:
 //returns all drives for a given type
-export const getDrivesByTypeOverTransit = async (
+export const getDrivesByTypeOverPeer = async (
   dotYouClient: DotYouClient,
   type: string,
   pageNumber: number,

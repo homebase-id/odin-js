@@ -1,5 +1,5 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
-import { RecentsFromConnectionsReturn, getPostOverTransit } from '@youfoundation/js-lib/transit';
+import { RecentsFromConnectionsReturn, getPostOverPeer } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../..';
 
 interface useSocialPostProps {
@@ -25,7 +25,7 @@ export const useSocialPost = ({ odinId, channelId, postId }: useSocialPostProps)
       if (post) return post;
     }
 
-    return await getPostOverTransit(dotYouClient, odinId, channelId, postId);
+    return await getPostOverPeer(dotYouClient, odinId, channelId, postId);
   };
 
   return {

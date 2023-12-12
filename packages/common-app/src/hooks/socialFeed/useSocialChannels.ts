@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getChannelsOverTransit } from '@youfoundation/js-lib/transit';
+import { getChannelsOverPeer } from '@youfoundation/js-lib/transit';
 import { useDotYouClient } from '../../..';
 
 interface useSocialChannelsProps {
@@ -13,7 +13,7 @@ export const useSocialChannels = ({ odinId }: useSocialChannelsProps) => {
     if (!odinId) {
       return;
     }
-    return await getChannelsOverTransit(dotYouClient, odinId);
+    return await getChannelsOverPeer(dotYouClient, odinId);
   };
 
   return {

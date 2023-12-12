@@ -3,12 +3,12 @@ import { SystemFileType, TargetDrive } from '../../core/core';
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/helpers';
 import { PlainVideoMetadata, SegmentedVideoMetadata } from '../../media/media';
 import {
-  getFileHeaderOverTransitByGlobalTransitId,
-  getPayloadBytesOverTransitByGlobalTransitId,
+  getFileHeaderOverPeerByGlobalTransitId,
+  getPayloadBytesOverPeerByGlobalTransitId,
 } from '../transit';
-import { getFileHeaderOverTransit, getPayloadBytesOverTransit } from './File/TransitFileProvider';
+import { getFileHeaderOverPeer, getPayloadBytesOverPeer } from './File/TransitFileProvider';
 
-export const getDecryptedVideoChunkOverTransit = async (
+export const getDecryptedVideoChunkOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -20,7 +20,7 @@ export const getDecryptedVideoChunkOverTransit = async (
   systemFileType?: SystemFileType
 ): Promise<Uint8Array | null> => {
   const payload = globalTransitId
-    ? await getPayloadBytesOverTransitByGlobalTransitId(
+    ? await getPayloadBytesOverPeerByGlobalTransitId(
         dotYouClient,
         odinId,
         targetDrive,
@@ -32,7 +32,7 @@ export const getDecryptedVideoChunkOverTransit = async (
           chunkEnd,
         }
       )
-    : await getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, key, {
+    : await getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
         systemFileType,
         chunkStart,
         chunkEnd,
@@ -41,7 +41,7 @@ export const getDecryptedVideoChunkOverTransit = async (
   return payload?.bytes || null;
 };
 
-export const getDecryptedVideoMetadataOverTransit = async (
+export const getDecryptedVideoMetadataOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -49,7 +49,7 @@ export const getDecryptedVideoMetadataOverTransit = async (
   fileKey: string,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+  const fileHeader = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
     systemFileType,
   });
   if (!fileHeader) return undefined;
@@ -61,7 +61,7 @@ export const getDecryptedVideoMetadataOverTransit = async (
   return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
 };
 
-export const getDecryptedVideoMetadataOverTransitByGlobalTransitId = async (
+export const getDecryptedVideoMetadataOverPeerByGlobalTransitId = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -69,7 +69,7 @@ export const getDecryptedVideoMetadataOverTransitByGlobalTransitId = async (
   fileKey: string,
   systemFileType?: SystemFileType
 ) => {
-  const fileHeader = await getFileHeaderOverTransitByGlobalTransitId(
+  const fileHeader = await getFileHeaderOverPeerByGlobalTransitId(
     dotYouClient,
     odinId,
     targetDrive,
@@ -87,7 +87,7 @@ export const getDecryptedVideoMetadataOverTransitByGlobalTransitId = async (
   return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
 };
 
-export const getDecryptedVideoUrlOverTransit = async (
+export const getDecryptedVideoUrlOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -96,7 +96,7 @@ export const getDecryptedVideoUrlOverTransit = async (
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
-  const meta = await getFileHeaderOverTransit(dotYouClient, odinId, targetDrive, fileId, {
+  const meta = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
     systemFileType,
   });
   if (!meta?.fileMetadata.isEncrypted) {
@@ -110,7 +110,7 @@ export const getDecryptedVideoUrlOverTransit = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, fileId, key, {
+  return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
     systemFileType,
     chunkStart: fileSizeLimit ? 0 : undefined,
     chunkEnd: fileSizeLimit,
@@ -120,7 +120,7 @@ export const getDecryptedVideoUrlOverTransit = async (
     return url;
   });
 };
-export const getDecryptedVideoUrlOverTransitByGlobalTransitId = async (
+export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -129,7 +129,7 @@ export const getDecryptedVideoUrlOverTransitByGlobalTransitId = async (
   systemFileType?: SystemFileType,
   fileSizeLimit?: number
 ): Promise<string> => {
-  const meta = await getFileHeaderOverTransitByGlobalTransitId(
+  const meta = await getFileHeaderOverPeerByGlobalTransitId(
     dotYouClient,
     odinId,
     targetDrive,
@@ -149,7 +149,7 @@ export const getDecryptedVideoUrlOverTransitByGlobalTransitId = async (
   }
 
   // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getPayloadBytesOverTransit(dotYouClient, odinId, targetDrive, meta?.fileId, key, {
+  return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, meta?.fileId, key, {
     systemFileType,
     chunkStart: fileSizeLimit ? 0 : undefined,
     chunkEnd: fileSizeLimit,

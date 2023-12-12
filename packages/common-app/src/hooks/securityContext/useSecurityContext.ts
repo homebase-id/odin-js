@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   ApiType,
   getSecurityContext,
-  getSecurityContextOverTransit,
+  getSecurityContextOverPeer,
 } from '@youfoundation/js-lib/core';
 import { useDotYouClient } from '../../..';
 
@@ -17,7 +17,7 @@ export const useSecurityContext = (odinId?: string, isEnabled?: boolean) => {
       (getApiType() === ApiType.App && odinId === dotYouClient.getIdentity())
     )
       return await getSecurityContext(dotYouClient);
-    else return await getSecurityContextOverTransit(dotYouClient, odinId);
+    else return await getSecurityContextOverPeer(dotYouClient, odinId);
   };
 
   return {

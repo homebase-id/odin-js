@@ -41,7 +41,7 @@ interface GetThumbRequest extends GetFileRequest {
 
 const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
 
-export const getPayloadAsJsonOverTransitByGlobalTransitId = async <T>(
+export const getPayloadAsJsonOverPeerByGlobalTransitId = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -54,7 +54,7 @@ export const getPayloadAsJsonOverTransitByGlobalTransitId = async <T>(
 ): Promise<T | null> => {
   const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
 
-  return getPayloadBytesOverTransitByGlobalTransitId(
+  return getPayloadBytesOverPeerByGlobalTransitId(
     dotYouClient,
     odinId,
     targetDrive,
@@ -68,7 +68,7 @@ export const getPayloadAsJsonOverTransitByGlobalTransitId = async <T>(
   ).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
-export const getPayloadBytesOverTransitByGlobalTransitId = async (
+export const getPayloadBytesOverPeerByGlobalTransitId = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -142,12 +142,12 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getPayloadBytesOverTransitByGlobalTransitId]', error);
+      console.error('[DotYouCore-js:getPayloadBytesOverPeerByGlobalTransitId]', error);
       return null;
     });
 };
 
-export const getThumbBytesOverTransitByGlobalTransitId = async (
+export const getThumbBytesOverPeerByGlobalTransitId = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -195,12 +195,12 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getThumbBytesOverTransitByGlobalTransitId]', error);
+      console.error('[DotYouCore-js:getThumbBytesOverPeerByGlobalTransitId]', error);
       return null;
     });
 };
 
-export const getFileHeaderOverTransitByGlobalTransitId = async <T = string>(
+export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -208,7 +208,7 @@ export const getFileHeaderOverTransitByGlobalTransitId = async <T = string>(
   options?: { systemFileType?: SystemFileType }
 ): Promise<DriveSearchResult<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
-  const fileHeader = await getFileHeaderBytesOverTransitByGlobalTransitId(
+  const fileHeader = await getFileHeaderBytesOverPeerByGlobalTransitId(
     dotYouClient,
     odinId,
     targetDrive,
@@ -234,7 +234,7 @@ export const getFileHeaderOverTransitByGlobalTransitId = async <T = string>(
   return typedFileHeader;
 };
 
-export const getFileHeaderBytesOverTransitByGlobalTransitId = async (
+export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -281,7 +281,7 @@ export const getFileHeaderBytesOverTransitByGlobalTransitId = async (
     })
     .catch((error) => {
       if (error.response?.status === 404) return null;
-      console.error('[DotYouCore-js:getFileHeaderBytesOverTransitByGlobalTransitId]', error);
+      console.error('[DotYouCore-js:getFileHeaderBytesOverPeerByGlobalTransitId]', error);
       throw error;
     });
 
@@ -290,7 +290,7 @@ export const getFileHeaderBytesOverTransitByGlobalTransitId = async (
   return promise;
 };
 
-export const getContentFromHeaderOrPayloadOverTransitByGlobalTransitId = async <T>(
+export const getContentFromHeaderOrPayloadOverPeerByGlobalTransitId = async <T>(
   dotYouClient: DotYouClient,
   odinId: string,
   targetDrive: TargetDrive,
@@ -316,7 +316,7 @@ export const getContentFromHeaderOrPayloadOverTransitByGlobalTransitId = async <
       decryptedJsonContent = await decryptJsonContent(fileMetadata, keyHeader);
     } else {
       // When contentIsComplete but includesJsonContent == false the query before was done without including the content; So we just get and parse
-      const fileHeader = await getFileHeaderOverTransitByGlobalTransitId(
+      const fileHeader = await getFileHeaderOverPeerByGlobalTransitId(
         dotYouClient,
         odinId,
         targetDrive,
@@ -330,7 +330,7 @@ export const getContentFromHeaderOrPayloadOverTransitByGlobalTransitId = async <
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
-    return await getPayloadAsJsonOverTransitByGlobalTransitId<T>(
+    return await getPayloadAsJsonOverPeerByGlobalTransitId<T>(
       dotYouClient,
       odinId,
       targetDrive,

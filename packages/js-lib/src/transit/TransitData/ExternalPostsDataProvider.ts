@@ -15,9 +15,9 @@ import {
   getRecentPosts,
   getChannelDrive,
 } from '../../public/public';
-import { getDrivesByTypeOverTransit } from './Drive/TransitDriveProvider';
-import { getContentFromHeaderOrPayloadOverTransit } from './File/TransitFileProvider';
-import { queryBatchOverTransit } from './Query/TransitDriveQueryProvider';
+import { getDrivesByTypeOverPeer } from './Drive/TransitDriveProvider';
+import { getContentFromHeaderOrPayloadOverPeer } from './File/TransitFileProvider';
+import { queryBatchOverPeer } from './Query/TransitDriveQueryProvider';
 
 const _internalChannelCache = new Map<string, Promise<ChannelDefinition[]>>();
 
@@ -94,7 +94,7 @@ export const getSocialFeed = async (
   };
 };
 
-export const getChannelsOverTransit = async (dotYouClient: DotYouClient, odinId: string) => {
+export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: string) => {
   const cacheKey = `${odinId}`;
   if (_internalChannelCache.has(cacheKey)) {
     const cacheData = await _internalChannelCache.get(cacheKey);
@@ -103,13 +103,7 @@ export const getChannelsOverTransit = async (dotYouClient: DotYouClient, odinId:
     }
   }
 
-  const drives = await getDrivesByTypeOverTransit(
-    dotYouClient,
-    BlogConfig.DriveType,
-    1,
-    1000,
-    odinId
-  );
+  const drives = await getDrivesByTypeOverPeer(dotYouClient, BlogConfig.DriveType, 1, 1000, odinId);
   const channelHeaders = drives.results.map((drive) => {
     return {
       id: drive.targetDriveInfo.alias,
@@ -121,7 +115,7 @@ export const getChannelsOverTransit = async (dotYouClient: DotYouClient, odinId:
     return (
       await Promise.all(
         channelHeaders.map(async (header) => {
-          const definition = await getChannelOverTransit(dotYouClient, odinId, header.id);
+          const definition = await getChannelOverPeer(dotYouClient, odinId, header.id);
           return definition;
         })
       )
@@ -133,7 +127,7 @@ export const getChannelsOverTransit = async (dotYouClient: DotYouClient, odinId:
   return await promise;
 };
 
-export const getRecentsOverTransit = async (
+export const getRecentsOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   maxRecords = 10,
@@ -153,7 +147,7 @@ export const getRecentsOverTransit = async (
     includeMetadataHeader: true,
   };
 
-  const result = await queryBatchOverTransit(dotYouClient, odinId, queryParams, ro);
+  const result = await queryBatchOverPeer(dotYouClient, odinId, queryParams, ro);
 
   const posts = (
     await Promise.all(
@@ -166,7 +160,7 @@ export const getRecentsOverTransit = async (
   return { cursorState: result.cursorState, results: posts };
 };
 
-export const getChannelOverTransit = async (
+export const getChannelOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   channelId: string
@@ -184,13 +178,13 @@ export const getChannelOverTransit = async (
     includeMetadataHeader: true,
   };
 
-  const response = await queryBatchOverTransit(dotYouClient, odinId, queryParams, ro);
+  const response = await queryBatchOverPeer(dotYouClient, odinId, queryParams, ro);
 
   try {
     if (response.searchResults.length == 1) {
       const dsr = response.searchResults[0];
       return (
-        (await getContentFromHeaderOrPayloadOverTransit<ChannelDefinition>(
+        (await getContentFromHeaderOrPayloadOverPeer<ChannelDefinition>(
           dotYouClient,
           odinId,
           targetDrive,
@@ -204,13 +198,13 @@ export const getChannelOverTransit = async (
   }
 };
 
-export const getPostOverTransit = async (
+export const getPostOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   channelId: string,
   postId: string
 ) => {
-  const channel = await getChannelOverTransit(dotYouClient, odinId, channelId);
+  const channel = await getChannelOverPeer(dotYouClient, odinId, channelId);
   if (!channel) {
     return;
   }
@@ -222,7 +216,7 @@ export const getPostOverTransit = async (
     fileType: [BlogConfig.PostFileType],
   };
 
-  const response = await queryBatchOverTransit(dotYouClient, odinId, params);
+  const response = await queryBatchOverPeer(dotYouClient, odinId, params);
 
   if (response.searchResults.length >= 1) {
     if (response.searchResults.length > 1) {
@@ -243,7 +237,7 @@ const dsrToPostFile = async <T extends PostContent>(
   includeMetadataHeader: boolean
 ): Promise<DriveSearchResult<T> | undefined> => {
   try {
-    const postContent = await getContentFromHeaderOrPayloadOverTransit<T>(
+    const postContent = await getContentFromHeaderOrPayloadOverPeer<T>(
       dotYouClient,
       odinId,
       targetDrive,

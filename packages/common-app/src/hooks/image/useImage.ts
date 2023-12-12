@@ -11,7 +11,7 @@ import {
   ThumbnailInstruction,
   uploadImage,
 } from '@youfoundation/js-lib/media';
-import { getDecryptedImageUrlOverTransit } from '@youfoundation/js-lib/transit';
+import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/transit';
 
 import { useDotYouClient } from '../../..';
 
@@ -55,7 +55,7 @@ export const useImage = (
       return {
         url:
           odinId !== localHost
-            ? await getDecryptedImageUrlOverTransit(
+            ? await getDecryptedImageUrlOverPeer(
                 dotYouClient,
                 odinId,
                 imageDrive,

@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ImageSize, TargetDrive, DotYouClient, SystemFileType } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
 import {
-  getDecryptedImageUrlOverTransit,
-  getDecryptedImageUrlOverTransitByGlobalTransitId,
+  getDecryptedImageUrlOverPeer,
+  getDecryptedImageUrlOverPeerByGlobalTransitId,
 } from '@youfoundation/js-lib/transit';
 
 interface ImageData {
@@ -149,7 +149,7 @@ export const useImage = (
         url:
           odinId !== localHost
             ? imageGlobalTransitId
-              ? await getDecryptedImageUrlOverTransitByGlobalTransitId(
+              ? await getDecryptedImageUrlOverPeerByGlobalTransitId(
                   dotYouClient,
                   odinId,
                   imageDrive,
@@ -160,7 +160,7 @@ export const useImage = (
                   systemFileType,
                   lastModified
                 )
-              : await getDecryptedImageUrlOverTransit(
+              : await getDecryptedImageUrlOverPeer(
                   dotYouClient,
                   odinId,
                   imageDrive,

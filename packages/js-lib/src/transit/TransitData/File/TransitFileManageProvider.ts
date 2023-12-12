@@ -2,7 +2,7 @@ import { DotYouClient } from '../../../core/DotYouClient';
 import { TargetDrive, SystemFileType } from '../../../core/core';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 
-export const deleteFileOverTransit = async (
+export const deleteFileOverPeer = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   globalTransitId: string,
@@ -33,7 +33,7 @@ export const deleteFileOverTransit = async (
       return false;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:deleteFileOverTransit]', error);
+      console.error('[DotYouCore-js:deleteFileOverPeer]', error);
       throw error;
     });
 };

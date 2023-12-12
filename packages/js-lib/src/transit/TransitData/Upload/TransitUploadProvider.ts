@@ -18,7 +18,7 @@ import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 const isDebug = hasDebugFlag();
 
 /// Upload methods
-export const uploadFileOverTransit = async (
+export const uploadFileOverPeer = async (
   dotYouClient: DotYouClient,
   instructions: TransitInstructionSet,
   metadata: UploadFileMetadata,
@@ -37,7 +37,7 @@ export const uploadFileOverTransit = async (
     );
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  const response = await uploadFileOverTransitUsingKeyHeader(
+  const response = await uploadFileOverPeerUsingKeyHeader(
     dotYouClient,
     keyHeader,
     instructions,
@@ -62,7 +62,7 @@ const failedTransferStatuses = [
   TransferStatus?.TotalRejectionClientShouldRetry.toString().toLowerCase(),
 ];
 
-export const uploadFileOverTransitUsingKeyHeader = async (
+export const uploadFileOverPeerUsingKeyHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: KeyHeader | undefined,
   instructions: TransitInstructionSet,
@@ -117,7 +117,7 @@ export const uploadFileOverTransitUsingKeyHeader = async (
       return response.data;
     })
     .catch((error) => {
-      console.error('[DotYouCore-js:uploadFileOverTransitUsingKeyHeader]', error);
+      console.error('[DotYouCore-js:uploadFileOverPeerUsingKeyHeader]', error);
       throw error;
     });
 };
