@@ -67,7 +67,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
 export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
   const fileData = await GetFile(dotYouClient, 'sitedata.json');
   if (fileData) {
-    let channels: DriveSearchResult<ChannelDefinition>[] = [];
+    let channels: DriveSearchResult<ChannelDefinitionVm>[] = [];
 
     fileData.forEach((entry) => {
       const entries = entry.filter(
@@ -93,7 +93,7 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
                 },
               },
             },
-          } as DriveSearchResult<ChannelDefinition>;
+          } as DriveSearchResult<ChannelDefinitionVm>;
         }),
       ];
     });
