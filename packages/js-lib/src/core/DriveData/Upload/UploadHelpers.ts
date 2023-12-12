@@ -72,7 +72,8 @@ export const encryptMetaData = async (
 
 export const buildManifest = (
   payloads: PayloadFile[] | undefined,
-  thumbnails: ThumbnailFile[] | undefined
+  thumbnails: ThumbnailFile[] | undefined,
+  generateIv?: boolean
 ): UploadManifest => {
   return {
     PayloadDescriptors: payloads?.map((payload) => ({
@@ -85,6 +86,7 @@ export const buildManifest = (
           pixelWidth: thumb.pixelWidth,
           pixelHeight: thumb.pixelHeight,
         })),
+      iv: generateIv ? getRandom16ByteArray() : undefined,
     })),
   };
 };
@@ -120,7 +122,8 @@ export const buildFormData = async (
   encryptedDescriptor: Uint8Array | undefined,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  keyHeader: KeyHeader | undefined
+  keyHeader: KeyHeader | undefined,
+  manifest: UploadManifest | undefined
 ) => {
   const data = new FormData();
   const instructionType =
@@ -133,7 +136,12 @@ export const buildFormData = async (
       const payload = payloads[i];
 
       const encryptedPayload = keyHeader
-        ? await encryptWithKeyheader(payload.payload, keyHeader)
+        ? await encryptWithKeyheader(payload.payload, {
+            ...keyHeader,
+            iv:
+              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === payload.key)?.iv ||
+              keyHeader.iv,
+          })
         : payload.payload;
 
       data.append('payload', encryptedPayload, payload.key);
@@ -145,7 +153,12 @@ export const buildFormData = async (
       const thumb = thumbnails[i];
 
       const encryptedThumb = keyHeader
-        ? await encryptWithKeyheader(thumb.payload, keyHeader)
+        ? await encryptWithKeyheader(thumb.payload, {
+            ...keyHeader,
+            iv:
+              manifest?.PayloadDescriptors?.find((p) => p.payloadKey === thumb.key)?.iv ||
+              keyHeader.iv,
+          })
         : thumb.payload;
 
       data.append('thumbnail', encryptedThumb, thumb.key + thumb.pixelWidth);

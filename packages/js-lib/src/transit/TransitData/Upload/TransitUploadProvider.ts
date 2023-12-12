@@ -1,9 +1,9 @@
 import { DotYouClient, assertIfDotYouClientIsOwner } from '../../../core/DotYouClient';
 import {
   GenerateKeyHeader,
-  encryptMetaData,
   buildDescriptor,
   buildFormData,
+  buildManifest,
 } from '../../../core/DriveData/Upload/UploadHelpers';
 import {
   KeyHeader,
@@ -14,6 +14,7 @@ import {
 } from '../../../core/core';
 import { TransitInstructionSet, TransitUploadResult } from '../TransitTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
+import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 
 const isDebug = hasDebugFlag();
 
@@ -37,14 +38,62 @@ export const uploadFileOverTransit = async (
     );
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  const response = await uploadFileOverTransitUsingKeyHeader(
+  const strippedInstructions: TransitInstructionSet = {
+    transferIv: instructions.transferIv,
+    overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
+    remoteTargetDrive: instructions.remoteTargetDrive,
+    schedule: instructions.schedule,
+    recipients: instructions.recipients,
+  };
+
+  const manifest = buildManifest(payloads, thumbnails, encrypt);
+  const instructionsWithManifest = {
+    ...strippedInstructions,
+    manifest,
+    transferIv: instructions.transferIv || getRandom16ByteArray(),
+  };
+
+  const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
     keyHeader,
-    instructions,
-    metadata,
-    payloads,
-    thumbnails
+    instructionsWithManifest,
+    metadata
   );
+
+  const data = await buildFormData(
+    strippedInstructions,
+    encryptedDescriptor,
+    payloads,
+    thumbnails,
+    keyHeader,
+    manifest
+  );
+
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const url = 'transit/sender/files/send';
+
+  const config = {
+    headers: {
+      'content-type': 'multipart/form-data',
+      'X-ODIN-FILE-SYSTEM-TYPE': instructions.systemFileType || 'Standard',
+    },
+  };
+
+  const response = await client
+    .post<TransitUploadResult>(url, data, config)
+    .then((response) => {
+      const recipientStatus = response.data.recipientStatus;
+      Object.keys(recipientStatus).forEach((key) => {
+        if (failedTransferStatuses.includes(recipientStatus[key].toLowerCase()))
+          throw new Error(`Recipient ${key} failed to receive file`);
+      });
+
+      return response.data;
+    })
+    .catch((error) => {
+      console.error('[DotYouCore-js:uploadFileOverTransitUsingKeyHeader]', error);
+      throw error;
+    });
 
   isDebug &&
     console.debug(
@@ -61,63 +110,3 @@ const failedTransferStatuses = [
   TransferStatus?.RecipientReturnedAccessDenied.toString().toLowerCase(),
   TransferStatus?.TotalRejectionClientShouldRetry.toString().toLowerCase(),
 ];
-
-export const uploadFileOverTransitUsingKeyHeader = async (
-  dotYouClient: DotYouClient,
-  keyHeader: KeyHeader | undefined,
-  instructions: TransitInstructionSet,
-  metadata: UploadFileMetadata,
-  payloads?: PayloadFile[],
-  thumbnails?: ThumbnailFile[]
-): Promise<TransitUploadResult> => {
-  assertIfDotYouClientIsOwner(dotYouClient);
-  const strippedInstructions: TransitInstructionSet = {
-    transferIv: instructions.transferIv,
-    overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
-    remoteTargetDrive: instructions.remoteTargetDrive,
-    schedule: instructions.schedule,
-    recipients: instructions.recipients,
-  };
-
-  const encryptedMetaData = await encryptMetaData(metadata, keyHeader);
-  const encryptedDescriptor = await buildDescriptor(
-    dotYouClient,
-    keyHeader,
-    instructions,
-    encryptedMetaData
-  );
-
-  const data = await buildFormData(
-    strippedInstructions,
-    encryptedDescriptor,
-    payloads,
-    thumbnails,
-    keyHeader
-  );
-
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
-  const url = 'transit/sender/files/send';
-
-  const config = {
-    headers: {
-      'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': instructions.systemFileType || 'Standard',
-    },
-  };
-
-  return client
-    .post<TransitUploadResult>(url, data, config)
-    .then((response) => {
-      const recipientStatus = response.data.recipientStatus;
-      Object.keys(recipientStatus).forEach((key) => {
-        if (failedTransferStatuses.includes(recipientStatus[key].toLowerCase()))
-          throw new Error(`Recipient ${key} failed to receive file`);
-      });
-
-      return response.data;
-    })
-    .catch((error) => {
-      console.error('[DotYouCore-js:uploadFileOverTransitUsingKeyHeader]', error);
-      throw error;
-    });
-};

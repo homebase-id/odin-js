@@ -12,7 +12,6 @@ import {
   DriveSearchResult,
   FileMetadata,
   EncryptedKeyHeader,
-  KeyHeader,
   SystemFileType,
   ImageContentType,
   ContentType,
@@ -47,12 +46,11 @@ export const getPayloadAsJsonOverTransitByGlobalTransitId = async <T>(
   targetDrive: TargetDrive,
   globalTransitId: string,
   key: string,
-  options: {
-    keyHeader: KeyHeader | EncryptedKeyHeader | undefined;
+  options?: {
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
-  const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType } = options ?? { systemFileType: 'Standard' };
 
   return getPayloadBytesOverTransitByGlobalTransitId(
     dotYouClient,
@@ -61,7 +59,6 @@ export const getPayloadAsJsonOverTransitByGlobalTransitId = async <T>(
     globalTransitId,
     key,
     {
-      keyHeader,
       systemFileType,
       decrypt: true,
     }
@@ -75,7 +72,6 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
   globalTransitId: string,
   key: string,
   options: {
-    keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -88,7 +84,7 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
+  const { chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -135,7 +131,7 @@ export const getPayloadBytesOverTransitByGlobalTransitId = async (
                 ? chunkEnd - chunkStart + 1
                 : undefined
             )
-          : await decryptBytesResponse(dotYouClient, response, keyHeader),
+          : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -156,7 +152,6 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
   width: number,
   height: number,
   options: {
-    keyHeader?: KeyHeader;
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
@@ -168,7 +163,7 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetThumbRequest = {
     odinId: odinId,
@@ -189,7 +184,7 @@ export const getThumbBytesOverTransitByGlobalTransitId = async (
     )
     .then(async (response) => {
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        bytes: await decryptBytesResponse(dotYouClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })
@@ -335,10 +330,7 @@ export const getContentFromHeaderOrPayloadOverTransitByGlobalTransitId = async <
       odinId,
       targetDrive,
       globalTransitId,
-      DEFAULT_PAYLOAD_KEY,
-      {
-        keyHeader,
-      }
+      DEFAULT_PAYLOAD_KEY
     );
   }
 };

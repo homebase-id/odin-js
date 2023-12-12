@@ -96,19 +96,20 @@ export const decryptUsingKeyHeader = async (
 
 export const decryptBytesResponse = async (
   dotYouClient: DotYouClient,
-  response: AxiosResponse<ArrayBuffer>,
-  keyHeader: KeyHeader | EncryptedKeyHeader | undefined
+  response: AxiosResponse<ArrayBuffer>
+  // keyHeader: KeyHeader | EncryptedKeyHeader | undefined
 ): Promise<Uint8Array> => {
   const responseBa = new Uint8Array(response.data);
 
-  if (keyHeader) {
-    const decryptedKeyHeader =
-      'encryptionVersion' in keyHeader
-        ? await decryptKeyHeader(dotYouClient, keyHeader)
-        : keyHeader;
+  // if (keyHeader) {
+  //   const decryptedKeyHeader =
+  //     'encryptionVersion' in keyHeader
+  //       ? await decryptKeyHeader(dotYouClient, keyHeader)
+  //       : keyHeader;
 
-    return decryptUsingKeyHeader(responseBa, decryptedKeyHeader);
-  } else if (
+  //   return decryptUsingKeyHeader(responseBa, decryptedKeyHeader);
+  // } else
+  if (
     response.headers.payloadencrypted === 'True' &&
     response.headers.sharedsecretencryptedheader64
   ) {
@@ -118,6 +119,8 @@ export const decryptBytesResponse = async (
     const keyHeader = await decryptKeyHeader(dotYouClient, encryptedKeyHeader);
 
     return await decryptUsingKeyHeader(responseBa, keyHeader);
+  } else if (response.headers.payloadencrypted === 'True') {
+    throw new Error(`Can't decrypt; missing keyheader`);
   } else {
     return responseBa;
   }

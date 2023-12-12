@@ -48,11 +48,7 @@ export const useFiles = ({
     payloadKey?: string
   ) => {
     if (payloadKey) {
-      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey, {
-        keyHeader: result.fileMetadata.isEncrypted
-          ? result.sharedSecretEncryptedKeyHeader
-          : undefined,
-      });
+      const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey);
       if (!payload) return null;
 
       return window.URL.createObjectURL(
@@ -89,11 +85,7 @@ export const useFiles = ({
             result,
             includeMetadataHeader
           )
-        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY, {
-            keyHeader: result.fileMetadata.isEncrypted
-              ? result.sharedSecretEncryptedKeyHeader
-              : undefined,
-          }),
+        : await getPayloadBytes(dotYouClient, targetDrive, result.fileId, DEFAULT_PAYLOAD_KEY),
     };
 
     const stringified = jsonStringify64(exportable);
