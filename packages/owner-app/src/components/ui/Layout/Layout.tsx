@@ -2,6 +2,7 @@ import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDarkMode, Toaster, Sidenav } from '@youfoundation/common-app';
 import { useAuth } from '../../../hooks/auth/useAuth';
+import { CriticalOwnerAlerts } from '../../OwnerAlerts/CriticalOwnerAlerts';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -51,6 +52,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg, noPadding }) => {
           </div>
         </div>
         <Toaster />
+        <CriticalOwnerAlerts />
       </div>
     </>
   );
@@ -65,6 +67,7 @@ export const MinimalLayout: FC<LayoutProps> = ({ children, noShadedBg, noPadding
         <div className={`${noPadding ? '' : 'px-5 py-4 sm:px-10 sm:py-8'}`}>{children}</div>
       </div>
       <Toaster />
+      <CriticalOwnerAlerts />
     </>
   );
 };
@@ -78,6 +81,7 @@ export const NoLayout: FC<LayoutProps> = ({ children, noShadedBg }) => {
         {children}
       </div>
       <Toaster />
+      <CriticalOwnerAlerts />
     </>
   );
 };

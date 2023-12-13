@@ -40,7 +40,10 @@ export const SecuritySettings = () => {
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              doSetNewPassword();
+
+              if (e.currentTarget.reportValidity()) {
+                doSetNewPassword();
+              }
             }}
           >
             <div className="mb-2">

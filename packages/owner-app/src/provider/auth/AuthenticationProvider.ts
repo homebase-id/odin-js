@@ -125,7 +125,7 @@ export const isPasswordSet = async (): Promise<boolean> => {
 };
 
 /// Internal helpers
-const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
+export const getNonce = async (dotYouClient: DotYouClient): Promise<NonceData> => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   return client
     .get('/authentication/nonce')
