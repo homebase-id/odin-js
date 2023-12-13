@@ -5,6 +5,8 @@ import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { ContactFile } from '@youfoundation/js-lib/network';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -19,6 +21,8 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
 
   if (!contact) return null;
 
+  const contactContent = contact?.fileMetadata.appData.content;
+
   return (
     <>
       <ErrorNotification error={refreshError} />
@@ -26,11 +30,11 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
         title={t('Details')}
         actions={
           odinId &&
-          contact?.id && (
+          contact?.fileMetadata.appData.uniqueId && (
             <ActionButton
               className="text-base"
               state={refreshState}
-              onClick={() => refresh({ contact })}
+              onClick={() => refresh({ contact: contact as DriveSearchResult<ContactFile> })}
               icon={Refresh}
               confirmOptions={{
                 type: 'info',
@@ -53,38 +57,38 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             ) : null}
           </div>
           <div className="px-4">
-            {contact.name && (
+            {contactContent.name && (
               <div className="my-3 flex flex-row">
                 <IconFrame className="mr-2">
                   <Person className="h-4 w-4" />
                 </IconFrame>
-                {contact.name.displayName ??
-                  `${contact.name.givenName ?? ''} ${contact.name.surname ?? ''}`}
+                {contactContent.name.displayName ??
+                  `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
               </div>
             )}
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
                 <Phone className="h-4 w-4" />
               </IconFrame>
-              {contact.phone?.number ?? ''}
+              {contactContent.phone?.number ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
                 <Envelope className="h-4 w-4" />
               </IconFrame>
-              {contact.email?.email ?? ''}
+              {contactContent.email?.email ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
                 <House className="h-4 w-4" />
               </IconFrame>
-              {contact.location?.city ?? ''} {contact.location?.country ?? ''}
+              {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
                 <Cake className="h-4 w-4" />
               </IconFrame>
-              {contact.birthday?.date ?? ''}
+              {contactContent.birthday?.date ?? ''}
             </div>
           </div>
         </div>

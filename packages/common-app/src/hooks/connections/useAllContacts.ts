@@ -1,6 +1,7 @@
 import { ContactFile, getContacts } from '@youfoundation/js-lib/network';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { useQuery } from '@tanstack/react-query';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 const CHUNKSIZE = 200;
 export const useAllContacts = (enabled: boolean) => {
@@ -11,7 +12,7 @@ export const useAllContacts = (enabled: boolean) => {
     const internalGetContacts = async (
       cursor: string | undefined,
       limit: number
-    ): Promise<ContactFile[]> => {
+    ): Promise<DriveSearchResult<ContactFile>[]> => {
       const contacts = await getContacts(dotYouClient, cursor, limit);
       if (contacts?.cursorState && contacts.results.length >= limit) {
         const nextContacts = await internalGetContacts(contacts.cursorState, limit);

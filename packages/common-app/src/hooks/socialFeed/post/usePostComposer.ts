@@ -30,10 +30,7 @@ export const usePostComposer = () => {
     channel: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>,
     reactAccess: ReactAccess | undefined
   ) => {
-    if (!mediaFiles && !caption && !embeddedPost) {
-      console.log('fast fail');
-      return;
-    }
+    if (!mediaFiles && !caption && !embeddedPost) return;
 
     try {
       setPostState('uploading');

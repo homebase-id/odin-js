@@ -171,8 +171,6 @@ export const InnerFieldEditors = ({
                         if (!result) return null;
 
                         updateVersionTag(result.newVersionTag);
-                        console.log('removePostMedia', result);
-
                         return result;
                       },
                     }

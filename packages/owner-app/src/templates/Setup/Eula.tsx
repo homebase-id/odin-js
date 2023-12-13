@@ -21,7 +21,6 @@ export const Eula = ({ onConfirm }: { onConfirm: () => void }) => {
         e.preventDefault();
         e.stopPropagation();
         if (e.currentTarget.reportValidity()) {
-          console.log(requiredVersion);
           await doMarkEulaAsAccepted(requiredVersion);
 
           onConfirm();

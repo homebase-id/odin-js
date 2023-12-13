@@ -27,11 +27,13 @@ export const NewConversationGroup = () => {
 
   const { data: contacts } = useAllContacts(true);
   const contactResults = contacts
-    ? contacts.filter(
-        (contact) =>
-          contact.odinId &&
-          (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
-      )
+    ? contacts
+        .map((dsr) => dsr.fileMetadata.appData.content)
+        .filter(
+          (contact) =>
+            contact.odinId &&
+            (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+        )
     : [];
 
   const { mutateAsync: createNew, status: createStatus } = useConversation().create;
@@ -56,10 +58,10 @@ export const NewConversationGroup = () => {
         <div className="flex flex-col gap-2 bg-primary/10 p-5">
           {isStepOne ? (
             <>
-              {newRecipients.map((recipient) => (
+              {newRecipients.map((recipient, index) => (
                 <div
                   className="flex flex-row items-center gap-1 rounded-lg bg-background px-2 py-1 "
-                  key={recipient.fileId}
+                  key={recipient.odinId || index}
                 >
                   <ConnectionImage odinId={recipient.odinId} size="xs" />
                   <ConnectionName odinId={recipient.odinId} />
@@ -122,11 +124,11 @@ export const NewConversationGroup = () => {
         </div>
       </form>
       <div className="flex-grow overflow-auto">
-        {contactResults.map((result) => (
+        {contactResults.map((result, index) => (
           <SingleConversationItem
             odinId={result.odinId as string}
             isActive={false}
-            key={result.fileId}
+            key={result.odinId || index}
             onClick={() =>
               setNewRecipients([...newRecipients.filter((x) => x.odinId !== result.odinId), result])
             }

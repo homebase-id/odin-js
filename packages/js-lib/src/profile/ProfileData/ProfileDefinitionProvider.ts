@@ -87,7 +87,7 @@ export const getProfileDefinition = async (
     return definition;
   } catch (ex) {
     // Profile drive probably doesn't exist
-    console.log(ex);
+    console.warn(ex);
     return;
   }
 };

@@ -57,7 +57,7 @@ export const IdentityPageMetaAndActions = ({
 
   // Contact data:
   const { data: contactData } = useContact({ odinId: odinId }).fetch;
-
+  const contactContent = contactData?.fileMetadata?.appData?.content;
   const mainAction =
     connectionInfo?.status === 'connected' ? (
       <>
@@ -160,9 +160,9 @@ export const IdentityPageMetaAndActions = ({
             <span className="flex flex-col">
               <span className="block leading-tight">
                 {`${
-                  contactData?.name
-                    ? contactData.name.displayName ??
-                      `${contactData.name.givenName} ${contactData.name.surname}`
+                  contactContent?.name
+                    ? contactContent.name.displayName ??
+                      `${contactContent.name.givenName} ${contactContent.name.surname}`
                     : odinId
                 }`}
               </span>
@@ -180,9 +180,9 @@ export const IdentityPageMetaAndActions = ({
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
         browserTitle={
-          connectionInfo?.status === 'connected' && contactData?.name
-            ? contactData.name.displayName ??
-              `${contactData.name.givenName} ${contactData.name.surname}`
+          connectionInfo?.status === 'connected' && contactContent?.name
+            ? contactContent.name.displayName ??
+              `${contactContent.name.givenName} ${contactContent.name.surname}`
             : odinId
         }
       />

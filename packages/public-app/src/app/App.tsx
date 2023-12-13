@@ -136,10 +136,8 @@ const ActionRedirect = () => {
   const [searchParams] = useSearchParams();
 
   const identity = getIdentity();
-  console.log(identity);
   if (isAuthenticated && identity) {
     console.debug('[AUTHENTICATED]: Redirect to action after login');
-
     window.location.href = `https://${identity}${searchParams.get('targetPath')}`;
 
     return null;

@@ -155,7 +155,6 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
           });
         }
 
-        console.log('cleared all channels');
         queryClient.invalidateQueries({ queryKey: ['channel'] });
         queryClient.invalidateQueries({ queryKey: ['channels'] });
 

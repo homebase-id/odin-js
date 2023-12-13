@@ -114,7 +114,6 @@ export const saveChannelDefinition = async (
   );
 
   const targetDrive = GetTargetDriveFromChannelId(definition.fileMetadata.appData.uniqueId);
-  console.log(targetDrive);
   await ensureDrive(dotYouClient, targetDrive, channelContent.name, channelMetadata, true, true);
 
   const existingChannelDef = await getChannelDefinitionInternal(

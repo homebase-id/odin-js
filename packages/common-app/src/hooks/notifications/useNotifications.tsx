@@ -28,7 +28,7 @@ export const useNotifications = () => {
       wsNotification.notificationType === 'connectionRequestAccepted' ||
       wsNotification.notificationType === 'connectionRequestReceived'
     ) {
-      console.log(clientNotification);
+      console.debug(clientNotification);
 
       const otherId =
         clientNotification.notificationType === 'connectionRequestReceived'

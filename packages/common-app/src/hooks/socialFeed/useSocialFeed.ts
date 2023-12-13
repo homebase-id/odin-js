@@ -21,7 +21,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       notification.targetDrive?.alias === BlogConfig.FeedDrive.alias &&
       notification.targetDrive?.type === BlogConfig.FeedDrive.type
     ) {
-      console.log({ notification });
+      console.debug({ notification });
       queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
     }
   };

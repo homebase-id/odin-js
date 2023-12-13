@@ -37,7 +37,7 @@ export const useFiles = ({
   }) => {
     const response = await queryBatch(
       dotYouClient,
-      { targetDrive, systemFileType, fileState: [0, 1] },
+      { targetDrive, systemFileType },
       { cursorState: pageParam, maxRecords: pageSize, includeMetadataHeader: includeMetadataHeader }
     );
     return response;

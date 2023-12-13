@@ -8,6 +8,7 @@ import {
 } from '@youfoundation/js-lib/network';
 import { saveContact } from '../../provider/contact/ContactProvider';
 import { fetchConnectionInfo } from '../../provider/contact/ContactSourceProvider';
+import { SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
   const queryClient = useQueryClient();
@@ -30,7 +31,11 @@ export const usePendingConnection = ({ odinId }: { odinId?: string }) => {
 
     // Save contact
     const connectionInfo = await fetchConnectionInfo(dotYouClient, senderOdinId);
-    if (connectionInfo) await saveContact(dotYouClient, connectionInfo);
+    if (connectionInfo)
+      await saveContact(dotYouClient, {
+        fileMetadata: { appData: { content: connectionInfo } },
+        serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner } },
+      });
 
     return { senderOdinId };
   };

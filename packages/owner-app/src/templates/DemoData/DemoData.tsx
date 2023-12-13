@@ -667,7 +667,6 @@ const DemoDataBlog = ({
             postFile: blogFile,
             channelId: channel.fileMetadata.appData.uniqueId as string,
           });
-          console.log(blogContent.id);
         }
       })
     );
