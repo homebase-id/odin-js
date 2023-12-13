@@ -77,7 +77,7 @@ export const useAuth = () => {
       } else {
         // We've confirmed the user is logged in, and has a valid token
         if (window.location.pathname === '/' && !document.referrer && isOwner) {
-          console.log(
+          console.debug(
             'Automatically redirected to /owner as you are logged in as owner, and open your homepage'
           );
           window.location.href = '/owner';
@@ -153,7 +153,6 @@ export const useYouAuthAuthorization = () => {
       window.localStorage.setItem(HOME_SHARED_SECRET, ss64);
       // Store the identity to the localStorage
       window.localStorage.setItem(STORAGE_IDENTITY_KEY, identity);
-      console.log({ returnUrl });
       // Redirect to the returnUrl; With a fallback to home
       window.location.href = returnUrl || '/';
     } catch (e) {

@@ -6,7 +6,7 @@ const ConnectionCard = (props: PersonCardProps) => {
   const { data: contactData, isLoading } = useContact({
     odinId: props.odinId,
   }).fetch;
-  const nameData = contactData?.name;
+  const nameData = contactData?.fileMetadata.appData.content?.name;
   const fullName = nameData
     ? nameData.displayName ?? `${nameData.givenName ?? ''} ${nameData.surname ?? ''}`
     : props.odinId;

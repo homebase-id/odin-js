@@ -32,7 +32,7 @@ export const saveContact = async (
   dotYouClient: DotYouClient,
   contact: NewDriveSearchResult<RawContact>
 ): Promise<NewDriveSearchResult<ContactFile>> => {
-  console.log('Saving contact', { ...contact });
+  console.debug('Saving contact', { ...contact });
 
   if (contact.fileMetadata.appData.uniqueId)
     contact.fileId = (
@@ -89,15 +89,13 @@ export const saveContact = async (
   };
 
   const payloadJson: string = jsonStringify64({
-    ...contact,
+    ...contact.fileMetadata.appData.content,
+    // image is stored in the payload, so remove it from the header content
     image: undefined,
-    fileId: undefined,
-    versionTag: undefined,
   });
   const payloadBytes = stringToUint8Array(payloadJson);
 
   const tags = [];
-  if (contact.fileMetadata.appData.uniqueId) tags.push(contact.fileMetadata.appData.uniqueId);
   if (contact.fileMetadata.appData.content.odinId)
     tags.push(toGuidId(contact.fileMetadata.appData.content.odinId));
 

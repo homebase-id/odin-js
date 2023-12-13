@@ -262,8 +262,6 @@ export const uploadChatMessage = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  console.log(payloads, thumbnails, uploadMetadata, uploadInstructions);
-
   return await uploadFile(
     dotYouClient,
     uploadInstructions,

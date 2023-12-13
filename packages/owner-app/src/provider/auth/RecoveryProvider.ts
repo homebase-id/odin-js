@@ -17,7 +17,7 @@ export const getRecoveryKey = async (dotYouClient: DotYouClient) => {
       return response.data;
     })
     .catch((error) => {
-      console.log(error);
+      console.warn(error);
       return null;
     });
 };

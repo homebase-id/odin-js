@@ -103,7 +103,9 @@ export const useContact = ({
     const connectionInfo =
       (await fetchConnectionInfo(dotYouClient, contact.fileMetadata.appData.content.odinId)) ??
       undefined;
-    const newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
+    const newContact = connectionInfo
+      ? { ...contact.fileMetadata.appData.content, ...connectionInfo }
+      : undefined;
 
     if (newContact) {
       await saveContact(dotYouClient, {
@@ -171,13 +173,9 @@ export const parseContact = (
 ): DriveSearchResult<ContactVm> | NewDriveSearchResult<ContactVm> => {
   const pureContent = contact.fileMetadata.appData.content;
 
-  const imageUrl =
-    pureContent.image &&
-    !(contact as DriveSearchResult<unknown>).fileMetadata.payloads.some((p) =>
-      p.contentType.startsWith('image')
-    )
-      ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
-      : `https://${pureContent.odinId}/pub/image`;
+  const imageUrl = pureContent.image
+    ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
+    : `https://${pureContent.odinId}/pub/image`;
 
   const { name, location, phone, birthday, odinId, source } = pureContent;
 

@@ -49,7 +49,6 @@ export function hasInvalidDnsRecords(dnsConfig: DnsConfig | undefined): boolean 
 //     }
 
 //     const response = await axios.get(root + `/registration/did-dns-records-propagate/${domain}`);
-//     // console.log(response.data)
 //     return response.data;
 //   };
 
@@ -104,7 +103,6 @@ export const useDomainHasValidCertificate = (domain: string, enabled: boolean) =
     }
 
     const response = await axios.get(root + `/registration/has-valid-certificate/${domain}`);
-    // console.log(response.data)
     return response.data;
   };
 
@@ -142,7 +140,6 @@ export const useCreateIdentity = () => {
         invitationCode: identity.invitationCode,
       }
     );
-    //console.log(response.data)
     return response.data;
   };
 

@@ -16,7 +16,6 @@ export const useImage = (imageFileId?: string, imageFileKey?: string, imageDrive
     imageFileKey: string,
     imageDrive?: TargetDrive
   ) => {
-    console.log({ imageFileId, imageFileKey });
     try {
       return await getDecryptedImageUrl(
         dotYouClient,

@@ -99,8 +99,6 @@ export const ImageElementBlock = <V extends Value = Value>(
   const options = getPluginOptions<MediaOptions | undefined>(editor, ELEMENT_IMAGE);
 
   const doRemove = async () => {
-    if (!options) console.log('doRemove', options);
-
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
       setTimeout(() => {
         removeNodes(editor, { at: path });

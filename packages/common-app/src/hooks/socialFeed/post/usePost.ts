@@ -58,7 +58,6 @@ export const usePost = () => {
         };
         savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
           (result) => {
-            console.log(result, result.newVersionTag);
             if (result) resolve(result);
           }
         );
