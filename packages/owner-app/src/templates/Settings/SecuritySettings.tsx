@@ -10,7 +10,7 @@ export const SecuritySettings = () => {
   const [password, setPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
 
-  const { changePassword, getDotYouClient } = useAuth();
+  const { changePassword, getDotYouClient, logout } = useAuth();
 
   const passwordIsValid = password === retypePassword && password !== '';
 
@@ -25,7 +25,14 @@ export const SecuritySettings = () => {
     <>
       <Section title={t('Change password')}>
         {state === 'success' ? (
-          <p className="my-2">{t('Your password has been changed successfully')}</p>
+          <>
+            <p className="my-2">
+              {t('Your password has been changed successfully, please login again')}
+            </p>
+            <div className="mt-5 flex flex-row-reverse">
+              <ActionButton onClick={() => logout('/owner/login')}>{t('Open login')}</ActionButton>
+            </div>
+          </>
         ) : state === 'error' ? (
           <>
             <Alert type="warning" isCompact={true}>
