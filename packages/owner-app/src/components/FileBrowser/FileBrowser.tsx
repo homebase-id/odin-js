@@ -215,10 +215,6 @@ const getLabelFromFileType = (fileType: number) => {
     case ProfileConfig.ProfileSectionFileType:
       return 'Profile Section';
 
-    // Home
-    case HomePageConfig.LinkFileType:
-      return 'Link';
-
     // Posts
     case BlogConfig.PostFileType:
       return 'Post';
@@ -230,8 +226,6 @@ const getLabelFromFileType = (fileType: number) => {
     // Reactions
     case ReactionConfig.CommentFileType:
       return 'Comment';
-    case ReactionConfig.EmojiFileType:
-      return 'Emoji';
 
     // Contacts:
     case ContactConfig.ContactFileType:

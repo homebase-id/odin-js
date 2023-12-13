@@ -9,8 +9,6 @@ export class HomePageConfig {
   static readonly AttributeSectionNotApplicable = toGuidId('section_not_applicable');
   static readonly BlogMainContentDriveId = HomePageConfig.DefaultDriveId;
 
-  static readonly LinkFileType: number = 777;
-
   static readonly HomepageTargetDrive: TargetDrive = {
     alias: toGuidId('homepage_drive'),
     type: ProfileConfig.ProfileDriveType,

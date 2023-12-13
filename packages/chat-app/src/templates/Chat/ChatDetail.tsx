@@ -22,12 +22,14 @@ import {
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useConversation } from '../../hooks/chat/useConversation';
 import { ChatMessage } from '../../providers/ChatProvider';
 import { ChatHistory } from '../../components/Chat/ChatHistory';
 import { ChatComposer } from '../../components/Chat/Composer/ChatComposer';
 import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
+import { useNavigate } from 'react-router-dom';
+import { CHAT_ROOT } from './ChatHome';
 
 export const ChatDetail = ({
   conversationId,
@@ -81,6 +83,8 @@ const ChatHeader = ({
   conversation: DriveSearchResult<Conversation> | undefined;
   toggleSidenav: () => void;
 }) => {
+  const navigate = useNavigate();
+
   const withYourself =
     conversationDsr?.fileMetadata.appData.uniqueId === ConversationWithYourselfId;
   const conversation = conversationDsr?.fileMetadata.appData.content;
@@ -88,7 +92,15 @@ const ChatHeader = ({
   const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
 
   const { mutate: clearChat, error: clearChatError } = useConversation().clearChat;
-  const { mutate: deleteChat, error: deleteChatError } = useConversation().deleteChat;
+  const {
+    mutate: deleteChat,
+    error: deleteChatError,
+    status: deleteChatStatus,
+  } = useConversation().deleteChat;
+
+  useEffect(() => {
+    if (deleteChatStatus === 'success') navigate(CHAT_ROOT);
+  }, [deleteChatStatus]);
 
   return (
     <>

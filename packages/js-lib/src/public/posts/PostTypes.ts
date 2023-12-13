@@ -168,5 +168,4 @@ export interface RawReactionContent extends Omit<ReactionContent, 'attachments'>
 
 export class ReactionConfig {
   static readonly CommentFileType: number = 801;
-  static readonly EmojiFileType: number = 805;
 }
