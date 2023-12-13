@@ -21,6 +21,7 @@ import {
   queryBatch,
   queryBatchCollection,
   TargetDrive,
+  deleteFilesByGroupId,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/DataUtil';
 
@@ -200,9 +201,43 @@ export const getPostBySlug = async <T extends PostContent>(
   return;
 };
 
-export const removePost = async (dotYouClient: DotYouClient, fileId: string, channelId: string) => {
+export const removePost = async (
+  dotYouClient: DotYouClient,
+  postFile: DriveSearchResult<PostContent>,
+  channelId: string
+) => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  deleteFile(dotYouClient, targetDrive, fileId);
+
+  if (postFile.fileMetadata.globalTransitId) {
+    // Fetch the first 1000 comments and delete them with the post;
+    // TODO: this should support a larger numbers of comments; Or a delete of a tree of groupIds
+    const comments = (
+      await queryBatch(
+        dotYouClient,
+        {
+          targetDrive: targetDrive,
+          groupId: [postFile.fileMetadata.globalTransitId],
+          systemFileType: 'Comment',
+        },
+        {
+          maxRecords: 1000,
+        }
+      )
+    ).searchResults;
+
+    await deleteFilesByGroupId(
+      dotYouClient,
+      targetDrive,
+      [
+        ...(comments.map((cmnt) => cmnt.fileMetadata.globalTransitId).filter(Boolean) as string[]),
+        postFile.fileMetadata.globalTransitId,
+      ],
+      undefined,
+      'Comment'
+    );
+  }
+
+  return await deleteFile(dotYouClient, targetDrive, postFile.fileId);
 };
 
 ///

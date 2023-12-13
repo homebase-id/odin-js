@@ -61,13 +61,8 @@ export const OwnerActions = ({ postFile }: { postFile: DriveSearchResult<PostCon
                     e.stopPropagation();
                     await removePost({
                       channelId: postContent.channelId,
-                      fileId: postFile.fileId ?? '',
-                      slug: postContent.slug,
+                      postFile,
                     });
-
-                    // setTimeout(() => {
-                    //   window.location.reload();
-                    // }, 200);
 
                     return false;
                   },

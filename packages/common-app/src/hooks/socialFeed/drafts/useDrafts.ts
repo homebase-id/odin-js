@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Article, getPosts, removePost } from '@youfoundation/js-lib/public';
+import { Article, PostContent, getPosts, removePost } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
@@ -30,8 +30,14 @@ export const useDrafts = () => {
     return drafts?.flatMap((item) => item.results);
   };
 
-  const remove = async ({ channelId, postFileId }: { channelId: string; postFileId: string }) => {
-    return await removePost(dotYouClient, postFileId, channelId);
+  const remove = async ({
+    channelId,
+    postFile,
+  }: {
+    channelId: string;
+    postFile: DriveSearchResult<PostContent>;
+  }) => {
+    return await removePost(dotYouClient, postFile, channelId);
   };
 
   return {
@@ -46,7 +52,7 @@ export const useDrafts = () => {
           'drafts',
         ]);
         const updatedDrafts = previousDrafts?.filter(
-          (post) => post.fileId !== toRemoveDetails.postFileId
+          (post) => post.fileId !== toRemoveDetails.postFile.fileId
         );
         queryClient.setQueryData(['drafts'], updatedDrafts);
 

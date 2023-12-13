@@ -200,9 +200,8 @@ export const useArticleComposer = ({
     if (!postFile.fileId) return;
 
     await removePost({
-      fileId: postFile.fileId,
+      postFile: postFile as DriveSearchResult<Article>,
       channelId: postFile.fileMetadata.appData.content.channelId,
-      slug: postFile.fileMetadata.appData.content.slug,
     });
   };
 
