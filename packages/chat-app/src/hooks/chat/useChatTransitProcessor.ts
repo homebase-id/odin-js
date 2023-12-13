@@ -63,6 +63,7 @@ export const useChatTransitProcessor = (isEnabled = true) => {
   }, []);
 
   const handler = async (notification: TypedConnectionNotification) => {
+    console.debug('[ChatTransitProcessor] Got notification', notification);
     if (notification.notificationType === 'transitFileReceived') {
       console.debug(
         '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'

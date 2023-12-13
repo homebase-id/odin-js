@@ -16,7 +16,6 @@ import {
   FileOverview,
   FileSelector,
   Globe,
-  ReactAccessEditorDialog,
   VolatileInput,
   getImagesFromPasteEvent,
   getVideosFromPasteEvent,
@@ -30,7 +29,7 @@ import {
   AclSummary,
   AclIcon,
 } from '@youfoundation/common-app';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 const PostComposer = ({
@@ -270,7 +269,11 @@ export const ChannelSelector = React.forwardRef(
           className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${
             disabled ? 'pointer-events-none opacity-50' : ''
           } ${className ?? ''}`}
-          defaultValue={defaultValue}
+          defaultValue={
+            channels.find((chnl) =>
+              stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultValue)
+            )?.fileMetadata.appData.uniqueId
+          }
           key={'loaded-select'}
           onChange={(e) => {
             if (e.target.value === 'more') {

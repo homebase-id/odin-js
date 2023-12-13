@@ -55,7 +55,7 @@ export const uploadFileOverPeer = async (
   );
 
   const data = await buildFormData(
-    strippedInstructions,
+    instructionsWithManifest,
     encryptedDescriptor,
     payloads,
     thumbnails,

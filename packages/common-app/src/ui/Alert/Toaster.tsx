@@ -5,30 +5,32 @@ import {
   OWNER_ROOT,
   Times,
   t,
+  useDotYouClient,
   useNotifications,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useErrors } from '@youfoundation/common-app';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
+import { ApiType } from '@youfoundation/js-lib/core';
 
 export const Toaster = () => {
-  const { liveNotifications, dismiss } = useNotifications();
-  const {
-    fetch: { data: errors },
-    dismiss: dismissError,
-  } = useErrors();
+  const { getApiType } = useDotYouClient();
+  const isOwner = getApiType() === ApiType.Owner;
+  // Only when logged in via owner we have access to the live notifications;
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
-      {errors?.map((error, index) => (
-        <Toast
-          title={t('Something went wrong')}
-          body={error.message}
-          key={index}
-          onDismiss={() => dismissError(error)}
-          type={error.type}
-        />
-      ))}
+      <ErrorToaser />
+      {isOwner ? <LiveToaster /> : null}
+    </div>
+  );
+};
+
+export const LiveToaster = () => {
+  const { liveNotifications, dismiss } = useNotifications();
+
+  return (
+    <>
       {liveNotifications.slice(0, 5).map((notification, index) => (
         <Toast
           {...notification}
@@ -44,7 +46,28 @@ export const Toaster = () => {
           </div>
         </div>
       ) : null}
-    </div>
+    </>
+  );
+};
+
+export const ErrorToaser = () => {
+  const {
+    fetch: { data: errors },
+    dismiss: dismissError,
+  } = useErrors();
+
+  return (
+    <>
+      {errors?.map((error, index) => (
+        <Toast
+          title={t('Something went wrong')}
+          body={error.message}
+          key={index}
+          onDismiss={() => dismissError(error)}
+          type={error.type}
+        />
+      ))}
+    </>
   );
 };
 
