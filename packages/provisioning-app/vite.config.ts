@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 
 const hostConfig = {
   host: 'dev.dotyou.cloud',
-  port: 3003,
+  port: 3005,
 };
 
 // https://vitejs.dev/config/
