@@ -9,7 +9,7 @@
   "module": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "start": "vite --clearScreen false",
+    "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",

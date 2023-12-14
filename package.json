@@ -12,7 +12,6 @@
     "build": "npm i && npm run build -workspaces --if-present",
     "build-libs": "npm i && npm run build -w ./packages/js-lib -w ./packages/ui-lib",
     "test": "npm run test -workspaces --if-present",
-    "start-all": "npm-run-all --parallel start:*",
     "start:owner": "npm start -w ./packages/owner-app",
     "start:feed": "npm start -w ./packages/feed-app",
     "start:chat": "npm start -w ./packages/chat-app",
@@ -32,13 +31,12 @@
     "@typescript-eslint/parser": "^5.59.0",
     "eslint": "^8.38.0",
     "eslint-plugin-react": "^7.32.2",
-    "npm-run-all": "^4.1.5",
     "prettier": "3.0.3",
-    "rollup": "4.6.1",
     "tslib": "^2.4.0",
     "typescript": "5.2",
     "vite": "5.0.4",
-    "vite-plugin-dts": "^3.6.3"
+    "vite-plugin-dts": "^3.6.3",
+    "rollup": "4.6.1"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.6.1"

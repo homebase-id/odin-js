@@ -25,7 +25,7 @@
     "tailwindcss": "3.3.3"
   },
   "scripts": {
-    "dev": "vite --clearScreen false",
+    "dev": "vite",
     "serve": "vite serve",
     "start": "npm run dev",
     "build": "tsc && vite build",

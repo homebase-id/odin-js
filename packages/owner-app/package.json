@@ -5,7 +5,7 @@
   "homepage": "/owner",
   "type": "module",
   "scripts": {
-    "start": "vite --clearScreen false",
+    "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "lint": "eslint src",
