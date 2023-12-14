@@ -5,7 +5,7 @@
   "homepage": "/",
   "type": "module",
   "scripts": {
-    "start": "vite",
+    "start": "vite --clearScreen false",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",
