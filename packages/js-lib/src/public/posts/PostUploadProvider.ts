@@ -44,6 +44,7 @@ import {
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
+import { BlobConstructor } from '../../core/BlobConstructor';
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
@@ -219,7 +220,7 @@ const uploadPost = async <T extends PostContent>(
   if (!shouldEmbedContent) {
     payloads.push({
       key: DEFAULT_PAYLOAD_KEY,
-      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
     });
   }
 
@@ -342,7 +343,7 @@ const uploadPostHeader = async <T extends PostContent>(
         [
           {
             key: DEFAULT_PAYLOAD_KEY,
-            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
           },
         ],
         undefined

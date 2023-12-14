@@ -1,3 +1,4 @@
+import { BlobConstructor } from '../../core/BlobConstructor';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
@@ -405,7 +406,7 @@ export const saveAttribute = async (
   const shouldEmbedContent = payloadBytes.length < 3000;
   if (!shouldEmbedContent)
     payloads.push({
-      payload: new Blob([payloadBytes], { type: 'application/json' }),
+      payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
       key: DEFAULT_PAYLOAD_KEY,
     });
 

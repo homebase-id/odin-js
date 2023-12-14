@@ -1,3 +1,4 @@
+import { BlobConstructor } from '../../core/BlobConstructor';
 import { mergeByteArrays } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 
@@ -153,7 +154,7 @@ export const segmentVideoFile = async (
           metadata.fileSize = finalBytes.length;
 
           resolve({
-            data: new Blob([finalBytes], { type: 'video/mp4' }),
+            data: new BlobConstructor([finalBytes], { type: 'video/mp4' }),
             metadata,
           });
           return;

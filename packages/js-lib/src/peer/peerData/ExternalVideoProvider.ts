@@ -1,3 +1,4 @@
+import { BlobConstructor } from '../../core/BlobConstructor';
 import { DotYouClient } from '../../core/DotYouClient';
 import { SystemFileType, TargetDrive } from '../../core/core';
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/helpers';
@@ -116,7 +117,7 @@ export const getDecryptedVideoUrlOverPeer = async (
     chunkEnd: fileSizeLimit,
   }).then((data) => {
     if (!data) return '';
-    const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+    const url = URL.createObjectURL(new BlobConstructor([data.bytes], { type: data.contentType }));
     return url;
   });
 };
@@ -155,7 +156,7 @@ export const getDecryptedVideoUrlOverPeerByGlobalTransitId = async (
     chunkEnd: fileSizeLimit,
   }).then((data) => {
     if (!data) return '';
-    const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+    const url = URL.createObjectURL(new BlobConstructor([data.bytes], { type: data.contentType }));
     return url;
   });
 };

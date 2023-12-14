@@ -1,3 +1,4 @@
+import { BlobConstructor } from '../../core/BlobConstructor';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
@@ -166,7 +167,7 @@ export const saveChannelDefinition = async (
       ? undefined
       : [
           {
-            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
             key: DEFAULT_PAYLOAD_KEY,
           },
         ],
