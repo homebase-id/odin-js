@@ -1,6 +1,6 @@
 import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../../DotYouClient';
-import { stringifyToQueryParams } from '../../../helpers/helpers';
+import { stringGuidsEqual, stringifyToQueryParams } from '../../../helpers/helpers';
 import { PagedResult, PagingOptions, TargetDrive } from '../../core';
 
 export const getDrives = async (
@@ -59,12 +59,11 @@ export const ensureDrive = async (
 
   const foundDrive = allDrives.results.find(
     (d) =>
-      d.targetDriveInfo.alias == targetDrive.alias && d.targetDriveInfo.type == targetDrive.type
+      stringGuidsEqual(d.targetDriveInfo.alias, targetDrive.alias) &&
+      stringGuidsEqual(d.targetDriveInfo.type, targetDrive.type)
   );
 
-  if (foundDrive) {
-    return true;
-  }
+  if (foundDrive) return true;
 
   const data = {
     name: name,

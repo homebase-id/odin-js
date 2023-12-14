@@ -11,7 +11,7 @@ import {
   PaperPlane,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { NewMediaFile } from '@youfoundation/js-lib/dist';
+import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import {

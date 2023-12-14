@@ -137,7 +137,7 @@ export const segmentVideoFile = async (
         tracksToRead[id] = true;
 
         if (!tracksToRead.some((trck) => !trck)) {
-          console.log('without offsets: ', metadata.segmentMap);
+          console.debug('without offsets: ', metadata.segmentMap);
 
           const finalMetaBytes = new Uint8Array(buildInitSegments(mp4File));
           const metaOffset = finalMetaBytes.length;
@@ -147,7 +147,7 @@ export const segmentVideoFile = async (
               return { ...segment, offset: metaOffset + segment.offset };
             }),
           ];
-          console.log('with offsets: ', metadata.segmentMap);
+          console.debug('with offsets: ', metadata.segmentMap);
           const finalSegmentedBytes = mergeByteArrays(segmentedBytes);
           const finalBytes = mergeByteArrays([finalMetaBytes, finalSegmentedBytes]);
           metadata.fileSize = finalBytes.length;

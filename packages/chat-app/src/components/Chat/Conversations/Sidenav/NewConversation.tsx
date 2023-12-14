@@ -12,11 +12,13 @@ export const NewConversation = () => {
 
   const { data: contacts } = useAllContacts(true);
   const contactResults = contacts
-    ? contacts.filter(
-        (contact) =>
-          contact.odinId &&
-          (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
-      )
+    ? contacts
+        .map((dsr) => dsr.fileMetadata.appData.content)
+        .filter(
+          (contact) =>
+            contact.odinId &&
+            (!query || contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+        )
     : [];
 
   return (
@@ -47,9 +49,9 @@ export const NewConversation = () => {
           </div>
           {t('New group')}
         </ConversationListItemWrapper>
-        {contactResults.map((result) => (
+        {contactResults.map((result, index) => (
           <NewConversationSearchItem
-            key={result.fileId}
+            key={result.odinId || index}
             result={result}
             onOpen={(newId) => navigate(`${CHAT_ROOT}/${newId}`)}
           />

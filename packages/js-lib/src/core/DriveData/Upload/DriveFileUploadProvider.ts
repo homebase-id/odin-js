@@ -42,29 +42,10 @@ export const uploadFile = async (
   metadata.isEncrypted = encrypt;
 
   const keyHeader = encrypt ? GenerateKeyHeader() : undefined;
-  return uploadUsingKeyHeader(
-    dotYouClient,
-    keyHeader,
-    instructions,
-    metadata,
-    payloads,
-    thumbnails,
-    onVersionConflict
-  );
-};
 
-const uploadUsingKeyHeader = async (
-  dotYouClient: DotYouClient,
-  keyHeader: KeyHeader | undefined,
-  instructions: UploadInstructionSet,
-  metadata: UploadFileMetadata,
-  payloads?: PayloadFile[],
-  thumbnails?: ThumbnailFile[],
-  onVersionConflict?: () => void
-): Promise<UploadResult | void> => {
   const { systemFileType, ...strippedInstructions } = instructions;
 
-  const manifest = buildManifest(payloads, thumbnails);
+  const manifest = buildManifest(payloads, thumbnails, encrypt);
   const instructionsWithManifest = {
     ...strippedInstructions,
     manifest,
@@ -84,7 +65,8 @@ const uploadUsingKeyHeader = async (
     encryptedDescriptor,
     payloads,
     thumbnails,
-    keyHeader
+    keyHeader,
+    manifest
   );
 
   // Upload
@@ -117,7 +99,6 @@ export const uploadHeader = async (
 
   // Build package
   const encryptedMetaData = await encryptMetaData(metadata, finalKeyHeader);
-
   const encryptedDescriptor = await encryptWithSharedSecret(
     dotYouClient,
     {
@@ -129,6 +110,7 @@ export const uploadHeader = async (
   const data = await buildFormData(
     strippedInstructions,
     encryptedDescriptor,
+    undefined,
     undefined,
     undefined,
     undefined
@@ -146,6 +128,7 @@ export const appendDataToFile = async (
   thumbnails: ThumbnailFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
+  const encrypt = !!keyHeader;
   const decryptedKeyHeader =
     keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)
@@ -153,7 +136,7 @@ export const appendDataToFile = async (
 
   const { systemFileType, ...strippedInstructions } = instructions;
 
-  const manifest = buildManifest(payloads, thumbnails);
+  const manifest = buildManifest(payloads, thumbnails, encrypt);
   const instructionsWithManifest = {
     ...strippedInstructions,
     manifest,
@@ -164,7 +147,8 @@ export const appendDataToFile = async (
     undefined,
     payloads,
     thumbnails,
-    decryptedKeyHeader
+    decryptedKeyHeader,
+    manifest
   );
 
   return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);

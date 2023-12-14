@@ -44,7 +44,7 @@ export const useTransitProcessor = (isEnabled = true) => {
 
   const handler = (notification: TypedConnectionNotification) => {
     if (notification.notificationType === 'transitFileReceived') {
-      console.log(
+      console.debug(
         '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
       );
 

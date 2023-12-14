@@ -12,6 +12,7 @@ import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 type useChannelsProps = {
   channelSlug?: string;
@@ -26,16 +27,22 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) return null;
 
-    const cachedChannels = queryClient.getQueryData<ChannelDefinitionVm[]>(['channels']);
+    const cachedChannels = queryClient.getQueryData<DriveSearchResult<ChannelDefinitionVm>[]>([
+      'channels',
+    ]);
     if (cachedChannels) {
       const foundChannel = cachedChannels.find(
-        (chnl) => stringGuidsEqual(chnl.channelId, channelId) || chnl.slug === channelSlug
+        (chnl) =>
+          stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelId) ||
+          chnl.fileMetadata.appData.content.slug === channelSlug
       );
       if (foundChannel) return foundChannel;
     }
 
     const channel = (await fetchCachedPublicChannels(dotYouClient))?.find(
-      (chnl) => stringGuidsEqual(chnl.channelId, channelId) || chnl.slug === channelSlug
+      (chnl) =>
+        stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelId) ||
+        chnl.fileMetadata.appData.content.slug === channelSlug
     );
     if (channel) return channel;
 
@@ -46,19 +53,31 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     if (directFetchOfChannel) {
       return {
         ...directFetchOfChannel,
-        template: parseChannelTemplate(directFetchOfChannel?.templateId),
-        acl: directFetchOfChannel?.acl,
-      } as ChannelDefinitionVm;
+        fileMetadata: {
+          ...directFetchOfChannel.fileMetadata,
+          appData: {
+            ...directFetchOfChannel.fileMetadata.appData,
+            content: {
+              ...directFetchOfChannel.fileMetadata.appData.content,
+              template: parseChannelTemplate(
+                directFetchOfChannel?.fileMetadata.appData.content?.templateId
+              ),
+            },
+          },
+        },
+      } as DriveSearchResult<ChannelDefinitionVm>;
     }
     return null;
   };
 
-  const saveData = async (channelDef: ChannelDefinition) => {
+  const saveData = async (
+    channelDef: NewDriveSearchResult<ChannelDefinition> | DriveSearchResult<ChannelDefinition>
+  ) => {
     await saveChannelDefinition(dotYouClient, { ...channelDef });
   };
 
-  const removeChannel = async (channelDef: ChannelDefinition) => {
-    await removeChannelDefinition(dotYouClient, channelDef.channelId);
+  const removeChannel = async (channelDef: DriveSearchResult<ChannelDefinition>) => {
+    await removeChannelDefinition(dotYouClient, channelDef.fileMetadata.appData.uniqueId as string);
   };
 
   return {
@@ -77,21 +96,42 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
         const toSaveChannelAsVm = {
           ...toSaveChannel,
-          template: parseChannelTemplate(toSaveChannel?.templateId),
-        } as ChannelDefinitionVm;
+          fileMetadata: {
+            ...toSaveChannel.fileMetadata,
+            appData: {
+              ...toSaveChannel.fileMetadata.appData,
+              content: {
+                ...toSaveChannel.fileMetadata.appData.content,
+                template: parseChannelTemplate(
+                  toSaveChannel?.fileMetadata.appData.content?.templateId
+                ),
+              },
+            },
+          },
+        } as DriveSearchResult<ChannelDefinitionVm>;
 
         // Update channels
-        const previousChannels: ChannelDefinitionVm[] | undefined = queryClient.getQueryData([
-          'channels',
-        ]);
+        const previousChannels: DriveSearchResult<ChannelDefinitionVm>[] | undefined =
+          queryClient.getQueryData(['channels']);
         const updatedChannels = previousChannels?.map((chnl) =>
-          stringGuidsEqual(chnl.channelId, toSaveChannelAsVm.channelId) ? toSaveChannelAsVm : chnl
+          stringGuidsEqual(
+            chnl.fileMetadata.appData.uniqueId,
+            toSaveChannelAsVm.fileMetadata.appData.uniqueId
+          )
+            ? toSaveChannelAsVm
+            : chnl
         );
         queryClient.setQueryData(['channels'], updatedChannels);
 
         // Update channel
-        queryClient.setQueryData(['channel', toSaveChannelAsVm.slug], toSaveChannelAsVm);
-        queryClient.setQueryData(['channel', toSaveChannelAsVm.channelId], toSaveChannelAsVm);
+        queryClient.setQueryData(
+          ['channel', toSaveChannelAsVm.fileMetadata.appData.content.slug],
+          toSaveChannelAsVm
+        );
+        queryClient.setQueryData(
+          ['channel', toSaveChannelAsVm.fileMetadata.appData.uniqueId],
+          toSaveChannelAsVm
+        );
 
         return { toSaveChannelAsVm, previousChannels };
       },
@@ -103,13 +143,21 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       },
       onSettled: (_data, _error, variables) => {
         // Boom baby!
-        if (variables.channelId && variables.channelId !== '') {
-          queryClient.invalidateQueries({ queryKey: ['channel', variables.channelId] });
-          queryClient.invalidateQueries({ queryKey: ['channel', variables.slug] });
-        } else {
-          queryClient.invalidateQueries({ queryKey: ['channel'] });
-          queryClient.invalidateQueries({ queryKey: ['channels'] });
+        if (
+          variables.fileMetadata.appData.uniqueId &&
+          variables.fileMetadata.appData.uniqueId !== ''
+        ) {
+          queryClient.invalidateQueries({
+            queryKey: ['channel', variables.fileMetadata.appData.uniqueId],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['channel', variables.fileMetadata.appData.content.slug],
+          });
         }
+
+        queryClient.invalidateQueries({ queryKey: ['channel'] });
+        queryClient.invalidateQueries({ queryKey: ['channels'] });
+
         // We don't invalidate channels by default, as fetching the channels is a combination of static and dynamic data
         // queryClient.invalidateQueries(['channels']);
 
@@ -121,11 +169,14 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       onMutate: async (toRemoveChannel) => {
         await queryClient.cancelQueries({ queryKey: ['channels'] });
 
-        const previousChannels: ChannelDefinitionVm[] | undefined = queryClient.getQueryData([
-          'channels',
-        ]);
+        const previousChannels: DriveSearchResult<ChannelDefinitionVm>[] | undefined =
+          queryClient.getQueryData(['channels']);
         const newChannels = previousChannels?.filter(
-          (channel) => channel.channelId !== toRemoveChannel.channelId
+          (channel) =>
+            !stringGuidsEqual(
+              channel.fileMetadata.appData.uniqueId,
+              toRemoveChannel.fileMetadata.appData.uniqueId
+            )
         );
 
         queryClient.setQueryData(['channels'], newChannels);

@@ -118,11 +118,8 @@ export const useExport = () => {
         );
       } else {
         return (
-          (
-            await getPayloadBytes(dotYouClient, targetDrive, dsr.fileId, DEFAULT_PAYLOAD_KEY, {
-              keyHeader: dsr.sharedSecretEncryptedKeyHeader,
-            })
-          )?.bytes || null
+          (await getPayloadBytes(dotYouClient, targetDrive, dsr.fileId, DEFAULT_PAYLOAD_KEY))
+            ?.bytes || null
         );
       }
     };

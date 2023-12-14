@@ -29,10 +29,6 @@ export const FileOverview = ({
     canvas.toBlob(async (blob) => {
       if (!blob) return;
 
-      // create object url from blob
-      const url = window.URL.createObjectURL(blob);
-      console.log(url);
-
       const newFiles = [...files];
       newFiles[fileIndex] = {
         ...file,

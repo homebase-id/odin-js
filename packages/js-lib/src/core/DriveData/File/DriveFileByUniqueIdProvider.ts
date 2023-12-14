@@ -125,13 +125,11 @@ export const getPayloadAsJsonByUniqueId = async <T>(
   uniqueId: string,
   key: string,
   options: {
-    keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
-  const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType } = options ?? { systemFileType: 'Standard' };
   return getPayloadBytesByUniqueId(dotYouClient, targetDrive, uniqueId, key, {
-    keyHeader,
     systemFileType,
     decrypt: true,
   }).then((bytes) => parseBytesToObject<T>(bytes));
@@ -143,7 +141,6 @@ export const getPayloadBytesByUniqueId = async (
   uniqueId: string,
   key: string,
   options: {
-    keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -156,7 +153,7 @@ export const getPayloadBytesByUniqueId = async (
   assertIfDefined('UniqueId', uniqueId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
+  const { chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -202,7 +199,7 @@ export const getPayloadBytesByUniqueId = async (
                 ? chunkEnd - chunkStart + 1
                 : undefined
             )
-          : await decryptBytesResponse(dotYouClient, response, keyHeader),
+          : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -222,7 +219,6 @@ export const getThumbBytesByUniqueId = async (
   width: number,
   height: number,
   options: {
-    keyHeader: KeyHeader | undefined;
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
@@ -234,7 +230,7 @@ export const getThumbBytesByUniqueId = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetFileThumbByUniqueIdRequest = {
     ...targetDrive,
@@ -253,7 +249,7 @@ export const getThumbBytesByUniqueId = async (
     .then(async (response) => {
       if (!response.data) return null;
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        bytes: await decryptBytesResponse(dotYouClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })

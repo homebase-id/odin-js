@@ -8,13 +8,15 @@ import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Feed } from '@youfoundation/common-app';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const FollowLink = ({
   className,
   channel,
 }: {
   className?: string;
-  channel?: ChannelDefinitionVm;
+  channel?: DriveSearchResult<ChannelDefinitionVm>;
 }) => {
   const { isOwner, getIdentity } = useAuth();
   const identity = getIdentity();
@@ -25,7 +27,10 @@ const FollowLink = ({
 
   const alreadyFollowingThis =
     (!channel && data?.notificationType === 'allNotifications') ||
-    (channel && data?.channels?.some((chnl) => chnl.alias === channel.channelId)) ||
+    (channel &&
+      data?.channels?.some((chnl) =>
+        stringGuidsEqual(chnl.alias, channel.fileMetadata.appData.uniqueId)
+      )) ||
     false;
 
   return (
@@ -35,7 +40,7 @@ const FollowLink = ({
         href={
           identity
             ? `https://${identity}/owner/follow/following/${window.location.hostname}` +
-              (channel ? `?chnl=${channel.channelId}` : '')
+              (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
             : undefined
         }
         onClick={!identity ? () => setIsLoginOpen(true) : undefined}
@@ -44,7 +49,11 @@ const FollowLink = ({
       >
         <span className="flex flex-col leading-tight">
           {alreadyFollowingThis ? t('Following') : t('Follow')}
-          {channel ? <small className="block">{ellipsisAtMaxChar(channel.name, 20)}</small> : null}
+          {channel ? (
+            <small className="block">
+              {ellipsisAtMaxChar(channel.fileMetadata.appData.content.name, 20)}
+            </small>
+          ) : null}
         </span>
       </ActionLink>
       <LoginDialog
@@ -53,7 +62,7 @@ const FollowLink = ({
         onCancel={() => setIsLoginOpen(false)}
         returnPath={`${HOME_ROOT_PATH}action?targetPath=${
           `/owner/follow/following/${window.location.hostname}` +
-          (channel ? `?chnl=${channel.channelId}` : '')
+          (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }`}
       >
         {t('You need to login before you can follow someone:')}

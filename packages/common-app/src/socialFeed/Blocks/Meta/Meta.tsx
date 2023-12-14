@@ -11,13 +11,15 @@ import {
   UserX,
 } from '@youfoundation/common-app';
 import { OwnerActions } from './OwnerActions';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
   postFile: DriveSearchResult<PostContent>;
   embeddedPost?: undefined;
-  channel?: ChannelDefinitionVm | ChannelDefinition;
+  channel?:
+    | DriveSearchResult<ChannelDefinitionVm | ChannelDefinition>
+    | NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
@@ -27,7 +29,9 @@ interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
   postFile?: DriveSearchResult<PostContent>;
   embeddedPost: EmbeddedPost;
-  channel?: ChannelDefinitionVm | ChannelDefinition;
+  channel?:
+    | DriveSearchResult<ChannelDefinitionVm | ChannelDefinition>
+    | NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
@@ -58,9 +62,9 @@ export const PostMeta = ({
 
   const isConnected = useIsConnected(odinId).data;
   const channelLink = channel
-    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${channel.slug}${
-        isConnected && identity ? '?youauth-logon=' + identity : ''
-      }`
+    ? `${odinId ? `https://${odinId}` : ''}${HOME_ROOT_PATH}posts/${
+        channel.fileMetadata.appData.content.slug
+      }${isConnected && identity ? '?youauth-logon=' + identity : ''}`
     : undefined;
 
   return (
@@ -77,7 +81,9 @@ export const PostMeta = ({
           onClick={(e) => e.stopPropagation()}
         >
           {postFile?.fileMetadata.isEncrypted ? <Lock className="h-3 w-3" /> : null}
-          {channel?.name ? `${channel?.name}` : ''}
+          {channel?.fileMetadata.appData.content.name
+            ? `${channel?.fileMetadata.appData.content.name}`
+            : ''}
         </a>
       ) : null}
 

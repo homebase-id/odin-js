@@ -81,7 +81,7 @@ const Notifications = () => {
 
   useEffect(() => {
     const handleEvent = (event: MessageEvent<NotificationClickData>) => {
-      console.log('incoming message', event?.data.notification);
+      console.log('incoming notification from click through', event?.data.notification);
     };
 
     navigator.serviceWorker.addEventListener('message', handleEvent);

@@ -15,7 +15,7 @@ export const useSocialChannel = ({ odinId, channelId }: useSocialChannelProps) =
     if (!odinId || !channelId) return;
 
     // Optimization to not fetch similar content, might break if the public channel is adapted by the user... Perhaps we should always keep the slug?
-    if (channelId === BlogConfig.PublicChannel.channelId) return BlogConfig.PublicChannel;
+    if (channelId === BlogConfig.PublicChannelId) return BlogConfig.PublicChannelNewDsr;
 
     return (await getChannelOverPeer(dotYouClient, odinId, channelId)) || null;
   };

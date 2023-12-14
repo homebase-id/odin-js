@@ -64,7 +64,7 @@ export const useAuth = () => {
     await setFirstOwnerPassword(newPassword, firstRunToken);
   };
 
-  const logout = async () => {
+  const logout = async (redirectPath?: string) => {
     await logoutOwner();
     setAuthenticationState('anonymous');
 
@@ -72,7 +72,7 @@ export const useAuth = () => {
     window.localStorage.removeItem(HOME_SHARED_SECRET);
     window.localStorage.removeItem(STORAGE_IDENTITY_KEY);
 
-    window.location.href = HOME_ROOT_PATH;
+    window.location.href = redirectPath || HOME_ROOT_PATH;
   };
 
   /// Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute

@@ -13,11 +13,7 @@ import {
   getRangeHeader,
   parseBytesToObject,
 } from '../../../core/DriveData/File/DriveFileHelper';
-import {
-  DriveSearchResult,
-  EncryptedKeyHeader,
-  KeyHeader,
-} from '../../../core/DriveData/File/DriveFileTypes';
+import { DriveSearchResult, EncryptedKeyHeader } from '../../../core/DriveData/File/DriveFileTypes';
 import {
   ContentType,
   FileMetadata,
@@ -50,15 +46,13 @@ export const getPayloadAsJsonOverPeer = async <T>(
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  options: {
-    keyHeader: KeyHeader | EncryptedKeyHeader | undefined;
+  options?: {
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
-  const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType } = options ?? { systemFileType: 'Standard' };
 
   return getPayloadBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, key, {
-    keyHeader,
     systemFileType,
     decrypt: true,
   }).then((bytes) => parseBytesToObject<T>(bytes));
@@ -71,7 +65,6 @@ export const getPayloadBytesOverPeer = async (
   fileId: string,
   key: string,
   options: {
-    keyHeader?: KeyHeader | EncryptedKeyHeader;
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -84,7 +77,7 @@ export const getPayloadBytesOverPeer = async (
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
+  const { chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -130,7 +123,7 @@ export const getPayloadBytesOverPeer = async (
                 ? chunkEnd - chunkStart + 1
                 : undefined
             )
-          : await decryptBytesResponse(dotYouClient, response, keyHeader),
+          : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -151,7 +144,6 @@ export const getThumbBytesOverPeer = async (
   width: number,
   height: number,
   options: {
-    keyHeader?: KeyHeader;
     systemFileType?: SystemFileType;
     lastModified?: number;
   }
@@ -163,7 +155,7 @@ export const getThumbBytesOverPeer = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetThumbRequest = {
@@ -186,7 +178,7 @@ export const getThumbBytesOverPeer = async (
     .then(async (response) => {
       if (!response.data) return null;
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        bytes: await decryptBytesResponse(dotYouClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })
@@ -318,10 +310,7 @@ export const getContentFromHeaderOrPayloadOverPeer = async <T>(
       odinId,
       targetDrive,
       fileId,
-      DEFAULT_PAYLOAD_KEY,
-      {
-        keyHeader,
-      }
+      DEFAULT_PAYLOAD_KEY
     );
   }
 };

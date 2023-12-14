@@ -3,7 +3,6 @@ import {
   ContentType,
   DriveSearchResult,
   EncryptedKeyHeader,
-  KeyHeader,
   SystemFileType,
 } from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
@@ -126,14 +125,12 @@ export const getPayloadAsJson = async <T>(
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  options: {
-    keyHeader: KeyHeader | EncryptedKeyHeader | undefined;
+  options?: {
     systemFileType?: SystemFileType;
   }
 ): Promise<T | null> => {
-  const { keyHeader, systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType } = options ?? { systemFileType: 'Standard' };
   return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
-    keyHeader,
     systemFileType,
     decrypt: true,
   }).then((bytes) => parseBytesToObject<T>(bytes));
@@ -144,8 +141,7 @@ export const getPayloadBytes = async (
   targetDrive: TargetDrive,
   fileId: string,
   key: string,
-  options: {
-    keyHeader?: KeyHeader | EncryptedKeyHeader;
+  options?: {
     systemFileType?: SystemFileType;
     chunkStart?: number;
     chunkEnd?: number;
@@ -158,7 +154,7 @@ export const getPayloadBytes = async (
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
 
-  const { keyHeader, chunkStart, chunkEnd, lastModified } = options;
+  const { chunkStart, chunkEnd, lastModified } = options || {};
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -201,7 +197,7 @@ export const getPayloadBytes = async (
               0,
               chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
             )
-          : await decryptBytesResponse(dotYouClient, response, keyHeader),
+          : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -220,7 +216,7 @@ export const getThumbBytes = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: { keyHeader?: KeyHeader; systemFileType?: SystemFileType; lastModified?: number }
+  options: { systemFileType?: SystemFileType; lastModified?: number }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
@@ -229,7 +225,7 @@ export const getThumbBytes = async (
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
 
-  const { keyHeader, systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
   const client = getAxiosClient(dotYouClient, systemFileType);
   const request: GetFileThumbRequest = {
@@ -249,7 +245,7 @@ export const getThumbBytes = async (
     .then(async (response) => {
       if (!response.data) return null;
       return {
-        bytes: await decryptBytesResponse(dotYouClient, response, keyHeader),
+        bytes: await decryptBytesResponse(dotYouClient, response),
         contentType: `${response.headers.decryptedcontenttype}` as ImageContentType,
       };
     })
@@ -294,7 +290,6 @@ export const getContentFromHeaderOrPayload = async <T>(
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
-      keyHeader,
       systemFileType,
     });
   }

@@ -29,7 +29,7 @@ const Settings = () => {
             path: `/owner/settings/security`,
           },
           {
-            title: `Delete`,
+            title: `Delete account`,
             path: `/owner/settings/delete`,
           },
         ]}

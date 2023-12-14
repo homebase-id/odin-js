@@ -168,9 +168,6 @@ const rsaImportKey = async (key64: string): Promise<CryptoKey> => {
     false,
     ['encrypt'] //must be ["encrypt", "decrypt"] or ["wrapKey", "unwrapKey"]
   );
-
-  // console.log("Imported key = ", key);
-  // return key;
 };
 
 const rsaOaepEncrypt = async (publicKey: CryptoKey, bytes: Uint8Array) => {
@@ -184,7 +181,6 @@ const rsaOaepEncrypt = async (publicKey: CryptoKey, bytes: Uint8Array) => {
       bytes //stringToUint8Array(str) //ArrayBuffer of data you want to encrypt
     )
     .then((encrypted) => {
-      // console.log("RSA Encrypted = ", encrypted);
       return new Uint8Array(encrypted);
     });
 };

@@ -7,7 +7,11 @@ import {
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
   DriveSearchResult,
 } from '@youfoundation/js-lib/core';
-import { stringifyArrayToQueryParams } from '@youfoundation/js-lib/helpers';
+import {
+  stringGuidsEqual,
+  stringifyArrayToQueryParams,
+  tryJsonParse,
+} from '@youfoundation/js-lib/helpers';
 import {
   PostType,
   BlogConfig,
@@ -27,7 +31,7 @@ export const getCachedPosts = async (
   const cachedData = await cachedQuery(dotYouClient);
   const posts =
     cachedData.postsPerChannel
-      .find((data) => data.channelId === channelId)
+      .find((data) => stringGuidsEqual(data.channelId, channelId))
       ?.posts.filter((post) =>
         postType ? post?.fileMetadata.appData.content?.type === postType : true
       ) ?? [];
@@ -63,7 +67,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
 export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
   const fileData = await GetFile(dotYouClient, 'sitedata.json');
   if (fileData) {
-    let channels: ChannelDefinition[] = [];
+    let channels: DriveSearchResult<ChannelDefinitionVm>[] = [];
 
     fileData.forEach((entry) => {
       const entries = entry.filter(
@@ -74,38 +78,44 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
       channels = [
         ...channels,
         ...entries.map((entry) => {
+          const parsedContent = tryJsonParse<ChannelDefinition>(
+            entry.header.fileMetadata.appData.content
+          );
           return {
-            ...entry.payload,
-            acl: entry.header.serverMetadata?.accessControlList,
-          } as ChannelDefinition;
+            ...entry.header,
+            fileMetadata: {
+              ...entry.header.fileMetadata,
+              appData: {
+                ...entry.header.fileMetadata.appData,
+                content: {
+                  ...parsedContent,
+                  template: parseChannelTemplate(parsedContent?.templateId),
+                },
+              },
+            },
+          } as DriveSearchResult<ChannelDefinitionVm>;
         }),
       ];
     });
 
     if (!channels.length) return null;
 
-    return channels.map((channel) => {
-      return {
-        ...channel,
-        template: parseChannelTemplate(channel?.templateId),
-      } as ChannelDefinitionVm;
-    });
+    return channels;
   }
 };
 
 const cachedQuery = async (dotYouClient: DotYouClient) => {
   const pageSize = 30;
   const channels = (await fetchCachedPublicChannels(dotYouClient)) || [];
-
   const allCursors: Record<string, string> = {};
   const queries: {
     name: string;
     queryParams: FileQueryParams;
     resultOptions?: GetBatchQueryResultOptions | undefined;
   }[] = channels
-    .filter((chnl) => chnl.showOnHomePage)
+    .filter((chnl) => chnl.fileMetadata.appData.content.showOnHomePage)
     .map((chnl) => {
-      const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
+      const targetDrive = GetTargetDriveFromChannelId(chnl.fileMetadata.appData.uniqueId as string);
       const params: FileQueryParams = {
         targetDrive: targetDrive,
         dataType: undefined,
@@ -119,7 +129,7 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
       };
 
       return {
-        name: chnl.channelId,
+        name: chnl.fileMetadata.appData.uniqueId as string,
         queryParams: params,
         resultOptions: ro,
       };

@@ -117,6 +117,7 @@ export interface UploadPayloadDescriptor {
   payloadKey: string;
   descriptorContent: string | undefined;
   thumbnails?: UploadThumbnailDescriptor[];
+  iv: Uint8Array | undefined;
 }
 
 export interface UploadThumbnailDescriptor extends ImageSize {

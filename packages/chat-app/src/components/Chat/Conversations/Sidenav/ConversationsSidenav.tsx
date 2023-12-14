@@ -192,11 +192,13 @@ const SearchConversation = ({
 
   const contactResults =
     query && contacts
-      ? contacts.filter(
-          (contact) =>
-            contact.odinId &&
-            (contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
-        )
+      ? contacts
+          .map((contact) => contact.fileMetadata.appData.content)
+          .filter(
+            (contact) =>
+              contact.odinId &&
+              (contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+          )
       : [];
 
   const contactsWithoutAConversation = contactResults.filter(
@@ -270,7 +272,7 @@ const SearchConversation = ({
                   <NewConversationSearchItem
                     onOpen={(id) => openConversation(id)}
                     result={result as ContactFile}
-                    key={result.fileId}
+                    key={result.odinId}
                   />
                 ))}
               </>

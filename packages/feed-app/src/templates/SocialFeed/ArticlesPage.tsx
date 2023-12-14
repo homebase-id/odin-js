@@ -18,6 +18,7 @@ import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const ArticlesPage = () => {
   return (
@@ -59,8 +60,11 @@ const DraftsView = () => {
         {drafts ? (
           <div className="-m-3">
             {drafts.map((draft, index) => {
-              const channel = channels?.find(
-                (chnl) => chnl.channelId === draft.fileMetadata.appData.content.channelId
+              const channel = channels?.find((chnl) =>
+                stringGuidsEqual(
+                  chnl.fileMetadata.appData.uniqueId,
+                  draft.fileMetadata.appData.content.channelId
+                )
               );
               return (
                 <PostTextListItem
@@ -119,8 +123,11 @@ const PublishedArticlesView = () => {
               <SubtleMessage className="m-3">{t('No articles found')}</SubtleMessage>
             ) : (
               flattenedPosts.map((draft, index) => {
-                const channel = channels?.find(
-                  (chnl) => chnl.channelId === draft.fileMetadata.appData.content.channelId
+                const channel = channels?.find((chnl) =>
+                  stringGuidsEqual(
+                    chnl.fileMetadata.appData.uniqueId,
+                    draft.fileMetadata.appData.content.channelId
+                  )
                 );
                 return (
                   <PostTextListItem

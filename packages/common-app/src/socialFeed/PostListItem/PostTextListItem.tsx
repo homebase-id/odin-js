@@ -4,7 +4,7 @@ import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostMeta } from '../Blocks/Meta/Meta';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const PostTextListItem = ({
   draft,
@@ -13,7 +13,7 @@ export const PostTextListItem = ({
   className,
 }: {
   draft: DriveSearchResult<Article>;
-  channel?: ChannelDefinitionVm;
+  channel?: NewDriveSearchResult<ChannelDefinitionVm>;
   linkRoot: string;
   className?: string;
 }) => {
@@ -26,7 +26,11 @@ export const PostTextListItem = ({
         } p-3 hover:shadow-md hover:dark:shadow-slate-600`}
         key={draft.fileId}
       >
-        <FakeAnchor href={`${linkRoot}/${channel?.slug ?? 'public-posts'}/${content.id}`}>
+        <FakeAnchor
+          href={`${linkRoot}/${channel?.fileMetadata.appData.content.slug ?? 'public-posts'}/${
+            content.id
+          }`}
+        >
           <div className="flex flex-col">
             <div className="flex flex-grow flex-col px-4 py-3">
               <div className="text-foreground mb-1 flex flex-col text-opacity-60 md:flex-row md:flex-wrap md:items-center">

@@ -14,7 +14,7 @@ const Channels = ({ className }: { className?: string }) => {
             {channels.map((channel) => {
               return (
                 <ChannelTeaser
-                  key={channel.channelId}
+                  key={channel.fileMetadata.appData.uniqueId}
                   channel={channel}
                   className={'w-full p-2 md:w-1/2'}
                 />

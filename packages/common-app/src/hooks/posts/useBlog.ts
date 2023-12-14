@@ -38,7 +38,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
       return;
     }
 
-    const cachedBlogs = getCachedBlogs(channel.channelId);
+    const cachedBlogs = getCachedBlogs(channel.fileMetadata.appData.uniqueId);
     if (cachedBlogs) {
       const foundBlog = cachedBlogs.find(
         (blog) =>
@@ -49,8 +49,12 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     }
 
     const postFile =
-      (await getPostBySlug(dotYouClient, channel.channelId, blogSlug)) ||
-      (await getPost(dotYouClient, channel.channelId, blogSlug));
+      (await getPostBySlug(
+        dotYouClient,
+        channel.fileMetadata.appData.uniqueId as string,
+        blogSlug
+      )) ||
+      (await getPost(dotYouClient, channel.fileMetadata.appData.uniqueId as string, blogSlug));
 
     if (postFile) return { activeBlog: postFile, activeChannel: channel };
   };

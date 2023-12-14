@@ -25,7 +25,7 @@ const PAGE_SIZE = 30;
 const PostOverview = () => {
   const { channelKey } = useParams();
   const { data: activeChannel } = useChannel(
-    channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannel.channelId }
+    channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannelId }
   ).fetch;
 
   const {
@@ -36,7 +36,7 @@ const PostOverview = () => {
     isFetchingNextPage,
     isLoading,
   } = useBlogPostsInfinite({
-    channelId: activeChannel?.channelId,
+    channelId: activeChannel?.fileMetadata.appData.uniqueId,
     pageSize: PAGE_SIZE,
     enabled: !channelKey || !!activeChannel,
   });
@@ -51,9 +51,9 @@ const PostOverview = () => {
   );
 
   const ListComponent = activeChannel
-    ? activeChannel.template === ChannelTemplate.LargeCards
+    ? activeChannel.fileMetadata.appData.content.template === ChannelTemplate.LargeCards
       ? CardPostOverview
-      : activeChannel.template === ChannelTemplate.MasonryLayout
+      : activeChannel.fileMetadata.appData.content.template === ChannelTemplate.MasonryLayout
       ? MasonryPostOverview
       : ListPostOverview
     : ListPostOverview;
@@ -67,13 +67,17 @@ const PostOverview = () => {
   );
 
   const encrypted =
-    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Anonymous &&
-    activeChannel?.acl?.requiredSecurityGroup !== SecurityGroupType.Authenticated;
+    activeChannel?.serverMetadata?.accessControlList?.requiredSecurityGroup !==
+      SecurityGroupType.Anonymous &&
+    activeChannel?.serverMetadata?.accessControlList?.requiredSecurityGroup !==
+      SecurityGroupType.Authenticated;
 
   return (
     <>
       <Helmet>
-        <title>{activeChannel ? activeChannel.name : t('Posts')} | Homebase</title>
+        <title>
+          {activeChannel ? activeChannel.fileMetadata.appData.content.name : t('Posts')} | Homebase
+        </title>
       </Helmet>
 
       <section className="py-5">
@@ -83,19 +87,22 @@ const PostOverview = () => {
               <Breadcrumbs
                 levels={[
                   { title: t('Posts') ?? '', href: `${HOME_ROOT_PATH}posts` },
-                  { title: activeChannel?.name ?? '' },
+                  { title: activeChannel?.fileMetadata.appData.content.name ?? '' },
                 ]}
                 className="text-sm"
               />
 
               <h1 className="text-4xl" title={encrypted ? t('Encrypted') : t('Unencrypted')}>
-                {activeChannel?.name}{' '}
-                {activeChannel?.acl ? (
-                  <AclIcon acl={activeChannel?.acl} className="inline h-3 w-3" />
+                {activeChannel?.fileMetadata.appData.content.name}{' '}
+                {activeChannel?.serverMetadata?.accessControlList ? (
+                  <AclIcon
+                    acl={activeChannel?.serverMetadata?.accessControlList}
+                    className="inline h-3 w-3"
+                  />
                 ) : null}{' '}
               </h1>
               <p className="my-2 max-w-md text-foreground text-opacity-80">
-                {activeChannel?.description}
+                {activeChannel?.fileMetadata.appData.content.description}
               </p>
             </div>
             <FollowLink className="sm:ml-auto" channel={activeChannel || undefined} />

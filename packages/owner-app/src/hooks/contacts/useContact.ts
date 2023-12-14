@@ -12,6 +12,11 @@ import {
   getContactByOdinId,
   getContactByUniqueId,
 } from '@youfoundation/js-lib/network';
+import {
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 
 export const useContact = ({
   odinId,
@@ -33,7 +38,7 @@ export const useContact = ({
     odinId: string;
     id: string;
     canSave?: boolean;
-  }): Promise<ContactVm | undefined> => {
+  }): Promise<DriveSearchResult<ContactVm> | NewDriveSearchResult<ContactVm> | undefined> => {
     if (!odinId) {
       if (!id) return;
 
@@ -45,7 +50,10 @@ export const useContact = ({
     // Use the data from the contact book, if it exists and if it's a contact level source or we are not allowed to save anyway
     // TODO: Not sure if this is the best way yet... But it works for now
     const contactBookContact = await getContactByOdinId(dotYouClient, odinId);
-    if (contactBookContact && contactBookContact.source === 'contact') {
+    if (
+      contactBookContact &&
+      contactBookContact.fileMetadata.appData.content.source === 'contact'
+    ) {
       return contactBookContact;
     } else if (contactBookContact)
       console.log(`[${odinId}] Ignoring contact book record`, contactBookContact);
@@ -66,43 +74,58 @@ export const useContact = ({
       // Only save contacts if we were allowed to or if the source is of the "contact" level
       if (canSave) {
         const savedReturnedContact = await saveContact(dotYouClient, {
-          ...returnContact,
-          odinId: odinId,
+          fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
+          serverMetadata: {
+            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+          },
         });
 
         return parseContact(savedReturnedContact);
       } else {
-        return parseContact(returnContact);
+        return parseContact({
+          fileMetadata: { appData: { content: { ...returnContact, odinId: odinId } } },
+          serverMetadata: {
+            accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+          },
+        });
       }
     }
 
     return undefined;
   };
 
-  const refresh = async ({ contact }: { contact: ContactFile }) => {
-    if (!contact.id || !contact.odinId) {
+  const refresh = async ({ contact }: { contact: DriveSearchResult<ContactFile> }) => {
+    if (!contact.fileMetadata.appData.uniqueId || !contact.fileMetadata.appData.content.odinId) {
       console.warn('Missing data to fetch new contact data reliable');
       return;
     }
 
-    const connectionInfo = (await fetchConnectionInfo(dotYouClient, contact.odinId)) ?? undefined;
-    const newContact = connectionInfo ? { ...contact, ...connectionInfo } : undefined;
+    const connectionInfo =
+      (await fetchConnectionInfo(dotYouClient, contact.fileMetadata.appData.content.odinId)) ??
+      undefined;
+    const newContact = connectionInfo
+      ? { ...contact.fileMetadata.appData.content, ...connectionInfo }
+      : undefined;
 
     if (newContact) {
       await saveContact(dotYouClient, {
-        ...newContact,
-        odinId: contact.odinId,
-        versionTag: contact.versionTag,
+        ...contact,
+        fileMetadata: {
+          ...contact.fileMetadata,
+          appData: { content: { ...newContact, odinId: odinId } },
+        },
       });
 
       return;
     } else {
-      const publicContact = await fetchDataFromPublic(contact.odinId);
+      const publicContact = await fetchDataFromPublic(contact.fileMetadata.appData.content.odinId);
       if (!publicContact) return;
       await saveContact(dotYouClient, {
-        ...publicContact,
-        odinId: contact.odinId,
-        versionTag: contact.versionTag,
+        ...contact,
+        fileMetadata: {
+          ...contact.fileMetadata,
+          appData: { content: { ...publicContact, odinId: odinId } },
+        },
       });
     }
   };
@@ -145,26 +168,37 @@ export const useContact = ({
   };
 };
 
-export const parseContact = (contact: RawContact): ContactVm => {
-  const imageUrl =
-    contact.image && !contact.hasImage
-      ? `data:${contact.image.contentType};base64,${contact.image.content}`
-      : `https://${contact.odinId}/pub/image`;
+export const parseContact = (
+  contact: DriveSearchResult<RawContact> | NewDriveSearchResult<RawContact>
+): DriveSearchResult<ContactVm> | NewDriveSearchResult<ContactVm> => {
+  const pureContent = contact.fileMetadata.appData.content;
 
-  const { id, name, location, phone, birthday, hasImage, odinId, source, lastModified } = contact;
+  const imageUrl = pureContent.image
+    ? `data:${pureContent.image.contentType};base64,${pureContent.image.content}`
+    : `https://${pureContent.odinId}/pub/image`;
+
+  const { name, location, phone, birthday, odinId, source } = pureContent;
 
   return {
-    id,
-    name,
-    lastModified,
+    ...contact,
+    fileMetadata: {
+      ...contact.fileMetadata,
+      updated: (contact as DriveSearchResult<unknown>).fileMetadata.updated,
+      appData: {
+        ...contact.fileMetadata.appData,
+        uniqueId: contact.fileMetadata.appData.uniqueId,
+        content: {
+          name,
 
-    location,
-    phone,
-    birthday,
-    hasImage,
+          location,
+          phone,
+          birthday,
 
-    imageUrl,
-    odinId,
-    source,
-  };
+          imageUrl,
+          odinId,
+          source,
+        },
+      },
+    },
+  } as DriveSearchResult<ContactVm>;
 };

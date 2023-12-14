@@ -21,6 +21,7 @@ import {
   queryBatch,
   queryBatchCollection,
   TargetDrive,
+  deleteFilesByGroupId,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/DataUtil';
 
@@ -73,16 +74,16 @@ export const getRecentPosts = async <T extends PostContent>(
   includeDrafts: true | 'only' | false,
   cursorState: Record<string, string> | undefined = undefined,
   pageSize = 10,
-  channels?: ChannelDefinition[],
+  channels?: DriveSearchResult<ChannelDefinition>[],
   includeHiddenChannels = false
 ): Promise<MultiRequestCursoredResult<DriveSearchResult<T>[]>> => {
   const chnls = channels || (await getChannelDefinitions(dotYouClient));
   const allCursors: Record<string, string> = {};
 
   const queries = chnls
-    ?.filter((chnl) => includeHiddenChannels || chnl.showOnHomePage)
+    ?.filter((chnl) => includeHiddenChannels || chnl.fileMetadata.appData.content.showOnHomePage)
     .map((chnl) => {
-      const targetDrive = GetTargetDriveFromChannelId(chnl.channelId);
+      const targetDrive = GetTargetDriveFromChannelId(chnl.fileMetadata.appData.uniqueId as string);
       const params: FileQueryParams = {
         targetDrive: targetDrive,
         dataType: type ? [postTypeToDataType(type)] : undefined,
@@ -97,12 +98,12 @@ export const getRecentPosts = async <T extends PostContent>(
 
       const ro: GetBatchQueryResultOptions = {
         maxRecords: pageSize,
-        cursorState: cursorState?.[chnl.channelId],
+        cursorState: cursorState?.[chnl.fileMetadata.appData.uniqueId as string],
         includeMetadataHeader: true,
       };
 
       return {
-        name: chnl.channelId,
+        name: chnl.fileMetadata.appData.uniqueId as string,
         queryParams: params,
         resultOptions: ro,
       };
@@ -200,9 +201,43 @@ export const getPostBySlug = async <T extends PostContent>(
   return;
 };
 
-export const removePost = async (dotYouClient: DotYouClient, fileId: string, channelId: string) => {
+export const removePost = async (
+  dotYouClient: DotYouClient,
+  postFile: DriveSearchResult<PostContent>,
+  channelId: string
+) => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
-  deleteFile(dotYouClient, targetDrive, fileId);
+
+  if (postFile.fileMetadata.globalTransitId) {
+    // Fetch the first 1000 comments and delete them with the post;
+    // TODO: this should support a larger numbers of comments; Or a delete of a tree of groupIds
+    const comments = (
+      await queryBatch(
+        dotYouClient,
+        {
+          targetDrive: targetDrive,
+          groupId: [postFile.fileMetadata.globalTransitId],
+          systemFileType: 'Comment',
+        },
+        {
+          maxRecords: 1000,
+        }
+      )
+    ).searchResults;
+
+    await deleteFilesByGroupId(
+      dotYouClient,
+      targetDrive,
+      [
+        ...(comments.map((cmnt) => cmnt.fileMetadata.globalTransitId).filter(Boolean) as string[]),
+        postFile.fileMetadata.globalTransitId,
+      ],
+      undefined,
+      'Comment'
+    );
+  }
+
+  return await deleteFile(dotYouClient, targetDrive, postFile.fileId);
 };
 
 ///

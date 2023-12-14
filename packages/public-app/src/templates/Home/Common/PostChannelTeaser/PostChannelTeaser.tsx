@@ -18,7 +18,7 @@ import { DriveSearchResult } from '@youfoundation/js-lib/core';
 interface PostChannelTeaserProps {
   className?: string;
   title: string;
-  channel: ChannelDefinitionVm;
+  channel: DriveSearchResult<ChannelDefinitionVm>;
   fallback: ReactNode;
 }
 
@@ -35,7 +35,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
   const scrollContainer = useRef<HTMLDivElement>(null);
 
   const { data: blogPosts, isFetched: blogsFetched } = useBlogPostsInfinite({
-    channelId: channel?.channelId,
+    channelId: channel?.fileMetadata.appData.uniqueId,
   });
   const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
 
@@ -103,7 +103,11 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
       <div className="mb-5 flex flex-row flex-wrap items-center">
         <h2 className="text-2xl">{title}</h2>
         <ActionLink
-          href={`${HOME_ROOT_PATH}posts/${channel.slug ? channel.slug + '/' : ''}`}
+          href={`${HOME_ROOT_PATH}posts/${
+            channel.fileMetadata.appData.content.slug
+              ? channel.fileMetadata.appData.content.slug + '/'
+              : ''
+          }`}
           className="ml-auto"
           icon={Arrow}
           type="mute"
@@ -122,7 +126,11 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
               <PostTeaser
                 className="w-1/2 sm:w-1/3 md:w-1/4 xl:w-1/6"
                 postFile={postFile}
-                linkRoot={`${HOME_ROOT_PATH}posts/${channel.slug ? channel.slug + '/' : ''}`}
+                linkRoot={`${HOME_ROOT_PATH}posts/${
+                  channel.fileMetadata.appData.content.slug
+                    ? channel.fileMetadata.appData.content.slug + '/'
+                    : ''
+                }`}
                 key={postFile?.fileId}
               />
             );

@@ -48,7 +48,13 @@ const ChannelSidebar = ({
     <div className={className}>
       <div className="hidden grid-flow-row gap-4 lg:grid">
         {channels?.map((channel) => {
-          return <ChannelTeaser key={channel.channelId} channel={channel} className={'w-full'} />;
+          return (
+            <ChannelTeaser
+              key={channel.fileMetadata.appData.uniqueId}
+              channel={channel}
+              className={'w-full'}
+            />
+          );
         })}
       </div>
       <div className="lg:hidden">
@@ -62,8 +68,11 @@ const ChannelSidebar = ({
         >
           <option value="all">{t('All channels')}</option>
           {channels?.map((channel) => (
-            <option value={channel.channelId} key={channel.channelId}>
-              {channel.name}
+            <option
+              value={channel.fileMetadata.appData.uniqueId}
+              key={channel.fileMetadata.appData.uniqueId}
+            >
+              {channel.fileMetadata.appData.content.name}
             </option>
           ))}
         </Select>

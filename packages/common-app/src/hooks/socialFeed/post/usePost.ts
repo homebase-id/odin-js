@@ -6,8 +6,6 @@ import {
   NewMediaFile,
   MediaFile,
   Media,
-  getChannelDrive,
-  getPostByFileId,
   removePost,
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
@@ -16,7 +14,6 @@ import {
   MultiRequestCursoredResult,
   NewDriveSearchResult,
   UploadResult,
-  deleteFile,
 } from '@youfoundation/js-lib/core';
 
 export const usePost = () => {
@@ -58,7 +55,6 @@ export const usePost = () => {
         };
         savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
           (result) => {
-            console.log(result, result.newVersionTag);
             if (result) resolve(result);
           }
         );
@@ -77,39 +73,13 @@ export const usePost = () => {
 
   // slug property is need to clear the cache later, but not for the actual removeData
   const removeData = async ({
-    fileId,
+    postFile,
     channelId,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    slug,
   }: {
-    fileId: string;
+    postFile: DriveSearchResult<PostContent>;
     channelId: string;
-    slug: string;
   }) => {
-    const post = await getPostByFileId(dotYouClient, channelId, fileId);
-    const channelDrive = getChannelDrive(channelId);
-    if (post) {
-      if (
-        post.fileMetadata.appData.content.primaryMediaFile &&
-        post.fileMetadata.appData.content.primaryMediaFile.fileId
-      )
-        await deleteFile(
-          dotYouClient,
-          channelDrive,
-          post.fileMetadata.appData.content.primaryMediaFile.fileId
-        );
-
-      const mediaPost = post as any as Media;
-      if (mediaPost.mediaFiles) {
-        await Promise.all(
-          mediaPost.mediaFiles.map(async (file) => {
-            if (file.fileId) await deleteFile(dotYouClient, channelDrive, file.fileId);
-          })
-        );
-      }
-    }
-
-    return await removePost(dotYouClient, fileId, channelId);
+    if (postFile) return await removePost(dotYouClient, postFile, channelId);
   };
 
   return {
@@ -279,8 +249,10 @@ export const usePost = () => {
       onSuccess: (_data, variables) => {
         queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
 
-        if (variables && variables.slug) {
-          queryClient.invalidateQueries({ queryKey: ['blog', variables.slug] });
+        if (variables && variables.postFile.fileMetadata.appData.content.slug) {
+          queryClient.invalidateQueries({
+            queryKey: ['blog', variables.postFile.fileMetadata.appData.content.slug],
+          });
         } else {
           queryClient.invalidateQueries({ queryKey: ['blog'] });
         }

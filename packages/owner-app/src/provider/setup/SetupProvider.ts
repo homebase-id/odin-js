@@ -180,9 +180,9 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
 
 export const SetupBlog = async (dotYouClient: DotYouClient) => {
   // Create Public Channel oon the (Default) Public Posts Drive
-  const publicDef = await getChannelDefinition(dotYouClient, BlogConfig.PublicChannel.channelId);
+  const publicDef = await getChannelDefinition(dotYouClient, BlogConfig.PublicChannelId);
   if (!publicDef) {
-    await saveChannelDefinition(dotYouClient, BlogConfig.PublicChannel);
+    await saveChannelDefinition(dotYouClient, BlogConfig.PublicChannelNewDsr);
   }
 };
 

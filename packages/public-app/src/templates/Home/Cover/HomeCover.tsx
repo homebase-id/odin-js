@@ -56,11 +56,7 @@ const HomeCover = ({ templateSettings }: { templateSettings?: ThemeCoverSettings
             <div className="-mb-4 mt-auto py-12">
               {channels?.map((channel) => {
                 return (
-                  <ChannelTeaser
-                    key={channel.channelId}
-                    channel={channel}
-                    className={'w-full py-4'}
-                  />
+                  <ChannelTeaser key={channel.fileId} channel={channel} className={'w-full py-4'} />
                 );
               })}
               <Links className="justify-center" style="secondary" direction="row" />

@@ -7,6 +7,7 @@ import {
 
 import { useDotYouClient } from '../../../..';
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }
@@ -36,8 +37,19 @@ export const useChannels = ({
         return (await getChannelDefinitions(dotYouClient))?.map((channel) => {
           return {
             ...channel,
-            template: parseChannelTemplate(channel?.templateId),
-          } as ChannelDefinitionVm;
+            fileMetadata: {
+              ...channel.fileMetadata,
+              appData: {
+                ...channel.fileMetadata.appData,
+                content: {
+                  ...channel.fileMetadata.appData.content,
+                  template: parseChannelTemplate(
+                    channel?.fileMetadata?.appData?.content?.templateId
+                  ),
+                },
+              },
+            },
+          } as DriveSearchResult<ChannelDefinitionVm>;
         });
       } catch (e) {
         ('failed to fetch dynamic data');

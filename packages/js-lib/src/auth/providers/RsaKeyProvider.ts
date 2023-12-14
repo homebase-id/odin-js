@@ -27,7 +27,6 @@ export const decryptWithRsaKey = async (encrypted: string, key: CryptoKey) => {
     .decrypt({ name: 'RSA-OAEP' }, key, base64ToUint8Array(encrypted))
     .then((decrypted) => {
       return new Uint8Array(decrypted);
-      // console.log('decrypted', new Uint8Array(decrypted));
     })
     .catch((err) => {
       console.error(err);

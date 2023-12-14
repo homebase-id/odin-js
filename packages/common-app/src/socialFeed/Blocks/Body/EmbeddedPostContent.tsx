@@ -41,12 +41,14 @@ export const EmbeddedPostContent = ({
   // When on the feed use the preview link
   const postPath =
     window.location.pathname === '/owner/feed'
-      ? `preview/${content.authorOdinId}/${channel?.channelId}/${content.id}`
+      ? `preview/${content.authorOdinId}/${channel?.fileMetadata.appData.uniqueId}/${content.id}`
       : content.permalink;
 
   const isChannelPublic =
-    channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated ||
-    channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous;
+    channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Authenticated ||
+    channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+      SecurityGroupType.Anonymous;
 
   return (
     <div className={`overflow-hidden rounded-lg border dark:border-slate-700 ${className ?? ''}`}>

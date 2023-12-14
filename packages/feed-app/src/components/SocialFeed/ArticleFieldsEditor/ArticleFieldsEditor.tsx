@@ -32,7 +32,7 @@ export const InnerFieldEditors = ({
   disabled,
 }: {
   postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
-  channel: ChannelDefinition;
+  channel: NewDriveSearchResult<ChannelDefinition>;
   primaryMediaFile: NewMediaFile | undefined | null;
   onChange: (e: { target: { name: string; value: string | Blob | RichText | undefined } }) => void;
   updateVersionTag: (versionTag: string) => void;
@@ -42,12 +42,12 @@ export const InnerFieldEditors = ({
   const { data: imageBlob } = usePayloadBlob(
     postFile.fileMetadata.appData.content.primaryMediaFile?.fileId || postFile.fileId,
     postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
-    getChannelDrive(channel.channelId),
+    getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
     (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated
   );
 
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const targetDrive = getChannelDrive(channel.channelId);
+  const targetDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
 
   return (
     <>
@@ -171,8 +171,6 @@ export const InnerFieldEditors = ({
                         if (!result) return null;
 
                         updateVersionTag(result.newVersionTag);
-                        console.log('removePostMedia', result);
-
                         return result;
                       },
                     }

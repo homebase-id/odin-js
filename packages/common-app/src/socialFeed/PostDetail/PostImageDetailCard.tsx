@@ -18,7 +18,11 @@ import {
   ArrowLeft,
   Arrow,
 } from '../../..';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 
 export const PostImageDetailCard = ({
   odinId,
@@ -33,7 +37,7 @@ export const PostImageDetailCard = ({
   rootUrl,
 }: {
   odinId?: string;
-  channel?: ChannelDefinition;
+  channel?: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>;
   postFile?: DriveSearchResult<PostContent>;
   isOwner: boolean;
   isAuthenticated: boolean;
@@ -201,8 +205,10 @@ export const PostImageDetailCard = ({
                 isOwner={isOwner}
                 login={login}
                 isPublic={
-                  channel?.acl?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-                  channel?.acl?.requiredSecurityGroup === SecurityGroupType.Authenticated
+                  channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                    SecurityGroupType.Anonymous ||
+                  channel?.serverMetadata?.accessControlList?.requiredSecurityGroup ===
+                    SecurityGroupType.Authenticated
                 }
               />
             ) : null}

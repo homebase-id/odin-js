@@ -41,7 +41,6 @@ export const useBlogPostsInfinite = ({
     pageParam: string | Record<string, string> | undefined;
   }): Promise<useBlogPostsInfiniteReturn> => {
     const canRunCached = !pageParam && !isAuthenticated;
-
     const cachedData = canRunCached
       ? channelId
         ? await getCachedPosts(dotYouClient, channelId, postType)

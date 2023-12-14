@@ -577,14 +577,22 @@ const DemoDataBlog = ({
         return;
       }
 
-      const newChannel: ChannelDefinition = {
-        channelId: channelId,
-        name: name,
-        slug: slugify(name),
-        description: description,
-        showOnHomePage: false,
-        templateId: undefined,
-        acl: { requiredSecurityGroup: SecurityGroupType.Connected },
+      const newChannel: NewDriveSearchResult<ChannelDefinition> = {
+        fileMetadata: {
+          appData: {
+            uniqueId: channelId,
+            content: {
+              name: name,
+              slug: slugify(name),
+              description: description,
+              showOnHomePage: false,
+              templateId: undefined,
+            },
+          },
+        },
+        serverMetadata: {
+          accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
+        },
       };
 
       saveChannel(newChannel);
@@ -614,7 +622,9 @@ const DemoDataBlog = ({
           // Look for an image file with the image id
           const potentialImages = (
             await queryBatch(client, {
-              targetDrive: GetTargetDriveFromChannelId(channel.channelId),
+              targetDrive: GetTargetDriveFromChannelId(
+                channel.fileMetadata.appData.uniqueId as string
+              ),
               tagsMatchAtLeastOne: [randomImageId],
             })
           ).searchResults;
@@ -625,7 +635,7 @@ const DemoDataBlog = ({
           const blogContent: Article = {
             id: getNewId(),
             authorOdinId: character,
-            channelId: channel.channelId,
+            channelId: channel.fileMetadata.appData.uniqueId as string,
             caption: randomTitle,
             slug: slugify(randomTitle),
             primaryMediaFile: imageFileId
@@ -648,17 +658,15 @@ const DemoDataBlog = ({
                 previewThumbnail: previewThumbnail || undefined,
               },
             },
-            serverMetadata: {
-              accessControlList: channel.acl
-                ? {
-                    ...channel.acl,
-                  }
-                : { requiredSecurityGroup: SecurityGroupType.Anonymous },
+            serverMetadata: channel.serverMetadata || {
+              accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous },
             },
           };
 
-          await saveBlog({ postFile: blogFile, channelId: channel.channelId });
-          console.log(blogContent.id);
+          await saveBlog({
+            postFile: blogFile,
+            channelId: channel.fileMetadata.appData.uniqueId as string,
+          });
         }
       })
     );

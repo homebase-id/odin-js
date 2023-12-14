@@ -18,7 +18,7 @@ import {
   stringifyArrayToQueryParams,
   tryJsonParse,
 } from './DataUtil';
-import { SecurityGroupType } from '../core/core';
+import { SecurityGroupType } from '../core/DriveData/File/DriveFileTypes';
 
 test('Convert string to Uint8Array', () => {
   expect(stringToUint8Array('test')).toEqual(new Uint8Array([116, 101, 115, 116]));

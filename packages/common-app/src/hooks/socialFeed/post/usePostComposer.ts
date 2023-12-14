@@ -1,4 +1,8 @@
-import { NewDriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 import {
   Tweet,
   Media,
@@ -23,13 +27,10 @@ export const usePostComposer = () => {
     caption: string | undefined,
     mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
-    channel: ChannelDefinition,
+    channel: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>,
     reactAccess: ReactAccess | undefined
   ) => {
-    if (!mediaFiles && !caption && !embeddedPost) {
-      console.log('fast fail');
-      return;
-    }
+    if (!mediaFiles && !caption && !embeddedPost) return;
 
     try {
       setPostState('uploading');
@@ -46,23 +47,21 @@ export const usePostComposer = () => {
               caption: caption?.trim() || '',
               id: postId,
               slug: postId,
-              channelId: channel.channelId || BlogConfig.PublicChannel.channelId,
+              channelId: channel.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId,
               reactAccess: reactAccess,
 
               embeddedPost: embeddedPost,
             },
           },
         },
-        serverMetadata: {
-          accessControlList: channel.acl
-            ? { ...channel.acl }
-            : { requiredSecurityGroup: SecurityGroupType.Owner },
+        serverMetadata: channel.serverMetadata || {
+          accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
         },
       };
 
       await savePostFile({
         postFile: postFile,
-        channelId: channel.channelId,
+        channelId: channel.fileMetadata.appData.uniqueId as string,
         mediaFiles: mediaFiles,
         onUpdate: (progress) => setProcessingProgress(progress),
       });

@@ -97,7 +97,9 @@ const IncomingConnectionDialog = ({
                 </div>
                 <div className="w-full p-4 text-gray-600 dark:text-gray-400 md:w-3/5">
                   <p>{pendingConnection?.message}</p>
-                  <p className="mt-2">-- {contactData?.name?.displayName}</p>
+                  <p className="mt-2">
+                    -- {contactData?.fileMetadata?.appData?.content?.name?.displayName}
+                  </p>
                 </div>
               </div>
             </div>
