@@ -11,7 +11,7 @@ import {
   mergeByteArrays,
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
-import { BlobConstructor } from '../BlobConstructor';
+import { OdinBlob } from '../OdinBlob';
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -47,7 +47,7 @@ export const encryptWithKeyheader = async <
       keyHeader.iv
     );
 
-    return new BlobConstructor([await streamToByteArray(encryptedStream, content.type)], {
+    return new OdinBlob([await streamToByteArray(encryptedStream, content.type)], {
       type: content.type,
     }) as R;
   }

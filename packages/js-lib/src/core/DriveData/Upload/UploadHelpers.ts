@@ -21,7 +21,7 @@ import {
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
 import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
-import { BlobConstructor } from '../../BlobConstructor';
+import { OdinBlob } from '../../OdinBlob';
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -31,7 +31,7 @@ const EMPTY_KEY_HEADER: KeyHeader = {
 const toBlob = (o: unknown): Blob => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
-  return new BlobConstructor([content], { type: 'application/octet-stream' });
+  return new OdinBlob([content], { type: 'application/octet-stream' });
 };
 
 export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mimeType: string) => {
@@ -130,7 +130,7 @@ export const buildFormData = async (
   const instructionType =
     'targetFile' in instructionSet ? 'payloadUploadInstructions' : 'instructions';
   data.append(instructionType, toBlob(instructionSet));
-  if (encryptedDescriptor) data.append('metaData', new BlobConstructor([encryptedDescriptor]));
+  if (encryptedDescriptor) data.append('metaData', new OdinBlob([encryptedDescriptor]));
 
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {

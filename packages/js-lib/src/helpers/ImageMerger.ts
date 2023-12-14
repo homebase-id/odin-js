@@ -1,6 +1,6 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from './DataUtil';
 import { EmbeddedThumb } from '../core/DriveData/File/DriveFileTypes';
-import { BlobConstructor } from '../core/BlobConstructor';
+import { OdinBlob } from '../core/OdinBlob';
 
 const GRID_PIXEL_SIZE = 40;
 const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;
@@ -12,7 +12,7 @@ export const makeGrid = async (thumbs: EmbeddedThumb[]) => {
   }
   const blobs = thumbs.slice(0, 4).map((thumb) => {
     const buffer = base64ToUint8Array(thumb.content);
-    return new BlobConstructor([buffer], { type: thumb.contentType });
+    return new OdinBlob([buffer], { type: thumb.contentType });
   });
 
   const imgs = await Promise.all(

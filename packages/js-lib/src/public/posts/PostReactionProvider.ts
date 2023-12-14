@@ -37,7 +37,7 @@ import { uploadFileOverPeer } from '../../peer/peerData/Upload/PeerUploadProvide
 import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
 import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
-import { BlobConstructor } from '../../core/BlobConstructor';
+import { OdinBlob } from '../../core/OdinBlob';
 
 const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
@@ -100,7 +100,7 @@ export const saveComment = async (
 
   if (!shouldEmbedContent)
     payloads.push({
-      payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
+      payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
       key: DEFAULT_PAYLOAD_KEY,
     });
 

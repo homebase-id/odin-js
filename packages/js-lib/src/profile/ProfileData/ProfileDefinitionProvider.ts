@@ -1,4 +1,4 @@
-import { BlobConstructor } from '../../core/BlobConstructor';
+import { OdinBlob } from '../../core/OdinBlob';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
@@ -151,7 +151,7 @@ export const saveProfileDefinition = async (
       ? undefined
       : [
           {
-            payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
+            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
             key: DEFAULT_PAYLOAD_KEY,
           },
         ],
@@ -218,7 +218,7 @@ export const saveProfileSection = async (
       ? undefined
       : [
           {
-            payload: new BlobConstructor([payloadBytes], { type: 'application/json' }),
+            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
             key: DEFAULT_PAYLOAD_KEY,
           },
         ],
