@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ActionLink, Alert, DomainHighlighter, t } from '@youfoundation/common-app';
+import { ActionLink, Alert, DomainHighlighter, PasswordInput, t } from '@youfoundation/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
@@ -22,7 +22,7 @@ const Login = () => {
   const doSetNewPassword = async () => {
     setState('loading');
 
-    if (await resetPassword(password, recoveryKey.replace(/ /g, ''))) {
+    if (await resetPassword(password, recoveryKey.trim())) {
       setState('success');
     } else {
       setState('error');
@@ -77,7 +77,7 @@ const Login = () => {
                   </div>
                   <div className="mb-2">
                     <Label>{t('Your recovery key')}</Label>
-                    <Input
+                    <PasswordInput
                       required
                       name="recoveryKey"
                       id="recoveryKey"
@@ -90,7 +90,7 @@ const Login = () => {
                   <hr className="mb-5 mt-7 dark:border-slate-700" />
                   <div className="mb-2">
                     <Label>{t('New password')}</Label>
-                    <Input
+                    <PasswordInput
                       required
                       name="password"
                       id="password"
@@ -104,7 +104,7 @@ const Login = () => {
                     <Label htmlFor="retypepassword" className="text-sm leading-7">
                       {t('Retype Password')}
                     </Label>
-                    <Input
+                    <PasswordInput
                       required
                       type="password"
                       name="retypePassword"

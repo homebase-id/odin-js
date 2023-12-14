@@ -5,9 +5,6 @@ import { useEffect, useState } from 'react';
 const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
   const { data: recoveryKey } = useRecoveryKey().fetchKey;
 
-  // Split key in 4 character parts //.match(/.{1,4}/g)?.join(' ');
-  const splittedKey = recoveryKey?.key;
-
   return (
     <>
       <p className="mb-5">
@@ -21,7 +18,7 @@ const ShowRecoveryKey = ({ onConfirm }: { onConfirm: () => void }) => {
       </p>
       <div className="my-5">
         <Label>{t('Your recovery key')}</Label>
-        <ClickToReveal textToShow={splittedKey} />
+        <ClickToReveal textToShow={recoveryKey?.key} />
         <p className="mt-2 text-sm text-slate-400">
           {t(
             'Click to reveal your recovery key, for your safety make sure no one else can see your screen'

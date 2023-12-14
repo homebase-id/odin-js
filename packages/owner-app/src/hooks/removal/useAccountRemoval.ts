@@ -5,10 +5,13 @@ import {
   markAccountDeletion,
   unmarkAccountDeletion,
 } from '../../provider/system/RemoveProvider';
+import { useAuth } from '../auth/useAuth';
 
 export const useAccountRemoval = () => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
+
+  const { isAuthenticated } = useAuth();
 
   const getAccountDeletionStatus = async () => {
     return accountDeletionStatus(dotYouClient);
@@ -23,7 +26,11 @@ export const useAccountRemoval = () => {
   };
 
   return {
-    status: useQuery({ queryKey: ['removal-status'], queryFn: getAccountDeletionStatus }),
+    status: useQuery({
+      queryKey: ['removal-status'],
+      queryFn: getAccountDeletionStatus,
+      enabled: isAuthenticated,
+    }),
     delete: useMutation({
       mutationFn: markDeletion,
       onSettled: () => {

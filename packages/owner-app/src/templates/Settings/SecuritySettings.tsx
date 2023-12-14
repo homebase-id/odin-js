@@ -1,4 +1,4 @@
-import { t, Alert, ActionButton, Label, Input } from '@youfoundation/common-app';
+import { t, Alert, ActionButton, Label, PasswordInput } from '@youfoundation/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { useAuth } from '../../hooks/auth/useAuth';
@@ -55,7 +55,7 @@ export const SecuritySettings = () => {
           >
             <div className="mb-2">
               <Label>{t('Your current password')}</Label>
-              <Input
+              <PasswordInput
                 required
                 name="oldPassword"
                 id="oldPassword"
@@ -68,7 +68,7 @@ export const SecuritySettings = () => {
             <hr className="mb-5 mt-7" />
             <div className="mb-2">
               <Label>{t('New password')}</Label>
-              <Input
+              <PasswordInput
                 required
                 name="password"
                 id="password"
@@ -82,7 +82,7 @@ export const SecuritySettings = () => {
               <Label htmlFor="retypepassword" className="text-sm leading-7  dark:text-gray-400">
                 {t('Retype your new password')}
               </Label>
-              <Input
+              <PasswordInput
                 required
                 type="password"
                 name="retypePassword"
