@@ -72,6 +72,9 @@ export const useInit = () => {
     // Do a first publish of the static files
     // This is normally a side effect from the useAttribute hook.. TODO: Move to providers instead of the hook
     await publishStaticFiles();
+
+    // We are done, remove the token
+    localStorage.removeItem(FIRST_RUN_TOKEN_STORAGE_KEY);
   };
 
   return {
