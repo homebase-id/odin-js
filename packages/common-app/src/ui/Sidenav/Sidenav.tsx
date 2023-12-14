@@ -188,7 +188,7 @@ export const Sidenav = ({
                 <p className={`${navItemClassName} opacity-40 leading-none`}>
                   <span className={`text-center text-2xl px-[0.18rem]`}>©</span>
                   <span
-                    className={`my-auto ml-3 max-w-[15rem] overflow-hidden ${
+                    className={`my-auto ml-3 max-w-[15rem] overflow-hidden whitespace-pre-wrap ${
                       !(canPin && isPinned) && !isOpen && 'hidden'
                     }`}
                   >
