@@ -1,7 +1,7 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
 import { useEffect, useState } from 'react';
 import { AclIcon, AclSummary, Trash, t } from '@youfoundation/common-app';
-import { useFiles } from '../../hooks/files/useFiles';
+import { useFile, useFiles } from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
 import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -13,7 +13,7 @@ import {
   SystemFileType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import { BlogConfig, HomePageConfig, ReactionConfig } from '@youfoundation/js-lib/public';
+import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
 
 const dateFormat: Intl.DateTimeFormatOptions = {
@@ -60,6 +60,7 @@ const FileBrowser = ({
     return null;
   }
 
+  const currentPageData = driveData?.pages?.[currentPage - 1];
   return (
     <Section
       title={`${t('Files')}${systemFileType ? ` (${systemFileType})` : ''}:`}
@@ -72,7 +73,7 @@ const FileBrowser = ({
       }
     >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        {driveData?.pages?.[currentPage - 1]?.searchResults.map((file) => (
+        {currentPageData?.searchResults.map((file) => (
           <File key={file.fileId} file={file} targetDrive={targetDrive} />
         ))}
       </div>
@@ -93,8 +94,8 @@ const File = ({
   const isImage = ['image/webp', 'image/jpeg', 'image/svg+xml', 'image/gif'].includes(contentType);
   const contentTypeExtension = (contentType || 'application/json').split('/')[1];
 
-  const fetchFile = useFiles({ targetDrive }).fetchFile;
-  const { mutate: deleteFile } = useFiles({
+  const fetchFile = useFile({ targetDrive }).fetchFile;
+  const { mutate: deleteFile } = useFile({
     targetDrive,
     systemFileType: file.fileSystemType,
   }).deleteFile;

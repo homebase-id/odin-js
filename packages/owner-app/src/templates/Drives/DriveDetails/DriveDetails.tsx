@@ -170,8 +170,8 @@ const DriveDetails = () => {
         </Section>
       ) : null}
 
-      <FileBrowser targetDrive={targetDriveInfo} />
-      <FileBrowser targetDrive={targetDriveInfo} systemFileType={'Comment'} />
+      <FileBrowser targetDrive={targetDriveInfo} systemFileType="Standard" key="Standard" />
+      <FileBrowser targetDrive={targetDriveInfo} systemFileType="Comment" key="Comment" />
 
       {/* <ImportDialog
         title={`${t('Import to')} ${driveDef.name}`}

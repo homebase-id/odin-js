@@ -11,7 +11,8 @@ import {
   mergeByteArrays,
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
-import { OdinBlob } from '../OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 /// Encryption
 export const encryptKeyHeader = async (

@@ -23,7 +23,8 @@ import {
 } from '../core/core';
 import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
-import { OdinBlob } from '../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 export type VideoContentType = 'video/mp4';
 

@@ -1,4 +1,5 @@
-import { OdinBlob } from '../../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 import { mergeByteArrays } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 

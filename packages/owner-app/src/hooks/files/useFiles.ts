@@ -25,7 +25,6 @@ export const useFiles = ({
   targetDrive: TargetDrive;
   systemFileType?: SystemFileType;
 }) => {
-  const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchFiles = async ({
@@ -42,6 +41,28 @@ export const useFiles = ({
     );
     return response;
   };
+
+  return {
+    fetch: useInfiniteQuery({
+      queryKey: ['files', systemFileType?.toLowerCase() || 'standard', targetDrive.alias],
+      initialPageParam: undefined as string | undefined,
+      queryFn: ({ pageParam }) => fetchFiles({ targetDrive, pageParam }),
+      getNextPageParam: (lastPage) =>
+        lastPage?.searchResults?.length >= pageSize ? lastPage?.cursorState : undefined,
+      enabled: !!targetDrive,
+    }),
+  };
+};
+
+export const useFile = ({
+  targetDrive,
+  systemFileType,
+}: {
+  targetDrive: TargetDrive;
+  systemFileType?: SystemFileType;
+}) => {
+  const queryClient = useQueryClient();
+  const dotYouClient = useAuth().getDotYouClient();
 
   const fetchFile = async (
     result: DriveSearchResult | DeletedDriveSearchResult,
@@ -99,22 +120,13 @@ export const useFiles = ({
   const removeFile = async (fileId: string) => await deleteFile(dotYouClient, targetDrive, fileId);
 
   return {
-    fetch: useInfiniteQuery({
-      queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
-      initialPageParam: undefined as string | undefined,
-      queryFn: ({ pageParam }) => fetchFiles({ targetDrive, pageParam }),
-      getNextPageParam: (lastPage) =>
-        lastPage?.searchResults?.length >= pageSize ? lastPage?.cursorState : undefined,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      enabled: !!targetDrive,
-    }),
     fetchFile: fetchFile,
     deleteFile: useMutation({
       mutationFn: removeFile,
       onSettled: () => {
         queryClient.invalidateQueries({
-          queryKey: ['files', systemFileType || 'Standard', targetDrive.alias],
+          queryKey: ['files', systemFileType?.toLowerCase() || 'standard', targetDrive.alias],
+          exact: false,
         });
       },
     }),

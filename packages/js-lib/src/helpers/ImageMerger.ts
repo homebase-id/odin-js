@@ -1,6 +1,7 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from './DataUtil';
 import { EmbeddedThumb } from '../core/DriveData/File/DriveFileTypes';
-import { OdinBlob } from '../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 const GRID_PIXEL_SIZE = 40;
 const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;

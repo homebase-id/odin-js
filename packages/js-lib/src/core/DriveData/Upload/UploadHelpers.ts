@@ -23,6 +23,9 @@ import {
 import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
 import { OdinBlob } from '../../OdinBlob';
 
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
   aesKey: new Uint8Array(Array(16).fill(0)),

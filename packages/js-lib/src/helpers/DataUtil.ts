@@ -2,7 +2,8 @@ import { Guid } from 'guid-typescript';
 
 import md5 from './md5/md5';
 import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
-import { OdinBlob } from '../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 export const getRandom16ByteArray = (): Uint8Array => {
   return crypto.getRandomValues(new Uint8Array(16));

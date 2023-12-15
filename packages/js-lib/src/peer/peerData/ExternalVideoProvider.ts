@@ -1,4 +1,5 @@
-import { OdinBlob } from '../../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 import { DotYouClient } from '../../core/DotYouClient';
 import { SystemFileType, TargetDrive } from '../../core/core';
 import { stringifyToQueryParams, tryJsonParse } from '../../helpers/helpers';

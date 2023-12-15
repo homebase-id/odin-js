@@ -44,7 +44,8 @@ import {
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
-import { OdinBlob } from '../../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
