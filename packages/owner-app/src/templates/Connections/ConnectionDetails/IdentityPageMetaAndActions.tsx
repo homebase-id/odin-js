@@ -10,6 +10,7 @@ import {
   Persons,
   ActionGroup,
   useDotYouClient,
+  ConfirmDialog,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -29,6 +30,7 @@ export const IdentityPageMetaAndActions = ({
   const navigate = useNavigate();
   const { action } = useParams();
   const [isSentConnectionOpen, setIsSentConnectionOpen] = useState(action === 'connect');
+  const [isBlockConfirmationOpen, setIsBlockConfirmationOpen] = useState(action === 'block');
   const { getIdentity } = useDotYouClient();
 
   useEffect(() => {
@@ -39,6 +41,14 @@ export const IdentityPageMetaAndActions = ({
     } else if (action !== 'connect' && isSentConnectionOpen)
       navigate(`${window.location.pathname}/connect`);
   }, [isSentConnectionOpen]);
+
+  useEffect(() => {
+    if (!isBlockConfirmationOpen && action === 'block') {
+      const paths = window.location.pathname.split('/');
+      paths.pop();
+      navigate(paths.join('/'));
+    }
+  }, [isBlockConfirmationOpen]);
 
   // Connection data:
   const {
@@ -136,16 +146,18 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
+  const blockConfirmOptions = {
+    title: `${t('Block')} ${odinId}`,
+    buttonText: t('Block'),
+    body: `${t('Are you sure you want to block')} ${odinId}`,
+  };
+
   if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
     actionGroupOptions.push({
       icon: Block,
       label: t('Block'),
       onClick: () => block(odinId),
-      confirmOptions: {
-        title: `${t('Block')} ${odinId}`,
-        buttonText: t('Block'),
-        body: `${t('Are you sure you want to block')} ${odinId}`,
-      },
+      confirmOptions: blockConfirmOptions,
     });
   }
 
@@ -194,6 +206,16 @@ export const IdentityPageMetaAndActions = ({
         onConfirm={() => setIsSentConnectionOpen(false)}
         onCancel={() => setIsSentConnectionOpen(false)}
       />
+      {isBlockConfirmationOpen ? (
+        <ConfirmDialog
+          {...blockConfirmOptions}
+          onConfirm={() => {
+            block(odinId);
+            setIsBlockConfirmationOpen(false);
+          }}
+          onCancel={() => setIsBlockConfirmationOpen(false)}
+        />
+      ) : null}
     </>
   );
 };
