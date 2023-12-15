@@ -1,6 +1,13 @@
 import { Suspense } from 'react';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
-import { ActionGroupOptionProps, Lock, useIsConnected } from '@youfoundation/common-app';
+import {
+  ActionGroupOptionProps,
+  Block,
+  Lock,
+  Times,
+  useIsConnected,
+  useManageSocialFeed,
+} from '@youfoundation/common-app';
 
 import {
   ChannelDefinitionVm,
@@ -92,20 +99,39 @@ export const PostMeta = ({
           <OwnerActions postFile={postFile} />
         </Suspense>
       ) : odinId ? (
-        <ExternalActions odinId={odinId} />
+        <ExternalActions odinId={odinId} postFile={postFile} />
       ) : null}
     </div>
   );
 };
 
-const ExternalActions = ({ odinId }: { odinId: string }) => {
+const ExternalActions = ({
+  odinId,
+  postFile,
+}: {
+  odinId: string;
+  postFile: DriveSearchResult<PostContent>;
+}) => {
   const identity = useDotYouClient().getIdentity();
+  const { mutateAsync: removeFromMyFeed } = useManageSocialFeed().removeFromFeed;
 
   const options: ActionGroupOptionProps[] = [
     {
       icon: UserX,
-      label: `${t('Edit what I follow from')} "${odinId}"`,
+      label: `${t('Follow settings')}`,
       href: `https://${identity}/owner/follow/following/${odinId}`,
+    },
+    {
+      icon: Times,
+      label: `${t('Remove this post from my feed')}`,
+      onClick: () => {
+        removeFromMyFeed({ postFile });
+      },
+    },
+    {
+      icon: Block,
+      label: `${t('Block this user')}`,
+      href: `https://${identity}/owner/connections/${odinId}/block`,
     },
   ];
 
