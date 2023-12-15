@@ -21,7 +21,7 @@ export const fetchFollowing = async (
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
+  const currentRoot = dotYouClient.getType() === ApiType.Guest ? `/circles${root}` : root;
 
   const params = {
     cursor: cursorState,
@@ -88,7 +88,7 @@ export const fetchFollowers = async (
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
+  const currentRoot = dotYouClient.getType() === ApiType.Guest ? `/circles${root}` : root;
 
   const params = {
     cursor: cursorState,
@@ -124,7 +124,7 @@ export const fetchFollowDetail = async (
 ): Promise<FollowRequest | null> => {
   const client = dotYouClient.createAxiosClient();
 
-  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
+  const currentRoot = dotYouClient.getType() === ApiType.Guest ? `/circles${root}` : root;
   const url = currentRoot + `/followerconfiguration`;
 
   return client
