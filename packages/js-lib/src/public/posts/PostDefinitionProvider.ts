@@ -1,3 +1,4 @@
+import { OdinBlob } from '../../core/OdinBlob';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
@@ -166,7 +167,7 @@ export const saveChannelDefinition = async (
       ? undefined
       : [
           {
-            payload: new Blob([payloadBytes], { type: 'application/json' }),
+            payload: new OdinBlob([payloadBytes], { type: 'application/json' }),
             key: DEFAULT_PAYLOAD_KEY,
           },
         ],

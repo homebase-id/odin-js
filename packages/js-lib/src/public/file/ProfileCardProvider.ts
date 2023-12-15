@@ -1,3 +1,4 @@
+import { OdinBlob } from '../../core/OdinBlob';
 import { DotYouClient } from '../../core/DotYouClient';
 import { DriveSearchResult, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
@@ -124,7 +125,7 @@ export const GetProfileImage = async (dotYouClient: DotYouClient): Promise<Blob 
         })
         .then(
           (response) =>
-            new Blob([new Uint8Array(Buffer.from(response.data, 'binary'))], {
+            new OdinBlob([new Uint8Array(Buffer.from(response.data, 'binary'))], {
               type: (response.headers['Content-Type'] as string) || 'image/webp',
             })
         );

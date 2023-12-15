@@ -1,3 +1,4 @@
+import { OdinBlob } from '../../core/OdinBlob';
 import { mergeByteArrays } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 
@@ -153,7 +154,7 @@ export const segmentVideoFile = async (
           metadata.fileSize = finalBytes.length;
 
           resolve({
-            data: new Blob([finalBytes], { type: 'video/mp4' }),
+            data: new OdinBlob([finalBytes], { type: 'video/mp4' }),
             metadata,
           });
           return;

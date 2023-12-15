@@ -23,6 +23,7 @@ import {
 } from '../core/core';
 import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
+import { OdinBlob } from '../core/OdinBlob';
 
 export type VideoContentType = 'video/mp4';
 
@@ -183,7 +184,7 @@ export const getDecryptedVideoUrl = async (
     chunkEnd: fileSizeLimit,
   }).then((data) => {
     if (!data) return '';
-    const url = URL.createObjectURL(new Blob([data.bytes], { type: data.contentType }));
+    const url = URL.createObjectURL(new OdinBlob([data.bytes], { type: data.contentType }));
     return url;
   });
 };

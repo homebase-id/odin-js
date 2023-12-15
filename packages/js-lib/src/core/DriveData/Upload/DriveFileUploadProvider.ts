@@ -19,6 +19,7 @@ import {
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { OdinBlob } from '../../OdinBlob';
 
 const isDebug = hasDebugFlag();
 
@@ -184,7 +185,7 @@ export const reUploadFile = async (
 
     payloads.push({
       key: existingPayload.key,
-      payload: new Blob([payloadData.bytes], { type: existingPayload.contentType }),
+      payload: new OdinBlob([payloadData.bytes], { type: existingPayload.contentType }),
     });
 
     const existingThumbnails = existingPayload.thumbnails;
@@ -202,7 +203,9 @@ export const reUploadFile = async (
       if (thumbnailData)
         thumbnails.push({
           key: existingPayload.key,
-          payload: new Blob([thumbnailData.bytes], { type: existingThumbnail.contentType }),
+          payload: new OdinBlob([thumbnailData.bytes], {
+            type: existingThumbnail.contentType,
+          }),
           pixelWidth: existingThumbnail.pixelWidth,
           pixelHeight: existingThumbnail.pixelHeight,
         });
