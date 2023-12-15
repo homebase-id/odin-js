@@ -61,7 +61,6 @@ const FileBrowser = ({
   }
 
   const currentPageData = driveData?.pages?.[currentPage - 1];
-  console.log('render', currentPageData);
   return (
     <Section
       title={`${t('Files')}${systemFileType ? ` (${systemFileType})` : ''}:`}
