@@ -37,7 +37,8 @@ import { uploadFileOverPeer } from '../../peer/peerData/Upload/PeerUploadProvide
 import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
 import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
-import { OdinBlob } from '../../core/OdinBlob';
+const OdinBlob: typeof Blob =
+  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 
