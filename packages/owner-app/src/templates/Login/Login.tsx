@@ -1,15 +1,15 @@
 import { FormEventHandler, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Arrow, CloseEye, Eye, PasswordInput, t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
-import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { Loader } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 import { DomainHighlighter } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
+import { PasswordInput } from '../../components/Password/PasswordInput';
 
 const Login = () => {
   const [password, setPassword] = useState(import.meta.env.DEV ? 'a' : '');

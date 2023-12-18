@@ -8,15 +8,9 @@ import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
 
 import { useSearchParams } from 'react-router-dom';
 import { FIRST_RUN_TOKEN_STORAGE_KEY } from '../../hooks/configure/useInit';
-import {
-  ActionButton,
-  Alert,
-  Arrow,
-  DomainHighlighter,
-  Input,
-  Label,
-  t,
-} from '@youfoundation/common-app';
+import { ActionButton, Alert, Arrow, DomainHighlighter, Label, t } from '@youfoundation/common-app';
+import { PasswordInput } from '../../components/Password/PasswordInput';
+import { PasswordStrength } from '../../components/Password/PasswordStrength';
 
 const FirstRun = () => {
   const [password, setPassword] = useState('');
@@ -68,11 +62,11 @@ const FirstRun = () => {
                 </>
               ) : (
                 <>
-                  <div className="mb-4">
+                  <div className="mb-2">
                     <Label htmlFor="password" className="text-sm leading-7  dark:text-gray-400">
                       {t('Password')}
                     </Label>
-                    <Input
+                    <PasswordInput
                       type="password"
                       name="password"
                       id="password"
@@ -82,6 +76,8 @@ const FirstRun = () => {
                       autoComplete="new-password"
                     />
                   </div>
+                  <PasswordStrength password={password} className="mb-4" />
+
                   <div className="mb-4">
                     <Label
                       htmlFor="retypepassword"
@@ -89,7 +85,7 @@ const FirstRun = () => {
                     >
                       {t('Retype Password')}
                     </Label>
-                    <Input
+                    <PasswordInput
                       type="password"
                       name="retypePassword"
                       id="retypePassword"

@@ -1,7 +1,9 @@
-import { t, Alert, ActionButton, Label, PasswordInput } from '@youfoundation/common-app';
+import { t, Alert, ActionButton, Label } from '@youfoundation/common-app';
 import { useState } from 'react';
 import Section from '../../components/ui/Sections/Section';
 import { useAuth } from '../../hooks/auth/useAuth';
+import { PasswordInput } from '../../components/Password/PasswordInput';
+import { PasswordStrength } from '../../components/Password/PasswordStrength';
 
 export const SecuritySettings = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
@@ -78,6 +80,9 @@ export const SecuritySettings = () => {
                 autoComplete="new-password"
               />
             </div>
+
+            <PasswordStrength password={password} userInputs={[oldPassword]} className="mb-2" />
+
             <div className="mb-2">
               <Label htmlFor="retypepassword" className="text-sm leading-7  dark:text-gray-400">
                 {t('Retype your new password')}
