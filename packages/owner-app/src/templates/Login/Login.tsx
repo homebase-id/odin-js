@@ -31,6 +31,7 @@ const Login = () => {
     return false;
   };
 
+  // In a normal use-case a user would be redirected to the firstRun page, when their password isn't set
   useEffect(() => {
     if (passwordState === 'unknown') {
       (async () => {
