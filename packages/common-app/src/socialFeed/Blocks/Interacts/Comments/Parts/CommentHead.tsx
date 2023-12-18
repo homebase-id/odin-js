@@ -1,6 +1,6 @@
 import { t } from '../../../../../helpers';
 import { useDotYouClient } from '../../../../../hooks';
-import { ActionGroup, Pencil, Times, Ellipsis } from '../../../../../ui';
+import { ActionGroup, Pencil, Times, Ellipsis, Block } from '../../../../../ui';
 import { AuthorName } from '../../../Author/Name';
 
 export const CommentHead = ({
@@ -15,35 +15,28 @@ export const CommentHead = ({
   onRemove?: () => void;
 }) => {
   const { getIdentity } = useDotYouClient();
-  const isAuthor = authorOdinId === getIdentity();
+  const identity = getIdentity();
+  const isAuthor = authorOdinId === identity;
+
+  const actionOptions = [];
+
+  if (isAuthor && setIsEdit && onRemove) {
+    actionOptions.push({ label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil });
+    actionOptions.push({ label: t('Remove'), onClick: onRemove, icon: Times });
+  }
+
+  if (!isAuthor) {
+    actionOptions.push({
+      icon: Block,
+      label: `${t('Block this user')}`,
+      href: `https://${identity}/owner/connections/${authorOdinId}/block`,
+    });
+  }
 
   return (
     <div className="flex flex-row justify-space-between">
       <AuthorName odinId={authorOdinId} />
-      {isAuthor && setIsEdit && onRemove ? (
-        <ActionGroup
-          options={[
-            { label: t('Edit'), onClick: () => setIsEdit(true), icon: Pencil },
-            {
-              label: t('Remove'),
-              onClick: onRemove,
-              icon: Times,
-              // TODO find better fix:
-              // Confirmoptions shows a new dialog, which might appear on top of the PostPreview dialog
-              // confirmOptions: {
-              //   title: t('Remove comment'),
-              //   body: `${t('Are you sure you want to remove your comment')}: "${commentBody}"`,
-              //   buttonText: t('Remove'),
-              // },
-            },
-          ]}
-          type="mute"
-          size="small"
-          icon={Ellipsis}
-        >
-          {' '}
-        </ActionGroup>
-      ) : null}
+      <ActionGroup options={actionOptions} type="mute" size="small" />
     </div>
   );
 };
