@@ -21,7 +21,7 @@ export const PasswordStrength = ({
   }, [password]);
 
   return (
-    <div className={`flex w-full flex-row items-center gap-2 ${className ?? ''}`}>
+    <div className={`flex w-full flex-col items-center gap-2 sm:flex-row ${className ?? ''}`}>
       <div className={`grid w-full max-w-sm flex-shrink-0 grid-cols-4 gap-2`}>
         {Array.from({ length: MAX_SCORE }).map((_, i) => (
           <div
