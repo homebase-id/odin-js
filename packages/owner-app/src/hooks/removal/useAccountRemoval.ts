@@ -7,6 +7,8 @@ import {
 } from '../../provider/system/RemoveProvider';
 import { useAuth } from '../auth/useAuth';
 
+const MINUTE_IN_MS = 60000;
+
 export const useAccountRemoval = () => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -30,6 +32,8 @@ export const useAccountRemoval = () => {
       queryKey: ['removal-status'],
       queryFn: getAccountDeletionStatus,
       enabled: isAuthenticated,
+      refetchOnMount: false,
+      staleTime: MINUTE_IN_MS * 10,
     }),
     delete: useMutation({
       mutationFn: markDeletion,
