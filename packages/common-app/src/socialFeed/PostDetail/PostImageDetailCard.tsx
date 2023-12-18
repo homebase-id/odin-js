@@ -100,8 +100,8 @@ export const PostImageDetailCard = ({
   return (
     <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
-      <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
-        <div className="flex h-full min-h-screen flex-col lg:flex-row">
+      <div className="inset-0 z-10 lg:fixed">
+        <div className="flex h-full min-h-screen flex-col lg:flex-row overflow-auto lg:overflow-none">
           <div
             className={`relative flex h-full max-h-screen flex-grow overflow-hidden lg:flex-grow-0`}
           >
@@ -175,7 +175,7 @@ export const PostImageDetailCard = ({
             ) : null}
           </div>
 
-          <div className="bg-background flex-shrink-0 flex-grow md:block lg:w-[25rem]">
+          <div className="bg-background flex-shrink-0 max-h-screen flex-grow md:block lg:w-[25rem] lg:overflow-auto">
             <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
               <AuthorImage odinId={odinId} size="sm" />
               <div className="flex max-w-lg flex-grow flex-col">

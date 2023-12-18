@@ -44,7 +44,7 @@ export const SocialFeed = () => {
       {isOwner ? <PageMeta title={t('Feed')} icon={Feed} /> : null}
       {identityKey && channelKey && postKey ? (
         <div
-          className={`fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm`}
+          className={`fixed inset-0 z-40 bg-page-background bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
         >
           <Suspense>
             <PostPreview
