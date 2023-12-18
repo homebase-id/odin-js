@@ -22,8 +22,10 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
 
   const doLike = () => {
     postReaction({
-      authorOdinId: getIdentity() || '',
-      content: { body: '❤️' },
+      emojiData: {
+        authorOdinId: getIdentity() || '',
+        body: '❤️',
+      },
       context: threadContext,
     });
   };

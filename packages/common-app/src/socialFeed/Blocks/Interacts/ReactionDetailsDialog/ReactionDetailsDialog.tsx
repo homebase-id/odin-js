@@ -43,8 +43,7 @@ export const ReactionDetailsDialog = ({
     .filter(Boolean) as ReactionFile[];
 
   const filteredEmojis = reactionSummary?.reactions?.filter(
-    (reaction) =>
-      flattenedReactions?.some((reactionFile) => reactionFile.content.body === reaction.emoji)
+    (reaction) => flattenedReactions?.some((reactionFile) => reactionFile.body === reaction.emoji)
   );
 
   useEffect(() => {
@@ -85,7 +84,7 @@ export const ReactionDetailsDialog = ({
       </ul>
       <div className="grid grid-flow-row gap-4 px-4 py-4 sm:px-8">
         {flattenedReactions
-          ?.filter((reaction) => reaction.content.body === activeEmoji)
+          ?.filter((reaction) => reaction.body === activeEmoji)
           .map((reaction) => {
             return (
               <div className="flex flex-row items-center text-lg" key={reaction.authorOdinId}>

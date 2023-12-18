@@ -1,7 +1,7 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  RawReactionContent,
   ReactionContext,
-  ReactionVm,
   removeComment,
   removeEmojiReaction,
   saveComment,
@@ -11,18 +11,38 @@ import {
 import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 import { useDotYouClient } from '../../..';
-import { EmojiReactionSummary, ReactionFile } from '@youfoundation/js-lib/core';
+import {
+  DriveSearchResult,
+  EmojiReactionSummary,
+  NewDriveSearchResult,
+  ReactionFile,
+} from '@youfoundation/js-lib/core';
 
 export const useReaction = () => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const saveCommentData = async (commentData: ReactionVm) => {
-    return await saveComment(dotYouClient, {
-      ...commentData,
-      content: {
-        ...commentData.content,
-        bodyAsRichText: getRichTextFromString(commentData.content.body.trim()),
+  const saveCommentData = async ({
+    context,
+    commentData,
+  }: {
+    context: ReactionContext;
+    commentData:
+      | Omit<DriveSearchResult<ReactionFile>, 'serverMetadata'>
+      | Omit<NewDriveSearchResult<RawReactionContent>, 'serverMetadata'>;
+  }) => {
+    return await saveComment(dotYouClient, context, {
+      fileMetadata: {
+        ...commentData.fileMetadata,
+        appData: {
+          ...commentData.fileMetadata.appData,
+          content: {
+            ...commentData.fileMetadata.appData.content,
+            bodyAsRichText: getRichTextFromString(
+              commentData.fileMetadata.appData.content.body.trim()
+            ),
+          },
+        },
       },
     });
   };
@@ -32,17 +52,29 @@ export const useReaction = () => {
     commentFile,
   }: {
     context: ReactionContext;
-    commentFile: ReactionFile;
+    commentFile: DriveSearchResult<ReactionFile>;
   }) => {
     return await removeComment(dotYouClient, context, commentFile);
   };
 
-  const saveEmojiReactionData = async (emojiData: ReactionVm) => {
-    return await saveEmojiReaction(dotYouClient, emojiData);
+  const saveEmojiReactionData = async ({
+    emojiData,
+    context,
+  }: {
+    emojiData: RawReactionContent;
+    context: ReactionContext;
+  }) => {
+    return await saveEmojiReaction(dotYouClient, emojiData, context);
   };
 
-  const removeEmojiReactionData = async (commentData: ReactionVm) => {
-    return await removeEmojiReaction(dotYouClient, commentData);
+  const removeEmojiReactionData = async ({
+    emojiData,
+    context,
+  }: {
+    emojiData: RawReactionContent;
+    context: ReactionContext;
+  }) => {
+    return await removeEmojiReaction(dotYouClient, emojiData, context);
   };
 
   return {
@@ -60,17 +92,22 @@ export const useReaction = () => {
 
         let newInfinite: InfiniteData<UseCommentsVal>;
         if (prevInfinite) {
-          if (toSaveCommentData.globalTransitId) {
+          if (
+            (toSaveCommentData.commentData as DriveSearchResult<ReactionFile>).fileMetadata
+              .globalTransitId
+          ) {
             newInfinite = {
               ...prevInfinite,
               pages: prevInfinite.pages.map((page) => {
                 return {
                   ...page,
                   comments: page.comments.map((comment) =>
-                    comment.globalTransitId === toSaveCommentData.globalTransitId
+                    comment.fileMetadata.globalTransitId ===
+                    (toSaveCommentData.commentData as DriveSearchResult<ReactionFile>).fileMetadata
+                      .globalTransitId
                       ? toSaveCommentData
                       : comment
-                  ),
+                  ) as DriveSearchResult<ReactionFile>[],
                 };
               }),
             };
@@ -78,7 +115,10 @@ export const useReaction = () => {
             const firstPage = prevInfinite.pages[0];
             const newFirtPage = {
               ...firstPage,
-              comments: [toSaveCommentData, ...firstPage.comments],
+              comments: [
+                toSaveCommentData.commentData,
+                ...firstPage.comments,
+              ] as DriveSearchResult<ReactionFile>[],
             };
             const newPages = [newFirtPage, ...prevInfinite.pages.slice(1)];
 
@@ -94,7 +134,10 @@ export const useReaction = () => {
         }
       },
       onSuccess: (savedGlobalId, savedCommentData) => {
-        if (savedCommentData.globalTransitId) {
+        if (
+          (savedCommentData.commentData as DriveSearchResult<ReactionFile>).fileMetadata
+            .globalTransitId
+        ) {
           // it was a normal update, already covered on the onMutate;
           return;
         }
@@ -120,8 +163,8 @@ export const useReaction = () => {
         const newFirstPage = {
           ...firstPage,
           comments: [
-            updatedCommentData,
-            ...firstPage.comments.filter((comment) => !!comment.globalTransitId),
+            updatedCommentData.commentData,
+            ...firstPage.comments.filter((comment) => !!comment.fileMetadata.globalTransitId),
           ],
         };
         const newPages = [newFirstPage, ...prevInfinite.pages.slice(1)];
@@ -180,7 +223,7 @@ export const useReaction = () => {
         if (existingSummary) {
           let emojiExists = false;
           const newReactions = existingSummary.reactions.map((reaction) => {
-            if (reaction.emoji !== toSaveEmoji.content.body) return reaction;
+            if (reaction.emoji !== toSaveEmoji.emojiData.body) return reaction;
 
             emojiExists = true;
             return {
@@ -191,7 +234,7 @@ export const useReaction = () => {
 
           if (!emojiExists) {
             newReactions.push({
-              emoji: toSaveEmoji.content.body,
+              emoji: toSaveEmoji.emojiData.body,
               count: 1,
             });
           }
@@ -208,10 +251,10 @@ export const useReaction = () => {
         const existingMyEmojis = queryClient.getQueryData<string[]>(['my-emojis', ...cacheKey]);
         const newMyEmojis = existingMyEmojis
           ? [
-              ...existingMyEmojis.filter((existing) => existing !== toSaveEmoji.content.body),
-              toSaveEmoji.content.body,
+              ...existingMyEmojis.filter((existing) => existing !== toSaveEmoji.emojiData.body),
+              toSaveEmoji.emojiData.body,
             ]
-          : [toSaveEmoji.content.body];
+          : [toSaveEmoji.emojiData.body];
         queryClient.setQueryData(['my-emojis', ...cacheKey], newMyEmojis);
       },
       onSettled: (_variables, _error, _data) => {
@@ -262,7 +305,7 @@ export const useReaction = () => {
 
         if (existingSummary) {
           const newReactions = existingSummary.reactions.map((reaction) => {
-            if (reaction.emoji === toRemoveEmoji.content.body) {
+            if (reaction.emoji === toRemoveEmoji.emojiData.body) {
               if (reaction.count === 1) return undefined;
 
               return {
@@ -284,7 +327,7 @@ export const useReaction = () => {
         // Upate my emojis
         const existingMyEmojis = queryClient.getQueryData<string[]>(['my-emojis', ...cacheKey]);
         const newMyEmojis = existingMyEmojis?.filter(
-          (emoji) => emoji !== toRemoveEmoji.content.body
+          (emoji) => emoji !== toRemoveEmoji.emojiData.body
         );
         queryClient.setQueryData(['my-emojis', ...cacheKey], newMyEmojis);
       },

@@ -22,6 +22,8 @@ import {
   ParsedReactionPreview,
   ReactionFile,
   CommentReactionPreview,
+  NewDriveSearchResult,
+  ReactionFileBody,
 } from '../../core/core';
 import {
   jsonStringify64,
@@ -31,7 +33,7 @@ import {
 } from '../../helpers/DataUtil';
 import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { RawReactionContent, ReactionConfig, ReactionContext, ReactionVm } from './PostTypes';
+import { RawReactionContent, ReactionConfig, ReactionContext } from './PostTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import { uploadFileOverPeer } from '../../peer/peerData/Upload/PeerUploadProvider';
 import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvider';
@@ -45,18 +47,21 @@ const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 /* Adding a comment might fail if the referencedFile isn't available anymore (ACL got updates, post got deleted...) */
 export const saveComment = async (
   dotYouClient: DotYouClient,
-  comment: ReactionVm
+  context: ReactionContext,
+  comment:
+    | Omit<NewDriveSearchResult<RawReactionContent>, 'serverMetadata'>
+    | DriveSearchResult<RawReactionContent>
 ): Promise<string> => {
-  const encrypt = comment.context.target.isEncrypted;
-  const isLocal = comment.context.authorOdinId === dotYouClient.getIdentity();
-  const targetDrive = GetTargetDriveFromChannelId(comment.context.channelId);
+  const encrypt = context.target.isEncrypted;
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
+  const targetDrive = GetTargetDriveFromChannelId(context.channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   let previewThumbnail: EmbeddedThumb | undefined;
 
-  if (comment.content.attachment) {
-    const imageFile = comment.content.attachment;
+  if (comment.fileMetadata.appData.content.attachment) {
+    const imageFile = comment.fileMetadata.appData.content.attachment;
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       imageFile,
       COMMENT_MEDIA_PAYLOAD,
@@ -67,31 +72,31 @@ export const saveComment = async (
     payloads.push({ payload: imageFile, key: COMMENT_MEDIA_PAYLOAD });
     previewThumbnail = tinyThumb;
 
-    delete comment.content.attachment;
-    comment.content.mediaPayloadKey = COMMENT_MEDIA_PAYLOAD;
+    delete comment.fileMetadata.appData.content.attachment;
+    comment.fileMetadata.appData.content.mediaPayloadKey = COMMENT_MEDIA_PAYLOAD;
   }
 
-  const payloadJson: string = jsonStringify64(comment.content);
+  const payloadJson: string = jsonStringify64(comment.fileMetadata.appData.content);
   const payloadBytes = stringToUint8Array(payloadJson);
 
   // Set max of 3kb for content so enough room is left for metadata
   const shouldEmbedContent = payloadBytes.length < 3000;
   const metadata: UploadFileMetadata = {
     // allowDistribution: true, // Disable
-    versionTag: comment.versionTag,
+    versionTag: comment.fileMetadata.versionTag,
     allowDistribution: false,
-    senderOdinId: comment.authorOdinId,
+    senderOdinId: comment.fileMetadata.appData.content.authorOdinId,
     referencedFile: {
       targetDrive,
-      globalTransitId: comment.threadId || comment.context.target.globalTransitId,
+      globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
     },
     appData: {
       tags: [],
-      uniqueId: comment.id ?? getNewId(),
+      uniqueId: comment.fileMetadata.appData.uniqueId ?? getNewId(),
       fileType: ReactionConfig.CommentFileType,
       content: shouldEmbedContent ? payloadJson : undefined,
       previewThumbnail: previewThumbnail,
-      userDate: comment.date ?? new Date().getTime(),
+      userDate: comment.fileMetadata.appData.userDate ?? new Date().getTime(),
     },
     isEncrypted: encrypt,
     accessControlList: {
@@ -136,17 +141,18 @@ export const saveComment = async (
   } else {
     metadata.referencedFile = {
       targetDrive: targetDrive,
-      globalTransitId: comment.threadId || comment.context.target.globalTransitId,
+      globalTransitId: comment.fileMetadata.appData.groupId || context.target.globalTransitId,
     };
     metadata.accessControlList = { requiredSecurityGroup: SecurityGroupType.Connected };
     metadata.allowDistribution = true;
 
     const instructionSet: TransitInstructionSet = {
       transferIv: getRandom16ByteArray(),
-      overwriteGlobalTransitFileId: comment.globalTransitId,
+      overwriteGlobalTransitFileId: (comment as DriveSearchResult<ReactionFile>).fileMetadata
+        .globalTransitId,
       remoteTargetDrive: targetDrive,
       schedule: ScheduleOptions.SendNowAwaitResponse,
-      recipients: [comment.context.authorOdinId],
+      recipients: [context.authorOdinId],
       systemFileType: 'Comment',
     };
 
@@ -165,9 +171,9 @@ export const saveComment = async (
         TransferStatus.TotalRejectionClientShouldRetry,
         TransferStatus.FileDoesNotAllowDistribution,
         TransferStatus.RecipientReturnedAccessDenied,
-      ].includes(result.recipientStatus[comment.context.authorOdinId])
+      ].includes(result.recipientStatus[context.authorOdinId])
     ) {
-      throw new Error(result.recipientStatus[comment.context.authorOdinId].toString());
+      throw new Error(result.recipientStatus[context.authorOdinId].toString());
     }
 
     return result.remoteGlobalTransitIdFileIdentifier.globalTransitId;
@@ -177,7 +183,7 @@ export const saveComment = async (
 export const removeComment = async (
   dotYouClient: DotYouClient,
   context: ReactionContext,
-  commentFile: ReactionFile
+  commentFile: DriveSearchResult<ReactionFile>
 ) => {
   const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
@@ -187,12 +193,12 @@ export const removeComment = async (
 
     return await deleteFile(dotYouClient, targetDrive, commentFile.fileId, undefined, 'Comment');
   } else {
-    if (!commentFile.globalTransitId) return;
+    if (!commentFile.fileMetadata.globalTransitId) return;
 
     return await deleteFileOverPeer(
       dotYouClient,
       targetDrive,
-      commentFile.globalTransitId,
+      commentFile.fileMetadata.globalTransitId,
       [context.authorOdinId],
       'Comment'
     );
@@ -204,7 +210,7 @@ export const getComments = async (
   context: ReactionContext,
   pageSize = 25,
   cursorState?: string
-): Promise<{ comments: ReactionFile[]; cursorState: string }> => {
+): Promise<{ comments: DriveSearchResult<ReactionFile>[]; cursorState: string }> => {
   const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const targetDrive = GetTargetDriveFromChannelId(context.channelId);
   const qp: FileQueryParams = {
@@ -223,7 +229,7 @@ export const getComments = async (
     ? await queryBatch(dotYouClient, qp, ro)
     : await queryBatchOverPeer(dotYouClient, context.authorOdinId, qp, ro);
 
-  const comments: ReactionFile[] = (
+  const comments: DriveSearchResult<ReactionFile>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToComment(
@@ -235,7 +241,7 @@ export const getComments = async (
         )
       )
     )
-  ).filter((attr) => !!attr) as ReactionFile[];
+  ).filter((attr) => !!attr) as DriveSearchResult<ReactionFile>[];
 
   return { comments, cursorState: result.cursorState };
 };
@@ -246,33 +252,29 @@ const dsrToComment = async (
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<ReactionFile | null> => {
+): Promise<DriveSearchResult<ReactionFile> | null> => {
   const isLocal = odinId === dotYouClient.getIdentity();
 
   const params = [targetDrive, dsr, includeMetadataHeader] as const;
 
   const contentData = isLocal
-    ? await getContentFromHeaderOrPayload<RawReactionContent>(dotYouClient, ...params)
-    : await getContentFromHeaderOrPayloadOverPeer<RawReactionContent>(
-        dotYouClient,
-        odinId,
-        ...params
-      );
+    ? await getContentFromHeaderOrPayload<ReactionFile>(dotYouClient, ...params)
+    : await getContentFromHeaderOrPayloadOverPeer<ReactionFile>(dotYouClient, odinId, ...params);
 
   if (!contentData) return null;
 
   return {
-    fileId: dsr.fileId,
-    globalTransitId: dsr.fileMetadata.globalTransitId,
-    versionTag: dsr.fileMetadata.versionTag,
-    id: dsr.fileMetadata.appData.uniqueId,
-    authorOdinId: dsr.fileMetadata.senderOdinId,
-    threadId: dsr.fileMetadata.appData.groupId,
-    content: { ...contentData },
-    date: dsr.fileMetadata.created,
-    updated: dsr.fileMetadata.updated !== 0 ? dsr.fileMetadata.updated : 0,
-    isEncrypted: dsr.fileMetadata.isEncrypted,
-    lastModified: dsr.fileMetadata.updated,
+    ...dsr,
+    fileMetadata: {
+      ...dsr.fileMetadata,
+      appData: {
+        ...dsr.fileMetadata.appData,
+        content: {
+          ...contentData,
+          authorOdinId: dsr.fileMetadata.senderOdinId || contentData.authorOdinId,
+        },
+      },
+    },
   };
 };
 
@@ -317,10 +319,11 @@ export const parseReactionPreview = (
             try {
               return {
                 authorOdinId: commentPreview.odinId,
-                content:
-                  commentPreview.isEncrypted && !commentPreview.content.length
-                    ? { body: '' }
-                    : tryJsonParse(commentPreview.content),
+
+                ...(commentPreview.isEncrypted && !commentPreview.content.length
+                  ? { body: '' }
+                  : tryJsonParse<ReactionFileBody>(commentPreview.content)),
+
                 isEncrypted: commentPreview.isEncrypted,
                 reactions: parseReactions(commentPreview.reactions),
               };

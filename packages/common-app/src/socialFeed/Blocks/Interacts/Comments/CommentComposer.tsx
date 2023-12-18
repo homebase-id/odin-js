@@ -51,10 +51,24 @@ export const CommentComposer = ({
 
     try {
       await postComment({
-        authorOdinId: odinId,
-        content: { body: commentBody, attachment },
-        context,
-        threadId: replyThreadId,
+        context: {
+          ...context,
+          target: {
+            ...context.target,
+            globalTransitId: replyThreadId || context.target.globalTransitId,
+          },
+        },
+        commentData: {
+          fileMetadata: {
+            appData: {
+              content: {
+                authorOdinId: odinId,
+                body: commentBody,
+                attachment,
+              },
+            },
+          },
+        },
       });
       setBodyAfterError(undefined);
       setAttachementAfterError(undefined);

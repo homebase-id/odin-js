@@ -33,8 +33,8 @@ export const LikeButton = ({
 
   const doLike = () =>
     postEmoji({
-      authorOdinId: getIdentity() || '',
-      content: {
+      emojiData: {
+        authorOdinId: getIdentity() || '',
         body: '❤️',
       },
       context,
