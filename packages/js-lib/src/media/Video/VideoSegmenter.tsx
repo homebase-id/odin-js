@@ -7,6 +7,25 @@ type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 const MB = 1024 * 1024;
 const MB_PER_CHUNK = 5 * MB;
 
+interface Mp4Info {
+  isFragmented: boolean;
+  tracks: {
+    id: number;
+    nb_samples: number;
+    type: string;
+    codec: string;
+    movie_duration: number;
+    movie_timescale: number;
+    duration: number;
+    timescale: number;
+  }[];
+  mime: string;
+  initial_duration?: number;
+  duration: number;
+  timescale: number;
+  brands: string[];
+}
+
 const loadMp4box = async () => {
   try {
     return await import('mp4box');
@@ -23,12 +42,16 @@ export const segmentVideoFile = async (
   }
 
   const { createFile, BoxParser, ISOFile } = await loadMp4box();
+  let mp4Info: Mp4Info | undefined;
 
   // mp4box.js isn't typed, mp4File is a complex object with many properties
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buildInitSegments = (mp4File: any): Uint8Array => {
     let i;
     let trak;
+
+    // Sanity check
+    if (!mp4Info) throw new Error('mp4Info not set');
 
     const moov = new BoxParser.moovBox();
     moov.mvhd = mp4File.moov.mvhd;
@@ -37,6 +60,14 @@ export const segmentVideoFile = async (
 
     for (i = 0; i < mp4File.fragmentedTracks.length; i++) {
       trak = mp4File.getTrackById(mp4File.fragmentedTracks[i].id);
+
+      // TODO: Check if there is a better way than to hope that the indexes still align
+      trak.tkhd.duration = mp4Info.tracks[i].duration;
+      trak.mdia.mdhd.duration = mp4Info.tracks[i].duration;
+
+      trak.tkhd.timescale = mp4Info.tracks[i].timescale;
+      trak.mdia.mdhd.timescale = mp4Info.tracks[i].timescale;
+
       moov.boxes.push(trak);
       moov.traks.push(trak);
     }
@@ -72,22 +103,10 @@ export const segmentVideoFile = async (
       reject(e);
     };
 
-    mp4File.onReady = function (info: {
-      isFragmented: boolean;
-      tracks: {
-        id: number;
-        nb_samples: number;
-        type: string;
-        codec: string;
-        movie_duration: number;
-        movie_timescale: number;
-      }[];
-      mime: string;
-      initial_duration?: number;
-      duration: number;
-      timescale: number;
-      brands: string[];
-    }) {
+    mp4File.onReady = function (info: Mp4Info) {
+      mp4Info = info;
+      console.debug('mp4box ready', info);
+
       metadata.codec = info.mime;
       const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
       videoTrackId = avTracks.find((trck) => trck.type === 'video')?.id || 1;
