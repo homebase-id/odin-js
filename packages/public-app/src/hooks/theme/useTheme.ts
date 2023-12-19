@@ -7,7 +7,7 @@ interface TemplateSettings {
   tabsOrder: string[];
   colors: { light: Record<string, string>; dark: Record<string, string> };
   imageFileId?: string;
-  favicon?: { fileId: string } | { emoji: string } | undefined;
+  favicon?: { fileKey: string } | { emoji: string } | undefined;
 }
 
 const isRecord = (obj: unknown): obj is Record<string, unknown> => {

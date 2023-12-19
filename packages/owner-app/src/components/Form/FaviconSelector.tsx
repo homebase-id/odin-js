@@ -19,25 +19,27 @@ const FaviconSelector = ({
   lastModified,
   ...props
 }: FaviconSelectorProps) => {
-  const valueObject: { fileId: string } | { emoji: string } | undefined = defaultValue as
-    | { fileId: string }
+  console.log(defaultValue);
+  const valueObject: { fileKey: string } | { emoji: string } | undefined = defaultValue as
+    | { fileKey: string }
     | { emoji: string }
     | undefined;
 
   const { data: imageData } = useImage({
     imageFileId: fileId,
     imageFileKey:
-      valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
-        ? valueObject.fileId
+      valueObject && typeof valueObject === 'object' && 'fileKey' in valueObject
+        ? valueObject.fileKey
         : undefined,
     imageDrive: targetDrive,
     lastModified,
   }).fetch;
 
   const dataVal: any =
-    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
-      ? valueObject.fileId
+    valueObject && typeof valueObject === 'object' && 'fileKey' in valueObject
+      ? valueObject.fileKey
       : undefined;
+
   const defaultFaviconImageValue =
     dataVal && dataVal instanceof Blob
       ? dataVal
@@ -72,7 +74,7 @@ const FaviconSelector = ({
         />
       </FaviconOption>
       <FaviconOption
-        isActive={valueObject && 'fileId' in valueObject}
+        isActive={valueObject && 'fileKey' in valueObject}
         label={t('Custom image')}
         onClick={() => setIsImageOpen(true)}
       >
@@ -86,7 +88,7 @@ const FaviconSelector = ({
                 name: e.target.name,
                 value: e.target.value
                   ? {
-                      fileId: e.target.value,
+                      fileKey: e.target.value,
                     }
                   : undefined,
               },

@@ -42,9 +42,11 @@ const Layout: FC<LayoutProps> = ({ children }) => {
 
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
   const { colors, favicon, imageFileId } = useTheme();
+
+  console.log('favicon', favicon);
   const { data: imageData } = useImage({
     imageFileId,
-    imageFileKey: favicon && 'fileId' in favicon ? favicon.fileId : undefined,
+    imageFileKey: favicon && 'fileKey' in favicon ? favicon.fileKey : undefined,
     imageDrive: GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
   }).fetch;
 
