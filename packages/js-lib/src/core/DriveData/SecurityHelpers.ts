@@ -165,7 +165,8 @@ export const decryptChunkedBytesResponse = async (
 
     const decryptedBytes = await cbcDecrypt(cipher, iv, key);
 
-    // Return without full block offset
+    // Return without full block offset; Ignore 16 extra bytes at
+    //  the start of the first block as that's already removed from the cipher to get the iv
     return decryptedBytes.slice(startOffset ? startOffset - 16 : 0);
   } else {
     return responseBa.slice(startOffset);
