@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActionButton, t } from '@youfoundation/common-app';
 import { Exclamation } from '@youfoundation/common-app';
 import { Pencil } from '@youfoundation/common-app';
@@ -10,7 +10,7 @@ interface ImageSelectorProps
     React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
     'onChange' | 'defaultValue'
   > {
-  defaultValue?: Blob;
+  defaultValue?: Blob | string;
 
   onChange: (event: { target: { name: string; value: Blob | undefined } }) => void;
   expectedAspectRatio?: number;
@@ -40,6 +40,7 @@ export const ImageSelector = ({
   isOpen: isDefaultOpen,
   onClose,
 }: ImageSelectorProps) => {
+  const [optimisticValue, setOptimisticValue] = useState<string>();
   const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => setIsEdit(!!isDefaultOpen), [isDefaultOpen]);
@@ -51,11 +52,14 @@ export const ImageSelector = ({
 
   const sizeClass = externalSizeClass ?? 'aspect-square max-w-[20rem]';
 
-  const imageUrl = useMemo(
-    () =>
-      defaultValue && defaultValue instanceof Blob ? URL.createObjectURL(defaultValue) : undefined,
-    [defaultValue]
-  );
+  // Keep the optimistic value in memory, so we avoid having a flash between the optimistic value and the new value
+  useEffect(() => {
+    console.log('defaultValue', defaultValue);
+    if (defaultValue instanceof Blob) setOptimisticValue(URL.createObjectURL(defaultValue));
+    else if (defaultValue === undefined) setOptimisticValue(undefined);
+  }, [defaultValue]);
+
+  const imageUrl = optimisticValue || (typeof defaultValue === 'string' ? defaultValue : undefined);
 
   return (
     <>
@@ -92,13 +96,7 @@ export const ImageSelector = ({
             >
               <Trash className="h-4 w-4 " />
             </ActionButton>
-            <img
-              src={imageUrl}
-              className="max-h-[20rem]"
-              onClick={() => {
-                setIsEdit(true);
-              }}
-            />
+            <img src={imageUrl} className="max-h-[20rem]" onClick={() => setIsEdit(true)} />
           </div>
         </div>
       ) : (

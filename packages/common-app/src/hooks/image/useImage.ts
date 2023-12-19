@@ -20,15 +20,25 @@ export interface ImageData {
   naturalSize?: ImageSize;
 }
 
-export const useImage = (
-  odinId?: string,
-  imageFileId?: string,
-  imageFileKey?: string,
-  imageDrive?: TargetDrive,
-  size?: ImageSize,
-  probablyEncrypted?: boolean,
-  naturalSize?: ImageSize
-) => {
+export const useImage = ({
+  odinId,
+  imageFileId,
+  imageFileKey,
+  imageDrive,
+  size,
+  probablyEncrypted,
+  naturalSize,
+  lastModified,
+}: {
+  odinId?: string;
+  imageFileId?: string;
+  imageFileKey?: string;
+  imageDrive?: TargetDrive;
+  size?: ImageSize;
+  probablyEncrypted?: boolean;
+  naturalSize?: ImageSize;
+  lastModified?: number;
+}) => {
   const localHost = window.location.hostname;
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -61,7 +71,10 @@ export const useImage = (
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size
+                size,
+                probablyEncrypted,
+                undefined,
+                lastModified
               )
             : await getDecryptedImageUrl(
                 dotYouClient,
@@ -69,7 +82,9 @@ export const useImage = (
                 imageFileId,
                 imageFileKey,
                 size,
-                probablyEncrypted
+                probablyEncrypted,
+                undefined,
+                lastModified
               ),
         naturalSize: naturalSize,
       };

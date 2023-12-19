@@ -1,4 +1,4 @@
-import { Label, t, ImageSelector, usePayloadBlob } from '@youfoundation/common-app';
+import { Label, t, ImageSelector, useImage } from '@youfoundation/common-app';
 import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 
@@ -14,16 +14,16 @@ export const PhotoAttributeEditor = ({
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
-  const { data: imageBlob } = usePayloadBlob(
-    fileId,
-    attribute.data?.[MinimalProfileFields.ProfileImageKey],
-    targetDrive,
-    lastModified
-  );
+  const { data: imageData } = useImage({
+    imageFileId: fileId,
+    imageFileKey: attribute.data?.[MinimalProfileFields.ProfileImageKey],
+    imageDrive: targetDrive,
+    lastModified,
+  }).fetch;
 
   const dataVal = attribute.data?.[MinimalProfileFields.ProfileImageKey];
   const defaultValue =
-    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+    dataVal instanceof Blob ? dataVal : dataVal ? imageData?.url || undefined : undefined;
 
   return (
     <div className="mb-5">

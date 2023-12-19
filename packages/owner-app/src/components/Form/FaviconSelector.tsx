@@ -1,4 +1,4 @@
-import { Block, EmojiSelector, t, ImageSelector, usePayloadBlob } from '@youfoundation/common-app';
+import { Block, EmojiSelector, t, ImageSelector, useImage } from '@youfoundation/common-app';
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 
@@ -24,21 +24,26 @@ const FaviconSelector = ({
     | { emoji: string }
     | undefined;
 
-  const { data: imageBlob } = usePayloadBlob(
-    fileId,
-    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
-      ? valueObject.fileId
-      : undefined,
-    targetDrive,
-    lastModified
-  );
+  const { data: imageData } = useImage({
+    imageFileId: fileId,
+    imageFileKey:
+      valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
+        ? valueObject.fileId
+        : undefined,
+    imageDrive: targetDrive,
+    lastModified,
+  }).fetch;
 
   const dataVal: any =
     valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
       ? valueObject.fileId
       : undefined;
   const defaultFaviconImageValue =
-    dataVal && dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+    dataVal && dataVal instanceof Blob
+      ? dataVal
+      : dataVal
+      ? imageData?.url || undefined
+      : undefined;
 
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);

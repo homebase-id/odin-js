@@ -5,9 +5,8 @@ import {
   GetTargetDriveFromProfileId,
   Attribute,
 } from '@youfoundation/js-lib/profile';
-import { useImage } from '../../../hooks/media/useImage';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
-import { FallbackImg, LoadingBlock } from '@youfoundation/common-app';
+import { FallbackImg, LoadingBlock, useImage } from '@youfoundation/common-app';
 import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
 
@@ -41,13 +40,15 @@ const YourSignature = ({ className }: YourSignatureProps) => {
 
   const filteredPhotoAttributes = filterAttributes(photoAttributes || []);
 
-  const { data: imageUrl } = useImage(
-    filteredPhotoAttributes?.[0]?.fileId,
-    filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
-      MinimalProfileFields.ProfileImageKey
-    ],
-    GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
-  ).fetch;
+  const { data: imageData } = useImage({
+    imageFileId: filteredPhotoAttributes?.[0]?.fileId,
+    imageFileKey:
+      filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
+        MinimalProfileFields.ProfileImageKey
+      ],
+    imageDrive: GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString()),
+  }).fetch;
+  const imageUrl = imageData?.url;
 
   const name =
     filteredNameAttributes?.[0]?.fileMetadata.appData.content.data[
