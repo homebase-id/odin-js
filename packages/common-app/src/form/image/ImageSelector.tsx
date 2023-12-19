@@ -54,7 +54,6 @@ export const ImageSelector = ({
 
   // Keep the optimistic value in memory, so we avoid having a flash between the optimistic value and the new value
   useEffect(() => {
-    console.log('defaultValue', defaultValue);
     if (defaultValue instanceof Blob) setOptimisticValue(URL.createObjectURL(defaultValue));
     else if (defaultValue === undefined) setOptimisticValue(undefined);
   }, [defaultValue]);
