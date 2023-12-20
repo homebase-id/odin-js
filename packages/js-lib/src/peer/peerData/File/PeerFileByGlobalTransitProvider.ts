@@ -127,9 +127,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
               )
             ).slice(
               0,
-              chunkEnd !== undefined && chunkStart !== undefined
-                ? chunkEnd - chunkStart + 1
-                : undefined
+              chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
             )
           : await decryptBytesResponse(dotYouClient, response),
 

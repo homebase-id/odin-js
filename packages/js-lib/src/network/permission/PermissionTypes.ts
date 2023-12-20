@@ -19,6 +19,7 @@ export enum AppPermissionType {
   ReadCircleMembers = 50,
   ReadWhoIFollow = 80,
   ReadMyFollowers = 130,
+  ManageFeed = 150,
   SendDataToOtherIdentitiesOnMyBehalf = 210,
   ReceiveDataFromOtherIdentitiesOnMyBehalf = 305,
   SendPushNotifications = 405,
