@@ -17,7 +17,8 @@ export const formatToTimeAgo = (date: TDate, locale = 'en_short', opts?: Opts): 
 
 export const formatToTimeAgoWithRelativeDetail = (
   date: Date | undefined,
-  keepDetailWhenIncludesDate?: boolean
+  keepDetailWhenIncludesDate?: boolean,
+  ignoreTimeOfDay?: boolean
 ): string | undefined => {
   if (!date) return undefined;
 
@@ -28,7 +29,7 @@ export const formatToTimeAgoWithRelativeDetail = (
   // if date is not today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  if (date >= today) {
+  if (date >= today && !ignoreTimeOfDay) {
     const timeFormat: Intl.DateTimeFormatOptions = {
       hour: 'numeric',
       minute: 'numeric',

@@ -20,6 +20,7 @@ import { PushNotification } from '../../provider/notifications/PushNotifications
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CHAT_APP_ID, OWNER_APP_ID } from '../../app/Constants';
+import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 interface NotificationClickData {
   notification: string;
@@ -66,7 +67,6 @@ const getTargetLink = (payload: PushNotification) => {
 };
 
 const Notifications = () => {
-  // const { notifications: notificationList } = useNotifications();
   const { data: notifications } = usePushNotifications().fetch;
   const { isSupported, isEnabled } = usePushNotificationClient();
   const {
@@ -86,11 +86,13 @@ const Notifications = () => {
     return () => navigator.serviceWorker.removeEventListener('message', handleEvent);
   }, []);
 
-  const groupedNotifications =
+  const groupedNotificationsPerDay =
     notifications?.results.reduce(
       (acc, notification) => {
-        if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
-        else acc[notification.options.appId] = [notification];
+        const date = new Date(notification.created).toDateString();
+
+        if (acc[date]) acc[date].push(notification);
+        else acc[date] = [notification];
 
         return acc;
       },
@@ -120,11 +122,11 @@ const Notifications = () => {
       <ErrorNotification error={enableError} />
       {notifications?.results?.length ? (
         <div className="flex flex-col gap-3 px-2">
-          {Object.keys(groupedNotifications).map((appId) => (
-            <NotificationGroup
-              appId={appId}
-              notifications={groupedNotifications[appId]}
-              key={appId}
+          {Object.keys(groupedNotificationsPerDay).map((day) => (
+            <NotificationDay
+              day={new Date(day)}
+              notifications={groupedNotificationsPerDay[day]}
+              key={day}
             />
           ))}
         </div>
@@ -132,6 +134,40 @@ const Notifications = () => {
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}
       <PushNotificationsDialog isOpen={isDialogOpen} onClose={() => setDialogOpen(false)} />
+    </>
+  );
+};
+
+const NotificationDay = ({
+  day,
+  notifications,
+}: {
+  day: Date;
+  notifications: PushNotification[];
+}) => {
+  const groupedNotifications =
+    notifications?.reduce(
+      (acc, notification) => {
+        if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
+        else acc[notification.options.appId] = [notification];
+
+        return acc;
+      },
+      {} as { [key: string]: PushNotification[] }
+    ) || {};
+
+  const today = new Date();
+  const isToday = day.toDateString() === today.toDateString();
+
+  return (
+    <>
+      <p className="text-sm text-gray-500">
+        {isToday ? t('Today') : formatToTimeAgoWithRelativeDetail(day, false, true)}
+      </p>
+
+      {Object.keys(groupedNotifications).map((appId) => (
+        <NotificationGroup appId={appId} notifications={groupedNotifications[appId]} key={appId} />
+      ))}
     </>
   );
 };
