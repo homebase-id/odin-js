@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { IconProps } from './Types';
+import { IconProps } from '../Icons/Types';
 
-export const Logo: FC<IconProps> = ({ className }) => {
+export const Homebase: FC<IconProps> = ({ className }) => {
   return (
     <svg
       width="919"

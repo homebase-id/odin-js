@@ -13,14 +13,17 @@ import {
   GetNotifications,
   MarkNotificationsAsRead,
 } from '../../provider/notifications/PushNotificationsProvider';
+import { ApiType } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 50;
-export const usePushNotifications = () => {
+export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: number | undefined) =>
-    await GetNotifications(dotYouClient, PAGE_SIZE, cursor);
+    dotYouClient.getType() === ApiType.App
+      ? { results: [], count: 0 }
+      : await GetNotifications(dotYouClient, props?.appId, PAGE_SIZE, cursor);
 
   const markAsRead = async (notificationIds: string[]) =>
     await MarkNotificationsAsRead(dotYouClient, notificationIds);
@@ -30,7 +33,7 @@ export const usePushNotifications = () => {
 
   return {
     fetch: useQuery({
-      queryKey: ['push-notifications'],
+      queryKey: ['push-notifications', props?.appId],
       queryFn: () => getNotifications(undefined),
     }),
     markAsRead: useMutation({
@@ -54,8 +57,8 @@ export const usePushNotifications = () => {
   };
 };
 
-export const useUnreadPushNotificationsCount = () => {
-  const { data: notifications } = usePushNotifications().fetch;
+export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
+  const { data: notifications } = usePushNotifications(props).fetch;
 
   return notifications?.results.filter((n) => n.unread).length ?? 0;
 };

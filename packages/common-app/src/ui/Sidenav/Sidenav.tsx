@@ -38,6 +38,8 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
+import { useUnreadPushNotificationsCount } from '../../../../owner-app/src/hooks/notifications/usePushNotifications';
+import { CHAT_APP_ID, OWNER_APP_ID } from '../../../../owner-app/src/app/Constants';
 
 const STORAGE_KEY = 'isOpen';
 
@@ -148,7 +150,8 @@ export const Sidenav = ({
               {isTightHeight ? null : (
                 <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
               )}
-              <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" />
+
+              <ChatNavItem />
             </div>
 
             <div className={`py-3`}>
@@ -442,17 +445,15 @@ const WalletLink = () => {
 };
 
 const NotificationBell = () => {
-  // TODO: re-enable when notifications are better supported on the other api's
-  // const { hasUnread } = useNotifications();
-
+  const count = useUnreadPushNotificationsCount();
   return (
-    <NavItem
-      label={t('Notifications')}
-      to={'/owner/notifications'}
-      icon={Bell}
-      // unread={hasUnread}
-    />
+    <NavItem label={t('Notifications')} to={'/owner/notifications'} icon={Bell} unread={!!count} />
   );
+};
+
+const ChatNavItem = () => {
+  const count = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!count} />;
 };
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {

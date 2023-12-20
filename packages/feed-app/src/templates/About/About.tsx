@@ -2,7 +2,7 @@ import { NoLayout } from '../../components/ui/Layout/Layout';
 
 import LoginNav from '../../components/Auth/LoginNav/LoginNav';
 
-import { ActionLink, Logo, t } from '@youfoundation/common-app';
+import { ActionLink, Homebase, t } from '@youfoundation/common-app';
 import { ROOT_PATH } from '../../app/App';
 
 const About = () => {
@@ -11,7 +11,7 @@ const About = () => {
       <section className="relative flex min-h-screen items-center justify-center">
         <div className="absolute inset-0 flex flex-col">
           <div className="flex flex-row items-center border-b px-5 py-3">
-            <Logo className="my-auto mr-2 h-10 w-10" />{' '}
+            <Homebase className="my-auto mr-2 h-10 w-10" />{' '}
             <h1 className="mr-auto text-2xl">Homebase Feed</h1>
             <LoginNav />
           </div>

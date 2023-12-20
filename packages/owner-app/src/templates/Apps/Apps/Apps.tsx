@@ -71,7 +71,12 @@ const AppListItem = ({ app, className }: { app: RedactedAppRegistration; classNa
           className ?? ''
         }`}
       >
-        <CompanyImage domain={app.corsHostName || app.name} className="w-12" fallbackSize="xs" />
+        <CompanyImage
+          domain={app.corsHostName || app.name}
+          appId={app.appId}
+          className="w-12"
+          fallbackSize="xs"
+        />
         <h2 className="font-thiner dark:text-white">
           <span className="break-words">
             {`${app.isRevoked ? t('Revoked') : ''}`} {app.name}{' '}

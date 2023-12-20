@@ -36,6 +36,8 @@ export const ActionGroup = ({
 
   const [isOpen, setIsOpen] = useState(false);
 
+  if (!options.length) return null;
+
   return (
     <div
       className={`${className?.includes('absolute') ? '' : 'relative'} ${className ?? ''}`}

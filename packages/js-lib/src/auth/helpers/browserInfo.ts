@@ -1,9 +1,23 @@
+type OperatingSystem =
+  | 'Windows'
+  | 'Windows Phone'
+  | 'OS X'
+  | 'Mac OS X'
+  | 'macOS'
+  | 'Linux'
+  | 'iOS'
+  | 'Android'
+  | 'BlackBerry'
+  | 'BlackBerryOS'
+  | 'Chrome OS'
+  | 'KaiOS';
+
 export const getOperatingSystem = (userAgentVal?: string) => {
   const userAgent = userAgentVal || navigator.userAgent;
 
   if (!userAgent) return 'Unknown';
 
-  const os: { name?: string; version?: string } = {
+  const os: { name?: OperatingSystem; version?: string } = {
     name: undefined,
     version: undefined,
   };
@@ -36,16 +50,12 @@ export const getOperatingSystem = (userAgentVal?: string) => {
     os.name = 'Android';
   }
 
-  if (userAgent.indexOf('BB10') >= 0) {
+  if (
+    userAgent.indexOf('BB10') >= 0 ||
+    userAgent.indexOf('RIM Tablet OS') >= 0 ||
+    userAgent.indexOf('BlackBerry') >= 0
+  ) {
     os.name = 'BlackBerry';
-  }
-
-  if (userAgent.indexOf('RIM Tablet OS') >= 0) {
-    os.name = 'BlackBerry Tablet OS';
-  }
-
-  if (userAgent.indexOf('BlackBerry') >= 0) {
-    os.name = 'BlackBerryOS';
   }
 
   if (userAgent.indexOf('CrOS') >= 0) {
@@ -133,11 +143,7 @@ export const getOperatingSystem = (userAgentVal?: string) => {
       match = userAgent.match(/(?:Android|Adr) (\d+([._]\d+)*)/);
       break;
     case 'BlackBerry':
-    case 'BlackBerryOS':
       match = userAgent.match(/Version\/((\d+\.)+\d+)/);
-      break;
-    case 'BlackBerry Tablet OS':
-      match = userAgent.match(/RIM Tablet OS ((\d+\.)+\d+)/);
       break;
     case 'Chrome OS':
       os.version = undefined;
@@ -172,7 +178,7 @@ export const getOperatingSystem = (userAgentVal?: string) => {
     }
   }
 
-  return `${os.name}`;
+  return os.name;
 };
 
 export const getBrowser = (userAgentVal?: string) => {
