@@ -1,4 +1,4 @@
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
+import { DotYouClient } from '../../core/DotYouClient';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
 import { TargetDrive } from '../../core/core';
 import { stringifyToQueryParams } from '../../helpers/DataUtil';
@@ -21,13 +21,12 @@ export const fetchFollowing = async (
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
 
   const params = {
     cursor: cursorState,
     max: pageSize,
   };
-  const url = currentRoot + `/IdentitiesIFollow?${stringifyToQueryParams(params)}`;
+  const url = root + `/IdentitiesIFollow?${stringifyToQueryParams(params)}`;
 
   return client
     .get(url)
@@ -88,13 +87,12 @@ export const fetchFollowers = async (
   pageSize?: number
 ): Promise<CursoredResult<string[]> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
 
   const params = {
     cursor: cursorState,
     max: pageSize,
   };
-  const url = currentRoot + `/followingme?${stringifyToQueryParams(params)}`;
+  const url = root + `/followingme?${stringifyToQueryParams(params)}`;
 
   return client
     .get(url)
@@ -124,8 +122,7 @@ export const fetchFollowDetail = async (
 ): Promise<FollowRequest | null> => {
   const client = dotYouClient.createAxiosClient();
 
-  const currentRoot = dotYouClient.getType() === ApiType.Owner ? root : `/circles${root}`;
-  const url = currentRoot + `/followerconfiguration`;
+  const url = root + `/followerconfiguration`;
 
   return client
     .get(url)
