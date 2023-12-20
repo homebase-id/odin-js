@@ -21,6 +21,7 @@ export interface ActionGroupOptionProps {
 }
 
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
+  buttonClassName?: string;
   options: ActionGroupOptionProps[];
 }
 
@@ -28,6 +29,7 @@ export const ActionGroup = ({
   options,
   className,
   children,
+  buttonClassName,
   ...actionButtonProps
 }: ActionGroupProps) => {
   const wrapperRef = useRef(null);
@@ -49,7 +51,7 @@ export const ActionGroup = ({
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="group"
+        className={`group ${buttonClassName || ''}`}
         {...actionButtonProps}
       >
         {children ? (

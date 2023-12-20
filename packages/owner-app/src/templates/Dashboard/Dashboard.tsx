@@ -81,14 +81,12 @@ const Dashboard = () => {
 };
 
 const AppWrapper = ({
-  children,
   unreadCount,
   href,
   name,
   appId,
   options,
 }: {
-  children?: React.ReactNode;
   unreadCount: number;
   href: string | undefined;
   name: string | undefined;
@@ -118,10 +116,10 @@ const AppWrapper = ({
       <ActionGroup
         type="mute"
         size="none"
-        className="pointer-events-none py-1 group-hover:pointer-events-auto"
+        className="pointer-events-none w-full py-1 group-hover:pointer-events-auto"
+        buttonClassName="w-full justify-center"
         options={options}
       />
-      {children ? children : null}
     </div>
   </div>
 );
