@@ -18,38 +18,46 @@ import {
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
+import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 
+const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 export const drives = [
   {
-    a: '4db49422ebad02e99ab96e9c477d1e08',
-    t: 'a3227ffba87608beeb24fee9b70d92a6',
-    n: 'Feed',
+    a: BlogConfig.FeedDrive.alias,
+    t: BlogConfig.FeedDrive.type,
+    n: '',
     d: '',
-    p: DrivePermissionType.Read,
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
   {
     // Standard profile Info
-    a: '8f12d8c4933813d378488d91ed23b64c',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    a: StandardProfileDrive.alias,
+    t: StandardProfileDrive.type,
     n: '',
     d: '',
     p: DrivePermissionType.Read,
   },
   {
     // Homepage Config
-    a: 'ec83345af6a747d4404ef8b0f8844caa',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    a: HomePageConfig.HomepageTargetDrive.alias,
+    t: HomePageConfig.HomepageTargetDrive.type,
     n: '',
     d: '',
     p: DrivePermissionType.Read,
   },
   {
     // Public posts
-    a: 'e8475dc46cb4b6651c2d0dbd0f3aad5f',
-    t: '8f448716e34cedf9014145e043ca6612',
+
+    a: BlogConfig.PublicChannelDrive.alias,
+    t: BlogConfig.PublicChannelDrive.type,
     n: '',
     d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
+    p:
+      DrivePermissionType.Read +
+      DrivePermissionType.Write +
+      DrivePermissionType.React +
+      DrivePermissionType.Comment,
   },
 ];
 export const appName = 'Homebase - Feed';
@@ -152,6 +160,7 @@ export const useYouAuthAuthorization = () => {
         AppPermissionType.ReadCircleMembers,
         AppPermissionType.ReadWhoIFollow,
         AppPermissionType.ReadMyFollowers,
+        AppPermissionType.ManageFeed,
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
       ],

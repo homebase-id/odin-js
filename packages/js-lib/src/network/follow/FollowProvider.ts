@@ -53,13 +53,14 @@ export const fetchIdentityIFollow = (
 
 export const createOrUpdateFollow = async (
   dotYouClient: DotYouClient,
-  request: FollowRequest
+  request: FollowRequest,
+  synchronizeFeedHistoryNow?: boolean
 ): Promise<boolean | undefined> => {
   const client = dotYouClient.createAxiosClient();
   const url = root + `/follow`;
 
   return client
-    .post(url, request)
+    .post(url, { ...request, synchronizeFeedHistoryNow })
     .then(() => {
       return true;
     })
