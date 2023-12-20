@@ -146,11 +146,6 @@ export const Sidenav = ({
 
             <div className="py-3">
               <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
-              <NavItem icon={Article} label={'Articles'} to="/owner/feed/articles" />
-              {isTightHeight ? null : (
-                <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
-              )}
-
               <ChatNavItem />
             </div>
 
@@ -174,7 +169,6 @@ export const Sidenav = ({
             <MoreItems isOpen={isPinned || isOpen || isHoverOpen || isPeeking} logout={logout}>
               {isTightHeight ? (
                 <>
-                  <NavItem icon={Quote} label={'Channels'} to="/owner/feed/channels" />
                   <NavItem icon={Persons} label={'Following & Followers'} to={'/owner/follow'} />
                   <NavItem
                     icon={Grid}

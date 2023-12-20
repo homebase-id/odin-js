@@ -26,6 +26,7 @@ export const ArticlesPage = () => {
       <PageMeta
         title={t('Articles')}
         icon={ArticleIcon}
+        breadCrumbs={[{ title: t('Feed'), href: '/owner/feed' }, { title: t('Articles') }]}
         actions={
           <ActionLink onClick={() => (window.location.href = '/owner/feed/new')} icon={Plus}>
             {t('New Article')}

@@ -28,6 +28,8 @@ import {
   ActionGroup,
   AclSummary,
   AclIcon,
+  Pencil,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 import { base64ToUint8Array, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
@@ -41,6 +43,8 @@ const PostComposer = ({
   embeddedPost?: EmbeddedPost;
   className?: string;
 }) => {
+  const { isOwner } = useDotYouClient();
+
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, processingProgress, error } = usePostComposer();
@@ -179,11 +183,21 @@ const PostComposer = ({
                         icon: Lock,
                         onClick: () => setReactAccess(false),
                       },
-                  {
-                    label: t('Convert to an article'),
-                    href: `/owner/feed/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
-                    icon: Article,
-                  },
+
+                  ...(isOwner
+                    ? [
+                        {
+                          label: t('Convert to an article'),
+                          href: `/owner/feed/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
+                          icon: Article,
+                        },
+                        {
+                          label: t('See my drafts'),
+                          href: `/owner/feed/articles`,
+                          icon: Pencil,
+                        },
+                      ]
+                    : []),
                 ]}
               />
             </>
