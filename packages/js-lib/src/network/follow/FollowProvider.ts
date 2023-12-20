@@ -67,6 +67,21 @@ export const createOrUpdateFollow = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
+export const syncFeedHistoryForFollowing = async (
+  dotYouClient: DotYouClient,
+  request: { odinId: string }
+): Promise<boolean | undefined> => {
+  const client = dotYouClient.createAxiosClient();
+  const url = root + `/sync-feed-history`;
+
+  return client
+    .post(url, request)
+    .then(() => {
+      return true;
+    })
+    .catch(dotYouClient.handleErrorResponse);
+};
+
 export const Unfollow = async (
   dotYouClient: DotYouClient,
   request: UnfollowRequest
