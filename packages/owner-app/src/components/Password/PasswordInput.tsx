@@ -1,6 +1,5 @@
+import { CloseEye, Eye, Input } from '@youfoundation/common-app';
 import React, { useState, useEffect, DetailedHTMLProps } from 'react';
-import { Input } from './Input';
-import { CloseEye, Eye } from '../ui/Icons/Eye';
 
 export const PasswordInput = (
   props: DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>

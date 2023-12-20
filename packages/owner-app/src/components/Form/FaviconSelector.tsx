@@ -1,4 +1,4 @@
-import { Block, EmojiSelector, t, ImageSelector, usePayloadBlob } from '@youfoundation/common-app';
+import { Block, EmojiSelector, t, ImageSelector, useImage } from '@youfoundation/common-app';
 import { TargetDrive } from '@youfoundation/js-lib/core';
 import { ReactNode, useState } from 'react';
 
@@ -19,26 +19,33 @@ const FaviconSelector = ({
   lastModified,
   ...props
 }: FaviconSelectorProps) => {
-  const valueObject: { fileId: string } | { emoji: string } | undefined = defaultValue as
-    | { fileId: string }
+  console.log(defaultValue);
+  const valueObject: { fileKey: string } | { emoji: string } | undefined = defaultValue as
+    | { fileKey: string }
     | { emoji: string }
     | undefined;
 
-  const { data: imageBlob } = usePayloadBlob(
-    fileId,
-    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
-      ? valueObject.fileId
-      : undefined,
-    targetDrive,
-    lastModified
-  );
+  const { data: imageData } = useImage({
+    imageFileId: fileId,
+    imageFileKey:
+      valueObject && typeof valueObject === 'object' && 'fileKey' in valueObject
+        ? valueObject.fileKey
+        : undefined,
+    imageDrive: targetDrive,
+    lastModified,
+  }).fetch;
 
   const dataVal: any =
-    valueObject && typeof valueObject === 'object' && 'fileId' in valueObject
-      ? valueObject.fileId
+    valueObject && typeof valueObject === 'object' && 'fileKey' in valueObject
+      ? valueObject.fileKey
       : undefined;
+
   const defaultFaviconImageValue =
-    dataVal && dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+    dataVal && dataVal instanceof Blob
+      ? dataVal
+      : dataVal
+      ? imageData?.url || undefined
+      : undefined;
 
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);
@@ -67,7 +74,7 @@ const FaviconSelector = ({
         />
       </FaviconOption>
       <FaviconOption
-        isActive={valueObject && 'fileId' in valueObject}
+        isActive={valueObject && 'fileKey' in valueObject}
         label={t('Custom image')}
         onClick={() => setIsImageOpen(true)}
       >
@@ -81,7 +88,7 @@ const FaviconSelector = ({
                 name: e.target.name,
                 value: e.target.value
                   ? {
-                      fileId: e.target.value,
+                      fileKey: e.target.value,
                     }
                   : undefined,
               },

@@ -5,7 +5,7 @@ import {
 } from '../../core/DriveData/File/DriveFileReactionTypes';
 import { tryJsonParse } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
-import { ReactionVm, ReactionContext } from './PostTypes';
+import { RawReactionContent, ReactionContext } from './PostTypes';
 
 interface ServerReactionsSummary {
   reactions: { reactionContent: string; count: number }[];
@@ -24,17 +24,18 @@ const emojiRootTransit = '/transit/reactions';
 const emojiRoot = '/drive/files/reactions';
 export const saveEmojiReaction = async (
   dotYouClient: DotYouClient,
-  emoji: ReactionVm
+  emoji: RawReactionContent,
+  context: ReactionContext
 ): Promise<string> => {
-  const isLocal = emoji.context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
-    reaction: JSON.stringify({ emoji: emoji.content.body }),
+    reaction: JSON.stringify({ emoji: emoji.body }),
     file: {
-      targetDrive: GetTargetDriveFromChannelId(emoji.context.channelId),
-      fileId: emoji.context.target.fileId,
-      globalTransitId: emoji.context.target.globalTransitId,
+      targetDrive: GetTargetDriveFromChannelId(context.channelId),
+      fileId: context.target.fileId,
+      globalTransitId: context.target.globalTransitId,
     },
   };
 
@@ -49,7 +50,7 @@ export const saveEmojiReaction = async (
   } else {
     const url = emojiRootTransit + '/add';
     return client
-      .post(url, { odinId: emoji.context.authorOdinId, request: data })
+      .post(url, { odinId: context.authorOdinId, request: data })
       .then((response) => ({ ...response.data, status: response.data?.status?.toLowerCase() }))
       .catch(dotYouClient.handleErrorResponse);
   }
@@ -57,18 +58,19 @@ export const saveEmojiReaction = async (
 
 export const removeEmojiReaction = async (
   dotYouClient: DotYouClient,
-  emoji: ReactionVm
+  emoji: RawReactionContent,
+  context: ReactionContext
 ): Promise<string> => {
-  const isLocal = emoji.context.authorOdinId === dotYouClient.getIdentity();
+  const isLocal = context.authorOdinId === dotYouClient.getIdentity();
   const client = dotYouClient.createAxiosClient();
 
   const data = {
     odinId: emoji.authorOdinId,
-    reaction: JSON.stringify({ emoji: emoji.content.body }),
+    reaction: JSON.stringify({ emoji: emoji.body }),
     file: {
-      targetDrive: GetTargetDriveFromChannelId(emoji.context.channelId),
-      fileId: emoji.context.target.fileId,
-      globalTransitId: emoji.context.target.globalTransitId,
+      targetDrive: GetTargetDriveFromChannelId(context.channelId),
+      fileId: context.target.fileId,
+      globalTransitId: context.target.globalTransitId,
     },
   };
 
@@ -83,7 +85,7 @@ export const removeEmojiReaction = async (
   } else {
     const url = emojiRootTransit + '/delete';
     return client
-      .post(url, { odinId: emoji.context.authorOdinId, request: data })
+      .post(url, { odinId: emoji.authorOdinId, request: data })
       .then((response) => {
         return { ...response.data, status: response.data?.status?.toLowerCase() };
       })
@@ -192,7 +194,7 @@ export const getReactions = async (
           reactions: response.data.reactions.map((reaction) => {
             return {
               authorOdinId: reaction.odinId,
-              content: { body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji },
+              body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
             };
           }),
           cursor: response.data.cursor,
@@ -208,7 +210,7 @@ export const getReactions = async (
           reactions: response.data.reactions.map((reaction) => {
             return {
               authorOdinId: reaction.odinId,
-              content: { body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji },
+              body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
             };
           }),
           cursor: response.data.cursor,

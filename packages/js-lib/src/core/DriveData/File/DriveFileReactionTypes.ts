@@ -29,31 +29,17 @@ export interface CommentsReactionSummary {
 
 export interface CommentReactionPreview extends ReactionFile {
   reactions: EmojiReactionSummary;
+  isEncrypted: boolean;
 }
 
-export interface ReactionFile {
-  globalTransitId?: string;
-
-  versionTag?: string;
-
-  fileId?: string;
-  id?: string;
-  threadId?: string;
-  lastModified?: number;
-
-  isEncrypted?: boolean;
-
+export interface ReactionFile extends ReactionFileBody {
   authorOdinId: string;
-  date?: number;
-  updated?: number;
-
-  content: ReactionContent;
 }
 
-export type RichText = Record<string, unknown>[];
-
-export interface ReactionContent {
+export interface ReactionFileBody {
   body: string;
   bodyAsRichText?: RichText;
   mediaPayloadKey?: string;
 }
+
+export type RichText = Record<string, unknown>[];

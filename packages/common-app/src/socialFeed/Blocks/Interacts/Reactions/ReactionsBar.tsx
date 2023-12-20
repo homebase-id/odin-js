@@ -42,8 +42,7 @@ export const ReactionsBar = ({
   const { data: myEmojis } = useMyEmojiReactions(isActive || isHover ? context : undefined).fetch;
   const doLike = async (body: string) => {
     postEmoji({
-      authorOdinId: getIdentity() || '',
-      content: { body: body },
+      emojiData: { body: body, authorOdinId: getIdentity() || '' },
       context,
     });
 
@@ -55,8 +54,7 @@ export const ReactionsBar = ({
   };
   const doUnlike = (body: string) => {
     removeEmoji({
-      authorOdinId: getIdentity() || '',
-      content: { body: body },
+      emojiData: { body: body, authorOdinId: getIdentity() || '' },
       context,
     });
 

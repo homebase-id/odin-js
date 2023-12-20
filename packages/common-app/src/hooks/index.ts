@@ -15,7 +15,6 @@ export * from './errors/useErrors';
 export * from './follow/useFollowers';
 export * from './follow/useFollowing';
 export * from './image/useImage';
-export * from './image/usePayloadBlob';
 export * from './intersection/useIntersection';
 export * from './intersection/useMostSpace';
 export * from './longPress/useLongPress';

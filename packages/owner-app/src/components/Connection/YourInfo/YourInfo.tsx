@@ -10,8 +10,7 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { FallbackImg, t } from '@youfoundation/common-app';
-import { useImage } from '../../../hooks/media/useImage';
+import { FallbackImg, t, useImage } from '@youfoundation/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { LoadingBlock, Cake, House, IconFrame, Phone } from '@youfoundation/common-app';
 import InfoBox from '../../ui/InfoBox/InfoBox';
@@ -66,13 +65,15 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
     circleGrants || []
   );
 
-  const { data: imageUrl } = useImage(
-    filteredPhotoAttributes?.[0]?.fileId,
-    filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
-      MinimalProfileFields.ProfileImageKey
-    ],
-    GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString())
-  ).fetch;
+  const { data: imageData } = useImage({
+    imageFileId: filteredPhotoAttributes?.[0]?.fileId,
+    imageFileKey:
+      filteredPhotoAttributes?.[0]?.fileMetadata.appData.content.data?.[
+        MinimalProfileFields.ProfileImageKey
+      ],
+    imageDrive: GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId.toString()),
+  }).fetch;
+  const imageUrl = imageData?.url;
 
   const { data: phoneAttributes, isLoading: phoneAttributesLoading } = useAttributeVersions({
     profileId: BuiltInProfiles.StandardProfileId.toString(),

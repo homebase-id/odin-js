@@ -190,7 +190,7 @@ const PostComposer = ({
           ) : null}
           <ChannelSelector
             className="ml-auto max-w-[35%] flex-shrink"
-            defaultValue={BlogConfig.PublicChannelId}
+            defaultValue={channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId}
             onChange={(channel) => channel && setChannel(channel)}
             ref={selectRef}
           />
@@ -278,7 +278,10 @@ export const ChannelSelector = React.forwardRef(
           onChange={(e) => {
             if (e.target.value === 'more') {
               setIsChnlMgmtOpen(true);
-              e.target.value = BlogConfig.PublicChannelId;
+              e.target.value =
+                channels.find((chnl) =>
+                  stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultValue)
+                )?.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId;
             } else {
               onChange(
                 channels?.find((chnl) => chnl.fileMetadata.appData.uniqueId === e.target.value)

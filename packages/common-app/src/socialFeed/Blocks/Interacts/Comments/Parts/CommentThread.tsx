@@ -39,7 +39,7 @@ export const CommentThread = ({
               context={context}
               commentData={comment}
               canReact={canReact}
-              key={comment.id || index}
+              key={comment.fileId || index}
               onReply={() => setIsReply(!isReply)}
               isThread={true}
             />

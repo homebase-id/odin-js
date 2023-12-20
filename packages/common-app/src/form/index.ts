@@ -1,5 +1,4 @@
 export * from './Input';
-export * from './PasswordInput';
 export * from './Label';
 export * from './CircleSelector';
 export * from './CheckboxToggle';

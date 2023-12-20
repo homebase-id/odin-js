@@ -301,7 +301,7 @@ const FAVICON_PAYLOAD_KEY = 'fvcn_key';
 const HEADER_PAYLOAD_KEY = 'headr_key';
 const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
   const faviconFieldKey = HomePageThemeFields.Favicon;
-  const faviconImageData = attr.data[faviconFieldKey]?.fileId;
+  const faviconImageData = attr.data[faviconFieldKey]?.fileKey;
 
   const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } = await getNewThumbnails(
     faviconImageData,
@@ -309,7 +309,7 @@ const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttri
     []
   );
 
-  if (faviconImageData) attr.data[faviconFieldKey] = { fileId: FAVICON_PAYLOAD_KEY };
+  if (faviconImageData) attr.data[faviconFieldKey] = { fileKey: FAVICON_PAYLOAD_KEY };
 
   const imageFieldKey = HomePageThemeFields.HeaderImageKey;
   const headerImageData = attr.data[imageFieldKey];

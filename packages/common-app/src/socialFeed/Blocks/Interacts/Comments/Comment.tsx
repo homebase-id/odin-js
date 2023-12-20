@@ -8,19 +8,24 @@ import {
   useReaction,
 } from '@youfoundation/common-app';
 
-import { ReactionContext, ReactionVm } from '@youfoundation/js-lib/public';
+import { RawReactionContent, ReactionContext } from '@youfoundation/js-lib/public';
 
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
-import { CommentReactionPreview, ReactionFile } from '@youfoundation/js-lib/core';
+import {
+  CommentReactionPreview,
+  DriveSearchResult,
+  NewDriveSearchResult,
+  ReactionFile,
+} from '@youfoundation/js-lib/core';
 
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: ReactionFile | ReactionVm;
+  commentData: DriveSearchResult<ReactionFile> | NewDriveSearchResult<RawReactionContent>;
   isThread: boolean;
   onReply?: () => void;
 }
@@ -42,26 +47,40 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
     removeComment: { mutateAsync: removeComment, error: removeCommentError },
   } = useReaction();
 
-  const { fileId, authorOdinId, content } = commentData;
+  const fileId = commentData.fileId;
+  const commentContent = commentData.fileMetadata.appData.content;
+  const authorOdinId = commentContent.authorOdinId;
+
   const threadContext: dirtyReactionContext = {
     ...context,
     target: {
       fileId: commentData.fileId,
-      globalTransitId: commentData.globalTransitId,
-      isEncrypted: commentData.isEncrypted || false,
+      globalTransitId: (commentData as DriveSearchResult<ReactionFile>).fileMetadata
+        .globalTransitId,
+      isEncrypted:
+        (commentData as DriveSearchResult<ReactionFile>).fileMetadata.isEncrypted || false,
     },
   };
 
   const doUpdate = (newBody: string, newAttachment?: File) => {
     (async () => {
       await postComment({
-        ...commentData,
-        content: {
-          ...commentData.content,
-          body: newBody,
-          attachment: newAttachment,
-        },
         context,
+        commentData: {
+          ...commentData,
+          fileMetadata: {
+            ...commentData.fileMetadata,
+            appData: {
+              ...commentData.fileMetadata.appData,
+
+              content: {
+                ...commentData.fileMetadata.appData.content,
+                body: newBody,
+                attachment: newAttachment,
+              },
+            },
+          },
+        },
       });
 
       setIsEdit(false);
@@ -84,14 +103,24 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
             <CommentHead
               authorOdinId={authorOdinId}
               setIsEdit={setIsEdit}
-              commentBody={commentData.content.body}
-              onRemove={() => removeComment({ context, commentFile: commentData })}
+              commentBody={commentContent.body}
+              onRemove={
+                commentData.fileId
+                  ? () =>
+                      removeComment({
+                        context,
+                        commentFile: commentData as DriveSearchResult<ReactionFile>,
+                      })
+                  : undefined
+              }
             />
             <CommentBody
               context={context}
-              content={content}
+              content={commentContent}
               commentFileId={fileId}
-              commentLastModifed={commentData.lastModified}
+              commentLastModifed={
+                (commentData as DriveSearchResult<ReactionFile>).fileMetadata.updated
+              }
               isEdit={isEdit}
               onCancel={() => setIsEdit(false)}
               onUpdate={doUpdate}
@@ -103,8 +132,8 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
           <CommentMeta
             canReact={canReact}
             threadContext={threadContext as ReactionContext}
-            created={commentData.date}
-            updated={commentData.updated}
+            created={(commentData as DriveSearchResult<ReactionFile>).fileMetadata.created}
+            updated={(commentData as DriveSearchResult<ReactionFile>).fileMetadata.updated}
             onReply={isThread ? undefined : () => (onReply ? onReply() : setIsReply(!isReply))}
           />
         ) : null}
@@ -127,8 +156,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
 const MAX_CHAR_FOR_SUMMARY = 280;
 
 export const CommentTeaser = ({ commentData }: { commentData: CommentReactionPreview }) => {
-  const { authorOdinId, content } = commentData;
-  const { body, mediaPayloadKey } = content;
+  const { authorOdinId, body, mediaPayloadKey } = commentData;
   const hasMedia = !!mediaPayloadKey;
 
   return (

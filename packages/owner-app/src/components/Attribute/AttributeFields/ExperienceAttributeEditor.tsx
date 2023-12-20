@@ -1,4 +1,4 @@
-import { Label, t, ImageSelector, Input, usePayloadBlob } from '@youfoundation/common-app';
+import { Label, t, ImageSelector, Input, useImage } from '@youfoundation/common-app';
 import { MinimalProfileFields, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
@@ -15,16 +15,16 @@ export const ExperienceAttributeEditor = ({
   onChange: (e: { target: { value: unknown; name: string } }) => void;
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(attribute.profileId);
-  const { data: imageBlob } = usePayloadBlob(
-    fileId,
-    attribute.data?.[MinimalProfileFields.ExperienceImageFileKey],
-    targetDrive,
-    lastModified
-  );
+  const { data: imageData } = useImage({
+    imageFileId: fileId,
+    imageFileKey: attribute.data?.[MinimalProfileFields.ExperienceImageFileKey],
+    imageDrive: targetDrive,
+    lastModified,
+  }).fetch;
 
   const dataVal = attribute.data?.[MinimalProfileFields.ExperienceImageFileKey];
   const defaultValue =
-    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+    dataVal instanceof Blob ? dataVal : dataVal ? imageData?.url || undefined : undefined;
 
   return (
     <>

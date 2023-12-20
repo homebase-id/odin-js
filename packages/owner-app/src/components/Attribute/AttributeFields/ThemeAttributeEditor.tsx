@@ -1,4 +1,4 @@
-import { Label, t, Input, Select, usePayloadBlob } from '@youfoundation/common-app';
+import { Label, t, Input, Select, useImage } from '@youfoundation/common-app';
 import { ImageSelector } from '@youfoundation/common-app';
 import { HomePageThemeFields, HomePageConfig, HomePageTheme } from '@youfoundation/js-lib/public';
 import { GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
@@ -74,16 +74,16 @@ const ThemeSpecificFields = ({
 }) => {
   const targetDrive = GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId);
   const themeId = attribute.data?.[HomePageThemeFields.ThemeId];
-  const { data: imageBlob } = usePayloadBlob(
-    fileId,
-    attribute.data?.[HomePageThemeFields.HeaderImageKey],
-    targetDrive,
-    lastModified
-  );
+  const { data: imageData } = useImage({
+    imageFileId: fileId,
+    imageFileKey: attribute.data?.[HomePageThemeFields.HeaderImageKey],
+    imageDrive: targetDrive,
+    lastModified,
+  }).fetch;
 
   const dataVal = attribute.data?.[HomePageThemeFields.HeaderImageKey];
   const defaultValue =
-    dataVal instanceof Blob ? dataVal : dataVal ? imageBlob || undefined : undefined;
+    dataVal instanceof Blob ? dataVal : dataVal ? imageData?.url || undefined : undefined;
 
   const theme =
     themeId === HomePageTheme.VerticalPosts.toString()
@@ -181,7 +181,7 @@ const ThemeSpecificFields = ({
           <ImageSelector
             id="headerImage"
             name={HomePageThemeFields.HeaderImageKey}
-            defaultValue={imageBlob || undefined}
+            defaultValue={defaultValue}
             onChange={(e) =>
               onChange({
                 target: {

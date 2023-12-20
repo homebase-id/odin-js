@@ -14,8 +14,8 @@ import {
   ActionButton,
   Arrow,
   Textarea,
-  usePayloadBlob,
   useDotYouClient,
+  useImage,
 } from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
@@ -39,12 +39,12 @@ export const InnerFieldEditors = ({
   disabled?: boolean;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
-  const { data: imageBlob } = usePayloadBlob(
-    postFile.fileMetadata.appData.content.primaryMediaFile?.fileId || postFile.fileId,
-    postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
-    getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
-    (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated
-  );
+  const { data: imageData } = useImage({
+    imageFileId: postFile.fileMetadata.appData.content.primaryMediaFile?.fileId || postFile.fileId,
+    imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
+    imageDrive: getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
+    lastModified: (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated,
+  }).fetch;
 
   const dotYouClient = useDotYouClient().getDotYouClient();
   const targetDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
@@ -108,10 +108,10 @@ export const InnerFieldEditors = ({
                   name="primaryImageFileId"
                   defaultValue={
                     primaryMediaFile === null
-                      ? imageBlob || undefined
+                      ? imageData?.url || undefined
                       : primaryMediaFile === undefined
                       ? undefined
-                      : primaryMediaFile?.file || imageBlob || undefined
+                      : primaryMediaFile?.file || imageData?.url || undefined
                   }
                   onChange={(e) =>
                     onChange(e as { target: { name: string; value: Blob | undefined } })

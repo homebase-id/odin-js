@@ -42,13 +42,13 @@ const Layout: FC<LayoutProps> = ({ children }) => {
 
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
   const { colors, favicon, imageFileId } = useTheme();
-  const { data: imageData } = useImage(
-    undefined,
+
+  console.log('favicon', favicon);
+  const { data: imageData } = useImage({
     imageFileId,
-    favicon && 'fileId' in favicon ? favicon.fileId : undefined,
-    GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
-    undefined
-  ).fetch;
+    imageFileKey: favicon && 'fileKey' in favicon ? favicon.fileKey : undefined,
+    imageDrive: GetTargetDriveFromProfileId(HomePageConfig.DefaultDriveId),
+  }).fetch;
 
   const emojiFavicon = favicon && 'emoji' in favicon ? faviconSvg(favicon.emoji) : undefined;
 

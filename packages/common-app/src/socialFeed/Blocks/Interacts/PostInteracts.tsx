@@ -381,7 +381,7 @@ const CommentList = ({
           context={context}
           canReact={canReact}
           commentData={comment}
-          key={comment.id ?? index}
+          key={comment.fileId ?? index}
           isThread={false}
         />
       ))}

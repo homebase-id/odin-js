@@ -12,7 +12,7 @@ interface Segment {
   start: number;
   end: number | undefined;
   samples: number;
-  requested: boolean;
+  state: 'fetching' | 'fetched' | undefined;
 }
 
 export interface OdinVideoProps {
@@ -174,7 +174,7 @@ const ChunkedSource = ({
         start: segment.offset,
         end: nextOffset ? nextOffset.offset : undefined,
         samples: segment.samples,
-        requested: false,
+        state: undefined,
       };
     });
 
@@ -198,9 +198,10 @@ const ChunkedSource = ({
     let sourceBuffer: SourceBuffer;
 
     const checkAndFetchNextSegment = async () => {
-      const nextSegement = segments.find((s) => s.requested === false) || segments[0];
+      const nextSegement = segments.find((s) => !s.state) || segments[0];
+      nextSegement.state = 'fetching';
       await fetchRange(nextSegement.start, nextSegement.end);
-      nextSegement.requested = true;
+      nextSegement.state = 'fetched';
     };
 
     const sourceOpen = async () => {
@@ -227,12 +228,14 @@ const ChunkedSource = ({
 
     const fetchMetaAndFirstSegment = async () => {
       const metaSegment = segments[0];
+      metaSegment.state = 'fetching';
       await fetchRange(metaSegment.start, metaSegment.end);
-      metaSegment.requested = true;
+      metaSegment.state = 'fetched';
 
       const firstSegment = segments[1];
+      firstSegment.state = 'fetching';
       await fetchRange(firstSegment.start, firstSegment.end);
-      firstSegment.requested = true;
+      firstSegment.state = 'fetched';
     };
 
     const fetchRange = async (start: number, end?: number) => {
@@ -262,13 +265,14 @@ const ChunkedSource = ({
 
     // TODO: Should we await the fetchRange before setting the segment to requested?
     // TODO: Check if we would better use the buffered property of the video element to know what is buffered
-    const checkBuffer = () => {
+    const checkBuffer = async () => {
       const currentSegment = getCurrentSegment();
 
-      if (!currentSegment.requested) {
+      if (!currentSegment.state) {
         console.debug('current segment not requested, user did seek?');
-        fetchRange(currentSegment.start, currentSegment.end);
-        currentSegment.requested = true;
+        currentSegment.state = 'fetching';
+        await fetchRange(currentSegment.start, currentSegment.end);
+        currentSegment.state = 'fetched';
         return;
       }
 
@@ -282,13 +286,21 @@ const ChunkedSource = ({
       const currentSample = getCurrentSample();
       const nextSegment = getNextSegment(currentSegment);
 
-      if (currentSample > currentSample * 0.3 && nextSegment && !nextSegment.requested) {
+      if (currentSample > currentSample * 0.3 && nextSegment && !nextSegment.state) {
         console.debug(`time to fetch next chunk ${videoRef.current?.currentTime}s`);
 
-        fetchRange(nextSegment.start, nextSegment.end);
-        nextSegment.requested = true;
+        nextSegment.state = 'fetching';
+        await fetchRange(nextSegment.start, nextSegment.end);
+        nextSegment.state = 'fetched';
         console.debug({ segments });
       }
+
+      // if (videoRef.current && videoRef.current.buffered.length >= 2) {
+      //   console.log(
+      //     videoRef.current.buffered.length,
+      //     'We seem to have reached an error.. Or did you seek?'
+      //   );
+      // }
     };
 
     // Not sure what to do with this yet? Works better without the abort on seek..
@@ -322,11 +334,7 @@ const ChunkedSource = ({
     };
 
     const getNextSegment = (currentSegment: Segment) => segments[currentSegment.sequence + 1];
-    const haveAllSegments = () => {
-      return segments.every((val) => {
-        return !!val.requested;
-      });
-    };
+    const haveAllSegments = () => segments.every((val) => val.state === 'fetched');
 
     innerMediaSource.addEventListener('sourceopen', sourceOpen);
 

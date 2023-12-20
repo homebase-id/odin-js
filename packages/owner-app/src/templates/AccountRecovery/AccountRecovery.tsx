@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ActionLink, Alert, DomainHighlighter, PasswordInput, t } from '@youfoundation/common-app';
+import { ActionLink, Alert, DomainHighlighter, t } from '@youfoundation/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { ActionButton } from '@youfoundation/common-app';
-import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
 import { MinimalLayout } from '../../components/ui/Layout/Layout';
 import UrlNotifier from '../../components/ui/Layout/UrlNotifier/UrlNotifier';
+import { PasswordInput } from '../../components/Password/PasswordInput';
+import { PasswordStrength } from '../../components/Password/PasswordStrength';
 
 const Login = () => {
   const [state, setState] = useState<'loading' | 'error' | 'success' | 'idle'>('idle');
@@ -100,6 +101,11 @@ const Login = () => {
                       autoComplete="new-password"
                     />
                   </div>
+                  <PasswordStrength
+                    password={password}
+                    userInputs={[recoveryKey]}
+                    className="mb-2"
+                  />
                   <div className="mb-2">
                     <Label htmlFor="retypepassword" className="text-sm leading-7">
                       {t('Retype Password')}

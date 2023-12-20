@@ -42,9 +42,9 @@ export const DoubleClickHeartForMedia = ({
 
   const doLike = () => {
     postEmoji({
-      authorOdinId: getIdentity() || '',
-      content: {
+      emojiData: {
         body: '❤️',
+        authorOdinId: getIdentity() || '',
       },
       context: reactionContext,
     });

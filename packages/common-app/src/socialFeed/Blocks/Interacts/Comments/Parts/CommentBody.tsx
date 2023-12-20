@@ -7,7 +7,7 @@ import { RichTextRenderer } from '../../../../../richText';
 import { CommentEditor } from '../CommentComposer';
 import { CommentMedia, CommentMediaPreview } from './CommentMedia';
 import { ActionButtonState } from '../../../../../ui';
-import { ReactionContent } from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@youfoundation/js-lib/core';
 
 export const CommentBody = ({
   context,
@@ -22,7 +22,7 @@ export const CommentBody = ({
   context?: ReactionContext;
   commentFileId?: string;
   commentLastModifed?: number;
-  content: RawReactionContent | ReactionContent;
+  content: RawReactionContent | ReactionFile;
   isEdit?: boolean;
   onUpdate?: (commentBody: string, attachment?: File) => void;
   onCancel?: () => void;

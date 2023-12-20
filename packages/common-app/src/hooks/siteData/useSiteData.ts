@@ -25,7 +25,7 @@ interface DefaultTemplateSettings {
     light: Record<string, string>;
     dark: Record<string, string>;
   };
-  favicon: { fileId: string } | { emoji: string } | undefined;
+  favicon: { fileKey: string } | { emoji: string } | undefined;
 }
 
 export interface ThemeCoverSettings extends DefaultTemplateSettings {

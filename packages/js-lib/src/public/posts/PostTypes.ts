@@ -4,7 +4,6 @@ import {
   ThumbnailFile,
   RichText,
   ReactionFile,
-  ReactionContent,
   NewDriveSearchResult,
   SecurityGroupType,
 } from '../../core/core';
@@ -157,12 +156,7 @@ export interface ReactionContext {
   target: { fileId: string; globalTransitId: string; isEncrypted: boolean };
 }
 
-export interface ReactionVm extends Omit<ReactionFile, 'content'> {
-  context: ReactionContext;
-  content: RawReactionContent;
-}
-
-export interface RawReactionContent extends Omit<ReactionContent, 'attachments'> {
+export interface RawReactionContent extends Omit<ReactionFile, 'attachments'> {
   attachment?: File;
 }
 
