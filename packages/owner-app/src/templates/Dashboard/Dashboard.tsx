@@ -66,7 +66,7 @@ const Dashboard = () => {
         .
       </p>
 
-      <div className="mt-10 flex max-w-2xl flex-row flex-wrap gap-4">
+      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4">
         <SystemApp />
         <ChatApp />
         <FeedApp />
@@ -213,10 +213,8 @@ const FeedApp = () => {
 };
 
 const PhotoApp = () => {
-  const { data: appReg } = useApp({ appId: PHOTO_APP_ID }).fetch;
+  // const { data: appReg } = useApp({ appId: PHOTO_APP_ID }).fetch;
   const unreadCount = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
-
-  if (!appReg) return null;
 
   const os = getOperatingSystem();
   const isAndroid = os === 'Android';
@@ -224,7 +222,7 @@ const PhotoApp = () => {
   return (
     <AppWrapper
       appId={PHOTO_APP_ID}
-      name={appReg?.name}
+      name={'Photos'}
       href={`https://photos.homebase.id`}
       unreadCount={unreadCount}
       options={[
