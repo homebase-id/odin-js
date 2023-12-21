@@ -41,7 +41,7 @@ export const encryptWithKeyheader = async <
   content: T,
   keyHeader: KeyHeader
 ): Promise<R> => {
-  if (content instanceof File || content instanceof Blob) {
+  if (content instanceof File || content instanceof Blob || content instanceof OdinBlob) {
     try {
       const encryptedStream = await streamEncryptWithCbc(
         content.stream(),

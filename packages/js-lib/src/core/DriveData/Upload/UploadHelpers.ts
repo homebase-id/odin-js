@@ -137,7 +137,6 @@ export const buildFormData = async (
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {
       const payload = payloads[i];
-
       const encryptedPayload = keyHeader
         ? await encryptWithKeyheader(payload.payload, {
             ...keyHeader,
@@ -154,7 +153,6 @@ export const buildFormData = async (
   if (thumbnails) {
     for (let i = 0; i < thumbnails.length; i++) {
       const thumb = thumbnails[i];
-
       const encryptedThumb = keyHeader
         ? await encryptWithKeyheader(thumb.payload, {
             ...keyHeader,
