@@ -36,7 +36,7 @@ export const encryptKeyHeader = async (
 
 export const encryptWithKeyheader = async <
   T extends Blob | Uint8Array,
-  R = T extends Blob ? Blob : Uint8Array,
+  R = T extends Blob ? Blob : T extends typeof OdinBlob ? typeof OdinBlob : Uint8Array,
 >(
   content: T,
   keyHeader: KeyHeader
@@ -55,7 +55,9 @@ export const encryptWithKeyheader = async <
     } catch (ex) {
       console.warn('Stream encryption failed, fallback to full encryption', ex);
       const contentAsArray = new Uint8Array(await content.arrayBuffer());
-      return (await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)) as R;
+      return new OdinBlob([await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)], {
+        type: content.type,
+      }) as R;
     }
   }
 

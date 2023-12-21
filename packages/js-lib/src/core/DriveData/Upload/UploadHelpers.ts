@@ -196,7 +196,9 @@ export const pureUpload = async (
         return;
       }
 
-      console.error('[DotYouCore-js:pureUpload]', error);
+      if (error.response?.status === 400)
+        console.error('[DotYouCore-js:pureUpload]', error.response?.data);
+      else console.error('[DotYouCore-js:pureUpload]', error);
       throw error;
     });
 };
