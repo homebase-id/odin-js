@@ -36,25 +36,32 @@ export const encryptKeyHeader = async (
 
 export const encryptWithKeyheader = async <
   T extends Blob | Uint8Array,
-  R = T extends Blob ? Blob : Uint8Array,
+  R = T extends Blob ? Blob : T extends typeof OdinBlob ? typeof OdinBlob : Uint8Array,
 >(
   content: T,
   keyHeader: KeyHeader
 ): Promise<R> => {
-  if (content instanceof File || content instanceof Blob) {
-    const encryptedStream = await streamEncryptWithCbc(
-      content.stream(),
-      keyHeader.aesKey,
-      keyHeader.iv
-    );
+  if (content instanceof File || content instanceof Blob || content instanceof OdinBlob) {
+    try {
+      const encryptedStream = await streamEncryptWithCbc(
+        content.stream(),
+        keyHeader.aesKey,
+        keyHeader.iv
+      );
 
-    return new OdinBlob([await streamToByteArray(encryptedStream, content.type)], {
-      type: content.type,
-    }) as R;
+      return new OdinBlob([await streamToByteArray(encryptedStream, content.type)], {
+        type: content.type,
+      }) as R;
+    } catch (ex) {
+      console.warn('Stream encryption failed, fallback to full encryption', ex);
+      const contentAsArray = new Uint8Array(await content.arrayBuffer());
+      return new OdinBlob([await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)], {
+        type: content.type,
+      }) as R;
+    }
   }
 
-  const cipher = await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey);
-  return cipher as R;
+  return (await cbcEncrypt(content, keyHeader.iv, keyHeader.aesKey)) as R;
 };
 
 export const encryptWithSharedSecret = async (
