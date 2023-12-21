@@ -19,13 +19,12 @@ import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDi
 import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { CHAT_APP_ID, OWNER_APP_ID } from '../../app/Constants';
+import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 interface NotificationClickData {
   notification: string;
 }
-
-const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
-const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
 const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
@@ -68,7 +67,6 @@ const getTargetLink = (payload: PushNotification) => {
 };
 
 const Notifications = () => {
-  // const { notifications: notificationList } = useNotifications();
   const { data: notifications } = usePushNotifications().fetch;
   const { isSupported, isEnabled } = usePushNotificationClient();
   const {
@@ -88,11 +86,13 @@ const Notifications = () => {
     return () => navigator.serviceWorker.removeEventListener('message', handleEvent);
   }, []);
 
-  const groupedNotifications =
+  const groupedNotificationsPerDay =
     notifications?.results.reduce(
       (acc, notification) => {
-        if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
-        else acc[notification.options.appId] = [notification];
+        const date = new Date(notification.created).toDateString();
+
+        if (acc[date]) acc[date].push(notification);
+        else acc[date] = [notification];
 
         return acc;
       },
@@ -122,11 +122,11 @@ const Notifications = () => {
       <ErrorNotification error={enableError} />
       {notifications?.results?.length ? (
         <div className="flex flex-col gap-3 px-2">
-          {Object.keys(groupedNotifications).map((appId) => (
-            <NotificationGroup
-              appId={appId}
-              notifications={groupedNotifications[appId]}
-              key={appId}
+          {Object.keys(groupedNotificationsPerDay).map((day) => (
+            <NotificationDay
+              day={new Date(day)}
+              notifications={groupedNotificationsPerDay[day]}
+              key={day}
             />
           ))}
         </div>
@@ -134,6 +134,40 @@ const Notifications = () => {
         <SubtleMessage>{t('No notifications')}</SubtleMessage>
       )}
       <PushNotificationsDialog isOpen={isDialogOpen} onClose={() => setDialogOpen(false)} />
+    </>
+  );
+};
+
+const NotificationDay = ({
+  day,
+  notifications,
+}: {
+  day: Date;
+  notifications: PushNotification[];
+}) => {
+  const groupedNotifications =
+    notifications?.reduce(
+      (acc, notification) => {
+        if (acc[notification.options.appId]) acc[notification.options.appId].push(notification);
+        else acc[notification.options.appId] = [notification];
+
+        return acc;
+      },
+      {} as { [key: string]: PushNotification[] }
+    ) || {};
+
+  const today = new Date();
+  const isToday = day.toDateString() === today.toDateString();
+
+  return (
+    <>
+      <p className="text-sm text-gray-500">
+        {isToday ? t('Today') : formatToTimeAgoWithRelativeDetail(day, false, true)}
+      </p>
+
+      {Object.keys(groupedNotifications).map((appId) => (
+        <NotificationGroup appId={appId} notifications={groupedNotifications[appId]} key={appId} />
+      ))}
     </>
   );
 };
@@ -149,6 +183,7 @@ const NotificationGroup = ({
   const appName = app?.name ?? (stringGuidsEqual(appId, OWNER_APP_ID) ? 'Homebase' : 'Unknown');
 
   const { mutate: remove } = usePushNotifications().remove;
+  const { mutate: markAsRead } = usePushNotifications().markAsRead;
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -197,8 +232,10 @@ const NotificationGroup = ({
                   body={bodyFormer(notification, false, appName)}
                   timestamp={notification.created}
                   onDismiss={() => remove(typeGroup.map((n) => n.id))}
+                  onOpen={() => markAsRead(typeGroup.map((n) => n.id))}
                   href={getTargetLink(notification)}
                   groupCount={groupCount}
+                  isRead={!notification.unread}
                 />
               </div>
             ))}

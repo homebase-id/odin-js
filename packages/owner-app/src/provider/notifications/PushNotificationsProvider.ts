@@ -3,7 +3,7 @@ import {
   NumberCursoredResult,
   PushNotificationOptions,
 } from '@youfoundation/js-lib/core';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 
 export interface PushNotification {
   id: string;
@@ -25,6 +25,7 @@ export const AddNotification = async (
 
 export const GetNotifications = async (
   dotYouClient: DotYouClient,
+  appId: string | undefined,
   count: number | undefined = 50,
   cursor: number | undefined
 ) => {
@@ -36,7 +37,14 @@ export const GetNotifications = async (
         cursor,
       })}`
     )
-    .then((res) => res.data);
+    .then((res) => {
+      return {
+        ...res.data,
+        results: res.data.results.filter(
+          (push) => !appId || stringGuidsEqual(push.options.appId, appId)
+        ),
+      };
+    });
 };
 
 export const MarkNotificationsAsRead = async (

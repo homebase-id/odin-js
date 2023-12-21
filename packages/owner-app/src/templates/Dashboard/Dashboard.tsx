@@ -1,35 +1,44 @@
 import { Link } from 'react-router-dom';
-import PersonIncomingRequest from '../../components/Connection/PersonIncomingRequest/PersonIncomingRequest';
-import { useApps } from '../../hooks/apps/useApps';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import {
-  usePendingConnections,
-  useCircles,
   t,
-  CirclePermissionView,
+  House,
+  ActionGroup,
+  Cog,
+  HybridLink,
+  ActionGroupOptionProps,
+  Download,
+  Question,
   EmbeddedPostContent,
   FakeAnchor,
-  Arrow,
-  House,
+  useSocialFeed,
 } from '@youfoundation/common-app';
-import { useSocialFeed } from '@youfoundation/common-app';
+import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
+import { useApp } from '../../hooks/apps/useApp';
+import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
+import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../app/Constants';
+import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 
-const About = {
-  circles: (
-    <>
-      Circles are groups of members that share the same permissions. You can name them based on
-      which social circle your connections belong (eg: family, friends, co-workers, ...). Or
-      anything else that works for you
-    </>
-  ),
-  apps: (
-    <>
-      Apps are applications that have been granted access to one or more of your drives. They are
-      able to access that information on your behalf so do make sure when registering new apps on
-      your identity that they don&apos;t request any drive access that you don&apos;t feel
-      comfortable with.
-    </>
-  ),
+// const About = {
+//   circles: (
+//     <>
+//       Circles are groups of members that share the same permissions. You can name them based on
+//       which social circle your connections belong (eg: family, friends, co-workers, ...). Or
+//       anything else that works for you
+//     </>
+//   ),
+//   apps: (
+//     <>
+//       Apps are applications that have been granted access to one or more of your drives. They are
+//       able to access that information on your behalf so do make sure when registering new apps on
+//       your identity that they don&apos;t request any drive access that you don&apos;t feel
+//       comfortable with.
+//     </>
+//   ),
+// };
+
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 };
 
 const Dashboard = () => {
@@ -38,7 +47,7 @@ const Dashboard = () => {
       <PageMeta title={t('Dashboard')} icon={House} />
 
       <p className="max-w-md text-slate-400">
-        Welcome to your owner console. Edit your{' '}
+        Your owner console. Edit your{' '}
         <Link className="underline" to="/owner/profile">
           profile
         </Link>
@@ -57,18 +66,182 @@ const Dashboard = () => {
         .
       </p>
 
-      <div className="mt-9 grid gap-10 lg:grid-cols-2 2xl:grid-cols-3">
-        <FeedTeaser className="" />
+      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4">
+        <SystemApp />
+        <ChatApp />
+        <FeedApp />
+        <PhotoApp />
+      </div>
 
-        <div className="flex w-full flex-col gap-10 2xl:col-span-2 2xl:flex-row">
-          <div className="flex flex-col gap-10">
-            <HomebaseAppTeaser className="w-full" />
-            <CircleTeaser className="w-full" />
-          </div>
-          <ConnectionTeaser className="w-full" />
-        </div>
+      <div className="mt-10 flex max-w-2xl flex-row flex-wrap gap-4">
+        <FeedTeaser />
       </div>
     </>
+  );
+};
+
+const AppWrapper = ({
+  unreadCount,
+  href,
+  name,
+  appId,
+  options,
+}: {
+  unreadCount: number;
+  href: string | undefined;
+  name: string | undefined;
+  appId?: string;
+  options: ActionGroupOptionProps[];
+}) => (
+  <div className="group relative flex h-full flex-grow flex-col rounded-lg bg-background transition-shadow hover:shadow-lg">
+    <HybridLink href={href} className="mx-auto px-5 pt-5">
+      <div className="relative flex flex-col items-center">
+        <CompanyImage domain={undefined} appId={appId} className="mb-auto w-20" fallbackSize="xs" />
+
+        <p className="mx-auto mt-1 text-foreground/40">{name?.replace('Homebase - ', '')}</p>
+
+        {unreadCount > 0 ? (
+          <div className="absolute -right-3 -top-3 my-auto flex h-10 w-10 rounded-full bg-foreground">
+            <p className="m-auto text-lg leading-none text-background">{unreadCount}</p>
+          </div>
+        ) : null}
+      </div>
+    </HybridLink>
+
+    <div
+      className={`flex flex-row justify-center rounded-b-lg bg-slate-100 ${
+        isTouchDevice() ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'
+      } dark:bg-slate-800`}
+    >
+      <ActionGroup
+        type="mute"
+        size="none"
+        className="pointer-events-none w-full py-1 group-hover:pointer-events-auto"
+        buttonClassName="w-full justify-center"
+        options={options}
+      />
+    </div>
+  </div>
+);
+
+const SystemApp = () => {
+  const unreadCount = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
+
+  const os = getOperatingSystem();
+  const isAndroid = os === 'Android';
+
+  return (
+    <AppWrapper
+      name={'Homebase'}
+      appId={OWNER_APP_ID}
+      href={'/owner/notifications'}
+      unreadCount={unreadCount}
+      options={[
+        {
+          label: t('How to install'),
+          icon: Question,
+          href: `https://web.dev/learn/pwa/installation#desktop_installation`,
+        },
+      ]}
+    />
+  );
+};
+
+const ChatApp = () => {
+  // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
+  const unreadCount = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
+  const os = getOperatingSystem();
+  const isAndroid = os === 'Android';
+  // const isIos = os === 'iOS';
+
+  return (
+    <AppWrapper
+      appId={CHAT_APP_ID}
+      name={'Chat'}
+      href={`/apps/chat`}
+      unreadCount={unreadCount}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${CHAT_APP_ID}`,
+        },
+        ...(isAndroid
+          ? [
+              {
+                label: t('Install on Android'),
+                icon: Download,
+                href: `https://play.google.com/store/apps/details?id=id.homebase.chattr`,
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
+};
+
+const FeedApp = () => {
+  // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;
+  const unreadCount = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  const os = getOperatingSystem();
+  const isAndroid = os === 'Android';
+
+  return (
+    <AppWrapper
+      appId={FEED_APP_ID}
+      name={'Feed'}
+      href={`/owner/feed`}
+      unreadCount={unreadCount}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${FEED_APP_ID}`,
+        },
+        ...(isAndroid
+          ? [
+              {
+                label: t('Install on Android'),
+                icon: Download,
+                href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
+              },
+            ]
+          : []),
+      ]}
+    />
+  );
+};
+
+const PhotoApp = () => {
+  // const { data: appReg } = useApp({ appId: PHOTO_APP_ID }).fetch;
+  const unreadCount = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
+
+  const os = getOperatingSystem();
+  const isAndroid = os === 'Android';
+
+  return (
+    <AppWrapper
+      appId={PHOTO_APP_ID}
+      name={'Photos'}
+      href={`https://photos.homebase.id`}
+      unreadCount={unreadCount}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${PHOTO_APP_ID}`,
+        },
+        ...(isAndroid
+          ? [
+              {
+                label: t('Install on Android'),
+                icon: Download,
+                href: `https://play.google.com/store/apps/details?id=id.homebase.photos`,
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 };
 
@@ -114,87 +287,6 @@ const FeedTeaser = ({ className }: { className?: string }) => {
           )}
         </div>
       </FakeAnchor>
-    </div>
-  );
-};
-
-const ConnectionTeaser = ({ className }: { className?: string }) => {
-  const { data: pendingConnections, isLoading: pendingConnectionsLoading } = usePendingConnections({
-    pageSize: 5,
-    pageNumber: 1,
-  }).fetch;
-
-  if (pendingConnectionsLoading || !pendingConnections?.results?.length) return null;
-
-  return (
-    <div className={className}>
-      <p className="text-2xl">{t('Connection requests')}</p>
-      <div className="flex flex-row flex-wrap gap-1">
-        {pendingConnections?.results?.map((pendingConnection) => (
-          <PersonIncomingRequest
-            className="w-1/2 max-w-[18rem]"
-            senderOdinId={pendingConnection.senderOdinId}
-            key={pendingConnection.senderOdinId}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const CircleTeaser = ({ className }: { className?: string }) => {
-  const {
-    fetch: { data: circles, isLoading: isCirclesLoading },
-  } = useCircles();
-
-  return (
-    <div className={className}>
-      <p className="mb-4 text-2xl">{t('Circles & Services')}</p>
-      {!circles?.length && !isCirclesLoading ? (
-        <p className="rounded-md bg-background px-4 py-4 text-slate-400">{About['circles']}</p>
-      ) : (
-        <div className="flex flex-row flex-wrap gap-2">
-          {circles?.map((circle) => {
-            return (
-              <CirclePermissionView
-                circleDef={circle}
-                key={circle.id}
-                hideMembers={true}
-                className="rounded-md bg-background px-5 py-4 text-lg transition-colors hover:bg-primary/10"
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const HomebaseAppTeaser = ({ className }: { className?: string }) => {
-  const { data: apps, isLoading: isAppsLoading } = useApps().fetchRegistered;
-  const webApps = apps?.filter((app) => !!app.corsHostName && !app.isRevoked);
-
-  return (
-    <div className={className}>
-      <p className="mb-4 text-2xl">{t('Apps & Services')}</p>
-      {!webApps?.length && !isAppsLoading ? (
-        <p className="rounded-md bg-background px-4 py-4 text-slate-400">{About['apps']}</p>
-      ) : (
-        <div className="flex flex-row flex-wrap gap-2">
-          {webApps?.map((app) => {
-            return (
-              <a
-                href={`https://${app.corsHostName}`}
-                className="flex flex-grow items-center justify-between gap-2 rounded-md bg-background px-5 py-4 text-lg transition-colors hover:bg-primary/10"
-                key={app.appId}
-              >
-                {app.name}
-                <Arrow className="h-5 w-5" />
-              </a>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };

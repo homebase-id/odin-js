@@ -3,7 +3,7 @@ import { OwnerName, getVersion, useSiteData } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 
 import Socials from '../Socials/Socials';
-import { Logo } from '@youfoundation/common-app';
+import { Homebase } from '@youfoundation/common-app';
 
 interface FooterProps {
   className: string;
@@ -16,7 +16,7 @@ const Footer: FC<FooterProps> = ({ className }) => {
     <footer className={`body-font bg-background ${className}`}>
       <div className="container mx-auto flex flex-col items-center px-5 py-8 sm:flex-row">
         <a className="title-font flex h-10 items-center justify-center font-medium md:justify-start">
-          <Logo className="h-12 w-12" />
+          <Homebase className="h-12 w-12" />
           <span className="ml-3 text-xl">
             <OwnerName />
             <small className="block text-xs font-normal">

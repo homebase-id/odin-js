@@ -46,7 +46,10 @@ export const PageMeta = ({
           {title && (
             <>
               <h1 className="flex flex-row text-2xl dark:text-white xl:text-4xl">
-                {icon && icon({ className: 'h-8 w-8 my-auto mr-4 flex-shrink-0 hidden sm:block' })}{' '}
+                {icon &&
+                  icon({
+                    className: 'h-6 w-6 sm:h-8 sm:w-8 my-auto mr-2 sm:mr-4 flex-shrink-0',
+                  })}{' '}
                 {title}
               </h1>
               <Helmet>

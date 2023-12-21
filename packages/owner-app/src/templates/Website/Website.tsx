@@ -1,5 +1,5 @@
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import { ActionButton, ActionLink, Save, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, ActionLink, Save, t } from '@youfoundation/common-app';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -40,9 +40,16 @@ const Website = () => {
         title={t('Home settings')}
         actions={
           <>
-            <ActionLink href={`https://${window.location.hostname}`} icon={Cloud}>
-              {t('Open website')}
-            </ActionLink>
+            <ActionGroup
+              type="mute"
+              options={[
+                {
+                  href: `https://${window.location.hostname}`,
+                  icon: Cloud,
+                  label: t('Open website'),
+                },
+              ]}
+            />
           </>
         }
         breadCrumbs={[

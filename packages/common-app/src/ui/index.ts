@@ -20,6 +20,11 @@ export * from './DarkModeToggle/DarkModeToggle';
 export * from './Sidenav/Sidenav';
 export * from './FallbackImg/FallbackImg';
 
+export * from './BrandIcons/Homebase';
+export * from './BrandIcons/HomebaseChat';
+export * from './BrandIcons/HomebaseFeed';
+export * from './BrandIcons/HomebasePhoto';
+
 export * from './Icons/AddressBook';
 export * from './Icons/Anonymous';
 export * from './Icons/Arrow';
@@ -69,7 +74,6 @@ export * from './Icons/Link';
 export * from './Icons/Linkedin';
 export * from './Icons/Loader';
 export * from './Icons/Lock';
-export * from './Icons/Logo';
 export * from './Icons/Lol';
 export * from './Icons/MagnifyingGlass';
 export * from './Icons/Minecraft';

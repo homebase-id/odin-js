@@ -130,6 +130,7 @@ export const ArticleComposerPage = () => {
         browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
+          { title: t('Feed'), href: '/owner/feed' },
           { title: t('Articles'), href: '/owner/feed/articles' },
           { title: t('New article') },
         ]}

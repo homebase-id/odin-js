@@ -11,7 +11,11 @@ export const ChannelsPage = () => {
 
   return (
     <>
-      <PageMeta title={t('Channels')} icon={Quote} />
+      <PageMeta
+        title={t('Channels')}
+        icon={Quote}
+        breadCrumbs={[{ title: t('Feed'), href: '/owner/feed' }, { title: t('Channels') }]}
+      />
       <section className="pb-10">
         <div className="px-2 sm:px-10">
           <div className="-m-2">

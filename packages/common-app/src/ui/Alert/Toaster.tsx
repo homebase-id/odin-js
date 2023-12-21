@@ -37,6 +37,7 @@ export const LiveToaster = () => {
           type={undefined}
           key={index}
           onDismiss={() => dismiss(notification)}
+          onOpen={() => dismiss(notification)}
         />
       ))}
       {liveNotifications.length > 5 ? (
@@ -64,6 +65,7 @@ export const ErrorToaser = () => {
           body={error.message}
           key={index}
           onDismiss={() => dismissError(error)}
+          onOpen={() => dismissError(error)}
           type={error.type}
         />
       ))}
@@ -78,8 +80,10 @@ export const Toast = ({
   groupCount,
   imgSrc,
   onDismiss,
+  onOpen,
   href,
   type,
+  isRead,
 }: {
   title: string;
   body?: string | ReactNode;
@@ -87,24 +91,26 @@ export const Toast = ({
   groupCount?: number;
   imgSrc?: string;
   onDismiss?: () => void;
+  onOpen?: () => void;
   href?: string;
   type?: 'critical' | 'warning';
+  isRead?: boolean;
 }) => {
   const navigate = useNavigate();
 
   const fadeAfter =
     'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
 
-  const onOpen = () => {
+  const doOpen = () => {
     if (!href) return;
 
     if (href.startsWith(OWNER_ROOT)) navigate(href);
     else {
-      onDismiss && onDismiss();
+      onOpen && onOpen();
       window.location.href = href;
     }
 
-    onDismiss && onDismiss();
+    onOpen && onOpen();
   };
 
   return (
@@ -112,7 +118,7 @@ export const Toast = ({
       className={`relative flex max-w-sm flex-row rounded-md bg-white px-2 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
         href ? 'cursor-pointer' : ''
       }`}
-      onClick={onOpen}
+      onClick={doOpen}
     >
       {imgSrc ? (
         <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
@@ -133,6 +139,9 @@ export const Toast = ({
           className={`max-h-12 w-full overflow-hidden text-ellipsis pr-8 font-medium ${fadeAfter} after:right-8`}
         >
           {title}
+          {isRead ? null : (
+            <span className="inline-block relative ml-2 bottom-[0.1rem] h-2 w-2 rounded-full bg-primary"></span>
+          )}
         </p>
         {body ? (
           <p className={`max-h-12 overflow-hidden ${fadeAfter} after:right-0`}>{body}</p>
