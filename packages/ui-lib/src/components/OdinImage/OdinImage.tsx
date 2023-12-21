@@ -374,7 +374,8 @@ const useOdinImage = (props: UseOdinImageProps) => {
     });
 
     // If no exact size, pass the size of the img element
-    if (!matchingSize) {
+    // If targetWidth or targetHeight is 0, we can't calculate the size; And shouldn't even fetch
+    if (!matchingSize && targetWidth && targetHeight) {
       // The preview size is heavily rounded so we recalculate the pixelHeight
       const validatedHeight = naturalSize
         ? Math.round(targetWidth * (naturalSize.pixelHeight / naturalSize.pixelWidth))
