@@ -21,8 +21,6 @@ import {
   Bars,
   Times,
   Feed,
-  Article,
-  Quote,
   AddressBook,
   Circles,
   useOutsideTrigger,
@@ -39,7 +37,7 @@ import {
   Bell,
 } from '@youfoundation/common-app';
 import { useUnreadPushNotificationsCount } from '../../../../owner-app/src/hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID, OWNER_APP_ID } from '../../../../owner-app/src/app/Constants';
+import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
 
 const STORAGE_KEY = 'isOpen';
 
