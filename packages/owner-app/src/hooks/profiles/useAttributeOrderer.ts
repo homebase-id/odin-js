@@ -3,7 +3,7 @@ import { moveElementInArray } from '../../templates/DemoData/helpers';
 import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';
 
-export type attributeGroup = {
+export type GroupedAttributes = {
   name: string;
   attributes: DriveSearchResult<AttributeVm>[];
   priority: number;
@@ -14,14 +14,16 @@ export const useAttributeOrderer = ({
   groupedAttributes,
 }: {
   attributes: DriveSearchResult<AttributeVm>[];
-  groupedAttributes: attributeGroup[];
+  groupedAttributes: GroupedAttributes[];
 }) => {
   const { mutateAsync: saveAttribute } = useAttribute({}).save;
 
   const respreadAttributes = async (
     orderedAttributes: DriveSearchResult<AttributeVm>[],
-    minPrio: number
-  ) =>
+    minPrio: number,
+    maxPrio?: number
+  ) => {
+    const increment = maxPrio ? Math.ceil((maxPrio - minPrio) / orderedAttributes.length) : 1000;
     await Promise.all(
       orderedAttributes.map(
         async (attr, index) =>
@@ -33,22 +35,21 @@ export const useAttributeOrderer = ({
                 ...attr.fileMetadata.appData,
                 content: {
                   ...attr.fileMetadata.appData.content,
-                  priority: minPrio + index * 1000,
+                  priority: minPrio + index * increment,
                 },
               },
             },
           })
       )
     );
+  };
 
   const reorderAttr = async (attr: DriveSearchResult<AttributeVm>, dir: -1 | 1) => {
     // Calculate new priority
     const currentPos = attributes.indexOf(attr);
     const toBecomePos = currentPos + dir;
 
-    if (toBecomePos === -1 || toBecomePos >= attributes.length) {
-      return attr.priority;
-    }
+    if (toBecomePos === -1 || toBecomePos >= attributes.length) return attr.priority;
 
     const beforeAttr =
       attributes[dir === -1 ? toBecomePos - 1 : toBecomePos]?.fileMetadata?.appData?.content;
@@ -87,7 +88,7 @@ export const useAttributeOrderer = ({
     ) {
       // there is a priority conflict, going to spread evenly and save
       moveElementInArray(updatedAttributes, currentPos, toBecomePos);
-      await respreadAttributes(updatedAttributes, minPriority);
+      await respreadAttributes(updatedAttributes, minPriority, maxPriority);
       return;
     }
 
@@ -99,9 +100,7 @@ export const useAttributeOrderer = ({
     const currentGroup = groupedAttributes[currentPos];
     const toBecomePos = currentPos + dir;
 
-    if (toBecomePos === -1 || toBecomePos >= groupedAttributes.length) {
-      return currentGroup.priority;
-    }
+    if (toBecomePos === -1 || toBecomePos >= groupedAttributes.length) return currentGroup.priority;
 
     const beforeGroup = groupedAttributes[dir === -1 ? toBecomePos - 1 : toBecomePos];
     const afterGroup = groupedAttributes[dir === -1 ? toBecomePos : toBecomePos + 1];

@@ -6,7 +6,10 @@ import {
   AttributeDefinition,
   AttributeDefinitions,
 } from '../../../hooks/profiles/AttributeDefinitions';
-import { useAttributeOrderer, attributeGroup } from '../../../hooks/profiles/useAttributeOrderer';
+import {
+  useAttributeOrderer,
+  GroupedAttributes,
+} from '../../../hooks/profiles/useAttributeOrderer';
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
@@ -19,7 +22,7 @@ const AttributeGroup = ({
 }: {
   attributes: DriveSearchResult<AttributeVm>[];
   groupTitle: string;
-  groupedAttributes?: attributeGroup[];
+  groupedAttributes?: GroupedAttributes[];
 }) => {
   const firstAttrVm = attributes[0].fileMetadata.appData.content;
 
