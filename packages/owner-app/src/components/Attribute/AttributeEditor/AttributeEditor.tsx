@@ -28,20 +28,21 @@ import {
 const AttributeEditor = ({
   attribute: attributeDsr,
   className,
-  reorderAttr,
+  orderAttrUp,
+  orderAttrDown,
   title,
   onCancel,
   onSave: onManualSave,
 }: {
   attribute: DriveSearchResult<AttributeVm> | NewDriveSearchResult<AttributeVm>;
   className?: string;
-  reorderAttr?: (attr: DriveSearchResult<AttributeVm>, dir: 1 | -1) => Promise<number | undefined>;
+  orderAttrUp?: () => Promise<number | undefined>;
+  orderAttrDown?: () => Promise<number | undefined>;
   title?: string;
   onCancel?: () => void;
   onSave?: () => void;
 }) => {
   const attribute = attributeDsr.fileMetadata.appData.content;
-
   const isNewAttribute = !attributeDsr.fileId;
   const {
     save: { data: updatedAttr, mutate: saveAttr, status: saveStatus, error: saveError },
@@ -99,8 +100,11 @@ const AttributeEditor = ({
 
   const reorder = async (dir: 1 | -1) => {
     if (isNewAttribute) return;
-    const newPriority =
-      reorderAttr && (await reorderAttr(attributeDsr as DriveSearchResult<AttributeVm>, dir));
+    let newPriority;
+
+    if (dir === 1 && orderAttrDown) newPriority = await orderAttrDown();
+    if (dir === -1 && orderAttrUp) newPriority = await orderAttrUp();
+
     if (!newPriority) return;
 
     const newAttr = { ...latestAttr };
@@ -145,12 +149,14 @@ const AttributeEditor = ({
   );
 
   const actions: ActionGroupOptionProps[] = [];
-  if (reorderAttr) {
+  if (orderAttrUp) {
     actions.push({
       label: t('Move up'),
       icon: ArrowUp,
       onClick: () => reorder(-1),
     });
+  }
+  if (orderAttrDown) {
     actions.push({
       label: t('Move down'),
       icon: ArrowDown,

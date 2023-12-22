@@ -65,6 +65,7 @@ const Website = () => {
         <AttributeGroup
           attributes={themeData?.length ? themeData : [defaultThemeAttribute]}
           groupTitle={t('Theme')}
+          groupIndex={0}
         />
       )}
 

@@ -43,7 +43,6 @@ const Layout: FC<LayoutProps> = ({ children }) => {
 export const NoLayout: FC<LayoutProps> = ({ children }) => {
   const { colors, favicon, imageFileId } = useTheme();
 
-  console.log('favicon', favicon);
   const { data: imageData } = useImage({
     imageFileId,
     imageFileKey: favicon && 'fileKey' in favicon ? favicon.fileKey : undefined,
