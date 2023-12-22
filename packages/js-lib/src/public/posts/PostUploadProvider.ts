@@ -350,6 +350,17 @@ const uploadPostHeader = async <T extends PostContent>(
         undefined
       )
     ).newVersionTag;
+  } else if (file.fileMetadata.payloads.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
+    // Remove default payload if it was there before
+    runningVersionTag = (
+      await deletePayload(
+        dotYouClient,
+        targetDrive,
+        file.fileId as string,
+        DEFAULT_PAYLOAD_KEY,
+        file.fileMetadata.versionTag
+      )
+    ).newVersionTag;
   }
 
   if (runningVersionTag) metadata.versionTag = runningVersionTag;
