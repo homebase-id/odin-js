@@ -22,6 +22,7 @@ import {
   appendDataToFile,
   NewDriveSearchResult,
   reUploadFile,
+  deletePayload,
 } from '../../core/core';
 import {
   getDisplayNameOfNameAttribute,
@@ -453,7 +454,7 @@ export const saveAttribute = async (
         ? toSaveAttribute.sharedSecretEncryptedKeyHeader
         : undefined;
 
-    if (payloads.length)
+    if (payloads.length) {
       runningVersionTag = (
         await appendDataToFile(
           dotYouClient,
@@ -469,6 +470,25 @@ export const saveAttribute = async (
           thumbnails
         )
       ).newVersionTag;
+    }
+
+    const existingPayloads =
+      (toSaveAttribute as DriveSearchResult<Attribute>)?.fileMetadata?.payloads ?? [];
+    // Cleanup the default payload if it existed, and we don't need it anymore
+    if (
+      shouldEmbedContent &&
+      existingPayloads.some((payload) => payload.key === DEFAULT_PAYLOAD_KEY)
+    ) {
+      runningVersionTag = (
+        await deletePayload(
+          dotYouClient,
+          targetDrive,
+          toSaveAttribute.fileId,
+          DEFAULT_PAYLOAD_KEY,
+          runningVersionTag || (toSaveAttribute.fileMetadata.versionTag as string)
+        )
+      ).newVersionTag;
+    }
 
     // Only save update header
     const appendInstructions: UploadInstructionSet = {

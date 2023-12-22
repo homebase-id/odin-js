@@ -86,6 +86,12 @@ export const uploadHeader = async (
   metadata: UploadFileMetadata,
   onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
+  isDebug &&
+    console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
+      instructions,
+      metadata,
+    });
+
   const decryptedKeyHeader =
     keyHeader && 'encryptionVersion' in keyHeader
       ? await decryptKeyHeader(dotYouClient, keyHeader)

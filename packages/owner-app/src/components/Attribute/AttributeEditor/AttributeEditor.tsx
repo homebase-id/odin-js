@@ -43,7 +43,6 @@ const AttributeEditor = ({
   onSave?: () => void;
 }) => {
   const attribute = attributeDsr.fileMetadata.appData.content;
-
   const isNewAttribute = !attributeDsr.fileId;
   const {
     save: { data: updatedAttr, mutate: saveAttr, status: saveStatus, error: saveError },
