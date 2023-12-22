@@ -1,7 +1,9 @@
 import { createPortal } from 'react-dom';
 import {
+  Check,
   ErrorNotification,
   HardDrive,
+  SubtleCheck,
   SubtleMessage,
   Times,
   Trash,
@@ -10,7 +12,10 @@ import {
 import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import { usePushNotificationClients } from '../../../hooks/notifications/usePushNotifications';
+import {
+  usePushNotificationClient,
+  usePushNotificationClients,
+} from '../../../hooks/notifications/usePushNotifications';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
 
 const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
@@ -23,10 +28,24 @@ const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose
       error: removeAllDevicesError,
     },
   } = usePushNotificationClients();
+  const { data: current } = usePushNotificationClients().fetchCurrent;
+  const { isSupported, isEnabled } = usePushNotificationClient();
 
   if (!isOpen) return null;
   const dialog = (
-    <DialogWrapper title={t('Notification Settings')} onClose={onClose}>
+    <DialogWrapper
+      title={
+        <>
+          {t('Notification Settings')}
+          {isSupported && isEnabled && current ? (
+            <small className="mt-1 flex flex-row items-center gap-1 text-sm">
+              <SubtleCheck className="h-5 w-5" /> {t('Notifications are enabled on this device')}
+            </small>
+          ) : null}
+        </>
+      }
+      onClose={onClose}
+    >
       <ErrorNotification error={removeAllDevicesError} />
       <p className="mb-5 text-xl">
         {t('Registered devices:')}
@@ -43,6 +62,7 @@ const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose
               <DeviceView subscription={device} key={device.accessRegistrationId} />
             ))}
           </div>
+
           <div className="flex flex-row-reverse">
             <ActionButton
               type="remove"

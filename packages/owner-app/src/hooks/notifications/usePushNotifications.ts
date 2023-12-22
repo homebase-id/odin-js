@@ -100,18 +100,19 @@ export const usePushNotificationClient = () => {
               applicationServerKey: publicKey,
             };
 
-            serviceWorkerRegistration.pushManager.subscribe(options).then(
-              async (pushSubscription) => {
+            await serviceWorkerRegistration.pushManager
+              .subscribe(options)
+              .then(async (pushSubscription) => {
                 console.log('Push registration success, sending to server...');
                 await RegisterNewDevice(dotYouClient, pushSubscription);
 
                 queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
                 queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
-              },
-              (error) => {
+              })
+              .catch((error) => {
                 console.error(error);
-              }
-            );
+                throw new Error('Notification registration failed');
+              });
           })
           .catch((error) => {
             console.warn('Service Worker error during registration:', error);
