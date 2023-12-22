@@ -14,6 +14,7 @@ import {
   MarkNotificationsAsRead,
 } from '../../provider/notifications/PushNotificationsProvider';
 import { ApiType } from '@youfoundation/js-lib/core';
+import { useEffect, useState } from 'react';
 
 const PAGE_SIZE = 50;
 export const usePushNotifications = (props?: { appId?: string }) => {
@@ -66,10 +67,21 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
 export const usePushNotificationClient = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    navigator.serviceWorker.ready.then(() => {
+      setIsReady(true);
+      console.log('Service Worker is ready :)');
+    });
+  }, []);
 
   return {
     isSupported:
-      'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window,
+      'PushManager' in window &&
+      'serviceWorker' in navigator &&
+      isReady &&
+      'Notification' in window,
     isEnabled: 'Notification' in window && Notification.permission === 'granted',
     enableOnThisDevice: useMutation({
       mutationFn: async () => {
@@ -79,27 +91,32 @@ export const usePushNotificationClient = () => {
 
         console.log('Notification permission granted.');
 
-        await navigator.serviceWorker.ready.then(async (serviceWorkerRegistration) => {
-          console.log('Service Worker is ready :^)');
-          const publicKey = await GetApplicationServerKey();
-          const options = {
-            userVisibleOnly: true,
-            applicationServerKey: publicKey,
-          };
+        await navigator.serviceWorker.ready
+          .then(async (serviceWorkerRegistration) => {
+            console.log('Service Worker is still ready)');
+            const publicKey = await GetApplicationServerKey();
+            const options = {
+              userVisibleOnly: true,
+              applicationServerKey: publicKey,
+            };
 
-          serviceWorkerRegistration.pushManager.subscribe(options).then(
-            async (pushSubscription) => {
-              console.log('Push registration success, sending to server...');
-              await RegisterNewDevice(dotYouClient, pushSubscription);
+            serviceWorkerRegistration.pushManager.subscribe(options).then(
+              async (pushSubscription) => {
+                console.log('Push registration success, sending to server...');
+                await RegisterNewDevice(dotYouClient, pushSubscription);
 
-              queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
-              queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
-            },
-            (error) => {
-              console.error(error);
-            }
-          );
-        });
+                queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
+                queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
+              },
+              (error) => {
+                console.error(error);
+              }
+            );
+          })
+          .catch((error) => {
+            console.warn('Service Worker error during registration:', error);
+            throw new Error('Service Worker error during registration');
+          });
       },
     }),
   };

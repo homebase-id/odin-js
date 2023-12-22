@@ -280,9 +280,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
             ))
           ) : (
             <p className="rounded-md bg-background px-4 py-4 text-slate-400">
-              {t(
-                'Fill up your feed, by following people, or making connections with other identtiies'
-              )}
+              {t('Fill up your feed, by following people, or connecting with other identtiies')}
             </p>
           )}
         </div>
