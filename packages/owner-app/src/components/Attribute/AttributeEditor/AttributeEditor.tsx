@@ -86,6 +86,8 @@ const AttributeEditor = ({
     target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
   }) => {
     const dirtyAttr = { ...latestAttr };
+    if (!dirtyAttr.fileMetadata.appData.content.data)
+      dirtyAttr.fileMetadata.appData.content.data = {};
     dirtyAttr.fileMetadata.appData.content.data[e.target.name] = e.target.value;
     if (e.target.previewThumbnail)
       dirtyAttr.fileMetadata.appData.previewThumbnail = e.target.previewThumbnail;
@@ -170,7 +172,7 @@ const AttributeEditor = ({
     });
 
   if (
-    !(attribute.data.isProtected && attribute.type === HomePageAttributes.Theme) &&
+    !(attribute.data?.isProtected && attribute.type === HomePageAttributes.Theme) &&
     !isNewAttribute
   ) {
     actions.push({

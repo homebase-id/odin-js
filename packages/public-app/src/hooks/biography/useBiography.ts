@@ -70,7 +70,7 @@ export const useBiography = () => {
 
             if (!attribute) return undefined;
             return {
-              body: attribute.data[MinimalProfileFields.ShortBioId] as string,
+              body: attribute.data?.[MinimalProfileFields.ShortBioId] as string,
               id: attribute.id,
               priority: attribute.priority,
             };
@@ -88,12 +88,12 @@ export const useBiography = () => {
           const attribute = entry.payload as Attribute;
 
           return {
-            title: attribute.data[MinimalProfileFields.ExperienceTitleId] as string,
-            body: attribute.data[MinimalProfileFields.ExperienceDecriptionId] as
+            title: attribute.data?.[MinimalProfileFields.ExperienceTitleId] as string,
+            body: attribute.data?.[MinimalProfileFields.ExperienceDecriptionId] as
               | string
               | Record<string, unknown>[],
-            link: attribute.data[MinimalProfileFields.ExperienceLinkId] as string,
-            imageFileKey: attribute.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            link: attribute.data?.[MinimalProfileFields.ExperienceLinkId] as string,
+            imageFileKey: attribute.data?.[MinimalProfileFields.ExperienceImageFileKey] as string,
             lastModified: entry.header.fileMetadata.updated,
             imageFileId: entry.header.fileId,
             id: attribute.id,
@@ -117,7 +117,7 @@ export const useBiography = () => {
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
           return {
-            body: attr.data[MinimalProfileFields.ShortBioId] as string,
+            body: attr.data?.[MinimalProfileFields.ShortBioId] as string,
             id: attr.id,
             priority: attr.priority,
           };
@@ -130,12 +130,12 @@ export const useBiography = () => {
         )?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
           return {
-            title: attr.data[MinimalProfileFields.ExperienceTitleId] as string,
-            body: attr.data[MinimalProfileFields.ExperienceDecriptionId] as
+            title: attr.data?.[MinimalProfileFields.ExperienceTitleId] as string,
+            body: attr.data?.[MinimalProfileFields.ExperienceDecriptionId] as
               | string
               | Record<string, unknown>[],
-            link: attr.data[MinimalProfileFields.ExperienceLinkId] as string,
-            imageFileKey: attr.data[MinimalProfileFields.ExperienceImageFileKey] as string,
+            link: attr.data?.[MinimalProfileFields.ExperienceLinkId] as string,
+            imageFileKey: attr.data?.[MinimalProfileFields.ExperienceImageFileKey] as string,
             lastModified: dsr.fileMetadata.updated,
             imageFileId: dsr.fileId,
             id: attr.id,

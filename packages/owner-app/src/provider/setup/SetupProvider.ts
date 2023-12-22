@@ -232,6 +232,8 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       serverMetadata: { accessControlList: ANONYMOUS_ACL },
     };
 
+    if (!newPhotoAttr.fileMetadata.appData.content.data)
+      newPhotoAttr.fileMetadata.appData.content.data = {};
     newPhotoAttr.fileMetadata.appData.content.data[MinimalProfileFields.ProfileImageKey] =
       profileData.imageData;
 
@@ -263,6 +265,8 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       serverMetadata: { accessControlList: ANONYMOUS_ACL },
     };
 
+    if (!newNameAttr.fileMetadata.appData.content.data)
+      newNameAttr.fileMetadata.appData.content.data = {};
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.GivenNameId] =
       profileData.givenName;
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.SurnameId] =
@@ -300,6 +304,8 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
         serverMetadata: { accessControlList: ANONYMOUS_ACL },
       };
 
+      if (!newLocationAttr.fileMetadata.appData.content.data)
+        newLocationAttr.fileMetadata.appData.content.data = {};
       newLocationAttr.fileMetadata.appData.content.data[LocationFields.City] =
         profileData.city ?? '';
       newLocationAttr.fileMetadata.appData.content.data[LocationFields.Country] =
@@ -338,6 +344,8 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
         serverMetadata: { accessControlList: ANONYMOUS_ACL },
       };
 
+      if (!socialAttribute.fileMetadata.appData.content.data)
+        socialAttribute.fileMetadata.appData.content.data = {};
       socialAttribute.fileMetadata.appData.content.data[dataField] = value;
 
       await saveAttribute(dotYouClient, socialAttribute);
@@ -413,6 +421,8 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
           serverMetadata: { accessControlList: ANONYMOUS_ACL },
         };
 
+        if (!linkAttribute.fileMetadata.appData.content.data)
+          linkAttribute.fileMetadata.appData.content.data = {};
         linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkText] = link.text;
         linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkTarget] = link.target;
 

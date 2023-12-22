@@ -113,7 +113,8 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
 
   const nameAttr = nameDsr?.fileMetadata.appData.content;
   const isNameSet =
-    attrHasData(nameAttr) && nameAttr?.data[MinimalProfileFields.SurnameId] === realmData.name.last;
+    attrHasData(nameAttr) &&
+    nameAttr?.data?.[MinimalProfileFields.SurnameId] === realmData.name.last;
 
   const addName = async () => {
     if (isNameSet) {
@@ -139,6 +140,8 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Anonymous } },
     };
 
+    if (!newNameAttr.fileMetadata.appData.content.data)
+      newNameAttr.fileMetadata.appData.content.data = {};
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.GivenNameId] =
       realmData.name.first;
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.SurnameId] =
@@ -203,6 +206,8 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         serverMetadata: { accessControlList: acl },
       };
 
+      if (!anonymousPhotoAttribute.fileMetadata.appData.content.data)
+        anonymousPhotoAttribute.fileMetadata.appData.content.data = {};
       anonymousPhotoAttribute.fileMetadata.appData.content.data[
         MinimalProfileFields.ProfileImageKey
       ] = new Blob([new Uint8Array(base64ToArrayBuffer(media.base64))], { type: 'image/webp' });
@@ -273,6 +278,8 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         },
       };
 
+      if (!socialAttribute.fileMetadata.appData.content.data)
+        socialAttribute.fileMetadata.appData.content.data = {};
       socialAttribute.fileMetadata.appData.content.data[dataField] = value;
 
       saveSocial(socialAttribute);
@@ -361,6 +368,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
         data: {},
       };
 
+      if (!bioAttr.data) bioAttr.data = {};
       bioAttr.data[MinimalProfileFields.ExperienceTitleId] = title;
       bioAttr.data[MinimalProfileFields.ExperienceDecriptionId] = body;
 
@@ -484,7 +492,7 @@ const DemoDataHomeAndTheme = ({
   const { data: themeDsr } = useHomeAttributes().fetchTheme;
   const themeAttr = themeDsr?.[0]?.fileMetadata.appData.content;
   const hasThemeData =
-    themeAttr && themeAttr.data[HomePageThemeFields.TagLineId] === realmData.home.tagLine;
+    themeAttr && themeAttr.data?.[HomePageThemeFields.TagLineId] === realmData.home.tagLine;
 
   const {
     save: { mutate: saveRoot },
@@ -506,6 +514,7 @@ const DemoDataHomeAndTheme = ({
       data: {},
     };
 
+    if (!newThemeAttr.data) newThemeAttr.data = {};
     newThemeAttr.data[HomePageThemeFields.HeaderImageKey] = new Blob(
       [new Uint8Array(base64ToArrayBuffer(realmData.home.headerImage.base64))],
       { type: 'image/webp' }

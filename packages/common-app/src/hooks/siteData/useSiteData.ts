@@ -103,14 +103,14 @@ export const useSiteData = () => {
       const statusAttr = statusDsr?.fileMetadata.appData.content;
 
       return {
-        displayName: nameAttr?.data.displayName ?? window.location.hostname,
-        firstName: nameAttr?.data.givenName,
-        surName: nameAttr?.data.surname,
+        displayName: nameAttr?.data?.displayName ?? window.location.hostname,
+        firstName: nameAttr?.data?.givenName,
+        surName: nameAttr?.data?.surname,
         profileImageFileId: photoDsr?.fileId,
-        profileImageFileKey: photoAttr?.data.profileImageKey,
+        profileImageFileKey: photoAttr?.data?.profileImageKey,
         profileImagePreviewThumbnail: photoDsr?.fileMetadata?.appData?.previewThumbnail,
         profileImageLastModified: photoDsr?.fileMetadata.updated,
-        status: statusAttr?.data.status,
+        status: statusAttr?.data?.status,
       };
     };
 
@@ -120,10 +120,10 @@ export const useSiteData = () => {
       return socialAttributes
         ?.map((dsr) => {
           const attr = dsr.fileMetadata.appData.content;
-          const value = Object.values(attr?.data)?.[0];
+          const value = Object.values(attr?.data || {})?.[0];
 
           return {
-            type: Object.keys(attr?.data)?.[0],
+            type: Object.keys(attr?.data || {})?.[0],
             username: typeof value === 'string' ? value : '',
             priority: attr?.priority,
           };
@@ -280,14 +280,14 @@ const getOwnerDataStatic = (fileData: Map<string, ResponseEntry[]>): OwnerSiteDa
 
     if (nameAttr && photoAttr) {
       return {
-        displayName: nameAttr?.data.displayName,
-        firstName: nameAttr?.data.givenName,
-        surName: nameAttr?.data.surname,
+        displayName: nameAttr?.data?.displayName,
+        firstName: nameAttr?.data?.givenName,
+        surName: nameAttr?.data?.surname,
         profileImageFileId: photoAttrHeader?.fileId,
-        profileImageFileKey: photoAttr?.data.profileImageKey,
+        profileImageFileKey: photoAttr?.data?.profileImageKey,
         profileImagePreviewThumbnail: photoAttrHeader?.fileMetadata.appData.previewThumbnail,
         profileImageLastModified: photoAttrHeader?.fileMetadata.updated,
-        status: statusAttr?.data.status,
+        status: statusAttr?.data?.status,
       };
     }
   }

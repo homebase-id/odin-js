@@ -106,20 +106,20 @@ const YourInfo = ({ circleGrants, className }: YourInfoProps) => {
   );
 
   const name =
-    filteredNameAttributes?.[0]?.fileMetadata.appData.content.data[
+    filteredNameAttributes?.[0]?.fileMetadata.appData.content.data?.[
       MinimalProfileFields.DisplayName
     ];
   const initials = getInitialsOfNameAttribute(
     filteredNameAttributes?.[0]?.fileMetadata.appData.content
   );
   const phone =
-    filteredPhoneAttributes?.[0]?.fileMetadata.appData.content.data[PhoneFields.PhoneNumber];
+    filteredPhoneAttributes?.[0]?.fileMetadata.appData.content.data?.[PhoneFields.PhoneNumber];
   const city =
-    filteredLocationAttributes?.[0]?.fileMetadata.appData.content.data[LocationFields.City];
+    filteredLocationAttributes?.[0]?.fileMetadata.appData.content.data?.[LocationFields.City];
   const country =
-    filteredLocationAttributes?.[0]?.fileMetadata.appData.content.data[LocationFields.Country];
+    filteredLocationAttributes?.[0]?.fileMetadata.appData.content.data?.[LocationFields.Country];
   const birthday =
-    filteredBirtydayAttributes?.[0]?.fileMetadata.appData.content.data[BirthdayFields.Date];
+    filteredBirtydayAttributes?.[0]?.fileMetadata.appData.content.data?.[BirthdayFields.Date];
 
   return (
     <div className={`relative border border-slate-100 dark:border-slate-800 ${className ?? ''}`}>

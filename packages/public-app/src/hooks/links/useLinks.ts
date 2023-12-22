@@ -60,8 +60,8 @@ export const useLinks = () => {
             const attr = dsr.fileMetadata.appData.content;
 
             return {
-              text: attr.data[LinkFields.LinkText] as string,
-              target: attr.data[LinkFields.LinkTarget] as string,
+              text: attr.data?.[LinkFields.LinkText] as string,
+              target: attr.data?.[LinkFields.LinkTarget] as string,
               id: attr.id,
               priority: attr.priority,
             };

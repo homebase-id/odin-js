@@ -219,6 +219,7 @@ type ProcessedAttribute = {
 
 const nameAttributeProcessing = (nameAttr: Attribute): ProcessedAttribute => {
   const newAttr = { ...nameAttr };
+  if (!nameAttr.data) nameAttr.data = {};
   nameAttr.data[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
 
   return {
@@ -259,7 +260,7 @@ const getNewThumbnails = async (
 const PHOTO_PAYLOAD_KEY = 'prfl_key';
 const photoAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
   const imageFieldKey = MinimalProfileFields.ProfileImageKey;
-  const imageData = attr.data[imageFieldKey];
+  const imageData = attr.data?.[imageFieldKey];
 
   const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
     imageData,
@@ -267,7 +268,7 @@ const photoAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttri
     profileInstructionThumbSizes
   );
 
-  attr.data[imageFieldKey] = imageData ? PHOTO_PAYLOAD_KEY : undefined;
+  if (attr.data && imageData) attr.data[imageFieldKey] = PHOTO_PAYLOAD_KEY;
 
   return {
     attr,
@@ -280,14 +281,14 @@ const photoAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttri
 const EXPERIENCE_PAYLOAD_KEY = 'xprnc_key';
 const experienceAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
   const imageFieldKey = MinimalProfileFields.ExperienceImageFileKey;
-  const imageData = attr.data[imageFieldKey];
+  const imageData = attr.data?.[imageFieldKey];
 
   const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
     imageData,
     EXPERIENCE_PAYLOAD_KEY
   );
 
-  attr.data[imageFieldKey] = imageData ? EXPERIENCE_PAYLOAD_KEY : undefined;
+  if (attr.data && imageData) attr.data[imageFieldKey] = EXPERIENCE_PAYLOAD_KEY;
 
   return {
     attr: attr,
@@ -301,7 +302,7 @@ const FAVICON_PAYLOAD_KEY = 'fvcn_key';
 const HEADER_PAYLOAD_KEY = 'headr_key';
 const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
   const faviconFieldKey = HomePageThemeFields.Favicon;
-  const faviconImageData = attr.data[faviconFieldKey]?.fileKey;
+  const faviconImageData = attr.data?.[faviconFieldKey]?.fileKey;
 
   const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } = await getNewThumbnails(
     faviconImageData,
@@ -309,10 +310,10 @@ const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttri
     []
   );
 
-  if (faviconImageData) attr.data[faviconFieldKey] = { fileKey: FAVICON_PAYLOAD_KEY };
+  if (attr.data && faviconImageData) attr.data[faviconFieldKey] = { fileKey: FAVICON_PAYLOAD_KEY };
 
   const imageFieldKey = HomePageThemeFields.HeaderImageKey;
-  const headerImageData = attr.data[imageFieldKey];
+  const headerImageData = attr.data?.[imageFieldKey];
 
   const {
     additionalThumbnails: headerThumbnails,
@@ -320,7 +321,7 @@ const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttri
     tinyThumb: headerTiny,
   } = await getNewThumbnails(headerImageData, HEADER_PAYLOAD_KEY, headerInstructionThumbSizes);
 
-  attr.data[imageFieldKey] = headerImageData ? HEADER_PAYLOAD_KEY : undefined;
+  if (attr.data && headerImageData) attr.data[imageFieldKey] = HEADER_PAYLOAD_KEY;
 
   return {
     attr,

@@ -273,10 +273,10 @@ const AttributeFields = ({
     default:
       return (
         <>
-          {Object.keys(attribute.data).map((dataKey) => {
+          {Object.keys(attribute.data || {}).map((dataKey) => {
             return (
               <p className="whitespace-pre-line" key={dataKey}>
-                {dataKey}: {attribute.data[dataKey]}
+                {dataKey}: {attribute.data?.[dataKey]}
               </p>
             );
           })}

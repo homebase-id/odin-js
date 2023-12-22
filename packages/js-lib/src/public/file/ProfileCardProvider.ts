@@ -88,7 +88,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
   if (publicProfilePhotoAttr) {
     const size = { pixelWidth: 250, pixelHeight: 250 };
     const fileKey =
-      publicProfilePhotoAttr.fileMetadata.appData.content.data[
+      publicProfilePhotoAttr.fileMetadata.appData.content.data?.[
         MinimalProfileFields.ProfileImageKey
       ];
 

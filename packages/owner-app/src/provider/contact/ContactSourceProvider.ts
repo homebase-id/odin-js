@@ -82,7 +82,7 @@ export const queryRemoteAttributes = async (
             dotYouClient,
             odinId,
             photo.fileId as string,
-            photoAttr.data[MinimalProfileFields.ProfileImageKey]
+            photoAttr.data?.[MinimalProfileFields.ProfileImageKey]
           )) || undefined
         : undefined,
     };
