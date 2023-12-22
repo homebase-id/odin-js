@@ -18,10 +18,12 @@ import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/c
 const AttributeGroup = ({
   attributes,
   groupTitle,
+  groupIndex,
   groupedAttributes,
 }: {
   attributes: DriveSearchResult<AttributeVm>[];
   groupTitle: string;
+  groupIndex: number;
   groupedAttributes?: GroupedAttributes[];
 }) => {
   const firstAttrVm = attributes[0].fileMetadata.appData.content;
@@ -30,8 +32,8 @@ const AttributeGroup = ({
   const [isActive, setIsActive] = useState(
     attributes.length === 1 || slugify(groupTitle) === typeKey
   );
-  const { reorderAttr, reorderAttrGroup } = useAttributeOrderer({
-    attributes,
+  const { reorderAttr } = useAttributeOrderer({
+    currentGroupAttributes: attributes,
     groupedAttributes: groupedAttributes ? groupedAttributes : [],
   });
   const navigate = useNavigate();
@@ -73,7 +75,12 @@ const AttributeGroup = ({
         <div className={`relative mb-3 pt-6`}>
           <AttributeEditor
             attribute={attributes[0]}
-            reorderAttr={(_attr, dir) => reorderAttrGroup(groupTitle, dir)}
+            orderAttrUp={groupIndex === 0 ? undefined : () => reorderAttr(attributes[0], -1)}
+            orderAttrDown={
+              groupedAttributes && groupIndex === groupedAttributes?.length - 1
+                ? undefined
+                : () => reorderAttr(attributes[0], 1)
+            }
             className="mb-2 mt-2"
           />
           <AddAnotherButton
@@ -146,7 +153,14 @@ const AttributeGroup = ({
                         ? 'pointer-events-none my-0 max-h-full overflow-hidden'
                         : 'mb-2 mt-0'
                     }`}
-                    reorderAttr={reorderAttr}
+                    orderAttrUp={
+                      index === 0 && groupIndex === 0 ? undefined : () => reorderAttr(attr, -1)
+                    }
+                    orderAttrDown={
+                      groupedAttributes && groupIndex === groupedAttributes?.length - 1
+                        ? undefined
+                        : () => reorderAttr(attr, 1)
+                    }
                   />
                 </span>
                 {isActive && (

@@ -283,7 +283,6 @@ const ProfileSectionEditor = ({
     };
   });
   groupedAttributes.sort((a, b) => a.priority - b.priority);
-  console.log(groupedAttributes);
 
   const highestPriority = attributes.reduce((prevValue, currValue) => {
     if (prevValue > currValue.fileMetadata.appData.content.priority) {
@@ -320,7 +319,7 @@ const ProfileSectionEditor = ({
         </div>
       ) : null}
       {attributes.length ? (
-        groupedAttributes.map((attrGroup) => {
+        groupedAttributes.map((attrGroup, groupIndex) => {
           return (
             <React.Fragment key={attrGroup.name}>
               <ErrorBoundary>
@@ -328,6 +327,7 @@ const ProfileSectionEditor = ({
                   groupTitle={attrGroup.name}
                   attributes={attrGroup.attributes}
                   key={attrGroup.name}
+                  groupIndex={groupIndex}
                   groupedAttributes={groupedAttributes}
                 />
               </ErrorBoundary>
