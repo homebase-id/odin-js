@@ -40,7 +40,7 @@ const InvitationCodeCheck = () => {
     const data = new FormData(e.currentTarget);
     const newCode = data.get('invitation-code') as string;
 
-    doSetInvitationCode(newCode);
+    doSetInvitationCode(newCode.trim());
 
     e.preventDefault();
     e.stopPropagation();
