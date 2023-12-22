@@ -191,7 +191,8 @@ const AddAnotherButton = ({
         },
       },
     } as NewDriveSearchResult<AttributeVm>;
-  }, [type, profileId, sectionId, priority]);
+    // isActive ensures that a new one is created each time the AddAnother is opened up again
+  }, [type, profileId, sectionId, priority, isActive]);
 
   if (isActive)
     return (
