@@ -480,7 +480,13 @@ export const saveAttribute = async (
     };
 
     metadata.versionTag = runningVersionTag || metadata.versionTag;
-    const result = await uploadHeader(dotYouClient, keyHeader, appendInstructions, metadata);
+    const result = await uploadHeader(
+      dotYouClient,
+      keyHeader,
+      appendInstructions,
+      metadata,
+      onVersionConflict
+    );
     if (result) {
       return {
         ...toSaveAttribute,

@@ -191,9 +191,13 @@ export const pureUpload = async (
       return response.data;
     })
     .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch' && onVersionConflict) {
-        onVersionConflict();
-        return;
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          onVersionConflict();
+          return;
+        }
       }
 
       if (error.response?.status === 400)
@@ -227,9 +231,13 @@ export const pureAppend = async (
       return response.data;
     })
     .catch((error) => {
-      if (error.response?.data?.errorCode === 'versionTagMismatch' && onVersionConflict) {
-        onVersionConflict();
-        return;
+      if (error.response?.data?.errorCode === 'versionTagMismatch') {
+        if (!onVersionConflict) {
+          console.warn('VersionTagMismatch, to avoid this, add an onVersionConflict handler');
+        } else {
+          onVersionConflict();
+          return;
+        }
       }
 
       console.error('[DotYouCore-js:pureUpload]', error);

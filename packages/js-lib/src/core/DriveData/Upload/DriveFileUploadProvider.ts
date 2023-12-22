@@ -83,7 +83,8 @@ export const uploadHeader = async (
   dotYouClient: DotYouClient,
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UploadInstructionSet,
-  metadata: UploadFileMetadata
+  metadata: UploadFileMetadata,
+  onVersionConflict?: () => void
 ): Promise<UploadResult | void> => {
   const decryptedKeyHeader =
     keyHeader && 'encryptionVersion' in keyHeader
@@ -119,7 +120,7 @@ export const uploadHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, systemFileType);
+  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
 };
 
 export const appendDataToFile = async (

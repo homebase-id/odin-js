@@ -84,7 +84,7 @@ const AttributeCreator = ({
   };
 
   return (
-    <section className="pb-16">
+    <section className="py-16">
       {isActive && attribute ? (
         <AttributeEditor
           attribute={attribute}

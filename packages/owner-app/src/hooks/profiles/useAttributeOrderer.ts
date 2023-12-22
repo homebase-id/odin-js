@@ -56,8 +56,12 @@ export const useAttributeOrderer = ({
       attributes[dir === -1 ? toBecomePos : toBecomePos + 1]?.fileMetadata?.appData?.content;
 
     // Force new priority to stay within existing priority bounds
-    const minPriority = Math.min(...attributes.map((attr) => attr.priority));
-    const maxPriority = Math.max(...attributes.map((attr) => attr.priority));
+    const minPriority = Math.min(
+      ...attributes.map((attr) => attr.fileMetadata.appData.content.priority)
+    );
+    const maxPriority = Math.max(
+      ...attributes.map((attr) => attr.fileMetadata.appData.content.priority)
+    );
 
     const newPriority = Math.ceil(
       Math.abs(
@@ -103,13 +107,16 @@ export const useAttributeOrderer = ({
     const afterGroup = groupedAttributes[dir === -1 ? toBecomePos : toBecomePos + 1];
 
     const beforeGroupMaxPrio = beforeGroup?.attributes?.length
-      ? Math.max(...beforeGroup.attributes.map((attr) => attr.priority))
+      ? Math.max(
+          ...beforeGroup.attributes.map((attr) => attr.fileMetadata.appData.content.priority)
+        )
       : 0;
 
     const newPriority = Math.ceil(
       Math.abs(
         (beforeGroupMaxPrio ?? 0) +
-          ((afterGroup?.priority ?? attributes[attributes.length - 1].priority + 2000) -
+          ((afterGroup?.priority ??
+            attributes[attributes.length - 1].fileMetadata.appData.content.priority + 2000) -
             (beforeGroupMaxPrio ?? 0)) /
             2
       )

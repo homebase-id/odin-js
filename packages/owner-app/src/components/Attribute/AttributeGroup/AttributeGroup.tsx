@@ -55,10 +55,11 @@ const AttributeGroup = ({
   };
 
   const doClose = () => {
-    if (profileKey)
+    if (profileKey) {
       navigate(`/owner/profile/${profileKey}/${sectionKey ?? firstAttrVm.sectionId}`, {
         replace: true,
       });
+    }
 
     setIsActive(false);
   };
@@ -70,7 +71,7 @@ const AttributeGroup = ({
           <AttributeEditor
             attribute={attributes[0]}
             reorderAttr={(_attr, dir) => reorderAttrGroup(groupTitle, dir)}
-            className="mb-0 mt-2"
+            className="mb-2 mt-2"
           />
           <AddAnotherButton
             profileId={firstAttrVm.profileId}
@@ -150,7 +151,7 @@ const AttributeGroup = ({
                     profileId={firstAttrVm.profileId}
                     sectionId={firstAttrVm.sectionId}
                     type={firstAttrVm.type}
-                    priority={attr.priority + 10}
+                    priority={attr.fileMetadata.appData.content.priority + 10}
                   />
                 )}
               </React.Fragment>
@@ -211,7 +212,6 @@ const AddAnotherButton = ({
         onClick={() => setIsActive(true)}
       >
         <Plus className="m-2 h-4 w-4" />
-        {/* <p className="pr-3">Add</p> */}
       </span>
     </div>
   );
