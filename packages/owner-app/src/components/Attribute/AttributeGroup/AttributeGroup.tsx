@@ -38,7 +38,7 @@ const AttributeGroup = ({
     else setIsActive(false);
   }, [typeKey]);
 
-  const open = () => {
+  const doOpen = () => {
     if (!isActive) {
       if (profileKey) {
         navigate(
@@ -54,7 +54,7 @@ const AttributeGroup = ({
     }
   };
 
-  const close = () => {
+  const doClose = () => {
     if (profileKey)
       navigate(`/owner/profile/${profileKey}/${sectionKey ?? firstAttrVm.sectionId}`, {
         replace: true,
@@ -66,11 +66,11 @@ const AttributeGroup = ({
   if (attributes.length === 1)
     return (
       <>
-        <div className={`relative my-6`}>
+        <div className={`relative mb-3 pt-6`}>
           <AttributeEditor
             attribute={attributes[0]}
             reorderAttr={(_attr, dir) => reorderAttrGroup(groupTitle, dir)}
-            className="mb-2 mt-5"
+            className="mb-0 mt-2"
           />
           <AddAnotherButton
             profileId={firstAttrVm.profileId}
@@ -84,26 +84,30 @@ const AttributeGroup = ({
 
   return (
     <div
-      className={`relative my-6 ${!isActive ? 'cursor-pointer transition-transform' : ''}`}
-      style={{ paddingBottom: `${attributes.length * 10}px` }}
-      onClick={open}
+      className={`relative mb-3 overflow-x-hidden sm:overflow-x-visible ${
+        !isActive ? 'cursor-pointer transition-transform' : ''
+      }`}
+      onClick={doOpen}
+      style={{ paddingBottom: `${(attributes.length - 1) * 0.5}rem` }}
     >
       <span
-        onClick={close}
-        className={`text-slate-600 transition-opacity dark:text-slate-400 ${
+        onClick={doClose}
+        className={`mb-2 inline-block text-slate-600 transition-opacity dark:text-slate-400 ${
           isActive ? 'cursor-pointer opacity-100' : 'opacity-0'
         }`}
       >
         <Collapse className={`inline-block h-4 w-4`} /> {t('Collapse')}
       </span>
       <div
-        className={`mt-2 border-l-[8px] sm:border-l-[16px] ${
+        className={`border-l-[8px] sm:border-l-[16px] ${
           isActive
             ? 'border-slate-200 border-opacity-40 dark:border-slate-800'
-            : 'overflow-hidden border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
-        } transition-all ${isActive ? 'pl-2 sm:pl-5' : '-translate-x-4 md:hover:translate-x-0'}`}
+            : ' border-transparent opacity-90 grayscale hover:border-slate-200 hover:border-opacity-40 hover:dark:border-slate-800'
+        } transition-all ${
+          isActive ? 'pl-2 sm:pl-5' : '-translate-x-2 md:-translate-x-4 md:hover:translate-x-0'
+        }`}
       >
-        {/* Sort again, as order of the attributes takes the ACL into account, which the user can't "change" */}
+        {/* Sort again, as the normal order of the attributes takes the ACL into account, which the user can't "change" */}
         {attributes
           .sort(
             (a, b) =>
@@ -115,16 +119,29 @@ const AttributeGroup = ({
                 <span
                   key={attr.fileMetadata.appData.content.id ?? 'pending'}
                   title={attr.fileMetadata.appData.content.id ?? 'pending'}
-                  className={`z-0 ${
-                    !isActive && index !== 0
-                      ? `absolute left-0 right-0 top-0 max-h-full overflow-hidden rounded-lg border-b border-gray-200 border-opacity-80 bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900`
-                      : 'relative'
+                  className={`rounded-lg bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900 ${
+                    !isActive && index !== 0 ? `absolute` : 'relative z-10'
                   }`}
-                  style={{ transform: `translateX(${index * 4}px) translateY(${index * 10}px)` }}
+                  style={
+                    index === 0 || isActive
+                      ? undefined
+                      : {
+                          top: `${index * 0.5}rem`,
+                          bottom: `${index * -0.5}rem`,
+                          left: `${index * 0.5}rem`,
+                          right: `${index * -0.5}rem`,
+                          zIndex: 5 - index,
+                          opacity: 1 - 0.3 * index,
+                        }
+                  }
                 >
                   <AttributeEditor
                     attribute={attr}
-                    className={`${!isActive ? 'pointer-events-none my-0' : 'mb-2 mt-0'}`}
+                    className={`${
+                      !isActive
+                        ? 'pointer-events-none my-0 max-h-full overflow-hidden'
+                        : 'mb-2 mt-0'
+                    }`}
                     reorderAttr={reorderAttr}
                   />
                 </span>
@@ -187,7 +204,7 @@ const AddAnotherButton = ({
     );
 
   return (
-    <div className="relative mb-4 mt-[-1.6rem] flex text-slate-500 transition-colors hover:text-slate-800 hover:dark:text-slate-100">
+    <div className="relative z-10 mb-2 mt-[-1.6rem] flex text-slate-500 transition-colors hover:text-slate-800 hover:dark:text-slate-100">
       <span
         className="relative mx-auto flex cursor-pointer flex-row items-center gap-1 rounded-full border bg-white transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 hover:dark:bg-slate-800"
         onClick={() => setIsActive(true)}

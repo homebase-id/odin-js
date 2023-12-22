@@ -19,7 +19,7 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
   }
 
   // True when no items match the current location; Forces a fallback to an active state on the first item
-  const activeFallback = !items.some((item) => item.path === location.pathname);
+  const activeFallback = !items.some((item) => location.pathname.startsWith(item.path));
 
   return (
     <>
@@ -51,7 +51,10 @@ const Submenu: FC<SubmenuProps> = ({ className, items, isLoading }) => {
       <Select
         className={`${!forceMobileView ? 'sm:hidden' : ''} py-4  ${className ?? ''}`}
         onChange={(e) => navigate(e.target.value)}
-        value={window.location.pathname}
+        value={
+          items.find((itm) => window.location.pathname.startsWith(itm.path))?.path ||
+          window.location.pathname
+        }
       >
         {items.map((item) => {
           return (
