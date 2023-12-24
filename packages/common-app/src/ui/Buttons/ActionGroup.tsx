@@ -39,7 +39,7 @@ export const ActionGroup = ({
   const target = usePortal('action-group');
 
   const wrapperRef = useRef(null);
-  useOutsideTrigger(wrapperRef, () => setIsOpen(false));
+  useOutsideTrigger(wrapperRef, () => !isSm && setIsOpen(false));
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
 
   const [isOpen, setIsOpen] = useState(false);
