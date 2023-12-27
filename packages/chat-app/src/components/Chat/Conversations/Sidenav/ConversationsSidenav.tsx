@@ -47,7 +47,7 @@ export const ConversationsSidebar = ({
       ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
 
   return (
-    <div className="flex flex-grow flex-col ">
+    <div className="flex flex-grow flex-col overflow-auto">
       <SearchConversation
         setIsSearchActive={setIsSearchActive}
         isSearchActive={isSearchActive}
