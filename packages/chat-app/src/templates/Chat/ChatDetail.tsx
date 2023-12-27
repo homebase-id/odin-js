@@ -204,10 +204,10 @@ const GroupChatConnectedState = ({
 };
 
 const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
-  const { data: isConnected } = useIsConnected(recipient);
+  const { data: isConnected, isFetched } = useIsConnected(recipient);
   const identity = useDotYouClient().getIdentity();
 
-  if (isConnected) return null;
+  if (isConnected || !isFetched) return null;
   return (
     <div className="flex w-full flex-row items-center justify-between bg-page-background px-5 py-2">
       <p>
