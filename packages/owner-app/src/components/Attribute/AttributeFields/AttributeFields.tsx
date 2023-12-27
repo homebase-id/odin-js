@@ -144,7 +144,7 @@ const AttributeFields = ({
       return (
         <>
           <div className="mb-5">
-            <Label htmlFor={`${fileId ?? 'new'}-handle`}>{attribute.typeDefinition.name}</Label>
+            <Label htmlFor={`${fileId ?? 'new'}-handle`}>{attribute.typeDefinition?.name}</Label>
             <Input
               id={`${fileId ?? 'new'}-handle`}
               name={SocialFields.Homebase}
@@ -530,12 +530,12 @@ const SocialAttributeEditor = ({
     <>
       <div className="mb-5">
         <Label htmlFor={`${fileId ?? 'new'}-handle`}>
-          {attribute.typeDefinition.name} {t('Username')}
+          {attribute.typeDefinition?.name} {t('Username')}
         </Label>
         <Input
           id={`${fileId ?? 'new'}-handle`}
-          name={attribute.typeDefinition.name.toLowerCase()}
-          defaultValue={attribute.data?.[attribute.typeDefinition.name.toLowerCase()] ?? ''}
+          name={attribute.typeDefinition?.name.toLowerCase()}
+          defaultValue={attribute.data?.[attribute.typeDefinition?.name.toLowerCase() || ''] ?? ''}
           onChange={onChange}
           onPaste={pasteHandler}
         />

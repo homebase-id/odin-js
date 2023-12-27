@@ -5,7 +5,7 @@ import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinition
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 
 export interface AttributeVm extends Attribute {
-  typeDefinition: AttributeDefinition;
+  typeDefinition?: AttributeDefinition;
 }
 
 export const useAttributes = ({

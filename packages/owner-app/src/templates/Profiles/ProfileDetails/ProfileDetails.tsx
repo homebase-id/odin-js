@@ -277,7 +277,9 @@ const ProfileSectionEditor = ({
     );
 
     return {
-      name: matchingAttributes[0]?.fileMetadata.appData.content.typeDefinition?.name,
+      name:
+        matchingAttributes[0]?.fileMetadata.appData.content.typeDefinition?.name ||
+        matchingAttributes[0].fileMetadata.appData.content.type,
       attributes: matchingAttributes,
       priority: lowestPrio,
     };

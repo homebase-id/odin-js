@@ -187,7 +187,7 @@ const AttributeEditor = ({
       confirmOptions: {
         title: t('Remove Attribute'),
         buttonText: t('Permanently remove'),
-        body: `${t('Are you sure you want to remove this')} ${attribute.typeDefinition.name} ${t(
+        body: `${t('Are you sure you want to remove this')} ${attribute.typeDefinition?.name} ${t(
           'attribute. This action cannot be undone.'
         )}`,
       },
@@ -218,7 +218,7 @@ const AttributeEditor = ({
               onClick={() => setIsAclEdit(true)}
               data-type={latestAttr?.fileMetadata?.appData?.content?.type}
             >
-              {title ?? latestAttr?.fileMetadata?.appData?.content.typeDefinition.name}{' '}
+              {title ?? latestAttr?.fileMetadata?.appData?.content.typeDefinition?.name}{' '}
               <small className="block text-xs">
                 {
                   <AclSummary
