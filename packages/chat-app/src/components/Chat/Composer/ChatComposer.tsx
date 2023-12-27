@@ -49,7 +49,8 @@ export const ChatComposer = ({
     if (
       (!message?.trim() && !files) ||
       !conversationContent ||
-      !conversation.fileMetadata.appData.uniqueId
+      !conversation.fileMetadata.appData.uniqueId ||
+      sendMessageState !== 'idle'
     )
       return;
 
@@ -120,7 +121,7 @@ export const ChatComposer = ({
               doSend();
             }}
           />
-          <span className="my-auto hidden sm:block">
+          <span className="my-auto">
             <ActionButton
               type="mute"
               onClick={doSend}

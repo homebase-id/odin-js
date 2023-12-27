@@ -14,7 +14,9 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const navigate = useNavigate();
 
   return (
-    <div className={`overflow-hidden rounded-lg ${isGallery ? 'grid grid-cols-2 gap-1' : ''}`}>
+    <div
+      className={`overflow-hidden rounded-lg ${isGallery ? 'grid w-full grid-cols-2 gap-1' : ''}`}
+    >
       {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => {
         const isColSpan2 = payloads.length === 3 && index === 2;
         return (
@@ -67,11 +69,6 @@ const MediaItem = ({
   return (
     <div
       className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
-      style={
-        largestThumb
-          ? { aspectRatio: `${largestThumb.pixelWidth}/${largestThumb.pixelHeight}` }
-          : undefined
-      }
       onClick={onClick}
     >
       <OdinImage
