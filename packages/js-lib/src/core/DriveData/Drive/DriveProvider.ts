@@ -1,6 +1,10 @@
 import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../../DotYouClient';
-import { stringGuidsEqual, stringifyToQueryParams } from '../../../helpers/helpers';
+import {
+  assertIfDefined,
+  stringGuidsEqual,
+  stringifyToQueryParams,
+} from '../../../helpers/helpers';
 import { PagedResult, PagingOptions, TargetDrive } from '../../core';
 
 export const getDrives = async (
@@ -53,6 +57,10 @@ export const ensureDrive = async (
   allowAnonymousReads: boolean,
   allowSubscriptions = false
 ): Promise<boolean> => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('name', name);
+  assertIfDefined('metadata', metadata);
+
   //create the drive if it does not exist
   const client = dotYouClient.createAxiosClient();
   const allDrives = await getDrives(dotYouClient, { pageNumber: 1, pageSize: 1000 });
