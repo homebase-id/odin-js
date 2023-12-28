@@ -206,39 +206,43 @@ const NotificationGroup = ({
         return (
           <div
             key={typeId}
-            className="relative"
             style={{
               paddingBottom: `${sliced.length * 0.5}rem`,
             }}
           >
-            {sliced.map((notification, index) => (
-              <div
-                key={notification.id}
-                className={index === 0 ? 'relative z-10' : 'absolute w-full'}
-                style={
-                  index === 0
-                    ? undefined
-                    : {
-                        top: `${index * 0.5}rem`,
-                        bottom: `${index * -0.5}rem`,
-                        left: `${index * 0.25}rem`,
-                        zIndex: 5 - index,
-                        opacity: 1 - 0.3 * index,
-                      }
-                }
-              >
-                <Toast
-                  title={titleFormer(appName)}
-                  body={bodyFormer(notification, false, appName)}
-                  timestamp={notification.created}
-                  onDismiss={() => remove(typeGroup.map((n) => n.id))}
-                  onOpen={() => markAsRead(typeGroup.map((n) => n.id))}
-                  href={getTargetLink(notification)}
-                  groupCount={groupCount}
-                  isRead={!notification.unread}
-                />
-              </div>
-            ))}
+            <div className="relative">
+              {sliced.map((notification, index) => (
+                <div
+                  key={notification.id}
+                  className={
+                    index === 0 ? 'relative z-10' : 'absolute w-full overflow-hidden rounded-lg'
+                  }
+                  style={
+                    index === 0
+                      ? undefined
+                      : {
+                          top: `${index * 0.5}rem`,
+                          bottom: `${index * -0.5}rem`,
+                          left: `${index * 0.25}rem`,
+                          right: `${index * -0.5}rem`,
+                          zIndex: 5 - index,
+                          opacity: 1 - 0.3 * index,
+                        }
+                  }
+                >
+                  <Toast
+                    title={titleFormer(appName)}
+                    body={bodyFormer(notification, false, appName)}
+                    timestamp={notification.created}
+                    onDismiss={() => remove(typeGroup.map((n) => n.id))}
+                    onOpen={() => markAsRead(typeGroup.map((n) => n.id))}
+                    href={getTargetLink(notification)}
+                    groupCount={groupCount}
+                    isRead={!notification.unread}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         );
       })}

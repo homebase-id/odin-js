@@ -84,7 +84,7 @@ const AttributeCreator = ({
   };
 
   return (
-    <section className="py-16">
+    <section className="pb-16">
       {isActive && attribute ? (
         <AttributeEditor
           attribute={attribute}
@@ -94,7 +94,7 @@ const AttributeCreator = ({
         />
       ) : (
         <>
-          <p className="mb-5 text-xl">
+          <p className="mb-5 mt-16 text-xl">
             {t('Add new')}
             <small className="block text-sm text-slate-400">
               {t(`Add the information you want, and keep it secure. You're in control.`)}
