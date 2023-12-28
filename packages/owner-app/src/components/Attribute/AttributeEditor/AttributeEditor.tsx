@@ -4,6 +4,7 @@ import {
   AclSummary,
   AclWizard,
   ActionGroupOptionProps,
+  ErrorBoundary,
   SaveStatus,
   Times,
   t,
@@ -258,74 +259,76 @@ const AttributeEditor = ({
           : ''
       } ${className ?? ''}`}
     >
-      {isAclEdit ? (
-        <AclWizard
-          acl={
-            latestAttr.serverMetadata?.accessControlList || {
-              requiredSecurityGroup: SecurityGroupType.Owner,
+      <ErrorBoundary>
+        {isAclEdit ? (
+          <AclWizard
+            acl={
+              latestAttr.serverMetadata?.accessControlList || {
+                requiredSecurityGroup: SecurityGroupType.Owner,
+              }
             }
-          }
-          onConfirm={(newAcl) => {
-            setIsAclEdit(false);
-            const dirtyAttr: NewDriveSearchResult<AttributeVm> = {
-              ...latestAttr,
-              serverMetadata: {
-                ...latestAttr.serverMetadata,
-                accessControlList: newAcl,
-              },
-            };
+            onConfirm={(newAcl) => {
+              setIsAclEdit(false);
+              const dirtyAttr: NewDriveSearchResult<AttributeVm> = {
+                ...latestAttr,
+                serverMetadata: {
+                  ...latestAttr.serverMetadata,
+                  accessControlList: newAcl,
+                },
+              };
 
-            if (isNewAttribute) setLatestAttr(dirtyAttr);
-            else doManualSave(dirtyAttr);
-          }}
-          onCancel={() => {
-            if (isNewAttribute && onCancel) onCancel();
-            setIsAclEdit(false);
-          }}
-        />
-      ) : (
-        <>
-          <AttributeFields
-            fileId={latestAttr.fileId}
-            lastModified={(attributeDsr as DriveSearchResult<unknown>)?.fileMetadata?.updated}
-            attribute={latestAttr.fileMetadata.appData.content}
-            onChange={changeHandler}
+              if (isNewAttribute) setLatestAttr(dirtyAttr);
+              else doManualSave(dirtyAttr);
+            }}
+            onCancel={() => {
+              if (isNewAttribute && onCancel) onCancel();
+              setIsAclEdit(false);
+            }}
           />
-          <SaveStatus className="mt-2 text-right sm:mt-0" state={saveStatus} error={saveError} />
-          {isNewAttribute ? (
-            <div className="flex flex-row justify-end pb-2">
-              <p className="text-slate-500">
-                {t('Accessible by: ')}{' '}
-                <AclSummary
-                  acl={
-                    latestAttr.serverMetadata?.accessControlList || {
-                      requiredSecurityGroup: SecurityGroupType.Owner,
+        ) : (
+          <>
+            <AttributeFields
+              fileId={latestAttr.fileId}
+              lastModified={(attributeDsr as DriveSearchResult<unknown>)?.fileMetadata?.updated}
+              attribute={latestAttr.fileMetadata.appData.content}
+              onChange={changeHandler}
+            />
+            <SaveStatus className="mt-2 text-right sm:mt-0" state={saveStatus} error={saveError} />
+            {isNewAttribute ? (
+              <div className="flex flex-row justify-end pb-2">
+                <p className="text-slate-500">
+                  {t('Accessible by: ')}{' '}
+                  <AclSummary
+                    acl={
+                      latestAttr.serverMetadata?.accessControlList || {
+                        requiredSecurityGroup: SecurityGroupType.Owner,
+                      }
                     }
-                  }
-                  maxLength={Infinity}
-                />
-              </p>
-            </div>
-          ) : null}
-          {isNewAttribute ? (
-            <div className="flex flex-row-reverse">
-              <ActionButton
-                type="primary"
-                className="ml-2"
-                onClick={() => doManualSave(latestAttr)}
-                state={saveStatus}
-              >
-                {t('Save')}
-              </ActionButton>
-              {onCancel ? (
-                <ActionButton type="secondary" onClick={onCancel}>
-                  {t('Cancel')}
+                    maxLength={Infinity}
+                  />
+                </p>
+              </div>
+            ) : null}
+            {isNewAttribute ? (
+              <div className="flex flex-row-reverse">
+                <ActionButton
+                  type="primary"
+                  className="ml-2"
+                  onClick={() => doManualSave(latestAttr)}
+                  state={saveStatus}
+                >
+                  {t('Save')}
                 </ActionButton>
-              ) : null}
-            </div>
-          ) : null}
-        </>
-      )}
+                {onCancel ? (
+                  <ActionButton type="secondary" onClick={onCancel}>
+                    {t('Cancel')}
+                  </ActionButton>
+                ) : null}
+              </div>
+            ) : null}
+          </>
+        )}
+      </ErrorBoundary>
     </Section>
   );
 };
