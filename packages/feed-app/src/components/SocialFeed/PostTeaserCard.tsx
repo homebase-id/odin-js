@@ -74,9 +74,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                   <AuthorName odinId={odinId} />
                 </h2>
                 <span className="hidden px-2 leading-4 md:block">·</span>
-                {channel && post ? (
-                  <PostMeta postFile={postFile} channel={channel} odinId={odinId} />
-                ) : null}
+
+                <PostMeta postFile={postFile} channel={channel || undefined} odinId={odinId} />
               </div>
 
               <PostBody

@@ -80,9 +80,8 @@ export const PostDetailCard = ({
                   <span className="px-2 leading-4">·</span>
                 </>
               )}
-              {post && channel ? (
-                <PostMeta postFile={postFile} channel={channel} odinId={odinId} size="text-sm" />
-              ) : null}
+
+              <PostMeta postFile={postFile} channel={channel} odinId={odinId} size="text-sm" />
             </>
           )}
         </div>
