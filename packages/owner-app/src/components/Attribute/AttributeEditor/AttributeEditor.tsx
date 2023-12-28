@@ -83,7 +83,7 @@ const AttributeEditor = ({
     if (onManualSave) onManualSave();
   };
 
-  const debouncedSave = useDebounce(() => saveAttr(latestAttr), { timeoutMillis: 1500 });
+  const debouncedSave = useDebounce(() => saveAttr(latestAttr), { timeoutMillis: 2000 });
   const changeHandler = (e: {
     target: { value: unknown; name: string; previewThumbnail?: EmbeddedThumb };
   }) => {
