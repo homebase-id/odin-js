@@ -23,7 +23,7 @@ export const NewConversation = () => {
 
   return (
     <>
-      <div className=" flex flex-row items-center justify-between bg-primary/20 p-5">
+      <div className="flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Conversation')}</h2>
         <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
       </div>
@@ -37,7 +37,7 @@ export const NewConversation = () => {
           />
         </div>
       </form>
-      <div>
+      <div className="overflow-auto">
         <ConversationListItemWrapper
           onClick={() => {
             navigate(`${CHAT_ROOT}/new-group`);
