@@ -24,6 +24,7 @@ const FirstRun = () => {
 
   const doNext: FormEventHandler = async (e) => {
     e.preventDefault();
+    if (state === 'loading') return;
     setState('loading');
     try {
       localStorage.setItem(FIRST_RUN_TOKEN_STORAGE_KEY, firstRunToken || ''); // Store FRT to localStorage so it can be used on initialize later
