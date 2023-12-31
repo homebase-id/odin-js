@@ -449,10 +449,27 @@ export const saveAttribute = async (
       throw new Error('We failed to change encryption status of an attribute');
     }
 
+    const existingAttribute = await getAttributeByFileId(
+      dotYouClient,
+      attrContent.profileId,
+      toSaveAttribute.fileId
+    );
+    const existingPayloads = existingAttribute?.fileMetadata?.payloads || [];
+
     const keyHeader =
       wasEncrypted && encrypt && 'sharedSecretEncryptedKeyHeader' in toSaveAttribute
         ? toSaveAttribute.sharedSecretEncryptedKeyHeader
         : undefined;
+
+    const existingDefaultPayload = existingPayloads.find(
+      (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+    );
+
+    if (keyHeader && existingDefaultPayload?.iv) {
+      keyHeader.iv = existingDefaultPayload.iv;
+    } else if (keyHeader) {
+      throw new Error('We failed to find the IV of an attribute to upload with');
+    }
 
     if (payloads.length) {
       runningVersionTag = (
@@ -472,13 +489,8 @@ export const saveAttribute = async (
       ).newVersionTag;
     }
 
-    const existingPayloads =
-      (toSaveAttribute as DriveSearchResult<Attribute>)?.fileMetadata?.payloads ?? [];
     // Cleanup the default payload if it existed, and we don't need it anymore
-    if (
-      shouldEmbedContent &&
-      existingPayloads.some((payload) => payload.key === DEFAULT_PAYLOAD_KEY)
-    ) {
+    if (shouldEmbedContent && existingDefaultPayload) {
       runningVersionTag = (
         await deletePayload(
           dotYouClient,

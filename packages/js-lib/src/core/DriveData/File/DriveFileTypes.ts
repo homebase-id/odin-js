@@ -107,6 +107,7 @@ export interface PayloadDescriptor {
   bytesWritten: number;
   lastModified: number;
   thumbnails: ThumbnailDescriptor[];
+  iv: Uint8Array | undefined;
 }
 
 export interface ThumbnailDescriptor extends ImageSize {

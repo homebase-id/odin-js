@@ -38,6 +38,7 @@ export const uploadFile = async (
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
       instructions,
       metadata,
+      payloads,
     });
 
   // Force isEncrypted on the metadata to match the encrypt flag
@@ -53,6 +54,8 @@ export const uploadFile = async (
     manifest,
     transferIv: instructions.transferIv || getRandom16ByteArray(),
   };
+
+  console.log({ instructionsWithManifest });
 
   // Build package
   const encryptedDescriptor = await buildDescriptor(
