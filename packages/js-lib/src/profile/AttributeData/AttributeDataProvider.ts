@@ -364,7 +364,7 @@ export const saveAttribute = async (
   toSaveAttribute: DriveSearchResult<Attribute> | NewDriveSearchResult<Attribute>,
   onVersionConflict?: () => void
 ): Promise<DriveSearchResult<Attribute> | NewDriveSearchResult<Attribute> | undefined> => {
-  let runningVersionTag = toSaveAttribute.fileMetadata.versionTag;
+  let runningVersionTag = toSaveAttribute.fileMetadata.versionTag as string;
   const targetDrive = GetTargetDriveFromProfileId(
     toSaveAttribute.fileMetadata.appData.content.profileId
   );
@@ -497,7 +497,7 @@ export const saveAttribute = async (
           targetDrive,
           toSaveAttribute.fileId,
           DEFAULT_PAYLOAD_KEY,
-          runningVersionTag || (toSaveAttribute.fileMetadata.versionTag as string)
+          runningVersionTag
         )
       ).newVersionTag;
     }
