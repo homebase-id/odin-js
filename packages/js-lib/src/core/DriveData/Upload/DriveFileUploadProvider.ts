@@ -55,8 +55,6 @@ export const uploadFile = async (
     transferIv: instructions.transferIv || getRandom16ByteArray(),
   };
 
-  console.log({ instructionsWithManifest });
-
   // Build package
   const encryptedDescriptor = await buildDescriptor(
     dotYouClient,
@@ -140,6 +138,17 @@ export const appendDataToFile = async (
   thumbnails: ThumbnailFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
+  isDebug &&
+    console.debug(
+      'request',
+      new URL(`${dotYouClient.getEndpoint()}/drive/files/uploadpayload`).pathname,
+      {
+        instructions,
+        payloads,
+        thumbnails,
+      }
+    );
+
   const encrypt = !!keyHeader;
   const decryptedKeyHeader =
     keyHeader && 'encryptionVersion' in keyHeader
