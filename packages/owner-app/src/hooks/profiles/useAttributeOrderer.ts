@@ -16,7 +16,7 @@ export const useAttributeOrderer = ({
   currentGroupAttributes: DriveSearchResult<AttributeVm>[];
   groupedAttributes: GroupedAttributes[];
 }) => {
-  const { mutateAsync: saveAttribute } = useAttribute({}).save;
+  const { mutateAsync: saveAttribute } = useAttribute().save;
 
   const flatAttributes = groupedAttributes.flatMap((group) => group.attributes);
 

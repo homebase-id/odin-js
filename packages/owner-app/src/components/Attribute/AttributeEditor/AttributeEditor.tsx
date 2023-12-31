@@ -48,7 +48,7 @@ const AttributeEditor = ({
   const {
     save: { data: updatedAttr, mutate: saveAttr, status: saveStatus, error: saveError },
     remove: { mutate: removeAttr },
-  } = useAttribute({});
+  } = useAttribute();
 
   // Local state of the changes
   const [latestAttr, setLatestAttr] = useState<NewDriveSearchResult<AttributeVm>>({

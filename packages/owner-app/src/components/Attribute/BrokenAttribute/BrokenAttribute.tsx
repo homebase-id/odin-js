@@ -11,6 +11,7 @@ const dateFormat: Intl.DateTimeFormatOptions = {
   minute: 'numeric',
 };
 
+// Broken attributes are attributes that have no content, but are there on the profile drive
 export const BrokenAttribute = ({
   attribute,
   profileId,
@@ -20,7 +21,7 @@ export const BrokenAttribute = ({
 }) => {
   const {
     remove: { mutate: removeAttr },
-  } = useAttribute({});
+  } = useAttribute();
 
   return (
     <Section

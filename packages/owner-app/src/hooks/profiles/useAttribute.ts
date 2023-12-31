@@ -21,13 +21,8 @@ const getListItemCacheKey = (newAttrVm: Attribute) => {
   ];
 };
 
-export const useAttribute = ({
-  profileId,
-  attributeId,
-}: {
-  profileId?: string;
-  attributeId?: string;
-}) => {
+export const useAttribute = (props?: { profileId?: string; attributeId?: string }) => {
+  const { profileId, attributeId } = props || {};
   const dotYouClient = useAuth().getDotYouClient();
 
   const queryClient = useQueryClient();
