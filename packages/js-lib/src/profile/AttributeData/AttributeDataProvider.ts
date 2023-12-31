@@ -38,9 +38,12 @@ import { GetTargetDriveFromProfileId, MinimalProfileFields } from '../profile';
 import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { Attribute } from './AttributeDataTypes';
 
-const sortAttrs = (a: DriveSearchResult<Attribute>, b: DriveSearchResult<Attribute>) =>
+const sortAttrs = (
+  a: DriveSearchResult<Attribute | undefined>,
+  b: DriveSearchResult<Attribute | undefined>
+) =>
   (a.priority || 0) - (b.priority || 0) ||
-  a.fileMetadata.appData.content.priority - b.fileMetadata.appData.content.priority;
+  (a.fileMetadata.appData.content?.priority || 0) - (b.fileMetadata.appData.content?.priority || 0);
 
 //Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
 export const getProfileAttributes = async (
@@ -48,7 +51,7 @@ export const getProfileAttributes = async (
   profileId: string,
   sectionId: string | undefined,
   pageSize: number
-): Promise<DriveSearchResult<Attribute>[]> => {
+): Promise<DriveSearchResult<Attribute | undefined>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -61,13 +64,13 @@ export const getProfileAttributes = async (
     includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   });
 
-  let attributes: DriveSearchResult<Attribute>[] = (
+  let attributes: DriveSearchResult<Attribute | undefined>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
+  ).filter((attr) => !!attr) as DriveSearchResult<Attribute | undefined>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -109,7 +112,7 @@ export const getAttributeByFileId = async (
   dotYouClient: DotYouClient,
   profileId: string,
   fileId: string
-): Promise<DriveSearchResult<Attribute> | null> => {
+): Promise<DriveSearchResult<Attribute | undefined> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
   if (!header) return null;
@@ -120,7 +123,7 @@ export const getAttribute = async (
   dotYouClient: DotYouClient,
   profileId: string,
   id: string
-): Promise<DriveSearchResult<Attribute> | null> => {
+): Promise<DriveSearchResult<Attribute | undefined> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -151,7 +154,7 @@ export const getAttributes = async (
   profileId: string,
   tags: string[] | undefined,
   pageSize: number
-): Promise<DriveSearchResult<Attribute>[]> => {
+): Promise<DriveSearchResult<Attribute | undefined>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -181,7 +184,7 @@ export const dsrToAttributeFile = async (
   dsr: DriveSearchResult,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<Attribute> | null> => {
+): Promise<DriveSearchResult<Attribute | undefined> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Attribute>(
       dotYouClient,
@@ -189,15 +192,14 @@ export const dsrToAttributeFile = async (
       dsr,
       includeMetadataHeader
     );
-    if (!attrContent) return null;
 
-    const attributeFile: DriveSearchResult<Attribute> = {
+    const attributeFile: DriveSearchResult<Attribute | undefined> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: attrContent,
+          content: attrContent || undefined,
         },
       },
     };

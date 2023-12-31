@@ -54,9 +54,9 @@ export const useAttribute = ({
             attribute.fileMetadata.appData.content.profileId,
             attribute.fileMetadata.appData.content.id
           );
-          if (!serverAttr) return;
+          if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
 
-          const newAttr = { ...attribute, ...serverAttr };
+          const newAttr = { ...attribute, ...(serverAttr as DriveSearchResult<Attribute>) };
           saveAttribute(dotYouClient, newAttr, onVersionConflict)
             .then((result) => {
               if (result) resolve(result);
@@ -84,13 +84,18 @@ export const useAttribute = ({
     );
   };
 
-  const removeData = async (attribute: DriveSearchResult<Attribute>) => {
-    if (attribute.fileId)
-      return await removeAttribute(
-        dotYouClient,
-        attribute.fileMetadata.appData.content.profileId,
-        attribute.fileId
-      );
+  const removeBroken = async ({
+    attribute,
+    overrideProfileId,
+  }: {
+    attribute: DriveSearchResult<Attribute | undefined>;
+    overrideProfileId?: string;
+  }) => {
+    const profileId =
+      (attribute.fileMetadata.appData.content as Attribute)?.profileId || overrideProfileId;
+
+    if (attribute.fileId && profileId)
+      return await removeAttribute(dotYouClient, profileId, attribute.fileId);
     else console.error('No FileId provided for removeData');
   };
 
@@ -203,9 +208,10 @@ export const useAttribute = ({
       },
     }),
     remove: useMutation({
-      mutationFn: removeData,
-      onMutate: async (toRemoveDsr) => {
-        const toRemoveAttr = toRemoveDsr.fileMetadata.appData.content;
+      mutationFn: removeBroken,
+      onMutate: async (data) => {
+        const toRemoveAttr = data.attribute.fileMetadata.appData.content;
+        if (!toRemoveAttr) return;
 
         await queryClient.cancelQueries({
           queryKey: ['attributes', toRemoveAttr.profileId, toRemoveAttr.sectionId],
@@ -223,15 +229,19 @@ export const useAttribute = ({
 
         return { toRemoveAttr, previousAttributes };
       },
-      onError: (err, toRemoveDsr, context) => {
+      onError: (err, data, context) => {
         console.error(err);
-        const toRemoveAttr = toRemoveDsr.fileMetadata.appData.content;
-
+        const toRemoveAttr = data.attribute.fileMetadata.appData.content;
+        if (!toRemoveAttr) return;
         // Revert local caches to what they were
         queryClient.setQueryData(getListItemCacheKey(toRemoveAttr), context?.previousAttributes);
       },
       onSettled: (_data, _err, variables) => {
-        const newAttr = variables.fileMetadata.appData.content;
+        const newAttr = variables.attribute.fileMetadata.appData.content;
+        if (!newAttr) {
+          queryClient.invalidateQueries({ queryKey: ['attributes'], exact: false });
+          return;
+        }
         // Settimeout to allow serverSide a bit more time to process remove before fetching the data again
         setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ['siteData'] });

@@ -61,40 +61,40 @@ export const pascalCase = (str: string) => {
 
 // TODO: Simplify this function
 export const getHighestPrioAttributesFromMultiTypes = (
-  attributes?: (DriveSearchResult<Attribute> | null)[]
+  attributes?: (DriveSearchResult<Attribute | undefined> | null)[]
 ) => {
   if (!attributes) return undefined;
 
-  return (attributes?.filter((attr) => !!attr) as DriveSearchResult<Attribute>[])?.reduce(
-    (highestPrioArr, attr) => {
-      const highAttr = highestPrioArr.find(
-        (highAttr) =>
-          highAttr.fileMetadata.appData.content.type === attr.fileMetadata.appData.content.type
-      );
-      if (!attr.fileMetadata.appData.content.data) return highestPrioArr;
+  return (
+    attributes?.filter(
+      (attr) => !!attr && !!attr.fileMetadata.appData.content
+    ) as DriveSearchResult<Attribute>[]
+  )?.reduce((highestPrioArr, attr) => {
+    const highAttr = highestPrioArr.find(
+      (highAttr) =>
+        highAttr.fileMetadata.appData.content.type === attr.fileMetadata.appData.content.type
+    );
+    if (!attr.fileMetadata.appData.content.data) return highestPrioArr;
 
-      if (highAttr) {
-        if (
-          (highAttr.priority || 0) < (attr.priority || 0) ||
-          ((highAttr.priority || 0) === (attr.priority || 0) &&
-            highAttr.fileMetadata.appData.content.priority <
-              attr.fileMetadata.appData.content.priority)
-        ) {
-          return highestPrioArr;
-        } else {
-          return [
-            ...highestPrioArr.filter(
-              (highPrio) =>
-                highPrio.fileMetadata.appData.content.type !==
-                attr.fileMetadata.appData.content.type
-            ),
-            attr,
-          ];
-        }
+    if (highAttr) {
+      if (
+        (highAttr.priority || 0) < (attr.priority || 0) ||
+        ((highAttr.priority || 0) === (attr.priority || 0) &&
+          highAttr.fileMetadata.appData.content.priority <
+            attr.fileMetadata.appData.content.priority)
+      ) {
+        return highestPrioArr;
       } else {
-        return [...highestPrioArr, attr];
+        return [
+          ...highestPrioArr.filter(
+            (highPrio) =>
+              highPrio.fileMetadata.appData.content.type !== attr.fileMetadata.appData.content.type
+          ),
+          attr,
+        ];
       }
-    },
-    [] as DriveSearchResult<Attribute>[]
-  );
+    } else {
+      return [...highestPrioArr, attr];
+    }
+  }, [] as DriveSearchResult<Attribute>[]);
 };

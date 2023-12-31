@@ -16,7 +16,6 @@ export const useAttributes = ({
   sectionId?: string;
 }) => {
   const dotYouClient = useAuth().getDotYouClient();
-
   const queryClient = useQueryClient();
 
   const fetchData = async (profileId: string, sectionId: string) => {
@@ -36,15 +35,17 @@ export const useAttributes = ({
           ...attr.fileMetadata,
           appData: {
             ...attr.fileMetadata.appData,
-            content: {
-              ...attr.fileMetadata.appData.content,
-              typeDefinition: Object.values(AttributeDefinitions).find((def) => {
-                return def.type === attr.fileMetadata.appData.content.type;
-              }),
-            },
+            content: attr.fileMetadata.appData.content
+              ? {
+                  ...attr.fileMetadata.appData.content,
+                  typeDefinition: Object.values(AttributeDefinitions).find((def) => {
+                    return def.type === attr.fileMetadata.appData.content?.type;
+                  }),
+                }
+              : undefined,
           },
         },
-      } as DriveSearchResult<AttributeVm>;
+      } as DriveSearchResult<AttributeVm | undefined>;
     });
   };
 

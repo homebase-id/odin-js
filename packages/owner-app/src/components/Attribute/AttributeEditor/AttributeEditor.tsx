@@ -192,7 +192,7 @@ const AttributeEditor = ({
           'attribute. This action cannot be undone.'
         )}`,
       },
-      onClick: () => removeAttr(latestAttr as DriveSearchResult<AttributeVm>), // latestAttr is not new, so it's a DriveSearchResult
+      onClick: () => removeAttr({ attribute: latestAttr as DriveSearchResult<AttributeVm> }), // latestAttr is not new, so it's a DriveSearchResult
     });
   }
   return (

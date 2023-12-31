@@ -27,7 +27,7 @@ export const useHomeAttributes = () => {
             content: {
               ...attr.fileMetadata.appData.content,
               typeDefinition: Object.values(AttributeDefinitions).find((def) => {
-                return def.type === attr.fileMetadata.appData.content.type;
+                return def.type === attr.fileMetadata.appData.content?.type;
               }),
             },
           },

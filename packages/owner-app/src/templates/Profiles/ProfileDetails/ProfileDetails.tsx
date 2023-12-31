@@ -2,11 +2,12 @@ import { getNewId, slugify } from '@youfoundation/js-lib/helpers';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { useAttributes } from '../../../hooks/profiles/useAttributes';
+import { AttributeVm, useAttributes } from '../../../hooks/profiles/useAttributes';
 import {
   ActionButton,
   ActionGroup,
   ErrorBoundary,
+  Exclamation,
   Pencil,
   useProfiles,
 } from '@youfoundation/common-app';
@@ -27,7 +28,10 @@ import { Label } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { ProfileSection } from '@youfoundation/js-lib/profile';
+import { Attribute, ProfileSection } from '@youfoundation/js-lib/profile';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { useAttribute } from '../../../hooks/profiles/useAttribute';
+import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
 
 const ProfileDetails = () => {
   const {
@@ -257,8 +261,21 @@ const ProfileSectionEditor = ({
     );
   }
 
+  const filteredAttributes: DriveSearchResult<AttributeVm>[] = attributes.filter(
+    (attr) => attr.fileMetadata.appData.content
+  ) as DriveSearchResult<AttributeVm>[];
+
+  const emptyAttributes: DriveSearchResult<undefined>[] = attributes.filter(
+    (attr) => !attr.fileMetadata.appData.content
+  ) as DriveSearchResult<undefined>[];
+
+  console.log({
+    filteredAttributes,
+    emptyAttributes,
+  });
+
   // Find unique types
-  const types: string[] = attributes
+  const types: string[] = filteredAttributes
     .map((dsr) => dsr.fileMetadata.appData.content)
     .reduce((prevVal, curVal) => {
       if (prevVal.indexOf(curVal.type) !== -1) {
@@ -269,7 +286,7 @@ const ProfileSectionEditor = ({
 
   // Find matching attributes for those types
   const groupedAttributes = types.map((currType) => {
-    const matchingAttributes = attributes.filter(
+    const matchingAttributes = filteredAttributes.filter(
       (attr) => attr.fileMetadata.appData.content.type === currType
     );
     const lowestPrio = Math.min(
@@ -286,7 +303,7 @@ const ProfileSectionEditor = ({
   });
   groupedAttributes.sort((a, b) => a.priority - b.priority);
 
-  const highestPriority = attributes.reduce((prevValue, currValue) => {
+  const highestPriority = filteredAttributes.reduce((prevValue, currValue) => {
     if (prevValue > currValue.fileMetadata.appData.content.priority) {
       return prevValue;
     } else {
@@ -339,6 +356,11 @@ const ProfileSectionEditor = ({
       ) : (
         <div className="py-5">{t('section-empty-attributes')}</div>
       )}
+      {emptyAttributes.length
+        ? emptyAttributes.map((attr) => {
+            return <BrokenAttribute attribute={attr} profileId={profileId} key={attr.fileId} />;
+          })
+        : null}
       <AttributeCreator
         profileId={profileId}
         sectionId={section.sectionId}
