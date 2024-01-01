@@ -53,13 +53,12 @@ export const ensureDrive = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   name: string,
-  metadata: string,
+  metadata: string | undefined,
   allowAnonymousReads: boolean,
   allowSubscriptions = false
 ): Promise<boolean> => {
   assertIfDefined('targetDrive', targetDrive);
   assertIfDefined('name', name);
-  assertIfDefined('metadata', metadata);
 
   //create the drive if it does not exist
   const client = dotYouClient.createAxiosClient();
