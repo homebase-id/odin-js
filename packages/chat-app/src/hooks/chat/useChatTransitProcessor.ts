@@ -43,7 +43,6 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 };
 
 export const useChatTransitProcessor = (isEnabled = true) => {
-  useInboxProcessor(isEnabled);
   const [preAuthenticated, setIspreAuthenticated] = useState(false);
   const queryClient = useQueryClient();
 
@@ -128,4 +127,8 @@ export const useChatTransitProcessor = (isEnabled = true) => {
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive]
   );
+
+  // We first setup the websocket, and then trigger processing of the inbox
+  // So that new message will be detected by the websocket;
+  useInboxProcessor(isEnabled);
 };
