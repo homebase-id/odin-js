@@ -57,10 +57,12 @@ export const useChatTransitProcessor = (isEnabled = true) => {
 
   useEffect(() => {
     (async () => {
-      await preAuth(dotYouClient);
-      setIspreAuthenticated(true);
+      if (!preAuthenticated) {
+        await preAuth(dotYouClient);
+        setIspreAuthenticated(true);
+      }
     })();
-  }, []);
+  }, [preAuthenticated]);
 
   const handler = async (notification: TypedConnectionNotification) => {
     console.debug('[ChatTransitProcessor] Got notification', notification);

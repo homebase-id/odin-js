@@ -73,6 +73,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       enabled: !!conversationId,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,

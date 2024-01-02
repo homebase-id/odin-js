@@ -176,6 +176,8 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       queryKey: ['conversation', conversationId],
       queryFn: () => getSingleConversation(dotYouClient, conversationId as string),
       enabled: !!conversationId,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
     }),
     create: useMutation({
       mutationFn: createConversation,

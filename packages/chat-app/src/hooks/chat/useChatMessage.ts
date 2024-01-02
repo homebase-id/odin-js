@@ -77,6 +77,8 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       queryKey: ['chat-message', props?.messageId],
       queryFn: () => getMessageByUniqueId(props?.messageId as string),
       enabled: !!props?.messageId,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }),
     send: useMutation({
       mutationFn: sendMessage,
