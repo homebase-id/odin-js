@@ -45,7 +45,7 @@ const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: st
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
-    return `${payload.senderId} has posted to your feed`;
+    return `${payload.senderId} posted to your feed`;
   }
 
   return `${payload.senderId} sent you a notification via ${appName}`;

@@ -54,7 +54,7 @@ const bodyFormer = (payload: NotificationData, existingNotifications: Notificati
       payload.appDisplayName
     }`;
   } else if (payload.options.appId === FEED_APP_ID) {
-    return `${payload.senderId} has posted to your feed`;
+    return `${payload.senderId} posted to your feed`;
   }
 
   return `${payload.senderId} sent you a notification via ${payload.appDisplayName}`;
