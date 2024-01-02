@@ -1,7 +1,7 @@
 {
     "name": "Homebase Chat App",
     "short_name": "Chat",
-    "start_url": "/",
+    "start_url": "/apps/chat",
     "icons": [
         {
             "src": "/icons/android-chrome-192x192.png",
