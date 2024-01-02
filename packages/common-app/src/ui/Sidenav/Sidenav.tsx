@@ -38,6 +38,7 @@ import {
 } from '@youfoundation/common-app';
 import { useUnreadPushNotificationsCount } from '../../../../owner-app/src/hooks/notifications/usePushNotifications';
 import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const STORAGE_KEY = 'isOpen';
 
@@ -212,6 +213,8 @@ export const Sidenav = ({
   );
 };
 
+const isDebug = hasDebugFlag();
+
 const MoreItems = ({
   isOpen: isNavOpen,
   logout,
@@ -261,7 +264,7 @@ const MoreItems = ({
           </button>
         ) : null}
         <NavItem icon={Cog} label={'Settings'} to={'/owner/settings'} />
-        <NavItem icon={Scissors} label={'Demo Data'} to={'/owner/demo-data'} />
+        {isDebug ? <NavItem icon={Scissors} label={'Demo Data'} to={'/owner/demo-data'} /> : null}
         <hr className="border-b dark:border-slate-500" />
         <NavItem icon={HardDrive} label={'Drives'} to={'/owner/drives'} />
         <hr className="border-b dark:border-slate-500" />

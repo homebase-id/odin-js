@@ -153,13 +153,13 @@ const CircleDetails = () => {
       />
       <div className="py-5">
         {members?.length && !membersLoading ? (
-          <div className="-m-1 flex flex-row flex-wrap">
+          <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
             {members.map((member) => (
               <CircleMemberCard
                 key={member.domain}
                 circleId={decodedCircleKey}
                 member={member}
-                className="w-1/2 p-1 sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6"
+                className="min-w-[5rem]"
               />
             ))}
           </div>

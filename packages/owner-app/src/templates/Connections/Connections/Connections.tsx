@@ -230,23 +230,24 @@ const ActiveConnectionSection = ({
               />
             }
           />
-          <div className="-m-1 mt-5 flex flex-row flex-wrap">
+          <div className="mt-5 grid grid-cols-2 gap-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
             {activeConnectionsLoading && (
               <>
-                <LoadingBlock className="w-1/2 p-1 sm:w-1/3 md:w-1/4 lg:w-1/6 2xl:w-1/12" />
-                <LoadingBlock className="w-1/2 p-1 sm:w-1/3 md:w-1/4 lg:w-1/6 2xl:w-1/12" />
+                <LoadingBlock className="w-full" />
+                <LoadingBlock className="w-full" />
               </>
             )}
 
             {activeConnections?.pages?.[activePage - 1]?.results?.map((activeConnection) =>
               typeof activeConnection === 'object' ? (
                 <PersonActive
-                  className="w-1/2 p-1 sm:w-1/3 md:w-1/4 lg:w-1/6 2xl:w-1/12"
+                  className="min-w-[5rem]"
                   dotYouProfile={activeConnection as DotYouProfile}
                   key={activeConnection.odinId}
                 />
               ) : null
             )}
+            <div></div>
           </div>
           <div className="flex flex-row justify-center pt-5 md:hidden">
             <Pager
