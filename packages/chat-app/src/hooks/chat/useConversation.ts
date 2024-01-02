@@ -19,8 +19,10 @@ import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 
-export const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) =>
-  conversationId ? await getConversation(dotYouClient, conversationId) : null;
+export const getSingleConversation = async (
+  dotYouClient: DotYouClient,
+  conversationId: string | undefined
+) => (conversationId ? await getConversation(dotYouClient, conversationId) : null);
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
@@ -174,9 +176,10 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
-      queryFn: () => getSingleConversation(dotYouClient, conversationId as string),
+      queryFn: () => getSingleConversation(dotYouClient, conversationId),
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+      enabled: !!conversationId,
     }),
     create: useMutation({
       mutationFn: createConversation,

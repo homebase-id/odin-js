@@ -92,7 +92,7 @@ export const useChatTransitProcessor = (isEnabled = true) => {
         // Check if the message is orphaned from a conversation
         const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>({
           queryKey: ['conversation', conversationId],
-          queryFn: () => getSingleConversation(dotYouClient, conversationId as string),
+          queryFn: () => getSingleConversation(dotYouClient, conversationId),
         });
 
         if (!conversation) {
