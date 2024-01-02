@@ -19,6 +19,9 @@ import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 
+export const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) =>
+  conversationId ? await getConversation(dotYouClient, conversationId) : null;
+
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -27,9 +30,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   // Already get the conversations in the cache, so we can use that on `getExistingConversationsForRecipient`
   useConversations().all;
-
-  const getSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) =>
-    await getConversation(dotYouClient, conversationId);
 
   const getExistingConversationsForRecipient = async (
     recipients: string[]
@@ -175,7 +175,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     single: useQuery({
       queryKey: ['conversation', conversationId],
       queryFn: () => getSingleConversation(dotYouClient, conversationId as string),
-      enabled: !!conversationId,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     }),
