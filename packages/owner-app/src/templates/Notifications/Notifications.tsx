@@ -19,7 +19,7 @@ import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDi
 import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { CHAT_APP_ID, OWNER_APP_ID } from '../../app/Constants';
+import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID } from '../../app/Constants';
 import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 interface NotificationClickData {
@@ -44,6 +44,8 @@ const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: st
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+  } else if (payload.options.appId === FEED_APP_ID) {
+    return `${payload.senderId} has posted to your feed`;
   }
 
   return `${payload.senderId} sent you a notification via ${appName}`;
@@ -63,6 +65,8 @@ const getTargetLink = (payload: PushNotification) => {
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
+  } else if (payload.options.appId === FEED_APP_ID) {
+    return `/owner/feed`;
   }
 };
 
@@ -180,7 +184,13 @@ const NotificationGroup = ({
   notifications: PushNotification[];
 }) => {
   const { data: app } = useApp({ appId: appId }).fetch;
-  const appName = app?.name ?? (stringGuidsEqual(appId, OWNER_APP_ID) ? 'Homebase' : 'Unknown');
+  const appName =
+    app?.name ??
+    (stringGuidsEqual(appId, OWNER_APP_ID)
+      ? 'Homebase'
+      : stringGuidsEqual(appId, FEED_APP_ID)
+      ? 'Homebase - Feed'
+      : 'Unknown');
 
   const { mutate: remove } = usePushNotifications().remove;
   const { mutate: markAsRead } = usePushNotifications().markAsRead;

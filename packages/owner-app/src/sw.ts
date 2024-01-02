@@ -30,6 +30,7 @@ interface PushData {
 
 const OWNER_APP_ID = 'ac126e09-54cb-4878-a690-856be692da16';
 const CHAT_APP_ID = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
+const FEED_APP_ID = '5f887d80-0132-4294-ba40-bda79155551d';
 
 const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
@@ -52,6 +53,8 @@ const bodyFormer = (payload: NotificationData, existingNotifications: Notificati
     return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'} via ${
       payload.appDisplayName
     }`;
+  } else if (payload.options.appId === FEED_APP_ID) {
+    return `${payload.senderId} has posted to your feed`;
   }
 
   return `${payload.senderId} sent you a notification via ${payload.appDisplayName}`;
