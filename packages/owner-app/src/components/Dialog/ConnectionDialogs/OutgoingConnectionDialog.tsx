@@ -45,7 +45,7 @@ const OutgoingConnectionDialog = ({
   const [doubleChecked, setDoubleChecked] = useState(false);
 
   const [connectionTarget, setConnectionTarget] = useState<string | undefined>(
-    targetOdinId || undefined
+    targetOdinId?.toLowerCase() || undefined
   );
   const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [circleGrants, setCircleGrants] = useState<string[]>([]);

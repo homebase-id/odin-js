@@ -16,13 +16,13 @@ export const useMarkMessagesAsRead = ({
   const {
     markAsRead: { mutate: markAsRead, status: markAsReadStatus },
   } = useChatMessages();
-  const isTriggeredOnce = useRef(false);
+  const isProcessing = useRef(false);
 
   const { mutate: updateConversation } = useConversation().update;
   const [pendingReadTime, setPendingReadTime] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    if (!conversation || !messages || isTriggeredOnce.current) return;
+    if (!conversation || !messages || isProcessing.current) return;
 
     setPendingReadTime(new Date());
     const unreadMessages = messages.filter(
@@ -32,7 +32,7 @@ export const useMarkMessagesAsRead = ({
     );
 
     if (!unreadMessages.length) return;
-    isTriggeredOnce.current = true;
+    isProcessing.current = true;
     markAsRead({
       conversation: conversation,
       messages: unreadMessages,
@@ -47,6 +47,7 @@ export const useMarkMessagesAsRead = ({
 
       updateConversation({ conversation });
       setPendingReadTime(undefined);
+      isProcessing.current = false;
     }
   }, [markAsReadStatus]);
 };

@@ -66,7 +66,10 @@ export const IdentityPageMetaAndActions = ({
   } = useConnectionActions();
 
   // Contact data:
-  const { data: contactData } = useContact({ odinId: odinId }).fetch;
+  const { data: contactData } = useContact({
+    odinId: odinId,
+    canSave: connectionInfo?.status === 'connected',
+  }).fetch;
   const contactContent = contactData?.fileMetadata?.appData?.content;
   const mainAction =
     connectionInfo?.status === 'connected' ? (

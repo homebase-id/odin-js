@@ -22,7 +22,7 @@ export const drives = [
   {
     a: '9ff813aff2d61e2f9b9db189e72d1a11',
     t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat',
+    n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
@@ -30,7 +30,7 @@ export const drives = [
     // Standard profile Info
     a: '8f12d8c4933813d378488d91ed23b64c',
     t: '597241530e3ef24b28b9a75ec3a5c45c',
-    n: '',
+    n: 'Standard Profile info',
     d: '',
     p: DrivePermissionType.Read,
   },
@@ -38,7 +38,7 @@ export const drives = [
     // Contacts
     a: '2612429d1c3f037282b8d42fb2cc0499',
     t: '70e92f0f94d05f5c7dcd36466094f3a5',
-    n: '',
+    n: 'Contact Drive',
     d: '',
     p: DrivePermissionType.Read,
   },
@@ -47,7 +47,7 @@ const circleDrives = [
   {
     a: '9ff813aff2d61e2f9b9db189e72d1a11',
     t: '66ea8355ae4155c39b5a719166b510e3',
-    n: '',
+    n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Write,
   },

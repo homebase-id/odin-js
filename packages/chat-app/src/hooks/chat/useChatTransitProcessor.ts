@@ -20,7 +20,7 @@ import { useEffect, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
 import { processCommand } from './useChatCommandProcessor';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { useConversation } from './useConversation';
+import { getSingleConversation, useConversation } from './useConversation';
 
 const MINUTE_IN_MS = 60000;
 
@@ -43,9 +43,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 };
 
 export const useChatTransitProcessor = (isEnabled = true) => {
-  useInboxProcessor(isEnabled);
   const [preAuthenticated, setIspreAuthenticated] = useState(false);
-  const queryClient = useQueryClient();
 
   const identity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -54,13 +52,16 @@ export const useChatTransitProcessor = (isEnabled = true) => {
   const {
     restoreChat: { mutate: restoreChat },
   } = useConversation();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     (async () => {
-      await preAuth(dotYouClient);
-      setIspreAuthenticated(true);
+      if (!preAuthenticated) {
+        await preAuth(dotYouClient);
+        setIspreAuthenticated(true);
+      }
     })();
-  }, []);
+  }, [preAuthenticated]);
 
   const handler = async (notification: TypedConnectionNotification) => {
     console.debug('[ChatTransitProcessor] Got notification', notification);
@@ -91,6 +92,7 @@ export const useChatTransitProcessor = (isEnabled = true) => {
         // Check if the message is orphaned from a conversation
         const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>({
           queryKey: ['conversation', conversationId],
+          queryFn: () => getSingleConversation(dotYouClient, conversationId),
         });
 
         if (!conversation) {
@@ -126,4 +128,8 @@ export const useChatTransitProcessor = (isEnabled = true) => {
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive]
   );
+
+  // We first setup the websocket, and then trigger processing of the inbox
+  // So that new message will be detected by the websocket;
+  useInboxProcessor(isEnabled);
 };

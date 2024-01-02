@@ -21,7 +21,7 @@ const ConnectionCard = (props: PersonCardProps) => {
         <h2 className="font-thiner mb-6 flex flex-col dark:text-white">
           <span>{fullName ?? props.odinId}</span>
           {fullName ? (
-            <small className="d-block text-sm text-slate-500 dark:text-slate-400">
+            <small className="d-block break-words text-sm text-slate-500 dark:text-slate-400">
               {props.odinId}
             </small>
           ) : (
