@@ -21,6 +21,7 @@ import {
 } from '../../../providers/ConversationProvider';
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
+import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 
 export const ChatComposer = ({
   conversation,
@@ -85,6 +86,10 @@ export const ChatComposer = ({
     if (files?.length) clearReplyMsg();
   }, [files]);
 
+  const isTouchDevice = () => {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  };
+
   return (
     <>
       <ErrorNotification error={sendMessageError} />
@@ -115,11 +120,15 @@ export const ChatComposer = ({
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
-            autoFocus={true}
-            onSubmit={(val) => {
-              setMessage(val);
-              doSend();
-            }}
+            autoFocus={!isTouchDevice()}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : (val) => {
+                    setMessage(val);
+                    doSend();
+                  }
+            }
           />
           <span className="my-auto">
             <ActionButton
