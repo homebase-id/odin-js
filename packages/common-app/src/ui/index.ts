@@ -37,6 +37,7 @@ export * from './Icons/Bullhorn';
 export * from './Icons/Cake';
 export * from './Icons/ChatBubble';
 export * from './Icons/Check';
+export * from './Icons/Clock';
 export * from './Icons/Circles';
 export * from './Icons/PaperPlane';
 export * from './Icons/Clipboard';

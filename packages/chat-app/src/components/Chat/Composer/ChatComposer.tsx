@@ -53,8 +53,7 @@ export const ChatComposer = ({
     if (
       (!message?.trim() && !files) ||
       !conversationContent ||
-      !conversation.fileMetadata.appData.uniqueId ||
-      sendMessageState !== 'idle'
+      !conversation.fileMetadata.appData.uniqueId
     )
       return;
 
@@ -72,7 +71,7 @@ export const ChatComposer = ({
 
   // Reset state, when the message was sent successfully
   useEffect(() => {
-    if (sendMessageState === 'success') {
+    if (sendMessageState === 'pending') {
       setMessage('');
       setStateIndex((oldIndex) => oldIndex + 1);
       setFiles([]);

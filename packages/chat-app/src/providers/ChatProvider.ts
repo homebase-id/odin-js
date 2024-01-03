@@ -42,7 +42,7 @@ export const ChatDeletedArchivalStaus = 2;
 
 export enum ChatDeliveryStatus {
   // NotSent = 10, // NotSent is not a valid atm, when it's not sent, it doesn't "exist"
-  // Sending = 15, // Sending is covered by the upload state of the hook
+  Sending = 15, // When it's sending; Used for optimistic updates
 
   Sent = 20, // when delivered to your identity
   Delivered = 30, // when delivered to the recipient inbox

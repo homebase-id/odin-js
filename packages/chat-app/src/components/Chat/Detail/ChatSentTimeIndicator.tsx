@@ -16,6 +16,8 @@ export const ChatSentTimeIndicator = ({
     <p className={`select-none text-sm text-foreground/70 ${className || ''}`}>{children}</p>
   );
 
+  if (!msg.fileMetadata.created) return null;
+
   const date = new Date(msg.fileMetadata.created);
   if (!date) return <Wrapper>{t('Unknown')}</Wrapper>;
 
