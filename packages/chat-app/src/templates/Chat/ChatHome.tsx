@@ -12,6 +12,7 @@ import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidena
 import { ProfileHeader } from '../../components/Chat/Conversations/Sidenav/ProfileHeader';
 import { Sidenav } from '@youfoundation/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
+import { Helmet } from 'react-helmet-async';
 
 export const CHAT_ROOT = ROOT_PATH;
 
@@ -23,16 +24,22 @@ export const ChatHome = () => {
   useChatCommandProcessor();
 
   return (
-    <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
-      <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
+    <>
+      <Helmet>
+        <title>Homebase | Chat</title>
+      </Helmet>
 
-      <div className="h-[100dvh] w-full flex-grow bg-background">
-        <ChatDetail
-          conversationId={conversationKey}
-          toggleSidenav={() => setIsSidenavOpen(!isSidenavOpen)}
-        />
+      <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
+        <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
+
+        <div className="h-[100dvh] w-full flex-grow bg-background">
+          <ChatDetail
+            conversationId={conversationKey}
+            toggleSidenav={() => setIsSidenavOpen(!isSidenavOpen)}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
