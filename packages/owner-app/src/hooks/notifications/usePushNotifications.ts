@@ -12,9 +12,11 @@ import {
   DeleteNotifications,
   GetNotifications,
   MarkNotificationsAsRead,
+  SendNotification,
 } from '../../provider/notifications/PushNotificationsProvider';
 import { ApiType } from '@youfoundation/js-lib/core';
 import { useEffect, useState } from 'react';
+import { OWNER_APP_ID } from '../../app/Constants';
 
 const PAGE_SIZE = 50;
 export const usePushNotifications = (props?: { appId?: string }) => {
@@ -64,6 +66,7 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   return notifications?.results.filter((n) => n.unread).length ?? 0;
 };
 
+const TestGuid = '00000000-0000-0000-0000-000000000000';
 export const usePushNotificationClient = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
@@ -78,11 +81,24 @@ export const usePushNotificationClient = () => {
 
   return {
     isSupported:
+      'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window,
+    canEnable:
       'PushManager' in window &&
       'serviceWorker' in navigator &&
       isReady &&
       'Notification' in window,
     isEnabled: 'Notification' in window && Notification.permission === 'granted',
+    sendTestNotification: useMutation({
+      mutationFn: async () => {
+        return await SendNotification(dotYouClient, {
+          appId: OWNER_APP_ID,
+          typeId: TestGuid,
+          silent: false,
+          tagId: TestGuid,
+          unEncryptedMessage: 'Test notification',
+        });
+      },
+    }),
     enableOnThisDevice: useMutation({
       mutationFn: async () => {
         const permission = await Notification.requestPermission();

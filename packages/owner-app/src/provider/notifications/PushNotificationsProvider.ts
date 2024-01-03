@@ -71,3 +71,11 @@ export const DeleteNotifications = async (
     },
   });
 };
+
+export const SendNotification = async (
+  dotYouClient: DotYouClient,
+  notification: PushNotificationOptions
+) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  return await axiosClient.post(`/notify/push/push`, notification);
+};

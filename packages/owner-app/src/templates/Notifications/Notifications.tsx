@@ -1,20 +1,14 @@
 import {
   ActionButton,
-  Bubble,
   Cog,
   ellipsisAtMaxChar,
-  ErrorNotification,
   SubtleMessage,
   t,
   Toast,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import {
-  usePushNotificationClient,
-  usePushNotificationClients,
-  usePushNotifications,
-} from '../../hooks/notifications/usePushNotifications';
+import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { useEffect, useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
@@ -73,13 +67,6 @@ const getTargetLink = (payload: PushNotification) => {
 
 const Notifications = () => {
   const { data: notifications } = usePushNotifications().fetch;
-  const { isSupported, isEnabled } = usePushNotificationClient();
-  const {
-    mutate: enable,
-    status: enableStatus,
-    error: enableError,
-  } = usePushNotificationClient().enableOnThisDevice;
-  const { data: current } = usePushNotificationClients().fetchCurrent;
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -110,21 +97,11 @@ const Notifications = () => {
         title={t('Notifications')}
         icon={Bell}
         actions={
-          <>
-            {isSupported ? (
-              (isEnabled && current) || enableStatus === 'success' ? null : (
-                <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
-                  {t('Enable push')}
-                </ActionButton>
-              )
-            ) : null}
-            <ActionButton type="secondary" icon={Cog} onClick={() => setDialogOpen(true)}>
-              {t('Settings')}
-            </ActionButton>
-          </>
+          <ActionButton type="primary" icon={Cog} onClick={() => setDialogOpen(true)}>
+            {t('Notifications')}
+          </ActionButton>
         }
       />
-      <ErrorNotification error={enableError} />
       {notifications?.results?.length ? (
         <div className="flex flex-col gap-3 px-2">
           {Object.keys(groupedNotificationsPerDay).map((day) => (

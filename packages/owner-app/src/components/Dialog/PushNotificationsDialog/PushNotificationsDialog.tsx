@@ -1,8 +1,11 @@
 import { createPortal } from 'react-dom';
 import {
+  Arrow,
+  Bubble,
   Check,
   ErrorNotification,
   HardDrive,
+  PaperPlane,
   SubtleCheck,
   SubtleMessage,
   Times,
@@ -15,19 +18,16 @@ import { DialogWrapper } from '@youfoundation/common-app';
 import {
   usePushNotificationClient,
   usePushNotificationClients,
+  usePushNotifications,
 } from '../../../hooks/notifications/usePushNotifications';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const target = usePortal('modal-container');
-  const { data: devices } = usePushNotificationClients().fetch;
-  const {
-    removeAll: {
-      mutate: removeAllDevices,
-      status: removeAllDevicesStatus,
-      error: removeAllDevicesError,
-    },
-  } = usePushNotificationClients();
+  const [isDetails, setIsDetails] = useState(false);
+
   const { data: current } = usePushNotificationClients().fetchCurrent;
   const { isSupported, isEnabled } = usePushNotificationClient();
 
@@ -46,11 +46,133 @@ const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose
       }
       onClose={onClose}
     >
+      <Settings />
+
+      <button
+        onClick={() => setIsDetails(!isDetails)}
+        className={`mt-5 flex flex-row items-center ${isDetails ? 'font-bold' : 'text-sm italic'}`}
+      >
+        {t('All devices')}{' '}
+        <Arrow className={`ml-2 h-4 w-4 transition-transform ${isDetails ? 'rotate-90' : ''}`} />
+      </button>
+      {isDetails ? <AllDevicesDetail className="mt-5" /> : null}
+    </DialogWrapper>
+  );
+
+  return createPortal(dialog, target);
+};
+
+const Settings = () => {
+  const { data: current } = usePushNotificationClients().fetchCurrent;
+  const { isSupported, canEnable, isEnabled } = usePushNotificationClient();
+
+  const {
+    mutate: enable,
+    status: enableStatus,
+    error: enableError,
+  } = usePushNotificationClient().enableOnThisDevice;
+
+  const {
+    mutate: sendTestNotification,
+    status: testNotificationStatus,
+    error: testNotificationError,
+  } = usePushNotificationClient().sendTestNotification;
+
+  // const {
+  //   mutate: removeCurrent,
+  //   status: removeStatus,
+  //   error: removeError,
+  // } = usePushNotificationClients().removeCurrent;
+
+  return (
+    <>
+      <ErrorNotification error={testNotificationError || enableError} />
+
+      {!isSupported ? (
+        <p>
+          {t('Notifications are not supported on this browser')}{' '}
+          <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
+            {t(`What does this mean?`)}
+          </Link>
+        </p>
+      ) : null}
+
+      {isSupported && !canEnable ? (
+        <p>{t(`We can't enable notifications at the moment, please refresh and try again`)}</p>
+      ) : null}
+
+      {isSupported && ((isEnabled && current) || enableStatus === 'success') ? (
+        <>
+          <SubtleMessage>
+            {t(
+              'You can confirm that notifications are working as expeced, by triggering a test notification:'
+            )}
+          </SubtleMessage>
+
+          <ActionButton
+            icon={PaperPlane}
+            onClick={() => sendTestNotification()}
+            state={testNotificationStatus}
+          >
+            {t('Send a test notification')}
+          </ActionButton>
+          {testNotificationStatus === 'success' ? (
+            <p className="my-2">
+              {t(`Notification sent. Didn't get it?`)}{' '}
+              <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
+                {t(`What can I do?`)}
+              </Link>
+            </p>
+          ) : null}
+
+          {/* <div className="mt-7">
+            <SubtleMessage>
+              {t(`Don't want to receive notifications on this device?`)}
+            </SubtleMessage>
+            <ActionButton
+              onClick={() => removeCurrent()}
+              type="remove"
+              icon={Times}
+              state={removeStatus}
+            >
+              {t('Disable notifications')}
+            </ActionButton>
+          </div> */}
+        </>
+      ) : (
+        <>
+          <SubtleMessage>
+            {t(
+              `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open`
+            )}
+            .
+          </SubtleMessage>
+          <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
+            {t('Enable push notifications')}
+          </ActionButton>
+        </>
+      )}
+    </>
+  );
+};
+
+const AllDevicesDetail = ({ className }: { className?: string }) => {
+  const { data: devices } = usePushNotificationClients().fetch;
+  const {
+    removeAll: {
+      mutate: removeAllDevices,
+      status: removeAllDevicesStatus,
+      error: removeAllDevicesError,
+    },
+  } = usePushNotificationClients();
+
+  return (
+    <div className={className}>
       <ErrorNotification error={removeAllDevicesError} />
       <p className="mb-5 text-xl">
         {t('Registered devices:')}
         <small className="block text-sm text-foreground/80">
-          {t('These devices will device specfici notification when they come in')}
+          {t('All of these devices will show notification when they come in')}
         </small>
       </p>
       {!devices?.length ? (
@@ -75,10 +197,8 @@ const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose
           </div>
         </>
       )}
-    </DialogWrapper>
+    </div>
   );
-
-  return createPortal(dialog, target);
 };
 
 const DeviceView = ({
