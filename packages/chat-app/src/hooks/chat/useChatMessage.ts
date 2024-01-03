@@ -45,6 +45,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             deliveryStatus: ChatDeliveryStatus.Sent,
             replyId: replyId,
           },
+          userDate: new Date().getTime(),
         },
       },
       serverMetadata: {
