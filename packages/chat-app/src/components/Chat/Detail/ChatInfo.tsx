@@ -69,7 +69,7 @@ export const ChatInfo = ({
                     href={`https://${recipient}`}
                     rel="noreferrer noopener"
                     target="_blank"
-                    className="text-primary"
+                    className="text-primary hover:underline"
                   >
                     {recipient}
                   </a>

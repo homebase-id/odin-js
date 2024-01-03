@@ -2,6 +2,7 @@ import {
   ActionButton,
   Bubble,
   Cog,
+  ellipsisAtMaxChar,
   ErrorNotification,
   SubtleMessage,
   t,
@@ -224,9 +225,7 @@ const NotificationGroup = ({
               {sliced.map((notification, index) => (
                 <div
                   key={notification.id}
-                  className={
-                    index === 0 ? 'relative z-10' : 'absolute w-full overflow-hidden rounded-lg'
-                  }
+                  className={index === 0 ? 'relative z-10' : 'absolute w-full rounded-lg'}
                   style={
                     index === 0
                       ? undefined
@@ -242,7 +241,11 @@ const NotificationGroup = ({
                 >
                   <Toast
                     title={titleFormer(appName)}
-                    body={bodyFormer(notification, false, appName)}
+                    // Keeping the hidden ones short
+                    body={ellipsisAtMaxChar(
+                      bodyFormer(notification, false, appName),
+                      index === 0 ? 120 : 40
+                    )}
                     timestamp={notification.created}
                     onDismiss={() => remove(typeGroup.map((n) => n.id))}
                     onOpen={() => markAsRead(typeGroup.map((n) => n.id))}

@@ -1,4 +1,4 @@
-import { Envelope, t } from '@youfoundation/common-app';
+import { Envelope, t, useDotYouClient } from '@youfoundation/common-app';
 import { useContact } from '../../../hooks/contacts/useContact';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
@@ -7,6 +7,7 @@ import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ContactFile } from '@youfoundation/js-lib/network';
+import { useConnection } from '../../../hooks/connections/useConnection';
 
 interface ContactInfoProps {
   odinId?: string;
@@ -18,16 +19,37 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
     fetch: { data: contact },
     refresh: { mutate: refresh, status: refreshState, error: refreshError },
   } = useContact(odinId ? { odinId: odinId } : { id: contactId });
+  const {
+    fetch: { data: connectionInfo },
+  } = useConnection({ odinId: odinId });
+  const { getIdentity } = useDotYouClient();
 
   if (!contact) return null;
 
   const contactContent = contact?.fileMetadata.appData.content;
 
+  const isConnected = connectionInfo?.status === 'connected';
+  const identity = getIdentity();
+
   return (
     <>
       <ErrorNotification error={refreshError} />
       <Section
-        title={t('Details')}
+        title={
+          <>
+            {t('Details')}
+            <a
+              href={`https://${odinId}${
+                isConnected && identity ? '?youauth-logon=' + identity : ''
+              }`}
+              rel="noopener noreferrer"
+              target="_blank"
+              className="block text-sm text-primary hover:underline"
+            >
+              {odinId}
+            </a>
+          </>
+        }
         actions={
           odinId &&
           contact?.fileMetadata.appData.uniqueId && (
