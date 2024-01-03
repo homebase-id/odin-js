@@ -21,7 +21,10 @@ import {
 } from '../../../providers/ConversationProvider';
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
-import { getOperatingSystem } from '@youfoundation/js-lib/auth';
+
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
 
 export const ChatComposer = ({
   conversation,
@@ -85,10 +88,6 @@ export const ChatComposer = ({
   useEffect(() => {
     if (files?.length) clearReplyMsg();
   }, [files]);
-
-  const isTouchDevice = () => {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  };
 
   return (
     <>
