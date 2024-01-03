@@ -5,6 +5,7 @@ import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { getSocialFeed } from '@youfoundation/js-lib/peer';
+import { useCallback } from 'react';
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -15,7 +16,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
 
   // Add invalidation of social feed when a new file is added to the feed drive (this enforces that only remote updates trigger a refresh)
   const queryClient = useQueryClient();
-  const handler = (notification: TypedConnectionNotification) => {
+  const handler = useCallback((notification: TypedConnectionNotification) => {
     if (
       notification.notificationType === 'fileAdded' &&
       notification.targetDrive?.alias === BlogConfig.FeedDrive.alias &&
@@ -24,7 +25,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       console.debug({ notification });
       queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
     }
-  };
+  }, []);
   useNotificationSubscriber(handler, ['fileAdded']);
 
   const fetchAll = async ({

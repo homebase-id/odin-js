@@ -6,7 +6,7 @@ import {
   TargetDrive,
   TypedConnectionNotification,
 } from '@youfoundation/js-lib/core';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 
@@ -16,6 +16,7 @@ export const useNotificationSubscriber = (
   types: NotificationType[],
   drives: TargetDrive[] = [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive]
 ) => {
+  const [isActive, setIsActive] = useState<boolean>(false);
   const isConnected = useRef<boolean>(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
 
@@ -35,7 +36,10 @@ export const useNotificationSubscriber = (
 
     if (!isConnected.current && localHandler) {
       isConnected.current = true;
-      Subscribe(dotYouClient, drives, localHandler);
+      (async () => {
+        await Subscribe(dotYouClient, drives, localHandler);
+        setIsActive(true);
+      })();
     }
 
     return () => {
@@ -43,6 +47,7 @@ export const useNotificationSubscriber = (
         isConnected.current = false;
         try {
           Disconnect(localHandler);
+          setIsActive(false);
         } catch (e) {
           console.error(e);
         }
@@ -50,5 +55,5 @@ export const useNotificationSubscriber = (
     };
   }, [subscriber]);
 
-  return;
+  return isActive;
 };

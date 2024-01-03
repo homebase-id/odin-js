@@ -17,7 +17,7 @@ import {
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
@@ -29,18 +29,17 @@ const MINUTE_IN_MS = 60000;
 // So that new message will be detected by the websocket;
 export const useLiveChatProcessor = () => {
   // Setup websocket, so that we get notified instantly when a new message is received
-  useChatWebsocket();
+  const connected = useChatWebsocket();
 
-  // We might need to add a connected check here, as we don't want to process the inbox if we are not connected on the websocket yet
-  // Process the inbox on startup
-  const { status: inboxStatus } = useInboxProcessor();
+  // Process the inbox on startup (once the socket is connected)
+  const { status: inboxStatus } = useInboxProcessor(connected);
 
   // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
   useChatCommandProcessor(inboxStatus === 'success');
 };
 
 // Process the inbox on startup
-const useInboxProcessor = () => {
+const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchData = async () => {
@@ -53,6 +52,7 @@ const useInboxProcessor = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: MINUTE_IN_MS * 60,
+    enabled: connected,
   });
 };
 
@@ -77,7 +77,7 @@ const useChatWebsocket = () => {
     })();
   }, [preAuthenticated]);
 
-  const handler = async (notification: TypedConnectionNotification) => {
+  const handler = useCallback(async (notification: TypedConnectionNotification) => {
     console.debug('[ChatTransitProcessor] Got notification', notification);
     if (notification.notificationType === 'transitFileReceived') {
       console.debug(
@@ -135,9 +135,9 @@ const useChatWebsocket = () => {
           await markCommandComplete(dotYouClient, ChatDrive, [processedCommand]);
       }
     }
-  };
+  }, []);
 
-  useNotificationSubscriber(
+  return useNotificationSubscriber(
     preAuthenticated ? handler : undefined,
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive]
