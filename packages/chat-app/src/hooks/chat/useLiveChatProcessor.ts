@@ -4,6 +4,7 @@ import {
   Notify,
   ReceivedCommand,
   TypedConnectionNotification,
+  getCommands,
   markCommandComplete,
 } from '@youfoundation/js-lib/core';
 
@@ -16,16 +17,30 @@ import {
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
-import { processCommand } from './useChatCommandProcessor';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
+import { processCommand } from '../../providers/ChatCommandProvider';
 
 const MINUTE_IN_MS = 60000;
 
+// We first setup the websocket, and then trigger processing of the inbox
+// So that new message will be detected by the websocket;
+export const useLiveChatProcessor = () => {
+  // Setup websocket, so that we get notified instantly when a new message is received
+  useChatWebsocket();
+
+  // We might need to add a connected check here, as we don't want to process the inbox if we are not connected on the websocket yet
+  // Process the inbox on startup
+  const { status: inboxStatus } = useInboxProcessor();
+
+  // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
+  useChatCommandProcessor(inboxStatus === 'success');
+};
+
 // Process the inbox on startup
-const useInboxProcessor = (isEnabled?: boolean) => {
+const useInboxProcessor = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchData = async () => {
@@ -38,11 +53,10 @@ const useInboxProcessor = (isEnabled?: boolean) => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: MINUTE_IN_MS * 60,
-    enabled: isEnabled,
   });
 };
 
-export const useChatTransitProcessor = (isEnabled = true) => {
+const useChatWebsocket = () => {
   const [preAuthenticated, setIspreAuthenticated] = useState(false);
 
   const identity = useDotYouClient().getIdentity();
@@ -124,12 +138,52 @@ export const useChatTransitProcessor = (isEnabled = true) => {
   };
 
   useNotificationSubscriber(
-    isEnabled && preAuthenticated ? handler : undefined,
+    preAuthenticated ? handler : undefined,
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive]
   );
+};
 
-  // We first setup the websocket, and then trigger processing of the inbox
-  // So that new message will be detected by the websocket;
-  useInboxProcessor(isEnabled);
+const useChatCommandProcessor = (isEnabled?: boolean) => {
+  const { getDotYouClient, getIdentity } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
+  const identity = getIdentity();
+  const queryClient = useQueryClient();
+
+  const isProcessing = useRef(false);
+
+  useEffect(() => {
+    if (!isEnabled) return;
+
+    (async () => {
+      if (!identity) return;
+      if (isProcessing.current) return;
+      isProcessing.current = true;
+      const commands = await getCommands(dotYouClient, ChatDrive);
+      const filteredCommands = commands.receivedCommands.filter(
+        (command) =>
+          command.clientCode === JOIN_CONVERSATION_COMMAND ||
+          command.clientCode === MARK_CHAT_READ_COMMAND ||
+          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
+      );
+
+      const completedCommands: string[] = [];
+      // Can't use Promise.all, as we need to wait for the previous command to complete as commands can target the same conversation
+      for (let i = 0; i < filteredCommands.length; i++) {
+        const command = filteredCommands[i];
+
+        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
+        if (completedCommand) completedCommands.push(completedCommand);
+      }
+
+      if (completedCommands.length > 0)
+        await markCommandComplete(
+          dotYouClient,
+          ChatDrive,
+          completedCommands.filter(Boolean) as string[]
+        );
+
+      isProcessing.current = false;
+    })();
+  }, [isEnabled]);
 };

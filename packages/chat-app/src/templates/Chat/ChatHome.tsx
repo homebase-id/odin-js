@@ -1,5 +1,4 @@
-import { useChatTransitProcessor } from '../../hooks/chat/useChatTransitProcessor';
-import { useChatCommandProcessor } from '../../hooks/chat/useChatCommandProcessor';
+import { useLiveChatProcessor } from '../../hooks/chat/useLiveChatProcessor';
 import { useNavigate, useParams, useMatch } from 'react-router-dom';
 
 import { ChatDetail } from './ChatDetail';
@@ -20,8 +19,7 @@ export const ChatHome = () => {
   const { conversationKey } = useParams();
   const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
-  useChatTransitProcessor(true);
-  useChatCommandProcessor();
+  useLiveChatProcessor();
 
   return (
     <>
