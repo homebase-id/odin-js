@@ -82,7 +82,7 @@ export const ChatHistory = ({
       return () => element.removeEventListener('scroll', handler);
     },
     overscan: 5,
-    getItemKey: (index) => flattenedMsgs[index]?.fileId || 'loader',
+    getItemKey: (index) => flattenedMsgs[index]?.fileId || `loader-${index}`,
   });
 
   const items = virtualizer.getVirtualItems();

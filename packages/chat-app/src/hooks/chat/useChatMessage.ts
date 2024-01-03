@@ -1,7 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useDotYouClient } from '@youfoundation/common-app';
+import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { t, useDotYouClient } from '@youfoundation/common-app';
 import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
+  DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
   TransferStatus,
@@ -44,6 +45,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             deliveryStatus: ChatDeliveryStatus.Sent,
             replyId: replyId,
           },
+          userDate: new Date().getTime(),
         },
       },
       serverMetadata: {
@@ -82,8 +84,49 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversationId, recipients, message }) => {
+      onMutate: async ({ conversationId, recipients, replyId, files, message }) => {
         // TODO: Optimistic update of the chat messages append the new message to the list
+        const existingData = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (DriveSearchResult<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat', conversationId]);
+
+        if (!existingData) return;
+
+        const newMessageDsr: NewDriveSearchResult<ChatMessage> = {
+          fileMetadata: {
+            appData: {
+              groupId: conversationId,
+              content: {
+                message: message || (files?.length ? `📷 ${t('Media')}` : ''),
+                deliveryStatus: ChatDeliveryStatus.Sending,
+                replyId: replyId,
+              },
+            },
+          },
+          serverMetadata: {
+            accessControlList: {
+              requiredSecurityGroup: SecurityGroupType.Connected,
+            },
+          },
+        };
+        const newData = {
+          ...existingData,
+          pages: existingData?.pages?.map((page, index) => ({
+            ...page,
+            searchResults: [newMessageDsr, ...page.searchResults],
+          })),
+        };
+
+        queryClient.setQueryData(['chat', conversationId], newData);
+        return { existingData };
+      },
+      onError: (err, messageParams, context) => {
+        queryClient.setQueryData(['chat', messageParams.conversationId], context?.existingData);
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });

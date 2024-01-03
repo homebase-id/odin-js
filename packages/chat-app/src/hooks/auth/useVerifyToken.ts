@@ -12,9 +12,7 @@ const hasSharedSecret = () => {
 
 export const useVerifyToken = (dotYouClient: DotYouClient) => {
   const fetchData = async () => {
-    if (!hasSharedSecret()) {
-      return false;
-    }
+    if (!hasSharedSecret()) return false;
 
     // When hasValidYouAuthToken returns undefined, it means that it couldn't be checked.. so we assume it's valid, to avoid unnecessary logouts
     return (await hasValidYouAuthToken(dotYouClient)) ?? true;

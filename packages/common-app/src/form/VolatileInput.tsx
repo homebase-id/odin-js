@@ -140,9 +140,9 @@ export const VolatileInput = ({
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && !wordTillCaret) {
+    if (onSubmit && e.key === 'Enter' && !e.shiftKey && !wordTillCaret) {
       e.preventDefault();
-      onSubmit && onSubmit(e.currentTarget.innerText);
+      onSubmit(e.currentTarget.innerText);
     }
   };
 

@@ -2,7 +2,6 @@ import {
   ActionButton,
   ActionGroup,
   ActionLink,
-  Bars,
   ChevronDown,
   ChevronLeft,
   ConnectionImage,
@@ -110,29 +109,35 @@ const ChatHeader = ({
           <ChevronLeft className="h-4 w-4" />
         </ActionButton>
 
-        {recipient ? (
-          <ConnectionImage
-            odinId={recipient}
-            className="border border-neutral-200 dark:border-neutral-800"
-            size="sm"
-          />
-        ) : withYourself ? (
-          <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
-        ) : (
-          <div className="rounded-full bg-primary/20 p-3">
-            <Persons className="h-6 w-6" />
-          </div>
-        )}
-        {recipient ? (
-          <ConnectionName odinId={recipient} />
-        ) : withYourself ? (
-          <>
-            <OwnerName />
-            <span className="text-sm text-foreground/50">({t('you')})</span>
-          </>
-        ) : (
-          conversation?.title
-        )}
+        <a
+          onClick={() => setShowChatInfo(true)}
+          className="flex cursor-pointer flex-row items-center gap-2"
+        >
+          {recipient ? (
+            <ConnectionImage
+              odinId={recipient}
+              className="border border-neutral-200 dark:border-neutral-800"
+              size="sm"
+            />
+          ) : withYourself ? (
+            <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
+          ) : (
+            <div className="rounded-full bg-primary/20 p-3">
+              <Persons className="h-6 w-6" />
+            </div>
+          )}
+          {recipient ? (
+            <ConnectionName odinId={recipient} />
+          ) : withYourself ? (
+            <>
+              <OwnerName />
+              <span className="text-sm text-foreground/50">({t('you')})</span>
+            </>
+          ) : (
+            conversation?.title
+          )}
+        </a>
+
         {conversationDsr && !withYourself ? (
           <ActionGroup
             options={[

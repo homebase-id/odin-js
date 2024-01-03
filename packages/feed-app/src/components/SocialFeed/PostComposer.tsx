@@ -34,6 +34,10 @@ import {
 import { base64ToUint8Array, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
 const PostComposer = ({
   onPost,
   embeddedPost,
@@ -132,10 +136,14 @@ const PostComposer = ({
                 e.preventDefault();
               }
             }}
-            onSubmit={() => {
-              doPost();
-              return false;
-            }}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : () => {
+                    doPost();
+                    return false;
+                  }
+            }
             key={stateIndex}
           />
         </div>

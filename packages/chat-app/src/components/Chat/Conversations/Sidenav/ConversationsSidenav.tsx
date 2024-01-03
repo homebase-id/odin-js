@@ -83,7 +83,7 @@ const ConversationList = ({
   activeConversationId: string | undefined;
 }) => {
   return (
-    <div className="flex-grow">
+    <div className="flex flex-grow flex-col">
       <ConversationListItemWithYourself
         onClick={() => openConversation(ConversationWithYourselfId)}
         isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}

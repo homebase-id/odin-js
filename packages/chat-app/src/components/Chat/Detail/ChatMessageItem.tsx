@@ -7,7 +7,11 @@ import {
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
+import {
+  ChatMessage,
+  ChatDeletedArchivalStaus,
+  ChatDeliveryStatus,
+} from '../../../providers/ChatProvider';
 import { Conversation, GroupConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
 import { ChatMediaGallery } from './Media/ChatMediaGallery';

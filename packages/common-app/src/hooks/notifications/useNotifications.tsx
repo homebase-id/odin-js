@@ -2,7 +2,7 @@ import {
   ClientConnectionNotification,
   TypedConnectionNotification,
 } from '@youfoundation/js-lib/core';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 
 import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
@@ -21,7 +21,7 @@ export const useNotifications = () => {
   const [liveNotifications, setLiveNotifications] = useState<Notification[]>([]);
   const queryClient = useQueryClient();
 
-  const handler = (wsNotification: TypedConnectionNotification) => {
+  const handler = useCallback((wsNotification: TypedConnectionNotification) => {
     const clientNotification = wsNotification as ClientConnectionNotification;
 
     if (
@@ -64,7 +64,7 @@ export const useNotifications = () => {
         queryClient.invalidateQueries({ queryKey: ['activeConnections'] });
       }
     }
-  };
+  }, []);
 
   const dismiss = (notification: Notification) => {
     // Just mark the notification as "handled" and avoid displaying it as an overlay; While keeping it in the list of notifications

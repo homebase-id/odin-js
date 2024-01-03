@@ -1,12 +1,5 @@
-import { useRef, useEffect } from 'react';
+import { DotYouClient, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
-  DotYouClient,
-  SecurityGroupType,
-  getCommands,
-  markCommandComplete,
-} from '@youfoundation/js-lib/core';
-import {
-  ChatDrive,
   GroupConversation,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
@@ -15,60 +8,17 @@ import {
   SingleConversation,
   getConversation,
   uploadConversation,
-} from '../../providers/ConversationProvider';
-import { useDotYouClient } from '@youfoundation/common-app';
+} from './ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { ReceivedCommand } from '@youfoundation/js-lib/core';
-import { useQueryClient, QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
   MARK_CHAT_READ_COMMAND,
   MarkAsReadRequest,
   getChatMessageByGlobalTransitId,
   updateChatMessage,
-} from '../../providers/ChatProvider';
-
-export const useChatCommandProcessor = () => {
-  const { getDotYouClient, getIdentity } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
-  const identity = getIdentity();
-  const queryClient = useQueryClient();
-
-  const isProcessing = useRef(false);
-
-  useEffect(() => {
-    (async () => {
-      if (!identity) return;
-      if (isProcessing.current) return;
-      isProcessing.current = true;
-      const commands = await getCommands(dotYouClient, ChatDrive);
-      const filteredCommands = commands.receivedCommands.filter(
-        (command) =>
-          command.clientCode === JOIN_CONVERSATION_COMMAND ||
-          command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
-      );
-
-      const completedCommands: string[] = [];
-      // Can't use Promise.all, as we need to wait for the previous command to complete as commands can target the same conversation
-      for (let i = 0; i < filteredCommands.length; i++) {
-        const command = filteredCommands[i];
-
-        const completedCommand = await processCommand(dotYouClient, queryClient, command, identity);
-        if (completedCommand) completedCommands.push(completedCommand);
-      }
-
-      if (completedCommands.length > 0)
-        await markCommandComplete(
-          dotYouClient,
-          ChatDrive,
-          completedCommands.filter(Boolean) as string[]
-        );
-
-      isProcessing.current = false;
-    })();
-  }, []);
-};
+} from './ChatProvider';
 
 export const processCommand = async (
   dotYouClient: DotYouClient,

@@ -7,7 +7,7 @@ import {
   OwnerImage,
   OwnerName,
 } from '@youfoundation/common-app';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
 import { ChatDeletedArchivalStaus, ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
@@ -21,12 +21,14 @@ const ListItemWrapper = ({
   onClick,
   isActive,
   children,
+  order,
 }: {
   onClick: (() => void) | undefined;
   isActive: boolean;
   children: ReactNode;
+  order?: number;
 }) => (
-  <div className="px-2">
+  <div className="px-2" style={{ order: order }}>
     <div
       onClick={onClick}
       className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 hover:bg-primary/20 ${
@@ -49,12 +51,14 @@ export const GroupConversationItem = ({
   conversationId?: string;
   isActive: boolean;
 }) => {
+  const [order, setOrder] = useState<number>();
+
   return (
-    <ListItemWrapper {...props}>
+    <ListItemWrapper {...props} order={order}>
       <div className="rounded-full bg-primary/20 p-4">
         <Persons className="h-4 w-4" />
       </div>
-      <ConversationBody title={title} conversationId={conversationId} />
+      <ConversationBody title={title} conversationId={conversationId} setOrder={setOrder} />
     </ListItemWrapper>
   );
 };
@@ -69,14 +73,17 @@ export const SingleConversationItem = ({
   conversationId?: string;
   isActive: boolean;
 }) => {
+  const [order, setOrder] = useState<number>();
+
   return (
-    <ListItemWrapper {...props}>
+    <ListItemWrapper {...props} order={order}>
       <ConnectionImage
         odinId={odinId}
         className="border border-neutral-200 dark:border-neutral-800"
         size="sm"
       />
       <ConversationBody
+        setOrder={setOrder}
         title={<ConnectionName odinId={odinId} />}
         conversationId={conversationId}
       />
@@ -112,9 +119,11 @@ export const ConversationWithYourselfItem = ({
 const ConversationBody = ({
   title,
   conversationId,
+  setOrder,
 }: {
   title: string | ReactNode | undefined;
   conversationId?: string;
+  setOrder?: (order: number) => void;
 }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
   const { data } = useChatMessages({ conversationId }).all;
@@ -136,6 +145,16 @@ const ConversationBody = ({
       : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
+
+  useEffect(
+    () =>
+      setOrder &&
+      setOrder(
+        new Date().getTime() -
+          (lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created)
+      ),
+    [flatMessages]
+  );
 
   return (
     <>

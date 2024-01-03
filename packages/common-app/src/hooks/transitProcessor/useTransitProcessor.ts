@@ -5,6 +5,7 @@ import { useChannelDrives } from './useChannelDrives';
 import { useNotificationSubscriber } from './useNotificationSubscriber';
 import { processInbox } from '@youfoundation/js-lib/peer';
 import { BlogConfig } from '@youfoundation/js-lib/public';
+import { useCallback } from 'react';
 
 const MINUTE_IN_MS = 60000;
 
@@ -42,7 +43,7 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 export const useTransitProcessor = (isEnabled = true) => {
   useInboxProcessor(isEnabled);
 
-  const handler = (notification: TypedConnectionNotification) => {
+  const handler = useCallback((notification: TypedConnectionNotification) => {
     if (notification.notificationType === 'transitFileReceived') {
       console.debug(
         '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
@@ -56,7 +57,7 @@ export const useTransitProcessor = (isEnabled = true) => {
         }),
       });
     }
-  };
+  }, []);
 
   useNotificationSubscriber(isEnabled ? handler : undefined, ['transitFileReceived']);
 

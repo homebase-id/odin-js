@@ -1,4 +1,4 @@
-import { useDotYouClient, SubtleCheck } from '@youfoundation/common-app';
+import { useDotYouClient, SubtleCheck, Clock } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
 
@@ -25,6 +25,7 @@ export const InnerDeliveryIndicator = ({
   state?: ChatDeliveryStatus;
   className?: string;
 }) => {
+  const isSent = state && state >= ChatDeliveryStatus.Sent;
   const isDelivered = state && state >= ChatDeliveryStatus.Delivered;
   const isRead = state === ChatDeliveryStatus.Read;
 
@@ -35,7 +36,7 @@ export const InnerDeliveryIndicator = ({
       } ${className || ''}`}
     >
       {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-4 w-4" /> : null}
-      <SubtleCheck className="h-4 w-4" />
+      {isSent ? <SubtleCheck className="h-4 w-4" /> : <Clock className="h-4 w-4 pb-1" />}
     </div>
   );
 };

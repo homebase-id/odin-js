@@ -22,6 +22,10 @@ import {
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
 export const ChatComposer = ({
   conversation,
   replyMsg,
@@ -49,8 +53,7 @@ export const ChatComposer = ({
     if (
       (!message?.trim() && !files) ||
       !conversationContent ||
-      !conversation.fileMetadata.appData.uniqueId ||
-      sendMessageState !== 'idle'
+      !conversation.fileMetadata.appData.uniqueId
     )
       return;
 
@@ -68,7 +71,7 @@ export const ChatComposer = ({
 
   // Reset state, when the message was sent successfully
   useEffect(() => {
-    if (sendMessageState === 'success') {
+    if (sendMessageState === 'pending') {
       setMessage('');
       setStateIndex((oldIndex) => oldIndex + 1);
       setFiles([]);
@@ -115,11 +118,15 @@ export const ChatComposer = ({
             defaultValue={message}
             className="rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
-            autoFocus={true}
-            onSubmit={(val) => {
-              setMessage(val);
-              doSend();
-            }}
+            autoFocus={!isTouchDevice()}
+            onSubmit={
+              isTouchDevice()
+                ? undefined
+                : (val) => {
+                    setMessage(val);
+                    doSend();
+                  }
+            }
           />
           <span className="my-auto">
             <ActionButton
