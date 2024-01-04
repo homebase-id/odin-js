@@ -10,17 +10,18 @@ type OperatingSystem =
   | 'BlackBerry'
   | 'BlackBerryOS'
   | 'Chrome OS'
-  | 'KaiOS';
+  | 'KaiOS'
+  | 'Unknown';
 
 export const getOperatingSystem = (userAgentVal?: string) => {
   const userAgent = userAgentVal || navigator.userAgent;
 
-  if (!userAgent) return 'Unknown';
-
-  const os: { name?: OperatingSystem; version?: string } = {
-    name: undefined,
+  const os: { name: OperatingSystem; version: string | undefined } = {
+    name: 'Unknown',
     version: undefined,
   };
+
+  if (!userAgent) return os;
 
   // extract operating system name from user agent
   if (userAgent.indexOf('Windows') >= 0) {
@@ -178,7 +179,7 @@ export const getOperatingSystem = (userAgentVal?: string) => {
     }
   }
 
-  return os.name;
+  return os;
 };
 
 export const getBrowser = (userAgentVal?: string) => {

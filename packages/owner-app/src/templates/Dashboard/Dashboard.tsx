@@ -128,7 +128,7 @@ const SystemApp = () => {
   const unreadCount = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
 
   const os = getOperatingSystem();
-  const isAndroid = os === 'Android';
+  const isAndroid = os.name === 'Android';
 
   return (
     <AppWrapper
@@ -151,7 +151,7 @@ const ChatApp = () => {
   // const { data: appReg } = useApp({ appId: CHAT_APP_ID }).fetch;
   const unreadCount = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
   const os = getOperatingSystem();
-  const isAndroid = os === 'Android';
+  const isAndroid = os.name === 'Android';
   // const isIos = os === 'iOS';
 
   return (
@@ -184,7 +184,7 @@ const FeedApp = () => {
   // const { data: appReg } = useApp({ appId: FEED_APP_ID }).fetch;
   const unreadCount = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
   const os = getOperatingSystem();
-  const isAndroid = os === 'Android';
+  const isAndroid = os.name === 'Android';
 
   return (
     <AppWrapper
@@ -217,7 +217,7 @@ const PhotoApp = () => {
   const unreadCount = useUnreadPushNotificationsCount({ appId: PHOTO_APP_ID });
 
   const os = getOperatingSystem();
-  const isAndroid = os === 'Android';
+  const isAndroid = os.name === 'Android';
 
   return (
     <AppWrapper

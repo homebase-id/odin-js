@@ -23,6 +23,7 @@ const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountR
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
 
 const Notifications = lazy(() => import('../templates/Notifications/Notifications'));
+const NotificationProblems = lazy(() => import('../templates/Notifications/NotificationProblems'));
 
 const Profile = lazy(() => import('../templates/Profiles/Profiles/Profiles'));
 const ProfileDetails = lazy(() => import('../templates/Profiles/ProfileDetails/ProfileDetails'));
@@ -163,6 +164,7 @@ function App() {
             <Route index={true} element={<Home />} />
 
             <Route path="notifications" element={<Notifications />}></Route>
+            <Route path="notifications/problems" element={<NotificationProblems />}></Route>
 
             <Route path="profile" element={<Profile />}></Route>
             <Route path="profile/homepage" element={<Website />}></Route>

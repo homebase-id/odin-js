@@ -15,6 +15,7 @@ interface NotificationDataOptions {
   typeId: string;
   tagId: string;
   silent: boolean;
+  unEncryptedMessage?: string;
 }
 
 interface NotificationData {
@@ -39,6 +40,7 @@ const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321'
 const titleFormer = (payload: NotificationData) => `${payload.appDisplayName || 'Homebase'}`;
 
 const bodyFormer = (payload: NotificationData, existingNotifications: Notification[]) => {
+  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
@@ -109,10 +111,6 @@ self.addEventListener('push', function (event) {
 
     event.waitUntil(promiseChain);
   }
-});
-
-self.addEventListener('message', (event) => {
-  console.log('sw: message', event);
 });
 
 self.addEventListener('notificationclick', (event) => {
