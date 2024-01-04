@@ -146,7 +146,6 @@ export const useYouAuthAuthorization = () => {
       appId,
       [
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReadConnections,
         AppPermissionType.SendPushNotifications,
       ],

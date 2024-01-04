@@ -2,10 +2,14 @@ import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import {
   assertIfDefined,
+  hasDebugFlag,
   stringGuidsEqual,
   stringifyToQueryParams,
 } from '../../../helpers/helpers';
 import { PagedResult, PagingOptions, TargetDrive } from '../../core';
+
+export const TRANSIENT_TEMP_DRIVE_ALIAS = '90f5e74ab7f9efda0ac298373a32ad8c';
+const isDebug = hasDebugFlag();
 
 export const getDrives = async (
   dotYouClient: DotYouClient,
@@ -13,8 +17,15 @@ export const getDrives = async (
 ): Promise<PagedResult<DriveDefinition>> => {
   const client = dotYouClient.createAxiosClient();
 
-  return client.post('drive/mgmt', params).then((response) => {
-    return response.data;
+  return client.post<PagedResult<DriveDefinition>>('drive/mgmt', params).then((response) => {
+    return {
+      ...response.data,
+      results: isDebug
+        ? response?.data?.results
+        : response?.data?.results?.filter(
+            (drive) => !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
+          ),
+    };
   });
 };
 
@@ -33,9 +44,19 @@ export const getDrivesByType = async (
 
   if (dotYouClient.getType() === ApiType.Owner) {
     const client = dotYouClient.createAxiosClient();
-    return client.get('drive/mgmt/type?' + stringifyToQueryParams(params)).then((response) => {
-      return response.data;
-    });
+    return client
+      .get<PagedResult<DriveDefinition>>('drive/mgmt/type?' + stringifyToQueryParams(params))
+      .then((response) => {
+        return {
+          ...response.data,
+          results: isDebug
+            ? response?.data?.results
+            : response?.data?.results?.filter(
+                (drive) =>
+                  !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
+              ),
+        };
+      });
   } else {
     const client = dotYouClient.createAxiosClient();
     return client.get('drive/metadata/type?' + stringifyToQueryParams(params)).then((response) => {
