@@ -15,7 +15,7 @@ export enum AppCirclePermissionType {
 export enum AppPermissionType {
   None = 0,
   ReadConnections = 10,
-  ManageConnectionRequests = 30,
+  ReadConnectionRequests = 30,
   ReadCircleMembers = 50,
   ReadWhoIFollow = 80,
   ReadMyFollowers = 130,

@@ -48,7 +48,6 @@ export const drives = [
   },
   {
     // Public posts
-
     a: BlogConfig.PublicChannelDrive.alias,
     t: BlogConfig.PublicChannelDrive.type,
     n: '',
@@ -156,7 +155,7 @@ export const useYouAuthAuthorization = () => {
       appId,
       [
         AppPermissionType.ReadConnections,
-        AppPermissionType.ManageConnectionRequests,
+        AppPermissionType.ReadConnectionRequests,
         AppPermissionType.ReadCircleMembers,
         AppPermissionType.ReadWhoIFollow,
         AppPermissionType.ReadMyFollowers,
