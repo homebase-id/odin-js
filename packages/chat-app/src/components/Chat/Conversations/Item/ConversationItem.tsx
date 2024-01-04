@@ -134,7 +134,7 @@ const ConversationBody = ({
         ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
     [data]
   );
-  const lastMessage = flatMessages?.slice(0, 1)?.[0];
+  const lastMessage = flatMessages?.[0];
 
   const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime;
   const unreadCount =
@@ -146,15 +146,10 @@ const ConversationBody = ({
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
-  useEffect(
-    () =>
-      setOrder &&
-      setOrder(
-        new Date().getTime() -
-          (lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created || 0)
-      ),
-    [flatMessages]
-  );
+  useEffect(() => {
+    const date = lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created;
+    setOrder && date && setOrder(new Date().getTime() - date);
+  }, [flatMessages]);
 
   return (
     <>
