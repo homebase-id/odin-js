@@ -37,6 +37,9 @@ const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
 const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
 
+const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
+const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
+
 const titleFormer = (payload: NotificationData) => `${payload.appDisplayName || 'Homebase'}`;
 
 const bodyFormer = (payload: NotificationData, existingNotifications: Notification[]) => {
@@ -56,7 +59,11 @@ const bodyFormer = (payload: NotificationData, existingNotifications: Notificati
       payload.appDisplayName
     }`;
   } else if (payload.options.appId === FEED_APP_ID) {
-    return `${payload.senderId} posted to your feed`;
+    if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
+      return `${payload.senderId} posted to your feed`;
+    } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
+      return `${payload.senderId} reacted to your post`;
+    }
   }
 
   return `${payload.senderId} sent you a notification via ${payload.appDisplayName}`;
