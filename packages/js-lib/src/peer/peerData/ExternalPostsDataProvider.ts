@@ -16,6 +16,7 @@ import {
   getChannelDrive,
 } from '../../public/public';
 import { getDrivesByTypeOverPeer } from './Drive/PeerDriveProvider';
+import { getContentFromHeaderOrPayloadOverPeerByGlobalTransitId } from './File/PeerFileByGlobalTransitProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
 
@@ -249,11 +250,15 @@ const dsrToPostFile = async <T extends PostContent>(
   includeMetadataHeader: boolean
 ): Promise<DriveSearchResult<T> | undefined> => {
   try {
-    const postContent = await getContentFromHeaderOrPayloadOverPeer<T>(
+    if (!dsr.fileMetadata.globalTransitId) return undefined;
+    const postContent = await getContentFromHeaderOrPayloadOverPeerByGlobalTransitId<T>(
       dotYouClient,
       odinId,
       targetDrive,
-      dsr,
+      {
+        globalTransitId: dsr.fileMetadata.globalTransitId,
+        ...dsr,
+      },
       includeMetadataHeader
     );
 
