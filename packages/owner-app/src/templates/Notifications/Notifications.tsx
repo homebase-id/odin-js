@@ -9,87 +9,71 @@ import {
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID } from '../../app/Constants';
 import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { useSearchParams } from 'react-router-dom';
 
 interface NotificationClickData {
   notification: string;
 }
 
-const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
-const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
-const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
-
-const titleFormer = (appName: string) => `${appName}`;
-
-const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: string) => {
-  if (payload.options.appId === OWNER_APP_ID) {
-    // Based on type, we show different messages
-    if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
-      return `${payload.senderId} started following you`;
-    } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
-      return `${payload.senderId} sent you a connection request`;
-    } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
-      return `${payload.senderId} accepted your connection request`;
-    }
-  } else if (payload.options.appId === CHAT_APP_ID) {
-    return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
-  } else if (payload.options.appId === FEED_APP_ID) {
-    return `${payload.senderId} posted to your feed`;
-  }
-
-  return `${payload.senderId} sent you a notification via ${appName}`;
-};
-
-const getTargetLink = (payload: PushNotification) => {
-  if (payload.options.appId === OWNER_APP_ID) {
-    // Based on type, we show different messages
-    if (
-      [
-        OWNER_FOLLOWER_TYPE_ID,
-        OWNER_CONNECTION_REQUEST_TYPE_ID,
-        OWNER_CONNECTION_ACCEPTED_TYPE_ID,
-      ].includes(payload.options.typeId)
-    ) {
-      return `/owner/connections/${payload.senderId}`;
-    }
-  } else if (payload.options.appId === CHAT_APP_ID) {
-    return `/apps/chat/${payload.options.typeId}`;
-  } else if (payload.options.appId === FEED_APP_ID) {
-    return `/owner/feed`;
-  }
-};
-
 const Notifications = () => {
-  const { data: notifications } = usePushNotifications().fetch;
+  const [params] = useSearchParams();
+
+  const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
   const [isDialogOpen, setDialogOpen] = useState(false);
 
+  const [toOpenNotification, setToOpenNotification] = useState<string | undefined>(
+    params.get('notification') || undefined
+  );
+
+  const doOpenNotification = (targetTagId: string) => {
+    console.log('doOpenNotification', targetTagId);
+    const activeNotification = notifications?.results.find((notification) =>
+      stringGuidsEqual(notification.options.tagId, targetTagId)
+    );
+
+    if (!activeNotification) return;
+
+    const targetLink = getTargetLink(activeNotification);
+    if (targetLink) window.location.href = targetLink;
+  };
+
+  useEffect(() => {
+    if (toOpenNotification && !fetchingNotifications) doOpenNotification(toOpenNotification);
+  }, [fetchingNotifications, toOpenNotification]);
+
+  // Listen for messages from the service worker to open the notification
   useEffect(() => {
     const handleEvent = (event: MessageEvent<NotificationClickData>) => {
-      console.log('incoming notification from click through', event?.data.notification);
+      const activeTagId = event?.data.notification;
+      setToOpenNotification(activeTagId);
     };
 
     navigator.serviceWorker.addEventListener('message', handleEvent);
     return () => navigator.serviceWorker.removeEventListener('message', handleEvent);
   }, []);
 
-  const groupedNotificationsPerDay =
-    notifications?.results.reduce(
-      (acc, notification) => {
-        const date = new Date(notification.created).toDateString();
+  const groupedNotificationsPerDay = useMemo(
+    () =>
+      notifications?.results.reduce(
+        (acc, notification) => {
+          const date = new Date(notification.created).toDateString();
 
-        if (acc[date]) acc[date].push(notification);
-        else acc[date] = [notification];
+          if (acc[date]) acc[date].push(notification);
+          else acc[date] = [notification];
 
-        return acc;
-      },
-      {} as { [key: string]: PushNotification[] }
-    ) || {};
+          return acc;
+        },
+        {} as { [key: string]: PushNotification[] }
+      ) || {},
+    [notifications]
+  );
 
   return (
     <>
@@ -217,6 +201,7 @@ const NotificationGroup = ({
                   }
                 >
                   <Toast
+                    // title={notification.options.tagId}
                     title={titleFormer(appName)}
                     // Keeping the hidden ones short
                     body={ellipsisAtMaxChar(
@@ -238,6 +223,52 @@ const NotificationGroup = ({
       })}
     </>
   );
+};
+
+const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
+const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
+const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
+
+const titleFormer = (appName: string) => `${appName}`;
+
+const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: string) => {
+  if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
+
+  if (payload.options.appId === OWNER_APP_ID) {
+    // Based on type, we show different messages
+    if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
+      return `${payload.senderId} started following you`;
+    } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
+      return `${payload.senderId} sent you a connection request`;
+    } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
+      return `${payload.senderId} accepted your connection request`;
+    }
+  } else if (payload.options.appId === CHAT_APP_ID) {
+    return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+  } else if (payload.options.appId === FEED_APP_ID) {
+    return `${payload.senderId} posted to your feed`;
+  }
+
+  return `${payload.senderId} sent you a notification via ${appName}`;
+};
+
+const getTargetLink = (payload: PushNotification) => {
+  if (payload.options.appId === OWNER_APP_ID) {
+    // Based on type, we show different messages
+    if (
+      [
+        OWNER_FOLLOWER_TYPE_ID,
+        OWNER_CONNECTION_REQUEST_TYPE_ID,
+        OWNER_CONNECTION_ACCEPTED_TYPE_ID,
+      ].includes(payload.options.typeId)
+    ) {
+      return `/owner/connections/${payload.senderId}`;
+    }
+  } else if (payload.options.appId === CHAT_APP_ID) {
+    return `/apps/chat/${payload.options.typeId}`;
+  } else if (payload.options.appId === FEED_APP_ID) {
+    return `/owner/feed`;
+  }
 };
 
 export default Notifications;

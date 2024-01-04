@@ -151,7 +151,7 @@ const ConversationBody = ({
       setOrder &&
       setOrder(
         new Date().getTime() -
-          (lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created)
+          (lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created || 0)
       ),
     [flatMessages]
   );

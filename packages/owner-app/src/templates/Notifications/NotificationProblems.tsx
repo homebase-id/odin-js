@@ -20,7 +20,17 @@ const NotificationProblems = () => {
 
   return (
     <>
-      <PageMeta title={t('Notifications')} icon={Question} />
+      <PageMeta
+        title={t('Notifications')}
+        icon={Question}
+        breadCrumbs={[
+          {
+            title: t('Notifications'),
+            href: '/owner/notifications',
+          },
+          { title: t('Common Problems') },
+        ]}
+      />
 
       <Section title={t(`I can't enable notifications?`)}>
         <div className="flex max-w-xl flex-col gap-4">

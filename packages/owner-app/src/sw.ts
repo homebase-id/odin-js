@@ -113,10 +113,6 @@ self.addEventListener('push', function (event) {
   }
 });
 
-self.addEventListener('message', (event) => {
-  console.log('sw: message', event);
-});
-
 self.addEventListener('notificationclick', (event) => {
   // console.log(event.notification);
 
