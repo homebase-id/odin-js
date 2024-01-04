@@ -25,6 +25,8 @@ const DrivePermissionView = ({
     return <LoadingBlock className={`h-4 max-w-xs ${className}`} />;
   }
 
+  if (!drive) return null;
+
   return (
     <div
       key={`${driveGrant?.permissionedDrive?.drive?.alias}-${driveGrant?.permissionedDrive.drive?.type}`}
