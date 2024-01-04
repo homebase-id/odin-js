@@ -25,12 +25,12 @@ const PersonCard = ({
   return (
     <HybridLink className={`${className}`} href={href}>
       <div
-        className={`h-full rounded-md border bg-white transition-colors  ${
+        className={`h-full rounded-md border bg-white transition-colors dark:bg-gray-800 ${
           isChecked
             ? 'border-4 border-indigo-500 dark:border-indigo-700'
             : isChecked === false
             ? 'border-4'
-            : 'border-gray-200 border-opacity-60 dark:border-gray-800 dark:bg-gray-800'
+            : 'border-gray-200 border-opacity-60 dark:border-gray-800'
         }
         ${href ? 'cursor-pointer hover:shadow-md hover:dark:shadow-slate-600' : ''}`}
         onClick={onClick}

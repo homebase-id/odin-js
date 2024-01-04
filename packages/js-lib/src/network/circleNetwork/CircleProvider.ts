@@ -9,6 +9,8 @@ import { CircleDefinition, DriveGrant } from './CircleDataTypes';
 //Handles management of Circles
 const root = '/circles/definitions';
 
+export const ALL_CONNECTIONS_CIRCLE_ID = 'bb2683fa402aff866e771a6495765a15';
+
 export const updateCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
@@ -60,7 +62,7 @@ export const createCircleDefinition = async (
 
 export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefinition[]> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/list';
+  const url = root + '/list?includeSystemCircle=true';
 
   const response = await client.get<CircleDefinition[]>(url);
 
