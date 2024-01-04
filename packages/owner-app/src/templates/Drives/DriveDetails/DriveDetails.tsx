@@ -17,7 +17,8 @@ import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialo
 import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { getDrivePermissionFromNumber } from '@youfoundation/js-lib/helpers';
+import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -33,6 +34,8 @@ const DriveDetails = () => {
 
   const { data: circles } = useCircles().fetch;
   const { data: apps } = useApps().fetchRegistered;
+
+  const readOnly = stringGuidsEqual(driveDef?.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS);
 
   // const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
@@ -116,7 +119,13 @@ const DriveDetails = () => {
         <Section
           title={t('Circles with access:')}
           actions={
-            <ActionButton type="mute" onClick={() => setIsCircleSelectorOpen(true)} icon={Pencil} />
+            !readOnly && (
+              <ActionButton
+                type="mute"
+                onClick={() => setIsCircleSelectorOpen(true)}
+                icon={Pencil}
+              />
+            )
           }
         >
           <ul className="-my-4">
@@ -145,7 +154,9 @@ const DriveDetails = () => {
         <Section
           title={t('Apps with access:')}
           actions={
-            <ActionButton type="mute" onClick={() => setIsAppSelectorOpen(true)} icon={Pencil} />
+            !readOnly && (
+              <ActionButton type="mute" onClick={() => setIsAppSelectorOpen(true)} icon={Pencil} />
+            )
           }
         >
           <ul className="-my-4">

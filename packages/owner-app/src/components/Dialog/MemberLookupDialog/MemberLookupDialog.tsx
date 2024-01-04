@@ -160,8 +160,8 @@ const MemberLookupDialog = ({
                 : ''}
               {toRevokeMembers?.length
                 ? `${
-                    toProvideMembers.length >= 2
-                      ? `${toProvideMembers.length} ${t('people')}`
+                    toRevokeMembers.length >= 2
+                      ? `${toRevokeMembers.length} ${t('people')}`
                       : `${t('One person')}`
                   } ${t('will loose access')}`
                 : ''}
