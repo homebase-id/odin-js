@@ -33,6 +33,7 @@ import {
 } from '@youfoundation/common-app';
 import { base64ToUint8Array, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { ROOT_PATH } from '../../app/App';
 
 const isTouchDevice = () => {
   return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -196,12 +197,12 @@ const PostComposer = ({
                     ? [
                         {
                           label: t('Convert to an article'),
-                          href: `/owner/feed/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
+                          href: `${ROOT_PATH}/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
                           icon: Article,
                         },
                         {
                           label: t('See my drafts'),
-                          href: `/owner/feed/articles`,
+                          href: `${ROOT_PATH}/articles`,
                           icon: Pencil,
                         },
                       ]

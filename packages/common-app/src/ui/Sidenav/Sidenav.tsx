@@ -144,7 +144,7 @@ export const Sidenav = ({
             </div>
 
             <div className="py-3">
-              <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
+              <NavItem icon={Feed} label={'Feed'} to={'/apps/feed'} end={true} />
               <ChatNavItem />
             </div>
 
@@ -456,7 +456,7 @@ const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) =
     <div className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1  ${sidebarBg}`}>
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner'} end={true} />
-        <NavItem icon={Feed} to={'/owner/feed'} end={true} />
+        <NavItem icon={Feed} to={'/apps/feed'} end={true} />
         <NavItem icon={ChatBubble} to="/apps/chat" />
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>

@@ -3,11 +3,13 @@ import { BlogConfig } from '@youfoundation/js-lib/public';
 
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
-import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
+import { ApiType, TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { getSocialFeed } from '@youfoundation/js-lib/peer';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { preAuth } from '@youfoundation/js-lib/auth';
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
+  const [preAuthenticated, setIspreAuthenticated] = useState(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { data: ownChannels, isFetched: channelsFetched } = useChannels({
     isAuthenticated: true,
@@ -16,6 +18,16 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
 
   // Add invalidation of social feed when a new file is added to the feed drive (this enforces that only remote updates trigger a refresh)
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    (async () => {
+      if (!preAuthenticated && dotYouClient.getType() === ApiType.App) {
+        await preAuth(dotYouClient);
+        setIspreAuthenticated(true);
+      }
+    })();
+  }, [preAuthenticated]);
+
   const handler = useCallback((notification: TypedConnectionNotification) => {
     if (
       notification.notificationType === 'fileAdded' &&
@@ -26,7 +38,7 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
     }
   }, []);
-  useNotificationSubscriber(handler, ['fileAdded']);
+  useNotificationSubscriber(preAuthenticated ? handler : undefined, ['fileAdded']);
 
   const fetchAll = async ({
     pageParam,

@@ -4,6 +4,7 @@ import { Quote } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { ROOT_PATH } from '../../app/App';
 
 export const ChannelsPage = () => {
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
@@ -14,7 +15,7 @@ export const ChannelsPage = () => {
       <PageMeta
         title={t('Channels')}
         icon={Quote}
-        breadCrumbs={[{ title: t('Feed'), href: '/owner/feed' }, { title: t('Channels') }]}
+        breadCrumbs={[{ title: t('Feed'), href: ROOT_PATH }, { title: t('Channels') }]}
       />
       <section className="pb-10">
         <div className="px-2 sm:px-10">

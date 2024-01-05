@@ -31,6 +31,7 @@ const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/P
 
 import { Feed } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { ROOT_PATH } from '../../app/App';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
@@ -58,12 +59,12 @@ export const SocialFeed = () => {
               options={[
                 {
                   label: t('Articles'),
-                  href: '/owner/feed/articles',
+                  href: `${ROOT_PATH}/articles`,
                   icon: Article,
                 },
                 {
                   label: t('Channels'),
-                  href: '/owner/feed/channels',
+                  href: `${ROOT_PATH}/channels`,
                   icon: Quote,
                 },
               ]}

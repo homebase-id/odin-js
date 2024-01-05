@@ -7,8 +7,13 @@ export const HOME_SHARED_SECRET = 'HSS';
 export const OWNER_SHARED_SECRET = 'SS';
 export const STORAGE_IDENTITY_KEY = 'identity';
 
-export const APP_AUTH_TOKEN = 'BX0900';
-export const APP_SHARED_SECRET = 'APSS';
+export const APP_AUTH_TOKEN = window.location.pathname.startsWith(OWNER_APPS_ROOT)
+  ? `BX0900_${window.location.pathname.split('/')?.[2]}`
+  : 'BX0900';
+
+export const APP_SHARED_SECRET = window.location.pathname.startsWith(OWNER_APPS_ROOT)
+  ? `APPS_${window.location.pathname.split('/')?.[2]}`
+  : 'APSS';
 
 export const useDotYouClient = () => {
   const _app = window.location.pathname.startsWith(OWNER_ROOT)

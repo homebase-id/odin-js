@@ -26,7 +26,7 @@ import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
-export const ROOT_PATH = '';
+export const ROOT_PATH = '/apps/feed';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';

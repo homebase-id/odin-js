@@ -32,7 +32,7 @@ export const OwnerActions = ({ postFile }: { postFile: DriveSearchResult<PostCon
             onClick: (e) => {
               e.stopPropagation();
               if (postContent.type === 'Article') {
-                const targetUrl = `/owner/feed/edit/${
+                const targetUrl = `/apps/feed/edit/${
                   channel?.fileMetadata.appData.content.slug ||
                   channel?.fileMetadata.appData.uniqueId
                 }/${postContent.id}`;

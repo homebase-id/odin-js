@@ -19,6 +19,7 @@ import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { ROOT_PATH } from '../../app/App';
 
 export const ArticlesPage = () => {
   return (
@@ -26,9 +27,9 @@ export const ArticlesPage = () => {
       <PageMeta
         title={t('Articles')}
         icon={ArticleIcon}
-        breadCrumbs={[{ title: t('Feed'), href: '/owner/feed' }, { title: t('Articles') }]}
+        breadCrumbs={[{ title: t('Feed'), href: ROOT_PATH }, { title: t('Articles') }]}
         actions={
-          <ActionLink onClick={() => (window.location.href = '/owner/feed/new')} icon={Plus}>
+          <ActionLink onClick={() => (window.location.href = `${ROOT_PATH}/new`)} icon={Plus}>
             {t('New Article')}
           </ActionLink>
         }
@@ -73,7 +74,7 @@ const DraftsView = () => {
                   channel={channel}
                   key={draft.fileId ?? index}
                   className="bg-background"
-                  linkRoot="/owner/feed/edit"
+                  linkRoot={`${ROOT_PATH}/edit`}
                 />
               );
             })}

@@ -191,7 +191,7 @@ export const useArticleComposer = ({
       window.history.replaceState(
         null,
         toPostFile.fileMetadata.appData.content.caption,
-        `/owner/feed/edit/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
+        `/apps/feed/edit/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.id}`
       );
     }
   };

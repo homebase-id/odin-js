@@ -23,6 +23,7 @@ import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
@@ -133,8 +134,8 @@ export const ArticleComposerPage = () => {
         browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
-          { title: t('Feed'), href: '/owner/feed' },
-          { title: t('Articles'), href: '/owner/feed/articles' },
+          { title: t('Feed'), href: `${ROOT_PATH}` },
+          { title: t('Articles'), href: `${ROOT_PATH}/articles` },
           { title: t('New article') },
         ]}
         actions={
@@ -153,7 +154,7 @@ export const ArticleComposerPage = () => {
                         label: t('Remove'),
                         onClick: () => {
                           doRemovePost();
-                          navigate('/owner/feed/articles');
+                          navigate(`${ROOT_PATH}/articles`);
                         },
                         icon: Trash,
                         confirmOptions: {
@@ -176,7 +177,7 @@ export const ArticleComposerPage = () => {
                 icon={Trash}
                 onClick={() => {
                   doRemovePost();
-                  navigate('/owner/feed/articles');
+                  navigate(`${ROOT_PATH}/articles`);
                 }}
                 confirmOptions={{
                   title: t('Discard draft'),
