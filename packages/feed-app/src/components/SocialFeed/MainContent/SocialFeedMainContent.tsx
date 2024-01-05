@@ -1,5 +1,5 @@
 import { PostContent } from '@youfoundation/js-lib/public';
-import { useMemo, useEffect, useRef, useLayoutEffect, FC } from 'react';
+import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { flattenInfinteData } from '@youfoundation/common-app';
@@ -52,14 +52,10 @@ const SocialFeedMainContent = () => {
 
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+    if (!lastItem) return;
 
-    if (!lastItem) {
-      return;
-    }
-
-    if (lastItem.index >= flattenedPosts?.length - 1 && hasMorePosts && !isFetchingNextPage) {
+    if (lastItem.index >= flattenedPosts?.length - 1 && hasMorePosts && !isFetchingNextPage)
       fetchNextPage();
-    }
   }, [
     hasMorePosts,
     fetchNextPage,

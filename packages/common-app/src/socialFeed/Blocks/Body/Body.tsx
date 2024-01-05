@@ -32,7 +32,7 @@ export const PostBody = ({
 
     return (
       <>
-        <h1 className={`text-foreground ${isExpanded ? 'text-2xl' : ''}`}>{post.caption}</h1>
+        <h1 className={`text-foreground`}>{post.caption}</h1>
         <div className="text-foreground leading-relaxed text-opacity-70">
           <Expander
             abstract={ellipsisAtMaxChar(articlePost.abstract, MAX_CHAR_FOR_SUMMARY)}
@@ -146,6 +146,4 @@ const Expander = ({
       )}
     </>
   );
-
-  return <></>;
 };
