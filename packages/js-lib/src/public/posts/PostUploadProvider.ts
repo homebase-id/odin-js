@@ -28,6 +28,7 @@ import {
   getNewId,
   getRandom16ByteArray,
   jsonStringify64,
+  stringGuidsEqual,
   stringToUint8Array,
   toGuidId,
 } from '../../helpers/DataUtil';
@@ -58,6 +59,7 @@ export const savePost = async <T extends PostContent>(
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult> => {
   if (!file.fileMetadata.appData.content.id) {
+    // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
       ? toGuidId(file.fileMetadata.appData.content.slug)
       : getNewId();
@@ -197,14 +199,14 @@ const uploadPost = async <T extends PostContent>(
 
   if (
     existingPostWithThisSlug &&
-    existingPostWithThisSlug?.fileMetadata.appData.content.id !==
-      file.fileMetadata.appData.content.id
+    !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
   ) {
     // There is clash with an existing slug
     file.fileMetadata.appData.content.slug = `${
       file.fileMetadata.appData.content.slug
     }-${new Date().getTime()}`;
   }
+
   const uniqueId = file.fileMetadata.appData.content.slug
     ? toGuidId(file.fileMetadata.appData.content.slug)
     : file.fileMetadata.appData.content.id;
@@ -293,6 +295,7 @@ const uploadPostHeader = async <T extends PostContent>(
       file.fileMetadata.appData.content.slug
     }-${new Date().getTime()}`;
   }
+
   const uniqueId = file.fileMetadata.appData.content.slug
     ? toGuidId(file.fileMetadata.appData.content.slug)
     : file.fileMetadata.appData.content.id;
@@ -350,7 +353,7 @@ const uploadPostHeader = async <T extends PostContent>(
         undefined
       )
     ).newVersionTag;
-  } else if (file.fileMetadata.payloads.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
+  } else if (file.fileMetadata.payloads?.some((p) => p.key === DEFAULT_PAYLOAD_KEY)) {
     // Remove default payload if it was there before
     runningVersionTag = (
       await deletePayload(
@@ -384,6 +387,7 @@ const updatePost = async <T extends PostContent>(
   if (!header) throw new Error('Cannot update a post that does not exist');
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
     throw new Error('Version conflict');
+
   let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
     (existingAndNewMediaFiles?.filter((f) => 'fileKey' in f) as MediaFile[]) ||
