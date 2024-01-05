@@ -130,7 +130,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
   return (
     <>
       <div className={className}>
-        {!isPostsLoaded && !combinePosts ? (
+        {!isPostsLoaded ? (
           <div className="-mx-4">
             <LoadingBlock className="m-4 h-10" />
             <LoadingBlock className="m-4 h-10" />
@@ -207,34 +207,6 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
       />
     </>
   );
-};
-
-const combinePosts = (
-  staticPosts?: DriveSearchResult<PostContent>[],
-  flattenedPosts?: DriveSearchResult<PostContent>[]
-) => {
-  const combinedPosts = [
-    ...(staticPosts ? staticPosts : []),
-    ...(flattenedPosts ? flattenedPosts : []),
-  ].reduce((uniquePosts, post) => {
-    if (
-      uniquePosts.some(
-        (unique) => unique.fileMetadata.appData.content.id === post.fileMetadata.appData.content.id
-      )
-    ) {
-      return uniquePosts;
-    } else {
-      return [...uniquePosts, post];
-    }
-  }, [] as DriveSearchResult<PostContent>[]);
-
-  combinedPosts.sort(
-    (a, b) =>
-      (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-      (a.fileMetadata.appData.userDate || a.fileMetadata.created)
-  );
-
-  return combinedPosts;
 };
 
 export default VerticalPosts;

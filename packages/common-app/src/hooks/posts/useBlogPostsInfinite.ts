@@ -64,7 +64,8 @@ export const useBlogPostsInfinite = ({
             false,
             typeof pageParam === 'object' ? pageParam : undefined,
             pageSize,
-            channels
+            channels,
+            false
           ));
 
     return {
