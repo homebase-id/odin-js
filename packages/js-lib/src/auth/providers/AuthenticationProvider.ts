@@ -53,7 +53,7 @@ export const getRegistrationParams = async (
   clientFriendlyName?: string,
   state?: string
 ): Promise<YouAuthorizationParams> => {
-  const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem()}`;
+  const clientFriendly = clientFriendlyName || `${getBrowser()} | ${getOperatingSystem().name}`;
 
   const permissionRequest: AppAuthorizationParams = {
     n: appName,
