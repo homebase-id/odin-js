@@ -27,7 +27,7 @@ export const RegisterNewDevice = async (
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient.post('/notify/push/subscribe', {
-    friendlyName: clientFriendlyName || `${getBrowser()} ${getOperatingSystem()}`,
+    friendlyName: clientFriendlyName || `${getBrowser()} ${getOperatingSystem().name}`,
     endpoint: subscription.endpoint,
     expirationTime: subscription.expirationTime,
     auth: jsonObject.keys.auth,
