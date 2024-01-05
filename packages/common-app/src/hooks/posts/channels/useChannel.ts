@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChannelDefinition,
+  GetTargetDriveFromChannelId,
   getChannelDefinition,
   getChannelDefinitionBySlug,
   removeChannelDefinition,
@@ -10,9 +11,15 @@ import {
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import {
+  DrivePermissionType,
+  DriveSearchResult,
+  NewDriveSearchResult,
+} from '@youfoundation/js-lib/core';
+import { ROOT_PATH } from '@youfoundation/feed-app/src/app/App';
+import { FEED_APP_ID } from '../../../../../owner-app/src/app/Constants';
 
 type useChannelsProps = {
   channelSlug?: string;
@@ -73,7 +80,43 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const saveData = async (
     channelDef: NewDriveSearchResult<ChannelDefinition> | DriveSearchResult<ChannelDefinition>
   ) => {
-    await saveChannelDefinition(dotYouClient, { ...channelDef });
+    if (!channelDef.fileId) {
+      if (!channelDef.fileMetadata.appData.uniqueId) {
+        channelDef.fileMetadata.appData.uniqueId = toGuidId(
+          channelDef.fileMetadata.appData.content.name
+        );
+      }
+      const identity = dotYouClient.getIdentity();
+      const returnUrl = `${ROOT_PATH}/channels?${JSON.stringify(channelDef)}`;
+
+      const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
+
+      const drives = [
+        {
+          a: targetDrive.alias,
+          t: targetDrive.type,
+          p:
+            DrivePermissionType.Read +
+            DrivePermissionType.Write +
+            DrivePermissionType.React +
+            DrivePermissionType.Comment, // Permission
+          n: channelDef.fileMetadata.appData.content.name, // Name
+          d: '',
+        },
+      ];
+
+      const params = {
+        appId: FEED_APP_ID,
+        d: JSON.stringify(drives),
+      };
+
+      const targetUrl = `https://${identity}/owner/app-new-drive?${stringifyToQueryParams(
+        params
+      )}&return=${encodeURIComponent(returnUrl)}`;
+      window.location.href = targetUrl;
+    } else {
+      return await saveChannelDefinition(dotYouClient, { ...channelDef });
+    }
   };
 
   const removeChannel = async (channelDef: DriveSearchResult<ChannelDefinition>) => {
