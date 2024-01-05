@@ -452,17 +452,12 @@ const ChatNavItem = () => {
 };
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
-  const { data: profiles } = useProfiles().fetchProfiles;
-  const standardProfile = profiles?.find(
-    (profile) => profile.profileId === BuiltInProfiles.StandardProfileId
-  );
-
   return (
     <div className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1  ${sidebarBg}`}>
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner'} end={true} />
-        <NavItem icon={Person} to={`/owner/profile/${standardProfile?.slug || 'standard-info'}`} />
-        <NavItem icon={Cloud} to={'/owner/profile/homepage'} />
+        <NavItem icon={Feed} to={'/owner/feed'} end={true} />
+        <NavItem icon={ChatBubble} to="/apps/chat" />
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
           <Bars className={iconClassName} />
