@@ -302,7 +302,7 @@ const NavItem = ({
   end?: boolean;
 }) => {
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== to.split('/')[1];
+  const isExternal = pathname.split('/')[1] !== to.split('/')[1] || to.split('/')[1] === 'apps';
 
   if (isExternal) {
     return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;

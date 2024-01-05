@@ -1,4 +1,4 @@
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import {
   getDrivePermissionFromString,
   getNewId,
@@ -62,7 +62,8 @@ export const createCircleDefinition = async (
 
 export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefinition[]> => {
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/list?includeSystemCircle=true';
+  const url =
+    root + '/list' + (dotYouClient.getType() === ApiType.Owner ? '?includeSystemCircle=true' : '');
 
   const response = await client.get<CircleDefinition[]>(url);
 

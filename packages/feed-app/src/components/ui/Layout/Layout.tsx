@@ -47,7 +47,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       <div
         className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
       >
-        <Sidenav logout={logout} />
+        <Sidenav logout={logout} disablePinning={true} />
         <div
           className={`relative flex min-h-screen w-full flex-col ${
             noShadedBg ? NOT_SHADED_BG : SHADED_BG
