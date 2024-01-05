@@ -1,4 +1,4 @@
-import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { Virtualizer, useWindowVirtualizer } from '@tanstack/react-virtual';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Label, SubtleMessage, useBlogPostsInfinite } from '@youfoundation/common-app';
@@ -108,6 +108,20 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     scrollMargin: parentOffsetRef.current,
     overscan: 5, // Amount of items to load before and after (improved performance especially with images)
     initialOffset: window.scrollY, // Take scroll position from window so we can restore tab positioning
+    scrollToFn: (
+      offset: number,
+      { adjustments = 0, behavior }: { adjustments?: number; behavior?: ScrollBehavior },
+      instance: Virtualizer<Window, any>
+    ) => {
+      // We block big adjustments to prevent the user from loosing their scroll position when expanding a post
+      if (Math.abs(adjustments) >= window.screenY) return;
+      const toOffset = offset + adjustments;
+
+      instance.scrollElement?.scrollTo?.({
+        [instance.options.horizontal ? 'left' : 'top']: toOffset,
+        behavior,
+      });
+    },
   });
 
   useEffect(() => {
@@ -130,7 +144,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
   return (
     <>
       <div className={className}>
-        {!isPostsLoaded && !combinePosts ? (
+        {!isPostsLoaded ? (
           <div className="-mx-4">
             <LoadingBlock className="m-4 h-10" />
             <LoadingBlock className="m-4 h-10" />
@@ -207,34 +221,6 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
       />
     </>
   );
-};
-
-const combinePosts = (
-  staticPosts?: DriveSearchResult<PostContent>[],
-  flattenedPosts?: DriveSearchResult<PostContent>[]
-) => {
-  const combinedPosts = [
-    ...(staticPosts ? staticPosts : []),
-    ...(flattenedPosts ? flattenedPosts : []),
-  ].reduce((uniquePosts, post) => {
-    if (
-      uniquePosts.some(
-        (unique) => unique.fileMetadata.appData.content.id === post.fileMetadata.appData.content.id
-      )
-    ) {
-      return uniquePosts;
-    } else {
-      return [...uniquePosts, post];
-    }
-  }, [] as DriveSearchResult<PostContent>[]);
-
-  combinedPosts.sort(
-    (a, b) =>
-      (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-      (a.fileMetadata.appData.userDate || a.fileMetadata.created)
-  );
-
-  return combinedPosts;
 };
 
 export default VerticalPosts;
