@@ -123,7 +123,10 @@ export const ArticleComposerPage = () => {
           <div className="flex-col">
             {postFile?.fileMetadata.appData.content?.caption || t('New article')}
             <small className="text-sm text-gray-400">
-              <SaveStatus state={saveStatus} className="text-sm" />
+              <SaveStatus
+                state={saveStatus === 'error' ? 'idle' : saveStatus}
+                className="text-sm"
+              />
             </small>
           </div>
         }

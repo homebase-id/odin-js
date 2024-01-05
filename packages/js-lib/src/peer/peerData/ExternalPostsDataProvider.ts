@@ -5,8 +5,8 @@ import {
   GetBatchQueryResultOptions,
   queryBatch,
   DriveSearchResult,
-  TargetDrive,
 } from '../../core/core';
+import { tryJsonParse } from '../../helpers/DataUtil';
 import {
   ChannelDefinition,
   PostContent,
@@ -57,7 +57,7 @@ export const getSocialFeed = async (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
         const odinId = dsr.fileMetadata.senderOdinId;
-        return dsrToPostFile(dotYouClient, odinId, dsr, feedDrive, result.includeMetadataHeader);
+        return dsrToPostFile(dotYouClient, odinId, dsr, result.includeMetadataHeader);
       })
     )
   ).filter(Boolean) as DriveSearchResult<PostContent>[];
@@ -128,39 +128,6 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
   return await promise;
 };
 
-export const getRecentsOverPeer = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  maxRecords = 10,
-  cursorState?: string,
-  channelId?: string
-): Promise<CursoredResult<DriveSearchResult<PostContent>[]>> => {
-  const targetDrive = channelId ? getChannelDrive(channelId) : BlogConfig.PublicChannelDrive;
-
-  const queryParams: FileQueryParams = {
-    targetDrive: targetDrive,
-    fileType: [BlogConfig.PostFileType, BlogConfig.DraftPostFileType],
-  };
-
-  const ro: GetBatchQueryResultOptions = {
-    cursorState: cursorState,
-    maxRecords: maxRecords,
-    includeMetadataHeader: true,
-  };
-
-  const result = await queryBatchOverPeer(dotYouClient, odinId, queryParams, ro);
-
-  const posts = (
-    await Promise.all(
-      result.searchResults.map(async (dsr) => {
-        return dsrToPostFile(dotYouClient, odinId, dsr, targetDrive, result.includeMetadataHeader);
-      })
-    )
-  ).filter(Boolean) as DriveSearchResult<PostContent>[];
-
-  return { cursorState: result.cursorState, results: posts };
-};
-
 export const getChannelOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
@@ -217,11 +184,6 @@ export const getPostOverPeer = async (
   channelId: string,
   postId: string
 ) => {
-  const channel = await getChannelOverPeer(dotYouClient, odinId, channelId);
-  if (!channel) {
-    return;
-  }
-
   const targetDrive = getChannelDrive(channelId);
   const params: FileQueryParams = {
     tagsMatchAtLeastOne: [postId],
@@ -231,26 +193,27 @@ export const getPostOverPeer = async (
 
   const response = await queryBatchOverPeer(dotYouClient, odinId, params);
 
-  if (response.searchResults.length >= 1) {
-    if (response.searchResults.length > 1) {
-      console.warn(`Found more than one file with id [${postId}].  Using first entry.`);
-    }
+  if (!response.searchResults || response.searchResults.length === 0) return undefined;
 
-    return dsrToPostFile(dotYouClient, odinId, response.searchResults[0], targetDrive, true);
-  }
+  if (response.searchResults.length > 1)
+    console.warn(`Found more than one file with id [${postId}].  Using first entry.`);
 
-  return;
+  return dsrToPostFile(dotYouClient, odinId, response.searchResults[0], true);
 };
 
 const dsrToPostFile = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   odinId: string,
   dsr: DriveSearchResult,
-  targetDrive: TargetDrive,
   includeMetadataHeader: boolean
 ): Promise<DriveSearchResult<T> | undefined> => {
   try {
     if (!dsr.fileMetadata.globalTransitId) return undefined;
+    // The header as a mimimum should have the channel id
+    const parsedHeaderContent = tryJsonParse<PostContent>(dsr.fileMetadata.appData.content);
+    const targetDrive =
+      getChannelDrive(parsedHeaderContent?.channelId) || BlogConfig.PublicChannelDrive;
+
     const postContent = await getContentFromHeaderOrPayloadOverPeerByGlobalTransitId<T>(
       dotYouClient,
       odinId,
