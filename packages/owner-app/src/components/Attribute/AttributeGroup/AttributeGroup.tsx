@@ -130,7 +130,7 @@ const AttributeGroup = ({
                 <span
                   key={attr.fileMetadata.appData.content.id ?? 'pending'}
                   title={attr.fileMetadata.appData.content.id ?? 'pending'}
-                  className={`rounded-lg bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900 ${
+                  className={`block rounded-lg bg-white shadow-slate-50 dark:border-gray-700 dark:bg-slate-900 ${
                     !isActive && index !== 0 ? `absolute` : 'relative z-10'
                   }`}
                   style={
