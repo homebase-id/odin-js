@@ -1,4 +1,4 @@
-import { Arrow, Question, t } from '@youfoundation/common-app';
+import { Alert, Arrow, Question, t } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Section from '../../components/ui/Sections/Section';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
@@ -55,10 +55,10 @@ const NotificationProblems = () => {
               <p>
                 <Em className="block">iOS 16.4</Em>
                 {isUnsupportediOS ? (
-                  <p>
-                    Your iOS version is reported as {os.version}, which doesn not support
+                  <Alert type="warning" isCompact={true} className="mb-2">
+                    Your iOS version is reported as {os.version}, which does not support
                     notifications, please upgrade your iOS version
-                  </p>
+                  </Alert>
                 ) : null}
                 iOS only allows notifications from web apps since iOS 16.4. Make sure you are
                 running a version of iOS that is at mimimum 16.4
