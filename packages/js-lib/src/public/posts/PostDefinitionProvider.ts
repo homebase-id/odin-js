@@ -10,7 +10,6 @@ import {
   getContentFromHeaderOrPayload,
   UploadResult,
   SecurityGroupType,
-  ensureDrive,
   UploadInstructionSet,
   ScheduleOptions,
   SendContents,
@@ -21,10 +20,12 @@ import {
   queryBatch,
   DriveSearchResult,
   NewDriveSearchResult,
+  getSecurityContext,
 } from '../../core/core';
 import {
   getRandom16ByteArray,
   jsonStringify64,
+  stringGuidsEqual,
   stringToUint8Array,
   toGuidId,
 } from '../../helpers/helpers';
@@ -94,9 +95,9 @@ export const getChannelDefinitionBySlug = async (dotYouClient: DotYouClient, slu
 
 export const saveChannelDefinition = async (
   dotYouClient: DotYouClient,
-  definition: NewDriveSearchResult<ChannelDefinition>
-): Promise<UploadResult> => {
-  const channelMetadata = '';
+  definition: NewDriveSearchResult<ChannelDefinition>,
+  onMissingDrive?: () => void
+): Promise<UploadResult | undefined> => {
   const channelContent = definition.fileMetadata.appData.content;
 
   if (!definition.fileMetadata.appData.uniqueId) {
@@ -116,14 +117,31 @@ export const saveChannelDefinition = async (
   );
 
   const targetDrive = GetTargetDriveFromChannelId(definition.fileMetadata.appData.uniqueId);
-  await ensureDrive(dotYouClient, targetDrive, channelContent.name, channelMetadata, true, true);
-
   const existingChannelDef = await getChannelDefinitionInternal(
     dotYouClient,
     definition.fileMetadata.appData.uniqueId
   );
   const fileId = existingChannelDef?.fileId;
   const versionTag = existingChannelDef?.fileMetadata.versionTag;
+
+  if (!fileId) {
+    // Channel doesn't exist yet, we need to check if the drive does exist and if there is access:
+    const securityContext = await getSecurityContext(dotYouClient);
+
+    if (
+      !securityContext?.permissionContext.permissionGroups.some((x) =>
+        x.driveGrants.some(
+          (driveGrant) =>
+            stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, targetDrive.alias) &&
+            stringGuidsEqual(driveGrant.permissionedDrive.drive.type, targetDrive.type)
+        )
+      )
+    ) {
+      console.warn(`[DotYouCore-js: PostDefinitionProvider] Save Channel: No access to drive`);
+      onMissingDrive && onMissingDrive();
+      return;
+    }
+  }
 
   const instructionSet: UploadInstructionSet = {
     transferIv: getRandom16ByteArray(),

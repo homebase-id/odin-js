@@ -1,11 +1,11 @@
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { DriveGrantRequest } from '../../provider/app/AppManagementProviderTypes';
 import { useSearchParams } from 'react-router-dom';
 import { ActionButton, Arrow, t } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
 import { useDrives } from '../../hooks/drives/useDrives';
+import { useEffect } from 'react';
+import { drivesParamToDriveGrantRequest } from './RegisterApp';
 
 const ExtendAppDrivePermissions = () => {
   // Read the queryString
@@ -17,18 +17,25 @@ const ExtendAppDrivePermissions = () => {
   const d = searchParams.get('d');
   const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
 
-  console.log({ driveGrants });
-
   const {
     fetch: { data: appRegistration },
-    updatePermissions: { status: updatePermissionStatus },
+    extendPermissions: { mutate: extendPermission, status: extendPermissionStatus },
   } = useApp({ appId: appId || undefined });
 
   const doUpdateApp = async () => {
-    // Ensure drives
-    // Update app
-    // Redirect
+    if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');
+
+    extendPermission({
+      ...appRegistration,
+      appId: appRegistration.appId,
+      permissionSet: appRegistration?.grant.permissionSet || { keys: [] },
+      drives: [...(appRegistration?.grant?.driveGrants || []), ...(driveGrants || [])],
+    });
   };
+
+  useEffect(() => {
+    if (extendPermissionStatus === 'success') window.location.href = returnUrl || '/';
+  }, [extendPermissionStatus]);
 
   const doCancel = async () => {
     // Redirect
@@ -68,8 +75,8 @@ const ExtendAppDrivePermissions = () => {
               {t('has requested extra access on your identity')}.
             </p>
             <p className="mt-2">
-              {t('By allowing, this app')}, &quot;{appRegistration?.name}&quot;{' '}
-              {t('will receive the following access on your identity')}:
+              {t('By allowing this, the app')} &quot;{appRegistration?.name}&quot;{' '}
+              {t('will receive the following extra access on your identity')}:
             </p>
 
             <Section>
@@ -107,7 +114,7 @@ const ExtendAppDrivePermissions = () => {
               <ActionButton
                 onClick={doUpdateApp}
                 type="primary"
-                state={updatePermissionStatus}
+                state={extendPermissionStatus}
                 icon={Arrow}
               >
                 {t('Allow')}
@@ -122,33 +129,6 @@ const ExtendAppDrivePermissions = () => {
       </section>
     </>
   );
-};
-
-const drivesParamToDriveGrantRequest = (queryParamVal: string | undefined): DriveGrantRequest[] => {
-  if (!queryParamVal) {
-    return [];
-  }
-  try {
-    const drivesParamObject = queryParamVal && tryJsonParse(queryParamVal);
-    return (Array.isArray(drivesParamObject) ? drivesParamObject : [drivesParamObject]).map((d) => {
-      return {
-        permissionedDrive: {
-          drive: {
-            alias: d.a,
-            type: d.t,
-          },
-          // I know, probably not really "safe" to do this... But hey, the drivePermission are hard
-          permission: [parseInt(d.p)],
-        },
-        driveMeta: {
-          name: d.n,
-          description: d.d,
-        },
-      };
-    });
-  } catch (ex) {
-    return [];
-  }
 };
 
 export default ExtendAppDrivePermissions;

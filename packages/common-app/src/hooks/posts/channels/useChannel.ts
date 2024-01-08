@@ -8,7 +8,7 @@ import {
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
 
-import { useStaticFiles } from '@youfoundation/common-app';
+import { useSecurityContext, useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
@@ -17,6 +17,7 @@ import {
   DrivePermissionType,
   DriveSearchResult,
   NewDriveSearchResult,
+  TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '@youfoundation/feed-app/src/app/App';
 import { FEED_APP_ID } from '../../../../../owner-app/src/app/Constants';
@@ -26,10 +27,43 @@ type useChannelsProps = {
   channelId?: string;
 };
 
+const getExtendAuthorizationUrl = (
+  identity: string,
+  name: string,
+  description: string,
+  targetDrive: TargetDrive,
+  returnUrl: string
+) => {
+  const drives = [
+    {
+      a: targetDrive.alias,
+      t: targetDrive.type,
+      p:
+        DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment, // Permission
+      n: name,
+      d: description,
+    },
+  ];
+
+  const params = {
+    appId: FEED_APP_ID,
+    d: JSON.stringify(drives),
+  };
+
+  return `https://${identity}/owner/app-new-drive?${stringifyToQueryParams(
+    params
+  )}&return=${encodeURIComponent(returnUrl)}`;
+};
+
 export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
+
+  const { data: securityContext } = useSecurityContext().fetch;
 
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) return null;
@@ -81,42 +115,31 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     channelDef: NewDriveSearchResult<ChannelDefinition> | DriveSearchResult<ChannelDefinition>
   ) => {
     if (!channelDef.fileId) {
-      if (!channelDef.fileMetadata.appData.uniqueId) {
+      if (!channelDef.fileMetadata.appData.uniqueId)
         channelDef.fileMetadata.appData.uniqueId = toGuidId(
           channelDef.fileMetadata.appData.content.name
         );
-      }
+    }
+
+    const onMissingDrive = () => {
+      if (!channelDef.fileMetadata.appData.uniqueId)
+        throw new Error('Channel unique id is not set');
+
       const identity = dotYouClient.getIdentity();
-      const returnUrl = `${ROOT_PATH}/channels?${JSON.stringify(channelDef)}`;
+      const returnUrl = `${ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
 
-      const drives = [
-        {
-          a: targetDrive.alias,
-          t: targetDrive.type,
-          p:
-            DrivePermissionType.Read +
-            DrivePermissionType.Write +
-            DrivePermissionType.React +
-            DrivePermissionType.Comment, // Permission
-          n: channelDef.fileMetadata.appData.content.name, // Name
-          d: '',
-        },
-      ];
+      window.location.href = getExtendAuthorizationUrl(
+        identity,
+        channelDef.fileMetadata.appData.content.name,
+        channelDef.fileMetadata.appData.content.description,
+        targetDrive,
+        returnUrl
+      );
+    };
 
-      const params = {
-        appId: FEED_APP_ID,
-        d: JSON.stringify(drives),
-      };
-
-      const targetUrl = `https://${identity}/owner/app-new-drive?${stringifyToQueryParams(
-        params
-      )}&return=${encodeURIComponent(returnUrl)}`;
-      window.location.href = targetUrl;
-    } else {
-      return await saveChannelDefinition(dotYouClient, { ...channelDef });
-    }
+    return await saveChannelDefinition(dotYouClient, { ...channelDef }, onMissingDrive);
   };
 
   const removeChannel = async (channelDef: DriveSearchResult<ChannelDefinition>) => {

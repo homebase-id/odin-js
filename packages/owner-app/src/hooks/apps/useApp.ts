@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ensureDrive } from '@youfoundation/js-lib/core';
+import { DriveGrant } from '@youfoundation/js-lib/network';
 import {
   AllowApp,
   GetAppRegistration,
@@ -11,10 +12,15 @@ import {
 } from '../../provider/app/AppManagementProvider';
 import {
   AppRegistrationRequest,
+  DriveGrantRequest,
   PermissionSetGrantRequest,
   PermissionUpdateRequest,
 } from '../../provider/app/AppManagementProviderTypes';
 import { useAuth } from '../auth/useAuth';
+
+interface PermissionExtensionRequest extends Omit<PermissionUpdateRequest, 'drives'> {
+  drives?: (DriveGrantRequest | DriveGrant)[];
+}
 
 export const useApp = ({ appId }: { appId?: string }) => {
   const queryClient = useQueryClient();
@@ -74,6 +80,33 @@ export const useApp = ({ appId }: { appId?: string }) => {
       appId,
       authorizedCircles: circleIds,
       circleMemberPermissionGrant,
+    });
+  };
+
+  const extendPermissions = async ({
+    appId,
+    permissionSet,
+    drives,
+  }: PermissionExtensionRequest) => {
+    if (drives)
+      await Promise.all(
+        drives.map(async (driveGrant: DriveGrantRequest) => {
+          console.log({ driveGrant });
+          if (driveGrant.driveMeta && driveGrant.driveMeta.name)
+            return await ensureDrive(
+              dotYouClient,
+              driveGrant.permissionedDrive.drive,
+              driveGrant.driveMeta.name,
+              driveGrant.driveMeta.description,
+              false
+            );
+        })
+      );
+
+    return await UpdatePermissions(dotYouClient, {
+      appId,
+      permissionSet,
+      drives: drives || [],
     });
   };
 
@@ -145,6 +178,16 @@ export const useApp = ({ appId }: { appId?: string }) => {
     }),
     updatePermissions: useMutation({
       mutationFn: updatePermissions,
+      onSuccess: (data, param) => {
+        queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
+        queryClient.invalidateQueries({ queryKey: ['registeredApps'] });
+      },
+      onError: (ex) => {
+        console.error(ex);
+      },
+    }),
+    extendPermissions: useMutation({
+      mutationFn: extendPermissions,
       onSuccess: (data, param) => {
         queryClient.invalidateQueries({ queryKey: ['app', param.appId] });
         queryClient.invalidateQueries({ queryKey: ['registeredApps'] });

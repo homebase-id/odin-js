@@ -320,10 +320,11 @@ const AppRegistration = ({
 //     },
 //   ])
 // );
-const drivesParamToDriveGrantRequest = (queryParamVal: string | undefined): DriveGrantRequest[] => {
-  if (!queryParamVal) {
-    return [];
-  }
+export const drivesParamToDriveGrantRequest = (
+  queryParamVal: string | undefined
+): DriveGrantRequest[] => {
+  if (!queryParamVal) return [];
+
   try {
     const drivesParamObject = queryParamVal && tryJsonParse(queryParamVal);
     return (Array.isArray(drivesParamObject) ? drivesParamObject : [drivesParamObject]).map((d) => {
