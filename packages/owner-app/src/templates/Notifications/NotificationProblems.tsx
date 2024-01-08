@@ -14,8 +14,6 @@ const NotificationProblems = () => {
   const isiOs = os.name === 'iOS';
   const isUnsupportediOS = isiOs && isOldIos(os.version);
 
-  // const isAndroid = os.name === 'Android';
-
   const [isShowiOS, setShowiOS] = useState(false);
 
   return (
