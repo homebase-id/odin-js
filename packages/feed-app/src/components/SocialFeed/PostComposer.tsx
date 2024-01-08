@@ -147,7 +147,7 @@ const PostComposer = ({
             key={stateIndex}
           />
         </div>
-        <FileOverview files={files} setFiles={setFiles} className="mt-2" />
+        <FileOverview files={files} setFiles={setFiles} className="mt-2" cols={4} />
         {embeddedPost ? (
           <EmbeddedPostContent content={embeddedPost} className="pointer-events-none mt-4" />
         ) : null}
