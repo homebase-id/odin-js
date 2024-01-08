@@ -6,6 +6,7 @@ import {
   t,
   OwnerImage,
   OwnerName,
+  LoadingBlock,
 } from '@youfoundation/common-app';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { useChatMessages } from '../../../../hooks/chat/useChatMessages';
@@ -99,7 +100,7 @@ export const ConversationWithYourselfItem = ({
   isActive: boolean;
 }) => {
   return (
-    <ListItemWrapper isActive={isActive} onClick={onClick}>
+    <ListItemWrapper isActive={isActive} onClick={onClick} order={1}>
       <OwnerImage
         className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
         size="sm"
@@ -126,7 +127,7 @@ const ConversationBody = ({
   setOrder?: (order: number) => void;
 }) => {
   const { data: conversation } = useConversation({ conversationId }).single;
-  const { data } = useChatMessages({ conversationId }).all;
+  const { data, isFetched: fetchedMessages } = useChatMessages({ conversationId }).all;
   const flatMessages = useMemo(
     () =>
       data?.pages
@@ -164,7 +165,7 @@ const ConversationBody = ({
         <div className="flex flex-row items-center gap-1">
           {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
 
-          <div className="leading-tight text-foreground/80">
+          <div className="w-full leading-tight text-foreground/80">
             {lastMessage && lastMessageContent ? (
               lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
                 <MessageDeletedInnerBody />
@@ -173,6 +174,8 @@ const ConversationBody = ({
               ) : (
                 <p>📷 {t('Media')}</p>
               )
+            ) : !fetchedMessages ? (
+              <LoadingBlock className="h-5 w-full flex-grow bg-slate-300 dark:bg-slate-200" />
             ) : null}
           </div>
 
