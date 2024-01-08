@@ -7,11 +7,7 @@ import {
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import {
-  ChatMessage,
-  ChatDeletedArchivalStaus,
-  ChatDeliveryStatus,
-} from '../../../providers/ChatProvider';
+import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { Conversation, GroupConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
 import { ChatMediaGallery } from './Media/ChatMediaGallery';
@@ -110,7 +106,7 @@ const ChatTextMessageBody = ({
 
   return (
     <div
-      className={`relative w-auto max-w-lg rounded-lg px-2 py-1  ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2  py-1 md:max-w-xs lg:max-w-lg  ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
