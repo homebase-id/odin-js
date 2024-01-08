@@ -106,7 +106,7 @@ const ChatTextMessageBody = ({
 
   return (
     <div
-      className={`relative w-auto max-w-[75vw] rounded-lg px-2  py-1 md:max-w-xs lg:max-w-lg  ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-1 md:max-w-xs lg:max-w-lg  ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -186,7 +186,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-xs rounded-lg ${
+      className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
       }`}
     >
