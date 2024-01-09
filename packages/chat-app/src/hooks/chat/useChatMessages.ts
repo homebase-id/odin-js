@@ -20,9 +20,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
-  const fetchMessages = async (conversationId: string, cursorState: string | undefined) => {
-    return await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
-  };
+  const fetchMessages = async (conversationId: string, cursorState: string | undefined) =>
+    await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
 
   const markAsRead = async ({
     conversation,
@@ -78,6 +77,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       enabled: !!conversationId,
+      staleTime: 1000 * 60 * 5, // 5 minutes; The chat messages are already invalidated by the websocket
       refetchOnMount: false,
       refetchOnWindowFocus: false,
     }),

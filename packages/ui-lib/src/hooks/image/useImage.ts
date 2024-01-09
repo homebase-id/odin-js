@@ -215,7 +215,7 @@ export const useImage = (
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60, // 1 min
-      gcTime: Infinity,
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
       enabled: !!imageFileId && imageFileId !== '',
     }),
   };
