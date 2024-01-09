@@ -8,6 +8,7 @@ import { NetworkVisibilitySettings } from './NetworkVisibilitySettings';
 import { ReactionSettings } from './ReactionSettings';
 import { SecuritySettings } from './SecuritySettings';
 import { DeleteAccountSettings } from './DeleteAccountSettings';
+import { UiSettings } from './UiSettings';
 
 const Settings = () => {
   const { sectionId } = useParams();
@@ -32,6 +33,10 @@ const Settings = () => {
             title: `Delete account`,
             path: `/owner/settings/delete`,
           },
+          {
+            title: `UI`,
+            path: `/owner/settings/ui`,
+          },
         ]}
         className="-mt-6 mb-4"
       />
@@ -39,6 +44,7 @@ const Settings = () => {
       {sectionId === 'reactions' && <ReactionSettings />}
       {sectionId === 'security' && <SecuritySettings />}
       {sectionId === 'delete' && <DeleteAccountSettings />}
+      {sectionId === 'ui' && <UiSettings />}
     </>
   );
 };
