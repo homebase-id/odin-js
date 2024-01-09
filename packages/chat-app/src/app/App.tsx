@@ -46,6 +46,7 @@ const queryClient = new QueryClient({
 const localStoragePersister = createSyncStoragePersister({
   storage: window.localStorage,
   retry: removeOldestQuery,
+  key: 'CHAT_REACT_QUERY_OFFLINE_CACHE',
 });
 
 // Explicit includes to avoid persisting media items, or large data in general
