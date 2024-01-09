@@ -85,7 +85,7 @@ export const useApexDomain = (domain?: string) => {
     queryFn: () => getApexDomain(domain),
     retry: false,
     enabled: !!domain,
-    gcTime: Infinity,
-    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours => Very unlikely to change
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours => Very unlikely to change
   });
 };
