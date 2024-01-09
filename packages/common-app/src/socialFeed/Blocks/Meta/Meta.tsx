@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
 import {
+  AclSummary,
   ActionGroupOptionProps,
   Block,
   Lock,
@@ -19,6 +20,7 @@ import {
 } from '@youfoundation/common-app';
 import { OwnerActions } from './OwnerActions';
 import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { aclEqual } from '@youfoundation/js-lib/helpers';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
@@ -88,9 +90,20 @@ export const PostMeta = ({
           onClick={(e) => e.stopPropagation()}
         >
           {postFile?.fileMetadata.isEncrypted ? <Lock className="h-3 w-3" /> : null}
-          {channel?.fileMetadata.appData.content.name
-            ? `${channel?.fileMetadata.appData.content.name}`
-            : ''}
+          {channel?.serverMetadata &&
+          postFile?.serverMetadata &&
+          !aclEqual(
+            channel.serverMetadata.accessControlList,
+            postFile.serverMetadata.accessControlList
+          ) ? (
+            <AclSummary acl={postFile.serverMetadata.accessControlList} />
+          ) : (
+            <>
+              {channel?.fileMetadata.appData.content.name
+                ? `${channel?.fileMetadata.appData.content.name}`
+                : ''}
+            </>
+          )}
         </a>
       ) : null}
 

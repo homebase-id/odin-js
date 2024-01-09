@@ -13,8 +13,9 @@ export const CircleSelector = ({
   onChange: (e: { target: { name: string; value: string[] } }) => void;
   name?: string;
 }) => {
-  const { data: circles, isLoading: circlesLoading } = useCircles().fetch;
-
+  const {
+    fetch: { data: circles, isLoading: isCirclesLoading },
+  } = useCircles();
   const [selection, setSelection] = useState<string[]>([...(defaultValue ?? [])]);
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export const CircleSelector = ({
 
   return (
     <>
-      {!circles?.length && !circlesLoading && (
+      {!circles?.length && !isCirclesLoading && (
         <p
           className="rounded-lg border bg-white px-4 py-4 dark:border-slate-800
         dark:bg-black"

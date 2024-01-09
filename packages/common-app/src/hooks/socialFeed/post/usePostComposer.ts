@@ -1,4 +1,5 @@
 import {
+  AccessControlList,
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
@@ -12,7 +13,7 @@ import {
   ReactAccess,
   NewMediaFile,
 } from '@youfoundation/js-lib/public';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
 import { useDotYouClient } from '../../../..';
@@ -28,10 +29,17 @@ export const usePostComposer = () => {
     mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
     channel: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>,
-    reactAccess: ReactAccess | undefined
+    reactAccess: ReactAccess | undefined,
+    overrideAcl: AccessControlList | undefined
   ) => {
     if (!mediaFiles && !caption && !embeddedPost) return;
 
+    if (
+      overrideAcl &&
+      !stringGuidsEqual(channel.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
+    ) {
+      throw new Error('Custom ACLs are only allowed for public channels');
+    }
     try {
       setPostState('uploading');
 
@@ -54,9 +62,13 @@ export const usePostComposer = () => {
             },
           },
         },
-        serverMetadata: channel.serverMetadata || {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-        },
+        serverMetadata: overrideAcl
+          ? {
+              accessControlList: overrideAcl,
+            }
+          : channel.serverMetadata || {
+              accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+            },
       };
 
       await savePostFile({

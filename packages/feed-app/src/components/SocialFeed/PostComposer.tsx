@@ -30,9 +30,15 @@ import {
   AclIcon,
   Pencil,
   useDotYouClient,
+  AclDialog,
 } from '@youfoundation/common-app';
 import { base64ToUint8Array, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import {
+  AccessControlList,
+  DriveSearchResult,
+  NewDriveSearchResult,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
 const isTouchDevice = () => {
@@ -59,6 +65,7 @@ const PostComposer = ({
   const [channel, setChannel] = useState<
     DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>
   >(BlogConfig.PublicChannelNewDsr);
+  const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
@@ -67,7 +74,7 @@ const PostComposer = ({
 
   const doPost = async () => {
     if (isPosting) return;
-    await savePost(caption, files, embeddedPost, channel, reactAccess);
+    await savePost(caption, files, embeddedPost, channel, reactAccess, customAcl);
     resetUi();
     onPost && onPost();
   };
@@ -211,10 +218,15 @@ const PostComposer = ({
               />
             </>
           ) : null}
-          <ChannelSelector
+          <ChannelOrAclSelector
             className="ml-auto max-w-[35%] flex-shrink"
-            defaultValue={channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId}
-            onChange={(channel) => channel && setChannel(channel)}
+            defaultChannelValue={
+              channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+            }
+            onChange={(channel, acl) => {
+              channel && setChannel(channel);
+              setCustomAcl(acl);
+            }}
             ref={selectRef}
           />
           <ActionButton
@@ -224,13 +236,16 @@ const PostComposer = ({
             icon={Arrow}
           >
             {channel.serverMetadata?.accessControlList && canPost ? (
-              <AclIcon className="mr-3 h-4 w-4" acl={channel.serverMetadata?.accessControlList} />
+              <AclIcon
+                className="mr-3 h-4 w-4"
+                acl={customAcl || channel.serverMetadata?.accessControlList}
+              />
             ) : null}
             <span className="flex flex-col">
               {t('Post')}{' '}
               {channel.serverMetadata?.accessControlList && canPost ? (
                 <small className="flex flex-row items-center gap-1 leading-none">
-                  <AclSummary acl={channel.serverMetadata?.accessControlList} />{' '}
+                  <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />{' '}
                 </small>
               ) : null}
             </span>
@@ -238,53 +253,60 @@ const PostComposer = ({
         </div>
       </form>
       {error ? <ErrorNotification error={error} /> : null}
-      {/* <ReactAccessEditorDialog
-        isOpen={isReactAccessEditorOpen}
-        onConfirm={(newReactAccess) => {
-          setReactAccess(newReactAccess);
-          setIsReactAccessEditorOpen(false);
-        }}
-        onCancel={() => setIsReactAccessEditorOpen(false)}
-        title={t('Edit react access')}
-        defaultValue={reactAccess}
-      /> */}
     </div>
   );
 };
 
 // eslint-disable-next-line react/display-name
-export const ChannelSelector = React.forwardRef(
+export const ChannelOrAclSelector = React.forwardRef(
   (
     {
       className,
-      defaultValue,
+      defaultChannelValue,
+      defaultAcl,
       onChange,
       disabled,
       excludeMore,
+      excludeCustom,
     }: {
       className?: string;
-      defaultValue?: string;
-      onChange: (channel: DriveSearchResult<ChannelDefinition> | undefined) => void;
+      defaultChannelValue?: string;
+      defaultAcl?: AccessControlList;
+      onChange: (
+        channel: DriveSearchResult<ChannelDefinition> | undefined,
+        acl: AccessControlList | undefined
+      ) => void;
       disabled?: boolean;
       excludeMore?: boolean;
+      excludeCustom?: boolean;
     },
     ref: Ref<HTMLSelectElement>
   ) => {
     const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
+    const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
 
     if (isLoading || !channels) {
-      // return a different 'loading-select', so we can still use the defaultValue when the channels are loaded
+      // return a different 'loading-select', so we can still use the defaultChannelValue once the channels are loaded
       return (
         <select
           className={`cursor-pointer bg-transparent px-3 py-2 text-sm ${className ?? ''}`}
-          defaultValue={defaultValue}
+          defaultValue={defaultChannelValue}
           key={'loading-select'}
         >
           <option>{t('Public Posts')}</option>
         </select>
       );
     }
+
+    const publicChannel = channels.find((chnl) =>
+      stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
+    );
+
+    const defaultChannel =
+      channels.find((chnl) =>
+        stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultChannelValue)
+      ) || publicChannel;
 
     return (
       <>
@@ -294,7 +316,7 @@ export const ChannelSelector = React.forwardRef(
           } ${className ?? ''}`}
           defaultValue={
             channels.find((chnl) =>
-              stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultValue)
+              stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultChannelValue)
             )?.fileMetadata.appData.uniqueId
           }
           key={'loaded-select'}
@@ -303,11 +325,18 @@ export const ChannelSelector = React.forwardRef(
               setIsChnlMgmtOpen(true);
               e.target.value =
                 channels.find((chnl) =>
-                  stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultValue)
-                )?.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId;
+                  stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultChannelValue)
+                )?.fileMetadata.appData.uniqueId ||
+                publicChannel?.fileMetadata.appData.uniqueId ||
+                BlogConfig.PublicChannelId;
+            } else if (e.target.value === 'custom') {
+              setIsCustomAclOpen(true);
+              e.target.value =
+                publicChannel?.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId;
             } else {
               onChange(
-                channels?.find((chnl) => chnl.fileMetadata.appData.uniqueId === e.target.value)
+                channels?.find((chnl) => chnl.fileMetadata.appData.uniqueId === e.target.value),
+                undefined
               );
             }
           }}
@@ -322,13 +351,37 @@ export const ChannelSelector = React.forwardRef(
               {channel.fileMetadata.appData.content.name}
             </option>
           ))}
-          {!excludeMore ? (
-            <option value={'more'} key={'more'}>
-              {t('More')}...
-            </option>
+          {!excludeMore && !excludeCustom ? (
+            <optgroup label={t('Advanced')}>
+              {!excludeMore ? (
+                <option value={'more'} key={'more'}>
+                  {t('More')}...
+                </option>
+              ) : null}
+              {!excludeCustom ? (
+                <option value={'custom'} key={'custom'}>
+                  {t('Custom')}...
+                </option>
+              ) : null}
+            </optgroup>
           ) : null}
         </select>
         <ChannelsDialog isOpen={isChnlMgmtOpen} onCancel={() => setIsChnlMgmtOpen(false)} />
+        <AclDialog
+          acl={
+            defaultAcl ||
+            defaultChannel?.serverMetadata?.accessControlList || {
+              requiredSecurityGroup: SecurityGroupType.Anonymous,
+            }
+          }
+          title={t('Who can see your post?')}
+          onConfirm={(acl) => {
+            onChange(publicChannel, acl);
+            setIsCustomAclOpen(false);
+          }}
+          isOpen={isCustomAclOpen}
+          onCancel={() => setIsCustomAclOpen(false)}
+        />
       </>
     );
   }
