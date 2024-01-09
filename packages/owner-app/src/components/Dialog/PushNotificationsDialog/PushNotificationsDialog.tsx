@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom';
 import {
+  Alert,
   Arrow,
   Bubble,
   Check,
@@ -89,69 +90,62 @@ const Settings = () => {
       <ErrorNotification error={testNotificationError || enableError} />
 
       {!isSupported ? (
-        <p>
+        <Alert type="warning">
           {t('Notifications are not supported on this browser')}{' '}
           <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
             {t(`What does this mean?`)}
           </Link>
-        </p>
+        </Alert>
       ) : null}
 
-      {isSupported && !canEnable ? (
+      {isSupported && !canEnable && !(isEnabled || current) ? (
         <p>{t(`We can't enable notifications at the moment, please refresh and try again`)}</p>
       ) : null}
 
-      {isSupported && ((isEnabled && current) || enableStatus === 'success') ? (
+      {isSupported ? (
         <>
-          <SubtleMessage>
-            {t(
-              'You can confirm that notifications are working as expeced, by triggering a test notification:'
-            )}
-          </SubtleMessage>
+          {(isEnabled && current) || enableStatus === 'success' ? (
+            <>
+              <SubtleMessage>
+                {t(
+                  'You can confirm that notifications are working as expeced, by triggering a test notification:'
+                )}
+              </SubtleMessage>
 
-          <ActionButton
-            icon={PaperPlane}
-            onClick={() => sendTestNotification()}
-            state={testNotificationStatus}
-          >
-            {t('Send a test notification')}
-          </ActionButton>
-          {testNotificationStatus === 'success' ? (
-            <p className="my-2">
-              {t(`Notification sent. Didn't get it?`)}{' '}
-              <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
-                {t(`What can I do?`)}
-              </Link>
-            </p>
-          ) : null}
-
-          {/* <div className="mt-7">
-            <SubtleMessage>
-              {t(`Don't want to receive notifications on this device?`)}
-            </SubtleMessage>
-            <ActionButton
-              onClick={() => removeCurrent()}
-              type="remove"
-              icon={Times}
-              state={removeStatus}
-            >
-              {t('Disable notifications')}
-            </ActionButton>
-          </div> */}
+              <ActionButton
+                icon={PaperPlane}
+                onClick={() => sendTestNotification()}
+                state={testNotificationStatus}
+              >
+                {t('Send a test notification')}
+              </ActionButton>
+              {testNotificationStatus === 'success' ? (
+                <p className="my-2">
+                  {t(`Notification sent. Didn't get it?`)}{' '}
+                  <Link
+                    className="text-primary hover:underline"
+                    to={`/owner/notifications/problems`}
+                  >
+                    {t(`What can I do?`)}
+                  </Link>
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <SubtleMessage>
+                {t(
+                  `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open`
+                )}
+                .
+              </SubtleMessage>
+              <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
+                {t('Enable push notifications')}
+              </ActionButton>
+            </>
+          )}
         </>
-      ) : (
-        <>
-          <SubtleMessage>
-            {t(
-              `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open`
-            )}
-            .
-          </SubtleMessage>
-          <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
-            {t('Enable push notifications')}
-          </ActionButton>
-        </>
-      )}
+      ) : null}
     </>
   );
 };

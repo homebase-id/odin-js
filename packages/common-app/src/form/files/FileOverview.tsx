@@ -108,7 +108,9 @@ export const FileOverview = ({
 
   return (
     <div
-      className={`gap-[2px] grid ${cols === 8 ? 'grid-cols-8' : 'grid-cols-4'} ${className ?? ''}`}
+      className={`gap-[2px] grid ${
+        cols === 8 ? 'grid-cols-4 md:grid-cols-6 lg:grid-cols-8' : cols === 4 ? 'grid-cols-4' : ''
+      } ${className ?? ''}`}
     >
       {renderedFiles}
     </div>

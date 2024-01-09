@@ -142,6 +142,7 @@ export const CommentEditor = ({
           files={files}
           setFiles={(newFiles) => setAttachment(newFiles?.[0]?.file as File)}
           className="my-2"
+          cols={4}
         />
         <div className="flex flex-shrink-0 flex-row items-center">
           <EmojiSelector
