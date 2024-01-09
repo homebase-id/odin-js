@@ -30,7 +30,7 @@ export const ChatHome = () => {
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
 
-        <div className="h-[100dvh] w-full flex-grow bg-background">
+        <div className="h-full w-full flex-grow bg-background">
           <ChatDetail
             conversationId={conversationKey}
             toggleSidenav={() => setIsSidenavOpen(!isSidenavOpen)}

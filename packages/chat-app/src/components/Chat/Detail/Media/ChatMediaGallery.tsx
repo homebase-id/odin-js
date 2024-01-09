@@ -83,7 +83,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
-        <div className="relative flex h-full min-h-screen flex-row items-center justify-center">
+        <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
           {msg.fileMetadata.payloads.find((p) => p.key === mediaKey)?.contentType ===
           'video/mp4' ? (
             <OdinVideo

@@ -8,7 +8,7 @@ import { ROOT_PATH } from '../../app/App';
 const About = () => {
   return (
     <NoLayout noShadedBg={true}>
-      <section className="relative flex min-h-screen items-center justify-center">
+      <section className="relative flex items-center justify-center">
         <div className="absolute inset-0 flex flex-col">
           <div className="flex flex-row items-center border-b px-5 py-3">
             <Homebase className="my-auto mr-2 h-10 w-10" />{' '}

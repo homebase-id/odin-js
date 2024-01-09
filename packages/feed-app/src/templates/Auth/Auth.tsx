@@ -20,7 +20,6 @@ const Auth = () => {
         <title>Login | Homebase</title>
       </Helmet>
       <Layout noShadedBg={true} noPadding={true}>
-        {/* <PhotoLibraryLoader className="h-screen overflow-hidden px-2 py-2 pt-4 sm:px-10 sm:pt-8" /> */}
         <DialogWrapper>
           {isError && (
             <Alert className="my-2" type="warning" isCompact={true}>
