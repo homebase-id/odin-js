@@ -30,10 +30,7 @@ export const AclDialog = ({
 
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel}>
-      <>
-        <h2 className="mb-2 text-xl">{t('General access')}</h2>
-        <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} direction="column" />
-      </>
+      <AclWizard acl={acl} onConfirm={onConfirm} onCancel={onCancel} direction="column" />
     </DialogWrapper>
   );
 

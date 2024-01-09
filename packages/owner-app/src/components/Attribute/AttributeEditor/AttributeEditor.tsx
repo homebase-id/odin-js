@@ -261,30 +261,33 @@ const AttributeEditor = ({
     >
       <ErrorBoundary>
         {isAclEdit ? (
-          <AclWizard
-            acl={
-              latestAttr.serverMetadata?.accessControlList || {
-                requiredSecurityGroup: SecurityGroupType.Owner,
+          <>
+            <h2 className="mb-2 text-lg">{t('Who can access this attribute?')}</h2>
+            <AclWizard
+              acl={
+                latestAttr.serverMetadata?.accessControlList || {
+                  requiredSecurityGroup: SecurityGroupType.Owner,
+                }
               }
-            }
-            onConfirm={(newAcl) => {
-              setIsAclEdit(false);
-              const dirtyAttr: NewDriveSearchResult<AttributeVm> = {
-                ...latestAttr,
-                serverMetadata: {
-                  ...latestAttr.serverMetadata,
-                  accessControlList: newAcl,
-                },
-              };
+              onConfirm={(newAcl) => {
+                setIsAclEdit(false);
+                const dirtyAttr: NewDriveSearchResult<AttributeVm> = {
+                  ...latestAttr,
+                  serverMetadata: {
+                    ...latestAttr.serverMetadata,
+                    accessControlList: newAcl,
+                  },
+                };
 
-              if (isNewAttribute) setLatestAttr(dirtyAttr);
-              else doManualSave(dirtyAttr);
-            }}
-            onCancel={() => {
-              if (isNewAttribute && onCancel) onCancel();
-              setIsAclEdit(false);
-            }}
-          />
+                if (isNewAttribute) setLatestAttr(dirtyAttr);
+                else doManualSave(dirtyAttr);
+              }}
+              onCancel={() => {
+                if (isNewAttribute && onCancel) onCancel();
+                setIsAclEdit(false);
+              }}
+            />
+          </>
         ) : (
           <>
             <AttributeFields

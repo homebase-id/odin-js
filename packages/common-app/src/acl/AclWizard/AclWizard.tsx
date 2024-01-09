@@ -19,7 +19,6 @@ export const AclWizard = ({
 
   return (
     <>
-      <h2 className="mb-2 text-lg">{t('Who can access this attribute?')}</h2>
       <div className="mb-8">
         <RequiredSecurityGroupRadioGroup
           defaultAcl={currentAcl}

@@ -5,7 +5,7 @@ import {
   NewMediaFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
-import React, { Ref, useEffect } from 'react';
+import React, { Ref, useEffect, useMemo } from 'react';
 import { useRef, useState } from 'react';
 import {
   ActionButton,
@@ -223,6 +223,7 @@ const PostComposer = ({
             defaultChannelValue={
               channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
             }
+            defaultAcl={customAcl}
             onChange={(channel, acl) => {
               channel && setChannel(channel);
               setCustomAcl(acl);
@@ -286,6 +287,14 @@ export const ChannelOrAclSelector = React.forwardRef(
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
     const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
 
+    const publicChannel = useMemo(
+      () =>
+        channels?.find((chnl) =>
+          stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
+        ),
+      [channels]
+    );
+
     if (isLoading || !channels) {
       // return a different 'loading-select', so we can still use the defaultChannelValue once the channels are loaded
       return (
@@ -299,14 +308,30 @@ export const ChannelOrAclSelector = React.forwardRef(
       );
     }
 
-    const publicChannel = channels.find((chnl) =>
-      stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
-    );
+    const getPublicChannel = () =>
+      publicChannel?.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId;
 
-    const defaultChannel =
+    const getDefaultChannel = () =>
       channels.find((chnl) =>
         stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultChannelValue)
-      ) || publicChannel;
+      )?.fileMetadata.appData.uniqueId || getPublicChannel();
+
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      if (e.target.value === 'more') {
+        setIsChnlMgmtOpen(true);
+        e.target.value = getDefaultChannel();
+      } else if (e.target.value === 'custom') {
+        setIsCustomAclOpen(true);
+        e.target.value = getPublicChannel();
+      } else {
+        onChange(
+          channels.find((chnl) =>
+            stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, e.target.value)
+          ),
+          undefined
+        );
+      }
+    };
 
     return (
       <>
@@ -320,26 +345,7 @@ export const ChannelOrAclSelector = React.forwardRef(
             )?.fileMetadata.appData.uniqueId
           }
           key={'loaded-select'}
-          onChange={(e) => {
-            if (e.target.value === 'more') {
-              setIsChnlMgmtOpen(true);
-              e.target.value =
-                channels.find((chnl) =>
-                  stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, defaultChannelValue)
-                )?.fileMetadata.appData.uniqueId ||
-                publicChannel?.fileMetadata.appData.uniqueId ||
-                BlogConfig.PublicChannelId;
-            } else if (e.target.value === 'custom') {
-              setIsCustomAclOpen(true);
-              e.target.value =
-                publicChannel?.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId;
-            } else {
-              onChange(
-                channels?.find((chnl) => chnl.fileMetadata.appData.uniqueId === e.target.value),
-                undefined
-              );
-            }
-          }}
+          onChange={handleChange}
           ref={ref}
           disabled={disabled}
         >
@@ -370,7 +376,7 @@ export const ChannelOrAclSelector = React.forwardRef(
         <AclDialog
           acl={
             defaultAcl ||
-            defaultChannel?.serverMetadata?.accessControlList || {
+            publicChannel?.serverMetadata?.accessControlList || {
               requiredSecurityGroup: SecurityGroupType.Anonymous,
             }
           }
