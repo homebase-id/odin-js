@@ -83,6 +83,7 @@ export const Subscribe = async (
   dotYouClient: DotYouClient,
   drives: TargetDrive[],
   handler: (data: TypedConnectionNotification) => void,
+  onDisconnect?: () => void,
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
   const apiType = dotYouClient.getType();
@@ -141,10 +142,12 @@ export const Subscribe = async (
 
     webSocketClient.onerror = (e) => {
       console.error('[NotificationProvider]', e);
+      onDisconnect?.();
     };
 
     webSocketClient.onclose = (e) => {
       if (isDebug) console.debug('[NotificationProvider] Connection closed');
+      onDisconnect?.();
     };
   });
 };

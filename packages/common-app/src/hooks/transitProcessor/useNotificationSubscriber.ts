@@ -20,6 +20,8 @@ export const useNotificationSubscriber = (
   const isConnected = useRef<boolean>(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
 
+  const [shouldReconnect, setShouldReconnect] = useState<boolean>(false);
+
   const localHandler = subscriber
     ? (notification: TypedConnectionNotification) => {
         if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
@@ -37,8 +39,14 @@ export const useNotificationSubscriber = (
     if (!isConnected.current && localHandler) {
       isConnected.current = true;
       (async () => {
-        await Subscribe(dotYouClient, drives, localHandler);
+        await Subscribe(dotYouClient, drives, localHandler, () => {
+          isConnected.current = false;
+          setIsActive(false);
+
+          setShouldReconnect(true);
+        });
         setIsActive(true);
+        setShouldReconnect(false);
       })();
     }
 
@@ -53,7 +61,7 @@ export const useNotificationSubscriber = (
         }
       }
     };
-  }, [subscriber]);
+  }, [subscriber, shouldReconnect]);
 
   return isActive;
 };
