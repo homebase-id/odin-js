@@ -33,7 +33,6 @@ const Notifications = () => {
   );
 
   const doOpenNotification = (targetTagId: string) => {
-    console.log('doOpenNotification', targetTagId);
     const activeNotification = notifications?.results.find((notification) =>
       stringGuidsEqual(notification.options.tagId, targetTagId)
     );
@@ -132,13 +131,17 @@ const NotificationDay = ({
       </p>
 
       {Object.keys(groupedNotifications).map((appId) => (
-        <NotificationGroup appId={appId} notifications={groupedNotifications[appId]} key={appId} />
+        <NotificationAppGroup
+          appId={appId}
+          notifications={groupedNotifications[appId]}
+          key={appId}
+        />
       ))}
     </>
   );
 };
 
-const NotificationGroup = ({
+const NotificationAppGroup = ({
   appId,
   notifications,
 }: {
@@ -153,9 +156,6 @@ const NotificationGroup = ({
       : stringGuidsEqual(appId, FEED_APP_ID)
       ? 'Homebase - Feed'
       : 'Unknown');
-
-  const { mutate: remove } = usePushNotifications().remove;
-  const { mutate: markAsRead } = usePushNotifications().markAsRead;
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -172,56 +172,82 @@ const NotificationGroup = ({
     <>
       {Object.keys(groupedByTypeNotifications).map((typeId) => {
         const typeGroup = groupedByTypeNotifications[typeId];
-        const groupCount = typeGroup.length - 1;
-        const sliced = typeGroup.slice(0, 3);
 
-        return (
-          <div
-            key={typeId}
-            style={{
-              paddingBottom: `${sliced.length * 0.5}rem`,
-            }}
-          >
-            <div className="relative">
-              {sliced.map((notification, index) => (
-                <div
-                  key={notification.id}
-                  className={index === 0 ? 'relative z-10' : 'absolute w-full rounded-lg'}
-                  style={
-                    index === 0
-                      ? undefined
-                      : {
-                          top: `${index * 0.5}rem`,
-                          bottom: `${index * -0.5}rem`,
-                          left: `${index * 0.25}rem`,
-                          right: `${index * -0.5}rem`,
-                          zIndex: 5 - index,
-                          opacity: 1 - 0.3 * index,
-                        }
-                  }
-                >
-                  <Toast
-                    // title={notification.options.typeId}
-                    title={titleFormer(appName)}
-                    // Keeping the hidden ones short
-                    body={ellipsisAtMaxChar(
-                      bodyFormer(notification, false, appName),
-                      index === 0 ? 120 : 40
-                    )}
-                    timestamp={notification.created}
-                    onDismiss={() => remove(typeGroup.map((n) => n.id))}
-                    onOpen={() => markAsRead(typeGroup.map((n) => n.id))}
-                    href={getTargetLink(notification)}
-                    groupCount={groupCount}
-                    isRead={!notification.unread}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <NotificationGroup typeGroup={typeGroup} appName={appName} key={typeId} />;
       })}
     </>
+  );
+};
+
+const NotificationGroup = ({
+  typeGroup,
+  appName,
+}: {
+  typeGroup: PushNotification[];
+  appName: string;
+}) => {
+  const canExpand = typeGroup.length > 1;
+  const [isExpanded, setExpanded] = useState(!canExpand);
+
+  const { mutate: remove } = usePushNotifications().remove;
+  const { mutate: markAsRead } = usePushNotifications().markAsRead;
+
+  const groupCount = typeGroup.length - 1;
+
+  return (
+    <div
+      style={{
+        paddingBottom: isExpanded ? '' : `${typeGroup.length * 0.5}rem`,
+      }}
+    >
+      <div className="relative flex flex-col gap-2">
+        {typeGroup.map((notification, index) => (
+          <div
+            key={notification.id}
+            className={index === 0 || isExpanded ? 'relative z-10' : 'absolute w-full rounded-lg'}
+            style={
+              index === 0 || isExpanded
+                ? undefined
+                : {
+                    top: `${index * 0.5}rem`,
+                    bottom: `${index * -0.5}rem`,
+                    left: `${index * 0.25}rem`,
+                    right: `${index * -0.5}rem`,
+                    zIndex: 5 - index,
+                    opacity: 1 - 0.3 * index,
+                  }
+            }
+          >
+            <Toast
+              // title={notification.options.typeId}
+              title={titleFormer(appName)}
+              // Keeping the hidden ones short
+              body={ellipsisAtMaxChar(
+                bodyFormer(notification, false, appName),
+                index === 0 || isExpanded ? 120 : 40
+              )}
+              timestamp={notification.created}
+              onDismiss={() => remove(typeGroup.map((n) => n.id))}
+              onOpen={() =>
+                canExpand && !isExpanded
+                  ? setExpanded(true)
+                  : markAsRead(typeGroup.map((n) => n.id))
+              }
+              href={canExpand && isExpanded ? getTargetLink(notification) : undefined}
+              groupCount={groupCount}
+              isRead={!notification.unread}
+            />
+          </div>
+        ))}
+        {canExpand && isExpanded ? (
+          <div className="flex max-w-sm flex-row-reverse">
+            <a onClick={() => setExpanded(false)} className="cursor-pointer text-sm text-slate-400">
+              {t('Hide')}
+            </a>
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 };
 
