@@ -17,6 +17,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID } from '../../app/Constants';
 import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 import { useSearchParams } from 'react-router-dom';
+import { useContact } from '../../hooks/contacts/useContact';
 
 interface NotificationClickData {
   notification: string;
@@ -218,24 +219,18 @@ const NotificationGroup = ({
                   }
             }
           >
-            <Toast
-              // title={notification.options.typeId}
-              title={titleFormer(appName)}
-              // Keeping the hidden ones short
-              body={ellipsisAtMaxChar(
-                bodyFormer(notification, false, appName),
-                index === 0 || isExpanded ? 120 : 40
-              )}
-              timestamp={notification.created}
+            <NotificationItem
+              notification={notification}
+              isExpanded={index === 0 || isExpanded}
               onDismiss={() => remove(typeGroup.map((n) => n.id))}
               onOpen={() =>
                 canExpand && !isExpanded
                   ? setExpanded(true)
                   : markAsRead(typeGroup.map((n) => n.id))
               }
-              href={canExpand && isExpanded ? getTargetLink(notification) : undefined}
               groupCount={groupCount}
-              isRead={!notification.unread}
+              href={canExpand && isExpanded ? getTargetLink(notification) : undefined}
+              appName={appName}
             />
           </div>
         ))}
@@ -251,6 +246,47 @@ const NotificationGroup = ({
   );
 };
 
+const NotificationItem = ({
+  notification,
+  isExpanded,
+  onOpen,
+  onDismiss,
+  href,
+  groupCount,
+  appName,
+}: {
+  notification: PushNotification;
+  isExpanded: boolean;
+  onOpen: () => void;
+  onDismiss: () => void;
+  href: string | undefined;
+  groupCount: number;
+  appName: string;
+}) => {
+  const { data: contactFile } = useContact({ odinId: notification.senderId }).fetch;
+  const senderName = contactFile?.fileMetadata.appData.content.name?.displayName;
+
+  const title = useMemo(() => `${appName}`, [appName]);
+  const body = useMemo(
+    () => bodyFormer(notification, true, appName, senderName),
+    [notification, senderName, appName]
+  );
+
+  return (
+    <Toast
+      title={title}
+      // Keeping the hidden ones short
+      body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
+      timestamp={notification.created}
+      onDismiss={onDismiss}
+      onOpen={onOpen}
+      href={href}
+      groupCount={groupCount}
+      isRead={!notification.unread}
+    />
+  );
+};
+
 const OWNER_FOLLOWER_TYPE_ID = '2cc468af-109b-4216-8119-542401e32f4d';
 const OWNER_CONNECTION_REQUEST_TYPE_ID = '8ee62e9e-c224-47ad-b663-21851207f768';
 const OWNER_CONNECTION_ACCEPTED_TYPE_ID = '79f0932a-056e-490b-8208-3a820ad7c321';
@@ -259,33 +295,38 @@ const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
 const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
-const titleFormer = (appName: string) => `${appName}`;
+const bodyFormer = (
+  payload: PushNotification,
+  hasMultiple: boolean,
+  appName: string,
+  senderName: string | undefined
+) => {
+  const sender = senderName || payload.senderId;
 
-const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: string) => {
   if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
 
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
-      return `${payload.senderId} started following you`;
+      return `${sender} started following you`;
     } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
-      return `${payload.senderId} sent you a connection request`;
+      return `${sender} sent you a connection request`;
     } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
-      return `${payload.senderId} accepted your connection request`;
+      return `${sender} accepted your connection request`;
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
-    return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${payload.senderId} posted to your feed`;
+      return `${sender} posted to your feed`;
     } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
-      return `${payload.senderId} reacted to your post`;
+      return `${sender} reacted to your post`;
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
-      return `${payload.senderId} commented to your post`;
+      return `${sender} commented to your post`;
     }
   }
 
-  return `${payload.senderId} sent you a notification via ${appName}`;
+  return `${sender} sent you a notification via ${appName}`;
 };
 
 const getTargetLink = (payload: PushNotification) => {
