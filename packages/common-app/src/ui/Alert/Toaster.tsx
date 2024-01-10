@@ -102,10 +102,8 @@ export const Toast = ({
     'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
 
   const doOpen = () => {
-    if (!href) return;
-
-    if (href.startsWith(OWNER_ROOT)) navigate(href);
-    else {
+    if (href && href.startsWith(OWNER_ROOT)) navigate(href);
+    else if (href) {
       onOpen && onOpen();
       window.location.href = href;
     }
@@ -116,7 +114,7 @@ export const Toast = ({
   return (
     <div
       className={`relative flex max-w-sm flex-row rounded-md bg-white px-2 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
-        href ? 'cursor-pointer' : ''
+        href || onOpen ? 'cursor-pointer' : ''
       }`}
       onClick={doOpen}
     >
