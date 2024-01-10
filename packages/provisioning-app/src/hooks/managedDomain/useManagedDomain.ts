@@ -47,7 +47,7 @@ export const useFetchIsManagedDomainAvailable = (prefix: string, apex: string) =
     fetchIsManagedDomainAvailable: useQuery<boolean, AxiosError>({
       queryKey: ['is-managed-domain-available', apex, prefix],
       queryFn: () => fetchIsManagedDomainAvailable(prefix, apex),
-      gcTime: 0,
+      gcTime: 0, // Immediately garbage collect this query so it's always fresh
       enabled: true,
       refetchOnWindowFocus: true, // Refetch as the available status may have changed on the server
       retry: false,

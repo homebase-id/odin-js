@@ -64,7 +64,7 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     queryFn: () => fetchBlog({ blogSlug }),
     refetchOnMount: false,
     enabled: channelFetched && !!blogSlug,
-    gcTime: 10 * 60 * 1000,
+    gcTime: isOwner ? 0 : 10 * 60 * 1000,
     staleTime: isOwner ? 0 : 10 * 60 * 1000,
   });
 };
