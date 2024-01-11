@@ -12,7 +12,7 @@ import {
   EstablishConnectionRequest,
   NotificationType,
   TypedConnectionNotification,
-} from './NotificationTypes';
+} from './WebsocketTypes';
 
 let webSocketClient: WebSocket | undefined;
 let activeSs: Uint8Array;

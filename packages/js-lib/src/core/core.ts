@@ -24,9 +24,12 @@ export * from './DriveData/Upload/DriveUploadTypes';
 export { decryptJsonContent, decryptKeyHeader } from './DriveData/SecurityHelpers';
 export { DEFAULT_PAYLOAD_KEY } from './DriveData/Upload/UploadHelpers';
 
-// NotificationData
-export * from './NotificationData/NotificationProvider';
-export * from './NotificationData/NotificationTypes';
+// WebsocketData
+export * from './WebsocketData/WebsocketProvider';
+export * from './WebsocketData/WebsocketTypes';
+
+// Notifications
+export * from './NotificationData/PushNotificationsProvider';
 
 // CommandData
 export * from './CommandData/CommandProvider';

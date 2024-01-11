@@ -3,7 +3,6 @@ import {
   Alert,
   Arrow,
   Bubble,
-  Check,
   ErrorNotification,
   HardDrive,
   PaperPlane,
@@ -16,14 +15,13 @@ import {
 import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import {
-  usePushNotificationClient,
-  usePushNotificationClients,
-  usePushNotifications,
-} from '../../../hooks/notifications/usePushNotifications';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  usePushNotificationClient,
+  usePushNotificationClients,
+} from '../../../hooks/notifications/usePushNotificationClients';
 
 const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const target = usePortal('modal-container');

@@ -162,6 +162,7 @@ export const useYouAuthAuthorization = () => {
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
         AppPermissionType.PublishStaticContent,
+        AppPermissionType.SendPushNotifications,
       ],
       undefined,
       drives,

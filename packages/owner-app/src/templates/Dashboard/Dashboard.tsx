@@ -12,10 +12,9 @@ import {
   EmbeddedPostContent,
   FakeAnchor,
   useSocialFeed,
+  useUnreadPushNotificationsCount,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
-import { useApp } from '../../hooks/apps/useApp';
-import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
 import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../app/Constants';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 

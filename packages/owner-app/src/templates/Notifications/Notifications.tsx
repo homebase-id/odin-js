@@ -5,19 +5,19 @@ import {
   SubtleMessage,
   t,
   Toast,
+  formatToTimeAgoWithRelativeDetail,
+  usePushNotifications,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { usePushNotifications } from '../../hooks/notifications/usePushNotifications';
 import { useEffect, useMemo, useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
-import { PushNotification } from '../../provider/notifications/PushNotificationsProvider';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID } from '../../app/Constants';
-import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '../../hooks/contacts/useContact';
+import { PushNotification } from '@youfoundation/js-lib/core';
 
 interface NotificationClickData {
   notification: string;
@@ -194,15 +194,16 @@ const NotificationGroup = ({
   const { mutate: markAsRead } = usePushNotifications().markAsRead;
 
   const groupCount = typeGroup.length - 1;
+  const visibleLength = isExpanded ? 10 : 3;
 
   return (
     <div
       style={{
-        paddingBottom: isExpanded ? '' : `${typeGroup.length * 0.5}rem`,
+        paddingBottom: isExpanded ? '' : `${visibleLength * 0.5}rem`,
       }}
     >
       <div className="relative flex flex-col gap-2">
-        {typeGroup.map((notification, index) => (
+        {typeGroup.slice(0, visibleLength).map((notification, index) => (
           <div
             key={notification.id}
             className={index === 0 || isExpanded ? 'relative z-10' : 'absolute w-full rounded-lg'}

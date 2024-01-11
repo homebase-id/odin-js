@@ -1,1 +1,1 @@
-export { formatToTimeAgo } from './format';
+export { formatToTimeAgo, formatToTimeAgoWithRelativeDetail } from './format';

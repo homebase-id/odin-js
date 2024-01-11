@@ -12,6 +12,7 @@ import {
   ellipsisAtMaxChar,
   getVersion,
   t,
+  useUnreadPushNotificationsCount,
 } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
@@ -36,7 +37,6 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
-import { useUnreadPushNotificationsCount } from '../../../../owner-app/src/hooks/notifications/usePushNotifications';
 import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 

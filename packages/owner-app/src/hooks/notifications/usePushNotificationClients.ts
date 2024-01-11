@@ -1,70 +1,16 @@
+import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
+import { useState, useEffect } from 'react';
+import { OWNER_APP_ID } from '../../app/Constants';
 import {
   GetApplicationServerKey,
-  GetCurrentDeviceDetails,
-  GetRegisteredDevices,
   RegisterNewDevice,
-  RemoveAllRegisteredDevice,
+  GetCurrentDeviceDetails,
   RemoveRegisteredDevice,
+  GetRegisteredDevices,
+  RemoveAllRegisteredDevice,
 } from '../../provider/notifications/PushClientProvider';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  DeleteNotifications,
-  GetNotifications,
-  MarkNotificationsAsRead,
-  SendNotification,
-} from '../../provider/notifications/PushNotificationsProvider';
-import { ApiType } from '@youfoundation/js-lib/core';
-import { useEffect, useState } from 'react';
-import { OWNER_APP_ID } from '../../app/Constants';
-
-const PAGE_SIZE = 50;
-export const usePushNotifications = (props?: { appId?: string }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-  const queryClient = useQueryClient();
-
-  const getNotifications = async (cursor: number | undefined) =>
-    dotYouClient.getType() === ApiType.App
-      ? { results: [], count: 0 }
-      : await GetNotifications(dotYouClient, props?.appId, PAGE_SIZE, cursor);
-
-  const markAsRead = async (notificationIds: string[]) =>
-    await MarkNotificationsAsRead(dotYouClient, notificationIds);
-
-  const removeNotifications = async (notificationIds: string[]) =>
-    await DeleteNotifications(dotYouClient, notificationIds);
-
-  return {
-    fetch: useQuery({
-      queryKey: ['push-notifications', props?.appId],
-      queryFn: () => getNotifications(undefined),
-    }),
-    markAsRead: useMutation({
-      mutationFn: markAsRead,
-      onMutate: async (_notificationIds) => {
-        // TODO
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
-      },
-    }),
-    remove: useMutation({
-      mutationFn: removeNotifications,
-      onMutate: async (notificationIds) => {
-        // TODO
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['push-notifications'] });
-      },
-    }),
-  };
-};
-
-export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
-  const { data: notifications } = usePushNotifications(props).fetch;
-
-  return notifications?.results.filter((n) => n.unread).length ?? 0;
-};
+import { SendNotification } from '@youfoundation/js-lib/core';
 
 const TestGuid = '00000000-0000-0000-0000-000000000000';
 export const usePushNotificationClient = () => {
