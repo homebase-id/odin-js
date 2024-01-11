@@ -148,7 +148,7 @@ const ConversationBody = ({
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
   useEffect(() => {
-    const date = lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created;
+    const date = lastMessage?.fileMetadata.created;
     setOrder && date && setOrder(new Date().getTime() - date);
   }, [flatMessages]);
 
