@@ -177,7 +177,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     single: useQuery({
       queryKey: ['conversation', conversationId],
       queryFn: () => getSingleConversation(dotYouClient, conversationId),
-      refetchOnWindowFocus: false,
       refetchOnMount: false,
       enabled: !!conversationId,
     }),

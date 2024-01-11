@@ -17,6 +17,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID } from '../../app/Constants';
 import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 import { useSearchParams } from 'react-router-dom';
+import { useContact } from '../../hooks/contacts/useContact';
 
 interface NotificationClickData {
   notification: string;
@@ -33,7 +34,6 @@ const Notifications = () => {
   );
 
   const doOpenNotification = (targetTagId: string) => {
-    console.log('doOpenNotification', targetTagId);
     const activeNotification = notifications?.results.find((notification) =>
       stringGuidsEqual(notification.options.tagId, targetTagId)
     );
@@ -132,13 +132,17 @@ const NotificationDay = ({
       </p>
 
       {Object.keys(groupedNotifications).map((appId) => (
-        <NotificationGroup appId={appId} notifications={groupedNotifications[appId]} key={appId} />
+        <NotificationAppGroup
+          appId={appId}
+          notifications={groupedNotifications[appId]}
+          key={appId}
+        />
       ))}
     </>
   );
 };
 
-const NotificationGroup = ({
+const NotificationAppGroup = ({
   appId,
   notifications,
 }: {
@@ -153,9 +157,6 @@ const NotificationGroup = ({
       : stringGuidsEqual(appId, FEED_APP_ID)
       ? 'Homebase - Feed'
       : 'Unknown');
-
-  const { mutate: remove } = usePushNotifications().remove;
-  const { mutate: markAsRead } = usePushNotifications().markAsRead;
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -172,56 +173,117 @@ const NotificationGroup = ({
     <>
       {Object.keys(groupedByTypeNotifications).map((typeId) => {
         const typeGroup = groupedByTypeNotifications[typeId];
-        const groupCount = typeGroup.length - 1;
-        const sliced = typeGroup.slice(0, 3);
 
-        return (
-          <div
-            key={typeId}
-            style={{
-              paddingBottom: `${sliced.length * 0.5}rem`,
-            }}
-          >
-            <div className="relative">
-              {sliced.map((notification, index) => (
-                <div
-                  key={notification.id}
-                  className={index === 0 ? 'relative z-10' : 'absolute w-full rounded-lg'}
-                  style={
-                    index === 0
-                      ? undefined
-                      : {
-                          top: `${index * 0.5}rem`,
-                          bottom: `${index * -0.5}rem`,
-                          left: `${index * 0.25}rem`,
-                          right: `${index * -0.5}rem`,
-                          zIndex: 5 - index,
-                          opacity: 1 - 0.3 * index,
-                        }
-                  }
-                >
-                  <Toast
-                    // title={notification.options.typeId}
-                    title={titleFormer(appName)}
-                    // Keeping the hidden ones short
-                    body={ellipsisAtMaxChar(
-                      bodyFormer(notification, false, appName),
-                      index === 0 ? 120 : 40
-                    )}
-                    timestamp={notification.created}
-                    onDismiss={() => remove(typeGroup.map((n) => n.id))}
-                    onOpen={() => markAsRead(typeGroup.map((n) => n.id))}
-                    href={getTargetLink(notification)}
-                    groupCount={groupCount}
-                    isRead={!notification.unread}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <NotificationGroup typeGroup={typeGroup} appName={appName} key={typeId} />;
       })}
     </>
+  );
+};
+
+const NotificationGroup = ({
+  typeGroup,
+  appName,
+}: {
+  typeGroup: PushNotification[];
+  appName: string;
+}) => {
+  const canExpand = typeGroup.length > 1;
+  const [isExpanded, setExpanded] = useState(!canExpand);
+
+  const { mutate: remove } = usePushNotifications().remove;
+  const { mutate: markAsRead } = usePushNotifications().markAsRead;
+
+  const groupCount = typeGroup.length - 1;
+
+  return (
+    <div
+      style={{
+        paddingBottom: isExpanded ? '' : `${typeGroup.length * 0.5}rem`,
+      }}
+    >
+      <div className="relative flex flex-col gap-2">
+        {typeGroup.map((notification, index) => (
+          <div
+            key={notification.id}
+            className={index === 0 || isExpanded ? 'relative z-10' : 'absolute w-full rounded-lg'}
+            style={
+              index === 0 || isExpanded
+                ? undefined
+                : {
+                    top: `${index * 0.5}rem`,
+                    bottom: `${index * -0.5}rem`,
+                    left: `${index * 0.25}rem`,
+                    right: `${index * -0.5}rem`,
+                    zIndex: 5 - index,
+                    opacity: 1 - 0.3 * index,
+                  }
+            }
+          >
+            <NotificationItem
+              notification={notification}
+              isExpanded={index === 0 || isExpanded}
+              onDismiss={() => remove(typeGroup.map((n) => n.id))}
+              onOpen={() =>
+                canExpand && !isExpanded
+                  ? setExpanded(true)
+                  : markAsRead(typeGroup.map((n) => n.id))
+              }
+              groupCount={groupCount}
+              href={canExpand && isExpanded ? getTargetLink(notification) : undefined}
+              appName={appName}
+            />
+          </div>
+        ))}
+        {canExpand && isExpanded ? (
+          <div className="flex max-w-sm flex-row-reverse">
+            <a onClick={() => setExpanded(false)} className="cursor-pointer text-sm text-slate-400">
+              {t('Hide')}
+            </a>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+const NotificationItem = ({
+  notification,
+  isExpanded,
+  onOpen,
+  onDismiss,
+  href,
+  groupCount,
+  appName,
+}: {
+  notification: PushNotification;
+  isExpanded: boolean;
+  onOpen: () => void;
+  onDismiss: () => void;
+  href: string | undefined;
+  groupCount: number;
+  appName: string;
+}) => {
+  const { data: contactFile } = useContact({ odinId: notification.senderId }).fetch;
+  const senderName = contactFile?.fileMetadata.appData.content.name?.displayName;
+
+  const title = useMemo(() => `${appName}`, [appName]);
+  const body = useMemo(
+    () => bodyFormer(notification, true, appName, senderName),
+    [notification, senderName, appName]
+  );
+
+  return (
+    <Toast
+      title={title}
+      // Keeping the hidden ones short
+      body={ellipsisAtMaxChar(body, isExpanded ? 120 : 40)}
+      timestamp={notification.created}
+      onDismiss={onDismiss}
+      onOpen={onOpen}
+      href={href}
+      groupCount={groupCount}
+      isRead={!notification.unread}
+    />
   );
 };
 
@@ -233,33 +295,38 @@ const FEED_NEW_CONTENT_TYPE_ID = 'ad695388-c2df-47a0-ad5b-fc9f9e1fffc9';
 const FEED_NEW_REACTION_TYPE_ID = '37dae95d-e137-4bd4-b782-8512aaa2c96a';
 const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
-const titleFormer = (appName: string) => `${appName}`;
+const bodyFormer = (
+  payload: PushNotification,
+  hasMultiple: boolean,
+  appName: string,
+  senderName: string | undefined
+) => {
+  const sender = senderName || payload.senderId;
 
-const bodyFormer = (payload: PushNotification, hasMultiple: boolean, appName: string) => {
   if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
 
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
-      return `${payload.senderId} started following you`;
+      return `${sender} started following you`;
     } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
-      return `${payload.senderId} sent you a connection request`;
+      return `${sender} sent you a connection request`;
     } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
-      return `${payload.senderId} accepted your connection request`;
+      return `${sender} accepted your connection request`;
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
-    return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${payload.senderId} posted to your feed`;
+      return `${sender} posted to your feed`;
     } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
-      return `${payload.senderId} reacted to your post`;
+      return `${sender} reacted to your post`;
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
-      return `${payload.senderId} commented to your post`;
+      return `${sender} commented to your post`;
     }
   }
 
-  return `${payload.senderId} sent you a notification via ${appName}`;
+  return `${sender} sent you a notification via ${appName}`;
 };
 
 const getTargetLink = (payload: PushNotification) => {

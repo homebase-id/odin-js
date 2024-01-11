@@ -9,6 +9,7 @@ export type NotificationType =
   | 'deviceHandshakeSuccess'
   | 'deviceConnected'
   | 'deviceDisconnected'
+  | 'pong'
   | 'fileAdded'
   | 'fileDeleted'
   | 'fileModified'
@@ -56,5 +57,5 @@ export type TypedConnectionNotification =
 
 export interface WebsocketCommand {
   command: string;
-  data: string;
+  data?: string;
 }

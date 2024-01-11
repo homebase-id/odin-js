@@ -79,7 +79,6 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       enabled: !!conversationId,
       staleTime: 1000 * 60 * 5, // 5 minutes; The chat messages are already invalidated by the websocket
       refetchOnMount: false,
-      refetchOnWindowFocus: false,
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,

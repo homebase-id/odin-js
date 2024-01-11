@@ -43,33 +43,44 @@ const FEED_NEW_COMMENT_TYPE_ID = '1e08b70a-3826-4840-8372-18410bfc02c7';
 
 const titleFormer = (payload: NotificationData) => `${payload.appDisplayName || 'Homebase'}`;
 
-const bodyFormer = (payload: NotificationData, existingNotifications: Notification[]) => {
+const getNameForOdinId = async (odinId: string) => {
+  return await fetch(`https://${odinId}/pub/profile`)
+    .then((response) => response.json())
+    .then((profile: { name: string } | undefined) => {
+      if (profile) return profile.name;
+    })
+    .catch(() => undefined);
+};
+
+const bodyFormer = async (payload: NotificationData, existingNotifications: Notification[]) => {
+  const sender = (await getNameForOdinId(payload.senderId)) || payload.senderId;
+
   if (payload.options.unEncryptedMessage) return payload.options.unEncryptedMessage;
   if (payload.options.appId === OWNER_APP_ID) {
     // Based on type, we show different messages
     if (payload.options.typeId === OWNER_FOLLOWER_TYPE_ID) {
-      return `${payload.senderId} started following you`;
+      return `${sender} started following you`;
     } else if (payload.options.typeId === OWNER_CONNECTION_REQUEST_TYPE_ID) {
-      return `${payload.senderId} sent you a connection request`;
+      return `${sender} sent you a connection request`;
     } else if (payload.options.typeId === OWNER_CONNECTION_ACCEPTED_TYPE_ID) {
-      return `${payload.senderId} accepted your connection request`;
+      return `${sender} accepted your connection request`;
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     const hasMultiple = existingNotifications.length;
-    return `${payload.senderId} sent you ${hasMultiple ? 'multiple messages' : 'a message'} via ${
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'} via ${
       payload.appDisplayName
     }`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
-      return `${payload.senderId} posted to your feed`;
+      return `${sender} posted to your feed`;
     } else if (payload.options.typeId === FEED_NEW_REACTION_TYPE_ID) {
-      return `${payload.senderId} reacted to your post`;
+      return `${sender} reacted to your post`;
     } else if (payload.options.typeId === FEED_NEW_COMMENT_TYPE_ID) {
-      return `${payload.senderId} commented to your post`;
+      return `${sender} commented to your post`;
     }
   }
 
-  return `${payload.senderId} sent you a notification via ${payload.appDisplayName}`;
+  return `${sender} sent you a notification via ${payload.appDisplayName}`;
 };
 
 const getTag = (payload: NotificationData) => {
@@ -94,7 +105,7 @@ self.addEventListener('push', function (event) {
         const existingNotifications = await self.registration.getNotifications({ tag });
 
         const title = titleFormer(payload);
-        const body = bodyFormer(payload, existingNotifications);
+        const body = await bodyFormer(payload, existingNotifications);
 
         if (!title || !body || !tag) return;
 

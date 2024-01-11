@@ -43,15 +43,16 @@ const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchData = async () => {
-    return await processInbox(dotYouClient, ChatDrive, 5);
+    return await processInbox(dotYouClient, ChatDrive, 50);
   };
 
   return useQuery({
     queryKey: ['processInbox'],
     queryFn: fetchData,
     refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: MINUTE_IN_MS * 60,
+    // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
+    refetchOnWindowFocus: true,
+    staleTime: MINUTE_IN_MS * 5,
     enabled: connected,
   });
 };
