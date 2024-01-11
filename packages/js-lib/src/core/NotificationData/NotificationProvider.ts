@@ -127,6 +127,7 @@ const ConnectSocket = async (
         }
         Notify({
           command: 'ping',
+          data: '',
         });
       }, PING_INTERVAL);
     };
