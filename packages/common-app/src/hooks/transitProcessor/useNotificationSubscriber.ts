@@ -1,6 +1,6 @@
 import {
   ApiType,
-  Disconnect,
+  Unsubscribe,
   NotificationType,
   Subscribe,
   TargetDrive,
@@ -54,7 +54,7 @@ export const useNotificationSubscriber = (
       if (isConnected.current && localHandler) {
         isConnected.current = false;
         try {
-          Disconnect(localHandler);
+          Unsubscribe(localHandler);
           setIsActive(false);
         } catch (e) {
           console.error(e);
