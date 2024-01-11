@@ -4,6 +4,7 @@ import {
   AclSummary,
   ActionGroupOptionProps,
   Block,
+  Flag,
   Lock,
   Times,
   useIsConnected,
@@ -126,7 +127,10 @@ const ExternalActions = ({
   postFile: DriveSearchResult<PostContent>;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const { mutateAsync: removeFromMyFeed } = useManageSocialFeed().removeFromFeed;
+  const {
+    removeFromFeed: { mutateAsync: removeFromMyFeed },
+    getReportContentUrl,
+  } = useManageSocialFeed({ odinId });
 
   const options: ActionGroupOptionProps[] = [
     {
@@ -139,6 +143,14 @@ const ExternalActions = ({
       label: `${t('Remove this post from my feed')}`,
       onClick: () => {
         removeFromMyFeed({ postFile });
+      },
+    },
+    {
+      icon: Flag,
+      label: `${t('Report')}`,
+      onClick: async () => {
+        const reportUrl = await getReportContentUrl();
+        window.open(reportUrl, '_blank');
       },
     },
     {
