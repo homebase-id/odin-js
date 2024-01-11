@@ -84,8 +84,6 @@ const PostComposer = ({
     setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
     setStateIndex((i) => i + 1);
-
-    if (selectRef.current) selectRef.current.value = BlogConfig.PublicChannelId;
   };
 
   useEffect(() => {
