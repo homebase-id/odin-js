@@ -9,9 +9,10 @@ import { NewConversation } from '../../components/Chat/Conversations/Sidenav/New
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
 import { ProfileHeader } from '../../components/Chat/Conversations/Sidenav/ProfileHeader';
-import { Sidenav } from '@youfoundation/common-app';
+import { Sidenav, useMarkAllAsRead } from '@youfoundation/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
+import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
 
 export const CHAT_ROOT = ROOT_PATH;
 
@@ -20,6 +21,7 @@ export const ChatHome = () => {
   const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
   useLiveChatProcessor();
+  useMarkAllAsRead({ appId: CHAT_APP_ID });
 
   return (
     <>

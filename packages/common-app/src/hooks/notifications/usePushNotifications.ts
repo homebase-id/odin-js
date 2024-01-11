@@ -6,14 +6,17 @@ import {
   GetNotifications,
   MarkNotificationsAsRead,
 } from '@youfoundation/js-lib/core';
+import { useEffect } from 'react';
+import { appId } from '@youfoundation/feed-app/src/hooks/auth/useAuth';
 
 const PAGE_SIZE = 50;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
-  const getNotifications = async (cursor: number | undefined) =>
-    await GetNotifications(dotYouClient, props?.appId, PAGE_SIZE, cursor);
+  const getNotifications = async (cursor: number | undefined) => {
+    return await GetNotifications(dotYouClient, props?.appId, PAGE_SIZE, cursor);
+  };
 
   const markAsRead = async (notificationIds: string[]) =>
     await MarkNotificationsAsRead(dotYouClient, notificationIds);
@@ -51,4 +54,21 @@ export const useUnreadPushNotificationsCount = (props?: { appId?: string }) => {
   const { data: notifications } = usePushNotifications(props).fetch;
 
   return notifications?.results.filter((n) => n.unread).length ?? 0;
+};
+
+export const useMarkAllAsRead = (props?: { appId?: string }) => {
+  const {
+    fetch: { data: notifications },
+    markAsRead: { mutateAsync: markListOfNotificationsAsRead },
+  } = usePushNotifications(props);
+
+  useEffect(() => {
+    (async () => {
+      const unreadNotifications = notifications?.results.filter((n) => n.unread);
+      if (unreadNotifications && unreadNotifications?.length > 0) {
+        console.log('Marking all notifications as read', appId);
+        await markListOfNotificationsAsRead(unreadNotifications.map((n) => n.id));
+      }
+    })();
+  }, [notifications]);
 };
