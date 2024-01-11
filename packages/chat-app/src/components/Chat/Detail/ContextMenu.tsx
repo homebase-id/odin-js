@@ -45,12 +45,12 @@ export const ContextMenu = ({
       },
       onClick: () => chatActions.doDelete(msg),
     });
-    if (conversation)
-      optionalOptions.push({
-        label: t('Message info'),
-        onClick: () => setShowMessageInfo(true),
-      });
   }
+  if (conversation)
+    optionalOptions.push({
+      label: t('Message info'),
+      onClick: () => setShowMessageInfo(true),
+    });
 
   return (
     <>

@@ -180,7 +180,7 @@ const ConversationBody = ({
           </div>
 
           {unreadCount ? (
-            <div className="ml-auto flex h-5 w-5 flex-row items-center justify-center rounded-full bg-primary text-xs text-primary-contrast">
+            <div className="ml-auto flex h-5 w-5 flex-shrink-0 flex-row items-center justify-center rounded-full bg-primary text-xs text-primary-contrast">
               {unreadCount}
             </div>
           ) : null}

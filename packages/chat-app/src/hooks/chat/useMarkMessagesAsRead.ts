@@ -13,9 +13,9 @@ export const useMarkMessagesAsRead = ({
   conversation: DriveSearchResult<Conversation> | undefined;
   messages: DriveSearchResult<ChatMessage>[] | undefined;
 }) => {
-  const {
-    markAsRead: { mutate: markAsRead, status: markAsReadStatus },
-  } = useChatMessages();
+  const { mutate: markAsRead, status: markAsReadStatus } = useChatMessages({
+    conversationId: conversation?.fileMetadata.appData.uniqueId,
+  }).markAsRead;
   const isProcessing = useRef(false);
 
   const { mutate: updateConversation } = useConversation().update;
@@ -23,7 +23,6 @@ export const useMarkMessagesAsRead = ({
 
   useEffect(() => {
     if (!conversation || !messages || isProcessing.current) return;
-
     setPendingReadTime(new Date());
     const unreadMessages = messages.filter(
       (msg) =>
