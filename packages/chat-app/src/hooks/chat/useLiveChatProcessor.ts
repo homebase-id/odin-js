@@ -43,7 +43,7 @@ const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchData = async () => {
-    return await processInbox(dotYouClient, ChatDrive, 50);
+    return await processInbox(dotYouClient, ChatDrive, 200);
   };
 
   return useQuery({
