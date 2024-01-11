@@ -37,7 +37,7 @@ import { FEED_APP_ID } from '../../../../owner-app/src/app/Constants';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
-  const { isOwner } = useDotYouClient();
+  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
 
   useMarkAllAsRead({ appId: FEED_APP_ID });
 
@@ -53,7 +53,7 @@ export const SocialFeed = () => {
       <Helmet>
         <title>{t('Feed')} | Homebase</title>
       </Helmet>
-      {isOwner ? (
+      {!isReactNative ? (
         <PageMeta
           title={t('Feed')}
           icon={Feed}

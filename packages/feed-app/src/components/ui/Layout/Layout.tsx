@@ -32,6 +32,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
   const { logout } = useAuth();
+  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
 
   if (uiSetting === 'none') {
     return <NoLayout>{children}</NoLayout>;
@@ -47,7 +48,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
       <div
         className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
       >
-        <Sidenav logout={logout} disablePinning={true} />
+        {!isReactNative ? <Sidenav logout={logout} disablePinning={true} /> : null}
         <div
           className={`relative flex min-h-screen w-full flex-col ${
             noShadedBg ? NOT_SHADED_BG : SHADED_BG
