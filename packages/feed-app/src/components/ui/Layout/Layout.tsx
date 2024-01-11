@@ -1,6 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Toaster, useDarkMode } from '@youfoundation/common-app';
+import { Sidenav, Toaster, useDarkMode } from '@youfoundation/common-app';
+import { useAuth } from '../../../hooks/auth/useAuth';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -30,6 +31,8 @@ const NOT_SHADED_BG = 'bg-white dark:bg-black';
 const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
+  const { logout } = useAuth();
+  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
 
   if (uiSetting === 'none') {
     return <NoLayout>{children}</NoLayout>;
@@ -43,13 +46,18 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     <>
       <SharedStyleTag />
       <div
-        className={`relative flex min-h-screen w-full flex-col ${
-          noShadedBg ? NOT_SHADED_BG : SHADED_BG
-        }`}
+        className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
       >
-        <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
+        {!isReactNative ? <Sidenav logout={logout} disablePinning={true} /> : null}
+        <div
+          className={`relative flex min-h-screen w-full flex-col ${
+            noShadedBg ? NOT_SHADED_BG : SHADED_BG
+          }`}
+        >
+          <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
+        </div>
+        <Toaster />
       </div>
-      <Toaster />
     </>
   );
 };

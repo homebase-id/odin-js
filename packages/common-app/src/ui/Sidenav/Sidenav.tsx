@@ -2,6 +2,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import {
+  CHAT_APP_ID,
   ChatBubble,
   Cloud,
   HOME_ROOT_PATH,
@@ -12,6 +13,7 @@ import {
   ellipsisAtMaxChar,
   getVersion,
   t,
+  useUnreadPushNotificationsCount,
 } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
@@ -36,8 +38,6 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
-import { useUnreadPushNotificationsCount } from '../../../../owner-app/src/hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const STORAGE_KEY = 'isOpen';
@@ -144,7 +144,7 @@ export const Sidenav = ({
             </div>
 
             <div className="py-3">
-              <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
+              <NavItem icon={Feed} label={'Feed'} to={'/apps/feed'} end={true} />
               <ChatNavItem />
             </div>
 
@@ -302,7 +302,7 @@ const NavItem = ({
   end?: boolean;
 }) => {
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== to.split('/')[1];
+  const isExternal = pathname.split('/')[1] !== to.split('/')[1] || to.split('/')[1] === 'apps';
 
   if (isExternal) {
     return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;
@@ -456,7 +456,7 @@ const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) =
     <div className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1  ${sidebarBg}`}>
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner'} end={true} />
-        <NavItem icon={Feed} to={'/owner/feed'} end={true} />
+        <NavItem icon={Feed} to={'/apps/feed'} end={true} />
         <NavItem icon={ChatBubble} to="/apps/chat" />
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>

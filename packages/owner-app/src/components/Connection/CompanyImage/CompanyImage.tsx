@@ -4,10 +4,13 @@ import {
   HomebaseChat,
   HomebaseFeed,
   HomebasePhoto,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  OWNER_APP_ID,
+  PHOTO_APP_ID,
 } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState, useMemo } from 'react';
-import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../../app/Constants';
 
 export const CompanyImage = ({
   domain,

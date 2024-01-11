@@ -23,4 +23,5 @@ export enum AppPermissionType {
   SendDataToOtherIdentitiesOnMyBehalf = 210,
   ReceiveDataFromOtherIdentitiesOnMyBehalf = 305,
   SendPushNotifications = 405,
+  PublishStaticContent = 505,
 }

@@ -13,7 +13,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
-const About = lazy(() => import('../templates/About/About'));
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 
@@ -26,7 +25,7 @@ import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
 import { useAuth } from '../hooks/auth/useAuth';
 
-export const ROOT_PATH = '';
+export const ROOT_PATH = '/apps/feed';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
@@ -47,7 +46,6 @@ function App() {
             </ErrorBoundary>
           }
         >
-          <Route path="about" element={<About />}></Route>
           <Route path="auth" element={<Auth />}></Route>
           <Route path="auth/finalize" element={<FinalizeAuth />}></Route>
 
@@ -116,7 +114,7 @@ const RootRoute = ({ children }: { children: ReactNode }) => {
       return <></>;
     }
 
-    return <Navigate to={`${ROOT_PATH}/about`} />;
+    return <Navigate to={`${ROOT_PATH}/auth`} />;
   }
 
   return <>{children}</>;

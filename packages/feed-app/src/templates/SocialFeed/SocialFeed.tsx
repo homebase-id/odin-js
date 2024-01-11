@@ -5,9 +5,11 @@ import {
   ActionGroup,
   Article,
   Ellipsis,
+  FEED_APP_ID,
   Quote,
   t,
   useDotYouClient,
+  useMarkAllAsRead,
 } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
@@ -31,10 +33,13 @@ const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/P
 
 import { Feed } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { ROOT_PATH } from '../../app/App';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
-  const { isOwner } = useDotYouClient();
+  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
+
+  useMarkAllAsRead({ appId: FEED_APP_ID });
 
   useEffect(() => {
     if (postKey) document.documentElement.classList.add('overflow-hidden');
@@ -48,7 +53,7 @@ export const SocialFeed = () => {
       <Helmet>
         <title>{t('Feed')} | Homebase</title>
       </Helmet>
-      {isOwner ? (
+      {!isReactNative ? (
         <PageMeta
           title={t('Feed')}
           icon={Feed}
@@ -58,12 +63,12 @@ export const SocialFeed = () => {
               options={[
                 {
                   label: t('Articles'),
-                  href: '/owner/feed/articles',
+                  href: `${ROOT_PATH}/articles`,
                   icon: Article,
                 },
                 {
                   label: t('Channels'),
-                  href: '/owner/feed/channels',
+                  href: `${ROOT_PATH}/channels`,
                   icon: Quote,
                 },
               ]}

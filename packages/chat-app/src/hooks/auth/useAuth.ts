@@ -17,6 +17,7 @@ import {
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET } from '@youfoundation/common-app';
 
 export const drives = [
   {
@@ -54,9 +55,6 @@ const circleDrives = [
 ];
 export const appName = 'Homebase - Chat';
 export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
-
-export const APP_SHARED_SECRET = 'APSS';
-export const APP_AUTH_TOKEN = 'BX0900';
 
 const hasSharedSecret = () => {
   const raw = window.localStorage.getItem(APP_SHARED_SECRET);

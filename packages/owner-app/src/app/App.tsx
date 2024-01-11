@@ -17,7 +17,10 @@ const YouAuthConsent = lazy(() => import('../templates/YouAuthConsent/YouAuthCon
 const Setup = lazy(() => import('../templates/Setup/Setup').then((m) => ({ default: m.Setup })));
 
 const Home = lazy(() => import('../templates/Dashboard/Dashboard'));
-const RegisterAppClient = lazy(() => import('../templates/RegisterApp/RegisterApp'));
+const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'));
+const ExtendAppDrivePermissions = lazy(
+  () => import('../templates/AppDefinition/ExtendAppDrivePermissions')
+);
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
@@ -48,27 +51,6 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
-
-const SocialFeed = lazy(() =>
-  import('@youfoundation/feed-app/src/templates/SocialFeed/SocialFeed').then((feedApp) => ({
-    default: feedApp.SocialFeed,
-  }))
-);
-const ArticlesPage = lazy(() =>
-  import('@youfoundation/feed-app/src/templates/SocialFeed/ArticlesPage').then((feedApp) => ({
-    default: feedApp.ArticlesPage,
-  }))
-);
-const ChannelsPage = lazy(() =>
-  import('@youfoundation/feed-app/src/templates/SocialFeed/ChannelsPage').then((feedApp) => ({
-    default: feedApp.ChannelsPage,
-  }))
-);
-const ArticleComposerPage = lazy(() =>
-  import('@youfoundation/feed-app/src/templates/SocialFeed/ArticleComposerPage').then(
-    (feedApp) => ({ default: feedApp.ArticleComposerPage })
-  )
-);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -146,7 +128,8 @@ function App() {
               </MinimalLayout>
             }
           >
-            <Route path="appreg" element={<RegisterAppClient />} />
+            <Route path="appreg" element={<RegisterApp />} />
+            <Route path="app-new-drive" element={<ExtendAppDrivePermissions />} />
           </Route>
 
           <Route
@@ -200,20 +183,6 @@ function App() {
 
             <Route path="demo-data" element={<DemoData />}></Route>
             <Route path="debug" element={<Debug />}></Route>
-
-            {/* Feed: */}
-            <Route path="feed">
-              <Route index={true} element={<SocialFeed />} />
-              <Route path="preview/:identityKey/:channelKey/:postKey" element={<SocialFeed />} />
-              <Route
-                path="preview/:identityKey/:channelKey/:postKey/:attachmentKey"
-                element={<SocialFeed />}
-              />
-              <Route path="new" element={<ArticleComposerPage />} />
-              <Route path="articles" element={<ArticlesPage />} />
-              <Route path="channels" element={<ChannelsPage />} />
-              <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
-            </Route>
           </Route>
 
           <Route

@@ -40,7 +40,7 @@ export const EmbeddedPostContent = ({
 
   // When on the feed use the preview link
   const postPath =
-    window.location.pathname === '/owner/feed'
+    window.location.pathname === '/apps/feed'
       ? `preview/${content.authorOdinId}/${channel?.fileMetadata.appData.uniqueId}/${content.id}`
       : content.permalink;
 

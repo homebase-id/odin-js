@@ -1,9 +1,8 @@
 import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { useState } from 'react';
 import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
-import { Lock, OpenLock, useCircles, AclDialog } from '@youfoundation/common-app';
+import { Lock, OpenLock, useCircles } from '@youfoundation/common-app';
 
 export const AclSummary = ({
   acl,
@@ -42,47 +41,5 @@ export const AclIcon = ({ acl, className }: { acl: AccessControlList; className:
     <OpenLock className={className} />
   ) : (
     <Lock className={className} />
-  );
-};
-
-export const AclEditor = ({
-  acl,
-  onChange,
-  isEdit,
-  onClose,
-  className,
-}: {
-  acl: AccessControlList;
-  onChange?: (acl: AccessControlList) => void;
-  isEdit?: boolean;
-  onClose?: () => void;
-  className?: string;
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-
-  return (
-    <>
-      <button
-        title={acl.requiredSecurityGroup}
-        className={`mr-2 inline-block ${onChange ? '' : 'cursor-default'} ${className ?? ''}`}
-        onClick={() => onChange && setIsEditing(true)}
-      >
-        <AclIcon className="h-5 w-5" acl={acl} />
-      </button>
-      <AclDialog
-        acl={acl}
-        isOpen={isEdit || isEditing}
-        title={t('Edit security')}
-        onCancel={() => {
-          setIsEditing(false);
-          onClose && onClose();
-        }}
-        onConfirm={(newAcl) => {
-          onChange && onChange(newAcl);
-          setIsEditing(false);
-          onClose && onClose();
-        }}
-      />
-    </>
   );
 };

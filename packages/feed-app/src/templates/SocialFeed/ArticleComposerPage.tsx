@@ -19,10 +19,11 @@ import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEdit
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
-import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
+import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
@@ -133,8 +134,8 @@ export const ArticleComposerPage = () => {
         browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
-          { title: t('Feed'), href: '/owner/feed' },
-          { title: t('Articles'), href: '/owner/feed/articles' },
+          { title: t('Feed'), href: `${ROOT_PATH}` },
+          { title: t('Articles'), href: `${ROOT_PATH}/articles` },
           { title: t('New article') },
         ]}
         actions={
@@ -153,7 +154,7 @@ export const ArticleComposerPage = () => {
                         label: t('Remove'),
                         onClick: () => {
                           doRemovePost();
-                          navigate('/owner/feed/articles');
+                          navigate(`${ROOT_PATH}/articles`);
                         },
                         icon: Trash,
                         confirmOptions: {
@@ -176,7 +177,7 @@ export const ArticleComposerPage = () => {
                 icon={Trash}
                 onClick={() => {
                   doRemovePost();
-                  navigate('/owner/feed/articles');
+                  navigate(`${ROOT_PATH}/articles`);
                 }}
                 confirmOptions={{
                   title: t('Discard draft'),
@@ -356,12 +357,13 @@ const OptionsDialog = ({
               {t('After a publish, the post can no longer be moved between channels')}
             </p>
           ) : null}
-          <ChannelSelector
+          <ChannelOrAclSelector
             className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
-            defaultValue={postFile.fileMetadata.appData.content?.channelId}
+            defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
             onChange={setNewChannel}
             disabled={isPublished}
             excludeMore={true}
+            excludeCustom={true}
           />
         </div>
         <div className="flex flex-row-reverse gap-2 py-3">

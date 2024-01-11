@@ -20,6 +20,7 @@ import { ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET } from '@youfoundation/common-app';
 
 const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
 export const drives = [
@@ -62,9 +63,6 @@ export const drives = [
 ];
 export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
-
-export const APP_SHARED_SECRET = 'APSS';
-export const APP_AUTH_TOKEN = 'BX0900';
 
 const hasSharedSecret = () => {
   const raw = window.localStorage.getItem(APP_SHARED_SECRET);
@@ -163,6 +161,8 @@ export const useYouAuthAuthorization = () => {
         AppPermissionType.ManageFeed,
         AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
         AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+        AppPermissionType.PublishStaticContent,
+        AppPermissionType.SendPushNotifications,
       ],
       undefined,
       drives,

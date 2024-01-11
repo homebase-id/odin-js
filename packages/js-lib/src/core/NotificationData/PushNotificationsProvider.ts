@@ -1,9 +1,5 @@
-import {
-  DotYouClient,
-  NumberCursoredResult,
-  PushNotificationOptions,
-} from '@youfoundation/js-lib/core';
-import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { DotYouClient, NumberCursoredResult, PushNotificationOptions } from '../../core/core';
+import { stringGuidsEqual, stringifyToQueryParams } from '../../helpers/helpers';
 
 export interface PushNotification {
   id: string;

@@ -12,11 +12,13 @@ import {
   EmbeddedPostContent,
   FakeAnchor,
   useSocialFeed,
+  useUnreadPushNotificationsCount,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  OWNER_APP_ID,
+  PHOTO_APP_ID,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
-import { useApp } from '../../hooks/apps/useApp';
-import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../app/Constants';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 
 // const About = {
@@ -190,7 +192,7 @@ const FeedApp = () => {
     <AppWrapper
       appId={FEED_APP_ID}
       name={'Feed'}
-      href={`/owner/feed`}
+      href={`/apps/feed`}
       unreadCount={unreadCount}
       options={[
         {
@@ -257,7 +259,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
       <div className="mb-4 flex flex-row items-center justify-between">
         <p className="text-2xl">{t('What has everyone been up to?')}</p>
       </div>
-      <FakeAnchor href={hasPosts ? `/owner/feed` : `/owner/connections`} className="">
+      <FakeAnchor href={hasPosts ? `/apps/feed` : `/owner/connections`} className="">
         <div className="pointer-events-none flex flex-col gap-4">
           {hasPosts ? (
             latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (

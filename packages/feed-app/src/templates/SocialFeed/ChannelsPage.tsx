@@ -1,20 +1,34 @@
-import { useState } from 'react';
-import { ChannelItem, Plus } from '@youfoundation/common-app';
+import { useMemo, useState } from 'react';
+import { ChannelDefinitionVm, ChannelItem, Plus } from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { ROOT_PATH } from '../../app/App';
+import { useSearchParams } from 'react-router-dom';
+import { NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsPage = () => {
+  const [params, setSearchParams] = useSearchParams();
+
+  const newChannelDefinition = useMemo(() => {
+    const newQueryParam = params.get('new');
+    if (!newQueryParam) return undefined;
+
+    const newChannel = tryJsonParse<NewDriveSearchResult<ChannelDefinitionVm>>(newQueryParam);
+    return newChannel;
+  }, [params]);
+
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
-  const [isAddNew, setIsAddNew] = useState(false);
+  const [isAddNew, setIsAddNew] = useState(!!newChannelDefinition);
 
   return (
     <>
       <PageMeta
         title={t('Channels')}
         icon={Quote}
-        breadCrumbs={[{ title: t('Feed'), href: '/owner/feed' }, { title: t('Channels') }]}
+        breadCrumbs={[{ title: t('Feed'), href: ROOT_PATH }, { title: t('Channels') }]}
       />
       <section className="pb-10">
         <div className="px-2 sm:px-10">
@@ -26,7 +40,16 @@ export const ChannelsPage = () => {
             ))}
             {isAddNew ? (
               <div className="p-2" key={'new'}>
-                <ChannelItem onClose={() => setIsAddNew(false)} className="bg-background" />
+                <ChannelItem
+                  chnl={newChannelDefinition}
+                  isDefaultEdit={!!newChannelDefinition}
+                  onClose={() => {
+                    setIsAddNew(false);
+                    params.delete('new');
+                    setSearchParams(params);
+                  }}
+                  className="bg-background"
+                />
               </div>
             ) : (
               <div className="p-2" key={'new'}>
