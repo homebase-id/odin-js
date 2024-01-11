@@ -174,7 +174,7 @@ const ConversationBody = ({
               ) : (
                 <p>📷 {t('Media')}</p>
               )
-            ) : !fetchedMessages ? (
+            ) : !fetchedMessages && conversationId ? (
               <LoadingBlock className="h-5 w-full flex-grow bg-slate-300 dark:bg-slate-200" />
             ) : null}
           </div>

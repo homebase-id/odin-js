@@ -126,7 +126,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   }: {
     conversation: DriveSearchResult<Conversation>;
   }) => {
-    console.log('updating conversation', conversation);
     return await updateConversation(dotYouClient, conversation);
   };
 
@@ -202,10 +201,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
-        console.log('invalidate', [
-          'conversation',
-          variables.conversation.fileMetadata.appData.uniqueId,
-        ]);
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
         queryClient.invalidateQueries({
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
