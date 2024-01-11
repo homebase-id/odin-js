@@ -8,7 +8,7 @@ import {
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
 
-import { useSecurityContext, useStaticFiles } from '@youfoundation/common-app';
+import { FEED_APP_ID, useSecurityContext, useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
@@ -20,7 +20,6 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '@youfoundation/feed-app/src/app/App';
-import { FEED_APP_ID } from '../../../../../owner-app/src/app/Constants';
 
 type useChannelsProps = {
   channelSlug?: string;

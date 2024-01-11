@@ -1,7 +1,6 @@
 import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
-import { useDotYouClient } from '@youfoundation/common-app';
+import { useDotYouClient, OWNER_APP_ID } from '@youfoundation/common-app';
 import { useState, useEffect } from 'react';
-import { OWNER_APP_ID } from '../../app/Constants';
 import {
   GetApplicationServerKey,
   RegisterNewDevice,

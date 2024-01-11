@@ -7,6 +7,9 @@ import {
   Toast,
   formatToTimeAgoWithRelativeDetail,
   usePushNotifications,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  OWNER_APP_ID,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -14,7 +17,6 @@ import { useEffect, useMemo, useState } from 'react';
 import PushNotificationsDialog from '../../components/Dialog/PushNotificationsDialog/PushNotificationsDialog';
 import { useApp } from '../../hooks/apps/useApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID } from '../../app/Constants';
 import { useSearchParams } from 'react-router-dom';
 import { useContact } from '../../hooks/contacts/useContact';
 import { PushNotification } from '@youfoundation/js-lib/core';

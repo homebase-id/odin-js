@@ -2,6 +2,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import {
+  CHAT_APP_ID,
   ChatBubble,
   Cloud,
   HOME_ROOT_PATH,
@@ -37,7 +38,6 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
-import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const STORAGE_KEY = 'isOpen';

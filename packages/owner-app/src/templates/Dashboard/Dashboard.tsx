@@ -13,9 +13,12 @@ import {
   FakeAnchor,
   useSocialFeed,
   useUnreadPushNotificationsCount,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  OWNER_APP_ID,
+  PHOTO_APP_ID,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
-import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../app/Constants';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 
 // const About = {

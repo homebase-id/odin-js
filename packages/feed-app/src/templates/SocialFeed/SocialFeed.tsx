@@ -5,6 +5,7 @@ import {
   ActionGroup,
   Article,
   Ellipsis,
+  FEED_APP_ID,
   Quote,
   t,
   useDotYouClient,
@@ -33,7 +34,6 @@ const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/P
 import { Feed } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
-import { FEED_APP_ID } from '../../../../owner-app/src/app/Constants';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
