@@ -57,5 +57,5 @@ export type TypedConnectionNotification =
 
 export interface WebsocketCommand {
   command: string;
-  data?: string;
+  data: string;
 }
