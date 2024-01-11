@@ -40,6 +40,7 @@ const enLocale = [
   ['writer', 'Write'],
   ['writereactionsandcomments', 'Write Reactions and Comments'],
   ['sendpushnotifications', 'Send Push Notifications'],
+  ['publishstaticcontent', 'Publish Static Content'],
 ] as const;
 
 const internalDict: Map<string, string> = new Map(enLocale);
