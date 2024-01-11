@@ -148,7 +148,7 @@ const ConversationBody = ({
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
   useEffect(() => {
-    const date = lastMessage?.fileMetadata.appData.userDate || lastMessage?.fileMetadata.created;
+    const date = lastMessage?.fileMetadata.created;
     setOrder && date && setOrder(new Date().getTime() - date);
   }, [flatMessages]);
 
@@ -174,13 +174,13 @@ const ConversationBody = ({
               ) : (
                 <p>📷 {t('Media')}</p>
               )
-            ) : !fetchedMessages ? (
+            ) : !fetchedMessages && conversationId ? (
               <LoadingBlock className="h-5 w-full flex-grow bg-slate-300 dark:bg-slate-200" />
             ) : null}
           </div>
 
           {unreadCount ? (
-            <div className="ml-auto flex h-5 w-5 flex-row items-center justify-center rounded-full bg-primary text-xs text-primary-contrast">
+            <div className="ml-auto flex h-5 w-5 flex-shrink-0 flex-row items-center justify-center rounded-full bg-primary text-xs text-primary-contrast">
               {unreadCount}
             </div>
           ) : null}

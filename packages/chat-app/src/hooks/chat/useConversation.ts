@@ -22,7 +22,9 @@ import { deleteAllChatMessages } from '../../providers/ChatProvider';
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,
   conversationId: string | undefined
-) => (conversationId ? await getConversation(dotYouClient, conversationId) : null);
+) => {
+  return conversationId ? await getConversation(dotYouClient, conversationId) : null;
+};
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
@@ -199,10 +201,10 @@ export const useConversation = (props?: { conversationId?: string | undefined })
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
         queryClient.invalidateQueries({
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
-        queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
     }),
     clearChat: useMutation({

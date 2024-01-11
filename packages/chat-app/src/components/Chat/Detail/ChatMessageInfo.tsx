@@ -15,6 +15,14 @@ import {
 } from '../../../providers/ConversationProvider';
 import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 
+const dateTimeFormat: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+};
+
 export const ChatMessageInfo = ({
   msg,
   conversation,
@@ -33,24 +41,45 @@ export const ChatMessageInfo = ({
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Message info')}>
-      <div>
-        <p className="mb-2 text-lg">{t('Recipients')}</p>
-        <div className="flex flex-col gap-4">
-          {recipients.map((recipient) => (
-            <div className="flex flex-row items-center justify-between" key={recipient}>
-              <div className="flex flex-row items-center gap-2">
-                <ConnectionImage
-                  odinId={recipient}
-                  className="border border-neutral-200 dark:border-neutral-800"
-                  size="sm"
+      <div className="flex flex-col gap-5">
+        <div>
+          <p className="mb-2 text-xl">{t('Details')}</p>
+          <p>
+            {t('Sent')}:{' '}
+            {new Date(msg.fileMetadata.created).toLocaleDateString(undefined, dateTimeFormat)}
+          </p>
+          {msg.fileMetadata.transitCreated ? (
+            <p>
+              {t('Received')}:{' '}
+              {new Date(msg.fileMetadata.transitCreated).toLocaleDateString(
+                undefined,
+                dateTimeFormat
+              )}
+            </p>
+          ) : null}
+        </div>
+
+        <div>
+          <p className="mb-2 text-xl">{t('Recipients')}</p>
+          <div className="flex flex-col gap-4">
+            {recipients.map((recipient) => (
+              <div className="flex flex-row items-center justify-between" key={recipient}>
+                <div className="flex flex-row items-center gap-2">
+                  <ConnectionImage
+                    odinId={recipient}
+                    className="border border-neutral-200 dark:border-neutral-800"
+                    size="sm"
+                  />
+                  <ConnectionName odinId={recipient} />
+                </div>
+                <InnerDeliveryIndicator
+                  state={
+                    messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
+                  }
                 />
-                <ConnectionName odinId={recipient} />
               </div>
-              <InnerDeliveryIndicator
-                state={messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus}
-              />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </DialogWrapper>

@@ -40,7 +40,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       )
       .map((msg) => msg.fileMetadata.globalTransitId) as string[];
 
-    await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
+    return await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
   };
 
   const removeMessage = async ({
@@ -81,16 +81,11 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       refetchOnMount: false,
     }),
     markAsRead: useMutation({
+      mutationKey: ['markAsRead', conversationId],
       mutationFn: markAsRead,
       onError: (error) => {
         console.error('Error marking chat as read', { error });
       },
-      // onMutate: async ({ conversation, recipients, message }) => {
-      //   // TODO: Optimistic update of the chat messages append the new message to the list
-      // },
-      // onSettled: async (_data, _error, variables) => {
-      //   queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
-      // },
     }),
     delete: useMutation({
       mutationFn: removeMessage,

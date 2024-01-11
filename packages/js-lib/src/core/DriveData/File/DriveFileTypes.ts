@@ -4,8 +4,11 @@ export type SystemFileType = 'Standard' | 'Comment';
 
 export interface FileMetadata<T = string> {
   created: number;
-  globalTransitId?: string;
   updated: number;
+  transitCreated?: number;
+  transitUpdated?: number;
+
+  globalTransitId?: string;
   isEncrypted: boolean;
   senderOdinId: string;
   appData: AppFileMetaData<T>;
