@@ -100,7 +100,7 @@ const Settings = () => {
         </Alert>
       ) : null}
 
-      {isSupported && !canEnable && !(isEnabled || current) ? (
+      {isSupported && !canEnable && !(isEnabled && current) ? (
         <p>{t(`We can't enable notifications at the moment, please refresh and try again`)}</p>
       ) : null}
 

@@ -99,7 +99,6 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
     });
 
     if (!channels.length) return null;
-    console.log('static channels', channels);
     return channels;
   }
 };
