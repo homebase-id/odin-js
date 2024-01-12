@@ -60,10 +60,17 @@ export const createCircleDefinition = async (
     .catch(dotYouClient.handleErrorResponse);
 };
 
-export const getCircles = async (dotYouClient: DotYouClient): Promise<CircleDefinition[]> => {
+export const getCircles = async (
+  dotYouClient: DotYouClient,
+  excludeSystemCircles: boolean
+): Promise<CircleDefinition[]> => {
   const client = dotYouClient.createAxiosClient();
   const url =
-    root + '/list' + (dotYouClient.getType() === ApiType.Owner ? '?includeSystemCircle=true' : '');
+    root +
+    '/list' +
+    (dotYouClient.getType() === ApiType.Owner && !excludeSystemCircles
+      ? '?includeSystemCircle=true'
+      : '');
 
   const response = await client.get<CircleDefinition[]>(url);
 

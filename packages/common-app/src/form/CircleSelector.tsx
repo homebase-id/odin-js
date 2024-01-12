@@ -8,14 +8,16 @@ export const CircleSelector = ({
   defaultValue,
   onChange,
   name,
+  excludeSystemCircles = false,
 }: {
   defaultValue: string[];
   onChange: (e: { target: { name: string; value: string[] } }) => void;
   name?: string;
+  excludeSystemCircles?: boolean;
 }) => {
   const {
     fetch: { data: circles, isLoading: isCirclesLoading },
-  } = useCircles();
+  } = useCircles(excludeSystemCircles);
   const [selection, setSelection] = useState<string[]>([...(defaultValue ?? [])]);
 
   useEffect(() => {

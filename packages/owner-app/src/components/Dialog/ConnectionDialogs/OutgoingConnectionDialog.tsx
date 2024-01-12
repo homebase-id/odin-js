@@ -176,7 +176,7 @@ const OutgoingConnectionDialog = ({
             <>
               <div className="mb-4 pb-4">
                 <h2 className="mb-2 text-lg leading-tight">
-                  {t('Add as member to one or more circles')}
+                  {t('Add as a member to one or more circles')}
                   <small className="block text-slate-400 dark:text-slate-600">
                     {connectionTarget} {t('will be added as member to the selected circles')}
                   </small>
@@ -184,6 +184,7 @@ const OutgoingConnectionDialog = ({
                 <CircleSelector
                   defaultValue={circleGrants}
                   onChange={(e) => setCircleGrants(e.target.value)}
+                  excludeSystemCircles={true}
                 />
               </div>
 

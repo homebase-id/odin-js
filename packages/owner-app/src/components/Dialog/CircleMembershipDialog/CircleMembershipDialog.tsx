@@ -167,6 +167,7 @@ const InnerCircleSelectionDialog = ({
           <CircleSelector
             defaultValue={newGrantIds}
             onChange={(e) => setNewGrantIds(e.target.value)}
+            excludeSystemCircles={true}
           />
 
           <div className="-m-2 flex flex-row-reverse py-3">
