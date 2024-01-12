@@ -48,6 +48,7 @@ const CircleAppInteractionDialog = ({
     setUpdateState('idle');
   };
 
+  console.log({ toGrantApps, toRevokeApps });
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel} size="4xlarge">
       <>
@@ -115,26 +116,27 @@ const CircleAppInteractionDialog = ({
                   toGrantApps.some((toGrant) => stringGuidsEqual(toGrant, app.appId));
 
                 const clickHandler = () => {
+                  console.log({ checked });
                   if (!checked) {
                     if (!hadAccess) {
                       // Provide access
-                      setToGrantApps([
+                      setToGrantApps((toGrantApps) => [
                         ...toGrantApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                         app.appId,
                       ]);
                     }
-                    setToRevokeApps([
+                    setToRevokeApps((toRevokeApps) => [
                       ...toRevokeApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                     ]);
                   } else {
                     if (hadAccess) {
                       // Revoke access
-                      setToRevokeApps([
+                      setToRevokeApps((toGrantApps) => [
                         ...toGrantApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                         app.appId,
                       ]);
                     }
-                    setToGrantApps([
+                    setToGrantApps((toGrantApps) => [
                       ...toGrantApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                     ]);
                   }
