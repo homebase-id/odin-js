@@ -56,33 +56,44 @@ export const usePushNotificationClient = () => {
 
         console.log('Notification permission granted.');
 
-        await navigator.serviceWorker.ready
-          .then(async (serviceWorkerRegistration) => {
-            console.log('Service Worker is still ready)');
-            const publicKey = await GetApplicationServerKey();
-            const options = {
-              userVisibleOnly: true,
-              applicationServerKey: publicKey,
-            };
+        await Promise.race([
+          navigator.serviceWorker.ready
+            .then(async (serviceWorkerRegistration) => {
+              console.log('Service Worker is still ready)');
+              const publicKey = await GetApplicationServerKey();
+              const options = {
+                userVisibleOnly: true,
+                applicationServerKey: publicKey,
+              };
 
-            await serviceWorkerRegistration.pushManager
-              .subscribe(options)
-              .then(async (pushSubscription) => {
-                console.log('Push registration success, sending to server...');
-                await RegisterNewDevice(dotYouClient, pushSubscription);
+              await serviceWorkerRegistration.pushManager
+                .subscribe(options)
+                .then(async (pushSubscription) => {
+                  console.log('Push registration success, sending to server...');
+                  await RegisterNewDevice(dotYouClient, pushSubscription);
 
-                queryClient.invalidateQueries({ queryKey: ['notification-clients', 'current'] });
-                queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
-              })
-              .catch((error) => {
-                console.error(error);
-                throw new Error('Notification registration failed');
-              });
-          })
-          .catch((error) => {
-            console.warn('Service Worker error during registration:', error);
-            throw new Error('Service Worker error during registration');
-          });
+                  queryClient.invalidateQueries({
+                    queryKey: ['notification-clients', 'current'],
+                  });
+                  queryClient.invalidateQueries({ queryKey: ['notification-clients'] });
+                })
+                .catch((error) => {
+                  console.error(error);
+                  throw new Error('Notification registration failed');
+                });
+            })
+            .catch((error) => {
+              console.warn('Service Worker error during registration:', error);
+              throw new Error('Service Worker error during registration');
+            }),
+          new Promise<void>((_resolve, reject) =>
+            setTimeout(() => {
+              reject(`We can't enable notifications at the moment, please refresh and try again`);
+            }, 1000 * 60)
+          ),
+        ]).catch((error) => {
+          throw new Error(error);
+        });
       },
     }),
   };

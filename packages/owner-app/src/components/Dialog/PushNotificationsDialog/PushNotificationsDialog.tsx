@@ -148,6 +148,15 @@ const Settings = () => {
           )}
         </>
       ) : null}
+
+      {testNotificationError || enableError ? (
+        <p className="my-2">
+          {t(`I can't get notifications working,`)}{' '}
+          <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
+            {t(`what can I do?`)}
+          </Link>
+        </p>
+      ) : null}
     </>
   );
 };
