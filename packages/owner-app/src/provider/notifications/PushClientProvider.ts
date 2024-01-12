@@ -47,7 +47,8 @@ export const GetCurrentDeviceDetails = async (dotYouClient: DotYouClient) => {
 
   return await axiosClient
     .get<PushNotificationSubscription>('/notify/push/subscription')
-    .then((response) => response.data);
+    .then((response) => response.data)
+    .catch(() => null);
 };
 
 export const GetRegisteredDevices = async (dotYouClient: DotYouClient) => {

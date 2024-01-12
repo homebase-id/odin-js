@@ -16,7 +16,7 @@ import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   usePushNotificationClient,
@@ -69,7 +69,11 @@ const Settings = () => {
     mutate: enable,
     status: enableStatus,
     error: enableError,
+    reset: resetEnable,
   } = usePushNotificationClient().enableOnThisDevice;
+  useEffect(() => {
+    resetEnable();
+  }, [current]);
 
   const {
     mutate: sendTestNotification,

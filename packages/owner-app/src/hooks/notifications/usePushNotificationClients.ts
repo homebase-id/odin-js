@@ -128,6 +128,10 @@ export const usePushNotificationClients = () => {
       mutationFn: () => removeCurrentDevice(),
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['notification-clients'], exact: false });
+        queryClient.invalidateQueries({
+          queryKey: ['notification-clients', 'current'],
+          exact: false,
+        });
       },
     }),
   };
