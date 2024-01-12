@@ -1,7 +1,6 @@
 export enum CirclePermissionType {
   None = 0,
   ReadConnections = 10,
-  ReadCircleMembers = 50,
 }
 
 export enum AppCirclePermissionType {
