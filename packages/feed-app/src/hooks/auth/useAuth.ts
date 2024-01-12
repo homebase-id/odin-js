@@ -57,7 +57,6 @@ export const drives = [
   },
   {
     // Public posts
-
     a: BlogConfig.PublicChannelDrive.alias,
     t: BlogConfig.PublicChannelDrive.type,
     n: '',

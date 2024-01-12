@@ -46,7 +46,11 @@ export const usePushNotificationClient = () => {
     }),
     enableOnThisDevice: useMutation({
       mutationFn: async () => {
-        const permission = await Notification.requestPermission();
+        const permission =
+          Notification.permission === 'granted'
+            ? 'granted'
+            : await Notification.requestPermission();
+
         if (permission === 'denied' || permission === 'default')
           throw new Error('Notification permission denied');
 
