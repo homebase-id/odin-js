@@ -183,7 +183,11 @@ export const VolatileInput = ({
   }, [autoFocus]);
 
   return (
-    <div className={`relative block w-full ${className || ''}`}>
+    <div
+      className={`relative block ${className?.indexOf('w-') === -1 ? 'w-full' : ''} ${
+        className || ''
+      }`}
+    >
       <span
         role="textbox"
         contentEditable
