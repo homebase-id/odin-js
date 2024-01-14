@@ -91,7 +91,8 @@ export const PostMeta = ({
           onClick={(e) => e.stopPropagation()}
         >
           {postFile?.fileMetadata.isEncrypted ? <Lock className="h-3 w-3" /> : null}
-          {channel?.serverMetadata &&
+          {isAuthor &&
+          channel?.serverMetadata &&
           postFile?.serverMetadata &&
           !aclEqual(
             channel.serverMetadata.accessControlList,
