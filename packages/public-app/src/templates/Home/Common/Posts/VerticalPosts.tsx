@@ -91,7 +91,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     hasNextPage: hasMorePosts,
     fetchNextPage,
     isFetchingNextPage,
-    isFetchedAfterMount: isPostsLoaded,
+    isFetched: isPostsLoaded,
   } = useBlogPostsInfinite({ pageSize: PAGE_SIZE, channelId: channelId });
   const flattenedPosts = flattenInfinteData<DriveSearchResult<PostContent>>(blogPosts, PAGE_SIZE);
 
