@@ -39,10 +39,9 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
 
   const fetchOwnDomainDnsStatus = async (domain: string): Promise<DnsConfig | null> => {
     if (!domain) return null;
-    const response = await axios.get(
-      `${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`
-    );
-    return response.data;
+    return await axios
+      .get(`${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`)
+      .then((response) => response.data);
   };
 
   return {
