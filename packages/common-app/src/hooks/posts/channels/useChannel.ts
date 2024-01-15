@@ -58,7 +58,8 @@ const getExtendAuthorizationUrl = (
 };
 
 export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getDotYouClient, isOwner } = useDotYouClient();
+  const dotYouClient = getDotYouClient();
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
 
@@ -84,7 +85,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, channelId) ||
         chnl.fileMetadata.appData.content.slug === channelSlug
     );
-    if (channel) return channel;
+    if (channel && !isOwner) return channel;
 
     const directFetchOfChannel =
       (channelSlug ? await getChannelDefinitionBySlug(dotYouClient, channelSlug) : undefined) ||
