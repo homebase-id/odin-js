@@ -16,7 +16,7 @@ export interface DnsRecord {
   value: string;
   description: string;
   status: DnsRecordStatus;
-  statusText: string;
+  records?: Record<string, string[]>;
 }
 
 export type DnsConfig = Array<DnsRecord>;

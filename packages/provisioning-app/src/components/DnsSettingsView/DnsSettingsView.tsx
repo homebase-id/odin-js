@@ -274,48 +274,84 @@ const RecordView = ({
   showStatus: boolean;
   appendDotOnValue?: boolean;
 }) => {
+  const [showBadValue, setShowBadValue] = useState(false);
+
   const simpleStatus = status || record.status;
   const isGood = simpleStatus === 'success';
 
+  const isInCorrectvalue = simpleStatus === 'incorrectValue';
+
   return (
-    <div
-      className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
-        showStatus
-          ? isGood
-            ? 'bg-green-100'
-            : errorStates.includes(simpleStatus)
-            ? 'bg-orange-100'
+    <>
+      {' '}
+      <div
+        className={`flex flex-row flex-wrap items-center gap-2 rounded-lg ${
+          showStatus
+            ? isGood
+              ? 'bg-green-100'
+              : errorStates.includes(simpleStatus)
+              ? 'bg-orange-100'
+              : 'bg-gray-100'
             : 'bg-gray-100'
-          : 'bg-gray-100'
-      } px-4 py-3 font-mono text-base shadow-sm`}
-    >
-      <p>
-        {[record.name || (domain ? `${domain}.` : undefined), subdomain].filter(Boolean).join('.')}
-      </p>
-      <p>{record.type}</p>
-      <p>
-        {record.value}
-        {appendDotOnValue ? '.' : ''}
-      </p>
-      {showStatus ? (
-        <div className="ml-auto flex flex-row items-center gap-2 text-sm">
-          {isGood ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <>
-              {simpleStatus === 'incorrectValue'
-                ? 'Incorrect value'
-                : simpleStatus === 'aaaaRecordsNotSupported'
-                ? 'AAAA records are not supported'
-                : simpleStatus === 'multipleRecordsNotSupported'
-                ? 'Multiple A or CNAME records are not supported'
-                : 'Record not found'}
-              <Exclamation className="h-4 w-4" />
-            </>
-          )}
-        </div>
+        } px-4 py-3 font-mono text-base shadow-sm`}
+      >
+        <p>
+          {[record.name || (domain ? `${domain}.` : undefined), subdomain]
+            .filter(Boolean)
+            .join('.')}
+        </p>
+        <p>{record.type}</p>
+        <p>
+          {record.value}
+          {appendDotOnValue ? '.' : ''}
+        </p>
+        {showStatus ? (
+          <div
+            className={`ml-auto flex flex-row items-center gap-2 text-sm ${
+              isInCorrectvalue ? 'cursor-pointer hover:underline' : ''
+            }`}
+            onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
+          >
+            {isGood ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <>
+                {isInCorrectvalue
+                  ? 'Incorrect value'
+                  : simpleStatus === 'aaaaRecordsNotSupported'
+                  ? 'AAAA records are not supported'
+                  : simpleStatus === 'multipleRecordsNotSupported'
+                  ? 'Multiple A or CNAME records are not supported'
+                  : 'Record not found'}
+                <Exclamation className="h-4 w-4" />
+              </>
+            )}
+          </div>
+        ) : null}
+      </div>
+      {record.records && showBadValue ? (
+        <DialogWrapper
+          title={t('Incorrect value')}
+          onClose={() => setShowBadValue(false)}
+          isSidePanel={false}
+          size="2xlarge"
+        >
+          <p className="mb-4">
+            Expected value:
+            <span className="mt-1 block bg-gray-100 px-4 py-3 font-mono text-base">
+              {record.value}
+              {appendDotOnValue ? '.' : ''}
+            </span>
+          </p>
+          <p>
+            But we have found this:{' '}
+            <span className="mt-1 block bg-orange-100 px-4 py-3 font-mono text-base">
+              {Object.values(record.records)[0]}
+            </span>
+          </p>
+        </DialogWrapper>
       ) : null}
-    </div>
+    </>
   );
 };
 
