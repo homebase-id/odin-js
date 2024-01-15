@@ -67,6 +67,7 @@ const DnsSettingsView = ({
                   subdomain={subdomain}
                   record={record}
                   showStatus={showStatus}
+                  appendDotOnValue={true}
                 />
               ))}
             </>
@@ -159,6 +160,7 @@ const ApexInfoBlock = ({
             status={uniformStatus}
             domain={domain}
             showStatus={showStatus}
+            appendDotOnValue={true}
           />
         </>
       ) : null}
@@ -221,6 +223,7 @@ const SubdomainInfoBlock = ({
             status={fallbackOnlyCorrect ? 'success' : undefined}
             subdomain={subdomain}
             showStatus={showStatus}
+            appendDotOnValue={true}
           />
           {fallbackOnlyCorrect ? (
             <Alert type="info">
@@ -262,12 +265,14 @@ const RecordView = ({
   domain,
   subdomain,
   showStatus,
+  appendDotOnValue,
 }: {
   record: DnsRecord;
   status?: DnsRecordStatus;
   domain?: string;
   subdomain?: string;
   showStatus: boolean;
+  appendDotOnValue?: boolean;
 }) => {
   const simpleStatus = status || record.status;
   const isGood = simpleStatus === 'success';
@@ -284,9 +289,14 @@ const RecordView = ({
           : 'bg-gray-100'
       } px-4 py-3 font-mono text-base shadow-sm`}
     >
-      <p>{[record.name || domain, subdomain].filter(Boolean).join('.')}</p>
+      <p>
+        {[record.name || (domain ? `${domain}.` : undefined), subdomain].filter(Boolean).join('.')}
+      </p>
       <p>{record.type}</p>
-      <p>{record.value}</p>
+      <p>
+        {record.value}
+        {appendDotOnValue ? '.' : ''}
+      </p>
       {showStatus ? (
         <div className="ml-auto flex flex-row items-center gap-2 text-sm">
           {isGood ? (
