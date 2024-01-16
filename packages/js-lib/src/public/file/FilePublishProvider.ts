@@ -1,12 +1,17 @@
+import { BuiltInAttributes } from '../../../profile';
 import { DotYouClient } from '../../core/DotYouClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { SecurityGroupType } from '../../core/core';
+import { stringGuidsEqual } from '../../helpers/DataUtil';
 import { getChannelDefinitions, getChannelDrive } from '../posts/PostDefinitionProvider';
 import { BlogConfig } from '../posts/PostTypes';
 import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile } from './FileProvider';
 
-export const publishProfile = async (dotYouClient: DotYouClient) => {
+export const publishProfile = async (
+  dotYouClient: DotYouClient,
+  dataType?: 'channel' | typeof BuiltInAttributes.Name
+) => {
   const channels = await getChannelDefinitions(dotYouClient);
   const channelSections = channels
     ?.filter(
@@ -29,8 +34,24 @@ export const publishProfile = async (dotYouClient: DotYouClient) => {
       };
     });
 
-  return await Promise.all([
-    await publishFile(dotYouClient, 'sitedata.json', [...DEFAULT_SECTIONS, ...channelSections]),
-    await publishFile(dotYouClient, 'public.json', DEFAULT_PUBLIC_SECTIONS, 'allowAllOrigins'),
-  ]);
+  const publishActions = [];
+
+  if (
+    !dataType ||
+    dataType === 'channel' ||
+    DEFAULT_SECTIONS.some(
+      (section) =>
+        section.queryParams.tagsMatchAtLeastOne?.some((tag) => stringGuidsEqual(tag, dataType))
+    )
+  )
+    publishActions.push(
+      publishFile(dotYouClient, 'sitedata.json', [...DEFAULT_SECTIONS, ...channelSections])
+    );
+
+  if (!dataType || dataType === BuiltInAttributes.Name || dataType === BuiltInAttributes.Photo)
+    publishActions.push(
+      publishFile(dotYouClient, 'public.json', DEFAULT_PUBLIC_SECTIONS, 'allowAllOrigins')
+    );
+
+  return await Promise.all(publishActions);
 };

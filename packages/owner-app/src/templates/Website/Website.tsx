@@ -76,7 +76,7 @@ const Website = () => {
 
 const PublishOptions = () => {
   const {
-    mutate: publishFile,
+    mutate: publishStaticFiles,
     status: publishStatus,
     error: publishFileError,
   } = useStaticFiles().publish;
@@ -93,7 +93,7 @@ const PublishOptions = () => {
       >
         <div className="flex flex-row">
           <ActionButton
-            onClick={() => publishFile()}
+            onClick={() => publishStaticFiles(undefined)}
             state={publishStatus}
             icon={Save}
             className="ml-auto"

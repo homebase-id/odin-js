@@ -63,8 +63,6 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const queryClient = useQueryClient();
   const { mutate: publishStaticFiles } = useStaticFiles().publish;
 
-  const { data: securityContext } = useSecurityContext().fetch;
-
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) return null;
 
@@ -227,7 +225,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         // We don't invalidate channels by default, as fetching the channels is a combination of static and dynamic data
         // queryClient.invalidateQueries(['channels']);
 
-        publishStaticFiles();
+        publishStaticFiles('channel');
       },
     }),
     remove: useMutation({

@@ -269,11 +269,6 @@ const ProfileSectionEditor = ({
     (attr) => !attr.fileMetadata.appData.content
   ) as DriveSearchResult<undefined>[];
 
-  console.log({
-    filteredAttributes,
-    emptyAttributes,
-  });
-
   // Find unique types
   const types: string[] = filteredAttributes
     .map((dsr) => dsr.fileMetadata.appData.content)
