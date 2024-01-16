@@ -201,8 +201,9 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryKey: ['attributeVersions', newAttr.profileId, newAttr.type],
         });
       },
-      onSuccess: () => {
-        if (!currentSettings?.disableAutoPublish) publishStaticFiles();
+      onSuccess: (updatedAttr) => {
+        if (!currentSettings?.disableAutoPublish)
+          publishStaticFiles(updatedAttr.fileMetadata.appData.content.type);
       },
     }),
     remove: useMutation({
@@ -245,7 +246,8 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryClient.invalidateQueries({ queryKey: ['siteData'] });
           queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
-          if (!currentSettings?.disableAutoPublish) publishStaticFiles();
+          if (!currentSettings?.disableAutoPublish)
+            publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);
         }, 1000);
       },
     }),
