@@ -113,16 +113,3 @@ export const DEFAULT_SECTIONS = [
     resultOptions: BASE_RESULT_OPTIONS,
   },
 ];
-
-export const DEFAULT_PUBLIC_SECTIONS = [
-  {
-    name: 'name',
-    queryParams: personalInfoNameQueryParam,
-    resultOptions: BASE_RESULT_OPTIONS,
-  },
-  {
-    name: 'photo',
-    queryParams: personalInfoPhotoQueryParam,
-    resultOptions: BASE_RESULT_OPTIONS,
-  },
-];

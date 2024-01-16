@@ -5,7 +5,7 @@ import { SecurityGroupType } from '../../core/core';
 import { stringGuidsEqual } from '../../helpers/DataUtil';
 import { getChannelDefinitions, getChannelDrive } from '../posts/PostDefinitionProvider';
 import { BlogConfig } from '../posts/PostTypes';
-import { DEFAULT_SECTIONS, DEFAULT_PUBLIC_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
+import { DEFAULT_SECTIONS, BASE_RESULT_OPTIONS } from './FileBase';
 import { publishFile } from './FileProvider';
 
 export const publishProfile = async (
@@ -46,11 +46,6 @@ export const publishProfile = async (
   )
     publishActions.push(
       publishFile(dotYouClient, 'sitedata.json', [...DEFAULT_SECTIONS, ...channelSections])
-    );
-
-  if (!dataType || dataType === BuiltInAttributes.Name || dataType === BuiltInAttributes.Photo)
-    publishActions.push(
-      publishFile(dotYouClient, 'public.json', DEFAULT_PUBLIC_SECTIONS, 'allowAllOrigins')
     );
 
   return await Promise.all(publishActions);
