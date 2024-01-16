@@ -44,6 +44,12 @@ export const drives = [
     p: DrivePermissionType.Read,
   },
 ];
+export const permissions = [
+  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReadConnections,
+  AppPermissionType.SendPushNotifications,
+];
+
 const circleDrives = [
   {
     a: '9ff813aff2d61e2f9b9db189e72d1a11',
@@ -142,11 +148,7 @@ export const useYouAuthAuthorization = () => {
       finalizeUrl,
       appName,
       appId,
-      [
-        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReadConnections,
-        AppPermissionType.SendPushNotifications,
-      ],
+      permissions,
       undefined,
       drives,
       circleDrives,

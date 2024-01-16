@@ -5,17 +5,25 @@ import DrivePermissionRequestView from '../../components/PermissionViews/DrivePe
 import { useApp } from '../../hooks/apps/useApp';
 import { useDrives } from '../../hooks/drives/useDrives';
 import { useEffect } from 'react';
-import { drivesParamToDriveGrantRequest } from './RegisterApp';
+import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
+import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
 
-const ExtendAppDrivePermissions = () => {
+const ExtendAppPermissions = () => {
   // Read the queryString
   const [searchParams] = useSearchParams();
 
   const appId = searchParams.get('appId');
   const returnUrl = searchParams.get('return');
 
+  const p = searchParams.get('p');
+  const permissionSet = p ? permissionParamToPermissionSet(p) : undefined;
   const d = searchParams.get('d');
   const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
+
+  // const cp = searchParams.get('cp');
+  // const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
+  // const cd = searchParams.get('cd');
+  // const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
 
   const {
     fetch: { data: appRegistration },
@@ -28,7 +36,12 @@ const ExtendAppDrivePermissions = () => {
     extendPermission({
       ...appRegistration,
       appId: appRegistration.appId,
-      permissionSet: appRegistration?.grant.permissionSet || { keys: [] },
+      permissionSet: {
+        keys: [
+          ...(appRegistration?.grant.permissionSet.keys || []),
+          ...(permissionSet?.keys || []),
+        ],
+      },
       drives: [...(appRegistration?.grant?.driveGrants || []), ...(driveGrants || [])],
     });
   };
@@ -78,6 +91,20 @@ const ExtendAppDrivePermissions = () => {
               {t('By allowing this, the app')} &quot;{appRegistration?.name}&quot;{' '}
               {t('will receive the following extra access on your identity')}:
             </p>
+
+            <Section>
+              {permissionSet?.keys.length ? (
+                <div className="flex flex-col gap-4">
+                  {permissionSet.keys.map((permissionLevel) => {
+                    return (
+                      <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-slate-400">{t('No changes to existing permissions')}</p>
+              )}
+            </Section>
 
             <Section>
               {existingDriveGrants?.length ? (
@@ -131,4 +158,4 @@ const ExtendAppDrivePermissions = () => {
   );
 };
 
-export default ExtendAppDrivePermissions;
+export default ExtendAppPermissions;

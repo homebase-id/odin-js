@@ -8,7 +8,6 @@ import {
   FEED_APP_ID,
   Quote,
   t,
-  useDotYouClient,
   useMarkAllAsRead,
 } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
@@ -31,9 +30,10 @@ const FollowingView = lazy(
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
-import { Feed } from '@youfoundation/common-app';
+import { Feed, ExtendPermissionDialog } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
+import { drives, permissions } from '../../hooks/auth/useAuth';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
@@ -53,6 +53,13 @@ export const SocialFeed = () => {
       <Helmet>
         <title>{t('Feed')} | Homebase</title>
       </Helmet>
+      <ExtendPermissionDialog
+        appName={t('Homebase Feed')}
+        appId={FEED_APP_ID}
+        drives={drives}
+        permissions={permissions}
+      />
+
       {!isReactNative ? (
         <PageMeta
           title={t('Feed')}
