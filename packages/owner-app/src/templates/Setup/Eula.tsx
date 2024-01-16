@@ -49,7 +49,7 @@ const EulaContents = () => {
   return (
     <div className="flex flex-col gap-5">
       <p className="text-lg">
-        <small className="block text-sm">Version: October 15, 2023</small>
+        <small className="block text-sm">Version: January 16, 2024</small>
       </p>
       <p>Essential quick points of the EULA:</p>
       <ul className="list-outside list-disc pl-4">
@@ -69,10 +69,9 @@ const EulaContents = () => {
         </li>
         <li>
           <em className="font-medium not-italic">Illegal Content: </em>You agree not to distribute
-          content that is universally regarded as illegal and extremely harmful: child pornography,
-          revenge porn, and snuff. Violating this provision will result in the immediate, permanent
-          termination of your rights to use Homebase. In addition, you agree to pay a penalty of
-          $1,000,000 USD to Homebase for each violation of this term.
+          content that is universally regarded as illegal and extremely harmful, including child
+          pornography, revenge porn, and snuff. Violating this provision will result in the
+          immediate, permanent termination of your rights to use Homebase.
         </li>
       </ul>
       <p>
