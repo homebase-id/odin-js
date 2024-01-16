@@ -231,7 +231,7 @@ const NotificationGroup = ({
                   ? setExpanded(true)
                   : markAsRead(typeGroup.map((n) => n.id))
               }
-              groupCount={groupCount}
+              groupCount={isExpanded ? 0 : groupCount}
               href={canExpand && isExpanded ? getTargetLink(notification) : undefined}
               appName={appName}
             />
