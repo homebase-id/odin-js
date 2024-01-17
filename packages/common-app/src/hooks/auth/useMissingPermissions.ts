@@ -47,7 +47,7 @@ export const useMissingPermissions = ({
   const identity = useDotYouClient().getIdentity();
 
   if (!context || !identity) return;
-  console.log({ context });
+
   const driveGrants = context?.permissionContext.permissionGroups.flatMap(
     (group) => group.driveGrants
   );

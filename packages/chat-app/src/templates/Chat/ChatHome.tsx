@@ -39,7 +39,7 @@ export const ChatHome = () => {
         appId={CHAT_APP_ID}
         drives={drives}
         permissions={permissions}
-        needsAllConnected={true}
+        // needsAllConnected={true}
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
