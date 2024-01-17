@@ -1,13 +1,12 @@
-import { ActionLink, Check, Feed, t, useIdentityIFollow } from '@youfoundation/common-app';
+import { ActionLink, Feed, t, useIdentityIFollow } from '@youfoundation/common-app';
 
 const FollowHomebase = ({ className }: { className?: string }) => {
   const { data: followingData, isFetched } = useIdentityIFollow({
     odinId: 'id.homebase.id',
   }).fetch;
 
-  if (!isFetched) return null;
-
   const alreadyFollowingThis = !!followingData;
+  if (!isFetched || alreadyFollowingThis) return null;
 
   return (
     <div className={`block overflow-hidden px-4 py-3 ${className ?? ''}`}>
@@ -17,12 +16,10 @@ const FollowHomebase = ({ className }: { className?: string }) => {
           <ActionLink
             className={`mr-auto w-auto `}
             href={`/owner/follow/following/id.homebase.id`}
-            icon={alreadyFollowingThis ? Check : Feed}
-            type={alreadyFollowingThis ? 'secondary' : 'primary'}
+            icon={Feed}
+            type={'primary'}
           >
-            <span className="flex flex-col leading-tight">
-              {alreadyFollowingThis ? t('Following') : t('Follow Homebase')}
-            </span>
+            <span className="flex flex-col leading-tight">{t('Follow Homebase')}</span>
           </ActionLink>
         </div>
       </div>
