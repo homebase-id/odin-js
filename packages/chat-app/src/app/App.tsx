@@ -43,10 +43,11 @@ const queryClient = new QueryClient({
   },
 });
 
+export const REACT_QUERY_CACHE_KEY = 'CHAT_REACT_QUERY_OFFLINE_CACHE';
 const localStoragePersister = createSyncStoragePersister({
   storage: window.localStorage,
   retry: removeOldestQuery,
-  key: 'CHAT_REACT_QUERY_OFFLINE_CACHE',
+  key: REACT_QUERY_CACHE_KEY,
 });
 
 // Explicit includes to avoid persisting media items, or large data in general

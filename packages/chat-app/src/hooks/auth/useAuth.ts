@@ -15,7 +15,7 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
-import { ROOT_PATH } from '../../app/App';
+import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
 import { APP_AUTH_TOKEN, APP_SHARED_SECRET } from '@youfoundation/common-app';
 
@@ -77,6 +77,7 @@ export const useAuth = () => {
 
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);
+    localStorage.removeItem(REACT_QUERY_CACHE_KEY);
     setAuthenticationState('anonymous');
 
     window.location.href = '/owner';
