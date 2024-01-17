@@ -77,6 +77,7 @@ const OutgoingConnectionDialog = ({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            if (sendConnectionRequestStatus === 'pending') return;
             if (doubleChecked) {
               await sendConnectionRequest(
                 {

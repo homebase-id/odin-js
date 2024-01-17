@@ -1,4 +1,4 @@
-import { BuiltInAttributes } from '../../../profile';
+import { BuiltInAttributes } from '../../profile/profile';
 import { DotYouClient } from '../../core/DotYouClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { SecurityGroupType } from '../../core/core';

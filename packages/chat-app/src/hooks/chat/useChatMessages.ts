@@ -77,8 +77,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       enabled: !!conversationId,
-      staleTime: 1000 * 60 * 5, // 5 minutes; The chat messages are already invalidated by the websocket
-      refetchOnMount: false,
+      staleTime: 1000 * 60 * 1, // 1 minute; The chat messages are already invalidated by the websocket; But that fails often atm
     }),
     markAsRead: useMutation({
       mutationKey: ['markAsRead', conversationId],

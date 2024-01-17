@@ -134,6 +134,7 @@ const IncomingConnectionDialog = ({
           <>
             <form
               onSubmit={async (e) => {
+                if (acceptPendingStatus === 'pending') return;
                 e.preventDefault();
                 await acceptPending({
                   senderOdinId: senderOdinId,

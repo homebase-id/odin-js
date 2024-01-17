@@ -14,7 +14,8 @@ import { BlogConfig } from '@youfoundation/js-lib/public';
 export const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[],
-  drives: TargetDrive[] = [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive]
+  drives: TargetDrive[] = [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive],
+  onDisconnect?: () => void
 ) => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const isConnected = useRef<boolean>(false);
@@ -44,6 +45,8 @@ export const useNotificationSubscriber = (
           setIsActive(false);
 
           setShouldReconnect(true);
+
+          onDisconnect && onDisconnect();
         });
         setIsActive(true);
         setShouldReconnect(false);
