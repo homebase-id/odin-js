@@ -1,4 +1,4 @@
-import { isLocalStorageAvailable, jsonStringify64, tryJsonParse } from '../../helpers/helpers';
+import { hasDebugFlag, jsonStringify64, tryJsonParse } from '../../helpers/helpers';
 import { ApiType, DotYouClient } from '../DotYouClient';
 import { decryptData, encryptData, getRandomIv } from '../InterceptionEncryptionUtil';
 import { TargetDrive } from '../core';
@@ -34,7 +34,7 @@ interface RawClientNotification {
   data: string;
 }
 
-const isDebug = isLocalStorageAvailable() && localStorage.getItem('debug') === '1';
+const isDebug = hasDebugFlag();
 
 const ParseRawClientNotification = (
   notification: RawClientNotification

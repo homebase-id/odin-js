@@ -2,7 +2,7 @@ import { Label, Input, Select, ActionButton, Times, t, Plus } from '@youfoundati
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useRef, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 
 const Debug = () => {
   const dotYouClient = useAuth().getDotYouClient();
@@ -29,7 +29,7 @@ const Debug = () => {
     addToOutput('\n-----------------\n');
   };
 
-  const isDebug = (localStorage && localStorage.getItem('debug') === '1') || import.meta.env.DEV;
+  const isDebug = hasDebugFlag();
   if (!isDebug) return null;
 
   return (
