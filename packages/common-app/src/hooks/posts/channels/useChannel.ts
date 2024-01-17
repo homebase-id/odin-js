@@ -8,7 +8,7 @@ import {
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
 
-import { FEED_APP_ID, useSecurityContext, useStaticFiles } from '@youfoundation/common-app';
+import { FEED_APP_ID, useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
@@ -52,7 +52,7 @@ const getExtendAuthorizationUrl = (
     d: JSON.stringify(drives),
   };
 
-  return `https://${identity}/owner/app-new-drive?${stringifyToQueryParams(
+  return `https://${identity}/owner/appupdate?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };

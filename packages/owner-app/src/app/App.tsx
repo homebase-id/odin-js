@@ -129,7 +129,6 @@ function App() {
             }
           >
             <Route path="appreg" element={<RegisterApp />} />
-            <Route path="app-new-drive" element={<ExtendAppDrivePermissions />} />
             <Route path="appupdate" element={<ExtendAppDrivePermissions />} />
           </Route>
 
