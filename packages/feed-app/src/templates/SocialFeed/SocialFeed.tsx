@@ -27,6 +27,9 @@ const FollowersView = lazy(
 const FollowingView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowingView/FollowingView')
 );
+const FollowHomebase = lazy(
+  () => import('../../components/SocialFeed/Sidebars/FollowHomebase/FollowHomebase')
+);
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
@@ -114,6 +117,7 @@ export const SocialFeed = () => {
                   <Suspense>
                     <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
                     <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}
