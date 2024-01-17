@@ -1,6 +1,6 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
-import { DotYouClient } from '../../core/DotYouClient';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
   getDrivesByType,
@@ -21,6 +21,7 @@ import {
   DriveSearchResult,
   NewDriveSearchResult,
   getSecurityContext,
+  ensureDrive,
 } from '../../core/core';
 import {
   getRandom16ByteArray,
@@ -127,7 +128,6 @@ export const saveChannelDefinition = async (
   if (!fileId) {
     // Channel doesn't exist yet, we need to check if the drive does exist and if there is access:
     const securityContext = await getSecurityContext(dotYouClient);
-
     if (
       !securityContext?.permissionContext.permissionGroups.some((x) =>
         x.driveGrants.some(
@@ -137,9 +137,19 @@ export const saveChannelDefinition = async (
         )
       )
     ) {
-      console.warn(`[DotYouCore-js: PostDefinitionProvider] Save Channel: No access to drive`);
-      onMissingDrive && onMissingDrive();
-      return;
+      if (dotYouClient.getType() === ApiType.Owner) {
+        await ensureDrive(
+          dotYouClient,
+          targetDrive,
+          channelContent.name,
+          channelContent.description,
+          true
+        );
+      } else {
+        console.warn(`[DotYouCore-js: PostDefinitionProvider] Save Channel: No access to drive`);
+        onMissingDrive && onMissingDrive();
+        return;
+      }
     }
   }
 
@@ -199,9 +209,8 @@ export const saveChannelDefinition = async (
 };
 
 export const removeChannelDefinition = async (dotYouClient: DotYouClient, channelId: string) => {
-  if (stringGuidsEqual(channelId, BlogConfig.PublicChannelId)) {
+  if (stringGuidsEqual(channelId, BlogConfig.PublicChannelId))
     throw new Error(`Remove Channel: can't remove default channel`);
-  }
 
   const channelData = await getChannelDefinitionInternal(dotYouClient, channelId);
   if (channelData?.fileId) {
