@@ -203,14 +203,21 @@ const EulaContents = () => {
         Examples of such activities include, but are not limited to:
       </p>
       <ul className="list-outside list-disc pl-4">
+        <li>Child pornography </li>
+        <li>Revenge porn or snuff.</li>
         <li>Fraud or financial crimes.</li>
-        <li>Distribution or production of illicit drugs.</li>
-        <li>Trafficking or promotion of illegal goods.</li>
-        <li>Any other activities prohibited by applicable law.</li>
+        <li>Distribution, selling or production of illicit drugs.</li>
+        <li>Trafficking or promotion of illegal goods or terrorism.</li>
+        <li>Any other activities prohibited by applicable law</li>
       </ul>
       <p>
+        Violating the forbidden uses will result in the immediate, permanent termination of your
+        rights to use Homebase and be liable for any reputational damage you may have cause to
+        Homebase.
+      </p>
+      <p>
         Violation of Third Party IPR: You are strictly prohibited from using the Software in a
-        manner that infringes, violates, or misappropriates any third-party intellectual property
+        manner that infringes, violates, or misappropriates any third- party intellectual property
         rights, including but not limited to:
       </p>
       <ul className="list-outside list-disc pl-4">
