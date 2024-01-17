@@ -19,7 +19,7 @@ import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/commo
 import { preAuth } from '@youfoundation/js-lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
 
@@ -29,7 +29,7 @@ const MINUTE_IN_MS = 60000;
 // So that new message will be detected by the websocket;
 export const useLiveChatProcessor = () => {
   // Setup websocket, so that we get notified instantly when a new message is received
-  const connected = useChatWebsocket();
+  const connected = useChatWebsocket(true);
 
   // Process the inbox on startup (once the socket is connected)
   const { status: inboxStatus } = useInboxProcessor(connected);
@@ -41,9 +41,12 @@ export const useLiveChatProcessor = () => {
 // Process the inbox on startup
 const useInboxProcessor = (connected?: boolean) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
+  const queryClient = useQueryClient();
 
   const fetchData = async () => {
     const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
+    // We don't know how many messages we have processed, so we can only invalidate the entire chat query
+    queryClient.invalidateQueries({ queryKey: ['chat'] });
     return processedresult;
   };
 
@@ -58,7 +61,9 @@ const useInboxProcessor = (connected?: boolean) => {
   });
 };
 
-const useChatWebsocket = () => {
+const isDebug = hasDebugFlag();
+
+const useChatWebsocket = (isEnabled: boolean) => {
   const [preAuthenticated, setIspreAuthenticated] = useState(false);
 
   const identity = useDotYouClient().getIdentity();
@@ -80,11 +85,12 @@ const useChatWebsocket = () => {
   }, [preAuthenticated]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    console.debug('[ChatTransitProcessor] Got notification', notification);
+    isDebug && console.debug('[ChatTransitProcessor] Got notification', notification);
     if (notification.notificationType === 'transitFileReceived') {
-      console.debug(
-        '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
-      );
+      isDebug &&
+        console.debug(
+          '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
+        );
 
       Notify({
         command: 'processInbox',
@@ -103,6 +109,7 @@ const useChatWebsocket = () => {
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
+        console.log('invalidate chat', conversationId);
         queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
 
         // Check if the message is orphaned from a conversation
@@ -140,7 +147,7 @@ const useChatWebsocket = () => {
   }, []);
 
   return useNotificationSubscriber(
-    preAuthenticated ? handler : undefined,
+    preAuthenticated && isEnabled ? handler : undefined,
     ['transitFileReceived', 'fileAdded'],
     [ChatDrive],
     () => {
