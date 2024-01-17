@@ -104,7 +104,7 @@ export const saveChannelDefinition = async (
     definition.fileMetadata.appData.uniqueId = toGuidId(channelContent.name);
   }
 
-  if (definition.fileMetadata.appData.uniqueId === BlogConfig.PublicChannelId) {
+  if (stringGuidsEqual(definition.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)) {
     // Always keep the slug for the public channel
     definition.fileMetadata.appData.content.slug = BlogConfig.PublicChannelSlug;
   }
@@ -199,7 +199,7 @@ export const saveChannelDefinition = async (
 };
 
 export const removeChannelDefinition = async (dotYouClient: DotYouClient, channelId: string) => {
-  if (channelId === BlogConfig.PublicChannelId) {
+  if (stringGuidsEqual(channelId, BlogConfig.PublicChannelId)) {
     throw new Error(`Remove Channel: can't remove default channel`);
   }
 
