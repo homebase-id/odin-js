@@ -19,7 +19,7 @@ let activeSs: Uint8Array;
 
 let isConnected = false;
 
-const PING_INTERVAL = 1000 * 15 * 1;
+const PING_INTERVAL = 1000 * 5 * 1;
 
 let pingInterval: NodeJS.Timeout | undefined;
 let lastPong: number | undefined;
@@ -127,8 +127,7 @@ const ConnectSocket = async (
         }
         Notify({
           command: 'ping',
-          data: '',
-        });
+        } as WebsocketCommand);
       }, PING_INTERVAL);
     };
 
@@ -159,7 +158,7 @@ const ConnectSocket = async (
     };
 
     webSocketClient.onclose = (e) => {
-      if (isDebug) console.debug('[NotificationProvider] Connection closed');
+      if (isDebug) console.debug('[NotificationProvider] Connection closed', e);
       DisconnectSocket();
     };
   });
@@ -181,6 +180,7 @@ const DisconnectSocket = async () => {
 
   // if there are still subscribes, inform them that the connection was closed
   subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
+  subscribers.length = 0;
 };
 
 export const Subscribe = async (

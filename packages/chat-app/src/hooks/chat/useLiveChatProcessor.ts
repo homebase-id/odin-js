@@ -142,7 +142,10 @@ const useChatWebsocket = () => {
   return useNotificationSubscriber(
     preAuthenticated ? handler : undefined,
     ['transitFileReceived', 'fileAdded'],
-    [ChatDrive]
+    [ChatDrive],
+    () => {
+      queryClient.invalidateQueries({ queryKey: ['processInbox'] });
+    }
   );
 };
 
