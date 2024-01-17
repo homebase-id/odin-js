@@ -27,12 +27,16 @@ const FollowersView = lazy(
 const FollowingView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowingView/FollowingView')
 );
+const FollowHomebase = lazy(
+  () => import('../../components/SocialFeed/Sidebars/FollowHomebase/FollowHomebase')
+);
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
-import { Feed } from '@youfoundation/common-app';
+import { Feed, ExtendPermissionDialog } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
+import { drives, permissions } from '../../hooks/auth/useAuth';
 import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 
 export const SocialFeed = () => {
@@ -54,6 +58,13 @@ export const SocialFeed = () => {
       <Helmet>
         <title>{t('Feed')} | Homebase</title>
       </Helmet>
+      <ExtendPermissionDialog
+        appName={t('Homebase Feed')}
+        appId={FEED_APP_ID}
+        drives={drives}
+        permissions={permissions}
+      />
+
       {!isReactNative ? (
         <PageMeta
           title={t('Feed')}
@@ -106,6 +117,7 @@ export const SocialFeed = () => {
                   <Suspense>
                     <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
                     <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}

@@ -24,7 +24,7 @@ export const OwnerActions = ({ postFile }: { postFile: DriveSearchResult<PostCon
       <ActionGroup
         className=""
         type="mute"
-        size="small"
+        size="none"
         options={[
           {
             icon: Pencil,

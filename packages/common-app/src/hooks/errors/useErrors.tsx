@@ -7,6 +7,7 @@ export interface Error {
 }
 
 const getKnownErrorMessages = (errorCode: string): string | undefined => {
+  if (errorCode === 'noErrorCode') return undefined;
   // TODO: Can be extended with more user friendly error messages
   return errorCode;
 };

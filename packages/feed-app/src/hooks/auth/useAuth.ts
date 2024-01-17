@@ -68,6 +68,20 @@ export const drives = [
       DrivePermissionType.Comment,
   },
 ];
+
+export const permissions = [
+  AppPermissionType.ReadConnections,
+  AppPermissionType.ManageConnectionRequests,
+  AppPermissionType.ReadCircleMembers,
+  AppPermissionType.ReadWhoIFollow,
+  AppPermissionType.ReadMyFollowers,
+  AppPermissionType.ManageFeed,
+  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+  AppPermissionType.PublishStaticContent,
+  AppPermissionType.SendPushNotifications,
+];
+
 export const appName = 'Homebase - Feed';
 export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
 
@@ -159,18 +173,7 @@ export const useYouAuthAuthorization = () => {
       finalizeUrl,
       appName,
       appId,
-      [
-        AppPermissionType.ReadConnections,
-        AppPermissionType.ManageConnectionRequests,
-        AppPermissionType.ReadCircleMembers,
-        AppPermissionType.ReadWhoIFollow,
-        AppPermissionType.ReadMyFollowers,
-        AppPermissionType.ManageFeed,
-        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
-        AppPermissionType.PublishStaticContent,
-        AppPermissionType.SendPushNotifications,
-      ],
+      permissions,
       undefined,
       drives,
       undefined,

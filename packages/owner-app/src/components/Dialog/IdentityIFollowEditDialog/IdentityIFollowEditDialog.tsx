@@ -5,16 +5,16 @@ import {
   t,
   useFollowingInfinite,
   useSocialChannels,
+  usePortal,
+  ActionButton,
+  DialogWrapper,
+  useIdentityIFollow,
+  Alert,
+  Quote,
+  Persons,
 } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { useIdentityIFollow } from '../../../hooks/follow/useIdentityIFollow';
-
-import { Alert } from '@youfoundation/common-app';
 import CheckboxToggle from '../../Form/CheckboxToggle';
-import { Quote } from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app';
+
 import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const IdentityIFollowEditDialog = ({

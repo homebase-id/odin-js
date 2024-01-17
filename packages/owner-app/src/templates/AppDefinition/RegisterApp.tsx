@@ -348,7 +348,9 @@ export const drivesParamToDriveGrantRequest = (
   }
 };
 
-const permissionParamToPermissionSet = (queryParamVal: string | undefined): PermissionSet => {
+export const permissionParamToPermissionSet = (
+  queryParamVal: string | undefined
+): PermissionSet => {
   return {
     keys: queryParamVal?.split(',').map((str) => parseInt(str)) ?? [],
   };

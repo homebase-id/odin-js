@@ -4,6 +4,7 @@ import { PermissionSet } from '../DriveData/Drive/DriveTypes';
 export interface SecurityCaller {
   odinId?: string;
   securityLevel: 'connected' | 'anonymous' | 'owner' | undefined;
+  isGrantedConnectedIdentitiesSystemCircle?: boolean;
 }
 
 export interface PermissionGroup {

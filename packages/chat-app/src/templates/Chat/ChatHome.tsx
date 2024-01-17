@@ -9,8 +9,14 @@ import { NewConversation } from '../../components/Chat/Conversations/Sidenav/New
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
 import { ProfileHeader } from '../../components/Chat/Conversations/Sidenav/ProfileHeader';
-import { CHAT_APP_ID, Sidenav, useMarkAllAsRead } from '@youfoundation/common-app';
-import { useAuth } from '../../hooks/auth/useAuth';
+import {
+  CHAT_APP_ID,
+  ExtendPermissionDialog,
+  Sidenav,
+  t,
+  useMarkAllAsRead,
+} from '@youfoundation/common-app';
+import { drives, permissions, useAuth } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 
 export const CHAT_ROOT = ROOT_PATH;
@@ -28,6 +34,13 @@ export const ChatHome = () => {
         <title>Homebase | Chat</title>
       </Helmet>
 
+      <ExtendPermissionDialog
+        appName={t('Homebase Chat')}
+        appId={CHAT_APP_ID}
+        drives={drives}
+        permissions={permissions}
+        // needsAllConnected={true}
+      />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
         <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
 
