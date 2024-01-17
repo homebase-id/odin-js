@@ -1,5 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
-import { ActionButton, Arrow, t } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Arrow,
+  CirclePermissionView,
+  ErrorNotification,
+  mergeStates,
+  t,
+  useCircles,
+} from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
@@ -7,6 +15,7 @@ import { useDrives } from '../../hooks/drives/useDrives';
 import { useEffect } from 'react';
 import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
 import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const ExtendAppPermissions = () => {
   // Read the queryString
@@ -20,6 +29,9 @@ const ExtendAppPermissions = () => {
   const d = searchParams.get('d');
   const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
 
+  const c = searchParams.get('c');
+  const circleIds = c ? circleToCircleIds(c) : undefined;
+
   // const cp = searchParams.get('cp');
   // const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
   // const cd = searchParams.get('cd');
@@ -27,11 +39,29 @@ const ExtendAppPermissions = () => {
 
   const {
     fetch: { data: appRegistration },
-    extendPermissions: { mutate: extendPermission, status: extendPermissionStatus },
+    extendPermissions: {
+      mutate: extendPermission,
+      status: extendPermissionStatus,
+      error: extendPermissionError,
+    },
+    updateAuthorizedCircles: {
+      mutate: updateCircles,
+      status: updateCirclesState,
+      error: updateCirclesError,
+    },
   } = useApp({ appId: appId || undefined });
+
+  const { data: circles } = useCircles().fetch;
 
   const doUpdateApp = async () => {
     if (!appRegistration || !appRegistration?.appId) throw new Error('App registration not found');
+
+    if (circleIds?.length)
+      updateCircles({
+        appId: appRegistration.appId,
+        circleMemberPermissionGrant: appRegistration.circleMemberPermissionSetGrantRequest,
+        circleIds: [...(appRegistration?.authorizedCircles || []), ...(circleIds || [])],
+      });
 
     extendPermission({
       ...appRegistration,
@@ -47,8 +77,12 @@ const ExtendAppPermissions = () => {
   };
 
   useEffect(() => {
-    if (extendPermissionStatus === 'success') window.location.href = returnUrl || '/';
-  }, [extendPermissionStatus]);
+    if (
+      extendPermissionStatus === 'success' &&
+      (!circleIds?.length || updateCirclesState === 'success')
+    )
+      window.location.href = returnUrl || '/';
+  }, [extendPermissionStatus, updateCirclesState]);
 
   const doCancel = async () => {
     // Redirect
@@ -76,6 +110,7 @@ const ExtendAppPermissions = () => {
 
   return (
     <>
+      <ErrorNotification error={extendPermissionError || updateCirclesError} />
       <section className="my-20">
         <div className="container mx-auto">
           <div className="max-w-[35rem]">
@@ -137,11 +172,28 @@ const ExtendAppPermissions = () => {
               </>
             ) : null}
 
+            {circleIds?.length ? (
+              <>
+                <p>{t('Requests these circles to be allowed')}</p>
+                <Section>
+                  <>
+                    {circleIds.map((circleId) => {
+                      const circleDef = circles?.find(
+                        (circle) => circle.id && stringGuidsEqual(circle.id, circleId)
+                      );
+                      if (!circleId || !circleDef) return null;
+                      return <CirclePermissionView circleDef={circleDef} key={circleId} />;
+                    })}
+                  </>
+                </Section>
+              </>
+            ) : null}
+
             <div className="flex flex-col items-center gap-2 sm:flex-row-reverse">
               <ActionButton
                 onClick={doUpdateApp}
                 type="primary"
-                state={extendPermissionStatus}
+                state={mergeStates(extendPermissionStatus, extendPermissionStatus)}
                 icon={Arrow}
               >
                 {t('Allow')}
@@ -159,3 +211,7 @@ const ExtendAppPermissions = () => {
 };
 
 export default ExtendAppPermissions;
+
+export const circleToCircleIds = (queryParamVal: string | undefined): string[] => {
+  return queryParamVal?.split(',') || [];
+};

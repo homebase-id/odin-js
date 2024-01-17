@@ -8,6 +8,7 @@ export const ExtendPermissionDialog = ({
   appName,
   drives,
   permissions,
+  needsAllConnected,
 }: {
   appId: string;
   appName: string;
@@ -19,9 +20,15 @@ export const ExtendPermissionDialog = ({
     p: number;
   }[];
   permissions: AppPermissionType[];
+  needsAllConnected?: boolean;
 }) => {
   const target = usePortal('modal-container');
-  const extendPermissionUrl = useMissingPermissions({ appId, drives, permissions });
+  const extendPermissionUrl = useMissingPermissions({
+    appId,
+    drives,
+    permissions,
+    needsAllConnected,
+  });
 
   if (!extendPermissionUrl) return null;
 
