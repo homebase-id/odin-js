@@ -8,7 +8,6 @@ import {
   FEED_APP_ID,
   Quote,
   t,
-  useDotYouClient,
   useMarkAllAsRead,
 } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
@@ -34,12 +33,14 @@ const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/P
 import { Feed } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
+import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
   const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
 
   useMarkAllAsRead({ appId: FEED_APP_ID });
+  useAutofixDefaultConfig();
 
   useEffect(() => {
     if (postKey) document.documentElement.classList.add('overflow-hidden');
