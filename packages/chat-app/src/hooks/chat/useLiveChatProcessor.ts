@@ -27,7 +27,7 @@ const MINUTE_IN_MS = 60000;
 
 // We first process the inbox, then we connect for live updates;
 export const useLiveChatProcessor = () => {
-  // Process the inbox on startup
+  // Process the inbox on startup; As we want to cover the backlog of messages first
   const { status: inboxStatus } = useInboxProcessor(true);
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
