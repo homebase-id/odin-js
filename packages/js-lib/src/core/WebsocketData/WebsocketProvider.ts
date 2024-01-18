@@ -24,9 +24,12 @@ const PING_INTERVAL = 1000 * 5 * 1;
 let pingInterval: NodeJS.Timeout | undefined;
 let lastPong: number | undefined;
 
+let reconnectTimeout: NodeJS.Timeout | undefined;
+
 const subscribers: {
   handler: (data: TypedConnectionNotification) => void;
   onDisconnect?: () => void;
+  onReconnect?: () => void;
 }[] = [];
 
 interface RawClientNotification {
@@ -120,9 +123,9 @@ const ConnectSocket = async (
       lastPong = Date.now();
       pingInterval = setInterval(() => {
         if (lastPong && Date.now() - lastPong > PING_INTERVAL * 2) {
-          // 2 ping intervals have passed without a pong, force disconnect
+          // 2 ping intervals have passed without a pong, reconnect
           if (isDebug) console.debug(`[NotificationProvider] Ping timeout`);
-          DisconnectSocket();
+          ReconnectSocket(dotYouClient, drives, args);
           return;
         }
         Notify({
@@ -154,21 +157,42 @@ const ConnectSocket = async (
 
     webSocketClient.onerror = (e) => {
       console.error('[NotificationProvider]', e);
-      DisconnectSocket();
     };
 
     webSocketClient.onclose = (e) => {
       if (isDebug) console.debug('[NotificationProvider] Connection closed', e);
-      DisconnectSocket();
+
+      subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
+      ReconnectSocket(dotYouClient, drives, args);
     };
   });
 };
 
-const DisconnectSocket = async () => {
-  if (!webSocketClient) throw new Error('No active client to disconnect');
+const ReconnectSocket = async (
+  dotYouClient: DotYouClient,
+  drives: TargetDrive[],
+  args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
+) => {
+  if (reconnectTimeout) return;
 
+  reconnectTimeout = setTimeout(async () => {
+    reconnectTimeout = undefined;
+    webSocketClient = undefined;
+    lastPong = undefined;
+    isConnected = false;
+    clearInterval(pingInterval);
+
+    if (isDebug) console.debug('[NotificationProvider] Reconnecting');
+
+    await ConnectSocket(dotYouClient, drives, args);
+    subscribers.map((subscriber) => subscriber.onReconnect && subscriber.onReconnect());
+  }, 5000);
+};
+
+const DisconnectSocket = async () => {
   try {
-    webSocketClient.close(1000, 'Normal Disconnect');
+    if (!webSocketClient) console.warn('No active client to disconnect');
+    else webSocketClient.close(1000, 'Normal Disconnect');
   } catch (e) {
     // Ignore any errors on close, as we always want to clean up
   }
@@ -188,6 +212,7 @@ export const Subscribe = async (
   drives: TargetDrive[],
   handler: (data: TypedConnectionNotification) => void,
   onDisconnect?: () => void,
+  onReconnect?: () => void,
   args?: unknown // Extra parameters to pass to WebSocket constructor; Only applicable for React Native...; TODO: Remove this
 ) => {
   const apiType = dotYouClient.getType();
@@ -197,7 +222,7 @@ export const Subscribe = async (
   }
 
   activeSs = sharedSecret;
-  subscribers.push({ handler, onDisconnect });
+  subscribers.push({ handler, onDisconnect, onReconnect });
 
   if (isDebug) console.debug(`[NotificationProvider] New subscriber (${subscribers.length})`);
 
