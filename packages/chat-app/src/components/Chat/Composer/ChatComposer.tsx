@@ -139,6 +139,7 @@ export const ChatComposer = ({
               className="flex-shrink"
               icon={PaperPlane}
               size="square"
+              onMouseDown={(e) => e.preventDefault()}
             />
           </span>
         </div>

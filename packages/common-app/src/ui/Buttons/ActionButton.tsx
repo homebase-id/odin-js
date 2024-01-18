@@ -5,7 +5,7 @@ import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app
 export type ActionButtonState = 'pending' | 'loading' | 'success' | 'error' | 'idle';
 import { ButtonColors } from './ColorConfig';
 
-export interface ActionButtonProps {
+export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
   className?: string;
   icon?: FC<IconProps>;
@@ -40,10 +40,10 @@ export const ActionButton: FC<ActionButtonProps> = ({
   icon,
   type,
   state,
-  title,
   size,
   confirmOptions,
   isDisabled,
+  ...buttonProps
 }) => {
   const Icon = (props: { className: string }) => {
     if (state === 'loading' || state === 'pending') return <Loader {...props} />;
@@ -108,7 +108,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
               }
             : onClick
         }
-        title={title}
+        {...buttonProps}
       >
         {children}
         <Icon className={`my-auto ${children ? 'ml-2' : ''} h-4 w-4`} />
