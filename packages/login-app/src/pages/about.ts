@@ -1,5 +1,5 @@
 const setupHtml = () => {
-    document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="container">
         <h2>Welcome to anon.homebase.id</h2>
         <p>This site does not track users or collect any personal information; its sole purpose is to enhance the user experience during the Homebase YouAuth login process.</p>
@@ -8,6 +8,4 @@ const setupHtml = () => {
     </div>`;
 };
 
-export const setupAbout = () => {
-    setupHtml();
-};
+export const About = () => setupHtml();

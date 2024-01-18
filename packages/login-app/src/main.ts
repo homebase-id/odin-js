@@ -1,12 +1,15 @@
 import './style.css';
 
 (async () => {
-    const isLogon = window.location.pathname.includes('anonymous');
-    if (isLogon) {
-        const { setupLogon } = await import('./logon');
-        setupLogon();
-    } else {
-        const { setupAbout } = await import('./about');
-        setupAbout();
-    }
+  const pathName = window.location.pathname;
+  if (pathName.includes('anonymous')) {
+    const { Logon } = await import('./pages/logon');
+    Logon();
+  } else if (pathName.includes('redirect')) {
+    const { Redirect } = await import('./pages/redirect');
+    Redirect();
+  } else {
+    const { About } = await import('./pages/about');
+    About();
+  }
 })();

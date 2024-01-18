@@ -51,13 +51,15 @@ export const getIdentityFromStorage = () => {
   }
 };
 
-export const storeIdentityAndAuthorize = (identity: string, params?: URLSearchParams) => {
+export const storeIdentity = (identity: string) => {
   try {
     window.localStorage.setItem(LOCAL_STORAGE_PREV_IDENTITY_KEY, identity);
   } catch (ex) {
     console.debug('window.localStorage is not accessible');
   }
+};
 
+export const authorize = async (identity: string, params: URLSearchParams) => {
   if (!window.top) throw new Error('window.top is not accessible');
 
   const parentUrl =
@@ -68,5 +70,5 @@ export const storeIdentityAndAuthorize = (identity: string, params?: URLSearchPa
   if (stripIdentity(parentUrl) === identity && !window.location.pathname.includes('anonymous-apps'))
     window.top.location.href = `https://${identity}/owner/login?returnUrl=/owner`;
   else
-    window.top.location.href = `https://${identity}/api/owner/v1/youauth/authorize?${params?.toString()}`;
+    window.top.location.href = `https://${identity}/api/owner/v1/youauth/authorize?${params.toString()}`;
 };

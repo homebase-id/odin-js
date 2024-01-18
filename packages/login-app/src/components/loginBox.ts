@@ -2,40 +2,36 @@ import {
   checkStorageAccess,
   getIdentityFromStorage,
   requestStorageAccess,
-  storeIdentityAndAuthorize,
+  storeIdentity,
   stripIdentity,
-} from './identity';
+} from '../helpers/identity';
 import { debounce } from 'lodash-es';
-
-const setupHtml = () => {
-  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-    <form id="main" class="form">
-        <h1 class="text-lg">YouAuth</h1>
-        <div class="label-group">
-            <label htmlFor="homebase-id" class="text-sm leading-7 text-gray-600">
-                Homebase Id
-            </label>
-            <span class="invalid-msg">Invalid identity</span>
-        </div>
-        <input type="text" name="homebase-id" id="homebase-id" required />
-        <button class="login">Login</button>
-    </form>
-    <p class="my-3 text-center">or</p>
-    <a class="signup" href="https://homebase.id/sign-up" target="_blank">Signup</a>`;
-};
 
 const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]{2,25}(?::\d{1,5})?$/i;
 const INVALID_CLASSNAME = 'invalid';
 const LOADING_CLASSNAME = 'loading';
 
-export const setupLogon = async () => {
-  setupHtml();
+const setupHtml = (isStandalone?: boolean) => {
+  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+    <div ${isStandalone ? 'class="max-w-sm m-auto w-full"' : ''}>
+      <form id="main" class="form">
+        <h1 class="text-lg">YouAuth</h1>
+        <div class="label-group">
+          <label htmlFor="homebase-id" class="text-sm leading-7 text-gray-600">
+            Homebase Id
+          </label>
+          <span class="invalid-msg">Invalid identity</span>
+        </div>
+        <input type="text" name="homebase-id" id="homebase-id" required />
+        <button class="login">Login</button>
+      </form>
+      <p class="my-3 text-center">or</p>
+      <a class="signup" href="https://homebase.id/sign-up" target="_blank">Signup</a>
+    </div>`;
+};
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const isDarkMode = urlParams.get('isDarkMode') === 'true';
-  urlParams.delete('isDarkMode');
-
-  document.documentElement.classList.toggle('dark', isDarkMode);
+export const LoginBox = async (onSubmit: (identity: string) => void, isStandalone?: boolean) => {
+  setupHtml(isStandalone);
 
   const mainForm = document.getElementById('main');
   const dotyouInputBox: HTMLInputElement | null = document.getElementById(
@@ -92,7 +88,8 @@ export const setupLogon = async () => {
 
     // If storage is partioned, try and request access to store the identity
     if (storagePartioned) await requestStorageAccess();
-    storeIdentityAndAuthorize(strippedIdentity, urlParams);
+    storeIdentity(strippedIdentity);
+    onSubmit(strippedIdentity);
 
     return false;
   });
