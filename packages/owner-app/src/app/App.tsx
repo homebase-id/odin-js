@@ -63,7 +63,7 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { useTransitProcessor, ErrorBoundary, t, NotFound } from '@youfoundation/common-app';
+import { useTransitProcessor, ErrorBoundary, NotFound } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 

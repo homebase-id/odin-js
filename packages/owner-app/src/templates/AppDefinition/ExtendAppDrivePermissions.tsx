@@ -72,7 +72,23 @@ const ExtendAppPermissions = () => {
           ...(permissionSet?.keys || []),
         ],
       },
-      drives: [...(appRegistration?.grant?.driveGrants || []), ...(driveGrants || [])],
+      drives: [
+        ...(appRegistration?.grant?.driveGrants.filter(
+          (existingGrant) =>
+            !driveGrants?.some(
+              (grant) =>
+                stringGuidsEqual(
+                  grant.permissionedDrive.drive.alias,
+                  existingGrant.permissionedDrive.drive.alias
+                ) &&
+                stringGuidsEqual(
+                  grant.permissionedDrive.drive.type,
+                  existingGrant.permissionedDrive.drive.type
+                )
+            )
+        ) || []),
+        ...(driveGrants || []),
+      ],
     });
   };
 
