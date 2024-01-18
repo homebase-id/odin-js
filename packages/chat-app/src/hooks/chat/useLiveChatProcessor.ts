@@ -31,10 +31,12 @@ export const useLiveChatProcessor = () => {
   const { status: inboxStatus } = useInboxProcessor(true);
 
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
-  useChatWebsocket(inboxStatus === 'success');
+  const isOnline = useChatWebsocket(inboxStatus === 'success');
 
   // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
   useChatCommandProcessor(inboxStatus === 'success');
+
+  return isOnline;
 };
 
 // Process the inbox on startup
