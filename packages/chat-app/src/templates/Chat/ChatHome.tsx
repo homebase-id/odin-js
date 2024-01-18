@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { NewConversation } from '../../components/Chat/Conversations/Sidenav/NewConversation';
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
-import { ProfileHeader } from '../../components/Chat/Conversations/Sidenav/ProfileHeader';
+import { NavHeader } from '../../components/Chat/Conversations/Sidenav/NavHeader';
 import {
   CHAT_APP_ID,
   ExtendPermissionDialog,
@@ -25,7 +25,7 @@ export const ChatHome = () => {
   const { conversationKey } = useParams();
   const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
-  useLiveChatProcessor();
+  const isOnline = useLiveChatProcessor();
   useMarkAllAsRead({ appId: CHAT_APP_ID });
 
   return (
@@ -42,7 +42,11 @@ export const ChatHome = () => {
         // needsAllConnected={true}
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
-        <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
+        <ChatSideNav
+          isOpen={isSidenavOpen}
+          setIsSidenavOpen={setIsSidenavOpen}
+          isOnline={isOnline}
+        />
 
         <div className="h-full w-full flex-grow bg-background">
           <ChatDetail
@@ -58,9 +62,11 @@ export const ChatHome = () => {
 const ChatSideNav = ({
   isOpen,
   setIsSidenavOpen,
+  isOnline,
 }: {
   isOpen: boolean;
   setIsSidenavOpen: (newIsOpen: boolean) => void;
+  isOnline: boolean;
 }) => {
   const { conversationKey } = useParams();
   const { logout } = useAuth();
@@ -93,7 +99,10 @@ const ChatSideNav = ({
           <NewConversationGroup />
         ) : (
           <>
-            <ProfileHeader closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)} />
+            <NavHeader
+              closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)}
+              isOnline={isOnline}
+            />
             <ConversationsSidebar
               activeConversationId={conversationKey}
               openConversation={(newId) => {

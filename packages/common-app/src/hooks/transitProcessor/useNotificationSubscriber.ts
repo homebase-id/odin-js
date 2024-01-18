@@ -15,13 +15,12 @@ export const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[],
   drives: TargetDrive[] = [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive],
-  onDisconnect?: () => void
+  onDisconnect?: () => void,
+  onReconnect?: () => void
 ) => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const isConnected = useRef<boolean>(false);
   const dotYouClient = useDotYouClient().getDotYouClient();
-
-  const [shouldReconnect, setShouldReconnect] = useState<boolean>(false);
 
   const localHandler = subscriber
     ? (notification: TypedConnectionNotification) => {
@@ -40,16 +39,20 @@ export const useNotificationSubscriber = (
     if (!isConnected.current && localHandler) {
       isConnected.current = true;
       (async () => {
-        await Subscribe(dotYouClient, drives, localHandler, () => {
-          isConnected.current = false;
-          setIsActive(false);
-
-          setShouldReconnect(true);
-
-          onDisconnect && onDisconnect();
-        });
+        await Subscribe(
+          dotYouClient,
+          drives,
+          localHandler,
+          () => {
+            setIsActive(false);
+            onDisconnect && onDisconnect();
+          },
+          () => {
+            setIsActive(true);
+            onReconnect && onReconnect();
+          }
+        );
         setIsActive(true);
-        setShouldReconnect(false);
       })();
     }
 
@@ -64,7 +67,7 @@ export const useNotificationSubscriber = (
         }
       }
     };
-  }, [subscriber, shouldReconnect]);
+  }, [subscriber]);
 
   return isActive;
 };

@@ -25,17 +25,18 @@ import { processCommand } from '../../providers/ChatCommandProvider';
 
 const MINUTE_IN_MS = 60000;
 
-// We first setup the websocket, and then trigger processing of the inbox
-// So that new message will be detected by the websocket;
+// We first process the inbox, then we connect for live updates;
 export const useLiveChatProcessor = () => {
-  // Setup websocket, so that we get notified instantly when a new message is received
-  const connected = useChatWebsocket(true);
+  // Process the inbox on startup; As we want to cover the backlog of messages first
+  const { status: inboxStatus } = useInboxProcessor(true);
 
-  // Process the inbox on startup (once the socket is connected)
-  const { status: inboxStatus } = useInboxProcessor(connected);
+  // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
+  const isOnline = useChatWebsocket(inboxStatus === 'success');
 
   // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
   useChatCommandProcessor(inboxStatus === 'success');
+
+  return isOnline;
 };
 
 // Process the inbox on startup
