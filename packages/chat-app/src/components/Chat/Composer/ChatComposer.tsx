@@ -130,7 +130,11 @@ export const ChatComposer = ({
           <span className="my-auto">
             <ActionButton
               type="mute"
-              onClick={doSend}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                doSend();
+              }}
               state={sendMessageState}
               className="flex-shrink"
               icon={PaperPlane}
