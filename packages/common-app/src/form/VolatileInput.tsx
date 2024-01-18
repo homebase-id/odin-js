@@ -191,7 +191,7 @@ export const VolatileInput = ({
       <span
         role="textbox"
         contentEditable
-        className="before:content block w-full cursor-pointer resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
+        className="before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         onPaste={onPasteHandler}

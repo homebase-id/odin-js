@@ -55,7 +55,6 @@ const PostComposer = ({
   className?: string;
 }) => {
   const { isOwner } = useDotYouClient();
-
   const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
 
   const { savePost, postState, processingProgress, error } = usePostComposer();

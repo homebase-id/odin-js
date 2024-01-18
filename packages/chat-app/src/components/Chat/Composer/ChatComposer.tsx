@@ -113,7 +113,6 @@ export const ChatComposer = ({
           </div>
 
           <VolatileInput
-            key={stateIndex}
             placeholder="Your message"
             defaultValue={message}
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
