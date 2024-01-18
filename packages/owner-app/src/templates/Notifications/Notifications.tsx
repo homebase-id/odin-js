@@ -345,7 +345,7 @@ const getTargetLink = (payload: PushNotification) => {
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
-  } else if (stringGuidsEqual(payload.options.appId, FEED_APP_ID)) {
+  } else if (payload.options.appId === FEED_APP_ID) {
     return `/apps/feed`;
   }
 };
