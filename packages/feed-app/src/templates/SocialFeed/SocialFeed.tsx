@@ -8,7 +8,7 @@ import {
   FEED_APP_ID,
   Quote,
   t,
-  useMarkAllAsRead,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
@@ -43,7 +43,7 @@ export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
   const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
 
-  useMarkAllAsRead({ appId: FEED_APP_ID });
+  useRemoveNotifications({ appId: FEED_APP_ID });
   useAutofixDefaultConfig();
 
   useEffect(() => {
