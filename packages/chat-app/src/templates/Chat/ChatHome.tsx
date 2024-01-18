@@ -14,7 +14,7 @@ import {
   ExtendPermissionDialog,
   Sidenav,
   t,
-  useMarkAllAsRead,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import { drives, permissions, useAuth } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
@@ -26,7 +26,7 @@ export const ChatHome = () => {
   const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
   const isOnline = useLiveChatProcessor();
-  useMarkAllAsRead({ appId: CHAT_APP_ID });
+  useRemoveNotifications({ appId: CHAT_APP_ID });
 
   return (
     <>
