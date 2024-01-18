@@ -229,7 +229,9 @@ const NotificationGroup = ({
                 canExpand && !isExpanded ? setExpanded(true) : remove(typeGroup.map((n) => n.id))
               }
               groupCount={isExpanded ? 0 : groupCount}
-              href={canExpand && isExpanded ? getTargetLink(notification) : undefined}
+              href={
+                (canExpand && isExpanded) || !canExpand ? getTargetLink(notification) : undefined
+              }
               appName={appName}
             />
           </div>
@@ -343,7 +345,7 @@ const getTargetLink = (payload: PushNotification) => {
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
-  } else if (payload.options.appId === FEED_APP_ID) {
+  } else if (stringGuidsEqual(payload.options.appId, FEED_APP_ID)) {
     return `/apps/feed`;
   }
 };
