@@ -110,7 +110,7 @@ export const ChatHistory = ({
         key={conversation?.fileId}
       >
         <div
-          className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" //TODO remove overflow-hidden when less height than window => Might need this one again, to avoid a growing height
+          className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" // This overflow-hidden cuts of the context-menu of the first chat-items; But we need it as it otherwise breaks the scroll edges
           style={{
             height: virtualizer.getTotalSize(),
           }}
@@ -125,7 +125,13 @@ export const ChatHistory = ({
               const isLoaderRow = item.index > flattenedMsgs.length - 1;
               if (isLoaderRow) {
                 return (
-                  <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
+                  <div
+                    key={item.key}
+                    data-index={item.index}
+                    ref={virtualizer.measureElement}
+                    className="sm:min-h-[10rem]"
+                    // h-10rem keeps space for the context menu of the first item; otherwise the context menu would be cut off by the overflow-hidden
+                  >
                     {hasMoreMessages || isFetchingNextPage ? (
                       <div className="animate-pulse" key={'loading'}>
                         {t('Loading...')}
