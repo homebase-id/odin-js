@@ -1,4 +1,3 @@
-import { useDotYouClient } from '@youfoundation/common-app';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
@@ -13,11 +12,13 @@ import {
   SingleConversation,
 } from '../../providers/ConversationProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
   const { conversationId } = props || { conversationId: undefined };
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+
   const queryClient = useQueryClient();
 
   const fetchMessages = async (conversationId: string, cursorState: string | undefined) =>

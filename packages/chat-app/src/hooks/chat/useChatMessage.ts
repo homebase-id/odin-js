@@ -1,5 +1,5 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { t, useDotYouClient } from '@youfoundation/common-app';
+import { t } from '@youfoundation/common-app';
 import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
   DriveSearchResult,
@@ -10,10 +10,10 @@ import {
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
-  const { getDotYouClient } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const getMessageByUniqueId = async (messageId: string) => {

@@ -1,9 +1,10 @@
-import { ConnectionName, t, useDotYouClient } from '@youfoundation/common-app';
+import { ConnectionName, t } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { ChatDrive } from '../../../providers/ConversationProvider';
+import { useDotYouClientContext } from '../../../hooks/auth/useDotYouClientContext';
 
 export const EmbeddedMessageWithId = ({
   msgId,
@@ -55,7 +56,7 @@ export const EmbeddedMessageMedia = ({
   msg: DriveSearchResult<ChatMessage>;
   className?: string;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const firstPayload = msg.fileMetadata.payloads[0];
   if (!firstPayload) return null;
 

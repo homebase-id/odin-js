@@ -1,10 +1,10 @@
-import { useDotYouClient } from '@youfoundation/common-app';
 import { getConversations } from '../../providers/ConversationProvider';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 500;
 export const useConversations = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const fetchConversations = async (cursorState: string | undefined) => {
     return await getConversations(dotYouClient, cursorState, PAGE_SIZE);
