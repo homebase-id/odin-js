@@ -33,7 +33,6 @@ export const useDotYouClient = () => {
 
   const getApiType = () => {
     if (_app === 'apps') return ApiType.App;
-
     if (_isOwner) return ApiType.Owner;
     return ApiType.Guest;
   };

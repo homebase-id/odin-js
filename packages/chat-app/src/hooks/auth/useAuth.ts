@@ -1,5 +1,4 @@
-import { ApiType, DotYouClient, DrivePermissionType } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -17,17 +16,15 @@ import {
 } from '@youfoundation/js-lib/auth';
 import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
-import { APP_AUTH_TOKEN, APP_SHARED_SECRET } from '@youfoundation/common-app';
-
-const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-  return !!raw;
-};
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@youfoundation/common-app';
 
 export const useAuth = () => {
+  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret() ? 'unknown' : 'anonymous');
+  >(hasSharedSecret ? 'unknown' : 'anonymous');
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
@@ -41,29 +38,6 @@ export const useAuth = () => {
   };
 
   const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
-  const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
-
-  const getSharedSecret = () => {
-    const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-    if (raw) return base64ToUint8Array(raw);
-  };
-
-  const getDotYouClient = () => {
-    const headers: Record<string, string> = {};
-    const authToken = getAppAuthToken();
-    if (authToken) {
-      headers['bx0900'] = authToken;
-    }
-
-    return new DotYouClient({
-      sharedSecret: getSharedSecret(),
-      api: ApiType.App,
-      identity: retrieveIdentity(),
-      headers: headers,
-    });
-  };
-
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
