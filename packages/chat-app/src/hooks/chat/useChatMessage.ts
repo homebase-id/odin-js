@@ -7,10 +7,11 @@ import {
   SecurityGroupType,
   TransferStatus,
 } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { ConversationWithYourselfId } from '../../providers/ConversationProvider';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const dotYouClient = useDotYouClientContext();
@@ -42,7 +43,9 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           groupId: conversationId,
           content: {
             message: message,
-            deliveryStatus: ChatDeliveryStatus.Sent,
+            deliveryStatus: stringGuidsEqual(conversationId, ConversationWithYourselfId)
+              ? ChatDeliveryStatus.Read
+              : ChatDeliveryStatus.Sent,
             replyId: replyId,
           },
           userDate: new Date().getTime(),
@@ -66,11 +69,10 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
     );
 
-    if (deliveredToInboxes.every((delivered) => delivered)) {
+    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
       newChat.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Delivered;
       await updateChatMessage(dotYouClient, newChat, recipients, uploadResult.keyHeader);
     }
-
     return newChat;
   };
 
