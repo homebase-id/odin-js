@@ -4,8 +4,10 @@ import {
   ActionGroup,
   Arrow,
   Article as ArticleIcon,
+  Cog,
   ConfirmDialog,
   DialogWrapper,
+  Ellipsis,
   ErrorNotification,
   Label,
   SaveStatus,
@@ -68,7 +70,7 @@ export const ArticleComposerPage = () => {
     if (isPublished)
       return (
         <ActionButton
-          className={`m-2 md:w-auto ${className ?? ''}`}
+          className={`md:w-auto ${className ?? ''}`}
           state={saveStatus !== 'success' ? saveStatus : undefined}
           onClick={(e) => {
             e.preventDefault();
@@ -83,7 +85,7 @@ export const ArticleComposerPage = () => {
             buttonText: t('Convert to draft'),
             type: 'info',
           }}
-          type="secondary"
+          type="primary"
         >
           {t('Convert to draft')}
         </ActionButton>
@@ -91,7 +93,7 @@ export const ArticleComposerPage = () => {
 
     return (
       <ActionButton
-        className={`m-2 md:w-auto ${
+        className={`md:w-auto ${
           isValidPost(postFile) ||
           !postFile.fileMetadata.appData.content.caption ||
           !postFile.fileMetadata.appData.content.caption.length
@@ -111,6 +113,7 @@ export const ArticleComposerPage = () => {
           buttonText: t('Publish'),
           type: 'info',
         }}
+        type="primary"
       >
         {t('Publish')}
       </ActionButton>
@@ -140,15 +143,18 @@ export const ArticleComposerPage = () => {
         ]}
         actions={
           <>
+            <PostButton />
+
             <ActionGroup
-              type="mute"
+              type="secondary"
               size="square"
               options={[
                 {
                   label: t('Options'),
+                  icon: Cog,
                   onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
                 },
-                ...(!(postFile.fileId && !isPublished)
+                ...(postFile.fileId
                   ? [
                       {
                         label: t('Remove'),
@@ -168,31 +174,10 @@ export const ArticleComposerPage = () => {
                     ]
                   : []),
               ]}
+              icon={Ellipsis}
             >
-              ...
+              {t('More')}
             </ActionGroup>
-            {postFile.fileId && !isPublished ? (
-              <ActionButton
-                type="remove"
-                icon={Trash}
-                onClick={() => {
-                  doRemovePost();
-                  navigate(`${ROOT_PATH}/articles`);
-                }}
-                confirmOptions={{
-                  title: t('Discard draft'),
-                  body: `${t('Are you sure you want to discard')} "${
-                    postFile.fileMetadata.appData.content.caption || t('Untitled')
-                  }"`,
-                  buttonText: t('Discard'),
-                  type: 'info',
-                }}
-                size="square"
-                state={removeStatus}
-                className="m-2"
-              />
-            ) : null}
-            <PostButton />
           </>
         }
       />

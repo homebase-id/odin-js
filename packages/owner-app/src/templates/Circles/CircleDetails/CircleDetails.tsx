@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Pencil, Plus, SubtleMessage, Times, t } from '@youfoundation/common-app';
+import { Ellipsis, Pencil, Plus, SubtleMessage, Times, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
@@ -78,11 +78,12 @@ const CircleDetails = () => {
                   setIsOpenEdit(true);
                 }}
               >
-                {t('Edit Circle')}
+                {t('Edit')}
               </ActionButton>
               <ActionGroup
-                type="mute"
+                type="secondary"
                 size="square"
+                icon={Ellipsis}
                 options={[
                   {
                     onClick: () => {
@@ -127,7 +128,7 @@ const CircleDetails = () => {
                       ]),
                 ]}
               >
-                ...
+                {t('More')}
               </ActionGroup>
             </>
           )

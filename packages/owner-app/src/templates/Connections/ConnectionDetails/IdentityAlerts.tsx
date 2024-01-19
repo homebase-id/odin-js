@@ -13,7 +13,7 @@ import { useConnection } from '../../../hooks/connections/useConnection';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 
-export const IdentityAlerts = ({ odinId }: { odinId: string }) => {
+export const IdentityAlerts = ({ odinId }: { odinId: string | undefined }) => {
   const navigate = useNavigate();
 
   const {
@@ -94,7 +94,7 @@ export const IdentityAlerts = ({ odinId }: { odinId: string }) => {
   );
 };
 
-const LimboStateAlert = ({ odinId }: { odinId: string }) => {
+const LimboStateAlert = ({ odinId }: { odinId: string | undefined }) => {
   const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false);
 
   const {

@@ -18,10 +18,10 @@ const ConnectionDetails = () => {
   const {
     fetch: { data: connectionInfo, isLoading: connectionInfoLoading },
   } = useConnection({ odinId: odinId });
-  const { data: contactData } = useContact({ odinId: odinId }).fetch;
+  const { data: contactData, isLoading: contactDataLoading } = useContact({ odinId: odinId }).fetch;
 
-  if (connectionInfoLoading) return <LoadingDetailPage />;
-  if ((!connectionInfo && !contactData) || !odinId) return <>{t('No matching connection found')}</>;
+  if (connectionInfoLoading || contactDataLoading) return <LoadingDetailPage />;
+  if (!odinId) return <>{t('No matching connection found')}</>;
 
   const activeConnection = connectionInfo as ConnectionInfo;
 

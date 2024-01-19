@@ -11,6 +11,7 @@ import {
   ActionGroup,
   useDotYouClient,
   ConfirmDialog,
+  Ellipsis,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -72,19 +73,7 @@ export const IdentityPageMetaAndActions = ({
   }).fetch;
   const contactContent = contactData?.fileMetadata?.appData?.content;
   const mainAction =
-    connectionInfo?.status === 'connected' ? (
-      <>
-        <ActionButton
-          type="primary"
-          onClick={() => {
-            setIsEditPermissionActive(true);
-          }}
-          icon={Pencil}
-        >
-          {t('Edit Access')}
-        </ActionButton>
-      </>
-    ) : connectionInfo?.status === 'sent' ? (
+    connectionInfo?.status === 'connected' ? null : connectionInfo?.status === 'sent' ? (
       <>
         <ActionButton
           type="remove"
@@ -131,6 +120,21 @@ export const IdentityPageMetaAndActions = ({
     },
   ];
 
+  const blockConfirmOptions = {
+    title: `${t('Block')} ${odinId}`,
+    buttonText: t('Block'),
+    body: `${t('Are you sure you want to block')} ${odinId}`,
+  };
+
+  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
+    actionGroupOptions.push({
+      icon: Block,
+      label: t('Block'),
+      onClick: () => block(odinId),
+      confirmOptions: blockConfirmOptions,
+    });
+  }
+
   if (connectionInfo?.status === 'connected') {
     actionGroupOptions.push({
       icon: Trash,
@@ -146,21 +150,6 @@ export const IdentityPageMetaAndActions = ({
           'from your connections. They will lose all existing access.'
         )}`,
       },
-    });
-  }
-
-  const blockConfirmOptions = {
-    title: `${t('Block')} ${odinId}`,
-    buttonText: t('Block'),
-    body: `${t('Are you sure you want to block')} ${odinId}`,
-  };
-
-  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
-    actionGroupOptions.push({
-      icon: Block,
-      label: t('Block'),
-      onClick: () => block(odinId),
-      confirmOptions: blockConfirmOptions,
     });
   }
 
@@ -190,7 +179,13 @@ export const IdentityPageMetaAndActions = ({
         actions={
           <>
             {mainAction}
-            <ActionGroup options={actionGroupOptions} type="mute" size="square" />
+            <ActionGroup
+              options={actionGroupOptions}
+              type="secondary"
+              size="square"
+              children={t('More')}
+              icon={Ellipsis}
+            />
           </>
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}
