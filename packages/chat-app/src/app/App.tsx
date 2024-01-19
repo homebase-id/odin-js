@@ -34,6 +34,7 @@ export const ROOT_PATH = '/apps/chat';
 const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
+import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,9 +86,11 @@ function App() {
             path=""
             element={
               <RootRoute>
-                <NoLayout>
-                  <Outlet />
-                </NoLayout>
+                <DotYouClientProvider>
+                  <NoLayout>
+                    <Outlet />
+                  </NoLayout>
+                </DotYouClientProvider>
               </RootRoute>
             }
           >

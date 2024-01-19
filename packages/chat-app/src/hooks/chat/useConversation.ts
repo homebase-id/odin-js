@@ -18,6 +18,7 @@ import {
 import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 export const getSingleConversation = async (
   dotYouClient: DotYouClient,
@@ -28,7 +29,7 @@ export const getSingleConversation = async (
 
 export const useConversation = (props?: { conversationId?: string | undefined }) => {
   const { conversationId } = props || {};
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = useDotYouClient().getIdentity();
 

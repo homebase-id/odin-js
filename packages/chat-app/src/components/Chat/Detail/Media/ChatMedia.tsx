@@ -3,8 +3,9 @@ import { OdinImage } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
-import { Triangle, useDotYouClient } from '@youfoundation/common-app';
+import { Triangle } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
+import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
 export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
   const payloads = msg.fileMetadata.payloads;
@@ -61,7 +62,7 @@ const MediaItem = ({
   children?: React.ReactNode;
   onClick: () => void;
 }) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const isVideo = payload.contentType.startsWith('video');
 
   const largestThumb = getLargestThumbOfPayload(payload);

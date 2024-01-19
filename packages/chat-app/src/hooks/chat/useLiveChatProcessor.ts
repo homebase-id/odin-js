@@ -22,6 +22,7 @@ import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/Cha
 import { hasDebugFlag, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const MINUTE_IN_MS = 60000;
 
@@ -41,7 +42,7 @@ export const useLiveChatProcessor = () => {
 
 // Process the inbox on startup
 const useInboxProcessor = (connected?: boolean) => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
 
   const fetchData = async () => {
@@ -68,7 +69,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
   const [preAuthenticated, setIspreAuthenticated] = useState(false);
 
   const identity = useDotYouClient().getIdentity();
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   // Added to ensure we have the conversation query available
   const {
@@ -158,8 +159,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
 };
 
 const useChatCommandProcessor = (isEnabled?: boolean) => {
-  const { getDotYouClient, getIdentity } = useDotYouClient();
-  const dotYouClient = getDotYouClient();
+  const { getIdentity } = useDotYouClient();
+  const dotYouClient = useDotYouClientContext();
   const identity = getIdentity();
   const queryClient = useQueryClient();
 
