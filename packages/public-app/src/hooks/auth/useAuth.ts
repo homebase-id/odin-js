@@ -26,7 +26,7 @@ import {
 } from '@youfoundation/js-lib/helpers';
 
 export const useAuth = () => {
-  const { getDotYouClient, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
+  const { getDotYouClient, getIdentity, getApiType, hasSharedSecret, getSharedSecret, isOwner } =
     useDotYouClient();
 
   const [authenticationState, setAuthenticationState] = useState<
@@ -49,10 +49,6 @@ export const useAuth = () => {
     }
 
     window.location.href = HOME_ROOT_PATH;
-  };
-
-  const getIdentity = () => {
-    return localStorage.getItem(STORAGE_IDENTITY_KEY);
   };
 
   useEffect(() => {
