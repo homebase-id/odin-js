@@ -18,9 +18,6 @@ const ConnectionsView = lazy(
 const IdentityLink = lazy(
   () => import('../../components/SocialFeed/Sidebars/IdentityLink/IdentityLink')
 );
-const CirclesView = lazy(
-  () => import('../../components/SocialFeed/Sidebars/CirclesView/CirclesView')
-);
 const FollowersView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowersView/FollowersView')
 );
@@ -116,7 +113,6 @@ export const SocialFeed = () => {
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
                     <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
-                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                     <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
@@ -127,8 +123,8 @@ export const SocialFeed = () => {
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
                     <ConnectionsView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <CirclesView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                     <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}
