@@ -11,7 +11,6 @@ import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
 import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import { useSettings } from '../settings/useSettings';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
   return [
@@ -23,8 +22,6 @@ const getListItemCacheKey = (newAttrVm: Attribute) => {
 };
 
 export const useAttribute = (props?: { profileId?: string; attributeId?: string }) => {
-  const { data: currentSettings } = useSettings().fetchUiSettings;
-
   const { profileId, attributeId } = props || {};
   const dotYouClient = useAuth().getDotYouClient();
 
@@ -202,8 +199,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         });
       },
       onSuccess: (updatedAttr) => {
-        if (!currentSettings?.disableAutoPublish)
-          publishStaticFiles(updatedAttr.fileMetadata.appData.content.type);
+        publishStaticFiles(updatedAttr.fileMetadata.appData.content.type);
       },
     }),
     remove: useMutation({
@@ -246,8 +242,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           queryClient.invalidateQueries({ queryKey: ['siteData'] });
           queryClient.invalidateQueries({ queryKey: getListItemCacheKey(newAttr) });
 
-          if (!currentSettings?.disableAutoPublish)
-            publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);
+          publishStaticFiles(variables.attribute?.fileMetadata?.appData?.content?.type);
         }, 1000);
       },
     }),

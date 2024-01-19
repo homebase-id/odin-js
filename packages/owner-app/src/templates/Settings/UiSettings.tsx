@@ -9,8 +9,6 @@ export const UiSettings = () => {
 
   const isAutoPublish = !currentSettings?.disableAutoPublish;
 
-  console.log('currentSettings', currentSettings);
-
   return (
     <>
       <Section title={<div className="flex flex-col">{t('Attribute save handling')}</div>}>
