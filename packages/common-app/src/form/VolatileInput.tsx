@@ -177,9 +177,7 @@ export const VolatileInput = ({
     rect = range?.getClientRects()?.[0];
 
   useEffect(() => {
-    if (autoFocus && divRef.current) {
-      divRef.current.focus();
-    }
+    if (autoFocus && divRef.current) divRef.current.focus();
   }, [autoFocus]);
 
   return (

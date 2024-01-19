@@ -128,6 +128,7 @@ export const CommentEditor = ({
           defaultValue={body}
           onSubmit={(val) => doPost(val || body, attachment)}
           placeholder={t('Write your comment')}
+          className="w-full"
           onPaste={(e) => {
             const imageFiles = getImagesFromPasteEvent(e);
 

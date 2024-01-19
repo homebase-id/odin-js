@@ -19,49 +19,6 @@ import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
 import { APP_AUTH_TOKEN, APP_SHARED_SECRET } from '@youfoundation/common-app';
 
-export const drives = [
-  {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
-  },
-  {
-    // Standard profile Info
-    a: '8f12d8c4933813d378488d91ed23b64c',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
-    n: 'Standard Profile info',
-    d: '',
-    p: DrivePermissionType.Read,
-  },
-  {
-    // Contacts
-    a: '2612429d1c3f037282b8d42fb2cc0499',
-    t: '70e92f0f94d05f5c7dcd36466094f3a5',
-    n: 'Contact Drive',
-    d: '',
-    p: DrivePermissionType.Read,
-  },
-];
-export const permissions = [
-  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-  AppPermissionType.ReadConnections,
-  AppPermissionType.SendPushNotifications,
-];
-
-const circleDrives = [
-  {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Write,
-  },
-];
-export const appName = 'Homebase - Chat';
-export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
-
 const hasSharedSecret = () => {
   const raw = window.localStorage.getItem(APP_SHARED_SECRET);
   return !!raw;
@@ -83,10 +40,7 @@ export const useAuth = () => {
     window.location.href = '/owner';
   };
 
-  const preauth = async (): Promise<void> => {
-    await preauthApps(getDotYouClient());
-  };
-
+  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
   const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
 
   const getSharedSecret = () => {
@@ -136,6 +90,51 @@ export const useAuth = () => {
     isAuthenticated: authenticationState !== 'anonymous',
   };
 };
+
+export const drives = [
+  {
+    a: '9ff813aff2d61e2f9b9db189e72d1a11',
+    t: '66ea8355ae4155c39b5a719166b510e3',
+    n: 'Chat Drive',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
+  {
+    // Standard profile Info
+    a: '8f12d8c4933813d378488d91ed23b64c',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: 'Standard Profile info',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+  {
+    // Contacts
+    a: '2612429d1c3f037282b8d42fb2cc0499',
+    t: '70e92f0f94d05f5c7dcd36466094f3a5',
+    n: 'Contact Drive',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+];
+
+export const permissions = [
+  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReadConnections,
+  AppPermissionType.SendPushNotifications,
+];
+
+const circleDrives = [
+  {
+    a: '9ff813aff2d61e2f9b9db189e72d1a11',
+    t: '66ea8355ae4155c39b5a719166b510e3',
+    n: 'Chat Drive',
+    d: '',
+    p: DrivePermissionType.Write,
+  },
+];
+
+export const appName = 'Homebase - Chat';
+export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
 
 export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
