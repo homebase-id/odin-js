@@ -6,9 +6,9 @@ import {
   ImageIcon,
   VolatileInput,
   ActionButton,
-  t,
   Times,
   PaperPlane,
+  getImagesFromPasteEvent,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
@@ -37,7 +37,6 @@ export const ChatComposer = ({
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
-  const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
   const [files, setFiles] = useState<NewMediaFile[]>();
 
@@ -73,7 +72,6 @@ export const ChatComposer = ({
   useEffect(() => {
     if (sendMessageState === 'pending') {
       setMessage('');
-      setStateIndex((oldIndex) => oldIndex + 1);
       setFiles([]);
       clearReplyMsg();
       resetState();
@@ -118,6 +116,14 @@ export const ChatComposer = ({
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
             autoFocus={!isTouchDevice()}
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+
+              if (mediaFiles.length) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
             onSubmit={
               isTouchDevice()
                 ? undefined
