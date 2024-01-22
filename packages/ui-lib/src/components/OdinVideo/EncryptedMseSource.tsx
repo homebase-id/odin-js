@@ -47,15 +47,15 @@ export const EncryptedMseSource = ({
 
   const objectUrl = useMemo(() => {
     if (!codec || !fileLength) {
-      console.warn('Missing codec, fileLength, metaDuration or segmentMap', videoMetaData);
+      console.warn('Missing codec or fileLength', videoMetaData);
       return null;
     }
     if (activeObjectUrl.current) return activeObjectUrl.current;
 
     const chunkSize = 8 * 1024 * 1024;
-    // let fetchedChunks:boolean = new Array(Math.ceil(fileLength / chunkSize));
     let currentChunk = 0;
     let reachedEnd = false;
+    let catchingUp = false;
 
     const innerMediaSource = new MediaSource();
     const objectUrl = URL.createObjectURL(innerMediaSource);
@@ -69,7 +69,7 @@ export const EncryptedMseSource = ({
       await appendRange(0, chunkSize);
 
       videoRef.current?.addEventListener('timeupdate', checkVideoBufferedState);
-      videoRef.current?.addEventListener('seeking', checkVideoBufferedState);
+      //   videoRef.current?.addEventListener('seeking', checkVideoBufferedState);
       videoRef.current?.addEventListener('stalled', checkVideoBufferedState);
       videoRef.current?.addEventListener('waiting', checkVideoBufferedState);
       videoRef.current?.addEventListener('error', (e) => console.error(e));
@@ -84,7 +84,6 @@ export const EncryptedMseSource = ({
     };
 
     const appendRange = async (start: number, end: number, isEnd?: boolean) => {
-      console.debug('fetching', start, end);
       const chunk = await getChunk(start, end);
       if (chunk) {
         await appendToBuffer(chunk);
@@ -118,8 +117,21 @@ export const EncryptedMseSource = ({
       });
     };
 
+    const appendNextChunk = async () => {
+      const nextChunkStart = (currentChunk + 1) * chunkSize;
+      const nextChunkEnd = nextChunkStart + chunkSize;
+      await appendRange(
+        nextChunkStart,
+        Math.min(nextChunkEnd, fileLength),
+        nextChunkEnd >= fileLength
+      );
+      currentChunk++;
+    };
+
     const checkVideoBufferedState = async () => {
       if (!videoRef.current) return;
+      if (catchingUp) return;
+
       const currentTime = videoRef.current.currentTime;
 
       for (let i = 0; videoRef.current && i < videoRef.current.buffered.length; i++) {
@@ -127,40 +139,28 @@ export const EncryptedMseSource = ({
         const end = videoRef.current?.buffered.end(i);
 
         if (videoRef.current?.buffered.length > 1)
-          console.warn('Buffers have drifted apart, ATM this is not good');
+          console.warn('Multile buffers have drifted apart, this is not good');
 
         if (Math.round(currentTime) % 5 === 0) console.log(currentTime, { start, end });
-
         if (currentTime >= start && currentTime <= end) {
           // We are buffered, check if we need to fetch the next segment
           if (currentTime > end * 0.5 && !reachedEnd) {
-            const nextChunkStart = (currentChunk + 1) * chunkSize;
-            const nextChunkEnd = nextChunkStart + chunkSize;
-
-            // Halfway to the end, fetch the next chunk
-            await appendRange(
-              nextChunkStart,
-              Math.min(nextChunkEnd, fileLength),
-              nextChunkEnd >= fileLength
-            );
-            currentChunk++;
+            await appendNextChunk();
           }
         } else {
-          // We don't have enough data, fetch the chunk for the currenTime
+          catchingUp = true;
+          // We don't have data for this part of the video, fetch the chunks we need
           if (!duration) {
             console.error('Missing duration, we cannot fetch the correct chunk');
           } else {
             const currentByteOffset = (fileLength / duration) * currentTime;
-            const currentChunk = Math.round(currentByteOffset / chunkSize);
-            console.log({
-              currentByteOffset,
-              currentChunk,
-              duration,
-              fileLength,
-              currentTime,
-            });
+            const neededChunkIndex = Math.ceil(currentByteOffset / chunkSize);
+
+            while (currentChunk < neededChunkIndex) {
+              await appendNextChunk();
+            }
+            catchingUp = false;
           }
-          // const chunkStart = Math.floor(currentTime / chunkSize) * chunkSize;
         }
       }
     };
