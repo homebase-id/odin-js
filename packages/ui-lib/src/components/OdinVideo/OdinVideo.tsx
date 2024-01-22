@@ -39,7 +39,7 @@ interface OdinChunkedProps extends OdinVideoProps {
 }
 
 interface OdinDirectProps extends OdinVideoProps {
-  videoMetaData: PlainVideoMetadata | SegmentedVideoMetadata;
+  videoMetaData: PlainVideoMetadata | SegmentedVideoMetadata | undefined;
   videoRef: React.RefObject<HTMLVideoElement>;
   onFatalError?: () => void;
 }
@@ -60,7 +60,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     setShouldFallback(!!videoProps.skipChunkedPlayback || !('MediaSource' in window));
   }, [videoProps.skipChunkedPlayback]);
   const {
-    fetchMetadata: { data: videoMetaData },
+    fetchMetadata: { data: videoMetaData, isFetched: videoMetaDataFetched },
   } = useVideo(
     dotYouClient,
     odinId,
@@ -76,7 +76,10 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
 
   const isChunkedPlayback = isInView && videoMetaData?.isSegmented && !shouldFallback;
   const isDirectPlayback =
-    isInView && videoMetaData && (videoMetaData.isSegmented === false || shouldFallback);
+    isInView &&
+    ((videoMetaData && videoMetaData.isSegmented === false) ||
+      (videoMetaDataFetched && !videoMetaData) ||
+      shouldFallback);
 
   if (fatalError) {
     return (
@@ -114,7 +117,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       {isDirectPlayback ? (
         <DirectSource
           {...videoProps}
-          videoMetaData={videoMetaData}
+          videoMetaData={videoMetaData || undefined}
           videoRef={videoRef}
           onFatalError={() => setFatalError(true)}
         />
@@ -383,5 +386,5 @@ const DirectSource = ({
   });
 
   if (!videoUrl) return null;
-  return <source src={videoUrl} type={videoMetaData.mimeType} data-type="direct" />;
+  return <source src={videoUrl} type={videoMetaData?.mimeType} data-type="direct" />;
 };
