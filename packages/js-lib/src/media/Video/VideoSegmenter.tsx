@@ -113,7 +113,7 @@ export const segmentVideoFile = async (
       if (avTracks?.length > 1) {
         metadata.codec = `video/mp4; codecs="${avTracks
           .map((trck) => trck.codec)
-          .join(',')}"; profiles="${info.brands.join(',')}'}"`;
+          .join(',')}"; profiles="${info.brands.join(',')}"`;
       }
       metadata.duration = (info.initial_duration || info.duration) / info.timescale;
 
