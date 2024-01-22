@@ -1,5 +1,5 @@
 import { DotYouClient, TargetDrive } from '@youfoundation/js-lib/core';
-import { PlainVideoMetadata, SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
+import { BaseVideoMetadata, SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIntersection } from '../../hooks/intersection/useIntersection';
 import { useVideo, useVideoUrl } from '../../hooks/video/useVideo';
@@ -32,6 +32,12 @@ export interface OdinVideoProps {
   lastModified: number | undefined;
 }
 
+interface OdinMseChunkedProps extends OdinVideoProps {
+  videoMetaData: SegmentedVideoMetadata;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  onFatalError?: () => void;
+}
+
 interface OdinChunkedProps extends OdinVideoProps {
   videoMetaData: SegmentedVideoMetadata;
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -39,7 +45,7 @@ interface OdinChunkedProps extends OdinVideoProps {
 }
 
 interface OdinDirectProps extends OdinVideoProps {
-  videoMetaData: PlainVideoMetadata | SegmentedVideoMetadata | undefined;
+  videoMetaData: BaseVideoMetadata | undefined;
   videoRef: React.RefObject<HTMLVideoElement>;
   onFatalError?: () => void;
 }
@@ -59,6 +65,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   useEffect(() => {
     setShouldFallback(!!videoProps.skipChunkedPlayback || !('MediaSource' in window));
   }, [videoProps.skipChunkedPlayback]);
+
   const {
     fetchMetadata: { data: videoMetaData, isFetched: videoMetaDataFetched },
   } = useVideo(
@@ -74,12 +81,15 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
   }, [videoProps.autoPlay]);
 
-  const isChunkedPlayback = isInView && videoMetaData?.isSegmented && !shouldFallback;
-  const isDirectPlayback =
-    isInView &&
-    ((videoMetaData && videoMetaData.isSegmented === false) ||
-      (videoMetaDataFetched && !videoMetaData) ||
-      shouldFallback);
+  const playback: 'encrypted-mse' | 'mse' | 'direct' = useMemo(() => {
+    if (shouldFallback || (videoMetaDataFetched && !videoMetaData)) return 'direct';
+
+    // TODO: Need to know for sure if we are encrypted or not, for now we assume based on the hint
+    if (videoMetaData?.isSegmented && videoProps.probablyEncrypted) return 'encrypted-mse';
+    if (videoMetaData?.isSegmented) return 'mse';
+
+    return 'direct';
+  }, [videoMetaData, videoMetaDataFetched, shouldFallback, videoProps.probablyEncrypted]);
 
   if (fatalError) {
     return (
@@ -105,25 +115,70 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-fileid={fileId}
       data-globaltransitid={globalTransitId}
       data-filekey={fileKey}
+      data-playback={playback}
     >
-      {isChunkedPlayback ? (
-        <ChunkedSource
-          {...videoProps}
-          videoMetaData={videoMetaData}
-          videoRef={videoRef}
-          onFatalError={() => setShouldFallback(true)}
-        />
-      ) : null}
-      {isDirectPlayback ? (
-        <DirectSource
-          {...videoProps}
-          videoMetaData={videoMetaData || undefined}
-          videoRef={videoRef}
-          onFatalError={() => setFatalError(true)}
-        />
+      {isInView ? (
+        <>
+          {playback === 'mse' ? (
+            <MseSource
+              {...videoProps}
+              videoMetaData={videoMetaData as SegmentedVideoMetadata}
+              videoRef={videoRef}
+              onFatalError={() => setShouldFallback(true)}
+            />
+          ) : playback === 'encrypted-mse' ? (
+            <ChunkedSource
+              {...videoProps}
+              videoMetaData={videoMetaData as SegmentedVideoMetadata}
+              videoRef={videoRef}
+              onFatalError={() => setShouldFallback(true)}
+            />
+          ) : (
+            <DirectSource
+              {...videoProps}
+              videoMetaData={videoMetaData || undefined}
+              videoRef={videoRef}
+              onFatalError={() => setFatalError(true)}
+            />
+          )}
+        </>
       ) : null}
     </video>
   );
+};
+
+const MseSource = ({
+  dotYouClient,
+  odinId,
+  targetDrive,
+  fileId,
+  globalTransitId,
+  fileKey,
+  videoMetaData,
+  videoRef,
+  onFatalError,
+}: OdinMseChunkedProps) => {
+  const { data: videoUrl } = useVideoUrl(
+    dotYouClient,
+    odinId,
+    fileId,
+    globalTransitId,
+    fileKey,
+    targetDrive
+  ).fetch;
+
+  useEffect(() => {
+    const errorHandler = (e: any) => {
+      console.error('[Odin-Video]-Direct', e);
+      onFatalError && onFatalError();
+    };
+
+    videoRef.current?.addEventListener('error', errorHandler);
+    return () => videoRef.current?.removeEventListener('error', errorHandler);
+  });
+
+  if (!videoUrl) return null;
+  return <source src={videoUrl} type={videoMetaData?.mimeType} data-type="direct" />;
 };
 
 /// based on demo from nickdesaulniers: https://github.com/nickdesaulniers/netfix/blob/gh-pages/demo/bufferWhenNeeded.html
@@ -166,7 +221,10 @@ const ChunkedSource = ({
   });
 
   const objectUrl = useMemo(() => {
-    if (!codec || !fileLength || !metaDuration || !segmentMap) return null;
+    if (!codec || !fileLength || !metaDuration || !segmentMap) {
+      console.warn('Missing codec, fileLength, metaDuration or segmentMap');
+      return null;
+    }
     if (activeObjectUrl.current) return activeObjectUrl.current;
 
     const sortedSegmentMap = segmentMap.sort((a, b) => a.offset - b.offset);
@@ -196,7 +254,6 @@ const ChunkedSource = ({
 
     const innerMediaSource = new MediaSource();
     const objectUrl = URL.createObjectURL(innerMediaSource);
-    activeObjectUrl.current = objectUrl;
 
     let sourceBuffer: SourceBuffer;
 

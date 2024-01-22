@@ -91,7 +91,7 @@ export const segmentVideoFile = async (
     const tracksToRead: boolean[] = [];
     const metadata: SegmentedVideoMetadata = {
       isSegmented: true,
-      mimeType: '',
+      mimeType: 'video/mp4',
       codec: '',
       fileSize: 0,
       duration: 0,
@@ -116,6 +116,19 @@ export const segmentVideoFile = async (
           .join(',')}"; profiles="${info.brands.join(',')}'}"`;
       }
       metadata.duration = (info.initial_duration || info.duration) / info.timescale;
+
+      // If the file is already fragmented, we can just return it; With the metadat we have;
+      if (info.isFragmented) {
+        metadata.fileSize = file.size;
+        metadata.segmentMap = [];
+
+        console.debug('already fragmented, returning file', metadata);
+        resolve({
+          data: file,
+          metadata,
+        });
+        return;
+      }
 
       info.tracks.forEach((trck) => {
         tracksToRead[trck.id] = false;
