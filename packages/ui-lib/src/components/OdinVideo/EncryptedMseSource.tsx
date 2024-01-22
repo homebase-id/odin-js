@@ -9,16 +9,6 @@ interface OdinEncryptedMseProps extends OdinVideoProps {
   onFatalError?: () => void;
 }
 
-interface Segment {
-  sequence: number;
-  start: number;
-  end: number | undefined;
-  samples: number;
-  state: 'fetching' | 'fetched' | undefined;
-}
-
-/// based on demo from nickdesaulniers: https://github.com/nickdesaulniers/netfix/blob/gh-pages/demo/bufferWhenNeeded.html
-/// But with introduction of segmentMap and other changes to support seeking
 export const EncryptedMseSource = ({
   dotYouClient,
   odinId,
@@ -43,8 +33,7 @@ export const EncryptedMseSource = ({
 
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
   const fileLength = videoMetaData.fileSize;
-  const metaDuration = videoMetaData.isSegmented ? videoMetaData.duration : undefined;
-  const segmentMap = videoMetaData.isSegmented ? videoMetaData.segmentMap : undefined;
+  const duration = videoMetaData.duration;
 
   useEffect(() => {
     const errorHandler = (e: any) => {
@@ -57,180 +46,124 @@ export const EncryptedMseSource = ({
   });
 
   const objectUrl = useMemo(() => {
-    if (!codec || !fileLength || !metaDuration || !segmentMap) {
+    if (!codec || !fileLength) {
       console.warn('Missing codec, fileLength, metaDuration or segmentMap', videoMetaData);
       return null;
     }
     if (activeObjectUrl.current) return activeObjectUrl.current;
 
-    const sortedSegmentMap = segmentMap.sort((a, b) => a.offset - b.offset);
-    const segments: Segment[] | undefined = sortedSegmentMap.map((segment, index) => {
-      const nextOffset = sortedSegmentMap[index + 1];
-      return {
-        sequence: index,
-        start: segment.offset,
-        end: nextOffset ? nextOffset.offset : undefined,
-        samples: segment.samples,
-        state: undefined,
-      };
-    });
-
-    const maxSamples = segments.reduce(
-      (prev, curr) => (curr.samples > prev ? curr.samples : prev),
-      0
-    );
-    const sampleDuration = metaDuration / maxSamples;
-    console.debug({
-      sortedSegmentMap,
-      segments,
-      maxSamples,
-      sampleDuration,
-      metaDuration,
-    });
+    const chunkSize = 8 * 1024 * 1024;
+    // let fetchedChunks:boolean = new Array(Math.ceil(fileLength / chunkSize));
+    let currentChunk = 0;
+    let reachedEnd = false;
 
     const innerMediaSource = new MediaSource();
     const objectUrl = URL.createObjectURL(innerMediaSource);
 
     let sourceBuffer: SourceBuffer;
-
-    const checkAndFetchNextSegment = async () => {
-      const nextSegement = segments.find((s) => !s.state) || segments[0];
-      nextSegement.state = 'fetching';
-      await fetchRange(nextSegement.start, nextSegement.end);
-      nextSegement.state = 'fetched';
-    };
-
     const sourceOpen = async () => {
       URL.revokeObjectURL(objectUrl);
       sourceBuffer = innerMediaSource.addSourceBuffer(codec);
 
-      await fetchMetaAndFirstSegment();
+      // Fetch the first chunk
+      await appendRange(0, chunkSize);
 
-      videoRef.current?.addEventListener('timeupdate', checkBuffer);
-      videoRef.current?.addEventListener('seeking', seek);
-      videoRef.current?.addEventListener('stalled', checkAndFetchNextSegment);
-      videoRef.current?.addEventListener('waiting', checkAndFetchNextSegment);
-      videoRef.current?.addEventListener('error', (e) => {
-        console.error(e);
-      });
+      videoRef.current?.addEventListener('timeupdate', checkVideoBufferedState);
+      videoRef.current?.addEventListener('seeking', checkVideoBufferedState);
+      videoRef.current?.addEventListener('stalled', checkVideoBufferedState);
+      videoRef.current?.addEventListener('waiting', checkVideoBufferedState);
+      videoRef.current?.addEventListener('error', (e) => console.error(e));
+
       // In case we start playing and the readyState isn't good enough...
-      videoRef.current?.addEventListener('play', async (e) => {
+      videoRef.current?.addEventListener('play', async () => {
         if (!videoRef.current) return;
         console.debug('readyState', videoRef.current?.readyState);
 
-        if (videoRef.current.readyState < 3) await checkAndFetchNextSegment();
+        if (videoRef.current.readyState < 3) await checkVideoBufferedState();
       });
     };
 
-    const fetchMetaAndFirstSegment = async () => {
-      const metaSegment = segments[0];
-      metaSegment.state = 'fetching';
-      await fetchRange(metaSegment.start, metaSegment.end);
-      metaSegment.state = 'fetched';
-
-      const firstSegment = segments[1];
-      firstSegment.state = 'fetching';
-      await fetchRange(firstSegment.start, firstSegment.end);
-      firstSegment.state = 'fetched';
-    };
-
-    const fetchRange = async (start: number, end?: number) => {
+    const appendRange = async (start: number, end: number, isEnd?: boolean) => {
       console.debug('fetching', start, end);
-
       const chunk = await getChunk(start, end);
       if (chunk) {
-        console.debug('received bytes:', chunk.length);
-        appendToBuffer(chunk);
+        await appendToBuffer(chunk);
+        if (isEnd && !reachedEnd) {
+          reachedEnd = true;
+          sourceBuffer.addEventListener('updateend', () => {
+            innerMediaSource.removeEventListener('sourceopen', sourceOpen);
+            innerMediaSource.endOfStream();
+          });
+        }
       }
     };
 
     const appendToBuffer = (chunk: Uint8Array) => {
-      if (sourceBuffer.updating) {
-        sourceBuffer.addEventListener('updateend', () => appendToBuffer(chunk), { once: true });
-      } else {
-        try {
-          sourceBuffer.appendBuffer(chunk.buffer);
-        } catch (e: any) {
-          if (e.name === 'QuotaExceededError') {
-            console.error('appendBuffer error', e);
-            onFatalError && onFatalError();
-          }
-        }
-      }
-    };
-
-    // TODO: Should we await the fetchRange before setting the segment to requested?
-    // TODO: Check if we would better use the buffered property of the video element to know what is buffered
-    const checkBuffer = async () => {
-      const currentSegment = getCurrentSegment();
-
-      if (!currentSegment.state) {
-        console.debug('current segment not requested, user did seek?');
-        currentSegment.state = 'fetching';
-        await fetchRange(currentSegment.start, currentSegment.end);
-        currentSegment.state = 'fetched';
-        return;
-      }
-
-      if (haveAllSegments() || currentSegment.end === fileLength) {
-        console.debug('all segments fetched');
-        innerMediaSource.endOfStream();
-        videoRef.current?.removeEventListener('timeupdate', checkBuffer);
-        return;
-      }
-
-      const currentSample = getCurrentSample();
-      const nextSegment = getNextSegment(currentSegment);
-
-      if (currentSample > currentSample * 0.3 && nextSegment && !nextSegment.state) {
-        console.debug(`time to fetch next chunk ${videoRef.current?.currentTime}s`);
-
-        nextSegment.state = 'fetching';
-        await fetchRange(nextSegment.start, nextSegment.end);
-        nextSegment.state = 'fetched';
-        console.debug({ segments });
-      }
-
-      // if (videoRef.current && videoRef.current.buffered.length >= 2) {
-      //   console.log(
-      //     videoRef.current.buffered.length,
-      //     'We seem to have reached an error.. Or did you seek?'
-      //   );
-      // }
-    };
-
-    // Not sure what to do with this yet? Works better without the abort on seek..
-    const seek = () => {
-      console.debug('seeking');
-      if (innerMediaSource.readyState === 'open') {
-        // sourceBuffer.abort();
-      } else {
-        console.debug('seek but not open?');
-        console.debug(innerMediaSource.readyState);
-      }
-    };
-
-    const getCurrentSample = () => {
-      return Math.ceil((videoRef.current?.currentTime || 0) / sampleDuration);
-    };
-
-    const getCurrentSegment = () => {
-      const currentSample = getCurrentSample();
-      const currentSegment = segments.reduce((prev, curr) => {
-        if (currentSample < curr.samples && currentSample > prev.samples) {
-          return curr;
+      return new Promise<void>((resolve) => {
+        if (sourceBuffer.updating) {
+          sourceBuffer.addEventListener('updateend', () => appendToBuffer(chunk).then(resolve), {
+            once: true,
+          });
         } else {
-          return prev;
+          try {
+            sourceBuffer.appendBuffer(chunk.buffer);
+          } catch (e: unknown) {
+            if (e && typeof e === 'object' && 'name' in e && e.name === 'QuotaExceededError') {
+              console.error('appendBuffer error', e);
+              onFatalError && onFatalError();
+            }
+          }
+          resolve();
         }
       });
-
-      console.debug({ currentSegment: currentSegment.sequence, currentSample });
-
-      return currentSegment;
     };
 
-    const getNextSegment = (currentSegment: Segment) => segments[currentSegment.sequence + 1];
-    const haveAllSegments = () => segments.every((val) => val.state === 'fetched');
+    const checkVideoBufferedState = async () => {
+      if (!videoRef.current) return;
+      const currentTime = videoRef.current.currentTime;
+
+      for (let i = 0; videoRef.current && i < videoRef.current.buffered.length; i++) {
+        const start = videoRef.current?.buffered.start(i);
+        const end = videoRef.current?.buffered.end(i);
+
+        if (videoRef.current?.buffered.length > 1)
+          console.warn('Buffers have drifted apart, ATM this is not good');
+
+        if (Math.round(currentTime) % 5 === 0) console.log(currentTime, { start, end });
+
+        if (currentTime >= start && currentTime <= end) {
+          // We are buffered, check if we need to fetch the next segment
+          if (currentTime > end * 0.5 && !reachedEnd) {
+            const nextChunkStart = (currentChunk + 1) * chunkSize;
+            const nextChunkEnd = nextChunkStart + chunkSize;
+
+            // Halfway to the end, fetch the next chunk
+            await appendRange(
+              nextChunkStart,
+              Math.min(nextChunkEnd, fileLength),
+              nextChunkEnd >= fileLength
+            );
+            currentChunk++;
+          }
+        } else {
+          // We don't have enough data, fetch the chunk for the currenTime
+          if (!duration) {
+            console.error('Missing duration, we cannot fetch the correct chunk');
+          } else {
+            const currentByteOffset = (fileLength / duration) * currentTime;
+            const currentChunk = Math.round(currentByteOffset / chunkSize);
+            console.log({
+              currentByteOffset,
+              currentChunk,
+              duration,
+              fileLength,
+              currentTime,
+            });
+          }
+          // const chunkStart = Math.floor(currentTime / chunkSize) * chunkSize;
+        }
+      }
+    };
 
     innerMediaSource.addEventListener('sourceopen', sourceOpen);
 

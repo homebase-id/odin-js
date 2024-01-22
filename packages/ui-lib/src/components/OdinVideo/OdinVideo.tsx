@@ -61,7 +61,9 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
     if (videoProps.autoPlay && videoRef.current) videoRef.current.play();
   }, [videoProps.autoPlay]);
 
-  const playback: 'encrypted-mse' | 'mse' | 'direct' = useMemo(() => {
+  const playback: 'encrypted-mse' | 'mse' | 'direct' | undefined = useMemo(() => {
+    if (!videoMetaDataFetched) return undefined;
+
     if (shouldFallback || (videoMetaDataFetched && !videoMetaData)) return 'direct';
 
     // TODO: Need to know for sure if we are encrypted or not, for now we assume based on the hint
@@ -97,7 +99,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-filekey={fileKey}
       data-playback={playback}
     >
-      {isInView ? (
+      {isInView && playback !== undefined ? (
         playback === 'encrypted-mse' ? (
           <EncryptedMseSource
             {...videoProps}
