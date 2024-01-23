@@ -11,7 +11,8 @@ const loadFFmpeg = async () => {
     const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const { toBlobURL } = await import('@ffmpeg/util');
 
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    // const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    const baseURL = '/ffmpeg-wasm/core@0.12.6/esm';
     const ffmpeg = new FFmpeg();
 
     if (isDebug)
