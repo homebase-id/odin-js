@@ -36,12 +36,61 @@ const loadMp4box = async () => {
   }
 };
 
+export const getMp4Info = async (file: File | Blob): Promise<Mp4Info> => {
+  if (!file || file.type !== 'video/mp4')
+    throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
+
+  const { createFile } = await loadMp4box();
+  return new Promise((resolve) => {
+    const mp4File = createFile(true);
+
+    mp4File.onReady = function (info: Mp4Info) {
+      resolve(info);
+    };
+
+    let offset = 0;
+    const reader = file.stream().getReader();
+
+    const getNextChunk = ({
+      done,
+      value,
+    }: ReadableStreamReadResult<Uint8Array>): Promise<void> | undefined => {
+      if (done) {
+        // Indicates that no more data will be received and that all remaining samples should be flushed in the segmentation or extraction process.
+        mp4File.stop();
+        mp4File.flush();
+        return;
+      }
+
+      const block: ExtendedBuffer = value.buffer;
+      block.fileStart = offset;
+      offset += value.length;
+
+      mp4File.appendBuffer(block);
+      return reader.read().then(getNextChunk);
+    };
+
+    reader.read().then(getNextChunk);
+  });
+};
+
+export const getCodecFromMp4Info = (info: Mp4Info): string => {
+  let codec = info.mime;
+  const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
+  if (avTracks?.length > 1) {
+    codec = `video/mp4; codecs="${avTracks
+      .map((trck) => trck.codec)
+      .join(',')}"; profiles="${info.brands.join(',')}"`;
+  }
+
+  return codec;
+};
+
 export const segmentVideoFile = async (
   file: File | Blob
 ): Promise<{ data: Blob; metadata: SegmentedVideoMetadata }> => {
-  if (!file || file.type !== 'video/mp4') {
+  if (!file || file.type !== 'video/mp4')
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
-  }
 
   const { createFile, BoxParser, ISOFile } = await loadMp4box();
   let mp4Info: Mp4Info | undefined;
