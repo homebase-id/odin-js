@@ -145,6 +145,7 @@ export const EncryptedMseSource = ({
         if (currentTime >= start && currentTime <= end) {
           // We are buffered, check if we need to fetch the next segment
           if (currentTime > end * 0.5 && !reachedEnd) {
+
             // Avoid firing the same request multiple times; While the previous request is still running
             catchingUp = true;
             await appendNextChunk();
