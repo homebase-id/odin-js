@@ -98,6 +98,7 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
       data-globaltransitid={globalTransitId}
       data-filekey={fileKey}
       data-playback={playback}
+      playsInline={true}
     >
       {isInView && playback !== undefined ? (
         playback === 'encrypted-mse' ? (
