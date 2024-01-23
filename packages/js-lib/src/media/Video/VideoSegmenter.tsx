@@ -1,11 +1,13 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
-import { mergeByteArrays } from '../../helpers/helpers';
+import { hasDebugFlag, mergeByteArrays } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 
 type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 const MB = 1024 * 1024;
 const MB_PER_CHUNK = 5 * MB;
+
+const isDebug = hasDebugFlag();
 
 interface Mp4Info {
   isFragmented: boolean;
@@ -105,7 +107,7 @@ export const segmentVideoFile = async (
 
     mp4File.onReady = function (info: Mp4Info) {
       mp4Info = info;
-      console.debug('mp4box ready', info);
+      isDebug && console.debug('mp4box ready', info);
 
       metadata.codec = info.mime;
       const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
@@ -117,12 +119,12 @@ export const segmentVideoFile = async (
       }
       metadata.duration = (info.initial_duration || info.duration) / info.timescale;
 
-      // If the file is already fragmented, we can just return it; With the metadat we have;
+      // If the file is already fragmented, we can just return it; With the metadata we have;
       if (info.isFragmented) {
         metadata.fileSize = file.size;
         metadata.segmentMap = [];
 
-        console.debug('already fragmented, returning file', metadata);
+        isDebug && console.debug('already fragmented, returning file', metadata);
         resolve({
           data: file,
           metadata,
@@ -141,7 +143,7 @@ export const segmentVideoFile = async (
           (track.movie_duration || info.duration || info.initial_duration || 0) /
           (track.movie_timescale || info.timescale || 1);
         const secondsFor8MbOfData = (metadata.duration / file.size) * MB_PER_CHUNK;
-        console.debug({ track: i, secondsFor8MbOfData });
+        isDebug && console.debug({ track: i, secondsFor8MbOfData });
 
         const nbrSamples = Math.round((nbSamples / durationInSec) * secondsFor8MbOfData);
         mp4File.setSegmentOptions(track.id, null, {
@@ -171,7 +173,7 @@ export const segmentVideoFile = async (
         tracksToRead[id] = true;
 
         if (!tracksToRead.some((trck) => !trck)) {
-          console.debug('without offsets: ', metadata.segmentMap);
+          isDebug && console.debug('without offsets: ', metadata.segmentMap);
 
           const finalMetaBytes = new Uint8Array(buildInitSegments(mp4File));
           const metaOffset = finalMetaBytes.length;
@@ -181,7 +183,7 @@ export const segmentVideoFile = async (
               return { ...segment, offset: metaOffset + segment.offset };
             }),
           ];
-          console.debug('with offsets: ', metadata.segmentMap);
+          isDebug && console.debug('with offsets: ', metadata.segmentMap);
           const finalSegmentedBytes = mergeByteArrays(segmentedBytes);
           const finalBytes = mergeByteArrays([finalMetaBytes, finalSegmentedBytes]);
           metadata.fileSize = finalBytes.length;
