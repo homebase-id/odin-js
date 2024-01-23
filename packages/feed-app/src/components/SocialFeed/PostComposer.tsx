@@ -225,6 +225,7 @@ const PostComposer = ({
               channel && setChannel(channel);
               setCustomAcl(acl);
             }}
+            excludeMore={true}
             ref={selectRef}
           />
           <ActionButton
@@ -319,7 +320,7 @@ export const ChannelOrAclSelector = React.forwardRef(
         e.target.value = getDefaultChannel();
       } else if (e.target.value === 'custom') {
         setIsCustomAclOpen(true);
-        e.target.value = getPublicChannel();
+        // e.target.value = getPublicChannel();
       } else {
         onChange(
           channels.find((chnl) =>
@@ -346,15 +347,18 @@ export const ChannelOrAclSelector = React.forwardRef(
           ref={ref}
           disabled={disabled}
         >
-          {channels.map((channel) => (
-            <option
-              value={channel.fileMetadata.appData.uniqueId}
-              key={channel.fileMetadata.appData.uniqueId}
-            >
-              {channel.fileMetadata.appData.content.name}
-            </option>
-          ))}
-          {!excludeMore && !excludeCustom ? (
+          <optgroup label={t('Channels')}>
+            {channels.map((channel) => (
+              <option
+                value={channel.fileMetadata.appData.uniqueId}
+                key={channel.fileMetadata.appData.uniqueId}
+              >
+                {channel.fileMetadata.appData.content.name}
+              </option>
+            ))}
+          </optgroup>
+
+          {!excludeMore || !excludeCustom ? (
             <optgroup label={t('Advanced')}>
               {!excludeMore ? (
                 <option value={'more'} key={'more'}>
