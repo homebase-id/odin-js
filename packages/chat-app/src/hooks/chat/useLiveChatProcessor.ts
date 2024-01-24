@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DriveSearchResult,
-  Notify,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -19,7 +18,7 @@ import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/commo
 import { preAuth } from '@youfoundation/js-lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
-import { hasDebugFlag, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
@@ -87,27 +86,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
   }, [preAuthenticated]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatTransitProcessor] Got notification', notification);
-    if (notification.notificationType === 'transitFileReceived') {
-      isDebug &&
-        console.debug(
-          '[TransitProcessor] Replying to TransitFileReceived by sending processTransitInstructions for the targetDrive'
-        );
-
-      Notify({
-        command: 'processInbox',
-        data: JSON.stringify({
-          targetDrive: notification.externalFileIdentifier.targetDrive,
-          batchSize: 100,
-        }),
-      });
-    }
+    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
     if (
-      (notification.notificationType === 'fileAdded' ||
-        notification.notificationType === 'fileModified') &&
-      notification.targetDrive?.alias === ChatDrive.alias &&
-      notification.targetDrive?.type === ChatDrive.type
+      notification.notificationType === 'fileAdded' &&
+      stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
+      stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
@@ -150,7 +134,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     preAuthenticated && isEnabled ? handler : undefined,
-    ['transitFileReceived', 'fileAdded'],
+    ['fileAdded'],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['processInbox'] });

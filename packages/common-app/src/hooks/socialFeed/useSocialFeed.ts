@@ -1,23 +1,67 @@
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { ApiType, TypedConnectionNotification } from '@youfoundation/js-lib/core';
-import { getSocialFeed } from '@youfoundation/js-lib/peer';
+import { getSocialFeed, processInbox } from '@youfoundation/js-lib/peer';
 import { useCallback, useEffect, useState } from 'react';
 import { preAuth } from '@youfoundation/js-lib/auth';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useChannelDrives } from './useChannelDrives';
 
-export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
-  const [preAuthenticated, setIspreAuthenticated] = useState(false);
+const MINUTE_IN_MS = 60000;
+
+// Process the inbox on startup
+const useInboxProcessor = (isEnabled?: boolean) => {
+  const { data: chnlDrives, isFetchedAfterMount: channelsFetched } = useChannelDrives(!!isEnabled);
   const dotYouClient = useDotYouClient().getDotYouClient();
-  const { data: ownChannels, isFetched: channelsFetched } = useChannels({
-    isAuthenticated: true,
-    isOwner: true,
-  });
 
-  // Add invalidation of social feed when a new file is added to the feed drive (this enforces that only remote updates trigger a refresh)
+  const fetchData = async () => {
+    await processInbox(dotYouClient, BlogConfig.FeedDrive, 100);
+    if (chnlDrives)
+      await Promise.all(
+        chnlDrives.map(async (chnlDrive) => {
+          return await processInbox(dotYouClient, chnlDrive.targetDriveInfo, 100);
+        })
+      );
+
+    return true;
+  };
+
+  return useQuery({
+    queryKey: ['processInbox'],
+    queryFn: fetchData,
+    refetchOnMount: false,
+    // We want to refetch on window focus, as we might have missed some messages while the window was not focused and the websocket might have lost connection
+    refetchOnWindowFocus: true,
+    staleTime: MINUTE_IN_MS * 5,
+    enabled: channelsFetched,
+  });
+};
+
+const useFeedWebsocket = (isEnabled: boolean) => {
+  const [preAuthenticated, setIspreAuthenticated] = useState(false);
+
+  const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
+
+  const handler = useCallback((notification: TypedConnectionNotification) => {
+    if (
+      (notification.notificationType === 'fileAdded' ||
+        notification.notificationType === 'fileModified') &&
+      stringGuidsEqual(notification.targetDrive?.alias, BlogConfig.FeedDrive.alias) &&
+      stringGuidsEqual(notification.targetDrive?.type, BlogConfig.FeedDrive.type)
+    ) {
+      queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
+    }
+  }, []);
+
+  useNotificationSubscriber(
+    preAuthenticated && isEnabled ? handler : undefined,
+    ['fileAdded', 'fileModified'],
+    [BlogConfig.FeedDrive]
+  );
 
   useEffect(() => {
     (async () => {
@@ -27,18 +71,17 @@ export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
       }
     })();
   }, [preAuthenticated]);
+};
 
-  const handler = useCallback((notification: TypedConnectionNotification) => {
-    if (
-      notification.notificationType === 'fileAdded' &&
-      notification.targetDrive?.alias === BlogConfig.FeedDrive.alias &&
-      notification.targetDrive?.type === BlogConfig.FeedDrive.type
-    ) {
-      console.debug({ notification });
-      queryClient.invalidateQueries({ queryKey: ['social-feeds'] });
-    }
-  }, []);
-  useNotificationSubscriber(preAuthenticated ? handler : undefined, ['fileAdded']);
+export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { data: ownChannels, isFetched: channelsFetched } = useChannels({
+    isAuthenticated: true,
+    isOwner: true,
+  });
+
+  const { status: inboxStatus } = useInboxProcessor(true);
+  useFeedWebsocket(inboxStatus === 'success');
 
   const fetchAll = async ({
     pageParam,

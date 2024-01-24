@@ -5,16 +5,19 @@ import {
   Subscribe,
   TargetDrive,
   TypedConnectionNotification,
+  Notify,
 } from '@youfoundation/js-lib/core';
 import { useRef, useEffect, useState } from 'react';
 import { useDotYouClient } from '../auth/useDotYouClient';
-import { BlogConfig } from '@youfoundation/js-lib/public';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+
+const isDebug = hasDebugFlag();
 
 // Wrapper for the notification subscriber within DotYouCore-js to add client side filtering of the notifications
 export const useNotificationSubscriber = (
   subscriber: ((notification: TypedConnectionNotification) => void) | undefined,
   types: NotificationType[],
-  drives: TargetDrive[] = [BlogConfig.FeedDrive, BlogConfig.PublicChannelDrive],
+  drives: TargetDrive[],
   onDisconnect?: () => void,
   onReconnect?: () => void
 ) => {
@@ -24,6 +27,21 @@ export const useNotificationSubscriber = (
 
   const localHandler = subscriber
     ? (notification: TypedConnectionNotification) => {
+        if (notification.notificationType === 'transitFileReceived') {
+          isDebug &&
+            console.debug(
+              '[NotificationSubscriber] Replying to TransitFileReceived by sending processInbox'
+            );
+
+          Notify({
+            command: 'processInbox',
+            data: JSON.stringify({
+              targetDrive: notification.externalFileIdentifier.targetDrive,
+              batchSize: 100,
+            }),
+          });
+        }
+
         if (types?.length >= 1 && !types.includes(notification.notificationType)) return;
         subscriber && subscriber(notification);
       }

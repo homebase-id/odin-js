@@ -63,7 +63,7 @@ import {
   SETUP_PATH,
 } from '../hooks/auth/useAuth';
 import { useIsConfigured } from '../hooks/configure/useIsConfigured';
-import { useTransitProcessor, ErrorBoundary, NotFound } from '@youfoundation/common-app';
+import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 
 const queryClient = new QueryClient();
 
@@ -215,7 +215,6 @@ function App() {
 const RootRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const { data: isConfigured, isFetched } = useIsConfigured().isConfigured;
-  useTransitProcessor(!!isConfigured);
 
   if (!isAuthenticated) {
     if (window.location.pathname === FIRSTRUN_PATH || window.location.pathname === RECOVERY_PATH) {

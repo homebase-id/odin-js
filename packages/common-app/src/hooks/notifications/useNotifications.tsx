@@ -6,6 +6,7 @@ import { ReactNode, useCallback, useState } from 'react';
 
 import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
+import { BlogConfig } from '@youfoundation/js-lib/public';
 
 interface Notification {
   title: string;
@@ -71,11 +72,11 @@ export const useNotifications = () => {
     setLiveNotifications(liveNotifications.filter((noti) => noti !== notification));
   };
 
-  useNotificationSubscriber(handler, [
-    'connectionRequestAccepted',
-    'connectionRequestReceived',
-    'unknown',
-  ]);
+  useNotificationSubscriber(
+    handler,
+    ['connectionRequestAccepted', 'connectionRequestReceived', 'unknown'],
+    [BlogConfig.FeedDrive]
+  );
 
   // const notifications = pending?.results.map((connection) => {
   //   return {
