@@ -4,6 +4,10 @@ import { hasDebugFlag } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import workerUrl from '@ffmpeg/ffmpeg/worker.js?worker&url';
+
 const isDebug = hasDebugFlag();
 
 const loadFFmpeg = async () => {
@@ -19,12 +23,17 @@ const loadFFmpeg = async () => {
       ffmpeg.on('log', ({ message }) => {
         console.debug(message);
       });
+
+    const dummyWorker = new Worker(workerUrl, { type: 'module' });
+    console.log('dummyWorker', workerUrl, dummyWorker);
     // toBlobURL is used to bypass CORS issue, urls with the same
     // domain can be used directly.
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
       wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      classWorkerURL: workerUrl,
     });
+    console.log('load ffmpeg success');
 
     return ffmpeg;
   } catch (ex) {
