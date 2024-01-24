@@ -22,17 +22,6 @@ export const processVideoFile = async (
         ])
       : { tinyThumb: undefined, additionalThumbnails: [] };
 
-  if (videoFile.file.size < 10000000 || 'bytes' in videoFile.file) {
-    return {
-      tinyThumb,
-      additionalThumbnails,
-      payload: {
-        payload: videoFile.file,
-        key: payloadKey,
-      },
-    };
-  }
-
   const { data: segmentedVideoData, metadata } = await segmentVideoFileWithFfmpeg(videoFile.file);
   return {
     tinyThumb,

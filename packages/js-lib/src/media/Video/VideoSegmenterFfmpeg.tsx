@@ -1,7 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 import { hasDebugFlag } from '../../helpers/helpers';
-import { SegmentedVideoMetadata } from '../MediaTypes';
+import { PlainVideoMetadata, SegmentedVideoMetadata } from '../MediaTypes';
 import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
 
 const isDebug = hasDebugFlag();
@@ -36,11 +36,23 @@ const loadFFmpeg = async () => {
   }
 };
 
+const MB = 1000000;
 export const segmentVideoFileWithFfmpeg = async (
   file: File | Blob
-): Promise<{ data: Blob; metadata: SegmentedVideoMetadata }> => {
+): Promise<{ data: Blob; metadata: SegmentedVideoMetadata | PlainVideoMetadata }> => {
   if (!file || file.type !== 'video/mp4') {
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
+  }
+
+  if (file.size < 10 * MB) {
+    return {
+      data: file,
+      metadata: {
+        isSegmented: false,
+        mimeType: 'video/mp4',
+        fileSize: file.size,
+      },
+    };
   }
 
   const mp4Info = await getMp4Info(file);

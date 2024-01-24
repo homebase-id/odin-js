@@ -117,6 +117,8 @@ export const savePost = async <T extends PostContent>(
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+
+      onUpdate?.((i + 1) / newMediaFiles.length);
     } else {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
