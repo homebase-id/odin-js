@@ -5,7 +5,7 @@ import {
   ThumbnailFile,
 } from '../../core/DriveData/File/DriveFileTypes';
 import { createThumbnails } from '../Thumbs/ThumbnailProvider';
-import { segmentVideoFile } from './VideoSegmenter';
+import { segmentVideoFileWithFfmpeg } from './VideoSegmenterFfmpeg';
 
 export const processVideoFile = async (
   videoFile: { file: File | Blob; thumbnail?: ThumbnailFile },
@@ -22,18 +22,7 @@ export const processVideoFile = async (
         ])
       : { tinyThumb: undefined, additionalThumbnails: [] };
 
-  if (videoFile.file.size < 10000000 || 'bytes' in videoFile.file) {
-    return {
-      tinyThumb,
-      additionalThumbnails,
-      payload: {
-        payload: videoFile.file,
-        key: payloadKey,
-      },
-    };
-  }
-
-  const { data: segmentedVideoData, metadata } = await segmentVideoFile(videoFile.file);
+  const { data: segmentedVideoData, metadata } = await segmentVideoFileWithFfmpeg(videoFile.file);
   return {
     tinyThumb,
     additionalThumbnails,

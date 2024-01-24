@@ -210,7 +210,10 @@ export const updateConversation = async (
     dotYouClient,
     conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
-    uploadMetadata
+    uploadMetadata,
+    () => {
+      // Ignore version conflict; Updates are not critical; (Most likely race condition between multiple clients)
+    }
   );
 };
 

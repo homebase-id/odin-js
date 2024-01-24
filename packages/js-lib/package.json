@@ -75,7 +75,9 @@
     "url": "https://github.com/YouFoundation/dotyoucore-js.git"
   },
   "dependencies": {
-    "guid-typescript": "^1.0.9"
+    "guid-typescript": "^1.0.9",
+    "@youfoundation/ffmpeg": "0.12.10",
+    "@ffmpeg/util": "^0.12.1"
   },
   "optionalDependencies": {
     "mp4box": "^0.5.2"
