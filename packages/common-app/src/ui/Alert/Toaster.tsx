@@ -65,7 +65,10 @@ export const ErrorToaser = () => {
           body={error.message}
           key={index}
           onDismiss={() => dismissError(error)}
-          onOpen={() => dismissError(error)}
+          onOpen={() => {
+            if (error.correlationId) navigator.clipboard.writeText(error.correlationId);
+            dismissError(error);
+          }}
           type={error.type}
         />
       ))}
