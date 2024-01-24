@@ -112,11 +112,10 @@ const ConnectSocket = async (
     if (isDebug) console.debug(`[NotificationProvider] Client connected`);
 
     webSocketClient.onopen = () => {
-      const connectionRequest: EstablishConnectionRequest = {
-        drives: drives,
-      };
-
-      Notify(connectionRequest);
+      Notify({
+        command: 'establishConnectionRequest',
+        data: JSON.stringify(drives),
+      });
     };
 
     const setupPing = () => {
@@ -136,6 +135,10 @@ const ConnectSocket = async (
 
     webSocketClient.onmessage = async (e) => {
       const notification: RawClientNotification = await parseMessage(e);
+
+      if (notification.notificationType === 'error') {
+        console.warn('[NotificationProvider] Error:', notification.data);
+      }
 
       if (!isConnected) {
         // First message must be acknowledgement of successful handshake
@@ -160,7 +163,13 @@ const ConnectSocket = async (
     };
 
     webSocketClient.onclose = (e) => {
-      if (isDebug) console.debug('[NotificationProvider] Connection closed', e);
+      if (isDebug) {
+        if (e.wasClean) {
+          console.debug('[NotificationProvider] Connection closed cleanly', e);
+        } else {
+          console.debug('[NotificationProvider] Connection closed unexpectedly', e);
+        }
+      }
 
       subscribers.map((subscriber) => subscriber.onDisconnect && subscriber.onDisconnect());
       ReconnectSocket(dotYouClient, drives, args);
