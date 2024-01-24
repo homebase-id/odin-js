@@ -16,6 +16,7 @@ export type NotificationType =
   | 'connectionRequestReceived'
   | 'connectionRequestAccepted'
   | 'transitFileReceived'
+  | 'error'
   | 'unknown';
 
 export interface ClientNotification {
