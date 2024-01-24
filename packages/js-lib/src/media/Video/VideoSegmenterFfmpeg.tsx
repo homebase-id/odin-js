@@ -62,7 +62,6 @@ export const segmentVideoFileWithFfmpeg = async (
 
   const buffer = await file.arrayBuffer();
   await ffmpeg.writeFile('input.mp4', new Uint8Array(buffer));
-
   await ffmpeg.exec([
     '-i',
     'input.mp4',
