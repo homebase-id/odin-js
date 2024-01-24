@@ -4,18 +4,17 @@ import { hasDebugFlag } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 import { getCodecFromMp4Info, getMp4Info } from './VideoSegmenter';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import workerUrl from '@ffmpeg/ffmpeg/worker.js?worker&url';
-
 const isDebug = hasDebugFlag();
 
 const loadFFmpeg = async () => {
   try {
-    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+    // Pretty hacky way to get the worker working; We have a custom package that has the "correct" vite way of importing the worker;
+    //  And thus solves the missing worker URL issue; (FYI, only works on vite enabled consumer projects)
+    const { FFmpeg } = await import('@youfoundation/ffmpeg');
     const { toBlobURL } = await import('@ffmpeg/util');
 
     // const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    // We use a slimmed down package following this guide: https://javascript.plainenglish.io/slimming-down-ffmpeg-for-a-web-app-compiling-a-custom-version-20a06d36ece1
     const baseURL = '/ffmpeg-wasm/core@0.12.6/esm';
     const ffmpeg = new FFmpeg();
 
@@ -24,16 +23,12 @@ const loadFFmpeg = async () => {
         console.debug(message);
       });
 
-    const dummyWorker = new Worker(workerUrl, { type: 'module' });
-    console.log('dummyWorker', workerUrl, dummyWorker);
     // toBlobURL is used to bypass CORS issue, urls with the same
     // domain can be used directly.
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
       wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-      classWorkerURL: workerUrl,
     });
-    console.log('load ffmpeg success');
 
     return ffmpeg;
   } catch (ex) {
