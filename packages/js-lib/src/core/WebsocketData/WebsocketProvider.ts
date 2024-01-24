@@ -136,10 +136,8 @@ const ConnectSocket = async (
     webSocketClient.onmessage = async (e) => {
       const notification: RawClientNotification = await parseMessage(e);
 
-      // STEF:TODO do something fancy here :)
       if (notification.notificationType === 'error') {
-        console.error('[NotificationProvider] Error:', notification.data);
-        return;
+        console.warn('[NotificationProvider] Error:', notification.data);
       }
 
       if (!isConnected) {
