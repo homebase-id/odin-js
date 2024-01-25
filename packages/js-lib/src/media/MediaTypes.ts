@@ -70,7 +70,6 @@ export interface SegmentedVideoMetadata extends BaseVideoMetadata {
   isSegmented: true;
   codec: string;
   duration: number;
-  segmentMap: { offset: number; samples: number }[];
 }
 
 export interface ThumbnailInstruction {

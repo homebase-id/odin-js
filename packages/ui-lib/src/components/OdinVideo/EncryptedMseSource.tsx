@@ -32,7 +32,7 @@ export const EncryptedMseSource = ({
   );
 
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
-  const fileLength = videoMetaData.fileSize;
+  const fileSize = videoMetaData.fileSize;
   const duration = videoMetaData.duration;
 
   useEffect(() => {
@@ -46,8 +46,8 @@ export const EncryptedMseSource = ({
   });
 
   const objectUrl = useMemo(() => {
-    if (!codec || !fileLength) {
-      console.warn('Missing codec or fileLength', videoMetaData);
+    if (!codec || !fileSize) {
+      console.warn('Missing codec or fileSize', videoMetaData);
       return null;
     }
     if (activeObjectUrl.current) return activeObjectUrl.current;
@@ -120,11 +120,7 @@ export const EncryptedMseSource = ({
     const appendNextChunk = async () => {
       const nextChunkStart = (currentChunk + 1) * chunkSize;
       const nextChunkEnd = nextChunkStart + chunkSize;
-      await appendRange(
-        nextChunkStart,
-        Math.min(nextChunkEnd, fileLength),
-        nextChunkEnd >= fileLength
-      );
+      await appendRange(nextChunkStart, Math.min(nextChunkEnd, fileSize), nextChunkEnd >= fileSize);
       currentChunk++;
     };
 
@@ -145,7 +141,6 @@ export const EncryptedMseSource = ({
         if (currentTime >= start && currentTime <= end) {
           // We are buffered, check if we need to fetch the next segment
           if (currentTime > end * 0.5 && !reachedEnd) {
-
             // Avoid firing the same request multiple times; While the previous request is still running
             catchingUp = true;
             await appendNextChunk();
@@ -157,7 +152,7 @@ export const EncryptedMseSource = ({
           if (!duration) {
             console.error('Missing duration, we cannot fetch the correct chunk');
           } else {
-            const currentByteOffset = (fileLength / duration) * currentTime;
+            const currentByteOffset = (fileSize / duration) * currentTime;
             const neededChunkIndex = Math.ceil(currentByteOffset / chunkSize);
 
             while (currentChunk < neededChunkIndex) {

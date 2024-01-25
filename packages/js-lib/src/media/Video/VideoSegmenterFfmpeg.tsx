@@ -65,7 +65,6 @@ export const segmentVideoFileWithFfmpeg = async (
         codec: getCodecFromMp4Info(mp4Info),
         fileSize: file.size,
         duration: mp4Info.duration,
-        segmentMap: [],
       },
     };
   }
@@ -95,7 +94,6 @@ export const segmentVideoFileWithFfmpeg = async (
     codec: getCodecFromMp4Info(mp4Info),
     fileSize: videoBlob.size,
     duration: mp4Info.duration,
-    segmentMap: [],
   };
 
   return {

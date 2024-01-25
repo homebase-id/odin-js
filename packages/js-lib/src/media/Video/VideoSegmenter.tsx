@@ -137,8 +137,6 @@ export const segmentVideoFile = async (
   return new Promise((resolve, reject) => {
     const mp4File = createFile(true);
     const segmentedBytes: Uint8Array[] = [];
-    let videoTrackId: number;
-    let segmentedByteOffset = 0;
     const tracksToRead: boolean[] = [];
     const metadata: SegmentedVideoMetadata = {
       isSegmented: true,
@@ -146,7 +144,6 @@ export const segmentVideoFile = async (
       codec: '',
       fileSize: 0,
       duration: 0,
-      segmentMap: [],
     };
 
     mp4File.onError = function (e: unknown) {
@@ -160,7 +157,6 @@ export const segmentVideoFile = async (
 
       metadata.codec = info.mime;
       const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
-      videoTrackId = avTracks.find((trck) => trck.type === 'video')?.id || 1;
       if (avTracks?.length > 1) {
         metadata.codec = `video/mp4; codecs="${avTracks
           .map((trck) => trck.codec)
@@ -171,7 +167,6 @@ export const segmentVideoFile = async (
       // If the file is already fragmented, we can just return it; With the metadata we have;
       if (info.isFragmented) {
         metadata.fileSize = file.size;
-        metadata.segmentMap = [];
 
         isDebug && console.debug('already fragmented, returning file', metadata);
         resolve({
@@ -211,28 +206,14 @@ export const segmentVideoFile = async (
       sampleNum: number,
       is_last: boolean
     ) {
-      if (id === videoTrackId)
-        metadata.segmentMap.push({ offset: segmentedByteOffset, samples: sampleNum });
-
       const segment = new Uint8Array(buffer);
-      segmentedByteOffset += segment.length;
       segmentedBytes.push(segment);
 
       if (is_last) {
         tracksToRead[id] = true;
 
         if (!tracksToRead.some((trck) => !trck)) {
-          isDebug && console.debug('without offsets: ', metadata.segmentMap);
-
           const finalMetaBytes = new Uint8Array(buildInitSegments(mp4File));
-          const metaOffset = finalMetaBytes.length;
-          metadata.segmentMap = [
-            { offset: 0, samples: 0 },
-            ...metadata.segmentMap.map((segment) => {
-              return { ...segment, offset: metaOffset + segment.offset };
-            }),
-          ];
-          isDebug && console.debug('with offsets: ', metadata.segmentMap);
           const finalSegmentedBytes = mergeByteArrays(segmentedBytes);
           const finalBytes = mergeByteArrays([finalMetaBytes, finalSegmentedBytes]);
           metadata.fileSize = finalBytes.length;
