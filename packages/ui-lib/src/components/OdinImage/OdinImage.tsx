@@ -422,7 +422,7 @@ const useOdinImage = (props: UseOdinImageProps) => {
 
   // If loading a thumb fails, try to load the full image
   const onLoadError = () => {
-    if (loadSize !== 'full') setLoadSize('full');
+    if (loadSize !== 'full' && !avoidPayload) setLoadSize('full');
     else setIsFatalError(true);
   };
 
