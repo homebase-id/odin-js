@@ -55,7 +55,7 @@ export const EmbeddedPostContent = ({
       <FakeAnchor href={postPath} onClick={(e) => e.stopPropagation()}>
         <div className="p-1">
           <div className="flex flex-row">
-            <div className="flex flex-grow flex-col px-2 py-2">
+            <div className="flex w-20 flex-grow flex-col px-2 py-2">
               <div className="text-foreground mb-1 flex flex-row gap-2 text-opacity-60">
                 <div className="flex-shrink-0">
                   <AuthorImage odinId={content.authorOdinId} className="h-7 w-7 rounded-full" />

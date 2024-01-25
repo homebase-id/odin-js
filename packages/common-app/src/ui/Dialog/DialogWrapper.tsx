@@ -72,7 +72,7 @@ export const DialogWrapper = ({
                 <div className="flex flex-row bg-slate-100 px-4 py-4 dark:bg-slate-700 sm:px-8">
                   {title ? (
                     <h3
-                      className="my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
+                      className="w-20 flex-grow my-3 text-2xl font-medium leading-6 text-gray-900 dark:text-slate-50"
                       id="modal-title"
                     >
                       {title}

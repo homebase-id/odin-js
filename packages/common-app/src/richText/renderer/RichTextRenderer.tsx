@@ -126,7 +126,7 @@ export const RichTextRenderer = ({
               (attributes?.url as string)?.startsWith(window.location.origin) ? '_self' : '_blank'
             }
             rel="noopener noreferrer"
-            className="text-primary hover:underline break-all"
+            className="text-primary hover:underline break-words"
             onClick={(e) => e.stopPropagation()}
           >
             {children ?? (attributes?.text || attributes?.url) + ''}
