@@ -81,5 +81,6 @@ jobs:
       - name: Commit version updates
         run: |
           git reset .npmrc
+          git add package-lock.json packages/js-lib/package.json packages/ui-lib/package.json
           git commit -am "Bump lib version(s)"
           git push
