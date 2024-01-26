@@ -30,10 +30,31 @@ const EMPTY_KEY_HEADER: KeyHeader = {
   aesKey: new Uint8Array(Array(16).fill(0)),
 };
 
-const toBlob = (o: unknown): Blob => {
+// Built purely for better support on react-native
+export const getSecuredBlob = async (
+  blobParts?: BlobPart[] | undefined,
+  options?: BlobPropertyBag
+) => {
+  const returnBlob = new OdinBlob(blobParts, options) as any;
+
+  await new Promise<void>((resolve) => {
+    if (returnBlob.written === undefined) resolve();
+
+    const interval = setInterval(async () => {
+      if (returnBlob.written) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
+
+  return returnBlob;
+};
+
+const toBlob = async (o: unknown): Promise<Blob> => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
-  return new OdinBlob([content], { type: 'application/octet-stream' });
+  return await getSecuredBlob([content], { type: 'application/octet-stream' });
 };
 
 export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mimeType: string) => {
@@ -131,8 +152,8 @@ export const buildFormData = async (
   const data = new FormData();
   const instructionType =
     'targetFile' in instructionSet ? 'payloadUploadInstructions' : 'instructions';
-  data.append(instructionType, toBlob(instructionSet));
-  if (encryptedDescriptor) data.append('metaData', new OdinBlob([encryptedDescriptor]));
+  data.append(instructionType, await toBlob(instructionSet));
+  if (encryptedDescriptor) data.append('metaData', await getSecuredBlob([encryptedDescriptor]));
 
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {

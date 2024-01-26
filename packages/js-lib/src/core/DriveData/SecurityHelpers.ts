@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { streamToByteArray } from './Upload/UploadHelpers';
+import { getSecuredBlob, streamToByteArray } from './Upload/UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
   jsonStringify64,
@@ -55,24 +55,12 @@ export const encryptWithKeyheader = async <
     } catch (ex) {
       console.warn('Stream encryption failed, fallback to full encryption', ex);
       const contentAsArray = new Uint8Array(await content.arrayBuffer());
-      const returnBlob = new OdinBlob(
+      return await getSecuredBlob(
         [await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)],
         {
           type: content.type,
         }
-      ) as any;
-
-      await new Promise<void>((resolve) => {
-        if (returnBlob.written === undefined) resolve();
-
-        const interval = setInterval(async () => {
-          if (returnBlob.written) {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 100);
-      });
-      return returnBlob as R;
+      );
     }
   }
 
