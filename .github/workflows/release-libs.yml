@@ -80,7 +80,6 @@ jobs:
       # Push the version increment back into the repo
       - name: Commit version updates
         run: |
-          git reset .npmrc
-          git add package-lock.json packages/js-lib/package.json packages/ui-lib/package.json
+          git restore .npmrc
           git commit -am "Bump lib version(s)"
           git push
