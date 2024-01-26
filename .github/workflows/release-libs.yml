@@ -80,5 +80,6 @@ jobs:
       # Push the version increment back into the repo
       - name: Commit version updates
         run: |
+          git reset .npmrc
           git commit -am "Bump lib version(s)"
           git push
