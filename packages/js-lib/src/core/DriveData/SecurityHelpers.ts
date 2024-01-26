@@ -55,9 +55,24 @@ export const encryptWithKeyheader = async <
     } catch (ex) {
       console.warn('Stream encryption failed, fallback to full encryption', ex);
       const contentAsArray = new Uint8Array(await content.arrayBuffer());
-      return new OdinBlob([await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)], {
-        type: content.type,
-      }) as R;
+      const returnBlob = new OdinBlob(
+        [await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)],
+        {
+          type: content.type,
+        }
+      ) as any;
+
+      await new Promise<void>((resolve) => {
+        if (returnBlob.written === undefined) resolve();
+
+        const interval = setInterval(async () => {
+          if (returnBlob.written) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      });
+      return returnBlob as R;
     }
   }
 
