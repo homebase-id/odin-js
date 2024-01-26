@@ -128,7 +128,7 @@ const DriveDetails = () => {
             )
           }
         >
-          <ul className="-my-4">
+          <ul className="flex flex-col items-start gap-4">
             {circlesWithAGrantOnThis.map((circle) => {
               const matchingGrant = circle.driveGrants?.find(
                 (grant) =>
@@ -142,7 +142,6 @@ const DriveDetails = () => {
                   permissionDetails={t(
                     getDrivePermissionFromNumber(matchingGrant?.permissionedDrive?.permission)
                   )}
-                  className="my-4"
                 />
               );
             })}
@@ -159,7 +158,7 @@ const DriveDetails = () => {
             )
           }
         >
-          <ul className="-my-4">
+          <ul className="flex flex-col items-start gap-4">
             {appsWithAGrantOnThis.map((app) => {
               const matchingGrant = app.grant.driveGrants.find(
                 (grant) =>
@@ -168,7 +167,6 @@ const DriveDetails = () => {
               );
               return (
                 <AppMembershipView
-                  className="my-4"
                   appDef={app}
                   key={app.appId}
                   permissionLevel={t(

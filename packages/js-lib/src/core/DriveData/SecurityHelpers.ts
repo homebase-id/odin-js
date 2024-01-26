@@ -55,12 +55,12 @@ export const encryptWithKeyheader = async <
     } catch (ex) {
       console.warn('Stream encryption failed, fallback to full encryption', ex);
       const contentAsArray = new Uint8Array(await content.arrayBuffer());
-      return await getSecuredBlob(
+      return (await getSecuredBlob(
         [await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)],
         {
           type: content.type,
         }
-      );
+      )) as R;
     }
   }
 

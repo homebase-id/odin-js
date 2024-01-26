@@ -83,7 +83,7 @@ export const EncryptedMseSource = ({
       });
     };
 
-    const appendRange = async (start: number, end: number, isEnd?: boolean) => {
+    const appendRange = async (start: number, end?: number, isEnd?: boolean) => {
       const chunk = await getChunk(start, end);
       if (chunk) {
         await appendToBuffer(chunk);
@@ -120,7 +120,8 @@ export const EncryptedMseSource = ({
     const appendNextChunk = async () => {
       const nextChunkStart = (currentChunk + 1) * chunkSize;
       const nextChunkEnd = nextChunkStart + chunkSize;
-      await appendRange(nextChunkStart, Math.min(nextChunkEnd, fileSize), nextChunkEnd >= fileSize);
+      const endOfFile = nextChunkEnd >= fileSize;
+      await appendRange(nextChunkStart, !endOfFile ? nextChunkEnd : undefined, endOfFile);
       currentChunk++;
     };
 

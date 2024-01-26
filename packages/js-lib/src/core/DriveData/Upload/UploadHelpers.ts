@@ -48,7 +48,7 @@ export const getSecuredBlob = async (
     }, 100);
   });
 
-  return returnBlob;
+  return returnBlob as Blob;
 };
 
 const toBlob = async (o: unknown): Promise<Blob> => {
