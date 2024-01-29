@@ -29,7 +29,7 @@ const ConnectionDetails = () => {
     <>
       <IdentityPageMetaAndActions
         odinId={odinId}
-        setIsEditPermissionActive={setIsEditPermissionActive}
+        // setIsEditPermissionActive={setIsEditPermissionActive}
       />
 
       <IdentityAlerts odinId={odinId} />

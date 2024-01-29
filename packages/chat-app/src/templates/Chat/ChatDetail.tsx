@@ -30,13 +30,7 @@ import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
 import { CHAT_ROOT } from './ChatHome';
 
-export const ChatDetail = ({
-  conversationId,
-  toggleSidenav,
-}: {
-  conversationId: string | undefined;
-  toggleSidenav: () => void;
-}) => {
+export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
 
   const { data: conversation } = useConversation({ conversationId }).single;
@@ -57,7 +51,7 @@ export const ChatDetail = ({
 
   return (
     <div className="flex h-full flex-grow flex-col overflow-hidden">
-      <ChatHeader conversation={conversation || undefined} toggleSidenav={toggleSidenav} />
+      <ChatHeader conversation={conversation || undefined} />
       <GroupChatConnectedState conversation={conversation || undefined} />
       <ChatHistory
         conversation={conversation || undefined}
@@ -77,10 +71,8 @@ export const ChatDetail = ({
 
 const ChatHeader = ({
   conversation: conversationDsr,
-  toggleSidenav,
 }: {
   conversation: DriveSearchResult<Conversation> | undefined;
-  toggleSidenav: () => void;
 }) => {
   const navigate = useNavigate();
 
@@ -105,9 +97,9 @@ const ChatHeader = ({
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionButton className="md:hidden" type="mute" onClick={toggleSidenav}>
+        <ActionLink className="md:hidden" type="mute" href={CHAT_ROOT}>
           <ChevronLeft className="h-4 w-4" />
-        </ActionButton>
+        </ActionLink>
 
         <a
           onClick={() => setShowChatInfo(true)}

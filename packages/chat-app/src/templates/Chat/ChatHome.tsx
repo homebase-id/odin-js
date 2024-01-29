@@ -49,10 +49,7 @@ export const ChatHome = () => {
         />
 
         <div className="h-full w-full flex-grow bg-background">
-          <ChatDetail
-            conversationId={conversationKey}
-            toggleSidenav={() => setIsSidenavOpen(!isSidenavOpen)}
-          />
+          <ChatDetail conversationId={conversationKey} />
         </div>
       </div>
     </>

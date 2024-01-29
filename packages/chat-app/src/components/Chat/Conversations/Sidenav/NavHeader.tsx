@@ -25,7 +25,7 @@ export const NavHeader = ({
           {t('New')}
         </ActionLink>
         {closeSideNav ? (
-          <ActionButton className="lg:hidden" type="mute" onClick={closeSideNav}>
+          <ActionButton className="md:hidden" type="mute" onClick={closeSideNav}>
             <Times className="h-5 w-5" />
           </ActionButton>
         ) : null}

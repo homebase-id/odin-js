@@ -1,6 +1,5 @@
 import {
   ActionButton,
-  Pencil,
   t,
   ActionGroupOptionProps,
   House,
@@ -12,6 +11,7 @@ import {
   useDotYouClient,
   ConfirmDialog,
   Ellipsis,
+  useIdentityIFollow,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -23,10 +23,10 @@ import { useConnectionActions } from '../../../hooks/connections/useConnectionAc
 
 export const IdentityPageMetaAndActions = ({
   odinId,
-  setIsEditPermissionActive,
-}: {
+} // setIsEditPermissionActive,
+: {
   odinId: string;
-  setIsEditPermissionActive: (newState: boolean) => void;
+  // setIsEditPermissionActive: (newState: boolean) => void;
 }) => {
   const navigate = useNavigate();
   const { action } = useParams();
@@ -65,6 +65,11 @@ export const IdentityPageMetaAndActions = ({
     block: { mutate: block, error: blockError },
     unblock: { mutate: unblock, status: unblockStatus, error: unblockError },
   } = useConnectionActions();
+
+  const { data: identityIfollow, isFetched: followStateFetched } = useIdentityIFollow({
+    odinId,
+  }).fetch;
+  const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
 
   // Contact data:
   const { data: contactData } = useContact({
@@ -153,6 +158,14 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
+  if (isFollowing === false) {
+    actionGroupOptions.push({
+      icon: Persons,
+      label: t('Follow'),
+      href: `/owner/follow/following/${odinId}`,
+    });
+  }
+
   return (
     <>
       <ErrorNotification error={disconnectError || revokeError || blockError || unblockError} />
@@ -166,7 +179,7 @@ export const IdentityPageMetaAndActions = ({
                 {`${
                   contactContent?.name
                     ? contactContent.name.displayName ??
-                      `${contactContent.name.givenName} ${contactContent.name.surname}`
+                      `${contactContent.name.givenName || ''} ${contactContent.name.surname || ''}`
                     : odinId
                 }`}
               </span>
