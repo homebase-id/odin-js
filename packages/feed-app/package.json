@@ -23,7 +23,7 @@
     "@youfoundation/js-lib": "*",
     "@youfoundation/ui-lib": "*",
     "@youfoundation/rich-text-editor": "*",
-    "axios": "1.5.1",
+    "axios": "1.6.7",
     "emoji-picker-element": "^1.15.1",
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",

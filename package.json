@@ -34,7 +34,7 @@
     "prettier": "3.0.3",
     "tslib": "^2.4.0",
     "typescript": "5.2",
-    "vite": "5.0.4",
+    "vite": "5.0.12",
     "vite-plugin-dts": "^3.6.3",
     "rollup": "4.6.1"
   },
