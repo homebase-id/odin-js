@@ -69,6 +69,8 @@ export const segmentVideoFileWithFfmpeg = async (
   }
 
   const mp4Info = await getMp4Info(file);
+  const durationInSeconds = mp4Info.duration / mp4Info.timescale;
+  const durationinMiliseconds = durationInSeconds * 1000;
   if (mp4Info.isFragmented) {
     return {
       data: file,
@@ -77,16 +79,19 @@ export const segmentVideoFileWithFfmpeg = async (
         mimeType: 'video/mp4',
         codec: getCodecFromMp4Info(mp4Info),
         fileSize: file.size,
-        duration: mp4Info.duration,
+        duration: durationinMiliseconds,
       },
     };
   }
 
   const ffmpeg = await loadFFmpeg();
+  // ffmpeg.on('log', ({ message }) => {
+  //   console.log(message);
+  // });
 
   const buffer = await file.arrayBuffer();
   await ffmpeg.writeFile('input.mp4', new Uint8Array(buffer));
-  await ffmpeg.exec([
+  const status = await ffmpeg.exec([
     '-i',
     'input.mp4',
     '-c:v',
@@ -97,6 +102,9 @@ export const segmentVideoFileWithFfmpeg = async (
     'frag_keyframe+empty_moov+default_base_moof ',
     'output.mp4',
   ]);
+  if (status !== 0) {
+    throw new Error('Failed to segment video');
+  }
 
   const data = await ffmpeg.readFile('output.mp4');
   const videoBlob = new OdinBlob([data], { type: 'video/mp4' });
@@ -106,11 +114,34 @@ export const segmentVideoFileWithFfmpeg = async (
     mimeType: 'video/mp4',
     codec: getCodecFromMp4Info(mp4Info),
     fileSize: videoBlob.size,
-    duration: mp4Info.duration,
+    duration: durationinMiliseconds,
   };
 
   return {
     data: videoBlob,
     metadata,
   };
+};
+
+export const getThumbnailWithFfmpeg = async (videoFile: File | Blob): Promise<Blob> => {
+  if (!videoFile || videoFile.type !== 'video/mp4') {
+    throw new Error('No (supported) mp4 file found, grabbing a thumb only works with mp4 files');
+  }
+
+  const ffmpeg = await loadFFmpeg();
+
+  const buffer = await videoFile.arrayBuffer();
+  await ffmpeg.writeFile('input.mp4', new Uint8Array(buffer));
+
+  // ffmpeg.on('log', ({ message }) => {
+  //   console.log(message);
+  // });
+  await ffmpeg.exec(['-i', 'input.mp4', '-frames:v', '1', 'thumb%04d.png']);
+
+  const data = await ffmpeg.readFile('thumb0001.png');
+  if (!data) {
+    throw new Error('Failed to get thumbnail');
+  }
+
+  return new OdinBlob([data], { type: 'image/png' });
 };
