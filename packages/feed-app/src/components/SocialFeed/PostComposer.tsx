@@ -80,7 +80,7 @@ const PostComposer = ({
 
   const resetUi = () => {
     setCaption('');
-    setChannel(BlogConfig.PublicChannelNewDsr);
+    // setChannel(BlogConfig.PublicChannelNewDsr);
     setFiles(undefined);
     setStateIndex((i) => i + 1);
   };

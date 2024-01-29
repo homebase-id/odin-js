@@ -254,6 +254,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       },
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['channels'] });
+        publishStaticFiles('channel');
       },
     }),
   };

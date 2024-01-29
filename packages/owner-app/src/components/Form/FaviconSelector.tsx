@@ -19,7 +19,6 @@ const FaviconSelector = ({
   lastModified,
   ...props
 }: FaviconSelectorProps) => {
-  console.log(defaultValue);
   const valueObject: { fileKey: string } | { emoji: string } | undefined = defaultValue as
     | { fileKey: string }
     | { emoji: string }
