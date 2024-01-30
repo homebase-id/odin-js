@@ -1,5 +1,5 @@
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import { ActionButton, ActionGroup, ActionLink, Save, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, ActionLink, Save, Times, t } from '@youfoundation/common-app';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -87,18 +87,23 @@ const PublishOptions = () => {
       <Section
         title={
           <>
-            <Cloud className="inline-block h-4 w-4" /> {t('Publish your public data')}
+            <Cloud className="inline-block h-4 w-4" /> {t('Clear cache')}
           </>
         }
       >
-        <div className="flex flex-row">
+        <p className="mb-2">
+          {t(
+            `Did your public cache get outdated? You can force a refresh of your public cache to attempt and fix the issues you may be having.`
+          )}
+        </p>
+        <div className="flex flex-row-reverse">
           <ActionButton
             onClick={() => publishStaticFiles(undefined)}
             state={publishStatus}
-            icon={Save}
-            className="ml-auto"
+            icon={Times}
+            type="secondary"
           >
-            {t('Publish static file')}
+            {t('Clear cache')}
           </ActionButton>
         </div>
       </Section>
