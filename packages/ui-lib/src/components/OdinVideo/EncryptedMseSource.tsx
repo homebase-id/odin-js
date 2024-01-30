@@ -1,5 +1,5 @@
 import { SegmentedVideoMetadata } from '@youfoundation/js-lib/media';
-import { useRef, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useVideo } from '../../hooks/video/useVideo';
 import { OdinVideoProps } from './OdinVideo';
 
@@ -20,8 +20,6 @@ export const EncryptedMseSource = ({
   videoRef,
   onFatalError,
 }: OdinEncryptedMseProps) => {
-  const activeObjectUrl = useRef<string>();
-
   const { getChunk } = useVideo(
     dotYouClient,
     odinId,
@@ -33,7 +31,7 @@ export const EncryptedMseSource = ({
 
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
   const fileSize = videoMetaData.fileSize;
-  const duration = videoMetaData.duration;
+  const durationInSec = videoMetaData.duration ? videoMetaData.duration / 1000 : undefined;
 
   useEffect(() => {
     const errorHandler = (e: any) => {
@@ -50,12 +48,13 @@ export const EncryptedMseSource = ({
       console.warn('Missing codec or fileSize', videoMetaData);
       return null;
     }
-    if (activeObjectUrl.current) return activeObjectUrl.current;
 
     const chunkSize = 8 * 1024 * 1024;
     let currentChunk = 0;
     let reachedEnd = false;
     let catchingUp = false;
+
+    let removedCounter = 0;
 
     const innerMediaSource = new MediaSource();
     const objectUrl = URL.createObjectURL(innerMediaSource);
@@ -64,6 +63,8 @@ export const EncryptedMseSource = ({
     const sourceOpen = async () => {
       URL.revokeObjectURL(objectUrl);
       sourceBuffer = innerMediaSource.addSourceBuffer(codec);
+      // Optional way of setting the duration, but it would be better if it's part of the mehd box
+      if (durationInSec) innerMediaSource.duration = durationInSec;
 
       // Fetch the first chunk
       await appendRange(0, chunkSize);
@@ -91,14 +92,14 @@ export const EncryptedMseSource = ({
           reachedEnd = true;
           sourceBuffer.addEventListener('updateend', () => {
             innerMediaSource.removeEventListener('sourceopen', sourceOpen);
-            innerMediaSource.endOfStream();
+            if (innerMediaSource.readyState === 'open') innerMediaSource.endOfStream();
           });
         }
       }
     };
 
     const appendToBuffer = (chunk: Uint8Array) => {
-      return new Promise<void>((resolve) => {
+      return new Promise<void>((resolve, reject) => {
         if (sourceBuffer.updating) {
           sourceBuffer.addEventListener('updateend', () => appendToBuffer(chunk).then(resolve), {
             once: true,
@@ -106,13 +107,32 @@ export const EncryptedMseSource = ({
         } else {
           try {
             sourceBuffer.appendBuffer(chunk.buffer);
+            resolve();
           } catch (e: unknown) {
-            if (e && typeof e === 'object' && 'name' in e && e.name === 'QuotaExceededError') {
+            if (
+              e &&
+              typeof e === 'object' &&
+              'name' in e &&
+              e.name === 'QuotaExceededError' &&
+              videoRef.current &&
+              durationInSec
+            ) {
+              if (removedCounter < 1) {
+                // We try and make it better.. But we don't support re-adding removed data ATM;
+                console.log('QuotaExceededError', videoRef.current.currentTime / 2);
+                removedCounter++;
+
+                sourceBuffer.remove(0, videoRef.current.currentTime / 2);
+                appendToBuffer(chunk).then(resolve);
+              }
+              // Nothing more we can do.. Just let it play and hope for the best
+              resolve();
+            } else {
               console.error('appendBuffer error', e);
               onFatalError && onFatalError();
+              reject();
             }
           }
-          resolve();
         }
       });
     };
@@ -150,11 +170,23 @@ export const EncryptedMseSource = ({
         } else {
           catchingUp = true;
           // We don't have data for this part of the video, fetch the chunks we need
-          if (!duration) {
-            console.error('Missing duration, we cannot fetch the correct chunk');
+          if (!durationInSec) {
+            console.error('Missing durationInSec, we cannot fetch the correct chunk');
           } else {
-            const currentByteOffset = (fileSize / duration) * currentTime;
+            const currentByteOffset = (fileSize / durationInSec) * currentTime;
             const neededChunkIndex = Math.ceil(currentByteOffset / chunkSize);
+
+            if (neededChunkIndex < currentChunk) {
+              // TODO: Can we fix this? Rebulding from index 0?
+              console.error('We got behind, not supported');
+              return;
+            }
+            console.log('Catching up', {
+              currentTime,
+              durationInSec,
+              currentChunk,
+              neededChunkIndex,
+            });
 
             while (currentChunk < neededChunkIndex) {
               await appendNextChunk();
