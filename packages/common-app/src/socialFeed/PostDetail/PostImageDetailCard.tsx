@@ -103,40 +103,40 @@ export const PostImageDetailCard = ({
       <div className="inset-0 z-10 lg:fixed">
         <div className="flex h-full min-h-screen flex-col lg:flex-row overflow-auto lg:overflow-none">
           <div
-            className={`relative flex h-full max-h-screen flex-grow overflow-hidden lg:flex-grow-0`}
+            className={`relative flex h-[60vh] lg:h-full lg:flex-grow max-h-screen flex-grow-0 overflow-hidden`}
           >
-            <div className="my-auto flex h-full w-full lg:w-[calc(100vw-25rem)] lg:p-5">
-              {!post ? (
-                <Loader className="m-auto h-10 w-10 text-white" />
-              ) : currentMediaFile?.type !== 'video' ? (
-                <Image
-                  odinId={odinId}
-                  className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
-                  fileId={currentMediaFile?.fileId || postFile.fileId}
-                  globalTransitId={postFile.fileMetadata.globalTransitId}
-                  fileKey={currentMediaFile?.fileKey}
-                  targetDrive={getChannelDrive(post.channelId)}
-                  lastModified={postFile.fileMetadata.updated}
-                  alt="post"
-                  fit="contain"
-                  previewThumbnail={
-                    mediaFileIds?.length === 1
-                      ? postFile.fileMetadata.appData.previewThumbnail
-                      : undefined
-                  }
-                  probablyEncrypted={postFile.fileMetadata.isEncrypted}
-                  key={
-                    (currentMediaFile?.fileId || postFile.fileId || '') +
-                    (currentMediaFile?.fileKey || currIndex)
-                  }
-                />
-              ) : (
+            {!post ? (
+              <Loader className="m-auto h-10 w-10 text-white" />
+            ) : currentMediaFile?.type !== 'video' ? (
+              <Image
+                odinId={odinId}
+                className={`absolute inset-0 flex max-h-[60vh] lg:max-h-full lg:w-full lg:static`}
+                fileId={currentMediaFile?.fileId || postFile.fileId}
+                globalTransitId={postFile.fileMetadata.globalTransitId}
+                fileKey={currentMediaFile?.fileKey}
+                targetDrive={getChannelDrive(post.channelId)}
+                lastModified={postFile.fileMetadata.updated}
+                alt="post"
+                fit="contain"
+                previewThumbnail={
+                  mediaFileIds?.length === 1
+                    ? postFile.fileMetadata.appData.previewThumbnail
+                    : undefined
+                }
+                probablyEncrypted={postFile.fileMetadata.isEncrypted}
+                key={
+                  (currentMediaFile?.fileId || postFile.fileId || '') +
+                  (currentMediaFile?.fileKey || currIndex)
+                }
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
                 <Video
                   fileId={currentMediaFile?.fileId || postFile.fileId}
                   globalTransitId={postFile.fileMetadata.globalTransitId}
                   lastModified={postFile.fileMetadata.updated}
                   fileKey={currentMediaFile?.fileKey}
-                  className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
+                  className={`object-contain max-h-full`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={
                     mediaFileIds?.length === 1
@@ -146,12 +146,12 @@ export const PostImageDetailCard = ({
                   odinId={odinId}
                   probablyEncrypted={postFile.fileMetadata.isEncrypted}
                 />
-              )}
-            </div>
+              </div>
+            )}
             <ActionButton
               icon={Times}
               onClick={doClose}
-              className="fixed left-2 top-2 rounded-full p-3 lg:absolute"
+              className="absolute left-2 top-2 rounded-full p-3 lg:absolute"
               size="square"
               type="secondary"
             />
@@ -175,7 +175,7 @@ export const PostImageDetailCard = ({
             ) : null}
           </div>
 
-          <div className="bg-background flex-shrink-0 max-h-screen flex-grow md:block lg:w-[25rem] lg:overflow-auto">
+          <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[25rem] lg:flex-grow-0 lg:overflow-auto">
             <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
               <AuthorImage odinId={odinId} size="sm" />
               <div className="flex max-w-lg flex-grow flex-col">

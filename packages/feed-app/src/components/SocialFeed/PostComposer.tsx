@@ -170,7 +170,9 @@ const PostComposer = ({
                 title="Attach a file"
               >
                 <FileSelector
-                  onChange={(files) => setFiles(files.map((file) => ({ file })))}
+                  onChange={(mediaFiles) =>
+                    setFiles([...(files ?? []), ...mediaFiles.map((file) => ({ file }))])
+                  }
                   accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
                   className="text-foreground hover:text-opacity-70"
                 />

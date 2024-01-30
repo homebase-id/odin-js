@@ -89,18 +89,14 @@ export const SocialFeed = () => {
         />
       ) : null}
       {identityKey && channelKey && postKey ? (
-        <div
-          className={`fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm`}
-        >
-          <Suspense>
-            <PostPreview
-              postKey={postKey}
-              identityKey={identityKey}
-              channelKey={channelKey}
-              attachmentKey={attachmentKey}
-            />
-          </Suspense>
-        </div>
+        <Suspense>
+          <PostPreview
+            postKey={postKey}
+            identityKey={identityKey}
+            channelKey={channelKey}
+            attachmentKey={attachmentKey}
+          />
+        </Suspense>
       ) : null}
       <section className="flex-grow bg-page-background md:pt-0">
         <div className="container mx-auto gap-4 pb-3 sm:pb-10 lg:grid lg:max-w-7xl lg:grid-cols-4">
