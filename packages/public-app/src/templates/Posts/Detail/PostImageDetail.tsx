@@ -11,6 +11,7 @@ const PostImageDetail = () => {
     channelKey && postKey
       ? {
           channelSlug: channelKey,
+          channelId: channelKey,
           blogSlug: postKey,
         }
       : undefined

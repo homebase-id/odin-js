@@ -95,7 +95,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
-        console.log('invalidate chat', conversationId);
         queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
 
         // Check if the message is orphaned from a conversation
