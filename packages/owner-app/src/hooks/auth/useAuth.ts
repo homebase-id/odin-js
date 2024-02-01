@@ -88,7 +88,7 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
-      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
+      setAuthenticationState(hasValidToken && hasSharedSecret ? 'authenticated' : 'anonymous');
 
       if (hasValidToken && hasSharedSecret) {
         // When authenticated check if on Login Pages and if so redirects to return or Home
