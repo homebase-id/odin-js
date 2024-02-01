@@ -21,6 +21,8 @@ import {
 
 import { ErrorNotification } from '@youfoundation/common-app';
 
+const TEN_MEGA_BYTES = 10 * 1024 * 1024;
+
 export const CommentComposer = ({
   context,
   replyThreadId,
@@ -154,6 +156,7 @@ export const CommentEditor = ({
           <FileSelector
             onChange={(newFiles) => setAttachment(newFiles?.[0])}
             className="text-foreground text-opacity-30 hover:text-opacity-100"
+            maxSize={TEN_MEGA_BYTES}
           >
             <ImageIcon className="h-5 w-5" />
           </FileSelector>

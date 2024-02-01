@@ -41,9 +41,8 @@ import {
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
+const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 const PostComposer = ({
   onPost,
@@ -175,6 +174,7 @@ const PostComposer = ({
                   }
                   accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
                   className="text-foreground hover:text-opacity-70"
+                  maxSize={HUNDRED_MEGA_BYTES}
                 />
               </div>
 

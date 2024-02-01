@@ -6,11 +6,13 @@ export const FileSelector = ({
   onChange,
   className,
   accept,
+  maxSize,
 }: {
   children?: ReactNode;
   onChange?: (files: File[]) => void;
   className?: string;
   accept?: string;
+  maxSize?: number;
 }) => {
   const id = getNewId();
 
@@ -28,6 +30,17 @@ export const FileSelector = ({
         onChange={(e) => {
           const files = e.target?.files;
           if (files) {
+            if (maxSize) {
+              for (let i = 0; i < files.length; i++) {
+                if (files[i].size > maxSize) {
+                  alert(
+                    `File ${files[i].name} is too big. Max size is ${maxSize / 1024 / 1024} MB.`
+                  );
+                  e.target.value = '';
+                  return;
+                }
+              }
+            }
             onChange && onChange(Array.from(files));
           }
         }}

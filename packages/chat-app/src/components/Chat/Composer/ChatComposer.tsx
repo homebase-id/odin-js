@@ -22,9 +22,8 @@ import {
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
+const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 export const ChatComposer = ({
   conversation,
@@ -105,6 +104,7 @@ export const ChatComposer = ({
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
               className="text-foreground text-opacity-30 hover:text-opacity-100"
               accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
+              maxSize={HUNDRED_MEGA_BYTES}
             >
               <ImageIcon className="h-5 w-5" />
             </FileSelector>
