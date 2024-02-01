@@ -78,11 +78,7 @@ export const useAuth = () => {
   const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      if (returnUrl) {
-        window.location.href = returnUrl;
-      } else {
-        window.location.href = HOME_PATH;
-      }
+      window.location.href = returnUrl || HOME_PATH;
     }
   };
 
