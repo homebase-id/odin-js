@@ -64,7 +64,9 @@ export const ArticleComposerPage = () => {
     caption: searchParams.get('caption') || undefined,
   });
 
-  const debouncedSave = useDebounce(() => doSave(postFile), { timeoutMillis: 1500 });
+  const debouncedSave = useDebounce(() => doSave(postFile, isPublished ? 'publish' : undefined), {
+    timeoutMillis: 1500,
+  });
 
   const PostButton = ({ className }: { className?: string }) => {
     if (isPublished)
@@ -189,8 +191,8 @@ export const ArticleComposerPage = () => {
               doSave();
               return false;
             }}
-            className={isPublished ? 'opacity-90 grayscale' : ''}
-            onClick={() => isPublished && setIsConfirmUnpublish(true)}
+            // className={isPublished ? 'opacity-90 grayscale' : ''}
+            // onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
             <InnerFieldEditors
               key={postFile.fileMetadata.appData.content.id}
@@ -233,7 +235,7 @@ export const ArticleComposerPage = () => {
                 }));
                 debouncedSave();
               }}
-              disabled={isPublished}
+              // disabled={isPublished}
             />
 
             <div className="mb-5 flex md:hidden">

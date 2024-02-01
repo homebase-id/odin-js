@@ -183,10 +183,7 @@ export const useArticleComposer = ({
         };
       });
 
-    // TODO: Move to component as it has page context?
-    if (isPublish) {
-      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
-    } else {
+    if (!isPublish) {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(
         null,
