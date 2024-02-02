@@ -121,7 +121,8 @@ export const useArticleComposer = ({
   const doSave = async (
     dirtyPostFile: DriveSearchResult<Article> | NewDriveSearchResult<Article> = postFile,
     action: 'save' | 'publish' | 'draft' = 'save',
-    explicitTargetChannel?: NewDriveSearchResult<ChannelDefinition>
+    explicitTargetChannel?: NewDriveSearchResult<ChannelDefinition>,
+    redirectOnPublish?: boolean
   ) => {
     // Check if fully empty and if so don't save
     if (isValidPost(dirtyPostFile)) return;
@@ -183,7 +184,10 @@ export const useArticleComposer = ({
         };
       });
 
-    if (!isPublish) {
+    // TODO: Move to component as it has page context?
+    if (isPublish && redirectOnPublish) {
+      window.location.href = `${HOME_ROOT_PATH}posts/${targetChannel.fileMetadata.appData.content.slug}/${toPostFile.fileMetadata.appData.content.slug}`;
+    } else {
       // Update url to support proper back browsing; And not losing the context when a refresh is needed
       window.history.replaceState(
         null,

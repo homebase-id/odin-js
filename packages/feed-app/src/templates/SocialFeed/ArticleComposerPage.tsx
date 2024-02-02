@@ -107,7 +107,7 @@ export const ArticleComposerPage = () => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          doSave(postFile, 'publish');
+          doSave(postFile, 'publish', undefined, true);
         }}
         confirmOptions={{
           title: t('Post'),
