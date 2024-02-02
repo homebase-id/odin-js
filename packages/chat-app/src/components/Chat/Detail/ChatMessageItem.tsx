@@ -100,13 +100,15 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
-    (content.message?.match(/^\p{Extended_Pictographic}/u) && !content.message?.match(/[0-9a-zA-Z]/)) ?? false;
+    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
+      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    false;
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
   return (
     <div
-      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-1 md:max-w-xs lg:max-w-lg  ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-1 shadow-sm md:max-w-xs lg:max-w-lg ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -186,7 +188,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs ${
+      className={`relative w-auto max-w-[75vw] rounded-lg shadow-sm md:max-w-xs ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
       }`}
     >
