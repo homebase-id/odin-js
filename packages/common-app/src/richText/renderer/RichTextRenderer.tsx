@@ -175,7 +175,7 @@ export const RichTextRenderer = ({
   };
 
   return (
-    <div className={`whitespace-normal break-words ${className ?? ''}`}>
+    <div className={`whitespace-pre-wrap break-words ${className ?? ''}`}>
       {body.map((element, index) => {
         return <React.Fragment key={index}>{render(element)}</React.Fragment>;
       })}
