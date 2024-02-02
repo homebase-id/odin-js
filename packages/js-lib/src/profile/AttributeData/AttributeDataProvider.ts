@@ -469,7 +469,8 @@ export const saveAttribute = async (
 
     if (keyHeader && existingDefaultPayload?.iv) {
       keyHeader.iv = existingDefaultPayload.iv;
-    } else if (keyHeader) {
+    } else if (keyHeader && !shouldEmbedContent) {
+      // Fail if we can't find the IV for the existing default payload (and we need it)
       throw new Error('We failed to find the IV of an attribute to upload with');
     }
 

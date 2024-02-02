@@ -102,7 +102,12 @@ export const decryptJsonContent = async (
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
 ): Promise<string> => {
-  if (!keyheader || !fileMetaData.appData.content) return fileMetaData.appData.content;
+  if (
+    !keyheader ||
+    !fileMetaData.appData.content ||
+    typeof fileMetaData.appData.content === 'object'
+  )
+    return fileMetaData.appData.content;
 
   try {
     const cipher = base64ToUint8Array(fileMetaData.appData.content);
