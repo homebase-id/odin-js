@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  ReactionsBar,
+  SocialReactionsBar,
   t,
   useDotYouClient,
   useOutsideTrigger,
@@ -39,7 +39,7 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
           onMouseLeave={() => setIsReact(false)}
           onMouseEnter={() => setIsReact(true)}
         >
-          <ReactionsBar
+          <SocialReactionsBar
             className="absolute left-0 top-0"
             isActive={isReact}
             context={threadContext}

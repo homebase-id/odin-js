@@ -4,6 +4,9 @@ import {
   ConnectionName,
   Block,
   t,
+  ReactionsBar,
+  useOutsideTrigger,
+  Lol,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -16,6 +19,7 @@ import { ChatSentTimeIndicator } from './ChatSentTimeIndicator';
 import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
+import { useRef, useState } from 'react';
 
 export const ChatMessageItem = ({
   msg,
@@ -74,8 +78,45 @@ export const ChatMessageItem = ({
             isDeleted={isDeleted}
           />
         )}
+
+        <ChatReactions />
       </div>
     </>
+  );
+};
+
+const ChatReactions = () => {
+  const [isReact, setIsReact] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useOutsideTrigger(wrapperRef, () => setIsReact(false));
+
+  return (
+    <div
+      className={`relative mx-1 my-auto cursor-pointer opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
+        isReact ? 'opacity-100' : ''
+      }`}
+      ref={wrapperRef}
+    >
+      <div className={`${isReact ? 'absolute' : 'contents'} -left-2 -top-12 bottom-0 w-[10rem]`}>
+        {isReact ? (
+          <ReactionsBar
+            className={`absolute left-0 top-0 z-20`}
+            defaultValue={[]}
+            doLike={() => setIsReact(false)}
+            doUnlike={() => setIsReact(false)}
+          />
+        ) : null}
+      </div>
+      <button
+        className={`cursor-pointer hover:text-black dark:text-slate-600 dark:hover:text-white ${
+          isReact ? 'text-black dark:text-white' : ''
+        }`}
+        onClick={() => setIsReact(!isReact)}
+      >
+        <Lol className="inline-block h-6 w-6" />
+        <span className="sr-only">{t('Like')}</span>
+      </button>
+    </div>
   );
 };
 
@@ -170,7 +211,6 @@ const ChatMediaMessageBody = ({
   messageFromMe: boolean;
 
   authorOdinId: string;
-
   chatActions?: ChatActions;
 }) => {
   const content = msg.fileMetadata.appData.content;
