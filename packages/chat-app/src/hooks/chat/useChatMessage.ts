@@ -63,6 +63,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
 
     newChat.fileId = uploadResult.file.fileId;
     newChat.fileMetadata.versionTag = uploadResult.newVersionTag;
+    newChat.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
     const deliveredToInboxes = recipients.map(
       (recipient) =>

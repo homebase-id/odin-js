@@ -1,4 +1,4 @@
-import { DriveSearchResult, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinImage } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
@@ -33,6 +33,7 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
               payload={payload}
               fit={isGallery ? 'cover' : 'contain'}
               onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)}
+              previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
             >
               {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                 <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
@@ -54,6 +55,7 @@ const MediaItem = ({
   fit,
   children,
   onClick,
+  previewThumbnail,
 }: {
   fileId: string;
   fileLastModified: number;
@@ -61,16 +63,18 @@ const MediaItem = ({
   fit?: 'contain' | 'cover';
   children?: React.ReactNode;
   onClick: () => void;
+  previewThumbnail?: EmbeddedThumb;
 }) => {
   const dotYouClient = useDotYouClientContext();
   const isVideo = payload.contentType.startsWith('video');
 
-  const largestThumb = getLargestThumbOfPayload(payload);
+  // const largestThumb = getLargestThumbOfPayload(payload);
 
   return (
     <div
       className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
       onClick={onClick}
+      data-thumb={!!previewThumbnail}
     >
       <OdinImage
         dotYouClient={dotYouClient}
@@ -79,7 +83,8 @@ const MediaItem = ({
         lastModified={payload.lastModified || fileLastModified}
         targetDrive={ChatDrive}
         avoidPayload={isVideo}
-        explicitSize={largestThumb ? largestThumb : undefined}
+        previewThumbnail={previewThumbnail}
+        // explicitSize={largestThumb ? largestThumb : undefined}
         fit={fit}
       />
       {isVideo ? (
