@@ -11,7 +11,12 @@ import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { ConversationWithYourselfId } from '../../providers/ConversationProvider';
+import {
+  Conversation,
+  ConversationWithYourselfId,
+  GroupConversation,
+  SingleConversation,
+} from '../../providers/ConversationProvider';
 
 export const useChatMessage = (props?: { messageId: string | undefined }) => {
   const dotYouClient = useDotYouClientContext();
@@ -23,18 +28,22 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
   };
 
   const sendMessage = async ({
-    conversationId,
-    recipients,
+    conversation,
     replyId,
     files,
     message,
   }: {
-    conversationId: string;
-    recipients: string[];
+    conversation: DriveSearchResult<Conversation>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
   }): Promise<NewDriveSearchResult<ChatMessage> | null> => {
+    const conversationId = conversation.fileMetadata.appData.uniqueId as string;
+    const conversationContent = conversation.fileMetadata.appData.content;
+    const recipients =
+      (conversationContent as GroupConversation).recipients ||
+      [(conversationContent as SingleConversation).recipient].filter(Boolean);
+
     const newChatId = getNewId();
     const newChat: NewDriveSearchResult<ChatMessage> = {
       fileMetadata: {
@@ -87,7 +96,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     }),
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async ({ conversationId, recipients, replyId, files, message }) => {
+      onMutate: async ({ conversation, replyId, files, message }) => {
         // TODO: Optimistic update of the chat messages append the new message to the list
         const existingData = queryClient.getQueryData<
           InfiniteData<{
@@ -96,14 +105,14 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['chat', conversationId]);
+        >(['chat', conversation.fileMetadata.appData.uniqueId]);
 
         if (!existingData) return;
 
         const newMessageDsr: NewDriveSearchResult<ChatMessage> = {
           fileMetadata: {
             appData: {
-              groupId: conversationId,
+              groupId: conversation.fileMetadata.appData.uniqueId,
               content: {
                 message: message || (files?.length ? `📷 ${t('Media')}` : ''),
                 deliveryStatus: ChatDeliveryStatus.Sending,
@@ -125,14 +134,19 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           })),
         };
 
-        queryClient.setQueryData(['chat', conversationId], newData);
+        queryClient.setQueryData(['chat', conversation.fileMetadata.appData.uniqueId], newData);
         return { existingData };
       },
       onError: (err, messageParams, context) => {
-        queryClient.setQueryData(['chat', messageParams.conversationId], context?.existingData);
+        queryClient.setQueryData(
+          ['chat', messageParams.conversation.fileMetadata.appData.uniqueId],
+          context?.existingData
+        );
       },
       onSettled: async (_data, _error, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
+        queryClient.invalidateQueries({
+          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+        });
       },
     }),
   };

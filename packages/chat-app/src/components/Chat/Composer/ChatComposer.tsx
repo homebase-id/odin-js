@@ -14,11 +14,7 @@ import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../../providers/ConversationProvider';
+import { Conversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 
@@ -56,13 +52,10 @@ export const ChatComposer = ({
       return;
 
     sendMessage({
-      conversationId: conversation.fileMetadata.appData.uniqueId as string,
+      conversation,
       message: message?.trim() || '',
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
-      recipients:
-        (conversationContent as GroupConversation).recipients ||
-        [(conversationContent as SingleConversation).recipient].filter(Boolean),
     });
     onSend && onSend();
   };
