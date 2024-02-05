@@ -97,7 +97,6 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     send: useMutation({
       mutationFn: sendMessage,
       onMutate: async ({ conversation, replyId, files, message }) => {
-        // TODO: Optimistic update of the chat messages append the new message to the list
         const existingData = queryClient.getQueryData<
           InfiniteData<{
             searchResults: (DriveSearchResult<ChatMessage> | null)[];

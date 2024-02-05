@@ -89,9 +89,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     }),
     delete: useMutation({
       mutationFn: removeMessage,
-      onMutate: async ({ conversation, messages }) => {
-        // TODO: Optimistic update of the chat messages delete the new message from the list
-      },
+
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],

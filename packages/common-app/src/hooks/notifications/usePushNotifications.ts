@@ -8,7 +8,9 @@ import {
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
 import { appId } from '@youfoundation/feed-app/src/hooks/auth/useAuth';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
+const isDebug = hasDebugFlag();
 const PAGE_SIZE = 50;
 export const usePushNotifications = (props?: { appId?: string }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -66,7 +68,7 @@ export const useRemoveNotifications = (props?: { appId?: string }) => {
     (async () => {
       const notifications = notifcationsData?.results;
       if (notifications && notifications?.length > 0) {
-        console.log('Removing all notifications', appId);
+        isDebug && console.debug('Removing all notifications', appId);
         await removeListOfNotifications(notifications.map((n) => n.id));
       }
     })();
