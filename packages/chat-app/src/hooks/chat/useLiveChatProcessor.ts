@@ -22,6 +22,7 @@ import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -47,7 +48,7 @@ const useInboxProcessor = (connected?: boolean) => {
   const fetchData = async () => {
     const processedresult = await processInbox(dotYouClient, ChatDrive, 2000);
     // We don't know how many messages we have processed, so we can only invalidate the entire chat query
-    queryClient.invalidateQueries({ queryKey: ['chat'] });
+    queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
     return processedresult;
   };
 
@@ -95,7 +96,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
 
         // Check if the message is orphaned from a conversation
         const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>({
@@ -109,6 +110,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
           restoreChat({ conversation });
         }
+      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
+        const messageId = notification.header.fileMetadata.appData.groupId;
+        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         [
           JOIN_CONVERSATION_COMMAND,

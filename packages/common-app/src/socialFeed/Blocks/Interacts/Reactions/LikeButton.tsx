@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   CanReactInfo,
   Heart,
-  ReactionsBar,
+  SocialReactionsBar,
   t,
   useDotYouClient,
   useOutsideTrigger,
@@ -61,7 +61,7 @@ export const LikeButton = ({
           onMouseLeave={() => setIsReact(false)}
           onMouseEnter={() => setIsReact(true)}
         >
-          <ReactionsBar
+          <SocialReactionsBar
             className={`absolute left-0 top-0`}
             isActive={isReact}
             context={context}

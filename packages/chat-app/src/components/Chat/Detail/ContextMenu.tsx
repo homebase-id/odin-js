@@ -69,7 +69,7 @@ export const ContextMenu = ({
           },
           ...optionalOptions,
         ]}
-        className="absolute right-1 top-[0.125rem] z-20 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
         type={'mute'}
         size="square"
       >

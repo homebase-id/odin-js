@@ -51,9 +51,21 @@ export const useMarkMessagesAsRead = ({
     if (!conversation || !messages) return;
 
     if (messagesMarkedAsRead && pendingReadTime && conversation) {
-      conversation.fileMetadata.appData.content.lastReadTime = pendingReadTime.getTime();
-
-      updateConversation({ conversation });
+      updateConversation({
+        conversation: {
+          ...conversation,
+          fileMetadata: {
+            ...conversation.fileMetadata,
+            appData: {
+              ...conversation.fileMetadata.appData,
+              content: {
+                ...conversation.fileMetadata.appData.content,
+                lastReadTime: pendingReadTime.getTime(),
+              },
+            },
+          },
+        },
+      });
       setPendingReadTime(undefined);
       setMessagesMarkedAsRead(false);
       isProcessing.current = false;

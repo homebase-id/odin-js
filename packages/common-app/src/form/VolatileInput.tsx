@@ -146,7 +146,7 @@ export const VolatileInput = ({
     }
   };
 
-  const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+  const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = () => {
     const wordTillCaret = getCurrentWordTillCaret();
     if (
       (wordTillCaret?.startsWith(':') || wordTillCaret?.startsWith('@')) &&

@@ -13,7 +13,7 @@ import {
 } from '@youfoundation/common-app';
 import { Plus } from '@youfoundation/common-app';
 
-export const ReactionsBar = ({
+export const SocialReactionsBar = ({
   className,
   isActive,
   context,
@@ -27,10 +27,6 @@ export const ReactionsBar = ({
   onClose: () => void;
 }) => {
   const [isHover, setIsHover] = useState(false);
-  const [isCustomOpen, setIsCustomOpen] = useState(false);
-  const wrapperRef = useRef<HTMLButtonElement>(null);
-  const { verticalSpace } = useMostSpace(wrapperRef);
-
   const addError = useErrors().add;
 
   const { getIdentity } = useDotYouClient();
@@ -47,9 +43,8 @@ export const ReactionsBar = ({
     });
 
     if (onClose) {
-      onClose();
-      setIsCustomOpen(false);
       setIsHover(false);
+      onClose();
     }
   };
   const doUnlike = (body: string) => {
@@ -59,15 +54,10 @@ export const ReactionsBar = ({
     });
 
     if (onClose) {
-      onClose();
-      setIsCustomOpen(false);
       setIsHover(false);
+      onClose();
     }
   };
-
-  useEffect(() => {
-    if (!isHover) setIsCustomOpen(false);
-  }, [isHover]);
 
   useEffect(() => {
     if (postEmojiError || removeEmojiError) {
@@ -92,18 +82,66 @@ export const ReactionsBar = ({
   }
 
   return (
+    <ReactionsBar
+      className={className}
+      doLike={doLike}
+      doUnlike={doUnlike}
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+      defaultValue={myEmojis || []}
+    />
+  );
+};
+
+const DEFAULT_EMOJIS = ['❤️', '😆', '😥'];
+
+export const ReactionsBar = ({
+  doLike,
+  doUnlike,
+  defaultValue,
+  emojis,
+  className,
+  onMouseEnter,
+  onMouseLeave,
+}: {
+  doLike: (body: string) => void;
+  doUnlike: (body: string) => void;
+  defaultValue: string[];
+  emojis?: string[];
+  className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}) => {
+  const wrapperRef = useRef<HTMLButtonElement>(null);
+  const { verticalSpace } = useMostSpace(wrapperRef);
+  const [isCustomOpen, setIsCustomOpen] = useState(false);
+
+  const handleLike = (emoji: string) => {
+    doLike(emoji);
+    setIsCustomOpen(false);
+  };
+
+  const handleUnlike = (emoji: string) => {
+    doUnlike(emoji);
+    setIsCustomOpen(false);
+  };
+
+  return (
     <>
       <div
         className={`bg-background text-foreground flex flex-row rounded-lg px-1 py-2 shadow-md dark:bg-slate-900 ${
           className ?? ''
         }`}
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => setIsHover(false)}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={() => {
+          setIsCustomOpen(false);
+          onMouseLeave?.();
+        }}
       >
-        {myEmojis?.length ? (
-          myEmojis.map((emoji) => (
+        {defaultValue?.length ? (
+          defaultValue.map((emoji) => (
             <EmojiButton
-              onClick={() => doUnlike(emoji)}
+              onClick={() => handleUnlike(emoji)}
               emoji={emoji}
               key={emoji}
               isActive={true}
@@ -111,9 +149,9 @@ export const ReactionsBar = ({
           ))
         ) : (
           <>
-            <EmojiButton onClick={() => doLike('❤️')} emoji={'❤️'} />
-            <EmojiButton onClick={() => doLike('😆')} emoji={'😆'} />
-            <EmojiButton onClick={() => doLike('😥')} emoji={'😥'} />
+            {(emojis || DEFAULT_EMOJIS).map((emoji) => (
+              <EmojiButton key={emoji} onClick={() => handleLike(emoji)} emoji={emoji} />
+            ))}
           </>
         )}
         <span className="ml-2 mr-1 border-l border-l-slate-400 dark:border-r-slate-800"></span>
@@ -134,9 +172,8 @@ export const ReactionsBar = ({
             <Suspense>
               <EmojiPicker
                 onInput={(emojiDetail) => {
-                  doLike(emojiDetail.unicode);
+                  handleLike(emojiDetail.unicode);
                   setIsCustomOpen(false);
-                  setIsHover(false);
                 }}
                 key={'emoji-picker'}
               />
@@ -144,7 +181,6 @@ export const ReactionsBar = ({
           </div>
         ) : null}
       </div>
-      {/* <ErrorNotification error={postEmojiError || removeEmojiError} /> */}
     </>
   );
 };

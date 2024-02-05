@@ -180,6 +180,7 @@ export interface NewAppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   fileType?: number;
   userDate?: number;
+  tags?: string[];
   uniqueId?: string;
   groupId?: string;
 }

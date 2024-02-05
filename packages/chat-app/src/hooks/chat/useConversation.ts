@@ -180,15 +180,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     single: useQuery({
       queryKey: ['conversation', conversationId],
       queryFn: () => getSingleConversation(dotYouClient, conversationId),
-      refetchOnMount: false,
       enabled: !!conversationId,
     }),
     create: useMutation({
       mutationFn: createConversation,
-      onMutate: async ({ recipients }) => {
-        // TODO: Optimistic update of the conversations, append the new conversation
-      },
-      onSettled: async (_data, _error, variables) => {
+      onSettled: async (_data) => {
         queryClient.invalidateQueries({ queryKey: ['conversation', _data?.newConversationId] });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
@@ -198,8 +194,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     update: useMutation({
       mutationFn: updateExistingConversation,
-      onMutate: async () => {
-        // TODO: Optimistic update of the conversations, append the new conversation
+      onMutate: async (variables) => {
+        queryClient.setQueryData<DriveSearchResult<Conversation>>(
+          ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+          variables.conversation
+        );
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -210,23 +209,19 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     clearChat: useMutation({
       mutationFn: clearChat,
-      onMutate: async ({ conversation }) => {
-        // TODO: Optimistic update of the conversations, append the new conversation
-      },
+
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),
     deleteChat: useMutation({
       mutationFn: deleteChat,
-      onMutate: async ({ conversation }) => {
-        // TODO: Optimistic update of the conversations, append the new conversation
-      },
+
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['conversations'],
@@ -235,15 +230,13 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),
     restoreChat: useMutation({
       mutationFn: restoreChat,
-      onMutate: async ({ conversation }) => {
-        // TODO: Optimistic update of the conversations, append the new conversation
-      },
+
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['conversations'],
@@ -252,7 +245,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),

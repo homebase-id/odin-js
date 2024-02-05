@@ -263,7 +263,7 @@ export const uploadChatMessage = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  return await uploadFile(
+  const uploadResult = await uploadFile(
     dotYouClient,
     uploadInstructions,
     uploadMetadata,
@@ -272,6 +272,13 @@ export const uploadChatMessage = async (
     undefined,
     onVersionConflict
   );
+
+  if (!uploadResult) return null;
+
+  return {
+    ...uploadResult,
+    previewThumbnail: uploadMetadata.appData.previewThumbnail,
+  };
 };
 
 export const updateChatMessage = async (
@@ -306,6 +313,7 @@ export const updateChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
+      previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },

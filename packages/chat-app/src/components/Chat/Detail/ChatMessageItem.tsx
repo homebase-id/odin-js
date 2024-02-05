@@ -16,6 +16,9 @@ import { ChatSentTimeIndicator } from './ChatSentTimeIndicator';
 import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
+import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
+import { useChatReaction } from '../../../hooks/chat/useChatReaction';
+import { ChatReactions } from './ChatReactions';
 
 export const ChatMessageItem = ({
   msg,
@@ -40,11 +43,16 @@ export const ChatMessageItem = ({
   const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
     ?.recipients;
 
+  const hasReactions = useChatReaction({
+    messageId: msg.fileMetadata.appData.uniqueId,
+    conversationId: conversation?.fileMetadata.appData.uniqueId,
+  }).get.data?.length;
+
   return (
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
       <div
-        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative`}
+        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${hasReactions ? 'pb-6' : ''}`}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -74,6 +82,9 @@ export const ChatMessageItem = ({
             isDeleted={isDeleted}
           />
         )}
+        {conversation && !isDeleted ? (
+          <ChatReactionComposer msg={msg} conversation={conversation} />
+        ) : null}
       </div>
     </>
   );
@@ -100,13 +111,15 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
-    (content.message?.match(/^\p{Extended_Pictographic}/u) && !content.message?.match(/[0-9a-zA-Z]/)) ?? false;
+    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
+      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    false;
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
   return (
     <div
-      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-1 md:max-w-xs lg:max-w-lg  ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] shadow-sm md:max-w-xs lg:max-w-lg ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -125,9 +138,10 @@ const ChatTextMessageBody = ({
         ) : (
           <div className="flex flex-col gap-1">
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-            <p className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}>
-              {content.message}
-            </p>
+            <ParagraphWithLinks
+              text={content.message}
+              className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}
+            />
           </div>
         )}
         <div className="ml-auto mt-auto flex flex-shrink-0 flex-row-reverse gap-2">
@@ -138,7 +152,34 @@ const ChatTextMessageBody = ({
           <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
         ) : null}
       </div>
+      {!isDeleted ? <ChatReactions msg={msg} conversation={conversation} /> : null}
     </div>
+  );
+};
+
+const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
+const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
+  const splitUpText = text.split(urlRegex);
+
+  return (
+    <p className={className}>
+      {splitUpText.map((part, index) => {
+        if (urlRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary underline"
+            >
+              {part}
+            </a>
+          );
+        }
+        return part;
+      })}
+    </p>
   );
 };
 
@@ -168,7 +209,6 @@ const ChatMediaMessageBody = ({
   messageFromMe: boolean;
 
   authorOdinId: string;
-
   chatActions?: ChatActions;
 }) => {
   const content = msg.fileMetadata.appData.content;
@@ -186,7 +226,7 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-[75vw] rounded-lg md:max-w-xs ${
+      className={`relative w-auto max-w-[75vw] rounded-lg shadow-sm md:max-w-xs ${
         messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
       }`}
     >
@@ -205,6 +245,7 @@ const ChatMediaMessageBody = ({
           <ChatFooter />
         </div>
       ) : null}
+      <ChatReactions msg={msg} conversation={conversation} />
     </div>
   );
 };

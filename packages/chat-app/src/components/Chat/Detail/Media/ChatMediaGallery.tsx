@@ -87,6 +87,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
               targetDrive={ChatDrive}
               lastModified={msg.fileMetadata.updated}
               probablyEncrypted={true}
+              autoPlay={true}
             />
           ) : (
             <OdinImage

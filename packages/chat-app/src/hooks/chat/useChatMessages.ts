@@ -72,13 +72,13 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 
   return {
     all: useInfiniteQuery({
-      queryKey: ['chat', conversationId],
+      queryKey: ['chat-messages', conversationId],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMessages(conversationId as string, pageParam),
       getNextPageParam: (lastPage) =>
         lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
       enabled: !!conversationId,
-      staleTime: 1000 * 60 * 1, // 1 minute; The chat messages are already invalidated by the websocket; But that fails often atm
+      staleTime: 1000 * 60 * 1, // 1 minute; The chat messages are already invalidated by the websocket;
     }),
     markAsRead: useMutation({
       mutationKey: ['markAsRead', conversationId],
@@ -89,12 +89,10 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     }),
     delete: useMutation({
       mutationFn: removeMessage,
-      onMutate: async ({ conversation, messages }) => {
-        // TODO: Optimistic update of the chat messages delete the new message from the list
-      },
+
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),
