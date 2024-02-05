@@ -138,9 +138,10 @@ const ChatTextMessageBody = ({
         ) : (
           <div className="flex flex-col gap-1">
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-            <p className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}>
-              {content.message}
-            </p>
+            <ParagraphWithLinks
+              text={content.message}
+              className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}
+            />
           </div>
         )}
         <div className="ml-auto mt-auto flex flex-shrink-0 flex-row-reverse gap-2">
@@ -153,6 +154,32 @@ const ChatTextMessageBody = ({
       </div>
       {!isDeleted ? <ChatReactions msg={msg} conversation={conversation} /> : null}
     </div>
+  );
+};
+
+const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
+const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
+  const splitUpText = text.split(urlRegex);
+
+  return (
+    <p className={className}>
+      {splitUpText.map((part, index) => {
+        if (urlRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary underline"
+            >
+              {part}
+            </a>
+          );
+        }
+        return part;
+      })}
+    </p>
   );
 };
 

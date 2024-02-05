@@ -109,6 +109,7 @@ export const ChatComposer = ({
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
             autoFocus={!isTouchDevice()}
+            linksArePlain={true}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
