@@ -197,8 +197,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     update: useMutation({
       mutationFn: updateExistingConversation,
-      onMutate: async () => {
-        // TODO: Optimistic update of the conversations, append the new conversation
+      onMutate: async (variables) => {
+        queryClient.setQueryData<DriveSearchResult<Conversation>>(
+          ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
+          variables.conversation
+        );
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
