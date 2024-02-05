@@ -180,7 +180,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     single: useQuery({
       queryKey: ['conversation', conversationId],
       queryFn: () => getSingleConversation(dotYouClient, conversationId),
-      refetchOnMount: false,
       enabled: !!conversationId,
     }),
     create: useMutation({
@@ -188,7 +187,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
       onMutate: async ({ recipients }) => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
-      onSettled: async (_data, _error, variables) => {
+      onSettled: async (_data) => {
         queryClient.invalidateQueries({ queryKey: ['conversation', _data?.newConversationId] });
         queryClient.invalidateQueries({ queryKey: ['conversations'] });
       },
