@@ -68,7 +68,7 @@ export const useChatReaction = (props?: {
 
   const removeReaction = async ({
     conversation,
-    message,
+
     reaction,
   }: {
     conversation: DriveSearchResult<Conversation>;
