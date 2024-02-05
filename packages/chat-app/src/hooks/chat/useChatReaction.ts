@@ -89,6 +89,7 @@ export const useChatReaction = (props?: {
       queryKey: ['chat-reaction', messageId],
       queryFn: getReactionsByMessageUniqueId(conversationId as string, messageId as string),
       enabled: !!conversationId && !!messageId,
+      staleTime: 1000 * 60 * 10, // 10 min
     }),
     add: useMutation({
       mutationFn: addReaction,

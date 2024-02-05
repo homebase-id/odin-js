@@ -72,7 +72,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 
   return {
     all: useInfiniteQuery({
-      queryKey: ['chat', conversationId],
+      queryKey: ['chat-messages', conversationId],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMessages(conversationId as string, pageParam),
       getNextPageParam: (lastPage) =>
@@ -94,7 +94,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),

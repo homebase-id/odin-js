@@ -129,8 +129,8 @@ const AppWrapper = ({
 const SystemApp = () => {
   const unreadCount = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
 
-  const os = getOperatingSystem();
-  const isAndroid = os.name === 'Android';
+  // const os = getOperatingSystem();
+  // const isAndroid = os.name === 'Android';
 
   return (
     <AppWrapper

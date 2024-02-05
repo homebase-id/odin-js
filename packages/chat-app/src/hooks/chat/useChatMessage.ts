@@ -105,7 +105,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             queryTime: number;
             includeMetadataHeader: boolean;
           }>
-        >(['chat', conversation.fileMetadata.appData.uniqueId]);
+        >(['chat-messages', conversation.fileMetadata.appData.uniqueId]);
 
         if (!existingData) return;
 
@@ -134,18 +134,21 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           })),
         };
 
-        queryClient.setQueryData(['chat', conversation.fileMetadata.appData.uniqueId], newData);
+        queryClient.setQueryData(
+          ['chat-messages', conversation.fileMetadata.appData.uniqueId],
+          newData
+        );
         return { existingData };
       },
       onError: (err, messageParams, context) => {
         queryClient.setQueryData(
-          ['chat', messageParams.conversation.fileMetadata.appData.uniqueId],
+          ['chat-messages', messageParams.conversation.fileMetadata.appData.uniqueId],
           context?.existingData
         );
       },
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),

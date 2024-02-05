@@ -52,7 +52,13 @@ const localStoragePersister = createSyncStoragePersister({
 });
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['chat-message', 'chat', 'conversation', 'conversations'];
+const INCLUDED_QUERY_KEYS = [
+  'chat-message',
+  'chat-messages',
+  'conversation',
+  'conversations',
+  'chat-reaction',
+];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: Infinity,
   persister: localStoragePersister,

@@ -177,7 +177,7 @@ const markChatAsRead = async (
       })
   );
 
-  queryClient.invalidateQueries({ queryKey: ['chat', conversationId] });
+  queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
   if (updateSuccess.every((success) => success)) return command.id;
 
   return null;

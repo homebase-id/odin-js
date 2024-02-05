@@ -217,7 +217,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),
@@ -234,7 +234,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),
@@ -251,7 +251,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           queryKey: ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
         });
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),
