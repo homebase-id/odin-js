@@ -58,9 +58,8 @@ export const makeGrid = async (thumbs: EmbeddedThumb[]) => {
   return await new Promise<EmbeddedThumb>((resolve) => {
     canvas.toBlob(
       (blob) => {
-        if (!blob) {
-          return;
-        }
+        if (!blob) return;
+
         blob.arrayBuffer().then((buffer) => {
           resolve({
             pixelHeight: GRID_PIXEL_SIZE,
