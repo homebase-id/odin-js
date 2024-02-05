@@ -17,6 +17,7 @@ import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
 import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
+import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 
 export const ChatMessageItem = ({
   msg,
@@ -41,11 +42,16 @@ export const ChatMessageItem = ({
   const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
     ?.recipients;
 
+  const hasReactions = useChatReaction({
+    messageId: msg.fileMetadata.appData.uniqueId,
+    conversationId: conversation?.fileMetadata.appData.uniqueId,
+  }).get.data?.length;
+
   return (
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
       <div
-        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative`}
+        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${hasReactions ? 'pb-4' : ''}`}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -78,6 +84,37 @@ export const ChatMessageItem = ({
         {conversation ? <ChatReactionComposer msg={msg} conversation={conversation} /> : null}
       </div>
     </>
+  );
+};
+
+const ChatReactions = ({
+  msg,
+  conversation,
+}: {
+  msg: DriveSearchResult<ChatMessage>;
+  conversation: DriveSearchResult<Conversation> | undefined;
+}) => {
+  const { data: reactions } = useChatReaction({
+    conversationId: conversation?.fileMetadata.appData.uniqueId,
+    messageId: msg.fileMetadata.appData.uniqueId,
+  }).get;
+
+  const uniqueEmojis = reactions
+    ?.map((reaction) => reaction.fileMetadata.appData.content.message)
+    .slice(0, 5);
+  const count = reactions?.length;
+
+  if (!reactions?.length) return null;
+
+  return (
+    <div className="absolute -bottom-4 left-2 right-0 flex flex-row">
+      <div className="flex cursor-pointer flex-row items-center gap-1 rounded-lg bg-background px-2 py-1 shadow-sm">
+        {uniqueEmojis?.map((emoji) => <p key={emoji}>{emoji}</p>)}
+        {count && uniqueEmojis && count > uniqueEmojis?.length ? (
+          <p className="text-sm text-foreground/80">{count}</p>
+        ) : null}
+      </div>
+    </div>
   );
 };
 
@@ -142,6 +179,7 @@ const ChatTextMessageBody = ({
           <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
         ) : null}
       </div>
+      <ChatReactions msg={msg} conversation={conversation} />
     </div>
   );
 };
@@ -208,6 +246,7 @@ const ChatMediaMessageBody = ({
           <ChatFooter />
         </div>
       ) : null}
+      <ChatReactions msg={msg} conversation={conversation} />
     </div>
   );
 };
