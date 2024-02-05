@@ -16,7 +16,7 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
 
   return (
     <div
-      className={`overflow-hidden rounded-lg ${isGallery ? 'grid w-full grid-cols-2 gap-1' : ''}`}
+      className={`overflow-hidden rounded-lg ${isGallery ? 'grid w-[75vw] max-w-xs grid-cols-2 gap-1' : ''}`}
     >
       {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => {
         const isColSpan2 = payloads.length === 3 && index === 2;
@@ -68,7 +68,7 @@ const MediaItem = ({
   const dotYouClient = useDotYouClientContext();
   const isVideo = payload.contentType.startsWith('video');
 
-  // const largestThumb = getLargestThumbOfPayload(payload);
+  const largestThumb = getLargestThumbOfPayload(payload);
 
   return (
     <div
@@ -84,7 +84,7 @@ const MediaItem = ({
         targetDrive={ChatDrive}
         avoidPayload={isVideo}
         previewThumbnail={previewThumbnail}
-        // explicitSize={largestThumb ? largestThumb : undefined}
+        explicitSize={largestThumb && !previewThumbnail ? largestThumb : undefined}
         fit={fit}
       />
       {isVideo ? (
