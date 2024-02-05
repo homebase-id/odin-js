@@ -143,10 +143,7 @@ const ChatReactionsDetail = ({
           )
           .map((reaction) => {
             return (
-              <div
-                className="flex flex-row items-center text-lg"
-                key={reaction.fileMetadata.senderOdinId}
-              >
+              <div className="flex flex-row items-center text-lg" key={reaction.fileId}>
                 <AuthorImage
                   odinId={reaction.fileMetadata.senderOdinId}
                   size="xs"
