@@ -22,6 +22,7 @@ import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -109,6 +110,9 @@ const useChatWebsocket = (isEnabled: boolean) => {
         } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
           restoreChat({ conversation });
         }
+      } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
+        const messageId = notification.header.fileMetadata.appData.groupId;
+        queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
         [
           JOIN_CONVERSATION_COMMAND,

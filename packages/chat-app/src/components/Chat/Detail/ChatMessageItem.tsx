@@ -51,7 +51,7 @@ export const ChatMessageItem = ({
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
       <div
-        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${hasReactions ? 'pb-4' : ''}`}
+        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${hasReactions ? 'pb-6' : ''}`}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -81,7 +81,9 @@ export const ChatMessageItem = ({
             isDeleted={isDeleted}
           />
         )}
-        {conversation ? <ChatReactionComposer msg={msg} conversation={conversation} /> : null}
+        {conversation && !isDeleted ? (
+          <ChatReactionComposer msg={msg} conversation={conversation} />
+        ) : null}
       </div>
     </>
   );
@@ -99,16 +101,16 @@ const ChatReactions = ({
     messageId: msg.fileMetadata.appData.uniqueId,
   }).get;
 
-  const uniqueEmojis = reactions
-    ?.map((reaction) => reaction.fileMetadata.appData.content.message)
-    .slice(0, 5);
+  const uniqueEmojis = Array.from(
+    new Set(reactions?.map((reaction) => reaction.fileMetadata.appData.content.message))
+  ).slice(0, 5);
   const count = reactions?.length;
 
   if (!reactions?.length) return null;
 
   return (
-    <div className="absolute -bottom-4 left-2 right-0 flex flex-row">
-      <div className="flex cursor-pointer flex-row items-center gap-1 rounded-lg bg-background px-2 py-1 shadow-sm">
+    <div className="absolute -bottom-6 left-2 right-0 flex flex-row">
+      <div className="flex cursor-pointer flex-row items-center gap-1 rounded-3xl bg-background px-2 py-1 shadow-sm">
         {uniqueEmojis?.map((emoji) => <p key={emoji}>{emoji}</p>)}
         {count && uniqueEmojis && count > uniqueEmojis?.length ? (
           <p className="text-sm text-foreground/80">{count}</p>
@@ -147,7 +149,7 @@ const ChatTextMessageBody = ({
 
   return (
     <div
-      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-1 shadow-sm md:max-w-xs lg:max-w-lg ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] shadow-sm md:max-w-xs lg:max-w-lg ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -179,7 +181,7 @@ const ChatTextMessageBody = ({
           <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
         ) : null}
       </div>
-      <ChatReactions msg={msg} conversation={conversation} />
+      {!isDeleted ? <ChatReactions msg={msg} conversation={conversation} /> : null}
     </div>
   );
 };
