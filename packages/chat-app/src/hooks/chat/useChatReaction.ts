@@ -17,6 +17,7 @@ import {
   uploadReaction,
 } from '../../providers/ChatReactionProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const useChatReaction = (props?: {
   conversationId: string | undefined;
@@ -91,8 +92,31 @@ export const useChatReaction = (props?: {
     }),
     add: useMutation({
       mutationFn: addReaction,
-      onMutate: async () => {
-        //
+      onMutate: async (variables) => {
+        const { message } = variables;
+        const previousReactions = queryClient.getQueryData<DriveSearchResult<ChatReaction>[]>([
+          'chat-reaction',
+          message.fileMetadata.appData.uniqueId,
+        ]);
+
+        if (!previousReactions) return;
+        const newReaction: NewDriveSearchResult<ChatReaction> = {
+          fileMetadata: {
+            appData: {
+              content: {
+                message: variables.reaction,
+              },
+            },
+          },
+          serverMetadata: {
+            accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
+          },
+        };
+
+        queryClient.setQueryData(
+          ['chat-reaction', message.fileMetadata.appData.uniqueId],
+          [...previousReactions, newReaction]
+        );
       },
       onSettled: (data, error, variables) => {
         queryClient.invalidateQueries({
@@ -102,8 +126,19 @@ export const useChatReaction = (props?: {
     }),
     remove: useMutation({
       mutationFn: removeReaction,
-      onMutate: async () => {
-        //
+      onMutate: async (variables) => {
+        const { message, reaction } = variables;
+        const previousReactions = queryClient.getQueryData<DriveSearchResult<ChatReaction>[]>([
+          'chat-reaction',
+          message.fileMetadata.appData.uniqueId,
+        ]);
+
+        if (!previousReactions) return;
+
+        queryClient.setQueryData(
+          ['chat-reaction', message.fileMetadata.appData.uniqueId],
+          [...previousReactions.filter((r) => !stringGuidsEqual(r.fileId, reaction.fileId))]
+        );
       },
       onSettled: (data, error, variables) => {
         queryClient.invalidateQueries({

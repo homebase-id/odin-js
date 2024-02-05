@@ -184,7 +184,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     create: useMutation({
       mutationFn: createConversation,
-      onMutate: async ({ recipients }) => {
+      onMutate: async () => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data) => {
@@ -209,7 +209,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     clearChat: useMutation({
       mutationFn: clearChat,
-      onMutate: async ({ conversation }) => {
+      onMutate: async () => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
@@ -223,7 +223,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     deleteChat: useMutation({
       mutationFn: deleteChat,
-      onMutate: async ({ conversation }) => {
+      onMutate: async () => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
@@ -240,7 +240,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
     restoreChat: useMutation({
       mutationFn: restoreChat,
-      onMutate: async ({ conversation }) => {
+      onMutate: async () => {
         // TODO: Optimistic update of the conversations, append the new conversation
       },
       onSettled: async (_data, _error, variables) => {
