@@ -47,6 +47,7 @@ export const ChatReactionComposer = ({
         {isReact ? (
           <ReactionsBar
             className={`absolute left-0 top-0 z-20`}
+            emojis={['👍️', '❤️', '😂', '😮', '😥']}
             defaultValue={
               myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
             }

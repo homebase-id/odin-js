@@ -93,10 +93,13 @@ export const SocialReactionsBar = ({
   );
 };
 
+const DEFAULT_EMOJIS = ['❤️', '😆', '😥'];
+
 export const ReactionsBar = ({
   doLike,
   doUnlike,
   defaultValue,
+  emojis,
   className,
   onMouseEnter,
   onMouseLeave,
@@ -104,6 +107,7 @@ export const ReactionsBar = ({
   doLike: (body: string) => void;
   doUnlike: (body: string) => void;
   defaultValue: string[];
+  emojis?: string[];
   className?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
@@ -145,9 +149,9 @@ export const ReactionsBar = ({
           ))
         ) : (
           <>
-            <EmojiButton onClick={() => handleLike('❤️')} emoji={'❤️'} />
-            <EmojiButton onClick={() => handleLike('😆')} emoji={'😆'} />
-            <EmojiButton onClick={() => handleLike('😥')} emoji={'😥'} />
+            {(emojis || DEFAULT_EMOJIS).map((emoji) => (
+              <EmojiButton key={emoji} onClick={() => handleLike(emoji)} emoji={emoji} />
+            ))}
           </>
         )}
         <span className="ml-2 mr-1 border-l border-l-slate-400 dark:border-r-slate-800"></span>
