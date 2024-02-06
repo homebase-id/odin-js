@@ -10,9 +10,12 @@ export const useLongPress = (
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timeout = useRef<NodeJS.Timeout>();
   const target = useRef<EventTarget>();
+  const beforeScrollY = useRef<number>();
 
   const start = useCallback(
     (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>) => {
+      beforeScrollY.current = window.scrollY;
+
       if (shouldPreventDefault && event.target) {
         event.target.addEventListener('touchend', preventDefault, {
           passive: false,
@@ -20,7 +23,11 @@ export const useLongPress = (
         target.current = event.target;
       }
       timeout.current = setTimeout(() => {
-        onLongPress(event);
+        const afterScrollY = window.scrollY;
+
+        if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {
+          onLongPress(event);
+        }
         setLongPressTriggered(true);
       }, delay);
     },
@@ -33,7 +40,12 @@ export const useLongPress = (
       shouldTriggerClick = true
     ) => {
       timeout.current && clearTimeout(timeout.current);
-      shouldTriggerClick && !longPressTriggered && onClick(event);
+      if (shouldTriggerClick && !longPressTriggered) {
+        const afterScrollY = window.scrollY;
+        if (Math.abs((beforeScrollY.current || 0) - afterScrollY) <= 20) {
+          onClick(event);
+        }
+      }
       setLongPressTriggered(false);
       if (shouldPreventDefault && target.current) {
         target.current.removeEventListener('touchend', preventDefault);
@@ -46,8 +58,8 @@ export const useLongPress = (
     onMouseDown: (e: React.MouseEvent<HTMLElement>) => start(e),
     onTouchStart: (e: React.TouchEvent<HTMLElement>) => start(e),
     onMouseUp: (e: React.MouseEvent<HTMLElement>) => clear(e),
-    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => clear(e, false),
     onTouchEnd: (e: React.TouchEvent<HTMLElement>) => clear(e),
+    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => clear(e, false),
   };
 };
 
