@@ -31,7 +31,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { getNewId, jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
@@ -136,8 +136,8 @@ export const getChatMessageByGlobalTransitId = async (
   messageGlobalTransitId: string
 ) => {
   const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-  return allChatMessages?.searchResults?.find(
-    (chat) => chat?.fileMetadata.globalTransitId === messageGlobalTransitId
+  return allChatMessages?.searchResults?.find((chat) =>
+    stringGuidsEqual(chat?.fileMetadata.globalTransitId, messageGlobalTransitId)
   );
 };
 
