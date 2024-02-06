@@ -50,6 +50,8 @@ export interface ImageMetadata {
       latitude: number;
       longitude: number;
       altitude?: number;
+      speed?: number;
+      direction?: number;
     };
   };
 }
