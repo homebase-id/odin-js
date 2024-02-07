@@ -45,8 +45,9 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   }).fetch;
 
   const channel = externalChannel || internalChannel;
-  const postPath = `preview/${isExternal ? odinId : identity}/${channel?.fileMetadata.appData
-    .uniqueId}/${post.id}`;
+  const postPath = `preview/${isExternal ? odinId : identity}/${
+    channel?.fileMetadata.appData.uniqueId
+  }/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
 
   return (
@@ -63,10 +64,12 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
         >
           <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
             <div className="flex-shrink-0 py-1">
-              <AuthorImage
-                odinId={odinId}
-                className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
-              />
+              <div className="h-10 w-10 md:h-[4rem] md:w-[4rem]">
+                <AuthorImage
+                  odinId={odinId}
+                  className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
+                />
+              </div>
             </div>
             <div className="flex w-20 flex-grow flex-col">
               <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
