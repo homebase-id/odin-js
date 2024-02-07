@@ -64,7 +64,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
         >
           <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
             <div className="flex-shrink-0 py-1">
-              <div className="h-10 w-10 md:h-[4rem] md:w-[4rem]">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
                 <AuthorImage
                   odinId={odinId}
                   className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
