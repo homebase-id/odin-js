@@ -92,7 +92,8 @@ export const EncryptedMseSource = ({
           reachedEnd = true;
           sourceBuffer.addEventListener('updateend', () => {
             innerMediaSource.removeEventListener('sourceopen', sourceOpen);
-            if (innerMediaSource.readyState === 'open') innerMediaSource.endOfStream();
+            if (innerMediaSource.readyState === 'open' && !sourceBuffer.updating)
+              innerMediaSource.endOfStream();
           });
         }
       }
