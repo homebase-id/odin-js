@@ -83,7 +83,7 @@ const AppListItem = ({ app, className }: { app: RedactedAppRegistration; classNa
             {app.corsHostName ? <>| {app.corsHostName}</> : null}
           </span>
           <small className="block text-sm text-slate-400">
-            {t('first used')}:{' '}
+            {t('First used')}:{' '}
             {new Date(app.created).toLocaleString(undefined, {
               month: 'short',
               day: 'numeric',

@@ -132,7 +132,7 @@ const DomainListItem = ({
             <h2 className="font-thiner dark:text-white">
               <span className="break-words">{domain.domain}</span>
               <small className="block text-sm text-slate-400">
-                {t('first used')}:{' '}
+                {t('First used')}:{' '}
                 {new Date(domain.modified).toLocaleString(undefined, {
                   month: 'short',
                   day: 'numeric',
