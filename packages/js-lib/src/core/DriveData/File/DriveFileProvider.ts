@@ -39,16 +39,17 @@ export const getFileHeader = async <T = string>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  options?: { systemFileType?: SystemFileType }
+  options?: { systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
 ): Promise<DriveSearchResult<T> | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, axiosConfig } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
     decrypt: true,
     systemFileType,
+    axiosConfig,
   });
   if (!fileHeader) return null;
 
@@ -70,7 +71,9 @@ export const getFileHeaderBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
+  options:
+    | { decrypt?: boolean; systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
+    | undefined
 ) => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
@@ -93,7 +96,11 @@ export const getFileHeaderBytes = async (
   };
 
   const promise: Promise<DriveSearchResult | null> = client
-    .get<DriveSearchResult>('/drive/files/header?' + stringifyToQueryParams(request as any))
+    .get<DriveSearchResult>(
+      '/drive/files/header?' +
+        stringifyToQueryParams(request as unknown as Record<string, unknown>),
+      options?.axiosConfig
+    )
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
@@ -127,12 +134,14 @@ export const getPayloadAsJson = async <T>(
   key: string,
   options?: {
     systemFileType?: SystemFileType;
+    axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<T | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,
+    axiosConfig: options?.axiosConfig,
   }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
@@ -147,6 +156,7 @@ export const getPayloadBytes = async (
     chunkEnd?: number;
     decrypt?: boolean;
     lastModified?: number;
+    axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
@@ -167,6 +177,7 @@ export const getPayloadBytes = async (
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
+    ...options?.axiosConfig,
   };
 
   const { startOffset, updatedChunkStart, rangeHeader } = getRangeHeader(chunkStart, chunkEnd);
@@ -186,18 +197,20 @@ export const getPayloadBytes = async (
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -216,7 +229,11 @@ export const getThumbBytes = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: { systemFileType?: SystemFileType; lastModified?: number }
+  options: {
+    systemFileType?: SystemFileType;
+    lastModified?: number;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
@@ -235,6 +252,7 @@ export const getThumbBytes = async (
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
+    ...options?.axiosConfig,
   };
 
   return client

@@ -21,6 +21,7 @@ import {
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
 import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
+import { AxiosRequestConfig } from 'axios';
 
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
@@ -194,15 +195,18 @@ export const pureUpload = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ) => {
   const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
   const url = '/drive/files/upload';
 
-  const config = {
+  const config: AxiosRequestConfig = {
+    ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+      ...axiosConfig?.headers,
     },
   };
 

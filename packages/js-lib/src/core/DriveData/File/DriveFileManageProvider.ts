@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from 'axios';
 import { assertIfDefined } from '../../../helpers/DataUtil';
 import { DotYouClient } from '../../DotYouClient';
 import { SystemFileType } from './DriveFileTypes';
@@ -9,7 +10,8 @@ export const deleteFile = async (
   targetDrive: TargetDrive,
   fileId: string,
   recipients?: string[],
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<boolean | void> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -29,7 +31,7 @@ export const deleteFile = async (
   };
 
   return client
-    .post('/drive/files/delete', request)
+    .post('/drive/files/delete', request, axiosConfig)
     .then((response) => {
       if (response.status === 200) {
         return true;
@@ -48,7 +50,8 @@ export const deleteFiles = async (
   targetDrive: TargetDrive,
   fileIds: string[],
   recipients?: string[],
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<boolean | void> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileIds', fileIds);
@@ -70,7 +73,7 @@ export const deleteFiles = async (
   };
 
   return client
-    .post('/drive/files/deletefileidbatch', request)
+    .post('/drive/files/deletefileidbatch', request, axiosConfig)
     .then((response) => {
       if (response.status === 200) return true;
 
@@ -87,7 +90,8 @@ export const deleteFilesByGroupId = async (
   targetDrive: TargetDrive,
   groupIds: string[],
   recipients?: string[],
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<boolean | void> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GroupIds', groupIds);
@@ -107,7 +111,7 @@ export const deleteFilesByGroupId = async (
   };
 
   return client
-    .post('/drive/files/deletegroupidbatch', request)
+    .post('/drive/files/deletegroupidbatch', request, axiosConfig)
     .then((response) => {
       if (response.status === 200) return true;
 
@@ -125,7 +129,8 @@ export const deletePayload = async (
   fileId: string,
   fileKey: string,
   versionTag: string,
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<{ newVersionTag: string }> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -147,7 +152,7 @@ export const deletePayload = async (
   };
 
   return client
-    .post('/drive/files/deletepayload', request)
+    .post('/drive/files/deletepayload', request, axiosConfig)
     .then((response) => response.data)
     .catch((error) => {
       console.error('[DotYouCore-js:deleteFile]', error);

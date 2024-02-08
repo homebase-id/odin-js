@@ -19,6 +19,7 @@ import {
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
@@ -32,7 +33,8 @@ export const uploadFile = async (
   payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
@@ -73,7 +75,13 @@ export const uploadFile = async (
   );
 
   // Upload
-  const uploadResult = await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+  const uploadResult = await pureUpload(
+    dotYouClient,
+    data,
+    systemFileType,
+    onVersionConflict,
+    axiosConfig
+  );
 
   if (!uploadResult) return;
   uploadResult.keyHeader = keyHeader;
@@ -85,7 +93,8 @@ export const uploadHeader = async (
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
@@ -127,7 +136,7 @@ export const uploadHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
 export const appendDataToFile = async (

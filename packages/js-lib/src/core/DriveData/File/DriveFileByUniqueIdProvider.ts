@@ -13,8 +13,6 @@ import {
   ContentType,
   ImageContentType,
   DriveSearchResult,
-  EncryptedKeyHeader,
-  KeyHeader,
 } from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
@@ -90,7 +88,8 @@ export const getFileHeaderBytesByUniqueId = async (
 
   const promise: Promise<DriveSearchResult | null> = client
     .get<DriveSearchResult>(
-      '/drive/query/specialized/cuid/header?' + stringifyToQueryParams(request as any)
+      '/drive/query/specialized/cuid/header?' +
+        stringifyToQueryParams(request as unknown as Record<string, unknown>)
     )
     .then((response) => response.data)
     .then(async (fileHeader) => {
@@ -186,20 +185,20 @@ export const getPayloadBytesByUniqueId = async (
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart + 1
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined
-                ? chunkEnd - chunkStart + 1
-                : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };

@@ -10,6 +10,7 @@ import {
 } from '../Drive/DriveTypes';
 import { SystemFileType } from '../File/DriveFileTypes';
 import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../../helpers/DataUtil';
+import { AxiosRequestConfig } from 'axios';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -38,7 +39,8 @@ export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
 export const queryModified = async (
   dotYouClient: DotYouClient,
   params: FileQueryParams,
-  ro?: GetModifiedResultOptions
+  ro?: GetModifiedResultOptions,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<QueryModifiedResponse> => {
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
@@ -63,9 +65,9 @@ export const queryModified = async (
     const getUrl = '/drive/query/modified?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryModifiedResponse>('/drive/query/modified', request);
+      return client.post<QueryModifiedResponse>('/drive/query/modified', request, axiosConfig);
     } else {
-      return client.get<QueryModifiedResponse>(getUrl);
+      return client.get<QueryModifiedResponse>(getUrl, axiosConfig);
     }
   })();
 
@@ -86,7 +88,8 @@ export const queryBatch = async <
 >(
   dotYouClient: DotYouClient,
   params: T,
-  ro?: GetBatchQueryResultOptions
+  ro?: GetBatchQueryResultOptions,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<R> => {
   const strippedQueryParams: FileQueryParams = {
     ...params,
@@ -114,9 +117,9 @@ export const queryBatch = async <
     const getUrl = '/drive/query/batch?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<R>('/drive/query/batch', request);
+      return client.post<R>('/drive/query/batch', request, axiosConfig);
     } else {
-      return client.get<R>(getUrl);
+      return client.get<R>(getUrl, axiosConfig);
     }
   })();
 
@@ -130,7 +133,8 @@ export const queryBatchCollection = async (
     queryParams: FileQueryParams;
     resultOptions?: GetBatchQueryResultOptions;
   }[],
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<QueryBatchCollectionResponse> => {
   const client = dotYouClient.createAxiosClient({
     headers: {
@@ -155,11 +159,15 @@ export const queryBatchCollection = async (
     const getUrl = '/drive/query/batchcollection?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
-        queries: updatedQueries,
-      });
+      return client.post<QueryBatchCollectionResponse>(
+        '/drive/query/batchcollection',
+        {
+          queries: updatedQueries,
+        },
+        axiosConfig
+      );
     } else {
-      return client.get<QueryBatchCollectionResponse>(getUrl);
+      return client.get<QueryBatchCollectionResponse>(getUrl, axiosConfig);
     }
   })();
 
