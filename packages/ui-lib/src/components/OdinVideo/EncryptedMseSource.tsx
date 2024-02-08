@@ -32,7 +32,6 @@ export const EncryptedMseSource = ({
   const codec = videoMetaData.isSegmented ? videoMetaData.codec : undefined;
   const fileSize = videoMetaData.fileSize;
   const durationInSec = videoMetaData.duration ? videoMetaData.duration / 1000 : undefined;
-
   useEffect(() => {
     const errorHandler = (e: any) => {
       console.error('[Odin-Video]-Chunked', e);
@@ -63,7 +62,8 @@ export const EncryptedMseSource = ({
     const sourceOpen = async () => {
       URL.revokeObjectURL(objectUrl);
       sourceBuffer = innerMediaSource.addSourceBuffer(codec);
-      // Optional way of setting the duration, but it would be better if it's part of the mehd box
+
+      // Only way of setting the duration, but some day, it would be better if it's part of the mehd box
       if (durationInSec) innerMediaSource.duration = durationInSec;
 
       // Fetch the first chunk
@@ -92,8 +92,10 @@ export const EncryptedMseSource = ({
           reachedEnd = true;
           sourceBuffer.addEventListener('updateend', () => {
             innerMediaSource.removeEventListener('sourceopen', sourceOpen);
-            if (innerMediaSource.readyState === 'open' && !sourceBuffer.updating)
+            if (innerMediaSource.readyState === 'open' && !sourceBuffer.updating) {
               innerMediaSource.endOfStream();
+              console.debug('endOfStream');
+            }
           });
         }
       }
@@ -142,7 +144,7 @@ export const EncryptedMseSource = ({
       const nextChunkStart = (currentChunk + 1) * chunkSize;
       const nextChunkEnd = nextChunkStart + chunkSize;
       const endOfFile = nextChunkEnd >= fileSize;
-      await appendRange(nextChunkStart, !endOfFile ? nextChunkEnd : undefined, endOfFile);
+      await appendRange(nextChunkStart, !endOfFile ? nextChunkEnd : fileSize - 16, endOfFile);
       currentChunk++;
     };
 

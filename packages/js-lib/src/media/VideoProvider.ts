@@ -127,23 +127,6 @@ export const getDecryptedVideoChunk = async (
   return payload?.bytes || null;
 };
 
-export const getDecryptedVideoMetadata = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  fileKey: string | undefined,
-  systemFileType?: SystemFileType
-) => {
-  const fileHeader = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
-  if (!fileHeader) return undefined;
-
-  const descriptor = fileHeader.fileMetadata.payloads.find((p) => p.key === fileKey)
-    ?.descriptorContent;
-  if (!descriptor) return undefined;
-
-  return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
-};
-
 export const getDecryptedVideoUrl = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,

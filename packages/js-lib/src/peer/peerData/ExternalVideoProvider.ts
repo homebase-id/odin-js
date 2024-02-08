@@ -43,52 +43,6 @@ export const getDecryptedVideoChunkOverPeer = async (
   return payload?.bytes || null;
 };
 
-export const getDecryptedVideoMetadataOverPeer = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  targetDrive: TargetDrive,
-  fileId: string,
-  fileKey: string,
-  systemFileType?: SystemFileType
-) => {
-  const fileHeader = await getFileHeaderOverPeer(dotYouClient, odinId, targetDrive, fileId, {
-    systemFileType,
-  });
-  if (!fileHeader) return undefined;
-
-  const descriptor = fileHeader.fileMetadata.payloads.find((p) => p.key === fileKey)
-    ?.descriptorContent;
-  if (!descriptor) return undefined;
-
-  return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
-};
-
-export const getDecryptedVideoMetadataOverPeerByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
-  odinId: string,
-  targetDrive: TargetDrive,
-  videoGlobalTransitId: string,
-  fileKey: string,
-  systemFileType?: SystemFileType
-) => {
-  const fileHeader = await getFileHeaderOverPeerByGlobalTransitId(
-    dotYouClient,
-    odinId,
-    targetDrive,
-    videoGlobalTransitId,
-    {
-      systemFileType,
-    }
-  );
-  if (!fileHeader) return undefined;
-
-  const descriptor = fileHeader.fileMetadata.payloads.find((p) => p.key === fileKey)
-    ?.descriptorContent;
-  if (!descriptor) return undefined;
-
-  return tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
-};
-
 export const getDecryptedVideoUrlOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
