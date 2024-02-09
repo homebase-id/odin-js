@@ -81,7 +81,7 @@ export const ChatComposer = ({
   return (
     <>
       <ErrorNotification error={sendMessageError} />
-      <div className="bg-page-background">
+      <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
         </div>
