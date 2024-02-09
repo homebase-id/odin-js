@@ -145,7 +145,8 @@ export const appendDataToFile = async (
   instructions: AppendInstructionSet,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ) => {
   isDebug &&
     console.debug(
@@ -181,14 +182,15 @@ export const appendDataToFile = async (
     manifest
   );
 
-  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);
+  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
 export const reUploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  encrypt: boolean
+  encrypt: boolean,
+  axiosConfig?: AxiosRequestConfig
 ) => {
   const targetDrive = instructions.storageOptions?.drive;
   const fileId = instructions.storageOptions?.overwriteFileId;
@@ -241,5 +243,14 @@ export const reUploadFile = async (
     }
   }
 
-  return await uploadFile(dotYouClient, instructions, metadata, payloads, thumbnails, encrypt);
+  return await uploadFile(
+    dotYouClient,
+    instructions,
+    metadata,
+    payloads,
+    thumbnails,
+    encrypt,
+    undefined,
+    axiosConfig
+  );
 };

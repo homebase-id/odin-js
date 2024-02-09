@@ -236,7 +236,8 @@ export const pureAppend = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<{ newVersionTag: string }> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
@@ -245,8 +246,10 @@ export const pureAppend = async (
   const url = '/drive/files/uploadpayload';
 
   const config = {
+    ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
+      ...axiosConfig?.headers,
     },
   };
 
