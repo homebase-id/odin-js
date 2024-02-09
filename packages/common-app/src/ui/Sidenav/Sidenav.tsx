@@ -453,7 +453,9 @@ const ChatNavItem = () => {
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
   return (
-    <div className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1  ${sidebarBg}`}>
+    <div
+      className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1 pb-[env(safe-area-inset-bottom)] ${sidebarBg}`}
+    >
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner'} end={true} />
         <NavItem icon={Feed} to={'/apps/feed'} end={true} />

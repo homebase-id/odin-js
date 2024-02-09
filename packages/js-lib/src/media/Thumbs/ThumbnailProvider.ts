@@ -31,7 +31,7 @@ const getEmbeddedThumbOfThumbnailFile = async (
 
 export const createThumbnails = async (
   image: Blob,
-  key: string,
+  payloadKey: string,
   thumbSizes?: ThumbnailInstruction[]
 ): Promise<{
   naturalSize: ImageSize;
@@ -45,7 +45,7 @@ export const createThumbnails = async (
   const contentType = image.type as ImageContentType;
 
   if (image.type === svgType) {
-    const vectorThumb = await createVectorThumbnail(imageBytes, key);
+    const vectorThumb = await createVectorThumbnail(imageBytes, payloadKey);
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(vectorThumb.thumb, vectorThumb.naturalSize),
@@ -55,14 +55,17 @@ export const createThumbnails = async (
   }
 
   if (contentType === gifType) {
-    const gifThumb = await createImageThumbnail(imageBytes, key, { ...tinyThumbSize, type: 'gif' });
+    const gifThumb = await createImageThumbnail(imageBytes, payloadKey, {
+      ...tinyThumbSize,
+      type: 'gif',
+    });
 
     return {
       tinyThumb: await getEmbeddedThumbOfThumbnailFile(gifThumb.thumb, gifThumb.naturalSize),
       naturalSize: gifThumb.naturalSize,
       additionalThumbnails: [
         {
-          key,
+          key: payloadKey,
           payload: image,
           ...gifThumb.naturalSize,
         },
@@ -73,7 +76,7 @@ export const createThumbnails = async (
   // Create a thumbnail that fits scaled into a 20 x 20 canvas
   const { naturalSize, thumb: tinyThumb } = await createImageThumbnail(
     imageBytes,
-    key,
+    payloadKey,
     tinyThumbSize
   );
 
@@ -103,7 +106,10 @@ export const createThumbnails = async (
     tinyThumb,
     ...(await Promise.all(
       applicableThumbSizes.map(
-        async (thumbSize) => await (await createImageThumbnail(imageBytes, key, thumbSize)).thumb
+        async (thumbSize) =>
+          await (
+            await createImageThumbnail(imageBytes, payloadKey, thumbSize)
+          ).thumb
       )
     )),
   ];
@@ -117,7 +123,7 @@ export const createThumbnails = async (
 
 const createVectorThumbnail = async (
   imageBytes: Uint8Array,
-  key: string
+  payloadKey: string
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
   const fallbackNaturalSize: ImageSize = {
     pixelWidth: 50,
@@ -127,7 +133,7 @@ const createVectorThumbnail = async (
     pixelWidth: 50,
     pixelHeight: 50,
     payload: new Blob([imageBytes], { type: svgType }),
-    key,
+    key: payloadKey,
   };
 
   const imageSizePromise: Promise<ImageSize | null> = new Promise((resolve) => {
@@ -153,7 +159,7 @@ const createVectorThumbnail = async (
 
 const createImageThumbnail = async (
   imageBytes: Uint8Array,
-  key: string,
+  payloadKey: string,
   instruction: ThumbnailInstruction
 ): Promise<{ naturalSize: ImageSize; thumb: ThumbnailFile }> => {
   const blob: Blob = new Blob([imageBytes], {});
@@ -171,7 +177,7 @@ const createImageThumbnail = async (
           pixelHeight: resizedData.size.height,
           payload: resizedData.blob,
           contentType: `image/${type}`,
-          key,
+          key: payloadKey,
         },
       };
     }

@@ -2,6 +2,8 @@ import { createPortal } from 'react-dom';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import {
+  AuthorImage,
+  AuthorName,
   ConnectionImage,
   ConnectionName,
   DialogWrapper,
@@ -14,6 +16,7 @@ import {
   SingleConversation,
 } from '../../../providers/ConversationProvider';
 import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
+import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   month: 'short',
@@ -38,6 +41,11 @@ export const ChatMessageInfo = ({
   const recipients = (conversationContent as GroupConversation).recipients || [
     (conversationContent as SingleConversation).recipient,
   ];
+
+  const { data: reactions } = useChatReaction({
+    conversationId: conversation?.fileMetadata.appData.uniqueId,
+    messageId: msg.fileMetadata.appData.uniqueId,
+  }).get;
 
   const dialog = (
     <DialogWrapper onClose={onClose} title={t('Message info')}>
@@ -81,6 +89,29 @@ export const ChatMessageInfo = ({
             ))}
           </div>
         </div>
+
+        {reactions?.length ? (
+          <div>
+            <p className="mb-2 text-xl">{t('Reactions')}</p>
+            <div className="flex flex-col gap-4">
+              {reactions?.map((reaction) => {
+                return (
+                  <div className="flex flex-row items-center text-lg" key={reaction.fileId}>
+                    <AuthorImage
+                      odinId={reaction.fileMetadata.senderOdinId}
+                      size="xs"
+                      className="mr-2"
+                    />
+                    <AuthorName odinId={reaction.fileMetadata.senderOdinId} />
+                    <p className="ml-auto text-3xl">
+                      {reaction.fileMetadata.appData.content.message}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
     </DialogWrapper>
   );
