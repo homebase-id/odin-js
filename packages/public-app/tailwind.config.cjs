@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+// eslint-disable-next-line no-undef
 module.exports = {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
@@ -16,6 +17,15 @@ module.exports = {
 
         primary: 'rgb(var(--color-button) / <alpha-value>)',
         'primary-contrast': 'rgb(var(--color-button-text) / <alpha-value>)',
+      },
+      keyframes: {
+        slowding: {
+          '0%, 60%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      },
+      animation: {
+        slowding: 'slowding 1.2s ease-in-out',
       },
     },
   },

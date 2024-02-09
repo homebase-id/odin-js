@@ -19,6 +19,15 @@ module.exports = {
         background: 'rgb(var(--color-background) / <alpha-value>)',
         foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
       },
+      keyframes: {
+        slowding: {
+          '0%, 60%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      },
+      animation: {
+        slowding: 'slowding 1.2s ease-in-out',
+      },
     },
   },
   plugins: [],
