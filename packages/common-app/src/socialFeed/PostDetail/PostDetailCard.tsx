@@ -96,7 +96,7 @@ export const PostDetailCard = ({
             {post.type !== 'Article' && post.captionAsRichText ? (
               <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
             ) : (
-              post.caption
+              <span className="whitespace-pre-wrap">{post.caption}</span>
             )}
           </h1>
         )}
