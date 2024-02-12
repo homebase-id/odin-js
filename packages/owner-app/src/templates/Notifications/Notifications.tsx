@@ -10,6 +10,7 @@ import {
   CHAT_APP_ID,
   FEED_APP_ID,
   OWNER_APP_ID,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -157,8 +158,8 @@ const NotificationAppGroup = ({
     (stringGuidsEqual(appId, OWNER_APP_ID)
       ? 'Homebase'
       : stringGuidsEqual(appId, FEED_APP_ID)
-      ? 'Homebase - Feed'
-      : 'Unknown');
+        ? 'Homebase - Feed'
+        : 'Unknown');
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -265,7 +266,12 @@ const NotificationItem = ({
   groupCount: number;
   appName: string;
 }) => {
-  const { data: contactFile } = useContact({ odinId: notification.senderId }).fetch;
+  const identity = useDotYouClient().getIdentity();
+  const isLocalNotification = notification.senderId === identity;
+
+  const { data: contactFile } = useContact({
+    odinId: isLocalNotification ? undefined : notification.senderId,
+  }).fetch;
   const senderName = contactFile?.fileMetadata.appData.content.name?.displayName;
 
   const title = useMemo(() => `${appName}`, [appName]);
