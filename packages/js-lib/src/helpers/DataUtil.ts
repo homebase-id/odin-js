@@ -13,6 +13,11 @@ export const assertIfDefined = (key: string, value: unknown) => {
   if (!value) throw new Error(`${key} undefined`);
 };
 
+export const assertIfDefinedAndNotDefault = (key: string, value: unknown) => {
+  assertIfDefined(key, value);
+  if (value === '') throw new Error(`${key} empty`);
+};
+
 // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
 export const stringToUint8Array = (str: string): Uint8Array => {
   return new TextEncoder().encode(str);
@@ -327,10 +332,7 @@ export const getBlobFromBytes = ({
 
 export const getLargestThumbOfPayload = (payload?: PayloadDescriptor) => {
   if (!payload?.thumbnails?.length) return;
-  return payload.thumbnails?.reduce(
-    (prev, curr) => {
-      return prev.pixelHeight * prev.pixelWidth > curr.pixelHeight * curr.pixelWidth ? prev : curr;
-    },
-    payload?.thumbnails?.[0]
-  );
+  return payload.thumbnails?.reduce((prev, curr) => {
+    return prev.pixelHeight * prev.pixelWidth > curr.pixelHeight * curr.pixelWidth ? prev : curr;
+  }, payload?.thumbnails?.[0]);
 };

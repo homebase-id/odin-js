@@ -16,7 +16,12 @@ import {
   ImageContentType,
   ContentType,
 } from '../../../core/core';
-import { assertIfDefined, tryJsonParse, stringifyToQueryParams } from '../../../helpers/DataUtil';
+import {
+  assertIfDefined,
+  tryJsonParse,
+  stringifyToQueryParams,
+  assertIfDefinedAndNotDefault,
+} from '../../../helpers/DataUtil';
 import {
   getAxiosClient,
   getRangeHeader,
@@ -83,6 +88,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefined('Key', key);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
@@ -118,18 +124,20 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -160,6 +168,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
@@ -237,6 +246,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';

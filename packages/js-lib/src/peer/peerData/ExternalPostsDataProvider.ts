@@ -57,6 +57,11 @@ export const getSocialFeed = async (
     await Promise.all(
       result.searchResults.map(async (dsr) => {
         const odinId = dsr.fileMetadata.senderOdinId;
+        // If the odinId is not set, we don't know who the author is, so we can't get the post; And something is up;
+        if (!odinId) {
+          console.warn('[ExtenalPostsDataProvider] Post without odinId', dsr?.fileId);
+          return undefined;
+        }
         return dsrToPostFile(dotYouClient, odinId, dsr, result.includeMetadataHeader);
       })
     )
