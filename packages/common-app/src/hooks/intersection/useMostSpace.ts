@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const useMostSpace = (el?: React.RefObject<HTMLElement>) => {
+export const useMostSpace = (el: React.RefObject<HTMLElement> | undefined, forceRun?: unknown) => {
   const [space, setSpace] = useState<{
     verticalSpace: 'top' | 'bottom';
     horizontalSpace: 'left' | 'right';
@@ -15,7 +15,7 @@ export const useMostSpace = (el?: React.RefObject<HTMLElement>) => {
 
     window.addEventListener('scroll', doIt);
     return () => window.removeEventListener('scroll', doIt);
-  }, [el?.current]);
+  }, [el?.current, forceRun]);
 
   const findSpaceDirection = (el: HTMLElement) => {
     const { top, left, bottom, right } = el.getBoundingClientRect();

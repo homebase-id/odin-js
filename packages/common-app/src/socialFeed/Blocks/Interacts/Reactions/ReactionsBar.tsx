@@ -113,7 +113,7 @@ export const ReactionsBar = ({
   onMouseLeave?: () => void;
 }) => {
   const wrapperRef = useRef<HTMLButtonElement>(null);
-  const { verticalSpace } = useMostSpace(wrapperRef);
+  const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
   const [isCustomOpen, setIsCustomOpen] = useState(false);
 
   const handleLike = (emoji: string) => {
@@ -167,7 +167,7 @@ export const ReactionsBar = ({
           <div
             className={`absolute z-20 ${
               verticalSpace === 'top' ? 'bottom-0' : 'top-0'
-            } left-0 overflow-hidden rounded-lg`}
+            } ${horizontalSpace === 'right' ? 'left-0' : 'right-0'} overflow-hidden rounded-lg`}
           >
             <Suspense>
               <EmojiPicker

@@ -3,6 +3,7 @@ import {
   ReactionsBar,
   t,
   useDotYouClient,
+  useMostSpace,
   useOutsideTrigger,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
@@ -24,6 +25,9 @@ export const ChatReactionComposer = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { verticalSpace, horizontalSpace } = useMostSpace(buttonRef, isReact);
+
   const { mutate: addReaction } = useChatReaction().add;
   const { mutate: removeReaction } = useChatReaction().remove;
   const { data } = useChatReaction({
@@ -43,33 +47,34 @@ export const ChatReactionComposer = ({
       }`}
       ref={wrapperRef}
     >
-      <div className={`${isReact ? 'absolute' : 'contents'} -left-2 -top-12 bottom-0 w-[10rem]`}>
-        {isReact ? (
-          <ReactionsBar
-            className={`absolute left-0 top-0 z-20`}
-            emojis={['👍️', '❤️', '😂', '😮', '😥']}
-            defaultValue={
-              myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
-            }
-            doLike={(emoji) => {
-              addReaction({ conversation, message: msg, reaction: emoji });
-              setIsReact(false);
-            }}
-            doUnlike={(emoji) => {
-              const dsr = myReactions?.find(
-                (reaction) => reaction.fileMetadata.appData.content.message === emoji
-              );
-              if (dsr) removeReaction({ conversation, message: msg, reaction: dsr });
-              setIsReact(false);
-            }}
-          />
-        ) : null}
-      </div>
+      {isReact ? (
+        <ReactionsBar
+          className={`absolute ${
+            verticalSpace === 'top' ? '-bottom-12' : '-top-12'
+          } ${horizontalSpace === 'right' ? 'left-0' : 'right-0'} z-20`}
+          emojis={['👍️', '❤️', '😂', '😮', '😥']}
+          defaultValue={
+            myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
+          }
+          doLike={(emoji) => {
+            addReaction({ conversation, message: msg, reaction: emoji });
+            setIsReact(false);
+          }}
+          doUnlike={(emoji) => {
+            const dsr = myReactions?.find(
+              (reaction) => reaction.fileMetadata.appData.content.message === emoji
+            );
+            if (dsr) removeReaction({ conversation, message: msg, reaction: dsr });
+            setIsReact(false);
+          }}
+        />
+      ) : null}
       <button
         className={`cursor-pointer text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white ${
           isReact ? 'text-black dark:text-white' : ''
         }`}
         onClick={() => setIsReact(!isReact)}
+        ref={buttonRef}
       >
         <Lol className="inline-block h-6 w-6" />
         <span className="sr-only">{t('Like')}</span>
