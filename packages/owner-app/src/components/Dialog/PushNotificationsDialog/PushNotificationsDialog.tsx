@@ -16,7 +16,7 @@ import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   usePushNotificationClient,
@@ -222,9 +222,9 @@ const DeviceView = ({
     },
   } = usePushNotificationClients();
 
-  const isCurrent = stringGuidsEqual(
-    currentDevice?.accessRegistrationId,
-    subscription.accessRegistrationId
+  const isCurrent = useMemo(
+    () => stringGuidsEqual(currentDevice?.accessRegistrationId, subscription.accessRegistrationId),
+    [currentDevice, subscription]
   );
 
   return (
