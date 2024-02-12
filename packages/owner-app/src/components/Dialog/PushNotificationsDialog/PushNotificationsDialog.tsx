@@ -22,6 +22,7 @@ import {
   usePushNotificationClient,
   usePushNotificationClients,
 } from '../../../hooks/notifications/usePushNotificationClients';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const target = usePortal('modal-container');
@@ -80,12 +81,6 @@ const Settings = () => {
     status: testNotificationStatus,
     error: testNotificationError,
   } = usePushNotificationClient().sendTestNotification;
-
-  // const {
-  //   mutate: removeCurrent,
-  //   status: removeStatus,
-  //   error: removeError,
-  // } = usePushNotificationClients().removeCurrent;
 
   return (
     <>
@@ -220,20 +215,33 @@ const DeviceView = ({
       status: removeCurrentDeviceStatus,
       error: removeCurrentDeviceError,
     },
+    removeRegisteredDevice: {
+      mutate: removeRegisteredDevice,
+      status: removeRegisteredDeviceStatus,
+      error: removeRegisteredDeviceError,
+    },
   } = usePushNotificationClients();
+
+  const isCurrent = stringGuidsEqual(
+    currentDevice?.accessRegistrationId,
+    subscription.accessRegistrationId
+  );
 
   return (
     <>
-      <ErrorNotification error={removeCurrentDeviceError} />
+      <ErrorNotification error={removeCurrentDeviceError || removeRegisteredDeviceError} />
       <div className={`flex flex-row items-center ${className ?? ''}`}>
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6" />
         <div className="mr-2 flex flex-col">
-          {subscription.friendlyName}
+          <div>
+            {subscription.friendlyName}{' '}
+            {isCurrent ? <span className="text-slate-400">({t('this device')})</span> : null}
+          </div>
           <small className="block text-sm">
             {t('Since')}: {new Date(subscription.subscriptionStartedDate).toLocaleDateString()}
           </small>
         </div>
-        {currentDevice?.accessRegistrationId === subscription.accessRegistrationId ? (
+        {isCurrent ? (
           <ActionButton
             icon={Times}
             type="secondary"
@@ -244,7 +252,18 @@ const DeviceView = ({
             }}
             state={removeCurrentDeviceStatus}
           />
-        ) : null}
+        ) : (
+          <ActionButton
+            icon={Times}
+            type="secondary"
+            size="square"
+            className="ml-2"
+            onClick={async () => {
+              removeRegisteredDevice(subscription.accessRegistrationId);
+            }}
+            state={removeRegisteredDeviceStatus}
+          />
+        )}
       </div>
     </>
   );

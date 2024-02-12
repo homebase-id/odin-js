@@ -5,9 +5,10 @@ import {
   GetApplicationServerKey,
   RegisterNewDevice,
   GetCurrentDeviceDetails,
-  RemoveRegisteredDevice,
   GetRegisteredDevices,
   RemoveAllRegisteredDevice,
+  RemoveCurrentRegisteredDevice,
+  RemoveRegisteredDevice,
 } from '../../provider/notifications/PushClientProvider';
 import { SendNotification } from '@youfoundation/js-lib/core';
 
@@ -108,7 +109,11 @@ export const usePushNotificationClients = () => {
   };
 
   const removeCurrentDevice = async () => {
-    return await RemoveRegisteredDevice(dotYouClient);
+    return await RemoveCurrentRegisteredDevice(dotYouClient);
+  };
+
+  const removeRegisteredDevice = async (key: string) => {
+    return await RemoveRegisteredDevice(dotYouClient, key);
   };
 
   const getNotificationClients = async () => {
@@ -136,13 +141,19 @@ export const usePushNotificationClients = () => {
       retry: false,
     }),
     removeCurrent: useMutation({
-      mutationFn: () => removeCurrentDevice(),
+      mutationFn: removeCurrentDevice,
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ['notification-clients'], exact: false });
         queryClient.invalidateQueries({
           queryKey: ['notification-clients', 'current'],
           exact: false,
         });
+      },
+    }),
+    removeRegisteredDevice: useMutation({
+      mutationFn: removeRegisteredDevice,
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: ['notification-clients'], exact: false });
       },
     }),
   };

@@ -1,5 +1,6 @@
 import { getBrowser, getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { ApiType, DotYouClient } from '@youfoundation/js-lib/core';
+import { assertIfDefined } from '@youfoundation/js-lib/helpers';
 
 export const GetApplicationServerKey = async () => {
   const dotYouClient = new DotYouClient({ api: ApiType.Guest });
@@ -59,10 +60,17 @@ export const GetRegisteredDevices = async (dotYouClient: DotYouClient) => {
     .then((response) => response.data);
 };
 
-export const RemoveRegisteredDevice = async (dotYouClient: DotYouClient) => {
+export const RemoveCurrentRegisteredDevice = async (dotYouClient: DotYouClient) => {
   const axiosClient = dotYouClient.createAxiosClient();
 
   return await axiosClient.post(`/notify/push/unsubscribe/`);
+};
+
+export const RemoveRegisteredDevice = async (dotYouClient: DotYouClient, key: string) => {
+  const axiosClient = dotYouClient.createAxiosClient();
+  assertIfDefined('key', key);
+
+  return await axiosClient.delete(`/notify/push/subscription?key=${key}`);
 };
 
 export const RemoveAllRegisteredDevice = async (dotYouClient: DotYouClient) => {
