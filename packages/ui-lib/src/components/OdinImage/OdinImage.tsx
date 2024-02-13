@@ -107,10 +107,9 @@ export const OdinImage = ({
           ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
           : loadSize
       }
-      data-fileid={(props as any).fileId}
-      data-globaltransitid={(props as any).globalTransitId}
+      data-fileid={props.fileId}
+      data-globaltransitid={props.globalTransitId}
       data-filekey={props.fileKey}
-      data-not={weDontHaveAnything ? 'true' : 'false'}
     >
       {weDontHaveSourceProps ? null : weDontHaveAnything ? (
         <LoadingBlock className="aspect-square h-full w-full" />
@@ -194,15 +193,15 @@ const TinyThumb = ({
     fit === 'cover'
       ? 'h-full w-full object-cover'
       : fit === 'contain'
-      ? 'm-auto max-h-[inherit] max-w-full object-contain'
-      : 'h-auto max-h-[inherit] w-full'
+        ? 'm-auto max-h-[inherit] max-w-full object-contain'
+        : 'h-auto max-h-[inherit] w-full'
   } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
 
   return (
     <img
       src={previewUrl}
       className={`${imgClassNames} pointer-events-none absolute inset-0 m-auto ${
-        previewIsTiny ? '' : 'blur-xl'
+        previewIsTiny ? 'blur-xl' : ''
       } transition-opacity delay-500 ${isFinal ? 'opacity-0' : 'opacity-100'}`}
       ref={previewImgRef}
       width={width}
@@ -238,8 +237,8 @@ const FinalImage = ({
     fit === 'cover'
       ? 'h-full w-full object-cover'
       : fit === 'contain'
-      ? 'm-auto max-h-[inherit] max-w-full object-contain'
-      : 'h-auto max-h-[inherit] w-full'
+        ? 'm-auto max-h-[inherit] max-w-full object-contain'
+        : 'h-auto max-h-[inherit] w-full'
   } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
 
   return (
@@ -338,8 +337,8 @@ const useOdinImage = (props: UseOdinImageProps) => {
     loadSize !== 'full'
       ? loadSize
       : avoidPayload
-      ? { pixelHeight: 200, pixelWidth: 200 }
-      : undefined,
+        ? { pixelHeight: 200, pixelWidth: 200 }
+        : undefined,
     probablyEncrypted,
     naturalSize,
     systemFileType,
@@ -436,7 +435,7 @@ const useOdinImage = (props: UseOdinImageProps) => {
     previewUrl,
     weDontHaveAnything,
     weDontHaveSourceProps,
-    previewIsTiny: !cachedImage,
+    previewIsTiny: !cachedImage?.url,
     loadSize,
     onLoadError,
     isFatalError,

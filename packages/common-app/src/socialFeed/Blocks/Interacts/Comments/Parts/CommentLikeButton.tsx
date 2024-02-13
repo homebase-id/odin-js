@@ -32,7 +32,7 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
 
   return (
     <>
-      <div className="relative" ref={wrapperRef}>
+      <div className={`relative select-none`} ref={wrapperRef}>
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
           className={`${isReact ? 'absolute' : 'contents'} -left-1 -top-10 bottom-0 w-[10rem]`}
