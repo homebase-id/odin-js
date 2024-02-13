@@ -34,13 +34,15 @@ export const MediaGallery = ({
   probablyEncrypted,
   onClick,
 }: MediaGalleryProps) => {
-  const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [isInView, setIsInView] = useState(false);
+  useIntersection(containerRef, () => setIsInView(true));
+
+  const [someLoaded, setSomeLoaded] = useState(false);
 
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
-
-  useIntersection(containerRef, () => setIsInView(true));
 
   const tinyThumbUrl = useMemo(
     () => (previewThumbnail ? getEmbeddedThumbUrl(previewThumbnail) : undefined),
@@ -59,7 +61,7 @@ export const MediaGallery = ({
           <div
             className={`${
               tinyThumbUrl ? 'absolute inset-0' : ''
-            } grid grid-cols-2 gap-1 bg-background`}
+            } ${someLoaded ? 'opacity-100' : 'opacity-0'} grid grid-cols-2 gap-1 bg-background`}
           >
             {slicedFiles.map((file, index) => (
               <div
@@ -83,6 +85,7 @@ export const MediaGallery = ({
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}
                     avoidPayload={file.type === 'video'}
+                    onLoad={() => setSomeLoaded(true)}
                   />
 
                   {index === maxVisible - 1 && countExcludedFromView > 0 ? (
@@ -91,7 +94,9 @@ export const MediaGallery = ({
                     </div>
                   ) : file.type === 'video' ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Triangle className="text-background h-16 w-16" />
+                      <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+                        <Triangle className="text-foreground h-12 w-12" />
+                      </div>
                     </div>
                   ) : null}
                 </div>

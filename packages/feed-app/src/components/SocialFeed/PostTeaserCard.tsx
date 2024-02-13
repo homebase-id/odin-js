@@ -132,7 +132,7 @@ const MediaStillUploading = ({ postFile }: { postFile: NewDriveSearchResult<Post
 
   return (
     <>
-      <div className={`relative ${mediaFiles?.length !== 1 ? 'grid grid-cols-2 gap-2' : ''}`}>
+      <div className={`relative ${mediaFiles?.length !== 1 ? 'grid grid-cols-2 gap-1' : ''}`}>
         {mediaFiles
           ?.slice(0, 4)
           ?.map((_media, index) => (
