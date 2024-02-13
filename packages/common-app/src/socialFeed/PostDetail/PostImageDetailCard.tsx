@@ -175,7 +175,7 @@ export const PostImageDetailCard = ({
             ) : null}
           </div>
 
-          <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[25rem] lg:flex-grow-0 lg:overflow-auto">
+          <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
             <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
               <AuthorImage odinId={odinId} size="sm" />
               <div className="flex max-w-lg flex-grow flex-col">

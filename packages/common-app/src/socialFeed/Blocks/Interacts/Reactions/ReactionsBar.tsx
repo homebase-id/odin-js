@@ -19,12 +19,14 @@ export const SocialReactionsBar = ({
   context,
   canReact,
   onClose,
+  customDirection,
 }: {
   className: string;
   isActive: boolean;
   context: ReactionContext;
   canReact?: CanReactInfo;
   onClose: () => void;
+  customDirection?: 'left' | 'right';
 }) => {
   const [isHover, setIsHover] = useState(false);
   const addError = useErrors().add;
@@ -89,6 +91,7 @@ export const SocialReactionsBar = ({
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       defaultValue={myEmojis || []}
+      customDirection={customDirection}
     />
   );
 };
@@ -103,6 +106,7 @@ export const ReactionsBar = ({
   className,
   onMouseEnter,
   onMouseLeave,
+  customDirection,
 }: {
   doLike: (body: string) => void;
   doUnlike: (body: string) => void;
@@ -111,6 +115,7 @@ export const ReactionsBar = ({
   className?: string;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  customDirection?: 'left' | 'right';
 }) => {
   const wrapperRef = useRef<HTMLButtonElement>(null);
   const { verticalSpace, horizontalSpace } = useMostSpace(wrapperRef);
@@ -166,7 +171,9 @@ export const ReactionsBar = ({
         {isCustomOpen ? (
           <div
             className={`absolute z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
-              horizontalSpace === 'right' ? 'left-0' : 'right-0'
+              customDirection === 'right' || (!customDirection && horizontalSpace === 'right')
+                ? 'left-0'
+                : 'right-0'
             } overflow-hidden rounded-lg`}
           >
             <Suspense>

@@ -67,6 +67,7 @@ export const LikeButton = ({
             context={context}
             canReact={canReact}
             onClose={() => setIsReact(false)}
+            customDirection="right"
           />
         </div>
         <button
