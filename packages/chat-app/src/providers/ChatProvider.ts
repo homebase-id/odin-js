@@ -245,7 +245,7 @@ export const uploadChatMessage = async (
         newMediaFile.file,
         payloadKey,
         [
-          { quality: 75, width: 250, height: 250 },
+          { quality: 75, width: 400, height: 400 },
           { quality: 75, width: 1600, height: 1600 },
         ]
       );

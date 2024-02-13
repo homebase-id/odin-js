@@ -69,12 +69,12 @@ export const MediaGallery = ({
                 <div
                   className={`relative ${
                     slicedFiles.length === 3 && index === 2 ? 'aspect-[2/1]' : 'aspect-square'
-                  } h-auto w-full cursor-pointer`}
+                  } h-auto w-full cursor-pointer overflow-hidden`}
                   onClick={onClick ? (e) => onClick(e, index) : undefined}
                 >
                   <Image
                     odinId={odinId}
-                    className={`h-full w-auto`}
+                    className={`h-full w-auto ${file.type === 'video' ? 'blur-sm' : ''}`}
                     fileId={file.fileId || fileId}
                     globalTransitId={file.fileId ? undefined : globalTransitId}
                     fileKey={file.fileKey}

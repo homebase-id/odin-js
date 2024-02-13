@@ -3,7 +3,7 @@ import { useImage } from '../../hooks/image/useImage';
 import { useEffect } from 'react';
 import { ImageEvents, ImageSource } from './types';
 
-interface OdinThumbnailImageProps
+export interface OdinThumbnailImageProps
   extends ImageSource,
     ImageEvents,
     Omit<

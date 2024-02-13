@@ -1,8 +1,7 @@
 import { DriveSearchResult, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { OdinImage } from '@youfoundation/ui-lib';
+import { OdinImage, OdinThumbnailImage } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
-import { getLargestThumbOfPayload } from '@youfoundation/js-lib/helpers';
 import { Triangle, useDarkMode } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
@@ -21,7 +20,6 @@ export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
         fileId={msg.fileId}
         fileLastModified={msg.fileMetadata.updated}
         payload={payloads[0]}
-        fit={'contain'}
         onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payloads[0].key}`)}
         previewThumbnail={isGallery ? undefined : msg.fileMetadata.appData.previewThumbnail}
       />
@@ -51,26 +49,36 @@ const MediaItem = ({
   const dotYouClient = useDotYouClientContext();
   const isVideo = payload.contentType.startsWith('video');
 
-  const largestThumb = getLargestThumbOfPayload(payload);
-
   return (
     <div
       className={`relative cursor-pointer ${fit === 'cover' ? 'aspect-square' : ''}`}
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
-      <OdinImage
-        dotYouClient={dotYouClient}
-        fileId={fileId}
-        fileKey={payload.key}
-        lastModified={payload.lastModified || fileLastModified}
-        targetDrive={ChatDrive}
-        avoidPayload={isVideo}
-        previewThumbnail={previewThumbnail}
-        explicitSize={largestThumb && !previewThumbnail ? largestThumb : undefined}
-        fit={fit}
-        onLoad={onLoad}
-      />
+      {!isVideo ? (
+        <OdinImage
+          dotYouClient={dotYouClient}
+          fileId={fileId}
+          fileKey={payload.key}
+          lastModified={payload.lastModified || fileLastModified}
+          targetDrive={ChatDrive}
+          avoidPayload={isVideo}
+          previewThumbnail={previewThumbnail}
+          className={`h-full w-auto`}
+          fit={fit}
+          onLoad={onLoad}
+        />
+      ) : (
+        <OdinThumbnailImage
+          dotYouClient={dotYouClient}
+          fileId={fileId}
+          fileKey={payload.key}
+          lastModified={payload.lastModified || fileLastModified}
+          targetDrive={ChatDrive}
+          className={`w-full blur-sm`}
+          loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+        />
+      )}
       {isVideo ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <Triangle className="h-16 w-16 text-background" />

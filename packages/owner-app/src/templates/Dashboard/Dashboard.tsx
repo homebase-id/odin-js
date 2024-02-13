@@ -21,8 +21,6 @@ import {
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
-import { OdinPayloadImage, OdinPreviewImage, OdinThumbnailImage } from '@youfoundation/ui-lib';
-import { BlogConfig } from '@youfoundation/js-lib/public';
 
 // const About = {
 //   circles: (
@@ -83,29 +81,6 @@ const Dashboard = () => {
       <div className="mt-10 flex max-w-2xl flex-row flex-wrap gap-4">
         <FeedTeaser />
       </div>
-
-      {/* <OdinPreviewImage
-        dotYouClient={dotYouClient}
-        fileId={'851bda18-50ba-7800-cb18-779ff2c34061'}
-        globalTransitId={'05a1e109-9226-40e8-a5c6-72cc04d54b17'}
-        targetDrive={BlogConfig.PublicChannelDrive}
-        fileKey={'pst_mdi0'}
-      />
-      <OdinThumbnailImage
-        dotYouClient={dotYouClient}
-        fileId={'851bda18-50ba-7800-cb18-779ff2c34061'}
-        globalTransitId={'05a1e109-9226-40e8-a5c6-72cc04d54b17'}
-        targetDrive={BlogConfig.PublicChannelDrive}
-        loadSize={{ pixelHeight: 200, pixelWidth: 200 }}
-        fileKey={'pst_mdi0'}
-      />
-      <OdinPayloadImage
-        dotYouClient={dotYouClient}
-        fileId={'851bda18-50ba-7800-cb18-779ff2c34061'}
-        globalTransitId={'05a1e109-9226-40e8-a5c6-72cc04d54b17'}
-        targetDrive={BlogConfig.PublicChannelDrive}
-        fileKey={'pst_mdi0'}
-      /> */}
     </>
   );
 };
