@@ -69,9 +69,9 @@ export const OdinImage = ({
 
     // Find the best matching size in the meta sizes
     let matchingSize = undefined;
-    // tinyThumb?.sizes?.find((size) => {
-    //   return targetWidth < size.pixelWidth && targetHeight < size.pixelHeight;
-    // });
+    tinyThumb?.sizes?.find((size) => {
+      return targetWidth < size.pixelWidth && targetHeight < size.pixelHeight;
+    });
 
     // If no exact size, pass the size of the img element
     // If targetWidth or targetHeight is 0, we can't calculate the size; And shouldn't even fetch

@@ -243,11 +243,7 @@ export const uploadChatMessage = async (
     } else {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
-        payloadKey,
-        [
-          { quality: 75, width: 400, height: 400 },
-          { quality: 75, width: 1600, height: 1600 },
-        ]
+        payloadKey
       );
 
       thumbnails.push(...additionalThumbnails);
