@@ -165,9 +165,9 @@ export const ReactionsBar = ({
         </button>
         {isCustomOpen ? (
           <div
-            className={`absolute z-20 ${
-              verticalSpace === 'top' ? 'bottom-0' : 'top-0'
-            } ${horizontalSpace === 'right' ? 'left-0' : 'right-0'} overflow-hidden rounded-lg`}
+            className={`absolute z-20 ${verticalSpace === 'top' ? 'bottom-0' : 'top-0'} ${
+              horizontalSpace === 'right' ? 'left-0' : 'right-0'
+            } overflow-hidden rounded-lg`}
           >
             <Suspense>
               <EmojiPicker

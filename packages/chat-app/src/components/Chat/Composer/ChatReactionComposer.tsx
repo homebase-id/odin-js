@@ -20,13 +20,15 @@ export const ChatReactionComposer = ({
   msg: DriveSearchResult<ChatMessage>;
 }) => {
   const identity = useDotYouClient().getIdentity();
+  const authorOdinId = msg.fileMetadata.senderOdinId;
+  const messageFromMe = !authorOdinId || authorOdinId === identity;
 
   const [isReact, setIsReact] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOutsideTrigger(wrapperRef, () => setIsReact(false));
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { verticalSpace, horizontalSpace } = useMostSpace(buttonRef, isReact);
+  const { verticalSpace } = useMostSpace(buttonRef, isReact);
 
   const { mutate: addReaction } = useChatReaction().add;
   const { mutate: removeReaction } = useChatReaction().remove;
@@ -42,7 +44,7 @@ export const ChatReactionComposer = ({
 
   return (
     <div
-      className={`relative mx-1 my-auto cursor-pointer opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
+      className={`mx-1 my-auto cursor-pointer opacity-0 transition-opacity duration-300 group-hover:opacity-100 md:relative ${
         isReact ? 'opacity-100' : ''
       }`}
       ref={wrapperRef}
@@ -50,8 +52,8 @@ export const ChatReactionComposer = ({
       {isReact ? (
         <ReactionsBar
           className={`absolute ${
-            verticalSpace === 'top' ? '-bottom-12' : '-top-12'
-          } ${horizontalSpace === 'right' ? 'left-0' : 'right-0'} z-20`}
+            verticalSpace === 'top' ? 'md:bottom-8' : 'md:top-8'
+          } ${messageFromMe ? 'right-0' : 'left-0'} z-20`}
           emojis={['👍️', '❤️', '😂', '😮', '😥']}
           defaultValue={
             myReactions?.map((reaction) => reaction.fileMetadata.appData.content.message) || []
