@@ -1,7 +1,14 @@
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { DotYouClient, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
-import { Image, useIntersection, useDarkMode, Triangle } from '@youfoundation/common-app';
+import {
+  Image,
+  useIntersection,
+  useDarkMode,
+  Triangle,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
+import { useImageCache } from '@youfoundation/ui-lib';
 
 interface MediaGalleryProps {
   odinId?: string;
@@ -44,11 +51,20 @@ export const MediaGallery = ({
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
 
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getFromCache } = useImageCache(dotYouClient);
+
+  const targetDrive = getChannelDrive(channelId);
+  const hasFirstInCache = useMemo(
+    () => !!getFromCache(odinId, fileId, globalTransitId, slicedFiles[0].fileKey, targetDrive),
+    []
+  );
+
   const tinyThumbUrl = useMemo(
-    () => (previewThumbnail ? getEmbeddedThumbUrl(previewThumbnail) : undefined),
+    () =>
+      previewThumbnail && !hasFirstInCache ? getEmbeddedThumbUrl(previewThumbnail) : undefined,
     [previewThumbnail]
   );
-  const targetDrive = getChannelDrive(channelId);
 
   return (
     <div className={`overflow-hidden ${className ?? ''}`} ref={containerRef}>
@@ -61,7 +77,7 @@ export const MediaGallery = ({
           <div
             className={`${
               tinyThumbUrl ? 'absolute inset-0' : ''
-            } ${someLoaded ? 'opacity-100' : 'opacity-0'} grid grid-cols-2 gap-1 bg-background`}
+            } ${someLoaded || hasFirstInCache ? 'opacity-100' : 'opacity-0'} grid grid-cols-2 gap-1 bg-background`}
           >
             {slicedFiles.map((file, index) => (
               <div

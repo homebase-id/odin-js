@@ -8,3 +8,6 @@ export * from './components/OdinImage/OdinPayloadImage';
 // Fully featured images
 export * from './components/OdinImage/OdinImage';
 export * from './components/OdinVideo/OdinVideo';
+
+// Hooks
+export * from './hooks/image/useImage';
