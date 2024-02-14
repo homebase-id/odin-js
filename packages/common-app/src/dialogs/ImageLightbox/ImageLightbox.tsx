@@ -67,7 +67,6 @@ export const ImageLightbox = ({
             fit="contain"
             previewThumbnail={previewThumbnail}
             lastModified={lastModified}
-            explicitSize={'full'}
           />
         </div>
       </div>

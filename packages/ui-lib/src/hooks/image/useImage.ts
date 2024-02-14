@@ -74,7 +74,7 @@ export const useImage = (
         queryKey: [
           'image',
           odinId || localHost,
-          imageDrive?.alias,
+          imageDrive.alias,
           imageGlobalTransitId || imageFileId,
           imageFileKey,
         ],
@@ -216,7 +216,7 @@ export const useImage = (
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60, // 1 min
       gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      enabled: !!imageFileId && imageFileId !== '',
+      enabled: !!imageFileId && imageFileId !== '' && !!imageDrive && !!imageFileKey,
     }),
   };
 };

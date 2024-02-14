@@ -1,350 +1,52 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useImage, useImageCache } from '../../hooks/image/useImage';
-import { useTinyThumb } from '../../hooks/image/useTinyThumb';
+import { useEffect, useRef, useState } from 'react';
+import { OdinPreviewImage, OdinPreviewImageProps } from './OdinPreviewImage';
+import { OdinThumbnailImage } from './OdinThumbnailImage';
+import { OdinPayloadImage } from './OdinPayloadImage';
 import Loader from '../ui/Icons/Loader/Loader';
-import { useIntersection } from '../../hooks/intersection/useIntersection';
-import {
-  TargetDrive,
-  EmbeddedThumb,
-  ImageSize,
-  DotYouClient,
-  SystemFileType,
-} from '@youfoundation/js-lib/core';
-
-import '../../app/app.css';
-import LoadingBlock from '../ui/LoadingBlock/LoadingBlock';
 import { Exclamation } from '../ui/Icons/Exclamation';
+import { ImageSize } from '@youfoundation/js-lib/core';
+import { useIntersection } from '../../hooks/intersection/useIntersection';
+import { ThumbnailMeta } from '@youfoundation/js-lib/media';
 
-interface OdinImageSource {
-  dotYouClient: DotYouClient;
-  odinId?: string;
-  targetDrive: TargetDrive;
-  fileKey: string | undefined;
+export interface OdinImageProps
+  extends Omit<Omit<OdinPreviewImageProps, 'onLoad'>, 'blockFetchFromServer'> {
   probablyEncrypted?: boolean;
-  previewThumbnail?: EmbeddedThumb;
 
-  avoidPayload?: boolean;
-  explicitSize?: ImageSize | 'full';
-  systemFileType?: SystemFileType;
-  lastModified: number | undefined;
-}
-
-export interface OdinImageSourceWithFileId extends OdinImageSource {
-  fileId: string | undefined;
-  globalTransitId?: string | undefined;
-}
-
-interface OdinImageEvents {
   onLoad?: () => void;
-  onError?: () => void;
-}
-
-interface OdinImageElement {
+  avoidPayload?: boolean;
   fit?: 'cover' | 'contain';
   position?: 'left' | 'right' | 'center';
-  className?: string;
-  alt?: string;
-  title?: string;
 }
-
-export type OdinImageProps = OdinImageSourceWithFileId & OdinImageElement & OdinImageEvents;
-
-interface UseOdingImageInternalProps {
-  wrapperRef: React.RefObject<HTMLPictureElement>;
-  previewImgRef: React.RefObject<HTMLImageElement>;
-}
-
-type UseOdinImageProps = UseOdingImageInternalProps & OdinImageEvents & OdinImageSourceWithFileId;
 
 const thumblessContentTypes = ['image/svg+xml', 'image/gif'];
 
 export const OdinImage = ({
-  odinId,
-
-  fit,
-  position,
   className,
-
+  previewThumbnail,
+  probablyEncrypted,
+  avoidPayload,
+  fit,
   onLoad,
   ...props
 }: OdinImageProps) => {
+  const imgFitClassNames = `${fit === 'cover' ? 'w-full h-full object-cover' : fit === 'contain' ? 'max-h-[inherit] m-auto object-contain' : ''}`;
+
   const wrapperRef = useRef<HTMLPictureElement>(null);
   const previewImgRef = useRef<HTMLImageElement>(null);
 
-  const {
-    naturalSize,
-    setIsTinyLoaded,
-    isFinal,
-    setIsFinal,
-    previewUrl,
-    weDontHaveSourceProps,
-    weDontHaveAnything,
-    loadSize,
-    isFatalError,
-    isTinyLoaded,
-    previewIsTiny,
-    onLoadError,
-    finalUrl,
-  } = useOdinImage({
-    ...props,
-    odinId,
-    wrapperRef,
-    previewImgRef,
-  });
-
-  if (!props.lastModified && props.fileId)
-    console.warn('[OdinImage] No lastmodified', props.fileId, props.globalTransitId);
-
-  return (
-    <figure
-      className={`${className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${
-        className ?? ''
-      }`}
-      ref={wrapperRef}
-      data-odinid={odinId}
-      data-load-size={
-        loadSize && loadSize !== 'full'
-          ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
-          : loadSize
-      }
-      data-fileid={(props as any).fileId}
-      data-globaltransitid={(props as any).globalTransitId}
-      data-filekey={props.fileKey}
-      data-not={weDontHaveAnything ? 'true' : 'false'}
-    >
-      {weDontHaveSourceProps ? null : weDontHaveAnything ? (
-        <LoadingBlock className="aspect-square h-full w-full" />
-      ) : (
-        <>
-          <TinyThumb
-            onLoad={() => setIsTinyLoaded(true)}
-            onError={() => setIsTinyLoaded(true)}
-            width={naturalSize?.pixelWidth}
-            height={naturalSize?.pixelHeight}
-            isFinal={isFinal}
-            previewImgRef={previewImgRef}
-            previewIsTiny={previewIsTiny}
-            previewUrl={previewUrl}
-            fit={fit}
-            position={position}
-          />
-          {!isFinal && !isFatalError ? <TinyThumbLoader isTinyLoaded={isTinyLoaded} /> : null}
-          <FinalImage
-            finalUrl={finalUrl}
-            isFinal={isFinal}
-            alt={props.alt}
-            fit={fit}
-            position={position}
-            width={naturalSize?.pixelWidth}
-            height={naturalSize?.pixelHeight}
-            title={props.title}
-            onError={onLoadError}
-            onLoad={() => {
-              setIsFinal(true);
-              onLoad && onLoad();
-            }}
-            key={loadSize === 'full' ? 'full' : `${loadSize?.pixelWidth}x${loadSize?.pixelHeight}`}
-          />
-          {isFatalError ? <FatalError /> : null}
-        </>
-      )}
-    </figure>
-  );
-};
-
-const TinyThumbLoader = ({ isTinyLoaded }: { isTinyLoaded: boolean }) => (
-  <div
-    className={`absolute inset-0 flex text-white transition-opacity delay-[2000ms] ${
-      isTinyLoaded ? 'opacity-100' : 'opacity-0'
-    }`}
-  >
-    <Loader className="m-auto h-7 w-7" />
-  </div>
-);
-
-const FatalError = () => (
-  <div className={`absolute inset-0 flex items-center justify-center bg-white/75 dark:bg-black/75`}>
-    <Exclamation className="mr-2 h-6 w-6" /> <p>Something went wrong</p>
-  </div>
-);
-
-interface TinyThumbImageProps extends Omit<OdinImageElement, 'className' | 'title' | 'alt'> {
-  height?: number;
-  width?: number;
-  onLoad: () => void;
-  onError: () => void;
-  isFinal: boolean;
-  previewImgRef: React.RefObject<HTMLImageElement>;
-  previewUrl: string | undefined;
-  previewIsTiny: boolean;
-}
-const TinyThumb = ({
-  height,
-  width,
-  fit,
-  position,
-  previewUrl,
-  previewIsTiny,
-  isFinal,
-  previewImgRef,
-  onLoad,
-  onError,
-}: TinyThumbImageProps) => {
-  const imgClassNames = `${
-    fit === 'cover'
-      ? 'h-full w-full object-cover'
-      : fit === 'contain'
-      ? 'm-auto max-h-[inherit] max-w-full object-contain'
-      : 'h-auto max-h-[inherit] w-full'
-  } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
-
-  return (
-    <img
-      src={previewUrl}
-      className={`${imgClassNames} pointer-events-none absolute inset-0 m-auto ${
-        previewIsTiny ? '' : 'blur-xl'
-      } transition-opacity delay-500 ${isFinal ? 'opacity-0' : 'opacity-100'}`}
-      ref={previewImgRef}
-      width={width}
-      height={height}
-      key="tiny"
-      onLoad={onLoad}
-      onError={onError}
-    />
-  );
-};
-
-interface FinalImageProps extends Omit<OdinImageElement, 'className'> {
-  finalUrl: string | undefined;
-  height?: number;
-  width?: number;
-  onLoad: () => void;
-  onError: () => void;
-  isFinal: boolean;
-}
-const FinalImage = ({
-  finalUrl,
-  height,
-  width,
-  isFinal,
-  onLoad,
-  onError,
-  title,
-  alt,
-  fit,
-  position,
-}: FinalImageProps) => {
-  const imgClassNames = `${
-    fit === 'cover'
-      ? 'h-full w-full object-cover'
-      : fit === 'contain'
-      ? 'm-auto max-h-[inherit] max-w-full object-contain'
-      : 'h-auto max-h-[inherit] w-full'
-  } ${position === 'left' ? 'object-left' : position === 'right' ? 'object-right' : ''}`;
-
-  return (
-    <img
-      src={finalUrl}
-      alt={alt}
-      // Setting the aspect ratio sets the figure element to be the same size as the image while the image is still loading
-      style={width && height ? { aspectRatio: `${width}/${height}` } : undefined}
-      className={`${
-        fit === 'cover' ? 'absolute inset-0' : 'relative'
-      } ${imgClassNames} transition-opacity duration-300 ${isFinal ? 'opacity-100' : 'opacity-0'}`}
-      title={title}
-      width={width}
-      height={height}
-      onLoad={onLoad}
-      onError={onError}
-    />
-  );
-};
-
-const useOdinImage = (props: UseOdinImageProps) => {
-  const {
-    dotYouClient,
-    fileId,
-    fileKey,
-    targetDrive,
-    avoidPayload,
-    explicitSize,
-    odinId,
-    onError,
-    previewThumbnail,
-    probablyEncrypted,
-    wrapperRef,
-    previewImgRef,
-    systemFileType,
-    lastModified,
-  } = props;
-  const globalTransitId = 'globalTransitId' in props ? props.globalTransitId : undefined;
+  const [isTinyLoaded, setIsTinyLoaded] = useState(false);
+  const [isFinal, setIsFinal] = useState(false);
+  const [isFatalError, setIsFatalError] = useState(false);
 
   const [isInView, setIsInView] = useState(false);
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const [loadSize, setLoadSize] = useState<ImageSize | 'full' | undefined>(undefined);
 
-  const [isTinyLoaded, setIsTinyLoaded] = useState(false);
-  const [isFinal, setIsFinal] = useState(false);
-  const [isFatalError, setIsFatalError] = useState(false);
+  const [naturalSize, setNaturalSize] = useState<ImageSize | undefined>(previewThumbnail);
+  const [tinyThumb, setTinyThumb] = useState<ThumbnailMeta | undefined>();
 
-  const embeddedThumbUrl = useMemo(() => {
-    if (!previewThumbnail) return;
-    return `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
-  }, [previewThumbnail]);
-
-  const { getFromCache } = useImageCache(dotYouClient);
-  const cachedImage = useMemo(
-    () =>
-      fileId && fileKey
-        ? getFromCache(odinId, fileId, globalTransitId, fileKey, targetDrive)
-        : undefined,
-    [fileId]
-  );
-  const skipTiny = !!previewThumbnail || !!cachedImage;
-
-  const shouldLoadTiny = !skipTiny && isInView;
-
-  const {
-    data: tinyThumb,
-    error: tinyError,
-    isFetched: isTinyFetched,
-  } = useTinyThumb(
-    dotYouClient,
-    odinId,
-    shouldLoadTiny ? fileId : undefined,
-    globalTransitId,
-    fileKey,
-    targetDrive,
-    systemFileType
-  );
-  const previewUrl = cachedImage?.url || embeddedThumbUrl || tinyThumb?.url;
-
-  const naturalSize: ImageSize | undefined = tinyThumb
-    ? { pixelHeight: tinyThumb.naturalSize.height, pixelWidth: tinyThumb.naturalSize.width }
-    : cachedImage?.naturalSize || previewThumbnail;
-
-  const {
-    data: imageData,
-    error: imageError,
-    isFetched: isImageFetched,
-  } = useImage(
-    dotYouClient,
-    odinId,
-    loadSize !== undefined ? fileId : undefined,
-    loadSize !== undefined ? globalTransitId : undefined,
-    fileKey,
-    targetDrive,
-    loadSize !== 'full'
-      ? loadSize
-      : avoidPayload
-      ? { pixelHeight: 200, pixelWidth: 200 }
-      : undefined,
-    probablyEncrypted,
-    naturalSize,
-    systemFileType,
-    lastModified
-  ).fetch;
+  const weDontHaveSourceProps = !props.fileId || !props.fileKey || !props.targetDrive;
 
   const calculateSize = () => {
     if (loadSize !== undefined) return;
@@ -353,15 +55,12 @@ const useOdinImage = (props: UseOdinImageProps) => {
     // If the image is an svg.. Then there are no thumbs and we should just load the full image;
     if (
       !previewImgRef.current ||
-      (!tinyThumb?.sizes?.length && !skipTiny) ||
-      thumblessContentTypes.includes(previewThumbnail?.contentType || tinyThumb?.contentType || '')
+      thumblessContentTypes.includes(
+        previewThumbnail?.contentType || tinyThumb?.contentType || ''
+      ) ||
+      (tinyThumb && !tinyThumb?.sizes?.length)
     ) {
-      setLoadSize('full');
-      return;
-    }
-
-    if (explicitSize) {
-      setLoadSize(explicitSize);
+      setLoadSize(avoidPayload ? { pixelHeight: 200, pixelWidth: 200 } : 'full');
       return;
     }
 
@@ -369,7 +68,8 @@ const useOdinImage = (props: UseOdinImageProps) => {
     const targetHeight = previewImgRef.current?.clientHeight;
 
     // Find the best matching size in the meta sizes
-    let matchingSize = tinyThumb?.sizes?.find((size) => {
+    let matchingSize = undefined;
+    tinyThumb?.sizes?.find((size) => {
       return targetWidth < size.pixelWidth && targetHeight < size.pixelHeight;
     });
 
@@ -391,56 +91,105 @@ const useOdinImage = (props: UseOdinImageProps) => {
   };
 
   useEffect(() => {
-    // When we have a tinyThumb, we can calculate the size
+    // Once we have the tinyThumb, we can calculate the size
     if (isTinyLoaded) calculateSize();
+  }, [isTinyLoaded]);
 
-    // If there's no tinyThumb data available, trigger the calculateSize
-    if (isTinyFetched && !tinyThumb) calculateSize();
-  }, [tinyThumb, isTinyLoaded]);
+  if (weDontHaveSourceProps) return null;
 
-  useEffect(() => {
-    // When the tiny fails and we don't have a loadSize yet => calculcate it
-    if (tinyError && !loadSize) calculateSize();
-  }, [tinyError]);
+  return (
+    <figure
+      className={`${className && className?.indexOf('absolute') !== -1 ? '' : 'relative'} overflow-hidden ${fit !== 'cover' ? 'm-auto h-auto w-full' : ''} ${
+        className ?? ''
+      }`}
+      ref={wrapperRef}
+      data-odinid={props.odinId}
+      data-load-size={
+        loadSize && loadSize !== 'full'
+          ? `${loadSize.pixelWidth}x${loadSize.pixelHeight}`
+          : loadSize
+      }
+      data-natural-size={
+        naturalSize ? `${naturalSize.pixelWidth}x${naturalSize.pixelHeight}` : 'none'
+      }
+      data-fileid={props.fileId}
+      data-globaltransitid={props.globalTransitId}
+      data-filekey={props.fileKey}
+      style={
+        naturalSize?.pixelWidth && naturalSize?.pixelHeight && fit !== 'cover'
+          ? {
+              aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}`,
+              maxWidth: `${naturalSize.pixelWidth}px`,
+            }
+          : undefined
+      }
+    >
+      <OdinPreviewImage
+        {...props}
+        previewThumbnail={previewThumbnail}
+        onLoad={(naturalSize: ImageSize | undefined, tinyThumb: ThumbnailMeta | undefined) => {
+          setNaturalSize((oldVal) => naturalSize || oldVal);
+          setTinyThumb(tinyThumb);
+          setIsTinyLoaded(true);
+        }}
+        className={`absolute inset-0 transition-opacity delay-500 ${imgFitClassNames} ${isFinal ? 'opacity-0' : 'opacity-100'}`}
+        onError={() => setIsTinyLoaded(true)}
+        ref={previewImgRef}
+        blur="auto"
+        blockFetchFromServer={!isInView}
+      />
 
-  useEffect(() => {
-    // Trigger error, when fetching the image fails;
-    if (imageError) setIsFatalError(true);
-
-    // Trigger error, when the data that comes back is emtpy;
-    if (!imageData?.url && isImageFetched) setIsFatalError(true);
-  }, [imageError, imageData]);
-
-  useEffect(() => {
-    if (isFatalError) onError && onError();
-  }, [isFatalError]);
-
-  if (tinyError || imageError) console.warn('[OdinImage]', { fileId, tinyError, imageError });
-
-  const weDontHaveAnything = !previewUrl && !isTinyFetched && !imageData && !isImageFetched;
-  const weDontHaveSourceProps = !fileId || !fileKey || !targetDrive;
-
-  // If loading a thumb fails, try to load the full image
-  const onLoadError = () => {
-    if (loadSize !== 'full' && !avoidPayload) setLoadSize('full');
-    else setIsFatalError(true);
-  };
-
-  const finalUrl = imageData?.url;
-
-  return {
-    naturalSize,
-    setIsTinyLoaded,
-    isFinal,
-    setIsFinal,
-    previewUrl,
-    weDontHaveAnything,
-    weDontHaveSourceProps,
-    previewIsTiny: !cachedImage,
-    loadSize,
-    onLoadError,
-    isFatalError,
-    isTinyLoaded,
-    finalUrl,
-  };
+      {!isFinal && !isFatalError ? <TinyThumbLoader isTinyLoaded={isTinyLoaded} /> : null}
+      {loadSize === 'full' ? (
+        <OdinPayloadImage
+          {...props}
+          naturalSize={naturalSize}
+          probablyEncrypted={probablyEncrypted}
+          style={
+            naturalSize?.pixelWidth && naturalSize?.pixelHeight
+              ? { aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}` }
+              : undefined
+          }
+          onLoad={() => setIsFinal(true)}
+          onError={() => setIsFatalError(true)}
+          className={`relative transition-opacity duration-300 ${imgFitClassNames} ${isFinal ? 'opacity-100' : 'opacity-0'}`}
+        />
+      ) : loadSize !== undefined ? (
+        <OdinThumbnailImage
+          {...props}
+          naturalSize={naturalSize}
+          probablyEncrypted={probablyEncrypted}
+          loadSize={loadSize}
+          style={
+            naturalSize?.pixelWidth && naturalSize?.pixelHeight
+              ? { aspectRatio: `${naturalSize?.pixelWidth}/${naturalSize?.pixelHeight}` }
+              : undefined
+          }
+          onLoad={() => {
+            setIsFinal(true);
+            onLoad?.();
+          }}
+          onError={() => setIsFatalError(true)}
+          className={`relative transition-opacity duration-300 ${imgFitClassNames} ${isFinal ? 'opacity-100' : 'opacity-0'}`}
+        />
+      ) : null}
+      {isFatalError ? <FatalError /> : null}
+    </figure>
+  );
 };
+
+const TinyThumbLoader = ({ isTinyLoaded }: { isTinyLoaded: boolean }) => (
+  <div
+    className={`absolute inset-0 flex text-white transition-opacity delay-[2000ms] ${
+      isTinyLoaded ? 'opacity-100' : 'opacity-0'
+    }`}
+  >
+    <Loader className="m-auto h-7 w-7" />
+  </div>
+);
+
+const FatalError = () => (
+  <div className={`absolute inset-0 flex items-center justify-center bg-white/75 dark:bg-black/75`}>
+    <Exclamation className="mr-2 h-6 w-6" /> <p>Something went wrong</p>
+  </div>
+);

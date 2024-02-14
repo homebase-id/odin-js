@@ -17,6 +17,7 @@ import {
   FEED_APP_ID,
   OWNER_APP_ID,
   PHOTO_APP_ID,
+  useDotYouClient,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
@@ -44,6 +45,8 @@ const isTouchDevice = () => {
 };
 
 const Dashboard = () => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+
   return (
     <>
       <PageMeta title={t('Dashboard')} icon={House} />
