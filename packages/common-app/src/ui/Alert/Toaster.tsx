@@ -13,7 +13,7 @@ import { useErrors } from '@youfoundation/common-app';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
 import { ApiType } from '@youfoundation/js-lib/core';
 
-export const Toaster = () => {
+export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
   const { getApiType } = useDotYouClient();
   const isOwner = getApiType() === ApiType.Owner;
   // Only when logged in via owner we have access to the live notifications;
