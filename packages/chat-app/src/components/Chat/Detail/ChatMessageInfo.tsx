@@ -56,6 +56,12 @@ export const ChatMessageInfo = ({
             {t('Sent')}:{' '}
             {new Date(msg.fileMetadata.created).toLocaleDateString(undefined, dateTimeFormat)}
           </p>
+          {msg.fileMetadata.updated !== msg.fileMetadata.created ? (
+            <p>
+              {t('Updated')}:{' '}
+              {new Date(msg.fileMetadata.updated).toLocaleDateString(undefined, dateTimeFormat)}
+            </p>
+          ) : null}
           {msg.fileMetadata.transitCreated ? (
             <p>
               {t('Received')}:{' '}

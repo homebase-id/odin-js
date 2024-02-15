@@ -38,7 +38,7 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const STORAGE_KEY = 'isOpen';
 
@@ -49,10 +49,6 @@ const iconClassName = `${iconSize} flex-shrink-0`;
 
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
-
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
 
 export const Sidenav = ({
   logout,
@@ -89,8 +85,8 @@ export const Sidenav = ({
       <aside
         className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-all duration-300 md:sticky md:bottom-auto md:min-h-[100dvh] ${
           (canPin && isPinned) || isOpen
-            ? 'translate-y-0 md:min-w-[20rem]'
-            : 'w-full translate-y-[+100%] md:translate-y-0 md:w-[4.3rem] md:min-w-0'
+            ? 'translate-y-0 pl-[env(safe-area-inset-left)] md:min-w-[20rem]'
+            : 'w-full translate-y-[+100%] md:translate-y-0 pl-[env(safe-area-inset-left)] md:w-[calc(env(safe-area-inset-left)+4.3rem)] md:min-w-0'
         }`}
         onClick={() => {
           if (!isMd && isOpen) setIsOpen(false);
@@ -302,7 +298,9 @@ const NavItem = ({
   end?: boolean;
 }) => {
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== to.split('/')[1] || to.split('/')[1] === 'apps';
+  const isExternal =
+    pathname.split('/')[1] !== to.split('/')[1] ||
+    (to.split('/')[1] === 'apps' && pathname.split('/')[2] !== to.split('/')[2]);
 
   if (isExternal) {
     return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;

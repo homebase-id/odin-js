@@ -55,16 +55,16 @@ export const DialogWrapper = ({
         >
           <div
             ref={wrapperRef}
-            className={`relative transform ${
-              !isSidePanel ? 'overflow-hidden rounded-lg shadow-xl' : ''
+            className={`relative transform overflow-hidden rounded-lg shadow-xl ${
+              isSidePanel ? 'sm:overflow-auto sm:rounded-none sm:shadow-none' : ''
             } w-full bg-white  text-left transition-all dark:bg-black ${
               size === 'normal'
                 ? 'sm:max-w-lg'
                 : size === 'large'
-                ? 'sm:max-w-xl'
-                : size === '2xlarge'
-                ? 'sm:max-w-2xl'
-                : 'sm:max-w-4xl'
+                  ? 'sm:max-w-xl'
+                  : size === '2xlarge'
+                    ? 'sm:max-w-2xl'
+                    : 'sm:max-w-4xl'
             }`}
           >
             <div className="flex h-full flex-col bg-white dark:bg-black dark:text-slate-50">

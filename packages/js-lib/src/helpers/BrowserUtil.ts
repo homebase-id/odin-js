@@ -9,5 +9,7 @@ export const isLocalStorageAvailable = () => {
   }
 };
 
+export const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
 export const hasDebugFlag = () =>
   isLocalStorageAvailable() ? localStorage.getItem('debug') === '1' : false;

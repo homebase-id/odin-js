@@ -96,7 +96,7 @@ const ChatHeader = ({
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionLink className="md:hidden" type="mute" href={CHAT_ROOT}>
+        <ActionLink className="lg:hidden" type="mute" href={CHAT_ROOT}>
           <ChevronLeft className="h-4 w-4" />
         </ActionLink>
 

@@ -17,8 +17,8 @@ import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
+import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
-const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 export const ChatComposer = ({

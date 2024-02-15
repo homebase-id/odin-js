@@ -32,7 +32,7 @@ import {
   useDotYouClient,
   AclDialog,
 } from '@youfoundation/common-app';
-import { base64ToUint8Array, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import {
   AccessControlList,
   DriveSearchResult,
@@ -41,7 +41,6 @@ import {
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
-const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 const PostComposer = ({
