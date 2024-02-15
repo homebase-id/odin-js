@@ -88,7 +88,7 @@ const ChatSideNav = ({
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} ${
           isCreateNew || isCreateNewGroup ? '' : 'pb-14'
         }
-        fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:static md:max-w-xs md:translate-x-0 md:pb-0 lg:max-w-sm`}
+        fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:static lg:max-w-sm lg:translate-x-0 lg:pb-0 lg:pl-0`}
       >
         {isCreateNew ? (
           <NewConversation />

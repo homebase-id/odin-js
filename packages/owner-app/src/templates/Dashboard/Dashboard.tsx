@@ -22,24 +22,6 @@ import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyIm
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
-// const About = {
-//   circles: (
-//     <>
-//       Circles are groups of members that share the same permissions. You can name them based on
-//       which social circle your connections belong (eg: family, friends, co-workers, ...). Or
-//       anything else that works for you
-//     </>
-//   ),
-//   apps: (
-//     <>
-//       Apps are applications that have been granted access to one or more of your drives. They are
-//       able to access that information on your behalf so do make sure when registering new apps on
-//       your identity that they don&apos;t request any drive access that you don&apos;t feel
-//       comfortable with.
-//     </>
-//   ),
-// };
-
 const Dashboard = () => {
   return (
     <>
@@ -256,7 +238,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
       <div className="mb-4 flex flex-row items-center justify-between">
         <p className="text-2xl">{t('What has everyone been up to?')}</p>
       </div>
-      <FakeAnchor href={hasPosts ? `/apps/feed` : `/owner/connections`} className="">
+      <FakeAnchor href={hasPosts ? `/apps/feed` : `/owner/connections`}>
         <div className="pointer-events-none flex flex-col gap-4">
           {hasPosts ? (
             latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (
