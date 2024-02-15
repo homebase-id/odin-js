@@ -58,7 +58,7 @@ export const ChatMessageInfo = ({
           </p>
           {msg.fileMetadata.updated !== msg.fileMetadata.created ? (
             <p>
-              {t('Edited')}:{' '}
+              {t('Updated')}:{' '}
               {new Date(msg.fileMetadata.updated).toLocaleDateString(undefined, dateTimeFormat)}
             </p>
           ) : null}
