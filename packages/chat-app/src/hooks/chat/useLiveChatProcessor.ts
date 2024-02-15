@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DriveSearchResult,
   ReceivedCommand,
@@ -17,7 +17,12 @@ import {
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChatMessageFileType, MARK_CHAT_READ_COMMAND } from '../../providers/ChatProvider';
+import {
+  ChatMessage,
+  ChatMessageFileType,
+  MARK_CHAT_READ_COMMAND,
+  dsrToMessage,
+} from '../../providers/ChatProvider';
 import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { getSingleConversation, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
@@ -90,25 +95,65 @@ const useChatWebsocket = (isEnabled: boolean) => {
     isDebug && console.debug('[ChatWebsocket] Got notification', notification);
 
     if (
-      notification.notificationType === 'fileAdded' &&
+      (notification.notificationType === 'fileAdded' ||
+        notification.notificationType === 'fileModified') &&
       stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
-        const conversationId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+        if (notification.notificationType === 'fileAdded') {
+          const conversationId = notification.header.fileMetadata.appData.groupId;
+          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
 
-        // Check if the message is orphaned from a conversation
-        const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>({
-          queryKey: ['conversation', conversationId],
-          queryFn: () => getSingleConversation(dotYouClient, conversationId),
-        });
+          // Check if the message is orphaned from a conversation
+          const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>(
+            {
+              queryKey: ['conversation', conversationId],
+              queryFn: () => getSingleConversation(dotYouClient, conversationId),
+            }
+          );
 
-        if (!conversation) {
-          console.error('Orphaned message received', notification.header.fileId, conversation);
-          // Can't handle this one ATM.. How to resolve?
-        } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
-          restoreChat({ conversation });
+          if (!conversation) {
+            console.error('Orphaned message received', notification.header.fileId, conversation);
+            // Can't handle this one ATM.. How to resolve?
+          } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
+            restoreChat({ conversation });
+          }
+        } else if (notification.notificationType === 'fileModified') {
+          const conversationId = notification.header.fileMetadata.appData.groupId;
+          const updatedChatMessage = await dsrToMessage(
+            dotYouClient,
+            notification.header,
+            ChatDrive,
+            true
+          );
+
+          if (!updatedChatMessage) return;
+
+          const extistingMessages = queryClient.getQueryData<
+            InfiniteData<{
+              searchResults: (DriveSearchResult<ChatMessage> | null)[];
+              cursorState: string;
+              queryTime: number;
+              includeMetadataHeader: boolean;
+            }>
+          >(['chat-messages', conversationId]);
+
+          const newData = {
+            ...extistingMessages,
+            pages: extistingMessages?.pages?.map((page) => ({
+              ...page,
+              searchResults: page.searchResults.map((msg) =>
+                stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId) ? updatedChatMessage : msg
+              ),
+            })),
+          };
+          queryClient.setQueryData(['chat-messages', conversationId], newData);
+
+          queryClient.setQueryData(
+            ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
+            updatedChatMessage
+          );
         }
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
@@ -137,7 +182,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
   return useNotificationSubscriber(
     preAuthenticated && isEnabled ? handler : undefined,
-    ['fileAdded'],
+    ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {
       queryClient.invalidateQueries({ queryKey: ['processInbox'] });
