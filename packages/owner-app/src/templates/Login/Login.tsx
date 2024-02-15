@@ -90,6 +90,7 @@ const Login = () => {
                     required
                     onChange={(e) => setPassword(e.target.value)}
                     defaultValue={password}
+                    autoComplete="current-password"
                   />
                 </div>
                 <ActionButton

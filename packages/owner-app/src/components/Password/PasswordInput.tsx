@@ -17,7 +17,6 @@ export const PasswordInput = (
         {...props}
         ref={undefined}
         type={show ? 'input' : 'password'}
-        autoComplete="current-password"
         className={`appearance-none pr-10 ${props.className}`}
       />
       <a

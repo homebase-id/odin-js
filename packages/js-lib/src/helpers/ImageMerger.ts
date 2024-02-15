@@ -8,6 +8,9 @@ const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;
 const MIME_TYPE = 'image/webp';
 
 export const makeGrid = async (thumbs: EmbeddedThumb[]) => {
+  if (typeof document === 'undefined')
+    throw new Error('makeGrid is only supported in a browser environment');
+
   if (thumbs.length < 2) {
     throw new Error('Making grid of less than 2 images is not supported');
   }

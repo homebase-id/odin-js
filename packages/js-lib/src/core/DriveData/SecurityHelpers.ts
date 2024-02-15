@@ -53,19 +53,16 @@ export const encryptWithKeyheader = async <
         type: content.type,
       }) as R;
     } catch (ex) {
-      console.warn('Stream encryption failed');
-
       const customContent = content as any;
       if ('encrypt' in customContent && customContent.encrypt) {
-        console.warn('fallback to custom encryption');
         try {
           return (await customContent.encrypt(keyHeader.aesKey, keyHeader.iv)) as R;
         } catch (ex) {
-          // Silent fail..
+          console.warn('Stream & custom encryption failed', ex);
         }
       }
 
-      console.warn('fallback to full encryption, custom encrypt of OdinBlob unavailable', ex);
+      console.warn('fallback to full encryption', ex);
       const contentAsArray = new Uint8Array(await content.arrayBuffer());
       return (await getSecuredBlob(
         [await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)],
