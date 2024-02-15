@@ -38,7 +38,7 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const STORAGE_KEY = 'isOpen';
 
@@ -49,10 +49,6 @@ const iconClassName = `${iconSize} flex-shrink-0`;
 
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
-
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
 
 export const Sidenav = ({
   logout,
@@ -302,7 +298,9 @@ const NavItem = ({
   end?: boolean;
 }) => {
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== to.split('/')[1] || to.split('/')[1] === 'apps';
+  const isExternal =
+    pathname.split('/')[1] !== to.split('/')[1] ||
+    (to.split('/')[1] === 'apps' && pathname.split('/')[2] !== to.split('/')[2]);
 
   if (isExternal) {
     return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;

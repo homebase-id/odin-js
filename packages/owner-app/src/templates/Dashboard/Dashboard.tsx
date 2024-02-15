@@ -17,10 +17,10 @@ import {
   FEED_APP_ID,
   OWNER_APP_ID,
   PHOTO_APP_ID,
-  useDotYouClient,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
+import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 // const About = {
 //   circles: (
@@ -40,13 +40,7 @@ import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 //   ),
 // };
 
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
-
 const Dashboard = () => {
-  const dotYouClient = useDotYouClient().getDotYouClient();
-
   return (
     <>
       <PageMeta title={t('Dashboard')} icon={House} />

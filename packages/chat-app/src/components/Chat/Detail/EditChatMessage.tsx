@@ -12,8 +12,7 @@ import {
 import { Conversation } from '../../../providers/ConversationProvider';
 import { useEffect, useState } from 'react';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
-
-const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 export const EditChatMessage = ({
   msg,
