@@ -115,8 +115,8 @@ const IdentityIFollowEditDialog = ({
         onClose={onCancel}
       >
         {!socialChannels && socialChannelsLoaded ? (
-          <Alert type="info" title={t("You don't have access to any channels")} className="my-5">
-            {t('By following you might not get any posts')}
+          <Alert type="info" className="my-5">
+            {t('No accessible channels found. You might not get any posts when subscribed')}
           </Alert>
         ) : (
           <ul className="my-5 grid grid-flow-row gap-4">
