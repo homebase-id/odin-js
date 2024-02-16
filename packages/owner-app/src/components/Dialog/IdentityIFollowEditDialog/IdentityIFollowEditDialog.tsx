@@ -95,6 +95,11 @@ const IdentityIFollowEditDialog = ({
     onConfirm();
   };
 
+  const doUnfollow = async () => {
+    await unfollow({ odinId: odinId });
+    onConfirm();
+  };
+
   if (!isOpen) return null;
 
   const dialog = (
@@ -156,12 +161,16 @@ const IdentityIFollowEditDialog = ({
             })}
           </ul>
         )}
-        <div className="-m-2 flex flex-row-reverse py-3">
-          <ActionButton className="m-2" onClick={updateFollow} state={followStatus}>
+        <div className="flex flex-row-reverse gap-2 py-3">
+          <ActionButton onClick={updateFollow} state={followStatus}>
             {identityIFollow ? t('Update') : t('Follow')}
           </ActionButton>
-          <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+          <ActionButton type="secondary" onClick={onCancel}>
             {t('Cancel')}
+          </ActionButton>
+
+          <ActionButton className="mr-auto" type="secondary" onClick={doUnfollow}>
+            {t('Unfollow')}
           </ActionButton>
         </div>
       </DialogWrapper>

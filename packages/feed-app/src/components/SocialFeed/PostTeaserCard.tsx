@@ -12,6 +12,7 @@ import {
   PostBody,
   t,
   LoadingBlock,
+  useCheckIdentity,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
@@ -21,6 +22,7 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
+import { UnreachableIdentity } from './UnreachableIdentity';
 
 interface PostTeaserCardProps {
   className?: string;
@@ -36,6 +38,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 
+  const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
+
   const { data: externalChannel } = useSocialChannel({
     odinId: isExternal ? odinId : undefined,
     channelId: post.channelId,
@@ -49,6 +53,9 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
     channel?.fileMetadata.appData.uniqueId
   }/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
+
+  if (identityAccessible === false && isExternal)
+    return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
 
   return (
     <div className={`w-full break-words rounded-lg ${className ?? ''}`}>

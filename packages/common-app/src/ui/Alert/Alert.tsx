@@ -13,15 +13,15 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
     type === 'critical'
       ? 'bg-red-50 dark:bg-red-900 dark:text-white'
       : type === 'warning'
-      ? 'bg-orange-50 dark:text-black'
-      : 'bg-slate-100 dark:bg-slate-700 dark:text-white';
+        ? 'bg-orange-50 dark:text-black'
+        : 'bg-slate-100 dark:bg-slate-700 dark:text-white';
 
   const borderClass =
     type === 'critical'
       ? 'border-red-100 dark:border-red-800 dark:text-white'
       : type === 'warning'
-      ? 'border-orange-100'
-      : 'dark:border-gray-700';
+        ? 'border-orange-100'
+        : 'dark:border-gray-700';
 
   return (
     <section
@@ -57,7 +57,7 @@ export const Alert = ({ type, title, children, className, isCompact }: AlertProp
           </div>
         )}
         <div className={`flex-grow ${isCompact ? 'contents' : 'contents sm:block'}`}>
-          {title && <p className="mb-2 ml-3 text-2xl sm:ml-0">{title}</p>}
+          {title && <p className="mb-2 ml-3 text-xl sm:ml-0">{title}</p>}
           {children}
         </div>
       </div>

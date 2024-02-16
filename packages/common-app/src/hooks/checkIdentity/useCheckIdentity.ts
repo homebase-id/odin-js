@@ -16,5 +16,9 @@ export const useCheckIdentity = (odinId?: string) => {
       .catch(() => false);
   };
 
-  return useQuery({ queryKey: ['check-identity', odinId], queryFn: () => doCheckIdentity(odinId) });
+  return useQuery({
+    queryKey: ['check-identity', odinId],
+    queryFn: () => doCheckIdentity(odinId),
+    staleTime: 1000 * 60 * 60,
+  });
 };

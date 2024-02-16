@@ -42,13 +42,13 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
         size === 'xs'
           ? 'h-[2rem] w-[2rem]'
           : size === 'sm'
-          ? 'h-[3rem] w-[3rem]'
-          : size === 'md'
-          ? 'h-[5rem] w-[5rem]'
-          : ''
+            ? 'h-[3rem] w-[3rem]'
+            : size === 'md'
+              ? 'h-[5rem] w-[5rem]'
+              : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
-      alt={t('Your profile picture')}
+      alt={t('Your avatar')}
     />
   );
 };
@@ -70,12 +70,15 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
             size === 'xs'
               ? 'h-[2rem] w-[2rem]'
               : size === 'sm'
-              ? 'h-[3rem] w-[3rem]'
-              : size === 'md'
-              ? 'h-[5rem] w-[5rem]'
-              : ''
+                ? 'h-[3rem] w-[3rem]'
+                : size === 'md'
+                  ? 'h-[5rem] w-[5rem]'
+                  : ''
           } rounded-full ${className ?? ''}`}
-          alt={`${t('The profile picture of')} ${odinId}`}
+          alt={`${odinId}`}
+          onError={(e) => {
+            console.warn('failed to fetch profile image', e);
+          }}
         />
       ) : (
         <div ref={wrapperRef}>
@@ -84,10 +87,10 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
               size === 'xs'
                 ? 'h-[2rem] w-[2rem]'
                 : size === 'sm'
-                ? 'h-[3rem] w-[3rem]'
-                : size === 'md'
-                ? 'h-[5rem] w-[5rem]'
-                : ''
+                  ? 'h-[3rem] w-[3rem]'
+                  : size === 'md'
+                    ? 'h-[5rem] w-[5rem]'
+                    : ''
             }
           />
         </div>

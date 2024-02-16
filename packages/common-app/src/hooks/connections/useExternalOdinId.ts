@@ -6,11 +6,8 @@ export const useExternalOdinId = ({ odinId }: { odinId?: string }) => {
   const dotYouClient = new DotYouClient({ api: ApiType.Guest, identity: odinId });
 
   const fetchSingle = async ({ odinId }: { odinId?: string }) => {
-    if (!odinId) {
-      return;
-    }
-
-    return await GetProfileCard(dotYouClient);
+    if (!odinId) return;
+    return (await GetProfileCard(dotYouClient)) || null;
   };
 
   return {
