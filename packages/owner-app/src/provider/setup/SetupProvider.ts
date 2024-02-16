@@ -444,9 +444,5 @@ const DEFAULT_FOLLOW_REQUEST: FollowRequest = {
   odinId: 'id.homebase.id',
 };
 export const SetupAutoFollow = async (dotYouClient: DotYouClient) => {
-  try {
-    await createOrUpdateFollow(dotYouClient, DEFAULT_FOLLOW_REQUEST, false);
-  } catch (ex) {
-    alert(ex);
-  }
+  await createOrUpdateFollow(dotYouClient, DEFAULT_FOLLOW_REQUEST, false);
 };
