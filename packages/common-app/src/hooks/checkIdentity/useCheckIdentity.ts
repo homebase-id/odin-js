@@ -11,7 +11,10 @@ export const useCheckIdentity = (odinId?: string) => {
     if (!isValid) return false;
 
     return await fetch(`https://${strippedIdentity}/api/guest/v1/auth/ident`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status !== 200) return;
+        return response.json();
+      })
       .then((validation) => validation?.odinId.toLowerCase() === strippedIdentity)
       .catch(() => false);
   };
