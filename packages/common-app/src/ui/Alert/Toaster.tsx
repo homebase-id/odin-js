@@ -21,7 +21,7 @@ export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
       <ErrorToaser />
-      {isOwner ? <LiveToaster /> : null}
+      {isOwner && !errorOnly ? <LiveToaster /> : null}
     </div>
   );
 };

@@ -26,6 +26,7 @@ import {
   Attribute,
 } from '@youfoundation/js-lib/profile';
 import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
+import { FollowRequest, createOrUpdateFollow } from '@youfoundation/js-lib/network';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   const initialStandardProfile: ProfileDefinition = {
@@ -271,9 +272,8 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       profileData.givenName;
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.SurnameId] =
       profileData.surname;
-    newNameAttr.fileMetadata.appData.content.data[
-      MinimalProfileFields.DisplayName
-    ] = `${profileData.givenName} ${profileData.surname}`;
+    newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.DisplayName] =
+      `${profileData.givenName} ${profileData.surname}`;
 
     await saveAttribute(dotYouClient, newNameAttr);
   }
@@ -437,4 +437,16 @@ export const SetupDefaultIdentity = async (
 ) => {
   await SetupProfileData(dotYouClient, data.profile);
   await SetupSocialData(dotYouClient, data.social);
+};
+
+const DEFAULT_FOLLOW_REQUEST: FollowRequest = {
+  notificationType: 'allNotifications',
+  odinId: 'id.homebase.id',
+};
+export const SetupAutoFollow = async (dotYouClient: DotYouClient) => {
+  try {
+    await createOrUpdateFollow(dotYouClient, DEFAULT_FOLLOW_REQUEST, false);
+  } catch (ex) {
+    alert(ex);
+  }
 };

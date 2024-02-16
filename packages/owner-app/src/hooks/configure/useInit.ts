@@ -7,6 +7,7 @@ import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { toGuidId } from '@youfoundation/js-lib/helpers';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import {
+  SetupAutoFollow,
   SetupBlog,
   SetupDefaultIdentity,
   SetupHome,
@@ -68,6 +69,7 @@ export const useInit = () => {
 
     // Setup (default) Data
     await SetupDefaultIdentity(dotYouClient, data);
+    await SetupAutoFollow(dotYouClient);
 
     // Do a first publish of the static files
     // This is normally a side effect from the useAttribute hook.. TODO: Move to providers instead of the hook
