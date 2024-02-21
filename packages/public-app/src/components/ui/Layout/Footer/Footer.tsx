@@ -25,7 +25,7 @@ const Footer: FC<FooterProps> = ({ className }) => {
           </span>
         </a>
         <p className="mt-4 text-sm text-gray-500 sm:ml-auto sm:mt-0 sm:border-l-2 sm:border-gray-200 sm:py-2 sm:pl-4 dark:sm:border-gray-700">
-          © 2023 | v.
+          © {new Date().getFullYear()} | v.
           {getVersion()}
         </p>
         <Socials

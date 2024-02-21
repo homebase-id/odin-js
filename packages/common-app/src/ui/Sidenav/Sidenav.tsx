@@ -184,7 +184,7 @@ export const Sidenav = ({
                       !(canPin && isPinned) && !isOpen && 'hidden'
                     }`}
                   >
-                    2023 | v.
+                    {new Date().getFullYear()} | v.
                     {getVersion()}
                   </span>
                 </p>
