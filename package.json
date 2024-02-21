@@ -15,6 +15,7 @@
     "start:owner": "npm start -w ./packages/owner-app",
     "start:feed": "npm start -w ./packages/feed-app",
     "start:chat": "npm start -w ./packages/chat-app",
+    "start:mail": "npm start -w ./packages/mail-app",
     "start:public": "npm start -w ./packages/public-app",
     "start:provisioning": "npm start -w ./packages/provisioning-app",
     "start:login": "npm start -w ./packages/login-app"

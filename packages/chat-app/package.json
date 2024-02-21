@@ -13,8 +13,7 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",
-    "lint": "eslint src",
-    "UNSUPPORTED_dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/chat-app && VITE_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/chat-app/"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@tanstack/query-sync-storage-persister": "^5.17.9",

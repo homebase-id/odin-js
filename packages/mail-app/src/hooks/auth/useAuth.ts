@@ -19,7 +19,7 @@ import { AppPermissionType } from '@youfoundation/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
-  CHAT_APP_ID,
+  MAIL_APP_ID,
   useDotYouClient,
 } from '@youfoundation/common-app';
 
@@ -72,9 +72,9 @@ export const useAuth = () => {
 
 export const drives = [
   {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
+    a: 'e69b5a48a663482fbfd846f3b0b143b0',
+    t: '2dfecc40311e41e5a12455e925144202',
+    n: 'Mail Drive',
     d: '',
     p: DrivePermissionType.Read + DrivePermissionType.Write,
   },
@@ -105,16 +105,16 @@ export const permissions = [
 
 const circleDrives = [
   {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
+    a: 'e69b5a48a663482fbfd846f3b0b143b0',
+    t: '2dfecc40311e41e5a12455e925144202',
+    n: 'Mail Drive',
     d: '',
     p: DrivePermissionType.Write,
   },
 ];
 
-export const appName = 'Homebase - Chat';
-export const appId = CHAT_APP_ID;
+export const appName = 'Homebase - Mail';
+export const appId = MAIL_APP_ID;
 
 export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {

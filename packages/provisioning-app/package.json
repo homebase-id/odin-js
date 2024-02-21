@@ -29,8 +29,7 @@
     "serve": "vite serve",
     "start": "npm run dev",
     "build": "tsc && vite build",
-    "lint": "eslint ./src/",
-    "dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/provisioning-app && VITE_APP_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/provisioning-app/"
+    "lint": "eslint ./src/"
   },
   "browserslist": {
     "production": [
