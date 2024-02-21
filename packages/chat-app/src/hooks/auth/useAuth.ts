@@ -93,6 +93,7 @@ export const drives = [
 
 export const permissions = [
   AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ManageConnectionRequests,
   AppPermissionType.ReadConnections,
   AppPermissionType.SendPushNotifications,
 ];
