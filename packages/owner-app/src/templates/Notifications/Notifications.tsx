@@ -11,6 +11,7 @@ import {
   FEED_APP_ID,
   OWNER_APP_ID,
   useDotYouClient,
+  MAIL_APP_ID,
 } from '@youfoundation/common-app';
 import { Bell } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -324,6 +325,8 @@ const bodyFormer = (
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
+  } else if (payload.options.appId === MAIL_APP_ID) {
+    return `${sender} sent you ${hasMultiple ? 'multiple messages' : 'a message'}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     if (payload.options.typeId === FEED_NEW_CONTENT_TYPE_ID) {
       return `${sender} posted to your feed`;
@@ -351,6 +354,8 @@ const getTargetLink = (payload: PushNotification) => {
     }
   } else if (payload.options.appId === CHAT_APP_ID) {
     return `/apps/chat/${payload.options.typeId}`;
+  } else if (payload.options.appId === MAIL_APP_ID) {
+    return `/apps/mail/${payload.options.typeId}`;
   } else if (payload.options.appId === FEED_APP_ID) {
     return `/apps/feed`;
   }
