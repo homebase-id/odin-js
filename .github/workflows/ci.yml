@@ -32,6 +32,8 @@ jobs:
 
       - run: npm run build --w ./packages/chat-app
 
+      - run: npm run build --w ./packages/mail-app
+
       - run: npm run build --w ./packages/provisioning-app
 
       - run: npm run test

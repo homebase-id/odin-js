@@ -17,7 +17,7 @@ import {
 } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 
-import { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
+import Layout, { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -87,9 +87,9 @@ function App() {
             element={
               <RootRoute>
                 <DotYouClientProvider>
-                  <NoLayout>
+                  <Layout>
                     <Outlet />
-                  </NoLayout>
+                  </Layout>
                 </DotYouClientProvider>
               </RootRoute>
             }

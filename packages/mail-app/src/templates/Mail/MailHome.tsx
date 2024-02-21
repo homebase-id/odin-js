@@ -21,9 +21,7 @@ export const MailHome = () => {
         appId={MAIL_APP_ID}
         drives={drives}
         permissions={permissions}
-        // needsAllConnected={true}
       />
-      <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}></div>
     </>
   );
 };
