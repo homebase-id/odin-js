@@ -35,6 +35,7 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import VideoPlayer from '../templates/VideoPlayer/VideoPlayer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,7 @@ function App() {
             <Route path={'new-group'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey'} element={<ChatHome />} />
             <Route path={':conversationKey/:chatMessageKey/:mediaKey'} element={<ChatHome />} />
+            <Route path={'player/:videoFileId/:videoFileKey'} element={<VideoPlayer />} />
           </Route>
 
           <Route
