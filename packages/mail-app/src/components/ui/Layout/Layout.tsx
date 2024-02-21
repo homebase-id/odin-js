@@ -41,16 +41,14 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   return (
     <>
       <SharedStyleTag />
-      <div
-        className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG} pb-14 md:pb-0`}
-      >
+      <div className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
         <Sidenav logout={logout} disablePinning={true} />
         <div
           className={`relative flex min-h-screen w-full flex-col ${
             noShadedBg ? NOT_SHADED_BG : SHADED_BG
           }`}
         >
-          <div className="min-h-full px-2 py-4 sm:px-10 sm:py-8">{children}</div>
+          {children}
         </div>
         <Toaster />
       </div>

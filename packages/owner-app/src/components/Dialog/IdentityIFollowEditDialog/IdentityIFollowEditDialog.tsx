@@ -12,8 +12,8 @@ import {
   Alert,
   Quote,
   Persons,
+  CheckboxToggle,
 } from '@youfoundation/common-app';
-import CheckboxToggle from '../../Form/CheckboxToggle';
 
 import { BlogConfig } from '@youfoundation/js-lib/public';
 

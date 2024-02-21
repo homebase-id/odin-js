@@ -1,6 +1,7 @@
 export * from './Input';
 export * from './Label';
 export * from './CircleSelector';
+export * from './Checkbox';
 export * from './CheckboxToggle';
 export * from './Select';
 export * from './Textarea';

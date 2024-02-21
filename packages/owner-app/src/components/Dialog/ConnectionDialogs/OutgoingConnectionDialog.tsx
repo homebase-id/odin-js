@@ -11,8 +11,7 @@ import YourSignature from '../../Connection/YourSignature/YourSignature';
 import { CircleSelector, useFollowingInfinite } from '@youfoundation/common-app';
 import { Input } from '@youfoundation/common-app';
 import { Label } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import CheckboxToggle from '../../Form/CheckboxToggle';
+import { DialogWrapper, CheckboxToggle } from '@youfoundation/common-app';
 import { getDomainFromUrl } from '@youfoundation/js-lib/helpers';
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 

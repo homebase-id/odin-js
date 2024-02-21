@@ -1,7 +1,7 @@
 import { PermissionSet } from '@youfoundation/js-lib/core';
 
-import { Persons, t } from '@youfoundation/common-app';
-import CheckboxToggle from './CheckboxToggle';
+import { Persons, t, CheckboxToggle } from '@youfoundation/common-app';
+
 import {
   AppPermissionType,
   AppCirclePermissionType,
@@ -21,8 +21,8 @@ const PermissionSelector = ({
     type === 'app'
       ? AppPermissionType
       : type === 'app-circles'
-      ? AppCirclePermissionType
-      : CirclePermissionType;
+        ? AppCirclePermissionType
+        : CirclePermissionType;
   const numericLevels = Object.values(levels).filter((v) => typeof v === 'number') as number[];
 
   return (

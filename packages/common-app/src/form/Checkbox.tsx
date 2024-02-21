@@ -1,4 +1,4 @@
-const Checkbox = (
+export const Checkbox = (
   props: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 ) => {
   return (
@@ -9,5 +9,3 @@ const Checkbox = (
     />
   );
 };
-
-export default Checkbox;
