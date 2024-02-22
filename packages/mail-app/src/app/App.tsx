@@ -17,7 +17,7 @@ import {
 } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 
-import Layout, { MinimalLayout, NoLayout } from '../components/ui/Layout/Layout';
+import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
 const Auth = lazy(() => import('../templates/Auth/Auth'));
 const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
@@ -35,6 +35,7 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import { MailConversation } from '../templates/Mail/MailConversation';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,6 +96,8 @@ function App() {
             }
           >
             <Route index={true} element={<MailHome />} />
+            <Route path=":conversationKey" element={<MailConversation />} />
+            <Route path="new" element={<MailHome />} />
           </Route>
 
           <Route

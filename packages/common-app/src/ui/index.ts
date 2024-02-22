@@ -27,6 +27,7 @@ export * from './BrandIcons/HomebasePhoto';
 
 export * from './Icons/AddressBook';
 export * from './Icons/Anonymous';
+export * from './Icons/Archive';
 export * from './Icons/Arrow';
 export * from './Icons/Article';
 export * from './Icons/Bars';

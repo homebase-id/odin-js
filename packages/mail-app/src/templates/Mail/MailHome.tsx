@@ -7,13 +7,20 @@ import {
   Input,
   MagnifyingGlass,
   ActionButton,
-  formatToTimeAgoWithRelativeDetail,
-  Checkbox,
-  ActionGroup,
+  Plus,
+  ActionLink,
+  usePortal,
+  VolatileInput,
+  Label,
+  Times,
+  PaperPlane,
 } from '@youfoundation/common-app';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
+import { ROOT_PATH } from '../../app/App';
+import { MailConversations } from '../../components/Conversations/MailConversations';
+import { useMatch, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 
 export const MailHome = () => {
   useRemoveNotifications({ appId: MAIL_APP_ID });
@@ -39,7 +46,7 @@ export const MailHome = () => {
 
 const MailHomeHeader = () => {
   return (
-    <section className="sticky left-0 right-0 top-0 border-b border-gray-100 bg-white px-2 py-2 dark:border-gray-800 dark:bg-black sm:px-5">
+    <section className="sticky left-0 right-0 top-0 z-20 border-b border-gray-100 bg-white px-2 py-2 dark:border-gray-800 dark:bg-black sm:px-5">
       <div className="flex-col">
         <div className="flex flex-row items-center gap-5">
           <h1 className="flex flex-row text-2xl dark:text-white xl:text-3xl">
@@ -47,6 +54,7 @@ const MailHomeHeader = () => {
             {t('Mail')}
           </h1>
           <MailHomeHeaderSearch />
+          <MailComposerButton />
         </div>
       </div>
     </section>
@@ -62,60 +70,72 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
   );
 };
 
-const MailConversations = () => {
-  const conversations = Array.from({ length: 25 });
+const MailComposerButton = () => {
+  const isCompose = useMatch({ path: `${ROOT_PATH}/new` });
+  const navigate = useNavigate();
 
   return (
-    <section className="mx-5 my-5 flex flex-grow flex-col">
-      <MailConversationsHeader />
-      <div className="flex-grow overflow-auto">
-        {conversations.map((_, index) => (
-          <MailConversation key={index} />
-        ))}
+    <>
+      <ActionLink icon={Plus} type="primary" href={`${ROOT_PATH}/new`}>
+        {t('Compose')}
+      </ActionLink>
+      {isCompose ? <ComposerDialog onClose={() => navigate(-1)} /> : null}
+    </>
+  );
+};
+
+const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
+  const target = usePortal('modal-container');
+
+  const dialog = (
+    <div className="fixed bottom-16 right-3 w-[calc(100%-1.5rem)] max-w-md rounded-lg bg-background shadow-md md:bottom-5 md:right-5">
+      <div className="mb-5 flex flex-row items-center justify-between px-5 pt-5">
+        <h2>{t('New mail')}</h2>
+        <ActionButton type="mute" icon={Times} onClick={onClose} size="square" />
       </div>
-    </section>
-  );
-};
-
-const MailConversationsHeader = () => {
-  return (
-    <div className="flex flex-row items-center gap-8 rounded-t-lg border-b border-b-slate-100 bg-white p-3 dark:border-b-slate-700 dark:bg-black">
-      <Checkbox />
-      <ActionGroup
-        type="mute"
-        size="none"
-        options={[
-          {
-            label: 'Mark as read',
-            onClick: () => {
-              //
-            },
-          },
-        ]}
-      />
-    </div>
-  );
-};
-
-const MailConversation = () => {
-  return (
-    <Link to="/mail/1" className="group">
-      <div className="flex flex-col gap-2 border-b border-b-slate-100 bg-white p-3 transition-colors group-last-of-type:border-0 group-hover:bg-slate-50 dark:border-b-slate-700 dark:bg-black dark:group-hover:bg-slate-900">
-        <div className="flex flex-row items-center justify-between gap-8">
-          <Checkbox onClick={(e) => e.stopPropagation()} />
-          <p>John Doe</p>
-          <p>What is next for Homebase</p>
-          <p className="ml-auto text-foreground/50">
-            {formatToTimeAgoWithRelativeDetail(new Date(), true)}
-          </p>
+      <form
+        className=""
+        onSubmit={() => {
+          console.log('new mail');
+        }}
+      >
+        <div className="flex flex-col gap-2 px-5">
+          <div>
+            <Label>{t('To')}</Label>
+            <Input required />
+          </div>
+          <div>
+            <Label>{t('Subject')}</Label>
+            <Input required />
+          </div>
+          <div>
+            <Label>{t('Message')}</Label>
+            <VolatileInput
+              defaultValue=""
+              className="min-h-32 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+            />
+          </div>
         </div>
 
-        {/* <MailConversationAttachments /> */}
-      </div>
-    </Link>
-  );
-};
+        <div className="mt-5 flex flex-row-reverse gap-2 px-5 pb-5">
+          <ActionButton type="primary" icon={PaperPlane}>
+            {t('Send')}
+          </ActionButton>
 
-const MailConversationAttachments = () => {
-  return <div className="flex flex-row justify-end"></div>;
+          <ActionButton
+            type="secondary"
+            onClick={(e) => {
+              e.preventDefault();
+              onClose();
+            }}
+            className="mr-auto"
+          >
+            {t('Discard')}
+          </ActionButton>
+        </div>
+      </form>
+    </div>
+  );
+
+  return createPortal(dialog, target);
 };
