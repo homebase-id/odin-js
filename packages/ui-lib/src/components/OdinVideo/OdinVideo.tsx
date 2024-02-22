@@ -29,6 +29,7 @@ export interface OdinVideoProps {
   lastModified: number | undefined;
 }
 
+const MB = 1000000;
 export const OdinVideo = (videoProps: OdinVideoProps) => {
   const { dotYouClient, odinId, targetDrive, fileId, globalTransitId, fileKey, className } =
     videoProps;
@@ -64,7 +65,12 @@ export const OdinVideo = (videoProps: OdinVideoProps) => {
   const playback: 'encrypted-mse' | 'mse' | 'direct' | undefined = useMemo(() => {
     if (!videoMetaDataFetched) return undefined;
 
-    if (shouldFallback || (videoMetaDataFetched && !videoMetaData)) return 'direct';
+    if (
+      shouldFallback ||
+      (videoMetaDataFetched && !videoMetaData) ||
+      (videoMetaData?.fileSize && videoMetaData.fileSize <= 16 * MB)
+    )
+      return 'direct';
 
     // TODO: Need to know for sure if we are encrypted or not, for now we assume based on the hint
     if (videoMetaData?.isSegmented && videoProps.probablyEncrypted) return 'encrypted-mse';
