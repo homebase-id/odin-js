@@ -22,6 +22,7 @@ import {
   CHAT_APP_ID,
   useDotYouClient,
 } from '@youfoundation/common-app';
+import { ChatDrive } from '../../providers/ConversationProvider';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -72,8 +73,8 @@ export const useAuth = () => {
 
 export const drives = [
   {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Read + DrivePermissionType.Write,
@@ -105,8 +106,8 @@ export const permissions = [
 
 const circleDrives = [
   {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Write,
