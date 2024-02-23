@@ -91,6 +91,7 @@ export * from './Icons/Question';
 export * from './Icons/Quote';
 export * from './Icons/Reddit';
 export * from './Icons/Refresh';
+export * from './Icons/ReplyArrow';
 export * from './Icons/Repost';
 export * from './Icons/RichTextIcons';
 export * from './Icons/RiotGames';

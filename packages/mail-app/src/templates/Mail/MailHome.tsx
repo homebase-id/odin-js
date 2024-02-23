@@ -6,7 +6,7 @@ import {
 } from '@youfoundation/common-app';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
-import { MailConversations } from '../../components/Conversations/MailConversations';
+import { MailThreads } from '../../components/Threads/MailThreads';
 import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
 import { MailHomeHeader } from '../../components/Header/Header';
 
@@ -29,7 +29,7 @@ export const MailHome = () => {
       />
 
       <MailHomeHeader />
-      <MailConversations />
+      <MailThreads />
     </>
   );
 };

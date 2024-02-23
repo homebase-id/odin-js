@@ -60,12 +60,12 @@ export const ActionButton: FC<ActionButtonProps> = ({
     (state === 'error'
       ? ButtonColors.error
       : type === 'secondary'
-      ? ButtonColors.secondary
-      : type === 'remove'
-      ? ButtonColors.remove
-      : type === 'mute'
-      ? ButtonColors.mute
-      : ButtonColors.primary) + (isDisabled ? ` ${ButtonColors.disabledSuffix}` : '');
+        ? ButtonColors.secondary
+        : type === 'remove'
+          ? ButtonColors.remove
+          : type === 'mute'
+            ? ButtonColors.mute
+            : ButtonColors.primary) + (isDisabled ? ` ${ButtonColors.disabledSuffix}` : '');
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
@@ -76,12 +76,12 @@ export const ActionButton: FC<ActionButtonProps> = ({
     size === 'large'
       ? 'px-5 py-3'
       : size === 'small'
-      ? 'px-3 py-1 text-sm'
-      : size === 'square'
-      ? 'p-2'
-      : size === 'none'
-      ? ''
-      : 'px-3 py-2';
+        ? 'px-3 py-1 text-sm'
+        : size === 'square'
+          ? 'p-2'
+          : size === 'none'
+            ? ''
+            : 'px-3 py-2';
 
   const stateClasses = state === 'loading' || state === 'pending' ? 'animate-pulse' : '';
 
