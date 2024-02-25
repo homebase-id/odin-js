@@ -38,7 +38,7 @@ export const ChatHistory = ({
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
   const flattenedMsgs = useMemo(
     () =>
-      (messages?.pages?.flatMap((page) => page.searchResults).filter(Boolean) ||
+      (messages?.pages?.flatMap((page) => page?.searchResults).filter(Boolean) ||
         []) as DriveSearchResult<ChatMessage>[],
     [messages]
   );
