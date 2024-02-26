@@ -139,11 +139,7 @@ export const MailThreads = () => {
                         <div className="animate-pulse" key={'loading'}>
                           {t('Loading...')}
                         </div>
-                      ) : (
-                        <div className="italic opacity-50" key={'no-more'}>
-                          {t('No more conversations')}
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   );
                 }
