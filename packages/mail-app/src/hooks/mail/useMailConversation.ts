@@ -5,7 +5,7 @@ import {
   NewDriveSearchResult,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import {
   MailConversation,
@@ -170,11 +170,93 @@ export const useMailConversation = () => {
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
-      onError: (error) => {
-        console.error('Error marking chat as read', { error });
-      },
       onMutate: async ({ mailConversations }) => {
         //
+        const existingConversations = queryClient.getQueryData<
+          InfiniteData<MailConversationsReturn>
+        >(['mail-conversations']);
+
+        if (existingConversations) {
+          const newConversations: InfiniteData<MailConversationsReturn> = {
+            ...existingConversations,
+            pages: [
+              ...existingConversations.pages.map((page) => {
+                return {
+                  ...page,
+                  results: page.results.map((conversation) => {
+                    return mailConversations.some((msg) =>
+                      stringGuidsEqual(msg.fileId, conversation.fileId)
+                    )
+                      ? {
+                          ...conversation,
+                          fileMetadata: {
+                            ...conversation.fileMetadata,
+                            appData: {
+                              ...conversation.fileMetadata.appData,
+                              content: {
+                                ...conversation.fileMetadata.appData.content,
+                                isRead: true,
+                              },
+                            },
+                          },
+                        }
+                      : conversation;
+                  }),
+                };
+              }),
+            ],
+          };
+
+          queryClient.setQueryData(['mail-conversations'], newConversations);
+        }
+
+        // This assumes all messages are from the same thread
+        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
+        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
+          'mail-thread',
+          threadId,
+        ]);
+        if (existingMailThread && threadId) {
+          const newMailThread: InfiniteData<MailThreadReturn> = {
+            ...existingMailThread,
+            pages: existingMailThread.pages.map((page) => {
+              return {
+                ...page,
+                results: page.results.map((conversation) => {
+                  return mailConversations.some((msg) =>
+                    stringGuidsEqual(msg.fileId, conversation.fileId)
+                  )
+                    ? {
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            content: {
+                              ...conversation.fileMetadata.appData.content,
+                              isRead: true,
+                            },
+                          },
+                        },
+                      }
+                    : conversation;
+                }),
+              };
+            }),
+          };
+
+          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
+        }
+
+        return { existingConversations, existingMailThread };
+      },
+      onError: (_error, { mailConversations }, context) => {
+        queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
+
+        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
+        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
+
+        console.error('Error sending chat message', _error);
       },
     }),
   };
