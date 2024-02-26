@@ -1,5 +1,6 @@
 import {
   ActionButton,
+  ErrorBoundary,
   Input,
   MagnifyingGlass,
   Persons,
@@ -47,29 +48,31 @@ export const ConversationsSidebar = ({
       ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
 
   return (
-    <div className="flex flex-grow flex-col overflow-auto">
-      <SearchConversation
-        setIsSearchActive={setIsSearchActive}
-        isSearchActive={isSearchActive}
-        openConversation={(id) => {
-          setIsSearchActive(false);
-          openConversation(id);
-        }}
-        conversations={flatConversations}
-        activeConversationId={activeConversationId}
-      />
-      {!isSearchActive ? (
-        <ConversationList
-          openConversation={(id) => openConversation(id)}
-          conversations={flatConversations.filter(
-            (chat) =>
-              chat.fileMetadata.appData.archivalStatus !== 2 ||
-              chat.fileMetadata.appData.uniqueId === activeConversationId
-          )}
+    <ErrorBoundary>
+      <div className="flex flex-grow flex-col overflow-auto">
+        <SearchConversation
+          setIsSearchActive={setIsSearchActive}
+          isSearchActive={isSearchActive}
+          openConversation={(id) => {
+            setIsSearchActive(false);
+            openConversation(id);
+          }}
+          conversations={flatConversations}
           activeConversationId={activeConversationId}
         />
-      ) : null}
-    </div>
+        {!isSearchActive ? (
+          <ConversationList
+            openConversation={(id) => openConversation(id)}
+            conversations={flatConversations.filter(
+              (chat) =>
+                chat.fileMetadata.appData.archivalStatus !== 2 ||
+                chat.fileMetadata.appData.uniqueId === activeConversationId
+            )}
+            activeConversationId={activeConversationId}
+          />
+        ) : null}
+      </div>
+    </ErrorBoundary>
   );
 };
 
