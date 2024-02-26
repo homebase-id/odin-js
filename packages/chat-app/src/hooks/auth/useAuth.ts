@@ -134,7 +134,7 @@ export const useYouAuthAuthorization = () => {
       drives,
       circleDrives,
       eccKey.publicKey,
-      window.location.host,
+      undefined,
       undefined,
       returnUrl
     );

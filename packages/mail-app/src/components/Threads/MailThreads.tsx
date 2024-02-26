@@ -258,6 +258,7 @@ const MailConversationItem = ({
   isSelected: boolean;
 }) => {
   const lastConversation = mailThread[0];
+  const numberOfConversations = mailThread.length;
   const threadId = lastConversation.fileMetadata.appData.groupId as string;
 
   const identity = useDotYouClientContext().getIdentity();
@@ -285,8 +286,11 @@ const MailConversationItem = ({
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
           />
           <Checkbox checked={isSelected} readOnly />
-          <div className="flex flex-col font-semibold md:contents">
-            <p className="w-16">{!messageFromMe ? <ConnectionName odinId={sender} /> : t('Me')}</p>
+          <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
+            <p className="w-16">
+              {!messageFromMe ? <ConnectionName odinId={sender} /> : t('Me')}{' '}
+              {numberOfConversations !== 1 ? `(${numberOfConversations})` : null}
+            </p>
             <p
               className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
             >
@@ -294,7 +298,10 @@ const MailConversationItem = ({
             </p>
           </div>
           <p className="ml-auto text-foreground/50">
-            {formatToTimeAgoWithRelativeDetail(new Date(), true)}
+            {formatToTimeAgoWithRelativeDetail(
+              new Date(lastConversation.fileMetadata.created),
+              true
+            )}
           </p>
         </div>
 

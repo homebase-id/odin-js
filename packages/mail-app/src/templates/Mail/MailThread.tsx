@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   ConnectionImage,
   ConnectionName,
+  ErrorNotification,
   Input,
   Label,
   PaperPlane,
@@ -48,7 +49,7 @@ export const MailThread = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useMailThread({ threadId: conversationKey }).thread;
+  } = useMailThread({ threadId: conversationKey }).fetch;
 
   // Flatten all pages, sorted descending and slice on the max number expected
   const mailThread = useMemo(
@@ -86,7 +87,7 @@ export const MailThread = () => {
     <>
       <MailHomeHeader />
       <section className="mx-5 my-5 flex flex-col rounded-lg bg-background py-3">
-        <MailThreadHeader subject={subject} className="px-5  " />
+        <MailThreadHeader mailThread={mailThread} subject={subject} className="px-5  " />
         <MailHistory
           mailThread={mailThread}
           fetchNextPage={fetchNextPage}
@@ -352,47 +353,69 @@ const ForwardAction = ({
 };
 
 const MailThreadHeader = ({
+  mailThread,
   subject,
   className,
 }: {
+  mailThread: DriveSearchResult<MailConversation>[];
   subject: string | undefined;
   className?: string;
 }) => {
+  const {
+    mutate: removeThread,
+    status: removeThreadStatus,
+    error: removeThreadError,
+  } = useMailThread().remove;
+  const {
+    mutate: archiveThread,
+    status: archiveThreadStatus,
+    error: archiveThreadError,
+  } = useMailThread().archive;
+
+  const doArchive = () => {
+    archiveThread(mailThread);
+  };
+
+  const doRemove = () => {
+    removeThread(mailThread);
+  };
+
   return (
-    <div
-      className={`sticky top-[3.7rem] z-20 mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
-    >
-      <ActionLink
-        href={`${ROOT_PATH}`}
-        icon={ArrowLeft}
-        type="mute"
-        size="none"
-        className="text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-      />
-      <ActionButton
-        type="mute"
-        className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-        size="none"
-        icon={Trash}
-        confirmOptions={{
-          title: t('Delete conversation'),
-          body: t('Are you sure you want to delete the conversation?'),
-          buttonText: t('Delete'),
-        }}
-        onClick={() => {
-          //
-        }}
-      />
-      <ActionButton
-        type="mute"
-        className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-        size="none"
-        icon={Archive}
-        onClick={() => {
-          //
-        }}
-      />
-      <h1 className="ml-3 text-xl">{subject}</h1>
-    </div>
+    <>
+      <ErrorNotification error={removeThreadError || archiveThreadError} />
+      <div
+        className={`sticky top-[3.7rem] z-20 mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
+      >
+        <ActionLink
+          href={`${ROOT_PATH}`}
+          icon={ArrowLeft}
+          type="mute"
+          size="none"
+          className="text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+        />
+        <ActionButton
+          type="mute"
+          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+          size="none"
+          icon={Trash}
+          state={removeThreadStatus}
+          confirmOptions={{
+            title: t('Delete conversation'),
+            body: t('Are you sure you want to delete the conversation?'),
+            buttonText: t('Delete'),
+          }}
+          onClick={doRemove}
+        />
+        <ActionButton
+          type="mute"
+          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+          size="none"
+          icon={Archive}
+          state={archiveThreadStatus}
+          onClick={doArchive}
+        />
+        <h1 className="ml-3 text-xl">{subject}</h1>
+      </div>
+    </>
   );
 };

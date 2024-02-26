@@ -56,6 +56,7 @@ export const getMailConversations = async (
   const params: FileQueryParams = {
     targetDrive: MailDrive,
     fileType: [MailConversationFileType],
+    archivalStatus: [0],
   };
 
   const ro: GetBatchQueryResultOptions = {
