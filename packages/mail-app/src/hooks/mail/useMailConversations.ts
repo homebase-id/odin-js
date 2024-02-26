@@ -10,7 +10,7 @@ export const useMailConversations = () => {
     const mailConversationResult = await getMailConversations(dotYouClient, cursorState, PAGE_SIZE);
     return {
       ...mailConversationResult,
-      results: mailConversationResult.results, //.filter((mail) => !!mail.fileMetadata.senderOdinId),
+      //results: mailConversationResult.results.filter((mail) => !!mail.fileMetadata.senderOdinId),
     };
   };
 
@@ -20,7 +20,7 @@ export const useMailConversations = () => {
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMailConversations(pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage.results?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
     }),
   };
 };

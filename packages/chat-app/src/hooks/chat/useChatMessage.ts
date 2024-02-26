@@ -145,7 +145,8 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
           ...existingData,
           pages: existingData?.pages?.map((page, index) => ({
             ...page,
-            searchResults: [newMessageDsr, ...page.searchResults],
+            searchResults:
+              index === 0 ? [newMessageDsr, ...page.searchResults] : page.searchResults,
           })),
         };
 

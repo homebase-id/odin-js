@@ -1,14 +1,18 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
-  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
-import { MailConversation, uploadMail } from '../../providers/MailProvider';
+import {
+  MailConversation,
+  MailConversationsReturn,
+  MailThreadReturn,
+  uploadMail,
+} from '../../providers/MailProvider';
 
 export const useMailConversation = () => {
   const dotYouClient = useDotYouClientContext();
@@ -64,8 +68,55 @@ export const useMailConversation = () => {
   return {
     send: useMutation({
       mutationFn: sendMessage,
-      onMutate: async () => {
-        //
+      onMutate: async ({ conversation }) => {
+        const existingConversations = queryClient.getQueryData<
+          InfiniteData<MailConversationsReturn>
+        >(['mail-conversations']);
+
+        if (existingConversations) {
+          const newConversations: InfiniteData<MailConversationsReturn> = {
+            ...existingConversations,
+            pages: [
+              ...existingConversations.pages.map((page, index) => {
+                return {
+                  ...page,
+                  results:
+                    index === 0
+                      ? [
+                          conversation as DriveSearchResult<MailConversation>,
+                          ...(existingConversations?.pages[0].results || []),
+                        ]
+                      : page.results,
+                };
+              }),
+            ],
+          };
+
+          queryClient.setQueryData(['mail-conversations'], newConversations);
+        }
+
+        const threadId = conversation.fileMetadata.appData.content.threadId;
+        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
+          'mail-thread',
+          threadId,
+        ]);
+
+        if (existingMailThread && threadId) {
+          const newMailThread: InfiniteData<MailThreadReturn> = {
+            ...existingMailThread,
+            pages: [
+              {
+                ...existingMailThread.pages[0],
+                results: [
+                  conversation as DriveSearchResult<MailConversation>,
+                  ...(existingMailThread.pages[0].results || []),
+                ],
+              },
+            ],
+          };
+
+          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
+        }
       },
       onError: () => {
         //

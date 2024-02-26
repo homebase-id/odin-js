@@ -1,4 +1,5 @@
 import {
+  CursoredResult,
   DotYouClient,
   DriveSearchResult,
   EmbeddedThumb,
@@ -42,11 +43,14 @@ export const MailDrive: TargetDrive = {
   type: '2dfecc40311e41e5a12455e925144202',
 };
 
+export interface MailConversationsReturn
+  extends CursoredResult<DriveSearchResult<MailConversation>[]> {}
+
 export const getMailConversations = async (
   dotYouClient: DotYouClient,
   cursorState: string | undefined,
   pageSize: number
-) => {
+): Promise<MailConversationsReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
     fileType: [MailConversationFileType],
@@ -61,7 +65,7 @@ export const getMailConversations = async (
   const response = await queryBatch(dotYouClient, params, ro);
 
   return {
-    ...response,
+    cursorState: response.cursorState,
     results: (await Promise.all(
       response.searchResults
         .map(async (result) => await dsrToMailConversation(dotYouClient, result, MailDrive, true))
@@ -70,12 +74,14 @@ export const getMailConversations = async (
   };
 };
 
+export interface MailThreadReturn extends CursoredResult<DriveSearchResult<MailConversation>[]> {}
+
 export const getMailThread = async (
   dotYouClient: DotYouClient,
   threadId: string,
   cursorState: string | undefined,
   pageSize: number
-) => {
+): Promise<MailThreadReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
     fileType: [MailConversationFileType],
@@ -91,7 +97,7 @@ export const getMailThread = async (
   const response = await queryBatch(dotYouClient, params, ro);
 
   return {
-    ...response,
+    cursorState: response.cursorState,
     results: (await Promise.all(
       response.searchResults
         .map(async (result) => await dsrToMailConversation(dotYouClient, result, MailDrive, true))

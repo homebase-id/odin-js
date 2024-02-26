@@ -17,7 +17,7 @@ export const useMailThread = ({ threadId }: { threadId: string | undefined }) =>
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMailConversations(threadId as string, pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage.results?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
     }),
   };
 };

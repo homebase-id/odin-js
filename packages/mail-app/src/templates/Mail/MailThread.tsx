@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
@@ -67,6 +67,9 @@ export const MailThread = () => {
 
     return {
       ...mailThread?.[0]?.fileMetadata.appData.content,
+      threadId:
+        mailThread?.[0]?.fileMetadata.appData.groupId ||
+        mailThread?.[0]?.fileMetadata.appData.content.threadId,
       recipients: allRecipients,
     };
   }, [mailThread]);
@@ -99,8 +102,8 @@ const MailMessages = ({
 }) => {
   return (
     <div className={`flex flex-col-reverse ${className || ''}`}>
-      {mailThread?.map((message) => (
-        <div className="py-1" key={message.fileId}>
+      {mailThread?.map((message, index) => (
+        <div className="py-1" key={message.fileId || index}>
           <MailMessage message={message} />
         </div>
       ))}
@@ -133,7 +136,10 @@ const MailMessage = ({
               t('Me')
             )}
           </p>
-          <p>{formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}</p>
+          <p>
+            {message.fileMetadata.created &&
+              formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
+          </p>
         </div>
         <RichTextRenderer body={message.fileMetadata.appData.content.message} />
       </div>
@@ -193,8 +199,21 @@ const ReplyAction = ({
   subject: string;
   onDone: () => void;
 }) => {
-  const { mutate: sendMail, status: sendMailStatus } = useMailConversation().send;
+  const {
+    mutate: sendMail,
+    status: sendMailStatus,
+    reset: resetState,
+  } = useMailConversation().send;
   const [message, setMessage] = useState<RichText>();
+
+  // Reset state, when the message was sent successfully
+  useEffect(() => {
+    if (sendMailStatus === 'success') {
+      setMessage([]);
+      resetState();
+      onDone();
+    }
+  }, [sendMailStatus]);
 
   const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -214,8 +233,6 @@ const ReplyAction = ({
       },
       serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected } },
     };
-
-    console.log('newEmailConversation', newEmailConversation);
 
     sendMail({ conversation: newEmailConversation, files: [] });
   };
@@ -270,7 +287,20 @@ const ForwardAction = ({
   mailThread: DriveSearchResult<MailConversation>[];
   onDone: () => void;
 }) => {
-  const { mutate: sendMail, status: sendMailStatus } = useMailConversation().send;
+  const {
+    mutate: sendMail,
+    status: sendMailStatus,
+    reset: resetState,
+  } = useMailConversation().send;
+
+  // Reset state, when the message was sent successfully
+  useEffect(() => {
+    if (sendMailStatus === 'success') {
+      setMessage([]);
+      resetState();
+      onDone();
+    }
+  }, [sendMailStatus]);
 
   const [recipients, setRecipients] = useState<string[]>([]);
   const [subject, setSubject] = useState<string>('');
@@ -279,8 +309,6 @@ const ForwardAction = ({
   const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     if (!subject || !message || !recipients.length) return;
-
-    console.log('mailThread', mailThread);
 
     const newFowardedEmailConversation: NewDriveSearchResult<MailConversation> = {
       fileMetadata: {
