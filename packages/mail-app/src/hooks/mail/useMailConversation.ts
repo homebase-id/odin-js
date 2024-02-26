@@ -81,7 +81,7 @@ export const useMailConversation = () => {
                 return {
                   ...page,
                   results:
-                    index === 0
+                    existingConversations.pages.length === 0
                       ? [
                           conversation as DriveSearchResult<MailConversation>,
                           ...(existingConversations?.pages[0].results || []),
@@ -104,15 +104,18 @@ export const useMailConversation = () => {
         if (existingMailThread && threadId) {
           const newMailThread: InfiniteData<MailThreadReturn> = {
             ...existingMailThread,
-            pages: [
-              {
-                ...existingMailThread.pages[0],
-                results: [
-                  conversation as DriveSearchResult<MailConversation>,
-                  ...(existingMailThread.pages[0].results || []),
-                ],
-              },
-            ],
+            pages: existingMailThread.pages.map((page, index) => {
+              return {
+                ...page,
+                results:
+                  existingMailThread.pages.length - 1 === index
+                    ? [
+                        ...(existingMailThread.pages[0].results || []),
+                        conversation as DriveSearchResult<MailConversation>,
+                      ]
+                    : page.results,
+              };
+            }),
           };
 
           queryClient.setQueryData(['mail-thread', threadId], newMailThread);

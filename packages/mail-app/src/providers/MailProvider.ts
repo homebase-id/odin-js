@@ -92,6 +92,7 @@ export const getMailThread = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    ordering: 'oldestFirst',
   };
 
   const response = await queryBatch(dotYouClient, params, ro);

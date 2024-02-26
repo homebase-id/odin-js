@@ -35,6 +35,7 @@ import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
 import { ROOT_PATH } from '../../app/App';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { RecipientInput } from '../../components/Composer/RecipientInput';
+import { MailHistory } from './MailHistory';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
@@ -42,7 +43,12 @@ export const MailThread = () => {
 
   const identity = useDotYouClientContext().getIdentity();
   const { conversationKey } = useParams();
-  const { data: messages } = useMailThread({ threadId: conversationKey }).thread;
+  const {
+    data: messages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMailThread({ threadId: conversationKey }).thread;
 
   // Flatten all pages, sorted descending and slice on the max number expected
   const mailThread = useMemo(
@@ -51,8 +57,8 @@ export const MailThread = () => {
         messages,
         PAGE_SIZE,
         (a, b) =>
-          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
+          (a.fileMetadata.appData.userDate || a.fileMetadata.created) -
+          (b.fileMetadata.appData.userDate || b.fileMetadata.created)
       ),
     [messages]
   );
@@ -78,8 +84,14 @@ export const MailThread = () => {
     <>
       <MailHomeHeader />
       <section className="mx-5 my-5 flex flex-col rounded-lg bg-background py-3">
-        <MailThreadHeader subject={subject} className="px-5" />
-        <MailMessages mailThread={mailThread} className="px-5" />
+        <MailThreadHeader subject={subject} className="px-5  " />
+        <MailHistory
+          mailThread={mailThread}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          className="px-5"
+        />
         <MailThreadActions
           className="px-5"
           mailThread={mailThread}
@@ -92,61 +104,6 @@ export const MailThread = () => {
     </>
   );
 };
-
-const MailMessages = ({
-  mailThread,
-  className,
-}: {
-  mailThread: DriveSearchResult<MailConversation>[];
-  className?: string;
-}) => {
-  return (
-    <div className={`flex flex-col-reverse ${className || ''}`}>
-      {mailThread?.map((message, index) => (
-        <div className="py-1" key={message.fileId || index}>
-          <MailMessage message={message} />
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const MailMessage = ({
-  message,
-  className,
-}: {
-  message: DriveSearchResult<MailConversation>;
-  className?: string;
-}) => {
-  const messageFromMe = !message.fileMetadata.senderOdinId;
-  return (
-    <div
-      key={message.fileId}
-      className={`flex gap-4 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
-    >
-      {messageFromMe ? null : (
-        <ConnectionImage className="h-10 w-10" odinId={message.fileMetadata.senderOdinId} />
-      )}
-      <div className="w-full max-w-[75vw] rounded-lg bg-page-background px-2 py-2 md:max-w-lg">
-        <div className={`flex flex-row gap-2`}>
-          <p className="font-semibold">
-            {!messageFromMe ? (
-              <ConnectionName odinId={message.fileMetadata.senderOdinId} />
-            ) : (
-              t('Me')
-            )}
-          </p>
-          <p>
-            {message.fileMetadata.created &&
-              formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
-          </p>
-        </div>
-        <RichTextRenderer body={message.fileMetadata.appData.content.message} />
-      </div>
-    </div>
-  );
-};
-
 const MailThreadActions = ({
   mailThread,
   className,
@@ -395,7 +352,7 @@ const MailThreadHeader = ({
 }) => {
   return (
     <div
-      className={`sticky top-[3.7rem] mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
+      className={`sticky top-[3.7rem] z-20 mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
     >
       <ActionLink
         href={`${ROOT_PATH}`}
