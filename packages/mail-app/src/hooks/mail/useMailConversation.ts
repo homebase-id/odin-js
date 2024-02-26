@@ -117,12 +117,17 @@ export const useMailConversation = () => {
 
           queryClient.setQueryData(['mail-thread', threadId], newMailThread);
         }
+
+        return { existingConversations, existingMailThread };
       },
-      onError: () => {
-        //
+      onError: (_error, { conversation }, context) => {
+        queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
+
+        const threadId = conversation.fileMetadata.appData.content.threadId;
+        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
       },
       onSettled: async () => {
-        //
+        // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
       },
     }),
   };
