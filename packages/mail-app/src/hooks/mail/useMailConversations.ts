@@ -7,11 +7,7 @@ export const useMailConversations = () => {
   const dotYouClient = useDotYouClientContext();
 
   const fetchMailConversations = async (cursorState: string | undefined) => {
-    const mailConversationResult = await getMailConversations(dotYouClient, cursorState, PAGE_SIZE);
-    return {
-      ...mailConversationResult,
-      //results: mailConversationResult.results.filter((mail) => !!mail.fileMetadata.senderOdinId),
-    };
+    return await getMailConversations(dotYouClient, cursorState, PAGE_SIZE);
   };
 
   return {

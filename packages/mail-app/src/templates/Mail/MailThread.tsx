@@ -39,7 +39,7 @@ import { MailHistory } from './MailHistory';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
-  const isOnline = useLiveMailProcessor();
+  useLiveMailProcessor();
 
   const identity = useDotYouClientContext().getIdentity();
   const { conversationKey } = useParams();
@@ -65,7 +65,9 @@ export const MailThread = () => {
 
   const { subject, threadId, originId, recipients } = useMemo(() => {
     const originalRecipients = mailThread?.[0]?.fileMetadata.appData.content.recipients || [];
-    const originalSender = mailThread?.[0]?.fileMetadata.senderOdinId;
+    const originalSender =
+      mailThread?.[0]?.fileMetadata.senderOdinId ||
+      mailThread?.[0]?.fileMetadata.appData.content.sender;
 
     const allRecipients = [...originalRecipients, originalSender || identity].filter(
       (recipient) => recipient && recipient !== identity
@@ -156,6 +158,7 @@ const ReplyAction = ({
   subject: string;
   onDone: () => void;
 }) => {
+  const sender = useDotYouClientContext().getIdentity();
   const {
     mutate: sendMail,
     status: sendMailStatus,
@@ -174,6 +177,7 @@ const ReplyAction = ({
 
   const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
+    console.log('recipients', recipients);
     if (!message || !recipients.length) return;
 
     const newEmailConversation: NewDriveSearchResult<MailConversation> = {
@@ -185,6 +189,7 @@ const ReplyAction = ({
             message,
             originId,
             threadId,
+            sender,
           },
         },
       },
@@ -244,6 +249,8 @@ const ForwardAction = ({
   mailThread: DriveSearchResult<MailConversation>[];
   onDone: () => void;
 }) => {
+  const sender = useDotYouClientContext().getIdentity();
+
   const {
     mutate: sendMail,
     status: sendMailStatus,
@@ -276,6 +283,7 @@ const ForwardAction = ({
             message,
             originId: originId,
             threadId: getNewId(),
+            sender,
           },
         },
       },

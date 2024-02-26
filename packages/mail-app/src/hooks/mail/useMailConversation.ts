@@ -11,6 +11,7 @@ import {
   MailConversation,
   MailConversationsReturn,
   MailThreadReturn,
+  updateLocalMailHeader,
   uploadMail,
 } from '../../providers/MailProvider';
 
@@ -63,6 +64,38 @@ export const useMailConversation = () => {
     // );
 
     return newMailConversation;
+  };
+
+  const markAsRead = async ({
+    mailConversations,
+  }: {
+    mailConversations: DriveSearchResult<MailConversation>[];
+  }) => {
+    const messagesToMarkAsRead = mailConversations.filter(
+      (msg) => msg && msg.fileMetadata.senderOdinId && !msg.fileMetadata.appData.content.isRead
+    );
+
+    await Promise.all(
+      messagesToMarkAsRead.map(async (conversation) => {
+        const updatedConversation: DriveSearchResult<MailConversation> = {
+          ...conversation,
+          fileMetadata: {
+            ...conversation.fileMetadata,
+            appData: {
+              ...conversation.fileMetadata.appData,
+              content: {
+                ...conversation.fileMetadata.appData.content,
+                sender:
+                  conversation.fileMetadata.senderOdinId ||
+                  conversation.fileMetadata.appData.content.sender,
+                isRead: true,
+              },
+            },
+          },
+        };
+        return await updateLocalMailHeader(dotYouClient, updatedConversation);
+      })
+    );
   };
 
   return {
@@ -128,9 +161,20 @@ export const useMailConversation = () => {
 
         const threadId = conversation.fileMetadata.appData.content.threadId;
         queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
+
+        console.error('Error sending chat message', _error);
       },
       onSettled: async () => {
         // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
+      },
+    }),
+    markAsRead: useMutation({
+      mutationFn: markAsRead,
+      onError: (error) => {
+        console.error('Error marking chat as read', { error });
+      },
+      onMutate: async ({ mailConversations }) => {
+        //
       },
     }),
   };

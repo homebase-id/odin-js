@@ -19,6 +19,7 @@ import {
   getContentFromHeaderOrPayload,
   queryBatch,
   uploadFile,
+  uploadHeader,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
@@ -34,6 +35,7 @@ export interface MailConversation {
   // uniqueId: string; // Stored in meta => The unique id of the conversation; Created uniquely for each message
   subject: string;
   message: RichText;
+  sender: string; // Copy of the senderOdinId which is reset when the recipient marks the message as read
   recipients: string[];
   isRead?: boolean;
 }
@@ -211,16 +213,54 @@ export const uploadMail = async (
   );
 
   if (!allDelivered.every((delivered) => delivered)) {
-    throw new Error(
-      `Not all recipients received the message: ${recipients.join(', ')}`,
-      uploadResult.recipientStatus
-    );
+    console.error('Not all recipients received the message: ', uploadResult);
+    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
   }
 
   return {
     ...uploadResult,
     previewThumbnail: uploadMetadata.appData.previewThumbnail,
   };
+};
+
+export const updateLocalMailHeader = async (
+  dotYouClient: DotYouClient,
+  conversation: DriveSearchResult<MailConversation>,
+  onVersionConflict?: () => void
+) => {
+  const uploadInstructions: UploadInstructionSet = {
+    storageOptions: {
+      drive: MailDrive,
+      overwriteFileId: conversation.fileId,
+    },
+  };
+
+  const conversationContent = conversation.fileMetadata.appData.content;
+
+  //TODO: Should we move an overload of content to a payload?
+  const payloadJson: string = jsonStringify64({ ...conversationContent });
+
+  const uploadMetadata: UploadFileMetadata = {
+    versionTag: conversation?.fileMetadata.versionTag,
+    allowDistribution: false,
+    appData: {
+      ...conversation.fileMetadata.appData,
+      fileType: conversation.fileMetadata.appData.fileType || MailConversationFileType,
+      content: payloadJson,
+    },
+    isEncrypted: true,
+    accessControlList: conversation.serverMetadata?.accessControlList || {
+      requiredSecurityGroup: SecurityGroupType.Owner,
+    },
+  };
+
+  return await uploadHeader(
+    dotYouClient,
+    conversation.sharedSecretEncryptedKeyHeader,
+    uploadInstructions,
+    uploadMetadata,
+    onVersionConflict
+  );
 };
 
 export const dsrToMailConversation = async (

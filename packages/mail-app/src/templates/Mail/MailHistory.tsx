@@ -9,6 +9,8 @@ import {
   RichTextRenderer,
 } from '@youfoundation/common-app';
 import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
+import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 
 export const MailHistory = ({
   mailThread,
@@ -56,6 +58,8 @@ export const MailHistory = ({
     isFetchingNextPage,
     virtualizer.getVirtualItems(),
   ]);
+
+  useMarkMailConversationsAsRead({ mailThread });
 
   return (
     <div className={`flex ${className || ''}`} ref={parentRef}>
@@ -114,23 +118,22 @@ const MailMessage = ({
   message: DriveSearchResult<MailConversation>;
   className?: string;
 }) => {
-  const messageFromMe = !message.fileMetadata.senderOdinId;
+  const identity = useDotYouClientContext().getIdentity();
+  const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
+
+  const messageFromMe = !sender || sender === identity;
   return (
     <div
+      data-sender-odin={message.fileMetadata.senderOdinId}
+      data-sender={message.fileMetadata.appData.content.sender}
       key={message.fileId}
       className={`flex gap-4 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
     >
-      {messageFromMe ? null : (
-        <ConnectionImage className="h-10 w-10" odinId={message.fileMetadata.senderOdinId} />
-      )}
+      {messageFromMe ? null : <ConnectionImage className="h-10 w-10" odinId={sender} />}
       <div className="w-full max-w-[75vw] rounded-lg bg-page-background px-2 py-2 md:max-w-lg">
         <div className={`flex flex-row gap-2`}>
           <p className="font-semibold">
-            {!messageFromMe ? (
-              <ConnectionName odinId={message.fileMetadata.senderOdinId} />
-            ) : (
-              t('Me')
-            )}
+            {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
           </p>
           <p>
             {message.fileMetadata.created &&

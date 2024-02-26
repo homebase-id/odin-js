@@ -88,7 +88,6 @@ export const useMissingPermissions = ({
     missingAllConnectedCircle,
     window.location.href
   );
-  console.log('extendPermissionUrl', extendPermissionUrl);
 
   return extendPermissionUrl;
 };

@@ -18,6 +18,7 @@ import { useMailConversations } from '../../hooks/mail/useMailConversations';
 import { MailConversation } from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 
 const PAGE_SIZE = 100;
 export const MailThreads = () => {
@@ -257,10 +258,16 @@ const MailConversationItem = ({
   isSelected: boolean;
 }) => {
   const lastConversation = mailThread[0];
-
   const threadId = lastConversation.fileMetadata.appData.groupId as string;
-  const isUnread = !lastConversation.fileMetadata.appData.content.isRead;
 
+  const identity = useDotYouClientContext().getIdentity();
+  const sender =
+    lastConversation.fileMetadata.senderOdinId ||
+    lastConversation.fileMetadata.appData.content.sender;
+
+  const messageFromMe = !sender || sender === identity;
+
+  const isUnread = !lastConversation.fileMetadata.appData.content.isRead && !messageFromMe;
   return (
     <Link to={`${ROOT_PATH}/${threadId}`} className="group">
       <div
@@ -279,13 +286,7 @@ const MailConversationItem = ({
           />
           <Checkbox checked={isSelected} readOnly />
           <div className="flex flex-col font-semibold md:contents">
-            <p className="w-16">
-              {lastConversation.fileMetadata.senderOdinId ? (
-                <ConnectionName odinId={lastConversation.fileMetadata.senderOdinId} />
-              ) : (
-                t('Me')
-              )}
-            </p>
+            <p className="w-16">{!messageFromMe ? <ConnectionName odinId={sender} /> : t('Me')}</p>
             <p
               className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
             >
