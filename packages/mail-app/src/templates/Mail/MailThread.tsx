@@ -372,13 +372,8 @@ const MailThreadHeader = ({
     error: archiveThreadError,
   } = useMailThread().archive;
 
-  const doArchive = () => {
-    archiveThread(mailThread);
-  };
-
-  const doRemove = () => {
-    removeThread(mailThread);
-  };
+  const doArchive = () => archiveThread(mailThread);
+  const doRemove = () => removeThread(mailThread);
 
   return (
     <>

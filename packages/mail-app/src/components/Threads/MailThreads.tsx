@@ -1,13 +1,13 @@
 import {
   formatToTimeAgoWithRelativeDetail,
   Checkbox,
-  ActionGroup,
   ActionButton,
   Trash,
   t,
   flattenInfinteData,
   LoadingBlock,
   ConnectionName,
+  ErrorNotification,
 } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
@@ -19,14 +19,13 @@ import { MailConversation } from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useMailThread } from '../../hooks/mail/useMailThread';
 
 const PAGE_SIZE = 100;
 export const MailThreads = () => {
-  const [selection, setSelection] = useState<string[]>([]);
+  const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  useEffect(() => setSelection([]), [isAllSelected]);
 
-  // TODO: needs to get updated so it only shows the last message of a conversation.. And groups the others within
   const {
     data: conversations,
     hasNextPage: hasMorePosts,
@@ -46,7 +45,6 @@ export const MailThreads = () => {
     );
 
     // Group the flattenedConversations by their groupId
-
     const threads = flattenedConversations?.reduce(
       (acc, conversation) => {
         const threadId = conversation.fileMetadata.appData.groupId as string;
@@ -69,6 +67,14 @@ export const MailThreads = () => {
     });
   }, [conversations]);
 
+  useEffect(() => {
+    if (isAllSelected) {
+      setSelection(threads.map((thread) => thread[0]));
+    } else {
+      setSelection([]);
+    }
+  }, [isAllSelected]);
+
   const parentRef = useRef<HTMLDivElement>(null);
   const parentOffsetRef = useRef(0);
 
@@ -80,7 +86,6 @@ export const MailThreads = () => {
     count: threads?.length + 1, // Add 1 so we have an index for the 'loaderRow'
     estimateSize: () => 120, // Rough size of a postTeasercard
     scrollMargin: parentOffsetRef.current,
-    // overscan: 5, // Amount of items to load before and after (improved performance especially with images)
   });
 
   useEffect(() => {
@@ -148,24 +153,31 @@ export const MailThreads = () => {
                 const mailThread = threads[virtualRow.index];
                 const lastConversation = mailThread[0];
                 const lastConversationId = lastConversation.fileMetadata.appData.groupId as string;
-                const isSelected = selection.includes(lastConversationId);
+                const isSelected = selection.some((select) =>
+                  stringGuidsEqual(select.fileMetadata.appData.groupId, lastConversationId)
+                );
 
                 return (
                   <MailConversationItem
                     key={lastConversation.fileId}
                     mailThread={mailThread}
-                    toggleSelection={() =>
+                    toggleSelection={() => {
+                      setIsAllSelected(false);
                       setSelection(
                         isSelected
                           ? [
                               ...selection.filter(
-                                (selected) => !stringGuidsEqual(selected, lastConversationId)
+                                (selected) =>
+                                  !stringGuidsEqual(
+                                    selected.fileMetadata.appData.groupId,
+                                    lastConversationId
+                                  )
                               ),
                             ]
-                          : [...selection, lastConversationId]
-                      )
-                    }
-                    isSelected={selection.includes(lastConversationId) || isAllSelected}
+                          : [...selection, lastConversation]
+                      );
+                    }}
+                    isSelected={isSelected}
                   />
                 );
               })}
@@ -188,44 +200,63 @@ const MailConversationsHeader = ({
   isAllSelected,
   toggleAllSelection,
 }: {
-  selection: string[];
+  selection: DriveSearchResult<MailConversation>[];
   isAllSelected: boolean;
   toggleAllSelection: () => void;
 }) => {
   const hasASelection = selection.length > 0;
+  const {
+    mutate: removeThread,
+    status: removeThreadStatus,
+    error: removeThreadError,
+  } = useMailThread().remove;
+  const {
+    mutate: archiveThread,
+    status: archiveThreadStatus,
+    error: archiveThreadError,
+  } = useMailThread().archive;
+
+  const doArchive = () => archiveThread(selection);
+  const doRemove = () => removeThread(selection);
 
   return (
-    <div className="flex flex-row items-center rounded-t-lg border-b border-b-slate-100 bg-white px-3 py-1 dark:border-b-slate-700 dark:bg-black">
-      <Checkbox checked={isAllSelected} onChange={toggleAllSelection} className="mr-6" />
-      {hasASelection ? (
-        <>
-          <ActionButton
-            type="mute"
-            className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-            size="none"
-            icon={Trash}
-            confirmOptions={{
-              title: t('Delete {0} selected conversations', selection.length),
-              body: t('Are you sure you want to delete the selected conversations?'),
-              buttonText: t('Delete'),
-            }}
-            onClick={() => {
-              //
-            }}
-          />
-          <ActionButton
-            type="mute"
-            className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-            size="none"
-            icon={Archive}
-            onClick={() => {
-              //
-            }}
-          />
-        </>
-      ) : null}
+    <>
+      <ErrorNotification error={removeThreadError || archiveThreadError} />
+      <div className="relative flex flex-row items-center rounded-t-lg border-b border-b-slate-100 bg-white px-1 py-1 dark:border-b-slate-700 dark:bg-black">
+        <div className="p-2">
+          <button
+            className="absolute bottom-0 left-0 top-0 z-10 w-10"
+            onClick={toggleAllSelection}
+          ></button>
+          <Checkbox checked={isAllSelected} readOnly className="block" />
+        </div>
+        {hasASelection ? (
+          <>
+            <ActionButton
+              type="mute"
+              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+              size="none"
+              icon={Trash}
+              confirmOptions={{
+                title: t('Delete {0} selected conversations', selection.length),
+                body: t('Are you sure you want to delete the selected conversations?'),
+                buttonText: t('Delete'),
+              }}
+              onClick={doRemove}
+              state={removeThreadStatus !== 'success' ? removeThreadStatus : undefined}
+            />
+            <ActionButton
+              type="mute"
+              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+              size="none"
+              icon={Archive}
+              onClick={doArchive}
+              state={archiveThreadStatus !== 'success' ? archiveThreadStatus : undefined}
+            />
+          </>
+        ) : null}
 
-      <ActionGroup
+        {/* <ActionGroup
         type="mute"
         size="none"
         className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
@@ -243,8 +274,9 @@ const MailConversationsHeader = ({
             },
           },
         ]}
-      />
-    </div>
+      /> */}
+      </div>
+    </>
   );
 };
 
