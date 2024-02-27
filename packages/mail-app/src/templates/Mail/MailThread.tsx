@@ -4,6 +4,7 @@ import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import {
   ActionButton,
+  ActionGroup,
   ActionLink,
   Archive,
   ArrowLeft,
@@ -33,6 +34,7 @@ import { ROOT_PATH } from '../../app/App';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { RecipientInput } from '../../components/Composer/RecipientInput';
 import { MailHistory } from './MailHistory';
+import { MailThreadInfo } from './MailThreadInfo';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
@@ -373,6 +375,8 @@ const MailThreadHeader = ({
   subject: string | undefined;
   className?: string;
 }) => {
+  const [showMailThreadInfo, setShowMailThreadInfo] = useState(false);
+
   const {
     mutate: removeThread,
     status: removeThreadStatus,
@@ -422,7 +426,21 @@ const MailThreadHeader = ({
           onClick={doArchive}
         />
         <h1 className="ml-3 text-xl">{subject}</h1>
+        <ActionGroup
+          className="ml-auto"
+          type={'mute'}
+          size="square"
+          options={[
+            {
+              label: t('Thread info'),
+              onClick: () => setShowMailThreadInfo(true),
+            },
+          ]}
+        />
       </div>
+      {showMailThreadInfo ? (
+        <MailThreadInfo mailThread={mailThread} onClose={() => setShowMailThreadInfo(false)} />
+      ) : null}
     </>
   );
 };

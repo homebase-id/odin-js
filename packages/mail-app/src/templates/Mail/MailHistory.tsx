@@ -7,10 +7,13 @@ import {
   t,
   formatToTimeAgoWithRelativeDetail,
   RichTextRenderer,
+  ActionGroup,
+  ChevronDown,
 } from '@youfoundation/common-app';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { MailConversationInfo } from './MailConversationInfo';
 
 export const MailHistory = ({
   mailThread,
@@ -121,6 +124,8 @@ const MailMessage = ({
   message: DriveSearchResult<MailConversation>;
   className?: string;
 }) => {
+  const [showMessageInfo, setShowMessageInfo] = useState(false);
+
   const identity = useDotYouClientContext().getIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
 
@@ -129,11 +134,11 @@ const MailMessage = ({
     <div key={message.fileId}>
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
-        className={`flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
+        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
         {messageFromMe ? null : <ConnectionImage className="h-10 w-10" odinId={sender} />}
         <div
-          className={`w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg ${
+          className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg ${
             messageFromMe
               ? 'bg-primary/10 dark:bg-primary/30'
               : 'bg-gray-500/10  dark:bg-gray-300/20'
@@ -149,8 +154,29 @@ const MailMessage = ({
             </p>
           </div>
           <RichTextRenderer body={message.fileMetadata.appData.content.message} />
+
+          <ActionGroup
+            options={[
+              {
+                label: t('Message info'),
+                onClick: () => setShowMessageInfo(true),
+              },
+            ]}
+            className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+            type={'mute'}
+            size="square"
+          >
+            <ChevronDown className="h-3 w-3" />
+            <span className="sr-only ml-1">{t('More')}</span>
+          </ActionGroup>
         </div>
       </div>
+      {showMessageInfo ? (
+        <MailConversationInfo
+          mailConversation={message}
+          onClose={() => setShowMessageInfo(false)}
+        />
+      ) : null}
     </div>
   );
 };
