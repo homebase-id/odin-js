@@ -7,19 +7,15 @@ import {
   ActionLink,
   Archive,
   ArrowLeft,
-  ConnectionImage,
-  ConnectionName,
   ErrorNotification,
   Input,
   Label,
   PaperPlane,
   ReplyArrow,
-  RichTextRenderer,
   Share,
   Trash,
   VolatileInput,
   flattenInfinteData,
-  formatToTimeAgoWithRelativeDetail,
   getTextRootsRecursive,
   t,
 } from '@youfoundation/common-app';
@@ -29,7 +25,7 @@ import {
   RichText,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { MailConversation } from '../../providers/MailProvider';
+import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
@@ -65,20 +61,14 @@ export const MailThread = () => {
   );
 
   const { subject, threadId, originId, recipients } = useMemo(() => {
-    const originalRecipients = mailThread?.[0]?.fileMetadata.appData.content.recipients || [];
-    const originalSender =
-      mailThread?.[0]?.fileMetadata.senderOdinId ||
-      mailThread?.[0]?.fileMetadata.appData.content.sender;
-
-    const allRecipients = [...originalRecipients, originalSender || identity].filter(
-      (recipient) => recipient && recipient !== identity
-    );
+    const lastMessage = mailThread?.[mailThread.length - 1];
+    const allRecipients = getAllRecipients(lastMessage, identity);
 
     return {
-      ...mailThread?.[0]?.fileMetadata.appData.content,
+      ...lastMessage?.fileMetadata.appData.content,
       threadId:
-        mailThread?.[0]?.fileMetadata.appData.groupId ||
-        mailThread?.[0]?.fileMetadata.appData.content.threadId,
+        lastMessage?.fileMetadata.appData.groupId ||
+        lastMessage?.fileMetadata.appData.content.threadId,
       recipients: allRecipients,
     };
   }, [mailThread]);

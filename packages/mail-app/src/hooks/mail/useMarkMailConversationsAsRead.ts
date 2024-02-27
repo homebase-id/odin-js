@@ -23,6 +23,8 @@ export const useMarkMailConversationsAsRead = ({
       await markAsRead({
         mailConversations: mailThread,
       });
+
+      isProcessing.current = false;
     })();
   }, [mailThread]);
 };

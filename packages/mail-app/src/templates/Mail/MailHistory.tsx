@@ -1,5 +1,5 @@
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { MailConversation } from '../../providers/MailProvider';
+import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import {
   ConnectionImage,
@@ -93,15 +93,16 @@ export const MailHistory = ({
               );
             }
 
+            const previousMessage =
+              virtualRow.index === 0 ? undefined : mailThread[virtualRow.index - 1];
             const message = mailThread[virtualRow.index];
             return (
               <div
                 key={virtualRow.key}
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
-                className="py-1"
               >
-                <MailMessage message={message} />
+                <MailMessage previousMessage={previousMessage} message={message} />
               </div>
             );
           })}
@@ -112,9 +113,11 @@ export const MailHistory = ({
 };
 
 const MailMessage = ({
+  previousMessage,
   message,
   className,
 }: {
+  previousMessage: DriveSearchResult<MailConversation> | undefined;
   message: DriveSearchResult<MailConversation>;
   className?: string;
 }) => {
@@ -123,25 +126,94 @@ const MailMessage = ({
 
   const messageFromMe = !sender || sender === identity;
   return (
-    <div
-      data-sender-odin={message.fileMetadata.senderOdinId}
-      data-sender={message.fileMetadata.appData.content.sender}
-      key={message.fileId}
-      className={`flex gap-4 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
-    >
-      {messageFromMe ? null : <ConnectionImage className="h-10 w-10" odinId={sender} />}
-      <div className="w-full max-w-[75vw] rounded-lg bg-page-background px-2 py-2 md:max-w-lg">
-        <div className={`flex flex-row gap-2`}>
-          <p className="font-semibold">
-            {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
-          </p>
-          <p>
-            {message.fileMetadata.created &&
-              formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
-          </p>
+    <div key={message.fileId}>
+      <ConversationalAwareness previousMessage={previousMessage} message={message} />
+      <div
+        className={`flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
+      >
+        {messageFromMe ? null : <ConnectionImage className="h-10 w-10" odinId={sender} />}
+        <div className="w-full max-w-[75vw] rounded-lg bg-page-background px-2 py-2 md:max-w-lg">
+          <div className={`flex flex-row gap-2`}>
+            <p className="font-semibold">
+              {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
+            </p>
+            <p>
+              {message.fileMetadata.created &&
+                formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
+            </p>
+          </div>
+          <RichTextRenderer body={message.fileMetadata.appData.content.message} />
         </div>
-        <RichTextRenderer body={message.fileMetadata.appData.content.message} />
       </div>
     </div>
+  );
+};
+
+const ConversationalAwareness = ({
+  previousMessage,
+  message,
+}: {
+  previousMessage: DriveSearchResult<MailConversation> | undefined;
+  message: DriveSearchResult<MailConversation>;
+}) => {
+  const identity = useDotYouClientContext().getIdentity();
+
+  if (!previousMessage) return null;
+
+  const previousSubject = previousMessage.fileMetadata.appData.content.subject;
+  const currentSubject = message.fileMetadata.appData.content.subject;
+
+  const previousRecipients = getAllRecipients(previousMessage, identity);
+  const currentRecipients = getAllRecipients(message, identity);
+
+  const addedRecipients = currentRecipients.filter(
+    (current) => !previousRecipients.includes(current)
+  );
+  const removedRecipients = previousRecipients.filter(
+    (previous) => !currentRecipients.includes(previous)
+  );
+
+  const isSameSubject = previousSubject === currentSubject;
+  const isSameRecipients = addedRecipients.length === 0 && removedRecipients.length === 0;
+
+  if (isSameSubject && isSameRecipients) return null;
+
+  const lastSender =
+    message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
+  const youWereLastSender = lastSender === identity;
+
+  const Author = () => {
+    return youWereLastSender ? t('You') : <ConnectionName odinId={lastSender} />;
+  };
+
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <div className="flex flex-row justify-center py-4">
+      <p className="rounded-lg bg-page-background px-3 py-1 text-sm italic">{children}</p>
+    </div>
+  );
+
+  return (
+    <>
+      {!isSameSubject && (
+        <Wrapper>
+          <Author /> {t('changed the subject from')} &quot;{previousSubject}&quot; {t('to')} &quot;
+          {currentSubject}&quot;
+        </Wrapper>
+      )}
+      {addedRecipients.map((recipient) => (
+        <Wrapper key={recipient}>
+          <Author /> {t('added')} &quot;
+          <ConnectionName odinId={recipient} />
+          &quot;
+        </Wrapper>
+      ))}
+      {removedRecipients.map((recipient) => (
+        <Wrapper key={recipient}>
+          <Author /> {t('removed')} &quot;
+          <ConnectionName odinId={recipient} />
+          &quot;
+        </Wrapper>
+      ))}
+    </>
   );
 };

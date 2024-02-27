@@ -238,9 +238,8 @@ export const updateLocalMailHeader = async (
 
   const conversationContent = conversation.fileMetadata.appData.content;
 
-  //TODO: Should we move an overload of content to a payload?
+  //TODO: Should we move an excess of content to a payload?
   const payloadJson: string = jsonStringify64({ ...conversationContent });
-
   const uploadMetadata: UploadFileMetadata = {
     versionTag: conversation?.fileMetadata.versionTag,
     allowDistribution: false,
@@ -295,4 +294,17 @@ export const dsrToMailConversation = async (
     console.error('[DotYouCore-js] failed to get the conversation payload of a dsr', dsr, ex);
     return null;
   }
+};
+
+export const getAllRecipients = (
+  conversation: DriveSearchResult<MailConversation>,
+  identity?: string
+): string[] => {
+  if (!conversation?.fileMetadata?.appData?.content?.recipients) return [];
+
+  const recipients = conversation.fileMetadata.appData.content.recipients;
+  const sender =
+    conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender;
+
+  return [...recipients, sender].filter((recipient) => recipient && recipient !== identity);
 };
