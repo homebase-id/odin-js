@@ -132,12 +132,18 @@ const MailMessage = ({
         className={`flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
         {messageFromMe ? null : <ConnectionImage className="h-10 w-10" odinId={sender} />}
-        <div className="w-full max-w-[75vw] rounded-lg bg-page-background px-2 py-2 md:max-w-lg">
+        <div
+          className={`w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg ${
+            messageFromMe
+              ? 'bg-primary/10 dark:bg-primary/30'
+              : 'bg-gray-500/10  dark:bg-gray-300/20'
+          }`}
+        >
           <div className={`flex flex-row gap-2`}>
             <p className="font-semibold">
               {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
             </p>
-            <p>
+            <p className="ml-auto select-none text-sm text-foreground/70">
               {message.fileMetadata.created &&
                 formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
             </p>

@@ -195,7 +195,7 @@ const ReplyAction = ({
   };
 
   return (
-    <div className="rounded-lg bg-page-background px-5 py-5">
+    <div className="rounded-lg bg-primary/10 px-5 py-5 dark:bg-primary/30">
       <form onSubmit={doSubmit}>
         <h2 className="mb-2">{t('Your reply')}</h2>
         <div className="flex flex-col gap-2">
@@ -307,8 +307,8 @@ const ForwardAction = ({
   };
 
   return (
-    <div className="rounded-lg bg-page-background px-5 py-5">
-      <form className="" onSubmit={doSubmit}>
+    <div className="rounded-lg bg-primary/10 px-5 py-5 dark:bg-primary/30">
+      <form onSubmit={doSubmit}>
         <h2>{t('Forward')}</h2>
         <div className="flex flex-col gap-2">
           <div>
