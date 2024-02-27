@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { MailDrive } from '../../providers/MailProvider';
+import { MAIL_CONVERSATION_FILE_TYPE, MailDrive } from '../../providers/MailProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -74,7 +74,11 @@ const useMailWebsocket = (isEnabled: boolean) => {
       notification.notificationType === 'fileAdded' ||
       notification.notificationType === 'fileModified'
     ) {
-      //
+      if (notification.header.fileMetadata.appData.fileType === MAIL_CONVERSATION_FILE_TYPE) {
+        const threadId = notification.header.fileMetadata.appData.groupId;
+        queryClient.invalidateQueries({ queryKey: ['mail-thread', threadId] });
+        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
+      }
     }
   }, []);
 

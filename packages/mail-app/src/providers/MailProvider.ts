@@ -26,7 +26,7 @@ import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
 
-export const MailConversationFileType = 9000;
+export const MAIL_CONVERSATION_FILE_TYPE = 9000;
 export const MAIL_MESSAGE_PAYLOAD_KEY = 'mail_web';
 
 export interface MailConversation {
@@ -57,7 +57,7 @@ export const getMailConversations = async (
 ): Promise<MailConversationsReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
-    fileType: [MailConversationFileType],
+    fileType: [MAIL_CONVERSATION_FILE_TYPE],
     archivalStatus: [0],
   };
 
@@ -89,7 +89,7 @@ export const getMailThread = async (
 ): Promise<MailThreadReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
-    fileType: [MailConversationFileType],
+    fileType: [MAIL_CONVERSATION_FILE_TYPE],
     groupId: [threadId],
   };
 
@@ -153,7 +153,7 @@ export const uploadMail = async (
     allowDistribution: distribute,
     appData: {
       ...conversation.fileMetadata.appData,
-      fileType: conversation.fileMetadata.appData.fileType || MailConversationFileType,
+      fileType: conversation.fileMetadata.appData.fileType || MAIL_CONVERSATION_FILE_TYPE,
       content: payloadJson,
     },
     isEncrypted: true,
@@ -247,7 +247,7 @@ export const updateLocalMailHeader = async (
     allowDistribution: false,
     appData: {
       ...conversation.fileMetadata.appData,
-      fileType: conversation.fileMetadata.appData.fileType || MailConversationFileType,
+      fileType: conversation.fileMetadata.appData.fileType || MAIL_CONVERSATION_FILE_TYPE,
       content: payloadJson,
     },
     isEncrypted: true,

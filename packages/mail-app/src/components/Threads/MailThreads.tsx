@@ -329,7 +329,7 @@ const MailConversationItem = ({
               {lastConversation.fileMetadata.appData.content.subject}
             </p>
           </div>
-          <p className="ml-auto text-foreground/50">
+          <p className="ml-auto text-sm text-foreground/50">
             {formatToTimeAgoWithRelativeDetail(
               new Date(lastConversation.fileMetadata.created),
               true

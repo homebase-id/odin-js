@@ -200,11 +200,6 @@ const ForwardedThread = ({
     <>
       {mailThread && hasHistory ? (
         <>
-          <div className="flex flex-row py-2">
-            <button onClick={() => setShowHistory(!showHistory)}>
-              {showHistory ? t('Hide history') : t('Show history')}
-            </button>
-          </div>
           {hasHistory && showHistory ? (
             <div className="">
               {mailThread.map((mail, index) => (
@@ -212,6 +207,14 @@ const ForwardedThread = ({
               ))}
             </div>
           ) : null}
+          <div className="flex flex-row justify-center py-2">
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="hover:underlin text-sm  text-primary"
+            >
+              {showHistory ? t('Hide history') : t('Show history')}
+            </button>
+          </div>
         </>
       ) : null}
     </>
