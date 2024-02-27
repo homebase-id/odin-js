@@ -38,6 +38,8 @@ export interface MailConversation {
   sender: string; // Copy of the senderOdinId which is reset when the recipient marks the message as read
   recipients: string[];
   isRead?: boolean;
+
+  forwardedMailThread?: DriveSearchResult<MailConversation>[];
 }
 
 export const MailDrive: TargetDrive = {

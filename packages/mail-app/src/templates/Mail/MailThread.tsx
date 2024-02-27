@@ -299,6 +299,7 @@ const ForwardAction = ({
             originId: originId,
             threadId: getNewId(),
             sender,
+            forwardedMailThread: mailThread,
           },
         },
       },

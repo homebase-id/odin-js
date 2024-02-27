@@ -130,13 +130,19 @@ const MailMessage = ({
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
 
   const messageFromMe = !sender || sender === identity;
+
   return (
     <div key={message.fileId}>
+      <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
         className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
-        {messageFromMe ? null : <ConnectionImage className="h-10 w-10" odinId={sender} />}
+        {messageFromMe ? null : (
+          <div className="h-10 w-10">
+            <ConnectionImage className="h-10 w-10" odinId={sender} />
+          </div>
+        )}
         <div
           className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg ${
             messageFromMe
@@ -181,6 +187,37 @@ const MailMessage = ({
   );
 };
 
+const ForwardedThread = ({
+  mailThread,
+}: {
+  mailThread: DriveSearchResult<MailConversation>[] | undefined;
+}) => {
+  const [showHistory, setShowHistory] = useState(false);
+  const hasHistory = mailThread && mailThread?.length > 1;
+  if (!hasHistory) return null;
+
+  return (
+    <>
+      {mailThread && hasHistory ? (
+        <>
+          <div className="flex flex-row py-2">
+            <button onClick={() => setShowHistory(!showHistory)}>
+              {showHistory ? t('Hide history') : t('Show history')}
+            </button>
+          </div>
+          {hasHistory && showHistory ? (
+            <div className="">
+              {mailThread.map((mail, index) => (
+                <MailMessage key={index} previousMessage={undefined} message={mail} />
+              ))}
+            </div>
+          ) : null}
+        </>
+      ) : null}
+    </>
+  );
+};
+
 const ConversationalAwareness = ({
   previousMessage,
   message,
@@ -190,7 +227,31 @@ const ConversationalAwareness = ({
 }) => {
   const identity = useDotYouClientContext().getIdentity();
 
-  if (!previousMessage) return null;
+  const lastSender =
+    message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
+  const youWereLastSender = lastSender === identity;
+
+  const Author = () => {
+    return youWereLastSender ? t('You') : <ConnectionName odinId={lastSender} />;
+  };
+
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <div className="flex flex-row justify-center py-4">
+      <p className="rounded-lg bg-page-background px-3 py-1 text-sm italic">{children}</p>
+    </div>
+  );
+
+  if (!previousMessage) {
+    const hasForwardedMailThread =
+      message.fileMetadata.appData.content.forwardedMailThread &&
+      message.fileMetadata.appData.content.forwardedMailThread?.length;
+    if (!hasForwardedMailThread) return null;
+    return (
+      <Wrapper>
+        <Author /> {t('forwarded a message thread')}
+      </Wrapper>
+    );
+  }
 
   const previousSubject = previousMessage.fileMetadata.appData.content.subject;
   const currentSubject = message.fileMetadata.appData.content.subject;
@@ -209,20 +270,6 @@ const ConversationalAwareness = ({
   const isSameRecipients = addedRecipients.length === 0 && removedRecipients.length === 0;
 
   if (isSameSubject && isSameRecipients) return null;
-
-  const lastSender =
-    message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
-  const youWereLastSender = lastSender === identity;
-
-  const Author = () => {
-    return youWereLastSender ? t('You') : <ConnectionName odinId={lastSender} />;
-  };
-
-  const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex flex-row justify-center py-4">
-      <p className="rounded-lg bg-page-background px-3 py-1 text-sm italic">{children}</p>
-    </div>
-  );
 
   return (
     <>
