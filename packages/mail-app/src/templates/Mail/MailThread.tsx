@@ -128,6 +128,7 @@ const MailThreadActions = ({
         <ReplyAction {...threadProps} onDone={() => setIsReply(false)} />
       ) : isForward ? (
         <ForwardAction
+          subject={threadProps.subject}
           originId={threadProps.originId}
           mailThread={mailThread}
           onDone={() => setIsForward(false)}
@@ -147,10 +148,10 @@ const MailThreadActions = ({
 };
 
 const ReplyAction = ({
-  recipients,
+  recipients: currentRecipients,
   originId,
   threadId,
-  subject,
+  subject: currentSubject,
   onDone,
 }: {
   recipients: string[];
@@ -165,6 +166,9 @@ const ReplyAction = ({
     status: sendMailStatus,
     reset: resetState,
   } = useMailConversation().send;
+
+  const [recipients, setRecipients] = useState<string[]>(currentRecipients);
+  const [subject, setSubject] = useState<string>(currentSubject);
   const [message, setMessage] = useState<RichText>();
 
   // Reset state, when the message was sent successfully
@@ -204,21 +208,37 @@ const ReplyAction = ({
     <div className="rounded-lg bg-page-background px-5 py-5">
       <form onSubmit={doSubmit}>
         <h2 className="mb-2">{t('Your reply')}</h2>
-        <div>
-          <Label className="sr-only">{t('Message')}</Label>
-          <VolatileInput
-            defaultValue={getTextRootsRecursive(message || []).join('')}
-            onChange={(newValue) =>
-              setMessage([
-                {
-                  type: 'paragraph',
-                  children: [{ text: newValue }],
-                },
-              ])
-            }
-            placeholder="Your message"
-            className="min-h-16 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-          />
+        <div className="flex flex-col gap-2">
+          <div>
+            <Label htmlFor="recipients">{t('To')}</Label>
+            <RecipientInput id="recipients" recipients={recipients} setRecipients={setRecipients} />
+          </div>
+          <div>
+            <Label htmlFor="subject">{t('Subject')}</Label>
+            <Input
+              id="subject"
+              required
+              defaultValue={subject}
+              onChange={(e) => setSubject(e.currentTarget.value)}
+            />
+          </div>
+          <hr className="my-2" />
+          <div>
+            <Label className="sr-only">{t('Message')}</Label>
+            <VolatileInput
+              defaultValue={getTextRootsRecursive(message || []).join('')}
+              onChange={(newValue) =>
+                setMessage([
+                  {
+                    type: 'paragraph',
+                    children: [{ text: newValue }],
+                  },
+                ])
+              }
+              placeholder="Your message"
+              className="min-h-16 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+            />
+          </div>
         </div>
         <div className="mt-3 flex flex-row-reverse gap-2">
           <ActionButton type="primary" icon={PaperPlane} state={sendMailStatus}>
@@ -243,10 +263,12 @@ const ReplyAction = ({
 
 const ForwardAction = ({
   originId,
+  subject: currentSubject,
   mailThread,
   onDone,
 }: {
   originId: string;
+  subject: string;
   mailThread: DriveSearchResult<MailConversation>[];
   onDone: () => void;
 }) => {
@@ -268,7 +290,7 @@ const ForwardAction = ({
   }, [sendMailStatus]);
 
   const [recipients, setRecipients] = useState<string[]>([]);
-  const [subject, setSubject] = useState<string>('');
+  const [subject, setSubject] = useState<string>(currentSubject);
   const [message, setMessage] = useState<RichText>();
 
   const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {

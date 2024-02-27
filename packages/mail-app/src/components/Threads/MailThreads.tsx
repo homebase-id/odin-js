@@ -319,10 +319,10 @@ const MailConversationItem = ({
           />
           <Checkbox checked={isSelected} readOnly />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
-            <p className="w-16">
-              {!messageFromMe ? <ConnectionName odinId={sender} /> : t('Me')}{' '}
-              {numberOfConversations !== 1 ? `(${numberOfConversations})` : null}
-            </p>
+            <div className="flex w-16 flex-shrink-0 flex-row gap-1">
+              {!messageFromMe ? <ConnectionName odinId={sender} /> : <p>{t('Me')}</p>}
+              {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
+            </div>
             <p
               className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
             >
