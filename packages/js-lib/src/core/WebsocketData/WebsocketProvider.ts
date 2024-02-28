@@ -101,7 +101,22 @@ const ConnectSocket = async (
   if (webSocketClient) throw new Error('Socket already connected');
 
   const apiType = dotYouClient.getType();
-  return new Promise<void>((resolve) => {
+
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise<void>(async (resolve, reject) => {
+    if (apiType === ApiType.App) {
+      // we need to preauth before we can connect
+      await dotYouClient
+        .createAxiosClient()
+        .post('/notify/preauth', undefined, {
+          validateStatus: () => true,
+        })
+        .catch((error) => {
+          console.error({ error });
+          reject('[WebsocketProvider] Preauth failed');
+        });
+    }
+
     const url = `wss://${dotYouClient.getIdentity()}/api/${
       apiType === ApiType.Owner ? 'owner' : 'apps'
     }/v1/notify/ws`;

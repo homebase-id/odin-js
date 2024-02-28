@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ConnectionImage,
   ConnectionName,
+  ErrorBoundary,
   ErrorNotification,
   OwnerImage,
   OwnerName,
@@ -49,22 +50,24 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
   };
 
   return (
-    <div className="flex h-full flex-grow flex-col overflow-hidden">
-      <ChatHeader conversation={conversation || undefined} />
-      <GroupChatConnectedState conversation={conversation || undefined} />
-      <ChatHistory
-        conversation={conversation || undefined}
-        setReplyMsg={setReplyMsg}
-        setIsEmptyChat={setIsEmptyChat}
-      />
-      <ChatComposer
-        conversation={conversation || undefined}
-        replyMsg={replyMsg}
-        clearReplyMsg={() => setReplyMsg(undefined)}
-        onSend={onSend}
-        key={conversationId}
-      />
-    </div>
+    <ErrorBoundary>
+      <div className="flex h-full flex-grow flex-col overflow-hidden">
+        <ChatHeader conversation={conversation || undefined} />
+        <GroupChatConnectedState conversation={conversation || undefined} />
+        <ChatHistory
+          conversation={conversation || undefined}
+          setReplyMsg={setReplyMsg}
+          setIsEmptyChat={setIsEmptyChat}
+        />
+        <ChatComposer
+          conversation={conversation || undefined}
+          replyMsg={replyMsg}
+          clearReplyMsg={() => setReplyMsg(undefined)}
+          onSend={onSend}
+          key={conversationId}
+        />
+      </div>
+    </ErrorBoundary>
   );
 };
 

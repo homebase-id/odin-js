@@ -131,7 +131,7 @@ const ConversationBody = ({
   const flatMessages = useMemo(
     () =>
       data?.pages
-        .flatMap((page) => page.searchResults)
+        ?.flatMap((page) => page?.searchResults)
         ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
     [data]
   );

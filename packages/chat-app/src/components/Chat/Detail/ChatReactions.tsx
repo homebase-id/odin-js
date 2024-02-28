@@ -81,8 +81,8 @@ const ChatReactionsDetail = ({
       reactions?.filter((reaction) =>
         reactions?.some(
           (reactionFile) =>
-            reactionFile.fileMetadata.appData.content.message ===
-            reaction.fileMetadata.appData.content.message
+            reactionFile?.fileMetadata?.appData?.content?.message ===
+            reaction?.fileMetadata?.appData?.content?.message
         )
       ),
     [reactions]
