@@ -29,7 +29,6 @@ import {
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
-import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
 import { ROOT_PATH } from '../../app/App';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { RecipientInput } from '../../components/Composer/RecipientInput';
@@ -38,10 +37,9 @@ import { MailThreadInfo } from './MailThreadInfo';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
-  useLiveMailProcessor();
-
   const identity = useDotYouClientContext().getIdentity();
   const { conversationKey } = useParams();
+  console.log('conversationKey', conversationKey);
   const {
     data: messages,
     fetchNextPage,

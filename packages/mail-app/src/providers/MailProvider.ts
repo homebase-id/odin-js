@@ -215,6 +215,7 @@ export const uploadMail = async (
       uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
   );
 
+  // TODO: Should this work differently with the job system? Would it auto retry?
   if (!allDelivered.every((delivered) => delivered)) {
     console.error('Not all recipients received the message: ', uploadResult);
     throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);

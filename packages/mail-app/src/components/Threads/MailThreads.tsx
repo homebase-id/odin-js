@@ -302,7 +302,7 @@ const MailConversationItem = ({
 
   const isUnread = !lastConversation.fileMetadata.appData.content.isRead && !messageFromMe;
   return (
-    <Link to={`${ROOT_PATH}/${threadId}`} className="group">
+    <Link to={`${threadId}`} className="group">
       <div
         className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
           ${isSelected ? 'bg-primary/10' : ''}

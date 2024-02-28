@@ -1,13 +1,7 @@
-import { ActionButton, ActionLink, Plus, Times, t } from '@youfoundation/common-app';
+import { ActionLink, Plus, t } from '@youfoundation/common-app';
 import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
 
-export const NavHeader = ({
-  closeSideNav,
-  isOnline,
-}: {
-  closeSideNav: (() => void) | undefined;
-  isOnline: boolean;
-}) => {
+export const NavHeader = ({ isOnline }: { isOnline: boolean }) => {
   return (
     <div className="flex flex-row items-center gap-2 p-2 lg:p-5">
       <div className="flex flex-row items-center gap-2">
@@ -24,11 +18,6 @@ export const NavHeader = ({
         <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary">
           {t('New')}
         </ActionLink>
-        {closeSideNav ? (
-          <ActionButton className="lg:hidden" type="mute" onClick={closeSideNav}>
-            <Times className="h-5 w-5" />
-          </ActionButton>
-        ) : null}
       </div>
     </div>
   );

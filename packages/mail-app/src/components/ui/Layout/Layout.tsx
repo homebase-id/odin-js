@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Sidenav, Toaster, useDarkMode } from '@youfoundation/common-app';
-import { useAuth } from '../../../hooks/auth/useAuth';
+import { Toaster, useDarkMode } from '@youfoundation/common-app';
+import { MailSidenav } from '../../Sidenav/MailSidenav';
 
 interface LayoutProps {
   children?: ReactNode;
@@ -30,11 +30,9 @@ const NOT_SHADED_BG = 'bg-white dark:bg-black';
 
 const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
-  const { logout } = useAuth();
   const uiSetting = searchParams.get('ui');
 
   if (uiSetting === 'none') return <NoLayout>{children}</NoLayout>;
-
   if (uiSetting === 'minimal' || uiSetting === 'focus')
     return <MinimalLayout>{children}</MinimalLayout>;
 
@@ -42,7 +40,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
     <>
       <SharedStyleTag />
       <div className={`relative flex flex-row ${noShadedBg ? NOT_SHADED_BG : SHADED_BG}`}>
-        <Sidenav logout={logout} disablePinning={true} />
+        <MailSidenav />
         <div
           className={`relative flex min-h-screen w-full flex-col ${
             noShadedBg ? NOT_SHADED_BG : SHADED_BG

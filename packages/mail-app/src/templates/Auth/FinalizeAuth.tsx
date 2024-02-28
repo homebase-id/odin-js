@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navigate, useSearchParams } from 'react-router-dom';
-import Layout from '../../components/ui/Layout/Layout';
 import { useYouAuthAuthorization } from '../../hooks/auth/useAuth';
 
 const AuthFinalize = () => {
@@ -36,11 +35,6 @@ const AuthFinalize = () => {
       <Helmet>
         <title>Login | Homebase</title>
       </Helmet>
-      <div className="cursor-wait ">
-        <div className="pointer-events-none ">
-          <Layout noShadedBg={true} noPadding={true}></Layout>
-        </div>
-      </div>
     </>
   );
 };

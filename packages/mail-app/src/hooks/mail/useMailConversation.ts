@@ -58,11 +58,6 @@ export const useMailConversation = () => {
     newMailConversation.fileMetadata.versionTag = uploadResult.newVersionTag;
     newMailConversation.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
-    // const deliveredToInboxes = recipients.map(
-    //   (recipient) =>
-    //     uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
-    // );
-
     return newMailConversation;
   };
 
@@ -110,7 +105,7 @@ export const useMailConversation = () => {
           const newConversations: InfiniteData<MailConversationsReturn> = {
             ...existingConversations,
             pages: [
-              ...existingConversations.pages.map((page, index) => {
+              ...existingConversations.pages.map((page) => {
                 return {
                   ...page,
                   results:
