@@ -4,8 +4,7 @@ import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { processInbox } from '@youfoundation/js-lib/peer';
 
 import { useNotificationSubscriber } from '@youfoundation/common-app';
-import { preAuth } from '@youfoundation/js-lib/auth';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
@@ -53,19 +52,7 @@ const useInboxProcessor = (connected?: boolean) => {
 const isDebug = hasDebugFlag();
 
 const useMailWebsocket = (isEnabled: boolean) => {
-  const [preAuthenticated, setIspreAuthenticated] = useState(false);
-  const dotYouClient = useDotYouClientContext();
-
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    (async () => {
-      if (!preAuthenticated) {
-        await preAuth(dotYouClient);
-        setIspreAuthenticated(true);
-      }
-    })();
-  }, [preAuthenticated]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[ChatWebsocket] Got notification', notification);
@@ -83,7 +70,7 @@ const useMailWebsocket = (isEnabled: boolean) => {
   }, []);
 
   return useNotificationSubscriber(
-    preAuthenticated && isEnabled ? handler : undefined,
+    isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
     [MailDrive],
     () => {
