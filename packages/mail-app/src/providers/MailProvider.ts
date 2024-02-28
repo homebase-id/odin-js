@@ -29,6 +29,10 @@ import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media'
 export const MAIL_CONVERSATION_FILE_TYPE = 9000;
 export const MAIL_MESSAGE_PAYLOAD_KEY = 'mail_web';
 
+export const DEFAULT_ARCHIVAL_STATUS = 0;
+export const REMOVE_ARCHIVAL_STATUS = 2;
+export const ARCHIVE_ARCHIVAL_STATUS = 1;
+
 export interface MailConversation {
   originId: string; // Stored in content => The origin of the conversation; Created uniquely for each new conversation; And kept the same for each reply/forward
   threadId: string; // Stored in groupId => The thread of the conversation; Created uniquely for new conversations and forwards
@@ -58,7 +62,7 @@ export const getMailConversations = async (
   const params: FileQueryParams = {
     targetDrive: MailDrive,
     fileType: [MAIL_CONVERSATION_FILE_TYPE],
-    archivalStatus: [0],
+    // archivalStatus: [0],
   };
 
   const ro: GetBatchQueryResultOptions = {

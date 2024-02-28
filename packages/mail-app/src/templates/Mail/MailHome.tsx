@@ -1,16 +1,18 @@
-import {
-  MAIL_APP_ID,
-  ExtendPermissionDialog,
-  t,
-  useRemoveNotifications,
-} from '@youfoundation/common-app';
+import { MAIL_APP_ID, ExtendPermissionDialog, t } from '@youfoundation/common-app';
 import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { MailThreads } from '../../components/Threads/MailThreads';
-import { useLiveMailProcessor } from '../../hooks/mail/useLiveMailProcessor';
 import { MailHomeHeader } from '../../components/Header/Header';
+import { useParams } from 'react-router-dom';
+import { MailThreadsFilter } from '../../hooks/mail/useFilteredMailThreads';
+
+type MailFilterParams = {
+  filter: MailThreadsFilter;
+};
 
 export const MailHome = () => {
+  const { filter } = useParams<MailFilterParams>();
+
   return (
     <>
       <Helmet>
@@ -25,7 +27,7 @@ export const MailHome = () => {
       />
 
       <MailHomeHeader />
-      <MailThreads />
+      <MailThreads filter={filter || 'inbox'} />
     </>
   );
 };

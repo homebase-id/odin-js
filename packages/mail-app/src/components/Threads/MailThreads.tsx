@@ -4,74 +4,32 @@ import {
   ActionButton,
   Trash,
   t,
-  flattenInfinteData,
   LoadingBlock,
   ConnectionName,
   ErrorNotification,
 } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
-import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Archive } from '@youfoundation/common-app';
-import { useMailConversations } from '../../hooks/mail/useMailConversations';
 import { MailConversation } from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { useMailThread } from '../../hooks/mail/useMailThread';
+import { ROOT_PATH } from '../../app/App';
+import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
 
-const PAGE_SIZE = 100;
-export const MailThreads = () => {
+export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
 
-  const {
-    data: conversations,
-    hasNextPage: hasMorePosts,
-    isLoading: conversationsLoading,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useMailConversations().mails;
-
-  // Flatten all pages, sorted descending and slice on the max number expected
-  const threads = useMemo(() => {
-    const flattenedConversations = flattenInfinteData<DriveSearchResult<MailConversation>>(
-      conversations,
-      PAGE_SIZE,
-      (a, b) =>
-        (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
-        (a.fileMetadata.appData.userDate || a.fileMetadata.created)
-    );
-
-    // Group the flattenedConversations by their groupId
-    const threads = flattenedConversations?.reduce(
-      (acc, conversation) => {
-        const threadId = conversation.fileMetadata.appData.groupId as string;
-
-        if (!acc[threadId]) {
-          acc[threadId] = [conversation];
-        } else {
-          acc[threadId].push(conversation);
-        }
-
-        return acc;
-      },
-      {} as Record<string, DriveSearchResult<MailConversation>[]>
-    );
-
-    if (!threads) return [];
-
-    return Object.keys(threads).map((threadKey) => {
-      return threads[threadKey];
-    });
-  }, [conversations]);
+  const { hasMorePosts, conversationsLoading, fetchNextPage, isFetchingNextPage, threads } =
+    useFilteredMailThreads(filter);
 
   useEffect(() => {
-    if (isAllSelected) {
-      setSelection(threads.map((thread) => thread[0]));
-    } else {
-      setSelection([]);
-    }
+    if (isAllSelected) setSelection(threads.map((thread) => thread[0]));
+    else setSelection([]);
   }, [isAllSelected]);
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -160,6 +118,7 @@ export const MailThreads = () => {
                   <MailConversationItem
                     key={lastConversation.fileId}
                     mailThread={mailThread}
+                    pathPrefix={`${ROOT_PATH}/${filter}/`}
                     toggleSelection={() => {
                       setIsAllSelected(false);
                       setSelection(
@@ -283,10 +242,12 @@ const MailConversationItem = ({
   mailThread,
   toggleSelection,
   isSelected,
+  pathPrefix,
 }: {
   mailThread: DriveSearchResult<MailConversation>[];
   toggleSelection: () => void;
   isSelected: boolean;
+  pathPrefix?: string;
 }) => {
   const lastConversation = mailThread[0];
   const numberOfConversations = mailThread.length;
@@ -301,7 +262,7 @@ const MailConversationItem = ({
 
   const isUnread = !lastConversation.fileMetadata.appData.content.isRead && !messageFromMe;
   return (
-    <Link to={`${threadId}`} className="group">
+    <Link to={`${pathPrefix || ''}${threadId}`} className="group">
       <div
         className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
           ${isSelected ? 'bg-primary/10' : ''}

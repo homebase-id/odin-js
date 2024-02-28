@@ -96,18 +96,8 @@ function App() {
             }
           >
             <Route index={true} element={<MailHome />} />
-            <Route path="new" element={<MailHome />} />
-
-            <Route index={true} element={<MailHome />} />
-            <Route path=":conversationKey" element={<MailThread />} />
-            <Route path="drafts" element={<MailHome />} />
-            <Route path="drafts/:conversationKey" element={<MailThread />} />
-            <Route path="sent" element={<MailHome />} />
-            <Route path="sent/:conversationKey" element={<MailThread />} />
-            <Route path="trash" element={<MailHome />} />
-            <Route path="trash/:conversationKey" element={<MailThread />} />
-            <Route path="archive" element={<MailHome />} />
-            <Route path="archive/:conversationKey" element={<MailThread />} />
+            <Route path=":filter" element={<MailHome />} />
+            <Route path=":filter/:conversationKey" element={<MailThread />} />
           </Route>
 
           <Route

@@ -1,8 +1,10 @@
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
+  ARCHIVE_ARCHIVAL_STATUS,
   MailConversation,
   MailConversationsReturn,
   MailThreadReturn,
+  REMOVE_ARCHIVAL_STATUS,
   getMailThread,
   updateLocalMailHeader,
 } from '../../providers/MailProvider';
@@ -11,8 +13,7 @@ import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@ta
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const PAGE_SIZE = 100;
-const REMOVE_ARCHIVAL_STATUS = 2;
-const ARCHIVE_ARCHIVAL_STATUS = 1;
+
 export const useMailThread = (props?: { threadId: string | undefined }) => {
   const { threadId } = props || {};
   const queryClient = useQueryClient();
