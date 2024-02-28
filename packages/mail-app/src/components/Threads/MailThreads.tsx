@@ -62,7 +62,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const items = virtualizer.getVirtualItems();
 
   return (
-    <section className="mx-5 my-5 flex flex-grow flex-col">
+    <section className="flex flex-grow flex-col md:mx-5 md:my-5">
       <MailConversationsHeader
         selection={selection}
         isAllSelected={isAllSelected}
@@ -83,7 +83,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
             }}
           >
             <div
-              className="absolute left-0 top-0 z-10 w-full"
+              className="absolute left-0 top-0 z-0 w-full"
               style={{
                 transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
               }}
@@ -180,7 +180,7 @@ const MailConversationsHeader = ({
   return (
     <>
       <ErrorNotification error={removeThreadError || archiveThreadError} />
-      <div className="relative flex flex-row items-center rounded-t-lg border-b border-b-slate-100 bg-white px-1 py-1 dark:border-b-slate-700 dark:bg-black">
+      <div className="relative flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black md:rounded-t-lg">
         <div className="p-2">
           <button
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
@@ -264,7 +264,7 @@ const MailConversationItem = ({
   return (
     <Link to={`${pathPrefix || ''}${threadId}`} className="group">
       <div
-        className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
+        className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
           ${isSelected ? 'bg-primary/10' : ''}
           ${!isSelected ? `group-hover:bg-slate-100 dark:group-hover:bg-slate-900 ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-950'}` : ''}`}
       >

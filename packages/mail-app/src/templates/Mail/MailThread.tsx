@@ -29,7 +29,6 @@ import {
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
-import { ROOT_PATH } from '../../app/App';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { RecipientInput } from '../../components/Composer/RecipientInput';
 import { MailHistory } from './MailHistory';
@@ -76,17 +75,17 @@ export const MailThread = () => {
   return (
     <>
       <MailHomeHeader />
-      <section className="mx-5 my-5 flex flex-col rounded-lg bg-background py-3">
-        <MailThreadHeader mailThread={mailThread} subject={subject} className="px-5  " />
+      <section className="flex flex-col bg-background py-3 md:mx-5 md:my-5 md:rounded-lg">
+        <MailThreadHeader mailThread={mailThread} subject={subject} className="px-2 md:px-5  " />
         <MailHistory
           mailThread={mailThread}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
-          className="px-5"
+          className="px-2 md:px-5"
         />
         <MailThreadActions
-          className="px-5"
+          className="px-2 md:px-5"
           mailThread={mailThread}
           originId={originId}
           threadId={threadId}
@@ -195,7 +194,7 @@ const ReplyAction = ({
   };
 
   return (
-    <div className="rounded-lg bg-primary/10 px-5 py-5 dark:bg-primary/30">
+    <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
       <form onSubmit={doSubmit}>
         <h2 className="mb-2">{t('Your reply')}</h2>
         <div className="flex flex-col gap-2">
@@ -308,7 +307,7 @@ const ForwardAction = ({
   };
 
   return (
-    <div className="rounded-lg bg-primary/10 px-5 py-5 dark:bg-primary/30">
+    <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
       <form onSubmit={doSubmit}>
         <h2>{t('Forward')}</h2>
         <div className="flex flex-col gap-2">
@@ -396,12 +395,12 @@ const MailThreadHeader = ({
       <div
         className={`sticky top-[3.7rem] z-20 mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
       >
-        <ActionLink
-          href={`${ROOT_PATH}`}
+        <ActionButton
+          onClick={() => window.history.back()}
           icon={ArrowLeft}
           type="mute"
           size="none"
-          className="text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
         />
         <ActionButton
           type="mute"
