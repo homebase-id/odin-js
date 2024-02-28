@@ -14,7 +14,7 @@ import { ROOT_PATH } from '../../app/App';
 
 export const MailHomeHeader = () => {
   return (
-    <section className="sticky left-0 right-0 top-0 z-10 border-b border-gray-100 bg-white px-2 py-2 dark:border-gray-800 dark:bg-black sm:px-5">
+    <section className="sticky left-0 right-0 top-0 z-10 border-b border-gray-100 bg-white px-2 py-2 dark:border-gray-800 dark:bg-black md:px-5">
       <div className="flex-col">
         <div className="flex flex-row items-center gap-2 md:gap-5">
           <MenuButton />

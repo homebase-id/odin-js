@@ -33,12 +33,12 @@ export const MailSidenav = () => {
     <>
       <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} logout={logout} />
       <div
-        className={`bottom-0 left-0 top-0 z-20 flex ${isActive ? 'fixed right-0 w-full lg:sticky lg:right-auto lg:w-[15rem]' : 'hidden lg:sticky lg:w-[15rem]'} flex-shrink-0 flex-col border-r border-gray-200/80 bg-background dark:border-gray-700/80`}
+        className={`bottom-0 left-0 top-0 z-[11] ${isActive ? 'fixed right-0 flex w-full md:sticky md:right-auto md:w-[15rem]' : 'hidden md:sticky md:flex md:w-[15rem]'} flex-shrink-0 flex-col border-r border-gray-200/80 bg-background dark:border-gray-700/80`}
       >
         <div
-          className={`sticky top-0 flex h-full max-h-[100dvh] flex-col gap-2 py-2 lg:gap-5 lg:py-5`}
+          className={`sticky top-0 flex h-full max-h-[100dvh] flex-col gap-5 py-2 pb-[calc(env(safe-area-inset-bottom)+4rem)] pt-5 md:pb-5`}
         >
-          <div className="flex flex-row items-center gap-2 px-2 lg:px-5">
+          <div className="flex flex-row items-center gap-2 px-5">
             <div className="flex flex-row items-center gap-2">
               <span
                 className={`h-3 w-3 rounded-full transition-colors ${
@@ -50,12 +50,12 @@ export const MailSidenav = () => {
               <p className="text-2xl dark:text-white">Homebase Mail</p>
             </div>
           </div>
-          <div className="flex flex-col px-2 lg:px-5">
+          <div className="flex flex-col px-5">
             <NavItem to={`${ROOT_PATH}/inbox`} icon={Envelope} label={t('Inbox')} />
             <NavItem to={`${ROOT_PATH}/sent`} icon={PaperPlane} label={t('Sent')} />
             <NavItem to={`${ROOT_PATH}/drafts`} icon={Pencil} label={t('Drafts')} />
           </div>
-          <div className="mt-auto flex flex-col px-2 lg:px-5">
+          <div className="mt-auto flex flex-col px-5">
             <NavItem to={`${ROOT_PATH}/trash`} icon={Trash} label={t('Trash')} />
             <NavItem to={`${ROOT_PATH}/archive`} icon={Archive} label={t('Archive')} />
           </div>
