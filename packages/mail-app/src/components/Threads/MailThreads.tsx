@@ -10,7 +10,6 @@ import {
   ErrorNotification,
 } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
-import { ROOT_PATH } from '../../app/App';
 import { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Archive } from '@youfoundation/common-app';

@@ -98,8 +98,8 @@ function App() {
             <Route index={true} element={<MailHome />} />
             <Route path="new" element={<MailHome />} />
 
-            <Route path="inbox" element={<MailHome />} />
-            <Route path="inbox/:conversationKey" element={<MailThread />} />
+            <Route index={true} element={<MailHome />} />
+            <Route path=":conversationKey" element={<MailThread />} />
             <Route path="drafts" element={<MailHome />} />
             <Route path="drafts/:conversationKey" element={<MailThread />} />
             <Route path="sent" element={<MailHome />} />

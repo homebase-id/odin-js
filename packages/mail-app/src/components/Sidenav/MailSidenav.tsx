@@ -51,7 +51,7 @@ export const MailSidenav = () => {
             </div>
           </div>
           <div className="flex flex-col px-2 lg:px-5">
-            <NavItem to={`${ROOT_PATH}/inbox`} icon={Envelope} label={t('Inbox')} />
+            <NavItem to={`${ROOT_PATH}`} end={true} icon={Envelope} label={t('Inbox')} />
             <NavItem to={`${ROOT_PATH}/sent`} icon={PaperPlane} label={t('Sent')} />
             <NavItem to={`${ROOT_PATH}/drafts`} icon={Pencil} label={t('Drafts')} />
           </div>

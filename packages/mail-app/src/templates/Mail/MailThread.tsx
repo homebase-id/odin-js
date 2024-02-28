@@ -39,7 +39,7 @@ const PAGE_SIZE = 100;
 export const MailThread = () => {
   const identity = useDotYouClientContext().getIdentity();
   const { conversationKey } = useParams();
-  console.log('conversationKey', conversationKey);
+
   const {
     data: messages,
     fetchNextPage,
