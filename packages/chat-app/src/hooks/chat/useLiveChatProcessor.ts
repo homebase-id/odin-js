@@ -71,8 +71,6 @@ const useInboxProcessor = (connected?: boolean) => {
 const isDebug = hasDebugFlag();
 
 const useChatWebsocket = (isEnabled: boolean) => {
-  const [preAuthenticated, setIspreAuthenticated] = useState(false);
-
   const identity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClientContext();
 
@@ -81,15 +79,6 @@ const useChatWebsocket = (isEnabled: boolean) => {
     restoreChat: { mutate: restoreChat },
   } = useConversation();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    (async () => {
-      if (!preAuthenticated) {
-        await preAuth(dotYouClient);
-        setIspreAuthenticated(true);
-      }
-    })();
-  }, [preAuthenticated]);
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[ChatWebsocket] Got notification', notification);
@@ -181,7 +170,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
   }, []);
 
   return useNotificationSubscriber(
-    preAuthenticated && isEnabled ? handler : undefined,
+    isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
     [ChatDrive],
     () => {

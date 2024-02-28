@@ -41,9 +41,6 @@ const useInboxProcessor = (isEnabled?: boolean) => {
 };
 
 const useFeedWebsocket = (isEnabled: boolean) => {
-  const [preAuthenticated, setIspreAuthenticated] = useState(false);
-
-  const dotYouClient = useDotYouClient().getDotYouClient();
   const queryClient = useQueryClient();
 
   const handler = useCallback((notification: TypedConnectionNotification) => {
@@ -58,19 +55,10 @@ const useFeedWebsocket = (isEnabled: boolean) => {
   }, []);
 
   useNotificationSubscriber(
-    preAuthenticated && isEnabled ? handler : undefined,
+    isEnabled ? handler : undefined,
     ['fileAdded', 'fileModified'],
     [BlogConfig.FeedDrive]
   );
-
-  useEffect(() => {
-    (async () => {
-      if (!preAuthenticated && dotYouClient.getType() === ApiType.App) {
-        await preAuth(dotYouClient);
-        setIspreAuthenticated(true);
-      }
-    })();
-  }, [preAuthenticated]);
 };
 
 export const useSocialFeed = ({ pageSize = 10 }: { pageSize: number }) => {
