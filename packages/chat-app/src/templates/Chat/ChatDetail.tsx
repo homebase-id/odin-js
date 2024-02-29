@@ -54,18 +54,22 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
       <div className="flex h-full flex-grow flex-col overflow-hidden">
         <ChatHeader conversation={conversation || undefined} />
         <GroupChatConnectedState conversation={conversation || undefined} />
-        <ChatHistory
-          conversation={conversation || undefined}
-          setReplyMsg={setReplyMsg}
-          setIsEmptyChat={setIsEmptyChat}
-        />
-        <ChatComposer
-          conversation={conversation || undefined}
-          replyMsg={replyMsg}
-          clearReplyMsg={() => setReplyMsg(undefined)}
-          onSend={onSend}
-          key={conversationId}
-        />
+        <ErrorBoundary>
+          <ChatHistory
+            conversation={conversation || undefined}
+            setReplyMsg={setReplyMsg}
+            setIsEmptyChat={setIsEmptyChat}
+          />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <ChatComposer
+            conversation={conversation || undefined}
+            replyMsg={replyMsg}
+            clearReplyMsg={() => setReplyMsg(undefined)}
+            onSend={onSend}
+            key={conversationId}
+          />
+        </ErrorBoundary>
       </div>
     </ErrorBoundary>
   );
