@@ -240,7 +240,7 @@ const AppRegistration = ({
             }}
           />
           <p className="mt-8">
-            {t('The selected cricles will receive the following access within')} &quot;
+            {t('The selected circles will receive the following access within')} &quot;
             {name}&quot;:
           </p>
           {circlePermissionSet?.keys?.length ? (
