@@ -7,6 +7,7 @@ import {
   getConversation,
   requestConversationCommand,
   updateConversation,
+  updateGroupConversationCommand,
   uploadConversation,
 } from '../../providers/ConversationProvider';
 import {
@@ -86,11 +87,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           content: {
             ...(recipients.length > 1
               ? {
-                  recipients: recipients,
-                }
+                recipients: recipients,
+              }
               : {
-                  recipient: recipients[0],
-                }),
+                recipient: recipients[0],
+              }),
             title: title || recipients.join(', '),
           },
         },
@@ -124,10 +125,22 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const updateExistingConversation = async ({
     conversation,
+    sendCommand = false,
+
   }: {
     conversation: DriveSearchResult<Conversation>;
+    sendCommand?: boolean;
+
   }) => {
-    return await updateConversation(dotYouClient, conversation);
+    return await updateConversation(dotYouClient, conversation).then(async () => {
+      if (sendCommand) {
+        await updateGroupConversationCommand(
+          dotYouClient,
+          conversation.fileMetadata.appData.content as GroupConversation,
+          conversation.fileMetadata.appData.uniqueId as string
+        );
+      }
+    })
   };
 
   const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
