@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ActionButton,
@@ -55,6 +55,10 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
 
     sendMail({ conversation: newEmailConversation, files: [] });
   };
+
+  useEffect(() => {
+    if (sendMailStatus === 'success') onClose();
+  }, [sendMailStatus]);
 
   const dialog = (
     <>

@@ -72,7 +72,7 @@ const AppWrapper = ({
   href: string | undefined;
   name: string | undefined;
   appId?: string;
-  options: ActionGroupOptionProps[];
+  options?: ActionGroupOptionProps[];
 }) => (
   <div className="group relative flex h-full flex-grow flex-col rounded-lg bg-background transition-shadow hover:shadow-lg">
     <HybridLink href={href} className="mx-auto px-5 pt-5">
@@ -89,19 +89,21 @@ const AppWrapper = ({
       </div>
     </HybridLink>
 
-    <div
-      className={`flex flex-row justify-center rounded-b-lg bg-slate-100 ${
-        isTouchDevice() ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'
-      } dark:bg-slate-800`}
-    >
-      <ActionGroup
-        type="mute"
-        size="none"
-        className="pointer-events-none w-full py-1 group-hover:pointer-events-auto"
-        buttonClassName="w-full justify-center"
-        options={options}
-      />
-    </div>
+    {options ? (
+      <div
+        className={`flex flex-row justify-center rounded-b-lg bg-slate-100 ${
+          isTouchDevice() ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'
+        } dark:bg-slate-800`}
+      >
+        <ActionGroup
+          type="mute"
+          size="none"
+          className="pointer-events-none w-full py-1 group-hover:pointer-events-auto"
+          buttonClassName="w-full justify-center"
+          options={options}
+        />
+      </div>
+    ) : null}
   </div>
 );
 
@@ -113,17 +115,10 @@ const SystemApp = () => {
 
   return (
     <AppWrapper
-      name={'Homebase'}
+      name={'Notifications'}
       appId={OWNER_APP_ID}
       href={'/owner/notifications'}
       unreadCount={unreadCount}
-      options={[
-        {
-          label: t('How to install'),
-          icon: Question,
-          href: `https://web.dev/learn/pwa/installation#desktop_installation`,
-        },
-      ]}
     />
   );
 };

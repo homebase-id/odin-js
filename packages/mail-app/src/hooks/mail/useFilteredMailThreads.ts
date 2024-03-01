@@ -34,15 +34,15 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
     );
 
     const filteredConversations = flattenedConversations?.filter((conversation) => {
+      const sender =
+        conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender;
+
       if (filter === 'inbox') {
         return (
           !conversation.fileMetadata.appData.archivalStatus ||
           conversation.fileMetadata.appData.archivalStatus === DEFAULT_ARCHIVAL_STATUS
         );
       } else if (filter === 'sent') {
-        const sender =
-          conversation.fileMetadata.senderOdinId ||
-          conversation.fileMetadata.appData.content.sender;
         return !sender || sender === identity;
       } else if (filter === 'archive') {
         return conversation.fileMetadata.appData.archivalStatus === ARCHIVE_ARCHIVAL_STATUS;
@@ -56,7 +56,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
     });
 
     // Group the flattenedConversations by their groupId
-    const threads = filteredConversations?.reduce(
+    const threadsDictionary = filteredConversations?.reduce(
       (acc, conversation) => {
         const threadId = conversation.fileMetadata.appData.groupId as string;
 
@@ -71,11 +71,25 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
       {} as Record<string, DriveSearchResult<MailConversation>[]>
     );
 
-    if (!threads) return [];
+    if (!threadsDictionary) return [];
 
-    return Object.keys(threads).map((threadKey) => {
-      return threads[threadKey];
+    // TODO: Check if the ordering remains correct.. Probably not
+    const threads = Object.keys(threadsDictionary).map((threadKey) => threadsDictionary[threadKey]);
+
+    const filteredThreads = threads.filter((thread) => {
+      if (filter === 'inbox') {
+        return thread.some((conversation) => {
+          const sender =
+            conversation.fileMetadata.senderOdinId ||
+            conversation.fileMetadata.appData.content.sender;
+          return sender !== identity;
+        });
+      }
+
+      return true;
     });
+
+    return filteredThreads;
   }, [filter, conversations]);
 
   return {
