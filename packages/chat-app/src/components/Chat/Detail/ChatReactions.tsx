@@ -84,7 +84,7 @@ const ChatReactionsDetail = ({
             reactionFile?.fileMetadata?.appData?.content?.message ===
             reaction?.fileMetadata?.appData?.content?.message
         )
-      ),
+      ) || [],
     [reactions]
   );
 
