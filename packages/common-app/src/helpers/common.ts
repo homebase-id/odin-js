@@ -35,11 +35,11 @@ export const flattenInfinteData = <T>(
   pageSize: number,
   sortFn?: (a: T, b: T) => number
 ) => {
-  return rawData?.pages
+  return (rawData?.pages
     .flatMap((page) => page?.results)
     .filter((post) => !!post)
     .sort(sortFn)
-    .slice(0, rawData?.pages.length * pageSize) as T[];
+    .slice(0, rawData?.pages.length * pageSize) || []) as T[];
 };
 
 export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {

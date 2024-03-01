@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Archive } from '@youfoundation/common-app';
-import { MailConversation } from '../../providers/MailProvider';
+import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
@@ -261,8 +261,14 @@ const MailConversationItem = ({
   const messageFromMe = !sender || sender === identity;
 
   const isUnread = !lastConversation.fileMetadata.appData.content.isRead && !messageFromMe;
+  const isDraft =
+    lastConversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
+
   return (
-    <Link to={`${pathPrefix || ''}${threadId}`} className="group">
+    <Link
+      to={isDraft ? `?new=${lastConversation.fileId}` : `${pathPrefix || ''}${threadId}`}
+      className="group"
+    >
       <div
         className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
           ${isSelected ? 'bg-primary/10' : ''}

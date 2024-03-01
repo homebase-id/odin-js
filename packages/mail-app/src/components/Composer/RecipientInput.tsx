@@ -8,7 +8,7 @@ export const RecipientInput = ({
   id,
 }: {
   recipients: string[];
-  setRecipients: React.Dispatch<React.SetStateAction<string[]>>;
+  setRecipients: (newRecipients: string[]) => void;
   id?: string;
 }) => {
   const [query, setQuery] = useState('');
@@ -30,23 +30,21 @@ export const RecipientInput = ({
   const doInsertRecipient = useCallback(
     (odinId: string) => {
       if (!recipients.includes(odinId)) {
-        setRecipients((recipients: string[]) =>
-          recipients.includes(odinId) ? recipients : [...recipients, odinId]
-        );
+        setRecipients(recipients.includes(odinId) ? recipients : [...recipients, odinId]);
         // Reset input
         setInputStateIndex((stateIndex) => stateIndex + 1);
         setQuery('');
         setIsFocused(false);
       }
     },
-    [setRecipients, setInputStateIndex]
+    [recipients, setRecipients, setInputStateIndex]
   );
 
   const doRemoveRecipient = useCallback(
     (odinId: string) => {
-      setRecipients((recipients) => recipients.filter((r) => r !== odinId));
+      setRecipients(recipients.filter((r) => r !== odinId));
     },
-    [setRecipients]
+    [recipients, setRecipients]
   );
 
   const onKeyDown = useCallback(

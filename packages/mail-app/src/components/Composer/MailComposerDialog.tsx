@@ -6,6 +6,7 @@ import {
   Input,
   Label,
   PaperPlane,
+  Save,
   Times,
   VolatileInput,
   getTextRootsRecursive,
@@ -13,24 +14,78 @@ import {
   usePortal,
 } from '@youfoundation/common-app';
 import {
-  RichText,
   NewDriveSearchResult,
   SecurityGroupType,
   DriveSearchResult,
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
-import { useMailConversation } from '../../hooks/mail/useMailConversation';
-import { MailConversation } from '../../providers/MailProvider';
+import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
+import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { useSearchParams } from 'react-router-dom';
 
 export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
   const target = usePortal('modal-container');
+
+  const [searchParams] = useSearchParams();
+  const draftFileId = searchParams.get('new');
+  const isDraft = !!draftFileId;
+
+  const { data: draftDsr } = useMailDraft(isDraft ? { draftFileId } : undefined).getDraft;
+
+  const dialog = (
+    <>
+      {isDraft ? (
+        draftDsr ? (
+          <MailComposer onDone={onClose} existingDraft={draftDsr} />
+        ) : null
+      ) : (
+        <MailComposer onDone={onClose} />
+      )}
+    </>
+  );
+
+  return createPortal(dialog, target);
+};
+
+const MailComposer = ({
+  existingDraft,
+  onDone,
+}: {
+  existingDraft?: DriveSearchResult<MailConversation>;
+  onDone: () => void;
+}) => {
   const identity = useDotYouClientContext().getIdentity();
 
   const [autosavedDsr, setAutosavedDsr] = useState<
-    NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation> | null
-  >(null);
+    NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>
+  >(
+    existingDraft || {
+      fileMetadata: {
+        appData: {
+          content: {
+            recipients: [],
+            subject: '',
+            message: [
+              {
+                type: 'paragraph',
+                children: [{ text: '' }],
+              },
+            ],
+            originId: getNewId(),
+            threadId: getNewId(),
+            sender: identity,
+          },
+          userDate: new Date().getTime(),
+          fileType: MAIL_DRAFT_CONVERSATION_FILE_TYPE,
+        },
+      },
+      serverMetadata: {
+        accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+      },
+    }
+  );
 
   const {
     mutate: sendMail,
@@ -42,71 +97,34 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
     mutate: saveDraft,
     status: saveDraftStatus,
     error: saveDraftError,
-  } = useMailConversation().saveDraft;
-  // Get fileId & versionTag into the autosavedDsr
+    data: saveDraftReturn,
+  } = useMailDraft().saveDraft;
 
-  const [recipients, setRecipients] = useState<string[]>([]);
-  const [subject, setSubject] = useState<string>('');
-  const [message, setMessage] = useState<RichText>([
-    {
-      type: 'paragraph',
-      children: [{ text: '' }],
-    },
-  ]);
+  useEffect(() => {
+    if (saveDraftReturn) {
+      // Get fileId & (new) versionTag into the autosavedDsr
+      setAutosavedDsr(saveDraftReturn);
+    }
+  }, [saveDraftReturn]);
 
   const doAutoSave = () => {
     if (saveDraftStatus === 'pending') return;
 
-    if (autosavedDsr) {
-      const newSavedDsr = { ...autosavedDsr };
-      newSavedDsr.fileMetadata.appData.content = {
-        ...autosavedDsr.fileMetadata.appData.content,
-        recipients,
-        subject,
-        message,
-      };
-      setAutosavedDsr(newSavedDsr);
-      saveDraft({ conversation: newSavedDsr, files: [] });
-    } else {
-      const newEmailConversation: NewDriveSearchResult<MailConversation> = {
-        fileMetadata: {
-          appData: {
-            content: {
-              recipients,
-              subject,
-              message,
-              originId: getNewId(),
-              threadId: getNewId(),
-              sender: identity,
-            },
-          },
-        },
-        serverMetadata: {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
-        },
-      };
-      setAutosavedDsr(newEmailConversation);
-      saveDraft({ conversation: newEmailConversation, files: [] });
-    }
+    const newSavedDsr = { ...autosavedDsr };
+    newSavedDsr.fileMetadata.appData.content = {
+      ...autosavedDsr.fileMetadata.appData.content,
+    };
+    setAutosavedDsr(newSavedDsr);
+    saveDraft({ conversation: newSavedDsr, files: [] });
   };
 
-  const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const doSend: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    if (!identity || !subject || !message || !recipients.length) return;
+    const content = autosavedDsr.fileMetadata.appData.content;
+    if (!identity || !content.subject || !content.message || !content.recipients.length) return;
 
     const newEmailConversation: NewDriveSearchResult<MailConversation> = {
-      fileMetadata: {
-        appData: {
-          content: {
-            recipients,
-            subject,
-            message,
-            originId: getNewId(),
-            threadId: getNewId(),
-            sender: identity,
-          },
-        },
-      },
+      ...autosavedDsr,
       serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected } },
     };
 
@@ -114,25 +132,39 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
   };
 
   useEffect(() => {
-    if (sendMailStatus === 'success') onClose();
+    if (sendMailStatus === 'success') onDone();
   }, [sendMailStatus]);
 
-  const dialog = (
+  return (
     <>
-      <ErrorNotification error={sendMailError} />
+      <ErrorNotification error={saveDraftError || sendMailError} />
       <div className="fixed bottom-16 right-3 w-[calc(100%-1.5rem)] max-w-xl rounded-lg bg-background shadow-md md:bottom-5 md:right-5">
         <div className="mb-3 flex flex-row items-center justify-between px-5 pt-3">
-          <h2>{t('New mail')}</h2>
-          <ActionButton type="mute" icon={Times} onClick={onClose} size="square" />
+          <h2>{existingDraft ? t('Edit draft') : t('New mail')}</h2>
+          <ActionButton type="mute" icon={Times} onClick={onDone} size="square" />
         </div>
-        <form className="" onSubmit={doSubmit}>
+        <form className="" onSubmit={doSend}>
           <div className="flex flex-col gap-2 px-5">
             <div>
               <Label htmlFor="recipients">{t('To')}</Label>
               <RecipientInput
                 id="recipients"
-                recipients={recipients}
-                setRecipients={setRecipients}
+                recipients={autosavedDsr.fileMetadata.appData.content.recipients}
+                setRecipients={(newRecipients) =>
+                  setAutosavedDsr({
+                    ...autosavedDsr,
+                    fileMetadata: {
+                      ...autosavedDsr.fileMetadata,
+                      appData: {
+                        ...autosavedDsr.fileMetadata.appData,
+                        content: {
+                          ...autosavedDsr.fileMetadata.appData.content,
+                          recipients: newRecipients,
+                        },
+                      },
+                    },
+                  })
+                }
               />
             </div>
             <div>
@@ -140,22 +172,50 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
               <Input
                 id="subject"
                 required
-                defaultValue={subject}
-                onChange={(e) => setSubject(e.currentTarget.value)}
+                defaultValue={autosavedDsr.fileMetadata.appData.content.subject}
+                onChange={(e) =>
+                  setAutosavedDsr({
+                    ...autosavedDsr,
+                    fileMetadata: {
+                      ...autosavedDsr.fileMetadata,
+                      appData: {
+                        ...autosavedDsr.fileMetadata.appData,
+                        content: {
+                          ...autosavedDsr.fileMetadata.appData.content,
+                          subject: e.currentTarget.value,
+                        },
+                      },
+                    },
+                  })
+                }
               />
             </div>
             <hr className="my-2" />
             <div>
               <Label className="sr-only">{t('Message')}</Label>
               <VolatileInput
-                defaultValue={getTextRootsRecursive(message || []).join('')}
+                defaultValue={getTextRootsRecursive(
+                  autosavedDsr.fileMetadata.appData.content.message || []
+                ).join('')}
                 onChange={(newValue) =>
-                  setMessage([
-                    {
-                      type: 'paragraph',
-                      children: [{ text: newValue }],
+                  setAutosavedDsr({
+                    ...autosavedDsr,
+                    fileMetadata: {
+                      ...autosavedDsr.fileMetadata,
+                      appData: {
+                        ...autosavedDsr.fileMetadata.appData,
+                        content: {
+                          ...autosavedDsr.fileMetadata.appData.content,
+                          message: [
+                            {
+                              type: 'paragraph',
+                              children: [{ text: newValue }],
+                            },
+                          ],
+                        },
+                      },
                     },
-                  ])
+                  })
                 }
                 placeholder="Your message"
                 className="min-h-32 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
@@ -168,9 +228,9 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
               {t('Send')}
             </ActionButton>
             <ActionButton
-              type="primary"
-              icon={PaperPlane}
-              state={sendMailStatus}
+              type="secondary"
+              icon={Save}
+              state={saveDraftStatus}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -184,7 +244,7 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
               type="secondary"
               onClick={(e) => {
                 e.preventDefault();
-                onClose();
+                onDone();
               }}
               className="mr-auto"
             >
@@ -195,6 +255,4 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
       </div>
     </>
   );
-
-  return createPortal(dialog, target);
 };

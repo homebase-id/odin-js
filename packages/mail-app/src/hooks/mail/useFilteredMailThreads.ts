@@ -6,6 +6,7 @@ import {
   DEFAULT_ARCHIVAL_STATUS,
   ARCHIVE_ARCHIVAL_STATUS,
   REMOVE_ARCHIVAL_STATUS,
+  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
 } from '../../providers/MailProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { useMailConversations } from './useMailConversations';
@@ -37,6 +38,14 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
       const sender =
         conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender;
 
+      // Remove drafts from all but the drafts filter
+      if (
+        conversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE &&
+        filter !== 'drafts'
+      ) {
+        return false;
+      }
+
       if (filter === 'inbox') {
         return (
           !conversation.fileMetadata.appData.archivalStatus ||
@@ -49,11 +58,15 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
       } else if (filter === 'trash') {
         return conversation.fileMetadata.appData.archivalStatus === REMOVE_ARCHIVAL_STATUS;
       } else if (filter === 'drafts') {
-        return !conversation.fileMetadata.appData.content.recipients?.length;
+        // Remove all but drafts from the drafts filter
+        return conversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
       }
 
       return true;
     });
+
+    // Sanity check, no grouping possible on drafts
+    if (filter === 'drafts') return filteredConversations.map((conversation) => [conversation]);
 
     // Group the flattenedConversations by their groupId
     const threadsDictionary = filteredConversations?.reduce(

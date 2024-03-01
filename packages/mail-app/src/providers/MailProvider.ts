@@ -17,6 +17,7 @@ import {
   UploadFileMetadata,
   UploadInstructionSet,
   getContentFromHeaderOrPayload,
+  getFileHeader,
   queryBatch,
   uploadFile,
   uploadHeader,
@@ -62,7 +63,7 @@ export const getMailConversations = async (
 ): Promise<MailConversationsReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
-    fileType: [MAIL_CONVERSATION_FILE_TYPE],
+    fileType: [MAIL_CONVERSATION_FILE_TYPE, MAIL_DRAFT_CONVERSATION_FILE_TYPE],
     // archivalStatus: [0],
   };
 
@@ -82,6 +83,10 @@ export const getMailConversations = async (
         .filter(Boolean)
     )) as DriveSearchResult<MailConversation>[],
   };
+};
+
+export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) => {
+  return await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
 };
 
 export interface MailThreadReturn extends CursoredResult<DriveSearchResult<MailConversation>[]> {}
@@ -119,7 +124,7 @@ export const getMailThread = async (
 
 export const uploadMail = async (
   dotYouClient: DotYouClient,
-  conversation: NewDriveSearchResult<MailConversation>,
+  conversation: NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>,
   files: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
 ) => {
@@ -219,11 +224,11 @@ export const uploadMail = async (
 
   const allDelivered = recipients.map(
     (recipient) =>
-      uploadResult.recipientStatus[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
+      uploadResult.recipientStatus?.[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
   );
 
   // TODO: Should this work differently with the job system? Would it auto retry?
-  if (!allDelivered.every((delivered) => delivered)) {
+  if (distribute && !allDelivered.every((delivered) => delivered)) {
     console.error('Not all recipients received the message: ', uploadResult);
     throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
   }
