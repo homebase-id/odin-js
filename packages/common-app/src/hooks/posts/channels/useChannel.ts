@@ -31,7 +31,9 @@ const getExtendAuthorizationUrl = (
   name: string,
   description: string,
   targetDrive: TargetDrive,
-  returnUrl: string
+  returnUrl: string,
+  allowAnonymousReads?: boolean,
+  allowSubscriptions?: boolean
 ) => {
   const drives = [
     {
@@ -44,6 +46,8 @@ const getExtendAuthorizationUrl = (
         DrivePermissionType.Comment, // Permission
       n: name,
       d: description,
+      r: allowAnonymousReads,
+      s: allowSubscriptions,
     },
   ];
 
@@ -133,7 +137,9 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         channelDef.fileMetadata.appData.content.name,
         channelDef.fileMetadata.appData.content.description,
         targetDrive,
-        returnUrl
+        returnUrl,
+        true,
+        true
       );
     };
 

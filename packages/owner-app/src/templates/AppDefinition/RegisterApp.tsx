@@ -147,13 +147,12 @@ const AppRegistration = ({
     });
   };
 
-  const existingDriveGrants = driveGrants?.filter(
-    (grant) =>
-      existingDrives?.some(
-        (drive) =>
-          drive.targetDriveInfo.alias === grant.permissionedDrive.drive.alias &&
-          drive.targetDriveInfo.type === grant.permissionedDrive.drive.type
-      )
+  const existingDriveGrants = driveGrants?.filter((grant) =>
+    existingDrives?.some(
+      (drive) =>
+        drive.targetDriveInfo.alias === grant.permissionedDrive.drive.alias &&
+        drive.targetDriveInfo.type === grant.permissionedDrive.drive.type
+    )
   );
 
   const newDriveGrants = driveGrants?.filter(
@@ -340,6 +339,8 @@ export const drivesParamToDriveGrantRequest = (
         driveMeta: {
           name: d.n,
           description: d.d,
+          allowAnonymousReads: d.r || false,
+          allowSubscriptions: d.s || false,
         },
       };
     });

@@ -106,13 +106,12 @@ const ExtendAppPermissions = () => {
   };
 
   const { data: existingDrives } = useDrives().fetch;
-  const existingDriveGrants = driveGrants?.filter(
-    (grant) =>
-      existingDrives?.some(
-        (drive) =>
-          drive.targetDriveInfo.alias === grant.permissionedDrive.drive.alias &&
-          drive.targetDriveInfo.type === grant.permissionedDrive.drive.type
-      )
+  const existingDriveGrants = driveGrants?.filter((grant) =>
+    existingDrives?.some(
+      (drive) =>
+        drive.targetDriveInfo.alias === grant.permissionedDrive.drive.alias &&
+        drive.targetDriveInfo.type === grant.permissionedDrive.drive.type
+    )
   );
 
   const newDriveGrants = driveGrants?.filter(

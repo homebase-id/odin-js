@@ -63,6 +63,8 @@ export interface DriveGrantRequest {
   driveMeta?: {
     name: string;
     description: string;
+    allowAnonymousReads?: boolean;
+    allowSubscriptions?: boolean;
   };
 }
 
