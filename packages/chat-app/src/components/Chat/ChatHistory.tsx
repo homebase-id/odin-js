@@ -36,15 +36,16 @@ export const ChatHistory = ({
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
+
   const flattenedMsgs = useMemo(
     () =>
-      (messages?.pages?.flatMap((page) => page?.searchResults).filter(Boolean) ||
+      (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
         []) as DriveSearchResult<ChatMessage>[],
     [messages]
   );
 
   useEffect(() => {
-    if (isFetchedAfterMount && flattenedMsgs.length === 0) setIsEmptyChat(true);
+    if (isFetchedAfterMount && (!flattenedMsgs || flattenedMsgs.length === 0)) setIsEmptyChat(true);
   }, [isFetchedAfterMount, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });

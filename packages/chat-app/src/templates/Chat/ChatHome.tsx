@@ -10,6 +10,7 @@ import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidena
 import { NavHeader } from '../../components/Chat/Conversations/Sidenav/NavHeader';
 import {
   CHAT_APP_ID,
+  ErrorBoundary,
   ExtendPermissionDialog,
   Sidenav,
   t,
@@ -75,21 +76,23 @@ const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
         }
         fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:static lg:max-w-sm lg:translate-x-0 lg:pb-0 lg:pl-0`}
       >
-        {isCreateNew ? (
-          <NewConversation />
-        ) : isCreateNewGroup ? (
-          <NewConversationGroup />
-        ) : (
-          <>
-            <NavHeader isOnline={isOnline} />
-            <ConversationsSidebar
-              activeConversationId={conversationKey}
-              openConversation={(newId) => {
-                navigate(`${CHAT_ROOT}/${newId}`);
-              }}
-            />
-          </>
-        )}
+        <ErrorBoundary>
+          {isCreateNew ? (
+            <NewConversation />
+          ) : isCreateNewGroup ? (
+            <NewConversationGroup />
+          ) : (
+            <>
+              <NavHeader isOnline={isOnline} />
+              <ConversationsSidebar
+                activeConversationId={conversationKey}
+                openConversation={(newId) => {
+                  navigate(`${CHAT_ROOT}/${newId}`);
+                }}
+              />
+            </>
+          )}
+        </ErrorBoundary>
       </div>
     </>
   );

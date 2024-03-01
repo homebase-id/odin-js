@@ -33,11 +33,11 @@ import { CHAT_ROOT } from './ChatHome';
 export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
 
-  const { data: conversation } = useConversation({ conversationId }).single;
+  const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
   const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
 
-  if (!conversationId)
+  if (!conversationId || isLoading || (!conversation && isFetched))
     return (
       <div className="flex h-full flex-grow flex-col items-center justify-center">
         <p className="text-4xl">Homebase Chat</p>
@@ -54,18 +54,22 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
       <div className="flex h-full flex-grow flex-col overflow-hidden">
         <ChatHeader conversation={conversation || undefined} />
         <GroupChatConnectedState conversation={conversation || undefined} />
-        <ChatHistory
-          conversation={conversation || undefined}
-          setReplyMsg={setReplyMsg}
-          setIsEmptyChat={setIsEmptyChat}
-        />
-        <ChatComposer
-          conversation={conversation || undefined}
-          replyMsg={replyMsg}
-          clearReplyMsg={() => setReplyMsg(undefined)}
-          onSend={onSend}
-          key={conversationId}
-        />
+        <ErrorBoundary>
+          <ChatHistory
+            conversation={conversation || undefined}
+            setReplyMsg={setReplyMsg}
+            setIsEmptyChat={setIsEmptyChat}
+          />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <ChatComposer
+            conversation={conversation || undefined}
+            replyMsg={replyMsg}
+            clearReplyMsg={() => setReplyMsg(undefined)}
+            onSend={onSend}
+            key={conversationId}
+          />
+        </ErrorBoundary>
       </div>
     </ErrorBoundary>
   );
