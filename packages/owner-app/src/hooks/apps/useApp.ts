@@ -40,7 +40,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.permissionedDrive.drive,
               driveGrant.driveMeta.name,
               driveGrant.driveMeta.description,
-              false
+              driveGrant.driveMeta.allowAnonymousReads || false,
+              driveGrant.driveMeta.allowSubscriptions || false
             );
         })
       );
@@ -98,7 +99,8 @@ export const useApp = ({ appId }: { appId?: string }) => {
               driveGrant.permissionedDrive.drive,
               driveGrant.driveMeta.name,
               driveGrant.driveMeta.description,
-              false
+              driveGrant.driveMeta.allowAnonymousReads || false,
+              driveGrant.driveMeta.allowSubscriptions || false
             );
         })
       );
