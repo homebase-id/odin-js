@@ -64,7 +64,7 @@ export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButto
         }}
         {...props}
       >
-        <ImageIcon />
+        <ImageIcon className="h-5 w-5" />
       </ToolbarButton>
       <ImageDialog
         isOpen={isActive}
