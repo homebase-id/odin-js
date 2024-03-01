@@ -272,6 +272,7 @@ const NotificationItem = ({
 
   const { data: contactFile } = useContact({
     odinId: isLocalNotification ? undefined : notification.senderId,
+    canSave: false,
   }).fetch;
   const senderName = contactFile?.fileMetadata.appData.content.name?.displayName;
 
