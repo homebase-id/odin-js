@@ -8,6 +8,7 @@ import {
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import {
+  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
   MailConversationsReturn,
   MailThreadReturn,
@@ -42,6 +43,49 @@ export const useMailConversation = () => {
             threadId: threadId,
           },
           userDate: new Date().getTime(),
+        },
+      },
+      serverMetadata: {
+        accessControlList: {
+          requiredSecurityGroup: SecurityGroupType.Connected,
+        },
+      },
+    };
+
+    const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
+    if (!uploadResult) throw new Error('Failed to send the chat message');
+
+    newMailConversation.fileId = uploadResult.file.fileId;
+    newMailConversation.fileMetadata.versionTag = uploadResult.newVersionTag;
+    newMailConversation.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
+
+    return newMailConversation;
+  };
+
+  const saveDraft = async ({
+    conversation,
+    files,
+  }: {
+    conversation: NewDriveSearchResult<MailConversation>;
+    files?: NewMediaFile[];
+  }): Promise<NewDriveSearchResult<MailConversation> | null> => {
+    const conversationContent = conversation.fileMetadata.appData.content;
+    const uniqueId = conversation.fileMetadata.appData.uniqueId || getNewId();
+    const threadId = conversationContent.threadId || getNewId();
+    const originId = conversationContent.originId || getNewId();
+
+    const newMailConversation: NewDriveSearchResult<MailConversation> = {
+      fileMetadata: {
+        appData: {
+          uniqueId: uniqueId,
+          groupId: threadId,
+          content: {
+            ...conversationContent,
+            originId: originId,
+            threadId: threadId,
+          },
+          userDate: new Date().getTime(),
+          fileType: MAIL_DRAFT_CONVERSATION_FILE_TYPE,
         },
       },
       serverMetadata: {
@@ -96,6 +140,7 @@ export const useMailConversation = () => {
   return {
     send: useMutation({
       mutationFn: sendMessage,
+
       onMutate: async ({ conversation }) => {
         const existingConversations = queryClient.getQueryData<
           InfiniteData<MailConversationsReturn>
@@ -162,6 +207,9 @@ export const useMailConversation = () => {
       onSettled: async () => {
         // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
       },
+    }),
+    saveDraft: useMutation({
+      mutationFn: saveDraft,
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,

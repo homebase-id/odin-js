@@ -110,8 +110,8 @@ export const InnerFieldEditors = ({
                     primaryMediaFile === null
                       ? imageData?.url || undefined
                       : primaryMediaFile === undefined
-                      ? undefined
-                      : primaryMediaFile?.file || imageData?.url || undefined
+                        ? undefined
+                        : primaryMediaFile?.file || imageData?.url || undefined
                   }
                   onChange={(e) =>
                     onChange(e as { target: { name: string; value: Blob | undefined } })
@@ -180,6 +180,7 @@ export const InnerFieldEditors = ({
               onChange={onChange}
               className="min-h-[50vh]"
               disabled={disabled}
+              key={postFile.fileId ? 'editor' : 'editor-new'}
             />
           </ErrorBoundary>
         </div>

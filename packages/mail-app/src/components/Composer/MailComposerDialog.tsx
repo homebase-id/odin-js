@@ -12,7 +12,12 @@ import {
   t,
   usePortal,
 } from '@youfoundation/common-app';
-import { RichText, NewDriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  RichText,
+  NewDriveSearchResult,
+  SecurityGroupType,
+  DriveSearchResult,
+} from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import { MailConversation } from '../../providers/MailProvider';
@@ -23,15 +28,67 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
   const target = usePortal('modal-container');
   const identity = useDotYouClientContext().getIdentity();
 
+  const [autosavedDsr, setAutosavedDsr] = useState<
+    NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation> | null
+  >(null);
+
   const {
     mutate: sendMail,
     status: sendMailStatus,
     error: sendMailError,
   } = useMailConversation().send;
 
+  const {
+    mutate: saveDraft,
+    status: saveDraftStatus,
+    error: saveDraftError,
+  } = useMailConversation().saveDraft;
+  // Get fileId & versionTag into the autosavedDsr
+
   const [recipients, setRecipients] = useState<string[]>([]);
   const [subject, setSubject] = useState<string>('');
-  const [message, setMessage] = useState<RichText>();
+  const [message, setMessage] = useState<RichText>([
+    {
+      type: 'paragraph',
+      children: [{ text: '' }],
+    },
+  ]);
+
+  const doAutoSave = () => {
+    if (saveDraftStatus === 'pending') return;
+
+    if (autosavedDsr) {
+      const newSavedDsr = { ...autosavedDsr };
+      newSavedDsr.fileMetadata.appData.content = {
+        ...autosavedDsr.fileMetadata.appData.content,
+        recipients,
+        subject,
+        message,
+      };
+      setAutosavedDsr(newSavedDsr);
+      saveDraft({ conversation: newSavedDsr, files: [] });
+    } else {
+      const newEmailConversation: NewDriveSearchResult<MailConversation> = {
+        fileMetadata: {
+          appData: {
+            content: {
+              recipients,
+              subject,
+              message,
+              originId: getNewId(),
+              threadId: getNewId(),
+              sender: identity,
+            },
+          },
+        },
+        serverMetadata: {
+          accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
+        },
+      };
+      setAutosavedDsr(newEmailConversation);
+      saveDraft({ conversation: newEmailConversation, files: [] });
+    }
+  };
 
   const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -109,6 +166,18 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
           <div className="mt-3 flex flex-row-reverse gap-2 px-5 pb-5">
             <ActionButton type="primary" icon={PaperPlane} state={sendMailStatus}>
               {t('Send')}
+            </ActionButton>
+            <ActionButton
+              type="primary"
+              icon={PaperPlane}
+              state={sendMailStatus}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                doAutoSave();
+              }}
+            >
+              {t('Save as draft')}
             </ActionButton>
 
             <ActionButton

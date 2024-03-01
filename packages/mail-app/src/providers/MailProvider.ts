@@ -26,6 +26,7 @@ import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
 
+export const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 export const MAIL_CONVERSATION_FILE_TYPE = 9000;
 export const MAIL_MESSAGE_PAYLOAD_KEY = 'mail_web';
 
@@ -123,7 +124,9 @@ export const uploadMail = async (
   onVersionConflict?: () => void
 ) => {
   const recipients = conversation.fileMetadata.appData.content.recipients;
-  const distribute = recipients?.length > 0;
+  const distribute =
+    recipients?.length > 0 &&
+    conversation.fileMetadata.appData.fileType !== MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
