@@ -26,6 +26,8 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
 
   // Flatten all pages, sorted descending and slice on the max number expected
   const threads = useMemo(() => {
+    console.log('filter them again');
+
     const flattenedConversations = flattenInfinteData<DriveSearchResult<MailConversation>>(
       conversations,
       PAGE_SIZE,

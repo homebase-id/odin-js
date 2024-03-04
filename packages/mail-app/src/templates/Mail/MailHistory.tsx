@@ -1,5 +1,9 @@
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
+import {
+  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
+  MailConversation,
+  getAllRecipients,
+} from '../../providers/MailProvider';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import {
   ConnectionImage,
@@ -14,6 +18,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailConversationInfo } from './MailConversationInfo';
+import { useNavigate } from 'react-router-dom';
 
 export const MailHistory = ({
   mailThread,
@@ -124,19 +129,28 @@ const MailMessage = ({
   message: DriveSearchResult<MailConversation>;
   className?: string;
 }) => {
+  const navigate = useNavigate();
   const [showMessageInfo, setShowMessageInfo] = useState(false);
 
   const identity = useDotYouClientContext().getIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
 
   const messageFromMe = !sender || sender === identity;
+  const isDraft = message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   return (
-    <div key={message.fileId}>
+    <div key={message.fileId} className={isDraft ? 'opacity-80' : ''}>
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
-        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
+        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${isDraft ? 'cursor-pointer' : ''} ${className || ''}`}
+        onClick={
+          isDraft
+            ? () => {
+                navigate(`?draft=${message.fileId}`);
+              }
+            : undefined
+        }
       >
         {messageFromMe ? null : (
           <div className="h-10 w-10">
@@ -154,6 +168,7 @@ const MailMessage = ({
             <p className="font-semibold">
               {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
             </p>
+            {isDraft ? <p>{t('Draft')}</p> : null}
             <p className="ml-auto select-none text-sm text-foreground/70">
               {message.fileMetadata.created &&
                 formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}

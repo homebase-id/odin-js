@@ -324,6 +324,10 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     saveDraft: useMutation({
       mutationFn: saveDraft,
       onMutate: async ({ conversation }) => {
+        const draftedConversation = { ...conversation };
+        draftedConversation.fileMetadata.appData.fileType = MAIL_DRAFT_CONVERSATION_FILE_TYPE;
+        console.log('draftedConversation', draftedConversation);
+
         const existingConversations = queryClient.getQueryData<
           InfiniteData<MailConversationsReturn>
         >(['mail-conversations']);
@@ -338,7 +342,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
                   results:
                     index === 0
                       ? [
-                          conversation as DriveSearchResult<MailConversation>,
+                          draftedConversation as DriveSearchResult<MailConversation>,
                           ...(existingConversations?.pages[0].results || []),
                         ]
                       : page.results,
@@ -350,7 +354,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        const threadId = conversation.fileMetadata.appData.content.threadId;
+        const threadId = draftedConversation.fileMetadata.appData.content.threadId;
         const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
           'mail-thread',
           threadId,
@@ -366,7 +370,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
                   existingMailThread.pages.length - 1 === index
                     ? [
                         ...(existingMailThread.pages[0].results || []),
-                        conversation as DriveSearchResult<MailConversation>,
+                        draftedConversation as DriveSearchResult<MailConversation>,
                       ]
                     : page.results,
               };

@@ -15,7 +15,7 @@ export const useMarkMailConversationsAsRead = ({
 
   useEffect(() => {
     (async () => {
-      if (!mailThread || isProcessing.current) return;
+      if (!mailThread || !mailThread.length || isProcessing.current) return;
       isProcessing.current = true;
 
       // We await the markAsRead (async version), as the mutationStatus isn't shared between hooks;

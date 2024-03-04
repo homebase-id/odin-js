@@ -99,7 +99,7 @@ export const getMailThread = async (
 ): Promise<MailThreadReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
-    fileType: [MAIL_CONVERSATION_FILE_TYPE],
+    fileType: [MAIL_CONVERSATION_FILE_TYPE, MAIL_DRAFT_CONVERSATION_FILE_TYPE],
     groupId: [threadId],
   };
 

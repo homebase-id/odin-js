@@ -5,7 +5,6 @@ import { useMailThread } from '../../hooks/mail/useMailThread';
 import {
   ActionButton,
   ActionGroup,
-  ActionLink,
   Archive,
   ArrowLeft,
   ErrorNotification,
@@ -27,12 +26,14 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { useMailConversation } from '../../hooks/mail/useMailConversation';
+import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { RecipientInput } from '../../components/Composer/RecipientInput';
 import { MailHistory } from './MailHistory';
 import { MailThreadInfo } from './MailThreadInfo';
+import { MailComposer } from '../../components/Composer/MailComposer';
+import { useSearchParams } from 'react-router-dom';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
@@ -108,13 +109,29 @@ const MailThreadActions = ({
   threadId: string;
   subject: string;
 }) => {
-  const [isReply, setIsReply] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const draftFileId = searchParams.get('draft');
+
+  const [isReply, setIsReply] = useState(!!draftFileId);
   const [isForward, setIsForward] = useState(false);
+
+  useEffect(() => {
+    if (draftFileId) setIsReply(true);
+  }, [draftFileId]);
 
   return (
     <div className={`mt-2 border-t border-gray-100 pt-3 dark:border-gray-800  ${className || ''}`}>
       {isReply ? (
-        <ReplyAction {...threadProps} onDone={() => setIsReply(false)} />
+        <ReplyAction
+          {...threadProps}
+          draftFileId={draftFileId || undefined}
+          onDone={() => {
+            setIsReply(false);
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.delete('draft');
+            setSearchParams(newSearchParams);
+          }}
+        />
       ) : isForward ? (
         <ForwardAction
           subject={threadProps.subject}
@@ -137,115 +154,39 @@ const MailThreadActions = ({
 };
 
 const ReplyAction = ({
-  recipients: currentRecipients,
+  draftFileId,
+
+  recipients,
   originId,
   threadId,
-  subject: currentSubject,
+  subject,
   onDone,
 }: {
+  draftFileId: string | undefined;
+
   recipients: string[];
   originId: string;
   threadId: string;
   subject: string;
   onDone: () => void;
 }) => {
-  const sender = useDotYouClientContext().getIdentity();
-  const {
-    mutate: sendMail,
-    status: sendMailStatus,
-    reset: resetState,
-  } = useMailConversation().send;
-
-  const [recipients, setRecipients] = useState<string[]>(currentRecipients);
-  const [subject, setSubject] = useState<string>(currentSubject);
-  const [message, setMessage] = useState<RichText>();
-
-  // Reset state, when the message was sent successfully
-  useEffect(() => {
-    if (sendMailStatus === 'success') {
-      setMessage([]);
-      resetState();
-      onDone();
-    }
-  }, [sendMailStatus]);
-
-  const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    console.log('recipients', recipients);
-    if (!message || !recipients.length) return;
-
-    const newEmailConversation: NewDriveSearchResult<MailConversation> = {
-      fileMetadata: {
-        appData: {
-          content: {
-            recipients,
-            subject,
-            message,
-            originId,
-            threadId,
-            sender,
-          },
-        },
-      },
-      serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected } },
-    };
-
-    sendMail({ conversation: newEmailConversation, files: [] });
-  };
+  const hasDraft = !!draftFileId;
+  const { data: draftDsr } = useMailDraft(hasDraft ? { draftFileId } : undefined).getDraft;
 
   return (
     <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
-      <form onSubmit={doSubmit}>
-        <h2 className="mb-2">{t('Your reply')}</h2>
-        <div className="flex flex-col gap-2">
-          <div>
-            <Label htmlFor="recipients">{t('To')}</Label>
-            <RecipientInput id="recipients" recipients={recipients} setRecipients={setRecipients} />
-          </div>
-          <div>
-            <Label htmlFor="subject">{t('Subject')}</Label>
-            <Input
-              id="subject"
-              required
-              defaultValue={subject}
-              onChange={(e) => setSubject(e.currentTarget.value)}
-            />
-          </div>
-          <hr className="my-2" />
-          <div>
-            <Label className="sr-only">{t('Message')}</Label>
-            <VolatileInput
-              defaultValue={getTextRootsRecursive(message || []).join('')}
-              onChange={(newValue) =>
-                setMessage([
-                  {
-                    type: 'paragraph',
-                    children: [{ text: newValue }],
-                  },
-                ])
-              }
-              placeholder="Your message"
-              className="min-h-16 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-            />
-          </div>
-        </div>
-        <div className="mt-3 flex flex-row-reverse gap-2">
-          <ActionButton type="primary" icon={PaperPlane} state={sendMailStatus}>
-            {t('Send')}
-          </ActionButton>
-
-          <ActionButton
-            type="secondary"
-            onClick={(e) => {
-              e.preventDefault();
-              onDone();
-            }}
-            className="mr-auto"
-          >
-            {t('Discard')}
-          </ActionButton>
-        </div>
-      </form>
+      {hasDraft && !draftDsr ? (
+        <></>
+      ) : (
+        <MailComposer
+          existingDraft={draftDsr || undefined}
+          recipients={recipients}
+          originId={originId}
+          threadId={threadId}
+          subject={subject}
+          onDone={onDone}
+        />
+      )}
     </div>
   );
 };
