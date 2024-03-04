@@ -117,6 +117,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
                 return (
                   <MailConversationItem
                     key={lastConversation.fileId}
+                    data-key={lastConversation.fileId}
                     mailThread={mailThread}
                     pathPrefix={`${ROOT_PATH}/${filter}/`}
                     toggleSelection={() => {

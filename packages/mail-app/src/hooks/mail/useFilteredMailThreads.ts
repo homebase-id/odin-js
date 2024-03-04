@@ -46,6 +46,22 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
         return false;
       }
 
+      // Remove removed from all but the trash filter
+      if (
+        conversation.fileMetadata.appData.archivalStatus === REMOVE_ARCHIVAL_STATUS &&
+        filter !== 'trash'
+      ) {
+        return false;
+      }
+
+      // Remove archived from all but the archive filter
+      if (
+        conversation.fileMetadata.appData.archivalStatus === ARCHIVE_ARCHIVAL_STATUS &&
+        filter !== 'archive'
+      ) {
+        return false;
+      }
+
       if (filter === 'inbox') {
         return (
           !conversation.fileMetadata.appData.archivalStatus ||

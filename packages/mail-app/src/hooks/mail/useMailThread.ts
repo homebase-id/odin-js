@@ -1,8 +1,10 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, deleteFile } from '@youfoundation/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
+  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
   MailConversationsReturn,
+  MailDrive,
   MailThreadReturn,
   REMOVE_ARCHIVAL_STATUS,
   getMailThread,
@@ -26,6 +28,10 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
   const removeMailThread = async (mailThread: DriveSearchResult<MailConversation>[]) => {
     return await Promise.all(
       mailThread.map((message) => {
+        if (message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE) {
+          return deleteFile(dotYouClient, MailDrive, message.fileId);
+        }
+
         const updatedMailMessage = { ...message };
         updatedMailMessage.fileMetadata.appData.archivalStatus = REMOVE_ARCHIVAL_STATUS;
         return updateLocalMailHeader(dotYouClient, message);
