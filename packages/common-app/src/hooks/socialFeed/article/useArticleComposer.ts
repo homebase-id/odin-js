@@ -101,6 +101,10 @@ export const useArticleComposer = ({
         },
       });
     }
+
+    setChannel(
+      serverData?.activeChannel ? serverData.activeChannel : BlogConfig.PublicChannelNewDsr
+    );
   }, [serverData]);
 
   const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
@@ -179,6 +183,13 @@ export const useArticleComposer = ({
           fileId: uploadResult.file.fileId,
           fileMetadata: {
             ...oldPostFile.fileMetadata,
+            appData: {
+              ...oldPostFile.fileMetadata.appData,
+              content: {
+                // These got updated during saving
+                ...toPostFile.fileMetadata.appData.content,
+              },
+            },
             versionTag: uploadResult.newVersionTag,
           },
         };
