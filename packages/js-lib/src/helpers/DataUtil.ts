@@ -10,7 +10,7 @@ export const getRandom16ByteArray = (): Uint8Array => {
 };
 
 export const assertIfDefined = (key: string, value: unknown) => {
-  if (!value) throw new Error(`${key} undefined`);
+  if (value === undefined || value === null) throw new Error(`${key} undefined`);
 };
 
 export const assertIfDefinedAndNotDefault = (key: string, value: unknown) => {

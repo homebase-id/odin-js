@@ -8,7 +8,7 @@ import {
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
 
-import { FEED_APP_ID, useStaticFiles } from '@youfoundation/common-app';
+import { FEED_APP_ID, t, useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 import { useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
@@ -135,7 +135,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       window.location.href = getExtendAuthorizationUrl(
         identity,
         channelDef.fileMetadata.appData.content.name,
-        channelDef.fileMetadata.appData.content.description,
+        t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
         targetDrive,
         returnUrl,
         true,

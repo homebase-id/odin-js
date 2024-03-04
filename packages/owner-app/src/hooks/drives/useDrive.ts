@@ -1,8 +1,15 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { DriveDefinition, getDrivesByType, TargetDrive } from '@youfoundation/js-lib/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  DriveDefinition,
+  editDriveAllowAnonymousRead,
+  editDriveMetadata,
+  getDrivesByType,
+  TargetDrive,
+} from '@youfoundation/js-lib/core';
 import { useAuth } from '../auth/useAuth';
 
-export const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
+export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
+  const { targetDrive } = props || {};
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
@@ -29,12 +36,48 @@ export const useDrive = ({ targetDrive }: { targetDrive?: TargetDrive }) => {
     );
   };
 
+  const editDescription = async ({
+    targetDrive,
+    newDescription,
+  }: {
+    targetDrive: TargetDrive;
+    newDescription: string;
+  }) => {
+    return editDriveMetadata(dotYouClient, targetDrive, newDescription);
+  };
+
+  const editAnonymousRead = async ({
+    targetDrive,
+    newAllowAnonymousRead,
+  }: {
+    targetDrive: TargetDrive;
+    newAllowAnonymousRead: boolean;
+  }) => {
+    return editDriveAllowAnonymousRead(dotYouClient, targetDrive, newAllowAnonymousRead);
+  };
+
   return {
     fetch: useQuery({
       queryKey: ['drive', `${targetDrive?.alias}_${targetDrive?.type}`],
       queryFn: () => fetch(targetDrive as TargetDrive),
       refetchOnWindowFocus: false,
       enabled: !!targetDrive,
+    }),
+    editDescription: useMutation({
+      mutationFn: editDescription,
+      onSettled: (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],
+        });
+      },
+    }),
+    editAnonymousRead: useMutation({
+      mutationFn: editAnonymousRead,
+      onSettled: (_data, _error, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ['drive', `${variables.targetDrive?.alias}_${variables.targetDrive?.type}`],
+        });
+      },
     }),
   };
 };
