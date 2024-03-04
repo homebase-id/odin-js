@@ -139,18 +139,11 @@ const MailMessage = ({
   const isDraft = message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   return (
-    <div key={message.fileId} className={isDraft ? 'opacity-80' : ''}>
+    <div key={message.fileId} className={isDraft ? 'opacity-60' : ''}>
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
-        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${isDraft ? 'cursor-pointer' : ''} ${className || ''}`}
-        onClick={
-          isDraft
-            ? () => {
-                navigate(`?draft=${message.fileId}`);
-              }
-            : undefined
-        }
+        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
         {messageFromMe ? null : (
           <div className="h-10 w-10">
@@ -162,7 +155,14 @@ const MailMessage = ({
             messageFromMe
               ? 'bg-primary/10 dark:bg-primary/30'
               : 'bg-gray-500/10  dark:bg-gray-300/20'
-          }`}
+          } ${isDraft ? 'cursor-pointer' : ''} `}
+          onClick={
+            isDraft
+              ? () => {
+                  navigate(`?draft=${message.fileId}`);
+                }
+              : undefined
+          }
         >
           <div className={`flex flex-row gap-2`}>
             <p className="font-semibold">

@@ -4,6 +4,7 @@ import {
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
+  deleteFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
@@ -11,6 +12,7 @@ import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
   MailConversationsReturn,
+  MailDrive,
   MailThreadReturn,
   getMailConversation,
   updateLocalMailHeader,
@@ -315,6 +317,10 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     return await getMailConversation(dotYouClient, fileId);
   };
 
+  const removeDraft = async (draftConversation: DriveSearchResult<MailConversation>) => {
+    return deleteFile(dotYouClient, MailDrive, draftConversation.fileId);
+  };
+
   return {
     getDraft: useQuery({
       queryKey: ['mail-draft', draftFileId],
@@ -389,6 +395,68 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
         queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error saving draft chat message', _error);
+      },
+      onSettled: async () => {
+        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
+        // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
+      },
+    }),
+    removeDraft: useMutation({
+      mutationFn: removeDraft,
+      onMutate: async (draftMailConversation) => {
+        const existingConversations = queryClient.getQueryData<
+          InfiniteData<MailConversationsReturn>
+        >(['mail-conversations']);
+
+        if (existingConversations) {
+          const newConversations: InfiniteData<MailConversationsReturn> = {
+            ...existingConversations,
+            pages: [
+              ...existingConversations.pages.map((page) => {
+                return {
+                  ...page,
+                  results: page.results.filter(
+                    (result) => !stringGuidsEqual(result.fileId, draftMailConversation.fileId)
+                  ),
+                };
+              }),
+            ],
+          };
+
+          queryClient.setQueryData(['mail-conversations'], newConversations);
+        }
+
+        const threadId = draftMailConversation.fileMetadata.appData.content.threadId;
+        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
+          'mail-thread',
+          threadId,
+        ]);
+
+        if (existingMailThread && threadId) {
+          const newMailThread: InfiniteData<MailThreadReturn> = {
+            ...existingMailThread,
+            pages: existingMailThread.pages.map((page, index) => {
+              return {
+                ...page,
+                results: page.results.filter(
+                  (result) => !stringGuidsEqual(result.fileId, draftMailConversation.fileId)
+                ),
+              };
+            }),
+          };
+
+          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
+        }
+
+        return { existingConversations, existingMailThread };
+      },
+      onError: (_error, draftConversation, context) => {
+        queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
+
+        const threadId = draftConversation.fileMetadata.appData.content.threadId;
+        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
+
+        console.error('Error removing draft chat message', _error);
       },
       onSettled: async () => {
         queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });

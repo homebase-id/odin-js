@@ -175,9 +175,7 @@ const ReplyAction = ({
 
   return (
     <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
-      {hasDraft && !draftDsr ? (
-        <></>
-      ) : (
+      {hasDraft && !draftDsr ? null : (
         <MailComposer
           existingDraft={draftDsr || undefined}
           recipients={recipients}
@@ -185,6 +183,7 @@ const ReplyAction = ({
           threadId={threadId}
           subject={subject}
           onDone={onDone}
+          key={draftFileId}
         />
       )}
     </div>
@@ -193,7 +192,7 @@ const ReplyAction = ({
 
 const ForwardAction = ({
   originId,
-  subject: currentSubject,
+  subject,
   mailThread,
   onDone,
 }: {
@@ -202,105 +201,14 @@ const ForwardAction = ({
   mailThread: DriveSearchResult<MailConversation>[];
   onDone: () => void;
 }) => {
-  const sender = useDotYouClientContext().getIdentity();
-
-  const {
-    mutate: sendMail,
-    status: sendMailStatus,
-    reset: resetState,
-  } = useMailConversation().send;
-
-  // Reset state, when the message was sent successfully
-  useEffect(() => {
-    if (sendMailStatus === 'success') {
-      setMessage([]);
-      resetState();
-      onDone();
-    }
-  }, [sendMailStatus]);
-
-  const [recipients, setRecipients] = useState<string[]>([]);
-  const [subject, setSubject] = useState<string>(currentSubject);
-  const [message, setMessage] = useState<RichText>();
-
-  const doSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    if (!subject || !message || !recipients.length) return;
-
-    const newFowardedEmailConversation: NewDriveSearchResult<MailConversation> = {
-      fileMetadata: {
-        appData: {
-          content: {
-            recipients,
-            subject,
-            message,
-            originId: originId,
-            threadId: getNewId(),
-            sender,
-            forwardedMailThread: mailThread,
-          },
-        },
-      },
-      serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected } },
-    };
-
-    sendMail({ conversation: newFowardedEmailConversation, files: [] });
-  };
-
   return (
     <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
-      <form onSubmit={doSubmit}>
-        <h2>{t('Forward')}</h2>
-        <div className="flex flex-col gap-2">
-          <div>
-            <Label htmlFor="recipients">{t('To')}</Label>
-            <RecipientInput id="recipients" recipients={recipients} setRecipients={setRecipients} />
-          </div>
-          <div>
-            <Label htmlFor="subject">{t('Subject')}</Label>
-            <Input
-              id="subject"
-              required
-              defaultValue={subject}
-              onChange={(e) => setSubject(e.currentTarget.value)}
-            />
-          </div>
-          <hr className="my-2" />
-          <div>
-            <Label className="sr-only">{t('Message')}</Label>
-            <VolatileInput
-              defaultValue={getTextRootsRecursive(message || []).join('')}
-              onChange={(newValue) =>
-                setMessage([
-                  {
-                    type: 'paragraph',
-                    children: [{ text: newValue }],
-                  },
-                ])
-              }
-              placeholder="Your message"
-              className="min-h-32 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-            />
-          </div>
-        </div>
-
-        <div className="mt-3 flex flex-row-reverse gap-2 pb-5">
-          <ActionButton type="primary" icon={PaperPlane} state={sendMailStatus}>
-            {t('Send')}
-          </ActionButton>
-
-          <ActionButton
-            type="secondary"
-            onClick={(e) => {
-              e.preventDefault();
-              onDone();
-            }}
-            className="mr-auto"
-          >
-            {t('Discard')}
-          </ActionButton>
-        </div>
-      </form>
+      <MailComposer
+        originId={originId}
+        subject={subject}
+        onDone={onDone}
+        forwardedMailThread={mailThread}
+      />
     </div>
   );
 };

@@ -28,6 +28,7 @@ export const MailComposer = ({
   originId,
   threadId,
   subject: currentSubject,
+  forwardedMailThread,
 
   onDone,
 }: {
@@ -37,6 +38,7 @@ export const MailComposer = ({
   originId?: string;
   threadId?: string;
   subject?: string;
+  forwardedMailThread?: DriveSearchResult<MailConversation>[];
 
   onDone: () => void;
 }) => {
@@ -60,6 +62,7 @@ export const MailComposer = ({
             originId: originId || getNewId(),
             threadId: threadId || getNewId(),
             sender: identity,
+            forwardedMailThread,
           },
           userDate: new Date().getTime(),
           fileType: MAIL_DRAFT_CONVERSATION_FILE_TYPE,
@@ -78,11 +81,14 @@ export const MailComposer = ({
   } = useMailConversation().send;
 
   const {
-    mutate: saveDraft,
-    status: saveDraftStatus,
-    error: saveDraftError,
-    data: saveDraftReturn,
-  } = useMailDraft().saveDraft;
+    saveDraft: {
+      mutate: saveDraft,
+      status: saveDraftStatus,
+      error: saveDraftError,
+      data: saveDraftReturn,
+    },
+    removeDraft: { mutate: removeDraft, status: removeDraftStatus, error: removeDraftError },
+  } = useMailDraft();
 
   useEffect(() => {
     if (saveDraftReturn) {
@@ -115,13 +121,26 @@ export const MailComposer = ({
     sendMail({ conversation: newEmailConversation, files: [] });
   };
 
+  const doDiscard = () => {
+    if (autosavedDsr.fileId) {
+      // Delete the draft on the server
+      removeDraft(autosavedDsr as DriveSearchResult<MailConversation>);
+    } else {
+      onDone();
+    }
+  };
+
   useEffect(() => {
     if (sendMailStatus === 'success') onDone();
   }, [sendMailStatus]);
 
+  useEffect(() => {
+    if (removeDraftStatus === 'success') onDone();
+  }, [removeDraftStatus]);
+
   return (
     <>
-      <ErrorNotification error={saveDraftError || sendMailError} />
+      <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
       <form className="" onSubmit={doSend}>
         <div className="flex flex-col gap-2 ">
           <div>
@@ -223,8 +242,17 @@ export const MailComposer = ({
             type="secondary"
             onClick={(e) => {
               e.preventDefault();
-              onDone();
+              doDiscard();
             }}
+            confirmOptions={
+              getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length
+                ? {
+                    title: t('Discard email'),
+                    body: t('Are you sure you want to discard this email?'),
+                    buttonText: t('Discard'),
+                  }
+                : undefined
+            }
             className="mr-auto"
           >
             {t('Discard')}
