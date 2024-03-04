@@ -103,15 +103,55 @@ export const ensureDrive = async (
 
   return client
     .post('/drive/mgmt/create', data)
-    .then((response) => {
-      if (response.status === 200) {
-        return true;
-      }
-
-      return false;
-    })
+    .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[DotYouCore-js:ensureDrive]', error);
+      throw error;
+    });
+};
+
+export const editDriveMetadata = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newMetadata: string
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newMetadata', newMetadata);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    metadata: newMetadata,
+  };
+
+  return client
+    .post('/drive/mgmt/updatemetadata', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[DotYouCore-js:editDriveMetadata]', error);
+      throw error;
+    });
+};
+
+export const editDriveAllowAnonymousRead = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newAllowAnonymousRead: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newAllowAnonymousRead', newAllowAnonymousRead);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    allowAnonymousReads: newAllowAnonymousRead,
+  };
+
+  return client
+    .post('/drive/mgmt/setdrivereadmode', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[DotYouCore-js:editDriveAllowAnonymousRead]', error);
       throw error;
     });
 };

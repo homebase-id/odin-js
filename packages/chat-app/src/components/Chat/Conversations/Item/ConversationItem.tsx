@@ -142,7 +142,7 @@ const ConversationBody = ({
     flatMessages && lastReadTime
       ? flatMessages.filter(
           (msg) => msg.fileMetadata.senderOdinId && msg.fileMetadata.created >= lastReadTime
-        ).length
+        )?.length
       : 0;
 
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;

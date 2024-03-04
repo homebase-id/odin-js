@@ -37,12 +37,13 @@ export const ChatHistory = ({
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
 
-  const flattenedMsgs = useMemo(
-    () =>
-      (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
-        []) as DriveSearchResult<ChatMessage>[],
-    [messages]
-  );
+  const flattenedMsgs =
+    useMemo(
+      () =>
+        (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
+          []) as DriveSearchResult<ChatMessage>[],
+      [messages]
+    ) || [];
 
   useEffect(() => {
     if (isFetchedAfterMount && (!flattenedMsgs || flattenedMsgs.length === 0)) setIsEmptyChat(true);
@@ -123,7 +124,7 @@ export const ChatHistory = ({
             }}
           >
             {items.map((item) => {
-              const isLoaderRow = item.index > flattenedMsgs.length - 1;
+              const isLoaderRow = item.index > flattenedMsgs?.length - 1;
               if (isLoaderRow) {
                 return (
                   <div

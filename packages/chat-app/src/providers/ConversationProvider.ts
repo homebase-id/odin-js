@@ -84,11 +84,12 @@ export const getConversations = async (
 
   return {
     ...response,
-    searchResults: await Promise.all(
-      response.searchResults.map(
-        async (result) => await dsrToConversation(dotYouClient, result, ChatDrive, true)
-      )
-    ),
+    searchResults:
+      ((await Promise.all(
+        response.searchResults
+          .map(async (result) => await dsrToConversation(dotYouClient, result, ChatDrive, true))
+          .filter(Boolean)
+      )) as DriveSearchResult<Conversation>[]) || [],
   };
 };
 

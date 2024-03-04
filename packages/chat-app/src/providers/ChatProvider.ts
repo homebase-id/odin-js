@@ -106,11 +106,12 @@ export const getChatMessages = async (
   const response = await queryBatch(dotYouClient, params, ro);
   return {
     ...response,
-    searchResults: await Promise.all(
-      response.searchResults.map(
-        async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true)
-      )
-    ),
+    searchResults:
+      ((await Promise.all(
+        response.searchResults
+          .map(async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true))
+          .filter(Boolean)
+      )) as DriveSearchResult<ChatMessage>[]) || [],
   };
 };
 
