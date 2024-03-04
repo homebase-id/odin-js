@@ -79,8 +79,26 @@ const IdentityIFollowEditDialog = ({
   const updateFollow = async () => {
     const selectChannels = channelSelection?.length !== socialChannels?.length;
 
+    console.log(selectChannels, channelSelection, identityIFollow);
+
     if (identityIFollow && channelSelection?.length === 0) unfollow({ odinId: odinId });
-    else
+    else {
+      // Check if following already exactly the same channels
+      if (identityIFollow?.notificationType === 'allNotifications' && !selectChannels) {
+        onConfirm();
+        return;
+      } else if (
+        identityIFollow?.notificationType === 'selectedChannels' &&
+        selectChannels &&
+        identityIFollow?.channels?.length === channelSelection?.length &&
+        !channelSelection.some((selectedChnl) =>
+          identityIFollow.channels?.some((chnl) => chnl.alias === selectedChnl)
+        )
+      ) {
+        onConfirm();
+        return;
+      }
+
       await follow({
         odinId: odinId,
         notificationType: selectChannels ? 'selectedChannels' : 'allNotifications',
@@ -91,6 +109,7 @@ const IdentityIFollowEditDialog = ({
           : undefined,
         // Pass undefined if all socialChannels are selected so it remains a follow all
       });
+    }
 
     onConfirm();
   };
