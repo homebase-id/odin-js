@@ -132,15 +132,14 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     sendCommand?: boolean;
 
   }) => {
-    return await updateConversation(dotYouClient, conversation).then(async () => {
-      if (sendCommand) {
-        await updateGroupConversationCommand(
-          dotYouClient,
-          conversation.fileMetadata.appData.content as GroupConversation,
-          conversation.fileMetadata.appData.uniqueId as string
-        );
-      }
-    })
+    await updateConversation(dotYouClient, conversation);
+    if (sendCommand) {
+      await updateGroupConversationCommand(
+        dotYouClient,
+        conversation.fileMetadata.appData.content as GroupConversation,
+        conversation.fileMetadata.appData.uniqueId as string
+      );
+    }
   };
 
   const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
