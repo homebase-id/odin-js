@@ -2,7 +2,6 @@ import {
   createPlugins,
   Plate,
   RenderAfterEditable,
-  withProps,
   PlateElement,
   PlateLeaf,
   PlateEditor,
@@ -14,6 +13,7 @@ import {
   PlateContent,
   TDescendant,
 } from '@udecode/plate-common';
+import { withProps } from '@udecode/cn';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
 import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
 import { createBlockquotePlugin, ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
@@ -71,7 +71,7 @@ export const RichTextEditor = ({
   defaultValue,
   placeholder,
   mediaOptions,
-  name,
+  name = 'richText',
   onChange,
   className,
   disabled,
@@ -81,8 +81,8 @@ export const RichTextEditor = ({
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
-  name?: string;
-  onChange: (e: { target: { name: string | undefined; value: RichText } }) => void;
+  name: string;
+  onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
   disabled?: boolean;
   uniqueId?: string;

@@ -7,7 +7,6 @@ import {
   Label,
   PaperPlane,
   Save,
-  VolatileInput,
   getTextRootsRecursive,
   t,
 } from '@youfoundation/common-app';
