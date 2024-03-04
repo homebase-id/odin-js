@@ -133,7 +133,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   }) => {
     await updateConversation(dotYouClient, conversation);
-    if (sendCommand) {
+    if (sendCommand && 'recipients' in conversation.fileMetadata.appData.content) {
       await updateGroupConversationCommand(
         dotYouClient,
         conversation.fileMetadata.appData.content as GroupConversation,
