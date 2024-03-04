@@ -22,7 +22,7 @@ export const ComposerDialog = ({ onClose }: { onClose: () => void }) => {
       <div className="px-5 py-5">
         {isDraft ? (
           draftDsr ? (
-            <MailComposer onDone={onClose} existingDraft={draftDsr} />
+            <MailComposer onDone={onClose} existingDraft={draftDsr} key={draftDsr.fileId} />
           ) : null
         ) : (
           <MailComposer onDone={onClose} />

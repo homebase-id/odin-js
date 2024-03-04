@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   ActionButton,
+  ErrorBoundary,
   ErrorNotification,
   Input,
   Label,
@@ -20,6 +21,7 @@ import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConve
 import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
+import { RichTextEditor } from '@youfoundation/rich-text-editor';
 
 export const MailComposer = ({
   existingDraft,
@@ -53,12 +55,7 @@ export const MailComposer = ({
           content: {
             recipients: currentRecipients || [],
             subject: currentSubject || '',
-            message: [
-              {
-                type: 'paragraph',
-                children: [{ text: '' }],
-              },
-            ],
+            message: [{ text: '' }],
             originId: originId || getNewId(),
             threadId: threadId || getNewId(),
             sender: identity,
@@ -191,33 +188,29 @@ export const MailComposer = ({
           <hr className="my-2" />
           <div>
             <Label className="sr-only">{t('Message')}</Label>
-            <VolatileInput
-              defaultValue={getTextRootsRecursive(
-                autosavedDsr.fileMetadata.appData.content.message || []
-              ).join('')}
-              onChange={(newValue) =>
-                setAutosavedDsr({
-                  ...autosavedDsr,
-                  fileMetadata: {
-                    ...autosavedDsr.fileMetadata,
-                    appData: {
-                      ...autosavedDsr.fileMetadata.appData,
-                      content: {
-                        ...autosavedDsr.fileMetadata.appData.content,
-                        message: [
-                          {
-                            type: 'paragraph',
-                            children: [{ text: newValue }],
-                          },
-                        ],
+            <ErrorBoundary>
+              <RichTextEditor
+                name="composer"
+                defaultValue={autosavedDsr.fileMetadata.appData.content.message || []}
+                onChange={(e) =>
+                  setAutosavedDsr({
+                    ...autosavedDsr,
+                    fileMetadata: {
+                      ...autosavedDsr.fileMetadata,
+                      appData: {
+                        ...autosavedDsr.fileMetadata.appData,
+                        content: {
+                          ...autosavedDsr.fileMetadata.appData.content,
+                          message: e.target.value,
+                        },
                       },
                     },
-                  },
-                })
-              }
-              placeholder="Your message"
-              className="min-h-32 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-            />
+                  })
+                }
+                placeholder="Your message"
+                className="min-h-32 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+              />
+            </ErrorBoundary>
           </div>
         </div>
 

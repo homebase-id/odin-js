@@ -81,8 +81,8 @@ export const RichTextEditor = ({
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
-  name: string;
-  onChange: (e: { target: { name: string; value: RichText } }) => void;
+  name?: string;
+  onChange: (e: { target: { name: string | undefined; value: RichText } }) => void;
   className?: string;
   disabled?: boolean;
   uniqueId?: string;
@@ -196,14 +196,14 @@ export const RichTextEditor = ({
   const defaultValAsRichText: TElement[] | undefined =
     defaultValue && Array.isArray(defaultValue)
       ? (defaultValue as TElement[])
-      : defaultValue
-      ? ([
-          {
-            type: 'paragraph',
-            children: [{ text: defaultValue ?? '' }] as TDescendant[],
-          },
-        ] as TElement[])
-      : undefined;
+      : defaultValue && typeof defaultValue === 'string'
+        ? ([
+            {
+              type: 'paragraph',
+              children: [{ text: defaultValue ?? '' }] as TDescendant[],
+            },
+          ] as TElement[])
+        : undefined;
 
   return (
     <>

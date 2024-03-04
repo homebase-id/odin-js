@@ -283,7 +283,9 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     const originId = conversationContent.originId || getNewId();
 
     const newMailConversation: NewDriveSearchResult<MailConversation> = {
+      ...conversation,
       fileMetadata: {
+        ...conversation.fileMetadata,
         appData: {
           uniqueId: uniqueId,
           groupId: threadId,
@@ -334,6 +336,8 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
         draftedConversation.fileMetadata.appData.fileType = MAIL_DRAFT_CONVERSATION_FILE_TYPE;
         console.log('draftedConversation', draftedConversation);
 
+        const alreadyExisted = !!draftedConversation.fileId;
+
         const existingConversations = queryClient.getQueryData<
           InfiniteData<MailConversationsReturn>
         >(['mail-conversations']);
@@ -346,12 +350,16 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
                 return {
                   ...page,
                   results:
-                    index === 0
+                    index === 0 && !alreadyExisted
                       ? [
                           draftedConversation as DriveSearchResult<MailConversation>,
                           ...(existingConversations?.pages[0].results || []),
                         ]
-                      : page.results,
+                      : page.results.map((result) => {
+                          return stringGuidsEqual(result.fileId, draftedConversation.fileId)
+                            ? (draftedConversation as DriveSearchResult<MailConversation>)
+                            : result;
+                        }),
                 };
               }),
             ],
@@ -373,12 +381,16 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
               return {
                 ...page,
                 results:
-                  existingMailThread.pages.length - 1 === index
+                  existingMailThread.pages.length - 1 === index && !alreadyExisted
                     ? [
                         ...(existingMailThread.pages[0].results || []),
                         draftedConversation as DriveSearchResult<MailConversation>,
                       ]
-                    : page.results,
+                    : page.results.map((result) => {
+                        return stringGuidsEqual(result.fileId, draftedConversation.fileId)
+                          ? (draftedConversation as DriveSearchResult<MailConversation>)
+                          : result;
+                      }),
               };
             }),
           };
