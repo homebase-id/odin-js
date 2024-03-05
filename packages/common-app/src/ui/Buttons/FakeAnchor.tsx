@@ -28,6 +28,7 @@ export const FakeAnchor = ({
       onClick={
         href
           ? (e) => {
+              e.preventDefault();
               e.stopPropagation();
               if (!href.startsWith('http') && !isExternal) {
                 navigate(href, { preventScrollReset: preventScrollReset });
