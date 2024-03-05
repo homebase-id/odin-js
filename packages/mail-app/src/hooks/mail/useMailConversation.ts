@@ -83,8 +83,6 @@ export const useMailConversation = () => {
         !msg.fileMetadata.appData.content.isRead
     );
 
-    console.log(messagesToMarkAsRead, 'messagesToMarkAsRead');
-
     await Promise.all(
       messagesToMarkAsRead.map(async (conversation) => {
         const updatedConversation: DriveSearchResult<MailConversation> = {
@@ -119,8 +117,6 @@ export const useMailConversation = () => {
         identity !== (msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.sender) &&
         msg.fileMetadata.appData.content.isRead
     );
-
-    console.log(messagesToMarkAsUnread, 'messagesToMarkAsUnread');
 
     await Promise.all(
       messagesToMarkAsUnread.map(async (conversation) => {
@@ -471,7 +467,6 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
       onMutate: async ({ conversation }) => {
         const draftedConversation = { ...conversation };
         draftedConversation.fileMetadata.appData.fileType = MAIL_DRAFT_CONVERSATION_FILE_TYPE;
-        console.log('draftedConversation', draftedConversation);
 
         const alreadyExisted = !!draftedConversation.fileId;
 
