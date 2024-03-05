@@ -36,6 +36,7 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 import { MailThread } from '../templates/Mail/MailThread';
+import { MailComposerPage } from '../templates/Mail/MailComposerPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -98,6 +99,8 @@ function App() {
             <Route index={true} element={<MailHome />} />
             <Route path=":filter" element={<MailHome />} />
             <Route path=":filter/:conversationKey" element={<MailThread />} />
+            <Route path="new" element={<MailComposerPage />} />
+            <Route path="new/:draftKey" element={<MailComposerPage />} />
           </Route>
 
           <Route

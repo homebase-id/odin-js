@@ -42,23 +42,9 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
 };
 
 const MailComposerButton = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const isCompose = searchParams.has('new');
-
   return (
-    <>
-      <ActionLink icon={Plus} type="primary" href={`?new`}>
-        {t('New')}
-      </ActionLink>
-      {isCompose ? (
-        <ComposerDialog
-          onClose={() => {
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.delete('new');
-            setSearchParams(newSearchParams);
-          }}
-        />
-      ) : null}
-    </>
+    <ActionLink icon={Plus} type="primary" href={`${ROOT_PATH}/new`}>
+      {t('New')}
+    </ActionLink>
   );
 };

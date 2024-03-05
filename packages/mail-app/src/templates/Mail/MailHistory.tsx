@@ -167,7 +167,7 @@ const MailMessage = ({
           }
         >
           <div className={`flex flex-row gap-2`}>
-            {!message.fileMetadata.appData.content.isRead ? (
+            {!message.fileMetadata.appData.content.isRead && !messageFromMe ? (
               <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
             ) : null}
             <p className="font-semibold">

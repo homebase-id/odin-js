@@ -274,7 +274,9 @@ const MailConversationItem = ({
 
   return (
     <Link
-      to={isDraft ? `?new=${lastConversation.fileId}` : `${pathPrefix || ''}${threadId}`}
+      to={
+        isDraft ? `${ROOT_PATH}/new/${lastConversation.fileId}` : `${pathPrefix || ''}${threadId}`
+      }
       className="group"
     >
       <div
@@ -294,7 +296,9 @@ const MailConversationItem = ({
           <Checkbox checked={isSelected} readOnly />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
             <div className="flex w-16 flex-shrink-0 flex-row gap-1">
-              {isUnread ? <span className="my-auto block h-2 w-2 rounded-full bg-primary" /> : null}
+              {isUnread && !messageFromMe ? (
+                <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
+              ) : null}
               {!messageFromMe ? <ConnectionName odinId={sender} /> : <p>{t('Me')}</p>}
               {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
             </div>

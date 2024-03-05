@@ -9,6 +9,7 @@ import {
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import {
+  MAIL_CONVERSATION_FILE_TYPE,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
   MailConversationsReturn,
@@ -41,8 +42,10 @@ export const useMailConversation = () => {
       fileMetadata: {
         ...conversation.fileMetadata,
         appData: {
+          ...conversation.fileMetadata.appData,
           uniqueId: uniqueId,
           groupId: threadId,
+          fileType: MAIL_CONVERSATION_FILE_TYPE,
           content: {
             ...conversationContent,
             originId: originId,
