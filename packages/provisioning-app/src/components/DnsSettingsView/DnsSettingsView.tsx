@@ -290,21 +290,18 @@ const RecordView = ({
             ? isGood
               ? 'bg-green-100'
               : errorStates.includes(simpleStatus)
-              ? 'bg-orange-100'
-              : 'bg-gray-100'
+                ? 'bg-orange-100'
+                : 'bg-gray-100'
             : 'bg-gray-100'
         } px-4 py-3 font-mono text-base shadow-sm`}
       >
-        <p>
+        <ClickToCopy>
           {[record.name || (domain ? `${domain}.` : undefined), subdomain]
             .filter(Boolean)
             .join('.')}
-        </p>
+        </ClickToCopy>
         <p>{record.type}</p>
-        <p>
-          {record.value}
-          {appendDotOnValue ? '.' : ''}
-        </p>
+        <ClickToCopy>{`${record.value}${appendDotOnValue ? '.' : ''}`}</ClickToCopy>
         {showStatus ? (
           <div
             className={`ml-auto flex flex-row items-center gap-2 text-sm ${
@@ -319,10 +316,10 @@ const RecordView = ({
                 {isInCorrectvalue
                   ? 'Incorrect value'
                   : simpleStatus === 'aaaaRecordsNotSupported'
-                  ? 'AAAA records are not supported'
-                  : simpleStatus === 'multipleRecordsNotSupported'
-                  ? 'Multiple A or CNAME records are not supported'
-                  : 'Record not found'}
+                    ? 'AAAA records are not supported'
+                    : simpleStatus === 'multipleRecordsNotSupported'
+                      ? 'Multiple A or CNAME records are not supported'
+                      : 'Record not found'}
                 <Exclamation className="h-4 w-4" />
               </>
             )}
@@ -352,6 +349,30 @@ const RecordView = ({
         </DialogWrapper>
       ) : null}
     </>
+  );
+};
+
+const ClickToCopy = ({ children }: { children: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <div
+      onClick={() => {
+        navigator.clipboard.writeText(children);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className="relative cursor-pointer"
+    >
+      <p>{children}</p>
+      {copied && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="rounded-lg bg-slate-800/80 px-2 py-1 text-sm text-white dark:bg-slate-600/80">
+            {t('Copied')}
+          </span>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import {
   FallbackImg,
-  Homebase,
   HomebaseChat,
   HomebaseFeed,
   HomebasePhoto,
@@ -8,6 +7,7 @@ import {
   FEED_APP_ID,
   OWNER_APP_ID,
   PHOTO_APP_ID,
+  HomebaseNotifications,
 } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState, useMemo } from 'react';
@@ -61,7 +61,7 @@ export const CompanyImage = ({
 
 export const AppSpecificIcon = (appId: string | undefined) => {
   if (!appId) return;
-  if (stringGuidsEqual(appId, OWNER_APP_ID)) return Homebase;
+  if (stringGuidsEqual(appId, OWNER_APP_ID)) return HomebaseNotifications;
   if (stringGuidsEqual(appId, CHAT_APP_ID)) return HomebaseChat;
   if (stringGuidsEqual(appId, FEED_APP_ID)) return HomebaseFeed;
   if (stringGuidsEqual(appId, PHOTO_APP_ID)) return HomebasePhoto;

@@ -11,6 +11,7 @@ import {
 import { SystemFileType } from '../File/DriveFileTypes';
 import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
+import { decryptJsonContent, decryptKeyHeader } from '../SecurityHelpers';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -40,8 +41,13 @@ export const queryModified = async (
   dotYouClient: DotYouClient,
   params: FileQueryParams,
   ro?: GetModifiedResultOptions,
-  axiosConfig?: AxiosRequestConfig
+  options?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<QueryModifiedResponse> => {
+  const { decrypt, axiosConfig } = options ?? {};
+
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
 
@@ -55,6 +61,8 @@ export const queryModified = async (
     queryParams: params,
     resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   };
+
+  if (decrypt) request.resultOptions.includeHeaderContent = true;
 
   const requestPromise = (() => {
     const queryParams = stringifyToQueryParams({
@@ -71,7 +79,28 @@ export const queryModified = async (
     }
   })();
 
-  return requestPromise.then((response) => {
+  return requestPromise.then(async (response) => {
+    // Decrypt the content if requested
+    if (decrypt) {
+      return {
+        ...response.data,
+        searchResults: await Promise.all(
+          response.data.searchResults.map(async (dsr) => {
+            const keyheader = dsr.fileMetadata.isEncrypted
+              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              : undefined;
+
+            dsr.fileMetadata.appData.content = await decryptJsonContent(
+              dsr.fileMetadata,
+              keyheader
+            );
+
+            return dsr;
+          })
+        ),
+      };
+    }
+
     return response.data;
   });
 };
@@ -89,8 +118,13 @@ export const queryBatch = async <
   dotYouClient: DotYouClient,
   params: T,
   ro?: GetBatchQueryResultOptions,
-  axiosConfig?: AxiosRequestConfig
+  options?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<R> => {
+  const { decrypt, axiosConfig } = options ?? {};
+
   const strippedQueryParams: FileQueryParams = {
     ...params,
     fileState: 'fileState' in params ? params.fileState : [1],
@@ -108,6 +142,8 @@ export const queryBatch = async <
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
 
+  if (decrypt) request.resultOptionsRequest.includeMetadataHeader = true;
+
   const requestPromise = (() => {
     const queryParams = stringifyToQueryParams({
       ...request.queryParams,
@@ -123,7 +159,31 @@ export const queryBatch = async <
     }
   })();
 
-  return requestPromise.then((response) => response.data);
+  return requestPromise.then(async (response) => {
+    if (decrypt) {
+      return {
+        ...response.data,
+        searchResults: await Promise.all(
+          (
+            response.data as QueryBatchResponseWithDeletedResults | QueryBatchResponse
+          ).searchResults.map(async (dsr) => {
+            const keyheader = dsr.fileMetadata.isEncrypted
+              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              : undefined;
+
+            dsr.fileMetadata.appData.content = await decryptJsonContent(
+              dsr.fileMetadata,
+              keyheader
+            );
+
+            return dsr;
+          })
+        ),
+      };
+    }
+
+    return response.data;
+  });
 };
 
 export const queryBatchCollection = async (
@@ -134,8 +194,13 @@ export const queryBatchCollection = async (
     resultOptions?: GetBatchQueryResultOptions;
   }[],
   systemFileType?: SystemFileType,
-  axiosConfig?: AxiosRequestConfig
+  config?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<QueryBatchCollectionResponse> => {
+  const { decrypt, axiosConfig } = config ?? {};
+
   const client = dotYouClient.createAxiosClient({
     headers: {
       'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
@@ -144,6 +209,7 @@ export const queryBatchCollection = async (
 
   const updatedQueries = queries.map((query) => {
     const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
+    if (decrypt) ro.includeMetadataHeader = true;
     return {
       ...query,
       queryParams: { ...query.queryParams, fileState: query.queryParams.fileState || [1] },
@@ -171,5 +237,33 @@ export const queryBatchCollection = async (
     }
   })();
 
-  return requestPromise.then((response) => response.data);
+  return requestPromise.then(async (response) => {
+    if (decrypt) {
+      return {
+        ...response.data,
+        results: await Promise.all(
+          response.data.results.map(async (result) => {
+            return {
+              ...result,
+              searchResults: await Promise.all(
+                result.searchResults.map(async (dsr) => {
+                  const keyheader = dsr.fileMetadata.isEncrypted
+                    ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+                    : undefined;
+
+                  dsr.fileMetadata.appData.content = await decryptJsonContent(
+                    dsr.fileMetadata,
+                    keyheader
+                  );
+                  return dsr;
+                })
+              ),
+            };
+          })
+        ),
+      };
+    }
+
+    return response.data;
+  });
 };

@@ -9,12 +9,14 @@ import {
   useFollowingInfinite,
   SubtleMessage,
   IdentityTeaser,
+  useIsConnected,
+  useDotYouClient,
+  House,
+  AddressBook,
 } from '@youfoundation/common-app';
-import { Pencil } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { Times } from '@youfoundation/common-app';
 import { t, useIdentityIFollow } from '@youfoundation/common-app';
-import { Eye } from '@youfoundation/common-app';
 import IdentityThatFollowsDialog from '../../components/Dialog/IdentityIFollowEditDialog/IdentityThatFollowsDialog';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../components/SubMenu/SubMenu';
@@ -154,21 +156,34 @@ const Followers = () => {
 const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: block } = useConnectionActions().block;
 
+  const identity = useDotYouClient().getIdentity();
+  const { data: isConnected } = useIsConnected(odinId);
+
   return (
     <>
-      <IdentityTeaser key={odinId} odinId={odinId} size="sm">
+      <IdentityTeaser
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEdit();
+        }}
+        key={odinId}
+        odinId={odinId}
+        size="sm"
+      >
         <ActionGroup
           type="mute"
           size="square"
           options={[
             {
-              onClick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onEdit();
-              },
-              icon: Eye,
-              label: t('Details'),
+              icon: AddressBook,
+              label: t('Open contact'),
+              href: `/owner/connections/${odinId}`,
+            },
+            {
+              icon: House,
+              label: t('Open homepage'),
+              href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
             },
             {
               onClick: (e) => {
@@ -178,9 +193,7 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
               },
               confirmOptions: {
                 title: t('Block'),
-                body: `${t('Are you sure you want to stop')} "${odinId}" ${t(
-                  'from following you by blocking them'
-                )}?`,
+                body: `${t('Are you sure you want to stop "{0}" from following you by blocking them?', odinId)}`,
                 buttonText: t('Block'),
               },
               icon: Block,
@@ -199,21 +212,34 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
 const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void }) => {
   const { mutate: unfollow } = useIdentityIFollow({ odinId }).unfollow;
 
+  const identity = useDotYouClient().getIdentity();
+  const { data: isConnected } = useIsConnected(odinId);
+
   return (
     <>
-      <IdentityTeaser key={odinId} odinId={odinId} size="sm">
+      <IdentityTeaser
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEdit();
+        }}
+        key={odinId}
+        odinId={odinId}
+        size="sm"
+      >
         <ActionGroup
           type="mute"
           size="square"
           options={[
             {
-              onClick: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onEdit();
-              },
-              icon: Pencil,
-              label: t('Edit'),
+              icon: AddressBook,
+              label: t('Open contact'),
+              href: `/owner/connections/${odinId}`,
+            },
+            {
+              icon: House,
+              label: t('Open homepage'),
+              href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
             },
             {
               onClick: (e) => {
@@ -223,7 +249,7 @@ const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => v
               },
               confirmOptions: {
                 title: t('Unfollow'),
-                body: `${t('Are you sure you want to unfollow')} "${odinId}"?`,
+                body: `${t('Are you sure you want to unfollow "{0}"?', odinId)}`,
                 buttonText: t('Unfollow'),
               },
               icon: Times,
