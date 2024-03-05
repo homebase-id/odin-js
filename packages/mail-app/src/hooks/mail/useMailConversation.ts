@@ -22,6 +22,7 @@ import {
 export const useMailConversation = () => {
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
+  const identity = dotYouClient.getIdentity();
 
   const sendMessage = async ({
     conversation,
@@ -73,8 +74,13 @@ export const useMailConversation = () => {
     mailConversations: DriveSearchResult<MailConversation>[];
   }) => {
     const messagesToMarkAsRead = mailConversations.filter(
-      (msg) => msg && msg.fileMetadata.senderOdinId && !msg.fileMetadata.appData.content.isRead
+      (msg) =>
+        msg &&
+        identity !== (msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.sender) &&
+        !msg.fileMetadata.appData.content.isRead
     );
+
+    console.log(messagesToMarkAsRead, 'messagesToMarkAsRead');
 
     await Promise.all(
       messagesToMarkAsRead.map(async (conversation) => {
@@ -90,6 +96,43 @@ export const useMailConversation = () => {
                   conversation.fileMetadata.senderOdinId ||
                   conversation.fileMetadata.appData.content.sender,
                 isRead: true,
+              },
+            },
+          },
+        };
+        return await updateLocalMailHeader(dotYouClient, updatedConversation);
+      })
+    );
+  };
+
+  const markAsUnread = async ({
+    mailConversations,
+  }: {
+    mailConversations: DriveSearchResult<MailConversation>[];
+  }) => {
+    const messagesToMarkAsUnread = mailConversations.filter(
+      (msg) =>
+        msg &&
+        identity !== (msg.fileMetadata.senderOdinId || msg.fileMetadata.appData.content.sender) &&
+        msg.fileMetadata.appData.content.isRead
+    );
+
+    console.log(messagesToMarkAsUnread, 'messagesToMarkAsUnread');
+
+    await Promise.all(
+      messagesToMarkAsUnread.map(async (conversation) => {
+        const updatedConversation: DriveSearchResult<MailConversation> = {
+          ...conversation,
+          fileMetadata: {
+            ...conversation.fileMetadata,
+            appData: {
+              ...conversation.fileMetadata.appData,
+              content: {
+                ...conversation.fileMetadata.appData.content,
+                sender:
+                  conversation.fileMetadata.senderOdinId ||
+                  conversation.fileMetadata.appData.content.sender,
+                isRead: false,
               },
             },
           },
@@ -237,6 +280,97 @@ export const useMailConversation = () => {
                             content: {
                               ...conversation.fileMetadata.appData.content,
                               isRead: true,
+                            },
+                          },
+                        },
+                      }
+                    : conversation;
+                }),
+              };
+            }),
+          };
+
+          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
+        }
+
+        return { existingConversations, existingMailThread };
+      },
+      onError: (_error, { mailConversations }, context) => {
+        queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
+
+        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
+        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
+
+        console.error('Error sending chat message', _error);
+      },
+    }),
+    markAsUnread: useMutation({
+      mutationFn: markAsUnread,
+      onMutate: async ({ mailConversations }) => {
+        //
+        const existingConversations = queryClient.getQueryData<
+          InfiniteData<MailConversationsReturn>
+        >(['mail-conversations']);
+
+        if (existingConversations) {
+          const newConversations: InfiniteData<MailConversationsReturn> = {
+            ...existingConversations,
+            pages: [
+              ...existingConversations.pages.map((page) => {
+                return {
+                  ...page,
+                  results: page.results.map((conversation) => {
+                    return mailConversations.some((msg) =>
+                      stringGuidsEqual(msg.fileId, conversation.fileId)
+                    )
+                      ? {
+                          ...conversation,
+                          fileMetadata: {
+                            ...conversation.fileMetadata,
+                            appData: {
+                              ...conversation.fileMetadata.appData,
+                              content: {
+                                ...conversation.fileMetadata.appData.content,
+                                isRead: false,
+                              },
+                            },
+                          },
+                        }
+                      : conversation;
+                  }),
+                };
+              }),
+            ],
+          };
+
+          queryClient.setQueryData(['mail-conversations'], newConversations);
+        }
+
+        // This assumes all messages are from the same thread
+        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
+        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
+          'mail-thread',
+          threadId,
+        ]);
+        if (existingMailThread && threadId) {
+          const newMailThread: InfiniteData<MailThreadReturn> = {
+            ...existingMailThread,
+            pages: existingMailThread.pages.map((page) => {
+              return {
+                ...page,
+                results: page.results.map((conversation) => {
+                  return mailConversations.some((msg) =>
+                    stringGuidsEqual(msg.fileId, conversation.fileId)
+                  )
+                    ? {
+                        ...conversation,
+                        fileMetadata: {
+                          ...conversation.fileMetadata,
+                          appData: {
+                            ...conversation.fileMetadata.appData,
+                            content: {
+                              ...conversation.fileMetadata.appData.content,
+                              isRead: false,
                             },
                           },
                         },

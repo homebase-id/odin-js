@@ -134,6 +134,20 @@ export const MailComposer = ({
     if (removeDraftStatus === 'success') onDone();
   }, [removeDraftStatus]);
 
+  // Show browser specific message when trying to close the tab with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handler);
+
+    return () => window.removeEventListener('beforeunload', handler);
+  });
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />

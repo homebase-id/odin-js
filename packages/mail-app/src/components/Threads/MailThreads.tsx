@@ -7,6 +7,7 @@ import {
   LoadingBlock,
   ConnectionName,
   ErrorNotification,
+  ActionGroup,
 } from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
@@ -19,6 +20,7 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
+import { useMailConversation } from '../../hooks/mail/useMailConversation';
 
 export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
@@ -175,12 +177,21 @@ const MailConversationsHeader = ({
     error: archiveThreadError,
   } = useMailThread().archive;
 
+  const {
+    markAsRead: { mutate: markAsRead, error: markAsReadError },
+    markAsUnread: { mutate: markAsUnread, error: markAsUnreadError },
+  } = useMailConversation();
+
   const doArchive = () => archiveThread(selection);
   const doRemove = () => removeThread(selection);
+  const doMarkAsRead = () => markAsRead({ mailConversations: selection });
+  const doMarkAsUnread = () => markAsUnread({ mailConversations: selection });
 
   return (
     <>
-      <ErrorNotification error={removeThreadError || archiveThreadError} />
+      <ErrorNotification
+        error={markAsReadError || markAsUnreadError || removeThreadError || archiveThreadError}
+      />
       <div className="relative flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black md:rounded-t-lg">
         <div className="p-2">
           <button
@@ -215,25 +226,21 @@ const MailConversationsHeader = ({
           </>
         ) : null}
 
-        {/* <ActionGroup
-        type="mute"
-        size="none"
-        className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-        options={[
-          {
-            label: 'Mark as unread',
-            onClick: () => {
-              //
+        <ActionGroup
+          type="mute"
+          size="none"
+          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+          options={[
+            {
+              label: t('Mark as unread'),
+              onClick: doMarkAsUnread,
             },
-          },
-          {
-            label: 'Mark as read',
-            onClick: () => {
-              //
+            {
+              label: t('Mark as read'),
+              onClick: doMarkAsRead,
             },
-          },
-        ]}
-      /> */}
+          ]}
+        />
       </div>
     </>
   );
@@ -287,6 +294,7 @@ const MailConversationItem = ({
           <Checkbox checked={isSelected} readOnly />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
             <div className="flex w-16 flex-shrink-0 flex-row gap-1">
+              {isUnread ? <span className="my-auto block h-2 w-2 rounded-full bg-primary" /> : null}
               {!messageFromMe ? <ConnectionName odinId={sender} /> : <p>{t('Me')}</p>}
               {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
             </div>

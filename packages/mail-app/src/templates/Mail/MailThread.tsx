@@ -8,28 +8,16 @@ import {
   Archive,
   ArrowLeft,
   ErrorNotification,
-  Input,
-  Label,
-  PaperPlane,
   ReplyArrow,
   Share,
   Trash,
-  VolatileInput,
   flattenInfinteData,
-  getTextRootsRecursive,
   t,
 } from '@youfoundation/common-app';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  RichText,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
-import { getNewId } from '@youfoundation/js-lib/helpers';
-import { RecipientInput } from '../../components/Composer/RecipientInput';
 import { MailHistory } from './MailHistory';
 import { MailThreadInfo } from './MailThreadInfo';
 import { MailComposer } from '../../components/Composer/MailComposer';
@@ -39,6 +27,8 @@ const PAGE_SIZE = 100;
 export const MailThread = () => {
   const identity = useDotYouClientContext().getIdentity();
   const { conversationKey } = useParams();
+
+  const [isDisabledMarkAsRead, setIsDisabledMarkAsRead] = useState(false);
 
   const {
     data: messages,
@@ -77,12 +67,18 @@ export const MailThread = () => {
     <>
       <MailHomeHeader />
       <section className="flex flex-col bg-background py-3 md:mx-5 md:my-5 md:rounded-lg">
-        <MailThreadHeader mailThread={mailThread} subject={subject} className="px-2 md:px-5  " />
+        <MailThreadHeader
+          mailThread={mailThread}
+          subject={subject}
+          onMarkAsUnread={() => setIsDisabledMarkAsRead(true)}
+          className="px-2 md:px-5"
+        />
         <MailHistory
           mailThread={mailThread}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
+          autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
           className="px-2 md:px-5"
         />
         <MailThreadActions
@@ -216,10 +212,12 @@ const ForwardAction = ({
 const MailThreadHeader = ({
   mailThread,
   subject,
+  onMarkAsUnread,
   className,
 }: {
   mailThread: DriveSearchResult<MailConversation>[];
   subject: string | undefined;
+  onMarkAsUnread: () => void;
   className?: string;
 }) => {
   const [showMailThreadInfo, setShowMailThreadInfo] = useState(false);
@@ -234,9 +232,16 @@ const MailThreadHeader = ({
     status: archiveThreadStatus,
     error: archiveThreadError,
   } = useMailThread().archive;
+  const { mutate: markAsUnRead } = useMailConversation().markAsUnread;
 
   const doArchive = () => archiveThread(mailThread);
   const doRemove = () => removeThread(mailThread);
+  const doMarkAsUnread = () => {
+    markAsUnRead({
+      mailConversations: mailThread,
+    });
+    onMarkAsUnread();
+  };
 
   return (
     <>
@@ -281,6 +286,10 @@ const MailThreadHeader = ({
             {
               label: t('Thread info'),
               onClick: () => setShowMailThreadInfo(true),
+            },
+            {
+              label: t('Mark as unread'),
+              onClick: doMarkAsUnread,
             },
           ]}
         />

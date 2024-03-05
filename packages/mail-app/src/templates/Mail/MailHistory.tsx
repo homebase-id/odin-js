@@ -25,6 +25,7 @@ export const MailHistory = ({
   hasNextPage,
   fetchNextPage,
   isFetchingNextPage,
+  autoMarkAsRead = true,
 
   className,
 }: {
@@ -32,6 +33,7 @@ export const MailHistory = ({
   hasNextPage: boolean;
   fetchNextPage: () => void;
   isFetchingNextPage: boolean;
+  autoMarkAsRead?: boolean;
 
   className?: string;
 }) => {
@@ -67,7 +69,7 @@ export const MailHistory = ({
     virtualizer.getVirtualItems(),
   ]);
 
-  useMarkMailConversationsAsRead({ mailThread });
+  useMarkMailConversationsAsRead({ mailThread: autoMarkAsRead ? mailThread : [] });
 
   return (
     <div className={`flex ${className || ''}`} ref={parentRef}>
@@ -165,6 +167,9 @@ const MailMessage = ({
           }
         >
           <div className={`flex flex-row gap-2`}>
+            {!message.fileMetadata.appData.content.isRead ? (
+              <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
+            ) : null}
             <p className="font-semibold">
               {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}
             </p>
