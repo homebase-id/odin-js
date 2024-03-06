@@ -153,7 +153,7 @@ const MailMessage = ({
           </div>
         )}
         <div
-          className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg ${
+          className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
             messageFromMe
               ? 'bg-primary/10 dark:bg-primary/30'
               : 'bg-gray-500/10  dark:bg-gray-300/20'
