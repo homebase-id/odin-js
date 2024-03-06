@@ -15,7 +15,12 @@ import {
   t,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
+import {
+  ARCHIVE_ARCHIVAL_STATUS,
+  MailConversation,
+  REMOVE_ARCHIVAL_STATUS,
+  getAllRecipients,
+} from '../../providers/MailProvider';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailHistory } from './MailHistory';
@@ -232,10 +237,16 @@ const MailThreadHeader = ({
     status: archiveThreadStatus,
     error: archiveThreadError,
   } = useMailThread().archive;
+  const {
+    mutate: restoreThread,
+    status: restoreThreadStatus,
+    error: restoreThreadError,
+  } = useMailThread().restore;
   const { mutate: markAsUnRead } = useMailConversation().markAsUnread;
 
   const doArchive = () => archiveThread(mailThread);
   const doRemove = () => removeThread(mailThread);
+  const doRestore = () => restoreThread(mailThread);
   const doMarkAsUnread = () => {
     markAsUnRead({
       mailConversations: mailThread,
@@ -243,9 +254,16 @@ const MailThreadHeader = ({
     onMarkAsUnread();
   };
 
+  const isArchived = mailThread.some(
+    (m) => m.fileMetadata.appData.archivalStatus === ARCHIVE_ARCHIVAL_STATUS
+  );
+  const isTrash = mailThread.some(
+    (m) => m.fileMetadata.appData.archivalStatus === REMOVE_ARCHIVAL_STATUS
+  );
+
   return (
     <>
-      <ErrorNotification error={removeThreadError || archiveThreadError} />
+      <ErrorNotification error={restoreThreadError || removeThreadError || archiveThreadError} />
       <div
         className={`sticky top-[3.7rem] z-20 mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
       >
@@ -256,27 +274,41 @@ const MailThreadHeader = ({
           size="none"
           className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
         />
-        <ActionButton
-          type="mute"
-          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-          size="none"
-          icon={Trash}
-          state={removeThreadStatus}
-          confirmOptions={{
-            title: t('Delete conversation'),
-            body: t('Are you sure you want to delete the conversation?'),
-            buttonText: t('Delete'),
-          }}
-          onClick={doRemove}
-        />
-        <ActionButton
-          type="mute"
-          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-          size="none"
-          icon={Archive}
-          state={archiveThreadStatus}
-          onClick={doArchive}
-        />
+        {isArchived || isTrash ? (
+          <ActionButton
+            type="mute"
+            className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+            size="none"
+            onClick={doRestore}
+            state={restoreThreadStatus !== 'success' ? restoreThreadStatus : undefined}
+          >
+            {t('Restore')}
+          </ActionButton>
+        ) : (
+          <>
+            <ActionButton
+              type="mute"
+              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+              size="none"
+              icon={Trash}
+              state={removeThreadStatus}
+              confirmOptions={{
+                title: t('Delete conversation'),
+                body: t('Are you sure you want to delete the conversation?'),
+                buttonText: t('Delete'),
+              }}
+              onClick={doRemove}
+            />
+            <ActionButton
+              type="mute"
+              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+              size="none"
+              icon={Archive}
+              state={archiveThreadStatus}
+              onClick={doArchive}
+            />
+          </>
+        )}
         <h1 className="ml-3 text-xl">{subject}</h1>
         <ActionGroup
           className="ml-auto"

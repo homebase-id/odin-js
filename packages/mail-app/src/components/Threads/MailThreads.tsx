@@ -75,6 +75,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
         selection={selection}
         isAllSelected={isAllSelected}
         toggleAllSelection={() => setIsAllSelected(!isAllSelected)}
+        filter={filter}
       />
       {conversationsLoading ? (
         <div className="flex flex-col gap-2">
@@ -171,10 +172,12 @@ const MailConversationsHeader = ({
   selection,
   isAllSelected,
   toggleAllSelection,
+  filter,
 }: {
   selection: DriveSearchResult<MailConversation>[];
   isAllSelected: boolean;
   toggleAllSelection: () => void;
+  filter?: MailThreadsFilter;
 }) => {
   const hasASelection = selection.length > 0;
   const {
@@ -187,6 +190,11 @@ const MailConversationsHeader = ({
     status: archiveThreadStatus,
     error: archiveThreadError,
   } = useMailThread().archive;
+  const {
+    mutate: restoreThread,
+    status: restoreThreadStatus,
+    error: restoreThreadError,
+  } = useMailThread().restore;
 
   const {
     markAsRead: { mutate: markAsRead, error: markAsReadError },
@@ -195,13 +203,20 @@ const MailConversationsHeader = ({
 
   const doArchive = () => archiveThread(selection);
   const doRemove = () => removeThread(selection);
+  const doRestore = () => restoreThread(selection);
   const doMarkAsRead = () => markAsRead({ mailConversations: selection });
   const doMarkAsUnread = () => markAsUnread({ mailConversations: selection });
 
   return (
     <>
       <ErrorNotification
-        error={markAsReadError || markAsUnreadError || removeThreadError || archiveThreadError}
+        error={
+          restoreThreadError ||
+          markAsReadError ||
+          markAsUnreadError ||
+          removeThreadError ||
+          archiveThreadError
+        }
       />
       <div className="relative flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black md:rounded-t-lg">
         <div className="p-2">
@@ -213,27 +228,41 @@ const MailConversationsHeader = ({
         </div>
         {hasASelection ? (
           <>
-            <ActionButton
-              type="mute"
-              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-              size="none"
-              icon={Trash}
-              confirmOptions={{
-                title: t('Delete {0} selected conversations', selection.length),
-                body: t('Are you sure you want to delete the selected conversations?'),
-                buttonText: t('Delete'),
-              }}
-              onClick={doRemove}
-              state={removeThreadStatus !== 'success' ? removeThreadStatus : undefined}
-            />
-            <ActionButton
-              type="mute"
-              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-              size="none"
-              icon={Archive}
-              onClick={doArchive}
-              state={archiveThreadStatus !== 'success' ? archiveThreadStatus : undefined}
-            />
+            {filter === 'archive' || filter === 'trash' ? (
+              <ActionButton
+                type="mute"
+                className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+                size="none"
+                onClick={doRestore}
+                state={restoreThreadStatus !== 'success' ? restoreThreadStatus : undefined}
+              >
+                {t('Restore')}
+              </ActionButton>
+            ) : (
+              <>
+                <ActionButton
+                  type="mute"
+                  className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+                  size="none"
+                  icon={Trash}
+                  confirmOptions={{
+                    title: t('Delete {0} selected conversations', selection.length),
+                    body: t('Are you sure you want to delete the selected conversations?'),
+                    buttonText: t('Delete'),
+                  }}
+                  onClick={doRemove}
+                  state={removeThreadStatus !== 'success' ? removeThreadStatus : undefined}
+                />
+                <ActionButton
+                  type="mute"
+                  className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+                  size="none"
+                  icon={Archive}
+                  onClick={doArchive}
+                  state={archiveThreadStatus !== 'success' ? archiveThreadStatus : undefined}
+                />
+              </>
+            )}
           </>
         ) : null}
 
