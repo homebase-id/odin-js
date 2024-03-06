@@ -13,7 +13,11 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Archive } from '@youfoundation/common-app';
-import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
+import {
+  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
+  MailConversation,
+  getAllRecipients,
+} from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
@@ -21,6 +25,7 @@ import { useMailThread } from '../../hooks/mail/useMailThread';
 import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
+import React from 'react';
 
 export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
@@ -265,21 +270,16 @@ const MailConversationItem = ({
 }) => {
   const identity = useDotYouClientContext().getIdentity();
 
-  const lastConversation =
-    mailThread.find(
-      (conv) =>
-        (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
-    ) || mailThread[0];
-  const numberOfConversations = mailThread.length;
+  const lastConversation = mailThread[0];
+  const lastReceivedConversation = mailThread.find(
+    (conv) =>
+      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
+  );
+
   const threadId = lastConversation.fileMetadata.appData.groupId as string;
 
-  const sender =
-    lastConversation.fileMetadata.senderOdinId ||
-    lastConversation.fileMetadata.appData.content.sender;
-
-  const messageFromMe = !sender || sender === identity;
-
-  const isUnread = !lastConversation.fileMetadata.appData.content.isRead && !messageFromMe;
+  const isUnread =
+    lastReceivedConversation && !lastReceivedConversation.fileMetadata.appData.content.isRead;
   const isDraft =
     lastConversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
@@ -306,12 +306,11 @@ const MailConversationItem = ({
           />
           <Checkbox checked={isSelected} readOnly />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
-            <div className="flex w-16 flex-shrink-0 flex-row gap-1">
+            <div className="flex w-28 flex-shrink-0 flex-row gap-1">
               {isUnread ? (
                 <span className="my-auto block h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
               ) : null}
-              {!messageFromMe ? <ConnectionName odinId={sender} /> : <p>{t('Me')}</p>}
-              {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
+              <RecipientsList mailThread={mailThread} />
             </div>
             <p
               className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
@@ -331,6 +330,58 @@ const MailConversationItem = ({
       </div>
     </Link>
   );
+};
+
+const RecipientsList = ({ mailThread }: { mailThread: DriveSearchResult<MailConversation>[] }) => {
+  const identity = useDotYouClientContext().getIdentity();
+  const allRecipients = getAllRecipients(mailThread[0]);
+
+  const anyReply = mailThread.some(
+    (conv) =>
+      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) === identity
+  );
+
+  const lastReceivedConversation = mailThread.find(
+    (conv) =>
+      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
+  );
+  const anyReceived = !!lastReceivedConversation;
+
+  const numberOfConversations = mailThread.length;
+  const onlySent = anyReply && !anyReceived;
+
+  const filteredRecipients = allRecipients.filter((recipient) =>
+    recipient === identity ? anyReply : anyReceived
+  );
+
+  return (
+    <>
+      <span className="overflow-hidden overflow-ellipsis text-nowrap">
+        {onlySent ? (
+          <>
+            {t('To')}:{' '}
+            <InnerRecipients
+              recipients={allRecipients.filter((recipient) => recipient !== identity)}
+            />
+          </>
+        ) : (
+          <InnerRecipients recipients={filteredRecipients} />
+        )}
+      </span>
+      {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
+    </>
+  );
+};
+
+const InnerRecipients = ({ recipients }: { recipients: string[] }) => {
+  const identity = useDotYouClientContext().getIdentity();
+
+  return recipients.map((recipient, index) => (
+    <React.Fragment key={recipient}>
+      {recipient === identity ? t('Me') : <ConnectionName odinId={recipient} />}
+      {recipients.length - 1 === index ? null : `, `}
+    </React.Fragment>
+  ));
 };
 
 const MailConversationAttachments = () => {
