@@ -239,6 +239,7 @@ export const MailComposer = ({
               e.preventDefault();
               e.stopPropagation();
               doAutoSave();
+              onDone();
             }}
           >
             {t('Save as draft')}

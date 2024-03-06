@@ -161,7 +161,9 @@ export const useMailConversation = () => {
                     existingConversations.pages.length === 0
                       ? [
                           conversation as DriveSearchResult<MailConversation>,
-                          ...(existingConversations?.pages[0].results || []),
+                          ...(existingConversations?.pages[0].results.filter(
+                            (item) => !stringGuidsEqual(item.fileId, conversation.fileId)
+                          ) || []),
                         ]
                       : page.results,
                 };
@@ -187,7 +189,9 @@ export const useMailConversation = () => {
                 results:
                   existingMailThread.pages.length - 1 === index
                     ? [
-                        ...(existingMailThread.pages[0].results || []),
+                        ...(existingMailThread.pages[0].results.filter(
+                          (item) => !stringGuidsEqual(item.fileId, conversation.fileId)
+                        ) || []),
                         conversation as DriveSearchResult<MailConversation>,
                       ]
                     : page.results,
@@ -540,9 +544,11 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
 
         console.error('Error saving draft chat message', _error);
       },
-      onSettled: async () => {
+      onSettled: async (conversation) => {
+        const threadId = conversation?.fileMetadata.appData.content.threadId;
+
         queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
-        // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
+        if (threadId) queryClient.invalidateQueries({ queryKey: ['mail-thread', threadId] });
       },
     }),
     removeDraft: useMutation({

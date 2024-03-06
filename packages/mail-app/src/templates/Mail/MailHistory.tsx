@@ -159,7 +159,7 @@ const MailMessage = ({
               : 'bg-gray-500/10  dark:bg-gray-300/20'
           } ${isDraft ? 'cursor-pointer' : ''} `}
           onClick={
-            isDraft
+            isDraft && message.fileId
               ? () => {
                   navigate(`?draft=${message.fileId}`);
                 }
