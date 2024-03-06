@@ -25,6 +25,7 @@ import { useMailConversation } from '../../hooks/mail/useMailConversation';
 export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
+  const identity = useDotYouClientContext().getIdentity();
 
   const { hasMorePosts, conversationsLoading, fetchNextPage, isFetchingNextPage, threads } =
     useFilteredMailThreads(filter);
@@ -110,7 +111,12 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
                 }
 
                 const mailThread = threads[virtualRow.index];
-                const lastConversation = mailThread[0];
+                const lastConversation =
+                  mailThread.find(
+                    (conv) =>
+                      (conv.fileMetadata.senderOdinId ||
+                        conv.fileMetadata.appData.content.sender) !== identity
+                  ) || mailThread[0];
                 const lastConversationId = lastConversation.fileMetadata.appData.groupId as string;
                 const isSelected = selection.some((select) =>
                   stringGuidsEqual(select.fileMetadata.appData.groupId, lastConversationId)
@@ -257,11 +263,16 @@ const MailConversationItem = ({
   isSelected: boolean;
   pathPrefix?: string;
 }) => {
-  const lastConversation = mailThread[0];
+  const identity = useDotYouClientContext().getIdentity();
+
+  const lastConversation =
+    mailThread.find(
+      (conv) =>
+        (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
+    ) || mailThread[0];
   const numberOfConversations = mailThread.length;
   const threadId = lastConversation.fileMetadata.appData.groupId as string;
 
-  const identity = useDotYouClientContext().getIdentity();
   const sender =
     lastConversation.fileMetadata.senderOdinId ||
     lastConversation.fileMetadata.appData.content.sender;
@@ -296,8 +307,8 @@ const MailConversationItem = ({
           <Checkbox checked={isSelected} readOnly />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
             <div className="flex w-16 flex-shrink-0 flex-row gap-1">
-              {isUnread && !messageFromMe ? (
-                <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
+              {isUnread ? (
+                <span className="my-auto block h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
               ) : null}
               {!messageFromMe ? <ConnectionName odinId={sender} /> : <p>{t('Me')}</p>}
               {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
