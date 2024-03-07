@@ -12,19 +12,31 @@ import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
 import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
 
+type NewFileArray = NewMediaFile[];
+interface FileOverViewProps {
+  targetDrive?: TargetDrive;
+  files?: NewFileArray;
+  setFiles: (files: NewFileArray) => void;
+  className?: string;
+  cols?: 4 | 8;
+}
+
+type ExistingFilesArray = (MediaFile | NewMediaFile)[];
+interface ExistingFileOverviewProps {
+  targetDrive?: TargetDrive;
+  files?: ExistingFilesArray;
+  setFiles: (files: ExistingFilesArray) => void;
+  className?: string;
+  cols?: 4 | 8;
+}
+
 export const FileOverview = ({
   targetDrive,
   files,
   setFiles,
   className,
   cols,
-}: {
-  targetDrive?: TargetDrive;
-  files?: (MediaFile | NewMediaFile)[];
-  setFiles: (files: (MediaFile | NewMediaFile)[]) => void;
-  className?: string;
-  cols?: 4 | 8;
-}) => {
+}: FileOverViewProps | ExistingFileOverviewProps) => {
   if (!files || !files.length) return null;
   const dotYouClient = useDotYouClient().getDotYouClient();
 
@@ -40,7 +52,7 @@ export const FileOverview = ({
     canvas.toBlob(async (blob) => {
       if (!blob) return;
 
-      const newFiles = [...files];
+      const newFiles: ExistingFilesArray = [...files];
       newFiles[fileIndex] = {
         ...file,
         thumbnail: {
@@ -51,7 +63,7 @@ export const FileOverview = ({
         },
       };
 
-      setFiles(newFiles);
+      setFiles(newFiles as NewFileArray);
     }, 'image/png');
   };
 
@@ -74,7 +86,7 @@ export const FileOverview = ({
               icon={Trash}
               type="remove"
               size="square"
-              onClick={() => setFiles(files.filter((file) => file !== currFile))}
+              onClick={() => setFiles(files.filter((file) => file !== currFile) as NewFileArray)}
             />
           </div>
         ) : null;
@@ -104,10 +116,10 @@ export const FileOverview = ({
               size="square"
               onClick={() =>
                 setFiles([
-                  ...files.filter(
+                  ...(files.filter(
                     (file) =>
                       'file' in file && (file.file as File).name !== (currFile.file as File).name
-                  ),
+                  ) as NewFileArray),
                 ])
               }
             />
@@ -129,10 +141,10 @@ export const FileOverview = ({
             size="square"
             onClick={() =>
               setFiles([
-                ...files.filter(
+                ...(files.filter(
                   (file) =>
                     'file' in file && (file.file as File).name !== (currFile.file as File).name
-                ),
+                ) as NewFileArray),
               ])
             }
           />

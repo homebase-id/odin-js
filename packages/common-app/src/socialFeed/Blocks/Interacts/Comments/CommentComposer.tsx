@@ -1,4 +1,4 @@
-import { ReactionContext } from '@youfoundation/js-lib/public';
+import { NewMediaFile, ReactionContext } from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
 import {
   ActionButton,
@@ -143,7 +143,7 @@ export const CommentEditor = ({
         />
         <FileOverview
           files={files}
-          setFiles={(newFiles) => setAttachment(newFiles?.[0]?.file as File)}
+          setFiles={(newFiles: NewMediaFile[]) => setAttachment(newFiles?.[0]?.file as File)}
           className="my-2"
           cols={4}
         />
