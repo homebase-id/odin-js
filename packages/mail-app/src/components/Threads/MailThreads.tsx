@@ -16,6 +16,7 @@ import { Archive } from '@youfoundation/common-app';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
+  MailDrive,
   getAllRecipients,
 } from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
@@ -26,6 +27,7 @@ import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
 import React from 'react';
+import { OdinPreviewImage } from '@youfoundation/ui-lib';
 
 export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
@@ -324,7 +326,7 @@ const MailConversationItem = ({
           ${isSelected ? 'bg-primary/10' : ''}
           ${!isSelected ? `group-hover:bg-slate-100 dark:group-hover:bg-slate-900 ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-950'}` : ''}`}
       >
-        <div className={`flex flex-row items-center justify-between gap-4 md:gap-8`}>
+        <div className={`flex flex-row justify-between gap-4 md:gap-8`}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -341,11 +343,14 @@ const MailConversationItem = ({
               ) : null}
               <RecipientsList mailThread={mailThread} />
             </div>
-            <p
-              className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
-            >
-              {lastConversation.fileMetadata.appData.content.subject}
-            </p>
+            <div className="flex flex-col gap-2">
+              <p
+                className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
+              >
+                {lastConversation.fileMetadata.appData.content.subject}
+              </p>
+              <MailConversationAttachments mailThread={mailThread} />
+            </div>
           </div>
           <p className="ml-auto text-sm text-foreground/50">
             {formatToTimeAgoWithRelativeDetail(
@@ -354,8 +359,6 @@ const MailConversationItem = ({
             )}
           </p>
         </div>
-
-        {/* <MailConversationAttachments /> */}
       </div>
     </Link>
   );
@@ -413,6 +416,56 @@ const InnerRecipients = ({ recipients }: { recipients: string[] }) => {
   ));
 };
 
-const MailConversationAttachments = () => {
-  return <div className="flex flex-row justify-end"></div>;
+const MailConversationAttachments = ({
+  mailThread,
+  maxVisible = 2,
+}: {
+  mailThread: DriveSearchResult<MailConversation>[];
+  maxVisible?: number;
+}) => {
+  const dotYouClient = useDotYouClientContext();
+  const payloads = mailThread.flatMap((conv) =>
+    conv.fileMetadata.payloads.map((payload) => ({ ...payload, fileId: conv.fileId }))
+  );
+
+  if (!payloads.length) return null;
+
+  const slicedPayloads = payloads.length > maxVisible ? payloads.slice(0, maxVisible) : payloads;
+  const countExcludedFromView = payloads.length - slicedPayloads.length;
+
+  return (
+    <div className="flex flex-row items-center gap-2">
+      {slicedPayloads.map((payload) => {
+        const contentTypeExtension = (payload.contentType || 'application/json').split('/')[1];
+
+        return (
+          <div
+            key={`${payload.fileId}-${payload.key}`}
+            className="flex cursor-pointer flex-row items-center gap-2 rounded-full border border-slate-200 bg-background px-3 py-2 dark:border-slate-700"
+          >
+            {payload.contentType.includes('image') ? (
+              <OdinPreviewImage
+                dotYouClient={dotYouClient}
+                fileId={payload.fileId}
+                fileKey={payload.key}
+                targetDrive={MailDrive}
+                lastModified={payload.lastModified}
+                className="h-4 w-4"
+              />
+            ) : (
+              <div className="dark:bg-indigo-80 flex h-10 w-10 flex-col items-center justify-center bg-indigo-200 text-[0.7rem] uppercase">
+                {contentTypeExtension}
+              </div>
+            )}
+            <p className="text-sm">{payload.key}</p>
+          </div>
+        );
+      })}
+      {countExcludedFromView ? (
+        <p className="flex aspect-square h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-background text-sm dark:border-slate-700">
+          +{countExcludedFromView}
+        </p>
+      ) : null}
+    </div>
+  );
 };
