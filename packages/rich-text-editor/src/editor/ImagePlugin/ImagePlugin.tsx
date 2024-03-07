@@ -8,12 +8,11 @@ import {
 import { Value, insertNodes, TElement, getPluginOptions, removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { useState } from 'react';
-import { ImageIcon, Pencil, Trash, t } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
+import { useCallback, useState } from 'react';
+import { ImageIcon, Pencil, Trash, t, useDotYouClient } from '@youfoundation/common-app';
 import { ImageDialog } from '@youfoundation/common-app';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
-import { Image } from '@youfoundation/common-app';
+import { OdinThumbnailImage } from '@youfoundation/ui-lib';
 
 export interface TImageElement extends TElement {
   fileKey: string;
@@ -91,6 +90,7 @@ export const ImageElementBlock = <V extends Value = Value>(
 ) => {
   const [isActive, setIsActive] = useState(false);
   const { attributes, children, nodeProps, element } = props;
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const editor = useEditorRef(useEventPlateId());
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,48 +108,59 @@ export const ImageElementBlock = <V extends Value = Value>(
 
   if (!options || !options.mediaDrive) return <></>;
 
+  const doOpenDialog = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsActive(true);
+  }, []);
+
   return (
     <>
-      <div {...attributes} {...nodeProps}>
+      <div
+        {...attributes}
+        {...nodeProps}
+        className="relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800"
+      >
         {children}
-        <div className="flex">
-          <div className="relative mr-auto max-w-lg flex-grow">
-            <Image
-              fileId={options.fileId}
-              fileKey={element.fileKey}
-              targetDrive={options.mediaDrive}
-              lastModified={new Date().getTime()}
-              className={` ${''}`}
-            />
-            <ActionButton
-              onClick={() => setIsActive(true)}
-              type="secondary"
-              icon={Pencil}
-              size="square"
-              className="absolute right-3 top-3 z-10 rounded-md bg-white"
-            />
-            <ActionButton
-              onClick={doRemove}
-              confirmOptions={{
-                title: t('Remove image'),
-                body: t('Are you sure you want to remove this image?'),
-                buttonText: t('Remove'),
-              }}
-              type="remove"
-              icon={Trash}
-              size="square"
-              className="absolute bottom-3 right-3 z-10 rounded-md"
-            />
-          </div>
+        <div className="absolute inset-4 mr-auto max-w-lg flex-grow">
+          <OdinThumbnailImage
+            dotYouClient={dotYouClient}
+            fileId={options.fileId}
+            fileKey={element.fileKey}
+            targetDrive={options.mediaDrive}
+            lastModified={new Date().getTime()}
+            loadSize={{
+              pixelWidth: 400,
+              pixelHeight: 400,
+            }}
+            className="absolute inset-0 h-full w-full object-contain"
+          />
         </div>
+        {/* We use buttons instead of our ActionButton because of endless rerenders when used inside of the RTE */}
+        <button
+          onClick={doOpenDialog}
+          className="absolute right-3 top-3 z-20 rounded-md bg-white p-2 dark:bg-slate-900"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            doRemove();
+          }}
+          className="absolute bottom-3 right-3 z-20 rounded-md bg-red-500 p-2 text-white hover:bg-red-600"
+        >
+          <Trash className="h-4 w-4" />
+        </button>
       </div>
+
       <ImageDialog
         isOpen={isActive}
         onCancel={() => setIsActive(false)}
         onConfirm={async (newImage) => {
-          if (!newImage) {
-            doRemove();
-          } else {
+          if (!newImage) doRemove();
+          else {
             const uploadResult = await options.onAppend(newImage);
             if (uploadResult) insertImage(editor, uploadResult.fileKey);
           }
