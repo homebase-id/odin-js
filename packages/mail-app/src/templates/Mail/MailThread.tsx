@@ -126,6 +126,7 @@ const MailThreadActions = ({
         <ReplyAction
           {...threadProps}
           draftFileId={draftFileId || undefined}
+          mailThread={mailThread}
           onDone={() => {
             setIsReply(false);
             const newSearchParams = new URLSearchParams(searchParams);
@@ -157,6 +158,7 @@ const MailThreadActions = ({
 const ReplyAction = ({
   draftFileId,
 
+  mailThread,
   recipients,
   originId,
   threadId,
@@ -165,6 +167,7 @@ const ReplyAction = ({
 }: {
   draftFileId: string | undefined;
 
+  mailThread: DriveSearchResult<MailConversation>[];
   recipients: string[];
   originId: string;
   threadId: string;
@@ -185,6 +188,7 @@ const ReplyAction = ({
           subject={subject}
           onDone={onDone}
           key={draftFileId}
+          forwardedMailThread={mailThread}
         />
       )}
     </div>

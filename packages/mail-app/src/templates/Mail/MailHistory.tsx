@@ -125,10 +125,12 @@ export const MailHistory = ({
 const MailMessage = ({
   previousMessage,
   message,
+  forceAsRead,
   className,
 }: {
   previousMessage: DriveSearchResult<MailConversation> | undefined;
   message: DriveSearchResult<MailConversation>;
+  forceAsRead?: boolean;
   className?: string;
 }) => {
   const navigate = useNavigate();
@@ -167,7 +169,7 @@ const MailMessage = ({
           }
         >
           <div className={`flex flex-row gap-2`}>
-            {!message.fileMetadata.appData.content.isRead && !messageFromMe ? (
+            {!message.fileMetadata.appData.content.isRead && !messageFromMe && !forceAsRead ? (
               <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
             ) : null}
             <p className="font-semibold">
@@ -212,8 +214,13 @@ const ForwardedThread = ({
 }: {
   mailThread: DriveSearchResult<MailConversation>[] | undefined;
 }) => {
+  const identity = useDotYouClientContext().getIdentity();
+  const filteredMailThread = mailThread?.filter(
+    (conv) => !getAllRecipients(conv).some((recipient) => recipient === identity)
+  );
+
   const [showHistory, setShowHistory] = useState(false);
-  const hasHistory = mailThread && mailThread?.length > 1;
+  const hasHistory = filteredMailThread && filteredMailThread?.length > 1;
   if (!hasHistory) return null;
 
   return (
@@ -223,7 +230,12 @@ const ForwardedThread = ({
           {hasHistory && showHistory ? (
             <div className="">
               {mailThread.map((mail, index) => (
-                <MailMessage key={index} previousMessage={undefined} message={mail} />
+                <MailMessage
+                  key={index}
+                  previousMessage={undefined}
+                  message={mail}
+                  forceAsRead={true}
+                />
               ))}
             </div>
           ) : null}
