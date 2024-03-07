@@ -135,13 +135,15 @@ export const getPayloadAsJson = async <T>(
   options?: {
     systemFileType?: SystemFileType;
     axiosConfig?: AxiosRequestConfig;
+    lastModified?: number;
   }
 ): Promise<T | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,
     axiosConfig: options?.axiosConfig,
+    lastModified,
   }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
@@ -307,8 +309,12 @@ export const getContentFromHeaderOrPayload = async <T>(
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
+    const payloadDescriptor = dsr.fileMetadata.payloads.find(
+      (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+    );
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
       systemFileType,
+      lastModified: payloadDescriptor?.lastModified,
     });
   }
 };

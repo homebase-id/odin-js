@@ -397,8 +397,8 @@ const updatePost = async <T extends PostContent>(
       ? (file.fileMetadata.appData.content as Media).mediaFiles
         ? (file.fileMetadata.appData.content as Media).mediaFiles
         : file.fileMetadata.appData.content.primaryMediaFile
-        ? [file.fileMetadata.appData.content.primaryMediaFile]
-        : []
+          ? [file.fileMetadata.appData.content.primaryMediaFile]
+          : []
       : []);
 
   const newMediaFiles = existingAndNewMediaFiles?.filter(
