@@ -155,7 +155,7 @@ export const CommentEditor = ({
           />
           <FileSelector
             onChange={(newFiles) => setAttachment(newFiles?.[0])}
-            className="text-foreground text-opacity-30 hover:text-opacity-100"
+            className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
             maxSize={TEN_MEGA_BYTES}
           >
             <ImageIcon className="h-5 w-5" />

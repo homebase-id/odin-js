@@ -1,21 +1,32 @@
 import { useMemo } from 'react';
-import { ActionButton, Triangle, Image, Trash, Video } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Triangle,
+  Image,
+  Trash,
+  Video,
+  useDotYouClient,
+} from '@youfoundation/common-app';
 
 import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
 import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
+import { OdinThumbnailImage } from '@youfoundation/ui-lib';
 
 export const FileOverview = ({
+  targetDrive,
   files,
   setFiles,
   className,
   cols,
 }: {
-  files?: NewMediaFile[];
-  setFiles: (files: NewMediaFile[]) => void;
+  targetDrive?: TargetDrive;
+  files?: (MediaFile | NewMediaFile)[];
+  setFiles: (files: (MediaFile | NewMediaFile)[]) => void;
   className?: string;
   cols?: 4 | 8;
 }) => {
   if (!files || !files.length) return null;
+  const dotYouClient = useDotYouClient().getDotYouClient();
 
   const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;
@@ -46,6 +57,28 @@ export const FileOverview = ({
 
   const renderedFiles = useMemo(() => {
     return files.map((currFile, index) => {
+      // Existing files:
+      if (!('file' in currFile))
+        return targetDrive ? (
+          <div key={index} className="relative">
+            <OdinThumbnailImage
+              fileId={currFile.fileId}
+              fileKey={currFile.fileKey}
+              targetDrive={targetDrive}
+              className="aspect-square h-auto w-full object-cover"
+              dotYouClient={dotYouClient}
+              loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
+            />
+            <ActionButton
+              className="absolute bottom-3 right-3"
+              icon={Trash}
+              type="remove"
+              size="square"
+              onClick={() => setFiles(files.filter((file) => file !== currFile))}
+            />
+          </div>
+        ) : null;
+
       const url =
         'bytes' in currFile.file
           ? window.URL.createObjectURL(currFile.file)
@@ -72,7 +105,8 @@ export const FileOverview = ({
               onClick={() =>
                 setFiles([
                   ...files.filter(
-                    (file) => (file.file as File).name !== (currFile.file as File).name
+                    (file) =>
+                      'file' in file && (file.file as File).name !== (currFile.file as File).name
                   ),
                 ])
               }
@@ -82,7 +116,7 @@ export const FileOverview = ({
       }
 
       return (
-        <div key={url} className="relative">
+        <div key={(currFile.file as File).name} className="relative">
           <img
             src={url}
             onLoad={() => URL.revokeObjectURL(url)}
@@ -96,7 +130,8 @@ export const FileOverview = ({
             onClick={() =>
               setFiles([
                 ...files.filter(
-                  (file) => (file.file as File).name !== (currFile.file as File).name
+                  (file) =>
+                    'file' in file && (file.file as File).name !== (currFile.file as File).name
                 ),
               ])
             }
@@ -117,6 +152,7 @@ export const FileOverview = ({
   );
 };
 
+// TODO: Merge with FileOverview
 export const ExistingFileOverview = ({
   fileId,
   mediaFiles,

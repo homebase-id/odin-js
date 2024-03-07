@@ -7,6 +7,7 @@ import {
   AppendInstructionSet,
   UploadResult,
   UploadManifest,
+  AppendResult,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -238,7 +239,7 @@ export const pureAppend = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void,
   axiosConfig?: AxiosRequestConfig
-): Promise<{ newVersionTag: string }> => {
+): Promise<AppendResult> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
     headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },

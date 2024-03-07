@@ -1,4 +1,5 @@
 import {
+  AppendResult,
   CursoredResult,
   DotYouClient,
   DriveSearchResult,
@@ -16,14 +17,17 @@ import {
   TransferStatus,
   UploadFileMetadata,
   UploadInstructionSet,
+  UploadResult,
+  appendDataToFile,
   getContentFromHeaderOrPayload,
   getFileHeader,
+  getPayloadBytes,
   queryBatch,
   uploadFile,
   uploadHeader,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
 
@@ -125,13 +129,14 @@ export const getMailThread = async (
 export const uploadMail = async (
   dotYouClient: DotYouClient,
   conversation: NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>,
-  files: NewMediaFile[] | undefined,
+  files: (NewMediaFile | MediaFile)[] | undefined,
   onVersionConflict?: () => void
 ) => {
   const recipients = conversation.fileMetadata.appData.content.recipients;
   const distribute =
     recipients?.length > 0 &&
     conversation.fileMetadata.appData.fileType !== MAIL_DRAFT_CONVERSATION_FILE_TYPE;
+  const anyExistingFiles = files?.some((file) => !('file' in file));
 
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -180,7 +185,29 @@ export const uploadMail = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     const payloadKey = `${MAIL_MESSAGE_PAYLOAD_KEY}${i}`;
-    const newMediaFile = files[i];
+    let newMediaFile = files[i];
+
+    if (!('file' in newMediaFile)) {
+      // We ignore existing files when not distributing as they are just kept
+      if (!distribute) continue;
+
+      // TODO: Is there a better way to handle this case?
+      // Fetch the file from the server
+      const payloadFromServer = await getPayloadBytes(
+        dotYouClient,
+        MailDrive,
+        newMediaFile.fileId as string,
+        payloadKey
+      );
+
+      if (!payloadFromServer) continue;
+      const existingFile: NewMediaFile = {
+        file: new Blob([payloadFromServer.bytes], { type: payloadFromServer.contentType }),
+      };
+
+      newMediaFile = existingFile;
+    }
+
     if (newMediaFile.file.type.startsWith('video/')) {
       const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
         newMediaFile,
@@ -210,27 +237,64 @@ export const uploadMail = async (
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  const uploadResult = await uploadFile(
-    dotYouClient,
-    uploadInstructions,
-    uploadMetadata,
-    undefined,
-    undefined,
-    undefined,
-    onVersionConflict
-  );
+  const uploadResult: AppendResult | UploadResult | null = await (async () => {
+    if (!distribute && anyExistingFiles && 'sharedSecretEncryptedKeyHeader' in conversation) {
+      const headerUploadResult = await uploadHeader(
+        dotYouClient,
+        conversation.sharedSecretEncryptedKeyHeader,
+        uploadInstructions,
+        uploadMetadata,
+        onVersionConflict
+      );
+      if (!headerUploadResult) return null;
+      if (payloads.length) {
+        const uploadResult = await appendDataToFile(
+          dotYouClient,
+          conversation.sharedSecretEncryptedKeyHeader,
+          {
+            targetFile: {
+              fileId: conversation.fileId as string,
+              targetDrive: MailDrive,
+            },
+            versionTag: headerUploadResult.newVersionTag,
+          },
+          payloads,
+          thumbnails,
+          onVersionConflict
+        );
+        return { ...uploadResult, file: { fileId: conversation.fileId } };
+      } else {
+        return headerUploadResult;
+      }
+    }
+
+    const uploadResult = await uploadFile(
+      dotYouClient,
+      uploadInstructions,
+      uploadMetadata,
+      payloads,
+      thumbnails,
+      true,
+      onVersionConflict
+    );
+
+    return uploadResult || null;
+  })();
 
   if (!uploadResult) return null;
 
-  const allDelivered = recipients.map(
-    (recipient) =>
-      uploadResult.recipientStatus?.[recipient].toLowerCase() === TransferStatus.DeliveredToInbox
-  );
+  if (distribute) {
+    const allDelivered = recipients.map(
+      (recipient) =>
+        (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
+        TransferStatus.DeliveredToInbox
+    );
 
-  // TODO: Should this work differently with the job system? Would it auto retry?
-  if (distribute && !allDelivered.every((delivered) => delivered)) {
-    console.error('Not all recipients received the message: ', uploadResult);
-    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    // TODO: Should this work differently with the job system? Would it auto retry?
+    if (!allDelivered.every((delivered) => delivered)) {
+      console.error('Not all recipients received the message: ', uploadResult);
+      throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+    }
   }
 
   return {

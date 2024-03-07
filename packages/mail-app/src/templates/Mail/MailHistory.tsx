@@ -1,7 +1,8 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, PayloadDescriptor } from '@youfoundation/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
+  MailDrive,
   getAllRecipients,
 } from '../../providers/MailProvider';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
@@ -19,6 +20,7 @@ import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConv
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
+import { OdinPreviewImage } from '@youfoundation/ui-lib';
 
 export const MailHistory = ({
   mailThread,
@@ -182,6 +184,7 @@ const MailMessage = ({
             </p>
           </div>
           <RichTextRenderer body={message.fileMetadata.appData.content.message} />
+          <AttachmentOverview fileId={message.fileId} files={message.fileMetadata.payloads} />
 
           <ActionGroup
             options={[
@@ -205,6 +208,48 @@ const MailMessage = ({
           onClose={() => setShowMessageInfo(false)}
         />
       ) : null}
+    </div>
+  );
+};
+
+const AttachmentOverview = ({
+  fileId,
+  files,
+}: {
+  fileId: string;
+  files: PayloadDescriptor[] | undefined;
+}) => {
+  const dotYouClient = useDotYouClientContext();
+  if (!files) return null;
+  return (
+    <div className="mt-5 flex flex-row items-center gap-2">
+      {files.map((file) => {
+        const contentTypeExtension = (file.contentType || 'application/json').split('/')[1];
+
+        return (
+          <div
+            key={file.key}
+            className="flex cursor-pointer flex-row items-center gap-2 rounded-lg bg-background px-3 py-2"
+            // onClick
+          >
+            {file.contentType.includes('image') ? (
+              <OdinPreviewImage
+                dotYouClient={dotYouClient}
+                fileId={fileId}
+                fileKey={file.key}
+                targetDrive={MailDrive}
+                lastModified={file.lastModified}
+                className="h-10 w-10"
+              />
+            ) : (
+              <div className="dark:bg-indigo-80 flex h-10 w-10 flex-col items-center justify-center bg-indigo-200 text-[0.7rem] uppercase">
+                {contentTypeExtension}
+              </div>
+            )}
+            {file.key}
+          </div>
+        );
+      })}
     </div>
   );
 };

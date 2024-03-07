@@ -7,7 +7,7 @@ import {
   deleteFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
@@ -30,7 +30,7 @@ export const useMailConversation = () => {
     files,
   }: {
     conversation: NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>;
-    files?: NewMediaFile[];
+    files?: (NewMediaFile | MediaFile)[] | undefined;
   }): Promise<NewDriveSearchResult<MailConversation> | null> => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const uniqueId = conversation.fileMetadata.appData.uniqueId || getNewId();
@@ -64,7 +64,8 @@ export const useMailConversation = () => {
     const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
-    newMailConversation.fileId = uploadResult.file.fileId;
+    newMailConversation.fileId =
+      'file' in uploadResult ? uploadResult.file.fileId : conversation.fileId;
     newMailConversation.fileMetadata.versionTag = uploadResult.newVersionTag;
     newMailConversation.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 
@@ -412,7 +413,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     files,
   }: {
     conversation: NewDriveSearchResult<MailConversation>;
-    files?: NewMediaFile[];
+    files?: (NewMediaFile | MediaFile)[] | undefined;
   }): Promise<NewDriveSearchResult<MailConversation> | null> => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const uniqueId = conversation.fileMetadata.appData.uniqueId || getNewId();
@@ -445,7 +446,8 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
     if (!uploadResult) throw new Error('Failed to send the chat message');
 
-    newMailConversation.fileId = uploadResult.file.fileId;
+    newMailConversation.fileId =
+      'file' in uploadResult ? uploadResult.file.fileId : conversation.fileId;
     newMailConversation.fileMetadata.versionTag = uploadResult.newVersionTag;
     newMailConversation.fileMetadata.appData.previewThumbnail = uploadResult.previewThumbnail;
 

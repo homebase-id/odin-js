@@ -3,9 +3,12 @@ import {
   ActionButton,
   ErrorBoundary,
   ErrorNotification,
+  FileOverview,
+  FileSelector,
   Input,
   Label,
   PaperPlane,
+  Plus,
   Save,
   getTextRootsRecursive,
   t,
@@ -17,10 +20,17 @@ import {
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
-import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
+import {
+  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
+  MailConversation,
+  MailDrive,
+} from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/public';
+
+const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
 export const MailComposer = ({
   existingDraft,
@@ -44,7 +54,6 @@ export const MailComposer = ({
   onDone: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
-
   const [autosavedDsr, setAutosavedDsr] = useState<
     NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>
   >(
@@ -70,6 +79,14 @@ export const MailComposer = ({
     }
   );
 
+  const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
+    existingDraft?.fileMetadata.payloads?.map((payload) => ({
+      fileId: existingDraft.fileId,
+      fileKey: payload.key,
+      type: payload.contentType.includes('video') ? 'video' : 'image',
+    })) || []
+  );
+
   const {
     mutate: sendMail,
     status: sendMailStatus,
@@ -87,10 +104,8 @@ export const MailComposer = ({
   } = useMailDraft();
 
   useEffect(() => {
-    if (saveDraftReturn) {
-      // Get fileId & (new) versionTag into the autosavedDsr
-      setAutosavedDsr(saveDraftReturn);
-    }
+    // Get fileId & (new) versionTag into the autosavedDsr
+    if (saveDraftReturn) setAutosavedDsr(saveDraftReturn);
   }, [saveDraftReturn]);
 
   const doAutoSave = () => {
@@ -101,7 +116,7 @@ export const MailComposer = ({
       ...autosavedDsr.fileMetadata.appData.content,
     };
     setAutosavedDsr(newSavedDsr);
-    saveDraft({ conversation: newSavedDsr, files: [] });
+    saveDraft({ conversation: newSavedDsr, files: files });
   };
 
   const doSend: React.FormEventHandler<HTMLFormElement> = (e) => {
@@ -114,7 +129,7 @@ export const MailComposer = ({
       serverMetadata: { accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected } },
     };
 
-    sendMail({ conversation: newEmailConversation, files: [] });
+    sendMail({ conversation: newEmailConversation, files: files });
   };
 
   const doDiscard = () => {
@@ -224,6 +239,21 @@ export const MailComposer = ({
                 className="min-h-44 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
             </ErrorBoundary>
+          </div>
+
+          <div>
+            <FileSelector
+              onChange={(mediaFiles) =>
+                setFiles([...(files ?? []), ...mediaFiles.map((file) => ({ file }))])
+              }
+              maxSize={FIFTY_MEGA_BYTES}
+              className="mb-2"
+            >
+              <span className="flex flex-row items-center gap-2">
+                {t('Attachments')} <Plus className="h-4 w-4" />
+              </span>
+            </FileSelector>
+            <FileOverview files={files} cols={8} setFiles={setFiles} targetDrive={MailDrive} />
           </div>
         </div>
 
