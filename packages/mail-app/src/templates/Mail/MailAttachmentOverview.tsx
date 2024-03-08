@@ -3,6 +3,7 @@ import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailDrive } from '../../providers/MailProvider';
+import { useMailAttachment } from '../../hooks/mail/useMailConversation';
 
 interface AttachmentItem extends PayloadDescriptor {
   fileId: string;
@@ -14,23 +15,39 @@ export const MailAttachmentOverview = ({
   className,
 }: {
   files: AttachmentItem[];
-  maxVisible?: number;
+  maxVisible?: number | null;
   className?: string;
 }) => {
   const dotYouClient = useDotYouClientContext();
   if (!files) return null;
 
-  const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
+  const slicedFiles = maxVisible && files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
 
+  const getFileUrl = useMailAttachment().fetchAttachment;
+
+  const doDownload = async (file: AttachmentItem) => {
+    const url = await getFileUrl(file.fileId, file.key, file.contentType);
+    if (!url) return;
+    // Dirty hack for easy download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.descriptorContent || file.key || url.substring(url.lastIndexOf('/') + 1);
+    link.click();
+  };
+
   return (
-    <div className={`flex flex-row items-center gap-2 ${className || ''}`}>
-      {files.map((file) => {
+    <div className={`flex flex-row flex-wrap items-center gap-2 ${className || ''}`}>
+      {slicedFiles.map((file) => {
         return (
           <div
             key={file.key}
             className="flex cursor-pointer flex-row items-center gap-2 rounded-full border border-slate-200 bg-background px-3 py-2 dark:border-slate-700"
-            // onClick
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              doDownload(file);
+            }}
           >
             {file.contentType.startsWith('image/') ? (
               <OdinPreviewImage
@@ -44,7 +61,7 @@ export const MailAttachmentOverview = ({
             ) : (
               <ExtensionThumbnail contentType={file.contentType} />
             )}
-            {file.key}
+            {file.descriptorContent || file.key}
           </div>
         );
       })}

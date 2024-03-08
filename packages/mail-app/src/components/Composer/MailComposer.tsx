@@ -122,8 +122,8 @@ export const MailComposer = ({
     const content = autosavedDsr.fileMetadata.appData.content;
     if (!identity || !content.subject || !content.message || !content.recipients.length) return;
 
-    const anyNewRecipients = content.recipients.some((recipient) =>
-      currentRecipients?.includes(recipient)
+    const anyNewRecipients = content.recipients.some(
+      (recipient) => !currentRecipients?.includes(recipient)
     );
 
     const newEmailConversation: NewDriveSearchResult<MailConversation> = {

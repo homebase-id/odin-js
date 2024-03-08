@@ -197,6 +197,7 @@ const MailMessage = ({
               ...file,
               fileId: message.fileId,
             }))}
+            maxVisible={null}
           />
 
           <ActionGroup
