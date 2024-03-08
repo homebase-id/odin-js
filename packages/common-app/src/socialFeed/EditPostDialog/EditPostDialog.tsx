@@ -1,7 +1,6 @@
 import {
   PostContent,
   getChannelDrive,
-  Media,
   MediaFile,
   NewMediaFile,
 } from '@youfoundation/js-lib/public';

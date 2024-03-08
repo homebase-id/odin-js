@@ -68,11 +68,7 @@ export const PostMedia = ({
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
         fit="contain"
-        primaryMediaFile={{
-          key: post.primaryMediaFile.fileKey,
-          contentType: post.primaryMediaFile.type,
-          fileId: post.primaryMediaFile.fileId,
-        }}
+        primaryMediaFile={post.primaryMediaFile}
         channelId={post.channelId}
         fileId={postInfo.fileId}
         globalTransitId={postInfo.globalTransitId}

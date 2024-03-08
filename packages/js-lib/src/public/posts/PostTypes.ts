@@ -94,6 +94,13 @@ export interface NewMediaFile {
   thumbnail?: ThumbnailFile;
 }
 
+// Kept different for historical data
+export interface PrimaryMediaFile {
+  fileKey: string;
+  fileId: string | undefined;
+  type: string;
+}
+
 // export type PostFile<T extends PostContent> = DriveSearchResult<T>;
 // export type NewPostFile<T extends PostContent> = NewDriveSearchResult<T>;
 
@@ -118,7 +125,7 @@ export interface PostContent {
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
-  primaryMediaFile?: { fileKey: string; fileId: string | undefined; type: string };
+  primaryMediaFile?: PrimaryMediaFile;
   type: 'Article' | 'Media' | 'Tweet';
 
   embeddedPost?: EmbeddedPost;
@@ -138,7 +145,6 @@ export interface ReadTimeStats {
 
 export interface Media extends PostContent {
   type: 'Media';
-  // mediaFiles?: MediaFile[];
 }
 
 // On hold for now, needs a proxy to get the linkMeta externally
