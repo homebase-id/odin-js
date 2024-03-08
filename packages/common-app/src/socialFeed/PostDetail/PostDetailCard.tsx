@@ -19,6 +19,7 @@ import {
   EmbeddedPostContent,
 } from '../../..';
 import {
+  DEFAULT_PAYLOAD_KEY,
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
@@ -46,7 +47,8 @@ export const PostDetailCard = ({
   login?: () => void;
 }) => {
   const post = postFile?.fileMetadata.appData.content;
-  const mediaFiles = (post as Media)?.mediaFiles;
+  const mediaFiles = postFile?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
+
   return (
     <div
       className={`bg-background rounded-lg border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
@@ -103,7 +105,7 @@ export const PostDetailCard = ({
       </div>
 
       {postFile?.fileId && post?.primaryMediaFile ? (
-        mediaFiles && mediaFiles.length > 1 ? (
+        mediaFiles && mediaFiles.length > 1 && post.type !== 'Article' ? (
           <MediaGallery
             fileId={postFile.fileId}
             globalTransitId={postFile.fileMetadata.globalTransitId}

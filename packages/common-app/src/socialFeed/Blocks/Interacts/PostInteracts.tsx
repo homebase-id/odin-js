@@ -222,6 +222,7 @@ export const RepostButton = ({
             permalink,
             userDate: postFile.fileMetadata.appData.userDate ?? postFile.fileMetadata.created,
             previewThumbnail: postFile.fileMetadata.appData.previewThumbnail,
+            payloads: postFile.fileMetadata.payloads,
           }}
           isOpen={isRepostDialogOpen}
           onClose={() => setIsReposeDialogOpen(false)}

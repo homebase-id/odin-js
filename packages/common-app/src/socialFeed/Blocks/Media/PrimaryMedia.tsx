@@ -38,14 +38,14 @@ export const PrimaryMedia = ({
 
   return (
     <div onClick={doNavigate}>
-      {primaryMediaFile?.type.startsWith('image') ? (
+      {primaryMediaFile?.contentType.startsWith('image') ? (
         <Image
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}
           fileId={primaryMediaFile?.fileId || fileId}
           globalTransitId={correctedGlobalTransitId}
           lastModified={lastModified}
-          fileKey={primaryMediaFile?.fileKey}
+          fileKey={primaryMediaFile?.key}
           className={className}
           previewThumbnail={previewThumbnail}
           fit={fit}
@@ -58,7 +58,7 @@ export const PrimaryMedia = ({
           fileId={primaryMediaFile?.fileId || fileId}
           globalTransitId={correctedGlobalTransitId}
           lastModified={lastModified}
-          fileKey={primaryMediaFile?.fileKey}
+          fileKey={primaryMediaFile?.key}
           className={className}
           probablyEncrypted={probablyEncrypted}
           previewThumbnail={previewThumbnail}
@@ -72,7 +72,7 @@ export const PrimaryMedia = ({
           fileId={primaryMediaFile?.fileId || fileId}
           globalTransitId={correctedGlobalTransitId}
           lastModified={lastModified}
-          fileKey={primaryMediaFile?.fileKey}
+          fileKey={primaryMediaFile?.key}
           className={className}
           probablyEncrypted={probablyEncrypted}
         />

@@ -82,11 +82,7 @@ export const MailComposer = ({
   );
 
   const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
-    existingDraft?.fileMetadata.payloads?.map((payload) => ({
-      fileId: existingDraft.fileId,
-      fileKey: payload.key,
-      type: payload.contentType,
-    })) || []
+    existingDraft?.fileMetadata.payloads || []
   );
 
   const {
@@ -260,11 +256,11 @@ export const MailComposer = ({
                         onAppend: async (file) => {
                           const fileKey = `${MAIL_MESSAGE_PAYLOAD_KEY}i${files.length}`;
 
-                          setFiles([...files, { file: file, fileKey: fileKey }]);
+                          setFiles([...files, { file: file, key: fileKey }]);
                           return { fileId: autosavedDsr.fileId as string, fileKey: fileKey };
                         },
                         onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
-                          setFiles(files.filter((f) => f.fileKey !== fileKey));
+                          setFiles(files.filter((f) => f.key !== fileKey));
                           return true;
                         },
                       }

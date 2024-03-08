@@ -69,6 +69,7 @@ export const DoubleClickHeartForMedia = ({
             isEncrypted: postFile.fileMetadata.isEncrypted,
 
             content: postContent,
+            payloads: postFile.fileMetadata.payloads,
           }}
           showFallback={showFallback}
           forceAspectRatio={forceAspectRatio}

@@ -34,18 +34,12 @@ import {
 } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { getPost, getPostBySlug } from './PostProvider';
-import {
-  PostContent,
-  NewMediaFile,
-  MediaFile,
-  BlogConfig,
-  postTypeToDataType,
-  Media,
-} from './PostTypes';
+import { PostContent, NewMediaFile, MediaFile, BlogConfig, postTypeToDataType } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
 const OdinBlob: typeof Blob =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
@@ -87,14 +81,13 @@ export const savePost = async <T extends PostContent>(
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
-    delete (file.fileMetadata.appData.content.embeddedPost as any)['embeddedPost'];
+    delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
   }
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
-  const mediaFiles: MediaFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
   // Handle image files:
@@ -109,12 +102,6 @@ export const savePost = async <T extends PostContent>(
 
       thumbnails.push(...additionalThumbnails);
       payloads.push(payload);
-
-      mediaFiles.push({
-        fileId: undefined,
-        fileKey: payloadKey,
-        type: newMediaFile.file.type,
-      });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
 
@@ -131,22 +118,21 @@ export const savePost = async <T extends PostContent>(
         payload: newMediaFile.file,
       });
 
-      mediaFiles.push({
-        fileId: undefined,
-        fileKey: payloadKey,
-        type: newMediaFile.file.type,
-      });
-
       if (tinyThumb) previewThumbnails.push(tinyThumb);
     }
     onUpdate?.((i + 1) / newMediaFiles.length);
   }
 
-  if (mediaFiles?.length) {
-    (file.fileMetadata.appData.content as Media).mediaFiles =
-      mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined;
+  // Don't force the primaryMediaFile on articles
+  if (file.fileMetadata.appData.content.type !== 'Article') {
+    file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
+      ? {
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
+      : undefined;
   }
-  file.fileMetadata.appData.content.primaryMediaFile = mediaFiles[0];
 
   const previewThumbnail: EmbeddedThumb | undefined =
     previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
@@ -390,21 +376,6 @@ const updatePost = async <T extends PostContent>(
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
     throw new Error('Version conflict');
 
-  let runningVersionTag: string = file.fileMetadata.versionTag;
-  const existingMediaFiles =
-    (existingAndNewMediaFiles?.filter((f) => 'fileKey' in f) as MediaFile[]) ||
-    (!existingAndNewMediaFiles
-      ? (file.fileMetadata.appData.content as Media).mediaFiles
-        ? (file.fileMetadata.appData.content as Media).mediaFiles
-        : file.fileMetadata.appData.content.primaryMediaFile
-          ? [file.fileMetadata.appData.content.primaryMediaFile]
-          : []
-      : []);
-
-  const newMediaFiles = existingAndNewMediaFiles?.filter(
-    (f) => 'file' in f && f.file instanceof Blob
-  ) as NewMediaFile[] | undefined;
-
   if (
     !file.fileId ||
     !file.serverMetadata?.accessControlList ||
@@ -415,17 +386,26 @@ const updatePost = async <T extends PostContent>(
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
-  const oldMediaFiles =
-    (file.fileMetadata.appData.content as Media).mediaFiles ||
-    (file.fileMetadata.appData.content.primaryMediaFile
-      ? [file.fileMetadata.appData.content.primaryMediaFile]
-      : []);
+  let runningVersionTag: string = file.fileMetadata.versionTag;
+  const existingMediaFiles =
+    (existingAndNewMediaFiles?.filter((f) => 'key' in f) as MediaFile[]) ||
+    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) ||
+    [];
+
+  const newMediaFiles: NewMediaFile[] =
+    (existingAndNewMediaFiles?.filter(
+      (f) => 'file' in f && f.file instanceof Blob
+    ) as NewMediaFile[]) || [];
+
+  const oldMediaFiles: MediaFile[] = file.fileMetadata.payloads?.filter(
+    (p) => p.key !== DEFAULT_PAYLOAD_KEY
+  );
 
   // Discover deleted files:
   const deletedMediaFiles: MediaFile[] = [];
   for (let i = 0; oldMediaFiles && i < oldMediaFiles?.length; i++) {
     const oldMediaFile = oldMediaFiles[i];
-    if (!existingMediaFiles?.find((f) => 'fileKey' in f && f.fileKey === oldMediaFile.fileKey)) {
+    if (!existingMediaFiles?.find((f) => f.key === oldMediaFile.key)) {
       deletedMediaFiles.push(oldMediaFile);
     }
   }
@@ -439,8 +419,8 @@ const updatePost = async <T extends PostContent>(
           dotYouClient,
           targetDrive,
           file.fileId as string,
-          mediaFile.fileKey,
-          file.fileMetadata.versionTag
+          mediaFile.key,
+          runningVersionTag
         )
       ).newVersionTag;
     }
@@ -450,7 +430,7 @@ const updatePost = async <T extends PostContent>(
   if (oldMediaFiles.length === deletedMediaFiles.length)
     file.fileMetadata.appData.previewThumbnail = undefined;
 
-  // Discover new files:
+  // Process new files:
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   let previewThumbnail: EmbeddedThumb | undefined;
@@ -468,8 +448,8 @@ const updatePost = async <T extends PostContent>(
     thumbnails.push(...additionalThumbnails);
     existingMediaFiles.push({
       fileId: file.fileId,
-      fileKey: payloadKey,
-      type: newMediaFile.file.type,
+      key: payloadKey,
+      contentType: newMediaFile.file.type,
     });
     previewThumbnail = previewThumbnail || tinyThumb;
   }
@@ -495,12 +475,19 @@ const updatePost = async <T extends PostContent>(
     ).newVersionTag;
   }
 
-  if (existingMediaFiles?.length)
-    (file.fileMetadata.appData.content as Media).mediaFiles =
-      existingMediaFiles && existingMediaFiles.length > 1 ? existingMediaFiles : undefined;
-  file.fileMetadata.appData.content.primaryMediaFile = existingMediaFiles?.[0];
+  if (file.fileMetadata.appData.content.type !== 'Article') {
+    if (existingMediaFiles?.length)
+      file.fileMetadata.appData.content.primaryMediaFile = {
+        fileId: file.fileId,
+        fileKey: existingMediaFiles[0].key,
+        type: existingMediaFiles[0].contentType,
+      };
+  }
+
   file.fileMetadata.appData.previewThumbnail =
-    file.fileMetadata.appData.previewThumbnail || previewThumbnail;
+    deletedMediaFiles.length && existingMediaFiles.length === 1
+      ? previewThumbnail
+      : file.fileMetadata.appData.previewThumbnail || previewThumbnail;
 
   const encrypt = !(
     file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||

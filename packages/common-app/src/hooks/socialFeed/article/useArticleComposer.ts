@@ -168,12 +168,6 @@ export const useArticleComposer = ({
     const uploadResult = await savePost({
       postFile: toPostFile,
       channelId: targetChannel.fileMetadata.appData.uniqueId as string,
-      mediaFiles:
-        primaryMediaFile !== null
-          ? primaryMediaFile === undefined
-            ? []
-            : [primaryMediaFile]
-          : undefined,
     });
 
     if (uploadResult)

@@ -185,7 +185,7 @@ export const uploadMail = async (
 
   for (let i = 0; files && i < files?.length; i++) {
     let newMediaFile = files[i];
-    const payloadKey = newMediaFile.fileKey || `${MAIL_MESSAGE_PAYLOAD_KEY}${i}`;
+    const payloadKey = newMediaFile.key || `${MAIL_MESSAGE_PAYLOAD_KEY}${i}`;
 
     if (!('file' in newMediaFile)) {
       // We ignore existing files when not distributing as they are just kept

@@ -113,9 +113,7 @@ export const ImageElementBlock = <V extends Value = Value>(
     setIsActive(true);
   }, []);
 
-  const pendingUpload = options.pendingUploadFiles?.find(
-    (file) => file.fileKey === element.fileKey
-  );
+  const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
   const pendingUrl = pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
 
   return (

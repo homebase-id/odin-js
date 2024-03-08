@@ -26,21 +26,26 @@ const RichTextEditor = lazy(() =>
 export const InnerFieldEditors = ({
   postFile,
   channel,
-  primaryMediaFile,
+
   onChange,
   updateVersionTag,
   disabled,
 }: {
   postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
   channel: NewDriveSearchResult<ChannelDefinition>;
-  primaryMediaFile: NewMediaFile | undefined | null;
-  onChange: (e: { target: { name: string; value: string | Blob | RichText | undefined } }) => void;
+
+  onChange: (e: {
+    target: {
+      name: string;
+      value: string | { fileKey: string; type: string } | RichText | undefined;
+    };
+  }) => void;
   updateVersionTag: (versionTag: string) => void;
   disabled?: boolean;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
   const { data: imageData } = useImage({
-    imageFileId: postFile.fileMetadata.appData.content.primaryMediaFile?.fileId || postFile.fileId,
+    imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
     imageDrive: getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
     lastModified: (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated,
@@ -106,16 +111,29 @@ export const InnerFieldEditors = ({
                 <ImageSelector
                   id="post_image"
                   name="primaryImageFileId"
-                  defaultValue={
-                    primaryMediaFile === null
-                      ? imageData?.url || undefined
-                      : primaryMediaFile === undefined
-                        ? undefined
-                        : primaryMediaFile?.file || imageData?.url || undefined
-                  }
-                  onChange={(e) =>
-                    onChange(e as { target: { name: string; value: Blob | undefined } })
-                  }
+                  defaultValue={imageData?.url}
+                  onChange={async (e) => {
+                    const result = await appendPostMedia(
+                      dotYouClient,
+                      targetDrive,
+                      postFile.fileId as string,
+                      e.target.value as Blob
+                    );
+                    console.log('result', result);
+                    if (!result) return null;
+
+                    updateVersionTag(result.newVersionTag);
+
+                    onChange({
+                      target: {
+                        name: 'primaryMediaFile',
+                        value: {
+                          fileKey: result.fileKey,
+                          type: e.target.value?.type || 'image/jpeg',
+                        },
+                      },
+                    });
+                  }}
                   sizeClass={`${
                     !postFile.fileMetadata.appData.content.primaryMediaFile
                       ? 'aspect-[16/9] md:aspect-[5/1]'

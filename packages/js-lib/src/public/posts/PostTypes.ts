@@ -1,3 +1,4 @@
+import { ContentType, PayloadDescriptor } from '../../../core';
 import {
   TargetDrive,
   EmbeddedThumb,
@@ -81,13 +82,14 @@ export const postTypeToDataType = (type: PostType): number => {
 
 export interface MediaFile {
   // When undefined.. It's the fileId of the postFile itself
-  fileId: string | undefined;
-  fileKey: string;
-  type: string;
+  fileId?: string | undefined;
+
+  key: string;
+  contentType: ContentType;
 }
 
 export interface NewMediaFile {
-  fileKey?: string;
+  key?: string;
   file: File | Blob;
   thumbnail?: ThumbnailFile;
 }
@@ -102,6 +104,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   globalTransitId: string | undefined;
   lastModified: number | undefined;
   userDate: number;
+  payloads: PayloadDescriptor[];
 }
 
 export type ReactAccess = 'emoji' | 'comment' | boolean;
@@ -115,7 +118,7 @@ export interface PostContent {
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
-  primaryMediaFile?: MediaFile;
+  primaryMediaFile?: { fileKey: string; fileId: string | undefined; type: string };
   type: 'Article' | 'Media' | 'Tweet';
 
   embeddedPost?: EmbeddedPost;
@@ -135,7 +138,7 @@ export interface ReadTimeStats {
 
 export interface Media extends PostContent {
   type: 'Media';
-  mediaFiles?: MediaFile[];
+  // mediaFiles?: MediaFile[];
 }
 
 // On hold for now, needs a proxy to get the linkMeta externally

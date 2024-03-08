@@ -8,7 +8,6 @@ import {
   HybridLink,
   ActionGroupOptionProps,
   Download,
-  Question,
   EmbeddedPostContent,
   FakeAnchor,
   useSocialFeed,
@@ -244,6 +243,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                 <EmbeddedPostContent
                   content={{
                     ...post.fileMetadata.appData.content,
+                    payloads: post.fileMetadata.payloads,
                     userDate: post.fileMetadata.appData.userDate || post.fileMetadata.created,
                     lastModified: post.fileMetadata.updated,
                     permalink: '',

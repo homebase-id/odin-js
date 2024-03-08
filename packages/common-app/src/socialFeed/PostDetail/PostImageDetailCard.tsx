@@ -19,6 +19,7 @@ import {
   Arrow,
 } from '../../..';
 import {
+  DEFAULT_PAYLOAD_KEY,
   DriveSearchResult,
   NewDriveSearchResult,
   SecurityGroupType,
@@ -50,14 +51,19 @@ export const PostImageDetailCard = ({
   const currIndex = attachmentKey ? parseInt(attachmentKey) : 0;
   const post = postFile?.fileMetadata.appData.content;
 
-  const mediaFileIds =
-    (post as Media)?.mediaFiles || (post?.primaryMediaFile ? [post.primaryMediaFile] : undefined);
+  const mediaFiles = postFile?.fileMetadata.payloads
+    ?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+    .map((p) => ({
+      fileId: undefined,
+      fileKey: p.key,
+      type: p.contentType,
+    }));
 
   const doSlide = (dir: 1 | -1) => {
     const dirtyIndex = currIndex + dir;
     let newIndex = dirtyIndex;
-    if (mediaFileIds && dirtyIndex >= mediaFileIds.length) {
-      newIndex = mediaFileIds.length - 1;
+    if (mediaFiles && dirtyIndex >= mediaFiles.length) {
+      newIndex = mediaFiles.length - 1;
 
       return;
     }
@@ -95,7 +101,10 @@ export const PostImageDetailCard = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currIndex]);
 
-  const currentMediaFile = mediaFileIds?.[currIndex];
+  const currentMediaFile = mediaFiles?.[currIndex];
+
+  console.log('currentMediaFile', currentMediaFile);
+  console.log('postFile', postFile);
 
   return (
     <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
@@ -119,7 +128,7 @@ export const PostImageDetailCard = ({
                 alt="post"
                 fit="contain"
                 previewThumbnail={
-                  mediaFileIds?.length === 1
+                  mediaFiles?.length === 1
                     ? postFile.fileMetadata.appData.previewThumbnail
                     : undefined
                 }
@@ -139,7 +148,7 @@ export const PostImageDetailCard = ({
                   className={`object-contain max-h-full`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={
-                    mediaFileIds?.length === 1
+                    mediaFiles?.length === 1
                       ? postFile.fileMetadata.appData.previewThumbnail
                       : undefined
                   }
@@ -164,7 +173,7 @@ export const PostImageDetailCard = ({
                 type="secondary"
               />
             ) : null}
-            {mediaFileIds && currIndex !== mediaFileIds.length - 1 ? (
+            {mediaFiles && currIndex !== mediaFiles.length - 1 ? (
               <ActionButton
                 icon={Arrow}
                 onClick={() => doSlide(1)}

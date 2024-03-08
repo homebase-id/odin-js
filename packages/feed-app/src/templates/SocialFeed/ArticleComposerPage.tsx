@@ -45,12 +45,10 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
-    primaryMediaFile,
 
     // Data updates
     setPostFile,
     setChannel,
-    setPrimaryMediaFile,
 
     // Status
     saveStatus,
@@ -197,7 +195,6 @@ export const ArticleComposerPage = () => {
             <InnerFieldEditors
               key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
-              primaryMediaFile={primaryMediaFile}
               channel={channel}
               updateVersionTag={(versionTag) =>
                 setPostFile({
@@ -218,10 +215,14 @@ export const ArticleComposerPage = () => {
                   dirtyPostFile.fileMetadata.appData.content.caption = (
                     e.target.value as string
                   ).trim();
-                } else if (e.target.name === 'primaryImageFileId') {
-                  setPrimaryMediaFile(
-                    e.target.value ? { file: e.target.value as Blob } : undefined
-                  );
+                } else if (e.target.name === 'primaryMediaFile') {
+                  if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
+                      fileId: undefined,
+                      fileKey: e.target.value.fileKey,
+                      type: e.target.value.type,
+                    };
+                  }
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
                 }

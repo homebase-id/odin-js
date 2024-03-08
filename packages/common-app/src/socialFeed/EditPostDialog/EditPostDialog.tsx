@@ -1,19 +1,19 @@
-import { PostContent, getChannelDrive, Media, MediaFile } from '@youfoundation/js-lib/public';
+import {
+  PostContent,
+  getChannelDrive,
+  Media,
+  MediaFile,
+  NewMediaFile,
+} from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ActionButton,
-  ExistingFileOverview,
-  Save,
-  VolatileInput,
-  t,
-} from '@youfoundation/common-app';
+import { ActionButton, FileOverview, Save, VolatileInput, t } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { usePost } from '../../hooks/socialFeed/post/usePost';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, DriveSearchResult } from '@youfoundation/js-lib/core';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
@@ -31,23 +31,15 @@ export const EditPostDialog = ({
     update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
   } = usePost();
   const [postFile, setPostFile] = useState<DriveSearchResult<PostContent>>({ ...incomingPostFile });
-  const [newMediaFiles, setNewMediaFiles] = useState<MediaFile[]>(
-    (postFile.fileMetadata.appData.content as Media).mediaFiles?.length
-      ? ((postFile.fileMetadata.appData.content as Media).mediaFiles as MediaFile[])
-      : postFile.fileMetadata.appData.content.primaryMediaFile
-      ? [postFile.fileMetadata.appData.content.primaryMediaFile]
-      : []
+  const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
+    postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
   );
 
   useEffect(() => {
     if (incomingPostFile) {
       setPostFile({ ...incomingPostFile });
       setNewMediaFiles(
-        (incomingPostFile.fileMetadata.appData.content as Media).mediaFiles?.length
-          ? ((incomingPostFile.fileMetadata.appData.content as Media).mediaFiles as MediaFile[])
-          : incomingPostFile.fileMetadata.appData.content.primaryMediaFile
-          ? [incomingPostFile.fileMetadata.appData.content.primaryMediaFile]
-          : []
+        incomingPostFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
       );
     }
   }, [incomingPostFile]);
@@ -97,12 +89,15 @@ export const EditPostDialog = ({
             placeholder={t("What's up?")}
             className={`w-full resize-none rounded-md border bg-transparent p-2`}
           />
-          <ExistingFileOverview
+          <FileOverview
             className="mt-2"
-            fileId={postFile.fileId}
-            mediaFiles={newMediaFiles}
+            files={newMediaFiles?.map((file) => ({
+              ...file,
+              fileId: (file as MediaFile).fileId || postFile.fileId,
+            }))}
             targetDrive={getChannelDrive(postFile.fileMetadata.appData.content.channelId)}
-            setMediaFiles={setNewMediaFiles}
+            setFiles={setNewMediaFiles}
+            cols={4}
           />
           <div className="-m-2 mt-3 flex flex-row-reverse items-center md:flex-nowrap">
             <ActionButton

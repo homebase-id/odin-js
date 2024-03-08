@@ -2,9 +2,7 @@ import { useMemo } from 'react';
 import {
   ActionButton,
   Triangle,
-  Image,
   Trash,
-  Video,
   useDotYouClient,
   ExtensionThumbnail,
 } from '@youfoundation/common-app';
@@ -74,20 +72,20 @@ export const FileOverview = ({
       if (!('file' in currFile))
         return targetDrive ? (
           <div key={index} className="relative">
-            {currFile.type.startsWith('image/') ? (
+            {currFile.contentType.startsWith('image/') ? (
               <OdinThumbnailImage
                 fileId={currFile.fileId}
-                fileKey={currFile.fileKey}
+                fileKey={currFile.key}
                 targetDrive={targetDrive}
                 className="aspect-square h-auto w-full object-cover"
                 dotYouClient={dotYouClient}
                 loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
               />
-            ) : currFile.type.startsWith('video/') ? (
+            ) : currFile.contentType.startsWith('video/') ? (
               <>
                 <OdinThumbnailImage
                   fileId={currFile.fileId}
-                  fileKey={currFile.fileKey}
+                  fileKey={currFile.key}
                   targetDrive={targetDrive}
                   className="aspect-square h-auto w-full object-cover"
                   dotYouClient={dotYouClient}
@@ -98,14 +96,18 @@ export const FileOverview = ({
                 </div>
               </>
             ) : (
-              <ExtensionThumbnail contentType={currFile.type} />
+              <ExtensionThumbnail contentType={currFile.contentType} />
             )}
             <ActionButton
               className="absolute bottom-3 right-3"
               icon={Trash}
               type="remove"
               size="square"
-              onClick={() => setFiles(files.filter((file) => file !== currFile) as NewFileArray)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setFiles(files.filter((file) => file !== currFile) as NewFileArray);
+              }}
             />
           </div>
         ) : null;
@@ -144,14 +146,16 @@ export const FileOverview = ({
             icon={Trash}
             type="remove"
             size="square"
-            onClick={() =>
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               setFiles([
                 ...(files.filter(
                   (file) =>
                     'file' in file && (file.file as File).name !== (currFile.file as File).name
                 ) as NewFileArray),
-              ])
-            }
+              ]);
+            }}
           />
         </div>
       );
@@ -166,69 +170,5 @@ export const FileOverview = ({
     >
       {renderedFiles}
     </div>
-  );
-};
-
-// TODO: Merge with FileOverview
-export const ExistingFileOverview = ({
-  fileId,
-  mediaFiles,
-  targetDrive,
-  setMediaFiles,
-  className,
-}: {
-  mediaFiles?: MediaFile[];
-  fileId: string;
-  targetDrive: TargetDrive;
-  setMediaFiles: (mediaFileIds: MediaFile[]) => void;
-  className?: string;
-}) => {
-  if (!mediaFiles) return null;
-
-  const renderedFiles = useMemo(() => {
-    return mediaFiles.map((image) => {
-      return (
-        <div key={image.fileId + image.fileKey} className="relative w-1/2 p-[2px] md:w-1/3">
-          {image.type === 'video' ? (
-            <Video
-              fileId={image.fileId || fileId}
-              fileKey={image.fileKey}
-              targetDrive={targetDrive}
-              lastModified={new Date().getTime()}
-              className="aspect-square h-full w-full"
-              directFileSizeLimit={10 * 1024}
-            />
-          ) : (
-            <Image
-              fileId={image.fileId || fileId}
-              fileKey={image.fileKey}
-              targetDrive={targetDrive}
-              lastModified={new Date().getTime()}
-              className="aspect-square h-full w-full"
-              fit="cover"
-            />
-          )}
-          <ActionButton
-            className="absolute bottom-3 right-3"
-            icon={Trash}
-            type="remove"
-            size="square"
-            onClick={(e) => {
-              e.preventDefault();
-              setMediaFiles(
-                mediaFiles.filter(
-                  (file) => file.fileId !== image.fileId || file.fileKey !== image.fileKey
-                )
-              );
-              return false;
-            }}
-          />
-        </div>
-      );
-    });
-  }, [mediaFiles]);
-
-  return (
-    <div className={`-m-[2px] flex flex-row flex-wrap ${className ?? ''}`}>{renderedFiles}</div>
   );
 };

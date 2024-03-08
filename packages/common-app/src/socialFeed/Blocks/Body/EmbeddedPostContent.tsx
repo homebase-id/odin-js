@@ -96,6 +96,7 @@ export const EmbeddedPostContent = ({
               globalTransitId: content.globalTransitId,
               lastModified: content.lastModified,
               content,
+              payloads: content.payloads,
               previewThumbnail: content.previewThumbnail,
               isEncrypted: isChannelPublic,
             }}
