@@ -103,9 +103,6 @@ export const PostImageDetailCard = ({
 
   const currentMediaFile = mediaFiles?.[currIndex];
 
-  console.log('currentMediaFile', currentMediaFile);
-  console.log('postFile', postFile);
-
   return (
     <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>

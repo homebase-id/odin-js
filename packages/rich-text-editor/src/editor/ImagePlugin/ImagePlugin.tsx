@@ -8,7 +8,7 @@ import {
 import { Value, insertNodes, TElement, getPluginOptions, removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ImageIcon, Pencil, Trash, t, useDotYouClient } from '@youfoundation/common-app';
 import { ImageDialog } from '@youfoundation/common-app';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
@@ -113,8 +113,10 @@ export const ImageElementBlock = <V extends Value = Value>(
     setIsActive(true);
   }, []);
 
-  const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
-  const pendingUrl = pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
+  const pendingUrl = useMemo(() => {
+    const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
+    return pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
+  }, []);
 
   return (
     <>

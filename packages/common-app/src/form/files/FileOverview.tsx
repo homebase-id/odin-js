@@ -38,7 +38,7 @@ export const FileOverview = ({
 }: FileOverViewProps | ExistingFileOverviewProps) => {
   if (!files || !files.length) return null;
   const dotYouClient = useDotYouClient().getDotYouClient();
-
+  console.log('files', files);
   const grabThumb = async (video: HTMLVideoElement, file: NewMediaFile, fileIndex: number) => {
     if (!video) return;
     if ('thumbnail' in file) return;

@@ -196,12 +196,13 @@ export const uploadMail = async (
       const payloadFromServer = await getPayloadBytes(
         dotYouClient,
         MailDrive,
-        newMediaFile.fileId as string,
+        newMediaFile.fileId || (conversation.fileId as string),
         payloadKey
       );
 
       if (!payloadFromServer) continue;
       const existingFile: NewMediaFile = {
+        key: payloadKey,
         file: new Blob([payloadFromServer.bytes], { type: payloadFromServer.contentType }),
       };
 

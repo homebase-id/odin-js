@@ -2,6 +2,7 @@ import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
+  MailDrive,
   getAllRecipients,
 } from '../../providers/MailProvider';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
@@ -182,7 +183,14 @@ const MailMessage = ({
                 formatToTimeAgoWithRelativeDetail(new Date(message.fileMetadata.created), true)}
             </p>
           </div>
-          <RichTextRenderer body={message.fileMetadata.appData.content.message} />
+          <RichTextRenderer
+            body={message.fileMetadata.appData.content.message}
+            options={{
+              defaultFileId: message.fileId,
+              imageDrive: MailDrive,
+              lastModified: message.fileMetadata.updated,
+            }}
+          />
           <MailAttachmentOverview
             className="mt-5"
             files={message.fileMetadata.payloads?.map((file) => ({

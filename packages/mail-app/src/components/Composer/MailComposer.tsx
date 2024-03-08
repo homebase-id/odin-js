@@ -285,7 +285,15 @@ export const MailComposer = ({
                 {t('Attachments')} <Plus className="h-4 w-4" />
               </span>
             </FileSelector>
-            <FileOverview files={files} cols={8} setFiles={setFiles} targetDrive={MailDrive} />
+            <FileOverview
+              files={files?.map((file) => ({
+                ...file,
+                fileId: (file as MediaFile).fileId || autosavedDsr.fileId,
+              }))}
+              cols={8}
+              setFiles={setFiles}
+              targetDrive={MailDrive}
+            />
           </div>
         </div>
 
