@@ -16,10 +16,12 @@ import {
   uploadHeader,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { ImageSource } from '@youfoundation/ui-lib';
 
 export const ConversationFileType = 8888;
 export const GroupConversationFileType = 8890;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
+export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
 export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
   fileState: 'active',
@@ -220,15 +222,46 @@ export const updateConversation = async (
 
 export const JOIN_CONVERSATION_COMMAND = 100;
 export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
+export const UPDATE_GROUP_CONVERSATION_COMMAND = 111;
+
 
 export interface JoinConversationRequest {
   conversationId: string;
   title: string;
 }
 
+export interface UpdateGroupConversationRequest {
+  title: string;
+  image?: ImageSource;
+  conversationId: string;
+}
+
 export interface JoinGroupConversationRequest extends JoinConversationRequest {
   recipients: string[];
 }
+
+export const updateGroupConversationCommand = async (
+  dotYouClient: DotYouClient,
+  conversation: GroupConversation,
+  conversationId: string
+) => {
+  const recipients = conversation.recipients;
+
+  if (!recipients || recipients.length === 0) { throw new Error('No recipients found for conversation'); }
+
+  const request: UpdateGroupConversationRequest = {
+    title: conversation.title,
+    conversationId,
+  };
+
+  return await sendCommand(dotYouClient, {
+    code: UPDATE_GROUP_CONVERSATION_COMMAND,
+    globalTransitIdList: [],
+    jsonMessage: jsonStringify64(request),
+    recipients,
+  }, ChatDrive);
+
+};
 
 export const requestConversationCommand = async (
   dotYouClient: DotYouClient,
