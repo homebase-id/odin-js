@@ -187,7 +187,8 @@ const ReplyAction = ({
           threadId={threadId}
           subject={subject}
           onDone={onDone}
-          key={draftFileId}
+          // We want to re-render when the versionTag changes.. So the latest updates are effectively rendered
+          key={`${draftFileId}${draftDsr?.fileMetadata.versionTag}`}
           forwardedMailThread={mailThread}
         />
       )}

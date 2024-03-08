@@ -454,13 +454,10 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     return newMailConversation;
   };
 
-  const getDraft = async (fileId: string) => {
-    return await getMailConversation(dotYouClient, fileId);
-  };
+  const getDraft = async (fileId: string) => await getMailConversation(dotYouClient, fileId);
 
-  const removeDraft = async (draftConversation: DriveSearchResult<MailConversation>) => {
-    return deleteFile(dotYouClient, MailDrive, draftConversation.fileId);
-  };
+  const removeDraft = async (draftConversation: DriveSearchResult<MailConversation>) =>
+    deleteFile(dotYouClient, MailDrive, draftConversation.fileId);
 
   return {
     getDraft: useQuery({
