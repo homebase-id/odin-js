@@ -38,7 +38,7 @@ export const PrimaryMedia = ({
 
   return (
     <div onClick={doNavigate}>
-      {primaryMediaFile?.type === 'image' ? (
+      {primaryMediaFile?.type.startsWith('image') ? (
         <Image
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}

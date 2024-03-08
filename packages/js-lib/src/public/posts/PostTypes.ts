@@ -83,7 +83,7 @@ export interface MediaFile {
   // When undefined.. It's the fileId of the postFile itself
   fileId: string | undefined;
   fileKey: string;
-  type: 'video' | 'image';
+  type: string;
 }
 
 export interface NewMediaFile {

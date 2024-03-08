@@ -6,6 +6,7 @@ import {
   Trash,
   Video,
   useDotYouClient,
+  ExtensionThumbnail,
 } from '@youfoundation/common-app';
 
 import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
@@ -73,14 +74,32 @@ export const FileOverview = ({
       if (!('file' in currFile))
         return targetDrive ? (
           <div key={index} className="relative">
-            <OdinThumbnailImage
-              fileId={currFile.fileId}
-              fileKey={currFile.fileKey}
-              targetDrive={targetDrive}
-              className="aspect-square h-auto w-full object-cover"
-              dotYouClient={dotYouClient}
-              loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
-            />
+            {currFile.type.startsWith('image/') ? (
+              <OdinThumbnailImage
+                fileId={currFile.fileId}
+                fileKey={currFile.fileKey}
+                targetDrive={targetDrive}
+                className="aspect-square h-auto w-full object-cover"
+                dotYouClient={dotYouClient}
+                loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
+              />
+            ) : currFile.type.startsWith('video/') ? (
+              <>
+                <OdinThumbnailImage
+                  fileId={currFile.fileId}
+                  fileKey={currFile.fileKey}
+                  targetDrive={targetDrive}
+                  className="aspect-square h-auto w-full object-cover"
+                  dotYouClient={dotYouClient}
+                  loadSize={{ pixelWidth: 400, pixelHeight: 400 }}
+                />
+                <div className="absolute inset-0 flex flex-row items-center justify-center">
+                  <Triangle className="text-background h-7 w-7" />
+                </div>
+              </>
+            ) : (
+              <ExtensionThumbnail contentType={currFile.type} />
+            )}
             <ActionButton
               className="absolute bottom-3 right-3"
               icon={Trash}
@@ -96,44 +115,30 @@ export const FileOverview = ({
           ? window.URL.createObjectURL(currFile.file)
           : URL.createObjectURL(currFile.file);
 
-      if (currFile.file.type === 'video/mp4') {
-        return (
-          <div key={(currFile.file as File).name || index} className="relative">
-            <video
-              src={url}
-              onLoadedMetadata={(e) => (e.currentTarget.currentTime = 1)}
-              onSeeked={(e) => grabThumb(e.currentTarget, currFile, index)}
-              className="aspect-square h-auto w-full object-cover"
-              controls={false}
-            />
-            <div className="absolute inset-0 flex flex-row items-center justify-center">
-              <Triangle className="text-background h-7 w-7" />
-            </div>
-            <ActionButton
-              className="absolute bottom-3 right-3"
-              icon={Trash}
-              type="remove"
-              size="square"
-              onClick={() =>
-                setFiles([
-                  ...(files.filter(
-                    (file) =>
-                      'file' in file && (file.file as File).name !== (currFile.file as File).name
-                  ) as NewFileArray),
-                ])
-              }
-            />
-          </div>
-        );
-      }
-
       return (
         <div key={(currFile.file as File).name || index} className="relative">
-          <img
-            src={url}
-            onLoad={() => URL.revokeObjectURL(url)}
-            className="aspect-square h-auto w-full object-cover"
-          />
+          {currFile.file.type === 'video/mp4' ? (
+            <>
+              <video
+                src={url}
+                onLoadedMetadata={(e) => (e.currentTarget.currentTime = 1)}
+                onSeeked={(e) => grabThumb(e.currentTarget, currFile, index)}
+                className="aspect-square h-auto w-full object-cover"
+                controls={false}
+              />
+              <div className="absolute inset-0 flex flex-row items-center justify-center">
+                <Triangle className="text-background h-7 w-7" />
+              </div>
+            </>
+          ) : currFile.file.type.startsWith('image/') ? (
+            <img
+              src={url}
+              onLoad={() => URL.revokeObjectURL(url)}
+              className="aspect-square h-auto w-full object-cover"
+            />
+          ) : (
+            <ExtensionThumbnail contentType={currFile.file.type} />
+          )}
           <ActionButton
             className="absolute bottom-3 right-3"
             icon={Trash}

@@ -85,7 +85,7 @@ export const MailComposer = ({
     existingDraft?.fileMetadata.payloads?.map((payload) => ({
       fileId: existingDraft.fileId,
       fileKey: payload.key,
-      type: payload.contentType.includes('video') ? 'video' : 'image',
+      type: payload.contentType,
     })) || []
   );
 
@@ -278,6 +278,7 @@ export const MailComposer = ({
 
           <div>
             <FileSelector
+              accept="*"
               onChange={(mediaFiles) =>
                 setFiles([...(files ?? []), ...mediaFiles.map((file) => ({ file }))])
               }

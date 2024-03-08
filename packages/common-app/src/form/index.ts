@@ -9,6 +9,7 @@ export * from './image/ImageSelector';
 export * from './image/ImageUploadAndCrop';
 export * from './image/ImageDialog/ImageDialog';
 export * from './image/ImageDialog/ImageCropper';
+export * from './files/ExtensionThumbnail';
 export * from './files/FileOverview';
 export * from './files/FileSelector';
 export * from './VolatileInput';

@@ -113,7 +113,7 @@ export const savePost = async <T extends PostContent>(
       mediaFiles.push({
         fileId: undefined,
         fileKey: payloadKey,
-        type: 'video',
+        type: newMediaFile.file.type,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -134,7 +134,7 @@ export const savePost = async <T extends PostContent>(
       mediaFiles.push({
         fileId: undefined,
         fileKey: payloadKey,
-        type: 'image',
+        type: newMediaFile.file.type,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -469,7 +469,7 @@ const updatePost = async <T extends PostContent>(
     existingMediaFiles.push({
       fileId: file.fileId,
       fileKey: payloadKey,
-      type: 'image',
+      type: newMediaFile.file.type,
     });
     previewThumbnail = previewThumbnail || tinyThumb;
   }

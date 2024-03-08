@@ -218,7 +218,7 @@ export const uploadMail = async (
       payloads.push(payload);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else {
+    } else if (newMediaFile.file.type.startsWith('image/')) {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
         payloadKey
@@ -231,6 +231,11 @@ export const uploadMail = async (
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else {
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.file,
+      });
     }
   }
 

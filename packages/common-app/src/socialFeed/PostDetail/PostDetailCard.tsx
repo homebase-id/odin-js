@@ -125,7 +125,7 @@ export const PostDetailCard = ({
           />
         ) : (
           <div className="relative mb-5 sm:w-full">
-            {post.primaryMediaFile.type === 'image' ? (
+            {post.primaryMediaFile.type.startsWith('image') ? (
               <Image
                 odinId={odinId}
                 className="rounded object-cover object-center"

@@ -1,4 +1,4 @@
-import { DotYouClient, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
 import {
   Image,
@@ -92,7 +92,7 @@ export const MediaGallery = ({
                 >
                   <Image
                     odinId={odinId}
-                    className={`h-full w-auto ${file.type === 'video' ? 'blur-sm' : ''}`}
+                    className={`h-full w-auto ${file.type.startsWith('video') ? 'blur-sm' : ''}`}
                     fileId={file.fileId || fileId}
                     globalTransitId={file.fileId ? undefined : globalTransitId}
                     fileKey={file.fileKey}
@@ -100,7 +100,7 @@ export const MediaGallery = ({
                     targetDrive={targetDrive}
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}
-                    avoidPayload={file.type === 'video'}
+                    avoidPayload={file.type.startsWith('video')}
                     onLoad={() => setSomeLoaded(true)}
                   />
 
@@ -108,7 +108,7 @@ export const MediaGallery = ({
                     <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
                       <span className="block text-center">+{countExcludedFromView}</span>
                     </div>
-                  ) : file.type === 'video' ? (
+                  ) : file.type.startsWith('video') ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
                         <Triangle className="text-foreground h-12 w-12" />
