@@ -13,9 +13,11 @@ import { ImageIcon, Pencil, Trash, t, useDotYouClient } from '@youfoundation/com
 import { ImageDialog } from '@youfoundation/common-app';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
+import { NewMediaFile } from '@youfoundation/js-lib/public';
 
 export interface TImageElement extends TElement {
   fileKey: string;
+  lastModified?: number;
 }
 
 export const ELEMENT_IMAGE = 'local_image';
@@ -25,6 +27,7 @@ export const insertImage = <V extends Value>(editor: PlateEditor<V>, fileKey: st
   const image: TImageElement = {
     type: ELEMENT_IMAGE,
     fileKey,
+    lastModified: new Date().getTime(),
     children: [text],
   };
   const paragraph = {
@@ -38,11 +41,9 @@ export const insertImage = <V extends Value>(editor: PlateEditor<V>, fileKey: st
 export interface MediaOptions {
   mediaDrive: TargetDrive;
   fileId: string;
+  pendingUploadFiles?: NewMediaFile[];
   onAppend: (file: Blob) => Promise<{ fileId: string; fileKey: string } | null>;
-  onRemove: (payload: {
-    fileId: string;
-    fileKey: string;
-  }) => Promise<{ newVersionTag: string } | null>;
+  onRemove: (payload: { fileId: string; fileKey: string }) => Promise<unknown | null>;
 }
 
 interface ImageToolbarButtonProps extends ToolbarButtonProps {
@@ -67,9 +68,7 @@ export const ImageToolbarButton = ({ mediaOptions, ...props }: ImageToolbarButto
       </ToolbarButton>
       <ImageDialog
         isOpen={isActive}
-        onCancel={() => {
-          setIsActive(false);
-        }}
+        onCancel={() => setIsActive(false)}
         onConfirm={async (image) => {
           if (image) {
             const uploadResult = await mediaOptions.onAppend(image);
@@ -102,7 +101,7 @@ export const ImageElementBlock = <V extends Value = Value>(
     if (await options?.onRemove({ fileId: options.fileId, fileKey: element.fileKey })) {
       setTimeout(() => {
         removeNodes(editor, { at: path });
-      }, 1000);
+      }, 10);
     }
   };
 
@@ -114,27 +113,38 @@ export const ImageElementBlock = <V extends Value = Value>(
     setIsActive(true);
   }, []);
 
+  const pendingUpload = options.pendingUploadFiles?.find(
+    (file) => file.fileKey === element.fileKey
+  );
+  const pendingUrl = pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
+
   return (
     <>
       <div
         {...attributes}
         {...nodeProps}
         className="relative aspect-square w-full max-w-lg bg-slate-50 dark:bg-slate-800"
+        data-file-id={options.fileId}
+        data-file-key={element.fileKey}
       >
         {children}
         <div className="absolute inset-4 mr-auto max-w-lg flex-grow">
-          <OdinThumbnailImage
-            dotYouClient={dotYouClient}
-            fileId={options.fileId}
-            fileKey={element.fileKey}
-            targetDrive={options.mediaDrive}
-            lastModified={new Date().getTime()}
-            loadSize={{
-              pixelWidth: 400,
-              pixelHeight: 400,
-            }}
-            className="absolute inset-0 h-full w-full object-contain"
-          />
+          {pendingUrl ? (
+            <img src={pendingUrl} className="absolute inset-0 h-full w-full object-contain" />
+          ) : (
+            <OdinThumbnailImage
+              dotYouClient={dotYouClient}
+              fileId={options.fileId}
+              fileKey={element.fileKey}
+              targetDrive={options.mediaDrive}
+              lastModified={element.lastModified || new Date().getTime()}
+              loadSize={{
+                pixelWidth: 400,
+                pixelHeight: 400,
+              }}
+              className="absolute inset-0 h-full w-full object-contain"
+            />
+          )}
         </div>
         {/* We use buttons instead of our ActionButton because of endless rerenders when used inside of the RTE */}
         <button

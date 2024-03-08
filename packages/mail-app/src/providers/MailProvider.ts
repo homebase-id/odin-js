@@ -184,8 +184,8 @@ export const uploadMail = async (
   const previewThumbnails: EmbeddedThumb[] = [];
 
   for (let i = 0; files && i < files?.length; i++) {
-    const payloadKey = `${MAIL_MESSAGE_PAYLOAD_KEY}${i}`;
     let newMediaFile = files[i];
+    const payloadKey = newMediaFile.fileKey || `${MAIL_MESSAGE_PAYLOAD_KEY}${i}`;
 
     if (!('file' in newMediaFile)) {
       // We ignore existing files when not distributing as they are just kept

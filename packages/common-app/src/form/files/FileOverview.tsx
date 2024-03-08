@@ -98,7 +98,7 @@ export const FileOverview = ({
 
       if (currFile.file.type === 'video/mp4') {
         return (
-          <div key={(currFile.file as File).name} className="relative">
+          <div key={(currFile.file as File).name || index} className="relative">
             <video
               src={url}
               onLoadedMetadata={(e) => (e.currentTarget.currentTime = 1)}
@@ -128,7 +128,7 @@ export const FileOverview = ({
       }
 
       return (
-        <div key={(currFile.file as File).name} className="relative">
+        <div key={(currFile.file as File).name || index} className="relative">
           <img
             src={url}
             onLoad={() => URL.revokeObjectURL(url)}

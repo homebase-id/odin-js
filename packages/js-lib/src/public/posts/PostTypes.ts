@@ -87,6 +87,7 @@ export interface MediaFile {
 }
 
 export interface NewMediaFile {
+  fileKey?: string;
   file: File | Blob;
   thumbnail?: ThumbnailFile;
 }

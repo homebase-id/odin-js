@@ -232,7 +232,7 @@ export const RichTextEditor = ({
           plugins={plugins}
           onChange={(newValue) => {
             const isActualChange = innerEditor?.operations.some(
-              (op: any) => 'set_selection' !== op.type
+              (op: { type: string }) => 'set_selection' !== op.type
             );
 
             if (isActualChange) onChange({ target: { name: name, value: newValue } });

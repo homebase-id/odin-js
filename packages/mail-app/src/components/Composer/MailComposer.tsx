@@ -10,6 +10,7 @@ import {
   PaperPlane,
   Plus,
   Save,
+  Trash,
   getTextRootsRecursive,
   t,
 } from '@youfoundation/common-app';
@@ -22,6 +23,7 @@ import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
+  MAIL_MESSAGE_PAYLOAD_KEY,
   MailConversation,
   MailDrive,
 } from '../../providers/MailProvider';
@@ -249,6 +251,25 @@ export const MailComposer = ({
                     },
                   })
                 }
+                mediaOptions={
+                  autosavedDsr.fileId
+                    ? {
+                        fileId: autosavedDsr.fileId,
+                        mediaDrive: MailDrive,
+                        pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
+                        onAppend: async (file) => {
+                          const fileKey = `${MAIL_MESSAGE_PAYLOAD_KEY}i${files.length}`;
+
+                          setFiles([...files, { file: file, fileKey: fileKey }]);
+                          return { fileId: autosavedDsr.fileId as string, fileKey: fileKey };
+                        },
+                        onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
+                          setFiles(files.filter((f) => f.fileKey !== fileKey));
+                          return true;
+                        },
+                      }
+                    : undefined
+                }
                 placeholder="Your message"
                 className="min-h-44 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
@@ -289,25 +310,37 @@ export const MailComposer = ({
             {t('Save as draft')}
           </ActionButton>
 
-          <ActionButton
-            type="secondary"
-            onClick={(e) => {
-              e.preventDefault();
-              doDiscard();
-            }}
-            confirmOptions={
-              getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length
-                ? {
-                    title: t('Discard email'),
-                    body: t('Are you sure you want to discard this email?'),
-                    buttonText: t('Discard'),
-                  }
-                : undefined
-            }
-            className="mr-auto"
-          >
-            {t('Discard')}
-          </ActionButton>
+          <div className="mr-auto flex flex-row gap-2">
+            <ActionButton
+              type="secondary"
+              onClick={(e) => {
+                e.preventDefault();
+                onDone();
+              }}
+            >
+              {t('Cancel')}
+            </ActionButton>
+            {autosavedDsr.fileId ? (
+              <ActionButton
+                type="secondary"
+                icon={Trash}
+                size="square"
+                onClick={(e) => {
+                  e.preventDefault();
+                  doDiscard();
+                }}
+                confirmOptions={
+                  getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length
+                    ? {
+                        title: t('Discard draft'),
+                        body: t('Are you sure you want to discard this draft?'),
+                        buttonText: t('Discard'),
+                      }
+                    : undefined
+                }
+              />
+            ) : null}
+          </div>
         </div>
       </form>
     </>

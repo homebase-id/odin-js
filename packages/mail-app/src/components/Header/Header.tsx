@@ -1,5 +1,3 @@
-import { useSearchParams } from 'react-router-dom';
-
 import {
   t,
   Input,
@@ -9,7 +7,6 @@ import {
   Plus,
   Bars,
 } from '@youfoundation/common-app';
-import { ComposerDialog } from '../Composer/MailComposerDialog';
 import { ROOT_PATH } from '../../app/App';
 
 export const MailHomeHeader = () => {
