@@ -27,9 +27,9 @@ const ListItemWrapper = ({
   onClick: (() => void) | undefined;
   isActive: boolean;
   children: ReactNode;
-  order?: number;
+  order: number | undefined;
 }) => (
-  <div className="px-2" style={{ order: order }}>
+  <div className="px-2" style={{ order: order, opacity: order ? 100 : 0 }}>
     <div
       onClick={onClick}
       className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 hover:bg-primary/20 ${
@@ -101,10 +101,12 @@ export const ConversationWithYourselfItem = ({
 }) => {
   return (
     <ListItemWrapper isActive={isActive} onClick={onClick} order={1}>
-      <OwnerImage
-        className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
-        size="sm"
-      />
+      <div className="h-[3rem] w-[3rem] flex-shrink-0">
+        <OwnerImage
+          className="flex-shrink-0 border border-neutral-200 dark:border-neutral-800"
+          size="sm"
+        />
+      </div>
       <ConversationBody
         title={
           <>
@@ -135,7 +137,7 @@ const ConversationBody = ({
         ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
     [data]
   );
-  const lastMessage = flatMessages?.[0];
+  const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
 
   const lastReadTime = conversation?.fileMetadata.appData.content.lastReadTime;
   const unreadCount =
@@ -148,9 +150,13 @@ const ConversationBody = ({
   const lastMessageContent = lastMessage?.fileMetadata.appData.content;
 
   useEffect(() => {
+    if (!lastMessage) {
+      setOrder && setOrder(2);
+      return;
+    }
     const date = lastMessage?.fileMetadata.created;
     setOrder && date && setOrder(new Date().getTime() - date);
-  }, [flatMessages]);
+  }, [lastMessage]);
 
   return (
     <>

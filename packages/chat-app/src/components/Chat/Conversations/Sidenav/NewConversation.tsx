@@ -47,6 +47,7 @@ export const NewConversation = () => {
       </form>
       <div className="overflow-auto">
         <ConversationListItemWrapper
+          order={1}
           onClick={() => {
             navigate(`${CHAT_ROOT}/new-group`);
           }}
