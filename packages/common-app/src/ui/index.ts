@@ -41,6 +41,8 @@ export * from './Icons/ChatBubble';
 export * from './Icons/Check';
 export * from './Icons/Clock';
 export * from './Icons/Circles';
+export * from './Icons/PaperClip';
+export * from './Icons/FileType';
 export * from './Icons/PaperPlane';
 export * from './Icons/Clipboard';
 export * from './Icons/Chevron';

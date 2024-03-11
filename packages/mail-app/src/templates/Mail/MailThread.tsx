@@ -8,6 +8,7 @@ import {
   Archive,
   ArrowLeft,
   ErrorNotification,
+  PaperClip,
   ReplyArrow,
   Share,
   Trash,
@@ -27,6 +28,7 @@ import { MailHistory } from './MailHistory';
 import { MailThreadInfo } from './MailThreadInfo';
 import { MailComposer } from '../../components/Composer/MailComposer';
 import { useSearchParams } from 'react-router-dom';
+import { MailAttachmentsInfo } from './MailAttachmentsInfo';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
@@ -231,6 +233,7 @@ const MailThreadHeader = ({
   className?: string;
 }) => {
   const [showMailThreadInfo, setShowMailThreadInfo] = useState(false);
+  const [showAttachmentsInfo, setShowAttachmentsInfo] = useState(false);
 
   const {
     mutate: removeThread,
@@ -315,24 +318,39 @@ const MailThreadHeader = ({
           </>
         )}
         <h1 className="ml-3 text-xl">{subject}</h1>
-        <ActionGroup
-          className="ml-auto"
-          type={'mute'}
-          size="square"
-          options={[
-            {
-              label: t('Thread info'),
-              onClick: () => setShowMailThreadInfo(true),
-            },
-            {
-              label: t('Mark as unread'),
-              onClick: doMarkAsUnread,
-            },
-          ]}
-        />
+        <div className="ml-auto flex flex-row items-center">
+          <ActionButton
+            onClick={() => setShowAttachmentsInfo(true)}
+            icon={PaperClip}
+            type="mute"
+            size="none"
+            className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+          />
+          <ActionGroup
+            className="ml-auto"
+            type={'mute'}
+            size="square"
+            options={[
+              {
+                label: t('Thread info'),
+                onClick: () => setShowMailThreadInfo(true),
+              },
+              {
+                label: t('Mark as unread'),
+                onClick: doMarkAsUnread,
+              },
+            ]}
+          />
+        </div>
       </div>
       {showMailThreadInfo ? (
         <MailThreadInfo mailThread={mailThread} onClose={() => setShowMailThreadInfo(false)} />
+      ) : null}
+      {showAttachmentsInfo ? (
+        <MailAttachmentsInfo
+          mailThread={mailThread}
+          onClose={() => setShowAttachmentsInfo(false)}
+        />
       ) : null}
     </>
   );
