@@ -118,7 +118,9 @@ const ChatHeader = ({
               size="sm"
             />
           ) : withYourself ? (
-            <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
+            <div className="h-[3rem] w-[3rem] flex-shrink-0">
+              <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
+            </div>
           ) : (
             <div className="rounded-full bg-primary/20 p-3">
               <Persons className="h-6 w-6" />

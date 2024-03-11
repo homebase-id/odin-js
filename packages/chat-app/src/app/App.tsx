@@ -59,6 +59,7 @@ const INCLUDED_QUERY_KEYS = [
   'conversation',
   'conversations',
   'chat-reaction',
+  'connectionDetails',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: Infinity,

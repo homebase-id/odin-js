@@ -239,6 +239,7 @@ const SearchConversation = ({
         {isActive ? (
           <>
             <ConversationListItemWrapper
+              order={1}
               onClick={() => {
                 navigate(`${CHAT_ROOT}/new-group`);
               }}

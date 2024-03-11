@@ -1,6 +1,5 @@
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { useState, useRef } from 'react';
-import { Image, t, useIntersection } from '@youfoundation/common-app';
+import { Image, t } from '@youfoundation/common-app';
 import { useSiteData } from '@youfoundation/common-app';
 
 import { Person } from '@youfoundation/common-app';
@@ -54,16 +53,9 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
 };
 
 export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProps) => {
-  const [isInView, setIsInView] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useIntersection(wrapperRef, () => {
-    setIsInView(true);
-  });
-
   return (
     <>
-      {odinId && isInView ? (
+      {odinId ? (
         <img
           src={`https://${odinId}/pub/image`}
           className={`${
@@ -81,7 +73,7 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
           }}
         />
       ) : (
-        <div ref={wrapperRef}>
+        <div>
           <Person
             className={
               size === 'xs'

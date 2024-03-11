@@ -18,7 +18,6 @@ export const AuthorName = ({ odinId }: { odinId?: string }) => {
 
 export const OwnerName = () => {
   const { owner } = useSiteData().data ?? {};
-
   return <>{owner?.displayName}</>;
 };
 
