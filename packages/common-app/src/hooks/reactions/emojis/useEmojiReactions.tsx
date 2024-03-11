@@ -38,7 +38,9 @@ export const useEmojiReactions = (context?: ReactionContext) => {
       queryFn: ({ pageParam }) => fetch({ context, pageParam }),
       staleTime: 1000 * 60 * 1, // 1 minute
       getNextPageParam: (lastPage) =>
-        lastPage && lastPage.reactions?.length >= PAGE_SIZE ? lastPage.cursor : undefined,
+        lastPage?.reactions && lastPage.reactions?.length >= PAGE_SIZE
+          ? lastPage.cursor
+          : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled:

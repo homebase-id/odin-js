@@ -50,7 +50,9 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetch({ context, pageParam }),
       getNextPageParam: (lastPage) =>
-        lastPage && lastPage.comments?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage?.comments && lastPage.comments?.length >= PAGE_SIZE
+          ? lastPage.cursorState
+          : undefined,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       enabled: !!context.authorOdinId && !!context.channelId && !!context.target.globalTransitId,
