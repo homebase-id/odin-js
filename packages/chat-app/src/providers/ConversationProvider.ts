@@ -84,6 +84,8 @@ export const getConversations = async (
 
   const response = await queryBatch(dotYouClient, params, ro);
 
+  if (!response) return null;
+
   return {
     ...response,
     searchResults:
@@ -224,7 +226,6 @@ export const JOIN_CONVERSATION_COMMAND = 100;
 export const JOIN_GROUP_CONVERSATION_COMMAND = 110;
 export const UPDATE_GROUP_CONVERSATION_COMMAND = 111;
 
-
 export interface JoinConversationRequest {
   conversationId: string;
   title: string;
@@ -247,20 +248,25 @@ export const updateGroupConversationCommand = async (
 ) => {
   const recipients = conversation.recipients;
 
-  if (!recipients || recipients.length === 0) { throw new Error('No recipients found for conversation'); }
+  if (!recipients || recipients.length === 0) {
+    throw new Error('No recipients found for conversation');
+  }
 
   const request: UpdateGroupConversationRequest = {
     title: conversation.title,
     conversationId,
   };
 
-  return await sendCommand(dotYouClient, {
-    code: UPDATE_GROUP_CONVERSATION_COMMAND,
-    globalTransitIdList: [],
-    jsonMessage: jsonStringify64(request),
-    recipients,
-  }, ChatDrive);
-
+  return await sendCommand(
+    dotYouClient,
+    {
+      code: UPDATE_GROUP_CONVERSATION_COMMAND,
+      globalTransitIdList: [],
+      jsonMessage: jsonStringify64(request),
+      recipients,
+    },
+    ChatDrive
+  );
 };
 
 export const requestConversationCommand = async (

@@ -17,9 +17,9 @@
     "UNSUPPORTED_dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/chat-app && VITE_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/chat-app/"
   },
   "dependencies": {
-    "@tanstack/query-sync-storage-persister": "^5.17.9",
-    "@tanstack/react-query": "^5.4.3",
-    "@tanstack/react-query-persist-client": "^5.17.9",
+    "@tanstack/query-sync-storage-persister": "^5.25.0",
+    "@tanstack/react-query": "^5.25.0",
+    "@tanstack/react-query-persist-client": "^5.25.0",
     "@tanstack/react-virtual": "^3.0.0-beta.68",
     "@youfoundation/common-app": "*",
     "@youfoundation/js-lib": "*",
