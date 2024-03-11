@@ -1,5 +1,6 @@
-import { ContentType, PayloadDescriptor } from '../../../core';
 import {
+  ContentType,
+  PayloadDescriptor,
   TargetDrive,
   EmbeddedThumb,
   ThumbnailFile,
