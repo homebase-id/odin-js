@@ -44,7 +44,7 @@ export const ConversationsSidebar = ({
 
   const flatConversations =
     (conversations?.pages
-      ?.flatMap((page) => page.searchResults)
+      ?.flatMap((page) => page?.searchResults)
       ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
 
   return (
