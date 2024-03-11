@@ -76,7 +76,9 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMessages(conversationId as string, pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage?.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
+          ? lastPage.cursorState
+          : undefined,
       enabled: !!conversationId,
       staleTime: 1000 * 60 * 1, // 1 minute; The chat messages are already invalidated by the websocket;
     }),
