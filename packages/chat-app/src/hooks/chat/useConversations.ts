@@ -15,7 +15,7 @@ export const useConversations = () => {
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchConversations(pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage.searchResults && lastPage.searchResults?.length >= PAGE_SIZE
+        lastPage?.searchResults && lastPage.searchResults?.length >= PAGE_SIZE
           ? lastPage.cursorState
           : undefined,
     }),
