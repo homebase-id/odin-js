@@ -5,7 +5,7 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { MailDrive } from '../../providers/MailProvider';
 import { useMailAttachment } from '../../hooks/mail/useMailConversation';
 
-interface AttachmentItem extends PayloadDescriptor {
+export interface AttachmentItem extends PayloadDescriptor {
   fileId: string;
 }
 
@@ -66,7 +66,7 @@ export const AttachmentFile = ({
   return (
     <div
       key={file.key}
-      className={`flex cursor-pointer flex-row items-center gap-2 ${className || ''}`}
+      className={`flex cursor-pointer flex-row items-center gap-2 bg-background transition-colors hover:bg-primary/10 hover:shadow-md ${className || ''}`}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
