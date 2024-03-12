@@ -170,7 +170,6 @@ const MailThreadActions = ({
             setIsReply(false);
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.delete('draft');
-            console.log('done', newSearchParams.toString());
             setSearchParams(newSearchParams);
           }}
         />
