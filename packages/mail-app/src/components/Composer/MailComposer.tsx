@@ -247,25 +247,21 @@ export const MailComposer = ({
                     },
                   })
                 }
-                mediaOptions={
-                  autosavedDsr.fileId
-                    ? {
-                        fileId: autosavedDsr.fileId,
-                        mediaDrive: MailDrive,
-                        pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
-                        onAppend: async (file) => {
-                          const fileKey = `${MAIL_MESSAGE_PAYLOAD_KEY}i${files.length}`;
+                mediaOptions={{
+                  fileId: autosavedDsr.fileId || '',
+                  mediaDrive: MailDrive,
+                  pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
+                  onAppend: async (file) => {
+                    const fileKey = `${MAIL_MESSAGE_PAYLOAD_KEY}i${files.length}`;
 
-                          setFiles([...files, { file: file, key: fileKey }]);
-                          return { fileId: autosavedDsr.fileId as string, fileKey: fileKey };
-                        },
-                        onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
-                          setFiles(files.filter((f) => f.key !== fileKey));
-                          return true;
-                        },
-                      }
-                    : undefined
-                }
+                    setFiles([...files, { file: file, key: fileKey }]);
+                    return { fileId: autosavedDsr.fileId || '', fileKey: fileKey };
+                  },
+                  onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
+                    setFiles(files.filter((f) => f.key !== fileKey));
+                    return true;
+                  },
+                }}
                 placeholder="Your message"
                 className="min-h-44 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />

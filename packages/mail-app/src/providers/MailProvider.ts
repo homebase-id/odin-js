@@ -228,6 +228,7 @@ export const uploadMail = async (
       payloads.push({
         key: payloadKey,
         payload: newMediaFile.file,
+        previewThumbnail: tinyThumb,
         descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
       });
 

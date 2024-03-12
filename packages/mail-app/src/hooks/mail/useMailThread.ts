@@ -15,6 +15,7 @@ import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
+const FIVE_MINUTES = 5 * 60 * 1000;
 const PAGE_SIZE = 100;
 
 export const useMailThread = (props?: { threadId: string | undefined }) => {
@@ -68,6 +69,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
       queryFn: ({ pageParam }) => fetchMailConversations(threadId as string, pageParam),
       getNextPageParam: (lastPage) =>
         lastPage.results?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+      staleTime: FIVE_MINUTES,
     }),
     remove: useMutation({
       mutationFn: removeMailThread,

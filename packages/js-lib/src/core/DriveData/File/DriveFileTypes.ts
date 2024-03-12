@@ -57,6 +57,7 @@ export interface ThumbnailFile extends ImageSize {
 export interface PayloadFile {
   key: string;
   payload: File | Blob;
+  previewThumbnail?: EmbeddedThumb;
   descriptorContent?: string;
 }
 
@@ -110,6 +111,7 @@ export interface PayloadDescriptor {
   bytesWritten: number;
   lastModified: number;
   thumbnails: ThumbnailDescriptor[];
+  previewThumbnail: EmbeddedThumb | undefined;
   iv: Uint8Array | undefined;
 }
 
@@ -121,6 +123,7 @@ export interface UploadPayloadDescriptor {
   payloadKey: string;
   descriptorContent: string | undefined;
   thumbnails?: UploadThumbnailDescriptor[];
+  previewThumbnail?: EmbeddedThumb;
   iv: Uint8Array | undefined;
 }
 

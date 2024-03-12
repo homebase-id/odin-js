@@ -105,6 +105,7 @@ function App() {
             <Route index={true} element={<MailHome />} />
             <Route path=":filter" element={<MailHome />} />
             <Route path=":filter/:conversationKey" element={<MailThread />} />
+            <Route path=":filter/:conversationKey/:messageKey" element={<MailThread />} />
             <Route
               path=":filter/:conversationKey/:messageKey/:payloadKey"
               element={<MailThread />}

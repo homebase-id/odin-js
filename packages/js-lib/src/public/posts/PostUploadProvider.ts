@@ -437,14 +437,17 @@ const updatePost = async <T extends PostContent>(
   for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
     const newMediaFile = newMediaFiles[i];
     const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${oldMediaFiles.length + i}`;
-    payloads.push({
-      payload: newMediaFile.file,
-      key: payloadKey,
-    });
+
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       newMediaFile.file,
       payloadKey
     );
+
+    payloads.push({
+      payload: newMediaFile.file,
+      key: payloadKey,
+      previewThumbnail: tinyThumb,
+    });
     thumbnails.push(...additionalThumbnails);
     existingMediaFiles.push({
       fileId: file.fileId,
@@ -522,12 +525,13 @@ export const appendPostMedia = async (
   const thumbnails: ThumbnailFile[] = [];
 
   const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${header.fileMetadata.payloads.length + 1}`;
+  const { additionalThumbnails, tinyThumb } = await createThumbnails(file, payloadKey);
   payloads.push({
     payload: file,
     key: payloadKey,
+    previewThumbnail: tinyThumb,
   });
 
-  const { additionalThumbnails } = await createThumbnails(file, payloadKey);
   thumbnails.push(...additionalThumbnails);
 
   const response = await appendDataToFile(

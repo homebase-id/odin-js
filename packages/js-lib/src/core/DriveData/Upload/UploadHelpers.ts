@@ -105,6 +105,7 @@ export const buildManifest = (
     PayloadDescriptors: payloads?.map((payload) => ({
       payloadKey: payload.key,
       descriptorContent: payload.descriptorContent,
+      previewThumbnail: payload.previewThumbnail,
       thumbnails: thumbnails
         ?.filter((thumb) => thumb.key === payload.key)
         .map((thumb) => ({

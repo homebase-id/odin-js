@@ -86,7 +86,7 @@ export const MailThread = () => {
   }, []);
 
   return (
-    <div className="flex max-h-[100vh] flex-col-reverse overflow-auto" ref={scrollRef}>
+    <div className="flex h-full max-h-[100vh] flex-col-reverse overflow-auto" ref={scrollRef}>
       <div className="absolute left-0 right-0 top-0 z-20" ref={headerRef}>
         <MailHomeHeader />
         <MailThreadHeader
@@ -96,16 +96,17 @@ export const MailThread = () => {
           className="px-2 md:px-5"
         />
       </div>
-      {isFetching ? (
-        <div className="flex flex-col gap-4 p-2 md:p-5">
-          <LoadingBlock className="h-32 w-full bg-background" />
-          <LoadingBlock className="h-32 w-full bg-background" />
-          <LoadingBlock className="h-32 w-full bg-background" />
-          <LoadingBlock className="h-32 w-full bg-background" />
-          <LoadingBlock className="h-32 w-full bg-background" />
-        </div>
-      ) : (
-        <section className="flex flex-col bg-background">
+
+      <section className="flex flex-grow flex-col">
+        {isFetching ? (
+          <div className="flex flex-grow flex-col gap-4 p-2 md:p-5">
+            <LoadingBlock className="h-32 w-full bg-background" />
+            <LoadingBlock className="h-32 w-full bg-background" />
+            <LoadingBlock className="h-32 w-full bg-background" />
+            <LoadingBlock className="h-32 w-full bg-background" />
+            <LoadingBlock className="h-32 w-full bg-background" />
+          </div>
+        ) : (
           <MailHistory
             scrollRef={scrollRef}
             mailThread={mailThread}
@@ -114,17 +115,19 @@ export const MailThread = () => {
             isFetchingNextPage={isFetchingNextPage}
             autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
             className="h-full bg-page-background p-2 md:p-5"
+            scrollToMessage={messageKey}
           />
-          <MailThreadActions
-            className="px-2 md:px-5"
-            mailThread={mailThread}
-            originId={originId}
-            threadId={threadId}
-            recipients={recipients}
-            subject={subject}
-          />
-        </section>
-      )}
+        )}
+        <MailThreadActions
+          className="bg-background px-2 md:px-5"
+          mailThread={mailThread}
+          originId={originId}
+          threadId={threadId}
+          recipients={recipients}
+          subject={subject}
+        />
+      </section>
+
       {/* This adds the necessary space for the absolute position header;
           We can't do a regular sticky as it's a col-reverse container */}
       <div style={{ height: `${headerHeight}px`, width: '20px' }} className="flex-shrink-0" />
@@ -167,6 +170,7 @@ const MailThreadActions = ({
             setIsReply(false);
             const newSearchParams = new URLSearchParams(searchParams);
             newSearchParams.delete('draft');
+            console.log('done', newSearchParams.toString());
             setSearchParams(newSearchParams);
           }}
         />

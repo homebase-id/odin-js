@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
@@ -29,6 +29,7 @@ export const MailHistory = ({
   isFetchingNextPage,
   autoMarkAsRead = true,
   scrollRef,
+  scrollToMessage,
 
   className,
 }: {
@@ -38,6 +39,7 @@ export const MailHistory = ({
   isFetchingNextPage: boolean;
   autoMarkAsRead?: boolean;
   scrollRef: React.RefObject<HTMLDivElement>;
+  scrollToMessage?: string;
 
   className?: string;
 }) => {
@@ -45,7 +47,8 @@ export const MailHistory = ({
   const virtualizer = useVirtualizer({
     getScrollElement: () => scrollRef?.current,
     count,
-    estimateSize: () => 300,
+    estimateSize: () => 500,
+    scrollPaddingEnd: 500,
     // Custom scroll handler to support inverted rendering with flex-col-reverse
     observeElementOffset: (instance, cb) => {
       const element = instance.scrollElement;
@@ -64,6 +67,14 @@ export const MailHistory = ({
     },
     overscan: 5,
     getItemKey: (index) => mailThread[index]?.fileId || `loader-${index}`,
+    scrollToFn(offset, options, instance) {
+      const element = instance.scrollElement;
+      if (!element) return;
+      element.scrollTo({
+        ...options,
+        top: offset * -1,
+      });
+    },
   });
 
   const items = virtualizer.getVirtualItems();
@@ -81,6 +92,13 @@ export const MailHistory = ({
     isFetchingNextPage,
     virtualizer.getVirtualItems(),
   ]);
+
+  useEffect(() => {
+    const index = mailThread.findIndex((mail) => mail.fileId === scrollToMessage);
+    if (index === -1) return;
+
+    virtualizer.scrollToIndex(index);
+  }, [virtualizer]);
 
   useMarkMailConversationsAsRead({ mailThread: autoMarkAsRead ? mailThread : [] });
 
@@ -125,7 +143,11 @@ export const MailHistory = ({
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
               >
-                <MailMessage previousMessage={previousMessage} message={message} />
+                <MailMessage
+                  previousMessage={previousMessage}
+                  message={message}
+                  isActive={scrollToMessage === message.fileId}
+                />
               </div>
             );
           })}
@@ -140,11 +162,13 @@ const MailMessage = ({
   message,
   forceAsRead,
   className,
+  isActive,
 }: {
   previousMessage: DriveSearchResult<MailConversation> | undefined;
   message: DriveSearchResult<MailConversation>;
   forceAsRead?: boolean;
   className?: string;
+  isActive: boolean;
 }) => {
   const navigate = useNavigate();
   const [showMessageInfo, setShowMessageInfo] = useState(false);
@@ -156,7 +180,10 @@ const MailMessage = ({
   const isDraft = message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   return (
-    <div key={message.fileId} className={isDraft ? 'opacity-60' : ''}>
+    <div
+      key={message.fileId}
+      className={`${isDraft ? 'opacity-60' : ''} ${isActive ? 'bg-red-400' : ''}`}
+    >
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
@@ -198,6 +225,15 @@ const MailMessage = ({
               defaultFileId: message.fileId,
               imageDrive: MailDrive,
               lastModified: message.fileMetadata.updated,
+              previewThumbnails: message.fileMetadata.payloads?.reduce(
+                (acc, payload) => {
+                  if (payload.previewThumbnail) {
+                    acc[payload.key] = payload.previewThumbnail;
+                  }
+                  return acc;
+                },
+                {} as Record<string, EmbeddedThumb>
+              ),
             }}
           />
           <MailAttachmentOverview
@@ -262,6 +298,7 @@ const ForwardedThread = ({
                   previousMessage={undefined}
                   message={mail}
                   forceAsRead={true}
+                  isActive={false}
                 />
               ))}
             </div>
@@ -302,6 +339,9 @@ const ConversationalAwareness = ({
       <p className="rounded-lg bg-page-background px-3 py-1 text-sm italic">{children}</p>
     </div>
   );
+
+  const isDraft = message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
+  if (isDraft) return null;
 
   if (!previousMessage) {
     const hasForwardedMailThread =
