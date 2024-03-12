@@ -8,6 +8,7 @@ import {
   Archive,
   ArrowLeft,
   ErrorNotification,
+  LoadingBlock,
   PaperClip,
   ReplyArrow,
   Share,
@@ -47,6 +48,7 @@ export const MailThread = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetching,
   } = useMailThread({ threadId: conversationKey }).fetch;
 
   // Flatten all pages, sorted descending and slice on the max number expected
@@ -94,26 +96,35 @@ export const MailThread = () => {
           className="px-2 md:px-5"
         />
       </div>
-
-      <section className="flex flex-col bg-background">
-        <MailHistory
-          scrollRef={scrollRef}
-          mailThread={mailThread}
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
-          className="h-full bg-page-background p-2 md:p-5"
-        />
-        <MailThreadActions
-          className="px-2 md:px-5"
-          mailThread={mailThread}
-          originId={originId}
-          threadId={threadId}
-          recipients={recipients}
-          subject={subject}
-        />
-      </section>
+      {isFetching ? (
+        <div className="flex flex-col gap-4 p-2 md:p-5">
+          <LoadingBlock className="h-32 w-full bg-background" />
+          <LoadingBlock className="h-32 w-full bg-background" />
+          <LoadingBlock className="h-32 w-full bg-background" />
+          <LoadingBlock className="h-32 w-full bg-background" />
+          <LoadingBlock className="h-32 w-full bg-background" />
+        </div>
+      ) : (
+        <section className="flex flex-col bg-background">
+          <MailHistory
+            scrollRef={scrollRef}
+            mailThread={mailThread}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
+            className="h-full bg-page-background p-2 md:p-5"
+          />
+          <MailThreadActions
+            className="px-2 md:px-5"
+            mailThread={mailThread}
+            originId={originId}
+            threadId={threadId}
+            recipients={recipients}
+            subject={subject}
+          />
+        </section>
+      )}
       {/* This adds the necessary space for the absolute position header;
           We can't do a regular sticky as it's a col-reverse container */}
       <div style={{ height: `${headerHeight}px`, width: '20px' }} className="flex-shrink-0" />
