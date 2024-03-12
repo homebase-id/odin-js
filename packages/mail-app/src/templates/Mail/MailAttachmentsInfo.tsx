@@ -31,6 +31,7 @@ export const MailAttachmentsInfo = ({
     conversation.fileMetadata.payloads.map((payload) => ({
       ...payload,
       fileId: conversation.fileId,
+      conversationId: conversation.fileMetadata.appData.groupId as string,
       created: conversation.fileMetadata.created,
       sender:
         conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender,
@@ -61,7 +62,7 @@ export const MailAttachmentsInfo = ({
     >
       <div className="flex flex-col gap-2">
         {Object.entries(groupedWithFileName).map(([fileName, files]) => (
-          <FileGroup files={files} fileName={fileName} key={fileName} />
+          <FileGroup files={files} fileName={fileName} key={fileName} onClose={onClose} />
         ))}
       </div>
     </DialogWrapper>
@@ -75,7 +76,15 @@ interface extendedFile extends AttachmentItem {
   sender: string;
 }
 
-const FileGroup = ({ files, fileName }: { files: extendedFile[]; fileName: string }) => {
+const FileGroup = ({
+  files,
+  fileName,
+  onClose,
+}: {
+  files: extendedFile[];
+  fileName: string;
+  onClose?: () => void;
+}) => {
   const dotYouClient = useDotYouClientContext();
   const identity = dotYouClient.getIdentity();
 
@@ -116,6 +125,7 @@ const FileGroup = ({ files, fileName }: { files: extendedFile[]; fileName: strin
               ? `ml-2 flex flex-col gap-2 border-l-8 border-l-primary/30 pl-2`
               : `contents`
           }
+          onClick={onClose}
         >
           {files.map((file) => (
             <AttachmentFile
@@ -139,27 +149,3 @@ const FileGroup = ({ files, fileName }: { files: extendedFile[]; fileName: strin
     </>
   );
 };
-
-// if (files.length === 1) {
-//     const file = files[0];
-//     return (
-//       <AttachmentFile
-//         file={file}
-//         key={`${file.created}_${file.key}`}
-//         className={`rounded-full border border-slate-200 bg-background px-3 py-2 dark:border-slate-700`}
-//       >
-//         <div className="ml-auto flex-shrink-0 text-slate-400">
-//           <span>
-//             {identity === file.sender ? t('You') : <ConnectionName odinId={file.sender} />}
-//           </span>{' '}
-//           {t('on')}{' '}
-//           <span>
-//             {new Date(file.created).toLocaleDateString(undefined, dateTimeFormat)}
-//           </span>
-//         </div>
-//       </AttachmentFile>
-//     );
-//   } else {
-
-//   }
-// })}

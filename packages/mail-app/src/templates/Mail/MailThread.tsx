@@ -29,11 +29,13 @@ import { MailThreadInfo } from './MailThreadInfo';
 import { MailComposer } from '../../components/Composer/MailComposer';
 import { useSearchParams } from 'react-router-dom';
 import { MailAttachmentsInfo } from './MailAttachmentsInfo';
+import { MailAttachmentPreview } from '../../components/Thread/MailAttachmentPreview';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
   const identity = useDotYouClientContext().getIdentity();
-  const { conversationKey } = useParams();
+  const { conversationKey, messageKey, payloadKey } = useParams();
+  const previewAttachment = !!messageKey && !!payloadKey;
 
   const [isDisabledMarkAsRead, setIsDisabledMarkAsRead] = useState(false);
 
@@ -97,6 +99,9 @@ export const MailThread = () => {
           subject={subject}
         />
       </section>
+      {previewAttachment ? (
+        <MailAttachmentPreview messageId={messageKey} payloadKey={payloadKey} />
+      ) : null}
     </>
   );
 };

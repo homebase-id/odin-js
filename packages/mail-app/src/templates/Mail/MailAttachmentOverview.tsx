@@ -3,9 +3,11 @@ import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailDrive } from '../../providers/MailProvider';
-import { useMailAttachment } from '../../hooks/mail/useMailConversation';
+import { ROOT_PATH } from '../../app/App';
+import { Link } from 'react-router-dom';
 
 export interface AttachmentItem extends PayloadDescriptor {
+  conversationId: string;
   fileId: string;
 }
 
@@ -51,27 +53,13 @@ export const AttachmentFile = ({
   children?: React.ReactNode;
 }) => {
   const dotYouClient = useDotYouClientContext();
-  const getFileUrl = useMailAttachment().fetchAttachment;
-
-  const doDownload = async (file: AttachmentItem) => {
-    const url = await getFileUrl(file.fileId, file.key, file.contentType);
-    if (!url) return;
-    // Dirty hack for easy download
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = file.descriptorContent || file.key || url.substring(url.lastIndexOf('/') + 1);
-    link.click();
-  };
 
   return (
-    <div
+    <Link
+      type="mute"
       key={file.key}
       className={`flex cursor-pointer flex-row items-center gap-2 bg-background transition-colors hover:bg-primary/10 hover:shadow-md ${className || ''}`}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        doDownload(file);
-      }}
+      to={`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}/${file.key}`}
     >
       {file.contentType.startsWith('image/') ? (
         <OdinPreviewImage
@@ -87,6 +75,6 @@ export const AttachmentFile = ({
       )}
       {file.descriptorContent || file.key}
       {children}
-    </div>
+    </Link>
   );
 };

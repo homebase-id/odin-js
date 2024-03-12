@@ -196,6 +196,7 @@ const MailMessage = ({
             files={message.fileMetadata.payloads?.map((file) => ({
               ...file,
               fileId: message.fileId,
+              conversationId: message.fileMetadata.appData.groupId as string,
             }))}
             maxVisible={null}
           />

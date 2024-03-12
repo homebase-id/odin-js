@@ -352,6 +352,7 @@ const MailConversationItem = ({
                 files={lastConversation.fileMetadata.payloads?.map((file) => ({
                   ...file,
                   fileId: lastConversation.fileId,
+                  conversationId: lastConversation.fileMetadata.appData.groupId as string,
                 }))}
               />
             </div>

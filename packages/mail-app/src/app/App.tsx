@@ -25,6 +25,14 @@ const FinalizeAuth = lazy(() => import('../templates/Auth/FinalizeAuth'));
 const MailHome = lazy(() =>
   import('../templates/Mail/MailHome').then((mailApp) => ({ default: mailApp.MailHome }))
 );
+const MailThread = lazy(() =>
+  import('../templates/Mail/MailThread').then((mailApp) => ({ default: mailApp.MailThread }))
+);
+const MailComposerPage = lazy(() =>
+  import('../templates/Mail/MailComposerPage').then((mailApp) => ({
+    default: mailApp.MailComposerPage,
+  }))
+);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -35,8 +43,6 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { MailThread } from '../templates/Mail/MailThread';
-import { MailComposerPage } from '../templates/Mail/MailComposerPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -99,6 +105,10 @@ function App() {
             <Route index={true} element={<MailHome />} />
             <Route path=":filter" element={<MailHome />} />
             <Route path=":filter/:conversationKey" element={<MailThread />} />
+            <Route
+              path=":filter/:conversationKey/:messageKey/:payloadKey"
+              element={<MailThread />}
+            />
             <Route path="new" element={<MailComposerPage />} />
             <Route path="new/:draftKey" element={<MailComposerPage />} />
           </Route>

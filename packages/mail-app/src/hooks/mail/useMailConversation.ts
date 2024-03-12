@@ -22,10 +22,15 @@ import {
   uploadMail,
 } from '../../providers/MailProvider';
 
-export const useMailConversation = () => {
+export const useMailConversation = (props?: { messageFileId: string }) => {
+  const { messageFileId } = props || {};
+
   const dotYouClient = useDotYouClientContext();
   const queryClient = useQueryClient();
   const identity = dotYouClient.getIdentity();
+
+  const getMessage = async (messageFileId: string) =>
+    await getMailConversation(dotYouClient, messageFileId);
 
   const sendMessage = async ({
     conversation,
@@ -145,6 +150,11 @@ export const useMailConversation = () => {
   };
 
   return {
+    getMessage: useQuery({
+      queryKey: ['mail-message', messageFileId],
+      queryFn: () => getMessage(messageFileId as string),
+      enabled: !!messageFileId,
+    }),
     send: useMutation({
       mutationFn: sendMessage,
 
