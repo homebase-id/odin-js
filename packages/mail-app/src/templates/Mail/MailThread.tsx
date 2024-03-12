@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
@@ -33,6 +33,9 @@ import { MailAttachmentPreview } from '../../components/Thread/MailAttachmentPre
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
   const identity = useDotYouClientContext().getIdentity();
   const { conversationKey, messageKey, payloadKey } = useParams();
   const previewAttachment = !!messageKey && !!payloadKey;
@@ -53,8 +56,8 @@ export const MailThread = () => {
         messages,
         PAGE_SIZE,
         (a, b) =>
-          (a.fileMetadata.appData.userDate || a.fileMetadata.created) -
-          (b.fileMetadata.appData.userDate || b.fileMetadata.created)
+          (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
+          (a.fileMetadata.appData.userDate || a.fileMetadata.created)
       ),
     [messages]
   );
@@ -72,23 +75,35 @@ export const MailThread = () => {
     };
   }, [mailThread]);
 
+  useEffect(() => {
+    const resizeHandler = () => setHeaderHeight(headerRef.current?.clientHeight || 0);
+    window.addEventListener('resize', resizeHandler);
+
+    resizeHandler();
+    return () => window.removeEventListener('resize', resizeHandler);
+  }, []);
+
   return (
-    <>
-      <MailHomeHeader />
-      <section className="flex flex-col bg-background py-3 md:mx-5 md:my-5 md:rounded-lg">
+    <div className="flex max-h-[100vh] flex-col-reverse overflow-auto" ref={scrollRef}>
+      <div className="absolute left-0 right-0 top-0 z-20" ref={headerRef}>
+        <MailHomeHeader />
         <MailThreadHeader
           mailThread={mailThread}
           subject={subject}
           onMarkAsUnread={() => setIsDisabledMarkAsRead(true)}
           className="px-2 md:px-5"
         />
+      </div>
+
+      <section className="flex flex-col bg-background">
         <MailHistory
+          scrollRef={scrollRef}
           mailThread={mailThread}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
-          className="px-2 md:px-5"
+          className="h-full bg-page-background p-2 md:p-5"
         />
         <MailThreadActions
           className="px-2 md:px-5"
@@ -99,10 +114,13 @@ export const MailThread = () => {
           subject={subject}
         />
       </section>
+      {/* This adds the necessary space for the absolute position header;
+          We can't do a regular sticky as it's a col-reverse container */}
+      <div style={{ height: `${headerHeight}px`, width: '20px' }} className="flex-shrink-0" />
       {previewAttachment ? (
         <MailAttachmentPreview messageId={messageKey} payloadKey={payloadKey} />
       ) : null}
-    </>
+    </div>
   );
 };
 const MailThreadActions = ({
@@ -128,7 +146,7 @@ const MailThreadActions = ({
   }, [draftFileId]);
 
   return (
-    <div className={`mt-2 border-t border-gray-100 pt-3 dark:border-gray-800  ${className || ''}`}>
+    <div className={`border-t border-gray-100 py-2 dark:border-gray-800  ${className || ''}`}>
       {isReply ? (
         <ReplyAction
           {...threadProps}
@@ -278,7 +296,7 @@ const MailThreadHeader = ({
     <>
       <ErrorNotification error={restoreThreadError || removeThreadError || archiveThreadError} />
       <div
-        className={`sticky top-[3.7rem] z-20 mb-2 flex flex-row items-center border-b border-gray-100 bg-background pb-3 dark:border-gray-800 ${className || ''}`}
+        className={`sticky top-[3.7rem] z-20 flex flex-row items-center border-b border-gray-100 bg-background p-2 dark:border-gray-800 ${className || ''}`}
       >
         <ActionButton
           onClick={() => window.history.back()}

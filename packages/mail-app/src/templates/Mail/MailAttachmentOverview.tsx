@@ -1,10 +1,10 @@
-import { ExtensionThumbnail } from '@youfoundation/common-app';
+import { ExtensionThumbnail, FakeAnchor } from '@youfoundation/common-app';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailDrive } from '../../providers/MailProvider';
 import { ROOT_PATH } from '../../app/App';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export interface AttachmentItem extends PayloadDescriptor {
   conversationId: string;
@@ -53,13 +53,16 @@ export const AttachmentFile = ({
   children?: React.ReactNode;
 }) => {
   const dotYouClient = useDotYouClientContext();
-
+  const navigate = useNavigate();
   return (
-    <Link
+    <FakeAnchor
       type="mute"
       key={file.key}
       className={`flex cursor-pointer flex-row items-center gap-2 bg-background transition-colors hover:bg-primary/10 hover:shadow-md ${className || ''}`}
-      to={`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}/${file.key}`}
+      onClick={(e) => {
+        e.preventDefault();
+        navigate(`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}/${file.key}`);
+      }}
     >
       {file.contentType.startsWith('image/') ? (
         <OdinPreviewImage
@@ -75,6 +78,6 @@ export const AttachmentFile = ({
       )}
       {file.descriptorContent || file.key}
       {children}
-    </Link>
+    </FakeAnchor>
   );
 };

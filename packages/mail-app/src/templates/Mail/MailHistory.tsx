@@ -5,7 +5,7 @@ import {
   MailDrive,
   getAllRecipients,
 } from '../../providers/MailProvider';
-import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ConnectionImage,
   ConnectionName,
@@ -15,7 +15,7 @@ import {
   ActionGroup,
   ChevronDown,
 } from '@youfoundation/common-app';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailConversationInfo } from './MailConversationInfo';
@@ -28,6 +28,7 @@ export const MailHistory = ({
   fetchNextPage,
   isFetchingNextPage,
   autoMarkAsRead = true,
+  scrollRef,
 
   className,
 }: {
@@ -36,21 +37,31 @@ export const MailHistory = ({
   fetchNextPage: () => void;
   isFetchingNextPage: boolean;
   autoMarkAsRead?: boolean;
+  scrollRef: React.RefObject<HTMLDivElement>;
 
   className?: string;
 }) => {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const parentOffsetRef = useRef(0);
-
-  useLayoutEffect(() => {
-    parentOffsetRef.current = parentRef.current?.offsetTop ?? 0;
-  }, []);
-
   const count = mailThread?.length + 1;
-  const virtualizer = useWindowVirtualizer({
+  const virtualizer = useVirtualizer({
+    getScrollElement: () => scrollRef?.current,
     count,
-    scrollMargin: parentOffsetRef.current,
     estimateSize: () => 300,
+    // Custom scroll handler to support inverted rendering with flex-col-reverse
+    observeElementOffset: (instance, cb) => {
+      const element = instance.scrollElement;
+      if (!element) return;
+
+      // Math.abs as the element.scrollTop will be negative with flex-col-reverse
+      const handler = () => cb(Math.abs(element.scrollTop));
+      // Start scroll is always 0, as flex-col-reverse starts at the bottom
+      cb(0);
+
+      element.addEventListener('scroll', handler, {
+        passive: true,
+      });
+
+      return () => element.removeEventListener('scroll', handler);
+    },
     overscan: 5,
     getItemKey: (index) => mailThread[index]?.fileId || `loader-${index}`,
   });
@@ -59,8 +70,8 @@ export const MailHistory = ({
 
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
-    if (!lastItem) return;
 
+    if (!lastItem) return;
     if (lastItem.index >= mailThread?.length - 1 && hasNextPage && !isFetchingNextPage)
       fetchNextPage();
   }, [
@@ -74,17 +85,17 @@ export const MailHistory = ({
   useMarkMailConversationsAsRead({ mailThread: autoMarkAsRead ? mailThread : [] });
 
   return (
-    <div className={`flex ${className || ''}`} ref={parentRef}>
+    <div className={`flex ${className || ''}`}>
       <div
-        className="relative w-full overflow-hidden"
+        className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden"
         style={{
           height: virtualizer.getTotalSize(),
         }}
       >
         <div
-          className="absolute left-0 top-0 flex h-full w-full flex-col"
+          className="absolute left-0 top-0 flex h-full w-full flex-col-reverse"
           style={{
-            transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
+            transform: `translateY(-${items[0]?.start ?? 0}px)`,
           }}
         >
           {items.map((virtualRow) => {
@@ -158,9 +169,7 @@ const MailMessage = ({
         )}
         <div
           className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
-            messageFromMe
-              ? 'bg-primary/10 dark:bg-primary/30'
-              : 'bg-gray-500/10  dark:bg-gray-300/20'
+            messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-background'
           } ${isDraft ? 'cursor-pointer' : ''} `}
           onClick={
             isDraft && message.fileId
