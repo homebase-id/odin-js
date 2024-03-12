@@ -218,7 +218,7 @@ const ReplyAction = ({
   const { data: draftDsr } = useMailDraft(hasDraft ? { draftFileId } : undefined).getDraft;
 
   return (
-    <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
+    <div className="rounded-lg px-2 py-5 md:px-5">
       {hasDraft && !draftDsr ? null : (
         <MailComposer
           existingDraft={draftDsr || undefined}
@@ -248,7 +248,7 @@ const ForwardAction = ({
   onDone: () => void;
 }) => {
   return (
-    <div className="rounded-lg bg-primary/10 px-2 py-5 dark:bg-primary/30 md:px-5">
+    <div className="rounded-lg px-2 py-5 md:px-5">
       <MailComposer
         originId={originId}
         subject={subject}
