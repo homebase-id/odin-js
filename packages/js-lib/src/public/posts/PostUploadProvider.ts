@@ -397,9 +397,8 @@ const updatePost = async <T extends PostContent>(
       (f) => 'file' in f && f.file instanceof Blob
     ) as NewMediaFile[]) || [];
 
-  const oldMediaFiles: MediaFile[] = file.fileMetadata.payloads?.filter(
-    (p) => p.key !== DEFAULT_PAYLOAD_KEY
-  );
+  const oldMediaFiles: MediaFile[] =
+    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
 
   // Discover deleted files:
   const deletedMediaFiles: MediaFile[] = [];
@@ -533,7 +532,7 @@ export const appendPostMedia = async (
   });
 
   thumbnails.push(...additionalThumbnails);
-
+  console.log('payloads', payloads);
   const response = await appendDataToFile(
     dotYouClient,
     header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,

@@ -21,6 +21,7 @@ import {
 import {
   DEFAULT_PAYLOAD_KEY,
   DriveSearchResult,
+  EmbeddedThumb,
   NewDriveSearchResult,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
@@ -96,7 +97,16 @@ export const PostDetailCard = ({
             }`}
           >
             {post.type !== 'Article' && post.captionAsRichText ? (
-              <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
+              <RichTextRenderer
+                body={post.captionAsRichText}
+                odinId={odinId}
+                options={{
+                  defaultFileId: postFile?.fileId,
+                  imageDrive: getChannelDrive(post.channelId),
+                  defaultGlobalTransitId: postFile?.fileMetadata.globalTransitId,
+                  lastModified: postFile?.fileMetadata.updated,
+                }}
+              />
             ) : (
               <span className="whitespace-pre-wrap">{post.caption}</span>
             )}
@@ -188,6 +198,15 @@ export const PostDetailCard = ({
                       defaultFileId: postFile.fileId,
                       defaultGlobalTransitId: postFile.fileMetadata.globalTransitId,
                       lastModified: postFile.fileMetadata.updated,
+                      previewThumbnails: postFile?.fileMetadata.payloads?.reduce(
+                        (acc, payload) => {
+                          if (payload.previewThumbnail) {
+                            acc[payload.key] = payload.previewThumbnail;
+                          }
+                          return acc;
+                        },
+                        {} as Record<string, EmbeddedThumb>
+                      ),
                     }
                   : undefined
               }

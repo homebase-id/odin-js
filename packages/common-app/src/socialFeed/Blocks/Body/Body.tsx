@@ -3,6 +3,7 @@ import { ReactNode, useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
+import { EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 
@@ -12,6 +13,7 @@ export const PostBody = ({
   hideEmbeddedPostMedia,
   fileId,
   globalTransitId,
+  payloads,
   lastModified,
 }: {
   post: PostContent;
@@ -19,6 +21,7 @@ export const PostBody = ({
   hideEmbeddedPostMedia?: boolean;
   fileId: string | undefined;
   globalTransitId: string | undefined;
+  payloads?: PayloadDescriptor[];
   lastModified: number | undefined;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -48,6 +51,15 @@ export const PostBody = ({
                         defaultFileId: fileId,
                         defaultGlobalTransitId: globalTransitId,
                         lastModified: lastModified,
+                        previewThumbnails: payloads?.reduce(
+                          (acc, payload) => {
+                            if (payload.previewThumbnail) {
+                              acc[payload.key] = payload.previewThumbnail;
+                            }
+                            return acc;
+                          },
+                          {} as Record<string, EmbeddedThumb>
+                        ),
                       }
                     : undefined
                 }

@@ -150,7 +150,7 @@ export const usePost = () => {
 
                   primaryMediaFile: {
                     fileKey: newPost.mediaFiles?.[0].key,
-                    type: (newPost.mediaFiles?.[0] as MediaFile).contentType,
+                    type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
                   },
                 },
               },
