@@ -53,7 +53,7 @@ export const MailAttachmentPreview = ({
 
   const navigate = useNavigate();
   const doClose = () =>
-    navigate(window.location.pathname.split('/').slice(0, -2).join('/'), {
+    navigate(rootUrl, {
       preventScrollReset: true,
     });
 

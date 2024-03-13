@@ -97,6 +97,10 @@ export const MailHistory = ({
   const hasScrolled = useRef<boolean>(false);
 
   useEffect(() => {
+    hasScrolled.current = false;
+  }, [scrollToMessage]);
+
+  useEffect(() => {
     const index = mailThread.findIndex((mail) => mail.fileId === scrollToMessage);
     if (index === -1 || hasScrolled.current) return;
 
@@ -104,7 +108,7 @@ export const MailHistory = ({
 
     if (virtualizer.measurementsCache[index].size === DEFAULT_SIZE) return;
     hasScrolled.current = true;
-  }, [virtualizer, virtualizer.measurementsCache]);
+  }, [scrollToMessage, virtualizer, virtualizer.measurementsCache]);
 
   useMarkMailConversationsAsRead({ mailThread: autoMarkAsRead ? mailThread : [] });
 
@@ -117,7 +121,7 @@ export const MailHistory = ({
         }}
       >
         <div
-          className="absolute left-0 top-0 flex h-full w-full flex-col-reverse"
+          className="absolute left-0 top-0 flex h-full w-full flex-col-reverse p-2 md:p-5"
           style={{
             transform: `translateY(-${items[0]?.start ?? 0}px)`,
           }}
@@ -187,10 +191,7 @@ const MailMessage = ({
   const isDraft = message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
   return (
-    <div
-      key={message.fileId}
-      className={`${isDraft ? 'opacity-60' : ''} ${isActive ? 'bg-red-400' : ''}`}
-    >
+    <div key={message.fileId} className={`${isDraft ? 'opacity-60' : ''}`}>
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
@@ -204,7 +205,7 @@ const MailMessage = ({
         <div
           className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
             messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-background'
-          } ${isDraft ? 'cursor-pointer' : ''} `}
+          } ${isDraft ? 'cursor-pointer' : ''} ${isActive ? 'outline outline-4 outline-primary/50' : ''}`}
           onClick={
             isDraft && message.fileId
               ? () => {
