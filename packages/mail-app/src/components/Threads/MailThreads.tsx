@@ -71,7 +71,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
   const items = virtualizer.getVirtualItems();
 
   return (
-    <section className="flex flex-grow flex-col md:mx-5 md:my-5">
+    <section className="flex flex-grow flex-col ">
       <MailConversationsHeader
         selection={selection}
         isAllSelected={isAllSelected}
@@ -159,7 +159,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
           </div>
         </div>
       ) : (
-        <div className="px-3 py-1">
+        <div className="px-5 py-3">
           <div className="italic opacity-50" key={'no-more'}>
             {t('No conversations')}
           </div>
@@ -219,7 +219,7 @@ const MailConversationsHeader = ({
           archiveThreadError
         }
       />
-      <div className="relative flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black md:rounded-t-lg">
+      <div className="relative flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black">
         <div className="p-2">
           <button
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
