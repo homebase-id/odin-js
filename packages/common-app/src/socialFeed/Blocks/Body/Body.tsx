@@ -51,15 +51,7 @@ export const PostBody = ({
                         defaultFileId: fileId,
                         defaultGlobalTransitId: globalTransitId,
                         lastModified: lastModified,
-                        previewThumbnails: payloads?.reduce(
-                          (acc, payload) => {
-                            if (payload.previewThumbnail) {
-                              acc[payload.key] = payload.previewThumbnail;
-                            }
-                            return acc;
-                          },
-                          {} as Record<string, EmbeddedThumb>
-                        ),
+                        previewThumbnails: payloads,
                       }
                     : undefined
                 }

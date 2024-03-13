@@ -105,6 +105,7 @@ export const PostDetailCard = ({
                   imageDrive: getChannelDrive(post.channelId),
                   defaultGlobalTransitId: postFile?.fileMetadata.globalTransitId,
                   lastModified: postFile?.fileMetadata.updated,
+                  previewThumbnails: postFile?.fileMetadata.payloads,
                 }}
               />
             ) : (
@@ -198,15 +199,7 @@ export const PostDetailCard = ({
                       defaultFileId: postFile.fileId,
                       defaultGlobalTransitId: postFile.fileMetadata.globalTransitId,
                       lastModified: postFile.fileMetadata.updated,
-                      previewThumbnails: postFile?.fileMetadata.payloads?.reduce(
-                        (acc, payload) => {
-                          if (payload.previewThumbnail) {
-                            acc[payload.key] = payload.previewThumbnail;
-                          }
-                          return acc;
-                        },
-                        {} as Record<string, EmbeddedThumb>
-                      ),
+                      previewThumbnails: postFile?.fileMetadata.payloads,
                     }
                   : undefined
               }

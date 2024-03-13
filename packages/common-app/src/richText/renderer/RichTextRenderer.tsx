@@ -1,4 +1,4 @@
-import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import React, { ReactNode } from 'react';
 import { ActionLink, Image } from '@youfoundation/common-app';
 
@@ -15,7 +15,7 @@ export const RichTextRenderer = ({
     defaultFileId: string;
     defaultGlobalTransitId?: string;
     lastModified: number | undefined;
-    previewThumbnails?: Record<string, EmbeddedThumb>;
+    previewThumbnails?: PayloadDescriptor[];
   };
   className?: string;
 }) => {
@@ -135,14 +135,14 @@ export const RichTextRenderer = ({
         );
       case 'local_image':
         if (attributes && options) {
+          const matchingPreviewThumbnail = options.previewThumbnails?.find(
+            (payload) => payload.key === attributes.fileKey
+          )?.previewThumbnail;
+
           return (
             <div
-              className={
-                options.previewThumbnails?.[attributes.fileKey as string]
-                  ? ''
-                  : 'w-full max-w-md aspect-square'
-              }
-              data-thumb={!!options.previewThumbnails?.[attributes.fileKey as string]}
+              className={matchingPreviewThumbnail ? '' : 'w-full max-w-md aspect-square'}
+              data-thumb={!!matchingPreviewThumbnail}
             >
               <Image
                 targetDrive={options.imageDrive}
@@ -150,7 +150,7 @@ export const RichTextRenderer = ({
                 globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
                 lastModified={options.lastModified}
                 fileKey={attributes.fileKey as string}
-                previewThumbnail={options.previewThumbnails?.[attributes.fileKey as string]}
+                previewThumbnail={matchingPreviewThumbnail}
                 className="my-4 max-w-md"
                 odinId={odinId}
               />

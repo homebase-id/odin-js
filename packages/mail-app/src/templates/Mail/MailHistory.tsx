@@ -232,15 +232,7 @@ const MailMessage = ({
               defaultFileId: message.fileId,
               imageDrive: MailDrive,
               lastModified: message.fileMetadata.updated,
-              previewThumbnails: message.fileMetadata.payloads?.reduce(
-                (acc, payload) => {
-                  if (payload.previewThumbnail) {
-                    acc[payload.key] = payload.previewThumbnail;
-                  }
-                  return acc;
-                },
-                {} as Record<string, EmbeddedThumb>
-              ),
+              previewThumbnails: message.fileMetadata.payloads,
             }}
           />
           <MailAttachmentOverview
