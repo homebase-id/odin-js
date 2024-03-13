@@ -47,7 +47,7 @@ import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours,
     },
   },
 });
@@ -60,7 +60,7 @@ const localStoragePersister = createSyncStoragePersister({
 });
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['conversation', 'conversations'];
+const INCLUDED_QUERY_KEYS = ['mail-thread', 'mail-conversations', 'mail-message'];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: Infinity,
   persister: localStoragePersister,

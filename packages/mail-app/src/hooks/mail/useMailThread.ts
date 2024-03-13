@@ -63,7 +63,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
 
   return {
     fetch: useInfiniteQuery({
-      queryKey: ['mail-thread', threadId],
+      queryKey: ['mail-thread', threadId || ''],
       enabled: !!threadId,
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMailConversations(threadId as string, pageParam),

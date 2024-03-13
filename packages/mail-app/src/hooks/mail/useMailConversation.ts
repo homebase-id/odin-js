@@ -151,9 +151,10 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
 
   return {
     getMessage: useQuery({
-      queryKey: ['mail-message', messageFileId],
+      queryKey: ['mail-message', messageFileId || ''],
       queryFn: () => getMessage(messageFileId as string),
       enabled: !!messageFileId,
+      staleTime: 1000 * 60 * 60 * 1,
     }),
     send: useMutation({
       mutationFn: sendMessage,

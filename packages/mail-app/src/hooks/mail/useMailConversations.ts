@@ -17,6 +17,7 @@ export const useMailConversations = () => {
       queryFn: ({ pageParam }) => fetchMailConversations(pageParam),
       getNextPageParam: (lastPage) =>
         lastPage.results?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+      staleTime: 1000 * 60 * 5, // 5 minutes
     }),
   };
 };
