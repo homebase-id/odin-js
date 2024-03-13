@@ -15,13 +15,14 @@ import {
   ActionGroup,
   ChevronDown,
 } from '@youfoundation/common-app';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
 import { MailAttachmentOverview } from './MailAttachmentOverview';
 
+const DEFAULT_SIZE = 500;
 export const MailHistory = ({
   mailThread,
   hasNextPage,
@@ -47,8 +48,7 @@ export const MailHistory = ({
   const virtualizer = useVirtualizer({
     getScrollElement: () => scrollRef?.current,
     count,
-    estimateSize: () => 500,
-    scrollPaddingEnd: 500,
+    estimateSize: () => DEFAULT_SIZE,
     // Custom scroll handler to support inverted rendering with flex-col-reverse
     observeElementOffset: (instance, cb) => {
       const element = instance.scrollElement;
@@ -70,9 +70,10 @@ export const MailHistory = ({
     scrollToFn(offset, options, instance) {
       const element = instance.scrollElement;
       if (!element) return;
-      element.scrollTo({
-        ...options,
-        top: offset * -1,
+
+      const toOffset = (offset + (options.adjustments || 0)) * -1;
+      instance.scrollElement?.scrollTo?.({
+        [instance.options.horizontal ? 'left' : 'top']: toOffset,
       });
     },
   });
@@ -93,12 +94,17 @@ export const MailHistory = ({
     virtualizer.getVirtualItems(),
   ]);
 
+  const hasScrolled = useRef<boolean>(false);
+
   useEffect(() => {
     const index = mailThread.findIndex((mail) => mail.fileId === scrollToMessage);
-    if (index === -1) return;
+    if (index === -1 || hasScrolled.current) return;
 
-    virtualizer.scrollToIndex(index);
-  }, [virtualizer]);
+    virtualizer.scrollToIndex(index, { align: 'start' });
+
+    if (virtualizer.measurementsCache[index].size === DEFAULT_SIZE) return;
+    hasScrolled.current = true;
+  }, [virtualizer, virtualizer.measurementsCache]);
 
   useMarkMailConversationsAsRead({ mailThread: autoMarkAsRead ? mailThread : [] });
 
@@ -142,11 +148,12 @@ export const MailHistory = ({
                 key={virtualRow.key}
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
+                data-fileid={message.fileId}
               >
                 <MailMessage
                   previousMessage={previousMessage}
                   message={message}
-                  isActive={scrollToMessage === message.fileId}
+                  isActive={scrollToMessage ? scrollToMessage === message.fileId : false}
                 />
               </div>
             );

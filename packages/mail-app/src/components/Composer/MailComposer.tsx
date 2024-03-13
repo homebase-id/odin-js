@@ -65,7 +65,7 @@ export const MailComposer = ({
           content: {
             recipients: currentRecipients || [],
             subject: currentSubject || '',
-            message: [{ text: '' }],
+            message: [],
             originId: originId || getNewId(),
             threadId: threadId || getNewId(),
             sender: identity,
@@ -231,7 +231,11 @@ export const MailComposer = ({
             <ErrorBoundary>
               <RichTextEditor
                 name="composer"
-                defaultValue={autosavedDsr.fileMetadata.appData.content.message || []}
+                defaultValue={
+                  autosavedDsr.fileMetadata.appData.content.message?.length
+                    ? autosavedDsr.fileMetadata.appData.content.message
+                    : undefined
+                }
                 onChange={(e) =>
                   setAutosavedDsr({
                     ...autosavedDsr,
