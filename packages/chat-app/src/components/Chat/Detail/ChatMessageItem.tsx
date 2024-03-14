@@ -52,7 +52,9 @@ export const ChatMessageItem = ({
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
       <div
-        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${hasReactions ? 'pb-6' : ''}`}
+        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${
+          hasReactions ? 'pb-6' : ''
+        }`}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -119,7 +121,9 @@ const ChatTextMessageBody = ({
 
   return (
     <div
-      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] ${isEmojiOnly ? '' : 'shadow-sm'} md:max-w-xs lg:max-w-lg ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] ${
+        isEmojiOnly ? '' : 'shadow-sm'
+      } md:max-w-xs lg:max-w-lg ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -136,11 +140,13 @@ const ChatTextMessageBody = ({
         {isDeleted ? (
           <MessageDeletedInnerBody />
         ) : (
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
             <ParagraphWithLinks
               text={content.message}
-              className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}
+              className={`whitespace-pre-wrap break-words ${
+                isEmojiOnly && !isReply ? 'text-7xl' : ''
+              }`}
             />
           </div>
         )}
@@ -240,8 +246,8 @@ const ChatMediaMessageBody = ({
         {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}
       </div>
       {hasACaption ? (
-        <div className="flex flex-col px-2 py-2 md:flex-row md:justify-between">
-          <p className="whitespace-pre-wrap">{content.message}</p>
+        <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
+          <p className="whitespace-pre-wrap break-words">{content.message}</p>
           <ChatFooter />
         </div>
       ) : null}
