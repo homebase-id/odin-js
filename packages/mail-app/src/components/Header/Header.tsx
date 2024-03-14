@@ -7,6 +7,7 @@ import {
   Plus,
   Bars,
 } from '@youfoundation/common-app';
+import { useSearchParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
 
 export const MailHomeHeader = () => {
@@ -30,9 +31,19 @@ const MenuButton = () => {
 };
 
 const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+
   return (
     <div className={`flex w-full flex-row items-center gap-2 ${className || ''}`}>
-      <Input className="w-full max-w-md" placeholder={t('Search mail')} />
+      <Input
+        className="w-full max-w-md"
+        placeholder={t('Search mail')}
+        defaultValue={searchParams.get('q') || ''}
+        onChange={(e) => {
+          if (e.target.value.length > 2) setSearchParams({ q: e.target.value });
+          else setSearchParams({});
+        }}
+      />
       <ActionButton icon={MagnifyingGlass} type="mute" size="square" />
     </div>
   );

@@ -3,7 +3,7 @@ import { drives, permissions } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 import { MailThreads } from '../../components/Threads/MailThreads';
 import { MailHomeHeader } from '../../components/Header/Header';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { MailThreadsFilter } from '../../hooks/mail/useFilteredMailThreads';
 
 type MailFilterParams = {
@@ -12,6 +12,9 @@ type MailFilterParams = {
 
 export const MailHome = () => {
   const { filter } = useParams<MailFilterParams>();
+  const [searchParams] = useSearchParams();
+
+  const query = searchParams.get('q');
 
   return (
     <>
@@ -27,7 +30,7 @@ export const MailHome = () => {
       />
 
       <MailHomeHeader />
-      <MailThreads filter={filter || 'inbox'} />
+      <MailThreads filter={filter || 'inbox'} query={query || undefined} />
     </>
   );
 };

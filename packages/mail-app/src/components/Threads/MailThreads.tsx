@@ -1,23 +1,16 @@
 import {
-  formatToTimeAgoWithRelativeDetail,
   Checkbox,
   ActionButton,
   Trash,
   t,
   LoadingBlock,
-  ConnectionName,
   ErrorNotification,
   ActionGroup,
 } from '@youfoundation/common-app';
-import { Link } from 'react-router-dom';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Archive } from '@youfoundation/common-app';
-import {
-  MAIL_DRAFT_CONVERSATION_FILE_TYPE,
-  MailConversation,
-  getAllRecipients,
-} from '../../providers/MailProvider';
+import { MailConversation } from '../../providers/MailProvider';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
@@ -25,16 +18,21 @@ import { useMailThread } from '../../hooks/mail/useMailThread';
 import { ROOT_PATH } from '../../app/App';
 import { MailThreadsFilter, useFilteredMailThreads } from '../../hooks/mail/useFilteredMailThreads';
 import { useMailConversation } from '../../hooks/mail/useMailConversation';
-import React from 'react';
-import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
+import { MailConversationItem } from './MailConversationItem';
 
-export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
+export const MailThreads = ({
+  filter,
+  query,
+}: {
+  filter: MailThreadsFilter;
+  query: string | undefined;
+}) => {
   const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const identity = useDotYouClientContext().getIdentity();
 
   const { hasMorePosts, conversationsLoading, fetchNextPage, isFetchingNextPage, threads } =
-    useFilteredMailThreads(filter);
+    useFilteredMailThreads(filter, query);
 
   useEffect(() => {
     if (isAllSelected) setSelection(threads.map((thread) => thread[0]));
@@ -131,6 +129,7 @@ export const MailThreads = ({ filter }: { filter: MailThreadsFilter }) => {
 
                 return (
                   <MailConversationItem
+                    query={query}
                     key={lastConversation.fileId}
                     data-key={lastConversation.fileId}
                     mailThread={mailThread}
@@ -285,138 +284,4 @@ const MailConversationsHeader = ({
       </div>
     </>
   );
-};
-
-const MailConversationItem = ({
-  mailThread,
-  toggleSelection,
-  isSelected,
-  pathPrefix,
-}: {
-  mailThread: DriveSearchResult<MailConversation>[];
-  toggleSelection: () => void;
-  isSelected: boolean;
-  pathPrefix?: string;
-}) => {
-  const identity = useDotYouClientContext().getIdentity();
-
-  const lastConversation = mailThread[0];
-  const lastReceivedConversation = mailThread.find(
-    (conv) =>
-      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
-  );
-
-  const threadId = lastConversation.fileMetadata.appData.groupId as string;
-
-  const isUnread =
-    lastReceivedConversation && !lastReceivedConversation.fileMetadata.appData.content.isRead;
-  const isDraft =
-    lastConversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
-
-  return (
-    <Link
-      to={
-        isDraft ? `${ROOT_PATH}/new/${lastConversation.fileId}` : `${pathPrefix || ''}${threadId}`
-      }
-      className="group"
-    >
-      <div
-        className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
-          ${isSelected ? 'bg-primary/10' : ''}
-          ${!isSelected ? `group-hover:bg-slate-100 dark:group-hover:bg-slate-900 ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-950'}` : ''}`}
-      >
-        <div className={`flex flex-row justify-between gap-4 md:gap-8`}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              toggleSelection();
-            }}
-            className="absolute bottom-0 left-0 top-0 z-10 w-10"
-          />
-          <Checkbox checked={isSelected} readOnly />
-          <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
-            <div className="flex w-28 flex-shrink-0 flex-row gap-1">
-              {isUnread ? (
-                <span className="my-auto block h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
-              ) : null}
-              <RecipientsList mailThread={mailThread} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <p
-                className={`font-normal text-foreground/60 ${isUnread ? 'md:font-semibold' : ''} md:text-inherit`}
-              >
-                {lastConversation.fileMetadata.appData.content.subject}
-              </p>
-              <MailAttachmentOverview
-                files={lastConversation.fileMetadata.payloads?.map((file) => ({
-                  ...file,
-                  fileId: lastConversation.fileId,
-                  conversationId: lastConversation.fileMetadata.appData.groupId as string,
-                }))}
-              />
-            </div>
-          </div>
-          <p className="ml-auto text-sm text-foreground/50">
-            {formatToTimeAgoWithRelativeDetail(
-              new Date(lastConversation.fileMetadata.created),
-              true
-            )}
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-};
-
-const RecipientsList = ({ mailThread }: { mailThread: DriveSearchResult<MailConversation>[] }) => {
-  const identity = useDotYouClientContext().getIdentity();
-  const allRecipients = getAllRecipients(mailThread[0]);
-
-  const anyReply = mailThread.some(
-    (conv) =>
-      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) === identity
-  );
-
-  const lastReceivedConversation = mailThread.find(
-    (conv) =>
-      (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !== identity
-  );
-  const anyReceived = !!lastReceivedConversation;
-
-  const numberOfConversations = mailThread.length;
-  const onlySent = anyReply && !anyReceived;
-
-  const filteredRecipients = allRecipients.filter((recipient) =>
-    recipient === identity ? anyReply : anyReceived
-  );
-
-  return (
-    <>
-      <span className="overflow-hidden overflow-ellipsis text-nowrap">
-        {onlySent ? (
-          <>
-            {t('To')}:{' '}
-            <InnerRecipients
-              recipients={allRecipients.filter((recipient) => recipient !== identity)}
-            />
-          </>
-        ) : (
-          <InnerRecipients recipients={filteredRecipients} />
-        )}
-      </span>
-      {numberOfConversations !== 1 ? <span>({numberOfConversations})</span> : null}
-    </>
-  );
-};
-
-const InnerRecipients = ({ recipients }: { recipients: string[] }) => {
-  const identity = useDotYouClientContext().getIdentity();
-
-  return recipients.map((recipient, index) => (
-    <React.Fragment key={recipient}>
-      {recipient === identity ? t('Me') : <ConnectionName odinId={recipient} />}
-      {recipients.length - 1 === index ? null : `, `}
-    </React.Fragment>
-  ));
 };

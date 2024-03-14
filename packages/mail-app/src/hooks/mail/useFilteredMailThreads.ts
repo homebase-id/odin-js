@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { flattenInfinteData } from '@youfoundation/common-app';
+import { flattenInfinteData, getTextRootsRecursive } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   MailConversation,
@@ -14,7 +14,8 @@ import { useMailConversations } from './useMailConversations';
 const PAGE_SIZE = 100;
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
 
-export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
+// TODO: Improve performance by using a search index; Both for queries and the filter
+export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string | undefined) => {
   const identity = useDotYouClientContext().getIdentity();
   const {
     data: conversations,
@@ -101,11 +102,24 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
     );
 
     if (!threadsDictionary) return [];
-
-    // TODO: Check if the ordering remains correct.. Probably not
     const threads = Object.keys(threadsDictionary).map((threadKey) => threadsDictionary[threadKey]);
 
     const filteredThreads = threads.filter((thread) => {
+      if (
+        query &&
+        !thread.some((mail) => {
+          const { subject, message } = mail.fileMetadata.appData.content;
+          return (
+            subject.toLowerCase().includes(query.toLowerCase()) ||
+            getTextRootsRecursive(message).some((text) =>
+              text.toLowerCase().includes(query.toLowerCase())
+            )
+          );
+        })
+      ) {
+        return false;
+      }
+
       if (filter === 'inbox') {
         return thread.some((conversation) => {
           const sender =
@@ -119,7 +133,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter) => {
     });
 
     return filteredThreads;
-  }, [filter, conversations]);
+  }, [filter, query, conversations]);
 
   return {
     threads,

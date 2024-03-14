@@ -3,7 +3,7 @@ import { ReactNode, useState } from 'react';
 import { ellipsisAtMaxChar, t } from '../../../helpers';
 import { RichTextRenderer } from '../../../richText';
 import { EmbeddedPostContent } from './EmbeddedPostContent';
-import { EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 
 const MAX_CHAR_FOR_SUMMARY = 400;
 
