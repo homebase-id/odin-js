@@ -6,26 +6,18 @@ import {
   MailConversation,
   MailConversationsReturn,
   MailDrive,
-  MailThreadReturn,
   REMOVE_ARCHIVAL_STATUS,
-  getMailThread,
   updateLocalMailHeader,
 } from '../../providers/MailProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-
-const FIVE_MINUTES = 5 * 60 * 1000;
-const PAGE_SIZE = 100;
+import { useMailConversations } from './useMailConversations';
 
 export const useMailThread = (props?: { threadId: string | undefined }) => {
   const { threadId } = props || {};
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
-
-  const fetchMailConversations = async (threadId: string, cursorState: string | undefined) => {
-    return await getMailThread(dotYouClient, threadId, cursorState, PAGE_SIZE);
-  };
 
   const removeMailThread = async (mailThread: DriveSearchResult<MailConversation>[]) => {
     return await Promise.all(
@@ -62,15 +54,20 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
   };
 
   return {
-    fetch: useInfiniteQuery({
-      queryKey: ['mail-thread', threadId || ''],
-      enabled: !!threadId,
-      initialPageParam: undefined as string | undefined,
-      queryFn: ({ pageParam }) => fetchMailConversations(threadId as string, pageParam),
-      getNextPageParam: (lastPage) =>
-        lastPage.results?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
-      staleTime: FIVE_MINUTES,
-    }),
+    // Filters the mail conversations by their threadId without affecting the query cache
+    fetch: useMailConversations((data) => {
+      return {
+        ...data,
+        pages: data.pages.map((page) => {
+          return {
+            ...page,
+            results: page.results.filter((conversation) => {
+              return stringGuidsEqual(conversation.fileMetadata.appData.groupId, threadId);
+            }),
+          };
+        }),
+      };
+    }).mails,
     remove: useMutation({
       mutationFn: removeMailThread,
       onMutate: (mailThread) => {
@@ -109,46 +106,10 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        // This assumes all messages are from the same thread
-        const threadId = mailThread[0].fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page) => {
-              return {
-                ...page,
-                results: page.results.map((conversation) => {
-                  return mailThread.some((msg) => stringGuidsEqual(msg.fileId, conversation.fileId))
-                    ? {
-                        ...conversation,
-                        fileMetadata: {
-                          ...conversation.fileMetadata,
-                          appData: {
-                            ...conversation.fileMetadata.appData,
-                            archivalStatus: REMOVE_ARCHIVAL_STATUS,
-                          },
-                        },
-                      }
-                    : conversation;
-                }),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
       onError: (error, mailThread, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = mailThread[0].fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error removing messages', error);
       },
@@ -194,46 +155,10 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        // This assumes all messages are from the same thread
-        const threadId = mailThread[0].fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page) => {
-              return {
-                ...page,
-                results: page.results.map((conversation) => {
-                  return mailThread.some((msg) => stringGuidsEqual(msg.fileId, conversation.fileId))
-                    ? {
-                        ...conversation,
-                        fileMetadata: {
-                          ...conversation.fileMetadata,
-                          appData: {
-                            ...conversation.fileMetadata.appData,
-                            archivalStatus: ARCHIVE_ARCHIVAL_STATUS,
-                          },
-                        },
-                      }
-                    : conversation;
-                }),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
       onError: (error, mailThread, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = mailThread[0].fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error archiving messages', error);
       },
@@ -279,46 +204,10 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        // This assumes all messages are from the same thread
-        const threadId = mailThread[0].fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page) => {
-              return {
-                ...page,
-                results: page.results.map((conversation) => {
-                  return mailThread.some((msg) => stringGuidsEqual(msg.fileId, conversation.fileId))
-                    ? {
-                        ...conversation,
-                        fileMetadata: {
-                          ...conversation.fileMetadata,
-                          appData: {
-                            ...conversation.fileMetadata.appData,
-                            archivalStatus: DEFAULT_ARCHIVAL_STATUS,
-                          },
-                        },
-                      }
-                    : conversation;
-                }),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
       onError: (error, mailThread, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = mailThread[0].fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error restoring messages', error);
       },

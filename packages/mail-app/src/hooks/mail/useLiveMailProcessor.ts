@@ -62,8 +62,6 @@ const useMailWebsocket = (isEnabled: boolean) => {
       notification.notificationType === 'fileModified'
     ) {
       if (notification.header.fileMetadata.appData.fileType === MAIL_CONVERSATION_FILE_TYPE) {
-        const threadId = notification.header.fileMetadata.appData.groupId;
-        queryClient.invalidateQueries({ queryKey: ['mail-thread', threadId] });
         queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       }
     }

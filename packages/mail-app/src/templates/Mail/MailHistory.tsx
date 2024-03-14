@@ -1,4 +1,4 @@
-import { DriveSearchResult, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
@@ -121,7 +121,7 @@ export const MailHistory = ({
         }}
       >
         <div
-          className="absolute left-0 top-0 flex h-full w-full flex-col-reverse p-2 md:p-5"
+          className="absolute left-0 top-0 flex h-full w-full flex-col-reverse px-2 md:px-5"
           style={{
             transform: `translateY(-${items[0]?.start ?? 0}px)`,
           }}

@@ -16,7 +16,6 @@ import {
   MailConversation,
   MailConversationsReturn,
   MailDrive,
-  MailThreadReturn,
   getMailConversation,
   updateLocalMailHeader,
   uploadMail,
@@ -188,42 +187,10 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        const threadId = conversation.fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page, index) => {
-              return {
-                ...page,
-                results:
-                  existingMailThread.pages.length - 1 === index
-                    ? [
-                        ...(existingMailThread.pages[0].results.filter(
-                          (item) => !stringGuidsEqual(item.fileId, conversation.fileId)
-                        ) || []),
-                        conversation as DriveSearchResult<MailConversation>,
-                      ]
-                    : page.results,
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
-      onError: (_error, { conversation }, context) => {
+      onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = conversation.fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
-
         console.error('Error sending chat message', _error);
       },
       onSettled: async () => {
@@ -272,51 +239,10 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        // This assumes all messages are from the same thread
-        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page) => {
-              return {
-                ...page,
-                results: page.results.map((conversation) => {
-                  return mailConversations.some((msg) =>
-                    stringGuidsEqual(msg.fileId, conversation.fileId)
-                  )
-                    ? {
-                        ...conversation,
-                        fileMetadata: {
-                          ...conversation.fileMetadata,
-                          appData: {
-                            ...conversation.fileMetadata.appData,
-                            content: {
-                              ...conversation.fileMetadata.appData.content,
-                              isRead: true,
-                            },
-                          },
-                        },
-                      }
-                    : conversation;
-                }),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
-      onError: (_error, { mailConversations }, context) => {
+      onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error sending chat message', _error);
       },
@@ -363,51 +289,10 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        // This assumes all messages are from the same thread
-        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page) => {
-              return {
-                ...page,
-                results: page.results.map((conversation) => {
-                  return mailConversations.some((msg) =>
-                    stringGuidsEqual(msg.fileId, conversation.fileId)
-                  )
-                    ? {
-                        ...conversation,
-                        fileMetadata: {
-                          ...conversation.fileMetadata,
-                          appData: {
-                            ...conversation.fileMetadata.appData,
-                            content: {
-                              ...conversation.fileMetadata.appData.content,
-                              isRead: false,
-                            },
-                          },
-                        },
-                      }
-                    : conversation;
-                }),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
-      onError: (_error, { mailConversations }, context) => {
+      onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = mailConversations[0].fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error sending chat message', _error);
       },
@@ -516,51 +401,15 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        const threadId = draftedConversation.fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page, index) => {
-              return {
-                ...page,
-                results:
-                  existingMailThread.pages.length - 1 === index && !alreadyExisted
-                    ? [
-                        ...(existingMailThread.pages[0].results || []),
-                        draftedConversation as DriveSearchResult<MailConversation>,
-                      ]
-                    : page.results.map((result) => {
-                        return stringGuidsEqual(result.fileId, draftedConversation.fileId)
-                          ? (draftedConversation as DriveSearchResult<MailConversation>)
-                          : result;
-                      }),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
-      onError: (_error, { conversation }, context) => {
+      onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = conversation.fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error saving draft chat message', _error);
       },
-      onSettled: async (conversation) => {
-        const threadId = conversation?.fileMetadata.appData.content.threadId;
-
+      onSettled: async () => {
         queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
-        if (threadId) queryClient.invalidateQueries({ queryKey: ['mail-thread', threadId] });
       },
     }),
     removeDraft: useMutation({
@@ -588,35 +437,10 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
           queryClient.setQueryData(['mail-conversations'], newConversations);
         }
 
-        const threadId = draftMailConversation.fileMetadata.appData.content.threadId;
-        const existingMailThread = queryClient.getQueryData<InfiniteData<MailThreadReturn>>([
-          'mail-thread',
-          threadId,
-        ]);
-
-        if (existingMailThread && threadId) {
-          const newMailThread: InfiniteData<MailThreadReturn> = {
-            ...existingMailThread,
-            pages: existingMailThread.pages.map((page, index) => {
-              return {
-                ...page,
-                results: page.results.filter(
-                  (result) => !stringGuidsEqual(result.fileId, draftMailConversation.fileId)
-                ),
-              };
-            }),
-          };
-
-          queryClient.setQueryData(['mail-thread', threadId], newMailThread);
-        }
-
-        return { existingConversations, existingMailThread };
+        return { existingConversations };
       },
       onError: (_error, draftConversation, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-
-        const threadId = draftConversation.fileMetadata.appData.content.threadId;
-        queryClient.setQueryData(['mail-thread', threadId], context?.existingMailThread);
 
         console.error('Error removing draft chat message', _error);
       },

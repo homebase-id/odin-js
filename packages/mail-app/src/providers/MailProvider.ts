@@ -63,12 +63,13 @@ export interface MailConversationsReturn
 export const getMailConversations = async (
   dotYouClient: DotYouClient,
   cursorState: string | undefined,
+  threadId: string | undefined,
   pageSize: number
 ): Promise<MailConversationsReturn> => {
   const params: FileQueryParams = {
     targetDrive: MailDrive,
     fileType: [MAIL_CONVERSATION_FILE_TYPE, MAIL_DRAFT_CONVERSATION_FILE_TYPE],
-    // archivalStatus: [0],
+    groupId: threadId ? [threadId] : undefined,
   };
 
   const ro: GetBatchQueryResultOptions = {
@@ -91,38 +92,6 @@ export const getMailConversations = async (
 
 export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) => {
   return await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
-};
-
-export interface MailThreadReturn extends CursoredResult<DriveSearchResult<MailConversation>[]> {}
-
-export const getMailThread = async (
-  dotYouClient: DotYouClient,
-  threadId: string,
-  cursorState: string | undefined,
-  pageSize: number
-): Promise<MailThreadReturn> => {
-  const params: FileQueryParams = {
-    targetDrive: MailDrive,
-    fileType: [MAIL_CONVERSATION_FILE_TYPE, MAIL_DRAFT_CONVERSATION_FILE_TYPE],
-    groupId: [threadId],
-  };
-
-  const ro: GetBatchQueryResultOptions = {
-    maxRecords: pageSize,
-    cursorState: cursorState,
-    includeMetadataHeader: true,
-  };
-
-  const response = await queryBatch(dotYouClient, params, ro);
-
-  return {
-    cursorState: response.cursorState,
-    results: (await Promise.all(
-      response.searchResults
-        .map(async (result) => await dsrToMailConversation(dotYouClient, result, MailDrive, true))
-        .filter(Boolean)
-    )) as DriveSearchResult<MailConversation>[],
-  };
 };
 
 export const uploadMail = async (
