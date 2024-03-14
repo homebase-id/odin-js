@@ -14,7 +14,7 @@ import { useMailConversations } from './useMailConversations';
 const PAGE_SIZE = 100;
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
 
-// TODO: Improve performance by using a search index; Both for queries and the filter
+// TODO: ? Improve performance by using a search index; Both for queries and the filter
 export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string | undefined) => {
   const identity = useDotYouClientContext().getIdentity();
   const {
@@ -34,34 +34,32 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
         (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
         (a.fileMetadata.appData.userDate || a.fileMetadata.created)
     );
+    if (!flattenedConversations) return [];
 
-    const filteredConversations = flattenedConversations?.filter((conversation) => {
+    const filteredConversations = flattenedConversations.filter((conversation) => {
       const sender =
         conversation.fileMetadata.senderOdinId || conversation.fileMetadata.appData.content.sender;
 
-      // Remove drafts from all but the drafts filter
+      // Remove "drafts" from all but the drafts filter
       if (
-        conversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE &&
-        filter !== 'drafts'
-      ) {
+        filter !== 'drafts' &&
+        conversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE
+      )
         return false;
-      }
 
-      // Remove removed from all but the trash filter
+      // Remove "removed" from all but the trash filter
       if (
-        conversation.fileMetadata.appData.archivalStatus === REMOVE_ARCHIVAL_STATUS &&
-        filter !== 'trash'
-      ) {
+        filter !== 'trash' &&
+        conversation.fileMetadata.appData.archivalStatus === REMOVE_ARCHIVAL_STATUS
+      )
         return false;
-      }
 
-      // Remove archived from all but the archive filter
+      // Remove "archived" from all but the archive filter
       if (
-        conversation.fileMetadata.appData.archivalStatus === ARCHIVE_ARCHIVAL_STATUS &&
-        filter !== 'archive'
-      ) {
+        filter !== 'archive' &&
+        conversation.fileMetadata.appData.archivalStatus === ARCHIVE_ARCHIVAL_STATUS
+      )
         return false;
-      }
 
       if (filter === 'inbox') {
         return (
@@ -82,27 +80,19 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
       return true;
     });
 
-    // Sanity check, no grouping possible on drafts
-    if (filter === 'drafts') return filteredConversations.map((conversation) => [conversation]);
-
     // Group the flattenedConversations by their groupId
-    const threadsDictionary = filteredConversations?.reduce(
+    const threadsDictionary = filteredConversations.reduce(
       (acc, conversation) => {
         const threadId = conversation.fileMetadata.appData.groupId as string;
 
-        if (!acc[threadId]) {
-          acc[threadId] = [conversation];
-        } else {
-          acc[threadId].push(conversation);
-        }
+        if (!acc[threadId]) acc[threadId] = [conversation];
+        else acc[threadId].push(conversation);
 
         return acc;
       },
       {} as Record<string, DriveSearchResult<MailConversation>[]>
     );
-
-    if (!threadsDictionary) return [];
-    const threads = Object.keys(threadsDictionary).map((threadKey) => threadsDictionary[threadKey]);
+    const threads = Object.values(threadsDictionary);
 
     const filteredThreads = threads.filter((thread) => {
       if (

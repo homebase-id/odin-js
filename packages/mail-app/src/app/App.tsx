@@ -43,6 +43,7 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
+import { DebugDataPage } from '../templates/Mail/DebugData';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -112,6 +113,7 @@ function App() {
             />
             <Route path="new" element={<MailComposerPage />} />
             <Route path="new/:draftKey" element={<MailComposerPage />} />
+            <Route path="debug" element={<DebugDataPage />} />
           </Route>
 
           <Route

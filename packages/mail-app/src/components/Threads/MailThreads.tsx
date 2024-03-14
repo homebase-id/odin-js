@@ -48,7 +48,7 @@ export const MailThreads = ({
 
   const virtualizer = useWindowVirtualizer({
     count: threads?.length + 1, // Add 1 so we have an index for the 'loaderRow'
-    estimateSize: () => 120, // Rough size of a postTeasercard
+    estimateSize: () => 40, // Rough size of a MailConversationItem
     scrollMargin: parentOffsetRef.current,
   });
 
@@ -91,7 +91,7 @@ export const MailThreads = ({
             }}
           >
             <div
-              className="absolute left-0 top-0 z-0 w-full"
+              className="absolute left-0 top-0 z-10 w-full"
               style={{
                 transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
               }}
@@ -128,30 +128,36 @@ export const MailThreads = ({
                 );
 
                 return (
-                  <MailConversationItem
-                    query={query}
-                    key={lastConversation.fileId}
-                    data-key={lastConversation.fileId}
-                    mailThread={mailThread}
-                    pathPrefix={`${ROOT_PATH}/${filter}/`}
-                    toggleSelection={() => {
-                      setIsAllSelected(false);
-                      setSelection(
-                        isSelected
-                          ? [
-                              ...selection.filter(
-                                (selected) =>
-                                  !stringGuidsEqual(
-                                    selected.fileMetadata.appData.groupId,
-                                    lastConversationId
-                                  )
-                              ),
-                            ]
-                          : [...selection, lastConversation]
-                      );
-                    }}
-                    isSelected={isSelected}
-                  />
+                  <div
+                    key={virtualRow.key}
+                    data-index={virtualRow.index}
+                    ref={virtualizer.measureElement}
+                    data-fileid={lastConversation.fileId}
+                  >
+                    <MailConversationItem
+                      query={query}
+                      data-key={lastConversation.fileId}
+                      mailThread={mailThread}
+                      pathPrefix={`${ROOT_PATH}/${filter}/`}
+                      toggleSelection={() => {
+                        setIsAllSelected(false);
+                        setSelection(
+                          isSelected
+                            ? [
+                                ...selection.filter(
+                                  (selected) =>
+                                    !stringGuidsEqual(
+                                      selected.fileMetadata.appData.groupId,
+                                      lastConversationId
+                                    )
+                                ),
+                              ]
+                            : [...selection, lastConversation]
+                        );
+                      }}
+                      isSelected={isSelected}
+                    />
+                  </div>
                 );
               })}
             </div>

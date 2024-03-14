@@ -7,6 +7,7 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
+import React from 'react';
 
 export const MailConversationItem = ({
   mailThread,
@@ -46,10 +47,10 @@ export const MailConversationItem = ({
     return strArr.map((str, index) => {
       if (index === strArr.length - 1) return str;
       return (
-        <>
+        <React.Fragment key={index}>
           {str}
           <span className="bg-primary/30 font-semibold">{query}</span>
-        </>
+        </React.Fragment>
       );
     });
   }, [query, lastConversation]);

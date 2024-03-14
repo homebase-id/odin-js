@@ -20,7 +20,7 @@ export const MailAttachmentOverview = ({
   maxVisible?: number | null;
   className?: string;
 }) => {
-  if (!files) return null;
+  if (!files || !files.length) return null;
 
   const slicedFiles = maxVisible && files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;

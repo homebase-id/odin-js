@@ -145,7 +145,9 @@ export const MailHistory = ({
             }
 
             const previousMessage =
-              virtualRow.index === 0 ? undefined : mailThread[virtualRow.index - 1];
+              virtualRow.index === mailThread.length - 1
+                ? undefined
+                : mailThread[virtualRow.index + 1];
             const message = mailThread[virtualRow.index];
             return (
               <div
