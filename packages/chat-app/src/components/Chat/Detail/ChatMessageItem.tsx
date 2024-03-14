@@ -44,8 +44,8 @@ export const ChatMessageItem = ({
     ?.recipients;
 
   const hasReactions = useChatReaction({
-    messageId: msg.fileMetadata.appData.uniqueId,
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
+    messageFileId: msg.fileId,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get.data?.length;
 
   return (

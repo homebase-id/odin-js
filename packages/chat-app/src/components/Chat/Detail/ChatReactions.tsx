@@ -23,13 +23,11 @@ export const ChatReactions = ({
   const [showDetail, setShowDetail] = useState(false);
 
   const { data: reactions } = useChatReaction({
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
-    messageId: msg.fileMetadata.appData.uniqueId,
+    messageFileId: msg.fileId,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
-  const uniqueEmojis = Array.from(
-    new Set(reactions?.map((reaction) => reaction.fileMetadata.appData.content.message))
-  ).slice(0, 5);
+  const uniqueEmojis = Array.from(new Set(reactions?.map((reaction) => reaction.body))).slice(0, 5);
   const count = reactions?.length;
 
   if (!reactions?.length) return null;
@@ -72,18 +70,14 @@ const ChatReactionsDetail = ({
   const [activeEmoji, setActiveEmoji] = useState<string>('all');
 
   const { data: reactions } = useChatReaction({
-    conversationId: conversation?.fileMetadata.appData.uniqueId,
-    messageId: msg.fileMetadata.appData.uniqueId,
+    messageFileId: msg.fileId,
+    messageGlobalTransitId: msg.fileMetadata.globalTransitId,
   }).get;
 
   const filteredEmojis = useMemo(
     () =>
       reactions?.filter((reaction) =>
-        reactions?.some(
-          (reactionFile) =>
-            reactionFile?.fileMetadata?.appData?.content?.message ===
-            reaction?.fileMetadata?.appData?.content?.message
-        )
+        reactions?.some((reactionFile) => reactionFile?.body === reaction?.body)
       ) || [],
     [reactions]
   );
@@ -112,24 +106,17 @@ const ChatReactionsDetail = ({
           </li>
         ) : null}
         {filteredEmojis.map((reaction) => {
-          const count = reactions?.filter(
-            (emoji) =>
-              emoji.fileMetadata.appData.content.message ===
-              reaction.fileMetadata.appData.content.message
-          ).length;
+          const count = reactions?.filter((emoji) => emoji.body === reaction.body).length;
           return (
-            <li className="" key={reaction.fileId}>
+            <li className="" key={reaction.body}>
               <ActionButton
                 type="mute"
                 className={`rounded-none border-b-primary hover:border-b-2 ${
-                  activeEmoji === reaction.fileMetadata.appData.content.message ||
-                  filteredEmojis?.length === 1
-                    ? 'border-b-2'
-                    : ''
+                  activeEmoji === reaction.body || filteredEmojis?.length === 1 ? 'border-b-2' : ''
                 }`}
-                onClick={() => setActiveEmoji(reaction.fileMetadata.appData.content.message)}
+                onClick={() => setActiveEmoji(reaction.body)}
               >
-                {reaction.fileMetadata.appData.content.message} {count}
+                {reaction.body} {count}
               </ActionButton>
             </li>
           );
@@ -137,20 +124,13 @@ const ChatReactionsDetail = ({
       </ul>
       <div className="grid grid-flow-row gap-4 px-4 py-4 sm:px-8">
         {reactions
-          ?.filter(
-            (reaction) =>
-              reaction.fileMetadata.appData.content.message === activeEmoji || activeEmoji === 'all'
-          )
+          ?.filter((reaction) => reaction.body === activeEmoji || activeEmoji === 'all')
           .map((reaction) => {
             return (
-              <div className="flex flex-row items-center text-lg" key={reaction.fileId}>
-                <AuthorImage
-                  odinId={reaction.fileMetadata.senderOdinId}
-                  size="xs"
-                  className="mr-2"
-                />
-                <AuthorName odinId={reaction.fileMetadata.senderOdinId} />
-                <p className="ml-auto">{reaction.fileMetadata.appData.content.message}</p>
+              <div className="flex flex-row items-center text-lg" key={reaction.body}>
+                <AuthorImage odinId={reaction.authorOdinId} size="xs" className="mr-2" />
+                <AuthorName odinId={reaction.authorOdinId} />
+                <p className="ml-auto">{reaction.body}</p>
               </div>
             );
           })}

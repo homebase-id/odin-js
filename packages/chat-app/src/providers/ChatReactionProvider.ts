@@ -4,6 +4,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   NewDriveSearchResult,
+  ReactionFile,
   ScheduleOptions,
   SecurityGroupType,
   SendContents,
@@ -17,7 +18,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
 import { appId } from '../hooks/auth/useAuth';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { getNewId, jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 export const ChatReactionFileType = 7979;
 const PAGE_SIZE = 100;
@@ -27,98 +28,126 @@ export interface ChatReaction {
   message: string;
 }
 
+// export const getReactions = async (
+//   dotYouClient: DotYouClient,
+//   messageGlobalTransitId: string,
+// ) => {
+//   const params: FileQueryParams = {
+//     targetDrive: ChatDrive,
+//     groupId: [messageId],
+//   };
+
+//   const ro: GetBatchQueryResultOptions = {
+//     maxRecords: PAGE_SIZE,
+//     cursorState: undefined,
+//     includeMetadataHeader: true,
+//   };
+
+//   const response = await queryBatch(dotYouClient, params, ro);
+//   return {
+//     ...response,
+//     searchResults: (
+//       await Promise.all(
+//         response.searchResults.map(
+//           async (result) => await dsrToReaction(dotYouClient, result, ChatDrive, true)
+//         )
+//       )
+//     ).filter(Boolean) as DriveSearchResult<ChatReaction>[],
+//   };
+// };
+
+interface ServerReactionsListWithCursor {
+  reactions: {
+    odinId: string;
+    reactionContent: string;
+  }[];
+  cursor: string;
+}
+const emojiRoot = '/drive/files/reactions';
+
 export const getReactions = async (
   dotYouClient: DotYouClient,
-  conversationId: string,
-  messageId: string
-) => {
-  const params: FileQueryParams = {
-    targetDrive: ChatDrive,
-    groupId: [messageId],
+  context: {
+    target: {
+      fileId: string;
+      globalTransitId: string;
+      targetDrive: TargetDrive;
+    };
+  },
+  pageSize = 15,
+  cursor?: string
+): Promise<{ reactions: ReactionFile[]; cursor: string } | undefined> => {
+  const client = dotYouClient.createAxiosClient();
+
+  const data = {
+    file: {
+      targetDrive: context.target.targetDrive,
+      fileId: context.target.fileId,
+      globalTransitId: context.target.globalTransitId,
+    },
+    cursor: cursor,
+    maxRecords: pageSize,
   };
 
-  const ro: GetBatchQueryResultOptions = {
-    maxRecords: PAGE_SIZE,
-    cursorState: undefined,
-    includeMetadataHeader: true,
-  };
-
-  const response = await queryBatch(dotYouClient, params, ro);
-  return {
-    ...response,
-    searchResults: (
-      await Promise.all(
-        response.searchResults.map(
-          async (result) => await dsrToReaction(dotYouClient, result, ChatDrive, true)
-        )
-      )
-    ).filter(Boolean) as DriveSearchResult<ChatReaction>[],
-  };
+  const url = emojiRoot + '/list';
+  return client
+    .post<ServerReactionsListWithCursor>(url, data)
+    .then((response) => {
+      return {
+        reactions: response.data.reactions.map((reaction) => {
+          return {
+            authorOdinId: reaction.odinId,
+            body: tryJsonParse<{ emoji: string }>(reaction.reactionContent).emoji,
+          };
+        }),
+        cursor: response.data.cursor,
+      };
+    })
+    .catch(dotYouClient.handleErrorResponse);
 };
 
 export const uploadReaction = async (
   dotYouClient: DotYouClient,
-  conversationId: string,
-  reaction: NewDriveSearchResult<ChatReaction>,
+  messageGlobalTransitId: string,
+  reaction: string,
   recipients: string[]
 ) => {
-  const reactionContent = reaction.fileMetadata.appData.content;
-  const distribute = recipients?.length > 0;
+  const axiosClient = dotYouClient.createAxiosClient();
 
-  const uploadInstructions: UploadInstructionSet = {
-    storageOptions: {
-      drive: ChatDrive,
-      overwriteFileId: reaction.fileId,
+  return await axiosClient.post(`/transit/reactions/group-add`, {
+    recipients: [...recipients, dotYouClient.getIdentity()],
+    request: {
+      file: {
+        targetDrive: ChatDrive,
+        globalTransitId: messageGlobalTransitId,
+      },
+      reaction: JSON.stringify({ emoji: reaction }),
     },
-    transitOptions: distribute
-      ? {
-          recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
-          sendContents: SendContents.All,
-          useGlobalTransitId: true,
-          useAppNotification: true,
-          appNotificationOptions: {
-            appId: appId,
-            typeId: conversationId,
-            tagId: getNewId(),
-            silent: false,
-          },
-        }
-      : undefined,
-  };
-
-  const jsonContent: string = jsonStringify64({ ...reactionContent });
-  const uploadMetadata: UploadFileMetadata = {
-    versionTag: reaction?.fileMetadata.versionTag,
-    allowDistribution: distribute,
-    appData: {
-      ...reaction.fileMetadata.appData,
-      fileType: ChatReactionFileType,
-      content: jsonContent,
-    },
-    isEncrypted: true,
-    accessControlList: reaction.serverMetadata?.accessControlList || {
-      requiredSecurityGroup: SecurityGroupType.Connected,
-    },
-  };
-
-  return await uploadFile(
-    dotYouClient,
-    uploadInstructions,
-    uploadMetadata,
-    undefined,
-    undefined,
-    undefined,
-    undefined
-  );
+  });
 };
 
 export const deleteReaction = async (
   dotYouClient: DotYouClient,
-  chatReaction: DriveSearchResult<ChatReaction>,
-  recipients: string[]
+  recipients: string[],
+  emoji: ReactionFile,
+  target: {
+    fileId: string;
+    globalTransitId: string;
+    targetDrive: TargetDrive;
+  }
 ) => {
-  return await deleteFile(dotYouClient, ChatDrive, chatReaction.fileId, recipients);
+  const axiosClient = dotYouClient.createAxiosClient();
+
+  return await axiosClient.post(`/transit/reactions/group-delete`, {
+    recipients: [...recipients, dotYouClient.getIdentity()],
+    request: {
+      file: {
+        targetDrive: ChatDrive,
+        globalTransitId: target.globalTransitId,
+      },
+      reaction: JSON.stringify({ emoji: emoji.body }),
+    },
+  });
 };
 
 export const dsrToReaction = async (
