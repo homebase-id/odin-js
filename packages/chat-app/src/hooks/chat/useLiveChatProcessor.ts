@@ -13,6 +13,7 @@ import {
   Conversation,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
+  UPDATE_GROUP_CONVERSATION_COMMAND,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { preAuth } from '@youfoundation/js-lib/auth';
@@ -152,6 +153,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           JOIN_CONVERSATION_COMMAND,
           JOIN_GROUP_CONVERSATION_COMMAND,
           MARK_CHAT_READ_COMMAND,
+          UPDATE_GROUP_CONVERSATION_COMMAND,
         ].includes(notification.header.fileMetadata.appData.dataType) &&
         identity
       ) {
@@ -199,7 +201,8 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
         (command) =>
           command.clientCode === JOIN_CONVERSATION_COMMAND ||
           command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
+          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
+          command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
       );
 
       const completedCommands: string[] = [];
