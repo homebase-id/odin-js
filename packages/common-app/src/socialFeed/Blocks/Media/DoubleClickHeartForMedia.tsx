@@ -7,7 +7,7 @@ import {
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRef } from 'react';
 
 export const DoubleClickHeartForMedia = ({
@@ -56,8 +56,17 @@ export const DoubleClickHeartForMedia = ({
     },
   });
 
+  const previewThumbnail = useMemo(() => {
+    if (postFile.fileMetadata.appData.content.type === 'Article') {
+      const primaryKey = postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey;
+      return postFile.fileMetadata.payloads.find((payload) => payload.key === primaryKey)
+        ?.previewThumbnail;
+    }
+    return postFile.fileMetadata.appData.previewThumbnail;
+  }, [postFile]);
+
   return (
-    <span ref={wrapperRef} onClick={(e) => e.stopPropagation()}>
+    <span ref={wrapperRef} onClick={(e) => e.stopPropagation()} data-thumb={!!previewThumbnail}>
       {postFile.fileId ? (
         <PostMedia
           odinId={odinId}
@@ -65,7 +74,7 @@ export const DoubleClickHeartForMedia = ({
             fileId: postFile.fileId,
             globalTransitId: postFile.fileMetadata.globalTransitId,
             lastModified: postFile.fileMetadata.updated,
-            previewThumbnail: postFile.fileMetadata.appData.previewThumbnail,
+            previewThumbnail: previewThumbnail,
             isEncrypted: postFile.fileMetadata.isEncrypted,
 
             content: postContent,

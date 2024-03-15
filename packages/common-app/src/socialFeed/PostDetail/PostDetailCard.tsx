@@ -21,7 +21,6 @@ import {
 import {
   DEFAULT_PAYLOAD_KEY,
   DriveSearchResult,
-  EmbeddedThumb,
   NewDriveSearchResult,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
@@ -148,7 +147,12 @@ export const PostDetailCard = ({
                 fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
-                previewThumbnail={postFile?.fileMetadata.appData.previewThumbnail}
+                previewThumbnail={
+                  postFile?.fileMetadata.appData.previewThumbnail ||
+                  postFile?.fileMetadata.payloads?.find(
+                    (payload) => payload.key === post.primaryMediaFile?.fileKey
+                  )?.previewThumbnail
+                }
                 probablyEncrypted={postFile?.fileMetadata.isEncrypted}
               />
             ) : (
@@ -161,7 +165,12 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
                 probablyEncrypted={postFile?.fileMetadata.isEncrypted}
-                previewThumbnail={postFile?.fileMetadata.appData.previewThumbnail}
+                previewThumbnail={
+                  postFile?.fileMetadata.appData.previewThumbnail ||
+                  postFile?.fileMetadata.payloads?.find(
+                    (payload) => payload.key === post.primaryMediaFile?.fileKey
+                  )?.previewThumbnail
+                }
               />
             )}
           </div>
