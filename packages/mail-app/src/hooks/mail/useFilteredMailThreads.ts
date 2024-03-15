@@ -80,6 +80,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
       return true;
     });
 
+    // TODO: Investigate if the prepare can be moved to the useMailConversations hook; So it's stored in cache "indexed"
     // TODO: Update sort to avoid re-sorting within the thread
     const sortedResults = query
       ? fuzzysort
