@@ -6,7 +6,7 @@ import { MailHomeHeader } from '../../components/Header/Header';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { MailThreadsFilter } from '../../hooks/mail/useFilteredMailThreads';
 
-type MailFilterParams = {
+export type MailFilterParams = {
   filter: MailThreadsFilter;
 };
 

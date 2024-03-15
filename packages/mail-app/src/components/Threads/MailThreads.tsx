@@ -6,6 +6,7 @@ import {
   LoadingBlock,
   ErrorNotification,
   ActionGroup,
+  Download,
 } from '@youfoundation/common-app';
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -31,6 +32,9 @@ export const MailThreads = ({
   const [isAllSelected, setIsAllSelected] = useState(false);
   const identity = useDotYouClientContext().getIdentity();
 
+  // Don't auto load next pages when there's a query
+  const autoPage = !query;
+
   const { hasMorePosts, conversationsLoading, fetchNextPage, isFetchingNextPage, threads } =
     useFilteredMailThreads(filter, query);
 
@@ -53,6 +57,8 @@ export const MailThreads = ({
   });
 
   useEffect(() => {
+    if (!autoPage) return;
+
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
     if (!lastItem) return;
 
@@ -110,6 +116,16 @@ export const MailThreads = ({
                         <div className="animate-pulse text-slate-400" key={'loading'}>
                           {t('Loading...')}
                         </div>
+                      ) : !autoPage && hasMorePosts ? (
+                        <div>
+                          <ActionButton
+                            onClick={() => fetchNextPage()}
+                            type="secondary"
+                            icon={Download}
+                          >
+                            {t('Fetch more from the server')}
+                          </ActionButton>
+                        </div>
                       ) : null}
                     </div>
                   );
@@ -166,7 +182,7 @@ export const MailThreads = ({
       ) : (
         <div className="px-5 py-3">
           <div className="italic opacity-50" key={'no-more'}>
-            {t('No conversations')}
+            {query ? t('No results for you query') : t('No conversations')}
           </div>
         </div>
       )}

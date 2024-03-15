@@ -13,9 +13,7 @@ import { QueryClient } from '@tanstack/react-query';
 import {
   PersistQueryClientOptions,
   PersistQueryClientProvider,
-  removeOldestQuery,
 } from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
@@ -33,6 +31,9 @@ const MailComposerPage = lazy(() =>
     default: mailApp.MailComposerPage,
   }))
 );
+const DebugDataPage = lazy(() =>
+  import('../templates/Mail/DebugData').then((mailApp) => ({ default: mailApp.DebugDataPage }))
+);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -43,7 +44,7 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { DebugDataPage } from '../templates/Mail/DebugData';
+import { createIDBPersister } from './createIdbPersister';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,11 +55,7 @@ const queryClient = new QueryClient({
 });
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
-const localStoragePersister = createSyncStoragePersister({
-  storage: window.localStorage,
-  retry: removeOldestQuery,
-  key: REACT_QUERY_CACHE_KEY,
-});
+const localStoragePersister = createIDBPersister(REACT_QUERY_CACHE_KEY);
 
 // Explicit includes to avoid persisting media items, or large data in general
 const INCLUDED_QUERY_KEYS = ['mail-thread', 'mail-conversations', 'mail-message'];
@@ -97,7 +94,9 @@ function App() {
               <RootRoute>
                 <DotYouClientProvider>
                   <Layout>
-                    <Outlet />
+                    <Suspense fallback={<></>}>
+                      <Outlet />
+                    </Suspense>
                   </Layout>
                 </DotYouClientProvider>
               </RootRoute>

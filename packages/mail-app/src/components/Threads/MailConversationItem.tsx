@@ -57,9 +57,12 @@ export const MailConversationItem = ({
 
   return (
     <Link
-      to={
-        isDraft ? `${ROOT_PATH}/new/${lastConversation.fileId}` : `${pathPrefix || ''}${threadId}`
-      }
+      to={{
+        pathname: isDraft
+          ? `${ROOT_PATH}/new/${lastConversation.fileId}`
+          : `${pathPrefix || ''}${threadId}`,
+        search: window.location.search,
+      }}
       className="group"
     >
       <div

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { flattenInfinteData, getTextRootsRecursive } from '@youfoundation/common-app';
+import { flattenInfinteData } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   MailConversation,
@@ -99,12 +99,11 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
         query &&
         !thread.some((mail) => {
           const { subject, message } = mail.fileMetadata.appData.content;
-          return (
-            subject.toLowerCase().includes(query.toLowerCase()) ||
-            getTextRootsRecursive(message).some((text) =>
-              text.toLowerCase().includes(query.toLowerCase())
-            )
-          );
+          return subject.toLowerCase().includes(query.toLowerCase());
+          // ||
+          // getTextRootsRecursive(message).some((text) =>
+          //   text.toLowerCase().includes(query.toLowerCase())
+          // )
         })
       ) {
         return false;

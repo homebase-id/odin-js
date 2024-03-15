@@ -90,7 +90,7 @@ const NavItem = ({
       className={({ isActive }) =>
         `${isActive && navItemActiveClassname} relative ${navItemClassName}`
       }
-      to={to}
+      to={{ pathname: to, search: window.location.search }}
       end={end}
     >
       {icon && icon({ className: iconClassName })}
