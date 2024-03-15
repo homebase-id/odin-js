@@ -91,7 +91,7 @@ export const MailThreads = ({
             }}
           >
             <div
-              className="absolute left-0 top-0 z-10 w-full"
+              className="absolute left-0 top-0 w-full"
               style={{
                 transform: `translateY(${items[0]?.start - virtualizer.options.scrollMargin}px)`,
               }}
@@ -107,7 +107,7 @@ export const MailThreads = ({
                       className="px-3 py-1"
                     >
                       {hasMorePosts || isFetchingNextPage ? (
-                        <div className="animate-pulse" key={'loading'}>
+                        <div className="animate-pulse text-slate-400" key={'loading'}>
                           {t('Loading...')}
                         </div>
                       ) : null}
@@ -224,7 +224,7 @@ const MailConversationsHeader = ({
           archiveThreadError
         }
       />
-      <div className="relative flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black">
+      <div className="sticky left-0 right-0 top-[3.7rem] z-10 flex flex-row items-center border-b border-b-slate-100 bg-white px-2 py-2 dark:border-b-slate-700 dark:bg-black">
         <div className="p-2">
           <button
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
