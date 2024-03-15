@@ -2,7 +2,7 @@
 
 [![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
 
-This repo contains the various apps and libraries that are maintaned by Homebase. The libraries can be easily consumed by other app developers that want to work with a Homebase Identity backend.
+This repo contains the various apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
 
 ## Apps
 
