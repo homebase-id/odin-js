@@ -30,6 +30,7 @@ import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpe
 import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
+import { getTextRootsRecursive } from '@youfoundation/common-app';
 
 export const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
 export const MAIL_CONVERSATION_FILE_TYPE = 9000;
@@ -45,6 +46,7 @@ export interface MailConversation {
   // uniqueId: string; // Stored in meta => The unique id of the conversation; Created uniquely for each message
   subject: string;
   message: RichText;
+  plainMessage?: string; // Used purely for search purposes
   sender: string; // Copy of the senderOdinId which is reset when the recipient marks the message as read
   recipients: string[];
   isRead?: boolean;
@@ -340,7 +342,10 @@ export const dsrToMailConversation = async (
         ...dsr.fileMetadata,
         appData: {
           ...dsr.fileMetadata.appData,
-          content: attrContent,
+          content: {
+            ...attrContent,
+            plainMessage: getTextRootsRecursive(attrContent.message).join(' '),
+          },
         },
       },
     };

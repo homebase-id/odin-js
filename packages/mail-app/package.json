@@ -28,6 +28,7 @@
     "@youfoundation/ui-lib": "*",
     "axios": "1.6.7",
     "emoji-picker-element": "^1.15.1",
+    "fuzzysort": "^2.0.4",
     "idb-keyval": "^6.2.1",
     "lodash-es": "^4.17.21",
     "mp4box": "^0.5.2",

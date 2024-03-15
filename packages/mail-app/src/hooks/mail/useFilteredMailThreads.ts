@@ -10,6 +10,7 @@ import {
 } from '../../providers/MailProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { useMailConversations } from './useMailConversations';
+import fuzzysort from 'fuzzysort';
 
 const PAGE_SIZE = 100;
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
@@ -79,8 +80,20 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
       return true;
     });
 
+    // TODO: Update sort to avoid re-sorting within the thread
+    const sortedResults = query
+      ? fuzzysort
+          .go(query, filteredConversations, {
+            keys: [
+              'fileMetadata.appData.content.subject',
+              'fileMetadata.appData.content.plainMessage',
+            ],
+          })
+          .map((result) => result.obj)
+      : filteredConversations;
+
     // Group the flattenedConversations by their groupId
-    const threadsDictionary = filteredConversations.reduce(
+    const threadsDictionary = sortedResults.reduce(
       (acc, conversation) => {
         const threadId = conversation.fileMetadata.appData.groupId as string;
 
@@ -94,21 +107,8 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
     const threads = Object.values(threadsDictionary);
 
     const filteredThreads = threads.filter((thread) => {
-      if (
-        query &&
-        !thread.some((mail) => {
-          const { subject, message } = mail.fileMetadata.appData.content;
-          return subject.toLowerCase().includes(query.toLowerCase());
-          // ||
-          // getTextRootsRecursive(message).some((text) =>
-          //   text.toLowerCase().includes(query.toLowerCase())
-          // )
-        })
-      ) {
-        return false;
-      }
-
-      if (filter === 'inbox') {
+      // Don't remove messages from yourself when searching
+      if (filter === 'inbox' && !query) {
         return thread.some((conversation) => {
           const sender =
             conversation.fileMetadata.senderOdinId ||

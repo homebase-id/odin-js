@@ -112,7 +112,7 @@ export const MailThreads = ({
                       ref={virtualizer.measureElement}
                       className="px-3 py-1"
                     >
-                      {hasMorePosts || isFetchingNextPage ? (
+                      {(autoPage && hasMorePosts) || isFetchingNextPage ? (
                         <div className="animate-pulse text-slate-400" key={'loading'}>
                           {t('Loading...')}
                         </div>
@@ -182,8 +182,20 @@ export const MailThreads = ({
       ) : (
         <div className="px-5 py-3">
           <div className="italic opacity-50" key={'no-more'}>
-            {query ? t('No results for you query') : t('No conversations')}
+            {query ? <>{t('No results for you query')}</> : t('No conversations')}
           </div>
+          {query && hasMorePosts ? (
+            <>
+              <ActionButton
+                className="mt-5"
+                onClick={() => fetchNextPage()}
+                type="secondary"
+                icon={Download}
+              >
+                {t('Search more on the server')}
+              </ActionButton>
+            </>
+          ) : null}
         </div>
       )}
     </section>
