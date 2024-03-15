@@ -2,7 +2,6 @@ import {
   ChannelDefinition,
   Article,
   getChannelDrive,
-  NewMediaFile,
   appendPostMedia,
   removePostMedia,
 } from '@youfoundation/js-lib/public';

@@ -14,7 +14,6 @@ import { useMailConversations } from './useMailConversations';
 const PAGE_SIZE = 100;
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
 
-// TODO: ? Improve performance by using a search index; Both for queries and the filter
 export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string | undefined) => {
   const identity = useDotYouClientContext().getIdentity();
   const {
