@@ -153,6 +153,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
           JOIN_CONVERSATION_COMMAND,
           JOIN_GROUP_CONVERSATION_COMMAND,
           MARK_CHAT_READ_COMMAND,
+          UPDATE_GROUP_CONVERSATION_COMMAND,
         ].includes(notification.header.fileMetadata.appData.dataType) &&
         identity
       ) {
