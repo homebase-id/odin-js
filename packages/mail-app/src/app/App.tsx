@@ -9,11 +9,7 @@ import {
 } from 'react-router-dom';
 
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { QueryClient } from '@tanstack/react-query';
-import {
-  PersistQueryClientOptions,
-  PersistQueryClientProvider,
-} from '@tanstack/react-query-persist-client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
@@ -44,31 +40,32 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { createIDBPersister } from './createIdbPersister';
+import { createExperimentalPersiter } from './createExperimentalPersister';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 60 * 60 * 24, // 24 hours,
+      persister: createExperimentalPersiter(),
     },
   },
 });
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
-const localStoragePersister = createIDBPersister(REACT_QUERY_CACHE_KEY);
+// const iDbPersister = createIDBPersister(REACT_QUERY_CACHE_KEY);
 
-// Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['mail-thread', 'mail-conversations', 'mail-message'];
-const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
-  maxAge: Infinity,
-  persister: localStoragePersister,
-  dehydrateOptions: {
-    shouldDehydrateQuery: (query) => {
-      const { queryKey } = query;
-      return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
-    },
-  },
-};
+// // Explicit includes to avoid persisting media items, or large data in general
+// const INCLUDED_QUERY_KEYS = ['mail-thread', 'mail-conversations', 'mail-message'];
+// const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
+//   maxAge: Infinity,
+//   persister: iDbPersister,
+//   dehydrateOptions: {
+//     shouldDehydrateQuery: (query) => {
+//       const { queryKey } = query;
+//       return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
+//     },
+//   },
+// };
 
 function App() {
   const router = createBrowserRouter(
@@ -135,9 +132,9 @@ function App() {
       <Helmet>
         <meta name="v" content={import.meta.env.VITE_VERSION} />
       </Helmet>
-      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+      <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} fallbackElement={<></>} />
-      </PersistQueryClientProvider>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }
