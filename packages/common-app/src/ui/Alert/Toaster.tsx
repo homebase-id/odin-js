@@ -25,7 +25,7 @@ export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
-      <ErrorToaser />
+      <ErrorToaster />
       {isOwner && !errorOnly ? <LiveToaster /> : null}
     </div>
   );
@@ -56,7 +56,7 @@ export const LiveToaster = () => {
   );
 };
 
-export const ErrorToaser = () => {
+export const ErrorToaster = () => {
   const {
     fetch: { data: errors },
     dismiss: dismissError,
