@@ -6,7 +6,10 @@ import {
   JoinConversationRequest,
   JoinGroupConversationRequest,
   SingleConversation,
+  UPDATE_GROUP_CONVERSATION_COMMAND,
+  UpdateGroupConversationRequest,
   getConversation,
+  updateConversation,
   uploadConversation,
 } from './ConversationProvider';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
@@ -19,6 +22,7 @@ import {
   getChatMessageByGlobalTransitId,
   updateChatMessage,
 } from './ChatProvider';
+import { getSingleConversation } from '../hooks/chat/useConversation';
 
 export const processCommand = async (
   dotYouClient: DotYouClient,
@@ -34,6 +38,9 @@ export const processCommand = async (
 
   if (command.clientCode === MARK_CHAT_READ_COMMAND)
     return await markChatAsRead(dotYouClient, queryClient, command);
+
+  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) { return await updateGroupConversation(dotYouClient, queryClient, command); }
+
 };
 
 const joinConversation = async (
@@ -111,6 +118,20 @@ const joinGroupConversation = async (
     return null;
   }
 
+  return command.id;
+};
+
+const updateGroupConversation = async (dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  command: ReceivedCommand) => {
+  const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
+    command.clientJsonMessage
+  );
+  const conversation = await getSingleConversation(dotYouClient, updateGroupConversation.conversationId);
+  if (!conversation) return null;
+  conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
+  await updateConversation(dotYouClient, conversation);
+  queryClient.invalidateQueries({ queryKey: ['conversations'] });
   return command.id;
 };
 

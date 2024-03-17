@@ -54,7 +54,7 @@ export const useArticleComposer = ({
       ...serverData?.activeBlog.fileMetadata,
       appData: {
         fileType: BlogConfig.DraftPostFileType,
-        userDate: new Date().getTime(),
+        userDate: serverData?.activeBlog.fileMetadata.appData.userDate || new Date().getTime(),
         content: {
           ...EMPTY_POST,
           caption: caption ?? EMPTY_POST.caption,
@@ -144,7 +144,7 @@ export const useArticleComposer = ({
 
         appData: {
           fileType: !isPublish || isUnpublish ? BlogConfig.DraftPostFileType : undefined,
-          userDate: new Date().getTime(),
+          userDate: dirtyPostFile.fileMetadata.appData.userDate || new Date().getTime(),
           content: {
             ...dirtyPostFile.fileMetadata.appData.content,
             id: dirtyPostFile.fileMetadata.appData.content.id ?? getNewId(), // Generate new id if there is none
