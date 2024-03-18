@@ -80,21 +80,8 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
       return true;
     });
 
-    // TODO: Investigate if the prepare can be moved to the useMailConversations hook; So it's stored in cache "indexed"
-    // TODO: Update sort to avoid re-sorting within the thread
-    const sortedResults = query
-      ? fuzzysort
-          .go(query, filteredConversations, {
-            keys: [
-              'fileMetadata.appData.content.subject',
-              'fileMetadata.appData.content.plainMessage',
-            ],
-          })
-          .map((result) => result.obj)
-      : filteredConversations;
-
     // Group the flattenedConversations by their groupId
-    const threadsDictionary = sortedResults.reduce(
+    const threadsDictionary = filteredConversations.reduce(
       (acc, conversation) => {
         const threadId = conversation.fileMetadata.appData.groupId as string;
 
@@ -109,7 +96,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
 
     const filteredThreads = threads.filter((thread) => {
       // Don't remove messages from yourself when searching
-      if (filter === 'inbox' && !query) {
+      if (filter === 'inbox') {
         return thread.some((conversation) => {
           const sender =
             conversation.fileMetadata.senderOdinId ||
@@ -120,6 +107,49 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
 
       return true;
     });
+
+    // TODO: Investigate if we can prepare in the useMailConversations hook; So it's stored in cache "indexed"
+    const today = new Date().getTime();
+    const searchResults = query
+      ? fuzzysort
+          .go(query, filteredConversations, {
+            keys: [
+              'fileMetadata.appData.content.subject',
+              'fileMetadata.appData.content.plainMessage',
+            ],
+            threshold: -10000,
+            scoreFn: (a) => {
+              // Less than 0 days old, no penalty
+              const agePenalty = Math.round(
+                ((a as unknown as { obj: DriveSearchResult<MailConversation> }).obj.fileMetadata
+                  .created -
+                  today) /
+                  (1000 * 60 * 60 * 24)
+              );
+
+              // -100 to the plainMessage score makes it a worse match than a subject match
+              return (
+                Math.max(a[0] ? a[0].score : -Infinity, a[1] ? a[1].score - 100 : -Infinity) -
+                agePenalty
+              );
+            },
+          })
+          .map((result) => ({
+            originId: result.obj.fileMetadata.appData.content.originId,
+            threadId: result.obj.fileMetadata.appData.content.threadId,
+          }))
+      : null;
+
+    if (searchResults) {
+      return searchResults
+        .map((thread) =>
+          filteredThreads.find(
+            (conversation) =>
+              conversation[0]?.fileMetadata.appData.content.threadId === thread.threadId
+          )
+        )
+        .filter(Boolean);
+    }
 
     return filteredThreads;
   }, [filter, query, conversations]);
