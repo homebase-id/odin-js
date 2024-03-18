@@ -150,7 +150,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
               conversation[0]?.fileMetadata.appData.content.threadId === thread.threadId
           )
         )
-        .filter(Boolean);
+        .filter(Boolean) as DriveSearchResult<MailConversation>[][];
     }
 
     return filteredThreads;
