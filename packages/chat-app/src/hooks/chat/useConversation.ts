@@ -40,9 +40,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const getExistingConversationsForRecipient = async (
     recipients: string[]
   ): Promise<null | DriveSearchResult<Conversation>> => {
-    const allConversationsInCache = await queryClient.fetchQuery<
-      InfiniteData<{ searchResults: DriveSearchResult<Conversation>[] }>
-    >({ queryKey: ['conversations'] });
+    const allConversationsInCache = await queryClient.fetchInfiniteQuery<{
+      searchResults: DriveSearchResult<Conversation>[];
+    }>({ queryKey: ['conversations'], initialPageParam: undefined });
 
     for (const page of allConversationsInCache?.pages || []) {
       const matchedConversation = page.searchResults.find((conversation) => {
@@ -87,11 +87,11 @@ export const useConversation = (props?: { conversationId?: string | undefined })
           content: {
             ...(recipients.length > 1
               ? {
-                recipients: recipients,
-              }
+                  recipients: recipients,
+                }
               : {
-                recipient: recipients[0],
-              }),
+                  recipient: recipients[0],
+                }),
             title: title || recipients.join(', '),
           },
         },
@@ -126,11 +126,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const updateExistingConversation = async ({
     conversation,
     isTitleUpdated = false,
-
   }: {
     conversation: DriveSearchResult<Conversation>;
     isTitleUpdated?: boolean;
-
   }) => {
     await updateConversation(dotYouClient, conversation);
     if (isTitleUpdated && 'recipients' in conversation.fileMetadata.appData.content) {
