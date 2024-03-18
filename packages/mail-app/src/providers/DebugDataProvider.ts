@@ -143,7 +143,7 @@ export const MakeConversation = async (dotYouClient: DotYouClient) => {
   ).results.map((result) => result.odinId);
   const recipients = connections;
 
-  for (let i = 0; i < 150; i++) {
+  for (let i = 0; i < 25; i++) {
     const threadId = getNewId();
     await sendOne(dotYouClient, threadId, recipients);
   }

@@ -120,11 +120,13 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
             threshold: -10000,
             scoreFn: (a) => {
               // Less than 0 days old, no penalty
-              const agePenalty = Math.round(
-                ((a as unknown as { obj: DriveSearchResult<MailConversation> }).obj.fileMetadata
-                  .created -
-                  today) /
-                  (1000 * 60 * 60 * 24)
+              const agePenalty = Math.abs(
+                Math.round(
+                  (today -
+                    (a as unknown as { obj: DriveSearchResult<MailConversation> }).obj.fileMetadata
+                      .created) /
+                    (1000 * 60 * 60 * 24)
+                )
               );
 
               // -100 to the plainMessage score makes it a worse match than a subject match
