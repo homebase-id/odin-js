@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "build": "npm i && npm run build -workspaces --if-present",
-    "build-libs": "npm i && npm run build -w ./packages/js-lib -w ./packages/ui-lib",
+    "build:libs": "npm i && npm run build -w ./packages/js-lib -w ./packages/ui-lib",
+    "build-libs": "npm run build:libs",
     "test": "npm run test -workspaces --if-present",
     "start:owner": "npm start -w ./packages/owner-app",
     "start:feed": "npm start -w ./packages/feed-app",

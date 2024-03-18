@@ -194,7 +194,7 @@ export const getPayloadBytes = async (
       config
     )
     .then(async (response) => {
-      if (!response.data) return null;
+      if (!response.data || !response.data.byteLength) return null;
       return {
         bytes: !decrypt
           ? new Uint8Array(response.data)
