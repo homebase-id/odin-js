@@ -141,6 +141,7 @@ export const useImage = ({
         imageFileId,
         imageFileKey,
         `${size?.pixelHeight}x${size?.pixelWidth}`,
+        lastModified,
       ],
       queryFn: () =>
         fetchImageData(

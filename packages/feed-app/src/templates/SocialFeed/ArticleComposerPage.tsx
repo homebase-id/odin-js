@@ -45,14 +45,16 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
+    files,
 
     // Data updates
     setPostFile,
     setChannel,
+    setFiles,
 
     // Status
     saveStatus,
-    removeStatus,
+    // removeStatus,
 
     // Errors
     error,
@@ -189,22 +191,13 @@ export const ArticleComposerPage = () => {
               doSave();
               return false;
             }}
-            // className={isPublished ? 'opacity-90 grayscale' : ''}
-            // onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
             <InnerFieldEditors
               key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
               channel={channel}
-              updateVersionTag={(versionTag) =>
-                setPostFile({
-                  ...postFile,
-                  fileMetadata: {
-                    ...postFile.fileMetadata,
-                    versionTag,
-                  },
-                })
-              }
+              files={files}
+              setFiles={setFiles}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
@@ -222,6 +215,8 @@ export const ArticleComposerPage = () => {
                       fileKey: e.target.value.fileKey,
                       type: e.target.value.type,
                     };
+                  } else {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
                   }
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
@@ -236,7 +231,6 @@ export const ArticleComposerPage = () => {
                 }));
                 debouncedSave();
               }}
-              // disabled={isPublished}
             />
 
             <div className="mb-5 flex md:hidden">

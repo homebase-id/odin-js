@@ -92,8 +92,8 @@ export const savePost = async <T extends PostContent>(
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
-    const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     const newMediaFile = newMediaFiles[i];
+    const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     if (newMediaFile.file.type.startsWith('video/')) {
       const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
         newMediaFile,
@@ -116,6 +116,7 @@ export const savePost = async <T extends PostContent>(
       payloads.push({
         key: payloadKey,
         payload: newMediaFile.file,
+        previewThumbnail: tinyThumb,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -388,26 +389,27 @@ const updatePost = async <T extends PostContent>(
 
   let runningVersionTag: string = file.fileMetadata.versionTag;
   const existingMediaFiles =
-    (existingAndNewMediaFiles?.filter((f) => 'key' in f) as MediaFile[]) ||
-    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) ||
-    [];
+    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
 
   const newMediaFiles: NewMediaFile[] =
     (existingAndNewMediaFiles?.filter(
       (f) => 'file' in f && f.file instanceof Blob
     ) as NewMediaFile[]) || [];
 
-  const oldMediaFiles: MediaFile[] =
-    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
-
   // Discover deleted files:
   const deletedMediaFiles: MediaFile[] = [];
-  for (let i = 0; oldMediaFiles && i < oldMediaFiles?.length; i++) {
-    const oldMediaFile = oldMediaFiles[i];
-    if (!existingMediaFiles?.find((f) => f.key === oldMediaFile.key)) {
-      deletedMediaFiles.push(oldMediaFile);
+  for (let i = 0; existingMediaFiles && i < existingMediaFiles?.length; i++) {
+    const existingMediaFile = existingMediaFiles[i];
+    if (!existingAndNewMediaFiles?.find((f) => f.key === existingMediaFile.key)) {
+      deletedMediaFiles.push(existingMediaFile);
     }
   }
+
+  console.log({
+    existingMediaFiles,
+    newMediaFiles,
+    deletedMediaFiles,
+  });
 
   // Remove the payloads that are removed from the post
   if (deletedMediaFiles.length) {
@@ -426,7 +428,7 @@ const updatePost = async <T extends PostContent>(
   }
 
   // When all media is removed from the post, remove the preview thumbnail
-  if (oldMediaFiles.length === deletedMediaFiles.length)
+  if (existingMediaFiles.length === deletedMediaFiles.length)
     file.fileMetadata.appData.previewThumbnail = undefined;
 
   // Process new files:
@@ -435,7 +437,14 @@ const updatePost = async <T extends PostContent>(
   let previewThumbnail: EmbeddedThumb | undefined;
   for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
     const newMediaFile = newMediaFiles[i];
-    const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${oldMediaFiles.length + i}`;
+    // We ignore existing files as they are just kept
+    if (!('file' in newMediaFile)) {
+      continue;
+    }
+
+    const payloadKey =
+      newMediaFile.key ||
+      `${POST_MEDIA_PAYLOAD_KEY}${(existingAndNewMediaFiles || newMediaFiles).length + i}`;
 
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       newMediaFile.file,
@@ -448,11 +457,6 @@ const updatePost = async <T extends PostContent>(
       previewThumbnail: tinyThumb,
     });
     thumbnails.push(...additionalThumbnails);
-    existingMediaFiles.push({
-      fileId: file.fileId,
-      key: payloadKey,
-      contentType: newMediaFile.file.type,
-    });
     previewThumbnail = previewThumbnail || tinyThumb;
   }
 
@@ -501,62 +505,4 @@ const updatePost = async <T extends PostContent>(
   if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 
   return result;
-};
-
-export const appendPostMedia = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  file: Blob
-) => {
-  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-  if (!header) throw new Error('Cannot append to a file that does not exist');
-
-  const appendInstructionSet: AppendInstructionSet = {
-    targetFile: {
-      fileId: fileId,
-      targetDrive: targetDrive,
-    },
-    versionTag: header.fileMetadata.versionTag,
-  };
-
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-
-  const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${header.fileMetadata.payloads.length + 1}`;
-  const { additionalThumbnails, tinyThumb } = await createThumbnails(file, payloadKey);
-  payloads.push({
-    payload: file,
-    key: payloadKey,
-    previewThumbnail: tinyThumb,
-  });
-
-  thumbnails.push(...additionalThumbnails);
-  console.log('payloads', payloads);
-  const response = await appendDataToFile(
-    dotYouClient,
-    header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
-    appendInstructionSet,
-    payloads,
-    thumbnails
-  );
-
-  return { ...response, fileKey: payloadKey };
-};
-
-export const removePostMedia = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  fileKey: string,
-  versionTag: string
-) => {
-  const response = await deletePayload(
-    dotYouClient,
-    targetDrive,
-    fileId as string,
-    fileKey,
-    versionTag
-  );
-  return response;
 };

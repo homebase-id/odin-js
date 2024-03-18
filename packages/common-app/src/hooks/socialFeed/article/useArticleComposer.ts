@@ -1,5 +1,11 @@
 import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { Article, ChannelDefinition, BlogConfig, NewMediaFile } from '@youfoundation/js-lib/public';
+import {
+  Article,
+  ChannelDefinition,
+  BlogConfig,
+  NewMediaFile,
+  MediaFile,
+} from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
@@ -71,7 +77,9 @@ export const useArticleComposer = ({
     },
   });
 
-  const [primaryMediaFile, setPrimaryMediaFile] = useState<NewMediaFile | undefined | null>(null);
+  const [files, setFiles] = useState<(NewMediaFile | MediaFile)[]>(
+    serverData?.activeBlog.fileMetadata.payloads || []
+  );
 
   const [channel, setChannel] = useState<NewDriveSearchResult<ChannelDefinition>>(
     serverData?.activeChannel &&
@@ -105,6 +113,8 @@ export const useArticleComposer = ({
     setChannel(
       serverData?.activeChannel ? serverData.activeChannel : BlogConfig.PublicChannelNewDsr
     );
+
+    setFiles([...(serverData?.activeBlog.fileMetadata.payloads || [])]);
   }, [serverData]);
 
   const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
@@ -128,6 +138,8 @@ export const useArticleComposer = ({
     explicitTargetChannel?: NewDriveSearchResult<ChannelDefinition>,
     redirectOnPublish?: boolean
   ) => {
+    console.log('doSave', dirtyPostFile);
+
     // Check if fully empty and if so don't save
     if (isValidPost(dirtyPostFile)) return;
 
@@ -158,16 +170,13 @@ export const useArticleComposer = ({
       serverMetadata: targetChannel.serverMetadata || {
         accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
       },
-      // TODO: ACL is not changed, as it impacts the encrytped state...
-      // targetChannel.acl && (isPublish || isPublished) && !isUnpublish
-      // { ...targetChannel.acl }
-      // : { requiredSecurityGroup: SecurityGroupType.Owner },
     };
 
     // Save and process result
     const uploadResult = await savePost({
       postFile: toPostFile,
       channelId: targetChannel.fileMetadata.appData.uniqueId as string,
+      mediaFiles: files,
     });
 
     if (uploadResult)
@@ -240,12 +249,12 @@ export const useArticleComposer = ({
     postFile,
     isValidPost,
     isPublished,
-    primaryMediaFile,
+    files,
 
     // Data updates
     setPostFile,
     setChannel,
-    setPrimaryMediaFile,
+    setFiles,
 
     // Status
     saveStatus: savePostStatus,
