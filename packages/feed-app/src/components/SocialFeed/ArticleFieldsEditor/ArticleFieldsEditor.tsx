@@ -5,7 +5,7 @@ import {
   MediaFile,
   NewMediaFile,
 } from '@youfoundation/js-lib/public';
-import { lazy, useMemo, useState } from 'react';
+import { lazy, useState } from 'react';
 import {
   t,
   ErrorBoundary,
@@ -54,13 +54,9 @@ export const InnerFieldEditors = ({
     lastModified: (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated,
   }).fetch;
 
-  const imageUrl = useMemo(() => {
-    const pendingFile = files.find(
-      (f) =>
-        'file' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
-    ) as NewMediaFile | null;
-    return pendingFile ? URL.createObjectURL(pendingFile.file) : imageData?.url;
-  }, [postFile, imageData, files]);
+  const pendingFile = files.find(
+    (f) => 'file' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
+  ) as NewMediaFile | null;
 
   const targetDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
 
@@ -103,7 +99,7 @@ export const InnerFieldEditors = ({
           </div>
 
           {isEditTeaser ? (
-            <div className="border-t pt-4 md:mt-4">
+            <div className="border-t pb-4 pt-4 md:mt-4">
               <div className="m-1">
                 <Label className="mb-1 text-gray-700 dark:text-gray-300">{t('Summary')}</Label>
                 <Textarea
@@ -121,7 +117,11 @@ export const InnerFieldEditors = ({
                 <ImageSelector
                   id="post_image"
                   name="primaryImageFileId"
-                  defaultValue={imageUrl}
+                  defaultValue={
+                    pendingFile?.file ||
+                    imageData?.url ||
+                    postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
+                  }
                   onChange={async (e) => {
                     if (!e.target.value) {
                       setFiles(

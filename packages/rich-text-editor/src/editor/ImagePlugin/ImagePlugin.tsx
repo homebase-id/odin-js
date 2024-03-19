@@ -8,8 +8,8 @@ import {
 import { Value, insertNodes, TElement, getPluginOptions, removeNodes } from '@udecode/plate-common';
 import { ReactEditor } from 'slate-react';
 import { TargetDrive } from '@youfoundation/js-lib/core';
-import { useCallback, useMemo, useState } from 'react';
-import { ImageIcon, Pencil, Trash, t, useDotYouClient } from '@youfoundation/common-app';
+import { useMemo, useState } from 'react';
+import { ImageIcon, Trash, t, useDotYouClient } from '@youfoundation/common-app';
 import { ImageDialog } from '@youfoundation/common-app';
 import { ToolbarButton, ToolbarButtonProps } from '../../components/plate-ui/toolbar';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
@@ -107,12 +107,6 @@ export const ImageElementBlock = <V extends Value = Value>(
 
   if (!options || !options.mediaDrive) return <></>;
 
-  const doOpenDialog = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsActive(true);
-  }, []);
-
   const pendingUrl = useMemo(() => {
     const pendingUpload = options.pendingUploadFiles?.find((file) => file.key === element.fileKey);
     return pendingUpload ? URL.createObjectURL(pendingUpload.file) : undefined;
@@ -147,12 +141,6 @@ export const ImageElementBlock = <V extends Value = Value>(
           )}
         </div>
         {/* We use buttons instead of our ActionButton because of endless rerenders when used inside of the RTE */}
-        <button
-          onClick={doOpenDialog}
-          className="absolute right-3 top-3 z-20 rounded-md bg-white p-2 dark:bg-slate-900"
-        >
-          <Pencil className="h-4 w-4" />
-        </button>
         <button
           onClick={(e) => {
             e.preventDefault();
