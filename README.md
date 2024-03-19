@@ -12,7 +12,7 @@ The apps are setup indepentently, and can use the first party common app library
 
 Before you can use the actual apps, you need to install and build the depencies:
 
-`npm install && npm run build-libs`
+`npm install && npm run build:libs`
 
 After that you can build the apps
 
