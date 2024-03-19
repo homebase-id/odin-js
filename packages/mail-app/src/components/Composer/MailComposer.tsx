@@ -267,7 +267,7 @@ export const MailComposer = ({
                   },
                 }}
                 placeholder="Your message"
-                className="min-h-44 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
             </ErrorBoundary>
           </div>
