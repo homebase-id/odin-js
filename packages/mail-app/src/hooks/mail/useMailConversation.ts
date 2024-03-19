@@ -90,7 +90,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         !msg.fileMetadata.appData.content.isRead
     );
 
-    await Promise.all(
+    const uploadResults = await Promise.all(
       messagesToMarkAsRead.map(async (conversation) => {
         const updatedConversation: DriveSearchResult<MailConversation> = {
           ...conversation,
@@ -108,9 +108,17 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
             },
           },
         };
-        return await updateLocalMailHeader(dotYouClient, updatedConversation);
+        return await updateLocalMailHeader(dotYouClient, updatedConversation, async () => {
+          const serverData = await getMailConversation(dotYouClient, conversation.fileId);
+          if (!serverData) return;
+          updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
+          await updateLocalMailHeader(dotYouClient, updatedConversation);
+          console.log('saved after a versionConflict');
+        });
       })
     );
+
+    return uploadResults;
   };
 
   const markAsUnread = async ({
@@ -125,7 +133,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         msg.fileMetadata.appData.content.isRead
     );
 
-    await Promise.all(
+    const uploadResults = await Promise.all(
       messagesToMarkAsUnread.map(async (conversation) => {
         const updatedConversation: DriveSearchResult<MailConversation> = {
           ...conversation,
@@ -143,9 +151,17 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
             },
           },
         };
-        return await updateLocalMailHeader(dotYouClient, updatedConversation);
+        return await updateLocalMailHeader(dotYouClient, updatedConversation, async () => {
+          const serverData = await getMailConversation(dotYouClient, conversation.fileId);
+          if (!serverData) return;
+          updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
+          await updateLocalMailHeader(dotYouClient, updatedConversation);
+          console.log('saved after a versionConflict');
+        });
       })
     );
+
+    return uploadResults;
   };
 
   return {
@@ -191,12 +207,13 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       },
       onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
-        console.error('Error sending chat message', _error);
+        console.error('Error sending mail message', _error);
       },
       onSettled: async () => {
         // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
       },
     }),
+    // TODO: Use new versionTag that comes follows the update for the cached data...
     markAsRead: useMutation({
       mutationFn: markAsRead,
       onMutate: async ({ mailConversations }) => {
@@ -243,10 +260,43 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       },
       onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
+        console.error('Error marking conversation as read', _error);
+      },
+      onSuccess: (_data) => {
+        const mailConversations = queryClient.getQueryData<InfiniteData<MailConversationsReturn>>([
+          'mail-conversations',
+        ]);
+        if (!mailConversations) return;
 
-        console.error('Error sending chat message', _error);
+        const newMailConversations = {
+          ...mailConversations,
+          pages: mailConversations.pages.map((page) => {
+            return {
+              ...page,
+              results: page.results.map((conversation) => {
+                const uploadResult = _data.find(
+                  (upload) => upload && stringGuidsEqual(upload.file.fileId, conversation.fileId)
+                );
+                if (uploadResult) {
+                  return {
+                    ...conversation,
+                    fileMetadata: {
+                      ...conversation.fileMetadata,
+                      versionTag: uploadResult.newVersionTag,
+                    },
+                  };
+                } else {
+                  return conversation;
+                }
+              }),
+            };
+          }),
+        };
+
+        queryClient.setQueryData(['mail-conversations'], newMailConversations);
       },
     }),
+    // TODO: Use new versionTag that comes follows the update for the cached data...
     markAsUnread: useMutation({
       mutationFn: markAsUnread,
       onMutate: async ({ mailConversations }) => {
@@ -294,7 +344,40 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
       onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
 
-        console.error('Error sending chat message', _error);
+        console.error('Error marking conversation as unread', _error);
+      },
+      onSuccess: (_data) => {
+        const mailConversations = queryClient.getQueryData<InfiniteData<MailConversationsReturn>>([
+          'mail-conversations',
+        ]);
+        if (!mailConversations) return;
+
+        const newMailConversations = {
+          ...mailConversations,
+          pages: mailConversations.pages.map((page) => {
+            return {
+              ...page,
+              results: page.results.map((conversation) => {
+                const uploadResult = _data.find(
+                  (upload) => upload && stringGuidsEqual(upload.file.fileId, conversation.fileId)
+                );
+                if (uploadResult) {
+                  return {
+                    ...conversation,
+                    fileMetadata: {
+                      ...conversation.fileMetadata,
+                      versionTag: uploadResult.newVersionTag,
+                    },
+                  };
+                } else {
+                  return conversation;
+                }
+              }),
+            };
+          }),
+        };
+
+        queryClient.setQueryData(['mail-conversations'], newMailConversations);
       },
     }),
   };

@@ -80,7 +80,10 @@ export const MailThreads = ({
         selection={selection}
         isAllSelected={isAllSelected}
         toggleAllSelection={() => setIsAllSelected(!isAllSelected)}
-        clearSelection={() => setSelection([])}
+        clearSelection={() => {
+          setSelection([]);
+          setIsAllSelected(false);
+        }}
         filter={filter}
       />
       {conversationsLoading ? (
