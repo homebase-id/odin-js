@@ -63,7 +63,7 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
     mainForm.classList.toggle(INVALID_CLASSNAME, !localDomainCheck(e.target.value));
   }, 500);
 
-  const replaceSpacesWithDots = (e: KeyboardEvent) => {
+  const replaceSpacesWithDots = () => {
     dotyouInputBox.value = dotyouInputBox.value.replace(/\s/g, '.');
   };
 
