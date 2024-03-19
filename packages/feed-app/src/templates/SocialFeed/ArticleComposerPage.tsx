@@ -45,16 +45,16 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
-    primaryMediaFile,
+    files,
 
     // Data updates
     setPostFile,
     setChannel,
-    setPrimaryMediaFile,
+    setFiles,
 
     // Status
     saveStatus,
-    removeStatus,
+    // removeStatus,
 
     // Errors
     error,
@@ -141,7 +141,7 @@ export const ArticleComposerPage = () => {
         breadCrumbs={[
           { title: t('Feed'), href: `${ROOT_PATH}` },
           { title: t('Articles'), href: `${ROOT_PATH}/articles` },
-          { title: t('New article') },
+          { title: isPublished ? t('Edit article') : t('New article') },
         ]}
         actions={
           <>
@@ -191,23 +191,13 @@ export const ArticleComposerPage = () => {
               doSave();
               return false;
             }}
-            // className={isPublished ? 'opacity-90 grayscale' : ''}
-            // onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
             <InnerFieldEditors
               key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
-              primaryMediaFile={primaryMediaFile}
               channel={channel}
-              updateVersionTag={(versionTag) =>
-                setPostFile({
-                  ...postFile,
-                  fileMetadata: {
-                    ...postFile.fileMetadata,
-                    versionTag,
-                  },
-                })
-              }
+              files={files}
+              setFiles={setFiles}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
@@ -218,10 +208,16 @@ export const ArticleComposerPage = () => {
                   dirtyPostFile.fileMetadata.appData.content.caption = (
                     e.target.value as string
                   ).trim();
-                } else if (e.target.name === 'primaryImageFileId') {
-                  setPrimaryMediaFile(
-                    e.target.value ? { file: e.target.value as Blob } : undefined
-                  );
+                } else if (e.target.name === 'primaryMediaFile') {
+                  if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
+                      fileId: undefined,
+                      fileKey: e.target.value.fileKey,
+                      type: e.target.value.type,
+                    };
+                  } else {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
+                  }
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
                 }
@@ -235,7 +231,6 @@ export const ArticleComposerPage = () => {
                 }));
                 debouncedSave();
               }}
-              // disabled={isPublished}
             />
 
             <div className="mb-5 flex md:hidden">

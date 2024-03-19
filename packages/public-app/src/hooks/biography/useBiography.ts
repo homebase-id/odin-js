@@ -49,9 +49,9 @@ export const useBiography = () => {
         if (!shortBioEntries) return undefined;
         const allPromise = await Promise.all(
           shortBioEntries.map(async (entry) => {
-            let attribute: Attribute | undefined = entry.payload as Attribute;
+            let attr: Attribute | undefined = entry.payload as Attribute;
             if (
-              !attribute &&
+              !attr &&
               entry.header.fileMetadata.payloads.filter(
                 (payload: PayloadDescriptor) => payload.contentType === 'application/json'
               ).length !== 0 &&
@@ -59,7 +59,7 @@ export const useBiography = () => {
             ) {
               console.warn(entry, 'fetching attribute, not enough data in static file');
               // Fetch attribute if it is not included in the static data
-              attribute = (
+              attr = (
                 await getAttribute(
                   dotYouClient,
                   BuiltInProfiles.StandardProfileId,
@@ -68,11 +68,11 @@ export const useBiography = () => {
               )?.fileMetadata.appData.content;
             }
 
-            if (!attribute) return undefined;
+            if (!attr) return undefined;
             return {
-              body: attribute.data?.[MinimalProfileFields.ShortBioId] as string,
-              id: attribute.id,
-              priority: attribute.priority,
+              body: attr.data?.[MinimalProfileFields.ShortBioId] as string,
+              id: attr.id,
+              priority: attr.priority,
             };
           })
         );
@@ -142,7 +142,7 @@ export const useBiography = () => {
             priority: attr.priority,
           };
         });
-
+        console.log('shortBiographyAttributes', shortBiographyAttributes);
         return {
           shortBio: shortBiographyAttributes?.[0],
           experience: longBiographyAttributes || [],

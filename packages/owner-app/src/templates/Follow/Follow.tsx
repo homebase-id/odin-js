@@ -183,7 +183,12 @@ const FollowIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => void
             {
               icon: House,
               label: t('Open homepage'),
-              href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+              onClick: () => {
+                window.open(
+                  `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  '_blank'
+                );
+              },
             },
             {
               onClick: (e) => {
@@ -239,7 +244,12 @@ const FollowingIdentity = ({ odinId, onEdit }: { odinId: string; onEdit: () => v
             {
               icon: House,
               label: t('Open homepage'),
-              href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+              onClick: () => {
+                window.open(
+                  `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+                  '_blank'
+                );
+              },
             },
             {
               onClick: (e) => {

@@ -251,6 +251,7 @@ export const uploadChatMessage = async (
       payloads.push({
         key: payloadKey,
         payload: newMediaFile.file,
+        previewThumbnail: tinyThumb,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);

@@ -1,4 +1,4 @@
-import { getChannelDrive, MediaFile } from '@youfoundation/js-lib/public';
+import { getChannelDrive, PrimaryMediaFile } from '@youfoundation/js-lib/public';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
 
@@ -17,7 +17,7 @@ export const PrimaryMedia = ({
   clickToLoad,
 }: {
   odinId?: string;
-  primaryMediaFile: MediaFile;
+  primaryMediaFile: PrimaryMediaFile;
   fileId: string;
   globalTransitId?: string;
   lastModified: number | undefined;
@@ -38,7 +38,7 @@ export const PrimaryMedia = ({
 
   return (
     <div onClick={doNavigate}>
-      {primaryMediaFile?.type === 'image' ? (
+      {primaryMediaFile?.type.startsWith('image') ? (
         <Image
           odinId={odinId}
           targetDrive={getChannelDrive(channelId)}

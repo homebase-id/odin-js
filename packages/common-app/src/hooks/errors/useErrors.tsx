@@ -4,7 +4,12 @@ import { t } from '../../helpers';
 export interface Error {
   type: 'warning' | 'critical';
   message: string;
-  correlationId?: string;
+  details?: {
+    title?: string;
+    stackTrace?: string;
+    correlationId?: string;
+    domain?: string;
+  };
 }
 
 const getKnownErrorMessages = (error: unknown): string | undefined => {
@@ -15,8 +20,15 @@ const getKnownErrorMessages = (error: unknown): string | undefined => {
   return errorCode;
 };
 
-const getCorrelationId = (error: unknown): string | undefined => {
-  return (error as any)?.response?.headers?.['odin-correlation-id'];
+const getDetails = (error: unknown) => {
+  return {
+    title: (error as any)?.response?.data.title,
+    stackTrace: (error as any)?.response?.data?.stackTrace,
+    correlationId:
+      (error as any)?.response?.headers?.['odin-correlation-id'] ||
+      (error as any)?.response?.data?.correlationId,
+    domain: window.location.hostname,
+  };
 };
 
 export const useErrors = () => {
@@ -33,7 +45,7 @@ export const useErrors = () => {
     add: (error: unknown) => {
       const currentErrors = queryClient.getQueryData<Error[]>(['errors']);
       const knownErrorMessage = getKnownErrorMessages(error);
-      const correlationId = getCorrelationId(error);
+      const details = getDetails(error);
 
       const newError: Error = {
         type: knownErrorMessage ? 'warning' : 'critical',
@@ -42,7 +54,7 @@ export const useErrors = () => {
           (error instanceof Error
             ? error.message
             : t('Something went wrong, please try again later')),
-        correlationId,
+        details,
       };
 
       const updatedErrors = [...(currentErrors || []), newError];

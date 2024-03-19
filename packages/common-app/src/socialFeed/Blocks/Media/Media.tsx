@@ -1,6 +1,6 @@
-import { PostContent, Media } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { MediaGallery, PrimaryMedia } from '@youfoundation/common-app';
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
 
 export const PostMedia = ({
   odinId,
@@ -18,6 +18,7 @@ export const PostMedia = ({
     content: PostContent;
     previewThumbnail?: EmbeddedThumb;
     isEncrypted?: boolean;
+    payloads?: PayloadDescriptor[];
   };
   showFallback?: boolean;
   forceAspectRatio?: boolean;
@@ -25,7 +26,13 @@ export const PostMedia = ({
   className?: string;
 }) => {
   const { content: post, previewThumbnail } = postInfo;
-  const mediaFiles = (post as Media).mediaFiles;
+
+  const mediaFiles =
+    postInfo?.content.type !== 'Article'
+      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
+      : [];
+
+  // const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (

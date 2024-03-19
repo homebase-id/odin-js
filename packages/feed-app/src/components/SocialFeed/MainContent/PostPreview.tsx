@@ -75,7 +75,7 @@ const PostPreview = ({
 
   return (
     <div
-      className={`fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
+      className={`fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm ${attachmentKey ? 'lg:overflow-hidden' : ''}`}
     >
       {attachmentKey ? (
         <PostImageDetailCard

@@ -4,7 +4,6 @@ import { useNavigate, useParams, useMatch } from 'react-router-dom';
 import { ChatDetail } from './ChatDetail';
 
 import { ROOT_PATH } from '../../app/App';
-import { useState } from 'react';
 import { NewConversation } from '../../components/Chat/Conversations/Sidenav/NewConversation';
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
@@ -24,7 +23,6 @@ export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {
   const { conversationKey } = useParams();
-  const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
   const isOnline = useLiveChatProcessor();
   useRemoveNotifications({ appId: CHAT_APP_ID });
@@ -43,12 +41,7 @@ export const ChatHome = () => {
         // needsAllConnected={true}
       />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
-        <ChatSideNav
-          isOpen={isSidenavOpen}
-          setIsSidenavOpen={setIsSidenavOpen}
-          isOnline={isOnline}
-        />
-
+        <ChatSideNav isOnline={isOnline} />
         <div className="h-full w-full flex-grow bg-background">
           <ChatDetail conversationId={conversationKey} />
         </div>
@@ -57,15 +50,7 @@ export const ChatHome = () => {
   );
 };
 
-const ChatSideNav = ({
-  isOpen,
-  setIsSidenavOpen,
-  isOnline,
-}: {
-  isOpen: boolean;
-  setIsSidenavOpen: (newIsOpen: boolean) => void;
-  isOnline: boolean;
-}) => {
+const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
   const { conversationKey } = useParams();
   const { logout } = useAuth();
 
@@ -80,11 +65,11 @@ const ChatSideNav = ({
   const rootChatMatch = useMatch({ path: CHAT_ROOT });
   const isRoot = !!rootChatMatch;
 
-  const isActive = isOpen || isCreateNew || isCreateNewGroup || isRoot;
+  const isActive = isCreateNew || isCreateNewGroup || isRoot;
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isOpen && !isRoot} logout={logout} />
+      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} logout={logout} />
       <div
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} ${
           isCreateNew || isCreateNewGroup ? '' : 'pb-14'
@@ -98,14 +83,10 @@ const ChatSideNav = ({
             <NewConversationGroup />
           ) : (
             <>
-              <NavHeader
-                closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)}
-                isOnline={isOnline}
-              />
+              <NavHeader isOnline={isOnline} />
               <ConversationsSidebar
                 activeConversationId={conversationKey}
                 openConversation={(newId) => {
-                  setIsSidenavOpen(false);
                   navigate(`${CHAT_ROOT}/${newId}`);
                 }}
               />

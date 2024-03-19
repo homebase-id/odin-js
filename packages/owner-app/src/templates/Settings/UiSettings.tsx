@@ -1,7 +1,6 @@
-import { t, Label } from '@youfoundation/common-app';
+import { t, Label, CheckboxToggle } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { useSettings } from '../../hooks/settings/useSettings';
-import CheckboxToggle from '../../components/Form/CheckboxToggle';
 
 export const UiSettings = () => {
   const { data: currentSettings } = useSettings().fetchUiSettings;

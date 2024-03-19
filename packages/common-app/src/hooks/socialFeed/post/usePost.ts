@@ -5,7 +5,6 @@ import {
   getPost,
   NewMediaFile,
   MediaFile,
-  Media,
   removePost,
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
@@ -28,7 +27,7 @@ export const usePost = () => {
   }: {
     postFile: NewDriveSearchResult<PostContent> | DriveSearchResult<PostContent>;
     channelId: string;
-    mediaFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[];
+    mediaFiles?: (NewMediaFile | MediaFile)[];
     onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<UploadResult>((resolve, reject) => {
@@ -149,13 +148,14 @@ export const usePost = () => {
                 content: {
                   ...newPost.postFile.fileMetadata.appData.content,
 
-                  primaryMediaFile: newPost.mediaFiles?.[0] as MediaFile,
+                  primaryMediaFile: {
+                    fileKey: newPost.mediaFiles?.[0].key,
+                    type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                  },
                 },
               },
             },
           } as DriveSearchResult<PostContent>;
-          (newPostFile.fileMetadata.appData.content as Media).mediaFiles =
-            newPost.mediaFiles as MediaFile[];
 
           const newFeed: InfiniteData<
             MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>

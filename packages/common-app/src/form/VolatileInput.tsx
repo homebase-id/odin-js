@@ -195,7 +195,9 @@ export const VolatileInput = ({
         onPaste={onPasteHandler}
         onInput={onInput}
         ref={divRef}
-        style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
+        style={
+          placeholder ? ({ '--tw-content': `"${placeholder}"` } as React.CSSProperties) : undefined
+        }
       ></span>
 
       <EmojiDropdown

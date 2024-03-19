@@ -1,15 +1,7 @@
 import { createPortal } from 'react-dom';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import {
-  AuthorImage,
-  AuthorName,
-  ConnectionImage,
-  ConnectionName,
-  DialogWrapper,
-  t,
-  usePortal,
-} from '@youfoundation/common-app';
+import { AuthorImage, AuthorName, DialogWrapper, t, usePortal } from '@youfoundation/common-app';
 import {
   Conversation,
   GroupConversation,
@@ -38,9 +30,11 @@ export const ChatMessageInfo = ({
   const target = usePortal('modal-container');
   const messageContent = msg.fileMetadata.appData.content;
   const conversationContent = conversation.fileMetadata.appData.content;
-  const recipients = (conversationContent as GroupConversation).recipients || [
-    (conversationContent as SingleConversation).recipient,
-  ];
+  const recipients = (
+    (conversationContent as GroupConversation).recipients || [
+      (conversationContent as SingleConversation).recipient,
+    ]
+  ).filter(Boolean);
 
   const { data: reactions } = useChatReaction({
     conversationId: conversation?.fileMetadata.appData.uniqueId,
@@ -73,28 +67,30 @@ export const ChatMessageInfo = ({
           ) : null}
         </div>
 
-        <div>
-          <p className="mb-2 text-xl">{t('Recipients')}</p>
-          <div className="flex flex-col gap-4">
-            {recipients.map((recipient) => (
-              <div className="flex flex-row items-center justify-between" key={recipient}>
-                <div className="flex flex-row items-center gap-2">
-                  <ConnectionImage
-                    odinId={recipient}
-                    className="border border-neutral-200 dark:border-neutral-800"
-                    size="sm"
+        {recipients?.length ? (
+          <div>
+            <p className="mb-2 text-xl">{t('Recipients')}</p>
+            <div className="flex flex-col gap-4">
+              {recipients.map((recipient) => (
+                <div className="flex flex-row items-center justify-between" key={recipient}>
+                  <div className="flex flex-row items-center gap-2">
+                    <AuthorImage
+                      odinId={recipient}
+                      className="border border-neutral-200 dark:border-neutral-800"
+                      size="sm"
+                    />
+                    <AuthorName odinId={recipient} />
+                  </div>
+                  <InnerDeliveryIndicator
+                    state={
+                      messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
+                    }
                   />
-                  <ConnectionName odinId={recipient} />
                 </div>
-                <InnerDeliveryIndicator
-                  state={
-                    messageContent.deliveryDetails?.[recipient] || messageContent.deliveryStatus
-                  }
-                />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {reactions?.length ? (
           <div>

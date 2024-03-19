@@ -1,4 +1,4 @@
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import React, { ReactNode } from 'react';
 import { ActionLink, Image } from '@youfoundation/common-app';
 
@@ -15,6 +15,7 @@ export const RichTextRenderer = ({
     defaultFileId: string;
     defaultGlobalTransitId?: string;
     lastModified: number | undefined;
+    previewThumbnails?: PayloadDescriptor[];
   };
   className?: string;
 }) => {
@@ -134,16 +135,26 @@ export const RichTextRenderer = ({
         );
       case 'local_image':
         if (attributes && options) {
+          const matchingPreviewThumbnail = options.previewThumbnails?.find(
+            (payload) => payload.key === attributes.fileKey
+          )?.previewThumbnail;
+
           return (
-            <Image
-              targetDrive={options.imageDrive}
-              fileId={(attributes.fileId as string) || options.defaultFileId}
-              globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
-              lastModified={options.lastModified}
-              fileKey={attributes.fileKey as string}
-              className="my-4 max-w-md"
-              odinId={odinId}
-            />
+            <div
+              className={matchingPreviewThumbnail ? '' : 'w-full max-w-md aspect-square'}
+              data-thumb={!!matchingPreviewThumbnail}
+            >
+              <Image
+                targetDrive={options.imageDrive}
+                fileId={(attributes.fileId as string) || options.defaultFileId}
+                globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
+                lastModified={options.lastModified}
+                fileKey={attributes.fileKey as string}
+                previewThumbnail={matchingPreviewThumbnail}
+                className="my-4 max-w-md"
+                odinId={odinId}
+              />
+            </div>
           );
         }
         return <></>;
@@ -165,7 +176,7 @@ export const RichTextRenderer = ({
       case 'p':
       case 'paragraph':
         return (
-          <p {...attributes} className="mb-3">
+          <p {...attributes} className="mb-3 last-of-type:mb-0">
             {children}
           </p>
         );

@@ -16,7 +16,13 @@ import {
 } from '@youfoundation/js-lib/auth';
 import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
-import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@youfoundation/common-app';
+import {
+  APP_AUTH_TOKEN,
+  APP_SHARED_SECRET,
+  CHAT_APP_ID,
+  useDotYouClient,
+} from '@youfoundation/common-app';
+import { ChatDrive } from '../../providers/ConversationProvider';
 
 export const useAuth = () => {
   const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
@@ -67,8 +73,8 @@ export const useAuth = () => {
 
 export const drives = [
   {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Read + DrivePermissionType.Write,
@@ -100,8 +106,8 @@ export const permissions = [
 
 const circleDrives = [
   {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
     p: DrivePermissionType.Write,
@@ -109,7 +115,7 @@ const circleDrives = [
 ];
 
 export const appName = 'Homebase - Chat';
-export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
+export const appId = CHAT_APP_ID;
 
 export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
@@ -128,7 +134,7 @@ export const useYouAuthAuthorization = () => {
       drives,
       circleDrives,
       eccKey.publicKey,
-      window.location.host,
+      undefined,
       undefined,
       returnUrl
     );

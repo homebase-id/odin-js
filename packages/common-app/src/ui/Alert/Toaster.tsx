@@ -1,15 +1,20 @@
-import { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { ReactNode, useState } from 'react';
 import {
   ActionButton,
+  DialogWrapper,
   Exclamation,
   OWNER_ROOT,
   Times,
   t,
   useDotYouClient,
   useNotifications,
+  usePortal,
+  useErrors,
+  Clipboard,
 } from '@youfoundation/common-app';
+import type { Error } from '../../hooks/errors/useErrors';
 import { useNavigate } from 'react-router-dom';
-import { useErrors } from '@youfoundation/common-app';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
 import { ApiType } from '@youfoundation/js-lib/core';
 
@@ -20,7 +25,7 @@ export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
-      <ErrorToaser />
+      <ErrorToaster />
       {isOwner && !errorOnly ? <LiveToaster /> : null}
     </div>
   );
@@ -51,11 +56,13 @@ export const LiveToaster = () => {
   );
 };
 
-export const ErrorToaser = () => {
+export const ErrorToaster = () => {
   const {
     fetch: { data: errors },
     dismiss: dismissError,
   } = useErrors();
+
+  const [openError, setOpenError] = useState<Error | null>(null);
 
   return (
     <>
@@ -66,14 +73,73 @@ export const ErrorToaser = () => {
           key={index}
           onDismiss={() => dismissError(error)}
           onOpen={() => {
-            if (error.correlationId) navigator.clipboard.writeText(error.correlationId);
+            setOpenError(error);
             dismissError(error);
           }}
           type={error.type}
         />
       ))}
+
+      {openError ? <ErrorDialog error={openError} onClose={() => setOpenError(null)} /> : null}
     </>
   );
+};
+
+const ErrorDialog = ({ error, onClose }: { error: Error; onClose: () => void }) => {
+  const target = usePortal('modal-container');
+  const errorDetails = error.details;
+
+  if (!errorDetails) return null;
+
+  const dialog = (
+    <DialogWrapper title={error.message} onClose={onClose} isSidePanel={false} size="2xlarge">
+      {errorDetails ? (
+        <>
+          <p className="text-xl mb-2">
+            {errorDetails.domain}: {errorDetails.correlationId}
+          </p>
+          {errorDetails.title || errorDetails.stackTrace ? (
+            <div className="overflow-auto max-h-[20rem]">
+              <pre>
+                <code>
+                  {errorDetails.title}
+                  {errorDetails.stackTrace}
+                </code>
+              </pre>
+            </div>
+          ) : null}
+
+          <div className="flex flex-row-reverse mt-5">
+            <ActionButton
+              onClick={() => {
+                const details = `${errorDetails.domain}: ${errorDetails.correlationId}\n\n${errorDetails.title}\n${errorDetails.stackTrace}`;
+                navigator.clipboard.writeText(details);
+              }}
+              type="primary"
+              icon={Clipboard}
+            >
+              {t('Copy')}
+            </ActionButton>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-xl mb-2">{error.message}</p>
+          <div className="flex flex-row-reverse mt-5">
+            <ActionButton
+              onClick={() => navigator.clipboard.writeText(error.message)}
+              type="primary"
+              icon={Clipboard}
+            >
+              {t('Copy')}
+            </ActionButton>
+          </div>
+        </>
+      )}
+    </DialogWrapper>
+  );
+
+  return createPortal(dialog, target);
 };
 
 export const Toast = ({

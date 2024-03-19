@@ -38,6 +38,8 @@ export const IdentityTeaser = ({
   return (
     <a
       href={link}
+      target="_blank"
+      rel="noopener noreferrer"
       onClick={onClick}
       className={`flex h-full w-full items-center rounded-lg ${
         isBorderLess ? '-mx-1 p-1' : 'border border-gray-200 p-4 dark:border-gray-700'

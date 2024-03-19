@@ -1,4 +1,4 @@
-import { DotYouClient, EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
 import {
   Image,
@@ -56,7 +56,7 @@ export const MediaGallery = ({
 
   const targetDrive = getChannelDrive(channelId);
   const hasFirstInCache = useMemo(
-    () => !!getFromCache(odinId, fileId, globalTransitId, slicedFiles[0].fileKey, targetDrive),
+    () => !!getFromCache(odinId, fileId, globalTransitId, slicedFiles[0].key, targetDrive),
     []
   );
 
@@ -82,7 +82,7 @@ export const MediaGallery = ({
             {slicedFiles.map((file, index) => (
               <div
                 className={slicedFiles.length === 3 && index === 2 ? 'col-span-2' : undefined}
-                key={file.fileId + file.fileKey}
+                key={file.fileId + file.key}
               >
                 <div
                   className={`relative ${
@@ -92,15 +92,15 @@ export const MediaGallery = ({
                 >
                   <Image
                     odinId={odinId}
-                    className={`h-full w-auto ${file.type === 'video' ? 'blur-sm' : ''}`}
+                    className={`h-full w-auto ${file.contentType.startsWith('video') ? 'blur-sm' : ''}`}
                     fileId={file.fileId || fileId}
                     globalTransitId={file.fileId ? undefined : globalTransitId}
-                    fileKey={file.fileKey}
+                    fileKey={file.key}
                     lastModified={lastModified}
                     targetDrive={targetDrive}
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}
-                    avoidPayload={file.type === 'video'}
+                    avoidPayload={file.contentType.startsWith('video')}
                     onLoad={() => setSomeLoaded(true)}
                   />
 
@@ -108,7 +108,7 @@ export const MediaGallery = ({
                     <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
                       <span className="block text-center">+{countExcludedFromView}</span>
                     </div>
-                  ) : file.type === 'video' ? (
+                  ) : file.contentType.startsWith('video') ? (
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
                         <Triangle className="text-foreground h-12 w-12" />
