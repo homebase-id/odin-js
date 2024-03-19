@@ -59,16 +59,16 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   };
 
   const debouncedDomainValidator = debounce(async (e) => {
-    if (e.key === ' ' || e.key === 'Spacebar') {
-      e.preventDefault();
-      dotyouInputBox.value += '.';
-    }
-
     if (!localDomainComplete(e.target.value)) return;
     mainForm.classList.toggle(INVALID_CLASSNAME, !localDomainCheck(e.target.value));
   }, 500);
 
+  const replaceSpacesWithDots = (e: KeyboardEvent) => {
+    dotyouInputBox.value = dotyouInputBox.value.replace(/\s/g, '.');
+  };
+
   dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);
+  dotyouInputBox.addEventListener('keyup', replaceSpacesWithDots);
 
   const pingIdentity = async (identity: string) => {
     return await fetch(`https://${identity}/api/guest/v1/auth/ident`)
