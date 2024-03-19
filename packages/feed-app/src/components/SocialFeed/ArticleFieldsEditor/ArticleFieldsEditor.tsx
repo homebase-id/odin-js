@@ -59,7 +59,6 @@ export const InnerFieldEditors = ({
       (f) =>
         'file' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
     ) as NewMediaFile | null;
-    console.log('pendingFile', pendingFile, imageData);
     return pendingFile ? URL.createObjectURL(pendingFile.file) : imageData?.url;
   }, [postFile, imageData, files]);
 

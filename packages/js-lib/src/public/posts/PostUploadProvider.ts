@@ -405,12 +405,6 @@ const updatePost = async <T extends PostContent>(
     }
   }
 
-  console.log({
-    existingMediaFiles,
-    newMediaFiles,
-    deletedMediaFiles,
-  });
-
   // Remove the payloads that are removed from the post
   if (deletedMediaFiles.length) {
     for (let i = 0; i < deletedMediaFiles.length; i++) {

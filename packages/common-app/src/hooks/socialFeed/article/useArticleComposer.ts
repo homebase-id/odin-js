@@ -138,8 +138,6 @@ export const useArticleComposer = ({
     explicitTargetChannel?: NewDriveSearchResult<ChannelDefinition>,
     redirectOnPublish?: boolean
   ) => {
-    console.log('doSave', dirtyPostFile);
-
     // Check if fully empty and if so don't save
     if (isValidPost(dirtyPostFile)) return;
 
