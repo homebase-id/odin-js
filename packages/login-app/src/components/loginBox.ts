@@ -22,7 +22,7 @@ const setupHtml = (isStandalone?: boolean) => {
           </label>
           <span class="invalid-msg">Invalid identity</span>
         </div>
-        <input type="text" name="homebase-id" id="homebase-id" required />
+        <input type="text" name="homebase-id" id="homebase-id" required inputmode="url" />
         <button class="login">Login</button>
       </form>
       <p class="my-3 text-center">or</p>
