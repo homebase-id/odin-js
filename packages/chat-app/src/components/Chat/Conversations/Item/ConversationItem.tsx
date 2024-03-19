@@ -160,7 +160,7 @@ const ConversationBody = ({
 
   return (
     <>
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-20 flex-grow flex-col gap-1">
         <div className="flex flex-row justify-between gap-2">
           <p className="font-semibold">
             {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
@@ -171,12 +171,14 @@ const ConversationBody = ({
         <div className="flex flex-row items-center gap-1">
           {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
 
-          <div className="w-full leading-tight text-foreground/80">
+          <div className="w-20 flex-grow leading-tight text-foreground/80">
             {lastMessage && lastMessageContent ? (
               lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
                 <MessageDeletedInnerBody />
               ) : lastMessageContent.message ? (
-                <p>{ellipsisAtMaxChar(lastMessageContent.message, 30)}</p>
+                <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                  {lastMessageContent.message}
+                </p>
               ) : (
                 <p>📷 {t('Media')}</p>
               )

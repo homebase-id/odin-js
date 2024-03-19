@@ -141,7 +141,7 @@ export const ArticleComposerPage = () => {
         breadCrumbs={[
           { title: t('Feed'), href: `${ROOT_PATH}` },
           { title: t('Articles'), href: `${ROOT_PATH}/articles` },
-          { title: t('New article') },
+          { title: isPublished ? t('Edit article') : t('New article') },
         ]}
         actions={
           <>
