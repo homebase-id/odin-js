@@ -63,7 +63,15 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
     mainForm.classList.toggle(INVALID_CLASSNAME, !localDomainCheck(e.target.value));
   }, 500);
 
+  const replaceSpaceWithDot = (e: KeyboardEvent) => {
+    if (e.key === ' ') {
+      e.preventDefault();
+      dotyouInputBox.value += '.';
+    }
+  };
+
   dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);
+  dotyouInputBox.addEventListener('keypress', replaceSpaceWithDot);
 
   const pingIdentity = async (identity: string) => {
     return await fetch(`https://${identity}/api/guest/v1/auth/ident`)
