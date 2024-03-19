@@ -20,9 +20,6 @@ export const useLiveMailProcessor = () => {
   // Only after the inbox is processed, we connect for live updates; So we avoid clearing the cache on each fileAdded update
   const isOnline = useMailWebsocket(inboxStatus === 'success');
 
-  // Only after the inbox is processed, we process commands as new ones might have been added via the inbox
-  //   useChatCommandProcessor(inboxStatus === 'success');
-
   return isOnline;
 };
 
@@ -33,7 +30,7 @@ const useInboxProcessor = (connected?: boolean) => {
 
   const fetchData = async () => {
     const processedresult = await processInbox(dotYouClient, MailDrive, 2000);
-    // We don't know how many messages we have processed, so we can only invalidate the entire chat query
+    // We don't know how many messages we have processed, so we can only invalidate the entire mail query
     queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
     return processedresult;
   };
@@ -55,7 +52,7 @@ const useMailWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
-    isDebug && console.debug('[ChatWebsocket] Got notification', notification);
+    isDebug && console.debug('[MailWebsocket] Got notification', notification);
 
     if (
       notification.notificationType === 'fileAdded' ||

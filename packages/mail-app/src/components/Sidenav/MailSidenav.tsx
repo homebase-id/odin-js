@@ -24,8 +24,8 @@ export const MailSidenav = () => {
   const isOnline = useLiveMailProcessor();
   useRemoveNotifications({ appId: MAIL_APP_ID });
 
-  const rootChatMatch = useMatch({ path: ROOT_PATH });
-  const isRoot = !!rootChatMatch;
+  const rootMailMatch = useMatch({ path: ROOT_PATH });
+  const isRoot = !!rootMailMatch;
 
   const isActive = isRoot;
 

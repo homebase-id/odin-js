@@ -68,7 +68,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
     };
 
     const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
-    if (!uploadResult) throw new Error('Failed to send the chat message');
+    if (!uploadResult) throw new Error('Failed to send the mail message');
 
     newMailConversation.fileId =
       'file' in uploadResult ? uploadResult.file.fileId : conversation.fileId;
@@ -425,7 +425,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     };
 
     const uploadResult = await uploadMail(dotYouClient, newMailConversation, files);
-    if (!uploadResult) throw new Error('Failed to send the chat message');
+    if (!uploadResult) throw new Error('Failed to save the mail message draft');
 
     newMailConversation.fileId =
       'file' in uploadResult ? uploadResult.file.fileId : conversation.fileId;
@@ -489,7 +489,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
       onError: (_error, _variables, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
 
-        console.error('Error saving draft chat message', _error);
+        console.error('Error saving draft mail message', _error);
       },
       onSettled: async () => {
         queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
@@ -525,7 +525,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
       onError: (_error, draftConversation, context) => {
         queryClient.setQueryData(['mail-conversations'], context?.existingConversations);
 
-        console.error('Error removing draft chat message', _error);
+        console.error('Error removing draft mail message', _error);
       },
       onSettled: async () => {
         queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
