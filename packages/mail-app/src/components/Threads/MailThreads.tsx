@@ -80,6 +80,7 @@ export const MailThreads = ({
         selection={selection}
         isAllSelected={isAllSelected}
         toggleAllSelection={() => setIsAllSelected(!isAllSelected)}
+        clearSelection={() => setSelection([])}
         filter={filter}
       />
       {conversationsLoading ? (
@@ -206,11 +207,13 @@ const MailConversationsHeader = ({
   selection,
   isAllSelected,
   toggleAllSelection,
+  clearSelection,
   filter,
 }: {
   selection: DriveSearchResult<MailConversation>[];
   isAllSelected: boolean;
   toggleAllSelection: () => void;
+  clearSelection: () => void;
   filter?: MailThreadsFilter;
 }) => {
   const hasASelection = selection.length > 0;
@@ -231,8 +234,8 @@ const MailConversationsHeader = ({
   } = useMailThread().restore;
 
   const {
-    markAsRead: { mutate: markAsRead, error: markAsReadError },
-    markAsUnread: { mutate: markAsUnread, error: markAsUnreadError },
+    markAsRead: { mutate: markAsRead, status: markAsReadStatus, error: markAsReadError },
+    markAsUnread: { mutate: markAsUnread, status: markAsUnreadStatus, error: markAsUnreadError },
   } = useMailConversation();
 
   const doArchive = () => archiveThread(selection);
@@ -240,6 +243,24 @@ const MailConversationsHeader = ({
   const doRestore = () => restoreThread(selection);
   const doMarkAsRead = () => markAsRead({ mailConversations: selection });
   const doMarkAsUnread = () => markAsUnread({ mailConversations: selection });
+
+  useEffect(() => {
+    if (
+      removeThreadStatus === 'success' ||
+      archiveThreadStatus === 'success' ||
+      restoreThreadStatus === 'success' ||
+      markAsReadStatus === 'success' ||
+      markAsUnreadStatus === 'success'
+    ) {
+      clearSelection();
+    }
+  }, [
+    removeThreadStatus,
+    archiveThreadStatus,
+    restoreThreadStatus,
+    markAsReadStatus,
+    markAsUnreadStatus,
+  ]);
 
   return (
     <>
