@@ -65,7 +65,7 @@ export const MailThread = () => {
   );
 
   const { subject, threadId, originId, recipients } = useMemo(() => {
-    const lastMessage = mailThread?.[mailThread.length - 1];
+    const lastMessage = mailThread?.[0];
     const allRecipients = getAllRecipients(lastMessage, identity);
 
     return {
