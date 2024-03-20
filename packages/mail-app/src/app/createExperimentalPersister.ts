@@ -20,4 +20,8 @@ export const createExperimentalPersiter = () =>
     maxAge: 1000 * 60 * 60 * 12, // 12 hours,
     serialize: (persistedQuery) => persistedQuery,
     deserialize: (cached) => cached,
+    filters: {
+      queryKey: ['mail-conversations'],
+      exact: true,
+    },
   });
