@@ -51,9 +51,7 @@ export const MailThread = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    isFetching,
   } = useMailThread({ threadId: conversationKey }).fetch;
-
   // Flatten all pages, sorted descending and slice on the max number expected
   const mailThread = useMemo(
     () =>
@@ -105,26 +103,17 @@ export const MailThread = () => {
       </div>
 
       <section className="flex flex-grow flex-col">
-        {isFetching ? (
-          <div className="flex flex-grow flex-col gap-4 p-2 md:p-5">
-            <LoadingBlock className="h-32 w-full bg-background" />
-            <LoadingBlock className="h-32 w-full bg-background" />
-            <LoadingBlock className="h-32 w-full bg-background" />
-            <LoadingBlock className="h-32 w-full bg-background" />
-            <LoadingBlock className="h-32 w-full bg-background" />
-          </div>
-        ) : (
-          <MailHistory
-            scrollRef={scrollRef}
-            mailThread={mailThread}
-            fetchNextPage={fetchNextPage}
-            hasNextPage={hasNextPage}
-            isFetchingNextPage={isFetchingNextPage}
-            autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
-            className="h-full bg-page-background py-2 md:py-5"
-            scrollToMessage={messageKey}
-          />
-        )}
+        {/* No loading state as the mailThread should always be there, only when all local data is gone, and you directly open a conversation, you might see a flash of nothing */}
+        <MailHistory
+          scrollRef={scrollRef}
+          mailThread={mailThread || []}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
+          className="h-full bg-page-background py-2 md:py-5"
+          scrollToMessage={messageKey}
+        />
         <MailThreadActions
           className="bg-background px-2 md:px-5"
           mailThread={mailThread}
