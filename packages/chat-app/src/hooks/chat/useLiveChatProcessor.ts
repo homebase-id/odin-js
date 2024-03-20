@@ -129,16 +129,20 @@ const useChatWebsocket = (isEnabled: boolean) => {
             }>
           >(['chat-messages', conversationId]);
 
-          const newData = {
-            ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page) => ({
-              ...page,
-              searchResults: page.searchResults.map((msg) =>
-                stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId) ? updatedChatMessage : msg
-              ),
-            })),
-          };
-          queryClient.setQueryData(['chat-messages', conversationId], newData);
+          if (extistingMessages) {
+            const newData = {
+              ...extistingMessages,
+              pages: extistingMessages?.pages?.map((page) => ({
+                ...page,
+                searchResults: page.searchResults.map((msg) =>
+                  stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ? updatedChatMessage
+                    : msg
+                ),
+              })),
+            };
+            queryClient.setQueryData(['chat-messages', conversationId], newData);
+          }
 
           queryClient.setQueryData(
             ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],

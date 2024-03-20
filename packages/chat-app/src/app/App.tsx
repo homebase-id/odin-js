@@ -45,7 +45,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export const REACT_QUERY_CACHE_KEY = 'CHAT_202403_REACT_QUERY_OFFLINE_CACHE';
+export const REACT_QUERY_CACHE_KEY = 'CHAT_REACT_QUERY_OFFLINE_CACHE';
 const localStoragePersister = createSyncStoragePersister({
   storage: window.localStorage,
   retry: removeOldestQuery,
@@ -62,10 +62,20 @@ const INCLUDED_QUERY_KEYS = [
   'connectionDetails',
 ];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
+  buster: '202403',
   maxAge: Infinity,
   persister: localStoragePersister,
   dehydrateOptions: {
     shouldDehydrateQuery: (query) => {
+      if (
+        query.state.status === 'pending' ||
+        query.state.status === 'error' ||
+        (query.state.data &&
+          typeof query.state.data === 'object' &&
+          !Array.isArray(query.state.data) &&
+          Object.keys(query.state.data).length === 0)
+      )
+        return false;
       const { queryKey } = query;
       return INCLUDED_QUERY_KEYS.some((key) => queryKey.includes(key));
     },
