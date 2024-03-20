@@ -1,7 +1,14 @@
 import { createPortal } from 'react-dom';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { AuthorImage, AuthorName, DialogWrapper, t, usePortal } from '@youfoundation/common-app';
-import { MailConversation } from '../../providers/MailProvider';
+import {
+  AuthorImage,
+  AuthorName,
+  DialogWrapper,
+  Exclamation,
+  t,
+  usePortal,
+} from '@youfoundation/common-app';
+import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   month: 'short',
@@ -66,6 +73,12 @@ export const MailConversationInfo = ({
                   />
                   <AuthorName odinId={recipient} />
                 </div>
+                {mailConversation.fileMetadata.appData.content.deliveryDetails?.[recipient] ===
+                MailDeliveryStatus.Failed ? (
+                  <div className="flex flex-row items-center gap-2 text-red-500">
+                    <Exclamation className="h-4 w-4" /> {t('Failed to deliver')}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

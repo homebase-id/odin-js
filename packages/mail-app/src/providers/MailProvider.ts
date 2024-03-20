@@ -6,6 +6,7 @@ import {
   EmbeddedThumb,
   FileQueryParams,
   GetBatchQueryResultOptions,
+  KeyHeader,
   NewDriveSearchResult,
   PayloadFile,
   RichText,
@@ -40,6 +41,16 @@ export const DEFAULT_ARCHIVAL_STATUS = 0;
 export const REMOVE_ARCHIVAL_STATUS = 2;
 export const ARCHIVE_ARCHIVAL_STATUS = 1;
 
+export enum MailDeliveryStatus {
+  NotSent = 10, // Draft state
+  Sending = 15, // When it's sending; Used for optimistic updates
+
+  Sent = 20, // when delivered to your identity
+  Delivered = 30, // when delivered to the recipient inbox
+  // Read = 40, // Not supported, we don't want read receipts on mail
+  Failed = 50, // when the message failed to send to the recipient
+}
+
 export interface MailConversation {
   originId: string; // Stored in content => The origin of the conversation; Created uniquely for each new conversation; And kept the same for each reply/forward
   threadId: string; // Stored in groupId => The thread of the conversation; Created uniquely for new conversations and forwards
@@ -52,6 +63,10 @@ export interface MailConversation {
   isRead?: boolean;
 
   forwardedMailThread?: DriveSearchResult<MailConversation>[];
+
+  /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
+  deliveryStatus: MailDeliveryStatus;
+  deliveryDetails?: Record<string, MailDeliveryStatus>;
 }
 
 export const MailDrive: TargetDrive = {
@@ -262,15 +277,46 @@ export const uploadMail = async (
 
   if (!uploadResult) return null;
 
+  conversation.fileId = conversation.fileId || (uploadResult as UploadResult).file.fileId;
+  conversation.fileMetadata.versionTag = uploadResult.newVersionTag;
+  conversation.fileMetadata.appData.previewThumbnail = uploadMetadata.appData.previewThumbnail;
+
   if (distribute) {
-    const allDelivered = recipients.map(
+    const deliveredToInboxes = recipients.map(
       (recipient) =>
         (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
         TransferStatus.DeliveredToInbox
     );
 
+    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
+      conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Delivered;
+      await updateLocalMailHeader(
+        dotYouClient,
+        conversation as DriveSearchResult<MailConversation>,
+        undefined,
+        (uploadResult as UploadResult).keyHeader
+      );
+    }
+
     // TODO: Should this work differently with the job system? Would it auto retry?
-    if (!allDelivered.every((delivered) => delivered)) {
+    if (!deliveredToInboxes.every((delivered) => delivered)) {
+      conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
+      conversation.fileMetadata.appData.content.deliveryDetails = {};
+      for (const recipient of recipients) {
+        conversation.fileMetadata.appData.content.deliveryDetails[recipient] =
+          (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
+          TransferStatus.DeliveredToInbox
+            ? MailDeliveryStatus.Delivered
+            : MailDeliveryStatus.Failed;
+      }
+
+      await updateLocalMailHeader(
+        dotYouClient,
+        conversation as DriveSearchResult<MailConversation>,
+        undefined,
+        (uploadResult as UploadResult).keyHeader
+      );
+
       console.error('Not all recipients received the message: ', uploadResult);
       throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
     }
@@ -285,7 +331,8 @@ export const uploadMail = async (
 export const updateLocalMailHeader = async (
   dotYouClient: DotYouClient,
   conversation: DriveSearchResult<MailConversation>,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  keyHeader?: KeyHeader
 ) => {
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {
@@ -314,7 +361,7 @@ export const updateLocalMailHeader = async (
 
   return await uploadHeader(
     dotYouClient,
-    conversation.sharedSecretEncryptedKeyHeader,
+    keyHeader || conversation.sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata,
     onVersionConflict

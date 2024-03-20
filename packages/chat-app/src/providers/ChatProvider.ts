@@ -50,24 +50,9 @@ export enum ChatDeliveryStatus {
   Failed = 50, // when the message failed to send to the recipient
 }
 
-export enum MessageType {
-  Text = 0,
-  Image = 1,
-  Video = 2,
-  Audio = 3,
-  File = 4,
-  Location = 5,
-  Sticker = 6,
-  Contact = 7,
-  Custom = 8,
-}
-
 export interface ChatMessage {
   // /// ReplyId used to get the replyId of the message
   replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
-
-  /// Type of the message
-  // messageType: MessageType;
 
   /// FileState of the Message
   /// [FileState.active] shows the message is active
@@ -76,8 +61,6 @@ export interface ChatMessage {
 
   /// Content of the message
   message: string;
-
-  // reactions: string;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;

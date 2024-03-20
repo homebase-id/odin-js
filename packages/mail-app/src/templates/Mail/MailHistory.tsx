@@ -2,6 +2,7 @@ import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
+  MailDeliveryStatus,
   MailDrive,
   getAllRecipients,
 } from '../../providers/MailProvider';
@@ -14,6 +15,7 @@ import {
   RichTextRenderer,
   ActionGroup,
   ChevronDown,
+  Exclamation,
 } from '@youfoundation/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
@@ -219,6 +221,12 @@ const MailMessage = ({
           <div className={`flex flex-row gap-2`}>
             {!message.fileMetadata.appData.content.isRead && !messageFromMe && !forceAsRead ? (
               <span className="my-auto block h-2 w-2 rounded-full bg-primary" />
+            ) : null}
+            {messageFromMe &&
+            message.fileMetadata.appData.content.deliveryStatus === MailDeliveryStatus.Failed ? (
+              <>
+                <Exclamation className="my-auto h-4 w-4 text-red-500" />
+              </>
             ) : null}
             <p className="font-semibold">
               {messageFromMe ? t('Me') : <ConnectionName odinId={sender} />}

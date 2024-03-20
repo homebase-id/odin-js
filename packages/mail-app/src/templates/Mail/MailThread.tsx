@@ -5,6 +5,7 @@ import { useMailThread } from '../../hooks/mail/useMailThread';
 import {
   ActionButton,
   ActionGroup,
+  ActionLink,
   Archive,
   ArrowLeft,
   ErrorNotification,
@@ -15,6 +16,8 @@ import {
   Trash,
   flattenInfinteData,
   t,
+  useDotYouClient,
+  useIsConnected,
 } from '@youfoundation/common-app';
 import { DriveSearchResult } from '@youfoundation/js-lib/core';
 import {
@@ -78,11 +81,14 @@ export const MailThread = () => {
   }, [mailThread]);
 
   useEffect(() => {
-    const resizeHandler = () => setHeaderHeight(headerRef.current?.clientHeight || 0);
-    window.addEventListener('resize', resizeHandler);
+    if (!headerRef.current) return;
 
-    resizeHandler();
-    return () => window.removeEventListener('resize', resizeHandler);
+    const resizeObserver = new ResizeObserver(() =>
+      setHeaderHeight(headerRef.current?.clientHeight || 0)
+    );
+
+    resizeObserver.observe(headerRef.current);
+    return () => resizeObserver.disconnect();
   }, []);
 
   return (
@@ -95,6 +101,7 @@ export const MailThread = () => {
           onMarkAsUnread={() => setIsDisabledMarkAsRead(true)}
           className="px-2 md:px-5"
         />
+        <MailConnectedState recipients={recipients} />
       </div>
 
       <section className="flex flex-grow flex-col">
@@ -390,5 +397,37 @@ const MailThreadHeader = ({
         />
       ) : null}
     </>
+  );
+};
+
+const MailConnectedState = ({ recipients }: { recipients: string[] }) => {
+  if (!recipients || recipients.length <= 1) return null;
+
+  return (
+    <div className="border-t empty:hidden dark:border-t-slate-800">
+      {recipients.map((recipient) => {
+        return <RecipientConnectedState recipient={recipient} key={recipient} />;
+      })}
+    </div>
+  );
+};
+
+const RecipientConnectedState = ({ recipient }: { recipient: string }) => {
+  const { data: isConnected, isFetched } = useIsConnected(recipient);
+  const identity = useDotYouClient().getIdentity();
+
+  if (isConnected || !isFetched) return null;
+  return (
+    <div className="flex w-full flex-row items-center justify-between bg-background px-5 py-2">
+      <p>
+        {t('You can only chat with connected identites, messages will not be delivered to')}:{' '}
+        <a href={`https://${recipient}`} className="underline">
+          {recipient}
+        </a>
+      </p>
+      <ActionLink href={`https://${identity}/owner/connections/${recipient}/connect`}>
+        {t('Connect')}
+      </ActionLink>
+    </div>
   );
 };

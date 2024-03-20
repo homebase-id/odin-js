@@ -8,6 +8,8 @@ import {
   OWNER_APP_ID,
   PHOTO_APP_ID,
   HomebaseNotifications,
+  MAIL_APP_ID,
+  HomebaseMail,
 } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState, useMemo } from 'react';
@@ -65,4 +67,5 @@ export const AppSpecificIcon = (appId: string | undefined) => {
   if (stringGuidsEqual(appId, CHAT_APP_ID)) return HomebaseChat;
   if (stringGuidsEqual(appId, FEED_APP_ID)) return HomebaseFeed;
   if (stringGuidsEqual(appId, PHOTO_APP_ID)) return HomebasePhoto;
+  if (stringGuidsEqual(appId, MAIL_APP_ID)) return HomebaseMail;
 };

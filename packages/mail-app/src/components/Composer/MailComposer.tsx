@@ -25,6 +25,7 @@ import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MAIL_MESSAGE_PAYLOAD_KEY,
   MailConversation,
+  MailDeliveryStatus,
   MailDrive,
 } from '../../providers/MailProvider';
 import { RecipientInput } from './RecipientInput';
@@ -70,6 +71,7 @@ export const MailComposer = ({
             threadId: threadId || getNewId(),
             sender: identity,
             forwardedMailThread,
+            deliveryStatus: MailDeliveryStatus.NotSent,
           },
           userDate: new Date().getTime(),
           fileType: MAIL_DRAFT_CONVERSATION_FILE_TYPE,
