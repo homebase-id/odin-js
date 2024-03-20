@@ -50,6 +50,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         ...conversation.fileMetadata,
         appData: {
           ...conversation.fileMetadata.appData,
+          tags: [originId],
           uniqueId: uniqueId,
           groupId: threadId,
           fileType: MAIL_CONVERSATION_FILE_TYPE,

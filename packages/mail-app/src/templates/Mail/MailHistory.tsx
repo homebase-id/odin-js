@@ -301,7 +301,7 @@ const ForwardedThread = ({
       {mailThread && hasHistory ? (
         <>
           {hasHistory && showHistory ? (
-            <div className="">
+            <div className="flex flex-col-reverse">
               {mailThread.map((mail, index) => (
                 <MailMessage
                   key={index}
