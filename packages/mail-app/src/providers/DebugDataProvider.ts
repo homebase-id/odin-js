@@ -7,6 +7,7 @@ import {
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MailConversation,
+  MailDeliveryStatus,
   getAllRecipients,
   getMailConversations,
   uploadMail,
@@ -120,6 +121,7 @@ const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients:
           recipients: recipients,
           originId: originId,
           threadId: threadId,
+          deliveryStatus: MailDeliveryStatus.Sent,
         },
         userDate: new Date().getTime(),
       },

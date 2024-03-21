@@ -24,6 +24,7 @@ export * from './BrandIcons/Homebase';
 export * from './BrandIcons/HomebaseChat';
 export * from './BrandIcons/HomebaseFeed';
 export * from './BrandIcons/HomebasePhoto';
+export * from './BrandIcons/HomebaseMail';
 export * from './BrandIcons/HomebaseNotifications';
 
 export * from './Icons/AddressBook';

@@ -15,6 +15,7 @@ import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
   MailConversationsReturn,
+  MailDeliveryStatus,
   MailDrive,
   getMailConversation,
   updateLocalMailHeader,
@@ -49,6 +50,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         ...conversation.fileMetadata,
         appData: {
           ...conversation.fileMetadata.appData,
+          tags: [originId],
           uniqueId: uniqueId,
           groupId: threadId,
           fileType: MAIL_CONVERSATION_FILE_TYPE,
@@ -56,6 +58,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
             ...conversationContent,
             originId: originId,
             threadId: threadId,
+            deliveryStatus: MailDeliveryStatus.Sent,
           },
           userDate: new Date().getTime(),
         },
@@ -113,7 +116,6 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           if (!serverData) return;
           updatedConversation.fileMetadata.versionTag = serverData.fileMetadata.versionTag;
           await updateLocalMailHeader(dotYouClient, updatedConversation);
-          console.log('saved after a versionConflict');
         });
       })
     );
