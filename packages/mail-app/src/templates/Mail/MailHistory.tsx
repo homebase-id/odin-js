@@ -311,7 +311,6 @@ const ForwardedThread = ({
                   previousMessage={undefined}
                   message={mail}
                   forceAsRead={true}
-                  isActive={false}
                 />
               ))}
             </div>
