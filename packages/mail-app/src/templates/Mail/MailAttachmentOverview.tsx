@@ -64,9 +64,7 @@ export const AttachmentFile = ({
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log(
-          `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}${window.location.search}`
-        );
+
         navigate({
           pathname: `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
           search: window.location.search,
