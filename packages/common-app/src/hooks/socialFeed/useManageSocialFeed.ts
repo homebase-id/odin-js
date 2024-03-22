@@ -23,7 +23,7 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
       .then((data: { url: string }) => {
         return data.url;
       })
-      .catch((err) => {
+      .catch(() => {
         return `https://ravenhosting.cloud/report`;
       });
   };
@@ -31,7 +31,7 @@ export const useManageSocialFeed = (props?: { odinId: string }) => {
   return {
     removeFromFeed: useMutation({
       mutationFn: removeFromFeed,
-      onMutate: async ({ postFile }) => {
+      onMutate: async () => {
         //
       },
       onSettled: () => {

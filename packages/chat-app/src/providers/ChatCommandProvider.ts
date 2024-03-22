@@ -39,8 +39,9 @@ export const processCommand = async (
   if (command.clientCode === MARK_CHAT_READ_COMMAND)
     return await markChatAsRead(dotYouClient, queryClient, command);
 
-  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) { return await updateGroupConversation(dotYouClient, queryClient, command); }
-
+  if (command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND) {
+    return await updateGroupConversation(dotYouClient, queryClient, command);
+  }
 };
 
 const joinConversation = async (
@@ -67,6 +68,7 @@ const joinConversation = async (
       },
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
@@ -111,6 +113,7 @@ const joinGroupConversation = async (
       },
     });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (ex: any) {
     if (ex?.response?.data?.errorCode === 'existingFileWithUniqueId') return command.id;
 
@@ -121,13 +124,18 @@ const joinGroupConversation = async (
   return command.id;
 };
 
-const updateGroupConversation = async (dotYouClient: DotYouClient,
+const updateGroupConversation = async (
+  dotYouClient: DotYouClient,
   queryClient: QueryClient,
-  command: ReceivedCommand) => {
+  command: ReceivedCommand
+) => {
   const updateGroupConversation = tryJsonParse<UpdateGroupConversationRequest>(
     command.clientJsonMessage
   );
-  const conversation = await getSingleConversation(dotYouClient, updateGroupConversation.conversationId);
+  const conversation = await getSingleConversation(
+    dotYouClient,
+    updateGroupConversation.conversationId
+  );
   if (!conversation) return null;
   conversation.fileMetadata.appData.content.title = updateGroupConversation.title;
   await updateConversation(dotYouClient, conversation);

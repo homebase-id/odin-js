@@ -1,3 +1,4 @@
+import { TargetDrive } from '../../../core';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import {
   getDrivePermissionFromString,
@@ -11,6 +12,14 @@ const root = '/circles/definitions';
 
 export const ALL_CONNECTIONS_CIRCLE_ID = 'bb2683fa402aff866e771a6495765a15';
 
+interface ServerCircleUpdateRequest extends Omit<CircleDefinition, 'driveGrants'> {
+  driveGrants: {
+    permissionedDrive: {
+      permission: number;
+      drive: TargetDrive;
+    };
+  }[];
+}
 export const updateCircleDefinition = async (
   dotYouClient: DotYouClient,
   circleDefinition: CircleDefinition
@@ -18,12 +27,14 @@ export const updateCircleDefinition = async (
   const client = dotYouClient.createAxiosClient();
   const url = root + '/update';
 
-  const data: any = { ...circleDefinition };
-  data.driveGrants =
-    data.driveGrants?.map((grant: DriveGrant) => ({
-      ...grant,
-      permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
-    })) || [];
+  const data: ServerCircleUpdateRequest = {
+    ...circleDefinition,
+    driveGrants:
+      circleDefinition.driveGrants?.map((grant: DriveGrant) => ({
+        ...grant,
+        permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
+      })) || [],
+  };
 
   return client
     .post(url, data)
@@ -40,17 +51,18 @@ export const createCircleDefinition = async (
   const client = dotYouClient.createAxiosClient();
   const url = root + '/create';
 
-  const data: any = { ...circleDefinition };
+  const data: ServerCircleUpdateRequest = {
+    ...circleDefinition,
+    driveGrants:
+      circleDefinition.driveGrants?.map((grant: DriveGrant) => ({
+        ...grant,
+        permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
+      })) || [],
+  };
 
   if (!data.id) {
     data.id = getNewId();
   }
-
-  data.driveGrants =
-    data.driveGrants?.map((grant: DriveGrant) => ({
-      ...grant,
-      permissionedDrive: getPermissionNumberFromDrivePermission(grant.permissionedDrive),
-    })) || [];
 
   return client
     .post(url, data)

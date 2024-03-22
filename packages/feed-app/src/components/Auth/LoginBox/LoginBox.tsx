@@ -23,7 +23,7 @@ export const LoginBox = () => {
   const isAutoAuthorize = window.location.pathname.startsWith(ROOT_PATH);
 
   const { data: authParams, isLoading } = useParams(ROOT_PATH || '/');
-  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams as any);
+  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export const LoginBox = () => {
     <>
       {authParams ? (
         <Helmet>
-          <meta name="youauth" content={stringifyToQueryParams(authParams as any)} />
+          <meta name="youauth" content={stringifyToQueryParams(authParams)} />
         </Helmet>
       ) : null}
       {stringifiedAuthParams ? (
@@ -60,7 +60,7 @@ export const LoginBox = () => {
 
 export const AutoAuthorize = () => {
   const { data: authParams } = useParams(ROOT_PATH || '/');
-  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams as any);
+  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
 
   useEffect(() => {
     if (stringifiedAuthParams)

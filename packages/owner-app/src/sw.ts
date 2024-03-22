@@ -6,7 +6,7 @@ declare const self: ServiceWorkerGlobalScope;
 // service worker typescript: https://joshuatz.com/posts/2021/strongly-typed-service-workers/
 // export default null;
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   console.log('SW installed');
 });
 

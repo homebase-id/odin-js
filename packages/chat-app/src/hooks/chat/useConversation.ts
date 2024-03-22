@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
   Conversation,

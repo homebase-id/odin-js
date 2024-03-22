@@ -1,4 +1,4 @@
-import { Media, PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,

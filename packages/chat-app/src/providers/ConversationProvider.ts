@@ -14,6 +14,7 @@ import {
   sendCommand,
   uploadFile,
   uploadHeader,
+  EncryptedKeyHeader,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { ImageSource } from '@youfoundation/ui-lib';
@@ -36,14 +37,18 @@ export const ConversationWithYourself: HomebaseFile<SingleConversation> = {
       uniqueId: ConversationWithYourselfId,
       fileType: ConversationFileType,
       dataType: 0,
-      content: {},
+      content: {
+        title: 'You',
+        recipient: '',
+      },
     },
     versionTag: '',
     payloads: [],
   },
   serverMetadata: undefined,
   priority: 0,
-} as any as HomebaseFile<SingleConversation>;
+  sharedSecretEncryptedKeyHeader: {} as EncryptedKeyHeader,
+};
 
 export const ChatDrive: TargetDrive = {
   alias: '9ff813aff2d61e2f9b9db189e72d1a11',

@@ -16,8 +16,7 @@ import {
   UPDATE_GROUP_CONVERSATION_COMMAND,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
-import { preAuth } from '@youfoundation/js-lib/auth';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   ChatMessage,
   ChatMessageFileType,

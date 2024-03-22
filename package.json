@@ -26,7 +26,8 @@
     "start:mail": "npm start -w ./packages/mail-app",
     "start:public": "npm start -w ./packages/public-app",
     "start:provisioning": "npm start -w ./packages/provisioning-app",
-    "start:login": "npm start -w ./packages/login-app"
+    "start:login": "npm start -w ./packages/login-app",
+    "lint": "npm run lint -workspaces --if-present"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"

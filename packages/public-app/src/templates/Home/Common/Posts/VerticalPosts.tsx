@@ -111,7 +111,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     scrollToFn: (
       offset: number,
       { adjustments = 0, behavior }: { adjustments?: number; behavior?: ScrollBehavior },
-      instance: Virtualizer<Window, any>
+      instance: Virtualizer<Window, Element>
     ) => {
       // We block big adjustments to prevent the user from loosing their scroll position when expanding a post
       if (Math.abs(adjustments) >= window.screenY) return;

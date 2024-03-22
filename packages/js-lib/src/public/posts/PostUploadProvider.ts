@@ -41,8 +41,8 @@ import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
 const OdinBlob: typeof Blob =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 

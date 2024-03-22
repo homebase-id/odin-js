@@ -92,8 +92,7 @@ export const getFileHeaderBytes = async (
 
   const promise: Promise<HomebaseFile | null> = client
     .get<HomebaseFile>(
-      '/drive/files/header?' +
-        stringifyToQueryParams(request as unknown as Record<string, unknown>),
+      '/drive/files/header?' + stringifyToQueryParams(request),
       options?.axiosConfig
     )
     .then((response) => response.data)

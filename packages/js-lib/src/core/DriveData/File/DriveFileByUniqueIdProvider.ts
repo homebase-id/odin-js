@@ -87,10 +87,7 @@ export const getFileHeaderBytesByUniqueId = async (
   };
 
   const promise: Promise<HomebaseFile | null> = client
-    .get<HomebaseFile>(
-      '/drive/query/specialized/cuid/header?' +
-        stringifyToQueryParams(request as unknown as Record<string, unknown>)
-    )
+    .get<HomebaseFile>('/drive/query/specialized/cuid/header?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

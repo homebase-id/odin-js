@@ -5,6 +5,7 @@ import { toggleList, unwrapList } from '@udecode/plate-list';
 
 export const preFormat: AutoformatBlockRule['preFormat'] = (editor) => unwrapList(editor);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const format = (editor: PlateEditor, customFormatting: any) => {
   if (editor.selection) {
     const parentEntry = getParentNode(editor, editor.selection);

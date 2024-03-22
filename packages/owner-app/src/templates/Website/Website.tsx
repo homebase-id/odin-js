@@ -1,5 +1,5 @@
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import { ActionButton, ActionGroup, ActionLink, Save, Times, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, Times, t } from '@youfoundation/common-app';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';

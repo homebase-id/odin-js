@@ -33,7 +33,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,
-      onMutate: async (_notificationIds) => {
+      onMutate: async () => {
         // TODO
       },
       onSettled: () => {
@@ -42,7 +42,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
     }),
     remove: useMutation({
       mutationFn: removeNotifications,
-      onMutate: async (notificationIds) => {
+      onMutate: async () => {
         // TODO
       },
       onSettled: () => {

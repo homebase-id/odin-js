@@ -33,6 +33,7 @@ export const DirectSource = ({
   ).fetch;
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorHandler = (e: any) => {
       console.error('[Odin-Video]-Direct', e);
       onFatalError && onFatalError();

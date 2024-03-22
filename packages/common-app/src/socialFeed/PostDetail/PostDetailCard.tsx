@@ -1,7 +1,6 @@
 import {
   ChannelDefinition,
   PostContent,
-  Media,
   Article,
   getChannelDrive,
 } from '@youfoundation/js-lib/public';

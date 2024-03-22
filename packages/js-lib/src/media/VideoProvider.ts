@@ -3,7 +3,6 @@ import {
   jsonStringify64,
   stringifyToQueryParams,
   getRandom16ByteArray,
-  tryJsonParse,
 } from '../helpers/DataUtil';
 import { DotYouClient } from '../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../core/DriveData/Upload/UploadHelpers';
@@ -24,7 +23,8 @@ import {
 import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
 import { createThumbnails } from './Thumbs/ThumbnailProvider';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 export type VideoContentType = 'video/mp4';
 

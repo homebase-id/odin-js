@@ -25,7 +25,8 @@ import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/D
 import { AxiosRequestConfig } from 'axios';
 
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -37,13 +38,13 @@ export const getSecuredBlob = async (
   blobParts?: BlobPart[] | undefined,
   options?: BlobPropertyBag
 ) => {
-  const returnBlob = new OdinBlob(blobParts, options) as any;
+  const returnBlob = new OdinBlob(blobParts, options);
 
   await new Promise<void>((resolve) => {
-    if (returnBlob.written === undefined) resolve();
+    if (!('written' in returnBlob)) resolve();
 
     const interval = setInterval(async () => {
-      if (returnBlob.written) {
+      if ('written' in returnBlob && returnBlob.written) {
         clearInterval(interval);
         resolve();
       }

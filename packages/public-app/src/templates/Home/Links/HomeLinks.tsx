@@ -1,8 +1,7 @@
 import ProfileHero from '../Common/ProfileHero/ProfileHero';
 import Links from '../../../components/ui/Layout/Links/Links';
-import { ThemeLinksSettings } from '@youfoundation/common-app';
 
-const HomeContent = (props: { templateSettings: ThemeLinksSettings }) => {
+const HomeContent = () => {
   return (
     <>
       <ProfileHero />

@@ -266,7 +266,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
   };
 
   const promise = client
-    .get('/transit/query/header_byglobaltransitid?' + stringifyToQueryParams(request as any))
+    .get('/transit/query/header_byglobaltransitid?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

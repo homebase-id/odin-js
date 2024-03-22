@@ -40,7 +40,8 @@ import { deleteFileOverPeer } from '../../peer/peerData/File/PeerFileManageProvi
 import { queryBatchOverPeer } from '../../peer/peerData/Query/PeerDriveQueryProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from '../../peer/peerData/File/PeerFileProvider';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const COMMENT_MEDIA_PAYLOAD = 'cmmnt_md';
 

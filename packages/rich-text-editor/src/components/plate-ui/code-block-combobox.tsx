@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   CODE_BLOCK_LANGUAGES,
   CODE_BLOCK_LANGUAGES_POPULAR,

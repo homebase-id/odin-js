@@ -3,10 +3,9 @@ import { BlogConfig } from '@youfoundation/js-lib/public';
 
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
-import { ApiType, TypedConnectionNotification } from '@youfoundation/js-lib/core';
+import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
 import { getSocialFeed, processInbox } from '@youfoundation/js-lib/peer';
-import { useCallback, useEffect, useState } from 'react';
-import { preAuth } from '@youfoundation/js-lib/auth';
+import { useCallback } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useChannelDrives } from './useChannelDrives';
 

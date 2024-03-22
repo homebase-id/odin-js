@@ -45,7 +45,6 @@ export const OdinPreviewImage = forwardRef(
       onError,
       onLoad,
       className,
-      lastModified,
       ...props
     }: OdinPreviewImageProps,
     ref: React.Ref<HTMLImageElement>

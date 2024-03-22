@@ -1,9 +1,9 @@
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 import { DotYouClient } from '../../core/DotYouClient';
 import { SystemFileType, TargetDrive } from '../../core/core';
-import { stringifyToQueryParams, tryJsonParse } from '../../helpers/helpers';
-import { PlainVideoMetadata, SegmentedVideoMetadata } from '../../media/media';
+import { stringifyToQueryParams } from '../../helpers/helpers';
 import {
   getFileHeaderOverPeerByGlobalTransitId,
   getPayloadBytesOverPeerByGlobalTransitId,

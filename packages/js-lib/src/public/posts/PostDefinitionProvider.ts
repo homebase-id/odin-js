@@ -1,5 +1,6 @@
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
@@ -280,7 +281,11 @@ export const dsrToChannelFile = async (
       ...dsr.fileMetadata,
       appData: {
         ...dsr.fileMetadata.appData,
-        uniqueId: dsr.fileMetadata.appData.uniqueId || (definitionContent as any).channelId,
+        uniqueId:
+          dsr.fileMetadata.appData.uniqueId ||
+          ('channelId' in definitionContent && typeof definitionContent.channelId === 'string'
+            ? definitionContent.channelId
+            : undefined),
         content: definitionContent,
       },
     },

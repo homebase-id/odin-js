@@ -234,7 +234,7 @@ export const usePost = () => {
           queryClient.setQueryData(['social-feeds'], newFeed);
         }
       },
-      onError: (err, _newCircle, context) => {
+      onError: (err) => {
         console.error(err);
       },
       onSettled: () => {

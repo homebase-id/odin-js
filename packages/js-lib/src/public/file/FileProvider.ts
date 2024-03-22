@@ -142,7 +142,7 @@ const convertFileToResponseEntry = async (file: any) => {
   try {
     if (
       file.header.fileMetadata.payloads.filter(
-        (payload: any) => payload.contentType === 'application/json'
+        (payload: PayloadDescriptor) => payload.contentType === 'application/json'
       ).length === 0 &&
       file.header.fileMetadata.appData.content.length !== 0
     ) {

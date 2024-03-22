@@ -9,7 +9,6 @@ import {
   Archive,
   ArrowLeft,
   ErrorNotification,
-  LoadingBlock,
   PaperClip,
   ReplyArrow,
   Share,

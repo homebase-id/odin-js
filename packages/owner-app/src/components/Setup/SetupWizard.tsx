@@ -29,7 +29,9 @@ const defaultData: WelcomeData = {
 const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) => void }) => {
   const [data, setData] = useState(defaultData);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const changeHandler = (e: { target: { name: string; value: any } }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dirtyState: any = { ...data };
     dirtyState.profile[e.target.name] = e.target.value;
 

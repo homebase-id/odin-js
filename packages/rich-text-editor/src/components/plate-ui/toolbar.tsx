@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import * as React from 'react';
 import { ReactNode } from 'react';
 import * as ToolbarPrimitive from '@radix-ui/react-toolbar';
@@ -15,7 +16,7 @@ export const linkVariants = cva('font-medium underline underline-offset-4');
 
 const ToolbarToggleGroup = ToolbarPrimitive.ToggleGroup;
 
-export type ToolbarProps = React.ComponentPropsWithoutRef<typeof Toolbar>
+export type ToolbarProps = React.ComponentPropsWithoutRef<typeof Toolbar>;
 
 const Toolbar = React.forwardRef<
   React.ElementRef<typeof ToolbarPrimitive.Root>,
@@ -40,7 +41,7 @@ const ToolbarSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToolbarPrimitive.Separator
     ref={ref}
-    className={cn('bg-border shrink-0', 'my-1 w-[1px]', className)}
+    className={cn('shrink-0 bg-border', 'my-1 w-[1px]', className)}
     {...props}
   />
 ));
@@ -59,57 +60,52 @@ export interface ToolbarButtonProps
 const ToolbarButton = React.forwardRef<
   React.ElementRef<typeof ToolbarPrimitive.Button>,
   ToolbarButtonProps
->(
-  (
-    { className, variant, size = 'sm', isDropdown, children, pressed, value, tooltip, ...props },
-    ref
-  ) => {
-    const [isLoaded, setIsLoaded] = React.useState(false);
+>(({ className, variant, size = 'sm', isDropdown, children, pressed, ...props }, ref) => {
+  const [, setIsLoaded] = React.useState(false);
 
-    React.useEffect(() => {
-      setIsLoaded(true);
-    }, []);
+  React.useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
-    const content =
-      typeof pressed === 'boolean' ? (
-        <ToolbarToggleGroup type="single" value={pressed ? 'single' : undefined}>
-          <ToolbarToggleItem
-            ref={ref}
-            className={cn(
-              toggleVariants({
-                variant,
-                size,
-              }),
-              isDropdown && 'my-1 justify-between pr-1',
-              className
-            )}
-            value="single"
-            {...props}
-          >
-            <div className="flex flex-1">{children}</div>
-            <div>{isDropdown && <Icons.arrowDown className="ml-0.5 h-4 w-4" data-icon />}</div>
-          </ToolbarToggleItem>
-        </ToolbarToggleGroup>
-      ) : (
-        <ToolbarPrimitive.Button
+  const content =
+    typeof pressed === 'boolean' ? (
+      <ToolbarToggleGroup type="single" value={pressed ? 'single' : undefined}>
+        <ToolbarToggleItem
           ref={ref}
           className={cn(
             toggleVariants({
               variant,
               size,
             }),
-            isDropdown && 'pr-1',
+            isDropdown && 'my-1 justify-between pr-1',
             className
           )}
           {...props}
+          value="single"
         >
-          {children}
-        </ToolbarPrimitive.Button>
-      );
+          <div className="flex flex-1">{children}</div>
+          <div>{isDropdown && <Icons.arrowDown className="ml-0.5 h-4 w-4" data-icon />}</div>
+        </ToolbarToggleItem>
+      </ToolbarToggleGroup>
+    ) : (
+      <ToolbarPrimitive.Button
+        ref={ref}
+        className={cn(
+          toggleVariants({
+            variant,
+            size,
+          }),
+          isDropdown && 'pr-1',
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </ToolbarPrimitive.Button>
+    );
 
-    return <>{content}</>;
-  }
-);
+  return <>{content}</>;
+});
 ToolbarButton.displayName = ToolbarPrimitive.Button.displayName;
 
 const ToolbarToggleItem = React.forwardRef<

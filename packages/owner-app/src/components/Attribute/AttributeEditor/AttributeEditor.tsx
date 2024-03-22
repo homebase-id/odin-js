@@ -25,6 +25,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
+import { OptionalACLHomebaseFile } from '../AttributeCreator/AttributeCreator';
 
 const AttributeEditor = ({
   attribute: attributeDsr,
@@ -35,7 +36,7 @@ const AttributeEditor = ({
   onCancel,
   onSave: onManualSave,
 }: {
-  attribute: HomebaseFile<AttributeVm> | NewHomebaseFile<AttributeVm>;
+  attribute: HomebaseFile<AttributeVm> | OptionalACLHomebaseFile<AttributeVm>;
   className?: string;
   orderAttrUp?: () => Promise<number | undefined>;
   orderAttrDown?: () => Promise<number | undefined>;

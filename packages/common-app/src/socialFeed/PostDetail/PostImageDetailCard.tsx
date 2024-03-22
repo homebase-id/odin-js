@@ -1,9 +1,4 @@
-import {
-  ChannelDefinition,
-  PostContent,
-  Media,
-  getChannelDrive,
-} from '@youfoundation/js-lib/public';
+import { ChannelDefinition, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
 import {
   Loader,

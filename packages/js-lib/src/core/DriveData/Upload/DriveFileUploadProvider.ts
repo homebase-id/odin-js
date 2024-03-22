@@ -21,7 +21,8 @@ import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFile
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
 import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const isDebug = hasDebugFlag();
 

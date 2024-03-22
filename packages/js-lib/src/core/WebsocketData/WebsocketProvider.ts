@@ -42,8 +42,9 @@ const isDebug = hasDebugFlag();
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } =
-    tryJsonParse<any>(notification.data);
+  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = tryJsonParse<
+    Record<string, unknown>
+  >(notification.data);
 
   if (notification.notificationType === 'transitFileReceived') {
     return {
@@ -277,14 +278,21 @@ export const Notify = async (command: WebsocketCommand | EstablishConnectionRequ
 };
 
 const parseMessage = async (e: MessageEvent): Promise<RawClientNotification> => {
-  const metaPayload = tryJsonParse<any>(e.data);
-  const encryptedPayload = tryJsonParse<any>(metaPayload.payload);
+  const metaPayload = tryJsonParse<Record<string, unknown>>(e.data);
+  if (!metaPayload || !('payload' in metaPayload) || typeof metaPayload.payload !== 'string')
+    throw new Error('Invalid message received');
+
+  const encryptedPayload = tryJsonParse<Record<string, unknown>>(metaPayload.payload);
+  if (
+    !encryptedPayload ||
+    typeof encryptedPayload.data !== 'string' ||
+    typeof encryptedPayload.iv !== 'string'
+  )
+    throw new Error('Invalid message received');
 
   const decryptedData = metaPayload.isEncrypted
     ? await decryptData(encryptedPayload.data, encryptedPayload.iv, activeSs)
     : encryptedPayload;
 
-  const notification: RawClientNotification = decryptedData;
-
-  return notification;
+  return decryptedData as RawClientNotification;
 };

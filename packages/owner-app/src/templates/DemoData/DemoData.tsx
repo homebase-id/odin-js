@@ -479,13 +479,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
   );
 };
 
-const DemoDataHomeAndTheme = ({
-  client,
-  realmData,
-}: {
-  client: DotYouClient;
-  realmData: RealmData;
-}) => {
+const DemoDataHomeAndTheme = ({ realmData }: { client: DotYouClient; realmData: RealmData }) => {
   if (!('home' in realmData)) return null;
 
   const { data: themeDsr } = useHomeAttributes().fetchTheme;
@@ -556,7 +550,6 @@ const DemoDataHomeAndTheme = ({
 const DemoDataBlog = ({
   client,
   realmData,
-  character,
 }: {
   client: DotYouClient;
   realmData: RealmData;

@@ -17,7 +17,6 @@ const headingVariants = cva('', {
 export function HeadingElement({
   className,
   variant = 'h1',
-  isFirstBlock,
   children,
   ...props
 }: PlateElementProps & VariantProps<typeof headingVariants>) {

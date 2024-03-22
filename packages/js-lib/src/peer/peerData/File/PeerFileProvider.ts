@@ -253,10 +253,7 @@ export const getFileHeaderBytesOverPeer = async (
   };
 
   const promise = client
-    .get(
-      '/transit/query/header?' +
-        stringifyToQueryParams(request as unknown as Record<string, unknown>)
-    )
+    .get('/transit/query/header?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
