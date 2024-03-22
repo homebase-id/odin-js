@@ -23,6 +23,8 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { MailConversationInfo } from './MailConversationInfo';
 import { useNavigate } from 'react-router-dom';
 import { MailAttachmentOverview } from './MailAttachmentOverview';
+import { useSearchParams, useParams } from 'react-router-dom';
+import { ROOT_PATH } from '../../app/App';
 
 const DEFAULT_SIZE = 500;
 export const MailHistory = ({
@@ -158,11 +160,7 @@ export const MailHistory = ({
                 ref={virtualizer.measureElement}
                 data-fileid={message.fileId}
               >
-                <MailMessage
-                  previousMessage={previousMessage}
-                  message={message}
-                  isActive={scrollToMessage ? scrollToMessage === message.fileId : false}
-                />
+                <MailMessage previousMessage={previousMessage} message={message} />
               </div>
             );
           })}
@@ -177,16 +175,18 @@ const MailMessage = ({
   message,
   forceAsRead,
   className,
-  isActive,
 }: {
   previousMessage: HomebaseFile<MailConversation> | undefined;
   message: HomebaseFile<MailConversation>;
   forceAsRead?: boolean;
   className?: string;
-  isActive: boolean;
 }) => {
+  const { filter, conversationKey, messageKey } = useParams();
+  const isActive = messageKey === message.fileId;
+
   const navigate = useNavigate();
-  const [showMessageInfo, setShowMessageInfo] = useState(false);
+  const [searchParams] = useSearchParams();
+  const showMessageInfo = isActive && searchParams.has('message-info');
 
   const identity = useDotYouClientContext().getIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
@@ -260,7 +260,10 @@ const MailMessage = ({
             options={[
               {
                 label: t('Message info'),
-                onClick: () => setShowMessageInfo(true),
+                onClick: () =>
+                  navigate(
+                    `${ROOT_PATH}/${filter}/${conversationKey}/${message.fileId}?message-info`
+                  ),
               },
             ]}
             className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
@@ -275,7 +278,7 @@ const MailMessage = ({
       {showMessageInfo ? (
         <MailConversationInfo
           mailConversation={message}
-          onClose={() => setShowMessageInfo(false)}
+          onClose={() => navigate(`${ROOT_PATH}/${filter}/${conversationKey}`)}
         />
       ) : null}
     </div>

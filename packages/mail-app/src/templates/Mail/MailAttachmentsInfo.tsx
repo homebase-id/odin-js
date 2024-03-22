@@ -64,11 +64,15 @@ export const MailAttachmentsInfo = ({
         </>
       }
     >
-      <div className="flex flex-col-reverse gap-2">
-        {Object.entries(groupedWithFileName).map(([fileName, files]) => (
-          <FileGroup files={files} fileName={fileName} key={fileName} onClose={onClose} />
-        ))}
-      </div>
+      {Object.entries(groupedWithFileName).length ? (
+        <div className="flex flex-col-reverse gap-2">
+          {Object.entries(groupedWithFileName).map(([fileName, files]) => (
+            <FileGroup files={files} fileName={fileName} key={fileName} onClose={onClose} />
+          ))}
+        </div>
+      ) : (
+        <p className="italic opacity-50">{t('No attachments found')}</p>
+      )}
     </DialogWrapper>
   );
 

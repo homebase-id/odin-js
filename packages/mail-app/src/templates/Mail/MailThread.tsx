@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { MailHomeHeader } from '../../components/Header/Header';
 import { useMailThread } from '../../hooks/mail/useMailThread';
 import {
@@ -33,6 +33,7 @@ import { MailComposer } from '../../components/Composer/MailComposer';
 import { useSearchParams } from 'react-router-dom';
 import { MailAttachmentsInfo } from './MailAttachmentsInfo';
 import { MailAttachmentPreview } from '../../components/Thread/MailAttachmentPreview';
+import { ROOT_PATH } from '../../app/App';
 
 const PAGE_SIZE = 100;
 export const MailThread = () => {
@@ -264,8 +265,12 @@ const MailThreadHeader = ({
   onMarkAsUnread: () => void;
   className?: string;
 }) => {
-  const [showMailThreadInfo, setShowMailThreadInfo] = useState(false);
-  const [showAttachmentsInfo, setShowAttachmentsInfo] = useState(false);
+  const { filter } = useParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const showMailThreadInfo = searchParams.has('info');
+  const showAttachmentsInfo = searchParams.has('attachments');
 
   const {
     mutate: removeThread,
@@ -308,7 +313,7 @@ const MailThreadHeader = ({
         className={`sticky top-[3.7rem] z-20 flex flex-row items-center border-b border-gray-100 bg-background p-2 dark:border-gray-800 ${className || ''}`}
       >
         <ActionButton
-          onClick={() => window.history.back()}
+          onClick={() => navigate(`${ROOT_PATH}/${filter}`)}
           icon={ArrowLeft}
           type="mute"
           size="none"
@@ -352,7 +357,7 @@ const MailThreadHeader = ({
         <h1 className="ml-3 text-xl">{subject}</h1>
         <div className="ml-auto flex flex-row items-center">
           <ActionButton
-            onClick={() => setShowAttachmentsInfo(true)}
+            onClick={() => navigate('?attachments')}
             icon={PaperClip}
             type="mute"
             size="none"
@@ -365,7 +370,7 @@ const MailThreadHeader = ({
             options={[
               {
                 label: t('Thread info'),
-                onClick: () => setShowMailThreadInfo(true),
+                onClick: () => navigate('?info'),
               },
               {
                 label: t('Mark as unread'),
@@ -375,14 +380,11 @@ const MailThreadHeader = ({
           />
         </div>
       </div>
-      {showMailThreadInfo ? (
-        <MailThreadInfo mailThread={mailThread} onClose={() => setShowMailThreadInfo(false)} />
+      {showMailThreadInfo && mailThread.length >= 1 ? (
+        <MailThreadInfo mailThread={mailThread} onClose={() => navigate('?')} />
       ) : null}
-      {showAttachmentsInfo ? (
-        <MailAttachmentsInfo
-          mailThread={mailThread}
-          onClose={() => setShowAttachmentsInfo(false)}
-        />
+      {showAttachmentsInfo && mailThread.length >= 1 ? (
+        <MailAttachmentsInfo mailThread={mailThread} onClose={() => navigate('?')} />
       ) : null}
     </>
   );
