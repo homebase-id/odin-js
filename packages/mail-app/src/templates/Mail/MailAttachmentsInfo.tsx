@@ -96,7 +96,6 @@ const FileGroup = ({
   fileName: string;
   onClose?: () => void;
 }) => {
-  const navigate = useNavigate();
   const dotYouClient = useDotYouClientContext();
 
   const hasMultiple = files.length > 1;
@@ -104,10 +103,10 @@ const FileGroup = ({
   const [showAll, setShowAll] = useState(!hasMultiple);
   const firstFile = files[0];
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {hasMultiple ? (
         <button
-          className="flex flex-row items-center gap-2 rounded-full border border-slate-200 bg-background px-3 py-2 transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700"
+          className="flex flex-row items-center gap-2 rounded-md border border-slate-200 bg-background px-1 py-1 transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700"
           onClick={() => setShowAll(!showAll)}
         >
           {firstFile.contentType.startsWith('image/') ? (
@@ -117,10 +116,10 @@ const FileGroup = ({
               fileKey={firstFile.key}
               targetDrive={MailDrive}
               lastModified={firstFile.lastModified}
-              className="h-6 w-6"
+              className="h-12 w-12"
             />
           ) : (
-            <ExtensionThumbnail contentType={firstFile.contentType} className="h-6 w-6" />
+            <ExtensionThumbnail contentType={firstFile.contentType} className="h-12 w-12" />
           )}
           {fileName}
           <div className="ml-auto flex-shrink-0 text-slate-400">{t('Multiple versions')}</div>
@@ -133,7 +132,7 @@ const FileGroup = ({
         <div
           className={
             hasMultiple
-              ? `ml-2 flex flex-col gap-2 border-l-8 border-l-primary/30 pl-2`
+              ? `ml-2 flex flex-col-reverse gap-2 border-l-8 border-l-primary/30 pl-2`
               : `contents`
           }
           onClick={onClose}
@@ -143,7 +142,7 @@ const FileGroup = ({
           ))}
         </div>
       ) : null}
-    </>
+    </div>
   );
 };
 
