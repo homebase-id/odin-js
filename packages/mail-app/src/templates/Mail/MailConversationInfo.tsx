@@ -9,6 +9,7 @@ import {
   usePortal,
 } from '@youfoundation/common-app';
 import { MailConversation, MailDeliveryStatus } from '../../providers/MailProvider';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   month: 'short',
@@ -35,26 +36,19 @@ export const MailConversationInfo = ({
           <p className="mb-2 text-xl">{t('Details')}</p>
           <p>
             {t('Sent')}:{' '}
-            {new Date(mailConversation.fileMetadata.created).toLocaleDateString(
-              undefined,
-              dateTimeFormat
-            )}
+            {formatDateExludingYearIfCurrent(new Date(mailConversation.fileMetadata.created))}
           </p>
           {mailConversation.fileMetadata.updated !== mailConversation.fileMetadata.created ? (
             <p>
               {t('Updated')}:{' '}
-              {new Date(mailConversation.fileMetadata.updated).toLocaleDateString(
-                undefined,
-                dateTimeFormat
-              )}
+              {formatDateExludingYearIfCurrent(new Date(mailConversation.fileMetadata.updated))}
             </p>
           ) : null}
           {mailConversation.fileMetadata.transitCreated ? (
             <p>
               {t('Received')}:{' '}
-              {new Date(mailConversation.fileMetadata.transitCreated).toLocaleDateString(
-                undefined,
-                dateTimeFormat
+              {formatDateExludingYearIfCurrent(
+                new Date(mailConversation.fileMetadata.transitCreated)
               )}
             </p>
           ) : null}
