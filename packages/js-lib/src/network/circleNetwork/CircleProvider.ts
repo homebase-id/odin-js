@@ -1,4 +1,4 @@
-import { TargetDrive } from '../../../core';
+import { TargetDrive } from '../../core/core';
 import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import {
   getDrivePermissionFromString,
