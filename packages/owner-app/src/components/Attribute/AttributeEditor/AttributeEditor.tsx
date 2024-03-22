@@ -36,7 +36,10 @@ const AttributeEditor = ({
   onCancel,
   onSave: onManualSave,
 }: {
-  attribute: HomebaseFile<AttributeVm> | OptionalACLHomebaseFile<AttributeVm>;
+  attribute:
+    | HomebaseFile<AttributeVm>
+    | NewHomebaseFile<AttributeVm>
+    | OptionalACLHomebaseFile<AttributeVm>;
   className?: string;
   orderAttrUp?: () => Promise<number | undefined>;
   orderAttrDown?: () => Promise<number | undefined>;

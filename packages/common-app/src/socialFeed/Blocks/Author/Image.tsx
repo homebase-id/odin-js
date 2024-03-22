@@ -47,7 +47,8 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
               : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
-      alt={t('Your avatar')}
+      alt={t('You')}
+      title={t('You')}
     />
   );
 };
@@ -68,6 +69,7 @@ export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProp
                   : ''
           } rounded-full ${className ?? ''}`}
           alt={`${odinId}`}
+          title={`${odinId}`}
           onError={(e) => {
             console.warn('failed to fetch profile image', e);
           }}

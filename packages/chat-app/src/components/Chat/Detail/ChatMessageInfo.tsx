@@ -9,6 +9,7 @@ import {
 } from '../../../providers/ConversationProvider';
 import { InnerDeliveryIndicator } from './ChatDeliveryIndicator';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   month: 'short',
@@ -47,22 +48,17 @@ export const ChatMessageInfo = ({
         <div>
           <p className="mb-2 text-xl">{t('Details')}</p>
           <p>
-            {t('Sent')}:{' '}
-            {new Date(msg.fileMetadata.created).toLocaleDateString(undefined, dateTimeFormat)}
+            {t('Sent')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.created))}
           </p>
           {msg.fileMetadata.updated !== msg.fileMetadata.created ? (
             <p>
-              {t('Updated')}:{' '}
-              {new Date(msg.fileMetadata.updated).toLocaleDateString(undefined, dateTimeFormat)}
+              {t('Updated')}: {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.updated))}
             </p>
           ) : null}
           {msg.fileMetadata.transitCreated ? (
             <p>
               {t('Received')}:{' '}
-              {new Date(msg.fileMetadata.transitCreated).toLocaleDateString(
-                undefined,
-                dateTimeFormat
-              )}
+              {formatDateExludingYearIfCurrent(new Date(msg.fileMetadata.transitCreated))}
             </p>
           ) : null}
         </div>

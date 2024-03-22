@@ -3,21 +3,23 @@ import { createPortal } from 'react-dom';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Chevron,
-  ConnectionName,
+  ConnectionImage,
   DialogWrapper,
   Envelope,
   ExtensionThumbnail,
+  FakeAnchor,
   ImageIcon,
-  formatToTimeAgoWithRelativeDetail,
+  OwnerImage,
   t,
   usePortal,
 } from '@youfoundation/common-app';
 import { MailConversation, MailDrive } from '../../providers/MailProvider';
-import { AttachmentFile, AttachmentItem } from './MailAttachmentOverview';
+import { AttachmentItem } from './MailAttachmentOverview';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ROOT_PATH } from '../../app/App';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 export const MailAttachmentsInfo = ({
   mailThread,
@@ -55,6 +57,7 @@ export const MailAttachmentsInfo = ({
   const dialog = (
     <DialogWrapper
       onClose={onClose}
+      keepOpenOnBlur={true}
       title={
         <>
           {t('Attachments')}
@@ -64,18 +67,22 @@ export const MailAttachmentsInfo = ({
         </>
       }
     >
-      <div className="flex flex-col-reverse gap-2">
-        {Object.entries(groupedWithFileName).map(([fileName, files]) => (
-          <FileGroup files={files} fileName={fileName} key={fileName} onClose={onClose} />
-        ))}
-      </div>
+      {Object.entries(groupedWithFileName).length ? (
+        <div className="flex flex-col-reverse gap-2">
+          {Object.entries(groupedWithFileName).map(([fileName, files]) => (
+            <FileGroup files={files} fileName={fileName} key={fileName} onClose={onClose} />
+          ))}
+        </div>
+      ) : (
+        <p className="italic opacity-50">{t('No attachments found')}</p>
+      )}
     </DialogWrapper>
   );
 
   return createPortal(dialog, target);
 };
 
-interface extendedFile extends AttachmentItem {
+interface ExtendedFile extends AttachmentItem {
   created: number;
   sender: string;
 }
@@ -85,23 +92,21 @@ const FileGroup = ({
   fileName,
   onClose,
 }: {
-  files: extendedFile[];
+  files: ExtendedFile[];
   fileName: string;
   onClose?: () => void;
 }) => {
-  const navigate = useNavigate();
   const dotYouClient = useDotYouClientContext();
-  const identity = dotYouClient.getIdentity();
 
   const hasMultiple = files.length > 1;
 
   const [showAll, setShowAll] = useState(!hasMultiple);
   const firstFile = files[0];
   return (
-    <>
+    <div className="flex flex-col gap-2">
       {hasMultiple ? (
         <button
-          className="flex flex-row items-center gap-2 rounded-full border border-slate-200 bg-background px-3 py-2 transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700"
+          className="flex flex-row items-center gap-2 rounded-md border border-slate-200 bg-background px-1 py-1 transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700"
           onClick={() => setShowAll(!showAll)}
         >
           {firstFile.contentType.startsWith('image/') ? (
@@ -111,10 +116,10 @@ const FileGroup = ({
               fileKey={firstFile.key}
               targetDrive={MailDrive}
               lastModified={firstFile.lastModified}
-              className="h-6 w-6"
+              className="h-12 w-12"
             />
           ) : (
-            <ExtensionThumbnail contentType={firstFile.contentType} className="h-6 w-6" />
+            <ExtensionThumbnail contentType={firstFile.contentType} className="h-12 w-12" />
           )}
           {fileName}
           <div className="ml-auto flex-shrink-0 text-slate-400">{t('Multiple versions')}</div>
@@ -127,44 +132,99 @@ const FileGroup = ({
         <div
           className={
             hasMultiple
-              ? `ml-2 flex flex-col gap-2 border-l-8 border-l-primary/30 pl-2`
+              ? `ml-2 flex flex-col-reverse gap-2 border-l-8 border-l-primary/30 pl-2`
               : `contents`
           }
           onClick={onClose}
         >
           {files.map((file) => (
-            <AttachmentFile
-              file={file}
-              key={`${file.created}_${file.key}`}
-              className={`rounded-full border border-slate-200 bg-background px-3 py-2 dark:border-slate-700`}
-            >
-              <div className="ml-auto flex flex-shrink-0 flex-row items-center">
-                <span className="font-semibold">
-                  {identity === file.sender ? t('You') : <ConnectionName odinId={file.sender} />}
-                </span>
-                ,
-                <span className="ml-2 text-slate-400">
-                  {formatToTimeAgoWithRelativeDetail(new Date(file.created), true, true)}
-                </span>
-                <button
-                  className="-my-2 px-2 py-2 opacity-40 transition-opacity hover:opacity-100"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    navigate(`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}`);
-                    onClose && onClose();
-                  }}
-                >
-                  <Envelope className="h-4 w-4" />
-                </button>
-                <button className="-my-2 px-2 py-2 opacity-40 transition-opacity hover:opacity-100">
-                  <ImageIcon className="h-4 w-4" />
-                </button>
-              </div>
-            </AttachmentFile>
+            <AttachmentFile file={file} key={`${file.created}_${file.key}`} />
           ))}
         </div>
       ) : null}
-    </>
+    </div>
+  );
+};
+
+const bytesToSize = (bytes: number) => {
+  return bytes < 1024
+    ? `${bytes} B`
+    : bytes < 1024 * 1024
+      ? `${(bytes / 1024).toFixed(2)} KB`
+      : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
+
+export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
+  const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
+  const navigate = useNavigate();
+  const { filter } = useParams();
+
+  return (
+    <FakeAnchor
+      type="mute"
+      key={file.key}
+      className={`flex cursor-pointer flex-row items-center gap-2
+      rounded-md border border-slate-200 bg-background px-1 py-1
+      transition-colors hover:bg-primary/10 hover:shadow-md dark:border-slate-700`}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate({
+          pathname: `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
+          search: window.location.search,
+        });
+      }}
+    >
+      {file.contentType.startsWith('image/') ? (
+        <OdinPreviewImage
+          dotYouClient={dotYouClient}
+          fileId={file.fileId}
+          fileKey={file.key}
+          targetDrive={MailDrive}
+          lastModified={file.lastModified}
+          className="h-12 w-12"
+        />
+      ) : (
+        <ExtensionThumbnail contentType={file.contentType} className="h-12 w-12" />
+      )}
+
+      <div className="flex flex-col">
+        {file.descriptorContent || file.key}
+        <p className="text-sm text-slate-400">
+          {bytesToSize(file.bytesWritten)}
+          <span className="ml-1 border-l border-slate-400 pl-1">
+            {formatDateExludingYearIfCurrent(new Date(file.created))}
+          </span>
+        </p>
+      </div>
+      <div className="ml-auto flex flex-row items-center gap-2">
+        {identity === file.sender ? (
+          <OwnerImage className="h-10 w-10" />
+        ) : (
+          <ConnectionImage className="h-10 w-10" odinId={file.sender} />
+        )}
+
+        <div className="">
+          <div className="flex flex-row"></div>
+
+          <div className="flex flex-row">
+            <button
+              className="-my-2 px-2 py-2 opacity-40 transition-opacity hover:opacity-100"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                navigate(`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}`);
+              }}
+            >
+              <Envelope className="h-4 w-4" />
+            </button>
+            <button className="-my-2 px-2 py-2 opacity-40 transition-opacity hover:opacity-100">
+              <ImageIcon className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </FakeAnchor>
   );
 };
