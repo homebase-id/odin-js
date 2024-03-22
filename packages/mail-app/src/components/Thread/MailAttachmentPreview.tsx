@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -27,18 +27,16 @@ export const MailAttachmentPreview = ({
   const { data: mailMessage, isLoading: mailMessageLoading } = useMailConversation({
     messageFileId: messageId,
   }).getMessage;
-  const payloadDescriptor = mailMessage?.fileMetadata.payloads.find((p) => p.key === payloadKey);
+  const allPayloads = useMemo(() => mailMessage?.fileMetadata.payloads || [], [mailMessage]);
+  const payloadDescriptor = allPayloads.find((p) => p.key === payloadKey);
 
   const rootUrl = window.location.pathname.split('/').slice(0, -1).join('/');
-  const currIndex = mailMessage?.fileMetadata.payloads.findIndex((p) => p.key === payloadKey) || 0;
+  const currIndex = allPayloads.findIndex((p) => p.key === payloadKey) || 0;
   const doSlide = (dir: 1 | -1) => {
     const dirtyIndex = currIndex + dir;
     let newIndex = dirtyIndex;
-    if (
-      mailMessage?.fileMetadata.payloads &&
-      dirtyIndex >= mailMessage.fileMetadata.payloads.length
-    ) {
-      newIndex = mailMessage.fileMetadata.payloads.length - 1;
+    if (allPayloads && dirtyIndex >= allPayloads.length) {
+      newIndex = allPayloads.length - 1;
 
       return;
     }
@@ -48,14 +46,23 @@ export const MailAttachmentPreview = ({
       return;
     }
 
-    navigate(`${rootUrl}/${mailMessage?.fileMetadata.payloads[newIndex].key}`);
+    navigate({
+      pathname: `${rootUrl}/${allPayloads[newIndex].key}`,
+      search: window.location.search,
+    });
   };
 
   const navigate = useNavigate();
   const doClose = () =>
-    navigate(window.location.pathname.split('/').slice(0, -2).join('/'), {
-      preventScrollReset: true,
-    });
+    navigate(
+      {
+        pathname: window.location.pathname.split('/').slice(0, -2).join('/'),
+        search: window.location.search,
+      },
+      {
+        preventScrollReset: true,
+      }
+    );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -101,7 +108,7 @@ export const MailAttachmentPreview = ({
 
   return (
     <div
-      className={`fixed inset-0 z-40 flex flex-col overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
+      className={`fixed inset-0 z-50 flex flex-col overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
     >
       <div
         className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center justify-center"
@@ -149,8 +156,7 @@ export const MailAttachmentPreview = ({
                 type="secondary"
               />
             ) : null}
-            {mailMessage?.fileMetadata.payloads &&
-            currIndex !== mailMessage?.fileMetadata.payloads.length - 1 ? (
+            {allPayloads && currIndex !== allPayloads.length - 1 ? (
               <ActionButton
                 icon={Arrow}
                 onClick={() => doSlide(1)}

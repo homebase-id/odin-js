@@ -4,7 +4,7 @@ import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { MailDrive } from '../../providers/MailProvider';
 import { ROOT_PATH } from '../../app/App';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export interface AttachmentItem extends PayloadDescriptor {
   conversationId: string;
@@ -54,6 +54,8 @@ export const AttachmentFile = ({
 }) => {
   const dotYouClient = useDotYouClientContext();
   const navigate = useNavigate();
+  const { filter } = useParams();
+
   return (
     <FakeAnchor
       type="mute"
@@ -61,7 +63,14 @@ export const AttachmentFile = ({
       className={`flex cursor-pointer flex-row items-center gap-2 bg-background transition-colors hover:bg-primary/10 hover:shadow-md ${className || ''}`}
       onClick={(e) => {
         e.preventDefault();
-        navigate(`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}/${file.key}`);
+        e.stopPropagation();
+        console.log(
+          `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}${window.location.search}`
+        );
+        navigate({
+          pathname: `${ROOT_PATH}/${filter || 'inbox'}/${file.conversationId}/${file.fileId}/${file.key}`,
+          search: window.location.search,
+        });
       }}
     >
       {file.contentType.startsWith('image/') ? (

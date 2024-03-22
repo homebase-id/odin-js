@@ -55,6 +55,7 @@ export const MailAttachmentsInfo = ({
   const dialog = (
     <DialogWrapper
       onClose={onClose}
+      keepOpenOnBlur={true}
       title={
         <>
           {t('Attachments')}
