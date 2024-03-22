@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
   MailConversation,
@@ -36,7 +36,7 @@ export const MailHistory = ({
 
   className,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   hasNextPage: boolean;
   fetchNextPage: () => void;
   isFetchingNextPage: boolean;
@@ -179,8 +179,8 @@ const MailMessage = ({
   className,
   isActive,
 }: {
-  previousMessage: DriveSearchResult<MailConversation> | undefined;
-  message: DriveSearchResult<MailConversation>;
+  previousMessage: HomebaseFile<MailConversation> | undefined;
+  message: HomebaseFile<MailConversation>;
   forceAsRead?: boolean;
   className?: string;
   isActive: boolean;
@@ -285,7 +285,7 @@ const MailMessage = ({
 const ForwardedThread = ({
   mailThread,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[] | undefined;
+  mailThread: HomebaseFile<MailConversation>[] | undefined;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const filteredMailThread = mailThread?.filter(
@@ -331,8 +331,8 @@ const ConversationalAwareness = ({
   previousMessage,
   message,
 }: {
-  previousMessage: DriveSearchResult<MailConversation> | undefined;
-  message: DriveSearchResult<MailConversation>;
+  previousMessage: HomebaseFile<MailConversation> | undefined;
+  message: HomebaseFile<MailConversation>;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
 

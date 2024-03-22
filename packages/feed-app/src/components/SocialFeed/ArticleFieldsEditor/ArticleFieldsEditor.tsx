@@ -17,7 +17,7 @@ import {
 } from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
-import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
@@ -33,8 +33,8 @@ export const InnerFieldEditors = ({
   disabled,
   setFiles,
 }: {
-  postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
-  channel: NewDriveSearchResult<ChannelDefinition>;
+  postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
+  channel: NewHomebaseFile<ChannelDefinition>;
   files: (NewMediaFile | MediaFile)[];
 
   onChange: (e: {
@@ -51,7 +51,7 @@ export const InnerFieldEditors = ({
     imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
     imageDrive: getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
-    lastModified: (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated,
+    lastModified: (postFile as HomebaseFile<unknown>)?.fileMetadata?.updated,
   }).fetch;
 
   const pendingFile = files.find(

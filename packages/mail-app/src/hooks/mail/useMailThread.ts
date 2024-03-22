@@ -1,4 +1,4 @@
-import { DriveSearchResult, deleteFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
   DEFAULT_ARCHIVAL_STATUS,
@@ -19,7 +19,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
   const queryClient = useQueryClient();
   const dotYouClient = useDotYouClientContext();
 
-  const removeMailThread = async (mailThread: DriveSearchResult<MailConversation>[]) => {
+  const removeMailThread = async (mailThread: HomebaseFile<MailConversation>[]) => {
     return await Promise.all(
       mailThread.map((message) => {
         if (message.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE) {
@@ -33,7 +33,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
     );
   };
 
-  const archiveMailThread = async (mailThread: DriveSearchResult<MailConversation>[]) => {
+  const archiveMailThread = async (mailThread: HomebaseFile<MailConversation>[]) => {
     return await Promise.all(
       mailThread.map((message) => {
         const updatedMailMessage = { ...message };
@@ -43,7 +43,7 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
     );
   };
 
-  const restoreMailThread = async (mailThread: DriveSearchResult<MailConversation>[]) => {
+  const restoreMailThread = async (mailThread: HomebaseFile<MailConversation>[]) => {
     return await Promise.all(
       mailThread.map((message) => {
         const updatedMailMessage = { ...message };

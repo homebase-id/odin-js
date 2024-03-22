@@ -1,4 +1,4 @@
-import { DriveSearchResult, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { HomebaseFile, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinImage, OdinThumbnailImage } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
 
-export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatMedia = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const payloads = msg.fileMetadata.payloads;
   const isGallery = payloads.length >= 2;
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ const MediaItem = ({
 const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
   `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
 
-const MediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+const MediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const payloads = msg.fileMetadata.payloads;
   const totalCount = payloads.length;
   const maxVisible = 4;
@@ -142,7 +142,7 @@ const MediaGalleryItem = ({
   onClick,
 }: {
   payload: PayloadDescriptor;
-  msg: DriveSearchResult<ChatMessage>;
+  msg: HomebaseFile<ChatMessage>;
   isColSpan2: boolean;
   children?: React.ReactNode;
   onClick: () => void;

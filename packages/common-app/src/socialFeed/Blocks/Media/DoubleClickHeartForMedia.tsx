@@ -5,7 +5,7 @@ import {
   ErrorNotification,
   useDoubleTap,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import React, { useMemo } from 'react';
 import { useRef } from 'react';
@@ -19,7 +19,7 @@ export const DoubleClickHeartForMedia = ({
   className,
 }: {
   odinId?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
   onClick: (e: React.MouseEvent, index: number) => void;

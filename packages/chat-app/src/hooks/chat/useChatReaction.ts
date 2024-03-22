@@ -1,9 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   GroupConversation,
@@ -37,8 +33,8 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    message: DriveSearchResult<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
+    message: HomebaseFile<ChatMessage>;
     reaction: string;
   }) => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
@@ -47,7 +43,7 @@ export const useChatReaction = (props?: {
       (conversationContent as GroupConversation).recipients ||
       [(conversationContent as SingleConversation).recipient].filter(Boolean);
 
-    const newReaction: NewDriveSearchResult<ChatReaction> = {
+    const newReaction: NewHomebaseFile<ChatReaction> = {
       fileMetadata: {
         appData: {
           groupId: message.fileMetadata.appData.uniqueId,
@@ -72,9 +68,9 @@ export const useChatReaction = (props?: {
 
     reaction,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    message: DriveSearchResult<ChatMessage>;
-    reaction: DriveSearchResult<ChatReaction>;
+    conversation: HomebaseFile<Conversation>;
+    message: HomebaseFile<ChatMessage>;
+    reaction: HomebaseFile<ChatReaction>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const recipients =
@@ -95,13 +91,13 @@ export const useChatReaction = (props?: {
       mutationFn: addReaction,
       onMutate: async (variables) => {
         const { message } = variables;
-        const previousReactions = queryClient.getQueryData<DriveSearchResult<ChatReaction>[]>([
+        const previousReactions = queryClient.getQueryData<HomebaseFile<ChatReaction>[]>([
           'chat-reaction',
           message.fileMetadata.appData.uniqueId,
         ]);
 
         if (!previousReactions) return;
-        const newReaction: NewDriveSearchResult<ChatReaction> = {
+        const newReaction: NewHomebaseFile<ChatReaction> = {
           fileMetadata: {
             appData: {
               content: {
@@ -129,7 +125,7 @@ export const useChatReaction = (props?: {
       mutationFn: removeReaction,
       onMutate: async (variables) => {
         const { message, reaction } = variables;
-        const previousReactions = queryClient.getQueryData<DriveSearchResult<ChatReaction>[]>([
+        const previousReactions = queryClient.getQueryData<HomebaseFile<ChatReaction>[]>([
           'chat-reaction',
           message.fileMetadata.appData.uniqueId,
         ]);

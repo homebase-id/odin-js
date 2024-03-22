@@ -20,8 +20,8 @@ import {
 } from '../../..';
 import {
   DEFAULT_PAYLOAD_KEY,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 
@@ -37,8 +37,8 @@ export const PostDetailCard = ({
   login,
 }: {
   odinId?: string;
-  channel?: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>;
-  postFile?: DriveSearchResult<PostContent>;
+  channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+  postFile?: HomebaseFile<PostContent>;
   showAuthorDetail?: boolean;
   className?: string;
   isAuthenticated: boolean;

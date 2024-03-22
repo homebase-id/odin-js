@@ -12,7 +12,7 @@ import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { usePost } from '../../hooks/socialFeed/post/usePost';
-import { DEFAULT_PAYLOAD_KEY, DriveSearchResult } from '@youfoundation/js-lib/core';
+import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@youfoundation/js-lib/core';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,
@@ -20,7 +20,7 @@ export const EditPostDialog = ({
   onConfirm,
   onCancel,
 }: {
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   isOpen: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -29,7 +29,7 @@ export const EditPostDialog = ({
   const {
     update: { mutate: updatePost, error: updatePostError, status: updatePostStatus },
   } = usePost();
-  const [postFile, setPostFile] = useState<DriveSearchResult<PostContent>>({ ...incomingPostFile });
+  const [postFile, setPostFile] = useState<HomebaseFile<PostContent>>({ ...incomingPostFile });
   const [newMediaFiles, setNewMediaFiles] = useState<(MediaFile | NewMediaFile)[]>(
     postFile.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
   );

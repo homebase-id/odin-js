@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { MailConversation } from '../../providers/MailProvider';
 import { useEffect, useRef } from 'react';
 import { useMailConversation } from './useMailConversation';
@@ -6,7 +6,7 @@ import { useMailConversation } from './useMailConversation';
 export const useMarkMailConversationsAsRead = ({
   mailThread,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
 }) => {
   // We really want this to only run once
   const isProcessing = useRef(false);

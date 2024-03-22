@@ -5,7 +5,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
 
@@ -56,7 +56,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             <ActionButton
               className="text-base"
               state={refreshState}
-              onClick={() => refresh({ contact: contact as DriveSearchResult<ContactFile> })}
+              onClick={() => refresh({ contact: contact as HomebaseFile<ContactFile> })}
               icon={Refresh}
               confirmOptions={{
                 type: 'info',

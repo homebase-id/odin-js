@@ -9,9 +9,9 @@ import {
 } from '@youfoundation/js-lib/public';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   MultiRequestCursoredResult,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
 
@@ -25,7 +25,7 @@ export const usePost = () => {
     mediaFiles,
     onUpdate,
   }: {
-    postFile: NewDriveSearchResult<PostContent> | DriveSearchResult<PostContent>;
+    postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
     channelId: string;
     mediaFiles?: (NewMediaFile | MediaFile)[];
     onUpdate?: (progress: number) => void;
@@ -39,7 +39,7 @@ export const usePost = () => {
         );
         if (!serverPost) return;
 
-        const newPost: DriveSearchResult<PostContent> = {
+        const newPost: HomebaseFile<PostContent> = {
           ...serverPost,
           fileMetadata: {
             ...serverPost.fileMetadata,
@@ -75,7 +75,7 @@ export const usePost = () => {
     postFile,
     channelId,
   }: {
-    postFile: DriveSearchResult<PostContent>;
+    postFile: HomebaseFile<PostContent>;
     channelId: string;
   }) => {
     if (postFile) return await removePost(dotYouClient, postFile, channelId);
@@ -109,7 +109,7 @@ export const usePost = () => {
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
@@ -135,11 +135,11 @@ export const usePost = () => {
 
         // Update section attributes
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
-          const newPostFile: DriveSearchResult<PostContent> = {
+          const newPostFile: HomebaseFile<PostContent> = {
             ...newPost.postFile,
             fileMetadata: {
               ...newPost.postFile.fileMetadata,
@@ -155,11 +155,9 @@ export const usePost = () => {
                 },
               },
             },
-          } as DriveSearchResult<PostContent>;
+          } as HomebaseFile<PostContent>;
 
-          const newFeed: InfiniteData<
-            MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>
-          > = {
+          const newFeed: InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>> = {
             ...previousFeed,
             pages: previousFeed.pages.map((page, index) => {
               return {
@@ -216,7 +214,7 @@ export const usePost = () => {
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {

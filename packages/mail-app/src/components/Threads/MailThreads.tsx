@@ -12,7 +12,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { Archive } from '@youfoundation/common-app';
 import { MailConversation } from '../../providers/MailProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { useMailThread } from '../../hooks/mail/useMailThread';
@@ -28,7 +28,7 @@ export const MailThreads = ({
   filter: MailThreadsFilter;
   query: string | undefined;
 }) => {
-  const [selection, setSelection] = useState<DriveSearchResult<MailConversation>[]>([]);
+  const [selection, setSelection] = useState<HomebaseFile<MailConversation>[]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const identity = useDotYouClientContext().getIdentity();
 
@@ -213,7 +213,7 @@ const MailConversationsHeader = ({
   clearSelection,
   filter,
 }: {
-  selection: DriveSearchResult<MailConversation>[];
+  selection: HomebaseFile<MailConversation>[];
   isAllSelected: boolean;
   toggleAllSelection: () => void;
   clearSelection: () => void;

@@ -6,7 +6,7 @@ import {
   FileQueryParams,
   queryBatch,
   GetBatchQueryResultOptions,
-  DriveSearchResult,
+  HomebaseFile,
   TargetDrive,
   getContentFromHeaderOrPayload,
   SecurityGroupType,
@@ -20,7 +20,7 @@ import {
   ThumbnailFile,
   uploadHeader,
   appendDataToFile,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   reUploadFile,
   deletePayload,
 } from '../../core/core';
@@ -39,8 +39,8 @@ import { AttributeConfig, BuiltInAttributes } from './AttributeConfig';
 import { Attribute } from './AttributeDataTypes';
 
 const sortAttrs = (
-  a: DriveSearchResult<Attribute | undefined>,
-  b: DriveSearchResult<Attribute | undefined>
+  a: HomebaseFile<Attribute | undefined>,
+  b: HomebaseFile<Attribute | undefined>
 ) =>
   (a.priority || 0) - (b.priority || 0) ||
   (a.fileMetadata.appData.content?.priority || 0) - (b.fileMetadata.appData.content?.priority || 0);
@@ -51,7 +51,7 @@ export const getProfileAttributes = async (
   profileId: string,
   sectionId: string | undefined,
   pageSize: number
-): Promise<DriveSearchResult<Attribute | undefined>[]> => {
+): Promise<HomebaseFile<Attribute | undefined>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -64,13 +64,13 @@ export const getProfileAttributes = async (
     includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
   });
 
-  let attributes: DriveSearchResult<Attribute | undefined>[] = (
+  let attributes: HomebaseFile<Attribute | undefined>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as DriveSearchResult<Attribute | undefined>[];
+  ).filter((attr) => !!attr) as HomebaseFile<Attribute | undefined>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -82,7 +82,7 @@ export const getAttributeVersions = async (
   profileId: string,
   sectionId: string | undefined,
   tags: string[]
-): Promise<DriveSearchResult<Attribute>[] | undefined> => {
+): Promise<HomebaseFile<Attribute>[] | undefined> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -96,13 +96,13 @@ export const getAttributeVersions = async (
     includeMetadataHeader: true,
   });
 
-  let attributes: DriveSearchResult<Attribute>[] = (
+  let attributes: HomebaseFile<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
+  ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -112,7 +112,7 @@ export const getAttributeByFileId = async (
   dotYouClient: DotYouClient,
   profileId: string,
   fileId: string
-): Promise<DriveSearchResult<Attribute | undefined> | null> => {
+): Promise<HomebaseFile<Attribute | undefined> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
   if (!header) return null;
@@ -123,7 +123,7 @@ export const getAttribute = async (
   dotYouClient: DotYouClient,
   profileId: string,
   id: string
-): Promise<DriveSearchResult<Attribute | undefined> | null> => {
+): Promise<HomebaseFile<Attribute | undefined> | null> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -145,7 +145,7 @@ export const getAttribute = async (
     );
   }
 
-  const dsr: DriveSearchResult = result.searchResults[0];
+  const dsr: HomebaseFile = result.searchResults[0];
   return dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader);
 };
 
@@ -154,7 +154,7 @@ export const getAttributes = async (
   profileId: string,
   tags: string[] | undefined,
   pageSize: number
-): Promise<DriveSearchResult<Attribute | undefined>[]> => {
+): Promise<HomebaseFile<Attribute | undefined>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
@@ -167,13 +167,13 @@ export const getAttributes = async (
     includeMetadataHeader: true,
   });
 
-  let attributes: DriveSearchResult<Attribute>[] = (
+  let attributes: HomebaseFile<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
       )
     )
-  ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
+  ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
 
   attributes = attributes.sort(sortAttrs);
   return attributes;
@@ -181,10 +181,10 @@ export const getAttributes = async (
 
 export const dsrToAttributeFile = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<Attribute | undefined> | null> => {
+): Promise<HomebaseFile<Attribute | undefined> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Attribute>(
       dotYouClient,
@@ -193,7 +193,7 @@ export const dsrToAttributeFile = async (
       includeMetadataHeader
     );
 
-    const attributeFile: DriveSearchResult<Attribute | undefined> = {
+    const attributeFile: HomebaseFile<Attribute | undefined> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -363,9 +363,9 @@ const processAttribute = async (attribute: Attribute) => {
 
 export const saveAttribute = async (
   dotYouClient: DotYouClient,
-  toSaveAttribute: DriveSearchResult<Attribute> | NewDriveSearchResult<Attribute>,
+  toSaveAttribute: HomebaseFile<Attribute> | NewHomebaseFile<Attribute>,
   onVersionConflict?: () => void
-): Promise<DriveSearchResult<Attribute> | NewDriveSearchResult<Attribute> | undefined> => {
+): Promise<HomebaseFile<Attribute> | NewHomebaseFile<Attribute> | undefined> => {
   let runningVersionTag = toSaveAttribute.fileMetadata.versionTag as string;
   const targetDrive = GetTargetDriveFromProfileId(
     toSaveAttribute.fileMetadata.appData.content.profileId
@@ -446,7 +446,7 @@ export const saveAttribute = async (
             versionTag: result.newVersionTag,
             isEncrypted: encrypt,
           },
-        } as DriveSearchResult<Attribute>;
+        } as HomebaseFile<Attribute>;
 
       throw new Error('We failed to change encryption status of an attribute');
     }
@@ -530,7 +530,7 @@ export const saveAttribute = async (
           ...toSaveAttribute.fileMetadata,
           versionTag: result.newVersionTag,
         },
-      } as NewDriveSearchResult<Attribute>;
+      } as NewHomebaseFile<Attribute>;
     }
   }
 
@@ -553,7 +553,7 @@ export const saveAttribute = async (
       ...toSaveAttribute.fileMetadata,
       versionTag: result.newVersionTag,
     },
-  } as NewDriveSearchResult<Attribute>;
+  } as NewHomebaseFile<Attribute>;
 };
 
 export const removeAttribute = async (

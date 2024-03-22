@@ -12,8 +12,8 @@ import {
 } from '../../providers/ConversationProvider';
 import {
   DotYouClient,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
@@ -39,9 +39,9 @@ export const useConversation = (props?: { conversationId?: string | undefined })
 
   const getExistingConversationsForRecipient = async (
     recipients: string[]
-  ): Promise<null | DriveSearchResult<Conversation>> => {
+  ): Promise<null | HomebaseFile<Conversation>> => {
     const allConversationsInCache = await queryClient.fetchInfiniteQuery<{
-      searchResults: DriveSearchResult<Conversation>[];
+      searchResults: HomebaseFile<Conversation>[];
     }>({ queryKey: ['conversations'], initialPageParam: undefined });
 
     for (const page of allConversationsInCache?.pages || []) {
@@ -80,7 +80,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     const newConversationId =
       recipients.length === 1 ? await getNewXorId(identity as string, recipients[0]) : getNewId();
 
-    const newConversation: NewDriveSearchResult<Conversation> = {
+    const newConversation: NewHomebaseFile<Conversation> = {
       fileMetadata: {
         appData: {
           uniqueId: newConversationId,
@@ -114,7 +114,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   const sendJoinCommand = async ({
     conversation,
   }: {
-    conversation: DriveSearchResult<Conversation>;
+    conversation: HomebaseFile<Conversation>;
   }): Promise<void> => {
     await requestConversationCommand(
       dotYouClient,
@@ -127,7 +127,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     conversation,
     isTitleUpdated = false,
   }: {
-    conversation: DriveSearchResult<Conversation>;
+    conversation: HomebaseFile<Conversation>;
     isTitleUpdated?: boolean;
   }) => {
     await updateConversation(dotYouClient, conversation);
@@ -140,18 +140,14 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }
   };
 
-  const clearChat = async ({ conversation }: { conversation: DriveSearchResult<Conversation> }) => {
+  const clearChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
     return await deleteAllChatMessages(
       dotYouClient,
       conversation.fileMetadata.appData.uniqueId as string
     );
   };
 
-  const deleteChat = async ({
-    conversation,
-  }: {
-    conversation: DriveSearchResult<Conversation>;
-  }) => {
+  const deleteChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
     const deletedResult = await deleteAllChatMessages(
       dotYouClient,
       conversation.fileMetadata.appData.uniqueId as string
@@ -159,7 +155,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     if (!deletedResult) throw new Error('Failed to delete chat messages');
 
     // We soft delete the conversation, so we can still see newly received messages
-    const newConversation: DriveSearchResult<Conversation> = {
+    const newConversation: HomebaseFile<Conversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -170,12 +166,8 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     return await updateConversation(dotYouClient, newConversation);
   };
 
-  const restoreChat = async ({
-    conversation,
-  }: {
-    conversation: DriveSearchResult<Conversation>;
-  }) => {
-    const newConversation: DriveSearchResult<Conversation> = {
+  const restoreChat = async ({ conversation }: { conversation: HomebaseFile<Conversation> }) => {
+    const newConversation: HomebaseFile<Conversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -205,7 +197,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     update: useMutation({
       mutationFn: updateExistingConversation,
       onMutate: async (variables) => {
-        queryClient.setQueryData<DriveSearchResult<Conversation>>(
+        queryClient.setQueryData<HomebaseFile<Conversation>>(
           ['conversation', variables.conversation.fileMetadata.appData.uniqueId],
           variables.conversation
         );

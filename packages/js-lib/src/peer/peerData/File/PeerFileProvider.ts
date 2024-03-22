@@ -18,7 +18,7 @@ import {
   getRangeHeader,
   parseBytesToObject,
 } from '../../../core/DriveData/File/DriveFileHelper';
-import { DriveSearchResult, EncryptedKeyHeader } from '../../../core/DriveData/File/DriveFileTypes';
+import { HomebaseFile, EncryptedKeyHeader } from '../../../core/DriveData/File/DriveFileTypes';
 import {
   ContentType,
   FileMetadata,
@@ -43,7 +43,7 @@ interface GetThumbRequest extends GetFileRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile>>();
 
 export const getPayloadAsJsonOverPeer = async <T>(
   dotYouClient: DotYouClient,
@@ -202,7 +202,7 @@ export const getFileHeaderOverPeer = async <T = string>(
   targetDrive: TargetDrive,
   fileId: string,
   options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
+): Promise<HomebaseFile<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, {
     decrypt: true,
@@ -210,7 +210,7 @@ export const getFileHeaderOverPeer = async <T = string>(
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -230,7 +230,7 @@ export const getFileHeaderBytesOverPeer = async (
   targetDrive: TargetDrive,
   fileId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
-): Promise<DriveSearchResult> => {
+): Promise<HomebaseFile> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('OdinId', odinId);
   assertIfDefined('FileId', fileId);

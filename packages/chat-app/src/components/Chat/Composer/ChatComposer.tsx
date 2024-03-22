@@ -10,7 +10,7 @@ import {
   PaperPlane,
   getImagesFromPasteEvent,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
@@ -27,8 +27,8 @@ export const ChatComposer = ({
   clearReplyMsg,
   onSend,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
-  replyMsg: DriveSearchResult<ChatMessage> | undefined;
+  conversation: HomebaseFile<Conversation> | undefined;
+  replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
@@ -151,7 +151,7 @@ const MessageForReply = ({
   msg,
   onClear,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
+  msg: HomebaseFile<ChatMessage>;
   onClear: () => void;
 }) => {
   return (

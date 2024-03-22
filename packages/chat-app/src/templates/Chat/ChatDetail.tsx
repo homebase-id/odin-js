@@ -14,7 +14,7 @@ import {
   useDotYouClient,
   useIsConnected,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   ConversationWithYourselfId,
@@ -35,7 +35,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 
   const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
-  const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
+  const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
 
   if (!conversationId || isLoading || (!conversation && isFetched))
     return (
@@ -78,7 +78,7 @@ export const ChatDetail = ({ conversationId }: { conversationId: string | undefi
 const ChatHeader = ({
   conversation: conversationDsr,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
+  conversation: HomebaseFile<Conversation> | undefined;
 }) => {
   const navigate = useNavigate();
 
@@ -193,7 +193,7 @@ const ChatHeader = ({
 const GroupChatConnectedState = ({
   conversation,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
+  conversation: HomebaseFile<Conversation> | undefined;
 }) => {
   if (!conversation) return null;
   const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;

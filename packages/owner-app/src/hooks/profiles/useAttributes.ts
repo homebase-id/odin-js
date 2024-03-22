@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Attribute, getProfileAttributes, removeAttribute } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 export interface AttributeVm extends Attribute {
   typeDefinition?: AttributeDefinition;
@@ -45,7 +45,7 @@ export const useAttributes = ({
               : undefined,
           },
         },
-      } as DriveSearchResult<AttributeVm | undefined>;
+      } as HomebaseFile<AttributeVm | undefined>;
     });
   };
 

@@ -3,7 +3,7 @@ import { getPost, getPostBySlug, PostContent } from '@youfoundation/js-lib/publi
 
 import { useBlogPostsInfiniteReturn } from './useBlogPostsInfinite';
 import { useChannel, useDotYouClient } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 type useBlogProps = {
   channelId?: string;
@@ -28,8 +28,8 @@ export const useBlog = ({ channelSlug, channelId, blogSlug }: useBlogProps = {})
     if (infinite) return infinite.pages.flatMap((page) => page.results);
 
     return (
-      queryClient.getQueryData<DriveSearchResult<PostContent>[]>(['blog-recents', channelId]) ||
-      queryClient.getQueryData<DriveSearchResult<PostContent>[]>(['blog-recents', undefined])
+      queryClient.getQueryData<HomebaseFile<PostContent>[]>(['blog-recents', channelId]) ||
+      queryClient.getQueryData<HomebaseFile<PostContent>[]>(['blog-recents', undefined])
     );
   };
 

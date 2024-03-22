@@ -1,6 +1,6 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -96,12 +96,10 @@ const useChatWebsocket = (isEnabled: boolean) => {
           queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
 
           // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>(
-            {
-              queryKey: ['conversation', conversationId],
-              queryFn: () => getSingleConversation(dotYouClient, conversationId),
-            }
-          );
+          const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
+            queryKey: ['conversation', conversationId],
+            queryFn: () => getSingleConversation(dotYouClient, conversationId),
+          });
 
           if (!conversation) {
             console.error('Orphaned message received', notification.header.fileId, conversation);
@@ -122,7 +120,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
 
           const extistingMessages = queryClient.getQueryData<
             InfiniteData<{
-              searchResults: (DriveSearchResult<ChatMessage> | null)[];
+              searchResults: (HomebaseFile<ChatMessage> | null)[];
               cursorState: string;
               queryTime: number;
               includeMetadataHeader: boolean;

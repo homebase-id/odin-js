@@ -1,8 +1,4 @@
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -98,7 +94,7 @@ export const ChannelItem = ({
   className,
   isDefaultEdit,
 }: {
-  chnl?: DriveSearchResult<ChannelDefinitionVm> | NewDriveSearchResult<ChannelDefinitionVm>;
+  chnl?: HomebaseFile<ChannelDefinitionVm> | NewHomebaseFile<ChannelDefinitionVm>;
   onClose?: () => void;
   className?: string;
   isDefaultEdit?: boolean;
@@ -270,7 +266,7 @@ export const ChannelItem = ({
                       onClick={async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        await removeChannel(chnlDsr as DriveSearchResult<ChannelDefinitionVm>);
+                        await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
                         return false;
                       }}
                       confirmOptions={{

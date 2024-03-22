@@ -4,7 +4,7 @@ import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public
 import { useAuth } from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
 import { AttributeDefinitions } from './AttributeDefinitions';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 export const useHomeAttributes = () => {
   const dotYouClient = useAuth().getDotYouClient();
@@ -32,7 +32,7 @@ export const useHomeAttributes = () => {
             },
           },
         },
-      } as DriveSearchResult<AttributeVm>;
+      } as HomebaseFile<AttributeVm>;
     });
     return foundThemeAttributes;
   };

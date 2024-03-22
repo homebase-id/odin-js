@@ -35,8 +35,8 @@ import {
 import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import {
   AccessControlList,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
@@ -60,7 +60,7 @@ const PostComposer = ({
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<
-    DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>
+    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
   >(BlogConfig.PublicChannelNewDsr);
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
@@ -273,7 +273,7 @@ export const ChannelOrAclSelector = React.forwardRef(
       defaultChannelValue?: string;
       defaultAcl?: AccessControlList;
       onChange: (
-        channel: DriveSearchResult<ChannelDefinition> | undefined,
+        channel: HomebaseFile<ChannelDefinition> | undefined,
         acl: AccessControlList | undefined
       ) => void;
       disabled?: boolean;

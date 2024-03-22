@@ -16,7 +16,7 @@ import { ContactFile } from '@youfoundation/js-lib/network';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useNavigate } from 'react-router-dom';
 import { useConversations } from '../../../../hooks/chat/useConversations';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   ConversationWithYourselfId,
@@ -45,7 +45,7 @@ export const ConversationsSidebar = ({
   const flatConversations =
     (conversations?.pages
       ?.flatMap((page) => page?.searchResults)
-      ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
+      ?.filter(Boolean) as HomebaseFile<Conversation>[]) || [];
 
   return (
     <ErrorBoundary>
@@ -81,7 +81,7 @@ const ConversationList = ({
   openConversation,
   activeConversationId,
 }: {
-  conversations: DriveSearchResult<Conversation>[];
+  conversations: HomebaseFile<Conversation>[];
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
 }) => {
@@ -124,7 +124,7 @@ const ConversationListItem = ({
   onClick,
   isActive,
 }: {
-  conversation: DriveSearchResult<Conversation>;
+  conversation: HomebaseFile<Conversation>;
   onClick: () => void;
   isActive: boolean;
 }) => {
@@ -161,7 +161,7 @@ const SearchConversation = ({
   setIsSearchActive: (isActive: boolean) => void;
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
-  conversations: DriveSearchResult<Conversation>[];
+  conversations: HomebaseFile<Conversation>[];
 }) => {
   const navigate = useNavigate();
   const [stateIndex, setStateIndex] = useState(0);
@@ -264,7 +264,7 @@ const SearchConversation = ({
                     onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
                     isActive={
                       activeConversationId ===
-                      (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
+                      (result as HomebaseFile<Conversation>).fileMetadata?.appData?.uniqueId
                     }
                     key={result.fileId}
                   />

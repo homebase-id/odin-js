@@ -2,12 +2,12 @@ import {
   AppendResult,
   CursoredResult,
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   EmbeddedThumb,
   FileQueryParams,
   GetBatchQueryResultOptions,
   KeyHeader,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   PayloadFile,
   RichText,
   ScheduleOptions,
@@ -62,7 +62,7 @@ export interface MailConversation {
   recipients: string[];
   isRead?: boolean;
 
-  forwardedMailThread?: DriveSearchResult<MailConversation>[];
+  forwardedMailThread?: HomebaseFile<MailConversation>[];
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: MailDeliveryStatus;
@@ -74,8 +74,7 @@ export const MailDrive: TargetDrive = {
   type: '2dfecc40311e41e5a12455e925144202',
 };
 
-export interface MailConversationsReturn
-  extends CursoredResult<DriveSearchResult<MailConversation>[]> {}
+export interface MailConversationsReturn extends CursoredResult<HomebaseFile<MailConversation>[]> {}
 
 export const getMailConversations = async (
   dotYouClient: DotYouClient,
@@ -103,7 +102,7 @@ export const getMailConversations = async (
       response.searchResults
         .map(async (result) => await dsrToMailConversation(dotYouClient, result, MailDrive, true))
         .filter(Boolean)
-    )) as DriveSearchResult<MailConversation>[],
+    )) as HomebaseFile<MailConversation>[],
   };
 };
 
@@ -113,7 +112,7 @@ export const getMailConversation = async (dotYouClient: DotYouClient, fileId: st
 
 export const uploadMail = async (
   dotYouClient: DotYouClient,
-  conversation: NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>,
+  conversation: NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>,
   files: (NewMediaFile | MediaFile)[] | undefined,
   onVersionConflict?: () => void
 ) => {
@@ -292,7 +291,7 @@ export const uploadMail = async (
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Delivered;
       await updateLocalMailHeader(
         dotYouClient,
-        conversation as DriveSearchResult<MailConversation>,
+        conversation as HomebaseFile<MailConversation>,
         undefined,
         (uploadResult as UploadResult).keyHeader
       );
@@ -312,7 +311,7 @@ export const uploadMail = async (
 
       await updateLocalMailHeader(
         dotYouClient,
-        conversation as DriveSearchResult<MailConversation>,
+        conversation as HomebaseFile<MailConversation>,
         undefined,
         (uploadResult as UploadResult).keyHeader
       );
@@ -330,7 +329,7 @@ export const uploadMail = async (
 
 export const updateLocalMailHeader = async (
   dotYouClient: DotYouClient,
-  conversation: DriveSearchResult<MailConversation>,
+  conversation: HomebaseFile<MailConversation>,
   onVersionConflict?: () => void,
   keyHeader?: KeyHeader
 ) => {
@@ -370,10 +369,10 @@ export const updateLocalMailHeader = async (
 
 export const dsrToMailConversation = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<MailConversation> | null> => {
+): Promise<HomebaseFile<MailConversation> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<MailConversation>(
       dotYouClient,
@@ -383,7 +382,7 @@ export const dsrToMailConversation = async (
     );
     if (!attrContent) return null;
 
-    const conversation: DriveSearchResult<MailConversation> = {
+    const conversation: HomebaseFile<MailConversation> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -405,7 +404,7 @@ export const dsrToMailConversation = async (
 };
 
 export const getAllRecipients = (
-  conversation: DriveSearchResult<MailConversation>,
+  conversation: HomebaseFile<MailConversation>,
   identity?: string
 ): string[] => {
   if (!conversation?.fileMetadata?.appData?.content?.recipients) return [];

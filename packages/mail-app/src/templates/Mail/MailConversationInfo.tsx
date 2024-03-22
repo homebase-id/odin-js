@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   AuthorImage,
   AuthorName,
@@ -22,7 +22,7 @@ export const MailConversationInfo = ({
   mailConversation,
   onClose,
 }: {
-  mailConversation: DriveSearchResult<MailConversation>;
+  mailConversation: HomebaseFile<MailConversation>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');

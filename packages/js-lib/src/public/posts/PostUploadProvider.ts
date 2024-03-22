@@ -15,8 +15,8 @@ import {
 import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   EmbeddedThumb,
   PayloadFile,
   TargetDrive,
@@ -46,7 +46,7 @@ const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T> | NewDriveSearchResult<T>,
+  file: HomebaseFile<T> | NewHomebaseFile<T>,
   channelId: string,
   toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
   onVersionConflict?: () => void,
@@ -65,7 +65,7 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (file.fileId) {
-    return await updatePost(dotYouClient, file as DriveSearchResult<T>, channelId, toSaveFiles);
+    return await updatePost(dotYouClient, file as HomebaseFile<T>, channelId, toSaveFiles);
   } else {
     if (toSaveFiles?.some((file) => 'fileKey' in file)) {
       throw new Error(
@@ -152,7 +152,7 @@ export const savePost = async <T extends PostContent>(
 
 const uploadPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T> | NewDriveSearchResult<T>,
+  file: HomebaseFile<T> | NewHomebaseFile<T>,
   payloads: PayloadFile[],
   thumbnails: ThumbnailFile[],
   previewThumbnail: EmbeddedThumb | undefined,
@@ -250,7 +250,7 @@ const uploadPost = async <T extends PostContent>(
 
 const uploadPostHeader = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T>,
+  file: HomebaseFile<T>,
   channelId: string,
   targetDrive: TargetDrive
 ) => {
@@ -366,7 +366,7 @@ const uploadPostHeader = async <T extends PostContent>(
 
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T>,
+  file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
 ): Promise<UploadResult> => {

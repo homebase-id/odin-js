@@ -1,5 +1,5 @@
 import { ErrorNotification, t } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';
@@ -20,8 +20,8 @@ export const ChatHistory = ({
   setReplyMsg,
   setIsEmptyChat,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
-  setReplyMsg: (msg: DriveSearchResult<ChatMessage>) => void;
+  conversation: HomebaseFile<Conversation> | undefined;
+  setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
   setIsEmptyChat: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -41,7 +41,7 @@ export const ChatHistory = ({
     useMemo(
       () =>
         (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
-          []) as DriveSearchResult<ChatMessage>[],
+          []) as HomebaseFile<ChatMessage>[],
       [messages]
     ) || [];
 
@@ -51,8 +51,8 @@ export const ChatHistory = ({
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
-    doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
-    doDelete: async (msg: DriveSearchResult<ChatMessage>) => {
+    doReply: (msg: HomebaseFile<ChatMessage>) => setReplyMsg(msg),
+    doDelete: async (msg: HomebaseFile<ChatMessage>) => {
       if (!conversation || !msg) return;
       await deleteMessages({
         conversation: conversation,

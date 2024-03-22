@@ -18,8 +18,8 @@ import {
   deleteFile,
   TargetDrive,
   queryBatch,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   getSecurityContext,
   ensureDrive,
 } from '../../core/core';
@@ -34,7 +34,7 @@ import { ChannelDefinition, BlogConfig } from './PostTypes';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
-): Promise<DriveSearchResult<ChannelDefinition>[]> => {
+): Promise<HomebaseFile<ChannelDefinition>[]> => {
   const drives = await getDrivesByType(dotYouClient, BlogConfig.DriveType, 1, 1000);
   const channelHeaders = drives.results.map((drive) => {
     return {
@@ -80,13 +80,13 @@ export const getChannelDefinitions = async (
 
   return definitions.filter(
     (channel) => channel !== undefined
-  ) as DriveSearchResult<ChannelDefinition>[];
+  ) as HomebaseFile<ChannelDefinition>[];
 };
 
 export const getChannelDefinition = async (
   dotYouClient: DotYouClient,
   channelId: string
-): Promise<DriveSearchResult<ChannelDefinition> | undefined> =>
+): Promise<HomebaseFile<ChannelDefinition> | undefined> =>
   await getChannelDefinitionInternal(dotYouClient, channelId);
 
 export const getChannelDefinitionBySlug = async (dotYouClient: DotYouClient, slug: string) => {
@@ -96,7 +96,7 @@ export const getChannelDefinitionBySlug = async (dotYouClient: DotYouClient, slu
 
 export const saveChannelDefinition = async (
   dotYouClient: DotYouClient,
-  definition: NewDriveSearchResult<ChannelDefinition>,
+  definition: NewHomebaseFile<ChannelDefinition>,
   onMissingDrive?: () => void
 ): Promise<UploadResult | undefined> => {
   const channelContent = definition.fileMetadata.appData.content;
@@ -232,7 +232,7 @@ export const GetTargetDriveFromChannelId = (channelId: string): TargetDrive => {
 const getChannelDefinitionInternal = async (
   dotYouClient: DotYouClient,
   channelId: string
-): Promise<DriveSearchResult<ChannelDefinition> | undefined> => {
+): Promise<HomebaseFile<ChannelDefinition> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     targetDrive: targetDrive,
@@ -262,10 +262,10 @@ const getChannelDefinitionInternal = async (
 
 export const dsrToChannelFile = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ChannelDefinition> | undefined> => {
+): Promise<HomebaseFile<ChannelDefinition> | undefined> => {
   const definitionContent = await getContentFromHeaderOrPayload<ChannelDefinition>(
     dotYouClient,
     targetDrive,
@@ -274,7 +274,7 @@ export const dsrToChannelFile = async (
   );
   if (!definitionContent) return undefined;
 
-  const file: DriveSearchResult<ChannelDefinition> = {
+  const file: HomebaseFile<ChannelDefinition> = {
     ...dsr,
     fileMetadata: {
       ...dsr.fileMetadata,

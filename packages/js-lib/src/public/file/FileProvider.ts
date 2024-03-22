@@ -1,7 +1,7 @@
 import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '../..';
 import { DotYouClient } from '../../core/DotYouClient';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
-import { DriveSearchResult } from '../../core/DriveData/File/DriveFileTypes';
+import { HomebaseFile } from '../../core/DriveData/File/DriveFileTypes';
 import {
   base64ToUint8Array,
   byteArrayToString,
@@ -11,7 +11,7 @@ import {
 
 export interface ResponseEntry {
   additionalThumbnails?: EmbeddedThumb[];
-  header: DriveSearchResult;
+  header: HomebaseFile;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any> | undefined;
 }

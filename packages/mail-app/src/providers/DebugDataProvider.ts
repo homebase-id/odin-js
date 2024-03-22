@@ -1,7 +1,7 @@
 import {
   DotYouClient,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import {
@@ -99,7 +99,7 @@ const sendOne = async (dotYouClient: DotYouClient, threadId: string, recipients:
   const uniqueId = getNewId();
   const originId = getNewId();
 
-  const newMailConversation: NewDriveSearchResult<MailConversation> = {
+  const newMailConversation: NewHomebaseFile<MailConversation> = {
     fileMetadata: {
       appData: {
         uniqueId: uniqueId,
@@ -165,7 +165,7 @@ export const BePolite = async (dotYouClient: DotYouClient) => {
 
       return acc;
     },
-    {} as Record<string, DriveSearchResult<MailConversation>[]>
+    {} as Record<string, HomebaseFile<MailConversation>[]>
   );
   const threads = Object.values(threadsDictionary);
 

@@ -14,11 +14,7 @@ import {
   getTextRootsRecursive,
   t,
 } from '@youfoundation/common-app';
-import {
-  NewDriveSearchResult,
-  SecurityGroupType,
-  DriveSearchResult,
-} from '@youfoundation/js-lib/core';
+import { NewHomebaseFile, SecurityGroupType, HomebaseFile } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import {
@@ -46,19 +42,19 @@ export const MailComposer = ({
 
   onDone,
 }: {
-  existingDraft?: DriveSearchResult<MailConversation>;
+  existingDraft?: HomebaseFile<MailConversation>;
 
   recipients?: string[];
   originId?: string;
   threadId?: string;
   subject?: string;
-  forwardedMailThread?: DriveSearchResult<MailConversation>[];
+  forwardedMailThread?: HomebaseFile<MailConversation>[];
 
   onDone: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const [autosavedDsr, setAutosavedDsr] = useState<
-    NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>
+    NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>
   >(
     existingDraft || {
       fileMetadata: {
@@ -128,7 +124,7 @@ export const MailComposer = ({
       (recipient) => !currentRecipients?.includes(recipient)
     );
 
-    const newEmailConversation: NewDriveSearchResult<MailConversation> = {
+    const newEmailConversation: NewHomebaseFile<MailConversation> = {
       ...autosavedDsr,
       fileMetadata: {
         ...autosavedDsr.fileMetadata,
@@ -149,7 +145,7 @@ export const MailComposer = ({
   const doDiscard = () => {
     if (autosavedDsr.fileId) {
       // Delete the draft on the server
-      removeDraft(autosavedDsr as DriveSearchResult<MailConversation>);
+      removeDraft(autosavedDsr as HomebaseFile<MailConversation>);
     } else {
       onDone();
     }

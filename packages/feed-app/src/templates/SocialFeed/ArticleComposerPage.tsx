@@ -24,7 +24,7 @@ import { useArticleComposer } from '@youfoundation/common-app';
 import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
@@ -290,13 +290,13 @@ const OptionsDialog = ({
   onConfirm,
 }: {
   isPublished?: boolean;
-  postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
+  postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
 
   isOpen: boolean;
   onCancel: () => void;
   onConfirm: (
     newReactAccess: ReactAccess | undefined,
-    newChannel: NewDriveSearchResult<ChannelDefinition> | undefined
+    newChannel: NewHomebaseFile<ChannelDefinition> | undefined
   ) => void;
 }) => {
   const target = usePortal('modal-container');
@@ -304,9 +304,7 @@ const OptionsDialog = ({
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
     postFile.fileMetadata.appData.content.reactAccess
   );
-  const [newChannel, setNewChannel] = useState<
-    NewDriveSearchResult<ChannelDefinition> | undefined
-  >();
+  const [newChannel, setNewChannel] = useState<NewHomebaseFile<ChannelDefinition> | undefined>();
 
   if (!isOpen) return null;
 

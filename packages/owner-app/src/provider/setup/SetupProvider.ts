@@ -1,4 +1,4 @@
-import { DotYouClient, NewDriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { DotYouClient, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import {
   HomePageConfig,
   HomePageAttributes,
@@ -88,7 +88,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     await saveProfileSection(dotYouClient, initialWallet.profileId, initialCreditCardSection);
   }
 
-  const defaultShortBioAttribute: NewDriveSearchResult<Attribute> = {
+  const defaultShortBioAttribute: NewHomebaseFile<Attribute> = {
     fileMetadata: {
       appData: {
         content: {
@@ -118,7 +118,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 
   if (!shortBioAttr?.length) await saveAttribute(dotYouClient, defaultShortBioAttribute);
 
-  const defaultStatusAttribute: NewDriveSearchResult<Attribute> = {
+  const defaultStatusAttribute: NewHomebaseFile<Attribute> = {
     fileMetadata: {
       appData: {
         content: {
@@ -147,7 +147,7 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
-  const defaultThemeAttribute: NewDriveSearchResult<Attribute> = {
+  const defaultThemeAttribute: NewHomebaseFile<Attribute> = {
     fileMetadata: {
       appData: {
         content: {
@@ -217,7 +217,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
   );
 
   if (!existingPhotoAttr && profileData.imageData) {
-    const newPhotoAttr: NewDriveSearchResult<Attribute> = {
+    const newPhotoAttr: NewHomebaseFile<Attribute> = {
       fileMetadata: {
         appData: {
           content: {
@@ -250,7 +250,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
   );
 
   if (!existingNameAttr) {
-    const newNameAttr: NewDriveSearchResult<Attribute> = {
+    const newNameAttr: NewHomebaseFile<Attribute> = {
       fileMetadata: {
         appData: {
           content: {
@@ -288,7 +288,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
     );
 
     if (!existingLocationAttr) {
-      const newLocationAttr: NewDriveSearchResult<Attribute> = {
+      const newLocationAttr: NewHomebaseFile<Attribute> = {
         fileMetadata: {
           appData: {
             content: {
@@ -328,7 +328,7 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
 
     if (!foundAttributesOfType?.length) {
       // Create attribute:
-      const socialAttribute: NewDriveSearchResult<Attribute> = {
+      const socialAttribute: NewHomebaseFile<Attribute> = {
         fileMetadata: {
           appData: {
             content: {
@@ -405,7 +405,7 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
   if (socialData.other)
     await Promise.all(
       socialData.other.map(async (link, index) => {
-        const linkAttribute: NewDriveSearchResult<Attribute> = {
+        const linkAttribute: NewHomebaseFile<Attribute> = {
           fileMetadata: {
             appData: {
               content: {

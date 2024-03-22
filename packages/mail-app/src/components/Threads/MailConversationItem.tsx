@@ -2,7 +2,7 @@ import { formatToTimeAgoWithRelativeDetail, Checkbox } from '@youfoundation/comm
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
@@ -16,7 +16,7 @@ export const MailConversationItem = ({
   pathPrefix,
   query,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   toggleSelection: () => void;
   isSelected: boolean;
   pathPrefix?: string;

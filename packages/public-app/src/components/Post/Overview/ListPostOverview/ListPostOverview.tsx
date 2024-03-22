@@ -2,13 +2,13 @@ import { PostTeaser, t } from '@youfoundation/common-app';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import LoginDialog from '../../../Dialog/LoginDialog/LoginDialog';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const ListPostOverview = ({
   blogPosts,
   showChannel,
 }: {
-  blogPosts: DriveSearchResult<PostContent>[];
+  blogPosts: HomebaseFile<PostContent>[];
   showChannel?: boolean;
 }) => {
   const [isLogin, setIsLogin] = useState(false);

@@ -20,8 +20,8 @@ import {
 } from '../../..';
 import {
   DEFAULT_PAYLOAD_KEY,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 
@@ -38,8 +38,8 @@ export const PostImageDetailCard = ({
   rootUrl,
 }: {
   odinId?: string;
-  channel?: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>;
-  postFile?: DriveSearchResult<PostContent>;
+  channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+  postFile?: HomebaseFile<PostContent>;
   isOwner: boolean;
   isAuthenticated: boolean;
   attachmentKey?: string;

@@ -4,7 +4,7 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   queryBatch,
-  DriveSearchResult,
+  HomebaseFile,
 } from '../../core/core';
 import { tryJsonParse } from '../../helpers/DataUtil';
 import {
@@ -20,10 +20,9 @@ import { getContentFromHeaderOrPayloadOverPeerByGlobalTransitId } from './File/P
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
 import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
 
-const _internalChannelCache = new Map<string, Promise<DriveSearchResult<ChannelDefinition>[]>>();
+const _internalChannelCache = new Map<string, Promise<HomebaseFile<ChannelDefinition>[]>>();
 
-export interface RecentsFromConnectionsReturn
-  extends CursoredResult<DriveSearchResult<PostContent>[]> {
+export interface RecentsFromConnectionsReturn extends CursoredResult<HomebaseFile<PostContent>[]> {
   ownerCursorState?: Record<string, string>;
 }
 
@@ -33,7 +32,7 @@ export const getSocialFeed = async (
   cursorState?: string,
   ownOption?: {
     ownCursorState?: Record<string, string>;
-    ownChannels?: DriveSearchResult<ChannelDefinition>[];
+    ownChannels?: HomebaseFile<ChannelDefinition>[];
   }
 ): Promise<RecentsFromConnectionsReturn> => {
   const feedDrive = BlogConfig.FeedDrive;
@@ -65,7 +64,7 @@ export const getSocialFeed = async (
         return dsrToPostFile(dotYouClient, odinId, dsr, result.includeMetadataHeader);
       })
     )
-  ).filter(Boolean) as DriveSearchResult<PostContent>[];
+  ).filter(Boolean) as HomebaseFile<PostContent>[];
 
   if (ownOption) {
     // const ownerDotYou = dotYouClient.getIdentity() || window.location.hostname;
@@ -125,7 +124,7 @@ export const getChannelsOverPeer = async (dotYouClient: DotYouClient, odinId: st
           return definition;
         })
       )
-    ).filter((channel) => channel !== undefined) as DriveSearchResult<ChannelDefinition>[];
+    ).filter((channel) => channel !== undefined) as HomebaseFile<ChannelDefinition>[];
   })();
 
   _internalChannelCache.set(cacheKey, promise);
@@ -137,7 +136,7 @@ export const getChannelOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   channelId: string
-): Promise<DriveSearchResult<ChannelDefinition> | undefined> => {
+): Promise<HomebaseFile<ChannelDefinition> | undefined> => {
   const targetDrive = getChannelDrive(channelId);
 
   const queryParams: FileQueryParams = {
@@ -166,7 +165,7 @@ export const getChannelOverPeer = async (
 
       if (!definitionContent) return undefined;
 
-      const file: DriveSearchResult<ChannelDefinition> = {
+      const file: HomebaseFile<ChannelDefinition> = {
         ...dsr,
         fileMetadata: {
           ...dsr.fileMetadata,
@@ -209,9 +208,9 @@ export const getPostOverPeer = async (
 const dsrToPostFile = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   odinId: string,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<T> | undefined> => {
+): Promise<HomebaseFile<T> | undefined> => {
   try {
     if (!dsr.fileMetadata.globalTransitId) return undefined;
     // The header as a mimimum should have the channel id
@@ -232,7 +231,7 @@ const dsrToPostFile = async <T extends PostContent>(
 
     if (!postContent) return undefined;
 
-    const file: DriveSearchResult<T> = {
+    const file: HomebaseFile<T> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,

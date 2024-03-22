@@ -2,8 +2,8 @@ import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/r
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
   ContentType,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
   deleteFile,
   getPayloadBytes,
@@ -36,15 +36,15 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
     conversation,
     files,
   }: {
-    conversation: NewDriveSearchResult<MailConversation> | DriveSearchResult<MailConversation>;
+    conversation: NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>;
     files?: (NewMediaFile | MediaFile)[] | undefined;
-  }): Promise<NewDriveSearchResult<MailConversation> | null> => {
+  }): Promise<NewHomebaseFile<MailConversation> | null> => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const uniqueId = conversation.fileMetadata.appData.uniqueId || getNewId();
     const threadId = conversationContent.threadId || getNewId();
     const originId = conversationContent.originId || getNewId();
 
-    const newMailConversation: NewDriveSearchResult<MailConversation> = {
+    const newMailConversation: NewHomebaseFile<MailConversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -84,7 +84,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
   const markAsRead = async ({
     mailConversations,
   }: {
-    mailConversations: DriveSearchResult<MailConversation>[];
+    mailConversations: HomebaseFile<MailConversation>[];
   }) => {
     const messagesToMarkAsRead = mailConversations.filter(
       (msg) =>
@@ -95,7 +95,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
 
     const uploadResults = await Promise.all(
       messagesToMarkAsRead.map(async (conversation) => {
-        const updatedConversation: DriveSearchResult<MailConversation> = {
+        const updatedConversation: HomebaseFile<MailConversation> = {
           ...conversation,
           fileMetadata: {
             ...conversation.fileMetadata,
@@ -126,7 +126,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
   const markAsUnread = async ({
     mailConversations,
   }: {
-    mailConversations: DriveSearchResult<MailConversation>[];
+    mailConversations: HomebaseFile<MailConversation>[];
   }) => {
     const messagesToMarkAsUnread = mailConversations.filter(
       (msg) =>
@@ -137,7 +137,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
 
     const uploadResults = await Promise.all(
       messagesToMarkAsUnread.map(async (conversation) => {
-        const updatedConversation: DriveSearchResult<MailConversation> = {
+        const updatedConversation: HomebaseFile<MailConversation> = {
           ...conversation,
           fileMetadata: {
             ...conversation.fileMetadata,
@@ -191,7 +191,7 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
                   results:
                     existingConversations.pages.length === 0
                       ? [
-                          conversation as DriveSearchResult<MailConversation>,
+                          conversation as HomebaseFile<MailConversation>,
                           ...(existingConversations?.pages[0].results.filter(
                             (item) => !stringGuidsEqual(item.fileId, conversation.fileId)
                           ) || []),
@@ -395,15 +395,15 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
     conversation,
     files,
   }: {
-    conversation: NewDriveSearchResult<MailConversation>;
+    conversation: NewHomebaseFile<MailConversation>;
     files?: (NewMediaFile | MediaFile)[] | undefined;
-  }): Promise<NewDriveSearchResult<MailConversation> | null> => {
+  }): Promise<NewHomebaseFile<MailConversation> | null> => {
     const conversationContent = conversation.fileMetadata.appData.content;
     const uniqueId = conversation.fileMetadata.appData.uniqueId || getNewId();
     const threadId = conversationContent.threadId || getNewId();
     const originId = conversationContent.originId || getNewId();
 
-    const newMailConversation: NewDriveSearchResult<MailConversation> = {
+    const newMailConversation: NewHomebaseFile<MailConversation> = {
       ...conversation,
       fileMetadata: {
         ...conversation.fileMetadata,
@@ -439,7 +439,7 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
 
   const getDraft = async (fileId: string) => await getMailConversation(dotYouClient, fileId);
 
-  const removeDraft = async (draftConversation: DriveSearchResult<MailConversation>) =>
+  const removeDraft = async (draftConversation: HomebaseFile<MailConversation>) =>
     deleteFile(dotYouClient, MailDrive, draftConversation.fileId);
 
   return {
@@ -470,12 +470,12 @@ export const useMailDraft = (props?: { draftFileId: string }) => {
                   results:
                     index === 0 && !alreadyExisted
                       ? [
-                          draftedConversation as DriveSearchResult<MailConversation>,
+                          draftedConversation as HomebaseFile<MailConversation>,
                           ...(existingConversations?.pages[0].results || []),
                         ]
                       : page.results.map((result) => {
                           return stringGuidsEqual(result.fileId, draftedConversation.fileId)
-                            ? (draftedConversation as DriveSearchResult<MailConversation>)
+                            ? (draftedConversation as HomebaseFile<MailConversation>)
                             : result;
                         }),
                 };

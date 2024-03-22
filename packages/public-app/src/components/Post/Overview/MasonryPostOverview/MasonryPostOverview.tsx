@@ -1,15 +1,15 @@
 import { PostTeaser } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useCallback, useEffect, useState } from 'react';
 
-const MasonryPostOverview = ({ blogPosts }: { blogPosts: DriveSearchResult<PostContent>[] }) => {
+const MasonryPostOverview = ({ blogPosts }: { blogPosts: HomebaseFile<PostContent>[] }) => {
   const [cols, setCols] = useState(1);
 
   /// Function to reorder the array to make it fit in the masonry layout which by
   ///  default is ordered from top to bottom, instead of left to right
   ///  credit: https://github.com/jessekorzan/masonry-css-js/blob/master/src/App.js
-  const reorder = (arr: DriveSearchResult<PostContent>[], columns: number) => {
+  const reorder = (arr: HomebaseFile<PostContent>[], columns: number) => {
     const cols = columns;
     const out = [];
     let col = 0;

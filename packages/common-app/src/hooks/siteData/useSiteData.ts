@@ -14,7 +14,7 @@ import {
   HomePageConfig,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
-import { DriveSearchResult, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
+import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
 
 interface DefaultTemplateSettings {
   imageFileId: string;
@@ -85,7 +85,7 @@ export const useSiteData = () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
     const parseOwnerData = async (
-      nameAndPhotoAndStatusAttr?: DriveSearchResult<Attribute>[]
+      nameAndPhotoAndStatusAttr?: HomebaseFile<Attribute>[]
     ): Promise<OwnerSiteData> => {
       const nameDsr = nameAndPhotoAndStatusAttr?.find(
         (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Name
@@ -115,7 +115,7 @@ export const useSiteData = () => {
     };
 
     const parseSocialData = async (
-      socialAttributes?: DriveSearchResult<Attribute>[]
+      socialAttributes?: HomebaseFile<Attribute>[]
     ): Promise<SocialSiteData> => {
       return socialAttributes
         ?.map((dsr) => {
@@ -133,7 +133,7 @@ export const useSiteData = () => {
     };
 
     const parseHomeData = async (
-      homeAndThemeAttr?: DriveSearchResult<Attribute>[]
+      homeAndThemeAttr?: HomebaseFile<Attribute>[]
     ): Promise<HomeSiteData> => {
       const themeAttribute = homeAndThemeAttr?.find(
         (attr) => attr.fileMetadata.appData.content.type === HomePageAttributes.Theme
@@ -234,7 +234,7 @@ export const useSiteData = () => {
       return {
         owner: await parseOwnerData(getHighestPrioAttributesFromMultiTypes(ownerAttr)),
         social: await parseSocialData(
-          socialAttr.filter((attr) => attr !== undefined) as DriveSearchResult<Attribute>[]
+          socialAttr.filter((attr) => attr !== undefined) as HomebaseFile<Attribute>[]
         ),
         home: await parseHomeData(getHighestPrioAttributesFromMultiTypes(homeAttr)),
       } as SiteData;

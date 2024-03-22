@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Arrow,
   ConnectionImage,
@@ -22,7 +22,7 @@ export const MailThreadInfo = ({
   mailThread,
   onClose,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   onClose: () => void;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
@@ -38,7 +38,7 @@ export const MailThreadInfo = ({
   }).fetchOrigin;
 
   const messagesFromTheSameOrigin = useMemo(() => {
-    const flattenedConversations = flattenInfinteData<DriveSearchResult<MailConversation>>(
+    const flattenedConversations = flattenInfinteData<HomebaseFile<MailConversation>>(
       originalThread,
       PAGE_SIZE,
       (a, b) =>
@@ -56,7 +56,7 @@ export const MailThreadInfo = ({
 
         return acc;
       },
-      {} as Record<string, DriveSearchResult<MailConversation>[]>
+      {} as Record<string, HomebaseFile<MailConversation>[]>
     );
   }, [originalThread]);
 

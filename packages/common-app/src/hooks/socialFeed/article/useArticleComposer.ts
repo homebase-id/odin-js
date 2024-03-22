@@ -9,11 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const EMPTY_POST: Article = {
   id: '',
@@ -52,9 +48,7 @@ export const useArticleComposer = ({
     },
   } = usePost();
 
-  const [postFile, setPostFile] = useState<
-    NewDriveSearchResult<Article> | DriveSearchResult<Article>
-  >({
+  const [postFile, setPostFile] = useState<NewHomebaseFile<Article> | HomebaseFile<Article>>({
     ...serverData?.activeBlog,
     fileMetadata: {
       ...serverData?.activeBlog.fileMetadata,
@@ -81,7 +75,7 @@ export const useArticleComposer = ({
     serverData?.activeBlog.fileMetadata.payloads || []
   );
 
-  const [channel, setChannel] = useState<NewDriveSearchResult<ChannelDefinition>>(
+  const [channel, setChannel] = useState<NewHomebaseFile<ChannelDefinition>>(
     serverData?.activeChannel &&
       stringGuidsEqual(
         postFile.fileMetadata.appData.content.channelId,
@@ -119,7 +113,7 @@ export const useArticleComposer = ({
 
   const isPublished = postFile.fileMetadata.appData.fileType !== BlogConfig.DraftPostFileType;
 
-  const isValidPost = (postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>) => {
+  const isValidPost = (postFile: HomebaseFile<Article> | NewHomebaseFile<Article>) => {
     const postContent = postFile.fileMetadata.appData.content;
     return (
       !postContent.caption?.length &&
@@ -133,9 +127,9 @@ export const useArticleComposer = ({
   };
 
   const doSave = async (
-    dirtyPostFile: DriveSearchResult<Article> | NewDriveSearchResult<Article> = postFile,
+    dirtyPostFile: HomebaseFile<Article> | NewHomebaseFile<Article> = postFile,
     action: 'save' | 'publish' | 'draft' = 'save',
-    explicitTargetChannel?: NewDriveSearchResult<ChannelDefinition>,
+    explicitTargetChannel?: NewHomebaseFile<ChannelDefinition>,
     redirectOnPublish?: boolean
   ) => {
     // Check if fully empty and if so don't save
@@ -147,7 +141,7 @@ export const useArticleComposer = ({
     const targetChannel = explicitTargetChannel || channel;
 
     // Build postFile
-    const toPostFile: NewDriveSearchResult<Article> = {
+    const toPostFile: NewHomebaseFile<Article> = {
       ...dirtyPostFile,
       fileMetadata: {
         ...dirtyPostFile.fileMetadata,
@@ -213,16 +207,16 @@ export const useArticleComposer = ({
     if (!postFile.fileId) return;
 
     await removePost({
-      postFile: postFile as DriveSearchResult<Article>,
+      postFile: postFile as HomebaseFile<Article>,
       channelId: postFile.fileMetadata.appData.content.channelId,
     });
   };
 
-  const movePost = async (newChannelDefinition: NewDriveSearchResult<ChannelDefinition>) => {
+  const movePost = async (newChannelDefinition: NewHomebaseFile<ChannelDefinition>) => {
     setChannel(newChannelDefinition);
 
     // Clear fileId and contentId (as they can clash with what exists, or cause a fail to overwrite during upload)
-    const dataToMove: NewDriveSearchResult<Article> = {
+    const dataToMove: NewHomebaseFile<Article> = {
       ...postFile,
     };
     dataToMove.fileId = undefined;

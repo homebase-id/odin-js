@@ -7,15 +7,15 @@ import {
   ActionGroup,
   ChevronDown,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 
 export interface ChatActions {
-  doReply: (msg: DriveSearchResult<ChatMessage>) => void;
-  doDelete: (msg: DriveSearchResult<ChatMessage>) => void;
+  doReply: (msg: HomebaseFile<ChatMessage>) => void;
+  doDelete: (msg: HomebaseFile<ChatMessage>) => void;
 }
 
 export const ContextMenu = ({
@@ -23,8 +23,8 @@ export const ContextMenu = ({
   conversation,
   chatActions,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;

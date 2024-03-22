@@ -143,7 +143,7 @@ export interface EncryptedKeyHeader {
   encryptedAesKey: Uint8Array;
 }
 
-interface BaseDriveSearchResult<T = string> {
+interface BaseHomebaseFile<T = string> {
   fileId: string;
 
   fileSystemType: SystemFileType;
@@ -155,15 +155,15 @@ interface BaseDriveSearchResult<T = string> {
   priority: number;
 }
 
-export interface DriveSearchResult<T = string> extends BaseDriveSearchResult<T> {
+export interface HomebaseFile<T = string> extends BaseHomebaseFile<T> {
   fileState: 'active';
 }
 
-export interface DeletedDriveSearchResult<T = string> extends BaseDriveSearchResult<T> {
+export interface DeletedHomebaseFile<T = string> extends BaseHomebaseFile<T> {
   fileState: 'deleted';
 }
 
-export interface NewDriveSearchResult<T = string> {
+export interface NewHomebaseFile<T = string> {
   fileId?: string;
 
   fileSystemType?: SystemFileType;

@@ -1,7 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
 import { DotYouClient } from '../../core/DotYouClient';
-import { DriveSearchResult, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
+import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
@@ -83,7 +83,7 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
     (attr) =>
       attr.serverMetadata?.accessControlList?.requiredSecurityGroup.toLowerCase() ===
         SecurityGroupType.Anonymous.toLowerCase() && attr.fileId !== undefined
-  ) as DriveSearchResult<Attribute> | undefined;
+  ) as HomebaseFile<Attribute> | undefined;
 
   if (publicProfilePhotoAttr) {
     const size = { pixelWidth: 250, pixelHeight: 250 };

@@ -16,17 +16,13 @@ import {
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { UnreachableIdentity } from './UnreachableIdentity';
 
 interface PostTeaserCardProps {
   className?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   odinId?: string;
   showSummary?: boolean;
 }
@@ -130,7 +126,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   );
 };
 
-const MediaStillUploading = ({ postFile }: { postFile: NewDriveSearchResult<PostContent> }) => {
+const MediaStillUploading = ({ postFile }: { postFile: NewHomebaseFile<PostContent> }) => {
   if (postFile.fileId) return null;
   if (!postFile.fileMetadata.appData.content.primaryMediaFile) return null;
 

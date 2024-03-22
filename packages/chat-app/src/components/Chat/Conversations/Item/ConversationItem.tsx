@@ -15,7 +15,7 @@ import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { useConversation } from '../../../../hooks/chat/useConversation';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
 
 const ListItemWrapper = ({
@@ -134,7 +134,7 @@ const ConversationBody = ({
     () =>
       data?.pages
         ?.flatMap((page) => page?.searchResults)
-        ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
+        ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
     [data]
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);

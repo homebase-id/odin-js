@@ -12,11 +12,7 @@ import {
   getContactByOdinId,
   getContactByUniqueId,
 } from '@youfoundation/js-lib/network';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 export const useContact = ({
   odinId,
@@ -38,7 +34,7 @@ export const useContact = ({
     odinId: string;
     id: string;
     canSave?: boolean;
-  }): Promise<DriveSearchResult<ContactVm> | NewDriveSearchResult<ContactVm> | undefined> => {
+  }): Promise<HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> | undefined> => {
     if (!odinId) {
       if (!id) return;
 
@@ -94,7 +90,7 @@ export const useContact = ({
     return undefined;
   };
 
-  const refresh = async ({ contact }: { contact: DriveSearchResult<ContactFile> }) => {
+  const refresh = async ({ contact }: { contact: HomebaseFile<ContactFile> }) => {
     if (!contact.fileMetadata.appData.uniqueId || !contact.fileMetadata.appData.content.odinId) {
       console.warn('Missing data to fetch new contact data reliable');
       return;
@@ -169,8 +165,8 @@ export const useContact = ({
 };
 
 export const parseContact = (
-  contact: DriveSearchResult<RawContact> | NewDriveSearchResult<RawContact>
-): DriveSearchResult<ContactVm> | NewDriveSearchResult<ContactVm> => {
+  contact: HomebaseFile<RawContact> | NewHomebaseFile<RawContact>
+): HomebaseFile<ContactVm> | NewHomebaseFile<ContactVm> => {
   const pureContent = contact.fileMetadata.appData.content;
 
   const imageUrl = pureContent.image
@@ -183,7 +179,7 @@ export const parseContact = (
     ...contact,
     fileMetadata: {
       ...contact.fileMetadata,
-      updated: (contact as DriveSearchResult<unknown>).fileMetadata.updated,
+      updated: (contact as HomebaseFile<unknown>).fileMetadata.updated,
       appData: {
         ...contact.fileMetadata.appData,
         uniqueId: contact.fileMetadata.appData.uniqueId,
@@ -200,5 +196,5 @@ export const parseContact = (
         },
       },
     },
-  } as DriveSearchResult<ContactVm>;
+  } as HomebaseFile<ContactVm>;
 };

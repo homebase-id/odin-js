@@ -2,8 +2,8 @@ import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/r
 import { t } from '@youfoundation/common-app';
 import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
   TransferStatus,
 } from '@youfoundation/js-lib/core';
@@ -33,11 +33,11 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     files,
     message,
   }: {
-    conversation: DriveSearchResult<Conversation>;
+    conversation: HomebaseFile<Conversation>;
     replyId?: string;
     files?: NewMediaFile[];
     message: string;
-  }): Promise<NewDriveSearchResult<ChatMessage> | null> => {
+  }): Promise<NewHomebaseFile<ChatMessage> | null> => {
     const conversationId = conversation.fileMetadata.appData.uniqueId as string;
     const conversationContent = conversation.fileMetadata.appData.content;
     const recipients =
@@ -45,7 +45,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       [(conversationContent as SingleConversation).recipient].filter(Boolean);
 
     const newChatId = getNewId();
-    const newChat: NewDriveSearchResult<ChatMessage> = {
+    const newChat: NewHomebaseFile<ChatMessage> = {
       fileMetadata: {
         appData: {
           uniqueId: newChatId,
@@ -90,8 +90,8 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
     updatedChatMessage,
     conversation,
   }: {
-    updatedChatMessage: DriveSearchResult<ChatMessage>;
-    conversation: DriveSearchResult<Conversation>;
+    updatedChatMessage: HomebaseFile<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
 
@@ -115,7 +115,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
       onMutate: async ({ conversation, replyId, files, message }) => {
         const existingData = queryClient.getQueryData<
           InfiniteData<{
-            searchResults: (DriveSearchResult<ChatMessage> | null)[];
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
             cursorState: string;
             queryTime: number;
             includeMetadataHeader: boolean;
@@ -124,7 +124,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
 
         if (!existingData) return;
 
-        const newMessageDsr: NewDriveSearchResult<ChatMessage> = {
+        const newMessageDsr: NewHomebaseFile<ChatMessage> = {
           fileMetadata: {
             appData: {
               groupId: conversation.fileMetadata.appData.uniqueId,
@@ -174,7 +174,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         // Update chat messages
         const extistingMessages = queryClient.getQueryData<
           InfiniteData<{
-            searchResults: (DriveSearchResult<ChatMessage> | null)[];
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
             cursorState: string;
             queryTime: number;
             includeMetadataHeader: boolean;
@@ -198,7 +198,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
         }
 
         // Update chat message
-        const existingMessage = queryClient.getQueryData<DriveSearchResult<ChatMessage>>([
+        const existingMessage = queryClient.getQueryData<HomebaseFile<ChatMessage>>([
           'chat-message',
           updatedChatMessage.fileMetadata.appData.uniqueId,
         ]);

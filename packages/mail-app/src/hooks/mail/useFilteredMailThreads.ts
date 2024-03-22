@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { flattenInfinteData } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   MailConversation,
   DEFAULT_ARCHIVAL_STATUS,
@@ -27,7 +27,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
 
   // Flatten all pages, sorted descending and slice on the max number expected
   const threads = useMemo(() => {
-    const flattenedConversations = flattenInfinteData<DriveSearchResult<MailConversation>>(
+    const flattenedConversations = flattenInfinteData<HomebaseFile<MailConversation>>(
       conversations,
       PAGE_SIZE,
       (a, b) =>
@@ -90,7 +90,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
 
         return acc;
       },
-      {} as Record<string, DriveSearchResult<MailConversation>[]>
+      {} as Record<string, HomebaseFile<MailConversation>[]>
     );
     const threads = Object.values(threadsDictionary);
 
@@ -123,7 +123,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
               const agePenalty = Math.abs(
                 Math.round(
                   (today -
-                    (a as unknown as { obj: DriveSearchResult<MailConversation> }).obj.fileMetadata
+                    (a as unknown as { obj: HomebaseFile<MailConversation> }).obj.fileMetadata
                       .created) /
                     (1000 * 60 * 60 * 24)
                 )
@@ -150,7 +150,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
               conversation[0]?.fileMetadata.appData.content.threadId === thread.threadId
           )
         )
-        .filter(Boolean) as DriveSearchResult<MailConversation>[][];
+        .filter(Boolean) as HomebaseFile<MailConversation>[][];
     }
 
     return filteredThreads;

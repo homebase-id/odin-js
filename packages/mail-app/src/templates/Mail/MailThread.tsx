@@ -19,7 +19,7 @@ import {
   useDotYouClient,
   useIsConnected,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ARCHIVE_ARCHIVAL_STATUS,
   MailConversation,
@@ -55,7 +55,7 @@ export const MailThread = () => {
   // Flatten all pages, sorted descending and slice on the max number expected
   const mailThread = useMemo(
     () =>
-      flattenInfinteData<DriveSearchResult<MailConversation>>(
+      flattenInfinteData<HomebaseFile<MailConversation>>(
         messages,
         PAGE_SIZE,
         (a, b) =>
@@ -138,7 +138,7 @@ const MailThreadActions = ({
   className,
   ...threadProps
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   className?: string;
   recipients: string[];
   originId: string;
@@ -202,7 +202,7 @@ const ReplyAction = ({
 }: {
   draftFileId: string | undefined;
 
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   recipients: string[];
   originId: string;
   threadId: string;
@@ -239,7 +239,7 @@ const ForwardAction = ({
 }: {
   originId: string;
   subject: string;
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   onDone: () => void;
 }) => {
   return (
@@ -260,7 +260,7 @@ const MailThreadHeader = ({
   onMarkAsUnread,
   className,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   subject: string | undefined;
   onMarkAsUnread: () => void;
   className?: string;

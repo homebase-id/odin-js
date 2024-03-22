@@ -6,7 +6,7 @@ import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
-import { NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsPage = () => {
@@ -16,7 +16,7 @@ export const ChannelsPage = () => {
     const newQueryParam = params.get('new');
     if (!newQueryParam) return undefined;
 
-    const newChannel = tryJsonParse<NewDriveSearchResult<ChannelDefinitionVm>>(newQueryParam);
+    const newChannel = tryJsonParse<NewHomebaseFile<ChannelDefinitionVm>>(newQueryParam);
     return newChannel;
   }, [params]);
 

@@ -6,7 +6,7 @@ import {
   DotYouClient,
   queryBatch,
   DEFAULT_PAYLOAD_KEY,
-  NewDriveSearchResult,
+  NewHomebaseFile,
 } from '@youfoundation/js-lib/core';
 import { demoImageArray } from './DemoImages';
 import { attrHasData, base64ToArrayBuffer, getFunName, getRandomAbstract, rando } from './helpers';
@@ -122,7 +122,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
     }
 
     //set an attribute for the standard profile
-    const newNameAttr: NewDriveSearchResult<Attribute> = {
+    const newNameAttr: NewHomebaseFile<Attribute> = {
       fileId: nameDsr?.fileId || undefined,
       fileMetadata: {
         ...nameDsr?.fileMetadata,
@@ -146,9 +146,8 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       realmData.name.first;
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.SurnameId] =
       realmData.name.last;
-    newNameAttr.fileMetadata.appData.content.data[
-      MinimalProfileFields.DisplayName
-    ] = `${realmData.name.first} ${realmData.name.last}`;
+    newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.DisplayName] =
+      `${realmData.name.first} ${realmData.name.last}`;
 
     saveName(newNameAttr);
 
@@ -188,7 +187,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       }
 
       // Create attribute
-      const anonymousPhotoAttribute: NewDriveSearchResult<Attribute> = {
+      const anonymousPhotoAttribute: NewHomebaseFile<Attribute> = {
         fileId: foundAttribute?.fileId || undefined,
         fileMetadata: {
           ...foundAttribute?.fileMetadata,
@@ -258,7 +257,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       }
 
       // Create attribute:
-      const socialAttribute: NewDriveSearchResult<Attribute> = {
+      const socialAttribute: NewHomebaseFile<Attribute> = {
         ...foundAttribute,
         fileMetadata: {
           ...foundAttribute?.fileMetadata,
@@ -586,7 +585,7 @@ const DemoDataBlog = ({
         return;
       }
 
-      const newChannel: NewDriveSearchResult<ChannelDefinition> = {
+      const newChannel: NewHomebaseFile<ChannelDefinition> = {
         fileMetadata: {
           appData: {
             uniqueId: channelId,
@@ -659,7 +658,7 @@ const DemoDataBlog = ({
             body: randomAbstract + ' and then some', //Note: this can be html
           };
 
-          const blogFile: NewDriveSearchResult<PostContent> = {
+          const blogFile: NewHomebaseFile<PostContent> = {
             fileMetadata: {
               appData: {
                 userDate: new Date().getTime(),

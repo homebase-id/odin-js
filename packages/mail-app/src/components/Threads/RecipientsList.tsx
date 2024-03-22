@@ -1,13 +1,13 @@
 import { t, ConnectionName } from '@youfoundation/common-app';
 import { MailConversation, getAllRecipients } from '../../providers/MailProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import React from 'react';
 
 export const RecipientsList = ({
   mailThread,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
 }) => {
   const identity = useDotYouClientContext().getIdentity();
   const allRecipients = getAllRecipients(mailThread[0]);

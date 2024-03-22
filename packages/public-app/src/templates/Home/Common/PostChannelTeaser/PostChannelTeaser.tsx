@@ -13,12 +13,12 @@ import { t } from '@youfoundation/common-app';
 import { ActionLink } from '@youfoundation/common-app';
 
 import './PostChannelTeaser.css';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 interface PostChannelTeaserProps {
   className?: string;
   title: string;
-  channel: DriveSearchResult<ChannelDefinitionVm>;
+  channel: HomebaseFile<ChannelDefinitionVm>;
   fallback: ReactNode;
 }
 
@@ -163,7 +163,7 @@ export const PostChannelTeaser: FC<PostChannelTeaserProps> = ({
 
 interface PostTeaserProps {
   className: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   linkRoot: string;
 }
 

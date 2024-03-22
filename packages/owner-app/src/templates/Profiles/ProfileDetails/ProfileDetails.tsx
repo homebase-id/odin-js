@@ -29,7 +29,7 @@ import { ErrorNotification } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { Attribute, ProfileSection } from '@youfoundation/js-lib/profile';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useAttribute } from '../../../hooks/profiles/useAttribute';
 import { BrokenAttribute } from '../../../components/Attribute/BrokenAttribute/BrokenAttribute';
 
@@ -261,13 +261,13 @@ const ProfileSectionEditor = ({
     );
   }
 
-  const filteredAttributes: DriveSearchResult<AttributeVm>[] = attributes.filter(
+  const filteredAttributes: HomebaseFile<AttributeVm>[] = attributes.filter(
     (attr) => attr.fileMetadata.appData.content
-  ) as DriveSearchResult<AttributeVm>[];
+  ) as HomebaseFile<AttributeVm>[];
 
-  const emptyAttributes: DriveSearchResult<undefined>[] = attributes.filter(
+  const emptyAttributes: HomebaseFile<undefined>[] = attributes.filter(
     (attr) => !attr.fileMetadata.appData.content
-  ) as DriveSearchResult<undefined>[];
+  ) as HomebaseFile<undefined>[];
 
   // Find unique types
   const types: string[] = filteredAttributes

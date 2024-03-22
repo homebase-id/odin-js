@@ -9,7 +9,7 @@ import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 const getAllowedAttributes = (sectionId: string) => {
   if (sectionId === BuiltInProfiles.PersonalInfoSectionId)
@@ -44,7 +44,7 @@ const AttributeCreator = ({
   newPriority: number;
   excludedTypes?: string[];
 }) => {
-  const [attribute, setAttribute] = useState<NewDriveSearchResult<AttributeVm>>();
+  const [attribute, setAttribute] = useState<NewHomebaseFile<AttributeVm>>();
   const [isActive, setIsActive] = useState(false);
   const alloweddAttributes = getAllowedAttributes(sectionId);
 

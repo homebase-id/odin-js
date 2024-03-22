@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ActionButton, Arrow, ArrowLeft, Times, usePortal } from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
@@ -8,7 +8,7 @@ import { OdinImage, OdinVideo } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
-export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const target = usePortal('modal-container');
   const dotYouClient = useDotYouClientContext();
 

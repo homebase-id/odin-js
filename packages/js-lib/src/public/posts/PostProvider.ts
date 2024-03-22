@@ -12,7 +12,7 @@ import {
   CursoredResult,
   deleteFile,
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
   getFileHeader,
@@ -33,7 +33,7 @@ export const getPosts = async <T extends PostContent>(
   includeDrafts: true | 'only' | false,
   cursorState: string | undefined = undefined,
   pageSize = 10
-): Promise<CursoredResult<DriveSearchResult<T>[]>> => {
+): Promise<CursoredResult<HomebaseFile<T>[]>> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     targetDrive: targetDrive,
@@ -55,14 +55,14 @@ export const getPosts = async <T extends PostContent>(
 
   const response = await queryBatch(dotYouClient, params, ro);
 
-  const posts: DriveSearchResult<T>[] = (
+  const posts: HomebaseFile<T>[] = (
     await Promise.all(
       response.searchResults.map(
         async (dsr) =>
           await dsrToPostFile(dotYouClient, dsr, targetDrive, response.includeMetadataHeader)
       )
     )
-  ).filter((post) => !!post) as DriveSearchResult<T>[];
+  ).filter((post) => !!post) as HomebaseFile<T>[];
 
   return { cursorState: response.cursorState, results: posts };
 };
@@ -74,9 +74,9 @@ export const getRecentPosts = async <T extends PostContent>(
   includeDrafts: true | 'only' | false,
   cursorState: Record<string, string> | undefined = undefined,
   pageSize = 10,
-  channels?: DriveSearchResult<ChannelDefinition>[],
+  channels?: HomebaseFile<ChannelDefinition>[],
   includeHiddenChannels = false
-): Promise<MultiRequestCursoredResult<DriveSearchResult<T>[]>> => {
+): Promise<MultiRequestCursoredResult<HomebaseFile<T>[]>> => {
   const chnls = channels || (await getChannelDefinitions(dotYouClient));
   const allCursors: Record<string, string> = {};
 
@@ -114,14 +114,14 @@ export const getRecentPosts = async <T extends PostContent>(
     response.results.map(async (result) => {
       const targetDrive = GetTargetDriveFromChannelId(result.name);
 
-      const posts: DriveSearchResult<T>[] = (
+      const posts: HomebaseFile<T>[] = (
         await Promise.all(
           result.searchResults.map(
             async (dsr) =>
               await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
           )
         )
-      ).filter((post) => !!post) as DriveSearchResult<T>[];
+      ).filter((post) => !!post) as HomebaseFile<T>[];
 
       allCursors[result.name] = result.cursorState;
       return { posts, cursorState: result.cursorState };
@@ -143,7 +143,7 @@ export const getPostByFileId = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   fileId: string
-): Promise<DriveSearchResult<T> | undefined> => {
+): Promise<HomebaseFile<T> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const header = await getFileHeader(dotYouClient, targetDrive, fileId);
   if (header) return await dsrToPostFile(dotYouClient, header, targetDrive, true);
@@ -154,7 +154,7 @@ export const getPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   id: string
-): Promise<DriveSearchResult<T> | undefined> => {
+): Promise<HomebaseFile<T> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     tagsMatchAtLeastOne: [id],
@@ -180,7 +180,7 @@ export const getPostBySlug = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   channelId: string,
   postSlug: string
-): Promise<DriveSearchResult<T> | undefined> => {
+): Promise<HomebaseFile<T> | undefined> => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
   const params: FileQueryParams = {
     clientUniqueIdAtLeastOne: [toGuidId(postSlug)],
@@ -203,7 +203,7 @@ export const getPostBySlug = async <T extends PostContent>(
 
 export const removePost = async (
   dotYouClient: DotYouClient,
-  postFile: DriveSearchResult<PostContent>,
+  postFile: HomebaseFile<PostContent>,
   channelId: string
 ) => {
   const targetDrive = GetTargetDriveFromChannelId(channelId);
@@ -244,10 +244,10 @@ export const removePost = async (
 
 export const dsrToPostFile = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<T> | undefined> => {
+): Promise<HomebaseFile<T> | undefined> => {
   try {
     const postContent = await getContentFromHeaderOrPayload<T>(
       dotYouClient,
@@ -258,7 +258,7 @@ export const dsrToPostFile = async <T extends PostContent>(
 
     if (!postContent) return undefined;
 
-    const file: DriveSearchResult<T> = {
+    const file: HomebaseFile<T> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,

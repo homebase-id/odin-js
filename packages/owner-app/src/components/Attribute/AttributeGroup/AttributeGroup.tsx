@@ -13,7 +13,7 @@ import {
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 const AttributeGroup = ({
   attributes,
@@ -21,7 +21,7 @@ const AttributeGroup = ({
   groupIndex,
   groupedAttributes,
 }: {
-  attributes: DriveSearchResult<AttributeVm>[];
+  attributes: HomebaseFile<AttributeVm>[];
   groupTitle: string;
   groupIndex: number;
   groupedAttributes?: GroupedAttributes[];
@@ -208,7 +208,7 @@ const AddAnotherButton = ({
           },
         },
       },
-    } as NewDriveSearchResult<AttributeVm>;
+    } as NewHomebaseFile<AttributeVm>;
     // isActive ensures that a new one is created each time the AddAnother is opened up again
   }, [type, profileId, sectionId, priority, isActive]);
 

@@ -10,10 +10,10 @@ import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 
-const defaultThemeAttribute: DriveSearchResult<AttributeVm> = {
+const defaultThemeAttribute: HomebaseFile<AttributeVm> = {
   fileMetadata: {
     appData: {
       content: {
@@ -28,7 +28,7 @@ const defaultThemeAttribute: DriveSearchResult<AttributeVm> = {
       },
     },
   },
-} as unknown as DriveSearchResult<AttributeVm>;
+} as unknown as HomebaseFile<AttributeVm>;
 
 const Website = () => {
   const { data: themeData, isLoading: themeIsLoading } = useHomeAttributes().fetchTheme;

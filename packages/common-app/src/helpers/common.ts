@@ -1,5 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Attribute } from '@youfoundation/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
@@ -61,14 +61,14 @@ export const pascalCase = (str: string) => {
 
 // TODO: Simplify this function
 export const getHighestPrioAttributesFromMultiTypes = (
-  attributes?: (DriveSearchResult<Attribute | undefined> | null)[]
+  attributes?: (HomebaseFile<Attribute | undefined> | null)[]
 ) => {
   if (!attributes) return undefined;
 
   return (
     attributes?.filter(
       (attr) => !!attr && !!attr.fileMetadata.appData.content
-    ) as DriveSearchResult<Attribute>[]
+    ) as HomebaseFile<Attribute>[]
   )?.reduce((highestPrioArr, attr) => {
     const highAttr = highestPrioArr.find(
       (highAttr) =>
@@ -96,5 +96,5 @@ export const getHighestPrioAttributesFromMultiTypes = (
     } else {
       return [...highestPrioArr, attr];
     }
-  }, [] as DriveSearchResult<Attribute>[]);
+  }, [] as HomebaseFile<Attribute>[]);
 };

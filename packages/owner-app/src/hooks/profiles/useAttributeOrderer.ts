@@ -1,11 +1,11 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { moveElementInArray } from '../../templates/DemoData/helpers';
 import { useAttribute } from './useAttribute';
 import { AttributeVm } from './useAttributes';
 
 export type GroupedAttributes = {
   name: string;
-  attributes: DriveSearchResult<AttributeVm>[];
+  attributes: HomebaseFile<AttributeVm>[];
   priority: number;
 };
 
@@ -13,14 +13,14 @@ export const useAttributeOrderer = ({
   currentGroupAttributes,
   groupedAttributes,
 }: {
-  currentGroupAttributes: DriveSearchResult<AttributeVm>[];
+  currentGroupAttributes: HomebaseFile<AttributeVm>[];
   groupedAttributes: GroupedAttributes[];
 }) => {
   const { mutateAsync: saveAttribute } = useAttribute().save;
 
   const flatAttributes = groupedAttributes.flatMap((group) => group.attributes);
 
-  const respreadAttributes = async (orderedAttributes: DriveSearchResult<AttributeVm>[]) => {
+  const respreadAttributes = async (orderedAttributes: HomebaseFile<AttributeVm>[]) => {
     const increment = 1000;
     await Promise.all(
       orderedAttributes.map(
@@ -42,7 +42,7 @@ export const useAttributeOrderer = ({
     );
   };
 
-  const reorderAttr = async (attr: DriveSearchResult<AttributeVm>, dir: -1 | 1) => {
+  const reorderAttr = async (attr: HomebaseFile<AttributeVm>, dir: -1 | 1) => {
     const currentPos = flatAttributes.indexOf(attr);
     const toBecomePos = currentPos + dir;
 

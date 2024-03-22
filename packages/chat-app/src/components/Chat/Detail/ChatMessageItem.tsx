@@ -5,7 +5,7 @@ import {
   Block,
   t,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { Conversation, GroupConversation } from '../../../providers/ConversationProvider';
@@ -25,8 +25,8 @@ export const ChatMessageItem = ({
   conversation,
   chatActions,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -102,8 +102,8 @@ const ChatTextMessageBody = ({
   chatActions,
   isDeleted,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -208,8 +208,8 @@ const ChatMediaMessageBody = ({
   authorOdinId,
   chatActions,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;

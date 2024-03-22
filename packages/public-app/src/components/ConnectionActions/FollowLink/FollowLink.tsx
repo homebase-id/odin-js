@@ -8,7 +8,7 @@ import LoginDialog from '../../Dialog/LoginDialog/LoginDialog';
 import { Feed } from '@youfoundation/common-app';
 import { useFollowDetail } from '../../../hooks/follow/useFollowDetail';
 import { Check } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const FollowLink = ({
@@ -16,7 +16,7 @@ const FollowLink = ({
   channel,
 }: {
   className?: string;
-  channel?: DriveSearchResult<ChannelDefinitionVm>;
+  channel?: HomebaseFile<ChannelDefinitionVm>;
 }) => {
   const { isOwner, getIdentity } = useAuth();
   const identity = getIdentity();

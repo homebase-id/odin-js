@@ -9,7 +9,7 @@ import {
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
-  DriveSearchResult,
+  HomebaseFile,
   FileMetadata,
   EncryptedKeyHeader,
   SystemFileType,
@@ -43,7 +43,7 @@ interface GetThumbRequest extends GetFileRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 export const getPayloadAsJsonOverPeerByGlobalTransitId = async <T>(
   dotYouClient: DotYouClient,
@@ -208,7 +208,7 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   targetDrive: TargetDrive,
   globalTransitId: string,
   options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
+): Promise<HomebaseFile<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytesOverPeerByGlobalTransitId(
     dotYouClient,
@@ -222,7 +222,7 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   );
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -242,7 +242,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
-): Promise<DriveSearchResult> => {
+): Promise<HomebaseFile> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);

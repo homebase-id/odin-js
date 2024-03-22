@@ -11,7 +11,7 @@ import {
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 100;
@@ -28,8 +28,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     conversation,
     messages,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    messages: DriveSearchResult<ChatMessage>[];
+    conversation: HomebaseFile<Conversation>;
+    messages: HomebaseFile<ChatMessage>[];
   }) => {
     // => Much nicer solution: Handle with a last read time on the conversation file;
     const messagesToMarkAsRead = messages
@@ -49,8 +49,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     messages,
     deleteForEveryone,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    messages: DriveSearchResult<ChatMessage>[];
+    conversation: HomebaseFile<Conversation>;
+    messages: HomebaseFile<ChatMessage>[];
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;

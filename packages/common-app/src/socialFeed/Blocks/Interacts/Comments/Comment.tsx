@@ -17,15 +17,15 @@ import { CommentMeta } from './Parts/CommentMeta';
 import { CommentThread } from './Parts/CommentThread';
 import {
   CommentReactionPreview,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   ReactionFile,
 } from '@youfoundation/js-lib/core';
 
 export interface CommentProps {
   context: ReactionContext;
   canReact?: CanReactInfo;
-  commentData: DriveSearchResult<ReactionFile> | NewDriveSearchResult<RawReactionContent>;
+  commentData: HomebaseFile<ReactionFile> | NewHomebaseFile<RawReactionContent>;
   isThread: boolean;
   onReply?: () => void;
 }
@@ -55,10 +55,8 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
     ...context,
     target: {
       fileId: commentData.fileId,
-      globalTransitId: (commentData as DriveSearchResult<ReactionFile>).fileMetadata
-        .globalTransitId,
-      isEncrypted:
-        (commentData as DriveSearchResult<ReactionFile>).fileMetadata.isEncrypted || false,
+      globalTransitId: (commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId,
+      isEncrypted: (commentData as HomebaseFile<ReactionFile>).fileMetadata.isEncrypted || false,
     },
   };
 
@@ -109,7 +107,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
                   ? () =>
                       removeComment({
                         context,
-                        commentFile: commentData as DriveSearchResult<ReactionFile>,
+                        commentFile: commentData as HomebaseFile<ReactionFile>,
                       })
                   : undefined
               }
@@ -118,9 +116,7 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
               context={context}
               content={commentContent}
               commentFileId={fileId}
-              commentLastModifed={
-                (commentData as DriveSearchResult<ReactionFile>).fileMetadata.updated
-              }
+              commentLastModifed={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
               isEdit={isEdit}
               onCancel={() => setIsEdit(false)}
               onUpdate={doUpdate}
@@ -132,8 +128,8 @@ export const Comment = ({ context, canReact, commentData, onReply, isThread }: C
           <CommentMeta
             canReact={canReact}
             threadContext={threadContext as ReactionContext}
-            created={(commentData as DriveSearchResult<ReactionFile>).fileMetadata.created}
-            updated={(commentData as DriveSearchResult<ReactionFile>).fileMetadata.updated}
+            created={(commentData as HomebaseFile<ReactionFile>).fileMetadata.created}
+            updated={(commentData as HomebaseFile<ReactionFile>).fileMetadata.updated}
             onReply={isThread ? undefined : () => (onReply ? onReply() : setIsReply(!isReply))}
           />
         ) : null}

@@ -6,7 +6,7 @@ import {
   ThumbnailFile,
   RichText,
   ReactionFile,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
@@ -41,7 +41,7 @@ export class BlogConfig {
     templateId: undefined,
   };
 
-  static readonly PublicChannelNewDsr: NewDriveSearchResult<ChannelDefinition> = {
+  static readonly PublicChannelNewDsr: NewHomebaseFile<ChannelDefinition> = {
     fileMetadata: {
       appData: {
         uniqueId: BlogConfig.PublicChannelId,
@@ -102,8 +102,8 @@ export interface PrimaryMediaFile {
   type: string;
 }
 
-// export type PostFile<T extends PostContent> = DriveSearchResult<T>;
-// export type NewPostFile<T extends PostContent> = NewDriveSearchResult<T>;
+// export type PostFile<T extends PostContent> = HomebaseFile<T>;
+// export type NewPostFile<T extends PostContent> = NewHomebaseFile<T>;
 
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;

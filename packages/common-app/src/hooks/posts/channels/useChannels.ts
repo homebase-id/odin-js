@@ -7,7 +7,7 @@ import {
 
 import { useDotYouClient } from '../../../..';
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }
@@ -16,8 +16,8 @@ export const parseChannelTemplate = (templateId: number | undefined) => {
   return parseInt(templateId + '') === ChannelTemplate.LargeCards
     ? ChannelTemplate.LargeCards
     : parseInt(templateId + '') === ChannelTemplate.MasonryLayout
-    ? ChannelTemplate.MasonryLayout
-    : ChannelTemplate.ClassicBlog;
+      ? ChannelTemplate.MasonryLayout
+      : ChannelTemplate.ClassicBlog;
 };
 
 export const useChannels = ({
@@ -49,7 +49,7 @@ export const useChannels = ({
                 },
               },
             },
-          } as DriveSearchResult<ChannelDefinitionVm>;
+          } as HomebaseFile<ChannelDefinitionVm>;
         });
       } catch (e) {
         ('failed to fetch dynamic data');

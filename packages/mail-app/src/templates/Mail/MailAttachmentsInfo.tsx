@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Chevron,
   ConnectionName,
@@ -23,7 +23,7 @@ export const MailAttachmentsInfo = ({
   mailThread,
   onClose,
 }: {
-  mailThread: DriveSearchResult<MailConversation>[];
+  mailThread: HomebaseFile<MailConversation>[];
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
