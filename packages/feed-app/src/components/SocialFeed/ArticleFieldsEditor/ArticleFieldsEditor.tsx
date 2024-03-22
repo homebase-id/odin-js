@@ -1,10 +1,4 @@
-import {
-  ChannelDefinition,
-  Article,
-  getChannelDrive,
-  MediaFile,
-  NewMediaFile,
-} from '@youfoundation/js-lib/public';
+import { ChannelDefinition, Article, getChannelDrive } from '@youfoundation/js-lib/public';
 import { lazy, useState } from 'react';
 import {
   t,
@@ -17,7 +11,13 @@ import {
 } from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
-import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
+import {
+  HomebaseFile,
+  NewHomebaseFile,
+  RichText,
+  MediaFile,
+  NewMediaFile,
+} from '@youfoundation/js-lib/core';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );

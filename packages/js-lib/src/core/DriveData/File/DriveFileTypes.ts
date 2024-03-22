@@ -131,6 +131,19 @@ export interface UploadThumbnailDescriptor extends ImageSize {
   thumbnailKey: string;
 }
 
+// Management of media files; New uploads and existing payloadDescriptor
+export interface MediaFile {
+  fileId?: string | undefined;
+  key: string;
+  contentType: ContentType;
+}
+
+export interface NewMediaFile {
+  key?: string;
+  file: File | Blob;
+  thumbnail?: ThumbnailFile;
+}
+
 export interface KeyHeader {
   iv: Uint8Array;
   aesKey: Uint8Array;

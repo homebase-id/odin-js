@@ -1,9 +1,7 @@
 import {
-  ContentType,
   PayloadDescriptor,
   TargetDrive,
   EmbeddedThumb,
-  ThumbnailFile,
   RichText,
   ReactionFile,
   NewHomebaseFile,
@@ -80,20 +78,6 @@ export const postTypeToDataType = (type: PostType): number => {
 
   throw 'Invalid post type';
 };
-
-export interface MediaFile {
-  // When undefined.. It's the fileId of the postFile itself
-  fileId?: string | undefined;
-
-  key: string;
-  contentType: ContentType;
-}
-
-export interface NewMediaFile {
-  key?: string;
-  file: File | Blob;
-  thumbnail?: ThumbnailFile;
-}
 
 // Kept different for historical data
 export interface PrimaryMediaFile {

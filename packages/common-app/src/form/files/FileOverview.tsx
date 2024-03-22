@@ -7,8 +7,12 @@ import {
   ExtensionThumbnail,
 } from '@youfoundation/common-app';
 
-import { DEFAULT_PAYLOAD_KEY, TargetDrive } from '@youfoundation/js-lib/core';
-import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
+import {
+  DEFAULT_PAYLOAD_KEY,
+  TargetDrive,
+  MediaFile,
+  NewMediaFile,
+} from '@youfoundation/js-lib/core';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
 
 type NewFileArray = NewMediaFile[];

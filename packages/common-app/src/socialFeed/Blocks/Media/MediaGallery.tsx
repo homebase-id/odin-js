@@ -1,4 +1,4 @@
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, MediaFile } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
 import {
   Image,
@@ -7,7 +7,7 @@ import {
   Triangle,
   useDotYouClient,
 } from '@youfoundation/common-app';
-import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
+import { getChannelDrive } from '@youfoundation/js-lib/public';
 import { useImageCache } from '@youfoundation/ui-lib';
 
 interface MediaGalleryProps {

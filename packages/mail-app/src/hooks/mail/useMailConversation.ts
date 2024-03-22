@@ -7,9 +7,10 @@ import {
   SecurityGroupType,
   deleteFile,
   getPayloadBytes,
+  MediaFile,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 import {
   MAIL_CONVERSATION_FILE_TYPE,
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,

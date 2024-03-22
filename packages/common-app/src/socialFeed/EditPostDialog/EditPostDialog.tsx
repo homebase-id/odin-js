@@ -1,9 +1,4 @@
-import {
-  PostContent,
-  getChannelDrive,
-  MediaFile,
-  NewMediaFile,
-} from '@youfoundation/js-lib/public';
+import { PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ActionButton, FileOverview, Save, VolatileInput, t } from '@youfoundation/common-app';
@@ -12,7 +7,12 @@ import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
 import { usePost } from '../../hooks/socialFeed/post/usePost';
-import { DEFAULT_PAYLOAD_KEY, HomebaseFile } from '@youfoundation/js-lib/core';
+import {
+  DEFAULT_PAYLOAD_KEY,
+  HomebaseFile,
+  MediaFile,
+  NewMediaFile,
+} from '@youfoundation/js-lib/core';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,

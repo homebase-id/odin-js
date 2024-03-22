@@ -3,10 +3,9 @@ import {
   PostContent,
   savePost as savePostFile,
   getPost,
-  NewMediaFile,
-  MediaFile,
   removePost,
 } from '@youfoundation/js-lib/public';
+import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/core';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
   HomebaseFile,

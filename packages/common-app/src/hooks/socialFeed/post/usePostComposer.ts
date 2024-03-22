@@ -3,6 +3,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   Tweet,
@@ -11,7 +12,6 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
-  NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';

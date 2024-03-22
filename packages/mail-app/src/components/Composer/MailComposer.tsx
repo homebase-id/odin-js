@@ -14,7 +14,13 @@ import {
   getTextRootsRecursive,
   t,
 } from '@youfoundation/common-app';
-import { NewHomebaseFile, SecurityGroupType, HomebaseFile } from '@youfoundation/js-lib/core';
+import {
+  NewHomebaseFile,
+  SecurityGroupType,
+  HomebaseFile,
+  NewMediaFile,
+  MediaFile,
+} from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
 import {
@@ -27,7 +33,6 @@ import {
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
-import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/public';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 

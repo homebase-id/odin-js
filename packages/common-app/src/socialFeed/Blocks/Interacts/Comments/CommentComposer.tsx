@@ -1,4 +1,5 @@
-import { NewMediaFile, ReactionContext } from '@youfoundation/js-lib/public';
+import { NewMediaFile } from '@youfoundation/js-lib/core';
+import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
 import {
   ActionButton,

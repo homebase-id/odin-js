@@ -2,7 +2,6 @@ import {
   BlogConfig,
   ChannelDefinition,
   EmbeddedPost,
-  NewMediaFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect, useMemo } from 'react';
@@ -38,6 +37,7 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 

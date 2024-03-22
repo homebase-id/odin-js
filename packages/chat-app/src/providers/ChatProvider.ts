@@ -24,6 +24,7 @@ import {
   sendCommand,
   uploadFile,
   uploadHeader,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   ChatDrive,
@@ -33,7 +34,6 @@ import {
 } from './ConversationProvider';
 import { getNewId, jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
 

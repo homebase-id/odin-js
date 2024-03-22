@@ -10,8 +10,8 @@ import {
   PaperPlane,
   getImagesFromPasteEvent,
 } from '@youfoundation/common-app';
-import { HomebaseFile } from '@youfoundation/js-lib/core';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
+
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';

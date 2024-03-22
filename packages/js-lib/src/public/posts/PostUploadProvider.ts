@@ -23,6 +23,8 @@ import {
   ThumbnailFile,
   deletePayload,
   getFileHeader,
+  NewMediaFile,
+  MediaFile,
 } from '../../core/core';
 import {
   getNewId,
@@ -34,7 +36,7 @@ import {
 } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { getPost, getPostBySlug } from './PostProvider';
-import { PostContent, NewMediaFile, MediaFile, BlogConfig, postTypeToDataType } from './PostTypes';
+import { PostContent, BlogConfig, postTypeToDataType } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';

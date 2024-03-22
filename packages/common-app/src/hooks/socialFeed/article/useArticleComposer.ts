@@ -1,15 +1,15 @@
 import { slugify, getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import {
-  Article,
-  ChannelDefinition,
-  BlogConfig,
-  NewMediaFile,
-  MediaFile,
-} from '@youfoundation/js-lib/public';
+import { Article, ChannelDefinition, BlogConfig } from '@youfoundation/js-lib/public';
 import { useState, useEffect } from 'react';
 import { HOME_ROOT_PATH, getReadingTime, useBlog, useDotYouClient } from '../../../..';
 import { usePost } from '../post/usePost';
-import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  HomebaseFile,
+  NewHomebaseFile,
+  SecurityGroupType,
+  NewMediaFile,
+  MediaFile,
+} from '@youfoundation/js-lib/core';
 
 export const EMPTY_POST: Article = {
   id: '',

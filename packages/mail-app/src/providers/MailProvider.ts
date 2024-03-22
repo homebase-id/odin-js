@@ -26,9 +26,10 @@ import {
   queryBatch,
   uploadFile,
   uploadHeader,
+  MediaFile,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
-import { MediaFile, NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { processVideoFile, createThumbnails } from '@youfoundation/js-lib/media';
 import { getTextRootsRecursive } from '@youfoundation/common-app';

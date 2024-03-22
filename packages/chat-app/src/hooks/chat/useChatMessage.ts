@@ -6,10 +6,11 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
   TransferStatus,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { updateChatMessage, uploadChatMessage } from '../../providers/ChatProvider';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
+
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import {
   Conversation,
