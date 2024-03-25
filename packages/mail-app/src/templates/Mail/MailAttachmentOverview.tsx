@@ -32,7 +32,7 @@ export const MailAttachmentOverview = ({
       {slicedFiles.map((file) => (
         <AttachmentFile
           file={file}
-          key={file.key}
+          key={`${file.fileId}+${file.key}`}
           query={query}
           className={`rounded-lg border bg-background px-2 py-1 text-sm`}
         />
