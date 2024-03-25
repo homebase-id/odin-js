@@ -31,11 +31,11 @@ export const MailAttachmentOverview = ({
         <AttachmentFile
           file={file}
           key={file.key}
-          className={`rounded-full border border-slate-200 bg-background px-3 py-1 dark:border-slate-700`}
+          className={`rounded-lg bg-background px-2 py-1 text-sm`}
         />
       ))}
       {countExcludedFromView ? (
-        <p className="flex aspect-square h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-background text-sm dark:border-slate-700">
+        <p className="flex aspect-square h-9 w-9 items-center justify-center rounded-lg bg-background text-sm">
           +{countExcludedFromView}
         </p>
       ) : null}

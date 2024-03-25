@@ -107,9 +107,8 @@ export const getMailConversations = async (
   };
 };
 
-export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) => {
-  return await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
-};
+export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) =>
+  await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
 
 export const uploadMail = async (
   dotYouClient: DotYouClient,

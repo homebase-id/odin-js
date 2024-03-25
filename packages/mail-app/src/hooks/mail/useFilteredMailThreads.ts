@@ -9,10 +9,9 @@ import {
   MAIL_DRAFT_CONVERSATION_FILE_TYPE,
 } from '../../providers/MailProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { useMailConversations } from './useMailConversations';
+import { MAIL_CONVERSATIONS_PAGE_SIZE, useMailConversations } from './useMailConversations';
 import fuzzysort from 'fuzzysort';
 
-const PAGE_SIZE = 100;
 export type MailThreadsFilter = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash';
 
 export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string | undefined) => {
@@ -29,7 +28,7 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
   const threads = useMemo(() => {
     const flattenedConversations = flattenInfinteData<HomebaseFile<MailConversation>>(
       conversations,
-      PAGE_SIZE,
+      MAIL_CONVERSATIONS_PAGE_SIZE,
       (a, b) =>
         (b.fileMetadata.appData.userDate || b.fileMetadata.created) -
         (a.fileMetadata.appData.userDate || a.fileMetadata.created)

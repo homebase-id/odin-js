@@ -58,7 +58,7 @@ export const MailConversationItem = ({
       <div
         className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
             ${isSelected ? 'bg-primary/10' : ''}
-            ${!isSelected ? `group-hover:bg-slate-100 dark:group-hover:bg-slate-900 ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-950'}` : ''}`}
+            ${!isSelected ? `group-hover:bg-white dark:group-hover:bg-black ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-900'}` : ''}`}
       >
         <div className={`flex flex-row justify-between gap-4 md:gap-8`}>
           <button
