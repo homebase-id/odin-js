@@ -90,10 +90,16 @@ const useChatWebsocket = (isEnabled: boolean) => {
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
-        if (notification.notificationType === 'fileAdded') {
-          const conversationId = notification.header.fileMetadata.appData.groupId;
-          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+        const conversationId = notification.header.fileMetadata.appData.groupId;
+        const isNewFile = notification.notificationType === 'fileAdded';
+        const sender = notification.header.fileMetadata.senderOdinId;
 
+        if (!sender || sender === identity) {
+          // Ignore messages sent by the current user
+          return;
+        }
+
+        if (isNewFile) {
           // Check if the message is orphaned from a conversation
           const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
             queryKey: ['conversation', conversationId],
@@ -106,46 +112,49 @@ const useChatWebsocket = (isEnabled: boolean) => {
           } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
             restoreChat({ conversation });
           }
-        } else if (notification.notificationType === 'fileModified') {
-          const conversationId = notification.header.fileMetadata.appData.groupId;
-          const updatedChatMessage = await dsrToMessage(
-            dotYouClient,
-            notification.header,
-            ChatDrive,
-            true
-          );
-
-          if (!updatedChatMessage) return;
-
-          const extistingMessages = queryClient.getQueryData<
-            InfiniteData<{
-              searchResults: (HomebaseFile<ChatMessage> | null)[];
-              cursorState: string;
-              queryTime: number;
-              includeMetadataHeader: boolean;
-            }>
-          >(['chat-messages', conversationId]);
-
-          if (extistingMessages) {
-            const newData = {
-              ...extistingMessages,
-              pages: extistingMessages?.pages?.map((page) => ({
-                ...page,
-                searchResults: page.searchResults.map((msg) =>
-                  stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                    ? updatedChatMessage
-                    : msg
-                ),
-              })),
-            };
-            queryClient.setQueryData(['chat-messages', conversationId], newData);
-          }
-
-          queryClient.setQueryData(
-            ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
-            updatedChatMessage
-          );
         }
+
+        // This skips the invalidation of all chat messages, as we only need to add/update this specific message
+        const updatedChatMessage = await dsrToMessage(
+          dotYouClient,
+          notification.header,
+          ChatDrive,
+          true
+        );
+        if (!updatedChatMessage) return;
+
+        const extistingMessages = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', conversationId]);
+
+        if (extistingMessages) {
+          const newData = {
+            ...extistingMessages,
+            pages: extistingMessages?.pages?.map((page, index) => ({
+              ...page,
+              searchResults: isNewFile
+                ? index === 0
+                  ? [updatedChatMessage, ...page.searchResults]
+                  : page.searchResults
+                : page.searchResults.map((msg) =>
+                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ? updatedChatMessage
+                      : msg
+                  ),
+            })),
+          };
+          queryClient.setQueryData(['chat-messages', conversationId], newData);
+        }
+
+        queryClient.setQueryData(
+          ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
+          updatedChatMessage
+        );
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });

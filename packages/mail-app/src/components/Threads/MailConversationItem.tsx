@@ -1,4 +1,8 @@
-import { formatToTimeAgoWithRelativeDetail, Checkbox } from '@youfoundation/common-app';
+import {
+  formatToTimeAgoWithRelativeDetail,
+  Checkbox,
+  highlightQuery,
+} from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
@@ -7,7 +11,6 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
-import React from 'react';
 
 export const MailConversationItem = ({
   mailThread,
@@ -37,23 +40,10 @@ export const MailConversationItem = ({
   const isDraft =
     lastConversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
-  const subject = useMemo(() => {
-    const subject = lastConversation.fileMetadata.appData.content.subject;
-    if (!query) return subject;
-
-    const regEscape = (v: string) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    const strArr = subject.split(new RegExp(regEscape(query), 'ig'));
-
-    return strArr.map((str, index) => {
-      if (index === strArr.length - 1) return str;
-      return (
-        <React.Fragment key={index}>
-          {str}
-          <span className="bg-primary/30 font-semibold">{query}</span>
-        </React.Fragment>
-      );
-    });
-  }, [query, lastConversation]);
+  const subject = useMemo(
+    () => highlightQuery(lastConversation.fileMetadata.appData.content.subject, query),
+    [query, lastConversation]
+  );
 
   return (
     <Link
@@ -67,10 +57,10 @@ export const MailConversationItem = ({
     >
       <div
         className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
-            ${isSelected ? 'bg-primary/10' : ''}
-            ${!isSelected ? `group-hover:bg-slate-100 dark:group-hover:bg-slate-900 ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-950'}` : ''}`}
+            ${isSelected ? 'bg-primary/20 dark:bg-primary/50' : ''}
+            ${!isSelected ? `group-hover:bg-slate-50 dark:group-hover:bg-slate-800 ${isUnread ? 'bg-slate-50 dark:bg-slate-700' : 'border-b-slate-200 bg-background dark:bg-background'}` : ''}`}
       >
-        <div className={`flex flex-row justify-between gap-4 md:gap-8`}>
+        <div className={`flex flex-row items-center justify-between gap-4 md:gap-8`}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -79,7 +69,7 @@ export const MailConversationItem = ({
             }}
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
           />
-          <Checkbox checked={isSelected} readOnly />
+          <Checkbox checked={isSelected} readOnly id={'select-' + lastConversation.fileId} />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
             <div className="flex w-28 flex-shrink-0 flex-row gap-1">
               {isUnread ? (
@@ -94,11 +84,14 @@ export const MailConversationItem = ({
                 {subject}
               </p>
               <MailAttachmentOverview
-                files={lastConversation.fileMetadata.payloads?.map((file) => ({
-                  ...file,
-                  fileId: lastConversation.fileId,
-                  conversationId: lastConversation.fileMetadata.appData.groupId as string,
-                }))}
+                query={query}
+                files={mailThread.flatMap((thread) =>
+                  (thread.fileMetadata.payloads || []).map((file) => ({
+                    ...file,
+                    fileId: thread.fileId,
+                    conversationId: thread.fileMetadata.appData.groupId as string,
+                  }))
+                )}
               />
             </div>
           </div>

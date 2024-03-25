@@ -2,7 +2,7 @@ import { MailConversationsReturn, getMailConversations } from '../../providers/M
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
 
-const PAGE_SIZE = 100;
+export const MAIL_CONVERSATIONS_PAGE_SIZE = 100;
 const FIVE_MINUTES = 5 * 60 * 1000;
 
 export const useMailConversations = (
@@ -15,7 +15,12 @@ export const useMailConversations = (
   const dotYouClient = useDotYouClientContext();
 
   const fetchMailConversations = async (cursorState: string | undefined) => {
-    return await getMailConversations(dotYouClient, cursorState, undefined, PAGE_SIZE);
+    return await getMailConversations(
+      dotYouClient,
+      cursorState,
+      undefined,
+      MAIL_CONVERSATIONS_PAGE_SIZE
+    );
   };
 
   return {
@@ -24,7 +29,7 @@ export const useMailConversations = (
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMailConversations(pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage.results?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage.results?.length >= MAIL_CONVERSATIONS_PAGE_SIZE ? lastPage.cursorState : undefined,
       staleTime: FIVE_MINUTES,
       select,
     }),

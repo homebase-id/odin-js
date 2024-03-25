@@ -16,6 +16,7 @@ import {
   ActionGroup,
   ChevronDown,
   Exclamation,
+  highlightQuery,
 } from '@youfoundation/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
@@ -187,6 +188,7 @@ const MailMessage = ({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const showMessageInfo = isActive && searchParams.has('message-info');
+  const query = searchParams.get('q');
 
   const identity = useDotYouClientContext().getIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
@@ -197,9 +199,9 @@ const MailMessage = ({
   return (
     <div key={message.fileId} className={`${isDraft ? 'opacity-60' : ''}`}>
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
-      <ConversationalAwareness previousMessage={previousMessage} message={message} />
+      <ConversationalAwareness previousMessage={previousMessage} message={message} query={query} />
       <div
-        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
+        className={`flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
         {messageFromMe ? null : (
           <div className="h-10 w-10">
@@ -207,8 +209,10 @@ const MailMessage = ({
           </div>
         )}
         <div
-          className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
-            messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-background'
+          className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
+            messageFromMe
+              ? 'bg-primary/10 dark:bg-primary/30'
+              : 'bg-gray-500/10 dark:bg-gray-300/20'
           } ${isDraft ? 'cursor-pointer' : ''} ${isActive ? 'outline outline-4 outline-primary/50' : ''}`}
           onClick={
             isDraft && message.fileId
@@ -244,6 +248,7 @@ const MailMessage = ({
               imageDrive: MailDrive,
               lastModified: message.fileMetadata.updated,
               previewThumbnails: message.fileMetadata.payloads,
+              query: query || undefined,
             }}
           />
           <MailAttachmentOverview
@@ -254,6 +259,7 @@ const MailMessage = ({
               conversationId: message.fileMetadata.appData.groupId as string,
             }))}
             maxVisible={null}
+            query={query}
           />
 
           <ActionGroup
@@ -266,12 +272,14 @@ const MailMessage = ({
                   ),
               },
             ]}
-            className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+            className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
             type={'mute'}
             size="square"
           >
-            <ChevronDown className="h-3 w-3" />
-            <span className="sr-only ml-1">{t('More')}</span>
+            <span className="opacity-0 group-hover:opacity-100">
+              <ChevronDown className="h-3 w-3" />
+              <span className="sr-only ml-1">{t('More')}</span>
+            </span>
           </ActionGroup>
         </div>
       </div>
@@ -332,9 +340,11 @@ const ForwardedThread = ({
 const ConversationalAwareness = ({
   previousMessage,
   message,
+  query,
 }: {
   previousMessage: HomebaseFile<MailConversation> | undefined;
   message: HomebaseFile<MailConversation>;
+  query: string | undefined | null;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
 
@@ -347,8 +357,8 @@ const ConversationalAwareness = ({
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex flex-row justify-center py-4">
-      <p className="rounded-lg bg-page-background px-3 py-1 text-sm italic">{children}</p>
+    <div className="flex flex-row justify-center py-5">
+      <p className="text-sm italic">{children}</p>
     </div>
   );
 
@@ -389,8 +399,9 @@ const ConversationalAwareness = ({
     <>
       {!isSameSubject && (
         <Wrapper>
-          <Author /> {t('changed the subject from')} &quot;{previousSubject}&quot; {t('to')} &quot;
-          {currentSubject}&quot;
+          <Author /> {t('changed the subject from')} &quot;{highlightQuery(previousSubject, query)}
+          &quot; {t('to')} &quot;
+          {highlightQuery(currentSubject, query)}&quot;
         </Wrapper>
       )}
       {addedRecipients.map((recipient) => (

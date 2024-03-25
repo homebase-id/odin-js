@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TypedConnectionNotification } from '@youfoundation/js-lib/core';
 
 import { processInbox } from '@youfoundation/js-lib/peer';
@@ -6,9 +6,14 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import { useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback } from 'react';
 
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { MAIL_CONVERSATION_FILE_TYPE, MailDrive } from '../../providers/MailProvider';
+import {
+  MAIL_CONVERSATION_FILE_TYPE,
+  MailConversationsReturn,
+  MailDrive,
+  dsrToMailConversation,
+} from '../../providers/MailProvider';
 
 const MINUTE_IN_MS = 60000;
 
@@ -50,6 +55,8 @@ const isDebug = hasDebugFlag();
 
 const useMailWebsocket = (isEnabled: boolean) => {
   const queryClient = useQueryClient();
+  const dotYouClient = useDotYouClientContext();
+  const identity = dotYouClient.getIdentity();
 
   const handler = useCallback(async (notification: TypedConnectionNotification) => {
     isDebug && console.debug('[MailWebsocket] Got notification', notification);
@@ -59,7 +66,56 @@ const useMailWebsocket = (isEnabled: boolean) => {
       notification.notificationType === 'fileModified'
     ) {
       if (notification.header.fileMetadata.appData.fileType === MAIL_CONVERSATION_FILE_TYPE) {
-        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
+        const isNewFile = notification.notificationType === 'fileAdded';
+
+        // This skips the invalidation of all chat messages, as we only need to add/update this specific message
+        const updatedChatMessage = await dsrToMailConversation(
+          dotYouClient,
+          notification.header,
+          MailDrive,
+          true
+        );
+        if (!updatedChatMessage) return;
+
+        const sender =
+          notification.header.fileMetadata.senderOdinId ||
+          updatedChatMessage.fileMetadata.appData.content.sender;
+
+        if (!sender || sender === identity) {
+          // Ignore messages sent by the current user
+          return;
+        }
+
+        const existingConversations = queryClient.getQueryData<
+          InfiniteData<MailConversationsReturn>
+        >(['mail-conversations']);
+
+        if (existingConversations) {
+          const newConversations = {
+            ...existingConversations,
+            pages: existingConversations?.pages?.map((page, index) => ({
+              ...page,
+              results: isNewFile
+                ? index === 0
+                  ? [
+                      updatedChatMessage,
+                      ...page.results.filter(
+                        (existingMail) =>
+                          !stringGuidsEqual(existingMail.fileId, updatedChatMessage.fileId)
+                      ),
+                    ]
+                  : page.results
+                : page.results.map((msg) =>
+                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ? updatedChatMessage
+                      : msg
+                  ),
+            })),
+          };
+          queryClient.setQueryData(['mail-conversations'], newConversations);
+        }
+
+        queryClient.setQueryData(['mail-message', updatedChatMessage.fileId], updatedChatMessage);
       }
     }
   }, []);

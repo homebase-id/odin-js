@@ -14,6 +14,7 @@ import {
   Share,
   Trash,
   flattenInfinteData,
+  highlightQuery,
   t,
   useDotYouClient,
   useIsConnected,
@@ -111,7 +112,7 @@ export const MailThread = () => {
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
-          className="h-full bg-page-background py-2 md:py-5"
+          className="h-full bg-background py-2 md:py-5"
           scrollToMessage={messageKey}
         />
         <MailThreadActions
@@ -271,6 +272,7 @@ const MailThreadHeader = ({
 
   const showMailThreadInfo = searchParams.has('info');
   const showAttachmentsInfo = searchParams.has('attachments');
+  const query = searchParams.get('q');
 
   const {
     mutate: removeThread,
@@ -313,7 +315,9 @@ const MailThreadHeader = ({
         className={`sticky top-[3.7rem] z-20 flex flex-row items-center border-b border-gray-100 bg-background p-2 dark:border-gray-800 ${className || ''}`}
       >
         <ActionButton
-          onClick={() => navigate(`${ROOT_PATH}/${filter}`)}
+          onClick={() =>
+            navigate({ pathname: `${ROOT_PATH}/${filter}`, search: window.location.search })
+          }
           icon={ArrowLeft}
           type="mute"
           size="none"
@@ -354,7 +358,7 @@ const MailThreadHeader = ({
             />
           </>
         )}
-        <h1 className="ml-3 text-xl">{subject}</h1>
+        <h1 className="ml-3 text-xl">{highlightQuery(subject, query)}</h1>
         <div className="ml-auto flex flex-row items-center">
           <ActionButton
             onClick={() => navigate('?attachments')}

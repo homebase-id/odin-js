@@ -46,29 +46,37 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { createExperimentalPersiter } from './createExperimentalPersister';
+import { createIDBPersister } from './createIdbPersister';
+// import { createExperimentalPersiter } from './createExperimentalPersister';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 60 * 60 * 24, // 24 hours,
-      persister: createExperimentalPersiter(),
+      // => TODO: Disabled the experimentalPersister as the setQueryData isn't kept in the persister
+      // => https://github.com/TanStack/query/issues/6310
+      // persister: createExperimentalPersiter(),
     },
   },
 });
 
 export const REACT_QUERY_CACHE_KEY = 'MAIL_REACT_QUERY_OFFLINE_CACHE';
-const localStoragePersister = createSyncStoragePersister({
-  storage: window.localStorage,
-  retry: removeOldestQuery,
-  key: REACT_QUERY_CACHE_KEY,
-});
+const idbPersister = createIDBPersister(REACT_QUERY_CACHE_KEY);
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['connectionDetails', 'push-notifications', 'siteData'];
+const INCLUDED_QUERY_KEYS = [
+  'mail-conversations',
+  'connectionDetails',
+  'push-notifications',
+  'siteData',
+  'connectionDetails',
+
+  // Small data (blobs to local file Uri)
+  'image',
+];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: Infinity,
-  persister: localStoragePersister,
+  persister: idbPersister,
   dehydrateOptions: {
     shouldDehydrateQuery: (query) => {
       if (

@@ -59,6 +59,8 @@ export interface MailConversation {
   subject: string;
   message: RichText;
   plainMessage?: string; // Used purely for search purposes
+  plainAttachment?: string; // Used purely for search purposes
+
   sender: string; // Copy of the senderOdinId which is reset when the recipient marks the message as read
   recipients: string[];
   isRead?: boolean;
@@ -107,9 +109,8 @@ export const getMailConversations = async (
   };
 };
 
-export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) => {
-  return await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
-};
+export const getMailConversation = async (dotYouClient: DotYouClient, fileId: string) =>
+  await getFileHeader<MailConversation>(dotYouClient, MailDrive, fileId);
 
 export const uploadMail = async (
   dotYouClient: DotYouClient,
@@ -392,6 +393,9 @@ export const dsrToMailConversation = async (
           content: {
             ...attrContent,
             plainMessage: getTextRootsRecursive(attrContent.message).join(' '),
+            plainAttachment: dsr.fileMetadata.payloads
+              .map((payload) => payload.descriptorContent)
+              .join(' '),
           },
         },
       },

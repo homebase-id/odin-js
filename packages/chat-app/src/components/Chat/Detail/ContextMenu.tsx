@@ -82,14 +82,14 @@ export const ContextMenu = ({
           },
           ...optionalOptions,
         ]}
-        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
         type={'mute'}
         size="square"
       >
-        <>
+        <span className="opacity-0 group-hover:opacity-100">
           <ChevronDown className="h-3 w-3" />
           <span className="sr-only ml-1">{t('More')}</span>
-        </>
+        </span>
       </ActionGroup>
     </>
   );

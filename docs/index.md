@@ -13,3 +13,5 @@ Our opioniated React specific UI library that handles consuming media from a Hom
 ### Video
 
 ### Client search + indexing of data
+
+### Handling 400 - bad requests.. Where to find the info
