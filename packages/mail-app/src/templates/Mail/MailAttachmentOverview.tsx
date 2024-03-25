@@ -13,8 +13,8 @@ export interface AttachmentItem extends PayloadDescriptor {
 
 export const MailAttachmentOverview = ({
   files,
-  maxVisible = 2,
   query,
+  maxVisible = 2,
   className,
 }: {
   files: AttachmentItem[];
@@ -34,7 +34,7 @@ export const MailAttachmentOverview = ({
           file={file}
           key={file.key}
           query={query}
-          className={`rounded-lg bg-background px-2 py-1 text-sm`}
+          className={`rounded-lg border bg-background px-2 py-1 text-sm`}
         />
       ))}
       {countExcludedFromView ? (

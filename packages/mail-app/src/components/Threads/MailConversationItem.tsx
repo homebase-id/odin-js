@@ -85,11 +85,13 @@ export const MailConversationItem = ({
               </p>
               <MailAttachmentOverview
                 query={query}
-                files={lastConversation.fileMetadata.payloads?.map((file) => ({
-                  ...file,
-                  fileId: lastConversation.fileId,
-                  conversationId: lastConversation.fileMetadata.appData.groupId as string,
-                }))}
+                files={mailThread.flatMap((thread) =>
+                  (thread.fileMetadata.payloads || []).map((file) => ({
+                    ...file,
+                    fileId: thread.fileId,
+                    conversationId: thread.fileMetadata.appData.groupId as string,
+                  }))
+                )}
               />
             </div>
           </div>
