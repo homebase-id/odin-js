@@ -16,6 +16,7 @@ import {
   ActionGroup,
   ChevronDown,
   Exclamation,
+  highlightQuery,
 } from '@youfoundation/common-app';
 import { useEffect, useRef, useState } from 'react';
 import { useMarkMailConversationsAsRead } from '../../hooks/mail/useMarkMailConversationsAsRead';
@@ -198,7 +199,7 @@ const MailMessage = ({
   return (
     <div key={message.fileId} className={`${isDraft ? 'opacity-60' : ''}`}>
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
-      <ConversationalAwareness previousMessage={previousMessage} message={message} />
+      <ConversationalAwareness previousMessage={previousMessage} message={message} query={query} />
       <div
         className={`flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
@@ -336,9 +337,11 @@ const ForwardedThread = ({
 const ConversationalAwareness = ({
   previousMessage,
   message,
+  query,
 }: {
   previousMessage: HomebaseFile<MailConversation> | undefined;
   message: HomebaseFile<MailConversation>;
+  query: string | undefined | null;
 }) => {
   const identity = useDotYouClientContext().getIdentity();
 
@@ -393,8 +396,9 @@ const ConversationalAwareness = ({
     <>
       {!isSameSubject && (
         <Wrapper>
-          <Author /> {t('changed the subject from')} &quot;{previousSubject}&quot; {t('to')} &quot;
-          {currentSubject}&quot;
+          <Author /> {t('changed the subject from')} &quot;{highlightQuery(previousSubject, query)}
+          &quot; {t('to')} &quot;
+          {highlightQuery(currentSubject, query)}&quot;
         </Wrapper>
       )}
       {addedRecipients.map((recipient) => (

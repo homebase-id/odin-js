@@ -202,7 +202,7 @@ export const RichTextRenderer = ({
   );
 };
 
-export const highlightQuery = (text: string, query?: string) => {
+export const highlightQuery = (text: string | undefined, query: string | undefined | null) => {
   if (!query || !text || !(typeof text === 'string')) return text;
 
   const regEscape = (v: string) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');

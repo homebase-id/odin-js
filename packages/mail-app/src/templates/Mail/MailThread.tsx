@@ -14,6 +14,7 @@ import {
   Share,
   Trash,
   flattenInfinteData,
+  highlightQuery,
   t,
   useDotYouClient,
   useIsConnected,
@@ -271,6 +272,7 @@ const MailThreadHeader = ({
 
   const showMailThreadInfo = searchParams.has('info');
   const showAttachmentsInfo = searchParams.has('attachments');
+  const query = searchParams.get('q');
 
   const {
     mutate: removeThread,
@@ -356,7 +358,7 @@ const MailThreadHeader = ({
             />
           </>
         )}
-        <h1 className="ml-3 text-xl">{subject}</h1>
+        <h1 className="ml-3 text-xl">{highlightQuery(subject, query)}</h1>
         <div className="ml-auto flex flex-row items-center">
           <ActionButton
             onClick={() => navigate('?attachments')}
