@@ -46,13 +46,15 @@ const AUTH_PATH = ROOT_PATH + '/auth';
 
 import { ErrorBoundary, NotFound } from '@youfoundation/common-app';
 import { DotYouClientProvider } from '../components/Auth/DotYouClientProvider';
-import { createExperimentalPersiter } from './createExperimentalPersister';
+// import { createExperimentalPersiter } from './createExperimentalPersister';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 60 * 60 * 24, // 24 hours,
-      persister: createExperimentalPersiter(),
+      // => TODO: Disabled the experimentalPersister as the setQueryData isn't kept in the persister
+      // => https://github.com/TanStack/query/issues/6310
+      // persister: createExperimentalPersiter(),
     },
   },
 });
@@ -65,7 +67,12 @@ const localStoragePersister = createSyncStoragePersister({
 });
 
 // Explicit includes to avoid persisting media items, or large data in general
-const INCLUDED_QUERY_KEYS = ['connectionDetails', 'push-notifications', 'siteData'];
+const INCLUDED_QUERY_KEYS = [
+  'mail-conversations',
+  'connectionDetails',
+  'push-notifications',
+  'siteData',
+];
 const persistOptions: Omit<PersistQueryClientOptions, 'queryClient'> = {
   maxAge: Infinity,
   persister: localStoragePersister,

@@ -186,11 +186,11 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
           const newConversations: InfiniteData<MailConversationsReturn> = {
             ...existingConversations,
             pages: [
-              ...existingConversations.pages.map((page) => {
+              ...existingConversations.pages.map((page, index) => {
                 return {
                   ...page,
                   results:
-                    existingConversations.pages.length === 0
+                    index === 0
                       ? [
                           conversation as HomebaseFile<MailConversation>,
                           ...(existingConversations?.pages[0].results.filter(
@@ -213,10 +213,10 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         console.error('Error sending mail message', _error);
       },
       onSettled: async () => {
-        // Should we fully refetch the mail conversations and mail thread? Might be a lot of data...
+        // TODO: Should we really fully refetch the mail conversations and mail thread? Might be a lot of data...
+        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       },
     }),
-    // TODO: Use new versionTag that comes follows the update for the cached data...
     markAsRead: useMutation({
       mutationFn: markAsRead,
       onMutate: async ({ mailConversations }) => {
@@ -299,7 +299,6 @@ export const useMailConversation = (props?: { messageFileId: string }) => {
         queryClient.setQueryData(['mail-conversations'], newMailConversations);
       },
     }),
-    // TODO: Use new versionTag that comes follows the update for the cached data...
     markAsUnread: useMutation({
       mutationFn: markAsUnread,
       onMutate: async ({ mailConversations }) => {
