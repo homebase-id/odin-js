@@ -187,6 +187,7 @@ const MailMessage = ({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const showMessageInfo = isActive && searchParams.has('message-info');
+  const query = searchParams.get('q');
 
   const identity = useDotYouClientContext().getIdentity();
   const sender = message.fileMetadata.senderOdinId || message.fileMetadata.appData.content.sender;
@@ -199,7 +200,7 @@ const MailMessage = ({
       <ForwardedThread mailThread={message.fileMetadata.appData.content.forwardedMailThread} />
       <ConversationalAwareness previousMessage={previousMessage} message={message} />
       <div
-        className={`group flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
+        className={`flex gap-4 py-1 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} ${className || ''}`}
       >
         {messageFromMe ? null : (
           <div className="h-10 w-10">
@@ -207,7 +208,7 @@ const MailMessage = ({
           </div>
         )}
         <div
-          className={`relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
+          className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
             messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-background'
           } ${isDraft ? 'cursor-pointer' : ''} ${isActive ? 'outline outline-4 outline-primary/50' : ''}`}
           onClick={
@@ -244,6 +245,7 @@ const MailMessage = ({
               imageDrive: MailDrive,
               lastModified: message.fileMetadata.updated,
               previewThumbnails: message.fileMetadata.payloads,
+              query: query || undefined,
             }}
           />
           <MailAttachmentOverview
@@ -266,12 +268,14 @@ const MailMessage = ({
                   ),
               },
             ]}
-            className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+            className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
             type={'mute'}
             size="square"
           >
-            <ChevronDown className="h-3 w-3" />
-            <span className="sr-only ml-1">{t('More')}</span>
+            <span className="opacity-0 group-hover:opacity-100">
+              <ChevronDown className="h-3 w-3" />
+              <span className="sr-only ml-1">{t('More')}</span>
+            </span>
           </ActionGroup>
         </div>
       </div>

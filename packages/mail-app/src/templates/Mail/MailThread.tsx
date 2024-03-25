@@ -313,7 +313,9 @@ const MailThreadHeader = ({
         className={`sticky top-[3.7rem] z-20 flex flex-row items-center border-b border-gray-100 bg-background p-2 dark:border-gray-800 ${className || ''}`}
       >
         <ActionButton
-          onClick={() => navigate(`${ROOT_PATH}/${filter}`)}
+          onClick={() =>
+            navigate({ pathname: `${ROOT_PATH}/${filter}`, search: window.location.search })
+          }
           icon={ArrowLeft}
           type="mute"
           size="none"

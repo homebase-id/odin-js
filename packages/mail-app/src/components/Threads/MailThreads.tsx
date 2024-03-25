@@ -282,7 +282,7 @@ const MailConversationsHeader = ({
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
             onClick={toggleAllSelection}
           ></button>
-          <Checkbox checked={isAllSelected} readOnly className="block" />
+          <Checkbox checked={isAllSelected} readOnly className="block" id={`select-all`} />
         </div>
         {hasASelection ? (
           <>

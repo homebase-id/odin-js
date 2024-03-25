@@ -1,4 +1,8 @@
-import { formatToTimeAgoWithRelativeDetail, Checkbox } from '@youfoundation/common-app';
+import {
+  formatToTimeAgoWithRelativeDetail,
+  Checkbox,
+  highlightQuery,
+} from '@youfoundation/common-app';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import { MAIL_DRAFT_CONVERSATION_FILE_TYPE, MailConversation } from '../../providers/MailProvider';
@@ -7,7 +11,6 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { ROOT_PATH } from '../../app/App';
 import { MailAttachmentOverview } from '../../templates/Mail/MailAttachmentOverview';
 import { RecipientsList } from './RecipientsList';
-import React from 'react';
 
 export const MailConversationItem = ({
   mailThread,
@@ -37,23 +40,10 @@ export const MailConversationItem = ({
   const isDraft =
     lastConversation.fileMetadata.appData.fileType === MAIL_DRAFT_CONVERSATION_FILE_TYPE;
 
-  const subject = useMemo(() => {
-    const subject = lastConversation.fileMetadata.appData.content.subject;
-    if (!query) return subject;
-
-    const regEscape = (v: string) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    const strArr = subject.split(new RegExp(regEscape(query), 'ig'));
-
-    return strArr.map((str, index) => {
-      if (index === strArr.length - 1) return str;
-      return (
-        <React.Fragment key={index}>
-          {str}
-          <span className="bg-primary/30 font-semibold">{query}</span>
-        </React.Fragment>
-      );
-    });
-  }, [query, lastConversation]);
+  const subject = useMemo(
+    () => highlightQuery(lastConversation.fileMetadata.appData.content.subject, query),
+    [query, lastConversation]
+  );
 
   return (
     <Link
@@ -79,7 +69,7 @@ export const MailConversationItem = ({
             }}
             className="absolute bottom-0 left-0 top-0 z-10 w-10"
           />
-          <Checkbox checked={isSelected} readOnly />
+          <Checkbox checked={isSelected} readOnly id={'select-' + lastConversation.fileId} />
           <div className={`${isUnread ? 'font-semibold' : ''} flex flex-col md:contents`}>
             <div className="flex w-28 flex-shrink-0 flex-row gap-1">
               {isUnread ? (

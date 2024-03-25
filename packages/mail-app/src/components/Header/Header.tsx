@@ -52,6 +52,7 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
           className="w-full max-w-md"
           placeholder={t('Search mail')}
           defaultValue={`${searchParams.get('q') || ''}`}
+          id="query"
           onChange={(e) => {
             if (e.target.value.length) setSearchParams({ q: e.target.value });
             else setSearchParams({});
@@ -63,9 +64,7 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
             type="mute"
             size="none"
             className="absolute bottom-0 right-0 top-0 m-auto cursor-pointer rounded-none bg-primary/20 p-2 transition-colors hover:bg-primary/30"
-            onClick={() => {
-              setSearchParams({});
-            }}
+            onClick={() => setSearchParams({})}
           />
         ) : null}
       </div>

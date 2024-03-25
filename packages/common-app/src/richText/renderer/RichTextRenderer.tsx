@@ -16,6 +16,7 @@ export const RichTextRenderer = ({
     defaultGlobalTransitId?: string;
     lastModified: number | undefined;
     previewThumbnails?: PayloadDescriptor[];
+    query?: string;
   };
   className?: string;
 }) => {
@@ -46,26 +47,33 @@ export const RichTextRenderer = ({
 
   const renderLeaf = (
     leaf: { text?: string; bold?: boolean; italic?: boolean; underline?: boolean; code?: boolean },
-    children: ReactNode,
+    text: string,
     attributes: Record<string, unknown>
   ) => {
+    let children: ReactNode;
+    const highlightedText = highlightQuery(text, options?.query);
+
     if (leaf.bold) {
-      children = <strong className="font-bold">{children}</strong>;
+      children = <strong className="font-bold">{highlightedText}</strong>;
     }
 
     if (leaf.code) {
-      children = <code>{children}</code>;
+      children = <code>{highlightedText}</code>;
     }
 
     if (leaf.italic) {
-      children = <em>{children}</em>;
+      children = <em>{highlightedText}</em>;
     }
 
     if (leaf.underline) {
-      children = <u>{children}</u>;
+      children = <u>{highlightedText}</u>;
     }
 
-    return <span {...attributes}>{children}</span>;
+    return (
+      <span data-type={'leaf'} {...attributes}>
+        {children || highlightedText}
+      </span>
+    );
   };
 
   const renderElement = (
@@ -192,4 +200,21 @@ export const RichTextRenderer = ({
       })}
     </div>
   );
+};
+
+export const highlightQuery = (text: string, query?: string) => {
+  if (!query || !text || !(typeof text === 'string')) return text;
+
+  const regEscape = (v: string) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  const strArr = text.split(new RegExp(regEscape(query), 'ig'));
+
+  return strArr.map((str, index) => {
+    if (index === strArr.length - 1) return str;
+    return (
+      <React.Fragment key={index}>
+        {str}
+        <span className="bg-amber-200 dark:bg-yellow-600">{query}</span>
+      </React.Fragment>
+    );
+  });
 };
