@@ -233,7 +233,7 @@ const ChatMediaMessageBody = ({
   return (
     <div
       className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs ${
-        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
+        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
       }`}
     >
       {isGroupChat && !messageFromMe ? (

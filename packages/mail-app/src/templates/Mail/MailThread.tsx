@@ -112,7 +112,7 @@ export const MailThread = () => {
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
-          className="h-full bg-page-background py-2 md:py-5"
+          className="h-full bg-background py-2 md:py-5"
           scrollToMessage={messageKey}
         />
         <MailThreadActions

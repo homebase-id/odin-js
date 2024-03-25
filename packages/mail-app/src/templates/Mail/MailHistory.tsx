@@ -210,7 +210,9 @@ const MailMessage = ({
         )}
         <div
           className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
-            messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-background'
+            messageFromMe
+              ? 'bg-primary/10 dark:bg-primary/30'
+              : 'bg-gray-500/10 dark:bg-gray-300/20'
           } ${isDraft ? 'cursor-pointer' : ''} ${isActive ? 'outline outline-4 outline-primary/50' : ''}`}
           onClick={
             isDraft && message.fileId
@@ -257,6 +259,7 @@ const MailMessage = ({
               conversationId: message.fileMetadata.appData.groupId as string,
             }))}
             maxVisible={null}
+            query={query}
           />
 
           <ActionGroup
@@ -354,8 +357,8 @@ const ConversationalAwareness = ({
   };
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex flex-row justify-center py-4">
-      <p className="rounded-lg bg-page-background px-3 py-1 text-sm italic">{children}</p>
+    <div className="flex flex-row justify-center py-5">
+      <p className="text-sm italic">{children}</p>
     </div>
   );
 

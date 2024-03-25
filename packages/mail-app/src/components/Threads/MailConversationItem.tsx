@@ -57,10 +57,10 @@ export const MailConversationItem = ({
     >
       <div
         className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
-            ${isSelected ? 'bg-primary/10' : ''}
-            ${!isSelected ? `group-hover:bg-white dark:group-hover:bg-black ${isUnread ? 'bg-white dark:bg-black' : 'border-b-slate-200 bg-slate-50 dark:bg-slate-900'}` : ''}`}
+            ${isSelected ? 'bg-primary/20 dark:bg-primary/50' : ''}
+            ${!isSelected ? `group-hover:bg-slate-50 dark:group-hover:bg-slate-800 ${isUnread ? 'bg-slate-50 dark:bg-slate-700' : 'border-b-slate-200 bg-background dark:bg-background'}` : ''}`}
       >
-        <div className={`flex flex-row justify-between gap-4 md:gap-8`}>
+        <div className={`flex flex-row items-center justify-between gap-4 md:gap-8`}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -84,6 +84,7 @@ export const MailConversationItem = ({
                 {subject}
               </p>
               <MailAttachmentOverview
+                query={query}
                 files={lastConversation.fileMetadata.payloads?.map((file) => ({
                   ...file,
                   fileId: lastConversation.fileId,

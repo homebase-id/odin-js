@@ -103,64 +103,68 @@ export const useFilteredMailThreads = (filter: MailThreadsFilter, query: string 
     );
   }, [filteredConversations]);
 
-  // Flatten all pages, sorted descending and slice on the max number expected
+  // TODO: Investigate if we can prepare in the useMailConversations hook; So it's stored in cache "indexed"
   const threads = useMemo(() => {
-    const threads = Object.values(threadsDictionary);
-    if (!query) {
-      return threads.filter((thread) => {
-        // Remove threads with only messages from yourself when on inbox
-        if (filter === 'inbox') {
-          return thread.some((conversation) => {
-            const sender =
-              conversation.fileMetadata.senderOdinId ||
-              conversation.fileMetadata.appData.content.sender;
-            return sender !== identity;
-          });
-        }
-
-        return true;
-      });
-    }
-
-    // TODO: Investigate if we can prepare in the useMailConversations hook; So it's stored in cache "indexed"
     const today = new Date().getTime();
-    const searchResults = fuzzysort
-      .go(query, filteredConversations, {
-        keys: ['fileMetadata.appData.content.subject', 'fileMetadata.appData.content.plainMessage'],
-        threshold: -10000,
-        scoreFn: (a) => {
-          // Less than 0 days old, no penalty
-          const agePenalty = Math.abs(
-            Math.round(
-              (today -
-                (a as unknown as { obj: HomebaseFile<MailConversation> }).obj.fileMetadata
-                  .created) /
-                (1000 * 60 * 60 * 24)
-            )
-          );
+    const searchResults = query
+      ? fuzzysort
+          .go(query, filteredConversations, {
+            keys: [
+              'fileMetadata.appData.content.subject',
+              'fileMetadata.appData.content.plainMessage',
+              'fileMetadata.appData.content.plainAttachment',
+            ],
+            threshold: -10000,
+            scoreFn: (a) => {
+              // Less than 0 days old, no penalty
+              const agePenalty = Math.abs(
+                Math.round(
+                  (today -
+                    (a as unknown as { obj: HomebaseFile<MailConversation> }).obj.fileMetadata
+                      .created) /
+                    (1000 * 60 * 60 * 24)
+                )
+              );
 
-          // -100 to the plainMessage score makes it a worse match than a subject match
-          return (
-            Math.max(a[0] ? a[0].score : -Infinity, a[1] ? a[1].score - 100 : -Infinity) -
-            agePenalty
-          );
-        },
-      })
-      .map((result) => ({
-        originId: result.obj.fileMetadata.appData.content.originId,
-        threadId: result.obj.fileMetadata.appData.content.threadId,
-      }));
+              // -100 to the plainMessage score makes it a worse match than a subject match
+              return (
+                Math.max(
+                  a[0] ? a[0].score : -Infinity,
+                  a[1] ? a[1].score - 100 : -Infinity,
+                  a[2] ? a[2].score - 50 : -Infinity
+                ) - agePenalty
+              );
+            },
+          })
+          .map((result) => ({
+            originId: result.obj.fileMetadata.appData.content.originId,
+            threadId: result.obj.fileMetadata.appData.content.threadId,
+          }))
+      : [];
 
-    // filter threadsDictionary by searchResults
+    // filter threadsDictionary by searchResults if there's a query
     const filteredThreads = Object.keys(threadsDictionary)
       .filter((threadId) => {
-        return searchResults.some((searchResult) =>
-          stringGuidsEqual(searchResult.threadId, threadId)
+        return (
+          !query ||
+          searchResults.some((searchResult) => stringGuidsEqual(searchResult.threadId, threadId))
         );
       })
       .map((threadId) => threadsDictionary[threadId]);
 
-    return filteredThreads;
+    return filteredThreads.filter((thread) => {
+      // Remove threads with only messages from yourself when on inbox
+      if (filter === 'inbox') {
+        return thread.some((conversation) => {
+          const sender =
+            conversation.fileMetadata.senderOdinId ||
+            conversation.fileMetadata.appData.content.sender;
+          return sender !== identity;
+        });
+      }
+
+      return true;
+    });
   }, [threadsDictionary, filteredConversations, filter, query]);
 
   return {

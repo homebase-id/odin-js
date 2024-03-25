@@ -1,4 +1,4 @@
-import { ExtensionThumbnail, FakeAnchor } from '@youfoundation/common-app';
+import { ExtensionThumbnail, FakeAnchor, highlightQuery } from '@youfoundation/common-app';
 import { PayloadDescriptor } from '@youfoundation/js-lib/core';
 import { OdinPreviewImage } from '@youfoundation/ui-lib';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
@@ -14,9 +14,11 @@ export interface AttachmentItem extends PayloadDescriptor {
 export const MailAttachmentOverview = ({
   files,
   maxVisible = 2,
+  query,
   className,
 }: {
   files: AttachmentItem[];
+  query?: string | null;
   maxVisible?: number | null;
   className?: string;
 }) => {
@@ -31,6 +33,7 @@ export const MailAttachmentOverview = ({
         <AttachmentFile
           file={file}
           key={file.key}
+          query={query}
           className={`rounded-lg bg-background px-2 py-1 text-sm`}
         />
       ))}
@@ -46,10 +49,12 @@ export const MailAttachmentOverview = ({
 export const AttachmentFile = ({
   file,
   className,
+  query,
   children,
 }: {
   file: AttachmentItem;
   className?: string;
+  query?: string | null;
   children?: React.ReactNode;
 }) => {
   const dotYouClient = useDotYouClientContext();
@@ -83,7 +88,7 @@ export const AttachmentFile = ({
       ) : (
         <ExtensionThumbnail contentType={file.contentType} className="h-6 w-6" />
       )}
-      {file.descriptorContent || file.key}
+      <span>{highlightQuery(file.descriptorContent || file.key, query)}</span>
       {children}
     </FakeAnchor>
   );
