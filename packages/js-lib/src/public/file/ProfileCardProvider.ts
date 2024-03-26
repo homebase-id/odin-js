@@ -48,7 +48,7 @@ export const GetProfileCard = async (odinId: string): Promise<ProfileCard | unde
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
       return await httpClient
-        .get<ProfileCard>(`/pub/profile`, {
+        .get<ProfileCard>(`https://${odinId}/pub/profile`, {
           withCredentials: false,
         })
         .then((response) => {
@@ -116,7 +116,7 @@ export const GetProfileImage = async (odinId: string): Promise<Blob | undefined>
     const httpClient = axios.create();
     const fetchProfileCard = async () => {
       return await httpClient
-        .get(`/pub/image`, {
+        .get(`https://${odinId}/pub/image`, {
           baseURL: odinId,
           withCredentials: false,
           responseType: 'arraybuffer',
