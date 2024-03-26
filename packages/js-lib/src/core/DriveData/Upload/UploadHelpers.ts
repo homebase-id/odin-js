@@ -201,14 +201,13 @@ export const pureUpload = async (
   onVersionConflict?: () => void,
   axiosConfig?: AxiosRequestConfig
 ) => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
   const config: AxiosRequestConfig = {
     ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
       ...axiosConfig?.headers,
     },
   };
@@ -244,7 +243,7 @@ export const pureAppend = async (
 ): Promise<AppendResult> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
-    headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
+    systemFileType,
   });
   const url = '/drive/files/uploadpayload';
 

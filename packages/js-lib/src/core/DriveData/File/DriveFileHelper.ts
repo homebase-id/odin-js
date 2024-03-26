@@ -13,9 +13,7 @@ export const getCacheKey = (targetDrive: TargetDrive, id: string, decrypt: boole
 
 export const getAxiosClient = (dotYouClient: DotYouClient, systemFileType?: SystemFileType) =>
   dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
 export const parseBytesToObject = <T>(

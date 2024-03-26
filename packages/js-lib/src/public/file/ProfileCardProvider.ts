@@ -1,6 +1,7 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
+import axios from 'axios';
 import { DotYouClient } from '../../core/DotYouClient';
 import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { getDecryptedImageData } from '../../media/ImageProvider';
@@ -38,32 +39,28 @@ export const publishProfileCard = async (dotYouClient: DotYouClient) => {
   if (displayNames?.length) await publishProfileCardFile(dotYouClient, { name: displayNames[0] });
 };
 
-export const GetProfileCard = async (
-  dotYouClient: DotYouClient
-): Promise<ProfileCard | undefined> => {
+export const GetProfileCard = async (odinId: string): Promise<ProfileCard | undefined> => {
   try {
-    if (_internalFileCache.has(dotYouClient.getRoot())) {
-      return await _internalFileCache.get(dotYouClient.getRoot());
+    if (_internalFileCache.has(odinId)) {
+      return await _internalFileCache.get(odinId);
     }
 
-    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
-
+    const httpClient = axios.create();
     const fetchProfileCard = async () => {
       return await httpClient
         .get<ProfileCard>(`/pub/profile`, {
-          baseURL: dotYouClient.getRoot(),
           withCredentials: false,
         })
         .then((response) => {
           return {
             ...response.data,
-            image: `https://${dotYouClient.getIdentity()}/pub/image`,
+            image: `https://${odinId}/pub/image`,
           };
         });
     };
 
     const promise = fetchProfileCard();
-    _internalFileCache.set(dotYouClient.getRoot(), promise);
+    _internalFileCache.set(odinId, promise);
 
     return await promise;
   } catch (ex) {
@@ -114,14 +111,13 @@ export const publishProfileImage = async (dotYouClient: DotYouClient) => {
   }
 };
 
-export const GetProfileImage = async (dotYouClient: DotYouClient): Promise<Blob | undefined> => {
+export const GetProfileImage = async (odinId: string): Promise<Blob | undefined> => {
   try {
-    const httpClient = dotYouClient.createAxiosClient({ overrideEncryption: true });
-
+    const httpClient = axios.create();
     const fetchProfileCard = async () => {
       return await httpClient
         .get(`/pub/image`, {
-          baseURL: dotYouClient.getRoot(),
+          baseURL: odinId,
           withCredentials: false,
           responseType: 'arraybuffer',
         })

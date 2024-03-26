@@ -52,9 +52,7 @@ export const queryModified = async (
   delete strippedQueryParams.systemFileType;
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
+    systemFileType: params.systemFileType,
   });
 
   const request: GetModifiedRequest = {
@@ -132,9 +130,7 @@ export const queryBatch = async <
   delete strippedQueryParams.systemFileType;
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
+    systemFileType: params.systemFileType,
   });
 
   const request: GetBatchRequest = {
@@ -202,9 +198,7 @@ export const queryBatchCollection = async (
   const { decrypt, axiosConfig } = config ?? {};
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const updatedQueries = queries.map((query) => {

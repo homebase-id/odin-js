@@ -167,9 +167,7 @@ const queryBatchCachedCollection = async (
   systemFileType?: SystemFileType
 ): Promise<QueryBatchCollectionResponse> => {
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const updatedQueries = queries.map((query) => {
