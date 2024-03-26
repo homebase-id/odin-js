@@ -28,7 +28,13 @@ export const MailHomeHeader = () => {
 
 const MenuButton = () => {
   return (
-    <ActionLink icon={Bars} type="mute" size="square" href={ROOT_PATH} className="md:hidden" />
+    <ActionLink
+      icon={Bars}
+      type="mute"
+      size="square"
+      href={`${ROOT_PATH}${window.location.search}`}
+      className="md:hidden"
+    />
   );
 };
 

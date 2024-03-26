@@ -16,6 +16,7 @@ import {
   FEED_APP_ID,
   OWNER_APP_ID,
   PHOTO_APP_ID,
+  MAIL_APP_ID,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
@@ -46,10 +47,11 @@ const Dashboard = () => {
         .
       </p>
 
-      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
         <SystemApp />
-        <ChatApp />
         <FeedApp />
+        <ChatApp />
+        <MailApp />
         <PhotoApp />
       </div>
 
@@ -146,10 +148,30 @@ const ChatApp = () => {
               {
                 label: t('Install on Android'),
                 icon: Download,
-                href: `https://play.google.com/store/apps/details?id=id.homebase.chattr`,
+                href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
               },
             ]
           : []),
+      ]}
+    />
+  );
+};
+
+const MailApp = () => {
+  const unreadCount = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+
+  return (
+    <AppWrapper
+      appId={MAIL_APP_ID}
+      name={'Mail'}
+      href={`/apps/mail`}
+      unreadCount={unreadCount}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${MAIL_APP_ID}`,
+        },
       ]}
     />
   );
