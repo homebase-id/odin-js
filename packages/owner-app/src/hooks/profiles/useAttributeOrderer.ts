@@ -16,7 +16,7 @@ export const useAttributeOrderer = ({
   currentGroupAttributes: HomebaseFile<AttributeVm>[];
   groupedAttributes: GroupedAttributes[];
 }) => {
-  const { mutateAsync: saveAttribute } = useAttribute().save;
+  const { mutateAsync: saveProfileAttribute } = useAttribute().save;
 
   const flatAttributes = groupedAttributes.flatMap((group) => group.attributes);
 
@@ -25,7 +25,7 @@ export const useAttributeOrderer = ({
     await Promise.all(
       orderedAttributes.map(
         async (attr, index) =>
-          await saveAttribute({
+          await saveProfileAttribute({
             ...attr,
             fileMetadata: {
               ...attr.fileMetadata,

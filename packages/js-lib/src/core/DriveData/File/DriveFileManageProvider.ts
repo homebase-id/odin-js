@@ -17,9 +17,7 @@ export const deleteFile = async (
   assertIfDefined('FileId', fileId);
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const request = {
@@ -57,9 +55,7 @@ export const deleteFiles = async (
   assertIfDefined('FileIds', fileIds);
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const request = {
@@ -97,9 +93,7 @@ export const deleteFilesByGroupId = async (
   assertIfDefined('GroupIds', groupIds);
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const request = {
@@ -137,9 +131,7 @@ export const deletePayload = async (
   assertIfDefined('FileKey', fileKey);
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const request = {

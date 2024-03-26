@@ -22,6 +22,7 @@ export interface AppAuthorizationParams {
   cp: string | undefined;
   d: string | undefined;
   cd: string | undefined;
+  c: string | undefined;
   return: string;
   o?: string;
 }
@@ -48,6 +49,7 @@ export const getRegistrationParams = async (
   circlePermissionKeys: number[] | undefined,
   drives: { a: string; t: string; n: string; d: string; p: number }[],
   circleDrives: { a: string; t: string; n: string; d: string; p: number }[] | undefined,
+  circles: string[] | undefined,
   eccPublicKey: CryptoKey,
   host?: string,
   clientFriendlyName?: string,
@@ -63,6 +65,7 @@ export const getRegistrationParams = async (
     cp: circlePermissionKeys?.join(','),
     d: JSON.stringify(drives),
     cd: circleDrives ? JSON.stringify(circleDrives) : undefined,
+    c: circles?.join(','),
     return: 'backend-will-decide',
     o: undefined,
   };

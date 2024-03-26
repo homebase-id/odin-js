@@ -20,9 +20,7 @@ export const getDrivesByTypeOverPeer = async (
   };
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   return client.post('transit/query/metadata/type', params).then((response) => {

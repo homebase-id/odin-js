@@ -4,8 +4,8 @@ import {
   BuiltInProfiles,
   MinimalProfileFields,
   Attribute,
-  getAttributeVersions,
-  getAttribute,
+  getProfileAttributes,
+  getProfileAttribute,
 } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
@@ -60,7 +60,7 @@ export const useBiography = () => {
               console.warn(entry, 'fetching attribute, not enough data in static file');
               // Fetch attribute if it is not included in the static data
               attr = (
-                await getAttribute(
+                await getProfileAttribute(
                   dotYouClient,
                   BuiltInProfiles.StandardProfileId,
                   entry.header.fileMetadata.appData.uniqueId
@@ -111,7 +111,7 @@ export const useBiography = () => {
     const fetchDynamicData = async (): Promise<BiographyData | undefined> => {
       try {
         const shortBiographyAttributes = (
-          await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+          await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
             BuiltInAttributes.ShortBio,
           ])
         )?.map((dsr) => {
@@ -124,7 +124,7 @@ export const useBiography = () => {
         });
 
         const longBiographyAttributes = (
-          await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+          await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
             BuiltInAttributes.Experience,
           ])
         )?.map((dsr) => {

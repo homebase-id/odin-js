@@ -14,19 +14,18 @@ import {
   getProfileDefinition,
   saveProfileDefinition,
   saveProfileSection,
-  getAttributes,
-  saveAttribute,
   BuiltInAttributes,
   LocationFields,
   MinimalProfileFields,
-  getAttribute,
+  getProfileAttribute,
   LinkFields,
   SocialFields,
-  getAttributeVersions,
+  getProfileAttributes,
   Attribute,
 } from '@youfoundation/js-lib/profile';
 import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
 import { FollowRequest, createOrUpdateFollow } from '@youfoundation/js-lib/network';
+import { saveProfileAttribute } from '../profile/AttributeData/ManageAttributeProvider';
 
 export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
   const initialStandardProfile: ProfileDefinition = {
@@ -109,14 +108,15 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     },
   };
 
-  const shortBioAttr = await getAttributes(
+  const shortBioAttr = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
+    undefined,
     [BuiltInAttributes.ShortBio],
     1
   );
 
-  if (!shortBioAttr?.length) await saveAttribute(dotYouClient, defaultShortBioAttribute);
+  if (!shortBioAttr?.length) await saveProfileAttribute(dotYouClient, defaultShortBioAttribute);
 
   const defaultStatusAttribute: NewHomebaseFile<Attribute> = {
     fileMetadata: {
@@ -136,14 +136,15 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     },
   };
 
-  const statusAttr = await getAttributes(
+  const statusAttr = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
+    undefined,
     [BuiltInAttributes.Status],
     1
   );
 
-  if (!statusAttr?.length) await saveAttribute(dotYouClient, defaultStatusAttribute);
+  if (!statusAttr?.length) await saveProfileAttribute(dotYouClient, defaultStatusAttribute);
 };
 
 export const SetupHome = async (dotYouClient: DotYouClient) => {
@@ -169,14 +170,15 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     serverMetadata: { accessControlList: ANONYMOUS_ACL },
   };
 
-  const themeDef = await getAttributes(
+  const themeDef = await getProfileAttributes(
     dotYouClient,
     HomePageConfig.DefaultDriveId,
+    undefined,
     [HomePageAttributes.Theme],
     1
   );
 
-  if (!themeDef?.length) await saveAttribute(dotYouClient, defaultThemeAttribute);
+  if (!themeDef?.length) await saveProfileAttribute(dotYouClient, defaultThemeAttribute);
 };
 
 export const SetupBlog = async (dotYouClient: DotYouClient) => {
@@ -210,7 +212,7 @@ const ANONYMOUS_ACL = { requiredSecurityGroup: SecurityGroupType.Anonymous };
 const SetupProfileData = async (dotYouClient: DotYouClient, profileData: ProfileSetupData) => {
   // Default Photo Attribute
   const defaultPhotoAttrId = toGuidId('default_photo_attribute');
-  const existingPhotoAttr = await getAttribute(
+  const existingPhotoAttr = await getProfileAttribute(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     defaultPhotoAttrId
@@ -238,12 +240,12 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
     newPhotoAttr.fileMetadata.appData.content.data[MinimalProfileFields.ProfileImageKey] =
       profileData.imageData;
 
-    await saveAttribute(dotYouClient, newPhotoAttr);
+    await saveProfileAttribute(dotYouClient, newPhotoAttr);
   }
 
   // Default Name Attribute
   const defaultNameAttrId = toGuidId('default_name_attribute');
-  const existingNameAttr = await getAttribute(
+  const existingNameAttr = await getProfileAttribute(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     defaultNameAttrId
@@ -275,13 +277,13 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
     newNameAttr.fileMetadata.appData.content.data[MinimalProfileFields.DisplayName] =
       `${profileData.givenName} ${profileData.surname}`;
 
-    await saveAttribute(dotYouClient, newNameAttr);
+    await saveProfileAttribute(dotYouClient, newNameAttr);
   }
 
   // Default Location Attribute (Optional)
   if (profileData.city || profileData.country) {
     const defaultLocationAttrId = toGuidId('default_location_attribute');
-    const existingLocationAttr = await getAttribute(
+    const existingLocationAttr = await getProfileAttribute(
       dotYouClient,
       BuiltInProfiles.StandardProfileId,
       defaultLocationAttrId
@@ -311,7 +313,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
       newLocationAttr.fileMetadata.appData.content.data[LocationFields.Country] =
         profileData.country ?? '';
 
-      await saveAttribute(dotYouClient, newLocationAttr);
+      await saveProfileAttribute(dotYouClient, newLocationAttr);
     }
   }
 };
@@ -319,7 +321,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
 const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSetupData) => {
   const saveSocial = async (type: string, dataField: string, value: string, priority: number) => {
     // Search attribute:
-    const foundAttributesOfType = await getAttributeVersions(
+    const foundAttributesOfType = await getProfileAttributes(
       dotYouClient,
       BuiltInProfiles.StandardProfileId,
       undefined,
@@ -348,7 +350,7 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
         socialAttribute.fileMetadata.appData.content.data = {};
       socialAttribute.fileMetadata.appData.content.data[dataField] = value;
 
-      await saveAttribute(dotYouClient, socialAttribute);
+      await saveProfileAttribute(dotYouClient, socialAttribute);
     }
 
     return true;
@@ -426,7 +428,7 @@ const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSet
         linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkText] = link.text;
         linkAttribute.fileMetadata.appData.content.data[LinkFields.LinkTarget] = link.target;
 
-        return await saveAttribute(dotYouClient, linkAttribute);
+        return await saveProfileAttribute(dotYouClient, linkAttribute);
       })
     );
 };

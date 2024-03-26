@@ -5,7 +5,7 @@ import {
   BuiltInProfiles,
   Attribute,
   AttributeConfig,
-  dsrToAttributeFile,
+  homebaseFileToProfileAttribute,
   GetTargetDriveFromProfileId,
 } from '@youfoundation/js-lib/profile';
 import {
@@ -155,7 +155,7 @@ export const useSiteData = () => {
       const socialDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
       const homeDrive = HomePageConfig.HomepageTargetDrive;
 
-      /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getAttributeVersions`
+      /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getProfileAttributes`
       const collectionResult = await queryBatchCollection(dotYouClient, [
         {
           name: 'owner',
@@ -211,7 +211,12 @@ export const useSiteData = () => {
           .get('owner')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, ownerDrive, INCLUDE_METADATA_HEADER)
+              await homebaseFileToProfileAttribute(
+                dotYouClient,
+                dsr,
+                ownerDrive,
+                INCLUDE_METADATA_HEADER
+              )
           ) ?? []
       );
       const socialAttr = await Promise.all(
@@ -219,7 +224,12 @@ export const useSiteData = () => {
           .get('social')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, ownerDrive, INCLUDE_METADATA_HEADER)
+              await homebaseFileToProfileAttribute(
+                dotYouClient,
+                dsr,
+                ownerDrive,
+                INCLUDE_METADATA_HEADER
+              )
           ) ?? []
       );
       const homeAttr = await Promise.all(
@@ -227,7 +237,12 @@ export const useSiteData = () => {
           .get('home')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, homeDrive, INCLUDE_METADATA_HEADER)
+              await homebaseFileToProfileAttribute(
+                dotYouClient,
+                dsr,
+                homeDrive,
+                INCLUDE_METADATA_HEADER
+              )
           ) ?? []
       );
 

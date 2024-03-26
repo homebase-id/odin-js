@@ -15,3 +15,7 @@ Our opioniated React specific UI library that handles consuming media from a Hom
 ### Client search + indexing of data
 
 ### Handling 400 - bad requests.. Where to find the info
+
+### How a file's modified date is calculated
+
+### Sending Files over peer and reporting status to users

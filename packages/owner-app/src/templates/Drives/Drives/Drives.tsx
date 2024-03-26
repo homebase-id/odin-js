@@ -17,11 +17,7 @@ const Drives = () => {
     fetch: { data: drives, isLoading: isDrivesLoading },
   } = useDrives();
 
-  // const [isImportOpen, setIsImportOpen] = useState(false);
-
-  if (isDrivesLoading) {
-    <LoadingDetailPage />;
-  }
+  if (isDrivesLoading) <LoadingDetailPage />;
 
   const driveTypeDefinitions = [
     {
@@ -94,13 +90,6 @@ const Drives = () => {
           ))
         )}
       </section>
-      {/*
-      <ImportDialog
-        title={`${t('Import new Drive')}`}
-        isOpen={isImportOpen}
-        onConfirm={() => setIsImportOpen(false)}
-        onCancel={() => setIsImportOpen(false)}
-      /> */}
     </>
   );
 };

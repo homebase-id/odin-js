@@ -116,10 +116,8 @@ export const queryConnectionPhotoData = async (
 };
 
 export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | undefined> => {
-  const client = new DotYouClient({ api: ApiType.Guest, identity: odinId });
-
-  const profileCard = await GetProfileCard(client);
-  const imageData = await GetProfileImage(client);
+  const profileCard = await GetProfileCard(odinId);
+  const imageData = await GetProfileImage(odinId);
 
   return {
     name: profileCard?.name
