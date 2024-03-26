@@ -25,6 +25,7 @@ export const useAttributes = ({
       dotYouClient,
       profileId,
       sectionId,
+      undefined,
       100 // TODO: Should we page this properly, or how many profile attributes do we expect as normal?
     );
 
@@ -60,7 +61,13 @@ export const useAttributes = ({
       return;
     }
 
-    const foundAttributes = await getProfileAttributes(dotYouClient, profileId, sectionId, 100);
+    const foundAttributes = await getProfileAttributes(
+      dotYouClient,
+      profileId,
+      sectionId,
+      undefined,
+      100
+    );
 
     return await Promise.all(
       foundAttributes.map(

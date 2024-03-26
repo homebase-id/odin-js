@@ -4,7 +4,7 @@ import {
   BuiltInProfiles,
   MinimalProfileFields,
   Attribute,
-  getAttributeVersions,
+  getProfileAttributes,
   getAttribute,
 } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
@@ -111,7 +111,7 @@ export const useBiography = () => {
     const fetchDynamicData = async (): Promise<BiographyData | undefined> => {
       try {
         const shortBiographyAttributes = (
-          await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+          await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
             BuiltInAttributes.ShortBio,
           ])
         )?.map((dsr) => {
@@ -124,7 +124,7 @@ export const useBiography = () => {
         });
 
         const longBiographyAttributes = (
-          await getAttributeVersions(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
+          await getProfileAttributes(dotYouClient, BuiltInProfiles.StandardProfileId, undefined, [
             BuiltInAttributes.Experience,
           ])
         )?.map((dsr) => {

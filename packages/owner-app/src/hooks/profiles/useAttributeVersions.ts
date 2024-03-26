@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAttributeVersions } from '@youfoundation/js-lib/profile';
+import { getProfileAttributes } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 
 export const useAttributeVersions = ({ profileId, type }: { profileId: string; type: string }) => {
   const dotYouClient = useAuth().getDotYouClient();
 
   const fetchVersions = async ({ profileId, type }: { profileId: string; type: string }) => {
-    return await getAttributeVersions(dotYouClient, profileId, undefined, [type]);
+    return await getProfileAttributes(dotYouClient, profileId, undefined, [type]);
   };
   return {
     fetchVersions: useQuery({

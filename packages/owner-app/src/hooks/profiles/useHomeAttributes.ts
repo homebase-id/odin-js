@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAttributes } from '@youfoundation/js-lib/profile';
+import { getProfileAttributes } from '@youfoundation/js-lib/profile';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
 import { useAuth } from '../auth/useAuth';
 import { AttributeVm } from './useAttributes';
@@ -11,9 +11,10 @@ export const useHomeAttributes = () => {
 
   const fetchTheme = async () => {
     const foundThemeAttributes = (
-      await getAttributes(
+      await getProfileAttributes(
         dotYouClient,
         HomePageConfig.DefaultDriveId,
+        undefined,
         [HomePageAttributes.Theme],
         10
       )

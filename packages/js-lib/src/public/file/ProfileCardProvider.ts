@@ -6,7 +6,7 @@ import { HomebaseFile, SecurityGroupType } from '../../core/DriveData/File/Drive
 import { getDecryptedImageData } from '../../media/ImageProvider';
 import { BuiltInProfiles, MinimalProfileFields } from '../../profile/ProfileData/ProfileConfig';
 import { GetTargetDriveFromProfileId } from '../../profile/ProfileData/ProfileDefinitionProvider';
-import { getAttributeVersions, BuiltInAttributes, Attribute } from '../../profile/profile';
+import { getProfileAttributes, BuiltInAttributes, Attribute } from '../../profile/profile';
 import { publishProfileCardFile, publishProfileImageFile } from './FileProvider';
 
 export interface ProfileCard {
@@ -16,7 +16,7 @@ export interface ProfileCard {
 const _internalFileCache = new Map<string, Promise<ProfileCard | undefined>>();
 
 export const publishProfileCard = async (dotYouClient: DotYouClient) => {
-  const profileNameAttributes = await getAttributeVersions(
+  const profileNameAttributes = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     BuiltInProfiles.PersonalInfoSectionId,
@@ -73,7 +73,7 @@ export const GetProfileCard = async (
 };
 
 export const publishProfileImage = async (dotYouClient: DotYouClient) => {
-  const profilePhotoAttributes = await getAttributeVersions(
+  const profilePhotoAttributes = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
     BuiltInProfiles.PersonalInfoSectionId,

@@ -46,58 +46,28 @@ const sortAttrs = (
   (a.priority || 0) - (b.priority || 0) ||
   (a.fileMetadata.appData.content?.priority || 0) - (b.fileMetadata.appData.content?.priority || 0);
 
-//Gets all attributes for a given profile.  if sectionId is defined, only attributes matching that section are returned.
+//Gets all versions of an attribute available to the caller
 export const getProfileAttributes = async (
   dotYouClient: DotYouClient,
   profileId: string,
   sectionId: string | undefined,
-  pageSize: number
-): Promise<HomebaseFile<Attribute | undefined>[]> => {
+  types: string[] | undefined,
+  pageSize: number = 10
+): Promise<HomebaseFile<Attribute>[]> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   const qp: FileQueryParams = {
     targetDrive: targetDrive,
     fileType: [AttributeConfig.AttributeFileType],
     groupId: sectionId ? [sectionId] : undefined,
+    tagsMatchAtLeastOne: types,
   };
 
   const result = await queryBatch(dotYouClient, qp, {
     maxRecords: pageSize,
-    includeMetadataHeader: true, // Set to true to allow content to be there, and we don't need extra calls to get the header with content
-  });
-
-  let attributes: HomebaseFile<Attribute | undefined>[] = (
-    await Promise.all(
-      result.searchResults.map(async (dsr) =>
-        dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
-      )
-    )
-  ).filter((attr) => !!attr) as HomebaseFile<Attribute | undefined>[];
-
-  attributes = attributes.sort(sortAttrs);
-  return attributes;
-};
-
-//gets all versions of an attribute available to the caller
-export const getAttributeVersions = async (
-  dotYouClient: DotYouClient,
-  profileId: string,
-  sectionId: string | undefined,
-  tags: string[]
-): Promise<HomebaseFile<Attribute>[] | undefined> => {
-  const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const qp: FileQueryParams = {
-    targetDrive: targetDrive,
-    fileType: [AttributeConfig.AttributeFileType],
-    groupId: sectionId ? [sectionId] : undefined,
-    tagsMatchAtLeastOne: tags,
-  };
-
-  const result = await queryBatch(dotYouClient, qp, {
-    maxRecords: 10,
     includeMetadataHeader: true,
   });
 
-  let attributes: HomebaseFile<Attribute>[] = (
+  const attributes: HomebaseFile<Attribute>[] = (
     await Promise.all(
       result.searchResults.map(async (dsr) =>
         dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
@@ -105,19 +75,7 @@ export const getAttributeVersions = async (
     )
   ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
 
-  attributes = attributes.sort(sortAttrs);
-  return attributes;
-};
-
-export const getAttributeByFileId = async (
-  dotYouClient: DotYouClient,
-  profileId: string,
-  fileId: string
-): Promise<HomebaseFile<Attribute | undefined> | null> => {
-  const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-  if (!header) return null;
-  return dsrToAttributeFile(dotYouClient, header, targetDrive, true);
+  return attributes.sort(sortAttrs);
 };
 
 export const getAttribute = async (
@@ -150,36 +108,6 @@ export const getAttribute = async (
   return dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader);
 };
 
-export const getAttributes = async (
-  dotYouClient: DotYouClient,
-  profileId: string,
-  tags: string[] | undefined,
-  pageSize: number
-): Promise<HomebaseFile<Attribute | undefined>[]> => {
-  const targetDrive = GetTargetDriveFromProfileId(profileId);
-  const qp: FileQueryParams = {
-    targetDrive: targetDrive,
-    fileType: [AttributeConfig.AttributeFileType],
-    tagsMatchAll: tags ?? undefined,
-  };
-
-  const result = await queryBatch(dotYouClient, qp, {
-    maxRecords: pageSize,
-    includeMetadataHeader: true,
-  });
-
-  let attributes: HomebaseFile<Attribute>[] = (
-    await Promise.all(
-      result.searchResults.map(async (dsr) =>
-        dsrToAttributeFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
-      )
-    )
-  ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
-
-  attributes = attributes.sort(sortAttrs);
-  return attributes;
-};
-
 export const dsrToAttributeFile = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
@@ -209,156 +137,6 @@ export const dsrToAttributeFile = async (
   } catch (ex) {
     console.error('[DotYouCore-js] failed to get the payload of a dsr', dsr, ex);
     return null;
-  }
-};
-
-// Attribute Processors:
-// Helpers:
-type ProcessedAttribute = {
-  attr: Attribute;
-  payloads: PayloadFile[];
-  thumbnails?: ThumbnailFile[] | undefined;
-  previewThumb?: EmbeddedThumb | undefined;
-};
-
-const nameAttributeProcessing = (nameAttr: Attribute): ProcessedAttribute => {
-  const newAttr = { ...nameAttr };
-  if (!nameAttr.data) nameAttr.data = {};
-  nameAttr.data[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
-
-  return {
-    attr: newAttr,
-    payloads: [],
-    thumbnails: [],
-    previewThumb: undefined,
-  };
-};
-
-const profileInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 250, height: 250 },
-  { quality: 75, width: 600, height: 600 },
-];
-
-const headerInstructionThumbSizes: ThumbnailInstruction[] = [
-  { quality: 85, width: 600, height: 600 },
-  { quality: 75, width: 1600, height: 1600 },
-  { quality: 75, width: 2600, height: 2600 },
-];
-
-const getNewThumbnails = async (
-  dataKey: Blob | string | undefined,
-  payloadKey: string,
-  thumbnailInstructions: ThumbnailInstruction[] = []
-) => {
-  if (dataKey && dataKey instanceof Blob) {
-    const { additionalThumbnails, tinyThumb } = await createThumbnails(
-      dataKey,
-      payloadKey,
-      thumbnailInstructions
-    );
-    return { additionalThumbnails, tinyThumb, blob: dataKey };
-  }
-  return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
-};
-
-const PHOTO_PAYLOAD_KEY = 'prfl_key';
-const photoAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
-  const imageFieldKey = MinimalProfileFields.ProfileImageKey;
-  const imageData = attr.data?.[imageFieldKey];
-
-  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
-    imageData,
-    PHOTO_PAYLOAD_KEY,
-    profileInstructionThumbSizes
-  );
-
-  if (attr.data && imageData) attr.data[imageFieldKey] = PHOTO_PAYLOAD_KEY;
-
-  return {
-    attr,
-    thumbnails: additionalThumbnails,
-    previewThumb: tinyThumb,
-    payloads: blob ? [{ payload: blob, key: PHOTO_PAYLOAD_KEY }] : [],
-  };
-};
-
-const EXPERIENCE_PAYLOAD_KEY = 'xprnc_key';
-const experienceAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
-  const imageFieldKey = MinimalProfileFields.ExperienceImageFileKey;
-  const imageData = attr.data?.[imageFieldKey];
-
-  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
-    imageData,
-    EXPERIENCE_PAYLOAD_KEY
-  );
-
-  if (attr.data && imageData) attr.data[imageFieldKey] = EXPERIENCE_PAYLOAD_KEY;
-
-  return {
-    attr: attr,
-    thumbnails: additionalThumbnails,
-    previewThumb: tinyThumb,
-    payloads: blob ? [{ payload: blob, key: EXPERIENCE_PAYLOAD_KEY }] : [],
-  };
-};
-
-const FAVICON_PAYLOAD_KEY = 'fvcn_key';
-const HEADER_PAYLOAD_KEY = 'headr_key';
-const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
-  const faviconFieldKey = HomePageThemeFields.Favicon;
-  const faviconImageData = attr.data?.[faviconFieldKey]?.fileKey;
-
-  const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } = await getNewThumbnails(
-    faviconImageData,
-    FAVICON_PAYLOAD_KEY,
-    []
-  );
-
-  if (attr.data && faviconImageData) attr.data[faviconFieldKey] = { fileKey: FAVICON_PAYLOAD_KEY };
-
-  const imageFieldKey = HomePageThemeFields.HeaderImageKey;
-  const headerImageData = attr.data?.[imageFieldKey];
-
-  const {
-    additionalThumbnails: headerThumbnails,
-    blob: headerBlob,
-    tinyThumb: headerTiny,
-  } = await getNewThumbnails(headerImageData, HEADER_PAYLOAD_KEY, headerInstructionThumbSizes);
-
-  if (attr.data && headerImageData) attr.data[imageFieldKey] = HEADER_PAYLOAD_KEY;
-
-  return {
-    attr,
-    thumbnails: [...faviconThumbnails, ...headerThumbnails],
-    previewThumb: headerTiny,
-    payloads: [
-      ...(faviconBlob ? [{ payload: faviconBlob, key: FAVICON_PAYLOAD_KEY }] : []),
-      ...(headerBlob ? [{ payload: headerBlob, key: HEADER_PAYLOAD_KEY }] : []),
-    ],
-  };
-};
-
-const processAttribute = async (attribute: Attribute) => {
-  switch (attribute.type) {
-    case BuiltInAttributes.Name:
-      return nameAttributeProcessing(attribute);
-
-    case BuiltInAttributes.Photo:
-      return await photoAttributeProcessing(attribute);
-
-    case HomePageAttributes.Theme:
-      return await themeAttributeProcessing(attribute);
-
-    case BuiltInAttributes.Experience:
-      return await experienceAttributeProcessing(attribute);
-
-    default:
-      return {
-        attr: attribute,
-        payloads: [],
-        thumbnails: [],
-        previewThumb: undefined,
-      } as ProcessedAttribute;
   }
 };
 
@@ -564,4 +342,165 @@ export const removeAttribute = async (
 ): Promise<void> => {
   const targetDrive = GetTargetDriveFromProfileId(profileId);
   deleteFile(dotYouClient, targetDrive, attributeFileId);
+};
+
+// Attribute Processors:
+// Helpers:
+type ProcessedAttribute = {
+  attr: Attribute;
+  payloads: PayloadFile[];
+  thumbnails?: ThumbnailFile[] | undefined;
+  previewThumb?: EmbeddedThumb | undefined;
+};
+
+const nameAttributeProcessing = (nameAttr: Attribute): ProcessedAttribute => {
+  const newAttr = { ...nameAttr };
+  if (!nameAttr.data) nameAttr.data = {};
+  nameAttr.data[MinimalProfileFields.DisplayName] = getDisplayNameOfNameAttribute(nameAttr);
+
+  return {
+    attr: newAttr,
+    payloads: [],
+    thumbnails: [],
+    previewThumb: undefined,
+  };
+};
+
+const profileInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 250, height: 250 },
+  { quality: 75, width: 600, height: 600 },
+];
+
+const headerInstructionThumbSizes: ThumbnailInstruction[] = [
+  { quality: 85, width: 600, height: 600 },
+  { quality: 75, width: 1600, height: 1600 },
+  { quality: 75, width: 2600, height: 2600 },
+];
+
+const getNewThumbnails = async (
+  dataKey: Blob | string | undefined,
+  payloadKey: string,
+  thumbnailInstructions: ThumbnailInstruction[] = []
+) => {
+  if (dataKey && dataKey instanceof Blob) {
+    const { additionalThumbnails, tinyThumb } = await createThumbnails(
+      dataKey,
+      payloadKey,
+      thumbnailInstructions
+    );
+    return { additionalThumbnails, tinyThumb, blob: dataKey };
+  }
+  return { additionalThumbnails: [], tinyThumb: undefined, blob: undefined };
+};
+
+const PHOTO_PAYLOAD_KEY = 'prfl_key';
+const photoAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
+  const imageFieldKey = MinimalProfileFields.ProfileImageKey;
+  const imageData = attr.data?.[imageFieldKey];
+
+  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
+    imageData,
+    PHOTO_PAYLOAD_KEY,
+    profileInstructionThumbSizes
+  );
+
+  if (attr.data && imageData) attr.data[imageFieldKey] = PHOTO_PAYLOAD_KEY;
+
+  return {
+    attr,
+    thumbnails: additionalThumbnails,
+    previewThumb: tinyThumb,
+    payloads: blob ? [{ payload: blob, key: PHOTO_PAYLOAD_KEY }] : [],
+  };
+};
+
+const EXPERIENCE_PAYLOAD_KEY = 'xprnc_key';
+const experienceAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
+  const imageFieldKey = MinimalProfileFields.ExperienceImageFileKey;
+  const imageData = attr.data?.[imageFieldKey];
+
+  const { additionalThumbnails, blob, tinyThumb } = await getNewThumbnails(
+    imageData,
+    EXPERIENCE_PAYLOAD_KEY
+  );
+
+  if (attr.data && imageData) attr.data[imageFieldKey] = EXPERIENCE_PAYLOAD_KEY;
+
+  return {
+    attr: attr,
+    thumbnails: additionalThumbnails,
+    previewThumb: tinyThumb,
+    payloads: blob ? [{ payload: blob, key: EXPERIENCE_PAYLOAD_KEY }] : [],
+  };
+};
+
+const FAVICON_PAYLOAD_KEY = 'fvcn_key';
+const HEADER_PAYLOAD_KEY = 'headr_key';
+const themeAttributeProcessing = async (attr: Attribute): Promise<ProcessedAttribute> => {
+  const faviconFieldKey = HomePageThemeFields.Favicon;
+  const faviconImageData = attr.data?.[faviconFieldKey]?.fileKey;
+
+  const { additionalThumbnails: faviconThumbnails, blob: faviconBlob } = await getNewThumbnails(
+    faviconImageData,
+    FAVICON_PAYLOAD_KEY,
+    []
+  );
+
+  if (attr.data && faviconImageData) attr.data[faviconFieldKey] = { fileKey: FAVICON_PAYLOAD_KEY };
+
+  const imageFieldKey = HomePageThemeFields.HeaderImageKey;
+  const headerImageData = attr.data?.[imageFieldKey];
+
+  const {
+    additionalThumbnails: headerThumbnails,
+    blob: headerBlob,
+    tinyThumb: headerTiny,
+  } = await getNewThumbnails(headerImageData, HEADER_PAYLOAD_KEY, headerInstructionThumbSizes);
+
+  if (attr.data && headerImageData) attr.data[imageFieldKey] = HEADER_PAYLOAD_KEY;
+
+  return {
+    attr,
+    thumbnails: [...faviconThumbnails, ...headerThumbnails],
+    previewThumb: headerTiny,
+    payloads: [
+      ...(faviconBlob ? [{ payload: faviconBlob, key: FAVICON_PAYLOAD_KEY }] : []),
+      ...(headerBlob ? [{ payload: headerBlob, key: HEADER_PAYLOAD_KEY }] : []),
+    ],
+  };
+};
+
+const processAttribute = async (attribute: Attribute) => {
+  switch (attribute.type) {
+    case BuiltInAttributes.Name:
+      return nameAttributeProcessing(attribute);
+
+    case BuiltInAttributes.Photo:
+      return await photoAttributeProcessing(attribute);
+
+    case HomePageAttributes.Theme:
+      return await themeAttributeProcessing(attribute);
+
+    case BuiltInAttributes.Experience:
+      return await experienceAttributeProcessing(attribute);
+
+    default:
+      return {
+        attr: attribute,
+        payloads: [],
+        thumbnails: [],
+        previewThumb: undefined,
+      } as ProcessedAttribute;
+  }
+};
+
+const getAttributeByFileId = async (
+  dotYouClient: DotYouClient,
+  profileId: string,
+  fileId: string
+): Promise<HomebaseFile<Attribute | undefined> | null> => {
+  const targetDrive = GetTargetDriveFromProfileId(profileId);
+  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
+  if (!header) return null;
+  return dsrToAttributeFile(dotYouClient, header, targetDrive, true);
 };

@@ -14,7 +14,6 @@ import {
   getProfileDefinition,
   saveProfileDefinition,
   saveProfileSection,
-  getAttributes,
   saveAttribute,
   BuiltInAttributes,
   LocationFields,
@@ -22,7 +21,7 @@ import {
   getAttribute,
   LinkFields,
   SocialFields,
-  getAttributeVersions,
+  getProfileAttributes,
   Attribute,
 } from '@youfoundation/js-lib/profile';
 import { fallbackHeaderImage } from '../../templates/Setup/fallbackImage';
@@ -109,9 +108,10 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     },
   };
 
-  const shortBioAttr = await getAttributes(
+  const shortBioAttr = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
+    undefined,
     [BuiltInAttributes.ShortBio],
     1
   );
@@ -136,9 +136,10 @@ export const SetupProfileDefinition = async (dotYouClient: DotYouClient) => {
     },
   };
 
-  const statusAttr = await getAttributes(
+  const statusAttr = await getProfileAttributes(
     dotYouClient,
     BuiltInProfiles.StandardProfileId,
+    undefined,
     [BuiltInAttributes.Status],
     1
   );
@@ -169,9 +170,10 @@ export const SetupHome = async (dotYouClient: DotYouClient) => {
     serverMetadata: { accessControlList: ANONYMOUS_ACL },
   };
 
-  const themeDef = await getAttributes(
+  const themeDef = await getProfileAttributes(
     dotYouClient,
     HomePageConfig.DefaultDriveId,
+    undefined,
     [HomePageAttributes.Theme],
     1
   );
@@ -319,7 +321,7 @@ const SetupProfileData = async (dotYouClient: DotYouClient, profileData: Profile
 const SetupSocialData = async (dotYouClient: DotYouClient, socialData: SocialSetupData) => {
   const saveSocial = async (type: string, dataField: string, value: string, priority: number) => {
     // Search attribute:
-    const foundAttributesOfType = await getAttributeVersions(
+    const foundAttributesOfType = await getProfileAttributes(
       dotYouClient,
       BuiltInProfiles.StandardProfileId,
       undefined,

@@ -155,7 +155,7 @@ export const useSiteData = () => {
       const socialDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
       const homeDrive = HomePageConfig.HomepageTargetDrive;
 
-      /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getAttributeVersions`
+      /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getProfileAttributes`
       const collectionResult = await queryBatchCollection(dotYouClient, [
         {
           name: 'owner',
