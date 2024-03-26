@@ -93,45 +93,6 @@ export const useImage = ({
     return await fetchDataPromise();
   };
 
-  const saveImageFile = async ({
-    image,
-    targetDrive,
-    acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
-    fileId = undefined,
-    versionTag = undefined,
-    thumbInstructions,
-  }: {
-    image: Blob;
-    targetDrive: TargetDrive;
-    acl?: AccessControlList;
-    fileId?: string;
-    versionTag?: string;
-    thumbInstructions?: ThumbnailInstruction[];
-  }) => {
-    return await uploadImage(
-      dotYouClient,
-      targetDrive,
-      acl,
-      image,
-      undefined,
-      {
-        fileId,
-        versionTag,
-      },
-      thumbInstructions
-    );
-  };
-
-  const removeImageFile = async ({
-    targetDrive,
-    fileId,
-  }: {
-    targetDrive: TargetDrive;
-    fileId: string;
-  }) => {
-    return await removeImage(dotYouClient, fileId, targetDrive);
-  };
-
   return {
     fetch: useQuery({
       queryKey: [
@@ -158,19 +119,5 @@ export const useImage = ({
       staleTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
     }),
-    save: useMutation({
-      mutationFn: saveImageFile,
-      onSuccess: (_data, variables) => {
-        // Boom baby!
-        if (variables.fileId) {
-          queryClient.invalidateQueries({
-            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
-          });
-        } else {
-          queryClient.invalidateQueries({ queryKey: ['image'], exact: false });
-        }
-      },
-    }),
-    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

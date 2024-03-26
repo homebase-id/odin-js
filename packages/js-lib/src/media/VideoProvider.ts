@@ -1,112 +1,12 @@
-import {
-  getNewId,
-  jsonStringify64,
-  stringifyToQueryParams,
-  getRandom16ByteArray,
-} from '../helpers/DataUtil';
+import { stringifyToQueryParams } from '../helpers/DataUtil';
 import { DotYouClient } from '../core/DotYouClient';
-import { DEFAULT_PAYLOAD_KEY } from '../core/DriveData/Upload/UploadHelpers';
 import { encryptUrl } from '../core/InterceptionEncryptionUtil';
-import {
-  TargetDrive,
-  AccessControlList,
-  TransitOptions,
-  ThumbnailFile,
-  SecurityGroupType,
-  UploadInstructionSet,
-  UploadFileMetadata,
-  uploadFile,
-  SystemFileType,
-  getPayloadBytes,
-  getFileHeader,
-} from '../core/core';
-import { PlainVideoMetadata, SegmentedVideoMetadata, VideoUploadResult } from './MediaTypes';
-import { createThumbnails } from './Thumbs/ThumbnailProvider';
+import { TargetDrive, SystemFileType, getPayloadBytes, getFileHeader } from '../core/core';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
 
 export type VideoContentType = 'video/mp4';
-
-export const uploadVideo = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  acl: AccessControlList,
-  file: Blob | File,
-  fileMetadata?: PlainVideoMetadata | SegmentedVideoMetadata,
-  uploadMeta?: {
-    tag?: string | undefined | string[];
-    uniqueId?: string;
-    fileId?: string;
-    versionTag?: string;
-    type?: VideoContentType;
-    transitOptions?: TransitOptions;
-    allowDistribution?: boolean;
-    userDate?: number;
-    thumb?: ThumbnailFile;
-  }
-): Promise<VideoUploadResult | undefined> => {
-  if (!targetDrive) throw 'Missing target drive';
-
-  const encrypt = !(
-    acl.requiredSecurityGroup === SecurityGroupType.Anonymous ||
-    acl.requiredSecurityGroup === SecurityGroupType.Authenticated
-  );
-
-  const instructionSet: UploadInstructionSet = {
-    transferIv: getRandom16ByteArray(),
-    storageOptions: {
-      overwriteFileId: uploadMeta?.fileId,
-      drive: targetDrive,
-    },
-    transitOptions: uploadMeta?.transitOptions,
-  };
-
-  const { tinyThumb, additionalThumbnails } = uploadMeta?.thumb
-    ? await createThumbnails(uploadMeta.thumb.payload, DEFAULT_PAYLOAD_KEY, [
-        { quality: 100, width: 250, height: 250 },
-      ])
-    : { tinyThumb: undefined, additionalThumbnails: undefined };
-
-  const metadata: UploadFileMetadata = {
-    versionTag: uploadMeta?.versionTag,
-    allowDistribution: uploadMeta?.allowDistribution || false,
-    appData: {
-      tags: uploadMeta?.tag
-        ? [...(Array.isArray(uploadMeta.tag) ? uploadMeta.tag : [uploadMeta.tag])]
-        : [],
-      uniqueId: uploadMeta?.uniqueId ?? getNewId(),
-      fileType: 0,
-      userDate: uploadMeta?.userDate,
-      previewThumbnail: tinyThumb,
-    },
-    isEncrypted: encrypt,
-    accessControlList: acl,
-  };
-
-  const result = await uploadFile(
-    dotYouClient,
-    instructionSet,
-    metadata,
-    [
-      {
-        payload: file,
-        key: DEFAULT_PAYLOAD_KEY,
-        descriptorContent: fileMetadata ? jsonStringify64(fileMetadata) : undefined,
-      },
-    ],
-    additionalThumbnails,
-    encrypt
-  );
-  if (!result) throw new Error(`Upload failed`);
-
-  return {
-    fileId: result.file.fileId,
-    fileKey: DEFAULT_PAYLOAD_KEY,
-    previewThumbnail: tinyThumb,
-    type: 'video',
-  };
-};
 
 export const getDecryptedVideoChunk = async (
   dotYouClient: DotYouClient,
