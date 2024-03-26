@@ -15,7 +15,7 @@ import {
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@youfoundation/js-lib/network';
 import {
   APP_AUTH_TOKEN,
   APP_SHARED_SECRET,
@@ -133,6 +133,7 @@ export const useYouAuthAuthorization = () => {
       undefined,
       drives,
       circleDrives,
+      [ALL_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
       undefined,
       undefined,
