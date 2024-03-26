@@ -1,16 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AccessControlList,
-  ImageSize,
-  SecurityGroupType,
-  TargetDrive,
-} from '@youfoundation/js-lib/core';
-import {
-  getDecryptedImageUrl,
-  removeImage,
-  ThumbnailInstruction,
-  uploadImage,
-} from '@youfoundation/js-lib/media';
+import { useQuery } from '@tanstack/react-query';
+import { ImageSize, TargetDrive } from '@youfoundation/js-lib/core';
+import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/peer';
 
 import { useDotYouClient } from '../../..';
@@ -40,7 +30,6 @@ export const useImage = ({
   lastModified?: number;
 }) => {
   const localHost = window.location.hostname;
-  const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchImageData = async (
