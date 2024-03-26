@@ -7,7 +7,6 @@ import {
   MarkNotificationsAsRead,
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
-import { appId } from '@youfoundation/feed-app/src/hooks/auth/useAuth';
 import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const isDebug = hasDebugFlag();
@@ -68,7 +67,7 @@ export const useRemoveNotifications = (props?: { appId?: string }) => {
     (async () => {
       const notifications = notifcationsData?.results;
       if (notifications && notifications?.length > 0) {
-        isDebug && console.debug('Removing all notifications', appId);
+        isDebug && console.debug('Removing all notifications', props?.appId);
         await removeListOfNotifications(notifications.map((n) => n.id));
       }
     })();
