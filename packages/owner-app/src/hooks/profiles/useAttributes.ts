@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Attribute, getProfileAttributes, removeAttribute } from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttributes } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { AttributeDefinition, AttributeDefinitions } from './AttributeDefinitions';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { removeProfileAttribute } from '../../provider/profile/AttributeData/ManageAttributeProvider';
 
 export interface AttributeVm extends Attribute {
   typeDefinition?: AttributeDefinition;
@@ -71,7 +72,7 @@ export const useAttributes = ({
 
     return await Promise.all(
       foundAttributes.map(
-        async (attr) => attr?.fileId && removeAttribute(dotYouClient, profileId, attr.fileId)
+        async (attr) => attr?.fileId && removeProfileAttribute(dotYouClient, profileId, attr.fileId)
       )
     );
   };

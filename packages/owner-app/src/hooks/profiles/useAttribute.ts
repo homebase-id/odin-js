@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Attribute,
-  getAttribute,
-  saveAttribute,
-  removeAttribute,
-} from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttribute } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
+import {
+  removeProfileAttribute,
+  saveProfileAttribute,
+} from '../../provider/profile/AttributeData/ManageAttributeProvider';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
   return [
@@ -33,7 +32,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
     if (!profileId || !attributeId) {
       return null;
     }
-    const foundAttribute = await getAttribute(dotYouClient, profileId, attributeId);
+    const foundAttribute = await getProfileAttribute(dotYouClient, profileId, attributeId);
 
     return foundAttribute || null;
   };
@@ -41,7 +40,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
   const saveData = async (attribute: NewHomebaseFile<Attribute> | HomebaseFile<Attribute>) => {
     return new Promise<NewHomebaseFile<Attribute> | HomebaseFile<Attribute>>((resolve, reject) => {
       const onVersionConflict = async () => {
-        const serverAttr = await getAttribute(
+        const serverAttr = await getProfileAttribute(
           dotYouClient,
           attribute.fileMetadata.appData.content.profileId,
           attribute.fileMetadata.appData.content.id
@@ -49,7 +48,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
         if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
 
         const newAttr = { ...attribute, ...(serverAttr as HomebaseFile<Attribute>) };
-        saveAttribute(dotYouClient, newAttr, onVersionConflict)
+        saveProfileAttribute(dotYouClient, newAttr, onVersionConflict)
           .then((result) => {
             if (result) resolve(result);
           })
@@ -59,7 +58,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
       };
 
       // Don't edit original attribute as it will be used for caching decisions in onSettled
-      saveAttribute(
+      saveProfileAttribute(
         dotYouClient,
         {
           ...attribute,
@@ -86,7 +85,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
       (attribute.fileMetadata.appData.content as Attribute)?.profileId || overrideProfileId;
 
     if (attribute.fileId && profileId)
-      return await removeAttribute(dotYouClient, profileId, attribute.fileId);
+      return await removeProfileAttribute(dotYouClient, profileId, attribute.fileId);
     else console.error('No FileId provided for removeData');
   };
 

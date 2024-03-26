@@ -5,7 +5,7 @@ import {
   MinimalProfileFields,
   Attribute,
   getProfileAttributes,
-  getAttribute,
+  getProfileAttribute,
 } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
@@ -60,7 +60,7 @@ export const useBiography = () => {
               console.warn(entry, 'fetching attribute, not enough data in static file');
               // Fetch attribute if it is not included in the static data
               attr = (
-                await getAttribute(
+                await getProfileAttribute(
                   dotYouClient,
                   BuiltInProfiles.StandardProfileId,
                   entry.header.fileMetadata.appData.uniqueId

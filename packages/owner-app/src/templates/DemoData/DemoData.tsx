@@ -26,7 +26,7 @@ import {
   MinimalProfileFields,
   ProfileConfig,
   SocialFields,
-  getAttribute,
+  getProfileAttribute,
 } from '@youfoundation/js-lib/profile';
 import {
   HomePageConfig,
@@ -175,7 +175,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       priority = 2000
     ) => {
       // Look for existing attribute with this id:
-      const foundAttribute = await getAttribute(
+      const foundAttribute = await getProfileAttribute(
         client,
         BuiltInProfiles.StandardProfileId.toString(),
         id
@@ -246,7 +246,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       priority: number
     ) => {
       // Search attribute:
-      const foundAttribute = await getAttribute(client, profileId, id);
+      const foundAttribute = await getProfileAttribute(client, profileId, id);
 
       if (attrHasData(foundAttribute)) {
         console.warn(
@@ -350,7 +350,7 @@ const DemoDataProfile = ({ client, realmData }: { client: DotYouClient; realmDat
       body: string,
       priority: number
     ) => {
-      const foundAttribute = await getAttribute(client, profileId, id);
+      const foundAttribute = await getProfileAttribute(client, profileId, id);
 
       if (foundAttribute) {
         console.warn('Already found a Bio Attribute with the demo id:', foundAttribute);
