@@ -1,11 +1,6 @@
 import { tinyThumbSize } from './Thumbs/ThumbnailProvider';
-import {
-  uint8ArrayToBase64,
-  stringifyToQueryParams,
-  getLargestThumbOfPayload,
-} from '../helpers/DataUtil';
-import { ApiType, DotYouClient } from '../core/DotYouClient';
-import { encryptUrl } from '../core/InterceptionEncryptionUtil';
+import { getLargestThumbOfPayload } from '../helpers/DataUtil';
+import { DotYouClient } from '../core/DotYouClient';
 import {
   TargetDrive,
   getFileHeader,
@@ -16,6 +11,7 @@ import {
   getPayloadBytes,
 } from '../core/core';
 import { ImageMetadata, ThumbnailMeta } from './MediaTypes';
+import { getDecryptedMediaUrl } from './MediaProvider';
 
 export const getDecryptedThumbnailMeta = (
   dotYouClient: DotYouClient,
@@ -47,10 +43,12 @@ export const getDecryptedThumbnailMeta = (
           targetDrive,
           fileId,
           fileKey,
-          { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
           header.fileMetadata.isEncrypted,
-          systemFileType,
-          header.fileMetadata.updated
+          header.fileMetadata.updated,
+          {
+            size: { pixelHeight: tinyThumbSize.height, pixelWidth: tinyThumbSize.width },
+            systemFileType,
+          }
         );
 
         const correspondingPayload = header.fileMetadata.payloads.find(
@@ -76,70 +74,7 @@ export const getDecryptedThumbnailMeta = (
 };
 
 // Retrieves an image/thumb, decrypts, then returns a url to be passed to an image control
-/**
- * @param isProbablyEncrypted {boolean} Hints wether or not we can expect the image to be encrypted, when true no direct url is returned instead the contents are fetched and decrypted depending on their metadata; This allows to skip a probably unneeded header call
- */
-export const getDecryptedImageUrl = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  key: string,
-  size?: ImageSize,
-  isProbablyEncrypted?: boolean,
-  systemFileType?: SystemFileType,
-  lastModified?: number
-): Promise<string> => {
-  const getDirectImageUrl = async () => {
-    const directUrl = `${dotYouClient.getEndpoint()}/drive/files/${
-      size ? 'thumb' : 'payload'
-    }?${stringifyToQueryParams({
-      ...targetDrive,
-      fileId,
-      ...(size
-        ? {
-            width: size.pixelWidth,
-            height: size.pixelHeight,
-          }
-        : {}),
-      xfst: systemFileType || 'Standard',
-      ...(size ? { payloadKey: key } : { key: key }),
-      lastModified,
-    })}`;
-
-    if (ss) return await encryptUrl(directUrl, ss);
-    return directUrl;
-  };
-
-  const ss = dotYouClient.getSharedSecret();
-
-  // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss) return await getDirectImageUrl();
-
-  // We try and avoid the payload call as much as possible, so if the payload is probabaly not encrypted,
-  //   we first get confirmation from the header and return a direct url if possible
-  // Also apps can't handle a direct image url as that endpoint always expects to be authenticated,
-  //   and the CAT is passed via a header that we can't set on a direct url
-  if (!isProbablyEncrypted && dotYouClient.getType() !== ApiType.App) {
-    const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
-    if (!meta?.fileMetadata.isEncrypted) return await getDirectImageUrl();
-  }
-
-  // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  return getDecryptedImageData(
-    dotYouClient,
-    targetDrive,
-    fileId,
-    key,
-    size,
-    systemFileType,
-    lastModified
-  ).then((data) => {
-    if (!data) return '';
-    const url = `data:${data.contentType};base64,${uint8ArrayToBase64(new Uint8Array(data.bytes))}`;
-
-    return url;
-  });
-};
+export const getDecryptedImageUrl = getDecryptedMediaUrl;
 
 export const getDecryptedImageData = async (
   dotYouClient: DotYouClient,

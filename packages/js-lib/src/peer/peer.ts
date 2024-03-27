@@ -13,8 +13,9 @@ export * from './peerData/Upload/PeerUploadProvider';
 export * from './peerData/InboxProvider';
 
 // Media
-export * from './peerData/ExternalImageProvider';
-export * from './peerData/ExternalVideoProvider';
+export * from './peerData/Media/ExternalMediaProvider';
+export * from './peerData/Media/ExternalImageProvider';
+export * from './peerData/Media/ExternalVideoProvider';
 
 // Posts
 export * from './peerData/ExternalPostsDataProvider';

@@ -1,10 +1,6 @@
-import { stringifyToQueryParams } from '../helpers/DataUtil';
 import { DotYouClient } from '../core/DotYouClient';
-import { encryptUrl } from '../core/InterceptionEncryptionUtil';
-import { TargetDrive, SystemFileType, getPayloadBytes, getFileHeader } from '../core/core';
-const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
-  Blob;
+import { TargetDrive, SystemFileType, getPayloadBytes } from '../core/core';
+import { getDecryptedMediaUrl } from './MediaProvider';
 
 export type VideoContentType = 'video/mp4';
 
@@ -27,48 +23,4 @@ export const getDecryptedVideoChunk = async (
   return payload?.bytes || null;
 };
 
-export const getDecryptedVideoUrl = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  key: string,
-  systemFileType?: SystemFileType,
-  fileSizeLimit?: number
-): Promise<string> => {
-  const getDirectImageUrl = async () => {
-    const directUrl = `${dotYouClient.getEndpoint()}/drive/files/payload?${stringifyToQueryParams({
-      ...targetDrive,
-      fileId,
-      key,
-      xfst: systemFileType || 'Standard',
-    })}`;
-
-    if (ss) return await encryptUrl(directUrl, ss);
-
-    return directUrl;
-  };
-
-  const ss = dotYouClient.getSharedSecret();
-
-  // If there is no shared secret, we wouldn't even be able to decrypt
-  if (!ss) {
-    return await getDirectImageUrl();
-  }
-
-  const meta = await getFileHeader(dotYouClient, targetDrive, fileId, { systemFileType });
-  if (!meta?.fileMetadata.isEncrypted) {
-    return await getDirectImageUrl();
-  }
-
-  // Direct download of the data and potentially decrypt if response headers indicate encrypted
-  // We limit download to 10MB to avoid memory issues
-  return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
-    systemFileType,
-    chunkStart: fileSizeLimit ? 0 : undefined,
-    chunkEnd: fileSizeLimit,
-  }).then((data) => {
-    if (!data) return '';
-    const url = URL.createObjectURL(new OdinBlob([data.bytes], { type: data.contentType }));
-    return url;
-  });
-};
+export const getDecryptedVideoUrl = getDecryptedMediaUrl;

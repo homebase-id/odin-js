@@ -9,5 +9,6 @@ export * from './Video/VideoSegmenter';
 export * from './Video/VideoSegmenterFfmpeg';
 
 // Data Providers
+export * from './MediaProvider';
 export * from './ImageProvider';
 export * from './VideoProvider';

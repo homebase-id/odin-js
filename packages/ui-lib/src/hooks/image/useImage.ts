@@ -155,10 +155,14 @@ export const useImage = (
                   imageDrive,
                   imageGlobalTransitId,
                   imageFileKey,
-                  size,
+
                   probablyEncrypted,
-                  systemFileType,
-                  lastModified
+
+                  lastModified,
+                  {
+                    size,
+                    systemFileType,
+                  }
                 )
               : await getDecryptedImageUrlOverPeer(
                   dotYouClient,
@@ -166,20 +170,24 @@ export const useImage = (
                   imageDrive,
                   imageFileId,
                   imageFileKey,
-                  size,
                   probablyEncrypted,
-                  systemFileType,
-                  lastModified
+                  lastModified,
+                  {
+                    size,
+                    systemFileType,
+                  }
                 )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size,
                 probablyEncrypted,
-                systemFileType,
-                lastModified
+                lastModified,
+                {
+                  size,
+                  systemFileType,
+                }
               ),
         naturalSize: naturalSize,
       };
