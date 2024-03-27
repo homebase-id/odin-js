@@ -67,8 +67,14 @@ export const OdinAudio = (props: OdinAudioProps) => {
     return URL.createObjectURL(blob);
   }, [audioData]);
 
-  if (!audioUrl) return null;
-  return <audio src={audioUrl} controls {...elementProps} onClick={(e) => e.stopPropagation()} />;
+  return (
+    <audio
+      src={audioUrl || undefined}
+      controls
+      {...elementProps}
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
 };
 
 export const useAudio = (
