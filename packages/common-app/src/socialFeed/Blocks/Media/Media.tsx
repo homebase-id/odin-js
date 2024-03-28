@@ -74,7 +74,7 @@ export const PostMedia = ({
         globalTransitId={postInfo.globalTransitId}
         lastModified={postInfo.lastModified}
         odinId={odinId}
-        className={`w-full max-h-[70vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
+        className={`w-full max-h-[80vh] ${forceAspectRatio ? 'md:aspect-square ' : ''} `}
         previewThumbnail={previewThumbnail}
         probablyEncrypted={postInfo.isEncrypted}
         onClick={onClick ? (e) => onClick(e, 0) : undefined}

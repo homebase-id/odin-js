@@ -114,6 +114,7 @@ export const OdinImage = ({
       data-natural-size={
         naturalSize ? `${naturalSize.pixelWidth}x${naturalSize.pixelHeight}` : 'none'
       }
+      data-probably-encrypted={probablyEncrypted}
       data-fileid={props.fileId}
       data-globaltransitid={props.globalTransitId}
       data-filekey={props.fileKey}

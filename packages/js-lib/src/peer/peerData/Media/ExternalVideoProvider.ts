@@ -1,14 +1,14 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { DotYouClient } from '../../core/DotYouClient';
-import { SystemFileType, TargetDrive } from '../../core/core';
-import { stringifyToQueryParams } from '../../helpers/helpers';
+import { DotYouClient } from '../../../core/DotYouClient';
+import { SystemFileType, TargetDrive } from '../../../core/core';
+import { stringifyToQueryParams } from '../../../helpers/helpers';
 import {
   getFileHeaderOverPeerByGlobalTransitId,
   getPayloadBytesOverPeerByGlobalTransitId,
-} from '../peer';
-import { getFileHeaderOverPeer, getPayloadBytesOverPeer } from './File/PeerFileProvider';
+} from '../../peer';
+import { getFileHeaderOverPeer, getPayloadBytesOverPeer } from '../File/PeerFileProvider';
 
 export const getDecryptedVideoChunkOverPeer = async (
   dotYouClient: DotYouClient,

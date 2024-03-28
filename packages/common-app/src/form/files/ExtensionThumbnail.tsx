@@ -50,7 +50,8 @@ export const ExtensionThumbnail = ({
 
   if (contentTypeExtension === 'zip') return <FileZip className={className} />;
 
-  if (contentTypeExtension === 'mp3') return <FileMp3 className={className} />;
+  if (contentTypeExtension === 'mp3' || contentType === 'audio/mpeg')
+    return <FileMp3 className={className} />;
 
   return (
     <div

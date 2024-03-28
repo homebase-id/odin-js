@@ -60,20 +60,18 @@ export const useImage = ({
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size,
                 probablyEncrypted,
-                undefined,
-                lastModified
+                lastModified,
+                { size }
               )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size,
                 probablyEncrypted,
-                undefined,
-                lastModified
+                lastModified,
+                { size }
               ),
         naturalSize: naturalSize,
       };

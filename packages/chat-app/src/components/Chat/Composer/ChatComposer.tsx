@@ -96,7 +96,7 @@ export const ChatComposer = ({
             <FileSelector
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
               className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
+              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3"
               maxSize={HUNDRED_MEGA_BYTES}
             >
               <ImageIcon className="h-5 w-5" />

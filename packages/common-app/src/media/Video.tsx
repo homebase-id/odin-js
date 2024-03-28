@@ -31,7 +31,11 @@ export interface VideoClickToLoadProps extends Omit<OdinVideoProps, 'dotYouClien
   previewThumbnail?: EmbeddedThumb;
 }
 
-export const VideoClickToLoad = ({ preload = true, ...props }: VideoClickToLoadProps) => {
+export const VideoClickToLoad = ({
+  preload = true,
+  previewThumbnail,
+  ...props
+}: VideoClickToLoadProps) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
   const [loadVideo, setLoadVideo] = useState(false);
   const [shouldFallback, setShouldFallback] = useState(false);
