@@ -1,13 +1,11 @@
 import { HomebaseFile, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { OdinImage, OdinThumbnailImage } from '@youfoundation/ui-lib';
+import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { Triangle, useDarkMode } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
-import { OdinAudio } from './OdinAudio';
-import { OdinAudioWaveForm } from './OdinAudioWaveForm';
 
 export const ChatMedia = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const payloads = msg.fileMetadata.payloads;
@@ -76,6 +74,15 @@ const MediaItem = ({
         </>
       ) : isAudio ? (
         <>
+          <OdinAudio
+            dotYouClient={dotYouClient}
+            fileId={fileId}
+            fileKey={payload.key}
+            lastModified={payload.lastModified || fileLastModified}
+            targetDrive={ChatDrive}
+            onLoad={onLoad}
+            className="w-full"
+          />
           <OdinAudioWaveForm
             dotYouClient={dotYouClient}
             fileId={fileId}
@@ -85,15 +92,6 @@ const MediaItem = ({
             onLoad={onLoad}
             isDarkMode={isDarkMode}
             className="my-3"
-          />
-          <OdinAudio
-            dotYouClient={dotYouClient}
-            fileId={fileId}
-            fileKey={payload.key}
-            lastModified={payload.lastModified || fileLastModified}
-            targetDrive={ChatDrive}
-            onLoad={onLoad}
-            className="mb-7 w-full"
           />
         </>
       ) : (

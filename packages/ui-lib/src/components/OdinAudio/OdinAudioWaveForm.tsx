@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AudioSource, useAudio } from './OdinAudio';
+import { useEffect, useMemo, useRef } from 'react';
+import { AudioSource } from './OdinAudio';
 import { DotYouClient } from '@youfoundation/js-lib/core';
-
-// const chunkSize = 250;
+import { useAudio } from '../../hooks/audio/useAudio';
 
 export interface OdinAudioWaveformProps
   extends AudioSource,

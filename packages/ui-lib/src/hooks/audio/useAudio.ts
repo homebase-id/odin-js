@@ -12,66 +12,6 @@ import {
   getPayloadBytesOverPeer,
   getPayloadBytesOverPeerByGlobalTransitId,
 } from '@youfoundation/js-lib/peer';
-import { useMemo } from 'react';
-
-export interface AudioSource {
-  odinId?: string;
-  targetDrive: TargetDrive;
-
-  // File
-  fileId: string | undefined;
-  globalTransitId?: string | undefined;
-
-  // Payload
-  fileKey: string | undefined;
-
-  // File params
-  systemFileType?: SystemFileType;
-  lastModified?: number;
-}
-
-export interface OdinAudioProps
-  extends AudioSource,
-    React.DetailedHTMLProps<React.AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement> {
-  probablyEncrypted?: boolean;
-  dotYouClient: DotYouClient;
-}
-
-export const OdinAudio = (props: OdinAudioProps) => {
-  const {
-    dotYouClient,
-    odinId,
-    fileId,
-    globalTransitId,
-    fileKey,
-    targetDrive,
-    systemFileType,
-    probablyEncrypted,
-    lastModified,
-
-    ...elementProps
-  } = props;
-  const { data: audioUrl } = useAudio(
-    dotYouClient,
-    odinId,
-    fileId,
-    globalTransitId,
-    fileKey,
-    targetDrive,
-    probablyEncrypted,
-    systemFileType,
-    lastModified
-  ).fetchUrl;
-
-  return (
-    <audio
-      src={audioUrl || undefined}
-      controls
-      {...elementProps}
-      onClick={(e) => e.stopPropagation()}
-    />
-  );
-};
 
 export const useAudio = (
   dotYouClient: DotYouClient,
@@ -93,8 +33,7 @@ export const useAudio = (
     fileId: string | undefined,
     globalTransitId: string | undefined,
     fileKey: string | undefined,
-    drive?: TargetDrive,
-    probablyEncrypted?: boolean
+    drive?: TargetDrive
   ): Promise<{ bytes: Uint8Array; contentType: string } | null> => {
     if (fileId === undefined || fileId === '' || !drive || fileKey === undefined || fileKey === '')
       return null;
@@ -198,15 +137,7 @@ export const useAudio = (
     }),
     fetch: useQuery({
       queryKey: ['audio', odinId || localHost, drive?.alias, globalTransitId || fileId, fileKey],
-      queryFn: () =>
-        fetchAudioData(
-          odinId || localHost,
-          fileId,
-          globalTransitId,
-          fileKey,
-          drive,
-          probablyEncrypted
-        ),
+      queryFn: () => fetchAudioData(odinId || localHost, fileId, globalTransitId, fileKey, drive),
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60, // 1 min
