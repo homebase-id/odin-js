@@ -1,10 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import {
-  ContentType,
-  DriveSearchResult,
-  EncryptedKeyHeader,
-  SystemFileType,
-} from './DriveFileTypes';
+import { ContentType, HomebaseFile, EncryptedKeyHeader, SystemFileType } from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
 
 import { DotYouClient } from '../../DotYouClient';
@@ -32,27 +27,28 @@ interface GetFileThumbRequest extends GetFileRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 /// Get methods by FileId:
 export const getFileHeader = async <T = string>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
+  options?: { systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
+): Promise<HomebaseFile<T> | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
 
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, axiosConfig } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytes(dotYouClient, targetDrive, fileId, {
     decrypt: true,
     systemFileType,
+    axiosConfig,
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -70,7 +66,9 @@ export const getFileHeaderBytes = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   fileId: string,
-  options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
+  options:
+    | { decrypt?: boolean; systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
+    | undefined
 ) => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
@@ -92,8 +90,11 @@ export const getFileHeaderBytes = async (
     fileId,
   };
 
-  const promise: Promise<DriveSearchResult | null> = client
-    .get<DriveSearchResult>('/drive/files/header?' + stringifyToQueryParams(request as any))
+  const promise: Promise<HomebaseFile | null> = client
+    .get<HomebaseFile>(
+      '/drive/files/header?' + stringifyToQueryParams(request),
+      options?.axiosConfig
+    )
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
@@ -127,12 +128,16 @@ export const getPayloadAsJson = async <T>(
   key: string,
   options?: {
     systemFileType?: SystemFileType;
+    axiosConfig?: AxiosRequestConfig;
+    lastModified?: number;
   }
 ): Promise<T | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   return getPayloadBytes(dotYouClient, targetDrive, fileId, key, {
     systemFileType,
     decrypt: true,
+    axiosConfig: options?.axiosConfig,
+    lastModified,
   }).then((bytes) => parseBytesToObject<T>(bytes));
 };
 
@@ -147,6 +152,7 @@ export const getPayloadBytes = async (
     chunkEnd?: number;
     decrypt?: boolean;
     lastModified?: number;
+    axiosConfig?: AxiosRequestConfig;
   }
 ): Promise<{ bytes: Uint8Array; contentType: ContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
@@ -167,6 +173,7 @@ export const getPayloadBytes = async (
 
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
+    ...options?.axiosConfig,
   };
 
   const { startOffset, updatedChunkStart, rangeHeader } = getRangeHeader(chunkStart, chunkEnd);
@@ -181,23 +188,25 @@ export const getPayloadBytes = async (
       config
     )
     .then(async (response) => {
-      if (!response.data) return null;
+      if (!response.data || !response.data.byteLength) return null;
       return {
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -216,7 +225,11 @@ export const getThumbBytes = async (
   payloadKey: string,
   width: number,
   height: number,
-  options: { systemFileType?: SystemFileType; lastModified?: number }
+  options: {
+    systemFileType?: SystemFileType;
+    lastModified?: number;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<{ bytes: ArrayBuffer; contentType: ImageContentType } | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
@@ -235,6 +248,7 @@ export const getThumbBytes = async (
   };
   const config: AxiosRequestConfig = {
     responseType: 'arraybuffer',
+    ...options?.axiosConfig,
   };
 
   return client
@@ -289,8 +303,12 @@ export const getContentFromHeaderOrPayload = async <T>(
     }
     return tryJsonParse<T>(decryptedJsonContent);
   } else {
+    const payloadDescriptor = dsr.fileMetadata.payloads.find(
+      (payload) => payload.key === DEFAULT_PAYLOAD_KEY
+    );
     return await getPayloadAsJson<T>(dotYouClient, targetDrive, fileId, DEFAULT_PAYLOAD_KEY, {
       systemFileType,
+      lastModified: payloadDescriptor?.lastModified,
     });
   }
 };

@@ -2,6 +2,7 @@ import { Label, Input, ActionButton } from '@youfoundation/common-app';
 import { useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { importRemotePublicEccKey } from '@youfoundation/js-lib/auth';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const EccDebug = () => {
   const [keyData, setKeyData] = useState<string>('');
@@ -16,7 +17,7 @@ const EccDebug = () => {
     addToOutput('\n-----------------\n');
   };
 
-  const isDebug = (localStorage && localStorage.getItem('debug') === '1') || import.meta.env.DEV;
+  const isDebug = hasDebugFlag();
   if (!isDebug) return null;
 
   return (

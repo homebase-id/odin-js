@@ -77,7 +77,7 @@ export const useTinyThumb = (
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 10, // 10min
-    gcTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours
     enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
   });
 };

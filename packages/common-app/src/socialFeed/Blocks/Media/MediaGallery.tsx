@@ -1,7 +1,14 @@
-import { EmbeddedThumb } from '@youfoundation/js-lib/core';
+import { EmbeddedThumb, MediaFile } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
-import { Image, useIntersection, useDarkMode, Triangle } from '@youfoundation/common-app';
-import { MediaFile, getChannelDrive } from '@youfoundation/js-lib/public';
+import {
+  Image,
+  useIntersection,
+  useDarkMode,
+  Triangle,
+  useDotYouClient,
+} from '@youfoundation/common-app';
+import { getChannelDrive } from '@youfoundation/js-lib/public';
+import { useImageCache } from '@youfoundation/ui-lib';
 
 interface MediaGalleryProps {
   odinId?: string;
@@ -34,19 +41,30 @@ export const MediaGallery = ({
   probablyEncrypted,
   onClick,
 }: MediaGalleryProps) => {
-  const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [isInView, setIsInView] = useState(false);
+  useIntersection(containerRef, () => setIsInView(true));
+
+  const [someLoaded, setSomeLoaded] = useState(false);
 
   const slicedFiles = files.length > maxVisible ? files.slice(0, maxVisible) : files;
   const countExcludedFromView = files.length - slicedFiles.length;
 
-  useIntersection(containerRef, () => setIsInView(true));
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { getFromCache } = useImageCache(dotYouClient);
+
+  const targetDrive = getChannelDrive(channelId);
+  const hasFirstInCache = useMemo(
+    () => !!getFromCache(odinId, fileId, globalTransitId, slicedFiles[0].key, targetDrive),
+    []
+  );
 
   const tinyThumbUrl = useMemo(
-    () => (previewThumbnail ? getEmbeddedThumbUrl(previewThumbnail) : undefined),
+    () =>
+      previewThumbnail && !hasFirstInCache ? getEmbeddedThumbUrl(previewThumbnail) : undefined,
     [previewThumbnail]
   );
-  const targetDrive = getChannelDrive(channelId);
 
   return (
     <div className={`overflow-hidden ${className ?? ''}`} ref={containerRef}>
@@ -59,39 +77,42 @@ export const MediaGallery = ({
           <div
             className={`${
               tinyThumbUrl ? 'absolute inset-0' : ''
-            } grid grid-cols-2 gap-1 bg-background`}
+            } ${someLoaded || hasFirstInCache ? 'opacity-100' : 'opacity-0'} grid grid-cols-2 gap-1 bg-background`}
           >
             {slicedFiles.map((file, index) => (
               <div
                 className={slicedFiles.length === 3 && index === 2 ? 'col-span-2' : undefined}
-                key={file.fileId + file.fileKey}
+                key={file.fileId + file.key}
               >
                 <div
                   className={`relative ${
                     slicedFiles.length === 3 && index === 2 ? 'aspect-[2/1]' : 'aspect-square'
-                  } h-auto w-full cursor-pointer`}
+                  } h-auto w-full cursor-pointer overflow-hidden`}
                   onClick={onClick ? (e) => onClick(e, index) : undefined}
                 >
                   <Image
                     odinId={odinId}
-                    className={`h-full w-auto`}
+                    className={`h-full w-auto ${file.contentType.startsWith('video') ? 'blur-sm' : ''}`}
                     fileId={file.fileId || fileId}
                     globalTransitId={file.fileId ? undefined : globalTransitId}
-                    fileKey={file.fileKey}
+                    fileKey={file.key}
                     lastModified={lastModified}
                     targetDrive={targetDrive}
                     fit="cover"
                     probablyEncrypted={probablyEncrypted}
-                    avoidPayload={file.type === 'video'}
+                    avoidPayload={file.contentType.startsWith('video')}
+                    onLoad={() => setSomeLoaded(true)}
                   />
 
                   {index === maxVisible - 1 && countExcludedFromView > 0 ? (
                     <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
                       <span className="block text-center">+{countExcludedFromView}</span>
                     </div>
-                  ) : file.type === 'video' ? (
+                  ) : file.contentType.startsWith('video') ? (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Triangle className="text-background h-16 w-16" />
+                      <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+                        <Triangle className="text-foreground h-12 w-12" />
+                      </div>
                     </div>
                   ) : null}
                 </div>

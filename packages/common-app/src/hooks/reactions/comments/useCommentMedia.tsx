@@ -33,30 +33,28 @@ export const useCommentMedia = ({
     const isLocal = odinId === dotYouClient.getIdentity();
 
     return (await isLocal)
-      ? getDecryptedImageUrl(
-          dotYouClient,
-          targetDrive,
-          fileId,
-          fileKey,
-          {
+      ? getDecryptedImageUrl(dotYouClient, targetDrive, fileId, fileKey, undefined, undefined, {
+          size: {
             pixelWidth: 250,
             pixelHeight: 250,
           },
-          undefined,
-          'Comment'
-        )
+          systemFileType: 'Comment',
+        })
       : getDecryptedImageUrlOverPeer(
           dotYouClient,
           odinId,
           targetDrive,
           fileId,
           fileKey,
-          {
-            pixelWidth: 250,
-            pixelHeight: 250,
-          },
           undefined,
-          'Comment'
+          undefined,
+          {
+            size: {
+              pixelWidth: 250,
+              pixelHeight: 250,
+            },
+            systemFileType: 'Comment',
+          }
         );
   };
 

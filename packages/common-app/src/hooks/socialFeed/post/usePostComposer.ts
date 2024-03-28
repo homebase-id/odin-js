@@ -1,7 +1,9 @@
 import {
-  DriveSearchResult,
-  NewDriveSearchResult,
+  AccessControlList,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   Tweet,
@@ -10,9 +12,8 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
-  NewMediaFile,
 } from '@youfoundation/js-lib/public';
-import { getNewId } from '@youfoundation/js-lib/helpers';
+import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
 import { useDotYouClient } from '../../../..';
@@ -27,17 +28,24 @@ export const usePostComposer = () => {
     caption: string | undefined,
     mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
-    channel: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>,
-    reactAccess: ReactAccess | undefined
+    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>,
+    reactAccess: ReactAccess | undefined,
+    overrideAcl: AccessControlList | undefined
   ) => {
     if (!mediaFiles && !caption && !embeddedPost) return;
 
+    if (
+      overrideAcl &&
+      !stringGuidsEqual(channel.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
+    ) {
+      throw new Error('Custom ACLs are only allowed for public channels');
+    }
     try {
       setPostState('uploading');
 
       // Upload post
       const postId = getNewId();
-      const postFile: NewDriveSearchResult<Tweet | Media> = {
+      const postFile: NewHomebaseFile<Tweet | Media> = {
         fileMetadata: {
           appData: {
             userDate: new Date().getTime(),
@@ -54,9 +62,13 @@ export const usePostComposer = () => {
             },
           },
         },
-        serverMetadata: channel.serverMetadata || {
-          accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
-        },
+        serverMetadata: overrideAcl
+          ? {
+              accessControlList: overrideAcl,
+            }
+          : channel.serverMetadata || {
+              accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
+            },
       };
 
       await savePostFile({

@@ -1,6 +1,5 @@
-import { ActionButton, t } from '@youfoundation/common-app';
+import { ActionButton, t, Checkbox } from '@youfoundation/common-app';
 import { useEffect } from 'react';
-import Checkbox from '../../components/Form/Checkbox';
 import { useEula } from '../../hooks/eula/useEula';
 
 export const Eula = ({ onConfirm }: { onConfirm: () => void }) => {
@@ -49,7 +48,7 @@ const EulaContents = () => {
   return (
     <div className="flex flex-col gap-5">
       <p className="text-lg">
-        <small className="block text-sm">Version: October 15, 2023</small>
+        <small className="block text-sm">Version: January 16, 2024</small>
       </p>
       <p>Essential quick points of the EULA:</p>
       <ul className="list-outside list-disc pl-4">
@@ -69,10 +68,9 @@ const EulaContents = () => {
         </li>
         <li>
           <em className="font-medium not-italic">Illegal Content: </em>You agree not to distribute
-          content that is universally regarded as illegal and extremely harmful: child pornography,
-          revenge porn, and snuff. Violating this provision will result in the immediate, permanent
-          termination of your rights to use Homebase. In addition, you agree to pay a penalty of
-          $1,000,000 USD to Homebase for each violation of this term.
+          content that is universally regarded as illegal and extremely harmful, including child
+          pornography, revenge porn, and snuff. Violating this provision will result in the
+          immediate, permanent termination of your rights to use Homebase.
         </li>
       </ul>
       <p>
@@ -204,14 +202,21 @@ const EulaContents = () => {
         Examples of such activities include, but are not limited to:
       </p>
       <ul className="list-outside list-disc pl-4">
+        <li>Child pornography </li>
+        <li>Revenge porn or snuff.</li>
         <li>Fraud or financial crimes.</li>
-        <li>Distribution or production of illicit drugs.</li>
-        <li>Trafficking or promotion of illegal goods.</li>
-        <li>Any other activities prohibited by applicable law.</li>
+        <li>Distribution, selling or production of illicit drugs.</li>
+        <li>Trafficking or promotion of illegal goods or terrorism.</li>
+        <li>Any other activities prohibited by applicable law</li>
       </ul>
       <p>
+        Violating the forbidden uses will result in the immediate, permanent termination of your
+        rights to use Homebase and be liable for any reputational damage you may have cause to
+        Homebase.
+      </p>
+      <p>
         Violation of Third Party IPR: You are strictly prohibited from using the Software in a
-        manner that infringes, violates, or misappropriates any third-party intellectual property
+        manner that infringes, violates, or misappropriates any third- party intellectual property
         rights, including but not limited to:
       </p>
       <ul className="list-outside list-disc pl-4">

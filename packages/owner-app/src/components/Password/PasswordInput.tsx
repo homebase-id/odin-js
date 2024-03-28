@@ -17,11 +17,10 @@ export const PasswordInput = (
         {...props}
         ref={undefined}
         type={show ? 'input' : 'password'}
-        autoComplete="current-password"
         className={`appearance-none pr-10 ${props.className}`}
       />
       <a
-        onClick={(e) => {
+        onClick={() => {
           setShow(!show);
         }}
         className="absolute bottom-0 right-0 top-0 flex cursor-pointer items-center justify-center pr-3 opacity-70 transition-opacity hover:opacity-100"

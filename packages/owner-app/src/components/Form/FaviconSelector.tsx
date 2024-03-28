@@ -19,7 +19,6 @@ const FaviconSelector = ({
   lastModified,
   ...props
 }: FaviconSelectorProps) => {
-  console.log(defaultValue);
   const valueObject: { fileKey: string } | { emoji: string } | undefined = defaultValue as
     | { fileKey: string }
     | { emoji: string }
@@ -35,17 +34,12 @@ const FaviconSelector = ({
     lastModified,
   }).fetch;
 
-  const dataVal: any =
+  const dataVal: string | undefined =
     valueObject && typeof valueObject === 'object' && 'fileKey' in valueObject
       ? valueObject.fileKey
       : undefined;
 
-  const defaultFaviconImageValue =
-    dataVal && dataVal instanceof Blob
-      ? dataVal
-      : dataVal
-      ? imageData?.url || undefined
-      : undefined;
+  const defaultFaviconImageValue = dataVal ? imageData?.url || undefined : undefined;
 
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isImageOpen, setIsImageOpen] = useState(false);

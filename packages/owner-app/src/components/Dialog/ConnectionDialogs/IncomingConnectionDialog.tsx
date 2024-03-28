@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Alert, Arrow, t, useFollowingInfinite } from '@youfoundation/common-app';
+import { Alert, Arrow, t, useFollowingInfinite, CheckboxToggle } from '@youfoundation/common-app';
 import { useFocusedEditing } from '../../../hooks/focusedEditing/useFocusedEditing';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -10,7 +10,6 @@ import ContactImage from '../../Connection/ContactImage/ContactImage';
 import YourInfo from '../../Connection/YourInfo/YourInfo';
 import { CircleSelector } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
-import CheckboxToggle from '../../Form/CheckboxToggle';
 import { usePendingConnection } from '../../../hooks/connections/usePendingConnection';
 import { useConnection } from '../../../hooks/connections/useConnection';
 import { useContact } from '../../../hooks/contacts/useContact';
@@ -134,6 +133,7 @@ const IncomingConnectionDialog = ({
           <>
             <form
               onSubmit={async (e) => {
+                if (acceptPendingStatus === 'pending') return;
                 e.preventDefault();
                 await acceptPending({
                   senderOdinId: senderOdinId,
@@ -148,7 +148,7 @@ const IncomingConnectionDialog = ({
             >
               <div className="mb-4 pb-4">
                 <h2 className="mb-2 text-lg leading-tight">
-                  {t('Add as member to one or more circles')}:
+                  {t('Add as a member to one or more circles')}:
                   <small className="block text-slate-400 dark:text-slate-600">
                     {senderOdinId} {t('will be added as member to the selected circles')}
                   </small>
@@ -156,6 +156,7 @@ const IncomingConnectionDialog = ({
                 <CircleSelector
                   defaultValue={circleGrants}
                   onChange={(e) => setCircleGrants(e.target.value)}
+                  excludeSystemCircles={true}
                 />
               </div>
 

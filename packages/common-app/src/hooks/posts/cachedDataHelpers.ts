@@ -5,7 +5,7 @@ import {
   SystemFileType,
   QueryBatchCollectionResponse,
   DEFAULT_QUERY_BATCH_RESULT_OPTION,
-  DriveSearchResult,
+  HomebaseFile,
 } from '@youfoundation/js-lib/core';
 import {
   stringGuidsEqual,
@@ -67,7 +67,7 @@ export const getCachedRecentPosts = async (dotYouClient: DotYouClient, postType?
 export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
   const fileData = await GetFile(dotYouClient, 'sitedata.json');
   if (fileData) {
-    let channels: DriveSearchResult<ChannelDefinitionVm>[] = [];
+    let channels: HomebaseFile<ChannelDefinitionVm>[] = [];
 
     fileData.forEach((entry) => {
       const entries = entry.filter(
@@ -93,13 +93,12 @@ export const fetchCachedPublicChannels = async (dotYouClient: DotYouClient) => {
                 },
               },
             },
-          } as DriveSearchResult<ChannelDefinitionVm>;
+          } as HomebaseFile<ChannelDefinitionVm>;
         }),
       ];
     });
 
     if (!channels.length) return null;
-
     return channels;
   }
 };
@@ -140,14 +139,14 @@ const cachedQuery = async (dotYouClient: DotYouClient) => {
     response.results.map(async (result) => {
       const targetDrive = GetTargetDriveFromChannelId(result.name);
 
-      const posts: DriveSearchResult<PostContent>[] = (
+      const posts: HomebaseFile<PostContent>[] = (
         await Promise.all(
           result.searchResults.map(
             async (dsr) =>
               await dsrToPostFile(dotYouClient, dsr, targetDrive, result.includeMetadataHeader)
           )
         )
-      ).filter((post) => !!post) as DriveSearchResult<PostContent>[];
+      ).filter((post) => !!post) as HomebaseFile<PostContent>[];
 
       allCursors[result.name] = result.cursorState;
 
@@ -168,9 +167,7 @@ const queryBatchCachedCollection = async (
   systemFileType?: SystemFileType
 ): Promise<QueryBatchCollectionResponse> => {
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const updatedQueries = queries.map((query) => {

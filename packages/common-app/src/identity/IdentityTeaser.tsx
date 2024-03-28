@@ -1,14 +1,16 @@
-import { ReactNode, useRef, useState } from 'react';
+import { MouseEventHandler, ReactNode, useRef, useState } from 'react';
 import { useDotYouClient, useExternalOdinId, useIntersection, useIsConnected } from '../..';
 
 export const IdentityTeaser = ({
   odinId,
+  onClick,
   className,
   size,
   isBorderLess,
   children,
 }: {
   odinId: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
   className?: string;
   size?: 'md' | 'sm';
   isBorderLess?: boolean;
@@ -36,6 +38,9 @@ export const IdentityTeaser = ({
   return (
     <a
       href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onClick}
       className={`flex h-full w-full items-center rounded-lg ${
         isBorderLess ? '-mx-1 p-1' : 'border border-gray-200 p-4 dark:border-gray-700'
       } bg-background hover:shadow-md relative hover:z-10 hover:dark:shadow-slate-600 ${

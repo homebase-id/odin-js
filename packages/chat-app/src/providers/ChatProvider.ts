@@ -1,13 +1,13 @@
 import {
   AppFileMetaData,
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   EmbeddedThumb,
   FileMetadata,
   FileQueryParams,
   GetBatchQueryResultOptions,
   KeyHeader,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   PayloadFile,
   ScheduleOptions,
   SecurityGroupType,
@@ -24,6 +24,7 @@ import {
   sendCommand,
   uploadFile,
   uploadHeader,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   ChatDrive,
@@ -31,9 +32,8 @@ import {
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
-import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
+import { getNewId, jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
 import { appId } from '../hooks/auth/useAuth';
 import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
 
@@ -50,24 +50,9 @@ export enum ChatDeliveryStatus {
   Failed = 50, // when the message failed to send to the recipient
 }
 
-export enum MessageType {
-  Text = 0,
-  Image = 1,
-  Video = 2,
-  Audio = 3,
-  File = 4,
-  Location = 5,
-  Sticker = 6,
-  Contact = 7,
-  Custom = 8,
-}
-
 export interface ChatMessage {
   // /// ReplyId used to get the replyId of the message
   replyId?: string; //=> Better to use the groupId (unless that would break finding the messages of a conversation)...
-
-  /// Type of the message
-  // messageType: MessageType;
 
   /// FileState of the Message
   /// [FileState.active] shows the message is active
@@ -76,8 +61,6 @@ export interface ChatMessage {
 
   /// Content of the message
   message: string;
-
-  // reactions: string;
 
   /// DeliveryStatus of the message. Indicates if the message is sent, delivered or read
   deliveryStatus: ChatDeliveryStatus;
@@ -106,11 +89,12 @@ export const getChatMessages = async (
   const response = await queryBatch(dotYouClient, params, ro);
   return {
     ...response,
-    searchResults: await Promise.all(
-      response.searchResults.map(
-        async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true)
-      )
-    ),
+    searchResults:
+      ((await Promise.all(
+        response.searchResults
+          .map(async (result) => await dsrToMessage(dotYouClient, result, ChatDrive, true))
+          .filter(Boolean)
+      )) as HomebaseFile<ChatMessage>[]) || [],
   };
 };
 
@@ -136,17 +120,17 @@ export const getChatMessageByGlobalTransitId = async (
   messageGlobalTransitId: string
 ) => {
   const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-  return allChatMessages?.searchResults?.find(
-    (chat) => chat?.fileMetadata.globalTransitId === messageGlobalTransitId
+  return allChatMessages?.searchResults?.find((chat) =>
+    stringGuidsEqual(chat?.fileMetadata.globalTransitId, messageGlobalTransitId)
   );
 };
 
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ChatMessage> | null> => {
+): Promise<HomebaseFile<ChatMessage> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ChatMessage>(
       dotYouClient,
@@ -156,7 +140,7 @@ export const dsrToMessage = async (
     );
     if (!attrContent) return null;
 
-    const chatMessage: DriveSearchResult<ChatMessage> = {
+    const chatMessage: HomebaseFile<ChatMessage> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -176,7 +160,7 @@ export const dsrToMessage = async (
 
 export const uploadChatMessage = async (
   dotYouClient: DotYouClient,
-  message: NewDriveSearchResult<ChatMessage>,
+  message: NewHomebaseFile<ChatMessage>,
   recipients: string[],
   files: NewMediaFile[] | undefined,
   onVersionConflict?: () => void
@@ -240,30 +224,32 @@ export const uploadChatMessage = async (
       payloads.push(payload);
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
-    } else {
+    } else if (newMediaFile.file.type.startsWith('image/')) {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
-        payloadKey,
-        [
-          { quality: 75, width: 250, height: 250 },
-          { quality: 75, width: 1600, height: 1600 },
-        ]
+        payloadKey
       );
 
       thumbnails.push(...additionalThumbnails);
       payloads.push({
         key: payloadKey,
         payload: newMediaFile.file,
+        previewThumbnail: tinyThumb,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else {
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.file,
+      });
     }
   }
 
   uploadMetadata.appData.previewThumbnail =
     previewThumbnails.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
 
-  return await uploadFile(
+  const uploadResult = await uploadFile(
     dotYouClient,
     uploadInstructions,
     uploadMetadata,
@@ -272,11 +258,18 @@ export const uploadChatMessage = async (
     undefined,
     onVersionConflict
   );
+
+  if (!uploadResult) return null;
+
+  return {
+    ...uploadResult,
+    previewThumbnail: uploadMetadata.appData.previewThumbnail,
+  };
 };
 
 export const updateChatMessage = async (
   dotYouClient: DotYouClient,
-  message: DriveSearchResult<ChatMessage> | NewDriveSearchResult<ChatMessage>,
+  message: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>,
   recipients: string[],
   keyHeader?: KeyHeader
 ) => {
@@ -306,6 +299,7 @@ export const updateChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
+      previewThumbnail: message.fileMetadata.appData.previewThumbnail,
       fileType: ChatMessageFileType,
       content: payloadJson,
     },
@@ -318,7 +312,7 @@ export const updateChatMessage = async (
 
   return await uploadHeader(
     dotYouClient,
-    keyHeader || (message as DriveSearchResult<ChatMessage>).sharedSecretEncryptedKeyHeader,
+    keyHeader || (message as HomebaseFile<ChatMessage>).sharedSecretEncryptedKeyHeader,
     uploadInstructions,
     uploadMetadata
   );
@@ -326,7 +320,7 @@ export const updateChatMessage = async (
 
 export const softDeleteChatMessage = async (
   dotYouClient: DotYouClient,
-  message: DriveSearchResult<ChatMessage>,
+  message: HomebaseFile<ChatMessage>,
   recipients: string[],
   deleteForEveryone?: boolean
 ) => {
@@ -361,7 +355,7 @@ export interface MarkAsReadRequest {
 
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
-  conversation: DriveSearchResult<Conversation>,
+  conversation: HomebaseFile<Conversation>,
   chatGlobalTransitIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
@@ -397,7 +391,7 @@ export const requestMarkAsRead = async (
 // Probably not needed, as the file is "updated" for a soft delete, which just is sent over transit to the recipients
 // export const requestDelete = async (
 //   dotYouClient: DotYouClient,
-//   conversation: DriveSearchResult<Conversation>,
+//   conversation: HomebaseFile<Conversation>,
 //   chatGlobalTransitIds: string[]
 // ) => {
 //   const request: DeleteRequest = {

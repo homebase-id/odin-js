@@ -5,7 +5,7 @@ import {
   BuiltInProfiles,
   Attribute,
   AttributeConfig,
-  dsrToAttributeFile,
+  homebaseFileToProfileAttribute,
   GetTargetDriveFromProfileId,
 } from '@youfoundation/js-lib/profile';
 import {
@@ -14,7 +14,7 @@ import {
   HomePageConfig,
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
-import { DriveSearchResult, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
+import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
 
 interface DefaultTemplateSettings {
   imageFileId: string;
@@ -85,7 +85,7 @@ export const useSiteData = () => {
     const fileData = await GetFile(dotYouClient, 'sitedata.json');
 
     const parseOwnerData = async (
-      nameAndPhotoAndStatusAttr?: DriveSearchResult<Attribute>[]
+      nameAndPhotoAndStatusAttr?: HomebaseFile<Attribute>[]
     ): Promise<OwnerSiteData> => {
       const nameDsr = nameAndPhotoAndStatusAttr?.find(
         (attr) => attr.fileMetadata.appData.content.type === BuiltInAttributes.Name
@@ -115,7 +115,7 @@ export const useSiteData = () => {
     };
 
     const parseSocialData = async (
-      socialAttributes?: DriveSearchResult<Attribute>[]
+      socialAttributes?: HomebaseFile<Attribute>[]
     ): Promise<SocialSiteData> => {
       return socialAttributes
         ?.map((dsr) => {
@@ -133,7 +133,7 @@ export const useSiteData = () => {
     };
 
     const parseHomeData = async (
-      homeAndThemeAttr?: DriveSearchResult<Attribute>[]
+      homeAndThemeAttr?: HomebaseFile<Attribute>[]
     ): Promise<HomeSiteData> => {
       const themeAttribute = homeAndThemeAttr?.find(
         (attr) => attr.fileMetadata.appData.content.type === HomePageAttributes.Theme
@@ -155,7 +155,7 @@ export const useSiteData = () => {
       const socialDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
       const homeDrive = HomePageConfig.HomepageTargetDrive;
 
-      /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getAttributeVersions`
+      /// Query batch collection to improve performance instead of higher level `AttributeDataProvider.getProfileAttributes`
       const collectionResult = await queryBatchCollection(dotYouClient, [
         {
           name: 'owner',
@@ -211,7 +211,12 @@ export const useSiteData = () => {
           .get('owner')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, ownerDrive, INCLUDE_METADATA_HEADER)
+              await homebaseFileToProfileAttribute(
+                dotYouClient,
+                dsr,
+                ownerDrive,
+                INCLUDE_METADATA_HEADER
+              )
           ) ?? []
       );
       const socialAttr = await Promise.all(
@@ -219,7 +224,12 @@ export const useSiteData = () => {
           .get('social')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, ownerDrive, INCLUDE_METADATA_HEADER)
+              await homebaseFileToProfileAttribute(
+                dotYouClient,
+                dsr,
+                ownerDrive,
+                INCLUDE_METADATA_HEADER
+              )
           ) ?? []
       );
       const homeAttr = await Promise.all(
@@ -227,14 +237,19 @@ export const useSiteData = () => {
           .get('home')
           ?.map(
             async (dsr) =>
-              await dsrToAttributeFile(dotYouClient, dsr, homeDrive, INCLUDE_METADATA_HEADER)
+              await homebaseFileToProfileAttribute(
+                dotYouClient,
+                dsr,
+                homeDrive,
+                INCLUDE_METADATA_HEADER
+              )
           ) ?? []
       );
 
       return {
         owner: await parseOwnerData(getHighestPrioAttributesFromMultiTypes(ownerAttr)),
         social: await parseSocialData(
-          socialAttr.filter((attr) => attr !== undefined) as DriveSearchResult<Attribute>[]
+          socialAttr.filter((attr) => attr !== undefined) as HomebaseFile<Attribute>[]
         ),
         home: await parseHomeData(getHighestPrioAttributesFromMultiTypes(homeAttr)),
       } as SiteData;

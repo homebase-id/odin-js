@@ -1,5 +1,5 @@
 import { PostContent } from '@youfoundation/js-lib/public';
-import { useMemo, useEffect, useRef, useLayoutEffect, FC } from 'react';
+import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { flattenInfinteData } from '@youfoundation/common-app';
@@ -8,7 +8,7 @@ import { LoadingBlock } from '@youfoundation/common-app';
 import PostComposer from '../PostComposer';
 import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
 import { useSocialFeed } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
 
@@ -26,7 +26,7 @@ const SocialFeedMainContent = () => {
   // Flatten all pages, sorted descending and slice on the max number expected
   const flattenedPosts = useMemo(
     () =>
-      flattenInfinteData<DriveSearchResult<PostContent>>(
+      flattenInfinteData<HomebaseFile<PostContent>>(
         posts,
         PAGE_SIZE,
         (a, b) =>
@@ -52,14 +52,10 @@ const SocialFeedMainContent = () => {
 
   useEffect(() => {
     const [lastItem] = [...virtualizer.getVirtualItems()].reverse();
+    if (!lastItem) return;
 
-    if (!lastItem) {
-      return;
-    }
-
-    if (lastItem.index >= flattenedPosts?.length - 1 && hasMorePosts && !isFetchingNextPage) {
+    if (lastItem.index >= flattenedPosts?.length - 1 && hasMorePosts && !isFetchingNextPage)
       fetchNextPage();
-    }
   }, [
     hasMorePosts,
     fetchNextPage,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import {
   comboboxActions,
@@ -63,7 +63,7 @@ export function ComboboxContent<TData extends Data = NoData>(props: ComboboxCont
           side="bottom"
           align="start"
           className={cn(
-            'bg-popover z-[500] m-0 max-h-[288px] w-[300px] overflow-scroll rounded-md p-0 shadow-md'
+            'z-[500] m-0 max-h-[288px] w-[300px] overflow-scroll rounded-md bg-popover p-0 shadow-md'
           )}
           onOpenAutoFocus={(event) => event.preventDefault()}
         >

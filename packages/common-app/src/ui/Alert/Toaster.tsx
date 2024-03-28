@@ -1,27 +1,32 @@
-import { ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { ReactNode, useState } from 'react';
 import {
   ActionButton,
+  DialogWrapper,
   Exclamation,
   OWNER_ROOT,
   Times,
   t,
   useDotYouClient,
   useNotifications,
+  usePortal,
+  useErrors,
+  Clipboard,
 } from '@youfoundation/common-app';
+import type { Error } from '../../hooks/errors/useErrors';
 import { useNavigate } from 'react-router-dom';
-import { useErrors } from '@youfoundation/common-app';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
 import { ApiType } from '@youfoundation/js-lib/core';
 
-export const Toaster = () => {
+export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
   const { getApiType } = useDotYouClient();
   const isOwner = getApiType() === ApiType.Owner;
   // Only when logged in via owner we have access to the live notifications;
 
   return (
     <div className="fixed bottom-2 left-2 right-2 z-50 grid grid-flow-row gap-4 sm:bottom-auto sm:left-auto sm:right-8 sm:top-8">
-      <ErrorToaser />
-      {isOwner ? <LiveToaster /> : null}
+      <ErrorToaster />
+      {isOwner && !errorOnly ? <LiveToaster /> : null}
     </div>
   );
 };
@@ -51,11 +56,13 @@ export const LiveToaster = () => {
   );
 };
 
-export const ErrorToaser = () => {
+export const ErrorToaster = () => {
   const {
     fetch: { data: errors },
     dismiss: dismissError,
   } = useErrors();
+
+  const [openError, setOpenError] = useState<Error | null>(null);
 
   return (
     <>
@@ -65,12 +72,74 @@ export const ErrorToaser = () => {
           body={error.message}
           key={index}
           onDismiss={() => dismissError(error)}
-          onOpen={() => dismissError(error)}
+          onOpen={() => {
+            setOpenError(error);
+            dismissError(error);
+          }}
           type={error.type}
         />
       ))}
+
+      {openError ? <ErrorDialog error={openError} onClose={() => setOpenError(null)} /> : null}
     </>
   );
+};
+
+const ErrorDialog = ({ error, onClose }: { error: Error; onClose: () => void }) => {
+  const target = usePortal('modal-container');
+  const errorDetails = error.details;
+
+  if (!errorDetails) return null;
+
+  const dialog = (
+    <DialogWrapper title={error.message} onClose={onClose} isSidePanel={false} size="2xlarge">
+      {errorDetails ? (
+        <>
+          <p className="text-xl mb-2">
+            {errorDetails.domain}: {errorDetails.correlationId}
+          </p>
+          {errorDetails.title || errorDetails.stackTrace ? (
+            <div className="overflow-auto max-h-[20rem]">
+              <pre>
+                <code>
+                  {errorDetails.title}
+                  {errorDetails.stackTrace}
+                </code>
+              </pre>
+            </div>
+          ) : null}
+
+          <div className="flex flex-row-reverse mt-5">
+            <ActionButton
+              onClick={() => {
+                const details = `${errorDetails.domain}: ${errorDetails.correlationId}\n\n${errorDetails.title}\n${errorDetails.stackTrace}`;
+                navigator.clipboard.writeText(details);
+              }}
+              type="primary"
+              icon={Clipboard}
+            >
+              {t('Copy')}
+            </ActionButton>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-xl mb-2">{error.message}</p>
+          <div className="flex flex-row-reverse mt-5">
+            <ActionButton
+              onClick={() => navigator.clipboard.writeText(error.message)}
+              type="primary"
+              icon={Clipboard}
+            >
+              {t('Copy')}
+            </ActionButton>
+          </div>
+        </>
+      )}
+    </DialogWrapper>
+  );
+
+  return createPortal(dialog, target);
 };
 
 export const Toast = ({
@@ -102,10 +171,8 @@ export const Toast = ({
     'relative after:content-[""] after:absolute after:top-[1.6rem] after:w-[50%] after:h-[1.4rem] after:bg-gradient-to-l after:from-white dark:after:from-black after:to-transparent';
 
   const doOpen = () => {
-    if (!href) return;
-
-    if (href.startsWith(OWNER_ROOT)) navigate(href);
-    else {
+    if (href && href.startsWith(OWNER_ROOT)) navigate(href);
+    else if (href) {
       onOpen && onOpen();
       window.location.href = href;
     }
@@ -116,7 +183,7 @@ export const Toast = ({
   return (
     <div
       className={`relative flex max-w-sm flex-row rounded-md bg-white px-2 py-2 shadow-md dark:bg-black dark:text-slate-300 ${
-        href ? 'cursor-pointer' : ''
+        href || onOpen ? 'cursor-pointer' : ''
       }`}
       onClick={doOpen}
     >

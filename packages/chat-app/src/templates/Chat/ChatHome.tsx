@@ -4,22 +4,28 @@ import { useNavigate, useParams, useMatch } from 'react-router-dom';
 import { ChatDetail } from './ChatDetail';
 
 import { ROOT_PATH } from '../../app/App';
-import { useState } from 'react';
 import { NewConversation } from '../../components/Chat/Conversations/Sidenav/NewConversation';
 import { NewConversationGroup } from '../../components/Chat/Conversations/Sidenav/NewConversationGroup';
 import { ConversationsSidebar } from '../../components/Chat/Conversations/Sidenav/ConversationsSidenav';
-import { ProfileHeader } from '../../components/Chat/Conversations/Sidenav/ProfileHeader';
-import { Sidenav } from '@youfoundation/common-app';
-import { useAuth } from '../../hooks/auth/useAuth';
+import { NavHeader } from '../../components/Chat/Conversations/Sidenav/NavHeader';
+import {
+  CHAT_APP_ID,
+  ErrorBoundary,
+  ExtendPermissionDialog,
+  Sidenav,
+  t,
+  useRemoveNotifications,
+} from '@youfoundation/common-app';
+import { drives, permissions, useAuth } from '../../hooks/auth/useAuth';
 import { Helmet } from 'react-helmet-async';
 
 export const CHAT_ROOT = ROOT_PATH;
 
 export const ChatHome = () => {
   const { conversationKey } = useParams();
-  const [isSidenavOpen, setIsSidenavOpen] = useState(false);
 
-  useLiveChatProcessor();
+  const isOnline = useLiveChatProcessor();
+  useRemoveNotifications({ appId: CHAT_APP_ID });
 
   return (
     <>
@@ -27,27 +33,24 @@ export const ChatHome = () => {
         <title>Homebase | Chat</title>
       </Helmet>
 
+      <ExtendPermissionDialog
+        appName={t('Homebase Chat')}
+        appId={CHAT_APP_ID}
+        drives={drives}
+        permissions={permissions}
+        // needsAllConnected={true}
+      />
       <div className={`flex h-[100dvh] w-full flex-row overflow-hidden`}>
-        <ChatSideNav isOpen={isSidenavOpen} setIsSidenavOpen={setIsSidenavOpen} />
-
-        <div className="h-[100dvh] w-full flex-grow bg-background">
-          <ChatDetail
-            conversationId={conversationKey}
-            toggleSidenav={() => setIsSidenavOpen(!isSidenavOpen)}
-          />
+        <ChatSideNav isOnline={isOnline} />
+        <div className="h-full w-full flex-grow bg-background">
+          <ChatDetail conversationId={conversationKey} />
         </div>
       </div>
     </>
   );
 };
 
-const ChatSideNav = ({
-  isOpen,
-  setIsSidenavOpen,
-}: {
-  isOpen: boolean;
-  setIsSidenavOpen: (newIsOpen: boolean) => void;
-}) => {
+const ChatSideNav = ({ isOnline }: { isOnline: boolean }) => {
   const { conversationKey } = useParams();
   const { logout } = useAuth();
 
@@ -62,33 +65,34 @@ const ChatSideNav = ({
   const rootChatMatch = useMatch({ path: CHAT_ROOT });
   const isRoot = !!rootChatMatch;
 
-  const isActive = isOpen || isCreateNew || isCreateNewGroup || isRoot;
+  const isActive = isCreateNew || isCreateNewGroup || isRoot;
 
   return (
     <>
-      <Sidenav disablePinning={true} hideMobileDrawer={!isOpen && !isRoot} logout={logout} />
+      <Sidenav disablePinning={true} hideMobileDrawer={!isRoot} logout={logout} />
       <div
         className={`${isActive ? 'translate-x-full' : 'translate-x-0'} ${
           isCreateNew || isCreateNewGroup ? '' : 'pb-14'
         }
-        fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:static md:max-w-xs md:translate-x-0 md:pb-0 lg:max-w-sm`}
+        fixed bottom-0 left-[-100%] top-0 z-10 flex h-[100dvh] w-full flex-shrink-0 flex-col border-r bg-page-background transition-transform dark:border-r-slate-800 md:pl-[calc(env(safe-area-inset-left)+4.3rem)] lg:static lg:max-w-sm lg:translate-x-0 lg:pb-0 lg:pl-0`}
       >
-        {isCreateNew ? (
-          <NewConversation />
-        ) : isCreateNewGroup ? (
-          <NewConversationGroup />
-        ) : (
-          <>
-            <ProfileHeader closeSideNav={isRoot ? undefined : () => setIsSidenavOpen(false)} />
-            <ConversationsSidebar
-              activeConversationId={conversationKey}
-              openConversation={(newId) => {
-                setIsSidenavOpen(false);
-                navigate(`${CHAT_ROOT}/${newId}`);
-              }}
-            />
-          </>
-        )}
+        <ErrorBoundary>
+          {isCreateNew ? (
+            <NewConversation />
+          ) : isCreateNewGroup ? (
+            <NewConversationGroup />
+          ) : (
+            <>
+              <NavHeader isOnline={isOnline} />
+              <ConversationsSidebar
+                activeConversationId={conversationKey}
+                openConversation={(newId) => {
+                  navigate(`${CHAT_ROOT}/${newId}`);
+                }}
+              />
+            </>
+          )}
+        </ErrorBoundary>
       </div>
     </>
   );

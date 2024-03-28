@@ -4,8 +4,11 @@ export type SystemFileType = 'Standard' | 'Comment';
 
 export interface FileMetadata<T = string> {
   created: number;
-  globalTransitId?: string;
   updated: number;
+  transitCreated?: number;
+  transitUpdated?: number;
+
+  globalTransitId?: string;
   isEncrypted: boolean;
   senderOdinId: string;
   appData: AppFileMetaData<T>;
@@ -54,6 +57,7 @@ export interface ThumbnailFile extends ImageSize {
 export interface PayloadFile {
   key: string;
   payload: File | Blob;
+  previewThumbnail?: EmbeddedThumb;
   descriptorContent?: string;
 }
 
@@ -107,6 +111,7 @@ export interface PayloadDescriptor {
   bytesWritten: number;
   lastModified: number;
   thumbnails: ThumbnailDescriptor[];
+  previewThumbnail: EmbeddedThumb | undefined;
   iv: Uint8Array | undefined;
 }
 
@@ -118,11 +123,25 @@ export interface UploadPayloadDescriptor {
   payloadKey: string;
   descriptorContent: string | undefined;
   thumbnails?: UploadThumbnailDescriptor[];
+  previewThumbnail?: EmbeddedThumb;
   iv: Uint8Array | undefined;
 }
 
 export interface UploadThumbnailDescriptor extends ImageSize {
   thumbnailKey: string;
+}
+
+// Management of media files; New uploads and existing payloadDescriptor
+export interface MediaFile {
+  fileId?: string | undefined;
+  key: string;
+  contentType: ContentType;
+}
+
+export interface NewMediaFile {
+  key?: string;
+  file: File | Blob;
+  thumbnail?: ThumbnailFile;
 }
 
 export interface KeyHeader {
@@ -137,7 +156,7 @@ export interface EncryptedKeyHeader {
   encryptedAesKey: Uint8Array;
 }
 
-interface BaseDriveSearchResult<T = string> {
+interface BaseHomebaseFile<T = string> {
   fileId: string;
 
   fileSystemType: SystemFileType;
@@ -149,15 +168,15 @@ interface BaseDriveSearchResult<T = string> {
   priority: number;
 }
 
-export interface DriveSearchResult<T = string> extends BaseDriveSearchResult<T> {
+export interface HomebaseFile<T = string> extends BaseHomebaseFile<T> {
   fileState: 'active';
 }
 
-export interface DeletedDriveSearchResult<T = string> extends BaseDriveSearchResult<T> {
+export interface DeletedHomebaseFile<T = string> extends BaseHomebaseFile<T> {
   fileState: 'deleted';
 }
 
-export interface NewDriveSearchResult<T = string> {
+export interface NewHomebaseFile<T = string> {
   fileId?: string;
 
   fileSystemType?: SystemFileType;
@@ -177,6 +196,7 @@ export interface NewAppFileMetaData<T = string> {
   previewThumbnail?: EmbeddedThumb;
   fileType?: number;
   userDate?: number;
+  tags?: string[];
   uniqueId?: string;
   groupId?: string;
 }

@@ -1,16 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AccessControlList,
-  ImageSize,
-  SecurityGroupType,
-  TargetDrive,
-} from '@youfoundation/js-lib/core';
-import {
-  getDecryptedImageUrl,
-  removeImage,
-  ThumbnailInstruction,
-  uploadImage,
-} from '@youfoundation/js-lib/media';
+import { useQuery } from '@tanstack/react-query';
+import { ImageSize, TargetDrive } from '@youfoundation/js-lib/core';
+import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/peer';
 
 import { useDotYouClient } from '../../..';
@@ -40,7 +30,6 @@ export const useImage = ({
   lastModified?: number;
 }) => {
   const localHost = window.location.hostname;
-  const queryClient = useQueryClient();
   const dotYouClient = useDotYouClient().getDotYouClient();
 
   const fetchImageData = async (
@@ -71,65 +60,24 @@ export const useImage = ({
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size,
                 probablyEncrypted,
-                undefined,
-                lastModified
+                lastModified,
+                { size }
               )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size,
                 probablyEncrypted,
-                undefined,
-                lastModified
+                lastModified,
+                { size }
               ),
         naturalSize: naturalSize,
       };
     };
 
     return await fetchDataPromise();
-  };
-
-  const saveImageFile = async ({
-    image,
-    targetDrive,
-    acl = { requiredSecurityGroup: SecurityGroupType.Anonymous },
-    fileId = undefined,
-    versionTag = undefined,
-    thumbInstructions,
-  }: {
-    image: Blob;
-    targetDrive: TargetDrive;
-    acl?: AccessControlList;
-    fileId?: string;
-    versionTag?: string;
-    thumbInstructions?: ThumbnailInstruction[];
-  }) => {
-    return await uploadImage(
-      dotYouClient,
-      targetDrive,
-      acl,
-      image,
-      undefined,
-      {
-        fileId,
-        versionTag,
-      },
-      thumbInstructions
-    );
-  };
-
-  const removeImageFile = async ({
-    targetDrive,
-    fileId,
-  }: {
-    targetDrive: TargetDrive;
-    fileId: string;
-  }) => {
-    return await removeImage(dotYouClient, fileId, targetDrive);
   };
 
   return {
@@ -141,6 +89,7 @@ export const useImage = ({
         imageFileId,
         imageFileKey,
         `${size?.pixelHeight}x${size?.pixelWidth}`,
+        lastModified,
       ],
       queryFn: () =>
         fetchImageData(
@@ -157,19 +106,5 @@ export const useImage = ({
       staleTime: Infinity,
       enabled: !!imageFileId && imageFileId !== '' && !!imageFileKey && imageFileKey !== '',
     }),
-    save: useMutation({
-      mutationFn: saveImageFile,
-      onSuccess: (_data, variables) => {
-        // Boom baby!
-        if (variables.fileId) {
-          queryClient.invalidateQueries({
-            queryKey: ['image', localHost, variables.targetDrive.alias, variables.fileId],
-          });
-        } else {
-          queryClient.invalidateQueries({ queryKey: ['image'], exact: false });
-        }
-      },
-    }),
-    remove: useMutation({ mutationFn: removeImageFile }),
   };
 };

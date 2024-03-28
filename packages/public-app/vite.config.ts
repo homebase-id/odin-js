@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const hostConfig = {
@@ -10,7 +10,7 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), splitVendorChunkPlugin()],
   server: {
     ...hostConfig,
     https: {
@@ -29,11 +29,21 @@ export default defineConfig({
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
         warn(warning);
       },
-      // output: {
-      //   manualChunks: {
-      //     richTextEditor: ['@youfoundation/rich-text-editor'],
-      //   },
-      // },
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes('lucide-react') ||
+            id.includes('@radix-ui') ||
+            id.includes('react-remove-scroll') ||
+            id.includes('react-style-singleton') ||
+            id.includes('rich-text-editor') ||
+            id.includes('@floating-ui') ||
+            id.includes('rich-text-editor')
+          ) {
+            return 'rich-text-editor';
+          }
+        },
+      },
     },
   },
 });

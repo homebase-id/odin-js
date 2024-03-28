@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { DotYouClient } from '../DotYouClient';
 
-import { streamToByteArray } from './Upload/UploadHelpers';
+import { getSecuredBlob, streamToByteArray } from './Upload/UploadHelpers';
 import { cbcEncrypt, streamEncryptWithCbc, cbcDecrypt } from '../../helpers/AesEncrypt';
 import {
   jsonStringify64,
@@ -12,7 +12,8 @@ import {
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -53,11 +54,29 @@ export const encryptWithKeyheader = async <
         type: content.type,
       }) as R;
     } catch (ex) {
-      console.warn('Stream encryption failed, fallback to full encryption', ex);
+      const customContent = content as unknown;
+      if (
+        customContent &&
+        typeof customContent === 'object' &&
+        'encrypt' in customContent &&
+        customContent.encrypt &&
+        typeof customContent.encrypt === 'function'
+      ) {
+        try {
+          return (await customContent.encrypt(keyHeader.aesKey, keyHeader.iv)) as R;
+        } catch (ex) {
+          console.warn('Stream & custom encryption failed', ex);
+        }
+      }
+
+      console.warn('fallback to full encryption', ex);
       const contentAsArray = new Uint8Array(await content.arrayBuffer());
-      return new OdinBlob([await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)], {
-        type: content.type,
-      }) as R;
+      return (await getSecuredBlob(
+        [await cbcEncrypt(contentAsArray, keyHeader.iv, keyHeader.aesKey)],
+        {
+          type: content.type,
+        }
+      )) as R;
     }
   }
 
@@ -87,7 +106,12 @@ export const decryptJsonContent = async (
   fileMetaData: FileMetadata,
   keyheader: KeyHeader | undefined
 ): Promise<string> => {
-  if (!keyheader || !fileMetaData.appData.content) return fileMetaData.appData.content;
+  if (
+    !keyheader ||
+    !fileMetaData.appData.content ||
+    typeof fileMetaData.appData.content === 'object'
+  )
+    return fileMetaData.appData.content;
 
   try {
     const cipher = base64ToUint8Array(fileMetaData.appData.content);

@@ -2,7 +2,6 @@ import {
   createPlugins,
   Plate,
   RenderAfterEditable,
-  withProps,
   PlateElement,
   PlateLeaf,
   PlateEditor,
@@ -14,6 +13,7 @@ import {
   PlateContent,
   TDescendant,
 } from '@udecode/plate-common';
+import { withProps } from '@udecode/cn';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
 import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
 import { createBlockquotePlugin, ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
@@ -71,7 +71,7 @@ export const RichTextEditor = ({
   defaultValue,
   placeholder,
   mediaOptions,
-  name,
+  name = 'richText',
   onChange,
   className,
   disabled,
@@ -196,14 +196,14 @@ export const RichTextEditor = ({
   const defaultValAsRichText: TElement[] | undefined =
     defaultValue && Array.isArray(defaultValue)
       ? (defaultValue as TElement[])
-      : defaultValue
-      ? ([
-          {
-            type: 'paragraph',
-            children: [{ text: defaultValue ?? '' }] as TDescendant[],
-          },
-        ] as TElement[])
-      : undefined;
+      : defaultValue && typeof defaultValue === 'string'
+        ? ([
+            {
+              type: 'paragraph',
+              children: [{ text: defaultValue ?? '' }] as TDescendant[],
+            },
+          ] as TElement[])
+        : undefined;
 
   return (
     <>
@@ -232,7 +232,7 @@ export const RichTextEditor = ({
           plugins={plugins}
           onChange={(newValue) => {
             const isActualChange = innerEditor?.operations.some(
-              (op: any) => 'set_selection' !== op.type
+              (op: { type: string }) => 'set_selection' !== op.type
             );
 
             if (isActualChange) onChange({ target: { name: name, value: newValue } });

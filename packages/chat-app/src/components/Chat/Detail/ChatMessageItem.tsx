@@ -5,13 +5,9 @@ import {
   Block,
   t,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import {
-  ChatMessage,
-  ChatDeletedArchivalStaus,
-  ChatDeliveryStatus,
-} from '../../../providers/ChatProvider';
+import { ChatMessage, ChatDeletedArchivalStaus } from '../../../providers/ChatProvider';
 import { Conversation, GroupConversation } from '../../../providers/ConversationProvider';
 import { ChatMedia } from './Media/ChatMedia';
 import { ChatMediaGallery } from './Media/ChatMediaGallery';
@@ -20,14 +16,17 @@ import { ChatSentTimeIndicator } from './ChatSentTimeIndicator';
 import { ChatActions, ContextMenu } from './ContextMenu';
 import { EmbeddedMessageWithId } from './EmbeddedMessage';
 import { useParams } from 'react-router-dom';
+import { ChatReactionComposer } from '../Composer/ChatReactionComposer';
+import { useChatReaction } from '../../../hooks/chat/useChatReaction';
+import { ChatReactions } from './ChatReactions';
 
 export const ChatMessageItem = ({
   msg,
   conversation,
   chatActions,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
   chatActions?: ChatActions;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -44,11 +43,18 @@ export const ChatMessageItem = ({
   const isGroupChat = !!(conversation?.fileMetadata.appData.content as GroupConversation)
     ?.recipients;
 
+  const hasReactions = useChatReaction({
+    messageId: msg.fileMetadata.appData.uniqueId,
+    conversationId: conversation?.fileMetadata.appData.uniqueId,
+  }).get.data?.length;
+
   return (
     <>
       {isDetail ? <ChatMediaGallery msg={msg} /> : null}
       <div
-        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative`}
+        className={`flex gap-2 ${messageFromMe ? 'flex-row-reverse' : 'flex-row'} group relative ${
+          hasReactions ? 'pb-6' : ''
+        }`}
       >
         {isGroupChat && !messageFromMe ? (
           <ConnectionImage
@@ -78,6 +84,9 @@ export const ChatMessageItem = ({
             isDeleted={isDeleted}
           />
         )}
+        {conversation && !isDeleted ? (
+          <ChatReactionComposer msg={msg} conversation={conversation} />
+        ) : null}
       </div>
     </>
   );
@@ -93,8 +102,8 @@ const ChatTextMessageBody = ({
   chatActions,
   isDeleted,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
@@ -104,13 +113,17 @@ const ChatTextMessageBody = ({
 }) => {
   const content = msg.fileMetadata.appData.content;
   const isEmojiOnly =
-    content.message.match(/^\p{Extended_Pictographic}/u) && !content.message.match(/[0-9a-zA-Z]/);
+    (content.message?.match(/^\p{Extended_Pictographic}/u) &&
+      !content.message?.match(/[0-9a-zA-Z]/)) ??
+    false;
   const isReply = !!content.replyId;
   const showBackground = !isEmojiOnly || isReply;
 
   return (
     <div
-      className={`relative w-auto max-w-lg rounded-lg px-2 py-1  ${
+      className={`relative w-auto max-w-[75vw] rounded-lg px-2 py-[0.4rem] ${
+        isEmojiOnly ? '' : 'shadow-sm'
+      } md:max-w-xs lg:max-w-lg ${
         showBackground
           ? messageFromMe
             ? 'bg-primary/10 dark:bg-primary/30'
@@ -127,11 +140,14 @@ const ChatTextMessageBody = ({
         {isDeleted ? (
           <MessageDeletedInnerBody />
         ) : (
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             {content.replyId ? <EmbeddedMessageWithId msgId={content.replyId} /> : null}
-            <p className={`whitespace-pre-wrap ${isEmojiOnly && !isReply ? 'text-7xl' : ''}`}>
-              {content.message}
-            </p>
+            <ParagraphWithLinks
+              text={content.message}
+              className={`whitespace-pre-wrap break-words ${
+                isEmojiOnly && !isReply ? 'text-7xl' : ''
+              }`}
+            />
           </div>
         )}
         <div className="ml-auto mt-auto flex flex-shrink-0 flex-row-reverse gap-2">
@@ -142,7 +158,34 @@ const ChatTextMessageBody = ({
           <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
         ) : null}
       </div>
+      {!isDeleted ? <ChatReactions msg={msg} conversation={conversation} /> : null}
     </div>
+  );
+};
+
+const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/);
+const ParagraphWithLinks = ({ text, className }: { text: string; className?: string }) => {
+  const splitUpText = text.split(urlRegex);
+
+  return (
+    <p className={className}>
+      {splitUpText.map((part, index) => {
+        if (urlRegex.test(part)) {
+          return (
+            <a
+              key={index}
+              href={part}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary underline"
+            >
+              {part}
+            </a>
+          );
+        }
+        return part;
+      })}
+    </p>
   );
 };
 
@@ -165,14 +208,13 @@ const ChatMediaMessageBody = ({
   authorOdinId,
   chatActions,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
 
   isGroupChat?: boolean;
   messageFromMe: boolean;
 
   authorOdinId: string;
-
   chatActions?: ChatActions;
 }) => {
   const content = msg.fileMetadata.appData.content;
@@ -180,7 +222,7 @@ const ChatMediaMessageBody = ({
   const hasACaption = !!content.message;
   const ChatFooter = ({ className }: { className?: string }) => (
     <>
-      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2  ${className || ''}`}>
+      <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
         <ChatDeliveryIndicator msg={msg} />
         <ChatSentTimeIndicator msg={msg} className={hasACaption ? undefined : 'invert'} />
       </div>
@@ -190,8 +232,8 @@ const ChatMediaMessageBody = ({
 
   return (
     <div
-      className={`relative w-full max-w-xs rounded-lg ${
-        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10  dark:bg-gray-300/20'
+      className={`relative w-full max-w-[75vw] rounded-lg shadow-sm md:max-w-xs ${
+        messageFromMe ? 'bg-primary/10 dark:bg-primary/30' : 'bg-gray-500/10 dark:bg-gray-300/20'
       }`}
     >
       {isGroupChat && !messageFromMe ? (
@@ -201,14 +243,15 @@ const ChatMediaMessageBody = ({
       ) : null}
       <div className="relative">
         <ChatMedia msg={msg} />
-        {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 z-10 px-2 py-1" /> : null}
+        {!hasACaption ? <ChatFooter className="absolute bottom-0 right-0 px-2 py-1" /> : null}
       </div>
       {hasACaption ? (
-        <div className="flex flex-col px-2 py-2 md:flex-row md:justify-between">
-          <p className="whitespace-pre-wrap">{content.message}</p>
+        <div className="flex min-w-0 flex-col px-2 py-2 md:flex-row md:justify-between">
+          <p className="whitespace-pre-wrap break-words">{content.message}</p>
           <ChatFooter />
         </div>
       ) : null}
+      <ChatReactions msg={msg} conversation={conversation} />
     </div>
   );
 };

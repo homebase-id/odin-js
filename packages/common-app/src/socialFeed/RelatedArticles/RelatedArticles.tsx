@@ -2,14 +2,14 @@ import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
 import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
 import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { PostTeaser } from '../PostListItem/PostTeaser';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 export const RelatedArticles = ({
   blog,
   channel,
 }: {
-  blog: DriveSearchResult<PostContent>;
-  channel: NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition> | undefined;
+  blog: HomebaseFile<PostContent>;
+  channel: NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition> | undefined;
 }) => {
   const { data: blogPosts } = useBlogPostsInfinite(
     channel ? { channelId: channel.fileMetadata.appData.uniqueId, postType: 'Article' } : {}

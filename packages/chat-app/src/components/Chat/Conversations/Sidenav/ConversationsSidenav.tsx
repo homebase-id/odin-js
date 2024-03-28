@@ -1,5 +1,6 @@
 import {
   ActionButton,
+  ErrorBoundary,
   Input,
   MagnifyingGlass,
   Persons,
@@ -15,7 +16,7 @@ import { ContactFile } from '@youfoundation/js-lib/network';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useNavigate } from 'react-router-dom';
 import { useConversations } from '../../../../hooks/chat/useConversations';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   ConversationWithYourselfId,
@@ -43,33 +44,35 @@ export const ConversationsSidebar = ({
 
   const flatConversations =
     (conversations?.pages
-      ?.flatMap((page) => page.searchResults)
-      ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
+      ?.flatMap((page) => page?.searchResults)
+      ?.filter(Boolean) as HomebaseFile<Conversation>[]) || [];
 
   return (
-    <div className="flex flex-grow flex-col overflow-auto">
-      <SearchConversation
-        setIsSearchActive={setIsSearchActive}
-        isSearchActive={isSearchActive}
-        openConversation={(id) => {
-          setIsSearchActive(false);
-          openConversation(id);
-        }}
-        conversations={flatConversations}
-        activeConversationId={activeConversationId}
-      />
-      {!isSearchActive ? (
-        <ConversationList
-          openConversation={(id) => openConversation(id)}
-          conversations={flatConversations.filter(
-            (chat) =>
-              chat.fileMetadata.appData.archivalStatus !== 2 ||
-              chat.fileMetadata.appData.uniqueId === activeConversationId
-          )}
+    <ErrorBoundary>
+      <div className="flex flex-grow flex-col overflow-auto">
+        <SearchConversation
+          setIsSearchActive={setIsSearchActive}
+          isSearchActive={isSearchActive}
+          openConversation={(id) => {
+            setIsSearchActive(false);
+            openConversation(id);
+          }}
+          conversations={flatConversations}
           activeConversationId={activeConversationId}
         />
-      ) : null}
-    </div>
+        {!isSearchActive ? (
+          <ConversationList
+            openConversation={(id) => openConversation(id)}
+            conversations={flatConversations.filter(
+              (chat) =>
+                chat.fileMetadata.appData.archivalStatus !== 2 ||
+                chat.fileMetadata.appData.uniqueId === activeConversationId
+            )}
+            activeConversationId={activeConversationId}
+          />
+        ) : null}
+      </div>
+    </ErrorBoundary>
   );
 };
 
@@ -78,7 +81,7 @@ const ConversationList = ({
   openConversation,
   activeConversationId,
 }: {
-  conversations: DriveSearchResult<Conversation>[];
+  conversations: HomebaseFile<Conversation>[];
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
 }) => {
@@ -121,7 +124,7 @@ const ConversationListItem = ({
   onClick,
   isActive,
 }: {
-  conversation: DriveSearchResult<Conversation>;
+  conversation: HomebaseFile<Conversation>;
   onClick: () => void;
   isActive: boolean;
 }) => {
@@ -158,7 +161,7 @@ const SearchConversation = ({
   setIsSearchActive: (isActive: boolean) => void;
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
-  conversations: DriveSearchResult<Conversation>[];
+  conversations: HomebaseFile<Conversation>[];
 }) => {
   const navigate = useNavigate();
   const [stateIndex, setStateIndex] = useState(0);
@@ -236,6 +239,7 @@ const SearchConversation = ({
         {isActive ? (
           <>
             <ConversationListItemWrapper
+              order={1}
               onClick={() => {
                 navigate(`${CHAT_ROOT}/new-group`);
               }}
@@ -260,7 +264,7 @@ const SearchConversation = ({
                     onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
                     isActive={
                       activeConversationId ===
-                      (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
+                      (result as HomebaseFile<Conversation>).fileMetadata?.appData?.uniqueId
                     }
                     key={result.fileId}
                   />

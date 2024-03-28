@@ -3,12 +3,7 @@ import { HomePageTheme } from '@youfoundation/js-lib/public';
 import HomeClassic from './Classic/HomeClassic';
 import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';
-import {
-  ThemeCoverSettings,
-  ThemeLinksSettings,
-  ThemeWithTabsSettings,
-  useSiteData,
-} from '@youfoundation/common-app';
+import { ThemeCoverSettings, ThemeWithTabsSettings, useSiteData } from '@youfoundation/common-app';
 import HomeLinks from './Links/HomeLinks';
 import { useMemo } from 'react';
 
@@ -26,7 +21,7 @@ const Home = ({ tab }: { tab?: string }) => {
         <HomeContent templateSettings={home?.templateSettings as ThemeWithTabsSettings} tab={tab} />
       );
     } else if (themeId === HomePageTheme.Links.toString()) {
-      return <HomeLinks templateSettings={home?.templateSettings as ThemeLinksSettings} />;
+      return <HomeLinks />;
     } else {
       return <HomeCover templateSettings={home?.templateSettings as ThemeCoverSettings} />;
     }

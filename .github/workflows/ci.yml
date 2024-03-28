@@ -8,25 +8,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20'
           registry-url: 'https://npm.pkg.github.com'
           # Defaults to the user or organization that owns the workflow file
           scope: '@octocat'
 
+      - name: Authenticate to Github packages
+        run: |
+          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
       - run: npm ci
 
-      - run: npm run build-libs
+      - run: npm run build:libs
 
-      - run: npm run build --w ./packages/public-app
+      - run: npm run build:public
 
-      - run: npm run build --w ./packages/owner-app
+      - run: npm run build:owner
 
-      - run: npm run build --w ./packages/chat-app
+      - run: npm run build:chat
 
-      - run: npm run build --w ./packages/provisioning-app
+      - run: npm run build:mail
+
+      - run: npm run build:provisioning
 
       - run: npm run test

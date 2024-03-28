@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { decryptData, encryptData, encryptUrl } from './InterceptionEncryptionUtil';
 import { hasDebugFlag, isLocalStorageAvailable, jsonStringify64 } from '../helpers/helpers';
+import { SystemFileType } from './DriveData/File/DriveFileTypes';
 
 export enum ApiType {
   Owner,
@@ -21,6 +22,7 @@ const getRandomIv = () => crypto.getRandomValues(new Uint8Array(16));
 interface createAxiosClientOptions {
   overrideEncryption?: boolean;
   headers?: Record<string, string>;
+  systemFileType?: SystemFileType;
 }
 
 export class BaseDotYouClient {
@@ -75,7 +77,11 @@ export class BaseDotYouClient {
     const client = axios.create({
       baseURL: this.getEndpoint(),
       withCredentials: isLocalStorageAvailable(),
-      headers: { ...this._options.headers, ...options?.headers },
+      headers: {
+        'X-ODIN-FILE-SYSTEM-TYPE': options?.systemFileType || 'Standard',
+        ...this._options.headers,
+        ...options?.headers,
+      },
     });
 
     if (options?.overrideEncryption) return client;

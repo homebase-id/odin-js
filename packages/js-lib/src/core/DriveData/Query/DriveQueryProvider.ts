@@ -10,6 +10,8 @@ import {
 } from '../Drive/DriveTypes';
 import { SystemFileType } from '../File/DriveFileTypes';
 import { stringifyArrayToQueryParams, stringifyToQueryParams } from '../../../helpers/DataUtil';
+import { AxiosRequestConfig } from 'axios';
+import { decryptJsonContent, decryptKeyHeader } from '../SecurityHelpers';
 
 interface GetModifiedRequest {
   queryParams: FileQueryParams;
@@ -38,21 +40,27 @@ export const DEFAULT_QUERY_BATCH_RESULT_OPTION = {
 export const queryModified = async (
   dotYouClient: DotYouClient,
   params: FileQueryParams,
-  ro?: GetModifiedResultOptions
+  ro?: GetModifiedResultOptions,
+  options?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<QueryModifiedResponse> => {
+  const { decrypt, axiosConfig } = options ?? {};
+
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
+    systemFileType: params.systemFileType,
   });
 
   const request: GetModifiedRequest = {
     queryParams: params,
     resultOptions: ro ?? DEFAULT_QUERY_MODIFIED_RESULT_OPTION,
   };
+
+  if (decrypt) request.resultOptions.includeHeaderContent = true;
 
   const requestPromise = (() => {
     const queryParams = stringifyToQueryParams({
@@ -63,13 +71,34 @@ export const queryModified = async (
     const getUrl = '/drive/query/modified?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryModifiedResponse>('/drive/query/modified', request);
+      return client.post<QueryModifiedResponse>('/drive/query/modified', request, axiosConfig);
     } else {
-      return client.get<QueryModifiedResponse>(getUrl);
+      return client.get<QueryModifiedResponse>(getUrl, axiosConfig);
     }
   })();
 
-  return requestPromise.then((response) => {
+  return requestPromise.then(async (response) => {
+    // Decrypt the content if requested
+    if (decrypt) {
+      return {
+        ...response.data,
+        searchResults: await Promise.all(
+          response.data.searchResults.map(async (dsr) => {
+            const keyheader = dsr.fileMetadata.isEncrypted
+              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              : undefined;
+
+            dsr.fileMetadata.appData.content = await decryptJsonContent(
+              dsr.fileMetadata,
+              keyheader
+            );
+
+            return dsr;
+          })
+        ),
+      };
+    }
+
     return response.data;
   });
 };
@@ -86,8 +115,14 @@ export const queryBatch = async <
 >(
   dotYouClient: DotYouClient,
   params: T,
-  ro?: GetBatchQueryResultOptions
+  ro?: GetBatchQueryResultOptions,
+  options?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<R> => {
+  const { decrypt, axiosConfig } = options ?? {};
+
   const strippedQueryParams: FileQueryParams = {
     ...params,
     fileState: 'fileState' in params ? params.fileState : [1],
@@ -95,15 +130,15 @@ export const queryBatch = async <
   delete strippedQueryParams.systemFileType;
 
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
+    systemFileType: params.systemFileType,
   });
 
   const request: GetBatchRequest = {
     queryParams: strippedQueryParams,
     resultOptionsRequest: ro ?? DEFAULT_QUERY_BATCH_RESULT_OPTION,
   };
+
+  if (decrypt) request.resultOptionsRequest.includeMetadataHeader = true;
 
   const requestPromise = (() => {
     const queryParams = stringifyToQueryParams({
@@ -114,13 +149,37 @@ export const queryBatch = async <
     const getUrl = '/drive/query/batch?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<R>('/drive/query/batch', request);
+      return client.post<R>('/drive/query/batch', request, axiosConfig);
     } else {
-      return client.get<R>(getUrl);
+      return client.get<R>(getUrl, axiosConfig);
     }
   })();
 
-  return requestPromise.then((response) => response.data);
+  return requestPromise.then(async (response) => {
+    if (decrypt) {
+      return {
+        ...response.data,
+        searchResults: await Promise.all(
+          (
+            response.data as QueryBatchResponseWithDeletedResults | QueryBatchResponse
+          ).searchResults.map(async (dsr) => {
+            const keyheader = dsr.fileMetadata.isEncrypted
+              ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+              : undefined;
+
+            dsr.fileMetadata.appData.content = await decryptJsonContent(
+              dsr.fileMetadata,
+              keyheader
+            );
+
+            return dsr;
+          })
+        ),
+      };
+    }
+
+    return response.data;
+  });
 };
 
 export const queryBatchCollection = async (
@@ -130,16 +189,21 @@ export const queryBatchCollection = async (
     queryParams: FileQueryParams;
     resultOptions?: GetBatchQueryResultOptions;
   }[],
-  systemFileType?: SystemFileType
+  systemFileType?: SystemFileType,
+  config?: {
+    decrypt?: boolean;
+    axiosConfig?: AxiosRequestConfig;
+  }
 ): Promise<QueryBatchCollectionResponse> => {
+  const { decrypt, axiosConfig } = config ?? {};
+
   const client = dotYouClient.createAxiosClient({
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
-    },
+    systemFileType,
   });
 
   const updatedQueries = queries.map((query) => {
     const ro = query.resultOptions ?? DEFAULT_QUERY_BATCH_RESULT_OPTION;
+    if (decrypt) ro.includeMetadataHeader = true;
     return {
       ...query,
       queryParams: { ...query.queryParams, fileState: query.queryParams.fileState || [1] },
@@ -155,13 +219,45 @@ export const queryBatchCollection = async (
     const getUrl = '/drive/query/batchcollection?' + queryParams;
     // Max Url is 1800 so we keep room for encryption overhead
     if ([...(client.defaults.baseURL || ''), ...getUrl].length > 1800) {
-      return client.post<QueryBatchCollectionResponse>('/drive/query/batchcollection', {
-        queries: updatedQueries,
-      });
+      return client.post<QueryBatchCollectionResponse>(
+        '/drive/query/batchcollection',
+        {
+          queries: updatedQueries,
+        },
+        axiosConfig
+      );
     } else {
-      return client.get<QueryBatchCollectionResponse>(getUrl);
+      return client.get<QueryBatchCollectionResponse>(getUrl, axiosConfig);
     }
   })();
 
-  return requestPromise.then((response) => response.data);
+  return requestPromise.then(async (response) => {
+    if (decrypt) {
+      return {
+        ...response.data,
+        results: await Promise.all(
+          response.data.results.map(async (result) => {
+            return {
+              ...result,
+              searchResults: await Promise.all(
+                result.searchResults.map(async (dsr) => {
+                  const keyheader = dsr.fileMetadata.isEncrypted
+                    ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+                    : undefined;
+
+                  dsr.fileMetadata.appData.content = await decryptJsonContent(
+                    dsr.fileMetadata,
+                    keyheader
+                  );
+                  return dsr;
+                })
+              ),
+            };
+          })
+        ),
+      };
+    }
+
+    return response.data;
+  });
 };

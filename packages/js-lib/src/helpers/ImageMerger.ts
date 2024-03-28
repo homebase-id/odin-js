@@ -1,13 +1,17 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from './DataUtil';
 import { EmbeddedThumb } from '../core/DriveData/File/DriveFileTypes';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const GRID_PIXEL_SIZE = 40;
 const IMAGE_SIZE = GRID_PIXEL_SIZE / 2;
 const MIME_TYPE = 'image/webp';
 
 export const makeGrid = async (thumbs: EmbeddedThumb[]) => {
+  if (typeof document === 'undefined')
+    throw new Error('makeGrid is only supported in a browser environment');
+
   if (thumbs.length < 2) {
     throw new Error('Making grid of less than 2 images is not supported');
   }
@@ -58,9 +62,8 @@ export const makeGrid = async (thumbs: EmbeddedThumb[]) => {
   return await new Promise<EmbeddedThumb>((resolve) => {
     canvas.toBlob(
       (blob) => {
-        if (!blob) {
-          return;
-        }
+        if (!blob) return;
+
         blob.arrayBuffer().then((buffer) => {
           resolve({
             pixelHeight: GRID_PIXEL_SIZE,

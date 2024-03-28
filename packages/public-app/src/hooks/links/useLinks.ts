@@ -4,7 +4,7 @@ import {
   BuiltInProfiles,
   Attribute,
   LinkFields,
-  getAttributeVersions,
+  getProfileAttributes,
 } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { GetFile } from '@youfoundation/js-lib/public';
@@ -48,7 +48,7 @@ export const useLinks = () => {
 
     const fetchDynamicData = async () => {
       try {
-        const linkAttributes = await getAttributeVersions(
+        const linkAttributes = await getProfileAttributes(
           dotYouClient,
           BuiltInProfiles.StandardProfileId,
           undefined,

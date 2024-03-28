@@ -4,8 +4,10 @@ import {
   ActionGroup,
   Arrow,
   Article as ArticleIcon,
+  Cog,
   ConfirmDialog,
   DialogWrapper,
+  Ellipsis,
   ErrorNotification,
   Label,
   SaveStatus,
@@ -19,10 +21,11 @@ import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEdit
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
-import { ChannelSelector } from '../../components/SocialFeed/PostComposer';
+import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
+import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
   const { channelKey, postKey } = useParams();
@@ -42,16 +45,16 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
-    primaryMediaFile,
+    files,
 
     // Data updates
     setPostFile,
     setChannel,
-    setPrimaryMediaFile,
+    setFiles,
 
     // Status
     saveStatus,
-    removeStatus,
+    // removeStatus,
 
     // Errors
     error,
@@ -61,13 +64,15 @@ export const ArticleComposerPage = () => {
     caption: searchParams.get('caption') || undefined,
   });
 
-  const debouncedSave = useDebounce(() => doSave(postFile), { timeoutMillis: 1500 });
+  const debouncedSave = useDebounce(() => doSave(postFile, isPublished ? 'publish' : undefined), {
+    timeoutMillis: 1500,
+  });
 
   const PostButton = ({ className }: { className?: string }) => {
     if (isPublished)
       return (
         <ActionButton
-          className={`m-2 md:w-auto ${className ?? ''}`}
+          className={`md:w-auto ${className ?? ''}`}
           state={saveStatus !== 'success' ? saveStatus : undefined}
           onClick={(e) => {
             e.preventDefault();
@@ -82,7 +87,7 @@ export const ArticleComposerPage = () => {
             buttonText: t('Convert to draft'),
             type: 'info',
           }}
-          type="secondary"
+          type="primary"
         >
           {t('Convert to draft')}
         </ActionButton>
@@ -90,7 +95,7 @@ export const ArticleComposerPage = () => {
 
     return (
       <ActionButton
-        className={`m-2 md:w-auto ${
+        className={`md:w-auto ${
           isValidPost(postFile) ||
           !postFile.fileMetadata.appData.content.caption ||
           !postFile.fileMetadata.appData.content.caption.length
@@ -102,7 +107,7 @@ export const ArticleComposerPage = () => {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          doSave(postFile, 'publish');
+          doSave(postFile, 'publish', undefined, true);
         }}
         confirmOptions={{
           title: t('Post'),
@@ -110,6 +115,7 @@ export const ArticleComposerPage = () => {
           buttonText: t('Publish'),
           type: 'info',
         }}
+        type="primary"
       >
         {t('Publish')}
       </ActionButton>
@@ -123,34 +129,40 @@ export const ArticleComposerPage = () => {
           <div className="flex-col">
             {postFile?.fileMetadata.appData.content?.caption || t('New article')}
             <small className="text-sm text-gray-400">
-              <SaveStatus state={saveStatus} className="text-sm" />
+              <SaveStatus
+                state={saveStatus === 'error' ? 'idle' : saveStatus}
+                className="text-sm"
+              />
             </small>
           </div>
         }
         browserTitle={postFile?.fileMetadata.appData.content?.caption || t('New article')}
         icon={ArticleIcon}
         breadCrumbs={[
-          { title: t('Feed'), href: '/owner/feed' },
-          { title: t('Articles'), href: '/owner/feed/articles' },
-          { title: t('New article') },
+          { title: t('Feed'), href: `${ROOT_PATH}` },
+          { title: t('Articles'), href: `${ROOT_PATH}/articles` },
+          { title: isPublished ? t('Edit article') : t('New article') },
         ]}
         actions={
           <>
+            <PostButton />
+
             <ActionGroup
-              type="mute"
+              type="secondary"
               size="square"
               options={[
                 {
                   label: t('Options'),
+                  icon: Cog,
                   onClick: () => setIsOptionsDialogOpen(!isOptionsDialogOpen),
                 },
-                ...(!(postFile.fileId && !isPublished)
+                ...(postFile.fileId
                   ? [
                       {
                         label: t('Remove'),
                         onClick: () => {
                           doRemovePost();
-                          navigate('/owner/feed/articles');
+                          navigate(`${ROOT_PATH}/articles`);
                         },
                         icon: Trash,
                         confirmOptions: {
@@ -164,31 +176,10 @@ export const ArticleComposerPage = () => {
                     ]
                   : []),
               ]}
+              icon={Ellipsis}
             >
-              ...
+              {t('More')}
             </ActionGroup>
-            {postFile.fileId && !isPublished ? (
-              <ActionButton
-                type="remove"
-                icon={Trash}
-                onClick={() => {
-                  doRemovePost();
-                  navigate('/owner/feed/articles');
-                }}
-                confirmOptions={{
-                  title: t('Discard draft'),
-                  body: `${t('Are you sure you want to discard')} "${
-                    postFile.fileMetadata.appData.content.caption || t('Untitled')
-                  }"`,
-                  buttonText: t('Discard'),
-                  type: 'info',
-                }}
-                size="square"
-                state={removeStatus}
-                className="m-2"
-              />
-            ) : null}
-            <PostButton />
           </>
         }
       />
@@ -200,23 +191,13 @@ export const ArticleComposerPage = () => {
               doSave();
               return false;
             }}
-            className={isPublished ? 'opacity-90 grayscale' : ''}
-            onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
             <InnerFieldEditors
               key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
-              primaryMediaFile={primaryMediaFile}
               channel={channel}
-              updateVersionTag={(versionTag) =>
-                setPostFile({
-                  ...postFile,
-                  fileMetadata: {
-                    ...postFile.fileMetadata,
-                    versionTag,
-                  },
-                })
-              }
+              files={files}
+              setFiles={setFiles}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
@@ -227,10 +208,16 @@ export const ArticleComposerPage = () => {
                   dirtyPostFile.fileMetadata.appData.content.caption = (
                     e.target.value as string
                   ).trim();
-                } else if (e.target.name === 'primaryImageFileId') {
-                  setPrimaryMediaFile(
-                    e.target.value ? { file: e.target.value as Blob } : undefined
-                  );
+                } else if (e.target.name === 'primaryMediaFile') {
+                  if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
+                      fileId: undefined,
+                      fileKey: e.target.value.fileKey,
+                      type: e.target.value.type,
+                    };
+                  } else {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
+                  }
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
                 }
@@ -244,7 +231,6 @@ export const ArticleComposerPage = () => {
                 }));
                 debouncedSave();
               }}
-              disabled={isPublished}
             />
 
             <div className="mb-5 flex md:hidden">
@@ -304,13 +290,13 @@ const OptionsDialog = ({
   onConfirm,
 }: {
   isPublished?: boolean;
-  postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
+  postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
 
   isOpen: boolean;
   onCancel: () => void;
   onConfirm: (
     newReactAccess: ReactAccess | undefined,
-    newChannel: NewDriveSearchResult<ChannelDefinition> | undefined
+    newChannel: NewHomebaseFile<ChannelDefinition> | undefined
   ) => void;
 }) => {
   const target = usePortal('modal-container');
@@ -318,9 +304,7 @@ const OptionsDialog = ({
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
     postFile.fileMetadata.appData.content.reactAccess
   );
-  const [newChannel, setNewChannel] = useState<
-    NewDriveSearchResult<ChannelDefinition> | undefined
-  >();
+  const [newChannel, setNewChannel] = useState<NewHomebaseFile<ChannelDefinition> | undefined>();
 
   if (!isOpen) return null;
 
@@ -353,12 +337,13 @@ const OptionsDialog = ({
               {t('After a publish, the post can no longer be moved between channels')}
             </p>
           ) : null}
-          <ChannelSelector
+          <ChannelOrAclSelector
             className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
-            defaultValue={postFile.fileMetadata.appData.content?.channelId}
+            defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
             onChange={setNewChannel}
             disabled={isPublished}
             excludeMore={true}
+            excludeCustom={true}
           />
         </div>
         <div className="flex flex-row-reverse gap-2 py-3">

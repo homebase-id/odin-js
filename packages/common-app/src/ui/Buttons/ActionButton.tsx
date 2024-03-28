@@ -5,7 +5,7 @@ import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app
 export type ActionButtonState = 'pending' | 'loading' | 'success' | 'error' | 'idle';
 import { ButtonColors } from './ColorConfig';
 
-export interface ActionButtonProps {
+export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
   className?: string;
   icon?: FC<IconProps>;
@@ -40,10 +40,10 @@ export const ActionButton: FC<ActionButtonProps> = ({
   icon,
   type,
   state,
-  title,
   size,
   confirmOptions,
   isDisabled,
+  ...buttonProps
 }) => {
   const Icon = (props: { className: string }) => {
     if (state === 'loading' || state === 'pending') return <Loader {...props} />;
@@ -60,12 +60,12 @@ export const ActionButton: FC<ActionButtonProps> = ({
     (state === 'error'
       ? ButtonColors.error
       : type === 'secondary'
-      ? ButtonColors.secondary
-      : type === 'remove'
-      ? ButtonColors.remove
-      : type === 'mute'
-      ? ButtonColors.mute
-      : ButtonColors.primary) + (isDisabled ? ` ${ButtonColors.disabledSuffix}` : '');
+        ? ButtonColors.secondary
+        : type === 'remove'
+          ? ButtonColors.remove
+          : type === 'mute'
+            ? ButtonColors.mute
+            : ButtonColors.primary) + (isDisabled ? ` ${ButtonColors.disabledSuffix}` : '');
 
   const widthClasses =
     children && type !== 'mute' && size !== 'square'
@@ -76,12 +76,12 @@ export const ActionButton: FC<ActionButtonProps> = ({
     size === 'large'
       ? 'px-5 py-3'
       : size === 'small'
-      ? 'px-3 py-1 text-sm'
-      : size === 'square'
-      ? 'p-2'
-      : size === 'none'
-      ? ''
-      : 'px-3 py-2';
+        ? 'px-3 py-1 text-sm'
+        : size === 'square'
+          ? 'p-2'
+          : size === 'none'
+            ? ''
+            : 'px-3 py-2';
 
   const stateClasses = state === 'loading' || state === 'pending' ? 'animate-pulse' : '';
 
@@ -108,7 +108,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
               }
             : onClick
         }
-        title={title}
+        {...buttonProps}
       >
         {children}
         <Icon className={`my-auto ${children ? 'ml-2' : ''} h-4 w-4`} />

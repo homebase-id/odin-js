@@ -42,8 +42,8 @@ export const ReactionDetailsDialog = ({
     .flatMap((page) => page?.reactions)
     .filter(Boolean) as ReactionFile[];
 
-  const filteredEmojis = reactionSummary?.reactions?.filter(
-    (reaction) => flattenedReactions?.some((reactionFile) => reactionFile.body === reaction.emoji)
+  const filteredEmojis = reactionSummary?.reactions?.filter((reaction) =>
+    flattenedReactions?.some((reactionFile) => reactionFile.body === reaction.emoji)
   );
 
   useEffect(() => {
@@ -52,9 +52,7 @@ export const ReactionDetailsDialog = ({
     }
   }, [reactionSummaryLoaded, reactionsDetailsLoaded]);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   const dialog = (
     <DialogWrapper

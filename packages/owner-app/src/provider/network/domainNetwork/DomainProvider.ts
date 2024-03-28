@@ -24,6 +24,7 @@ export interface DomainClient {
 
 export const getDomains = async (
   dotYouClient: DotYouClient,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   data: {
     count: number;
     cursor?: number;

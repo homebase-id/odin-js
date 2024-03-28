@@ -7,13 +7,18 @@ import {
   decryptBytesResponse,
 } from '../../../core/DriveData/SecurityHelpers';
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
-import { assertIfDefined, tryJsonParse, stringifyToQueryParams } from '../../../helpers/DataUtil';
+import {
+  assertIfDefined,
+  tryJsonParse,
+  stringifyToQueryParams,
+  assertIfDefinedAndNotDefault,
+} from '../../../helpers/DataUtil';
 import {
   getAxiosClient,
   getRangeHeader,
   parseBytesToObject,
 } from '../../../core/DriveData/File/DriveFileHelper';
-import { DriveSearchResult, EncryptedKeyHeader } from '../../../core/DriveData/File/DriveFileTypes';
+import { HomebaseFile, EncryptedKeyHeader } from '../../../core/DriveData/File/DriveFileTypes';
 import {
   ContentType,
   FileMetadata,
@@ -38,7 +43,7 @@ interface GetThumbRequest extends GetFileRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile>>();
 
 export const getPayloadAsJsonOverPeer = async <T>(
   dotYouClient: DotYouClient,
@@ -76,6 +81,7 @@ export const getPayloadBytesOverPeer = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
   assertIfDefined('Key', key);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
@@ -110,18 +116,20 @@ export const getPayloadBytesOverPeer = async (
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -152,6 +160,7 @@ export const getThumbBytesOverPeer = async (
   assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
 
@@ -193,7 +202,7 @@ export const getFileHeaderOverPeer = async <T = string>(
   targetDrive: TargetDrive,
   fileId: string,
   options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
+): Promise<HomebaseFile<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytesOverPeer(dotYouClient, odinId, targetDrive, fileId, {
     decrypt: true,
@@ -201,7 +210,7 @@ export const getFileHeaderOverPeer = async <T = string>(
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -221,10 +230,12 @@ export const getFileHeaderBytesOverPeer = async (
   targetDrive: TargetDrive,
   fileId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
-): Promise<DriveSearchResult> => {
+): Promise<HomebaseFile> => {
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('OdinId', odinId);
   assertIfDefined('FileId', fileId);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
+
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
 
@@ -242,7 +253,7 @@ export const getFileHeaderBytesOverPeer = async (
   };
 
   const promise = client
-    .get('/transit/query/header?' + stringifyToQueryParams(request as any))
+    .get('/transit/query/header?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

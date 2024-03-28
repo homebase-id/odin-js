@@ -12,9 +12,7 @@ import {
   SystemFileType,
   ContentType,
   ImageContentType,
-  DriveSearchResult,
-  EncryptedKeyHeader,
-  KeyHeader,
+  HomebaseFile,
 } from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
@@ -32,7 +30,7 @@ interface GetFileThumbByUniqueIdRequest extends GetFileByUniqueIdRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 /// Get methods by UniqueId
 export const getFileHeaderByUniqueId = async <T = string>(
@@ -40,7 +38,7 @@ export const getFileHeaderByUniqueId = async <T = string>(
   targetDrive: TargetDrive,
   uniqueId: string,
   options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
+): Promise<HomebaseFile<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId, {
     decrypt: true,
@@ -48,7 +46,7 @@ export const getFileHeaderByUniqueId = async <T = string>(
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -67,7 +65,7 @@ export const getFileHeaderBytesByUniqueId = async (
   targetDrive: TargetDrive,
   uniqueId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
-): Promise<DriveSearchResult | null> => {
+): Promise<HomebaseFile | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
@@ -88,10 +86,8 @@ export const getFileHeaderBytesByUniqueId = async (
     clientUniqueId: uniqueId,
   };
 
-  const promise: Promise<DriveSearchResult | null> = client
-    .get<DriveSearchResult>(
-      '/drive/query/specialized/cuid/header?' + stringifyToQueryParams(request as any)
-    )
+  const promise: Promise<HomebaseFile | null> = client
+    .get<HomebaseFile>('/drive/query/specialized/cuid/header?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {
@@ -186,20 +182,20 @@ export const getPayloadBytesByUniqueId = async (
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart + 1
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined
-                ? chunkEnd - chunkStart + 1
-                : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };

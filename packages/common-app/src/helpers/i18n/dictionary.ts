@@ -41,12 +41,18 @@ const enLocale = [
   ['writer', 'Write'],
   ['writereactionsandcomments', 'Write Reactions and Comments'],
   ['sendpushnotifications', 'Send Push Notifications'],
+  ['publishstaticcontent', 'Publish Static Content'],
+  ['managefeed', 'Manage feed'],
 ] as const;
 
 const internalDict: Map<string, string> = new Map(enLocale);
 
-const t = (key: string) => {
-  return internalDict.get(key.toLowerCase()) ?? key;
+const t = (key: string, ...args: (string | number)[]) => {
+  const localizedKey = internalDict.get(key.toLowerCase()) ?? key;
+
+  return localizedKey.replaceAll(/{(\d+)}/g, (match, number) => {
+    return typeof args[number] !== 'undefined' ? args[number].toString() : match;
+  });
 };
 
 export { t };

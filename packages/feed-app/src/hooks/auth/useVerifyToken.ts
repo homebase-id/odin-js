@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import { APP_SHARED_SECRET } from '@youfoundation/common-app';
 import { hasValidToken as hasValidYouAuthToken } from '@youfoundation/js-lib/auth';
 import { DotYouClient } from '@youfoundation/js-lib/core';
-import { APP_SHARED_SECRET } from './useAuth';
 
 const MINUTE_IN_MS = 60000;
 
@@ -23,5 +23,6 @@ export const useVerifyToken = (dotYouClient: DotYouClient) => {
     queryFn: fetchData,
     refetchOnMount: false,
     staleTime: MINUTE_IN_MS * 10,
+    gcTime: MINUTE_IN_MS * 10,
   });
 };

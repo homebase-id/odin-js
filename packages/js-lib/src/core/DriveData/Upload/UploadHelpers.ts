@@ -7,6 +7,7 @@ import {
   AppendInstructionSet,
   UploadResult,
   UploadManifest,
+  AppendResult,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -21,19 +22,42 @@ import {
   getRandom16ByteArray,
 } from '../../../helpers/DataUtil';
 import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/DriveFileTypes';
+import { AxiosRequestConfig } from 'axios';
 
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
   aesKey: new Uint8Array(Array(16).fill(0)),
 };
 
-const toBlob = (o: unknown): Blob => {
+// Built purely for better support on react-native
+export const getSecuredBlob = async (
+  blobParts?: BlobPart[] | undefined,
+  options?: BlobPropertyBag
+) => {
+  const returnBlob = new OdinBlob(blobParts, options);
+
+  await new Promise<void>((resolve) => {
+    if (!('written' in returnBlob)) resolve();
+
+    const interval = setInterval(async () => {
+      if ('written' in returnBlob && returnBlob.written) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 100);
+  });
+
+  return returnBlob as Blob;
+};
+
+const toBlob = async (o: unknown): Promise<Blob> => {
   const json = jsonStringify64(o);
   const content = new TextEncoder().encode(json);
-  return new OdinBlob([content], { type: 'application/octet-stream' });
+  return await getSecuredBlob([content], { type: 'application/octet-stream' });
 };
 
 export const streamToByteArray = async (stream: ReadableStream<Uint8Array>, mimeType: string) => {
@@ -82,6 +106,7 @@ export const buildManifest = (
     PayloadDescriptors: payloads?.map((payload) => ({
       payloadKey: payload.key,
       descriptorContent: payload.descriptorContent,
+      previewThumbnail: payload.previewThumbnail,
       thumbnails: thumbnails
         ?.filter((thumb) => thumb.key === payload.key)
         .map((thumb) => ({
@@ -131,8 +156,8 @@ export const buildFormData = async (
   const data = new FormData();
   const instructionType =
     'targetFile' in instructionSet ? 'payloadUploadInstructions' : 'instructions';
-  data.append(instructionType, toBlob(instructionSet));
-  if (encryptedDescriptor) data.append('metaData', new OdinBlob([encryptedDescriptor]));
+  data.append(instructionType, await toBlob(instructionSet));
+  if (encryptedDescriptor) data.append('metaData', await getSecuredBlob([encryptedDescriptor]));
 
   if (payloads) {
     for (let i = 0; i < payloads.length; i++) {
@@ -173,15 +198,17 @@ export const pureUpload = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ) => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
-  const config = {
+  const config: AxiosRequestConfig = {
+    ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
+      ...axiosConfig?.headers,
     },
   };
 
@@ -211,17 +238,20 @@ export const pureAppend = async (
   dotYouClient: DotYouClient,
   data: FormData,
   systemFileType?: SystemFileType,
-  onVersionConflict?: () => void
-): Promise<{ newVersionTag: string }> => {
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
+): Promise<AppendResult> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
-    headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
+    systemFileType,
   });
   const url = '/drive/files/uploadpayload';
 
   const config = {
+    ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
+      ...axiosConfig?.headers,
     },
   };
 

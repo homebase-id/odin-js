@@ -39,10 +39,9 @@ export const useFetchOwnDomainDnsConfig = (domain: string) => {
 
   const fetchOwnDomainDnsStatus = async (domain: string): Promise<DnsConfig | null> => {
     if (!domain) return null;
-    const response = await axios.get(
-      `${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`
-    );
-    return response.data;
+    return await axios
+      .get(`${root}/registration/own-domain-dns-status/${domain}?includeAlias=true`)
+      .then((response) => response.data);
   };
 
   return {
@@ -85,7 +84,7 @@ export const useApexDomain = (domain?: string) => {
     queryFn: () => getApexDomain(domain),
     retry: false,
     enabled: !!domain,
-    gcTime: Infinity,
-    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours => Very unlikely to change
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours => Very unlikely to change
   });
 };

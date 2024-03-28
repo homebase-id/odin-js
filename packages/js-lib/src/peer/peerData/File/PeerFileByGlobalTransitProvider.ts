@@ -9,14 +9,19 @@ import {
 import { DEFAULT_PAYLOAD_KEY } from '../../../core/DriveData/Upload/UploadHelpers';
 import {
   TargetDrive,
-  DriveSearchResult,
+  HomebaseFile,
   FileMetadata,
   EncryptedKeyHeader,
   SystemFileType,
   ImageContentType,
   ContentType,
 } from '../../../core/core';
-import { assertIfDefined, tryJsonParse, stringifyToQueryParams } from '../../../helpers/DataUtil';
+import {
+  assertIfDefined,
+  tryJsonParse,
+  stringifyToQueryParams,
+  assertIfDefinedAndNotDefault,
+} from '../../../helpers/DataUtil';
 import {
   getAxiosClient,
   getRangeHeader,
@@ -38,7 +43,7 @@ interface GetThumbRequest extends GetFileRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 export const getPayloadAsJsonOverPeerByGlobalTransitId = async <T>(
   dotYouClient: DotYouClient,
@@ -83,6 +88,7 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
   assertIfDefined('Key', key);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { chunkStart, chunkEnd, lastModified } = options;
   const decrypt = options?.decrypt ?? true;
@@ -118,18 +124,20 @@ export const getPayloadBytesOverPeerByGlobalTransitId = async (
         bytes: !decrypt
           ? new Uint8Array(response.data)
           : updatedChunkStart !== undefined
-          ? (
-              await decryptChunkedBytesResponse(
-                dotYouClient,
-                response,
-                startOffset,
-                updatedChunkStart
+            ? (
+                await decryptChunkedBytesResponse(
+                  dotYouClient,
+                  response,
+                  startOffset,
+                  updatedChunkStart
+                )
+              ).slice(
+                0,
+                chunkEnd !== undefined && chunkStart !== undefined
+                  ? chunkEnd - chunkStart
+                  : undefined
               )
-            ).slice(
-              0,
-              chunkEnd !== undefined && chunkStart !== undefined ? chunkEnd - chunkStart : undefined
-            )
-          : await decryptBytesResponse(dotYouClient, response),
+            : await decryptBytesResponse(dotYouClient, response),
 
         contentType: `${response.headers.decryptedcontenttype}` as ContentType,
       };
@@ -160,6 +168,7 @@ export const getThumbBytesOverPeerByGlobalTransitId = async (
   assertIfDefined('PayloadKey', payloadKey);
   assertIfDefined('Width', width);
   assertIfDefined('Height', height);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const { systemFileType, lastModified } = options ?? { systemFileType: 'Standard' };
   const client = getAxiosClient(dotYouClient, systemFileType);
@@ -199,7 +208,7 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   targetDrive: TargetDrive,
   globalTransitId: string,
   options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
+): Promise<HomebaseFile<T> | null> => {
   const { systemFileType } = options ?? { systemFileType: 'Standard' };
   const fileHeader = await getFileHeaderBytesOverPeerByGlobalTransitId(
     dotYouClient,
@@ -213,7 +222,7 @@ export const getFileHeaderOverPeerByGlobalTransitId = async <T = string>(
   );
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -233,10 +242,11 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
   targetDrive: TargetDrive,
   globalTransitId: string,
   options?: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
-): Promise<DriveSearchResult> => {
+): Promise<HomebaseFile> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('GlobalTransitId', globalTransitId);
+  assertIfDefinedAndNotDefault('OdinId', odinId);
 
   const decrypt = options?.decrypt ?? true;
   const systemFileType = options?.systemFileType ?? 'Standard';
@@ -256,7 +266,7 @@ export const getFileHeaderBytesOverPeerByGlobalTransitId = async (
   };
 
   const promise = client
-    .get('/transit/query/header_byglobaltransitid?' + stringifyToQueryParams(request as any))
+    .get('/transit/query/header_byglobaltransitid?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

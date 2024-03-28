@@ -8,8 +8,6 @@ export * from './Blocks/Interacts/Comments/CommentComposer';
 export * from './Blocks/Interacts/EmojiPicker/EmojiPicker';
 export * from './Blocks/Interacts/EmojiPicker/EmojiSelector';
 
-export * from './ReactAccessEditorDialog/ReactAccessEditorDialog';
-
 export * from './Blocks/Interacts/Reactions/LikeButton';
 export * from './Blocks/Interacts/Reactions/ReactionsBar';
 
@@ -27,7 +25,6 @@ export * from './Blocks/Body/EmbeddedPostContent';
 export * from './Blocks/Meta/Meta';
 
 export * from './EditPostDialog/EditPostDialog';
-export * from './ReactAccessEditorDialog/ReactAccessEditorDialog';
 export * from './RelatedArticles/RelatedArticles';
 
 export * from './PostDetail/PostDetailCard';

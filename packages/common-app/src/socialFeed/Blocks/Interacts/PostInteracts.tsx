@@ -23,7 +23,7 @@ import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';
 import {
   CommentsReactionSummary,
-  DriveSearchResult,
+  HomebaseFile,
   EmojiReactionSummary,
   ParsedReactionPreview,
 } from '@youfoundation/js-lib/core';
@@ -42,7 +42,7 @@ export const PostInteracts = ({
   login,
 }: {
   authorOdinId: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
 
   isAuthenticated?: boolean;
   isOwner?: boolean;
@@ -193,7 +193,7 @@ export const RepostButton = ({
   postFile,
   permalink,
 }: {
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   permalink: string;
 }) => {
   const [isRepostDialogOpen, setIsReposeDialogOpen] = useState(false);
@@ -222,6 +222,7 @@ export const RepostButton = ({
             permalink,
             userDate: postFile.fileMetadata.appData.userDate ?? postFile.fileMetadata.created,
             previewThumbnail: postFile.fileMetadata.appData.previewThumbnail,
+            payloads: postFile.fileMetadata.payloads,
           }}
           isOpen={isRepostDialogOpen}
           onClose={() => setIsReposeDialogOpen(false)}

@@ -25,21 +25,17 @@ export default defineConfig({
       // formats: ['es', 'cjs'], // Output formats are inferred automatically when building with outputs
     },
     rollupOptions: {
-      // external: ['axios'],
-      // output: [
-      //   {
-      //     format: 'es',
-      //     globals: {
-      //       axios: 'axios',
-      //     },
-      //   },
-      //   {
-      //     format: 'cjs',
-      //     globals: {
-      //       axios: 'axios',
-      //     },
-      //   },
-      // ],
+      // make sure to externalize deps that shouldn't be bundled
+      // into your library
+      external: ['mp4box', '@youfoundation/ffmpeg'],
+      output: {
+        // Provide global variables to use in the UMD build
+        // for externalized deps
+        globals: {
+          mp4box: 'Mp4box',
+          '@youfoundation/ffmpeg': '@youfoundation/ffmpeg',
+        },
+      },
     },
   },
 });

@@ -1,4 +1,4 @@
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -92,14 +92,16 @@ export const ChannelItem = ({
   chnl: chnlDsr,
   onClose,
   className,
+  isDefaultEdit,
 }: {
-  chnl?: DriveSearchResult<ChannelDefinitionVm>;
+  chnl?: HomebaseFile<ChannelDefinitionVm> | NewHomebaseFile<ChannelDefinitionVm>;
   onClose?: () => void;
   className?: string;
+  isDefaultEdit?: boolean;
 }) => {
   const isNew = !chnlDsr;
 
-  const [isEdit, setIsEdit] = useState(false);
+  const [isEdit, setIsEdit] = useState(isDefaultEdit);
   const [isAclEdit, setIsAclEdit] = useState(isNew);
   const {
     save: { mutateAsync: saveChannel, status: saveStatus },
@@ -164,7 +166,9 @@ export const ChannelItem = ({
                   e.preventDefault();
                   e.stopPropagation();
 
-                  await saveChannel({
+                  if (!e.currentTarget.reportValidity()) return;
+
+                  const uploadResult = await saveChannel({
                     ...chnlDsr,
                     fileMetadata: {
                       ...chnlDsr?.fileMetadata,
@@ -185,9 +189,10 @@ export const ChannelItem = ({
                       accessControlList: newAcl,
                     },
                   });
-                  setIsEdit(false);
-                  onClose && onClose();
-
+                  if (uploadResult) {
+                    setIsEdit(false);
+                    onClose && onClose();
+                  }
                   return false;
                 }}
                 className="flex w-full flex-col"
@@ -197,6 +202,7 @@ export const ChannelItem = ({
                   <Input
                     id="name"
                     defaultValue={chnl?.name}
+                    required={true}
                     onChange={(e) => {
                       setNewName(e.target.value);
                       setNewSlug(slugify(e.target.value));
@@ -231,7 +237,7 @@ export const ChannelItem = ({
                 </div>
                 <div className="-m-2 flex flex-row-reverse">
                   <ActionButton className="m-2" state={saveStatus}>
-                    {t('Save')}
+                    {isNew && !chnl ? t('Create Drive & Save') : t('Save')}
                   </ActionButton>
                   <ActionButton
                     type="secondary"
@@ -247,6 +253,7 @@ export const ChannelItem = ({
                     {t('Cancel')}
                   </ActionButton>
                   {chnlDsr &&
+                  chnlDsr.fileId &&
                   !stringGuidsEqual(
                     chnlDsr.fileMetadata.appData.uniqueId,
                     BlogConfig.PublicChannelId
@@ -259,7 +266,7 @@ export const ChannelItem = ({
                       onClick={async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        await removeChannel(chnlDsr);
+                        await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
                         return false;
                       }}
                       confirmOptions={{

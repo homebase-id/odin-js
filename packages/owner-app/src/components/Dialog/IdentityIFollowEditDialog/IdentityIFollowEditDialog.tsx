@@ -5,16 +5,16 @@ import {
   t,
   useFollowingInfinite,
   useSocialChannels,
+  usePortal,
+  ActionButton,
+  DialogWrapper,
+  useIdentityIFollow,
+  Alert,
+  Quote,
+  Persons,
+  CheckboxToggle,
 } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { ActionButton } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
-import { useIdentityIFollow } from '../../../hooks/follow/useIdentityIFollow';
 
-import { Alert } from '@youfoundation/common-app';
-import CheckboxToggle from '../../Form/CheckboxToggle';
-import { Quote } from '@youfoundation/common-app';
-import { Persons } from '@youfoundation/common-app';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 
 const IdentityIFollowEditDialog = ({
@@ -79,8 +79,26 @@ const IdentityIFollowEditDialog = ({
   const updateFollow = async () => {
     const selectChannels = channelSelection?.length !== socialChannels?.length;
 
+    console.log(selectChannels, channelSelection, identityIFollow);
+
     if (identityIFollow && channelSelection?.length === 0) unfollow({ odinId: odinId });
-    else
+    else {
+      // Check if following already exactly the same channels
+      if (identityIFollow?.notificationType === 'allNotifications' && !selectChannels) {
+        onConfirm();
+        return;
+      } else if (
+        identityIFollow?.notificationType === 'selectedChannels' &&
+        selectChannels &&
+        identityIFollow?.channels?.length === channelSelection?.length &&
+        !channelSelection.some((selectedChnl) =>
+          identityIFollow.channels?.some((chnl) => chnl.alias === selectedChnl)
+        )
+      ) {
+        onConfirm();
+        return;
+      }
+
       await follow({
         odinId: odinId,
         notificationType: selectChannels ? 'selectedChannels' : 'allNotifications',
@@ -91,7 +109,13 @@ const IdentityIFollowEditDialog = ({
           : undefined,
         // Pass undefined if all socialChannels are selected so it remains a follow all
       });
+    }
 
+    onConfirm();
+  };
+
+  const doUnfollow = async () => {
+    await unfollow({ odinId: odinId });
     onConfirm();
   };
 
@@ -110,8 +134,8 @@ const IdentityIFollowEditDialog = ({
         onClose={onCancel}
       >
         {!socialChannels && socialChannelsLoaded ? (
-          <Alert type="info" title={t("You don't have access to any channels")} className="my-5">
-            {t('By following you might not get any posts')}
+          <Alert type="info" className="my-5">
+            {t('No accessible channels found. You might not get any posts when subscribed')}
           </Alert>
         ) : (
           <ul className="my-5 grid grid-flow-row gap-4">
@@ -156,12 +180,16 @@ const IdentityIFollowEditDialog = ({
             })}
           </ul>
         )}
-        <div className="-m-2 flex flex-row-reverse py-3">
-          <ActionButton className="m-2" onClick={updateFollow} state={followStatus}>
+        <div className="flex flex-row-reverse gap-2 py-3">
+          <ActionButton onClick={updateFollow} state={followStatus}>
             {identityIFollow ? t('Update') : t('Follow')}
           </ActionButton>
-          <ActionButton className="m-2" type="secondary" onClick={onCancel}>
+          <ActionButton type="secondary" onClick={onCancel}>
             {t('Cancel')}
+          </ActionButton>
+
+          <ActionButton className="mr-auto" type="secondary" onClick={doUnfollow}>
+            {t('Unfollow')}
           </ActionButton>
         </div>
       </DialogWrapper>

@@ -1,4 +1,4 @@
-import { OdinImage, OdinVideo, OdinVideoProps } from '@youfoundation/ui-lib';
+import { OdinThumbnailImage, OdinVideo, OdinVideoProps } from '@youfoundation/ui-lib';
 import { Triangle, useDotYouClient } from '../..';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
 import { useMemo, useState } from 'react';
@@ -52,18 +52,18 @@ export const VideoClickToLoad = ({
           <div className="bg-slate-200 dark:bg-slate-800 aspect-video w-full"></div>
         )
       ) : (
-        <OdinImage
+        <OdinThumbnailImage
           dotYouClient={dotYouClient}
           {...props}
-          className={`blur-[5px] ${props.className || ''}`}
-          fit={props.fit}
-          avoidPayload={true}
-          previewThumbnail={previewThumbnail}
+          className={`${props.className || ''} blur-sm`}
+          loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
           onError={() => setShouldFallback(true)}
         />
       )}
       <div className="absolute inset-0 flex items-center justify-center z-0">
-        <Triangle className="text-background h-16 w-16" />
+        <div className="bg-background/40 rounded-full p-7 border border-foreground/40">
+          <Triangle className="text-foreground h-12 w-12" />
+        </div>
       </div>
 
       {preload || loadVideo ? (

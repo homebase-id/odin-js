@@ -2,16 +2,21 @@ import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import {
+  CHAT_APP_ID,
   ChatBubble,
   Cloud,
+  Envelope,
+  FEED_APP_ID,
   HOME_ROOT_PATH,
   House,
+  MAIL_APP_ID,
   MiniDarkModeToggle,
   Persons,
   Pin,
   ellipsisAtMaxChar,
   getVersion,
   t,
+  useUnreadPushNotificationsCount,
 } from '@youfoundation/common-app';
 import { useDarkMode } from '@youfoundation/common-app';
 import { useProfiles } from '@youfoundation/common-app';
@@ -36,9 +41,7 @@ import {
   ArrowDown,
   Bell,
 } from '@youfoundation/common-app';
-import { useUnreadPushNotificationsCount } from '../../../../owner-app/src/hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID } from '../../../../owner-app/src/app/Constants';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const STORAGE_KEY = 'isOpen';
 
@@ -49,10 +52,6 @@ const iconClassName = `${iconSize} flex-shrink-0`;
 
 const sidebarBg = 'bg-indigo-100 text-black dark:bg-indigo-900 dark:text-white';
 const moreBg = 'bg-[#d4ddff] dark:bg-[#3730a3] text-black dark:text-white';
-
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
 
 export const Sidenav = ({
   logout,
@@ -89,8 +88,8 @@ export const Sidenav = ({
       <aside
         className={`body-font fixed bottom-0 left-0 right-0 top-0 z-30 max-w-3xl flex-shrink-0 transition-all duration-300 md:sticky md:bottom-auto md:min-h-[100dvh] ${
           (canPin && isPinned) || isOpen
-            ? 'translate-y-0 md:min-w-[20rem]'
-            : 'w-full translate-y-[+100%] md:translate-y-0 md:w-[4.3rem] md:min-w-0'
+            ? 'translate-y-0 pl-[env(safe-area-inset-left)] md:min-w-[20rem]'
+            : 'w-full translate-y-[+100%] md:translate-y-0 pl-[env(safe-area-inset-left)] md:w-[calc(env(safe-area-inset-left)+4.3rem)] md:min-w-0'
         }`}
         onClick={() => {
           if (!isMd && isOpen) setIsOpen(false);
@@ -144,8 +143,9 @@ export const Sidenav = ({
             </div>
 
             <div className="py-3">
-              <NavItem icon={Feed} label={'Feed'} to={'/owner/feed'} end={true} />
+              <FeedNavItem />
               <ChatNavItem />
+              <MailNavItem />
             </div>
 
             <div className={`py-3`}>
@@ -188,7 +188,7 @@ export const Sidenav = ({
                       !(canPin && isPinned) && !isOpen && 'hidden'
                     }`}
                   >
-                    2023 | v.
+                    {new Date().getFullYear()} | v.
                     {getVersion()}
                   </span>
                 </p>
@@ -302,7 +302,9 @@ const NavItem = ({
   end?: boolean;
 }) => {
   const { pathname } = window.location;
-  const isExternal = pathname.split('/')[1] !== to.split('/')[1];
+  const isExternal =
+    pathname.split('/')[1] !== to.split('/')[1] ||
+    (to.split('/')[1] === 'apps' && pathname.split('/')[2] !== to.split('/')[2]);
 
   if (isExternal) {
     return <ExternalNavItem icon={icon} href={to} label={label} unread={unread} />;
@@ -446,23 +448,30 @@ const NotificationBell = () => {
   );
 };
 
+const FeedNavItem = () => {
+  const count = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!count} />;
+};
+
 const ChatNavItem = () => {
   const count = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
   return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!count} />;
 };
 
-const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
-  const { data: profiles } = useProfiles().fetchProfiles;
-  const standardProfile = profiles?.find(
-    (profile) => profile.profileId === BuiltInProfiles.StandardProfileId
-  );
+const MailNavItem = () => {
+  const count = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!count} />;
+};
 
+const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {
   return (
-    <div className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1  ${sidebarBg}`}>
+    <div
+      className={`fixed left-0 right-0 bottom-0 md:hidden z-20 px-4 py-1 pb-[env(safe-area-inset-bottom)] ${sidebarBg}`}
+    >
       <div className="flex flex-row justify-between">
         <NavItem icon={House} to={'/owner'} end={true} />
-        <NavItem icon={Person} to={`/owner/profile/${standardProfile?.slug || 'standard-info'}`} />
-        <NavItem icon={Cloud} to={'/owner/profile/homepage'} />
+        <NavItem icon={Feed} to={'/apps/feed'} end={true} />
+        <NavItem icon={ChatBubble} to="/apps/chat" />
 
         <button className={navItemClassName} onClick={() => setIsOpen(true)}>
           <Bars className={iconClassName} />

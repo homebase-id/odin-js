@@ -74,7 +74,7 @@ export const useImage = (
         queryKey: [
           'image',
           odinId || localHost,
-          imageDrive?.alias,
+          imageDrive.alias,
           imageGlobalTransitId || imageFileId,
           imageFileKey,
         ],
@@ -155,10 +155,14 @@ export const useImage = (
                   imageDrive,
                   imageGlobalTransitId,
                   imageFileKey,
-                  size,
+
                   probablyEncrypted,
-                  systemFileType,
-                  lastModified
+
+                  lastModified,
+                  {
+                    size,
+                    systemFileType,
+                  }
                 )
               : await getDecryptedImageUrlOverPeer(
                   dotYouClient,
@@ -166,20 +170,24 @@ export const useImage = (
                   imageDrive,
                   imageFileId,
                   imageFileKey,
-                  size,
                   probablyEncrypted,
-                  systemFileType,
-                  lastModified
+                  lastModified,
+                  {
+                    size,
+                    systemFileType,
+                  }
                 )
             : await getDecryptedImageUrl(
                 dotYouClient,
                 imageDrive,
                 imageFileId,
                 imageFileKey,
-                size,
                 probablyEncrypted,
-                systemFileType,
-                lastModified
+                lastModified,
+                {
+                  size,
+                  systemFileType,
+                }
               ),
         naturalSize: naturalSize,
       };
@@ -215,8 +223,8 @@ export const useImage = (
       refetchOnMount: true,
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60, // 1 min
-      gcTime: Infinity,
-      enabled: !!imageFileId && imageFileId !== '',
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      enabled: !!imageFileId && imageFileId !== '' && !!imageDrive && !!imageFileKey,
     }),
   };
 };

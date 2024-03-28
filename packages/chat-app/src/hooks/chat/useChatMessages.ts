@@ -1,4 +1,3 @@
-import { useDotYouClient } from '@youfoundation/common-app';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ChatDeliveryStatus,
@@ -12,24 +11,25 @@ import {
   GroupConversation,
   SingleConversation,
 } from '../../providers/ConversationProvider';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 
 const PAGE_SIZE = 100;
 export const useChatMessages = (props?: { conversationId: string | undefined }) => {
   const { conversationId } = props || { conversationId: undefined };
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
+
   const queryClient = useQueryClient();
 
-  const fetchMessages = async (conversationId: string, cursorState: string | undefined) => {
-    return await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
-  };
+  const fetchMessages = async (conversationId: string, cursorState: string | undefined) =>
+    await getChatMessages(dotYouClient, conversationId, cursorState, PAGE_SIZE);
 
   const markAsRead = async ({
     conversation,
     messages,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    messages: DriveSearchResult<ChatMessage>[];
+    conversation: HomebaseFile<Conversation>;
+    messages: HomebaseFile<ChatMessage>[];
   }) => {
     // => Much nicer solution: Handle with a last read time on the conversation file;
     const messagesToMarkAsRead = messages
@@ -41,7 +41,7 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
       )
       .map((msg) => msg.fileMetadata.globalTransitId) as string[];
 
-    await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
+    return await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
   };
 
   const removeMessage = async ({
@@ -49,8 +49,8 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
     messages,
     deleteForEveryone,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    messages: DriveSearchResult<ChatMessage>[];
+    conversation: HomebaseFile<Conversation>;
+    messages: HomebaseFile<ChatMessage>[];
     deleteForEveryone?: boolean;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
@@ -60,42 +60,41 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
 
     return await Promise.all(
       messages.map(async (msg) => {
-        await softDeleteChatMessage(dotYouClient, msg, recipients, deleteForEveryone);
+        await softDeleteChatMessage(
+          dotYouClient,
+          msg,
+          recipients.filter(Boolean),
+          deleteForEveryone
+        );
       })
     );
   };
 
   return {
     all: useInfiniteQuery({
-      queryKey: ['chat', conversationId],
+      queryKey: ['chat-messages', conversationId],
       initialPageParam: undefined as string | undefined,
       queryFn: ({ pageParam }) => fetchMessages(conversationId as string, pageParam),
       getNextPageParam: (lastPage) =>
-        lastPage.searchResults?.length >= PAGE_SIZE ? lastPage.cursorState : undefined,
+        lastPage?.searchResults && lastPage?.searchResults?.length >= PAGE_SIZE
+          ? lastPage.cursorState
+          : undefined,
       enabled: !!conversationId,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 1, // 1 minute; The chat messages are already invalidated by the websocket;
     }),
     markAsRead: useMutation({
+      mutationKey: ['markAsRead', conversationId],
       mutationFn: markAsRead,
       onError: (error) => {
         console.error('Error marking chat as read', { error });
       },
-      // onMutate: async ({ conversation, recipients, message }) => {
-      //   // TODO: Optimistic update of the chat messages append the new message to the list
-      // },
-      // onSettled: async (_data, _error, variables) => {
-      //   queryClient.invalidateQueries({ queryKey: ['chat', variables.conversationId] });
-      // },
     }),
     delete: useMutation({
       mutationFn: removeMessage,
-      onMutate: async ({ conversation, messages }) => {
-        // TODO: Optimistic update of the chat messages delete the new message from the list
-      },
+
       onSettled: async (_data, _error, variables) => {
         queryClient.invalidateQueries({
-          queryKey: ['chat', variables.conversation.fileMetadata.appData.uniqueId],
+          queryKey: ['chat-messages', variables.conversation.fileMetadata.appData.uniqueId],
         });
       },
     }),

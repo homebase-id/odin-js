@@ -1,7 +1,5 @@
-import { ApiType, DotYouClient, DrivePermissionType } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useVerifyToken } from './useVerifyToken';
 import {
   logout as logoutYouauth,
@@ -17,64 +15,22 @@ import {
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
+import {
+  ALL_CONNECTIONS_CIRCLE_ID,
+  AppPermissionType,
+  ContactConfig,
+} from '@youfoundation/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
-
-const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
-export const drives = [
-  {
-    a: BlogConfig.FeedDrive.alias,
-    t: BlogConfig.FeedDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
-  },
-  {
-    // Standard profile Info
-    a: StandardProfileDrive.alias,
-    t: StandardProfileDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read,
-  },
-  {
-    // Homepage Config
-    a: HomePageConfig.HomepageTargetDrive.alias,
-    t: HomePageConfig.HomepageTargetDrive.type,
-    n: '',
-    d: '',
-    p: DrivePermissionType.Read,
-  },
-  {
-    // Public posts
-    a: BlogConfig.PublicChannelDrive.alias,
-    t: BlogConfig.PublicChannelDrive.type,
-    n: '',
-    d: '',
-    p:
-      DrivePermissionType.Read +
-      DrivePermissionType.Write +
-      DrivePermissionType.React +
-      DrivePermissionType.Comment,
-  },
-];
-export const appName = 'Homebase - Feed';
-export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
-
-export const APP_SHARED_SECRET = 'APSS';
-export const APP_AUTH_TOKEN = 'BX0900';
-
-const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-  return !!raw;
-};
+import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@youfoundation/common-app';
 
 export const useAuth = () => {
+  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret() ? 'unknown' : 'anonymous');
-  const navigate = useNavigate();
+  >(hasSharedSecret ? 'unknown' : 'anonymous');
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
@@ -83,37 +39,10 @@ export const useAuth = () => {
     localStorage.removeItem(APP_AUTH_TOKEN);
     setAuthenticationState('anonymous');
 
-    navigate('/');
-    window.location.reload();
+    window.location.href = '/';
   };
 
-  const preauth = async (): Promise<void> => {
-    await preauthApps(getDotYouClient());
-  };
-
-  const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
-
-  const getSharedSecret = () => {
-    const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-    if (raw) return base64ToUint8Array(raw);
-  };
-
-  const getDotYouClient = () => {
-    const headers: Record<string, string> = {};
-    const authToken = getAppAuthToken();
-    if (authToken) {
-      headers['bx0900'] = authToken;
-    }
-
-    return new DotYouClient({
-      sharedSecret: getSharedSecret(),
-      api: ApiType.App,
-      identity: retrieveIdentity(),
-      headers: headers,
-    });
-  };
-
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
+  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
@@ -141,6 +70,69 @@ export const useAuth = () => {
   };
 };
 
+const StandardProfileDrive = GetTargetDriveFromProfileId(BuiltInProfiles.StandardProfileId);
+export const drives = [
+  {
+    a: BlogConfig.FeedDrive.alias,
+    t: BlogConfig.FeedDrive.type,
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
+  {
+    // Standard profile Info
+    a: StandardProfileDrive.alias,
+    t: StandardProfileDrive.type,
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+  {
+    // Homepage Drive
+    a: HomePageConfig.HomepageTargetDrive.alias,
+    t: HomePageConfig.HomepageTargetDrive.type,
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+  {
+    // Contact Drive
+    a: ContactConfig.ContactTargetDrive.alias,
+    t: ContactConfig.ContactTargetDrive.type,
+    n: '',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+  {
+    // Public posts
+    a: BlogConfig.PublicChannelDrive.alias,
+    t: BlogConfig.PublicChannelDrive.type,
+    n: '',
+    d: '',
+    p:
+      DrivePermissionType.Read +
+      DrivePermissionType.Write +
+      DrivePermissionType.React +
+      DrivePermissionType.Comment,
+  },
+];
+
+export const permissions = [
+  AppPermissionType.ReadConnections,
+  AppPermissionType.ManageConnectionRequests,
+  AppPermissionType.ReadCircleMembers,
+  AppPermissionType.ReadWhoIFollow,
+  AppPermissionType.ReadMyFollowers,
+  AppPermissionType.ManageFeed,
+  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
+  AppPermissionType.PublishStaticContent,
+  AppPermissionType.SendPushNotifications,
+];
+
+export const appName = 'Homebase - Feed';
+export const appId = '5f887d80-0132-4294-ba40-bda79155551d';
+
 export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const eccKey = await createEccPair();
@@ -153,19 +145,11 @@ export const useYouAuthAuthorization = () => {
       finalizeUrl,
       appName,
       appId,
-      [
-        AppPermissionType.ReadConnections,
-        AppPermissionType.ReadConnectionRequests,
-        AppPermissionType.ReadCircleMembers,
-        AppPermissionType.ReadWhoIFollow,
-        AppPermissionType.ReadMyFollowers,
-        AppPermissionType.ManageFeed,
-        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
-      ],
+      permissions,
       undefined,
       drives,
       undefined,
+      [ALL_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
       window.location.host,
       undefined,

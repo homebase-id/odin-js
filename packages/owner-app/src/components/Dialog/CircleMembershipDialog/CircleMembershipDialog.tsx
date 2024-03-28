@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButtonState, Arrow, t } from '@youfoundation/common-app';
+import { Arrow, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { usePortal } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -167,6 +167,7 @@ const InnerCircleSelectionDialog = ({
           <CircleSelector
             defaultValue={newGrantIds}
             onChange={(e) => setNewGrantIds(e.target.value)}
+            excludeSystemCircles={true}
           />
 
           <div className="-m-2 flex flex-row-reverse py-3">

@@ -19,8 +19,10 @@ import {
 } from './UploadHelpers';
 import { getFileHeader, getPayloadBytes, getThumbBytes } from '../File/DriveFileProvider';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
+import { AxiosRequestConfig } from 'axios';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const isDebug = hasDebugFlag();
 
@@ -32,7 +34,8 @@ export const uploadFile = async (
   payloads?: PayloadFile[],
   thumbnails?: ThumbnailFile[],
   encrypt = true,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
@@ -73,7 +76,13 @@ export const uploadFile = async (
   );
 
   // Upload
-  const uploadResult = await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+  const uploadResult = await pureUpload(
+    dotYouClient,
+    data,
+    systemFileType,
+    onVersionConflict,
+    axiosConfig
+  );
 
   if (!uploadResult) return;
   uploadResult.keyHeader = keyHeader;
@@ -85,7 +94,8 @@ export const uploadHeader = async (
   keyHeader: EncryptedKeyHeader | KeyHeader | undefined,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ): Promise<UploadResult | void> => {
   isDebug &&
     console.debug('request', new URL(`${dotYouClient.getEndpoint()}/drive/files/upload`).pathname, {
@@ -127,7 +137,7 @@ export const uploadHeader = async (
   );
 
   // Upload
-  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict);
+  return await pureUpload(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
 export const appendDataToFile = async (
@@ -136,7 +146,8 @@ export const appendDataToFile = async (
   instructions: AppendInstructionSet,
   payloads: PayloadFile[] | undefined,
   thumbnails: ThumbnailFile[] | undefined,
-  onVersionConflict?: () => void
+  onVersionConflict?: () => void,
+  axiosConfig?: AxiosRequestConfig
 ) => {
   isDebug &&
     console.debug(
@@ -172,14 +183,15 @@ export const appendDataToFile = async (
     manifest
   );
 
-  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict);
+  return await pureAppend(dotYouClient, data, systemFileType, onVersionConflict, axiosConfig);
 };
 
 export const reUploadFile = async (
   dotYouClient: DotYouClient,
   instructions: UploadInstructionSet,
   metadata: UploadFileMetadata,
-  encrypt: boolean
+  encrypt: boolean,
+  axiosConfig?: AxiosRequestConfig
 ) => {
   const targetDrive = instructions.storageOptions?.drive;
   const fileId = instructions.storageOptions?.overwriteFileId;
@@ -232,5 +244,14 @@ export const reUploadFile = async (
     }
   }
 
-  return await uploadFile(dotYouClient, instructions, metadata, payloads, thumbnails, encrypt);
+  return await uploadFile(
+    dotYouClient,
+    instructions,
+    metadata,
+    payloads,
+    thumbnails,
+    encrypt,
+    undefined,
+    axiosConfig
+  );
 };

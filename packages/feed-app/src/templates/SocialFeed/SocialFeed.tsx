@@ -5,9 +5,10 @@ import {
   ActionGroup,
   Article,
   Ellipsis,
+  FEED_APP_ID,
   Quote,
   t,
-  useDotYouClient,
+  useRemoveNotifications,
 } from '@youfoundation/common-app';
 import SocialFeedMainContent from '../../components/SocialFeed/MainContent/SocialFeedMainContent';
 
@@ -17,24 +18,30 @@ const ConnectionsView = lazy(
 const IdentityLink = lazy(
   () => import('../../components/SocialFeed/Sidebars/IdentityLink/IdentityLink')
 );
-const CirclesView = lazy(
-  () => import('../../components/SocialFeed/Sidebars/CirclesView/CirclesView')
-);
 const FollowersView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowersView/FollowersView')
 );
 const FollowingView = lazy(
   () => import('../../components/SocialFeed/Sidebars/FollowingView/FollowingView')
 );
+const FollowHomebase = lazy(
+  () => import('../../components/SocialFeed/Sidebars/FollowHomebase/FollowHomebase')
+);
 
 const PostPreview = lazy(() => import('../../components/SocialFeed/MainContent/PostPreview'));
 
-import { Feed } from '@youfoundation/common-app';
+import { Feed, ExtendPermissionDialog } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
+import { ROOT_PATH } from '../../app/App';
+import { drives, permissions } from '../../hooks/auth/useAuth';
+import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
-  const { isOwner } = useDotYouClient();
+  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
+
+  useRemoveNotifications({ appId: FEED_APP_ID });
+  useAutofixDefaultConfig();
 
   useEffect(() => {
     if (postKey) document.documentElement.classList.add('overflow-hidden');
@@ -48,7 +55,14 @@ export const SocialFeed = () => {
       <Helmet>
         <title>{t('Feed')} | Homebase</title>
       </Helmet>
-      {isOwner ? (
+      <ExtendPermissionDialog
+        appName={t('Homebase Feed')}
+        appId={FEED_APP_ID}
+        drives={drives}
+        permissions={permissions}
+      />
+
+      {!isReactNative ? (
         <PageMeta
           title={t('Feed')}
           icon={Feed}
@@ -58,12 +72,12 @@ export const SocialFeed = () => {
               options={[
                 {
                   label: t('Articles'),
-                  href: '/owner/feed/articles',
+                  href: `${ROOT_PATH}/articles`,
                   icon: Article,
                 },
                 {
                   label: t('Channels'),
-                  href: '/owner/feed/channels',
+                  href: `${ROOT_PATH}/channels`,
                   icon: Quote,
                 },
               ]}
@@ -75,18 +89,14 @@ export const SocialFeed = () => {
         />
       ) : null}
       {identityKey && channelKey && postKey ? (
-        <div
-          className={`fixed inset-0 z-40 bg-page-background bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
-        >
-          <Suspense>
-            <PostPreview
-              postKey={postKey}
-              identityKey={identityKey}
-              channelKey={channelKey}
-              attachmentKey={attachmentKey}
-            />
-          </Suspense>
-        </div>
+        <Suspense>
+          <PostPreview
+            postKey={postKey}
+            identityKey={identityKey}
+            channelKey={channelKey}
+            attachmentKey={attachmentKey}
+          />
+        </Suspense>
       ) : null}
       <section className="flex-grow bg-page-background md:pt-0">
         <div className="container mx-auto gap-4 pb-3 sm:pb-10 lg:grid lg:max-w-7xl lg:grid-cols-4">
@@ -99,7 +109,7 @@ export const SocialFeed = () => {
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
                     <IdentityLink className="overflow-hidden rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm hover:shadow-md dark:border-gray-800 hover:dark:shadow-slate-600" />
-                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <FollowHomebase className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}
@@ -109,8 +119,8 @@ export const SocialFeed = () => {
                 <div className="sticky top-4 flex flex-col gap-4">
                   <Suspense>
                     <ConnectionsView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
-                    <CirclesView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                     <FollowingView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
+                    <FollowersView className="rounded-md border border-gray-200 border-opacity-60 bg-background shadow-sm dark:border-gray-800" />
                   </Suspense>
                 </div>
               ) : null}

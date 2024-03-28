@@ -1,6 +1,6 @@
 import { t } from '../../../../../helpers';
 import { useDotYouClient } from '../../../../../hooks';
-import { ActionGroup, Pencil, Times, Ellipsis, Block } from '../../../../../ui';
+import { ActionGroup, Pencil, Times, Block } from '../../../../../ui';
 import { AuthorName } from '../../../Author/Name';
 
 export const CommentHead = ({

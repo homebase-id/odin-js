@@ -3,7 +3,7 @@ import { cva, VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/utils';
 
-const listVariants = cva('m-0 ps-6', {
+const listVariants = cva('m-0 pl-6', {
   variants: {
     variant: {
       ul: 'list-disc [&_ul]:list-[circle] [&_ul_ul]:list-[square]',

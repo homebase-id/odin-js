@@ -21,10 +21,7 @@ export const getPendingRequests = async (
   params: PagingOptions
 ): Promise<PagedResult<RedactedConnectionRequest> | undefined> => {
   const client = dotYouClient.createAxiosClient();
-  const url =
-    PendingPathRoot +
-    '/list?' +
-    stringifyToQueryParams(params as unknown as Record<string, unknown>);
+  const url = PendingPathRoot + '/list?' + stringifyToQueryParams(params);
 
   return client
     .get<PagedResult<RedactedConnectionRequest>>(url)
@@ -57,8 +54,7 @@ export const getSentRequests = async (
   params: PagingOptions
 ): Promise<PagedResult<ConnectionRequest>> => {
   const client = dotYouClient.createAxiosClient();
-  const url =
-    SentPathRoot + '/list?' + stringifyToQueryParams(params as unknown as Record<string, unknown>);
+  const url = SentPathRoot + '/list?' + stringifyToQueryParams(params);
 
   return client
     .get(url)
@@ -99,6 +95,7 @@ export const acceptConnectionRequest = async (
     permissions: undefined,
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (header as any).contactData = { name: 'NO_LONGER_USED' };
 
   return client
@@ -154,6 +151,7 @@ export const sendRequest = async (
     circleIds: circleIds,
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (data as any).contactData = {
     name: 'NO_LONGER_USED',
   };

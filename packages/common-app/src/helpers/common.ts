@@ -1,5 +1,5 @@
 import { InfiniteData } from '@tanstack/react-query';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { Attribute } from '@youfoundation/js-lib/profile';
 
 export const stringify = (obj: Record<string, unknown>) => {
@@ -35,11 +35,11 @@ export const flattenInfinteData = <T>(
   pageSize: number,
   sortFn?: (a: T, b: T) => number
 ) => {
-  return rawData?.pages
+  return (rawData?.pages
     .flatMap((page) => page?.results)
     .filter((post) => !!post)
     .sort(sortFn)
-    .slice(0, rawData?.pages.length * pageSize) as T[];
+    .slice(0, rawData?.pages.length * pageSize) || []) as T[];
 };
 
 export const ellipsisAtMaxChar = (str?: string, maxChar?: number) => {
@@ -61,14 +61,14 @@ export const pascalCase = (str: string) => {
 
 // TODO: Simplify this function
 export const getHighestPrioAttributesFromMultiTypes = (
-  attributes?: (DriveSearchResult<Attribute | undefined> | null)[]
+  attributes?: (HomebaseFile<Attribute | undefined> | null)[]
 ) => {
   if (!attributes) return undefined;
 
   return (
     attributes?.filter(
       (attr) => !!attr && !!attr.fileMetadata.appData.content
-    ) as DriveSearchResult<Attribute>[]
+    ) as HomebaseFile<Attribute>[]
   )?.reduce((highestPrioArr, attr) => {
     const highAttr = highestPrioArr.find(
       (highAttr) =>
@@ -96,5 +96,5 @@ export const getHighestPrioAttributesFromMultiTypes = (
     } else {
       return [...highestPrioArr, attr];
     }
-  }, [] as DriveSearchResult<Attribute>[]);
+  }, [] as HomebaseFile<Attribute>[]);
 };

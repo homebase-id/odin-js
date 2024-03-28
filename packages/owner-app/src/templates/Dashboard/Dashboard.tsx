@@ -8,38 +8,19 @@ import {
   HybridLink,
   ActionGroupOptionProps,
   Download,
-  Question,
   EmbeddedPostContent,
   FakeAnchor,
   useSocialFeed,
+  useUnreadPushNotificationsCount,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  OWNER_APP_ID,
+  PHOTO_APP_ID,
+  MAIL_APP_ID,
 } from '@youfoundation/common-app';
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
-import { useApp } from '../../hooks/apps/useApp';
-import { useUnreadPushNotificationsCount } from '../../hooks/notifications/usePushNotifications';
-import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../app/Constants';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
-
-// const About = {
-//   circles: (
-//     <>
-//       Circles are groups of members that share the same permissions. You can name them based on
-//       which social circle your connections belong (eg: family, friends, co-workers, ...). Or
-//       anything else that works for you
-//     </>
-//   ),
-//   apps: (
-//     <>
-//       Apps are applications that have been granted access to one or more of your drives. They are
-//       able to access that information on your behalf so do make sure when registering new apps on
-//       your identity that they don&apos;t request any drive access that you don&apos;t feel
-//       comfortable with.
-//     </>
-//   ),
-// };
-
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
+import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const Dashboard = () => {
   return (
@@ -66,10 +47,11 @@ const Dashboard = () => {
         .
       </p>
 
-      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="mt-10 grid max-w-2xl grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
         <SystemApp />
-        <ChatApp />
         <FeedApp />
+        <ChatApp />
+        <MailApp />
         <PhotoApp />
       </div>
 
@@ -91,7 +73,7 @@ const AppWrapper = ({
   href: string | undefined;
   name: string | undefined;
   appId?: string;
-  options: ActionGroupOptionProps[];
+  options?: ActionGroupOptionProps[];
 }) => (
   <div className="group relative flex h-full flex-grow flex-col rounded-lg bg-background transition-shadow hover:shadow-lg">
     <HybridLink href={href} className="mx-auto px-5 pt-5">
@@ -108,41 +90,36 @@ const AppWrapper = ({
       </div>
     </HybridLink>
 
-    <div
-      className={`flex flex-row justify-center rounded-b-lg bg-slate-100 ${
-        isTouchDevice() ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'
-      } dark:bg-slate-800`}
-    >
-      <ActionGroup
-        type="mute"
-        size="none"
-        className="pointer-events-none w-full py-1 group-hover:pointer-events-auto"
-        buttonClassName="w-full justify-center"
-        options={options}
-      />
-    </div>
+    {options ? (
+      <div
+        className={`flex flex-row justify-center rounded-b-lg bg-slate-100 ${
+          isTouchDevice() ? '' : 'opacity-0 transition-opacity group-hover:opacity-100'
+        } dark:bg-slate-800`}
+      >
+        <ActionGroup
+          type="mute"
+          size="none"
+          className="pointer-events-none w-full py-1 group-hover:pointer-events-auto"
+          buttonClassName="w-full justify-center"
+          options={options}
+        />
+      </div>
+    ) : null}
   </div>
 );
 
 const SystemApp = () => {
   const unreadCount = useUnreadPushNotificationsCount({ appId: OWNER_APP_ID });
 
-  const os = getOperatingSystem();
-  const isAndroid = os.name === 'Android';
+  // const os = getOperatingSystem();
+  // const isAndroid = os.name === 'Android';
 
   return (
     <AppWrapper
-      name={'Homebase'}
+      name={'Notifications'}
       appId={OWNER_APP_ID}
       href={'/owner/notifications'}
       unreadCount={unreadCount}
-      options={[
-        {
-          label: t('How to install'),
-          icon: Question,
-          href: `https://web.dev/learn/pwa/installation#desktop_installation`,
-        },
-      ]}
     />
   );
 };
@@ -171,10 +148,30 @@ const ChatApp = () => {
               {
                 label: t('Install on Android'),
                 icon: Download,
-                href: `https://play.google.com/store/apps/details?id=id.homebase.chattr`,
+                href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
               },
             ]
           : []),
+      ]}
+    />
+  );
+};
+
+const MailApp = () => {
+  const unreadCount = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+
+  return (
+    <AppWrapper
+      appId={MAIL_APP_ID}
+      name={'Mail'}
+      href={`/apps/mail`}
+      unreadCount={unreadCount}
+      options={[
+        {
+          label: t('Settings'),
+          icon: Cog,
+          href: `/owner/third-parties/apps/${MAIL_APP_ID}`,
+        },
       ]}
     />
   );
@@ -190,7 +187,7 @@ const FeedApp = () => {
     <AppWrapper
       appId={FEED_APP_ID}
       name={'Feed'}
-      href={`/owner/feed`}
+      href={`/apps/feed`}
       unreadCount={unreadCount}
       options={[
         {
@@ -257,7 +254,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
       <div className="mb-4 flex flex-row items-center justify-between">
         <p className="text-2xl">{t('What has everyone been up to?')}</p>
       </div>
-      <FakeAnchor href={hasPosts ? `/owner/feed` : `/owner/connections`} className="">
+      <FakeAnchor href={hasPosts ? `/apps/feed` : `/owner/connections`}>
         <div className="pointer-events-none flex flex-col gap-4">
           {hasPosts ? (
             latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (
@@ -268,6 +265,7 @@ const FeedTeaser = ({ className }: { className?: string }) => {
                 <EmbeddedPostContent
                   content={{
                     ...post.fileMetadata.appData.content,
+                    payloads: post.fileMetadata.payloads,
                     userDate: post.fileMetadata.appData.userDate || post.fileMetadata.created,
                     lastModified: post.fileMetadata.updated,
                     permalink: '',

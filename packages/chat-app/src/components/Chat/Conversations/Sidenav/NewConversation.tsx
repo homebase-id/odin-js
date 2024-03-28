@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { ActionButton, Input, Persons, Times, t, useAllContacts } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  ErrorBoundary,
+  Input,
+  Persons,
+  Times,
+  t,
+  useAllContacts,
+} from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
 import { ConversationListItemWrapper } from '../Item/ConversationItem';
@@ -22,7 +30,7 @@ export const NewConversation = () => {
     : [];
 
   return (
-    <>
+    <ErrorBoundary>
       <div className="flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Conversation')}</h2>
         <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
@@ -39,6 +47,7 @@ export const NewConversation = () => {
       </form>
       <div className="overflow-auto">
         <ConversationListItemWrapper
+          order={1}
           onClick={() => {
             navigate(`${CHAT_ROOT}/new-group`);
           }}
@@ -57,6 +66,6 @@ export const NewConversation = () => {
           />
         ))}
       </div>
-    </>
+    </ErrorBoundary>
   );
 };

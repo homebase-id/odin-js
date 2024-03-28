@@ -202,3 +202,35 @@ input {
     transform: rotate(1turn);
   }
 }
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-sm {
+  max-width: 640px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.m-auto {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.min-h-screen {
+  min-height: 100dvh;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}

@@ -61,7 +61,7 @@ export const getEccSharedSecret = async (
 };
 
 export const importRemotePublicEccKey = async (publicKey: string) => {
-  const publicKeyJWK = tryJsonParse<any>(byteArrayToString(base64ToUint8Array(publicKey)));
+  const publicKeyJWK = tryJsonParse<JsonWebKey>(byteArrayToString(base64ToUint8Array(publicKey)));
   return await crypto.subtle.importKey(
     'jwk',
     publicKeyJWK,

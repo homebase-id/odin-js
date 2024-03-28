@@ -1,9 +1,4 @@
-import {
-  ChannelDefinition,
-  PostContent,
-  Media,
-  getChannelDrive,
-} from '@youfoundation/js-lib/public';
+import { ChannelDefinition, PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
 import {
   Loader,
@@ -19,8 +14,9 @@ import {
   Arrow,
 } from '../../..';
 import {
-  DriveSearchResult,
-  NewDriveSearchResult,
+  DEFAULT_PAYLOAD_KEY,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 
@@ -37,8 +33,8 @@ export const PostImageDetailCard = ({
   rootUrl,
 }: {
   odinId?: string;
-  channel?: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>;
-  postFile?: DriveSearchResult<PostContent>;
+  channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+  postFile?: HomebaseFile<PostContent>;
   isOwner: boolean;
   isAuthenticated: boolean;
   attachmentKey?: string;
@@ -50,14 +46,19 @@ export const PostImageDetailCard = ({
   const currIndex = attachmentKey ? parseInt(attachmentKey) : 0;
   const post = postFile?.fileMetadata.appData.content;
 
-  const mediaFileIds =
-    (post as Media)?.mediaFiles || (post?.primaryMediaFile ? [post.primaryMediaFile] : undefined);
+  const mediaFiles = postFile?.fileMetadata.payloads
+    ?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+    .map((p) => ({
+      fileId: undefined,
+      fileKey: p.key,
+      type: p.contentType,
+    }));
 
   const doSlide = (dir: 1 | -1) => {
     const dirtyIndex = currIndex + dir;
     let newIndex = dirtyIndex;
-    if (mediaFileIds && dirtyIndex >= mediaFileIds.length) {
-      newIndex = mediaFileIds.length - 1;
+    if (mediaFiles && dirtyIndex >= mediaFiles.length) {
+      newIndex = mediaFiles.length - 1;
 
       return;
     }
@@ -95,7 +96,7 @@ export const PostImageDetailCard = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currIndex]);
 
-  const currentMediaFile = mediaFileIds?.[currIndex];
+  const currentMediaFile = mediaFiles?.[currIndex];
 
   return (
     <div className="relative z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
@@ -103,55 +104,55 @@ export const PostImageDetailCard = ({
       <div className="inset-0 z-10 lg:fixed">
         <div className="flex h-full min-h-screen flex-col lg:flex-row overflow-auto lg:overflow-none">
           <div
-            className={`relative flex h-full max-h-screen flex-grow overflow-hidden lg:flex-grow-0`}
+            className={`relative flex h-[60vh] lg:h-full lg:flex-grow max-h-screen flex-grow-0 overflow-hidden`}
           >
-            <div className="my-auto flex h-full w-full lg:w-[calc(100vw-25rem)] lg:p-5">
-              {!post ? (
-                <Loader className="m-auto h-10 w-10 text-white" />
-              ) : currentMediaFile?.type !== 'video' ? (
-                <Image
-                  odinId={odinId}
-                  className={`m-auto h-auto max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain`}
-                  fileId={currentMediaFile?.fileId || postFile.fileId}
-                  globalTransitId={postFile.fileMetadata.globalTransitId}
-                  fileKey={currentMediaFile?.fileKey}
-                  targetDrive={getChannelDrive(post.channelId)}
-                  lastModified={postFile.fileMetadata.updated}
-                  alt="post"
-                  fit="contain"
-                  previewThumbnail={
-                    mediaFileIds?.length === 1
-                      ? postFile.fileMetadata.appData.previewThumbnail
-                      : undefined
-                  }
-                  probablyEncrypted={postFile.fileMetadata.isEncrypted}
-                  key={
-                    (currentMediaFile?.fileId || postFile.fileId || '') +
-                    (currentMediaFile?.fileKey || currIndex)
-                  }
-                />
-              ) : (
+            {!post ? (
+              <Loader className="m-auto h-10 w-10 text-white" />
+            ) : currentMediaFile?.type !== 'video' ? (
+              <Image
+                odinId={odinId}
+                className={`absolute inset-0 flex max-h-[60vh] lg:max-h-full lg:w-full lg:static`}
+                fileId={currentMediaFile?.fileId || postFile.fileId}
+                globalTransitId={postFile.fileMetadata.globalTransitId}
+                fileKey={currentMediaFile?.fileKey}
+                targetDrive={getChannelDrive(post.channelId)}
+                lastModified={postFile.fileMetadata.updated}
+                alt="post"
+                fit="contain"
+                previewThumbnail={
+                  mediaFiles?.length === 1
+                    ? postFile.fileMetadata.appData.previewThumbnail
+                    : undefined
+                }
+                probablyEncrypted={postFile.fileMetadata.isEncrypted}
+                key={
+                  (currentMediaFile?.fileId || postFile.fileId || '') +
+                  (currentMediaFile?.fileKey || currIndex)
+                }
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
                 <Video
                   fileId={currentMediaFile?.fileId || postFile.fileId}
                   globalTransitId={postFile.fileMetadata.globalTransitId}
                   lastModified={postFile.fileMetadata.updated}
                   fileKey={currentMediaFile?.fileKey}
-                  className={`m-auto flex h-full max-h-[calc(100vh-5rem)] w-full max-w-full flex-row items-center justify-center object-contain`}
+                  className={`object-contain max-h-full`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={
-                    mediaFileIds?.length === 1
+                    mediaFiles?.length === 1
                       ? postFile.fileMetadata.appData.previewThumbnail
                       : undefined
                   }
                   odinId={odinId}
                   probablyEncrypted={postFile.fileMetadata.isEncrypted}
                 />
-              )}
-            </div>
+              </div>
+            )}
             <ActionButton
               icon={Times}
               onClick={doClose}
-              className="fixed left-2 top-2 rounded-full p-3 lg:absolute"
+              className="absolute left-2 top-2 rounded-full p-3 lg:absolute"
               size="square"
               type="secondary"
             />
@@ -164,7 +165,7 @@ export const PostImageDetailCard = ({
                 type="secondary"
               />
             ) : null}
-            {mediaFileIds && currIndex !== mediaFileIds.length - 1 ? (
+            {mediaFiles && currIndex !== mediaFiles.length - 1 ? (
               <ActionButton
                 icon={Arrow}
                 onClick={() => doSlide(1)}
@@ -175,7 +176,7 @@ export const PostImageDetailCard = ({
             ) : null}
           </div>
 
-          <div className="bg-background flex-shrink-0 max-h-screen flex-grow md:block lg:w-[25rem] lg:overflow-auto">
+          <div className="bg-background flex-shrink-0 lg:max-h-screen flex-grow md:block lg:w-[27rem] lg:flex-grow-0 lg:overflow-auto">
             <div className="grid grid-flow-col grid-cols-[3rem_auto] gap-3 p-5 pb-0">
               <AuthorImage odinId={odinId} size="sm" />
               <div className="flex max-w-lg flex-grow flex-col">

@@ -6,8 +6,8 @@
   "type": "module",
   "dependencies": {
     "@youfoundation/common-app": "*",
-    "@tanstack/react-query": "^5.4.3",
-    "axios": "1.5.1",
+    "@tanstack/react-query": "5.27.5",
+    "axios": "1.6.7",
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -22,15 +22,14 @@
     "autoprefixer": "10.4.16",
     "postcss": "8.4.31",
     "prettier-plugin-tailwindcss": "0.5.5",
-    "tailwindcss": "3.3.3"
+    "tailwindcss": "3.4.1"
   },
   "scripts": {
     "dev": "vite",
     "serve": "vite serve",
     "start": "npm run dev",
     "build": "tsc && vite build",
-    "lint": "eslint ./src/",
-    "dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/provisioning-app && VITE_APP_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/provisioning-app/"
+    "lint": "eslint ./src/"
   },
   "browserslist": {
     "production": [

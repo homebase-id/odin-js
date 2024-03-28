@@ -8,7 +8,7 @@ import {
   QueryBatchResponse,
   AppFileMetaData,
   TargetDrive,
-  DriveSearchResult,
+  HomebaseFile,
   DEFAULT_PAYLOAD_KEY,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
@@ -88,7 +88,7 @@ export const useExport = () => {
       );
     };
 
-    const searchResults: DriveSearchResult[] = [];
+    const searchResults: HomebaseFile[] = [];
     let cursorState: string | undefined = undefined;
 
     for (let i = 0; i < maxPages; i++) {
@@ -108,7 +108,7 @@ export const useExport = () => {
     const targetDrive = drive.targetDriveInfo;
     const searchResults = await getAllFilesOnDrive(targetDrive);
 
-    const getPayloadForDsr = async (dsr: DriveSearchResult) => {
+    const getPayloadForDsr = async (dsr: HomebaseFile) => {
       if (dsr.fileMetadata.appData.content) {
         return await getContentFromHeaderOrPayload(
           dotYouClient,
@@ -124,7 +124,7 @@ export const useExport = () => {
       }
     };
 
-    const getFile = async (dsr: DriveSearchResult) => {
+    const getFile = async (dsr: HomebaseFile) => {
       return {
         fileId: dsr.fileId,
         fileMetadata: {

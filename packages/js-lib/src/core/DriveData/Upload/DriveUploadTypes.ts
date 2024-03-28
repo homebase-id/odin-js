@@ -113,6 +113,10 @@ export interface UploadResult {
   newVersionTag: string;
 }
 
+export interface AppendResult {
+  newVersionTag: string;
+}
+
 export enum TransferStatus {
   AwaitingTransferKey = 'awaitingtransferkey',
   TransferKeyCreated = 'transferkeycreated',

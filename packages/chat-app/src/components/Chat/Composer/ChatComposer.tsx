@@ -6,25 +6,20 @@ import {
   ImageIcon,
   VolatileInput,
   ActionButton,
-  t,
   Times,
   PaperPlane,
+  getImagesFromPasteEvent,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
-import { NewMediaFile } from '@youfoundation/js-lib/public';
+import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
+
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
-import {
-  Conversation,
-  GroupConversation,
-  SingleConversation,
-} from '../../../providers/ConversationProvider';
+import { Conversation } from '../../../providers/ConversationProvider';
 import { useState, useEffect } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
+import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
+const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 export const ChatComposer = ({
   conversation,
@@ -32,12 +27,11 @@ export const ChatComposer = ({
   clearReplyMsg,
   onSend,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
-  replyMsg: DriveSearchResult<ChatMessage> | undefined;
+  conversation: HomebaseFile<Conversation> | undefined;
+  replyMsg: HomebaseFile<ChatMessage> | undefined;
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
-  const [stateIndex, setStateIndex] = useState(0); // Used to force a re-render of the component, to reset the input
   const [message, setMessage] = useState<string | undefined>();
   const [files, setFiles] = useState<NewMediaFile[]>();
 
@@ -58,13 +52,10 @@ export const ChatComposer = ({
       return;
 
     sendMessage({
-      conversationId: conversation.fileMetadata.appData.uniqueId as string,
+      conversation,
       message: message?.trim() || '',
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
-      recipients:
-        (conversationContent as GroupConversation).recipients ||
-        [(conversationContent as SingleConversation).recipient].filter(Boolean),
     });
     onSend && onSend();
   };
@@ -73,7 +64,6 @@ export const ChatComposer = ({
   useEffect(() => {
     if (sendMessageState === 'pending') {
       setMessage('');
-      setStateIndex((oldIndex) => oldIndex + 1);
       setFiles([]);
       clearReplyMsg();
       resetState();
@@ -91,7 +81,7 @@ export const ChatComposer = ({
   return (
     <>
       <ErrorNotification error={sendMessageError} />
-      <div className="bg-page-background">
+      <div className="bg-page-background pb-[env(safe-area-inset-bottom)]">
         <div className="max-h-[30vh] overflow-auto">
           <FileOverview files={files} setFiles={setFiles} cols={8} />
         </div>
@@ -105,20 +95,28 @@ export const ChatComposer = ({
             />
             <FileSelector
               onChange={(files) => setFiles(files.map((file) => ({ file })))}
-              className="text-foreground text-opacity-30 hover:text-opacity-100"
-              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
+              className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
+              accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, audio/mp3"
+              maxSize={HUNDRED_MEGA_BYTES}
             >
               <ImageIcon className="h-5 w-5" />
             </FileSelector>
           </div>
 
           <VolatileInput
-            key={stateIndex}
             placeholder="Your message"
             defaultValue={message}
-            className="rounded-md border bg-background p-2 dark:border-slate-800"
+            className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={setMessage}
             autoFocus={!isTouchDevice()}
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+
+              if (mediaFiles.length) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
             onSubmit={
               isTouchDevice()
                 ? undefined
@@ -131,11 +129,16 @@ export const ChatComposer = ({
           <span className="my-auto">
             <ActionButton
               type="mute"
-              onClick={doSend}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                doSend();
+              }}
               state={sendMessageState}
               className="flex-shrink"
               icon={PaperPlane}
               size="square"
+              onMouseDown={(e) => e.preventDefault()}
             />
           </span>
         </div>
@@ -148,7 +151,7 @@ const MessageForReply = ({
   msg,
   onClear,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
+  msg: HomebaseFile<ChatMessage>;
   onClear: () => void;
 }) => {
   return (

@@ -39,6 +39,7 @@ export const ImageSelector = ({
   disabled,
   isOpen: isDefaultOpen,
   onClose,
+  ...props
 }: ImageSelectorProps) => {
   const [optimisticValue, setOptimisticValue] = useState<string>();
   const [isEdit, setIsEdit] = useState(false);
@@ -69,6 +70,7 @@ export const ImageSelector = ({
               className="absolute right-2 top-2"
               size="square"
               type="secondary"
+              id={props.id}
               onClick={(e) => {
                 e.preventDefault();
                 setIsEdit(true);

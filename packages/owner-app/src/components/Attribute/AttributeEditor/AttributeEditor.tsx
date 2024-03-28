@@ -20,11 +20,12 @@ import { ActionGroup } from '@youfoundation/common-app';
 import { Trash, Shield, ArrowDown, ArrowUp } from '@youfoundation/common-app';
 import { HomePageAttributes } from '@youfoundation/js-lib/public';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   EmbeddedThumb,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
+import { OptionalACLHomebaseFile } from '../AttributeCreator/AttributeCreator';
 
 const AttributeEditor = ({
   attribute: attributeDsr,
@@ -35,7 +36,10 @@ const AttributeEditor = ({
   onCancel,
   onSave: onManualSave,
 }: {
-  attribute: DriveSearchResult<AttributeVm> | NewDriveSearchResult<AttributeVm>;
+  attribute:
+    | HomebaseFile<AttributeVm>
+    | NewHomebaseFile<AttributeVm>
+    | OptionalACLHomebaseFile<AttributeVm>;
   className?: string;
   orderAttrUp?: () => Promise<number | undefined>;
   orderAttrDown?: () => Promise<number | undefined>;
@@ -51,7 +55,7 @@ const AttributeEditor = ({
   } = useAttribute();
 
   // Local state of the changes
-  const [latestAttr, setLatestAttr] = useState<NewDriveSearchResult<AttributeVm>>({
+  const [latestAttr, setLatestAttr] = useState<NewHomebaseFile<AttributeVm>>({
     ...attributeDsr,
     ...updatedAttr,
     serverMetadata: {
@@ -78,7 +82,7 @@ const AttributeEditor = ({
   const [isFadeOut, setIsFadeOut] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
-  const doManualSave = (dirtyAttr: NewDriveSearchResult<AttributeVm>) => {
+  const doManualSave = (dirtyAttr: NewHomebaseFile<AttributeVm>) => {
     saveAttr({ ...dirtyAttr });
     if (onManualSave) onManualSave();
   };
@@ -192,7 +196,7 @@ const AttributeEditor = ({
           'attribute. This action cannot be undone.'
         )}`,
       },
-      onClick: () => removeAttr({ attribute: latestAttr as DriveSearchResult<AttributeVm> }), // latestAttr is not new, so it's a DriveSearchResult
+      onClick: () => removeAttr({ attribute: latestAttr as HomebaseFile<AttributeVm> }), // latestAttr is not new, so it's a HomebaseFile
     });
   }
   return (
@@ -261,35 +265,38 @@ const AttributeEditor = ({
     >
       <ErrorBoundary>
         {isAclEdit ? (
-          <AclWizard
-            acl={
-              latestAttr.serverMetadata?.accessControlList || {
-                requiredSecurityGroup: SecurityGroupType.Owner,
+          <>
+            <h2 className="mb-2 text-lg">{t('Who can access this attribute?')}</h2>
+            <AclWizard
+              acl={
+                latestAttr.serverMetadata?.accessControlList || {
+                  requiredSecurityGroup: SecurityGroupType.Owner,
+                }
               }
-            }
-            onConfirm={(newAcl) => {
-              setIsAclEdit(false);
-              const dirtyAttr: NewDriveSearchResult<AttributeVm> = {
-                ...latestAttr,
-                serverMetadata: {
-                  ...latestAttr.serverMetadata,
-                  accessControlList: newAcl,
-                },
-              };
+              onConfirm={(newAcl) => {
+                setIsAclEdit(false);
+                const dirtyAttr: NewHomebaseFile<AttributeVm> = {
+                  ...latestAttr,
+                  serverMetadata: {
+                    ...latestAttr.serverMetadata,
+                    accessControlList: newAcl,
+                  },
+                };
 
-              if (isNewAttribute) setLatestAttr(dirtyAttr);
-              else doManualSave(dirtyAttr);
-            }}
-            onCancel={() => {
-              if (isNewAttribute && onCancel) onCancel();
-              setIsAclEdit(false);
-            }}
-          />
+                if (isNewAttribute) setLatestAttr(dirtyAttr);
+                else doManualSave(dirtyAttr);
+              }}
+              onCancel={() => {
+                if (isNewAttribute && onCancel) onCancel();
+                setIsAclEdit(false);
+              }}
+            />
+          </>
         ) : (
           <>
             <AttributeFields
               fileId={latestAttr.fileId}
-              lastModified={(attributeDsr as DriveSearchResult<unknown>)?.fileMetadata?.updated}
+              lastModified={(attributeDsr as HomebaseFile<unknown>)?.fileMetadata?.updated}
               attribute={latestAttr.fileMetadata.appData.content}
               onChange={changeHandler}
             />

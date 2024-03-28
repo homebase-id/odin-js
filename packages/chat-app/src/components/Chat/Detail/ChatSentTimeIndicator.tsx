@@ -1,5 +1,5 @@
 import { t } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { formatToTimeAgoWithRelativeDetail } from '@youfoundation/common-app/src/helpers/timeago/format';
 
@@ -8,7 +8,7 @@ export const ChatSentTimeIndicator = ({
   className,
   keepDetail,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
+  msg: HomebaseFile<ChatMessage>;
   className?: string;
   keepDetail?: boolean;
 }) => {
@@ -18,7 +18,7 @@ export const ChatSentTimeIndicator = ({
 
   if (!msg.fileMetadata.created) return null;
 
-  const date = new Date(msg.fileMetadata.appData.userDate || msg.fileMetadata.created);
+  const date = new Date(msg.fileMetadata.created);
   if (!date) return <Wrapper>{t('Unknown')}</Wrapper>;
 
   return <Wrapper>{formatToTimeAgoWithRelativeDetail(date, keepDetail)}</Wrapper>;

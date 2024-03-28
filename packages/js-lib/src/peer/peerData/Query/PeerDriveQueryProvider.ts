@@ -18,7 +18,7 @@ export const queryBatchOverPeer = async (
   params: FileQueryParams,
   ro?: GetBatchQueryResultOptions
 ): Promise<QueryBatchResponse> => {
-  const client = dotYouClient.createAxiosClient();
+  const client = dotYouClient.createAxiosClient({ systemFileType: params.systemFileType });
 
   const strippedQueryParams = { ...params };
   delete strippedQueryParams.systemFileType;
@@ -29,14 +29,8 @@ export const queryBatchOverPeer = async (
     odinId: odinId,
   };
 
-  const config = {
-    headers: {
-      'X-ODIN-FILE-SYSTEM-TYPE': params.systemFileType || 'Standard',
-    },
-  };
-
   return client
-    .post<QueryBatchResponse>('/transit/query/batch', request, config)
+    .post<QueryBatchResponse>('/transit/query/batch', request)
     .then((response) => {
       return response.data;
     })

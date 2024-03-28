@@ -33,6 +33,11 @@ jobs:
           # Defaults to the user or organization that owns the workflow file
           scope: '@octocat'
 
+      - name: Authenticate to Github packages
+        run: |
+          echo "@youfoundation:registry=https://npm.pkg.github.com" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
+
       # Set git User & Bump the version: https://docs.npmjs.com/cli/v8/commands/npm-version
       - name: Bump js-lib version
         if: steps.filter.outputs.jslib == 'true'
@@ -75,5 +80,6 @@ jobs:
       # Push the version increment back into the repo
       - name: Commit version updates
         run: |
+          git restore .npmrc
           git commit -am "Bump lib version(s)"
           git push

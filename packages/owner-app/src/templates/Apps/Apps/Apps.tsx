@@ -3,8 +3,6 @@ import { useApps } from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
 import { LoadingBlock } from '@youfoundation/common-app';
-import CardLink from '../../../components/ui/Buttons/CardLink';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section from '../../../components/ui/Sections/Section';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';
@@ -55,7 +53,7 @@ const Apps = () => {
         </Section>
       )}
 
-      <DiscoverApps />
+      {/* <DiscoverApps /> */}
     </>
   );
 };
@@ -83,7 +81,7 @@ const AppListItem = ({ app, className }: { app: RedactedAppRegistration; classNa
             {app.corsHostName ? <>| {app.corsHostName}</> : null}
           </span>
           <small className="block text-sm text-slate-400">
-            {t('first used')}:{' '}
+            {t('First used')}:{' '}
             {new Date(app.created).toLocaleString(undefined, {
               month: 'short',
               day: 'numeric',
@@ -99,52 +97,52 @@ const AppListItem = ({ app, className }: { app: RedactedAppRegistration; classNa
   );
 };
 
-const DiscoverApps = () => {
-  const { data: registeredApps, isLoading: registeredAppsLoading } = useApps().fetchRegistered;
-  const potentialApps = [
-    {
-      name: 'Chatr',
-      appId: '0babb1e6-7604-4bcd-b1fb-87e959226492',
-      href: 'https://chat.homebase.id',
-    },
-    {
-      name: 'Homebase - Photos',
-      appId: `32f0bdbf-017f-4fc0-8004-2d4631182d1e`,
-      href: 'https://photos.homebase.id',
-    },
-  ];
+// const DiscoverApps = () => {
+//   const { data: registeredApps, isLoading: registeredAppsLoading } = useApps().fetchRegistered;
+//   const potentialApps = [
+//     {
+//       name: 'Chatr',
+//       appId: '0babb1e6-7604-4bcd-b1fb-87e959226492',
+//       href: 'https://chat.homebase.id',
+//     },
+//     {
+//       name: 'Homebase - Photos',
+//       appId: `32f0bdbf-017f-4fc0-8004-2d4631182d1e`,
+//       href: 'https://photos.homebase.id',
+//     },
+//   ];
 
-  const availableApps = potentialApps.filter(
-    (potential) =>
-      !registeredApps?.some((registered) => stringGuidsEqual(registered.appId, potential.appId))
-  );
+//   const availableApps = potentialApps.filter(
+//     (potential) =>
+//       !registeredApps?.some((registered) => stringGuidsEqual(registered.appId, potential.appId))
+//   );
 
-  if (!availableApps.length || registeredAppsLoading) return null;
+//   if (!availableApps.length || registeredAppsLoading) return null;
 
-  return (
-    <>
-      <Section
-        title={
-          <>
-            {t('Discover other apps')}
-            <small className="block text-sm text-slate-400">
-              {t(
-                'Secure your data even further, keep it all safe on your own personal and private identity'
-              )}
-              :
-            </small>
-          </>
-        }
-        className="mt-20"
-      >
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {availableApps.map((app) => (
-            <CardLink href={app.href} title={app.name} key={app.appId} icon={Grid} />
-          ))}
-        </div>
-      </Section>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <Section
+//         title={
+//           <>
+//             {t('Discover other apps')}
+//             <small className="block text-sm text-slate-400">
+//               {t(
+//                 'Secure your data even further, keep it all safe on your own personal and private identity'
+//               )}
+//               :
+//             </small>
+//           </>
+//         }
+//         className="mt-20"
+//       >
+//         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+//           {availableApps.map((app) => (
+//             <CardLink href={app.href} title={app.name} key={app.appId} icon={Grid} />
+//           ))}
+//         </div>
+//       </Section>
+//     </>
+//   );
+// };
 
 export default Apps;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AxiosError } from 'axios';
 import { t } from '../../helpers/i18n/dictionary';
 import ActionButton from '../ui/Buttons/ActionButton';

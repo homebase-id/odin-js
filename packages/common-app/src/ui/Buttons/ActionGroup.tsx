@@ -143,12 +143,12 @@ const ActionOption = ({
                   return false;
                 }
               : onClick
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClick(e);
-                }
-              : undefined
+                ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClick(e);
+                  }
+                : undefined
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >

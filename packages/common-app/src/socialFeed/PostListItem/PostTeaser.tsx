@@ -12,11 +12,11 @@ import { useChannel } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 interface PostTeaserProps {
   className?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   hideImageWhenNone?: boolean;
   showChannel?: boolean;
   forceAspectRatio?: boolean;
@@ -84,6 +84,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
                 fileId={postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
                 lastModified={postFile.fileMetadata.updated}
+                payloads={postFile.fileMetadata.payloads}
               />
             </div>
             <PostInteracts

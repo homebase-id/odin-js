@@ -27,7 +27,7 @@ const useParams = (returnUrl: string) => {
 // https://www.aleksandrhovhannisyan.com/blog/react-iframes-back-navigation-bug/
 const CentralLoginBox = ({ returnUrl }: { returnUrl?: string }) => {
   const { data: authParams } = useParams(returnUrl || window.location.href.split('?')[0]);
-  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams as any);
+  const stringifiedAuthParams = authParams && stringifyToQueryParams(authParams);
   const isDarkMode = document.documentElement.classList.contains(IS_DARK_CLASSNAME);
 
   // Auto logon when requested by a queryString param

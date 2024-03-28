@@ -8,7 +8,7 @@ import {
 } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '../../..';
 import { getCachedPosts, getCachedRecentPosts } from './cachedDataHelpers';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 type useBlogPostsInfiniteProps = {
   channelId?: string;
@@ -18,7 +18,7 @@ type useBlogPostsInfiniteProps = {
 };
 
 export type useBlogPostsInfiniteReturn = {
-  results: DriveSearchResult<PostContent>[];
+  results: HomebaseFile<PostContent>[];
   cursorState: string | Record<string, string>;
 };
 
@@ -64,7 +64,8 @@ export const useBlogPostsInfinite = ({
             false,
             typeof pageParam === 'object' ? pageParam : undefined,
             pageSize,
-            channels
+            channels,
+            false
           ));
 
     return {

@@ -146,7 +146,7 @@ export const VolatileInput = ({
     }
   };
 
-  const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+  const onKeyUp: React.KeyboardEventHandler<HTMLDivElement> = () => {
     const wordTillCaret = getCurrentWordTillCaret();
     if (
       (wordTillCaret?.startsWith(':') || wordTillCaret?.startsWith('@')) &&
@@ -177,23 +177,27 @@ export const VolatileInput = ({
     rect = range?.getClientRects()?.[0];
 
   useEffect(() => {
-    if (autoFocus && divRef.current) {
-      divRef.current.focus();
-    }
+    if (autoFocus && divRef.current) divRef.current.focus();
   }, [autoFocus]);
 
   return (
-    <div className={`relative block w-full ${className || ''}`}>
+    <div
+      className={`relative block ${className?.indexOf('w-') === -1 ? 'w-full' : ''} ${
+        className || ''
+      }`}
+    >
       <span
         role="textbox"
         contentEditable
-        className="before:content block w-full cursor-pointer resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
+        className="before:content block w-full cursor-text resize whitespace-pre-wrap break-words before:opacity-50 before:empty:content-[inherit] focus:outline-none"
         onKeyDown={onKeyDown}
         onKeyUp={onKeyUp}
         onPaste={onPasteHandler}
         onInput={onInput}
         ref={divRef}
-        style={{ '--tw-content': `"${placeholder}"` } as React.CSSProperties}
+        style={
+          placeholder ? ({ '--tw-content': `"${placeholder}"` } as React.CSSProperties) : undefined
+        }
       ></span>
 
       <EmojiDropdown

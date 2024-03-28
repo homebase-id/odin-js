@@ -74,7 +74,9 @@ const PostPreview = ({
   const rootUrl = paths.join('/');
 
   return (
-    <>
+    <div
+      className={`fixed inset-0 z-40 overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm ${attachmentKey ? 'lg:overflow-hidden' : ''}`}
+    >
       {attachmentKey ? (
         <PostImageDetailCard
           odinId={identityKey}
@@ -120,7 +122,7 @@ const PostPreview = ({
           />
         </div>
       )}
-    </>
+    </div>
   );
 };
 

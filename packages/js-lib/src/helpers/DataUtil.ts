@@ -3,14 +3,20 @@ import { Guid } from 'guid-typescript';
 import md5 from './md5/md5';
 import { AccessControlList, EncryptedKeyHeader, PayloadDescriptor } from '../core/core';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 export const getRandom16ByteArray = (): Uint8Array => {
   return crypto.getRandomValues(new Uint8Array(16));
 };
 
 export const assertIfDefined = (key: string, value: unknown) => {
-  if (!value) throw new Error(`${key} undefined`);
+  if (value === undefined || value === null) throw new Error(`${key} undefined`);
+};
+
+export const assertIfDefinedAndNotDefault = (key: string, value: unknown) => {
+  assertIfDefined(key, value);
+  if (value === '') throw new Error(`${key} empty`);
 };
 
 // from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String
@@ -162,13 +168,22 @@ export const roundToLargerMultipleOf16 = (x: number) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const stringify = (obj: Record<string, any>) => {
+const stringify = (obj: Record<string, any> | unknown) => {
+  if (!obj || !hasIndexSignature(obj)) return '';
   return Object.keys(obj)
-    .map((key) => key + '=' + encodeURIComponent(obj[key]))
+    .map((key) => key + '=' + encodeURIComponent(obj[key] + ''))
     .join('&');
 };
 
-export const stringifyToQueryParams = (obj: Record<string, unknown>) => {
+const hasIndexSignature = (
+  o: unknown | { [index: string]: unknown }
+): o is { [index: string]: unknown } => {
+  return typeof o === 'object';
+};
+
+export const stringifyToQueryParams = (obj: Record<string, unknown> | unknown) => {
+  if (!obj || typeof obj !== 'object' || !hasIndexSignature(obj)) return '';
+
   const params: string[] = [];
   const paramsObj = { ...obj };
 
@@ -183,8 +198,8 @@ export const stringifyToQueryParams = (obj: Record<string, unknown>) => {
       });
 
       delete paramsObj[key];
-    } else if (typeof obj[key] === 'object') {
-      const subObj = obj[key] as Record<string, unknown>;
+    } else if (hasIndexSignature(obj[key])) {
+      const subObj = obj[key];
       params.push(stringify(subObj));
       delete paramsObj[key];
     }
@@ -327,10 +342,7 @@ export const getBlobFromBytes = ({
 
 export const getLargestThumbOfPayload = (payload?: PayloadDescriptor) => {
   if (!payload?.thumbnails?.length) return;
-  return payload.thumbnails?.reduce(
-    (prev, curr) => {
-      return prev.pixelHeight * prev.pixelWidth > curr.pixelHeight * curr.pixelWidth ? prev : curr;
-    },
-    payload?.thumbnails?.[0]
-  );
+  return payload.thumbnails?.reduce((prev, curr) => {
+    return prev.pixelHeight * prev.pixelWidth > curr.pixelHeight * curr.pixelWidth ? prev : curr;
+  }, payload?.thumbnails?.[0]);
 };

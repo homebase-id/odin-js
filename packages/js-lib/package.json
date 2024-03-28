@@ -1,5 +1,5 @@
 {
-  "version": "0.0.2-alpha.36",
+  "version": "0.0.2-alpha.87",
   "name": "@youfoundation/js-lib",
   "author": "YouFoundation",
   "description": "JavaScript SDK for the DotYouCore api",
@@ -78,12 +78,14 @@
     "guid-typescript": "^1.0.9"
   },
   "optionalDependencies": {
-    "mp4box": "^0.5.2"
+    "mp4box": "^0.5.2",
+    "@youfoundation/ffmpeg": "0.12.10",
+    "@ffmpeg/util": "^0.12.1"
   },
   "devDependencies": {
     "vitest": "^0.34.6"
   },
   "peerDependencies": {
-    "axios": "^1.5.1"
+    "axios": "1.6.7"
   }
 }

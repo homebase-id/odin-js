@@ -7,7 +7,7 @@ import {
   ThumbnailFile,
   PayloadFile,
   EmbeddedThumb,
-  NewDriveSearchResult,
+  NewHomebaseFile,
 } from '@youfoundation/js-lib/core';
 import { createThumbnails } from '@youfoundation/js-lib/media';
 import {
@@ -30,8 +30,8 @@ import {
 //Handles management of Contacts
 export const saveContact = async (
   dotYouClient: DotYouClient,
-  contact: NewDriveSearchResult<RawContact>
-): Promise<NewDriveSearchResult<ContactFile>> => {
+  contact: NewHomebaseFile<RawContact>
+): Promise<NewHomebaseFile<ContactFile>> => {
   console.debug('Saving contact', { ...contact });
 
   if (contact.fileMetadata.appData.uniqueId)

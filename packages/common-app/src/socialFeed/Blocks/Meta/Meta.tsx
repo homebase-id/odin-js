@@ -1,8 +1,10 @@
 import { Suspense } from 'react';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
 import {
+  AclSummary,
   ActionGroupOptionProps,
   Block,
+  Flag,
   Lock,
   Times,
   useIsConnected,
@@ -18,15 +20,16 @@ import {
   UserX,
 } from '@youfoundation/common-app';
 import { OwnerActions } from './OwnerActions';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { aclEqual } from '@youfoundation/js-lib/helpers';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   embeddedPost?: undefined;
   channel?:
-    | DriveSearchResult<ChannelDefinitionVm | ChannelDefinition>
-    | NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition>;
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
@@ -34,11 +37,11 @@ interface PostMetaWithPostFileProps {
 
 interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
-  postFile?: DriveSearchResult<PostContent>;
+  postFile?: HomebaseFile<PostContent>;
   embeddedPost: EmbeddedPost;
   channel?:
-    | DriveSearchResult<ChannelDefinitionVm | ChannelDefinition>
-    | NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition>;
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
@@ -88,9 +91,21 @@ export const PostMeta = ({
           onClick={(e) => e.stopPropagation()}
         >
           {postFile?.fileMetadata.isEncrypted ? <Lock className="h-3 w-3" /> : null}
-          {channel?.fileMetadata.appData.content.name
-            ? `${channel?.fileMetadata.appData.content.name}`
-            : ''}
+          {(isAuthor || (!odinId && isOwner)) &&
+          channel?.serverMetadata &&
+          postFile?.serverMetadata &&
+          !aclEqual(
+            channel.serverMetadata.accessControlList,
+            postFile.serverMetadata.accessControlList
+          ) ? (
+            <AclSummary acl={postFile.serverMetadata.accessControlList} />
+          ) : (
+            <>
+              {channel?.fileMetadata.appData.content.name
+                ? `${channel?.fileMetadata.appData.content.name}`
+                : ''}
+            </>
+          )}
         </a>
       ) : null}
 
@@ -110,10 +125,13 @@ const ExternalActions = ({
   postFile,
 }: {
   odinId: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
 }) => {
   const identity = useDotYouClient().getIdentity();
-  const { mutateAsync: removeFromMyFeed } = useManageSocialFeed().removeFromFeed;
+  const {
+    removeFromFeed: { mutateAsync: removeFromMyFeed },
+    getReportContentUrl,
+  } = useManageSocialFeed({ odinId });
 
   const options: ActionGroupOptionProps[] = [
     {
@@ -126,6 +144,14 @@ const ExternalActions = ({
       label: `${t('Remove this post from my feed')}`,
       onClick: () => {
         removeFromMyFeed({ postFile });
+      },
+    },
+    {
+      icon: Flag,
+      label: `${t('Report')}`,
+      onClick: async () => {
+        const reportUrl = await getReportContentUrl();
+        window.open(reportUrl, '_blank');
       },
     },
     {

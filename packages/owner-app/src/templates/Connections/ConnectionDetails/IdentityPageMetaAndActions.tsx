@@ -1,6 +1,5 @@
 import {
   ActionButton,
-  Pencil,
   t,
   ActionGroupOptionProps,
   House,
@@ -11,6 +10,8 @@ import {
   ActionGroup,
   useDotYouClient,
   ConfirmDialog,
+  Ellipsis,
+  useIdentityIFollow,
 } from '@youfoundation/common-app';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
@@ -21,11 +22,10 @@ import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialo
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 
 export const IdentityPageMetaAndActions = ({
-  odinId,
-  setIsEditPermissionActive,
+  odinId, // setIsEditPermissionActive,
 }: {
   odinId: string;
-  setIsEditPermissionActive: (newState: boolean) => void;
+  // setIsEditPermissionActive: (newState: boolean) => void;
 }) => {
   const navigate = useNavigate();
   const { action } = useParams();
@@ -65,6 +65,11 @@ export const IdentityPageMetaAndActions = ({
     unblock: { mutate: unblock, status: unblockStatus, error: unblockError },
   } = useConnectionActions();
 
+  const { data: identityIfollow, isFetched: followStateFetched } = useIdentityIFollow({
+    odinId,
+  }).fetch;
+  const isFollowing = !followStateFetched ? undefined : !!identityIfollow;
+
   // Contact data:
   const { data: contactData } = useContact({
     odinId: odinId,
@@ -72,19 +77,7 @@ export const IdentityPageMetaAndActions = ({
   }).fetch;
   const contactContent = contactData?.fileMetadata?.appData?.content;
   const mainAction =
-    connectionInfo?.status === 'connected' ? (
-      <>
-        <ActionButton
-          type="primary"
-          onClick={() => {
-            setIsEditPermissionActive(true);
-          }}
-          icon={Pencil}
-        >
-          {t('Edit Access')}
-        </ActionButton>
-      </>
-    ) : connectionInfo?.status === 'sent' ? (
+    connectionInfo?.status === 'connected' ? null : connectionInfo?.status === 'sent' ? (
       <>
         <ActionButton
           type="remove"
@@ -127,9 +120,29 @@ export const IdentityPageMetaAndActions = ({
     {
       icon: House,
       label: t('Open homepage'),
-      href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+      onClick: () => {
+        window.open(
+          `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+          '_blank'
+        );
+      },
     },
   ];
+
+  const blockConfirmOptions = {
+    title: `${t('Block')} ${odinId}`,
+    buttonText: t('Block'),
+    body: `${t('Are you sure you want to block')} ${odinId}`,
+  };
+
+  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
+    actionGroupOptions.push({
+      icon: Block,
+      label: t('Block'),
+      onClick: () => block(odinId),
+      confirmOptions: blockConfirmOptions,
+    });
+  }
 
   if (connectionInfo?.status === 'connected') {
     actionGroupOptions.push({
@@ -149,18 +162,11 @@ export const IdentityPageMetaAndActions = ({
     });
   }
 
-  const blockConfirmOptions = {
-    title: `${t('Block')} ${odinId}`,
-    buttonText: t('Block'),
-    body: `${t('Are you sure you want to block')} ${odinId}`,
-  };
-
-  if (connectionInfo?.status !== 'blocked' && connectionInfo?.status) {
+  if (isFollowing === false) {
     actionGroupOptions.push({
-      icon: Block,
-      label: t('Block'),
-      onClick: () => block(odinId),
-      confirmOptions: blockConfirmOptions,
+      icon: Persons,
+      label: t('Follow'),
+      href: `/owner/follow/following/${odinId}`,
     });
   }
 
@@ -177,7 +183,7 @@ export const IdentityPageMetaAndActions = ({
                 {`${
                   contactContent?.name
                     ? contactContent.name.displayName ??
-                      `${contactContent.name.givenName} ${contactContent.name.surname}`
+                      `${contactContent.name.givenName || ''} ${contactContent.name.surname || ''}`
                     : odinId
                 }`}
               </span>
@@ -190,7 +196,13 @@ export const IdentityPageMetaAndActions = ({
         actions={
           <>
             {mainAction}
-            <ActionGroup options={actionGroupOptions} type="mute" size="square" />
+            <ActionGroup
+              options={actionGroupOptions}
+              type="secondary"
+              size="square"
+              children={t('More')}
+              icon={Ellipsis}
+            />
           </>
         }
         breadCrumbs={[{ href: '/owner/connections', title: 'Contacts' }, { title: odinId }]}

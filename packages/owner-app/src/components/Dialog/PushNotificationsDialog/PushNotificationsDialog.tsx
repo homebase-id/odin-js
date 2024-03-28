@@ -1,8 +1,8 @@
 import { createPortal } from 'react-dom';
 import {
+  Alert,
   Arrow,
   Bubble,
-  Check,
   ErrorNotification,
   HardDrive,
   PaperPlane,
@@ -15,14 +15,14 @@ import {
 import { usePortal } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
+import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   usePushNotificationClient,
   usePushNotificationClients,
-  usePushNotifications,
-} from '../../../hooks/notifications/usePushNotifications';
-import { PushNotificationSubscription } from '../../../provider/notifications/PushClientProvider';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+} from '../../../hooks/notifications/usePushNotificationClients';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const target = usePortal('modal-container');
@@ -70,7 +70,11 @@ const Settings = () => {
     mutate: enable,
     status: enableStatus,
     error: enableError,
+    reset: resetEnable,
   } = usePushNotificationClient().enableOnThisDevice;
+  useEffect(() => {
+    resetEnable();
+  }, [current]);
 
   const {
     mutate: sendTestNotification,
@@ -78,80 +82,76 @@ const Settings = () => {
     error: testNotificationError,
   } = usePushNotificationClient().sendTestNotification;
 
-  // const {
-  //   mutate: removeCurrent,
-  //   status: removeStatus,
-  //   error: removeError,
-  // } = usePushNotificationClients().removeCurrent;
-
   return (
     <>
       <ErrorNotification error={testNotificationError || enableError} />
 
       {!isSupported ? (
-        <p>
+        <Alert type="warning">
           {t('Notifications are not supported on this browser')}{' '}
           <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
             {t(`What does this mean?`)}
           </Link>
-        </p>
+        </Alert>
       ) : null}
 
-      {isSupported && !canEnable ? (
+      {isSupported && !canEnable && !(isEnabled && current) ? (
         <p>{t(`We can't enable notifications at the moment, please refresh and try again`)}</p>
       ) : null}
 
-      {isSupported && ((isEnabled && current) || enableStatus === 'success') ? (
+      {isSupported ? (
         <>
-          <SubtleMessage>
-            {t(
-              'You can confirm that notifications are working as expeced, by triggering a test notification:'
-            )}
-          </SubtleMessage>
+          {(isEnabled && current) || enableStatus === 'success' ? (
+            <>
+              <SubtleMessage>
+                {t(
+                  'You can confirm that notifications are working as expeced, by triggering a test notification:'
+                )}
+              </SubtleMessage>
 
-          <ActionButton
-            icon={PaperPlane}
-            onClick={() => sendTestNotification()}
-            state={testNotificationStatus}
-          >
-            {t('Send a test notification')}
-          </ActionButton>
-          {testNotificationStatus === 'success' ? (
-            <p className="my-2">
-              {t(`Notification sent. Didn't get it?`)}{' '}
-              <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
-                {t(`What can I do?`)}
-              </Link>
-            </p>
-          ) : null}
+              <ActionButton
+                icon={PaperPlane}
+                onClick={() => sendTestNotification()}
+                state={testNotificationStatus}
+              >
+                {t('Send a test notification')}
+              </ActionButton>
+              {testNotificationStatus === 'success' ? (
+                <p className="my-2">
+                  {t(`Notification sent. Didn't get it?`)}{' '}
+                  <Link
+                    className="text-primary hover:underline"
+                    to={`/owner/notifications/problems`}
+                  >
+                    {t(`What can I do?`)}
+                  </Link>
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <SubtleMessage>
+                {t(
+                  `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open`
+                )}
+                .
+              </SubtleMessage>
+              <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
+                {t('Enable push notifications')}
+              </ActionButton>
+            </>
+          )}
+        </>
+      ) : null}
 
-          {/* <div className="mt-7">
-            <SubtleMessage>
-              {t(`Don't want to receive notifications on this device?`)}
-            </SubtleMessage>
-            <ActionButton
-              onClick={() => removeCurrent()}
-              type="remove"
-              icon={Times}
-              state={removeStatus}
-            >
-              {t('Disable notifications')}
-            </ActionButton>
-          </div> */}
-        </>
-      ) : (
-        <>
-          <SubtleMessage>
-            {t(
-              `When push notifications are enabled, you will get notifications as they come in, even if you don't have your identity open`
-            )}
-            .
-          </SubtleMessage>
-          <ActionButton onClick={() => enable()} icon={Bubble} state={enableStatus}>
-            {t('Enable push notifications')}
-          </ActionButton>
-        </>
-      )}
+      {testNotificationError || enableError ? (
+        <p className="my-2">
+          {t(`I can't get notifications working,`)}{' '}
+          <Link className="text-primary hover:underline" to={`/owner/notifications/problems`}>
+            {t(`what can I do?`)}
+          </Link>
+        </p>
+      ) : null}
     </>
   );
 };
@@ -215,20 +215,33 @@ const DeviceView = ({
       status: removeCurrentDeviceStatus,
       error: removeCurrentDeviceError,
     },
+    removeRegisteredDevice: {
+      mutate: removeRegisteredDevice,
+      status: removeRegisteredDeviceStatus,
+      error: removeRegisteredDeviceError,
+    },
   } = usePushNotificationClients();
+
+  const isCurrent = useMemo(
+    () => stringGuidsEqual(currentDevice?.accessRegistrationId, subscription.accessRegistrationId),
+    [currentDevice, subscription]
+  );
 
   return (
     <>
-      <ErrorNotification error={removeCurrentDeviceError} />
+      <ErrorNotification error={removeCurrentDeviceError || removeRegisteredDeviceError} />
       <div className={`flex flex-row items-center ${className ?? ''}`}>
         <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6" />
         <div className="mr-2 flex flex-col">
-          {subscription.friendlyName}
+          <div>
+            {subscription.friendlyName}{' '}
+            {isCurrent ? <span className="text-slate-400">({t('this device')})</span> : null}
+          </div>
           <small className="block text-sm">
             {t('Since')}: {new Date(subscription.subscriptionStartedDate).toLocaleDateString()}
           </small>
         </div>
-        {currentDevice?.accessRegistrationId === subscription.accessRegistrationId ? (
+        {isCurrent ? (
           <ActionButton
             icon={Times}
             type="secondary"
@@ -239,7 +252,18 @@ const DeviceView = ({
             }}
             state={removeCurrentDeviceStatus}
           />
-        ) : null}
+        ) : (
+          <ActionButton
+            icon={Times}
+            type="secondary"
+            size="square"
+            className="ml-2"
+            onClick={async () => {
+              removeRegisteredDevice(subscription.accessRegistrationId);
+            }}
+            state={removeRegisteredDeviceStatus}
+          />
+        )}
       </div>
     </>
   );

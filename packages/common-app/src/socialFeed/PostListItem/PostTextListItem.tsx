@@ -4,7 +4,7 @@ import { ChannelDefinitionVm } from '../../hooks';
 import { FakeAnchor } from '../../ui';
 import { AuthorName } from '../Blocks/Author/Name';
 import { PostMeta } from '../Blocks/Meta/Meta';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 export const PostTextListItem = ({
   draft,
@@ -12,8 +12,8 @@ export const PostTextListItem = ({
   linkRoot,
   className,
 }: {
-  draft: DriveSearchResult<Article>;
-  channel?: NewDriveSearchResult<ChannelDefinitionVm>;
+  draft: HomebaseFile<Article>;
+  channel?: NewHomebaseFile<ChannelDefinitionVm>;
   linkRoot: string;
   className?: string;
 }) => {

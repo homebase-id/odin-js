@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import {
-  ReactionsBar,
+  SocialReactionsBar,
   t,
   useDotYouClient,
   useOutsideTrigger,
@@ -32,15 +32,16 @@ export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionCo
 
   return (
     <>
-      <div className="relative" ref={wrapperRef}>
+      <div className={`relative select-none`} ref={wrapperRef}>
         {/* Wrapper div that holds a bigger "hover target", which spans the likeButton itself as well */}
         <div
-          className={`${isReact ? 'absolute' : 'contents'} -left-1 -top-10 bottom-[100%] w-[10rem]`}
+          className={`${isReact ? 'absolute' : 'contents'} -left-1 -top-10 bottom-0 w-[10rem]`}
           onMouseLeave={() => setIsReact(false)}
           onMouseEnter={() => setIsReact(true)}
         >
-          <ReactionsBar
+          <SocialReactionsBar
             className="absolute left-0 top-0"
+            customDirection="right"
             isActive={isReact}
             context={threadContext}
             // Forced to yes, as this component won't render if the user can't react

@@ -1,7 +1,6 @@
 import {
   ChannelDefinition,
   PostContent,
-  Media,
   Article,
   getChannelDrive,
 } from '@youfoundation/js-lib/public';
@@ -19,8 +18,9 @@ import {
   EmbeddedPostContent,
 } from '../../..';
 import {
-  DriveSearchResult,
-  NewDriveSearchResult,
+  DEFAULT_PAYLOAD_KEY,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 
@@ -36,8 +36,8 @@ export const PostDetailCard = ({
   login,
 }: {
   odinId?: string;
-  channel?: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>;
-  postFile?: DriveSearchResult<PostContent>;
+  channel?: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+  postFile?: HomebaseFile<PostContent>;
   showAuthorDetail?: boolean;
   className?: string;
   isAuthenticated: boolean;
@@ -46,7 +46,8 @@ export const PostDetailCard = ({
   login?: () => void;
 }) => {
   const post = postFile?.fileMetadata.appData.content;
-  const mediaFiles = (post as Media)?.mediaFiles;
+  const mediaFiles = postFile?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
+
   return (
     <div
       className={`bg-background rounded-lg border-gray-200 border-opacity-60 p-4 dark:border-gray-800 lg:border ${
@@ -94,16 +95,26 @@ export const PostDetailCard = ({
             }`}
           >
             {post.type !== 'Article' && post.captionAsRichText ? (
-              <RichTextRenderer body={post.captionAsRichText} odinId={odinId} />
+              <RichTextRenderer
+                body={post.captionAsRichText}
+                odinId={odinId}
+                options={{
+                  defaultFileId: postFile?.fileId,
+                  imageDrive: getChannelDrive(post.channelId),
+                  defaultGlobalTransitId: postFile?.fileMetadata.globalTransitId,
+                  lastModified: postFile?.fileMetadata.updated,
+                  previewThumbnails: postFile?.fileMetadata.payloads,
+                }}
+              />
             ) : (
-              post.caption
+              <span className="whitespace-pre-wrap">{post.caption}</span>
             )}
           </h1>
         )}
       </div>
 
       {postFile?.fileId && post?.primaryMediaFile ? (
-        mediaFiles && mediaFiles.length > 1 ? (
+        mediaFiles && mediaFiles.length > 1 && post.type !== 'Article' ? (
           <MediaGallery
             fileId={postFile.fileId}
             globalTransitId={postFile.fileMetadata.globalTransitId}
@@ -125,7 +136,7 @@ export const PostDetailCard = ({
           />
         ) : (
           <div className="relative mb-5 sm:w-full">
-            {post.primaryMediaFile.type === 'image' ? (
+            {post.primaryMediaFile.type.startsWith('image') ? (
               <Image
                 odinId={odinId}
                 className="rounded object-cover object-center"
@@ -135,7 +146,12 @@ export const PostDetailCard = ({
                 fileKey={post.primaryMediaFile.fileKey}
                 targetDrive={getChannelDrive(post.channelId)}
                 alt="blog"
-                previewThumbnail={postFile?.fileMetadata.appData.previewThumbnail}
+                previewThumbnail={
+                  postFile?.fileMetadata.appData.previewThumbnail ||
+                  postFile?.fileMetadata.payloads?.find(
+                    (payload) => payload.key === post.primaryMediaFile?.fileKey
+                  )?.previewThumbnail
+                }
                 probablyEncrypted={postFile?.fileMetadata.isEncrypted}
               />
             ) : (
@@ -148,7 +164,12 @@ export const PostDetailCard = ({
                 odinId={odinId}
                 className={`w-full rounded object-cover object-center`}
                 probablyEncrypted={postFile?.fileMetadata.isEncrypted}
-                previewThumbnail={postFile?.fileMetadata.appData.previewThumbnail}
+                previewThumbnail={
+                  postFile?.fileMetadata.appData.previewThumbnail ||
+                  postFile?.fileMetadata.payloads?.find(
+                    (payload) => payload.key === post.primaryMediaFile?.fileKey
+                  )?.previewThumbnail
+                }
               />
             )}
           </div>
@@ -186,6 +207,7 @@ export const PostDetailCard = ({
                       defaultFileId: postFile.fileId,
                       defaultGlobalTransitId: postFile.fileMetadata.globalTransitId,
                       lastModified: postFile.fileMetadata.updated,
+                      previewThumbnails: postFile?.fileMetadata.payloads,
                     }
                   : undefined
               }

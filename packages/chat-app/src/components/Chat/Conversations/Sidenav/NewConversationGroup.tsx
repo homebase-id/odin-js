@@ -4,6 +4,7 @@ import {
   Arrow,
   ConnectionImage,
   ConnectionName,
+  ErrorBoundary,
   Input,
   Label,
   Times,
@@ -49,7 +50,7 @@ export const NewConversationGroup = () => {
   };
 
   return (
-    <>
+    <ErrorBoundary>
       <div className="flex flex-row items-center justify-between bg-primary/20 p-5">
         <h2 className="font-semibold">{t('New Group')}</h2>
         <ActionButton onClick={() => navigate(`${CHAT_ROOT}/`)} icon={Times} type="mute" />
@@ -135,6 +136,6 @@ export const NewConversationGroup = () => {
           />
         ))}
       </div>
-    </>
+    </ErrorBoundary>
   );
 };

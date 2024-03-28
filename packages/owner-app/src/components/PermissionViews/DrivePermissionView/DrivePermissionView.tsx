@@ -25,6 +25,8 @@ const DrivePermissionView = ({
     return <LoadingBlock className={`h-4 max-w-xs ${className}`} />;
   }
 
+  if (!drive) return null;
+
   return (
     <div
       key={`${driveGrant?.permissionedDrive?.drive?.alias}-${driveGrant?.permissionedDrive.drive?.type}`}
@@ -35,7 +37,7 @@ const DrivePermissionView = ({
         to={`/owner/drives/${drive?.targetDriveInfo?.alias}_${drive?.targetDriveInfo?.type}`}
         className="flex flex-row hover:text-slate-700 hover:underline dark:hover:text-slate-400"
       >
-        <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6" />
+        <HardDrive className="mb-auto mr-3 mt-1 h-6 w-6 flex-shrink-0" />
         <div className="mr-2 flex flex-col">
           <p className={`leading-none ${!permissionTree ? 'my-auto' : ''}`}>
             {drive?.name}:{' '}

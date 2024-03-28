@@ -2,7 +2,7 @@ import { DotYouClient } from '../../core/DotYouClient';
 import { getContentFromHeaderOrPayload } from '../../core/DriveData/File/DriveFileProvider';
 import { queryBatch } from '../../core/DriveData/Query/DriveQueryProvider';
 import { CursoredResult } from '../../core/DriveData/Query/DriveQueryTypes';
-import { DriveSearchResult } from '../../core/DriveData/File/DriveFileTypes';
+import { HomebaseFile } from '../../core/DriveData/File/DriveFileTypes';
 import { toGuidId } from '../../helpers/DataUtil';
 import { ContactConfig, ContactFile } from './ContactTypes';
 import { getFileHeaderByUniqueId } from '../../core/core';
@@ -12,13 +12,13 @@ export const CONTACT_PROFILE_IMAGE_KEY = 'prfl_pic';
 export const getContactByOdinId = async (
   dotYouClient: DotYouClient,
   odinId: string
-): Promise<DriveSearchResult<ContactFile> | undefined> =>
+): Promise<HomebaseFile<ContactFile> | undefined> =>
   getContactByUniqueId(dotYouClient, toGuidId(odinId));
 
 export const getContactByUniqueId = async (
   dotYouClient: DotYouClient,
   uniqueId: string
-): Promise<DriveSearchResult<ContactFile> | undefined> => {
+): Promise<HomebaseFile<ContactFile> | undefined> => {
   try {
     return (
       (await getFileHeaderByUniqueId<ContactFile>(
@@ -37,7 +37,7 @@ export const getContacts = async (
   dotYouClient: DotYouClient,
   cursorState: string | undefined = undefined,
   pageSize = 10
-): Promise<CursoredResult<DriveSearchResult<ContactFile>[]>> => {
+): Promise<CursoredResult<HomebaseFile<ContactFile>[]>> => {
   const response = await queryBatch(
     dotYouClient,
     {
@@ -55,22 +55,22 @@ export const getContacts = async (
     results: (
       await Promise.all(
         response.searchResults.map(async (result) => {
-          const dsr: DriveSearchResult = result;
+          const dsr: HomebaseFile = result;
           if (!dsr) return;
 
           return dsrToContact(dotYouClient, dsr, response.includeMetadataHeader);
         })
       )
-    ).filter(Boolean) as DriveSearchResult<ContactFile>[],
+    ).filter(Boolean) as HomebaseFile<ContactFile>[],
     cursorState: response.cursorState,
   };
 };
 
 const dsrToContact = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ContactFile> | undefined> => {
+): Promise<HomebaseFile<ContactFile> | undefined> => {
   const contactContent: ContactFile | null = await getContentFromHeaderOrPayload<ContactFile>(
     dotYouClient,
     ContactConfig.ContactTargetDrive,

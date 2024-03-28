@@ -5,13 +5,13 @@ import { Attribute, AttributeConfig } from '../../profile/profile';
 import { FileQueryParams } from '../../core/DriveData/Drive/DriveTypes';
 import { queryBatchOverPeer } from './Query/PeerDriveQueryProvider';
 import { getContentFromHeaderOrPayloadOverPeer } from './File/PeerFileProvider';
-import { DriveSearchResult, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
+import { HomebaseFile, TargetDrive } from '../../core/DriveData/File/DriveFileTypes';
 
 export const getProfileAttributesOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
   attributeType?: string
-): Promise<DriveSearchResult<Attribute>[]> => {
+): Promise<HomebaseFile<Attribute>[]> => {
   const profileId = BuiltInProfiles.StandardProfileId;
   const targetDrive = GetTargetDriveFromProfileId(profileId);
 
@@ -24,7 +24,7 @@ export const getProfileAttributesOverPeer = async (
     const result = await queryBatchOverPeer(dotYouClient, odinId, queryParams);
     if (!result) return [];
 
-    let attributes: DriveSearchResult<Attribute>[] = (
+    let attributes: HomebaseFile<Attribute>[] = (
       await Promise.all(
         result.searchResults.map(async (dsr) =>
           dsrToAttributeFileOverPeer(
@@ -36,7 +36,7 @@ export const getProfileAttributesOverPeer = async (
           )
         )
       )
-    ).filter((attr) => !!attr) as DriveSearchResult<Attribute>[];
+    ).filter((attr) => !!attr) as HomebaseFile<Attribute>[];
 
     attributes = attributes.sort((a, b) => (a.priority || 0) - (b.priority || 0));
 
@@ -50,10 +50,10 @@ export const getProfileAttributesOverPeer = async (
 export const dsrToAttributeFileOverPeer = async (
   dotYouClient: DotYouClient,
   odinId: string,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<Attribute> | null> => {
+): Promise<HomebaseFile<Attribute> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayloadOverPeer<Attribute>(
       dotYouClient,
@@ -64,7 +64,7 @@ export const dsrToAttributeFileOverPeer = async (
     );
     if (!attrContent) return null;
 
-    const attributeFile: DriveSearchResult<Attribute> = {
+    const attributeFile: HomebaseFile<Attribute> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,

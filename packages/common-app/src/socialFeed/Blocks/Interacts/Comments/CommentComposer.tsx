@@ -1,3 +1,4 @@
+import { NewMediaFile } from '@youfoundation/js-lib/core';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
 import {
@@ -20,6 +21,8 @@ import {
 } from '@youfoundation/common-app';
 
 import { ErrorNotification } from '@youfoundation/common-app';
+
+const TEN_MEGA_BYTES = 10 * 1024 * 1024;
 
 export const CommentComposer = ({
   context,
@@ -128,6 +131,7 @@ export const CommentEditor = ({
           defaultValue={body}
           onSubmit={(val) => doPost(val || body, attachment)}
           placeholder={t('Write your comment')}
+          className="w-full"
           onPaste={(e) => {
             const imageFiles = getImagesFromPasteEvent(e);
 
@@ -140,8 +144,9 @@ export const CommentEditor = ({
         />
         <FileOverview
           files={files}
-          setFiles={(newFiles) => setAttachment(newFiles?.[0]?.file as File)}
+          setFiles={(newFiles: NewMediaFile[]) => setAttachment(newFiles?.[0]?.file as File)}
           className="my-2"
+          cols={4}
         />
         <div className="flex flex-shrink-0 flex-row items-center">
           <EmojiSelector
@@ -151,7 +156,8 @@ export const CommentEditor = ({
           />
           <FileSelector
             onChange={(newFiles) => setAttachment(newFiles?.[0])}
-            className="text-foreground text-opacity-30 hover:text-opacity-100"
+            className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
+            maxSize={TEN_MEGA_BYTES}
           >
             <ImageIcon className="h-5 w-5" />
           </FileSelector>

@@ -1,5 +1,5 @@
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
-import { ActionButton, ActionGroup, ActionLink, Save, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, Times, t } from '@youfoundation/common-app';
 import { useHomeAttributes } from '../../hooks/profiles/useHomeAttributes';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
@@ -10,10 +10,10 @@ import Section from '../../components/ui/Sections/Section';
 import { AttributeVm } from '../../hooks/profiles/useAttributes';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { AttributeDefinitions } from '../../hooks/profiles/AttributeDefinitions';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 
-const defaultThemeAttribute: DriveSearchResult<AttributeVm> = {
+const defaultThemeAttribute: HomebaseFile<AttributeVm> = {
   fileMetadata: {
     appData: {
       content: {
@@ -28,7 +28,7 @@ const defaultThemeAttribute: DriveSearchResult<AttributeVm> = {
       },
     },
   },
-} as unknown as DriveSearchResult<AttributeVm>;
+} as unknown as HomebaseFile<AttributeVm>;
 
 const Website = () => {
   const { data: themeData, isLoading: themeIsLoading } = useHomeAttributes().fetchTheme;
@@ -76,7 +76,7 @@ const Website = () => {
 
 const PublishOptions = () => {
   const {
-    mutate: publishFile,
+    mutate: publishStaticFiles,
     status: publishStatus,
     error: publishFileError,
   } = useStaticFiles().publish;
@@ -87,18 +87,23 @@ const PublishOptions = () => {
       <Section
         title={
           <>
-            <Cloud className="inline-block h-4 w-4" /> {t('Publish your public data')}
+            <Cloud className="inline-block h-4 w-4" /> {t('Clear cache')}
           </>
         }
       >
-        <div className="flex flex-row">
+        <p className="mb-2">
+          {t(
+            `Did your public cache get outdated? You can force a refresh of your public cache to attempt and fix the issues you may be having.`
+          )}
+        </p>
+        <div className="flex flex-row-reverse">
           <ActionButton
-            onClick={() => publishFile()}
+            onClick={() => publishStaticFiles(undefined)}
             state={publishStatus}
-            icon={Save}
-            className="ml-auto"
+            icon={Times}
+            type="secondary"
           >
-            {t('Publish static file')}
+            {t('Clear cache')}
           </ActionButton>
         </div>
       </Section>

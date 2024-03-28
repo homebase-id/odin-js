@@ -57,7 +57,7 @@ export const getBlockedConnections = (
 ): Promise<PagedResult<DotYouProfile>> => {
   assertIfDotYouClientIsOwner(dotYouClient);
   const client = dotYouClient.createAxiosClient();
-  const url = root + '/blocked?' + stringifyToQueryParams(params as any);
+  const url = root + '/blocked?' + stringifyToQueryParams(params);
   return client
     .get(url)
     .then((response) => {

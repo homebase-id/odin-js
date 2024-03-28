@@ -34,7 +34,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
             <Sidenav logout={logout} />
           </Suspense>
         ) : null}
-        <div className={`flex min-h-screen w-auto flex-grow flex-col`}>{children}</div>
+        <div className={`flex min-h-screen w-full flex-grow flex-col`}>{children}</div>
       </div>
     </NoLayout>
   );

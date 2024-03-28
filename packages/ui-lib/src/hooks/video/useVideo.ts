@@ -1,18 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { DotYouClient, TargetDrive } from '@youfoundation/js-lib/core';
+import { DotYouClient, TargetDrive, getFileHeader } from '@youfoundation/js-lib/core';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import {
   getDecryptedVideoChunk,
-  getDecryptedVideoMetadata,
   getDecryptedVideoUrl,
   PlainVideoMetadata,
   SegmentedVideoMetadata,
 } from '@youfoundation/js-lib/media';
 import {
   getDecryptedVideoChunkOverPeer,
-  getDecryptedVideoMetadataOverPeer,
-  getDecryptedVideoMetadataOverPeerByGlobalTransitId,
   getDecryptedVideoUrlOverPeer,
   getDecryptedVideoUrlOverPeerByGlobalTransitId,
+  getFileHeaderBytesOverPeerByGlobalTransitId,
+  getFileHeaderOverPeer,
 } from '@youfoundation/js-lib/peer';
 
 export const useVideo = (
@@ -42,23 +42,27 @@ export const useVideo = (
     }
 
     const fetchMetaPromise = async () => {
-      return odinId !== localHost
-        ? videoGlobalTransitId
-          ? await getDecryptedVideoMetadataOverPeerByGlobalTransitId(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoGlobalTransitId,
-              videoFileKey
-            )
-          : await getDecryptedVideoMetadataOverPeer(
-              dotYouClient,
-              odinId,
-              videoDrive,
-              videoFileId,
-              videoFileKey
-            )
-        : await getDecryptedVideoMetadata(dotYouClient, videoDrive, videoFileId, videoFileKey);
+      const fileHeader =
+        odinId !== localHost
+          ? videoGlobalTransitId
+            ? await getFileHeaderBytesOverPeerByGlobalTransitId(
+                dotYouClient,
+                odinId,
+                videoDrive,
+                videoGlobalTransitId
+              )
+            : await getFileHeaderOverPeer(dotYouClient, odinId, videoDrive, videoFileId)
+          : await getFileHeader(dotYouClient, videoDrive, videoFileId);
+
+      if (!fileHeader) return undefined;
+      const payloadData = fileHeader.fileMetadata.payloads.find((p) => p.key === videoFileKey);
+      const descriptor = payloadData?.descriptorContent;
+      if (!descriptor) return undefined;
+
+      const parsedMetaData = tryJsonParse<PlainVideoMetadata | SegmentedVideoMetadata>(descriptor);
+      // The fileHeader contains the most accurate file size; So we use that one.
+      parsedMetaData.fileSize = payloadData.bytesWritten;
+      return parsedMetaData;
     };
 
     return (await fetchMetaPromise()) || null;

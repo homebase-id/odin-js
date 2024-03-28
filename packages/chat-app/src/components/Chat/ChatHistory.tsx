@@ -1,5 +1,5 @@
 import { ErrorNotification, t } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatMessages } from '../../hooks/chat/useChatMessages';
 import { useMarkMessagesAsRead } from '../../hooks/chat/useMarkMessagesAsRead';
 import { ChatMessage } from '../../providers/ChatProvider';
@@ -20,8 +20,8 @@ export const ChatHistory = ({
   setReplyMsg,
   setIsEmptyChat,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
-  setReplyMsg: (msg: DriveSearchResult<ChatMessage>) => void;
+  conversation: HomebaseFile<Conversation> | undefined;
+  setReplyMsg: (msg: HomebaseFile<ChatMessage>) => void;
   setIsEmptyChat: (isEmpty: boolean) => void;
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -36,21 +36,23 @@ export const ChatHistory = ({
     },
     delete: { mutate: deleteMessages, error: deleteMessagesError },
   } = useChatMessages({ conversationId: conversation?.fileMetadata?.appData?.uniqueId });
-  const flattenedMsgs = useMemo(
-    () =>
-      (messages?.pages.flatMap((page) => page.searchResults).filter(Boolean) ||
-        []) as DriveSearchResult<ChatMessage>[],
-    [messages]
-  );
+
+  const flattenedMsgs =
+    useMemo(
+      () =>
+        (messages?.pages?.flatMap((page) => page?.searchResults)?.filter(Boolean) ||
+          []) as HomebaseFile<ChatMessage>[],
+      [messages]
+    ) || [];
 
   useEffect(() => {
-    if (isFetchedAfterMount && flattenedMsgs.length === 0) setIsEmptyChat(true);
+    if (isFetchedAfterMount && (!flattenedMsgs || flattenedMsgs.length === 0)) setIsEmptyChat(true);
   }, [isFetchedAfterMount, flattenedMsgs]);
 
   useMarkMessagesAsRead({ conversation, messages: flattenedMsgs });
   const chatActions: ChatActions = {
-    doReply: (msg: DriveSearchResult<ChatMessage>) => setReplyMsg(msg),
-    doDelete: async (msg: DriveSearchResult<ChatMessage>) => {
+    doReply: (msg: HomebaseFile<ChatMessage>) => setReplyMsg(msg),
+    doDelete: async (msg: HomebaseFile<ChatMessage>) => {
       if (!conversation || !msg) return;
       await deleteMessages({
         conversation: conversation,
@@ -105,12 +107,12 @@ export const ChatHistory = ({
     <>
       <ErrorNotification error={deleteMessagesError} />
       <div
-        className="flex h-full w-full flex-grow flex-col-reverse overflow-auto p-5"
+        className="flex w-full flex-grow flex-col-reverse overflow-auto p-5"
         ref={scrollRef}
         key={conversation?.fileId}
       >
         <div
-          className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" //TODO remove overflow-hidden when less height than window => Might need this one again, to avoid a growing height
+          className="relative w-full flex-shrink-0 flex-grow-0 overflow-hidden" // This overflow-hidden cuts of the context-menu of the first chat-items; But we need it as it otherwise breaks the scroll edges
           style={{
             height: virtualizer.getTotalSize(),
           }}
@@ -122,10 +124,16 @@ export const ChatHistory = ({
             }}
           >
             {items.map((item) => {
-              const isLoaderRow = item.index > flattenedMsgs.length - 1;
+              const isLoaderRow = item.index > flattenedMsgs?.length - 1;
               if (isLoaderRow) {
                 return (
-                  <div key={item.key} data-index={item.index} ref={virtualizer.measureElement}>
+                  <div
+                    key={item.key}
+                    data-index={item.index}
+                    ref={virtualizer.measureElement}
+                    className="sm:min-h-[10rem]"
+                    // h-10rem keeps space for the context menu of the first item; otherwise the context menu would be cut off by the overflow-hidden
+                  >
                     {hasMoreMessages || isFetchingNextPage ? (
                       <div className="animate-pulse" key={'loading'}>
                         {t('Loading...')}

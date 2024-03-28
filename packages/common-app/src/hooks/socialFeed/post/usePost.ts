@@ -3,16 +3,14 @@ import {
   PostContent,
   savePost as savePostFile,
   getPost,
-  NewMediaFile,
-  MediaFile,
-  Media,
   removePost,
 } from '@youfoundation/js-lib/public';
+import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/core';
 import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   MultiRequestCursoredResult,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
 
@@ -26,9 +24,9 @@ export const usePost = () => {
     mediaFiles,
     onUpdate,
   }: {
-    postFile: NewDriveSearchResult<PostContent> | DriveSearchResult<PostContent>;
+    postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
     channelId: string;
-    mediaFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[];
+    mediaFiles?: (NewMediaFile | MediaFile)[];
     onUpdate?: (progress: number) => void;
   }) => {
     return new Promise<UploadResult>((resolve, reject) => {
@@ -40,7 +38,7 @@ export const usePost = () => {
         );
         if (!serverPost) return;
 
-        const newPost: DriveSearchResult<PostContent> = {
+        const newPost: HomebaseFile<PostContent> = {
           ...serverPost,
           fileMetadata: {
             ...serverPost.fileMetadata,
@@ -76,7 +74,7 @@ export const usePost = () => {
     postFile,
     channelId,
   }: {
-    postFile: DriveSearchResult<PostContent>;
+    postFile: HomebaseFile<PostContent>;
     channelId: string;
   }) => {
     if (postFile) return await removePost(dotYouClient, postFile, channelId);
@@ -110,7 +108,7 @@ export const usePost = () => {
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
@@ -136,11 +134,11 @@ export const usePost = () => {
 
         // Update section attributes
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
-          const newPostFile: DriveSearchResult<PostContent> = {
+          const newPostFile: HomebaseFile<PostContent> = {
             ...newPost.postFile,
             fileMetadata: {
               ...newPost.postFile.fileMetadata,
@@ -149,17 +147,16 @@ export const usePost = () => {
                 content: {
                   ...newPost.postFile.fileMetadata.appData.content,
 
-                  primaryMediaFile: newPost.mediaFiles?.[0] as MediaFile,
+                  primaryMediaFile: {
+                    fileKey: newPost.mediaFiles?.[0].key,
+                    type: (newPost.mediaFiles?.[0] as MediaFile)?.contentType,
+                  },
                 },
               },
             },
-          } as DriveSearchResult<PostContent>;
-          (newPostFile.fileMetadata.appData.content as Media).mediaFiles =
-            newPost.mediaFiles as MediaFile[];
+          } as HomebaseFile<PostContent>;
 
-          const newFeed: InfiniteData<
-            MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>
-          > = {
+          const newFeed: InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>> = {
             ...previousFeed,
             pages: previousFeed.pages.map((page, index) => {
               return {
@@ -216,7 +213,7 @@ export const usePost = () => {
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
-          | InfiniteData<MultiRequestCursoredResult<DriveSearchResult<PostContent>[]>>
+          | InfiniteData<MultiRequestCursoredResult<HomebaseFile<PostContent>[]>>
           | undefined = queryClient.getQueryData(['social-feeds']);
 
         if (previousFeed) {
@@ -237,7 +234,7 @@ export const usePost = () => {
           queryClient.setQueryData(['social-feeds'], newFeed);
         }
       },
-      onError: (err, _newCircle, context) => {
+      onError: (err) => {
         console.error(err);
       },
       onSettled: () => {

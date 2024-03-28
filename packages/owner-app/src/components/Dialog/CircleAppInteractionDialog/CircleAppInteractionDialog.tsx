@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { usePortal, ActionButton, ActionButtonState, t, Arrow } from '@youfoundation/common-app';
+import {
+  usePortal,
+  ActionButton,
+  ActionButtonState,
+  t,
+  Arrow,
+  CheckboxToggle,
+} from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useApp } from '../../../hooks/apps/useApp';
-import CheckboxToggle from '../../Form/CheckboxToggle';
 import AppPermissionView from '../../PermissionViews/AppPermissionView/AppPermissionView';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -48,6 +54,7 @@ const CircleAppInteractionDialog = ({
     setUpdateState('idle');
   };
 
+  console.log({ toGrantApps, toRevokeApps });
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel} size="4xlarge">
       <>
@@ -115,26 +122,27 @@ const CircleAppInteractionDialog = ({
                   toGrantApps.some((toGrant) => stringGuidsEqual(toGrant, app.appId));
 
                 const clickHandler = () => {
+                  console.log({ checked });
                   if (!checked) {
                     if (!hadAccess) {
                       // Provide access
-                      setToGrantApps([
+                      setToGrantApps((toGrantApps) => [
                         ...toGrantApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                         app.appId,
                       ]);
                     }
-                    setToRevokeApps([
+                    setToRevokeApps((toRevokeApps) => [
                       ...toRevokeApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                     ]);
                   } else {
                     if (hadAccess) {
                       // Revoke access
-                      setToRevokeApps([
+                      setToRevokeApps((toGrantApps) => [
                         ...toGrantApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                         app.appId,
                       ]);
                     }
-                    setToGrantApps([
+                    setToGrantApps((toGrantApps) => [
                       ...toGrantApps.filter((appId) => !stringGuidsEqual(appId, app.appId)),
                     ]);
                   }

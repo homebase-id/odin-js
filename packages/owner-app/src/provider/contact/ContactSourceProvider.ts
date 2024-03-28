@@ -15,7 +15,7 @@ import {
   getDecryptedImageDataOverPeer,
 } from '@youfoundation/js-lib/peer';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
-import { GetFile, GetProfileImage } from '@youfoundation/js-lib/public';
+import { GetProfileCard, GetProfileImage } from '@youfoundation/js-lib/public';
 import { RawContact, getDetailedConnectionInfo } from '@youfoundation/js-lib/network';
 
 //Handles fetching and parsing of Contact Source data
@@ -116,21 +116,15 @@ export const queryConnectionPhotoData = async (
 };
 
 export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | undefined> => {
-  const client = new DotYouClient({ api: ApiType.Guest, identity: odinId });
-  const rawData = await GetFile(client, 'public.json');
-
-  const nameAttr = rawData?.get('name')?.[0];
-  const imageData = await GetProfileImage(client);
+  const profileCard = await GetProfileCard(odinId);
+  const imageData = await GetProfileImage(odinId);
 
   return {
-    name:
-      nameAttr?.payload?.data.givenName || nameAttr?.payload?.data.surname
-        ? {
-            displayName: nameAttr?.payload.data[MinimalProfileFields.DisplayName],
-            givenName: nameAttr?.payload.data[MinimalProfileFields.GivenNameId],
-            surname: nameAttr?.payload.data[MinimalProfileFields.SurnameId],
-          }
-        : undefined,
+    name: profileCard?.name
+      ? {
+          displayName: profileCard?.name,
+        }
+      : undefined,
     image: imageData
       ? {
           content: uint8ArrayToBase64(new Uint8Array(await imageData.arrayBuffer())),
@@ -140,32 +134,5 @@ export const fetchDataFromPublic = async (odinId: string): Promise<RawContact | 
         }
       : undefined,
     source: 'public',
-  };
-};
-
-export const getPhotoDataFromPublic = async (odinId: string, imageFileId: string) => {
-  const client = new DotYouClient({ api: ApiType.Guest, identity: odinId });
-  const rawData = await GetFile(client, 'public.json');
-
-  const photoData = rawData?.get(imageFileId)?.[0];
-
-  if (!photoData) return;
-
-  const previewThumbnail = photoData.additionalThumbnails?.reduce(
-    (prevVal, curValue) => {
-      if (prevVal.pixelWidth < curValue.pixelWidth && curValue.pixelWidth <= 250) {
-        return curValue;
-      }
-      return prevVal;
-    },
-    { ...photoData.header.fileMetadata.appData.previewThumbnail, pixelWidth: 20, pixelHeight: 20 }
-  );
-  if (!previewThumbnail || !previewThumbnail.content) return;
-
-  return {
-    pixelWidth: previewThumbnail.pixelWidth,
-    pixelHeight: previewThumbnail.pixelHeight,
-    contentType: previewThumbnail.contentType || 'image/jpeg',
-    content: previewThumbnail.content.toString(),
   };
 };

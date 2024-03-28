@@ -25,6 +25,7 @@ export const register = (locale: string, func: LocaleFunc) => {
  * @param locale
  * @returns {*}
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getLocale = (locale: string): LocaleFunc => {
   // return Locales[locale] || Locales['en_US'];
 

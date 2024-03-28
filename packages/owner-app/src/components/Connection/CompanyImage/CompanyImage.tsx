@@ -1,13 +1,18 @@
 import {
   FallbackImg,
-  Homebase,
   HomebaseChat,
   HomebaseFeed,
   HomebasePhoto,
+  CHAT_APP_ID,
+  FEED_APP_ID,
+  OWNER_APP_ID,
+  PHOTO_APP_ID,
+  HomebaseNotifications,
+  MAIL_APP_ID,
+  HomebaseMail,
 } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState, useMemo } from 'react';
-import { CHAT_APP_ID, FEED_APP_ID, OWNER_APP_ID, PHOTO_APP_ID } from '../../../app/Constants';
 
 export const CompanyImage = ({
   domain,
@@ -58,8 +63,9 @@ export const CompanyImage = ({
 
 export const AppSpecificIcon = (appId: string | undefined) => {
   if (!appId) return;
-  if (stringGuidsEqual(appId, OWNER_APP_ID)) return Homebase;
+  if (stringGuidsEqual(appId, OWNER_APP_ID)) return HomebaseNotifications;
   if (stringGuidsEqual(appId, CHAT_APP_ID)) return HomebaseChat;
   if (stringGuidsEqual(appId, FEED_APP_ID)) return HomebaseFeed;
   if (stringGuidsEqual(appId, PHOTO_APP_ID)) return HomebasePhoto;
+  if (stringGuidsEqual(appId, MAIL_APP_ID)) return HomebaseMail;
 };

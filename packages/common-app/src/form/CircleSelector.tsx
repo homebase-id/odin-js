@@ -8,13 +8,16 @@ export const CircleSelector = ({
   defaultValue,
   onChange,
   name,
+  excludeSystemCircles = false,
 }: {
   defaultValue: string[];
   onChange: (e: { target: { name: string; value: string[] } }) => void;
   name?: string;
+  excludeSystemCircles?: boolean;
 }) => {
-  const { data: circles, isLoading: circlesLoading } = useCircles().fetch;
-
+  const {
+    fetch: { data: circles, isLoading: isCirclesLoading },
+  } = useCircles(excludeSystemCircles);
   const [selection, setSelection] = useState<string[]>([...(defaultValue ?? [])]);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export const CircleSelector = ({
 
   return (
     <>
-      {!circles?.length && !circlesLoading && (
+      {!circles?.length && !isCirclesLoading && (
         <p
           className="rounded-lg border bg-white px-4 py-4 dark:border-slate-800
         dark:bg-black"

@@ -16,7 +16,7 @@ export interface DnsRecord {
   value: string;
   description: string;
   status: DnsRecordStatus;
-  statusText: string;
+  records?: Record<string, string[]>;
 }
 
 export type DnsConfig = Array<DnsRecord>;
@@ -85,7 +85,7 @@ export const useCanConnectToDomain = (domain: string, port: number) => {
       queryKey: ['can-connect-to-domain', domain, port],
       queryFn: () => canConnectToDomain(domain, port),
       enabled: !!domain,
-      refetchInterval: (success) => (!success ? 1000 : false),
+      refetchInterval: (query) => (!query.state.data?.valueOf() ? 1000 : false),
       refetchOnWindowFocus: false,
       retry: false,
     }),
@@ -112,7 +112,7 @@ export const useDomainHasValidCertificate = (domain: string, enabled: boolean) =
       queryFn: () => domainHasValidCertificate(domain),
       enabled,
       initialData: false,
-      refetchInterval: (success) => (!success ? 1000 : false),
+      refetchInterval: (query) => (!query.state.data?.valueOf() ? 1000 : false),
       refetchOnWindowFocus: false,
       retry: false,
     }),

@@ -8,7 +8,7 @@ import {
   LocationFields,
   Attribute,
 } from '@youfoundation/js-lib/profile';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { FallbackImg, t, useImage } from '@youfoundation/common-app';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
@@ -21,7 +21,7 @@ interface YourInfoProps {
 }
 
 const filterAttributesWithCircleGrants = (
-  attributes: DriveSearchResult<Attribute>[],
+  attributes: HomebaseFile<Attribute>[],
   circleGrants: string[]
 ) => {
   return attributes
@@ -34,11 +34,8 @@ const filterAttributesWithCircleGrants = (
     ?.sort((attrA, attrB) => attrA.priority - attrB.priority)
     ?.filter((attr) =>
       attr.serverMetadata?.accessControlList?.circleIdList?.length
-        ? attr.serverMetadata?.accessControlList.circleIdList.some(
-            (allowedCircleId) =>
-              circleGrants?.some((circleGrantId) =>
-                stringGuidsEqual(circleGrantId, allowedCircleId)
-              )
+        ? attr.serverMetadata?.accessControlList.circleIdList.some((allowedCircleId) =>
+            circleGrants?.some((circleGrantId) => stringGuidsEqual(circleGrantId, allowedCircleId))
           )
         : true
     );

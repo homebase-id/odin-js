@@ -6,10 +6,12 @@ export const AclWizard = ({
   acl,
   onConfirm,
   onCancel,
+  direction,
 }: {
   acl: AccessControlList;
   onConfirm: (acl: AccessControlList) => void;
   onCancel?: () => void;
+  direction?: 'row' | 'column';
 }) => {
   const [currentAcl, setCurrentAcl] = useState(
     acl ?? { requiredSecurityGroup: SecurityGroupType.Owner }
@@ -17,11 +19,11 @@ export const AclWizard = ({
 
   return (
     <>
-      <h2 className="mb-2 text-lg">{t('Who can access this attribute?')}</h2>
       <div className="mb-8">
         <RequiredSecurityGroupRadioGroup
           defaultAcl={currentAcl}
           onChange={(newAcl) => setCurrentAcl({ ...newAcl })}
+          direction={direction}
         />
       </div>
       {currentAcl.requiredSecurityGroup.toLowerCase() ===
@@ -62,9 +64,11 @@ export const AclWizard = ({
 const RequiredSecurityGroupRadioGroup = ({
   defaultAcl,
   onChange,
+  direction = 'row',
 }: {
   defaultAcl?: AccessControlList;
   onChange?: (acl: AccessControlList) => void;
+  direction?: 'row' | 'column';
 }) => {
   const GroupOption = (props: { name: string; description: string; value: AccessControlList }) => {
     const checked =
@@ -89,42 +93,42 @@ const RequiredSecurityGroupRadioGroup = ({
 
   return (
     <>
-      <div className="-m-1 flex flex-row flex-wrap">
-        <div className="w-1/2 p-1 md:w-1/5">
-          <GroupOption
-            name={t('Owner')}
-            description={t('Only you')}
-            value={{ requiredSecurityGroup: SecurityGroupType.Owner }}
-          />
-        </div>
-        <div className="w-1/2 p-1 md:w-1/5">
-          <GroupOption
-            name={t('Circles')}
-            description={t('Only people that are member of a circle')}
-            value={{ requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [] }}
-          />
-        </div>
-        <div className="w-1/2 p-1 md:w-1/5">
-          <GroupOption
-            name={t('Connected')}
-            description={t('Only people that are connected to you')}
-            value={{ requiredSecurityGroup: SecurityGroupType.Connected }}
-          />
-        </div>
-        <div className="w-1/2 p-1 md:w-1/5">
-          <GroupOption
-            name={t('Authenticated')}
-            description={t('Only people that are authenticated')}
-            value={{ requiredSecurityGroup: SecurityGroupType.Authenticated }}
-          />
-        </div>
-        <div className="w-1/2 p-1 md:w-1/5">
-          <GroupOption
-            name={t('Public')}
-            description={t('Accessible by everyone on the internet')}
-            value={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
-          />
-        </div>
+      <div
+        className={`gap-1 ${
+          direction === 'row'
+            ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5'
+            : 'flex flex-col gap-1'
+        }`}
+      >
+        <GroupOption
+          name={t('Owner')}
+          description={t('Only you')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Owner }}
+        />
+
+        <GroupOption
+          name={t('Circles')}
+          description={t('Only people that are member of a circle')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Connected, circleIdList: [] }}
+        />
+
+        <GroupOption
+          name={t('Connected')}
+          description={t('Only people that are connected to you')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Connected }}
+        />
+
+        <GroupOption
+          name={t('Authenticated')}
+          description={t('Only people that are authenticated')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Authenticated }}
+        />
+
+        <GroupOption
+          name={t('Public')}
+          description={t('Accessible by everyone on the internet')}
+          value={{ requiredSecurityGroup: SecurityGroupType.Anonymous }}
+        />
       </div>
     </>
   );

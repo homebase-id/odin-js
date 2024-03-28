@@ -39,7 +39,6 @@ export const useAuth = () => {
 
   const authenticate = async (password: string) => {
     const response = await authenticateOwner(password);
-
     if (!response) return false;
 
     // Cleanup the public items: (There might have been a public login already in place)
@@ -52,7 +51,7 @@ export const useAuth = () => {
     window.localStorage.setItem(OWNER_SHARED_SECRET, uint8ArrayToBase64(response.sharedSecret));
     setAuthenticationState('authenticated');
 
-    doRedirectToReturn();
+    checkRedirectToReturn();
 
     return true;
   };
@@ -76,24 +75,20 @@ export const useAuth = () => {
   };
 
   /// Redirects back to returnUrls; Explicitly uses window navigation to ensure that the anonymous state doesn't stick on the rootRoute
-  const doRedirectToReturn = () => {
+  const checkRedirectToReturn = () => {
     if (window.location.pathname === LOGIN_PATH || window.location.pathname === FIRSTRUN_PATH) {
       const returnUrl = searchParams.get(RETURN_URL_PARAM);
-      if (returnUrl) {
-        window.location.href = returnUrl;
-      } else {
-        window.location.href = HOME_PATH;
-      }
+      window.location.href = returnUrl || HOME_PATH;
     }
   };
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
-      setAuthenticationState(hasValidToken ? 'authenticated' : 'anonymous');
+      setAuthenticationState(hasValidToken && hasSharedSecret ? 'authenticated' : 'anonymous');
 
       if (hasValidToken && hasSharedSecret) {
         // When authenticated check if on Login Pages and if so redirects to return or Home
-        doRedirectToReturn();
+        checkRedirectToReturn();
       } else if (hasSharedSecret) {
         (async () => {
           console.error('kicking identity');

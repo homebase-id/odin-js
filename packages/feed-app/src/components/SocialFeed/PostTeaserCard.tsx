@@ -1,4 +1,4 @@
-import { Media, PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,
@@ -10,21 +10,19 @@ import {
   useSocialChannel,
   ErrorBoundary,
   PostBody,
-  t,
+  useCheckIdentity,
   LoadingBlock,
+  t,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
+import { UnreachableIdentity } from './UnreachableIdentity';
 
 interface PostTeaserCardProps {
   className?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   odinId?: string;
   showSummary?: boolean;
 }
@@ -36,6 +34,8 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   const isExternal = odinId && odinId !== identity;
   const navigate = useNavigate();
 
+  const { data: identityAccessible } = useCheckIdentity(isExternal ? odinId : undefined);
+
   const { data: externalChannel } = useSocialChannel({
     odinId: isExternal ? odinId : undefined,
     channelId: post.channelId,
@@ -45,9 +45,13 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   }).fetch;
 
   const channel = externalChannel || internalChannel;
-  const postPath = `preview/${isExternal ? odinId : identity}/${channel?.fileMetadata.appData
-    .uniqueId}/${post.id}`;
+  const postPath = `preview/${isExternal ? odinId : identity}/${
+    channel?.fileMetadata.appData.uniqueId
+  }/${post.id}`;
   const clickable = post.type === 'Article'; // Post is only clickable if it's an article; While media posts are clickable only on the media itself
+
+  if (identityAccessible === false && isExternal)
+    return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
 
   return (
     <div className={`w-full break-words rounded-lg ${className ?? ''}`}>
@@ -63,12 +67,14 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
         >
           <div className="flex flex-row gap-4 px-3 py-3 sm:px-4">
             <div className="flex-shrink-0 py-1">
-              <AuthorImage
-                odinId={odinId}
-                className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
-              />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]">
+                <AuthorImage
+                  odinId={odinId}
+                  className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[4rem] md:w-[4rem]"
+                />
+              </div>
             </div>
-            <div className="flex flex-grow flex-col">
+            <div className="flex w-20 flex-grow flex-col">
               <div className="mb-1 flex flex-col text-foreground text-opacity-60 md:flex-row md:flex-wrap md:items-center">
                 <h2>
                   <AuthorName odinId={odinId} />
@@ -84,6 +90,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 fileId={postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
                 lastModified={postFile.fileMetadata.updated}
+                payloads={postFile.fileMetadata.payloads}
               />
             </div>
           </div>
@@ -119,22 +126,14 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   );
 };
 
-const MediaStillUploading = ({ postFile }: { postFile: NewDriveSearchResult<PostContent> }) => {
+const MediaStillUploading = ({ postFile }: { postFile: NewHomebaseFile<PostContent> }) => {
   if (postFile.fileId) return null;
   if (!postFile.fileMetadata.appData.content.primaryMediaFile) return null;
 
-  const mediaFiles = (postFile.fileMetadata.appData.content as Media).mediaFiles || [
-    postFile.fileMetadata.appData.content.primaryMediaFile,
-  ];
-
   return (
     <>
-      <div className="relative grid grid-cols-2 gap-2">
-        {mediaFiles
-          ?.slice(0, 4)
-          ?.map((_media, index) => (
-            <LoadingBlock key={index} className="aspect-square h-full w-full" />
-          ))}
+      <div className={`relative`}>
+        <LoadingBlock className="aspect-square h-full w-full" />
         <div className="absolute inset-0 flex animate-pulse items-center justify-center">
           <p>{t('Your media is being processed')}</p>
         </div>

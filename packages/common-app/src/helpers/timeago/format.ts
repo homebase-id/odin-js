@@ -69,3 +69,17 @@ export const formatToTimeAgoWithRelativeDetail = (
   };
   return date.toLocaleDateString(undefined, dateTimeFormat);
 };
+
+const dateFormat: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+};
+export const formatDateExludingYearIfCurrent = (date: Date) => {
+  const now = new Date();
+  if (now.getFullYear() === date.getFullYear()) {
+    return date.toLocaleDateString(undefined, dateFormat);
+  }
+  return date.toLocaleDateString(undefined, { ...dateFormat, year: 'numeric' });
+};

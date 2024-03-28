@@ -1,5 +1,4 @@
-import { ApiType, DotYouClient, DrivePermissionType } from '@youfoundation/js-lib/core';
-import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
+import { DrivePermissionType } from '@youfoundation/js-lib/core';
 import { useEffect, useState } from 'react';
 import { useVerifyToken } from './useVerifyToken';
 import {
@@ -15,96 +14,36 @@ import {
   retrieveEccKey,
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
-import { ROOT_PATH } from '../../app/App';
-import { AppPermissionType } from '@youfoundation/js-lib/network';
-
-export const drives = [
-  {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Read + DrivePermissionType.Write,
-  },
-  {
-    // Standard profile Info
-    a: '8f12d8c4933813d378488d91ed23b64c',
-    t: '597241530e3ef24b28b9a75ec3a5c45c',
-    n: 'Standard Profile info',
-    d: '',
-    p: DrivePermissionType.Read,
-  },
-  {
-    // Contacts
-    a: '2612429d1c3f037282b8d42fb2cc0499',
-    t: '70e92f0f94d05f5c7dcd36466094f3a5',
-    n: 'Contact Drive',
-    d: '',
-    p: DrivePermissionType.Read,
-  },
-];
-const circleDrives = [
-  {
-    a: '9ff813aff2d61e2f9b9db189e72d1a11',
-    t: '66ea8355ae4155c39b5a719166b510e3',
-    n: 'Chat Drive',
-    d: '',
-    p: DrivePermissionType.Write,
-  },
-];
-export const appName = 'Homebase - Chat';
-export const appId = '2d781401-3804-4b57-b4aa-d8e4e2ef39f4';
-
-export const APP_SHARED_SECRET = 'APSS';
-export const APP_AUTH_TOKEN = 'BX0900';
-
-const hasSharedSecret = () => {
-  const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-  return !!raw;
-};
+import { REACT_QUERY_CACHE_KEY, ROOT_PATH } from '../../app/App';
+import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@youfoundation/js-lib/network';
+import {
+  APP_AUTH_TOKEN,
+  APP_SHARED_SECRET,
+  CHAT_APP_ID,
+  useDotYouClient,
+} from '@youfoundation/common-app';
+import { ChatDrive } from '../../providers/ConversationProvider';
 
 export const useAuth = () => {
+  const { getDotYouClient, getSharedSecret, hasSharedSecret } = useDotYouClient();
+
   const [authenticationState, setAuthenticationState] = useState<
     'unknown' | 'anonymous' | 'authenticated'
-  >(hasSharedSecret() ? 'unknown' : 'anonymous');
+  >(hasSharedSecret ? 'unknown' : 'anonymous');
+  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
 
   const logout = async (): Promise<void> => {
     await logoutYouauth(getDotYouClient());
 
     localStorage.removeItem(APP_SHARED_SECRET);
     localStorage.removeItem(APP_AUTH_TOKEN);
+    localStorage.removeItem(REACT_QUERY_CACHE_KEY);
     setAuthenticationState('anonymous');
 
     window.location.href = '/owner';
   };
 
-  const preauth = async (): Promise<void> => {
-    await preauthApps(getDotYouClient());
-  };
-
-  const getAppAuthToken = () => window.localStorage.getItem(APP_AUTH_TOKEN);
-
-  const getSharedSecret = () => {
-    const raw = window.localStorage.getItem(APP_SHARED_SECRET);
-    if (raw) return base64ToUint8Array(raw);
-  };
-
-  const getDotYouClient = () => {
-    const headers: Record<string, string> = {};
-    const authToken = getAppAuthToken();
-    if (authToken) {
-      headers['bx0900'] = authToken;
-    }
-
-    return new DotYouClient({
-      sharedSecret: getSharedSecret(),
-      api: ApiType.App,
-      identity: retrieveIdentity(),
-      headers: headers,
-    });
-  };
-
-  const { data: hasValidToken, isFetchedAfterMount } = useVerifyToken(getDotYouClient());
+  const preauth = async (): Promise<void> => await preauthApps(getDotYouClient());
 
   useEffect(() => {
     if (isFetchedAfterMount && hasValidToken !== undefined) {
@@ -132,6 +71,52 @@ export const useAuth = () => {
   };
 };
 
+export const drives = [
+  {
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
+    n: 'Chat Drive',
+    d: '',
+    p: DrivePermissionType.Read + DrivePermissionType.Write,
+  },
+  {
+    // Standard profile Info
+    a: '8f12d8c4933813d378488d91ed23b64c',
+    t: '597241530e3ef24b28b9a75ec3a5c45c',
+    n: 'Standard Profile info',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+  {
+    // Contacts
+    a: '2612429d1c3f037282b8d42fb2cc0499',
+    t: '70e92f0f94d05f5c7dcd36466094f3a5',
+    n: 'Contact Drive',
+    d: '',
+    p: DrivePermissionType.Read,
+  },
+];
+
+export const permissions = [
+  AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
+  AppPermissionType.ManageConnectionRequests,
+  AppPermissionType.ReadConnections,
+  AppPermissionType.SendPushNotifications,
+];
+
+const circleDrives = [
+  {
+    a: ChatDrive.alias,
+    t: ChatDrive.type,
+    n: 'Chat Drive',
+    d: '',
+    p: DrivePermissionType.Write,
+  },
+];
+
+export const appName = 'Homebase - Chat';
+export const appId = CHAT_APP_ID;
+
 export const useYouAuthAuthorization = () => {
   const getAuthorizationParameters = async (returnUrl: string): Promise<YouAuthorizationParams> => {
     const eccKey = await createEccPair();
@@ -144,17 +129,13 @@ export const useYouAuthAuthorization = () => {
       finalizeUrl,
       appName,
       appId,
-      [
-        AppPermissionType.SendDataToOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReceiveDataFromOtherIdentitiesOnMyBehalf,
-        AppPermissionType.ReadConnections,
-        AppPermissionType.SendPushNotifications,
-      ],
+      permissions,
       undefined,
       drives,
       circleDrives,
+      [ALL_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
-      window.location.host,
+      undefined,
       undefined,
       returnUrl
     );

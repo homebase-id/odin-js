@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Pencil, Plus, SubtleMessage, Times, t } from '@youfoundation/common-app';
+import { Ellipsis, Pencil, Plus, SubtleMessage, Times, t } from '@youfoundation/common-app';
 import { useCircle } from '@youfoundation/common-app';
 import { Alert } from '@youfoundation/common-app';
 import { ErrorNotification, mergeStates, ActionButton } from '@youfoundation/common-app';
@@ -20,8 +20,9 @@ import { AppInteractionPermissionOverview } from '../../../components/Permission
 import CircleAppInteractionDialog from '../../../components/Dialog/CircleAppInteractionDialog/CircleAppInteractionDialog';
 import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
-import { Membership } from '@youfoundation/js-lib/network';
+import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@youfoundation/js-lib/network';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const CircleDetails = () => {
   const { circleKey } = useParams();
@@ -55,6 +56,7 @@ const CircleDetails = () => {
   }
 
   const circleId = circle.id;
+  const isSystemCircle = stringGuidsEqual(circleId, ALL_CONNECTIONS_CIRCLE_ID);
 
   return (
     <>
@@ -67,66 +69,69 @@ const CircleDetails = () => {
         icon={Circles}
         title={`${circle.name}`}
         actions={
-          <>
-            <ActionButton
-              type="primary"
-              icon={Pencil}
-              onClick={() => {
-                setIsOpenEdit(true);
-              }}
-            >
-              {t('Edit Circle')}
-            </ActionButton>
-            <ActionGroup
-              type="mute"
-              size="square"
-              options={[
-                {
-                  onClick: () => {
-                    setIsOpenMemberLookup(true);
+          !isSystemCircle && (
+            <>
+              <ActionButton
+                type="primary"
+                icon={Pencil}
+                onClick={() => {
+                  setIsOpenEdit(true);
+                }}
+              >
+                {t('Edit')}
+              </ActionButton>
+              <ActionGroup
+                type="secondary"
+                size="square"
+                icon={Ellipsis}
+                options={[
+                  {
+                    onClick: () => {
+                      setIsOpenMemberLookup(true);
+                    },
+                    label: t('Edit Members'),
+                    icon: Persons,
                   },
-                  label: t('Edit Members'),
-                  icon: Persons,
-                },
-                ...(circle.disabled
-                  ? [
-                      {
-                        icon: Trash,
-                        onClick: () => removeCircle({ circleId }),
-                        confirmOptions: {
-                          title: `${t('Remove Circle')} ${circle.name}`,
-                          buttonText: t('Remove'),
-                          body: t(
-                            'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
-                          ),
+                  ...(circle.disabled
+                    ? [
+                        {
+                          icon: Trash,
+                          onClick: () => removeCircle({ circleId }),
+                          confirmOptions: {
+                            title: `${t('Remove Circle')} ${circle.name}`,
+                            buttonText: t('Remove'),
+                            body: t(
+                              'Are you sure you want to remove this circle, all members will lose their access provided by the permissions of this circle?'
+                            ),
+                          },
+                          label: t('Delete'),
                         },
-                        label: t('Delete'),
-                      },
-                      {
-                        icon: Check,
-                        onClick: () => {
-                          enableCircle({ circleId });
+                        {
+                          icon: Check,
+                          onClick: () => {
+                            enableCircle({ circleId });
+                          },
+                          label: t('Enable Circle'),
                         },
-                        label: t('Enable Circle'),
-                      },
-                    ]
-                  : [
-                      {
-                        icon: Block,
-                        onClick: () => disableCircle({ circleId }),
-                        confirmOptions: {
-                          title: `${t('Disable Circle')} ${circle.name}`,
-                          buttonText: t('Disable'),
-                          body: `${t('Are you sure you want to disable this circle')}`,
+                      ]
+                    : [
+                        {
+                          icon: Block,
+                          onClick: () => disableCircle({ circleId }),
+                          confirmOptions: {
+                            title: `${t('Disable Circle')} ${circle.name}`,
+                            buttonText: t('Disable'),
+                            body: `${t('Are you sure you want to disable this circle')}`,
+                          },
+                          label: t('Disable Circle'),
                         },
-                        label: t('Disable Circle'),
-                      },
-                    ]),
-              ]}
-            >
-              ...
-            </ActionGroup>
-          </>
+                      ]),
+                ]}
+              >
+                {t('More')}
+              </ActionGroup>
+            </>
+          )
         }
         breadCrumbs={[
           { href: '/owner/circles', title: 'My Circles' },
@@ -142,13 +147,21 @@ const CircleDetails = () => {
       )}
 
       <section>
-        <div className="mr-auto max-w-2xl">{circle.description}</div>
+        <div className="mr-auto max-w-2xl">
+          {isSystemCircle
+            ? t(
+                'This is a built-in circle, that contains all your connections. Because of that you cannot edit it.'
+              )
+            : circle.description}
+        </div>
       </section>
 
       <SectionTitle
         title={t('Members')}
         actions={
-          <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={Pencil} />
+          !isSystemCircle && (
+            <ActionButton type="mute" onClick={() => setIsOpenMemberLookup(true)} icon={Pencil} />
+          )
         }
       />
       <div className="py-5">
@@ -160,21 +173,24 @@ const CircleDetails = () => {
                 circleId={decodedCircleKey}
                 member={member}
                 className="min-w-[5rem]"
+                isEditable={!isSystemCircle}
               />
             ))}
           </div>
         ) : (
-          <SubtleMessage className="flex flex-row items-center">
-            <span>{t('Ready to add some connections?')}</span>
-            <ActionButton
-              onClick={() => setIsOpenMemberLookup(true)}
-              type="secondary"
-              className="ml-2"
-              icon={Plus}
-            >
-              {t('Add')}
-            </ActionButton>
-          </SubtleMessage>
+          !isSystemCircle && (
+            <SubtleMessage className="flex flex-row items-center">
+              <span>{t('Ready to add some connections?')}</span>
+              <ActionButton
+                onClick={() => setIsOpenMemberLookup(true)}
+                type="secondary"
+                className="ml-2"
+                icon={Plus}
+              >
+                {t('Add')}
+              </ActionButton>
+            </SubtleMessage>
+          )
         )}
       </div>
 
@@ -211,7 +227,9 @@ const CircleDetails = () => {
           </>
         }
         actions={
-          <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={Pencil} />
+          !isSystemCircle && (
+            <ActionButton type="mute" onClick={() => setIsDrivesEditOpen(true)} icon={Pencil} />
+          )
         }
       >
         {circle.driveGrants?.length ? (
@@ -287,10 +305,12 @@ const CircleMemberCard = ({
   circleId,
   member,
   className,
+  isEditable,
 }: {
   circleId: string;
   member: Membership;
   className: string;
+  isEditable: boolean;
 }) => {
   const {
     mutate: revokeGrants,
@@ -313,28 +333,30 @@ const CircleMemberCard = ({
           className={`${className ?? ''} group relative`}
           href={(member.domain && `/owner/third-parties/services/${member.domain}`) ?? undefined}
         >
-          <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
-            <ActionButton
-              type="secondary"
-              onClick={(e) => {
-                e.preventDefault();
-                revokeDomainGrants({ circleId, domains: [member.domain] });
-                return false;
-              }}
-              confirmOptions={{
-                type: 'info',
-                title: t('Remove member'),
-                body: `${t('Are you sure you want to remove')} ${member.domain} ${t(
-                  'from this circle?'
-                )}`,
-                buttonText: t('Remove'),
-              }}
-              state={revokeDomainGrantsStatus}
-              icon={Times}
-              className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
-              size="square"
-            />
-          </div>
+          {isEditable ? (
+            <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
+              <ActionButton
+                type="secondary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  revokeDomainGrants({ circleId, domains: [member.domain] });
+                  return false;
+                }}
+                confirmOptions={{
+                  type: 'info',
+                  title: t('Remove member'),
+                  body: `${t('Are you sure you want to remove')} ${member.domain} ${t(
+                    'from this circle?'
+                  )}`,
+                  buttonText: t('Remove'),
+                }}
+                state={revokeDomainGrantsStatus}
+                icon={Times}
+                className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+                size="square"
+              />
+            </div>
+          ) : null}
         </DomainCard>
       </>
     );
@@ -349,27 +371,29 @@ const CircleMemberCard = ({
         odinId={odinId}
         href={(odinId && `/owner/connections/${odinId}`) ?? undefined}
       >
-        <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
-          <ActionButton
-            type="secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              revokeGrants({ circleId, odinIds: [odinId] });
-              return false;
-            }}
-            confirmOptions={{
-              type: 'info',
-              title: t('Remove member'),
-              body: `${t('Are you sure you want to remove')} ${odinId} ${t('from this circle?')}`,
-              buttonText: t('Remove'),
-            }}
-            state={revokeGrantsStatus}
-            icon={Times}
-            className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
-            size="square"
-          />
-        </div>
+        {isEditable ? (
+          <div className="absolute right-2 top-2 z-10 aspect-square rounded-full">
+            <ActionButton
+              type="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                revokeGrants({ circleId, odinIds: [odinId] });
+                return false;
+              }}
+              confirmOptions={{
+                type: 'info',
+                title: t('Remove member'),
+                body: `${t('Are you sure you want to remove')} ${odinId} ${t('from this circle?')}`,
+                buttonText: t('Remove'),
+              }}
+              state={revokeGrantsStatus}
+              icon={Times}
+              className="rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+              size="square"
+            />
+          </div>
+        ) : null}
       </ConnectionCard>
     </>
   );

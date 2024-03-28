@@ -1,11 +1,11 @@
 import {
-  ActionButton,
   ActionGroup,
   ActionLink,
   ChevronDown,
   ChevronLeft,
   ConnectionImage,
   ConnectionName,
+  ErrorBoundary,
   ErrorNotification,
   OwnerImage,
   OwnerName,
@@ -14,7 +14,7 @@ import {
   useDotYouClient,
   useIsConnected,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   ConversationWithYourselfId,
@@ -30,20 +30,14 @@ import { ChatInfo } from '../../components/Chat/Detail/ChatInfo';
 import { useNavigate } from 'react-router-dom';
 import { CHAT_ROOT } from './ChatHome';
 
-export const ChatDetail = ({
-  conversationId,
-  toggleSidenav,
-}: {
-  conversationId: string | undefined;
-  toggleSidenav: () => void;
-}) => {
+export const ChatDetail = ({ conversationId }: { conversationId: string | undefined }) => {
   const [isEmptyChat, setIsEmptyChat] = useState<boolean>(false);
 
-  const { data: conversation } = useConversation({ conversationId }).single;
+  const { data: conversation, isLoading, isFetched } = useConversation({ conversationId }).single;
   const { mutate: inviteRecipient } = useConversation().inviteRecipient;
-  const [replyMsg, setReplyMsg] = useState<DriveSearchResult<ChatMessage> | undefined>();
+  const [replyMsg, setReplyMsg] = useState<HomebaseFile<ChatMessage> | undefined>();
 
-  if (!conversationId)
+  if (!conversationId || isLoading || (!conversation && isFetched))
     return (
       <div className="flex h-full flex-grow flex-col items-center justify-center">
         <p className="text-4xl">Homebase Chat</p>
@@ -56,31 +50,35 @@ export const ChatDetail = ({
   };
 
   return (
-    <div className="flex h-[100dvh] flex-grow flex-col overflow-hidden">
-      <ChatHeader conversation={conversation || undefined} toggleSidenav={toggleSidenav} />
-      <GroupChatConnectedState conversation={conversation || undefined} />
-      <ChatHistory
-        conversation={conversation || undefined}
-        setReplyMsg={setReplyMsg}
-        setIsEmptyChat={setIsEmptyChat}
-      />
-      <ChatComposer
-        conversation={conversation || undefined}
-        replyMsg={replyMsg}
-        clearReplyMsg={() => setReplyMsg(undefined)}
-        onSend={onSend}
-        key={conversationId}
-      />
-    </div>
+    <ErrorBoundary>
+      <div className="flex h-full flex-grow flex-col overflow-hidden">
+        <ChatHeader conversation={conversation || undefined} />
+        <GroupChatConnectedState conversation={conversation || undefined} />
+        <ErrorBoundary>
+          <ChatHistory
+            conversation={conversation || undefined}
+            setReplyMsg={setReplyMsg}
+            setIsEmptyChat={setIsEmptyChat}
+          />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <ChatComposer
+            conversation={conversation || undefined}
+            replyMsg={replyMsg}
+            clearReplyMsg={() => setReplyMsg(undefined)}
+            onSend={onSend}
+            key={conversationId}
+          />
+        </ErrorBoundary>
+      </div>
+    </ErrorBoundary>
   );
 };
 
 const ChatHeader = ({
   conversation: conversationDsr,
-  toggleSidenav,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
-  toggleSidenav: () => void;
+  conversation: HomebaseFile<Conversation> | undefined;
 }) => {
   const navigate = useNavigate();
 
@@ -105,9 +103,9 @@ const ChatHeader = ({
     <>
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
-        <ActionButton className="md:hidden" type="mute" onClick={toggleSidenav}>
+        <ActionLink className="lg:hidden" type="mute" href={CHAT_ROOT}>
           <ChevronLeft className="h-4 w-4" />
-        </ActionButton>
+        </ActionLink>
 
         <a
           onClick={() => setShowChatInfo(true)}
@@ -120,7 +118,9 @@ const ChatHeader = ({
               size="sm"
             />
           ) : withYourself ? (
-            <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
+            <div className="h-[3rem] w-[3rem] flex-shrink-0">
+              <OwnerImage className="border border-neutral-200 dark:border-neutral-800" size="sm" />
+            </div>
           ) : (
             <div className="rounded-full bg-primary/20 p-3">
               <Persons className="h-6 w-6" />
@@ -193,7 +193,7 @@ const ChatHeader = ({
 const GroupChatConnectedState = ({
   conversation,
 }: {
-  conversation: DriveSearchResult<Conversation> | undefined;
+  conversation: HomebaseFile<Conversation> | undefined;
 }) => {
   if (!conversation) return null;
   const recipients = (conversation.fileMetadata.appData.content as GroupConversation).recipients;

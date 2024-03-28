@@ -1,6 +1,6 @@
 import { t } from '../../../helpers';
 import { CanReactInfo, CantReact } from '../../../hooks';
-import { ActionButton, Loader } from '../../../ui';
+import { Loader } from '../../../ui';
 
 export const CantReactInfo = ({
   cantReact,
@@ -9,20 +9,14 @@ export const CantReactInfo = ({
   cantReact: CanReactInfo | undefined;
   login?: () => void;
 }) => {
-  if (!cantReact) {
+  if (cantReact === undefined) {
     return (
-      <div className="flex flex-row items-center gap-2">
+      <div className="flex flex-row items-center gap-2 animate-slowding ">
         <Loader className="h-5 w-5 text-foreground" />
         <p>{t('Determining if you can react')}</p>
       </div>
     );
   }
-
-  let infoMessage = '';
-
-  // If we can react.. Then it's just partial
-  if (cantReact?.canReact === 'emoji' || cantReact?.canReact === 'comment')
-    infoMessage = t('You do not have the necessary access to react on this post');
 
   const details = (cantReact as CantReact)?.details;
   if (details === 'NOT_AUTHENTICATED' && login) {
@@ -39,16 +33,21 @@ export const CantReactInfo = ({
     );
   }
 
-  infoMessage =
-    details === 'NOT_AUTHENTICATED'
-      ? t('Reactions are disabled for anonymous users')
-      : details === 'NOT_AUTHORIZED'
-      ? t('You do not have the necessary access to react on this post')
-      : details === 'DISABLED_ON_POST'
-      ? t('Reactions are disabled on this post')
-      : details === 'UNKNOWN'
-      ? t("We couldn't determine if you can react on this post")
-      : '';
+  let infoMessage = '';
+  // If we can react.. Then it's just partial
+  if (cantReact?.canReact === 'emoji' || cantReact?.canReact === 'comment')
+    infoMessage = t('You do not have the necessary access to react on this post');
+  else
+    infoMessage =
+      details === 'NOT_AUTHENTICATED'
+        ? t('Reactions are disabled for anonymous users')
+        : details === 'NOT_AUTHORIZED'
+          ? t('You do not have the necessary access to react on this post')
+          : details === 'DISABLED_ON_POST'
+            ? t('Reactions are disabled on this post')
+            : details === 'UNKNOWN'
+              ? t("We couldn't determine if you can react on this post")
+              : '';
 
   return <p className="text-foreground text-sm italic text-opacity-50">{infoMessage}</p>;
 };

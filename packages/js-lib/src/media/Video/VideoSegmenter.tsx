@@ -1,11 +1,14 @@
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
-import { mergeByteArrays } from '../../helpers/helpers';
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
+import { hasDebugFlag, mergeByteArrays } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 
 type ExtendedBuffer = ArrayBuffer & { fileStart?: number };
 const MB = 1024 * 1024;
 const MB_PER_CHUNK = 5 * MB;
+
+const isDebug = hasDebugFlag();
 
 interface Mp4Info {
   isFragmented: boolean;
@@ -34,12 +37,61 @@ const loadMp4box = async () => {
   }
 };
 
+export const getMp4Info = async (file: File | Blob): Promise<Mp4Info> => {
+  if (!file || file.type !== 'video/mp4')
+    throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
+
+  const { createFile } = await loadMp4box();
+  return new Promise((resolve) => {
+    const mp4File = createFile(true);
+
+    mp4File.onReady = function (info: Mp4Info) {
+      resolve(info);
+    };
+
+    let offset = 0;
+    const reader = file.stream().getReader();
+
+    const getNextChunk = ({
+      done,
+      value,
+    }: ReadableStreamReadResult<Uint8Array>): Promise<void> | undefined => {
+      if (done) {
+        // Indicates that no more data will be received and that all remaining samples should be flushed in the segmentation or extraction process.
+        mp4File.stop();
+        mp4File.flush();
+        return;
+      }
+
+      const block: ExtendedBuffer = value.buffer;
+      block.fileStart = offset;
+      offset += value.length;
+
+      mp4File.appendBuffer(block);
+      return reader.read().then(getNextChunk);
+    };
+
+    reader.read().then(getNextChunk);
+  });
+};
+
+export const getCodecFromMp4Info = (info: Mp4Info): string => {
+  let codec = info.mime;
+  const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
+  if (avTracks?.length > 1) {
+    codec = `video/mp4; codecs="${avTracks
+      .map((trck) => trck.codec)
+      .join(',')}"; profiles="${info.brands.join(',')}"`;
+  }
+
+  return codec;
+};
+
 export const segmentVideoFile = async (
   file: File | Blob
 ): Promise<{ data: Blob; metadata: SegmentedVideoMetadata }> => {
-  if (!file || file.type !== 'video/mp4') {
+  if (!file || file.type !== 'video/mp4')
     throw new Error('No (supported) mp4 file found, segmentation only works with mp4 files');
-  }
 
   const { createFile, BoxParser, ISOFile } = await loadMp4box();
   let mp4Info: Mp4Info | undefined;
@@ -86,16 +138,13 @@ export const segmentVideoFile = async (
   return new Promise((resolve, reject) => {
     const mp4File = createFile(true);
     const segmentedBytes: Uint8Array[] = [];
-    let videoTrackId: number;
-    let segmentedByteOffset = 0;
     const tracksToRead: boolean[] = [];
     const metadata: SegmentedVideoMetadata = {
       isSegmented: true,
-      mimeType: '',
+      mimeType: 'video/mp4',
       codec: '',
       fileSize: 0,
       duration: 0,
-      segmentMap: [],
     };
 
     mp4File.onError = function (e: unknown) {
@@ -105,17 +154,28 @@ export const segmentVideoFile = async (
 
     mp4File.onReady = function (info: Mp4Info) {
       mp4Info = info;
-      console.debug('mp4box ready', info);
+      isDebug && console.debug('mp4box ready', info);
 
       metadata.codec = info.mime;
       const avTracks = info.tracks?.filter((trck) => ['video', 'audio'].includes(trck.type));
-      videoTrackId = avTracks.find((trck) => trck.type === 'video')?.id || 1;
       if (avTracks?.length > 1) {
         metadata.codec = `video/mp4; codecs="${avTracks
           .map((trck) => trck.codec)
-          .join(',')}"; profiles="${info.brands.join(',')}'}"`;
+          .join(',')}"; profiles="${info.brands.join(',')}"`;
       }
       metadata.duration = (info.initial_duration || info.duration) / info.timescale;
+
+      // If the file is already fragmented, we can just return it; With the metadata we have;
+      if (info.isFragmented) {
+        metadata.fileSize = file.size;
+
+        isDebug && console.debug('already fragmented, returning file', metadata);
+        resolve({
+          data: file,
+          metadata,
+        });
+        return;
+      }
 
       info.tracks.forEach((trck) => {
         tracksToRead[trck.id] = false;
@@ -128,7 +188,7 @@ export const segmentVideoFile = async (
           (track.movie_duration || info.duration || info.initial_duration || 0) /
           (track.movie_timescale || info.timescale || 1);
         const secondsFor8MbOfData = (metadata.duration / file.size) * MB_PER_CHUNK;
-        console.debug({ track: i, secondsFor8MbOfData });
+        isDebug && console.debug({ track: i, secondsFor8MbOfData });
 
         const nbrSamples = Math.round((nbSamples / durationInSec) * secondsFor8MbOfData);
         mp4File.setSegmentOptions(track.id, null, {
@@ -147,28 +207,14 @@ export const segmentVideoFile = async (
       sampleNum: number,
       is_last: boolean
     ) {
-      if (id === videoTrackId)
-        metadata.segmentMap.push({ offset: segmentedByteOffset, samples: sampleNum });
-
       const segment = new Uint8Array(buffer);
-      segmentedByteOffset += segment.length;
       segmentedBytes.push(segment);
 
       if (is_last) {
         tracksToRead[id] = true;
 
         if (!tracksToRead.some((trck) => !trck)) {
-          console.debug('without offsets: ', metadata.segmentMap);
-
           const finalMetaBytes = new Uint8Array(buildInitSegments(mp4File));
-          const metaOffset = finalMetaBytes.length;
-          metadata.segmentMap = [
-            { offset: 0, samples: 0 },
-            ...metadata.segmentMap.map((segment) => {
-              return { ...segment, offset: metaOffset + segment.offset };
-            }),
-          ];
-          console.debug('with offsets: ', metadata.segmentMap);
           const finalSegmentedBytes = mergeByteArrays(segmentedBytes);
           const finalBytes = mergeByteArrays([finalMetaBytes, finalSegmentedBytes]);
           metadata.fileSize = finalBytes.length;

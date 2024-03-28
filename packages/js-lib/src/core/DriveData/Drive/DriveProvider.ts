@@ -2,10 +2,14 @@ import { DriveDefinition } from './DriveTypes';
 import { ApiType, DotYouClient } from '../../DotYouClient';
 import {
   assertIfDefined,
+  hasDebugFlag,
   stringGuidsEqual,
   stringifyToQueryParams,
 } from '../../../helpers/helpers';
 import { PagedResult, PagingOptions, TargetDrive } from '../../core';
+
+export const TRANSIENT_TEMP_DRIVE_ALIAS = '90f5e74ab7f9efda0ac298373a32ad8c';
+const isDebug = hasDebugFlag();
 
 export const getDrives = async (
   dotYouClient: DotYouClient,
@@ -13,8 +17,15 @@ export const getDrives = async (
 ): Promise<PagedResult<DriveDefinition>> => {
   const client = dotYouClient.createAxiosClient();
 
-  return client.post('drive/mgmt', params).then((response) => {
-    return response.data;
+  return client.post<PagedResult<DriveDefinition>>('drive/mgmt', params).then((response) => {
+    return {
+      ...response.data,
+      results: isDebug
+        ? response?.data?.results
+        : response?.data?.results?.filter(
+            (drive) => !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
+          ),
+    };
   });
 };
 
@@ -33,9 +44,19 @@ export const getDrivesByType = async (
 
   if (dotYouClient.getType() === ApiType.Owner) {
     const client = dotYouClient.createAxiosClient();
-    return client.get('drive/mgmt/type?' + stringifyToQueryParams(params)).then((response) => {
-      return response.data;
-    });
+    return client
+      .get<PagedResult<DriveDefinition>>('drive/mgmt/type?' + stringifyToQueryParams(params))
+      .then((response) => {
+        return {
+          ...response.data,
+          results: isDebug
+            ? response?.data?.results
+            : response?.data?.results?.filter(
+                (drive) =>
+                  !stringGuidsEqual(drive.targetDriveInfo.alias, TRANSIENT_TEMP_DRIVE_ALIAS)
+              ),
+        };
+      });
   } else {
     const client = dotYouClient.createAxiosClient();
     return client.get('drive/metadata/type?' + stringifyToQueryParams(params)).then((response) => {
@@ -82,15 +103,55 @@ export const ensureDrive = async (
 
   return client
     .post('/drive/mgmt/create', data)
-    .then((response) => {
-      if (response.status === 200) {
-        return true;
-      }
-
-      return false;
-    })
+    .then((response) => response.status === 200)
     .catch((error) => {
       console.error('[DotYouCore-js:ensureDrive]', error);
+      throw error;
+    });
+};
+
+export const editDriveMetadata = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newMetadata: string
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newMetadata', newMetadata);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    metadata: newMetadata,
+  };
+
+  return client
+    .post('/drive/mgmt/updatemetadata', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[DotYouCore-js:editDriveMetadata]', error);
+      throw error;
+    });
+};
+
+export const editDriveAllowAnonymousRead = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newAllowAnonymousRead: boolean
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newAllowAnonymousRead', newAllowAnonymousRead);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    allowAnonymousReads: newAllowAnonymousRead,
+  };
+
+  return client
+    .post('/drive/mgmt/setdrivereadmode', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[DotYouCore-js:editDriveAllowAnonymousRead]', error);
       throw error;
     });
 };

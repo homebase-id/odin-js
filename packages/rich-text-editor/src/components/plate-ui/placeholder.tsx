@@ -33,6 +33,7 @@ export const Placeholder = (props: PlaceholderProps) => {
 export const withPlaceholder = createNodeHOC(Placeholder);
 export const withPlaceholdersPrimitive = createNodesHOC(Placeholder);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const withPlaceholders = (components: any) =>
   withPlaceholdersPrimitive(components, [
     {

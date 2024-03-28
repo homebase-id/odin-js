@@ -1,22 +1,16 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
-import {
-  ActionButton,
-  Arrow,
-  ArrowLeft,
-  Times,
-  useDotYouClient,
-  usePortal,
-} from '@youfoundation/common-app';
+import { ActionButton, Arrow, ArrowLeft, Times, usePortal } from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { OdinImage, OdinVideo } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
-export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const target = usePortal('modal-container');
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const dotYouClient = useDotYouClientContext();
 
   const navigate = useNavigate();
   const { mediaKey } = useParams();
@@ -83,7 +77,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
     <div className="fixed inset-0 z-40 bg-black lg:bg-transparent" role="dialog" aria-modal="true">
       <div className="inset-0 bg-black transition-opacity lg:fixed"></div>
       <div className="inset-0 z-10 lg:fixed lg:overflow-y-auto">
-        <div className="relative flex h-full min-h-screen flex-row items-center justify-center">
+        <div className="relative flex h-full min-h-[100dvh] flex-row items-center justify-center">
           {msg.fileMetadata.payloads.find((p) => p.key === mediaKey)?.contentType ===
           'video/mp4' ? (
             <OdinVideo
@@ -93,6 +87,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
               targetDrive={ChatDrive}
               lastModified={msg.fileMetadata.updated}
               probablyEncrypted={true}
+              autoPlay={true}
             />
           ) : (
             <OdinImage

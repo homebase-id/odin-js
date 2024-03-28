@@ -1,9 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+// eslint-disable-next-line no-undef
 module.exports = {
   content: [
     './src/**/*.{js,jsx,ts,tsx}',
     '../common-app/src/**/*.{js,jsx,ts,tsx}',
     '../rich-text-editor/src/**/*.{js,jsx,ts,tsx}',
+    '../feed-app/src/components/SocialFeed/PostComposer.tsx',
   ],
   theme: {
     extend: {
@@ -16,6 +18,15 @@ module.exports = {
 
         primary: 'rgb(var(--color-button) / <alpha-value>)',
         'primary-contrast': 'rgb(var(--color-button-text) / <alpha-value>)',
+      },
+      keyframes: {
+        slowding: {
+          '0%, 60%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      },
+      animation: {
+        slowding: 'slowding 1.2s ease-in-out',
       },
     },
   },

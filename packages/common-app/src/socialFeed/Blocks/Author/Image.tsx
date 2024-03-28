@@ -1,6 +1,5 @@
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { useState, useRef } from 'react';
-import { Image, t, useIntersection } from '@youfoundation/common-app';
+import { Image, t } from '@youfoundation/common-app';
 import { useSiteData } from '@youfoundation/common-app';
 
 import { Person } from '@youfoundation/common-app';
@@ -42,52 +41,50 @@ export const OwnerImage = ({ className, size }: ImageProps) => {
         size === 'xs'
           ? 'h-[2rem] w-[2rem]'
           : size === 'sm'
-          ? 'h-[3rem] w-[3rem]'
-          : size === 'md'
-          ? 'h-[5rem] w-[5rem]'
-          : ''
+            ? 'h-[3rem] w-[3rem]'
+            : size === 'md'
+              ? 'h-[5rem] w-[5rem]'
+              : ''
       } rounded-full ${className ?? ''}`}
       fit="cover"
-      alt={t('Your profile picture')}
+      alt={t('You')}
+      title={t('You')}
     />
   );
 };
 
 export const ConnectionImage = ({ odinId, className, size }: ConnectionImageProps) => {
-  const [isInView, setIsInView] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useIntersection(wrapperRef, () => {
-    setIsInView(true);
-  });
-
   return (
     <>
-      {odinId && isInView ? (
+      {odinId ? (
         <img
           src={`https://${odinId}/pub/image`}
           className={`${
             size === 'xs'
               ? 'h-[2rem] w-[2rem]'
               : size === 'sm'
-              ? 'h-[3rem] w-[3rem]'
-              : size === 'md'
-              ? 'h-[5rem] w-[5rem]'
-              : ''
+                ? 'h-[3rem] w-[3rem]'
+                : size === 'md'
+                  ? 'h-[5rem] w-[5rem]'
+                  : ''
           } rounded-full ${className ?? ''}`}
-          alt={`${t('The profile picture of')} ${odinId}`}
+          alt={`${odinId}`}
+          title={`${odinId}`}
+          onError={(e) => {
+            console.warn('failed to fetch profile image', e);
+          }}
         />
       ) : (
-        <div ref={wrapperRef}>
+        <div>
           <Person
             className={
               size === 'xs'
                 ? 'h-[2rem] w-[2rem]'
                 : size === 'sm'
-                ? 'h-[3rem] w-[3rem]'
-                : size === 'md'
-                ? 'h-[5rem] w-[5rem]'
-                : ''
+                  ? 'h-[3rem] w-[3rem]'
+                  : size === 'md'
+                    ? 'h-[5rem] w-[5rem]'
+                    : ''
             }
           />
         </div>
