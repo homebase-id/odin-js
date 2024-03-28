@@ -32,8 +32,8 @@ const ListItemWrapper = ({
   <div className="px-2" style={{ order: order, opacity: order ? 100 : 0 }}>
     <div
       onClick={onClick}
-      className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 hover:bg-primary/20 ${
-        isActive ? 'bg-slate-200 dark:bg-slate-800' : ''
+      className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
+        isActive ? 'bg-slate-200 dark:bg-slate-800' : 'bg-transparent'
       }`}
     >
       {children}

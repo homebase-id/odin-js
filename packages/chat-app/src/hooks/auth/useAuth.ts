@@ -110,7 +110,7 @@ const circleDrives = [
     t: ChatDrive.type,
     n: 'Chat Drive',
     d: '',
-    p: DrivePermissionType.Write,
+    p: DrivePermissionType.Write + DrivePermissionType.React,
   },
 ];
 

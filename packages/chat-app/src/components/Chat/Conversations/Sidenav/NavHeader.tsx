@@ -3,7 +3,7 @@ import { CHAT_ROOT } from '../../../../templates/Chat/ChatHome';
 
 export const NavHeader = ({ isOnline }: { isOnline: boolean }) => {
   return (
-    <div className="flex flex-row items-center gap-2 p-2 lg:p-5">
+    <div className="flex flex-row items-center gap-2 p-2 lg:p-5 lg:pb-2">
       <div className="flex flex-row items-center gap-2">
         <span
           className={`h-3 w-3 rounded-full transition-colors ${
