@@ -119,7 +119,7 @@ export const drives = [
 
 export const permissions = [
   AppPermissionType.ReadConnections,
-  AppPermissionType.ManageConnectionRequests,
+  AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadCircleMembers,
   AppPermissionType.ReadWhoIFollow,
   AppPermissionType.ReadMyFollowers,

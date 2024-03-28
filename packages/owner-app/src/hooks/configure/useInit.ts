@@ -3,7 +3,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { DriveDefinitionParam, initialize } from '../../provider/system/SystemProvider';
 import { useAuth } from '../auth/useAuth';
-import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { toGuidId } from '@youfoundation/js-lib/helpers';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import {
@@ -26,24 +25,7 @@ export const useInit = () => {
 
   const { mutateAsync: publishStaticFiles } = useStaticFiles().publish;
 
-  const initDrives: DriveDefinitionParam[] = [
-    {
-      targetDrive: HomePageConfig.HomepageTargetDrive,
-      name: 'Homepage Config',
-      metadata: '',
-      allowAnonymousReads: true,
-      ownerOnly: false,
-      allowSubscriptions: false,
-    },
-    {
-      targetDrive: BlogConfig.PublicChannelDrive,
-      name: 'Public Posts',
-      metadata: '',
-      allowAnonymousReads: true,
-      ownerOnly: false,
-      allowSubscriptions: true,
-    },
-  ];
+  const initDrives: DriveDefinitionParam[] = [];
 
   const doInitWithData = async (data: WelcomeData) => {
     if (!isAuthenticated) return;
