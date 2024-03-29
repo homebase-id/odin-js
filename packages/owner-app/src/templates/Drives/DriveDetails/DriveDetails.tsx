@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, Pencil, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, HeartBeat, Pencil, t } from '@youfoundation/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 
 import { HardDrive } from '@youfoundation/common-app';
@@ -12,14 +12,15 @@ import AppMembershipView from '../../../components/PermissionViews/AppPermission
 import { CirclePermissionView } from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useCircles } from '@youfoundation/common-app';
-import DriveCircleAccessDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveCircleAccessDialog';
-import DriveAppAccessDialog from '../../../components/Dialog/DriveAppAccessDialog/DriveAppAccessDialog';
+import DriveCircleAccessDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveCircleAccessDialog';
+import DriveAppAccessDialog from '../../../components/Drives/DriveAppAccessDialog/DriveAppAccessDialog';
 import FileBrowser from '../../../components/FileBrowser/FileBrowser';
 import { Download } from '@youfoundation/common-app';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
-import DriveMetadataEditDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveMetadataEditDialog';
+import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
+import { DriveOutboxStatusDialog } from '../../../components/Drives/DriveOutboxStatusDialog/DriveOutboxStatusDialog';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -31,6 +32,7 @@ const DriveDetails = () => {
       ? { alias: splittedDriveKey[0], type: splittedDriveKey[1] }
       : undefined,
   });
+
   const { mutateAsync: exportUnencrypted, status: exportStatus } = useExport().exportUnencrypted;
 
   const { data: circles } = useCircles().fetch;
@@ -41,6 +43,7 @@ const DriveDetails = () => {
   const [isDriveEditOpen, setIsDriveEditOpen] = useState(false);
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
   const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
+  const [isShowOutboxStatus, setIsShowOutboxStatus] = useState(false);
 
   if (driveDefLoading) return <LoadingDetailPage />;
 
@@ -79,14 +82,22 @@ const DriveDetails = () => {
         title={`${driveDef.name}`}
         actions={
           <>
-            <ActionButton
-              onClick={async () => doDownload(await exportUnencrypted(driveDef))}
+            <ActionGroup
+              options={[
+                {
+                  label: 'Export',
+                  icon: Download,
+                  onClick: async () => doDownload(await exportUnencrypted(driveDef)),
+                },
+                {
+                  label: 'Outbox Status',
+                  icon: HeartBeat,
+                  onClick: () => setIsShowOutboxStatus(true),
+                },
+              ]}
               state={exportStatus}
               type="secondary"
-              icon={Download}
-            >
-              {t('Export')}
-            </ActionButton>
+            />
           </>
         }
         breadCrumbs={[
@@ -200,6 +211,12 @@ const DriveDetails = () => {
         onCancel={() => setIsAppSelectorOpen(false)}
         onConfirm={() => setIsAppSelectorOpen(false)}
         title={`${t('Edit access on')} ${driveDef.name}`}
+      />
+
+      <DriveOutboxStatusDialog
+        targetDrive={targetDriveInfo}
+        isOpen={isShowOutboxStatus}
+        onClose={() => setIsShowOutboxStatus(false)}
       />
     </>
   );

@@ -18,7 +18,7 @@ import { Block } from '@youfoundation/common-app';
 import { Check } from '@youfoundation/common-app';
 import { AppInteractionPermissionOverview } from '../../../components/PermissionViews/AppInteractionPermissionView/AppInteractionPermissionView';
 import CircleAppInteractionDialog from '../../../components/Dialog/CircleAppInteractionDialog/CircleAppInteractionDialog';
-import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { ALL_CONNECTIONS_CIRCLE_ID, Membership } from '@youfoundation/js-lib/network';
 import DomainCard from '../../../components/Connection/DomainCard/DomainCard';

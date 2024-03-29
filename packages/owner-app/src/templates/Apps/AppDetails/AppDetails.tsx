@@ -13,7 +13,7 @@ import { useCircles } from '@youfoundation/common-app';
 import { AppClientRegistration } from '../../../provider/app/AppManagementProviderTypes';
 import { HardDrive } from '@youfoundation/common-app';
 import { useState } from 'react';
-import DrivePermissionSelectorDialog from '../../../components/Dialog/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
+import DrivePermissionSelectorDialog from '../../../components/Drives/DrivePermissionSelectorDialog/DrivePermissionSelectorDialog';
 import PermissionSelectorDialog from '../../../components/Dialog/PermissionSelectorDialog/PermissionSelectorDialog';
 import { useAppClients } from '../../../hooks/apps/useAppClients';
 import { Times } from '@youfoundation/common-app';

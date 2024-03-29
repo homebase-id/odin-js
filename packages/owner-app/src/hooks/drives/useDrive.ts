@@ -3,13 +3,14 @@ import {
   DriveDefinition,
   editDriveAllowAnonymousRead,
   editDriveMetadata,
+  getDriveOutboxStatus,
   getDrivesByType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { useAuth } from '../auth/useAuth';
 
-export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
-  const { targetDrive } = props || {};
+export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?: boolean }) => {
+  const { targetDrive, fetchOutboxStatus } = props || {};
   const dotYouClient = useAuth().getDotYouClient();
   const queryClient = useQueryClient();
 
@@ -35,6 +36,9 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
       ) || null
     );
   };
+
+  const fetchOutboxDetail = async (targetDrive: TargetDrive) =>
+    await getDriveOutboxStatus(dotYouClient, targetDrive);
 
   const editDescription = async ({
     targetDrive,
@@ -62,6 +66,12 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
       queryFn: () => fetch(targetDrive as TargetDrive),
       refetchOnWindowFocus: false,
       enabled: !!targetDrive,
+    }),
+    fetchOutboxStatus: useQuery({
+      queryKey: ['drive-outbox-status', `${targetDrive?.alias}_${targetDrive?.type}`],
+      queryFn: () => fetchOutboxDetail(targetDrive as TargetDrive),
+      refetchOnWindowFocus: false,
+      enabled: !!targetDrive && fetchOutboxStatus,
     }),
     editDescription: useMutation({
       mutationFn: editDescription,
