@@ -25,6 +25,7 @@ import {
   uploadFile,
   uploadHeader,
   NewMediaFile,
+  UploadTransferStatus,
 } from '@youfoundation/js-lib/core';
 import {
   ChatDrive,
@@ -139,6 +140,19 @@ export const dsrToMessage = async (
       includeMetadataHeader
     );
     if (!attrContent) return null;
+
+    if (
+      attrContent.deliveryStatus === ChatDeliveryStatus.Sent &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      const someFailed = Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
+        (recipient) => {
+          !dsr.serverMetadata?.transferHistory?.recipients[recipient]
+            .latestSuccessfullyDeliveredVersionTag;
+        }
+      );
+      if (!someFailed) attrContent.deliveryStatus = ChatDeliveryStatus.Delivered;
+    }
 
     const chatMessage: HomebaseFile<ChatMessage> = {
       ...dsr,
@@ -260,6 +274,29 @@ export const uploadChatMessage = async (
   );
 
   if (!uploadResult) return null;
+
+  if (
+    recipients.some(
+      (recipient) =>
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        UploadTransferStatus.FailedToEnqueueOutbox
+    )
+  ) {
+    message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
+    message.fileMetadata.appData.content.deliveryDetails = {};
+    for (const recipient of recipients) {
+      message.fileMetadata.appData.content.deliveryDetails[recipient] =
+        uploadResult.recipientStatus?.[recipient].toLowerCase() ===
+        UploadTransferStatus.FailedToEnqueueOutbox
+          ? ChatDeliveryStatus.Failed
+          : ChatDeliveryStatus.Delivered;
+    }
+
+    await updateChatMessage(dotYouClient, message, recipients, uploadResult.keyHeader);
+
+    console.error('Not all recipients received the message: ', uploadResult);
+    throw new Error(`Not all recipients received the message: ${recipients.join(', ')}`);
+  }
 
   return {
     ...uploadResult,

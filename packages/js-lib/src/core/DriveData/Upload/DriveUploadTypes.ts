@@ -109,12 +109,18 @@ export interface UploadResult {
   keyHeader: KeyHeader | undefined;
   file: ExternalFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
-  recipientStatus: { [key: string]: TransferStatus };
+  recipientStatus: { [key: string]: UploadTransferStatus };
   newVersionTag: string;
 }
 
 export interface AppendResult {
   newVersionTag: string;
+}
+
+export enum UploadTransferStatus {
+  FailedToEnqueueOutbox = 'failedtoenqueueoutbox',
+  Queued = 'queued',
+  Delivered = 'delivered',
 }
 
 export enum TransferStatus {

@@ -15,7 +15,6 @@ import {
   SendContents,
   TargetDrive,
   ThumbnailFile,
-  TransferStatus,
   UploadFileMetadata,
   UploadInstructionSet,
   UploadResult,
@@ -28,6 +27,7 @@ import {
   uploadHeader,
   MediaFile,
   NewMediaFile,
+  UploadTransferStatus,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
@@ -283,32 +283,21 @@ export const uploadMail = async (
   conversation.fileMetadata.appData.previewThumbnail = uploadMetadata.appData.previewThumbnail;
 
   if (distribute) {
-    const deliveredToInboxes = recipients.map(
-      (recipient) =>
-        (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-        TransferStatus.DeliveredToInbox
-    );
-
-    if (recipients.length && deliveredToInboxes.every((delivered) => delivered)) {
-      conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Delivered;
-      await updateLocalMailHeader(
-        dotYouClient,
-        conversation as HomebaseFile<MailConversation>,
-        undefined,
-        (uploadResult as UploadResult).keyHeader
-      );
-    }
-
-    // TODO: Should this work differently with the job system? Would it auto retry?
-    if (!deliveredToInboxes.every((delivered) => delivered)) {
+    if (
+      recipients.some(
+        (recipient) =>
+          (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
+          UploadTransferStatus.FailedToEnqueueOutbox
+      )
+    ) {
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
       conversation.fileMetadata.appData.content.deliveryDetails = {};
       for (const recipient of recipients) {
         conversation.fileMetadata.appData.content.deliveryDetails[recipient] =
           (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          TransferStatus.DeliveredToInbox
-            ? MailDeliveryStatus.Delivered
-            : MailDeliveryStatus.Failed;
+          UploadTransferStatus.FailedToEnqueueOutbox
+            ? MailDeliveryStatus.Failed
+            : MailDeliveryStatus.Delivered;
       }
 
       await updateLocalMailHeader(
@@ -383,6 +372,19 @@ export const dsrToMailConversation = async (
       includeMetadataHeader
     );
     if (!attrContent) return null;
+
+    if (
+      attrContent.deliveryStatus === MailDeliveryStatus.Sent &&
+      dsr.serverMetadata?.transferHistory?.recipients
+    ) {
+      const someFailed = Object.keys(dsr.serverMetadata.transferHistory.recipients).some(
+        (recipient) => {
+          !dsr.serverMetadata?.transferHistory?.recipients[recipient]
+            .latestSuccessfullyDeliveredVersionTag;
+        }
+      );
+      if (!someFailed) attrContent.deliveryStatus = MailDeliveryStatus.Delivered;
+    }
 
     const conversation: HomebaseFile<MailConversation> = {
       ...dsr,
