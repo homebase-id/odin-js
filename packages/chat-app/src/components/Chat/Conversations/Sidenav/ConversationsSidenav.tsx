@@ -219,7 +219,7 @@ const SearchConversation = ({
   return (
     <>
       <form onSubmit={(e) => e.preventDefault()}>
-        <div className="flex flex-row gap-1 px-5 pb-5">
+        <div className="flex flex-row gap-1 px-2 pb-2 pt-1 lg:px-5 lg:pb-5 lg:pt-3">
           <Input
             onChange={(e) => setQuery(e.target.value.toLowerCase())}
             key={stateIndex}
