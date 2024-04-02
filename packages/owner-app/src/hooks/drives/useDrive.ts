@@ -3,7 +3,7 @@ import {
   DriveDefinition,
   editDriveAllowAnonymousRead,
   editDriveMetadata,
-  getDriveOutboxStatus,
+  getDriveStatus,
   getDrivesByType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
@@ -37,8 +37,8 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
     );
   };
 
-  const fetchOutboxDetail = async (targetDrive: TargetDrive) =>
-    await getDriveOutboxStatus(dotYouClient, targetDrive);
+  const fetchDriveDetail = async (targetDrive: TargetDrive) =>
+    await getDriveStatus(dotYouClient, targetDrive);
 
   const editDescription = async ({
     targetDrive,
@@ -67,9 +67,9 @@ export const useDrive = (props?: { targetDrive?: TargetDrive; fetchOutboxStatus?
       refetchOnWindowFocus: false,
       enabled: !!targetDrive,
     }),
-    fetchOutboxStatus: useQuery({
-      queryKey: ['drive-outbox-status', `${targetDrive?.alias}_${targetDrive?.type}`],
-      queryFn: () => fetchOutboxDetail(targetDrive as TargetDrive),
+    fetchStatus: useQuery({
+      queryKey: ['drive-status', `${targetDrive?.alias}_${targetDrive?.type}`],
+      queryFn: () => fetchDriveDetail(targetDrive as TargetDrive),
       refetchOnWindowFocus: false,
       enabled: !!targetDrive && fetchOutboxStatus,
     }),

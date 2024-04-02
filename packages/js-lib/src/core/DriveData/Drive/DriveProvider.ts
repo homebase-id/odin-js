@@ -156,24 +156,36 @@ export const editDriveAllowAnonymousRead = async (
     });
 };
 
-export interface DriveOutboxStatus {
-  checkedOutCount: number;
-  nextItemRun: number;
-  totalItems: number;
+export interface DriveStatus {
+  inbox: {
+    oldestItemTimestamp: number;
+    poppedCount: number;
+    totalItems: number;
+  };
+  outbox: {
+    checkedOutCount: number;
+    nextItemRun: number;
+    totalItems: number;
+  };
+  sizeInfo: {
+    fileCount: number;
+    size: number;
+  };
 }
-export const getDriveOutboxStatus = async (
+
+export const getDriveStatus = async (
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive
-): Promise<DriveOutboxStatus> => {
+): Promise<DriveStatus> => {
   assertIfDefined('targetDrive', targetDrive);
 
   const client = dotYouClient.createAxiosClient();
 
   return client
-    .get<DriveOutboxStatus>('/drive/outbox/status?' + stringifyToQueryParams(targetDrive))
+    .get<DriveStatus>('/drive/status?' + stringifyToQueryParams(targetDrive))
     .then((response) => response.data)
     .catch((error) => {
-      console.error('[DotYouCore-js:getDriveOutboxStatus]', error);
+      console.error('[DotYouCore-js:getDriveStatus]', error);
       throw error;
     });
 };

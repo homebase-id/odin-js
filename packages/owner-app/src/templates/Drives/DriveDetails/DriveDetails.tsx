@@ -20,7 +20,7 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
 import DriveMetadataEditDialog from '../../../components/Drives/DriveCircleAccessDialog/DriveMetadataEditDialog';
-import { DriveOutboxStatusDialog } from '../../../components/Drives/DriveOutboxStatusDialog/DriveOutboxStatusDialog';
+import { DriveStatusDialog } from '../../../components/Drives/DriveStatusDialog/DriveStatusDialog';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -43,7 +43,7 @@ const DriveDetails = () => {
   const [isDriveEditOpen, setIsDriveEditOpen] = useState(false);
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
   const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
-  const [isShowOutboxStatus, setIsShowOutboxStatus] = useState(false);
+  const [isShowDriveStatus, setIsShowDriveStatus] = useState(false);
 
   if (driveDefLoading) return <LoadingDetailPage />;
 
@@ -90,9 +90,9 @@ const DriveDetails = () => {
                   onClick: async () => doDownload(await exportUnencrypted(driveDef)),
                 },
                 {
-                  label: 'Outbox Status',
+                  label: 'Drive Status',
                   icon: HeartBeat,
-                  onClick: () => setIsShowOutboxStatus(true),
+                  onClick: () => setIsShowDriveStatus(true),
                 },
               ]}
               state={exportStatus}
@@ -213,10 +213,10 @@ const DriveDetails = () => {
         title={`${t('Edit access on')} ${driveDef.name}`}
       />
 
-      <DriveOutboxStatusDialog
+      <DriveStatusDialog
         targetDrive={targetDriveInfo}
-        isOpen={isShowOutboxStatus}
-        onClose={() => setIsShowOutboxStatus(false)}
+        isOpen={isShowDriveStatus}
+        onClose={() => setIsShowDriveStatus(false)}
       />
     </>
   );
