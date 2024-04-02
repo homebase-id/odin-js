@@ -26,7 +26,7 @@ const enLocale = [
   ['comment', 'Comment'],
   ['editor', 'Edit'],
   ['full', 'Full'],
-  ['readconnectionrequests', 'Manage Connection Requests'],
+  ['readconnectionrequests', 'Read Connection Requests'],
   ['none', 'None'],
   ['react', 'React'],
   ['readandwritereactionsandcomments', 'React/Comment'],
