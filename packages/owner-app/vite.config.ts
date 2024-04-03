@@ -13,7 +13,7 @@ const hostConfig = {
 export default defineConfig({
   plugins: [
     react(),
-    splitVendorChunkPlugin(),
+    // splitVendorChunkPlugin(),
     VitePWA({
       srcDir: 'src',
       filename: 'sw.ts',

@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const hostConfig = {
@@ -10,7 +10,10 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // splitVendorChunkPlugin()
+  ],
   server: {
     ...hostConfig,
     https: {
