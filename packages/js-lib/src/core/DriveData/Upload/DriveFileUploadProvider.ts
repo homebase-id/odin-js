@@ -42,6 +42,7 @@ export const uploadFile = async (
       instructions,
       metadata,
       payloads,
+      thumbnails,
     });
 
   // Force isEncrypted on the metadata to match the encrypt flag
