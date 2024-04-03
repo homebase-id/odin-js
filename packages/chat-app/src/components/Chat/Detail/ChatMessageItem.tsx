@@ -224,7 +224,17 @@ const ChatMediaMessageBody = ({
     <>
       <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
         <ChatDeliveryIndicator msg={msg} />
-        <ChatSentTimeIndicator msg={msg} className={hasACaption ? undefined : 'invert'} />
+        <ChatSentTimeIndicator
+          msg={msg}
+          className={
+            msg.fileMetadata.payloads.some(
+              (payload) =>
+                payload.contentType.includes('image/') || payload.contentType.includes('video/')
+            )
+              ? 'invert'
+              : undefined
+          }
+        />
       </div>
       <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
     </>
