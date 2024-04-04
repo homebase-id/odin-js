@@ -112,11 +112,11 @@ export const MailThread = () => {
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           autoMarkAsRead={isDisabledMarkAsRead ? false : undefined}
-          className="h-full bg-background py-2 md:py-5"
+          className="max-h-full bg-background py-2 md:py-5"
           scrollToMessage={messageKey}
         />
         <MailThreadActions
-          className="bg-background px-2 md:px-5"
+          className="flex-grow bg-background p-2 md:p-5"
           mailThread={mailThread}
           originId={originId}
           threadId={threadId}
@@ -157,7 +157,7 @@ const MailThreadActions = ({
   }, [draftFileId]);
 
   return (
-    <div className={`border-t border-gray-100 py-2 dark:border-gray-800  ${className || ''}`}>
+    <div className={`border-t border-gray-100 dark:border-gray-800  ${className || ''}`}>
       {isReply ? (
         <ReplyAction
           {...threadProps}
@@ -213,22 +213,18 @@ const ReplyAction = ({
   const hasDraft = !!draftFileId;
   const { data: draftDsr } = useMailDraft(hasDraft ? { draftFileId } : undefined).getDraft;
 
-  return (
-    <div className="rounded-lg px-2 py-5 md:px-5">
-      {hasDraft && !draftDsr ? null : (
-        <MailComposer
-          existingDraft={draftDsr || undefined}
-          recipients={recipients}
-          originId={originId}
-          threadId={threadId}
-          subject={subject}
-          onDone={onDone}
-          // We want to re-render when the versionTag changes.. So the latest updates are effectively rendered
-          key={`${draftFileId}${draftDsr?.fileMetadata.versionTag}`}
-          forwardedMailThread={mailThread}
-        />
-      )}
-    </div>
+  return hasDraft && !draftDsr ? null : (
+    <MailComposer
+      existingDraft={draftDsr || undefined}
+      recipients={recipients}
+      originId={originId}
+      threadId={threadId}
+      subject={subject}
+      onDone={onDone}
+      // We want to re-render when the versionTag changes.. So the latest updates are effectively rendered
+      key={`${draftFileId}${draftDsr?.fileMetadata.versionTag}`}
+      forwardedMailThread={mailThread}
+    />
   );
 };
 
@@ -244,14 +240,14 @@ const ForwardAction = ({
   onDone: () => void;
 }) => {
   return (
-    <div className="rounded-lg px-2 py-5 md:px-5">
-      <MailComposer
-        originId={originId}
-        subject={subject}
-        onDone={onDone}
-        forwardedMailThread={mailThread}
-      />
-    </div>
+    // <div className="rounded-lg py-5">
+    <MailComposer
+      originId={originId}
+      subject={subject}
+      onDone={onDone}
+      forwardedMailThread={mailThread}
+    />
+    // </div>
   );
 };
 

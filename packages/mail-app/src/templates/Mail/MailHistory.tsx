@@ -209,7 +209,7 @@ const MailMessage = ({
           </div>
         )}
         <div
-          className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 md:max-w-lg xl:max-w-2xl ${
+          className={`group relative w-full max-w-[75vw] rounded-lg px-2 py-2 sm:max-w-sm lg:max-w-lg xl:max-w-2xl ${
             messageFromMe
               ? 'bg-primary/10 dark:bg-primary/30'
               : 'bg-gray-500/10 dark:bg-gray-300/20'
@@ -250,6 +250,7 @@ const MailMessage = ({
               previewThumbnails: message.fileMetadata.payloads,
               query: query || undefined,
             }}
+            className="leading-7"
           />
           <MailAttachmentOverview
             className="mt-5"
