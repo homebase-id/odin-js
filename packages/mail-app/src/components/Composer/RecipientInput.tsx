@@ -6,10 +6,12 @@ export const RecipientInput = ({
   recipients,
   setRecipients,
   id,
+  autoFocus,
 }: {
   recipients: string[];
   setRecipients: (newRecipients: string[]) => void;
   id?: string;
+  autoFocus?: boolean;
 }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -96,6 +98,7 @@ export const RecipientInput = ({
           onBlur={() => setIsFocused(false)}
           key={inputStateIndex}
           id={id}
+          autoFocus={autoFocus}
         />
       </div>
       {query.length ? (

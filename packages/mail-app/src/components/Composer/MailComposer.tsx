@@ -33,6 +33,8 @@ import {
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { useBlocker } from 'react-router-dom';
+import { BlockerDialog } from './BlockerDialog';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -178,6 +180,13 @@ export const MailComposer = ({
     return () => window.removeEventListener('beforeunload', handler);
   });
 
+  // Block navigating elsewhere when data has been entered into the input
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !!getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
@@ -187,6 +196,7 @@ export const MailComposer = ({
             <Label htmlFor="recipients">{t('To')}</Label>
             <RecipientInput
               id="recipients"
+              autoFocus={true}
               recipients={autosavedDsr.fileMetadata.appData.content.recipients}
               setRecipients={(newRecipients) =>
                 setAutosavedDsr({
@@ -351,6 +361,16 @@ export const MailComposer = ({
           </div>
         </div>
       </form>
+      {blocker && blocker.reset && blocker.proceed ? (
+        <BlockerDialog
+          isOpen={blocker.state === 'blocked'}
+          onCancel={blocker.reset}
+          onProceed={blocker.proceed}
+          title={t('You have unsaved changes')}
+        >
+          <p>{t('Are you sure you want to leave this page? Your changes will be lost.')}</p>
+        </BlockerDialog>
+      ) : null}
     </>
   );
 };

@@ -51,8 +51,8 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
   }, [query]);
 
   return (
-    <div className={`flex w-full flex-row items-center gap-2 ${className || ''}`}>
-      <div className="relative flex w-full max-w-md flex-row">
+    <div className={`flex w-full max-w-md flex-row items-center gap-2 ${className || ''}`}>
+      <div className="relative flex w-full flex-row">
         <Input
           ref={inputRef}
           className="w-full max-w-md"
