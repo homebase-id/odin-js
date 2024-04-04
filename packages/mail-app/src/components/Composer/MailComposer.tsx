@@ -11,6 +11,7 @@ import {
   Plus,
   Save,
   Trash,
+  getImagesFromPasteEvent,
   getTextRootsRecursive,
   t,
   useAllContacts,
@@ -260,7 +261,16 @@ export const MailComposer = ({
             />
           </div>
           <hr className="my-2" />
-          <div>
+          <div
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+
+              if (mediaFiles.length) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
+          >
             <Label className="sr-only">{t('Message')}</Label>
             <ErrorBoundary>
               <RichTextEditor
