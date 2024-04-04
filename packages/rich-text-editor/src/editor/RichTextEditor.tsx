@@ -47,6 +47,9 @@ import { createTabbablePlugin } from '@udecode/plate-tabbable';
 import { createTrailingBlockPlugin } from '@udecode/plate-trailing-block';
 import { createDeserializeMdPlugin } from '@udecode/plate-serializer-md';
 
+import { createComboboxPlugin } from '@udecode/plate-combobox';
+import { createEmojiPlugin } from '@udecode/plate-emoji';
+
 import { BlockquoteElement } from '../components/plate-ui/blockquote-element';
 import { CodeBlockElement } from '../components/plate-ui/code-block-element';
 import { CodeLineElement } from '../components/plate-ui/code-line-element';
@@ -66,6 +69,7 @@ import { useDarkMode } from '@youfoundation/common-app';
 import { createImagePlugin, ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';
 import { useState, useEffect } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
+import { EmojiCombobox } from './Combobox/EmojiCombobox';
 
 export const RichTextEditor = ({
   defaultValue,
@@ -158,6 +162,8 @@ export const RichTextEditor = ({
       }),
       createDeserializeHtmlPlugin(),
       createDeserializeMdPlugin(),
+      createComboboxPlugin(),
+      createEmojiPlugin(),
       createImagePlugin({ options: mediaOptions }),
     ],
     {
@@ -246,6 +252,7 @@ export const RichTextEditor = ({
           </FixedToolbar>
 
           <PlateContent placeholder={placeholder} />
+          <EmojiCombobox />
 
           <EditorExposer />
         </Plate>

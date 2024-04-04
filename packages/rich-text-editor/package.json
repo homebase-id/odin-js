@@ -31,6 +31,7 @@
     "@udecode/plate-break": "30.5.3",
     "@udecode/plate-code-block": "30.7.0",
     "@udecode/plate-combobox": "30.5.3",
+    "@udecode/plate-emoji": "30.5.3",
     "@udecode/plate-common": "30.4.5",
     "@udecode/plate-core": "30.4.5",
     "@udecode/plate-floating": "30.5.3",
