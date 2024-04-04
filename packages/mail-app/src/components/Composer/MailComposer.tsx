@@ -184,7 +184,11 @@ export const MailComposer = ({
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       !!getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
-      currentLocation.pathname !== nextLocation.pathname
+      currentLocation.pathname !== nextLocation.pathname &&
+      sendMailStatus !== 'success' &&
+      removeDraftStatus !== 'success' &&
+      sendMailStatus !== 'pending' && // We include pending state, as the status might not have updated through to the blocker;
+      removeDraftStatus !== 'pending'
   );
 
   return (
