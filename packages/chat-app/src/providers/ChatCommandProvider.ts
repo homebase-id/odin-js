@@ -163,6 +163,7 @@ const markChatAsRead = async (
   if (!recipients.filter(Boolean)?.length) return null;
 
   const chatMessages = await Promise.all(
+    // Array.from(new Set(...chatGlobalTransIds))
     chatGlobalTransIds.map((msgId) =>
       getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId)
     )
