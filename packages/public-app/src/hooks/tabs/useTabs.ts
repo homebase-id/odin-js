@@ -1,5 +1,6 @@
-import { t } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH, t } from '@youfoundation/common-app';
 import { useTheme } from '../theme/useTheme';
+import { useMatch } from 'react-router-dom';
 
 export const useTabs = () => {
   const { isTabs, tabsOrder } = useTheme();
@@ -11,8 +12,11 @@ export const useTabs = () => {
     };
   });
 
+  const tabMatch = useMatch({ path: `${HOME_ROOT_PATH}:tab` });
+
   return {
     isTabs,
     tabs: [...tabsArray],
+    activeTab: tabMatch?.params.tab || 'posts',
   };
 };

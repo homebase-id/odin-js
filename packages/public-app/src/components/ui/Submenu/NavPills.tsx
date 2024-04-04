@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface NavPillsProps {
   className?: string;
-  items: { title: string; key: string; isActive: boolean }[];
+  items: { title: string; key: string; isActive: boolean; href?: string }[];
   onChange: (key: string) => void;
   disallowWrap?: boolean;
 }
@@ -31,7 +31,11 @@ const NavPills = ({ className, items, onChange, disallowWrap }: NavPillsProps) =
             className={`block cursor-pointer select-none rounded-lg px-4 py-2 ${
               item.isActive ? 'bg-button text-white' : ''
             }`}
-            onClick={() => onChange(item.key)}
+            onClick={(e) => {
+              e.preventDefault();
+              onChange(item.key);
+            }}
+            href={item.href}
           >
             {item.title}
           </a>
