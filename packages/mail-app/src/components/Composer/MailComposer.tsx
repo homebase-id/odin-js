@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActionButton,
   ErrorBoundary,
@@ -13,6 +13,7 @@ import {
   Trash,
   getTextRootsRecursive,
   t,
+  useAllContacts,
 } from '@youfoundation/common-app';
 import {
   NewHomebaseFile,
@@ -191,6 +192,22 @@ export const MailComposer = ({
       removeDraftStatus !== 'pending'
   );
 
+  const { data: contacts } = useAllContacts(true);
+  const mentionables: { key: string; text: string }[] = useMemo(
+    () =>
+      (contacts
+        ?.map((contact) =>
+          contact.fileMetadata.appData.content.odinId
+            ? {
+                key: contact.fileMetadata.appData.content.odinId,
+                text: contact.fileMetadata.appData.content.odinId,
+              }
+            : undefined
+        )
+        .filter(Boolean) as { key: string; text: string }[]) || [],
+    [contacts]
+  );
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
@@ -283,6 +300,7 @@ export const MailComposer = ({
                     return true;
                   },
                 }}
+                mentionables={mentionables}
                 placeholder="Your message"
                 className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
