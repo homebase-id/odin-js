@@ -327,7 +327,7 @@ export const MailComposer = ({
               className="mb-2"
             >
               <span className="flex flex-row items-center gap-2">
-                {t('Attachments')} <Plus className="h-4 w-4" />
+                {t('Attachments')} <Plus className="h-5 w-5" />
               </span>
             </FileSelector>
             <FileOverview

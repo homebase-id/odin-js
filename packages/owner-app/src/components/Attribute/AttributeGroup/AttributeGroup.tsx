@@ -107,7 +107,7 @@ const AttributeGroup = ({
           isActive ? 'cursor-pointer opacity-100' : 'opacity-0'
         }`}
       >
-        <Collapse className={`inline-block h-4 w-4`} /> {t('Collapse')}
+        <Collapse className={`inline-block h-5 w-5`} /> {t('Collapse')}
       </span>
       <div
         className={`border-l-[8px] sm:border-l-[16px] ${
@@ -228,7 +228,7 @@ const AddAnotherButton = ({
         className="relative mx-auto flex cursor-pointer flex-row items-center gap-1 rounded-full border bg-white transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 hover:dark:bg-slate-800"
         onClick={() => setIsActive(true)}
       >
-        <Plus className="m-2 h-4 w-4" />
+        <Plus className="m-2 h-5 w-5" />
       </span>
     </div>
   );

@@ -54,7 +54,7 @@ export const ImageLightbox = ({
               onClick={onClose}
               className={`absolute left-4 top-4 rounded-full p-3 ${ButtonColors.secondary}`}
             >
-              <Times className="h-4 w-4" />
+              <Times className="h-5 w-5" />
             </button>
           ) : null}
 

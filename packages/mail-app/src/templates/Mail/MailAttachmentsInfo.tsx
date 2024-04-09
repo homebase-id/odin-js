@@ -124,7 +124,7 @@ const FileGroup = ({
           {fileName}
           <div className="ml-auto flex-shrink-0 text-slate-400">{t('Multiple versions')}</div>
           <Chevron
-            className={`h-4 w-4 transition-transform ${showAll ? 'rotate-90' : 'rotate-0'}`}
+            className={`h-5 w-5 transition-transform ${showAll ? 'rotate-90' : 'rotate-0'}`}
           />
         </button>
       ) : null}
@@ -217,10 +217,10 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
                 navigate(`${ROOT_PATH}/inbox/${file.conversationId}/${file.fileId}`);
               }}
             >
-              <Envelope className="h-4 w-4" />
+              <Envelope className="h-5 w-5" />
             </button>
             <button className="-my-2 px-2 py-2 opacity-40 transition-opacity hover:opacity-100">
-              <ImageIcon className="h-4 w-4" />
+              <ImageIcon className="h-5 w-5" />
             </button>
           </div>
         </div>

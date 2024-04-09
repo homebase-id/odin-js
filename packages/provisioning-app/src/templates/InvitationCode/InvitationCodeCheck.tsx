@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useCheckInvitationCode } from '../../hooks/invitationCode/useCheckInvitationCode';
 import { t } from '../../helpers/i18n/dictionary';
-import { Loader } from '@youfoundation/common-app';
+import { Loader, Label, Input } from '@youfoundation/common-app';
 import ActionLink from '../../components/ui/Buttons/ActionLink';
 import ActionButton from '../../components/ui/Buttons/ActionButton';
-import Label from '../../components/Form/Label';
-import Input from '../../components/Form/Input';
 
 const InvitationCodeCheck = () => {
   const [searchParams, setSearchParams] = useSearchParams();

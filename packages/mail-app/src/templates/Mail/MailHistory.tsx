@@ -229,7 +229,7 @@ const MailMessage = ({
             {messageFromMe &&
             message.fileMetadata.appData.content.deliveryStatus === MailDeliveryStatus.Failed ? (
               <>
-                <Exclamation className="my-auto h-4 w-4 text-red-500" />
+                <Exclamation className="my-auto h-5 w-5 text-red-500" />
               </>
             ) : null}
             <p className="font-semibold">

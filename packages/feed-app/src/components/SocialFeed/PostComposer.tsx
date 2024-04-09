@@ -237,7 +237,7 @@ const PostComposer = ({
           >
             {channel.serverMetadata?.accessControlList && canPost ? (
               <AclIcon
-                className="mr-3 h-4 w-4"
+                className="mr-3 h-5 w-5"
                 acl={customAcl || channel.serverMetadata?.accessControlList}
               />
             ) : null}

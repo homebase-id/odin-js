@@ -94,7 +94,7 @@ const ImageUploadAndCrop = ({
                 className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-red-200 p-2 dark:bg-red-800"
                 onClick={() => reset()}
               >
-                <Trash className="h-4 w-4" />
+                <Trash className="h-5 w-5" />
               </button>
             )}
           </div>
@@ -120,7 +120,7 @@ const ImageUploadAndCrop = ({
                 className="absolute bottom-3 right-3 cursor-pointer rounded-lg bg-red-200 p-2 dark:bg-red-800"
                 onClick={() => reset()}
               >
-                <Trash className="h-4 w-4" />
+                <Trash className="h-5 w-5" />
               </button>
             )}
           </div>

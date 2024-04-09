@@ -148,7 +148,7 @@ export const ImageElementBlock = <V extends Value = Value>(
           }}
           className="absolute bottom-3 right-3 z-20 rounded-md bg-red-500 p-2 text-white hover:bg-red-600"
         >
-          <Trash className="h-4 w-4" />
+          <Trash className="h-5 w-5" />
         </button>
       </div>
 

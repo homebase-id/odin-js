@@ -3,6 +3,7 @@ export * from './Label';
 export * from './CircleSelector';
 export * from './Checkbox';
 export * from './CheckboxToggle';
+export * from './Radio';
 export * from './Select';
 export * from './Textarea';
 export * from './image/ImageSelector';

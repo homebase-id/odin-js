@@ -192,7 +192,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
 export const MessageDeletedInnerBody = () => {
   return (
     <div className="flex select-none flex-row items-center gap-2 text-foreground/50">
-      <Block className="h-4 w-4" />
+      <Block className="h-5 w-5" />
       <p>{t('This message was deleted')}</p>
     </div>
   );

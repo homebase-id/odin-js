@@ -1,5 +1,3 @@
-import Input from '../Form/Input';
-import Label from '../Form/Label';
 import ActionButton from '../ui/Buttons/ActionButton';
 import { t } from '../../helpers/i18n/dictionary';
 import { validDomainRegEx } from '../../helpers/common';
@@ -8,7 +6,7 @@ import {
   useFetchIsOwnDomainAvailable,
 } from '../../hooks/ownDomain/useOwnDomain';
 import { AlertError } from '../ErrorAlert/ErrorAlert';
-import { Arrow, Exclamation } from '@youfoundation/common-app';
+import { Arrow, Exclamation, Input, Label } from '@youfoundation/common-app';
 
 interface Props {
   domain: string;
@@ -55,7 +53,7 @@ const EnteringDetails = ({ domain, setDomain, email, setEmail, setProvisionState
           <Label htmlFor="domain">{t('Your own domain')}</Label>
           {isOwnDomainAvailable === false && domain ? (
             <p className="order-1 ml-auto mt-2 flex flex-row items-center rounded-lg bg-slate-100 px-2 py-1 md:order-none md:mt-0 md:rounded-b-none">
-              <Exclamation className="mr-2 h-4 w-4" />
+              <Exclamation className="mr-2 h-5 w-5" />
               {t(`This domain isn't available, try another one`)}
             </p>
           ) : null}
