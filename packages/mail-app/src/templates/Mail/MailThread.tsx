@@ -93,7 +93,7 @@ export const MailThread = () => {
   return (
     <div className="flex h-full max-h-[100vh] flex-col-reverse overflow-auto" ref={scrollRef}>
       <div className="absolute left-0 right-0 top-0 z-20" ref={headerRef}>
-        <MailHomeHeader />
+        <MailHomeHeader className="hidden md:block" />
         <MailThreadHeader
           mailThread={mailThread}
           subject={subject}
@@ -308,77 +308,83 @@ const MailThreadHeader = ({
     <>
       <ErrorNotification error={restoreThreadError || removeThreadError || archiveThreadError} />
       <div
-        className={`sticky top-[3.7rem] z-20 flex flex-row items-center border-b border-gray-100 bg-background p-2 dark:border-gray-800 ${className || ''}`}
+        className={`sticky top-[3.7rem] z-20 flex flex-col border-b border-gray-100 bg-background p-2 dark:border-gray-800 sm:flex-row sm:items-center sm:gap-5 ${className || ''}`}
       >
-        <ActionButton
-          onClick={() =>
-            navigate({ pathname: `${ROOT_PATH}/${filter}`, search: window.location.search })
-          }
-          icon={ArrowLeft}
-          type="mute"
-          size="none"
-          className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-        />
-        {isArchived || isTrash ? (
-          <ActionButton
-            type="mute"
-            className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-            size="none"
-            onClick={doRestore}
-            state={restoreThreadStatus !== 'success' ? restoreThreadStatus : undefined}
-          >
-            {t('Restore')}
-          </ActionButton>
-        ) : (
-          <>
+        <div className="flex flex-row gap-2 sm:contents">
+          <div className="order-1 flex flex-row gap-2">
             <ActionButton
+              onClick={() =>
+                navigate({ pathname: `${ROOT_PATH}/${filter}`, search: window.location.search })
+              }
+              icon={ArrowLeft}
               type="mute"
-              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
               size="none"
-              icon={Trash}
-              state={removeThreadStatus}
-              confirmOptions={{
-                title: t('Delete conversation'),
-                body: t('Are you sure you want to delete the conversation?'),
-                buttonText: t('Delete'),
-              }}
-              onClick={doRemove}
+              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
             />
+            {isArchived || isTrash ? (
+              <ActionButton
+                type="mute"
+                className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+                size="none"
+                onClick={doRestore}
+                state={restoreThreadStatus !== 'success' ? restoreThreadStatus : undefined}
+              >
+                {t('Restore')}
+              </ActionButton>
+            ) : (
+              <>
+                <ActionButton
+                  type="mute"
+                  className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+                  size="none"
+                  icon={Trash}
+                  state={removeThreadStatus}
+                  confirmOptions={{
+                    title: t('Delete conversation'),
+                    body: t('Are you sure you want to delete the conversation?'),
+                    buttonText: t('Delete'),
+                  }}
+                  onClick={doRemove}
+                />
+                <ActionButton
+                  type="mute"
+                  className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
+                  size="none"
+                  icon={Archive}
+                  state={archiveThreadStatus}
+                  onClick={doArchive}
+                />
+              </>
+            )}
+          </div>
+
+          <div className="order-3 ml-auto flex flex-row items-center gap-2">
             <ActionButton
+              onClick={() => navigate('?attachments')}
+              icon={PaperClip}
               type="mute"
-              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
               size="none"
-              icon={Archive}
-              state={archiveThreadStatus}
-              onClick={doArchive}
+              className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
             />
-          </>
-        )}
-        <h1 className="ml-3 text-xl">{highlightQuery(subject, query)}</h1>
-        <div className="ml-auto flex flex-row items-center">
-          <ActionButton
-            onClick={() => navigate('?attachments')}
-            icon={PaperClip}
-            type="mute"
-            size="none"
-            className="p-2 text-gray-400 hover:text-black dark:text-gray-500 dark:hover:text-white"
-          />
-          <ActionGroup
-            className="ml-auto"
-            type={'mute'}
-            size="square"
-            options={[
-              {
-                label: t('Thread info'),
-                onClick: () => navigate('?info'),
-              },
-              {
-                label: t('Mark as unread'),
-                onClick: doMarkAsUnread,
-              },
-            ]}
-          />
+            <ActionGroup
+              className="ml-auto"
+              type={'mute'}
+              size="square"
+              options={[
+                {
+                  label: t('Thread info'),
+                  onClick: () => navigate('?info'),
+                },
+                {
+                  label: t('Mark as unread'),
+                  onClick: doMarkAsUnread,
+                },
+              ]}
+            />
+          </div>
         </div>
+
+        <h1 className="order-2 mt-3 text-xl sm:mt-0">{highlightQuery(subject, query)}</h1>
       </div>
       {showMailThreadInfo && mailThread.length >= 1 ? (
         <MailThreadInfo mailThread={mailThread} onClose={() => navigate('?')} />
