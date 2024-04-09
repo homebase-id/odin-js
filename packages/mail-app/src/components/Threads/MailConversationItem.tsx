@@ -99,6 +99,8 @@ export const MailConversationItem = ({
     markAsUnread({ mailConversations: [lastReceivedConversation || lastConversation] });
   };
 
+  const quickActionsClassName = 'hover:bg-primary/20 dark:hover:bg-primary/50 p-1 rounded-md';
+
   return (
     <>
       <ErrorNotification
@@ -150,7 +152,7 @@ export const MailConversationItem = ({
                       state={removeThreadStatus == 'success' ? undefined : removeThreadStatus}
                       isDisabled={isTrash}
                       title={t('Remove')}
-                      className="opacity-60 transition-opacity hover:opacity-100"
+                      className={quickActionsClassName}
                     />
                     <ActionButton
                       type="mute"
@@ -159,7 +161,7 @@ export const MailConversationItem = ({
                       state={archiveThreadStatus == 'success' ? undefined : archiveThreadStatus}
                       isDisabled={isArchived}
                       title={t('Archive')}
-                      className="opacity-60 transition-opacity hover:opacity-100"
+                      className={quickActionsClassName}
                     />
                     {isUnread ? (
                       <ActionButton
@@ -168,7 +170,7 @@ export const MailConversationItem = ({
                         onClick={doMarkAsRead}
                         state={markAsReadStatus == 'success' ? undefined : markAsReadStatus}
                         title={t('Mark as read')}
-                        className="opacity-60 transition-opacity hover:opacity-100"
+                        className={quickActionsClassName}
                       />
                     ) : (
                       <ActionButton
@@ -177,7 +179,7 @@ export const MailConversationItem = ({
                         onClick={doMarkAsUnread}
                         state={markAsUnreadStatus == 'success' ? undefined : markAsUnreadStatus}
                         title={t('Mark as unread')}
-                        className="opacity-60 transition-opacity hover:opacity-100"
+                        className={quickActionsClassName}
                       />
                     )}
                   </div>
