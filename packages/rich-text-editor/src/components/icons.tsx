@@ -247,7 +247,7 @@ export const iconVariants = cva('', {
       menuItem: 'mr-2 h-5 w-5',
     },
     size: {
-      sm: 'mr-2 h-4 w-4',
+      sm: 'mr-2 h-5 w-5',
       md: 'mr-2 h-6 w-6',
     },
   },

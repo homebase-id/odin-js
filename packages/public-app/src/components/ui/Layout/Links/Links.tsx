@@ -192,7 +192,7 @@ const BetterLink = ({
           }
         }}
       >
-        {icon({ className: `my-auto ${style === 'secondary' ? 'mr-2' : 'mr-5'} h-4 w-4` })}
+        {icon({ className: `my-auto ${style === 'secondary' ? 'mr-2' : 'mr-5'} h-5 w-5` })}
         {copyText ? (
           <div className="flex w-full flex-row">
             {children}

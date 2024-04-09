@@ -74,7 +74,7 @@ const MultiSelect = (props: MultiSelectProps) => {
             <Times className="my-auto ml-1 h-2 w-2" />
           </li>
         ))}
-        <Arrow className="my-auto ml-auto h-4 w-4 rotate-90" />
+        <Arrow className="my-auto ml-auto h-5 w-5 rotate-90" />
       </ul>
       {isOpen && (
         <ul className="absolute left-0 right-0 top-full z-30 select-none border border-slate-100 bg-white dark:border-slate-700 dark:bg-gray-800">

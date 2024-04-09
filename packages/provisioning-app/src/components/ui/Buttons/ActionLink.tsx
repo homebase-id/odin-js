@@ -37,12 +37,12 @@ const ActionLink: FC<ActionLinkProps> = ({
     state === 'error'
       ? 'bg-red-500 hover:bg-red-600 text-white'
       : type === 'secondary'
-      ? config.secondaryClassName
-      : type === 'remove'
-      ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
-      : type === 'mute'
-      ? ''
-      : config.primaryClassName;
+        ? config.secondaryClassName
+        : type === 'remove'
+          ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
+          : type === 'mute'
+            ? ''
+            : config.primaryClassName;
 
   const widthClasses =
     children && type !== 'mute'
@@ -64,7 +64,7 @@ const ActionLink: FC<ActionLinkProps> = ({
         onClick={onClick}
       >
         {children && <span className="mr-1">{children}</span>}
-        <Icon className={'my-auto ml-auto h-4 w-4'} />
+        <Icon className={'my-auto ml-auto h-5 w-5'} />
       </a>
     </>
   );

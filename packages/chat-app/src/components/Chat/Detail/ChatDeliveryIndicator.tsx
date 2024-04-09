@@ -35,8 +35,8 @@ export const InnerDeliveryIndicator = ({
         isRead ? 'text-blue-600 ' : 'text-foreground/50'
       } ${className || ''}`}
     >
-      {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-4 w-4" /> : null}
-      {isSent ? <SubtleCheck className="h-4 w-4" /> : <Clock className="h-4 w-4 pb-1" />}
+      {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-5 w-5" /> : null}
+      {isSent ? <SubtleCheck className="h-5 w-5" /> : <Clock className="h-5 w-5 pb-1" />}
     </div>
   );
 };

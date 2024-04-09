@@ -115,8 +115,8 @@ export const Sidenav = ({
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
-                  <Pin className={'h-4 w-4 flex-shrink-0 hidden md:block'} />
-                  <Times className={'h-4 w-4 flex-shrink-0 block md:hidden'} />
+                  <Pin className={'h-5 w-5 flex-shrink-0 hidden md:block'} />
+                  <Times className={'h-5 w-5 flex-shrink-0 block md:hidden'} />
                 </button>
               ) : isOpen || isPeeking ? (
                 <button
@@ -128,7 +128,7 @@ export const Sidenav = ({
                     setIsOpen(false);
                   }}
                 >
-                  <Times className={'h-4 w-4 flex-shrink-0'} />
+                  <Times className={'h-5 w-5 flex-shrink-0'} />
                 </button>
               ) : null}
             </div>

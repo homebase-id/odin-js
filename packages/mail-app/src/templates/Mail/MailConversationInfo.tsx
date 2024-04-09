@@ -70,7 +70,7 @@ export const MailConversationInfo = ({
                 {mailConversation.fileMetadata.appData.content.deliveryDetails?.[recipient] ===
                 MailDeliveryStatus.Failed ? (
                   <div className="flex flex-row items-center gap-2 text-red-500">
-                    <Exclamation className="h-4 w-4" /> {t('Failed to deliver')}
+                    <Exclamation className="h-5 w-5" /> {t('Failed to deliver')}
                   </div>
                 ) : null}
               </div>

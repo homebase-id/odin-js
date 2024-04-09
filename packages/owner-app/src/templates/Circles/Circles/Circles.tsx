@@ -117,7 +117,7 @@ const CircleCardLink = ({ circleDef }: { circleDef: CircleDefinition }) => {
               </div>
               {members.length > 5 ? (
                 <span className="mb-1 mt-auto pl-2 text-slate-400">
-                  <Ellipsis className="h-4 w-4" />
+                  <Ellipsis className="h-5 w-5" />
                 </span>
               ) : (
                 ''

@@ -36,7 +36,7 @@ const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
           )}
           <p className="inline-flex items-center text-button">
             {t('See all')}
-            <Arrow className="ml-2 h-4 w-4" />
+            <Arrow className="ml-2 h-5 w-5" />
           </p>
         </div>
       </Link>

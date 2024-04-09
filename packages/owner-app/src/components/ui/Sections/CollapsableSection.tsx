@@ -43,7 +43,7 @@ const CollapsableSection = ({
         <h3 className="pr-6 text-2xl dark:text-white">{title}</h3>
         <button className="absolute bottom-0 right-0 top-0">
           <Arrow
-            className={`h-4 w-4 transition-transform duration-300 ${
+            className={`h-5 w-5 transition-transform duration-300 ${
               isOpen ? 'rotate-90' : '-rotate-90'
             }`}
           />

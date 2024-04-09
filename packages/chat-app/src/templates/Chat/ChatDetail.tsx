@@ -104,7 +104,7 @@ const ChatHeader = ({
       <ErrorNotification error={clearChatError || deleteChatError} />
       <div className="flex flex-row items-center gap-2 bg-page-background p-2 lg:p-5">
         <ActionLink className="lg:hidden" type="mute" href={CHAT_ROOT}>
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </ActionLink>
 
         <a
@@ -176,7 +176,7 @@ const ChatHeader = ({
             size="square"
           >
             <>
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-5 w-5" />
               <span className="sr-only ml-1">{t('More')}</span>
             </>
           </ActionGroup>

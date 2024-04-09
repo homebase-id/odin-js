@@ -28,7 +28,7 @@ export const MailThreads = ({
   filter: MailThreadsFilter;
   query: string | undefined;
 }) => {
-  const [selection, setSelection] = useState<HomebaseFile<MailConversation>[]>([]);
+  const [selection, setSelection] = useState<HomebaseFile<MailConversation>[][]>([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
   const identity = useDotYouClientContext().getIdentity();
 
@@ -39,7 +39,7 @@ export const MailThreads = ({
     useFilteredMailThreads(filter, query);
 
   useEffect(() => {
-    if (isAllSelected) setSelection(threads.map((thread) => thread[0]));
+    if (isAllSelected) setSelection(threads);
     else setSelection([]);
   }, [isAllSelected]);
 
@@ -144,7 +144,7 @@ export const MailThreads = ({
                   ) || mailThread[0];
                 const lastConversationId = lastConversation.fileMetadata.appData.groupId as string;
                 const isSelected = selection.some((select) =>
-                  stringGuidsEqual(select.fileMetadata.appData.groupId, lastConversationId)
+                  stringGuidsEqual(select[0].fileMetadata.appData.groupId, lastConversationId)
                 );
 
                 return (
@@ -167,12 +167,12 @@ export const MailThreads = ({
                                 ...selection.filter(
                                   (selected) =>
                                     !stringGuidsEqual(
-                                      selected.fileMetadata.appData.groupId,
+                                      selected[0].fileMetadata.appData.groupId,
                                       lastConversationId
                                     )
                                 ),
                               ]
-                            : [...selection, lastConversation]
+                            : [...selection, mailThread]
                         );
                       }}
                       isSelected={isSelected}
@@ -213,12 +213,13 @@ const MailConversationsHeader = ({
   clearSelection,
   filter,
 }: {
-  selection: HomebaseFile<MailConversation>[];
+  selection: HomebaseFile<MailConversation>[][];
   isAllSelected: boolean;
   toggleAllSelection: () => void;
   clearSelection: () => void;
   filter?: MailThreadsFilter;
 }) => {
+  const identity = useDotYouClientContext().getIdentity();
   const hasASelection = selection.length > 0;
   const {
     mutate: removeThread,
@@ -241,11 +242,31 @@ const MailConversationsHeader = ({
     markAsUnread: { mutate: markAsUnread, status: markAsUnreadStatus, error: markAsUnreadError },
   } = useMailConversation();
 
-  const doArchive = () => archiveThread(selection);
-  const doRemove = () => removeThread(selection);
-  const doRestore = () => restoreThread(selection);
-  const doMarkAsRead = () => markAsRead({ mailConversations: selection });
-  const doMarkAsUnread = () => markAsUnread({ mailConversations: selection });
+  const doArchive = () => archiveThread(selection.flat());
+  const doRemove = () => removeThread(selection.flat());
+  const doRestore = () => restoreThread(selection.flat());
+  const doMarkAsRead = () =>
+    markAsRead({
+      mailConversations: selection.map(
+        (mailThread) =>
+          mailThread.find(
+            (conv) =>
+              (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !==
+              identity
+          ) || mailThread[0]
+      ),
+    });
+  const doMarkAsUnread = () =>
+    markAsUnread({
+      mailConversations: selection.map(
+        (mailThread) =>
+          mailThread.find(
+            (conv) =>
+              (conv.fileMetadata.senderOdinId || conv.fileMetadata.appData.content.sender) !==
+              identity
+          ) || mailThread[0]
+      ),
+    });
 
   useEffect(() => {
     if (

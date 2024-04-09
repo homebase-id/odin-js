@@ -8,7 +8,7 @@ const LinkToConsole = ({ className }: { className: string }) => {
         className ?? ''
       }`}
     >
-      <Cog className="h-4 w-4" />
+      <Cog className="h-5 w-5" />
     </a>
   );
 };

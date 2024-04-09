@@ -147,7 +147,7 @@ const DomainListItem = ({
           <div className="ml-auto flex flex-row items-center text-sm text-slate-400 sm:mx-auto">
             {hasExtendedPermissions ? (
               <>
-                <Shield className="mr-2 h-4 w-4" />
+                <Shield className="mr-2 h-5 w-5" />
                 <p className="flex flex-col">
                   <span>{t('Private access')}</span>
                   <small className="block leading-none">
@@ -158,7 +158,7 @@ const DomainListItem = ({
               </>
             ) : (
               <>
-                <Eye className="mr-2 h-4 w-4" /> <p>{t('Public access')}</p>
+                <Eye className="mr-2 h-5 w-5" /> <p>{t('Public access')}</p>
               </>
             )}
           </div>

@@ -180,9 +180,9 @@ export const CommentEditor = ({
                 onClick={() => doPost(body, attachment)}
               >
                 {postState === 'loading' ? (
-                  <Loader className="h-4 w-4" />
+                  <Loader className="h-5 w-5" />
                 ) : (
-                  <PaperPlane className="h-4 w-4" />
+                  <PaperPlane className="h-5 w-5" />
                 )}
               </ActionButton>
             </div>

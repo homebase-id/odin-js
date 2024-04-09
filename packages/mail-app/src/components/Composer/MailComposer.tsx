@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ActionButton,
   ErrorBoundary,
@@ -11,8 +11,10 @@ import {
   Plus,
   Save,
   Trash,
+  getImagesFromPasteEvent,
   getTextRootsRecursive,
   t,
+  useAllContacts,
 } from '@youfoundation/common-app';
 import {
   NewHomebaseFile,
@@ -33,6 +35,8 @@ import {
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { useBlocker } from 'react-router-dom';
+import { BlockerDialog } from './BlockerDialog';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -178,6 +182,33 @@ export const MailComposer = ({
     return () => window.removeEventListener('beforeunload', handler);
   });
 
+  // Block navigating elsewhere when data has been entered into the input
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !!getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
+      currentLocation.pathname !== nextLocation.pathname &&
+      sendMailStatus !== 'success' &&
+      removeDraftStatus !== 'success' &&
+      sendMailStatus !== 'pending' && // We include pending state, as the status might not have updated through to the blocker;
+      removeDraftStatus !== 'pending'
+  );
+
+  const { data: contacts } = useAllContacts(true);
+  const mentionables: { key: string; text: string }[] = useMemo(
+    () =>
+      (contacts
+        ?.map((contact) =>
+          contact.fileMetadata.appData.content.odinId
+            ? {
+                key: contact.fileMetadata.appData.content.odinId,
+                text: contact.fileMetadata.appData.content.odinId,
+              }
+            : undefined
+        )
+        .filter(Boolean) as { key: string; text: string }[]) || [],
+    [contacts]
+  );
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
@@ -187,6 +218,7 @@ export const MailComposer = ({
             <Label htmlFor="recipients">{t('To')}</Label>
             <RecipientInput
               id="recipients"
+              autoFocus={true}
               recipients={autosavedDsr.fileMetadata.appData.content.recipients}
               setRecipients={(newRecipients) =>
                 setAutosavedDsr({
@@ -229,7 +261,16 @@ export const MailComposer = ({
             />
           </div>
           <hr className="my-2" />
-          <div>
+          <div
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+
+              if (mediaFiles.length) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
+              }
+            }}
+          >
             <Label className="sr-only">{t('Message')}</Label>
             <ErrorBoundary>
               <RichTextEditor
@@ -269,8 +310,9 @@ export const MailComposer = ({
                     return true;
                   },
                 }}
+                mentionables={mentionables}
                 placeholder="Your message"
-                className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-7 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
             </ErrorBoundary>
           </div>
@@ -285,7 +327,7 @@ export const MailComposer = ({
               className="mb-2"
             >
               <span className="flex flex-row items-center gap-2">
-                {t('Attachments')} <Plus className="h-4 w-4" />
+                {t('Attachments')} <Plus className="h-5 w-5" />
               </span>
             </FileSelector>
             <FileOverview
@@ -351,6 +393,16 @@ export const MailComposer = ({
           </div>
         </div>
       </form>
+      {blocker && blocker.reset && blocker.proceed ? (
+        <BlockerDialog
+          isOpen={blocker.state === 'blocked'}
+          onCancel={blocker.reset}
+          onProceed={blocker.proceed}
+          title={t('You have unsaved changes')}
+        >
+          <p>{t('Are you sure you want to leave this page? Your changes will be lost.')}</p>
+        </BlockerDialog>
+      ) : null}
     </>
   );
 };

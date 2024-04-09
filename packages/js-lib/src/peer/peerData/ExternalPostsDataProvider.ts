@@ -48,6 +48,8 @@ export const getSocialFeed = async (
     maxRecords: pageSize,
     cursorState: cursorState,
     includeMetadataHeader: true,
+    ordering: 'newestFirst',
+    sorting: 'userDate',
   };
 
   const result = await queryBatch(dotYouClient, queryParams, ro);

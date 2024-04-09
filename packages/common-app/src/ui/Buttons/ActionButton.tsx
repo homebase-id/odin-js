@@ -111,7 +111,7 @@ export const ActionButton: FC<ActionButtonProps> = ({
         {...buttonProps}
       >
         {children}
-        <Icon className={`my-auto ${children ? 'ml-2' : ''} h-4 w-4`} />
+        <Icon className={`my-auto ${children ? 'ml-2' : ''} h-5 w-5`} />
       </button>
       {confirmOptions && onClick && needsConfirmation ? (
         <ConfirmDialog

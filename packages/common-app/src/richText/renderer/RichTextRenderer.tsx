@@ -188,6 +188,19 @@ export const RichTextRenderer = ({
             {children}
           </p>
         );
+      case 'mention':
+        if (attributes && 'value' in attributes && typeof attributes.value === 'string') {
+          return (
+            <a
+              href={`https://${attributes.value}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-primary hover:underline break-words"
+            >
+              {attributes.value}
+            </a>
+          );
+        } else return <></>;
       default:
         return <span {...attributes}>{children}</span>;
     }

@@ -249,7 +249,7 @@ const SearchConversation = ({
               isActive={false}
             >
               <div className="rounded-full bg-primary/20 p-4">
-                <Persons className="h-4 w-4" />
+                <Persons className="h-5 w-5" />
               </div>
               {t('New group')}
             </ConversationListItemWrapper>
