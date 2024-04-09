@@ -43,9 +43,10 @@ export const ChatComposer = ({
   } = useChatMessage().send;
 
   const conversationContent = conversation?.fileMetadata.appData.content;
-  const doSend = () => {
+  const doSend = (forcedVal?: string) => {
+    const trimmedVal = (forcedVal || message)?.trim();
     if (
-      (!message?.trim() && !files) ||
+      (!trimmedVal && !files) ||
       !conversationContent ||
       !conversation.fileMetadata.appData.uniqueId
     )
@@ -53,7 +54,7 @@ export const ChatComposer = ({
 
     sendMessage({
       conversation,
-      message: message?.trim() || '',
+      message: trimmedVal || '',
       replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
       files,
     });
@@ -107,7 +108,7 @@ export const ChatComposer = ({
             placeholder="Your message"
             defaultValue={message}
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
-            onChange={setMessage}
+            onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
@@ -117,14 +118,7 @@ export const ChatComposer = ({
                 e.preventDefault();
               }
             }}
-            onSubmit={
-              isTouchDevice()
-                ? undefined
-                : (val) => {
-                    setMessage(val);
-                    doSend();
-                  }
-            }
+            onSubmit={isTouchDevice() ? undefined : doSend}
           />
           <span className="my-auto">
             <ActionButton
