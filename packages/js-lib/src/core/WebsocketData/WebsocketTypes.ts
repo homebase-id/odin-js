@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '../DriveData/File/DriveFileTypes';
+import { HomebaseFile } from '../DriveData/File/DriveFileTypes';
 import { TargetDrive, ExternalFileIdentifier } from '../core';
 
 export interface EstablishConnectionRequest {
@@ -27,7 +27,7 @@ export interface ClientNotification {
 export interface ClientFileNotification extends ClientNotification {
   notificationType: 'fileAdded' | 'fileDeleted' | 'fileModified';
   targetDrive?: TargetDrive;
-  header: DriveSearchResult;
+  header: HomebaseFile;
 }
 
 export interface ClientTransitNotification extends ClientNotification {

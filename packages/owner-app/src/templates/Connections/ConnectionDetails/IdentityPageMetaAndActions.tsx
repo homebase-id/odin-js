@@ -22,9 +22,8 @@ import OutgoingConnectionDialog from '../../../components/Dialog/ConnectionDialo
 import { useConnectionActions } from '../../../hooks/connections/useConnectionActions';
 
 export const IdentityPageMetaAndActions = ({
-  odinId,
-} // setIsEditPermissionActive,
-: {
+  odinId, // setIsEditPermissionActive,
+}: {
   odinId: string;
   // setIsEditPermissionActive: (newState: boolean) => void;
 }) => {
@@ -121,7 +120,12 @@ export const IdentityPageMetaAndActions = ({
     {
       icon: House,
       label: t('Open homepage'),
-      href: `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+      onClick: () => {
+        window.open(
+          `https://${odinId}${isConnected && identity ? '?youauth-logon=' + identity : ''}`,
+          '_blank'
+        );
+      },
     },
   ];
 

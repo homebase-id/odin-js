@@ -9,7 +9,7 @@ import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { AccessControlList, NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 const getAllowedAttributes = (sectionId: string) => {
   if (sectionId === BuiltInProfiles.PersonalInfoSectionId)
@@ -33,6 +33,11 @@ const getAllowedAttributes = (sectionId: string) => {
   return Object.values(AttributeDefinitions);
 };
 
+export interface OptionalACLHomebaseFile<T> extends Omit<NewHomebaseFile<T>, 'serverMetadata'> {
+  serverMetadata: {
+    accessControlList: AccessControlList | undefined;
+  };
+}
 const AttributeCreator = ({
   profileId,
   sectionId,
@@ -44,7 +49,7 @@ const AttributeCreator = ({
   newPriority: number;
   excludedTypes?: string[];
 }) => {
-  const [attribute, setAttribute] = useState<NewDriveSearchResult<AttributeVm>>();
+  const [attribute, setAttribute] = useState<OptionalACLHomebaseFile<AttributeVm>>();
   const [isActive, setIsActive] = useState(false);
   const alloweddAttributes = getAllowedAttributes(sectionId);
 
@@ -68,7 +73,7 @@ const AttributeCreator = ({
         },
       },
       serverMetadata: {
-        accessControlList: undefined as any,
+        accessControlList: undefined,
       },
     });
   };

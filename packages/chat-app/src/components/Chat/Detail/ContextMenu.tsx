@@ -7,15 +7,15 @@ import {
   ActionGroup,
   ChevronDown,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
 import { ChatMessageInfo } from './ChatMessageInfo';
 import { EditChatMessage } from './EditChatMessage';
 
 export interface ChatActions {
-  doReply: (msg: DriveSearchResult<ChatMessage>) => void;
-  doDelete: (msg: DriveSearchResult<ChatMessage>) => void;
+  doReply: (msg: HomebaseFile<ChatMessage>) => void;
+  doDelete: (msg: HomebaseFile<ChatMessage>) => void;
 }
 
 export const ContextMenu = ({
@@ -23,8 +23,8 @@ export const ContextMenu = ({
   conversation,
   chatActions,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation?: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation?: HomebaseFile<Conversation>;
   chatActions?: ChatActions;
 }) => {
   if (!chatActions) return null;
@@ -82,14 +82,14 @@ export const ContextMenu = ({
           },
           ...optionalOptions,
         ]}
-        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-background/60 opacity-0 group-hover:pointer-events-auto group-hover:opacity-100"
+        className="absolute right-1 top-[0.125rem] z-10 rounded-full bg-transparent group-hover:pointer-events-auto group-hover:bg-background/60"
         type={'mute'}
         size="square"
       >
-        <>
+        <span className="opacity-0 group-hover:opacity-100">
           <ChevronDown className="h-3 w-3" />
           <span className="sr-only ml-1">{t('More')}</span>
-        </>
+        </span>
       </ActionGroup>
     </>
   );

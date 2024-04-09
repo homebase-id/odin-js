@@ -2,8 +2,8 @@ import {
   TargetDrive,
   ArchivalStatus,
   SystemFileType,
-  DriveSearchResult,
-  DeletedDriveSearchResult,
+  HomebaseFile,
+  DeletedHomebaseFile,
 } from '../File/DriveFileTypes';
 
 export interface PermissionedDrive {
@@ -38,7 +38,7 @@ export interface QueryParams {
   tag?: string | undefined;
   userDate?: TimeRange;
 
-  //specifies if the DriveSearchResult.content field should be parsed as JSON
+  //specifies if the HomebaseFile.content field should be parsed as JSON
   includeMetadataHeader?: boolean;
   pageNumber: number;
   pageSize: number;
@@ -79,21 +79,21 @@ export interface GetBatchQueryResultOptions {
 export interface QueryModifiedResponse {
   includeHeaderContent: boolean;
   cursor: number;
-  searchResults: (DriveSearchResult | DeletedDriveSearchResult)[];
+  searchResults: (HomebaseFile | DeletedHomebaseFile)[];
 }
 
 export interface QueryBatchResponse {
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-  searchResults: DriveSearchResult[];
+  searchResults: HomebaseFile[];
 }
 
 export interface QueryBatchResponseWithDeletedResults {
   cursorState: string;
   queryTime: number;
   includeMetadataHeader: boolean;
-  searchResults: (DriveSearchResult | DeletedDriveSearchResult)[];
+  searchResults: (HomebaseFile | DeletedHomebaseFile)[];
 }
 
 export interface QueryBatchResponseResult extends QueryBatchResponse {

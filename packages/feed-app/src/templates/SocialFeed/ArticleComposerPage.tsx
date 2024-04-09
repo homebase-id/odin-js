@@ -24,7 +24,7 @@ import { useArticleComposer } from '@youfoundation/common-app';
 import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
 export const ArticleComposerPage = () => {
@@ -45,16 +45,16 @@ export const ArticleComposerPage = () => {
     postFile,
     isValidPost,
     isPublished,
-    primaryMediaFile,
+    files,
 
     // Data updates
     setPostFile,
     setChannel,
-    setPrimaryMediaFile,
+    setFiles,
 
     // Status
     saveStatus,
-    removeStatus,
+    // removeStatus,
 
     // Errors
     error,
@@ -141,7 +141,7 @@ export const ArticleComposerPage = () => {
         breadCrumbs={[
           { title: t('Feed'), href: `${ROOT_PATH}` },
           { title: t('Articles'), href: `${ROOT_PATH}/articles` },
-          { title: t('New article') },
+          { title: isPublished ? t('Edit article') : t('New article') },
         ]}
         actions={
           <>
@@ -191,23 +191,13 @@ export const ArticleComposerPage = () => {
               doSave();
               return false;
             }}
-            // className={isPublished ? 'opacity-90 grayscale' : ''}
-            // onClick={() => isPublished && setIsConfirmUnpublish(true)}
           >
             <InnerFieldEditors
               key={postFile.fileMetadata.appData.content.id}
               postFile={postFile}
-              primaryMediaFile={primaryMediaFile}
               channel={channel}
-              updateVersionTag={(versionTag) =>
-                setPostFile({
-                  ...postFile,
-                  fileMetadata: {
-                    ...postFile.fileMetadata,
-                    versionTag,
-                  },
-                })
-              }
+              files={files}
+              setFiles={setFiles}
               onChange={(e) => {
                 const dirtyPostFile = { ...postFile };
                 if (e.target.name === 'abstract') {
@@ -218,10 +208,16 @@ export const ArticleComposerPage = () => {
                   dirtyPostFile.fileMetadata.appData.content.caption = (
                     e.target.value as string
                   ).trim();
-                } else if (e.target.name === 'primaryImageFileId') {
-                  setPrimaryMediaFile(
-                    e.target.value ? { file: e.target.value as Blob } : undefined
-                  );
+                } else if (e.target.name === 'primaryMediaFile') {
+                  if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
+                      fileId: undefined,
+                      fileKey: e.target.value.fileKey,
+                      type: e.target.value.type,
+                    };
+                  } else {
+                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
+                  }
                 } else if (e.target.name === 'body') {
                   dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
                 }
@@ -235,7 +231,6 @@ export const ArticleComposerPage = () => {
                 }));
                 debouncedSave();
               }}
-              // disabled={isPublished}
             />
 
             <div className="mb-5 flex md:hidden">
@@ -295,13 +290,13 @@ const OptionsDialog = ({
   onConfirm,
 }: {
   isPublished?: boolean;
-  postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
+  postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
 
   isOpen: boolean;
   onCancel: () => void;
   onConfirm: (
     newReactAccess: ReactAccess | undefined,
-    newChannel: NewDriveSearchResult<ChannelDefinition> | undefined
+    newChannel: NewHomebaseFile<ChannelDefinition> | undefined
   ) => void;
 }) => {
   const target = usePortal('modal-container');
@@ -309,9 +304,7 @@ const OptionsDialog = ({
   const [newReactAccess, setNewReactAccess] = useState<ReactAccess | undefined>(
     postFile.fileMetadata.appData.content.reactAccess
   );
-  const [newChannel, setNewChannel] = useState<
-    NewDriveSearchResult<ChannelDefinition> | undefined
-  >();
+  const [newChannel, setNewChannel] = useState<NewHomebaseFile<ChannelDefinition> | undefined>();
 
   if (!isOpen) return null;
 

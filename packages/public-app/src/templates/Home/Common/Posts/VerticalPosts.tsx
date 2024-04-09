@@ -11,7 +11,7 @@ import { LoadingBlock } from '@youfoundation/common-app';
 import { useAuth } from '../../../../hooks/auth/useAuth';
 import { PostTeaser } from '@youfoundation/common-app';
 import LoginDialog from '../../../../components/Dialog/LoginDialog/LoginDialog';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 
@@ -93,7 +93,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     isFetchingNextPage,
     isFetched: isPostsLoaded,
   } = useBlogPostsInfinite({ pageSize: PAGE_SIZE, channelId: channelId });
-  const flattenedPosts = flattenInfinteData<DriveSearchResult<PostContent>>(blogPosts, PAGE_SIZE);
+  const flattenedPosts = flattenInfinteData<HomebaseFile<PostContent>>(blogPosts, PAGE_SIZE);
 
   const parentRef = useRef<HTMLDivElement>(null);
   const parentOffsetRef = useRef(0);
@@ -111,7 +111,7 @@ const MainVerticalPosts = ({ className, channelId }: { className: string; channe
     scrollToFn: (
       offset: number,
       { adjustments = 0, behavior }: { adjustments?: number; behavior?: ScrollBehavior },
-      instance: Virtualizer<Window, any>
+      instance: Virtualizer<Window, Element>
     ) => {
       // We block big adjustments to prevent the user from loosing their scroll position when expanding a post
       if (Math.abs(adjustments) >= window.screenY) return;

@@ -1,6 +1,5 @@
 /* eslint-disable no-fallthrough */
-import { ErrorNotification, t, Label } from '@youfoundation/common-app';
-import RadioButton from '../../components/Form/RadioButton';
+import { ErrorNotification, t, Label, Radio } from '@youfoundation/common-app';
 import Section from '../../components/ui/Sections/Section';
 import { useSettings } from '../../hooks/settings/useSettings';
 
@@ -161,7 +160,7 @@ const RadioOption = ({
 }) => {
   return (
     <div className="mb-5 flex flex-row gap-4">
-      <RadioButton
+      <Radio
         name={name}
         id={id}
         defaultChecked={defaultChecked}

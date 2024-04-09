@@ -3,34 +3,25 @@ import { HomePageTheme } from '@youfoundation/js-lib/public';
 import HomeClassic from './Classic/HomeClassic';
 import HomeContent from './Content/HomeContent';
 import HomeCover from './Cover/HomeCover';
-import {
-  ThemeCoverSettings,
-  ThemeLinksSettings,
-  ThemeWithTabsSettings,
-  useSiteData,
-} from '@youfoundation/common-app';
+import { ThemeCoverSettings, useSiteData } from '@youfoundation/common-app';
 import HomeLinks from './Links/HomeLinks';
 import { useMemo } from 'react';
 
-const Home = ({ tab }: { tab?: string }) => {
+const Home = () => {
   const { home, owner } = useSiteData().data ?? {};
 
   const body = useMemo(() => {
     const themeId = home?.templateSettings?.themeId;
     if (themeId === HomePageTheme.VerticalPosts.toString()) {
-      return (
-        <HomeClassic templateSettings={home?.templateSettings as ThemeWithTabsSettings} tab={tab} />
-      );
+      return <HomeClassic />;
     } else if (themeId === HomePageTheme.HorizontalPosts.toString()) {
-      return (
-        <HomeContent templateSettings={home?.templateSettings as ThemeWithTabsSettings} tab={tab} />
-      );
+      return <HomeContent />;
     } else if (themeId === HomePageTheme.Links.toString()) {
-      return <HomeLinks templateSettings={home?.templateSettings as ThemeLinksSettings} />;
+      return <HomeLinks />;
     } else {
       return <HomeCover templateSettings={home?.templateSettings as ThemeCoverSettings} />;
     }
-  }, [home, tab]);
+  }, [home]);
 
   if (!home) return null;
 

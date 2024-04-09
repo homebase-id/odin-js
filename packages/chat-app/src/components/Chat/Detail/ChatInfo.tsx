@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Arrow,
   ConnectionImage,
@@ -24,7 +24,7 @@ export const ChatInfo = ({
   conversation,
   onClose,
 }: {
-  conversation: DriveSearchResult<Conversation>;
+  conversation: HomebaseFile<Conversation>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');

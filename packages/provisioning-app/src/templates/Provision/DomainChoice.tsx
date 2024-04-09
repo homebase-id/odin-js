@@ -27,7 +27,7 @@ const DomainChoice = () => {
                     )}
                   </p>
                   <div className="mt-auto flex flex-row justify-end">
-                    <Arrow className="h-4 w-4" />
+                    <Arrow className="h-5 w-5" />
                   </div>
                 </div>
               </Link>
@@ -42,7 +42,7 @@ const DomainChoice = () => {
                     )}
                   </p>
                   <div className="mt-auto flex flex-row justify-end">
-                    <Arrow className="h-4 w-4" />
+                    <Arrow className="h-5 w-5" />
                   </div>
                 </div>
               </Link>

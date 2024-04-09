@@ -10,7 +10,10 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // splitVendorChunkPlugin()
+  ],
   server: {
     ...hostConfig,
     https: {

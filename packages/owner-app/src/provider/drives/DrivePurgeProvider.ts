@@ -3,7 +3,7 @@ import {
   TargetDrive,
   QueryBatchResponse,
   queryBatch,
-  DriveSearchResult,
+  HomebaseFile,
 } from '@youfoundation/js-lib/core';
 import { assertIfDefined } from '@youfoundation/js-lib/helpers';
 
@@ -31,7 +31,7 @@ export const purgeAllFiles = async (
       );
     };
 
-    const searchResults: DriveSearchResult[] = [];
+    const searchResults: HomebaseFile[] = [];
     let cursorState: string | undefined = undefined;
 
     for (let i = 0; i < maxPages; i++) {

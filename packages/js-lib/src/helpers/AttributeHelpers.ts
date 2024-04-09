@@ -1,4 +1,4 @@
-import { DriveSearchResult, NewDriveSearchResult } from '../core/core';
+import { HomebaseFile, NewHomebaseFile } from '../core/core';
 import { Attribute, LocationFields, MinimalProfileFields } from '../profile/profile';
 import { PostContent } from '../public/public';
 import { getNewId } from './DataUtil';
@@ -13,9 +13,7 @@ export const slugify = (text: string) => {
 };
 
 /// Makes a slug of a Post; When it's an article it's a readable slug, otherwise it's the content id or a new id
-export const makeSlug = (
-  post: DriveSearchResult<PostContent> | NewDriveSearchResult<PostContent>
-) => {
+export const makeSlug = (post: HomebaseFile<PostContent> | NewHomebaseFile<PostContent>) => {
   if (
     post.fileMetadata.appData.content.type === 'Article' &&
     post.fileMetadata.appData.content.caption

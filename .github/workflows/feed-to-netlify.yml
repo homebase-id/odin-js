@@ -30,7 +30,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build-libs
+      - run: npm run build:libs
 
       - run: npm run build -w packages/feed-app
 

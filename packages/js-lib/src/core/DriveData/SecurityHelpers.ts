@@ -12,7 +12,8 @@ import {
 } from '../../helpers/DataUtil';
 import { EncryptedKeyHeader, FileMetadata, KeyHeader } from './File/DriveFileTypes';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 /// Encryption
 export const encryptKeyHeader = async (
@@ -53,8 +54,14 @@ export const encryptWithKeyheader = async <
         type: content.type,
       }) as R;
     } catch (ex) {
-      const customContent = content as any;
-      if ('encrypt' in customContent && customContent.encrypt) {
+      const customContent = content as unknown;
+      if (
+        customContent &&
+        typeof customContent === 'object' &&
+        'encrypt' in customContent &&
+        customContent.encrypt &&
+        typeof customContent.encrypt === 'function'
+      ) {
         try {
           return (await customContent.encrypt(keyHeader.aesKey, keyHeader.iv)) as R;
         } catch (ex) {

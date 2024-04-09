@@ -57,8 +57,8 @@ const PermissionFlagsEditor = ({
                 value.some((val) => val === level)
                   ? setValue(value.filter((val) => val !== level))
                   : level !== 0
-                  ? setValue([...value, level])
-                  : setValue([])
+                    ? setValue([...value, level])
+                    : setValue([])
               }
             >
               {t(CirclePermissionType[level])}
@@ -87,7 +87,7 @@ const Option = ({
       onClick={onChange}
     >
       <Check
-        className={`my-auto mr-3 h-4 w-4 flex-shrink-0 ${
+        className={`my-auto mr-3 h-5 w-5 flex-shrink-0 ${
           isChecked ? 'text-slate-700 dark:text-slate-200' : 'text-transparent'
         }`}
       />{' '}

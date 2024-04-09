@@ -13,18 +13,6 @@ import {
 } from '@youfoundation/common-app';
 import { useState } from 'react';
 
-// Component set to maximize the visibility of the hero image
-{
-  /* <div className="relative">
-<div className="mx-auto flex min-h-[15rem] max-w-[1920px] flex-col justify-items-start">
-  <Image
-    fileId={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
-    targetDrive={HomePageConfig.HomepageTargetDrive}
-    className="mt-auto h-auto w-full"
-  />
-</div> */
-}
-
 const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
   const { owner, home, social } = useSiteData().data ?? {};
   const [isImageLightboxOpen, setIsImageLightboxOpen] = useState(false);
@@ -36,21 +24,22 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
   return (
     <>
       <section className="bg-background">
-        <div className="relative h-[27vh] min-h-[330px]">
+        <div className="relative min-h-[10rem] bg-slate-50">
           <Image
             fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
             fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}
             lastModified={(home?.templateSettings as ThemeLinksSettings)?.imageLastModified}
             targetDrive={HomePageConfig.HomepageTargetDrive}
-            className="absolute inset-0"
-            fit="cover"
             previewThumbnail={home?.headerPreviewThumbnail}
+            className="absolute inset-0 mx-auto flex max-h-[35rem] max-w-[1920px] flex-col justify-center sm:static"
+            fit="cover"
           />
+
           {showProfileImage ? (
             <div className="container absolute bottom-0 left-0 right-0 top-0 mx-auto flex justify-center px-5 md:block">
               <a
                 onClick={() => setIsImageLightboxOpen(true)}
-                className="absolute bottom-[-4.5rem] block h-60 w-60 cursor-pointer overflow-hidden rounded-full border-4 border-page-background bg-background md:bottom-[-7.5rem]"
+                className="w-h-32 absolute bottom-[-4.5rem] block h-32 cursor-pointer overflow-hidden rounded-full border-4 border-page-background bg-background sm:h-40 sm:w-40 md:bottom-[-7.5rem] md:h-60 md:w-60"
               >
                 <Image
                   fileId={owner?.profileImageFileId}

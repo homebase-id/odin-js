@@ -3,7 +3,7 @@ import { useContact } from '../../../hooks/contacts/useContact';
 import { FallbackImg, Image, LoadingBlock } from '@youfoundation/common-app';
 import { getTwoLettersFromDomain } from '@youfoundation/js-lib/helpers';
 import { CONTACT_PROFILE_IMAGE_KEY, ContactConfig } from '@youfoundation/js-lib/network';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const getInitials = (
   fullName: string | undefined,
@@ -52,14 +52,14 @@ const ContactImage = ({
     <div className={`relative aspect-square ${className || ''}`}>
       {isLoading ? (
         <LoadingBlock className={`aspect-square`} />
-      ) : (contactData as DriveSearchResult<unknown>)?.fileMetadata?.payloads?.some((pyld) =>
+      ) : (contactData as HomebaseFile<unknown>)?.fileMetadata?.payloads?.some((pyld) =>
           pyld.contentType.startsWith('image/')
         ) ? (
         <Image
           fileId={contactData?.fileId}
           fileKey={CONTACT_PROFILE_IMAGE_KEY}
           targetDrive={ContactConfig.ContactTargetDrive}
-          lastModified={(contactData as DriveSearchResult<unknown>).fileMetadata.updated}
+          lastModified={(contactData as HomebaseFile<unknown>).fileMetadata.updated}
           fit="cover"
           className="h-full w-full"
         />

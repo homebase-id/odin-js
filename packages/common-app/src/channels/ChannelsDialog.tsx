@@ -1,8 +1,4 @@
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -76,7 +72,7 @@ export const ChannelsDialog = ({
               onClick={() => setIsAddNew(true)}
               className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-slate-50 px-4 py-4 dark:border-slate-800 dark:bg-slate-900"
             >
-              <Plus className="mr-2 h-4 w-4" /> {t('Add new')}
+              <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
             </div>
           </div>
         )}
@@ -98,7 +94,7 @@ export const ChannelItem = ({
   className,
   isDefaultEdit,
 }: {
-  chnl?: DriveSearchResult<ChannelDefinitionVm> | NewDriveSearchResult<ChannelDefinitionVm>;
+  chnl?: HomebaseFile<ChannelDefinitionVm> | NewHomebaseFile<ChannelDefinitionVm>;
   onClose?: () => void;
   className?: string;
   isDefaultEdit?: boolean;
@@ -270,7 +266,7 @@ export const ChannelItem = ({
                       onClick={async (e) => {
                         e.stopPropagation();
                         e.preventDefault();
-                        await removeChannel(chnlDsr as DriveSearchResult<ChannelDefinitionVm>);
+                        await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
                         return false;
                       }}
                       confirmOptions={{

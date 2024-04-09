@@ -49,6 +49,8 @@ const RegisterApp = () => {
   const d = searchParams.get('d');
   const driveGrants = d ? drivesParamToDriveGrantRequest(d) : undefined;
 
+  const c = searchParams.get('c');
+  const circleSelection = c ? circleParamToCircleIds(c) : undefined;
   const cp = searchParams.get('cp');
   const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
   const cd = searchParams.get('cd');
@@ -88,6 +90,7 @@ const RegisterApp = () => {
               origin={origin}
               permissionSet={permissionSet}
               driveGrants={driveGrants}
+              defaultCircleIds={circleSelection}
               circlePermissionSet={circlePermissionSet}
               circleDriveGrants={circleDriveGrants}
               registerApp={doRegisterApp}
@@ -109,6 +112,7 @@ const AppRegistration = ({
   origin,
   permissionSet,
   driveGrants,
+  defaultCircleIds,
   circlePermissionSet,
   circleDriveGrants,
   registerApp,
@@ -120,15 +124,15 @@ const AppRegistration = ({
   origin: string | undefined;
   permissionSet?: PermissionSet;
   driveGrants?: DriveGrantRequest[];
+  defaultCircleIds?: string[];
   circlePermissionSet?: PermissionSet;
   circleDriveGrants?: DriveGrantRequest[];
   registerApp: (data: AppRegistrationRequest) => Promise<void>;
   registerAppState: ActionButtonState;
   doCancel: () => void;
 }) => {
-  const [circleIds, setCircleIds] = useState<string[]>([]);
+  const [circleIds, setCircleIds] = useState<string[]>(defaultCircleIds || []);
   const { data: existingDrives } = useDrives().fetch;
-
   const needsCircleSelection = circleDriveGrants?.length;
   const [circleSelection, setCircleSelection] = useState(false);
 
@@ -355,4 +359,8 @@ export const permissionParamToPermissionSet = (
   return {
     keys: queryParamVal?.split(',').map((str) => parseInt(str)) ?? [],
   };
+};
+
+export const circleParamToCircleIds = (queryParamVal: string | undefined): string[] => {
+  return queryParamVal?.split(',') ?? [];
 };

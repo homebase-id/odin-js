@@ -1,8 +1,8 @@
 import { PostTeaser } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 
-const CardPostOverview = ({ blogPosts }: { blogPosts: DriveSearchResult<PostContent>[] }) => {
+const CardPostOverview = ({ blogPosts }: { blogPosts: HomebaseFile<PostContent>[] }) => {
   return (
     <div className="-m-4 flex flex-wrap">
       {blogPosts?.map((postFile) => {

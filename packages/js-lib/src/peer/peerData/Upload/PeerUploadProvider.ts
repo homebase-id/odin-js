@@ -63,13 +63,15 @@ export const uploadFileOverPeer = async (
     manifest
   );
 
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({
+    overrideEncryption: true,
+    systemFileType: instructions.systemFileType,
+  });
   const url = 'transit/sender/files/send';
 
   const config = {
     headers: {
       'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': instructions.systemFileType || 'Standard',
     },
   };
 

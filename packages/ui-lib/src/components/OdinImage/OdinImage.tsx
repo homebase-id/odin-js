@@ -12,6 +12,7 @@ export interface OdinImageProps
   extends Omit<Omit<OdinPreviewImageProps, 'onLoad'>, 'blockFetchFromServer'> {
   probablyEncrypted?: boolean;
 
+  lazyLoad?: boolean;
   onLoad?: () => void;
   avoidPayload?: boolean;
   fit?: 'cover' | 'contain';
@@ -27,6 +28,7 @@ export const OdinImage = ({
   avoidPayload,
   fit,
   onLoad,
+  lazyLoad = true,
   ...props
 }: OdinImageProps) => {
   const imgFitClassNames = `${fit === 'cover' ? 'w-full h-full object-cover' : fit === 'contain' ? 'max-h-[inherit] m-auto object-contain' : ''}`;
@@ -38,7 +40,7 @@ export const OdinImage = ({
   const [isFinal, setIsFinal] = useState(false);
   const [isFatalError, setIsFatalError] = useState(false);
 
-  const [isInView, setIsInView] = useState(false);
+  const [isInView, setIsInView] = useState(!lazyLoad);
   useIntersection(wrapperRef, () => setIsInView(true));
 
   const [loadSize, setLoadSize] = useState<ImageSize | 'full' | undefined>(undefined);
@@ -112,6 +114,7 @@ export const OdinImage = ({
       data-natural-size={
         naturalSize ? `${naturalSize.pixelWidth}x${naturalSize.pixelHeight}` : 'none'
       }
+      data-probably-encrypted={probablyEncrypted}
       data-fileid={props.fileId}
       data-globaltransitid={props.globalTransitId}
       data-filekey={props.fileKey}

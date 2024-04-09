@@ -1,5 +1,5 @@
-import { DriveSearchResult, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
-import { OdinImage, OdinThumbnailImage } from '@youfoundation/ui-lib';
+import { HomebaseFile, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
 import { Triangle, useDarkMode } from '@youfoundation/common-app';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
 
-export const ChatMedia = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatMedia = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const payloads = msg.fileMetadata.payloads;
   const isGallery = payloads.length >= 2;
   const navigate = useNavigate();
@@ -46,8 +46,10 @@ const MediaItem = ({
   previewThumbnail?: EmbeddedThumb;
   onLoad?: () => void;
 }) => {
+  const { isDarkMode } = useDarkMode();
   const dotYouClient = useDotYouClientContext();
   const isVideo = payload.contentType.startsWith('video');
+  const isAudio = payload.contentType.startsWith('audio');
 
   return (
     <div
@@ -55,7 +57,44 @@ const MediaItem = ({
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
-      {!isVideo ? (
+      {isVideo ? (
+        <>
+          <OdinThumbnailImage
+            dotYouClient={dotYouClient}
+            fileId={fileId}
+            fileKey={payload.key}
+            lastModified={payload.lastModified || fileLastModified}
+            targetDrive={ChatDrive}
+            className={`w-full blur-sm`}
+            loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Triangle className="h-16 w-16 text-background" />
+          </div>
+        </>
+      ) : isAudio ? (
+        <>
+          <OdinAudio
+            dotYouClient={dotYouClient}
+            fileId={fileId}
+            fileKey={payload.key}
+            lastModified={payload.lastModified || fileLastModified}
+            targetDrive={ChatDrive}
+            onLoad={onLoad}
+            className="w-full"
+          />
+          <OdinAudioWaveForm
+            dotYouClient={dotYouClient}
+            fileId={fileId}
+            fileKey={payload.key}
+            lastModified={payload.lastModified || fileLastModified}
+            targetDrive={ChatDrive}
+            onLoad={onLoad}
+            isDarkMode={isDarkMode}
+            className="my-3"
+          />
+        </>
+      ) : (
         <OdinImage
           dotYouClient={dotYouClient}
           fileId={fileId}
@@ -68,22 +107,7 @@ const MediaItem = ({
           fit={fit}
           onLoad={onLoad}
         />
-      ) : (
-        <OdinThumbnailImage
-          dotYouClient={dotYouClient}
-          fileId={fileId}
-          fileKey={payload.key}
-          lastModified={payload.lastModified || fileLastModified}
-          targetDrive={ChatDrive}
-          className={`w-full blur-sm`}
-          loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
-        />
       )}
-      {isVideo ? (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Triangle className="h-16 w-16 text-background" />
-        </div>
-      ) : null}
       {children ? <>{children}</> : null}
     </div>
   );
@@ -92,7 +116,7 @@ const MediaItem = ({
 const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
   `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
 
-const MediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+const MediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const payloads = msg.fileMetadata.payloads;
   const totalCount = payloads.length;
   const maxVisible = 4;
@@ -142,7 +166,7 @@ const MediaGalleryItem = ({
   onClick,
 }: {
   payload: PayloadDescriptor;
-  msg: DriveSearchResult<ChatMessage>;
+  msg: HomebaseFile<ChatMessage>;
   isColSpan2: boolean;
   children?: React.ReactNode;
   onClick: () => void;

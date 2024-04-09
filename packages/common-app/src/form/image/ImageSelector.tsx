@@ -78,7 +78,7 @@ export const ImageSelector = ({
               }}
               isDisabled={disabled}
             >
-              <Pencil className="h-4 w-4 " />
+              <Pencil className="h-5 w-5 " />
             </ActionButton>
             <ActionButton
               className="absolute bottom-2 right-2"
@@ -95,7 +95,7 @@ export const ImageSelector = ({
               onClick={removeData}
               isDisabled={disabled}
             >
-              <Trash className="h-4 w-4 " />
+              <Trash className="h-5 w-5 " />
             </ActionButton>
             <img src={imageUrl} className="max-h-[20rem]" onClick={() => setIsEdit(true)} />
           </div>

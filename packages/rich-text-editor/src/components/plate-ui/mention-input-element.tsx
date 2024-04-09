@@ -6,6 +6,7 @@ import { useFocused, useSelected } from 'slate-react';
 import { cn } from '../../lib/utils';
 
 export interface MentionInputElementProps extends PlateElementProps<Value, TMentionElement> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick?: (mentionNode: any) => void;
 }
 
@@ -25,7 +26,7 @@ const MentionInputElement = React.forwardRef<
       data-slate-value={element.value}
       className={cn(
         'inline-block rounded-md bg-slate-100 px-1.5 py-0.5 align-baseline text-sm dark:bg-slate-700',
-        selected && focused && 'ring-ring ring-2',
+        selected && focused && 'ring-2 ring-ring',
         className
       )}
       onClick={getHandler(onClick, element)}

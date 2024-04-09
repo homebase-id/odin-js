@@ -15,7 +15,7 @@ import { ChatDeliveryIndicator } from '../../Detail/ChatDeliveryIndicator';
 import { MessageDeletedInnerBody } from '../../Detail/ChatMessageItem';
 import { ChatSentTimeIndicator } from '../../Detail/ChatSentTimeIndicator';
 import { useConversation } from '../../../../hooks/chat/useConversation';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ConversationWithYourselfId } from '../../../../providers/ConversationProvider';
 
 const ListItemWrapper = ({
@@ -32,8 +32,8 @@ const ListItemWrapper = ({
   <div className="px-2" style={{ order: order, opacity: order ? 100 : 0 }}>
     <div
       onClick={onClick}
-      className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 hover:bg-primary/20 ${
-        isActive ? 'bg-slate-200 dark:bg-slate-800' : ''
+      className={`flex w-full cursor-pointer flex-row items-center gap-3 rounded-lg px-3 py-4 transition-colors hover:bg-primary/20 ${
+        isActive ? 'bg-slate-200 dark:bg-slate-800' : 'bg-transparent'
       }`}
     >
       {children}
@@ -57,7 +57,7 @@ export const GroupConversationItem = ({
   return (
     <ListItemWrapper {...props} order={order}>
       <div className="rounded-full bg-primary/20 p-4">
-        <Persons className="h-4 w-4" />
+        <Persons className="h-5 w-5" />
       </div>
       <ConversationBody title={title} conversationId={conversationId} setOrder={setOrder} />
     </ListItemWrapper>
@@ -134,7 +134,7 @@ const ConversationBody = ({
     () =>
       data?.pages
         ?.flatMap((page) => page?.searchResults)
-        ?.filter(Boolean) as DriveSearchResult<ChatMessage>[],
+        ?.filter(Boolean) as HomebaseFile<ChatMessage>[],
     [data]
   );
   const lastMessage = useMemo(() => flatMessages?.[0], [flatMessages]);
@@ -160,7 +160,7 @@ const ConversationBody = ({
 
   return (
     <>
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-20 flex-grow flex-col gap-1">
         <div className="flex flex-row justify-between gap-2">
           <p className="font-semibold">
             {typeof title === 'string' ? ellipsisAtMaxChar(title, 25) : title}
@@ -171,12 +171,14 @@ const ConversationBody = ({
         <div className="flex flex-row items-center gap-1">
           {lastMessage ? <ChatDeliveryIndicator msg={lastMessage} /> : null}
 
-          <div className="w-full leading-tight text-foreground/80">
+          <div className="w-20 flex-grow leading-tight text-foreground/80">
             {lastMessage && lastMessageContent ? (
               lastMessage.fileMetadata.appData.archivalStatus === ChatDeletedArchivalStaus ? (
                 <MessageDeletedInnerBody />
               ) : lastMessageContent.message ? (
-                <p>{ellipsisAtMaxChar(lastMessageContent.message, 30)}</p>
+                <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                  {lastMessageContent.message}
+                </p>
               ) : (
                 <p>📷 {t('Media')}</p>
               )

@@ -13,12 +13,11 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "type": "tsc",
-    "lint": "eslint src",
-    "UNSUPPORTED_dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/feed-app && VITE_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/feed-app/"
+    "lint": "eslint src"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.25.0",
-    "@tanstack/react-virtual": "^3.0.0-beta.68",
+    "@tanstack/react-query": "5.27.5",
+    "@tanstack/react-virtual": "3.1.3",
     "@youfoundation/common-app": "*",
     "@youfoundation/js-lib": "*",
     "@youfoundation/ui-lib": "*",
@@ -30,7 +29,7 @@
     "react-cropper": "^2.1.8",
     "react-dom": "^18.2.0",
     "react-helmet-async": "2.0.3",
-    "react-router-dom": "^6.10.0",
+    "react-router-dom": "^6.22.3",
     "mp4box": "^0.5.2",
     "@youfoundation/ffmpeg": "0.12.10",
     "@ffmpeg/util": "^0.12.1"

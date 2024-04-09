@@ -1,7 +1,5 @@
 import { ReactNode } from 'react';
 
-import { IconProps } from './Types';
-
 export const IconFrame = ({ children, className }: { children: ReactNode; className?: string }) => {
   return (
     <div

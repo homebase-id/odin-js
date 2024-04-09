@@ -84,7 +84,7 @@ const ExperienceBlock = ({
               rel="noreferrer"
             >
               {t('Link')}
-              <Arrow className="h-4 w-4" />
+              <Arrow className="h-5 w-5" />
             </a>
           </div>
         ) : null}

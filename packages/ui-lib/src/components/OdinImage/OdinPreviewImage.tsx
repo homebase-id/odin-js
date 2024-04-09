@@ -45,6 +45,7 @@ export const OdinPreviewImage = forwardRef(
       onError,
       onLoad,
       className,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       lastModified,
       ...props
     }: OdinPreviewImageProps,

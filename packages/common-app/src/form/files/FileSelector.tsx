@@ -18,10 +18,7 @@ export const FileSelector = ({
 
   return (
     <>
-      <label
-        htmlFor={id}
-        className={`block cursor-pointer select-none px-2 py-1 ${className ?? ''}`}
-      >
+      <label htmlFor={id} className={`block cursor-pointer select-none ${className ?? ''}`}>
         {children ?? '+'}
       </label>
       <input

@@ -39,12 +39,12 @@ const ActionButton: FC<ActionButtonProps> = ({
     (state === 'error'
       ? 'bg-red-500 hover:bg-red-600 text-white'
       : type === 'secondary'
-      ? config.secondaryClassName
-      : type === 'remove'
-      ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
-      : type === 'mute'
-      ? ''
-      : config.primaryClassName) + (isDisabled ? ' opacity-50 cursor-not-allowed' : '');
+        ? config.secondaryClassName
+        : type === 'remove'
+          ? 'bg-red-200 hover:bg-red-400 dark:bg-red-700 hover:dark:bg-red-800 dark:text-white'
+          : type === 'mute'
+            ? ''
+            : config.primaryClassName) + (isDisabled ? ' opacity-50 cursor-not-allowed' : '');
 
   const widthClasses =
     children && type !== 'mute'
@@ -55,10 +55,10 @@ const ActionButton: FC<ActionButtonProps> = ({
     size === 'large'
       ? 'px-5 py-3'
       : size === 'small'
-      ? 'px-3 py-1 text-sm'
-      : size === 'square'
-      ? 'p-2'
-      : 'px-3 py-2';
+        ? 'px-3 py-1 text-sm'
+        : size === 'square'
+          ? 'p-2'
+          : 'px-3 py-2';
 
   const stateClasses = state === 'loading' || state === 'pending' ? 'animate-pulse' : '';
 
@@ -75,7 +75,7 @@ const ActionButton: FC<ActionButtonProps> = ({
         title={title}
       >
         {children}
-        <Icon className={`my-auto ${children ? 'ml-1' : ''} h-4 w-4`} />
+        <Icon className={`my-auto ${children ? 'ml-1' : ''} h-5 w-5`} />
       </button>
     </>
   );

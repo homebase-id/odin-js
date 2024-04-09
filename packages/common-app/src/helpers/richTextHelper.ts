@@ -24,7 +24,7 @@ export const getRichTextFromString = (body: string): RichText | undefined => {
   return richText.some((part) => part.type) ? richText : undefined;
 };
 
-const getTextRootsRecursive = (children: RichText): string[] => {
+export const getTextRootsRecursive = (children: RichText): string[] => {
   return children
     .map((child) =>
       child.children

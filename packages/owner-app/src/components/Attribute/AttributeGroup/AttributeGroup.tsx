@@ -13,7 +13,7 @@ import {
 import { AttributeVm } from '../../../hooks/profiles/useAttributes';
 import { Collapse, Plus } from '@youfoundation/common-app';
 import AttributeEditor from '../AttributeEditor/AttributeEditor';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 const AttributeGroup = ({
   attributes,
@@ -21,7 +21,7 @@ const AttributeGroup = ({
   groupIndex,
   groupedAttributes,
 }: {
-  attributes: DriveSearchResult<AttributeVm>[];
+  attributes: HomebaseFile<AttributeVm>[];
   groupTitle: string;
   groupIndex: number;
   groupedAttributes?: GroupedAttributes[];
@@ -107,7 +107,7 @@ const AttributeGroup = ({
           isActive ? 'cursor-pointer opacity-100' : 'opacity-0'
         }`}
       >
-        <Collapse className={`inline-block h-4 w-4`} /> {t('Collapse')}
+        <Collapse className={`inline-block h-5 w-5`} /> {t('Collapse')}
       </span>
       <div
         className={`border-l-[8px] sm:border-l-[16px] ${
@@ -208,7 +208,7 @@ const AddAnotherButton = ({
           },
         },
       },
-    } as NewDriveSearchResult<AttributeVm>;
+    } as NewHomebaseFile<AttributeVm>;
     // isActive ensures that a new one is created each time the AddAnother is opened up again
   }, [type, profileId, sectionId, priority, isActive]);
 
@@ -228,7 +228,7 @@ const AddAnotherButton = ({
         className="relative mx-auto flex cursor-pointer flex-row items-center gap-1 rounded-full border bg-white transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 hover:dark:bg-slate-800"
         onClick={() => setIsActive(true)}
       >
-        <Plus className="m-2 h-4 w-4" />
+        <Plus className="m-2 h-5 w-5" />
       </span>
     </div>
   );

@@ -16,7 +16,7 @@ import { ContactFile } from '@youfoundation/js-lib/network';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useNavigate } from 'react-router-dom';
 import { useConversations } from '../../../../hooks/chat/useConversations';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   Conversation,
   ConversationWithYourselfId,
@@ -45,7 +45,7 @@ export const ConversationsSidebar = ({
   const flatConversations =
     (conversations?.pages
       ?.flatMap((page) => page?.searchResults)
-      ?.filter(Boolean) as DriveSearchResult<Conversation>[]) || [];
+      ?.filter(Boolean) as HomebaseFile<Conversation>[]) || [];
 
   return (
     <ErrorBoundary>
@@ -81,7 +81,7 @@ const ConversationList = ({
   openConversation,
   activeConversationId,
 }: {
-  conversations: DriveSearchResult<Conversation>[];
+  conversations: HomebaseFile<Conversation>[];
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
 }) => {
@@ -124,7 +124,7 @@ const ConversationListItem = ({
   onClick,
   isActive,
 }: {
-  conversation: DriveSearchResult<Conversation>;
+  conversation: HomebaseFile<Conversation>;
   onClick: () => void;
   isActive: boolean;
 }) => {
@@ -161,7 +161,7 @@ const SearchConversation = ({
   setIsSearchActive: (isActive: boolean) => void;
   openConversation: (id: string | undefined) => void;
   activeConversationId: string | undefined;
-  conversations: DriveSearchResult<Conversation>[];
+  conversations: HomebaseFile<Conversation>[];
 }) => {
   const navigate = useNavigate();
   const [stateIndex, setStateIndex] = useState(0);
@@ -187,8 +187,10 @@ const SearchConversation = ({
           const content = conversation.fileMetadata.appData.content;
           return (
             (content as GroupConversation).recipients?.some((recipient) =>
-              recipient.includes(query)
-            ) || (content as SingleConversation).recipient?.includes(query)
+              recipient?.toLowerCase().includes(query)
+            ) ||
+            (content as GroupConversation).title?.toLowerCase().includes(query) ||
+            (content as SingleConversation).recipient?.toLowerCase().includes(query)
           );
         })
       : [];
@@ -200,7 +202,8 @@ const SearchConversation = ({
           .filter(
             (contact) =>
               contact.odinId &&
-              (contact.odinId?.includes(query) || contact.name?.displayName.includes(query))
+              (contact.odinId?.toLowerCase().includes(query) ||
+                contact.name?.displayName?.toLowerCase().includes(query))
           )
       : [];
 
@@ -216,9 +219,9 @@ const SearchConversation = ({
   return (
     <>
       <form onSubmit={(e) => e.preventDefault()}>
-        <div className="flex flex-row gap-1 px-5 pb-5">
+        <div className="flex flex-row gap-1 px-2 pb-2 pt-1 lg:px-5 lg:pb-5 lg:pt-3">
           <Input
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => setQuery(e.target.value?.toLowerCase())}
             key={stateIndex}
             defaultValue={query}
             placeholder={t('Search or start a new chat')}
@@ -246,7 +249,7 @@ const SearchConversation = ({
               isActive={false}
             >
               <div className="rounded-full bg-primary/20 p-4">
-                <Persons className="h-4 w-4" />
+                <Persons className="h-5 w-5" />
               </div>
               {t('New group')}
             </ConversationListItemWrapper>
@@ -264,7 +267,7 @@ const SearchConversation = ({
                     onClick={() => openConversation(result.fileMetadata.appData.uniqueId)}
                     isActive={
                       activeConversationId ===
-                      (result as DriveSearchResult<Conversation>).fileMetadata?.appData?.uniqueId
+                      (result as HomebaseFile<Conversation>).fileMetadata?.appData?.uniqueId
                     }
                     key={result.fileId}
                   />

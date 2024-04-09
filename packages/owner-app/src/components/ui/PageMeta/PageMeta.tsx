@@ -42,7 +42,7 @@ export const PageMeta = ({
         <div className="flex flex-row items-end gap-5">
           {title && (
             <>
-              <h1 className="flex flex-row text-2xl dark:text-white xl:text-4xl">
+              <h1 className="my-auto flex flex-row text-2xl dark:text-white xl:text-4xl">
                 {icon &&
                   icon({
                     className: 'h-6 w-6 sm:h-8 sm:w-8 my-auto mr-2 sm:mr-4 flex-shrink-0',

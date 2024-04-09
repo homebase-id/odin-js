@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Article, PostContent, getPosts, removePost } from '@youfoundation/js-lib/public';
 import { useChannels, useDotYouClient } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 export const useDrafts = () => {
   const queryClient = useQueryClient();
@@ -35,7 +35,7 @@ export const useDrafts = () => {
     postFile,
   }: {
     channelId: string;
-    postFile: DriveSearchResult<PostContent>;
+    postFile: HomebaseFile<PostContent>;
   }) => {
     return await removePost(dotYouClient, postFile, channelId);
   };
@@ -48,7 +48,7 @@ export const useDrafts = () => {
         await queryClient.cancelQueries({ queryKey: ['drafts'] });
 
         // Updates
-        const previousDrafts: DriveSearchResult<Article>[] | undefined = queryClient.getQueryData([
+        const previousDrafts: HomebaseFile<Article>[] | undefined = queryClient.getQueryData([
           'drafts',
         ]);
         const updatedDrafts = previousDrafts?.filter(

@@ -7,7 +7,7 @@ import { Quote } from '@youfoundation/common-app';
 import { Persons } from '@youfoundation/common-app';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useFollower } from '../../../hooks/follow/useFollower';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const IdentityThatFollowsDialog = ({
   odinId,
@@ -36,13 +36,12 @@ const IdentityThatFollowsDialog = ({
   const channels =
     follower.notificationType === 'selectedChannels'
       ? (follower.channels
-          ?.map(
-            (chnlRef) =>
-              allChannels?.find((chnl) =>
-                stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, chnlRef.alias)
-              )
+          ?.map((chnlRef) =>
+            allChannels?.find((chnl) =>
+              stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, chnlRef.alias)
+            )
           )
-          .filter(Boolean) as DriveSearchResult<ChannelDefinitionVm>[])
+          .filter(Boolean) as HomebaseFile<ChannelDefinitionVm>[])
       : allChannels;
 
   const dialog = (

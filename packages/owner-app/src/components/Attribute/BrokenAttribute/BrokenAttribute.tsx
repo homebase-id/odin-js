@@ -1,5 +1,5 @@
 import { Exclamation, t, ActionButton, Trash } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useAttribute } from '../../../hooks/profiles/useAttribute';
 import Section from '../../ui/Sections/Section';
 
@@ -16,7 +16,7 @@ export const BrokenAttribute = ({
   attribute,
   profileId,
 }: {
-  attribute: DriveSearchResult<undefined>;
+  attribute: HomebaseFile<undefined>;
   profileId: string;
 }) => {
   const {

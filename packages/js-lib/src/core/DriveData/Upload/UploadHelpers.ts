@@ -7,6 +7,7 @@ import {
   AppendInstructionSet,
   UploadResult,
   UploadManifest,
+  AppendResult,
 } from './DriveUploadTypes';
 import {
   encryptWithKeyheader,
@@ -24,7 +25,8 @@ import { ThumbnailFile, SystemFileType, PayloadFile, KeyHeader } from '../File/D
 import { AxiosRequestConfig } from 'axios';
 
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const EMPTY_KEY_HEADER: KeyHeader = {
   iv: new Uint8Array(Array(16).fill(0)),
@@ -36,13 +38,13 @@ export const getSecuredBlob = async (
   blobParts?: BlobPart[] | undefined,
   options?: BlobPropertyBag
 ) => {
-  const returnBlob = new OdinBlob(blobParts, options) as any;
+  const returnBlob = new OdinBlob(blobParts, options);
 
   await new Promise<void>((resolve) => {
-    if (returnBlob.written === undefined) resolve();
+    if (!('written' in returnBlob)) resolve();
 
     const interval = setInterval(async () => {
-      if (returnBlob.written) {
+      if ('written' in returnBlob && returnBlob.written) {
         clearInterval(interval);
         resolve();
       }
@@ -104,6 +106,7 @@ export const buildManifest = (
     PayloadDescriptors: payloads?.map((payload) => ({
       payloadKey: payload.key,
       descriptorContent: payload.descriptorContent,
+      previewThumbnail: payload.previewThumbnail,
       thumbnails: thumbnails
         ?.filter((thumb) => thumb.key === payload.key)
         .map((thumb) => ({
@@ -198,14 +201,13 @@ export const pureUpload = async (
   onVersionConflict?: () => void,
   axiosConfig?: AxiosRequestConfig
 ) => {
-  const client = dotYouClient.createAxiosClient({ overrideEncryption: true });
+  const client = dotYouClient.createAxiosClient({ overrideEncryption: true, systemFileType });
   const url = '/drive/files/upload';
 
   const config: AxiosRequestConfig = {
     ...axiosConfig,
     headers: {
       'content-type': 'multipart/form-data',
-      'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard',
       ...axiosConfig?.headers,
     },
   };
@@ -238,10 +240,10 @@ export const pureAppend = async (
   systemFileType?: SystemFileType,
   onVersionConflict?: () => void,
   axiosConfig?: AxiosRequestConfig
-): Promise<{ newVersionTag: string }> => {
+): Promise<AppendResult> => {
   const client = dotYouClient.createAxiosClient({
     overrideEncryption: true,
-    headers: { 'X-ODIN-FILE-SYSTEM-TYPE': systemFileType || 'Standard' },
+    systemFileType,
   });
   const url = '/drive/files/uploadpayload';
 

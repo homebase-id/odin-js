@@ -15,14 +15,16 @@ import {
 import { SecurityGroupType } from '../../core/DriveData/File/DriveFileTypes';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
 import {
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   EmbeddedThumb,
   PayloadFile,
   TargetDrive,
   ThumbnailFile,
   deletePayload,
   getFileHeader,
+  NewMediaFile,
+  MediaFile,
 } from '../../core/core';
 import {
   getNewId,
@@ -34,25 +36,19 @@ import {
 } from '../../helpers/DataUtil';
 import { GetTargetDriveFromChannelId } from './PostDefinitionProvider';
 import { getPost, getPostBySlug } from './PostProvider';
-import {
-  PostContent,
-  NewMediaFile,
-  MediaFile,
-  BlogConfig,
-  postTypeToDataType,
-  Media,
-} from './PostTypes';
+import { PostContent, BlogConfig, postTypeToDataType } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 
 const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T> | NewDriveSearchResult<T>,
+  file: HomebaseFile<T> | NewHomebaseFile<T>,
   channelId: string,
   toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
   onVersionConflict?: () => void,
@@ -71,7 +67,7 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (file.fileId) {
-    return await updatePost(dotYouClient, file as DriveSearchResult<T>, channelId, toSaveFiles);
+    return await updatePost(dotYouClient, file as HomebaseFile<T>, channelId, toSaveFiles);
   } else {
     if (toSaveFiles?.some((file) => 'fileKey' in file)) {
       throw new Error(
@@ -87,20 +83,19 @@ export const savePost = async <T extends PostContent>(
 
   // Delete embeddedPost of embeddedPost (we don't want to embed an embed)
   if (file.fileMetadata.appData.content.embeddedPost) {
-    delete (file.fileMetadata.appData.content.embeddedPost as any)['embeddedPost'];
+    delete (file.fileMetadata.appData.content.embeddedPost as PostContent)['embeddedPost'];
   }
 
   const targetDrive = GetTargetDriveFromChannelId(channelId);
 
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
-  const mediaFiles: MediaFile[] = [];
   const previewThumbnails: EmbeddedThumb[] = [];
 
   // Handle image files:
   for (let i = 0; newMediaFiles && i < newMediaFiles?.length; i++) {
-    const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     const newMediaFile = newMediaFiles[i];
+    const payloadKey = newMediaFile.key || `${POST_MEDIA_PAYLOAD_KEY}${i}`;
     if (newMediaFile.file.type.startsWith('video/')) {
       const { tinyThumb, additionalThumbnails, payload } = await processVideoFile(
         newMediaFile,
@@ -109,12 +104,6 @@ export const savePost = async <T extends PostContent>(
 
       thumbnails.push(...additionalThumbnails);
       payloads.push(payload);
-
-      mediaFiles.push({
-        fileId: undefined,
-        fileKey: payloadKey,
-        type: 'video',
-      });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
 
@@ -129,12 +118,7 @@ export const savePost = async <T extends PostContent>(
       payloads.push({
         key: payloadKey,
         payload: newMediaFile.file,
-      });
-
-      mediaFiles.push({
-        fileId: undefined,
-        fileKey: payloadKey,
-        type: 'image',
+        previewThumbnail: tinyThumb,
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
@@ -142,11 +126,16 @@ export const savePost = async <T extends PostContent>(
     onUpdate?.((i + 1) / newMediaFiles.length);
   }
 
-  if (mediaFiles?.length) {
-    (file.fileMetadata.appData.content as Media).mediaFiles =
-      mediaFiles && mediaFiles.length > 1 ? mediaFiles : undefined;
+  // Don't force the primaryMediaFile on articles
+  if (file.fileMetadata.appData.content.type !== 'Article') {
+    file.fileMetadata.appData.content.primaryMediaFile = payloads[0]
+      ? {
+          fileId: undefined,
+          fileKey: payloads[0].key,
+          type: payloads[0].payload.type,
+        }
+      : undefined;
   }
-  file.fileMetadata.appData.content.primaryMediaFile = mediaFiles[0];
 
   const previewThumbnail: EmbeddedThumb | undefined =
     previewThumbnails?.length >= 2 ? await makeGrid(previewThumbnails) : previewThumbnails[0];
@@ -165,7 +154,7 @@ export const savePost = async <T extends PostContent>(
 
 const uploadPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T> | NewDriveSearchResult<T>,
+  file: HomebaseFile<T> | NewHomebaseFile<T>,
   payloads: PayloadFile[],
   thumbnails: ThumbnailFile[],
   previewThumbnail: EmbeddedThumb | undefined,
@@ -263,7 +252,7 @@ const uploadPost = async <T extends PostContent>(
 
 const uploadPostHeader = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T>,
+  file: HomebaseFile<T>,
   channelId: string,
   targetDrive: TargetDrive
 ) => {
@@ -379,7 +368,7 @@ const uploadPostHeader = async <T extends PostContent>(
 
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
-  file: DriveSearchResult<T>,
+  file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
 ): Promise<UploadResult> => {
@@ -389,21 +378,6 @@ const updatePost = async <T extends PostContent>(
   if (!header) throw new Error('Cannot update a post that does not exist');
   if (header?.fileMetadata.versionTag !== file.fileMetadata.versionTag)
     throw new Error('Version conflict');
-
-  let runningVersionTag: string = file.fileMetadata.versionTag;
-  const existingMediaFiles =
-    (existingAndNewMediaFiles?.filter((f) => 'fileKey' in f) as MediaFile[]) ||
-    (!existingAndNewMediaFiles
-      ? (file.fileMetadata.appData.content as Media).mediaFiles
-        ? (file.fileMetadata.appData.content as Media).mediaFiles
-        : file.fileMetadata.appData.content.primaryMediaFile
-          ? [file.fileMetadata.appData.content.primaryMediaFile]
-          : []
-      : []);
-
-  const newMediaFiles = existingAndNewMediaFiles?.filter(
-    (f) => 'file' in f && f.file instanceof Blob
-  ) as NewMediaFile[] | undefined;
 
   if (
     !file.fileId ||
@@ -415,18 +389,21 @@ const updatePost = async <T extends PostContent>(
   if (!file.fileMetadata.appData.content.authorOdinId)
     file.fileMetadata.appData.content.authorOdinId = dotYouClient.getIdentity();
 
-  const oldMediaFiles =
-    (file.fileMetadata.appData.content as Media).mediaFiles ||
-    (file.fileMetadata.appData.content.primaryMediaFile
-      ? [file.fileMetadata.appData.content.primaryMediaFile]
-      : []);
+  let runningVersionTag: string = file.fileMetadata.versionTag;
+  const existingMediaFiles =
+    file.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
+
+  const newMediaFiles: NewMediaFile[] =
+    (existingAndNewMediaFiles?.filter(
+      (f) => 'file' in f && f.file instanceof Blob
+    ) as NewMediaFile[]) || [];
 
   // Discover deleted files:
   const deletedMediaFiles: MediaFile[] = [];
-  for (let i = 0; oldMediaFiles && i < oldMediaFiles?.length; i++) {
-    const oldMediaFile = oldMediaFiles[i];
-    if (!existingMediaFiles?.find((f) => 'fileKey' in f && f.fileKey === oldMediaFile.fileKey)) {
-      deletedMediaFiles.push(oldMediaFile);
+  for (let i = 0; existingMediaFiles && i < existingMediaFiles?.length; i++) {
+    const existingMediaFile = existingMediaFiles[i];
+    if (!existingAndNewMediaFiles?.find((f) => f.key === existingMediaFile.key)) {
+      deletedMediaFiles.push(existingMediaFile);
     }
   }
 
@@ -439,38 +416,43 @@ const updatePost = async <T extends PostContent>(
           dotYouClient,
           targetDrive,
           file.fileId as string,
-          mediaFile.fileKey,
-          file.fileMetadata.versionTag
+          mediaFile.key,
+          runningVersionTag
         )
       ).newVersionTag;
     }
   }
 
   // When all media is removed from the post, remove the preview thumbnail
-  if (oldMediaFiles.length === deletedMediaFiles.length)
+  if (existingMediaFiles.length === deletedMediaFiles.length)
     file.fileMetadata.appData.previewThumbnail = undefined;
 
-  // Discover new files:
+  // Process new files:
   const payloads: PayloadFile[] = [];
   const thumbnails: ThumbnailFile[] = [];
   let previewThumbnail: EmbeddedThumb | undefined;
   for (let i = 0; newMediaFiles && i < newMediaFiles.length; i++) {
     const newMediaFile = newMediaFiles[i];
-    const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${oldMediaFiles.length + i}`;
-    payloads.push({
-      payload: newMediaFile.file,
-      key: payloadKey,
-    });
+    // We ignore existing files as they are just kept
+    if (!('file' in newMediaFile)) {
+      continue;
+    }
+
+    const payloadKey =
+      newMediaFile.key ||
+      `${POST_MEDIA_PAYLOAD_KEY}${(existingAndNewMediaFiles || newMediaFiles).length + i}`;
+
     const { additionalThumbnails, tinyThumb } = await createThumbnails(
       newMediaFile.file,
       payloadKey
     );
-    thumbnails.push(...additionalThumbnails);
-    existingMediaFiles.push({
-      fileId: file.fileId,
-      fileKey: payloadKey,
-      type: 'image',
+
+    payloads.push({
+      payload: newMediaFile.file,
+      key: payloadKey,
+      previewThumbnail: tinyThumb,
     });
+    thumbnails.push(...additionalThumbnails);
     previewThumbnail = previewThumbnail || tinyThumb;
   }
 
@@ -495,12 +477,19 @@ const updatePost = async <T extends PostContent>(
     ).newVersionTag;
   }
 
-  if (existingMediaFiles?.length)
-    (file.fileMetadata.appData.content as Media).mediaFiles =
-      existingMediaFiles && existingMediaFiles.length > 1 ? existingMediaFiles : undefined;
-  file.fileMetadata.appData.content.primaryMediaFile = existingMediaFiles?.[0];
+  if (file.fileMetadata.appData.content.type !== 'Article') {
+    if (existingMediaFiles?.length)
+      file.fileMetadata.appData.content.primaryMediaFile = {
+        fileId: file.fileId,
+        fileKey: existingMediaFiles[0].key,
+        type: existingMediaFiles[0].contentType,
+      };
+  }
+
   file.fileMetadata.appData.previewThumbnail =
-    file.fileMetadata.appData.previewThumbnail || previewThumbnail;
+    deletedMediaFiles.length && existingMediaFiles.length === 1
+      ? previewThumbnail
+      : file.fileMetadata.appData.previewThumbnail || previewThumbnail;
 
   const encrypt = !(
     file.serverMetadata.accessControlList?.requiredSecurityGroup === SecurityGroupType.Anonymous ||
@@ -512,61 +501,4 @@ const updatePost = async <T extends PostContent>(
   if (!result) throw new Error(`[DotYouCore-js] PostProvider: Post update failed`);
 
   return result;
-};
-
-export const appendPostMedia = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  file: Blob
-) => {
-  const header = await getFileHeader(dotYouClient, targetDrive, fileId);
-  if (!header) throw new Error('Cannot append to a file that does not exist');
-
-  const appendInstructionSet: AppendInstructionSet = {
-    targetFile: {
-      fileId: fileId,
-      targetDrive: targetDrive,
-    },
-    versionTag: header.fileMetadata.versionTag,
-  };
-
-  const payloads: PayloadFile[] = [];
-  const thumbnails: ThumbnailFile[] = [];
-
-  const payloadKey = `${POST_MEDIA_PAYLOAD_KEY}${header.fileMetadata.payloads.length + 1}`;
-  payloads.push({
-    payload: file,
-    key: payloadKey,
-  });
-
-  const { additionalThumbnails } = await createThumbnails(file, payloadKey);
-  thumbnails.push(...additionalThumbnails);
-
-  const response = await appendDataToFile(
-    dotYouClient,
-    header?.fileMetadata.isEncrypted ? header.sharedSecretEncryptedKeyHeader : undefined,
-    appendInstructionSet,
-    payloads,
-    thumbnails
-  );
-
-  return { ...response, fileKey: payloadKey };
-};
-
-export const removePostMedia = async (
-  dotYouClient: DotYouClient,
-  targetDrive: TargetDrive,
-  fileId: string,
-  fileKey: string,
-  versionTag: string
-) => {
-  const response = await deletePayload(
-    dotYouClient,
-    targetDrive,
-    fileId as string,
-    fileKey,
-    versionTag
-  );
-  return response;
 };

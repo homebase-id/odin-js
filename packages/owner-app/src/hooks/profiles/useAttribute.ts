@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Attribute,
-  getAttribute,
-  saveAttribute,
-  removeAttribute,
-} from '@youfoundation/js-lib/profile';
+import { Attribute, getProfileAttribute } from '@youfoundation/js-lib/profile';
 import { useAuth } from '../auth/useAuth';
 import { useStaticFiles } from '@youfoundation/common-app';
 import { AttributeDefinitions } from './AttributeDefinitions';
 import { AttributeVm } from './useAttributes';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { HomePageAttributes, HomePageConfig } from '@youfoundation/js-lib/public';
+import {
+  removeProfileAttribute,
+  saveProfileAttribute,
+} from '../../provider/profile/AttributeData/ManageAttributeProvider';
 
 const getListItemCacheKey = (newAttrVm: Attribute) => {
   return [
@@ -33,64 +32,60 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
     if (!profileId || !attributeId) {
       return null;
     }
-    const foundAttribute = await getAttribute(dotYouClient, profileId, attributeId);
+    const foundAttribute = await getProfileAttribute(dotYouClient, profileId, attributeId);
 
     return foundAttribute || null;
   };
 
-  const saveData = async (
-    attribute: NewDriveSearchResult<Attribute> | DriveSearchResult<Attribute>
-  ) => {
-    return new Promise<NewDriveSearchResult<Attribute> | DriveSearchResult<Attribute>>(
-      (resolve, reject) => {
-        const onVersionConflict = async () => {
-          const serverAttr = await getAttribute(
-            dotYouClient,
-            attribute.fileMetadata.appData.content.profileId,
-            attribute.fileMetadata.appData.content.id
-          );
-          if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
-
-          const newAttr = { ...attribute, ...(serverAttr as DriveSearchResult<Attribute>) };
-          saveAttribute(dotYouClient, newAttr, onVersionConflict)
-            .then((result) => {
-              if (result) resolve(result);
-            })
-            .catch((err) => {
-              reject(err);
-            });
-        };
-
-        // Don't edit original attribute as it will be used for caching decisions in onSettled
-        saveAttribute(
+  const saveData = async (attribute: NewHomebaseFile<Attribute> | HomebaseFile<Attribute>) => {
+    return new Promise<NewHomebaseFile<Attribute> | HomebaseFile<Attribute>>((resolve, reject) => {
+      const onVersionConflict = async () => {
+        const serverAttr = await getProfileAttribute(
           dotYouClient,
-          {
-            ...attribute,
-          },
-          onVersionConflict
-        )
+          attribute.fileMetadata.appData.content.profileId,
+          attribute.fileMetadata.appData.content.id
+        );
+        if (!serverAttr || !serverAttr.fileMetadata.appData.content) return;
+
+        const newAttr = { ...attribute, ...(serverAttr as HomebaseFile<Attribute>) };
+        saveProfileAttribute(dotYouClient, newAttr, onVersionConflict)
           .then((result) => {
             if (result) resolve(result);
           })
           .catch((err) => {
             reject(err);
           });
-      }
-    );
+      };
+
+      // Don't edit original attribute as it will be used for caching decisions in onSettled
+      saveProfileAttribute(
+        dotYouClient,
+        {
+          ...attribute,
+        },
+        onVersionConflict
+      )
+        .then((result) => {
+          if (result) resolve(result);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   };
 
   const removeBroken = async ({
     attribute,
     overrideProfileId,
   }: {
-    attribute: DriveSearchResult<Attribute | undefined>;
+    attribute: HomebaseFile<Attribute | undefined>;
     overrideProfileId?: string;
   }) => {
     const profileId =
       (attribute.fileMetadata.appData.content as Attribute)?.profileId || overrideProfileId;
 
     if (attribute.fileId && profileId)
-      return await removeAttribute(dotYouClient, profileId, attribute.fileId);
+      return await removeProfileAttribute(dotYouClient, profileId, attribute.fileId);
     else console.error('No FileId provided for removeData');
   };
 
@@ -128,7 +123,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
           typeDefinition,
         };
 
-        const updatedDsr: NewDriveSearchResult<AttributeVm> = {
+        const updatedDsr: NewHomebaseFile<AttributeVm> = {
           ...newDsr,
           fileMetadata: {
             ...newDsr.fileMetadata,
@@ -146,7 +141,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(newAttrVm);
-        const previousAttributes: DriveSearchResult<AttributeVm>[] | undefined =
+        const previousAttributes: HomebaseFile<AttributeVm>[] | undefined =
           queryClient.getQueryData(listItemCacheKey);
 
         // if new attribute can't be found in existing list, then it's a new one, so can't update but need to add
@@ -214,7 +209,7 @@ export const useAttribute = (props?: { profileId?: string; attributeId?: string 
 
         // Update section attributes
         const listItemCacheKey = getListItemCacheKey(toRemoveAttr);
-        const previousAttributes: DriveSearchResult<Attribute>[] | undefined =
+        const previousAttributes: HomebaseFile<Attribute>[] | undefined =
           queryClient.getQueryData(listItemCacheKey);
 
         const updatedAttributes = previousAttributes?.filter(

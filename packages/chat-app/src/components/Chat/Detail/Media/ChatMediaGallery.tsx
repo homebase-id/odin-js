@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ActionButton, Arrow, ArrowLeft, Times, usePortal } from '@youfoundation/common-app';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
@@ -8,7 +8,7 @@ import { OdinImage, OdinVideo } from '@youfoundation/ui-lib';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 
-export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> }) => {
+export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
   const target = usePortal('modal-container');
   const dotYouClient = useDotYouClientContext();
 
@@ -107,7 +107,7 @@ export const ChatMediaGallery = ({ msg }: { msg: DriveSearchResult<ChatMessage> 
               onClick={onClose}
               className={`absolute left-4 top-4 rounded-full border border-primary/50 bg-background p-3 text-foreground hover:brightness-90 hover:filter dark:border-primary/50`}
             >
-              <Times className="h-4 w-4" />
+              <Times className="h-5 w-5" />
             </button>
           ) : null}
 

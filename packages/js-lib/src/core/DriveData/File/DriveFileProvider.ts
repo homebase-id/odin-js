@@ -1,10 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import {
-  ContentType,
-  DriveSearchResult,
-  EncryptedKeyHeader,
-  SystemFileType,
-} from './DriveFileTypes';
+import { ContentType, HomebaseFile, EncryptedKeyHeader, SystemFileType } from './DriveFileTypes';
 import { TargetDrive, ImageContentType, FileMetadata } from './DriveFileTypes';
 
 import { DotYouClient } from '../../DotYouClient';
@@ -32,7 +27,7 @@ interface GetFileThumbRequest extends GetFileRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 /// Get methods by FileId:
 export const getFileHeader = async <T = string>(
@@ -40,7 +35,7 @@ export const getFileHeader = async <T = string>(
   targetDrive: TargetDrive,
   fileId: string,
   options?: { systemFileType?: SystemFileType; axiosConfig?: AxiosRequestConfig }
-): Promise<DriveSearchResult<T> | null> => {
+): Promise<HomebaseFile<T> | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('FileId', fileId);
@@ -53,7 +48,7 @@ export const getFileHeader = async <T = string>(
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -95,10 +90,9 @@ export const getFileHeaderBytes = async (
     fileId,
   };
 
-  const promise: Promise<DriveSearchResult | null> = client
-    .get<DriveSearchResult>(
-      '/drive/files/header?' +
-        stringifyToQueryParams(request as unknown as Record<string, unknown>),
+  const promise: Promise<HomebaseFile | null> = client
+    .get<HomebaseFile>(
+      '/drive/files/header?' + stringifyToQueryParams(request),
       options?.axiosConfig
     )
     .then((response) => response.data)
@@ -194,7 +188,7 @@ export const getPayloadBytes = async (
       config
     )
     .then(async (response) => {
-      if (!response.data) return null;
+      if (!response.data || !response.data.byteLength) return null;
       return {
         bytes: !decrypt
           ? new Uint8Array(response.data)

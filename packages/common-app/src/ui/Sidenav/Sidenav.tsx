@@ -5,8 +5,11 @@ import {
   CHAT_APP_ID,
   ChatBubble,
   Cloud,
+  Envelope,
+  FEED_APP_ID,
   HOME_ROOT_PATH,
   House,
+  MAIL_APP_ID,
   MiniDarkModeToggle,
   Persons,
   Pin,
@@ -112,8 +115,8 @@ export const Sidenav = ({
                   }`}
                   onClick={() => setIsPinned(!isPinned)}
                 >
-                  <Pin className={'h-4 w-4 flex-shrink-0 hidden md:block'} />
-                  <Times className={'h-4 w-4 flex-shrink-0 block md:hidden'} />
+                  <Pin className={'h-5 w-5 flex-shrink-0 hidden md:block'} />
+                  <Times className={'h-5 w-5 flex-shrink-0 block md:hidden'} />
                 </button>
               ) : isOpen || isPeeking ? (
                 <button
@@ -125,7 +128,7 @@ export const Sidenav = ({
                     setIsOpen(false);
                   }}
                 >
-                  <Times className={'h-4 w-4 flex-shrink-0'} />
+                  <Times className={'h-5 w-5 flex-shrink-0'} />
                 </button>
               ) : null}
             </div>
@@ -140,8 +143,9 @@ export const Sidenav = ({
             </div>
 
             <div className="py-3">
-              <NavItem icon={Feed} label={'Feed'} to={'/apps/feed'} end={true} />
+              <FeedNavItem />
               <ChatNavItem />
+              <MailNavItem />
             </div>
 
             <div className={`py-3`}>
@@ -444,9 +448,19 @@ const NotificationBell = () => {
   );
 };
 
+const FeedNavItem = () => {
+  const count = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
+  return <NavItem icon={Feed} label={'Feed'} to="/apps/feed" unread={!!count} />;
+};
+
 const ChatNavItem = () => {
   const count = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
   return <NavItem icon={ChatBubble} label={'Chat'} to="/apps/chat" unread={!!count} />;
+};
+
+const MailNavItem = () => {
+  const count = useUnreadPushNotificationsCount({ appId: MAIL_APP_ID });
+  return <NavItem icon={Envelope} label={'Mail'} to="/apps/mail" unread={!!count} />;
 };
 
 const MobileDrawer = ({ setIsOpen }: { setIsOpen: (isOpen: boolean) => void }) => {

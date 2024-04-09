@@ -2,7 +2,6 @@ import {
   BlogConfig,
   ChannelDefinition,
   EmbeddedPost,
-  NewMediaFile,
   ReactAccess,
 } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect, useMemo } from 'react';
@@ -35,9 +34,10 @@ import {
 import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import {
   AccessControlList,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
 
@@ -60,7 +60,7 @@ const PostComposer = ({
 
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<
-    DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>
+    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
   >(BlogConfig.PublicChannelNewDsr);
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
@@ -237,7 +237,7 @@ const PostComposer = ({
           >
             {channel.serverMetadata?.accessControlList && canPost ? (
               <AclIcon
-                className="mr-3 h-4 w-4"
+                className="mr-3 h-5 w-5"
                 acl={customAcl || channel.serverMetadata?.accessControlList}
               />
             ) : null}
@@ -273,7 +273,7 @@ export const ChannelOrAclSelector = React.forwardRef(
       defaultChannelValue?: string;
       defaultAcl?: AccessControlList;
       onChange: (
-        channel: DriveSearchResult<ChannelDefinition> | undefined,
+        channel: HomebaseFile<ChannelDefinition> | undefined,
         acl: AccessControlList | undefined
       ) => void;
       disabled?: boolean;

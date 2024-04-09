@@ -12,9 +12,9 @@ import { getRichTextFromString } from '../../helpers/richTextHelper';
 import { UseCommentsVal } from './comments/useComments';
 import { useDotYouClient } from '../../..';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   EmojiReactionSummary,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   ReactionFile,
 } from '@youfoundation/js-lib/core';
 
@@ -28,8 +28,8 @@ export const useReaction = () => {
   }: {
     context: ReactionContext;
     commentData:
-      | Omit<DriveSearchResult<ReactionFile>, 'serverMetadata'>
-      | Omit<NewDriveSearchResult<RawReactionContent>, 'serverMetadata'>;
+      | Omit<HomebaseFile<ReactionFile>, 'serverMetadata'>
+      | Omit<NewHomebaseFile<RawReactionContent>, 'serverMetadata'>;
   }) => {
     return await saveComment(dotYouClient, context, {
       fileMetadata: {
@@ -52,7 +52,7 @@ export const useReaction = () => {
     commentFile,
   }: {
     context: ReactionContext;
-    commentFile: DriveSearchResult<ReactionFile>;
+    commentFile: HomebaseFile<ReactionFile>;
   }) => {
     return await removeComment(dotYouClient, context, commentFile);
   };
@@ -93,7 +93,7 @@ export const useReaction = () => {
         let newInfinite: InfiniteData<UseCommentsVal>;
         if (prevInfinite) {
           if (
-            (toSaveCommentData.commentData as DriveSearchResult<ReactionFile>).fileMetadata
+            (toSaveCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata
               .globalTransitId
           ) {
             newInfinite = {
@@ -103,11 +103,11 @@ export const useReaction = () => {
                   ...page,
                   comments: page.comments.map((comment) =>
                     comment.fileMetadata.globalTransitId ===
-                    (toSaveCommentData.commentData as DriveSearchResult<ReactionFile>).fileMetadata
+                    (toSaveCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata
                       .globalTransitId
                       ? toSaveCommentData
                       : comment
-                  ) as DriveSearchResult<ReactionFile>[],
+                  ) as HomebaseFile<ReactionFile>[],
                 };
               }),
             };
@@ -118,7 +118,7 @@ export const useReaction = () => {
               comments: [
                 toSaveCommentData.commentData,
                 ...firstPage.comments,
-              ] as DriveSearchResult<ReactionFile>[],
+              ] as HomebaseFile<ReactionFile>[],
             };
             const newPages = [newFirtPage, ...prevInfinite.pages.slice(1)];
 
@@ -135,8 +135,7 @@ export const useReaction = () => {
       },
       onSuccess: (savedGlobalId, savedCommentData) => {
         if (
-          (savedCommentData.commentData as DriveSearchResult<ReactionFile>).fileMetadata
-            .globalTransitId
+          (savedCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata.globalTransitId
         ) {
           // it was a normal update, already covered on the onMutate;
           return;

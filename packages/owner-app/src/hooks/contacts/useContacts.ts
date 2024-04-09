@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { CursoredResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { CursoredResult, NewHomebaseFile } from '@youfoundation/js-lib/core';
 
 import { useAuth } from '../auth/useAuth';
 import { parseContact } from './useContact';
@@ -12,7 +12,7 @@ export const useContacts = () => {
 
   const fetch = async (
     cursorState?: string
-  ): Promise<CursoredResult<NewDriveSearchResult<RawContact>[]>> => {
+  ): Promise<CursoredResult<NewHomebaseFile<RawContact>[]>> => {
     const data = await await getContacts(dotYouClient, cursorState, pageSize);
     return { ...data, results: data.results.map((contact) => parseContact(contact)) };
   };

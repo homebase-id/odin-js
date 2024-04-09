@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import {
   ActionButton,
@@ -19,8 +19,8 @@ export const EditChatMessage = ({
   conversation,
   onClose,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation: DriveSearchResult<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
+  conversation: HomebaseFile<Conversation>;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');
@@ -36,7 +36,7 @@ export const EditChatMessage = ({
   const doSend = () => {
     if (!message.trim()) return;
 
-    const updatedMessage: DriveSearchResult<ChatMessage> = {
+    const updatedMessage: HomebaseFile<ChatMessage> = {
       ...msg,
       fileMetadata: {
         ...msg.fileMetadata,

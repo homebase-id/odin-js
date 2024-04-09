@@ -6,7 +6,7 @@ import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
-import { NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 export const ChannelsPage = () => {
@@ -16,7 +16,7 @@ export const ChannelsPage = () => {
     const newQueryParam = params.get('new');
     if (!newQueryParam) return undefined;
 
-    const newChannel = tryJsonParse<NewDriveSearchResult<ChannelDefinitionVm>>(newQueryParam);
+    const newChannel = tryJsonParse<NewHomebaseFile<ChannelDefinitionVm>>(newQueryParam);
     return newChannel;
   }, [params]);
 
@@ -57,7 +57,7 @@ export const ChannelsPage = () => {
                   onClick={() => setIsAddNew(true)}
                   className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
                 >
-                  <Plus className="mr-2 h-4 w-4" /> {t('Add new')}
+                  <Plus className="mr-2 h-5 w-5" /> {t('Add new')}
                 </div>
               </div>
             )}

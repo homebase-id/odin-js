@@ -42,8 +42,9 @@ const isDebug = hasDebugFlag();
 const ParseRawClientNotification = (
   notification: RawClientNotification
 ): TypedConnectionNotification => {
-  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } =
-    tryJsonParse<any>(notification.data);
+  const { targetDrive, header, externalFileIdentifier, sender, recipient, ...data } = tryJsonParse<
+    Record<string, unknown>
+  >(notification.data);
 
   if (notification.notificationType === 'transitFileReceived') {
     return {
@@ -277,14 +278,31 @@ export const Notify = async (command: WebsocketCommand | EstablishConnectionRequ
 };
 
 const parseMessage = async (e: MessageEvent): Promise<RawClientNotification> => {
-  const metaPayload = tryJsonParse<any>(e.data);
-  const encryptedPayload = tryJsonParse<any>(metaPayload.payload);
+  const metaPayload = tryJsonParse<Record<string, unknown>>(e.data);
+  if (!metaPayload || !('payload' in metaPayload) || typeof metaPayload.payload !== 'string') {
+    console.error('[WebsocketProvider] Invalid message received', e.data);
+    throw new Error('Invalid message received');
+  }
 
-  const decryptedData = metaPayload.isEncrypted
-    ? await decryptData(encryptedPayload.data, encryptedPayload.iv, activeSs)
-    : encryptedPayload;
+  const encryptedPayload = tryJsonParse<Record<string, unknown>>(metaPayload.payload);
 
-  const notification: RawClientNotification = decryptedData;
+  if (metaPayload.isEncrypted) {
+    if (
+      !encryptedPayload ||
+      typeof encryptedPayload.data !== 'string' ||
+      typeof encryptedPayload.iv !== 'string'
+    ) {
+      console.error('[WebsocketProvider] Invalid message received for decryption', e.data);
+      throw new Error('Invalid message received for decryption');
+    }
 
-  return notification;
+    return (await decryptData(
+      encryptedPayload.data,
+      encryptedPayload.iv,
+      activeSs
+    )) as RawClientNotification;
+  }
+
+  const decryptedData: unknown = encryptedPayload;
+  return decryptedData as RawClientNotification;
 };

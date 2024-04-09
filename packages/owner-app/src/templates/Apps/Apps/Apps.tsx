@@ -3,8 +3,6 @@ import { useApps } from '../../../hooks/apps/useApps';
 import { Grid } from '@youfoundation/common-app';
 
 import { LoadingBlock } from '@youfoundation/common-app';
-import CardLink from '../../../components/ui/Buttons/CardLink';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import Section from '../../../components/ui/Sections/Section';
 import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import Submenu from '../../../components/SubMenu/SubMenu';

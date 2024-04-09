@@ -1,4 +1,4 @@
-import { TargetDrive } from '@youfoundation/js-lib/core';
+import { PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import React, { ReactNode } from 'react';
 import { ActionLink, Image } from '@youfoundation/common-app';
 
@@ -15,6 +15,8 @@ export const RichTextRenderer = ({
     defaultFileId: string;
     defaultGlobalTransitId?: string;
     lastModified: number | undefined;
+    previewThumbnails?: PayloadDescriptor[];
+    query?: string;
   };
   className?: string;
 }) => {
@@ -45,26 +47,33 @@ export const RichTextRenderer = ({
 
   const renderLeaf = (
     leaf: { text?: string; bold?: boolean; italic?: boolean; underline?: boolean; code?: boolean },
-    children: ReactNode,
+    text: string,
     attributes: Record<string, unknown>
   ) => {
+    let children: ReactNode;
+    const highlightedText = highlightQuery(text, options?.query);
+
     if (leaf.bold) {
-      children = <strong className="font-bold">{children}</strong>;
+      children = <strong className="font-bold">{highlightedText}</strong>;
     }
 
     if (leaf.code) {
-      children = <code>{children}</code>;
+      children = <code>{highlightedText}</code>;
     }
 
     if (leaf.italic) {
-      children = <em>{children}</em>;
+      children = <em>{highlightedText}</em>;
     }
 
     if (leaf.underline) {
-      children = <u>{children}</u>;
+      children = <u>{highlightedText}</u>;
     }
 
-    return <span {...attributes}>{children}</span>;
+    return (
+      <span data-type={'leaf'} {...attributes}>
+        {children || highlightedText}
+      </span>
+    );
   };
 
   const renderElement = (
@@ -134,16 +143,26 @@ export const RichTextRenderer = ({
         );
       case 'local_image':
         if (attributes && options) {
+          const matchingPreviewThumbnail = options.previewThumbnails?.find(
+            (payload) => payload.key === attributes.fileKey
+          )?.previewThumbnail;
+
           return (
-            <Image
-              targetDrive={options.imageDrive}
-              fileId={(attributes.fileId as string) || options.defaultFileId}
-              globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
-              lastModified={options.lastModified}
-              fileKey={attributes.fileKey as string}
-              className="my-4 max-w-md"
-              odinId={odinId}
-            />
+            <div
+              className={matchingPreviewThumbnail ? '' : 'w-full max-w-md aspect-square'}
+              data-thumb={!!matchingPreviewThumbnail}
+            >
+              <Image
+                targetDrive={options.imageDrive}
+                fileId={(attributes.fileId as string) || options.defaultFileId}
+                globalTransitId={attributes.fileId ? undefined : options.defaultGlobalTransitId}
+                lastModified={options.lastModified}
+                fileKey={attributes.fileKey as string}
+                previewThumbnail={matchingPreviewThumbnail}
+                className="my-4 max-w-md"
+                odinId={odinId}
+              />
+            </div>
           );
         }
         return <></>;
@@ -165,10 +184,23 @@ export const RichTextRenderer = ({
       case 'p':
       case 'paragraph':
         return (
-          <p {...attributes} className="mb-3">
+          <p {...attributes} className="mb-3 last-of-type:mb-0">
             {children}
           </p>
         );
+      case 'mention':
+        if (attributes && 'value' in attributes && typeof attributes.value === 'string') {
+          return (
+            <a
+              href={`https://${attributes.value}`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-primary hover:underline break-words"
+            >
+              {attributes.value}
+            </a>
+          );
+        } else return <></>;
       default:
         return <span {...attributes}>{children}</span>;
     }
@@ -181,4 +213,21 @@ export const RichTextRenderer = ({
       })}
     </div>
   );
+};
+
+export const highlightQuery = (text: string | undefined, query: string | undefined | null) => {
+  if (!query || !text || !(typeof text === 'string')) return text;
+
+  const regEscape = (v: string) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  const strArr = text.split(new RegExp(regEscape(query), 'ig'));
+
+  return strArr.map((str, index) => {
+    if (index === strArr.length - 1) return str;
+    return (
+      <React.Fragment key={index}>
+        {str}
+        <span className="bg-amber-200 dark:bg-yellow-600">{query}</span>
+      </React.Fragment>
+    );
+  });
 };

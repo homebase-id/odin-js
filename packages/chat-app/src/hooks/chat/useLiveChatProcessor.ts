@@ -1,6 +1,6 @@
 import { InfiniteData, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  DriveSearchResult,
+  HomebaseFile,
   ReceivedCommand,
   TypedConnectionNotification,
   getCommands,
@@ -11,12 +11,15 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import {
   ChatDrive,
   Conversation,
+  ConversationFileType,
+  GroupConversationFileType,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
+  UPDATE_GROUP_CONVERSATION_COMMAND,
+  dsrToConversation,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
-import { preAuth } from '@youfoundation/js-lib/auth';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   ChatMessage,
   ChatMessageFileType,
@@ -90,17 +93,21 @@ const useChatWebsocket = (isEnabled: boolean) => {
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
-        if (notification.notificationType === 'fileAdded') {
-          const conversationId = notification.header.fileMetadata.appData.groupId;
-          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+        const conversationId = notification.header.fileMetadata.appData.groupId;
+        const isNewFile = notification.notificationType === 'fileAdded';
+        const sender = notification.header.fileMetadata.senderOdinId;
 
+        if (!sender || sender === identity) {
+          // Ignore messages sent by the current user
+          return;
+        }
+
+        if (isNewFile) {
           // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery<DriveSearchResult<Conversation> | null>(
-            {
-              queryKey: ['conversation', conversationId],
-              queryFn: () => getSingleConversation(dotYouClient, conversationId),
-            }
-          );
+          const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
+            queryKey: ['conversation', conversationId],
+            queryFn: () => getSingleConversation(dotYouClient, conversationId),
+          });
 
           if (!conversation) {
             console.error('Orphaned message received', notification.header.fileId, conversation);
@@ -108,50 +115,131 @@ const useChatWebsocket = (isEnabled: boolean) => {
           } else if (conversation.fileMetadata.appData.archivalStatus === 2) {
             restoreChat({ conversation });
           }
-        } else if (notification.notificationType === 'fileModified') {
-          const conversationId = notification.header.fileMetadata.appData.groupId;
-          const updatedChatMessage = await dsrToMessage(
-            dotYouClient,
-            notification.header,
-            ChatDrive,
-            true
-          );
+        }
 
-          if (!updatedChatMessage) return;
+        // This skips the invalidation of all chat messages, as we only need to add/update this specific message
+        const updatedChatMessage = await dsrToMessage(
+          dotYouClient,
+          notification.header,
+          ChatDrive,
+          true
+        );
+        if (
+          !updatedChatMessage ||
+          Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+          return;
+        }
 
-          const extistingMessages = queryClient.getQueryData<
-            InfiniteData<{
-              searchResults: (DriveSearchResult<ChatMessage> | null)[];
-              cursorState: string;
-              queryTime: number;
-              includeMetadataHeader: boolean;
-            }>
-          >(['chat-messages', conversationId]);
+        const extistingMessages = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: (HomebaseFile<ChatMessage> | null)[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['chat-messages', conversationId]);
 
+        if (extistingMessages) {
           const newData = {
             ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page) => ({
+            pages: extistingMessages?.pages?.map((page, index) => ({
               ...page,
-              searchResults: page.searchResults.map((msg) =>
-                stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId) ? updatedChatMessage : msg
-              ),
+              searchResults: isNewFile
+                ? index === 0
+                  ? [
+                      updatedChatMessage,
+                      // There shouldn't be any duplicates for a fileAdded, but just in case
+                      ...page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ),
+                    ]
+                  : page.searchResults.filter(
+                      (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ) // There shouldn't be any duplicates for a fileAdded, but just in case
+                : page.searchResults.map((msg) =>
+                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ? updatedChatMessage
+                      : msg
+                  ),
             })),
           };
           queryClient.setQueryData(['chat-messages', conversationId], newData);
-
-          queryClient.setQueryData(
-            ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
-            updatedChatMessage
-          );
         }
+
+        queryClient.setQueryData(
+          ['chat-message', updatedChatMessage.fileMetadata.appData.uniqueId],
+          updatedChatMessage
+        );
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
+      } else if (
+        notification.header.fileMetadata.appData.fileType === ConversationFileType ||
+        notification.header.fileMetadata.appData.fileType === GroupConversationFileType
+      ) {
+        const isNewFile = notification.notificationType === 'fileAdded';
+
+        const updatedConversation = await dsrToConversation(
+          dotYouClient,
+          notification.header,
+          ChatDrive,
+          true
+        );
+
+        if (
+          !updatedConversation ||
+          Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          return;
+        }
+
+        const extistingConversations = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: HomebaseFile<Conversation>[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['conversations']);
+
+        if (extistingConversations) {
+          const newData = {
+            ...extistingConversations,
+            pages: extistingConversations.pages.map((page, index) => ({
+              ...page,
+              searchResults: isNewFile
+                ? index === 0
+                  ? [
+                      updatedConversation,
+                      // There shouldn't be any duplicates for a fileAdded, but just in case
+                      ...page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedConversation.fileId)
+                      ),
+                    ]
+                  : page.searchResults.filter(
+                      (msg) => !stringGuidsEqual(msg?.fileId, updatedConversation.fileId)
+                    ) // There shouldn't be any duplicates for a fileAdded, but just in case
+                : page.searchResults.map((conversation) =>
+                    stringGuidsEqual(
+                      conversation.fileMetadata.appData.uniqueId,
+                      updatedConversation.fileMetadata.appData.uniqueId
+                    )
+                      ? updatedConversation
+                      : conversation
+                  ),
+            })),
+          };
+          queryClient.setQueryData(['conversations'], newData);
+        }
       } else if (
         [
           JOIN_CONVERSATION_COMMAND,
           JOIN_GROUP_CONVERSATION_COMMAND,
           MARK_CHAT_READ_COMMAND,
+          UPDATE_GROUP_CONVERSATION_COMMAND,
         ].includes(notification.header.fileMetadata.appData.dataType) &&
         identity
       ) {
@@ -199,7 +287,8 @@ const useChatCommandProcessor = (isEnabled?: boolean) => {
         (command) =>
           command.clientCode === JOIN_CONVERSATION_COMMAND ||
           command.clientCode === MARK_CHAT_READ_COMMAND ||
-          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND
+          command.clientCode === JOIN_GROUP_CONVERSATION_COMMAND ||
+          command.clientCode === UPDATE_GROUP_CONVERSATION_COMMAND
       );
 
       const completedCommands: string[] = [];

@@ -12,7 +12,7 @@ import {
   SystemFileType,
   ContentType,
   ImageContentType,
-  DriveSearchResult,
+  HomebaseFile,
 } from './DriveFileTypes';
 import { assertIfDefined, stringifyToQueryParams, tryJsonParse } from '../../../helpers/DataUtil';
 import { getAxiosClient, getCacheKey, getRangeHeader, parseBytesToObject } from './DriveFileHelper';
@@ -30,23 +30,23 @@ interface GetFileThumbByUniqueIdRequest extends GetFileByUniqueIdRequest {
   payloadKey: string;
 }
 
-const _internalMetadataPromiseCache = new Map<string, Promise<DriveSearchResult | null>>();
+const _internalMetadataPromiseCache = new Map<string, Promise<HomebaseFile | null>>();
 
 /// Get methods by UniqueId
 export const getFileHeaderByUniqueId = async <T = string>(
   dotYouClient: DotYouClient,
   targetDrive: TargetDrive,
   uniqueId: string,
-  options?: { systemFileType?: SystemFileType }
-): Promise<DriveSearchResult<T> | null> => {
-  const { systemFileType } = options ?? { systemFileType: 'Standard' };
+  options?: { systemFileType?: SystemFileType; decrypt?: boolean }
+): Promise<HomebaseFile<T> | null> => {
+  const { systemFileType, decrypt } = options ?? { systemFileType: 'Standard', decrypt: true };
   const fileHeader = await getFileHeaderBytesByUniqueId(dotYouClient, targetDrive, uniqueId, {
-    decrypt: true,
+    decrypt,
     systemFileType,
   });
   if (!fileHeader) return null;
 
-  const typedFileHeader: DriveSearchResult<T> = {
+  const typedFileHeader: HomebaseFile<T> = {
     ...fileHeader,
     fileMetadata: {
       ...fileHeader.fileMetadata,
@@ -65,7 +65,7 @@ export const getFileHeaderBytesByUniqueId = async (
   targetDrive: TargetDrive,
   uniqueId: string,
   options: { decrypt?: boolean; systemFileType?: SystemFileType } | undefined
-): Promise<DriveSearchResult | null> => {
+): Promise<HomebaseFile | null> => {
   assertIfDefined('DotYouClient', dotYouClient);
   assertIfDefined('TargetDrive', targetDrive);
   assertIfDefined('UniqueId', uniqueId);
@@ -86,11 +86,8 @@ export const getFileHeaderBytesByUniqueId = async (
     clientUniqueId: uniqueId,
   };
 
-  const promise: Promise<DriveSearchResult | null> = client
-    .get<DriveSearchResult>(
-      '/drive/query/specialized/cuid/header?' +
-        stringifyToQueryParams(request as unknown as Record<string, unknown>)
-    )
+  const promise: Promise<HomebaseFile | null> = client
+    .get<HomebaseFile>('/drive/query/specialized/cuid/header?' + stringifyToQueryParams(request))
     .then((response) => response.data)
     .then(async (fileHeader) => {
       if (decrypt) {

@@ -6,7 +6,7 @@ import {
   useMostSpace,
   useOutsideTrigger,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useState, useRef } from 'react';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
@@ -16,8 +16,8 @@ export const ChatReactionComposer = ({
   conversation,
   msg,
 }: {
-  conversation: DriveSearchResult<Conversation>;
-  msg: DriveSearchResult<ChatMessage>;
+  conversation: HomebaseFile<Conversation>;
+  msg: HomebaseFile<ChatMessage>;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const authorOdinId = msg.fileMetadata.senderOdinId;

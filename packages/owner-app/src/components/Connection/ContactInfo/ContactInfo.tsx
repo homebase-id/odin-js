@@ -5,7 +5,7 @@ import { ActionButton } from '@youfoundation/common-app';
 import { Cake, House, IconFrame, Person, Phone, Refresh } from '@youfoundation/common-app';
 import Section from '../../ui/Sections/Section';
 import ContactImage from '../ContactImage/ContactImage';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ContactFile } from '@youfoundation/js-lib/network';
 import { useConnection } from '../../../hooks/connections/useConnection';
 
@@ -56,7 +56,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             <ActionButton
               className="text-base"
               state={refreshState}
-              onClick={() => refresh({ contact: contact as DriveSearchResult<ContactFile> })}
+              onClick={() => refresh({ contact: contact as HomebaseFile<ContactFile> })}
               icon={Refresh}
               confirmOptions={{
                 type: 'info',
@@ -82,7 +82,7 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             {contactContent.name && (
               <div className="my-3 flex flex-row">
                 <IconFrame className="mr-2">
-                  <Person className="h-4 w-4" />
+                  <Person className="h-5 w-5" />
                 </IconFrame>
                 {contactContent.name.displayName ??
                   `${contactContent.name.givenName ?? ''} ${contactContent.name.surname ?? ''}`}
@@ -90,25 +90,25 @@ const ContactInfo = ({ odinId, contactId }: ContactInfoProps) => {
             )}
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
-                <Phone className="h-4 w-4" />
+                <Phone className="h-5 w-5" />
               </IconFrame>
               {contactContent.phone?.number ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
-                <Envelope className="h-4 w-4" />
+                <Envelope className="h-5 w-5" />
               </IconFrame>
               {contactContent.email?.email ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
-                <House className="h-4 w-4" />
+                <House className="h-5 w-5" />
               </IconFrame>
               {contactContent.location?.city ?? ''} {contactContent.location?.country ?? ''}
             </div>
             <div className="my-3 flex flex-row">
               <IconFrame className="mr-2">
-                <Cake className="h-4 w-4" />
+                <Cake className="h-5 w-5" />
               </IconFrame>
               {contactContent.birthday?.date ?? ''}
             </div>

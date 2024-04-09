@@ -80,6 +80,7 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
   let value: string = ELEMENT_PARAGRAPH;
   if (isCollapsed(editor?.selection)) {
     const entry = findNode<TElement>(editor!, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       match: (n: any) => isBlock(editor, n),
     });
     if (entry) {

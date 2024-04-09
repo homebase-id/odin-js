@@ -33,6 +33,7 @@ export const EncryptedMseSource = ({
   const fileSize = videoMetaData.fileSize;
   const durationInSec = videoMetaData.duration ? videoMetaData.duration / 1000 : undefined;
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorHandler = (e: any) => {
       console.error('[Odin-Video]-Chunked', e);
       onFatalError && onFatalError();

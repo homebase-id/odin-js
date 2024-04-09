@@ -2,7 +2,7 @@
 
 [![CI Build](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml/badge.svg)](https://github.com/YouFoundation/dotyoucore-js/actions/workflows/ci.yml)
 
-This repo contains the various apps and libraries that are maintaned by Homebase. The libraries can be easily consumed by other app developers that want to work with a Homebase Identity backend.
+This repo contains the various apps and libraries that are maintaned by Homebase. The libraries can easily be consumed by other app developers that want to work with a Homebase Identity backend.
 
 ## Apps
 
@@ -12,7 +12,7 @@ The apps are setup indepentently, and can use the first party common app library
 
 Before you can use the actual apps, you need to install and build the depencies:
 
-`npm install && npm run build-libs`
+`npm install && npm run build:libs`
 
 After that you can build the apps
 

@@ -9,15 +9,25 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm i && npm run build -workspaces --if-present",
-    "build-libs": "npm i && npm run build -w ./packages/js-lib -w ./packages/ui-lib",
+    "postinstall": "patch-package",
     "test": "npm run test -workspaces --if-present",
+    "build": "npm i && npm run build -workspaces --if-present",
+    "build:libs": "npm i && npm run build -w ./packages/js-lib -w ./packages/ui-lib",
+    "build:owner": "npm run build -w ./packages/owner-app",
+    "build:feed": "npm run build -w ./packages/feed-app",
+    "build:chat": "npm run build -w ./packages/chat-app",
+    "build:mail": "npm run build -w ./packages/mail-app",
+    "build:public": "npm run build -w ./packages/public-app",
+    "build:login": "npm run build -w ./packages/login-app",
+    "build:provisioning": "npm run build -w ./packages/provisioning-app",
     "start:owner": "npm start -w ./packages/owner-app",
     "start:feed": "npm start -w ./packages/feed-app",
     "start:chat": "npm start -w ./packages/chat-app",
+    "start:mail": "npm start -w ./packages/mail-app",
     "start:public": "npm start -w ./packages/public-app",
     "start:provisioning": "npm start -w ./packages/provisioning-app",
-    "start:login": "npm start -w ./packages/login-app"
+    "start:login": "npm start -w ./packages/login-app",
+    "lint": "npm run lint -workspaces --if-present"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/youfoundation"
@@ -32,13 +42,16 @@
     "eslint": "8.56.0",
     "eslint-plugin-react": "7.33.2",
     "prettier": "3.2.4",
+    "rollup": "4.9.6",
     "tslib": "2.6.2",
     "typescript": "5.3.3",
-    "vite": "5.0.12",
-    "vite-plugin-dts": "3.7.2",
-    "rollup": "4.9.6"
+    "vite": "5.2.6",
+    "vite-plugin-dts": "3.7.2"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.6.1"
+  },
+  "dependencies": {
+    "patch-package": "^8.0.0"
   }
 }

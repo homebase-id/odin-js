@@ -7,14 +7,14 @@ import {
 } from '@youfoundation/js-lib/profile';
 import { useAttributeVersions } from '../../../hooks/profiles/useAttributeVersions';
 import { FallbackImg, LoadingBlock, useImage } from '@youfoundation/common-app';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { getInitialsOfNameAttribute } from '@youfoundation/js-lib/helpers';
 
 interface YourSignatureProps {
   className?: string;
 }
 
-const filterAttributes = (attributes: DriveSearchResult<Attribute>[]) => {
+const filterAttributes = (attributes: HomebaseFile<Attribute>[]) => {
   return attributes
     ?.filter(
       (attr) =>

@@ -3,9 +3,9 @@ import {
   decryptJsonContent,
   decryptKeyHeader,
   DEFAULT_PAYLOAD_KEY,
-  DeletedDriveSearchResult,
+  DeletedHomebaseFile,
   deleteFile,
-  DriveSearchResult,
+  HomebaseFile,
   getContentFromHeaderOrPayload,
   getPayloadBytes,
   queryBatch,
@@ -64,18 +64,16 @@ export const useFile = ({
   const queryClient = useQueryClient();
   const dotYouClient = useAuth().getDotYouClient();
 
-  const fetchFile = async (
-    result: DriveSearchResult | DeletedDriveSearchResult,
-    payloadKey?: string
-  ) => {
+  const fetchFile = async (result: HomebaseFile | DeletedHomebaseFile, payloadKey?: string) => {
     if (payloadKey) {
       const payload = await getPayloadBytes(dotYouClient, targetDrive, result.fileId, payloadKey);
       if (!payload) return null;
 
       return window.URL.createObjectURL(
         new Blob([payload.bytes], {
-          type: `${result.fileMetadata.payloads.find((payload) => payload.key === payloadKey)
-            ?.contentType};charset=utf-8`,
+          type: `${
+            result.fileMetadata.payloads.find((payload) => payload.key === payloadKey)?.contentType
+          };charset=utf-8`,
         })
       );
     }

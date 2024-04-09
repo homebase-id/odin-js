@@ -2,7 +2,6 @@ import {
   createPlugins,
   Plate,
   RenderAfterEditable,
-  withProps,
   PlateElement,
   PlateLeaf,
   PlateEditor,
@@ -14,6 +13,7 @@ import {
   PlateContent,
   TDescendant,
 } from '@udecode/plate-common';
+import { withProps } from '@udecode/cn';
 import { createParagraphPlugin, ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
 import { createHeadingPlugin, ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
 import { createBlockquotePlugin, ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
@@ -47,6 +47,9 @@ import { createTabbablePlugin } from '@udecode/plate-tabbable';
 import { createTrailingBlockPlugin } from '@udecode/plate-trailing-block';
 import { createDeserializeMdPlugin } from '@udecode/plate-serializer-md';
 
+import { createComboboxPlugin, TComboboxItem } from '@udecode/plate-combobox';
+import { createEmojiPlugin } from '@udecode/plate-emoji';
+
 import { BlockquoteElement } from '../components/plate-ui/blockquote-element';
 import { CodeBlockElement } from '../components/plate-ui/code-block-element';
 import { CodeLineElement } from '../components/plate-ui/code-line-element';
@@ -66,12 +69,17 @@ import { useDarkMode } from '@youfoundation/common-app';
 import { createImagePlugin, ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';
 import { useState, useEffect } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
+import { EmojiCombobox } from './Combobox/EmojiCombobox';
+import { createMentionPlugin, ELEMENT_MENTION } from '@udecode/plate-mention';
+import { MentionCombobox } from './Combobox/MentionCombobox';
+import { MentionElement } from '../components/plate-ui/mention-element';
 
 export const RichTextEditor = ({
   defaultValue,
   placeholder,
   mediaOptions,
-  name,
+  mentionables,
+  name = 'richText',
   onChange,
   className,
   disabled,
@@ -81,6 +89,7 @@ export const RichTextEditor = ({
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
   mediaOptions?: MediaOptions;
+  mentionables?: TComboboxItem[];
   name: string;
   onChange: (e: { target: { name: string; value: RichText } }) => void;
   className?: string;
@@ -158,6 +167,9 @@ export const RichTextEditor = ({
       }),
       createDeserializeHtmlPlugin(),
       createDeserializeMdPlugin(),
+      createComboboxPlugin(),
+      createEmojiPlugin(),
+      createMentionPlugin(),
       createImagePlugin({ options: mediaOptions }),
     ],
     {
@@ -178,6 +190,7 @@ export const RichTextEditor = ({
         [MARK_KBD]: KbdLeaf,
         [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: 's' }),
         [MARK_UNDERLINE]: withProps(PlateLeaf, { as: 'u' }),
+        [ELEMENT_MENTION]: MentionElement,
       },
     }
   );
@@ -196,14 +209,14 @@ export const RichTextEditor = ({
   const defaultValAsRichText: TElement[] | undefined =
     defaultValue && Array.isArray(defaultValue)
       ? (defaultValue as TElement[])
-      : defaultValue
-      ? ([
-          {
-            type: 'paragraph',
-            children: [{ text: defaultValue ?? '' }] as TDescendant[],
-          },
-        ] as TElement[])
-      : undefined;
+      : defaultValue && typeof defaultValue === 'string'
+        ? ([
+            {
+              type: 'paragraph',
+              children: [{ text: defaultValue ?? '' }] as TDescendant[],
+            },
+          ] as TElement[])
+        : undefined;
 
   return (
     <>
@@ -232,7 +245,7 @@ export const RichTextEditor = ({
           plugins={plugins}
           onChange={(newValue) => {
             const isActualChange = innerEditor?.operations.some(
-              (op: any) => 'set_selection' !== op.type
+              (op: { type: string }) => 'set_selection' !== op.type
             );
 
             if (isActualChange) onChange({ target: { name: name, value: newValue } });
@@ -246,6 +259,8 @@ export const RichTextEditor = ({
           </FixedToolbar>
 
           <PlateContent placeholder={placeholder} />
+          <EmojiCombobox />
+          {mentionables?.length ? <MentionCombobox items={mentionables} /> : null}
 
           <EditorExposer />
         </Plate>
@@ -253,3 +268,80 @@ export const RichTextEditor = ({
     </>
   );
 };
+
+// const MENTIONABLES: TComboboxItem[] = [
+//   { key: '0', text: 'Aayla Secura' },
+//   { key: '1', text: 'Adi Gallia' },
+//   {
+//     key: '2',
+//     text: 'Admiral Dodd Rancit',
+//   },
+//   {
+//     key: '3',
+//     text: 'Admiral Firmus Piett',
+//   },
+//   {
+//     key: '4',
+//     text: 'Admiral Gial Ackbar',
+//   },
+//   { key: '5', text: 'Admiral Ozzel' },
+//   { key: '6', text: 'Admiral Raddus' },
+//   {
+//     key: '7',
+//     text: 'Admiral Terrinald Screed',
+//   },
+//   { key: '8', text: 'Admiral Trench' },
+//   {
+//     key: '9',
+//     text: 'Admiral U.O. Statura',
+//   },
+//   { key: '10', text: 'Agen Kolar' },
+//   { key: '11', text: 'Agent Kallus' },
+//   {
+//     key: '12',
+//     text: 'Aiolin and Morit Astarte',
+//   },
+//   { key: '13', text: 'Aks Moe' },
+//   { key: '14', text: 'Almec' },
+//   { key: '15', text: 'Alton Kastle' },
+//   { key: '16', text: 'Amee' },
+//   { key: '17', text: 'AP-5' },
+//   { key: '18', text: 'Armitage Hux' },
+//   { key: '19', text: 'Artoo' },
+//   { key: '20', text: 'Arvel Crynyd' },
+//   { key: '21', text: 'Asajj Ventress' },
+//   { key: '22', text: 'Aurra Sing' },
+//   { key: '23', text: 'AZI-3' },
+//   { key: '24', text: 'Bala-Tik' },
+//   { key: '25', text: 'Barada' },
+//   { key: '26', text: 'Bargwill Tomder' },
+//   { key: '27', text: 'Baron Papanoida' },
+//   { key: '28', text: 'Barriss Offee' },
+//   { key: '29', text: 'Baze Malbus' },
+//   { key: '30', text: 'Bazine Netal' },
+//   { key: '31', text: 'BB-8' },
+//   { key: '32', text: 'BB-9E' },
+//   { key: '33', text: 'Ben Quadinaros' },
+//   { key: '34', text: 'Berch Teller' },
+//   { key: '35', text: 'Beru Lars' },
+//   { key: '36', text: 'Bib Fortuna' },
+//   {
+//     key: '37',
+//     text: 'Biggs Darklighter',
+//   },
+//   { key: '38', text: 'Black Krrsantan' },
+//   { key: '39', text: 'Bo-Katan Kryze' },
+//   { key: '40', text: 'Boba Fett' },
+//   { key: '41', text: 'Bobbajo' },
+//   { key: '42', text: 'Bodhi Rook' },
+//   { key: '43', text: 'Borvo the Hutt' },
+//   { key: '44', text: 'Boss Nass' },
+//   { key: '45', text: 'Bossk' },
+//   {
+//     key: '46',
+//     text: 'Breha Antilles-Organa',
+//   },
+//   { key: '47', text: 'Bren Derlin' },
+//   { key: '48', text: 'Brendol Hux' },
+//   { key: '49', text: 'BT-1' },
+// ];

@@ -1,9 +1,9 @@
 import {
   DotYouClient,
-  DriveSearchResult,
+  HomebaseFile,
   FileQueryParams,
   GetBatchQueryResultOptions,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   SecurityGroupType,
   TargetDrive,
   UploadFileMetadata,
@@ -14,6 +14,7 @@ import {
   sendCommand,
   uploadFile,
   uploadHeader,
+  EncryptedKeyHeader,
 } from '@youfoundation/js-lib/core';
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { ImageSource } from '@youfoundation/ui-lib';
@@ -23,7 +24,7 @@ export const GroupConversationFileType = 8890;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
-export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
+export const ConversationWithYourself: HomebaseFile<SingleConversation> = {
   fileState: 'active',
   fileId: '',
   fileSystemType: 'Standard',
@@ -36,14 +37,18 @@ export const ConversationWithYourself: DriveSearchResult<SingleConversation> = {
       uniqueId: ConversationWithYourselfId,
       fileType: ConversationFileType,
       dataType: 0,
-      content: {},
+      content: {
+        title: 'You',
+        recipient: '',
+      },
     },
     versionTag: '',
     payloads: [],
   },
   serverMetadata: undefined,
   priority: 0,
-} as any as DriveSearchResult<SingleConversation>;
+  sharedSecretEncryptedKeyHeader: {} as EncryptedKeyHeader,
+};
 
 export const ChatDrive: TargetDrive = {
   alias: '9ff813aff2d61e2f9b9db189e72d1a11',
@@ -93,7 +98,7 @@ export const getConversations = async (
         response.searchResults
           .map(async (result) => await dsrToConversation(dotYouClient, result, ChatDrive, true))
           .filter(Boolean)
-      )) as DriveSearchResult<Conversation>[]) || [],
+      )) as HomebaseFile<Conversation>[]) || [],
   };
 };
 
@@ -111,10 +116,10 @@ export const getConversation = async (dotYouClient: DotYouClient, conversationId
 
 export const dsrToConversation = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<Conversation> | null> => {
+): Promise<HomebaseFile<Conversation> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<Conversation>(
       dotYouClient,
@@ -124,7 +129,7 @@ export const dsrToConversation = async (
     );
     if (!attrContent) return null;
 
-    const conversation: DriveSearchResult<Conversation> = {
+    const conversation: HomebaseFile<Conversation> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,
@@ -144,7 +149,7 @@ export const dsrToConversation = async (
 
 export const uploadConversation = async (
   dotYouClient: DotYouClient,
-  conversation: NewDriveSearchResult<Conversation>,
+  conversation: NewHomebaseFile<Conversation>,
   onVersionConflict?: () => void
 ) => {
   const uploadInstructions: UploadInstructionSet = {
@@ -184,7 +189,7 @@ export const uploadConversation = async (
 
 export const updateConversation = async (
   dotYouClient: DotYouClient,
-  conversation: DriveSearchResult<Conversation>
+  conversation: HomebaseFile<Conversation>
 ) => {
   const uploadInstructions: UploadInstructionSet = {
     storageOptions: {

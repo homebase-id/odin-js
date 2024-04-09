@@ -1,10 +1,10 @@
 import {
+  PayloadDescriptor,
   TargetDrive,
   EmbeddedThumb,
-  ThumbnailFile,
   RichText,
   ReactionFile,
-  NewDriveSearchResult,
+  NewHomebaseFile,
   SecurityGroupType,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
@@ -39,7 +39,7 @@ export class BlogConfig {
     templateId: undefined,
   };
 
-  static readonly PublicChannelNewDsr: NewDriveSearchResult<ChannelDefinition> = {
+  static readonly PublicChannelNewDsr: NewHomebaseFile<ChannelDefinition> = {
     fileMetadata: {
       appData: {
         uniqueId: BlogConfig.PublicChannelId,
@@ -79,20 +79,15 @@ export const postTypeToDataType = (type: PostType): number => {
   throw 'Invalid post type';
 };
 
-export interface MediaFile {
-  // When undefined.. It's the fileId of the postFile itself
-  fileId: string | undefined;
+// Kept different for historical data
+export interface PrimaryMediaFile {
   fileKey: string;
-  type: 'video' | 'image';
+  fileId: string | undefined;
+  type: string;
 }
 
-export interface NewMediaFile {
-  file: File | Blob;
-  thumbnail?: ThumbnailFile;
-}
-
-// export type PostFile<T extends PostContent> = DriveSearchResult<T>;
-// export type NewPostFile<T extends PostContent> = NewDriveSearchResult<T>;
+// export type PostFile<T extends PostContent> = HomebaseFile<T>;
+// export type NewPostFile<T extends PostContent> = NewHomebaseFile<T>;
 
 export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   permalink: string;
@@ -101,6 +96,7 @@ export interface EmbeddedPost extends Omit<PostContent, 'embeddedPost'> {
   globalTransitId: string | undefined;
   lastModified: number | undefined;
   userDate: number;
+  payloads: PayloadDescriptor[];
 }
 
 export type ReactAccess = 'emoji' | 'comment' | boolean;
@@ -114,7 +110,7 @@ export interface PostContent {
   caption: string;
   captionAsRichText?: RichText;
   slug: string;
-  primaryMediaFile?: MediaFile;
+  primaryMediaFile?: PrimaryMediaFile;
   type: 'Article' | 'Media' | 'Tweet';
 
   embeddedPost?: EmbeddedPost;
@@ -134,7 +130,6 @@ export interface ReadTimeStats {
 
 export interface Media extends PostContent {
   type: 'Media';
-  mediaFiles?: MediaFile[];
 }
 
 // On hold for now, needs a proxy to get the linkMeta externally

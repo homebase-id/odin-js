@@ -62,14 +62,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               className="flex flex-row items-center gap-2 hover:underline"
               type="secondary"
             >
-              Retry <Refresh className="h-4 w-4" />{' '}
+              Retry <Refresh className="h-5 w-5" />{' '}
             </ActionButton>
 
             <button
               onClick={() => this.setState({ ...this.state, showDetails: !this.state.showDetails })}
               className="flex flex-row items-center gap-2 hover:underline"
             >
-              {this.state.showDetails ? 'Less' : 'More'} information <Arrow className="h-4 w-4" />
+              {this.state.showDetails ? 'Less' : 'More'} information <Arrow className="h-5 w-5" />
             </button>
           </div>
           {this.state.showDetails ? (

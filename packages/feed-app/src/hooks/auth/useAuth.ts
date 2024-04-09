@@ -15,7 +15,11 @@ import {
   throwAwayTheECCKey,
 } from '@youfoundation/js-lib/auth';
 import { ROOT_PATH } from '../../app/App';
-import { AppPermissionType, ContactConfig } from '@youfoundation/js-lib/network';
+import {
+  ALL_CONNECTIONS_CIRCLE_ID,
+  AppPermissionType,
+  ContactConfig,
+} from '@youfoundation/js-lib/network';
 import { BlogConfig, HomePageConfig } from '@youfoundation/js-lib/public';
 import { BuiltInProfiles, GetTargetDriveFromProfileId } from '@youfoundation/js-lib/profile';
 import { APP_AUTH_TOKEN, APP_SHARED_SECRET, useDotYouClient } from '@youfoundation/common-app';
@@ -115,7 +119,7 @@ export const drives = [
 
 export const permissions = [
   AppPermissionType.ReadConnections,
-  AppPermissionType.ManageConnectionRequests,
+  AppPermissionType.ReadConnectionRequests,
   AppPermissionType.ReadCircleMembers,
   AppPermissionType.ReadWhoIFollow,
   AppPermissionType.ReadMyFollowers,
@@ -145,6 +149,7 @@ export const useYouAuthAuthorization = () => {
       undefined,
       drives,
       undefined,
+      [ALL_CONNECTIONS_CIRCLE_ID],
       eccKey.publicKey,
       window.location.host,
       undefined,

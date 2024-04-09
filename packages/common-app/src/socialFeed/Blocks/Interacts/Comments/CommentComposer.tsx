@@ -1,3 +1,4 @@
+import { NewMediaFile } from '@youfoundation/js-lib/core';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useMemo, useState } from 'react';
 import {
@@ -143,7 +144,7 @@ export const CommentEditor = ({
         />
         <FileOverview
           files={files}
-          setFiles={(newFiles) => setAttachment(newFiles?.[0]?.file as File)}
+          setFiles={(newFiles: NewMediaFile[]) => setAttachment(newFiles?.[0]?.file as File)}
           className="my-2"
           cols={4}
         />
@@ -155,7 +156,7 @@ export const CommentEditor = ({
           />
           <FileSelector
             onChange={(newFiles) => setAttachment(newFiles?.[0])}
-            className="text-foreground text-opacity-30 hover:text-opacity-100"
+            className="px-2 py-1 text-foreground text-opacity-30 hover:text-opacity-100"
             maxSize={TEN_MEGA_BYTES}
           >
             <ImageIcon className="h-5 w-5" />
@@ -179,9 +180,9 @@ export const CommentEditor = ({
                 onClick={() => doPost(body, attachment)}
               >
                 {postState === 'loading' ? (
-                  <Loader className="h-4 w-4" />
+                  <Loader className="h-5 w-5" />
                 ) : (
-                  <PaperPlane className="h-4 w-4" />
+                  <PaperPlane className="h-5 w-5" />
                 )}
               </ActionButton>
             </div>

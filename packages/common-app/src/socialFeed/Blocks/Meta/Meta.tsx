@@ -20,16 +20,16 @@ import {
   UserX,
 } from '@youfoundation/common-app';
 import { OwnerActions } from './OwnerActions';
-import { DriveSearchResult, NewDriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { aclEqual } from '@youfoundation/js-lib/helpers';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   embeddedPost?: undefined;
   channel?:
-    | DriveSearchResult<ChannelDefinitionVm | ChannelDefinition>
-    | NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition>;
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
@@ -37,11 +37,11 @@ interface PostMetaWithPostFileProps {
 
 interface PostMetaWithEmbeddedPostContentProps {
   odinId?: string;
-  postFile?: DriveSearchResult<PostContent>;
+  postFile?: HomebaseFile<PostContent>;
   embeddedPost: EmbeddedPost;
   channel?:
-    | DriveSearchResult<ChannelDefinitionVm | ChannelDefinition>
-    | NewDriveSearchResult<ChannelDefinitionVm | ChannelDefinition>;
+    | HomebaseFile<ChannelDefinitionVm | ChannelDefinition>
+    | NewHomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
   className?: string;
   size?: 'text-xs' | 'text-sm';
   excludeContextMenu?: boolean;
@@ -125,7 +125,7 @@ const ExternalActions = ({
   postFile,
 }: {
   odinId: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
 }) => {
   const identity = useDotYouClient().getIdentity();
   const {

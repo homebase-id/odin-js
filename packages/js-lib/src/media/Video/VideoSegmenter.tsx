@@ -1,5 +1,6 @@
 const OdinBlob: typeof Blob =
-  (typeof window !== 'undefined' && (window as any)?.CustomBlob) || Blob;
+  (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
+  Blob;
 import { hasDebugFlag, mergeByteArrays } from '../../helpers/helpers';
 import { SegmentedVideoMetadata } from '../MediaTypes';
 

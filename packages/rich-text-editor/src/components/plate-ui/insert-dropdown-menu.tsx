@@ -2,7 +2,7 @@ import React from 'react';
 import { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 import { ELEMENT_BLOCKQUOTE } from '@udecode/plate-block-quote';
 import { focusEditor, insertEmptyElement, useEditorState } from '@udecode/plate-common';
-import { ELEMENT_H1, ELEMENT_H2, ELEMENT_H3 } from '@udecode/plate-heading';
+import { ELEMENT_H1, ELEMENT_H2 } from '@udecode/plate-heading';
 import { ELEMENT_PARAGRAPH } from '@udecode/plate-paragraph';
 
 import { Icons } from '../../components/icons';
@@ -134,7 +134,7 @@ export function InsertDropdownMenu(props: DropdownMenuProps) {
 
       <DropdownMenuContent
         align="start"
-        className="text-foreground bg-background flex max-h-[500px] min-w-0 flex-col gap-0.5 overflow-y-auto"
+        className="flex max-h-[500px] min-w-0 flex-col gap-0.5 overflow-y-auto bg-background text-foreground"
       >
         {items.map(({ items: nestedItems, label }, index) => (
           <React.Fragment key={label}>

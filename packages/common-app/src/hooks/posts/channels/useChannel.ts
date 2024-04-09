@@ -15,8 +15,8 @@ import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundati
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
 import {
   DrivePermissionType,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '@youfoundation/feed-app/src/app/App';
@@ -70,7 +70,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const fetchChannelData = async ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelSlug && !channelId) return null;
 
-    const cachedChannels = queryClient.getQueryData<DriveSearchResult<ChannelDefinitionVm>[]>([
+    const cachedChannels = queryClient.getQueryData<HomebaseFile<ChannelDefinitionVm>[]>([
       'channels',
     ]);
     if (cachedChannels) {
@@ -108,13 +108,13 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
             },
           },
         },
-      } as DriveSearchResult<ChannelDefinitionVm>;
+      } as HomebaseFile<ChannelDefinitionVm>;
     }
     return null;
   };
 
   const saveData = async (
-    channelDef: NewDriveSearchResult<ChannelDefinition> | DriveSearchResult<ChannelDefinition>
+    channelDef: NewHomebaseFile<ChannelDefinition> | HomebaseFile<ChannelDefinition>
   ) => {
     if (!channelDef.fileId) {
       if (!channelDef.fileMetadata.appData.uniqueId)
@@ -146,7 +146,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     return await saveChannelDefinition(dotYouClient, { ...channelDef }, onMissingDrive);
   };
 
-  const removeChannel = async (channelDef: DriveSearchResult<ChannelDefinition>) => {
+  const removeChannel = async (channelDef: HomebaseFile<ChannelDefinition>) => {
     await removeChannelDefinition(dotYouClient, channelDef.fileMetadata.appData.uniqueId as string);
   };
 
@@ -178,10 +178,10 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
               },
             },
           },
-        } as DriveSearchResult<ChannelDefinitionVm>;
+        } as HomebaseFile<ChannelDefinitionVm>;
 
         // Update channels
-        const previousChannels: DriveSearchResult<ChannelDefinitionVm>[] | undefined =
+        const previousChannels: HomebaseFile<ChannelDefinitionVm>[] | undefined =
           queryClient.getQueryData(['channels']);
         const updatedChannels = previousChannels?.map((chnl) =>
           stringGuidsEqual(
@@ -239,7 +239,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       onMutate: async (toRemoveChannel) => {
         await queryClient.cancelQueries({ queryKey: ['channels'] });
 
-        const previousChannels: DriveSearchResult<ChannelDefinitionVm>[] | undefined =
+        const previousChannels: HomebaseFile<ChannelDefinitionVm>[] | undefined =
           queryClient.getQueryData(['channels']);
         const newChannels = previousChannels?.filter(
           (channel) =>

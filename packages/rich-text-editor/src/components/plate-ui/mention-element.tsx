@@ -10,6 +10,7 @@ export interface MentionElementProps extends PlateElementProps<Value, TMentionEl
    * Prefix rendered before mention
    */
   prefix?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick?: (mentionNode: any) => void;
   renderLabel?: (mentionable: TMentionElement) => string;
 }
@@ -26,7 +27,7 @@ const MentionElement = forwardRef<React.ElementRef<typeof PlateElement>, Mention
         ref={ref}
         className={cn(
           'inline-block cursor-pointer rounded-md bg-slate-100 px-1.5 py-0.5 align-baseline text-sm font-medium dark:bg-slate-700',
-          selected && focused && 'ring-ring ring-2',
+          selected && focused && 'ring-2 ring-ring',
           element.children[0].bold === true && 'font-bold',
           element.children[0].italic === true && 'italic',
           element.children[0].underline === true && 'underline',

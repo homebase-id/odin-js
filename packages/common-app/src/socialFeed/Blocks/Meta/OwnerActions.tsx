@@ -8,9 +8,9 @@ import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoun
 import { Pencil } from '@youfoundation/common-app';
 import { Trash } from '@youfoundation/common-app';
 import { EditPostDialog } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 
-export const OwnerActions = ({ postFile }: { postFile: DriveSearchResult<PostContent> }) => {
+export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const postContent = postFile.fileMetadata.appData.content;
 
   const [isEditOpen, setIsEditOpen] = useState(false);

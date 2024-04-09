@@ -1,4 +1,3 @@
-import { flip, offset, UseVirtualFloatingOptions } from '@udecode/plate-floating';
 import {
   FloatingLinkUrlInput,
   LinkFloatingToolbarState,
@@ -67,7 +66,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
     <div className="flex w-[330px] flex-col">
       <div className="flex items-center">
         <div className="flex items-center pl-3 text-muted-foreground">
-          <Icons.link className="h-4 w-4" />
+          <Icons.link className="h-5 w-5" />
         </div>
 
         <FloatingLinkUrlInput
@@ -80,7 +79,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
 
       <div className="flex items-center">
         <div className="flex items-center pl-3 text-muted-foreground">
-          <Icons.text className="h-4 w-4" />
+          <Icons.text className="h-5 w-5" />
         </div>
         <input
           className={inputVariants({ variant: 'ghost', h: 'sm' })}

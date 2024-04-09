@@ -1,8 +1,9 @@
 import {
   AccessControlList,
-  DriveSearchResult,
-  NewDriveSearchResult,
+  HomebaseFile,
+  NewHomebaseFile,
   SecurityGroupType,
+  NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import {
   Tweet,
@@ -11,7 +12,6 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
-  NewMediaFile,
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ export const usePostComposer = () => {
     caption: string | undefined,
     mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
-    channel: DriveSearchResult<ChannelDefinition> | NewDriveSearchResult<ChannelDefinition>,
+    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>,
     reactAccess: ReactAccess | undefined,
     overrideAcl: AccessControlList | undefined
   ) => {
@@ -45,7 +45,7 @@ export const usePostComposer = () => {
 
       // Upload post
       const postId = getNewId();
-      const postFile: NewDriveSearchResult<Tweet | Media> = {
+      const postFile: NewHomebaseFile<Tweet | Media> = {
         fileMetadata: {
           appData: {
             userDate: new Date().getTime(),

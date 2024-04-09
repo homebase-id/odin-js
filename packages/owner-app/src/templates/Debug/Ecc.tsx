@@ -2,7 +2,7 @@ import { Label, Input, ActionButton } from '@youfoundation/common-app';
 import { useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { importRemotePublicEccKey } from '@youfoundation/js-lib/auth';
-import { hasDebugFlag } from '@youfoundation/js-lib/dist';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
 const EccDebug = () => {
   const [keyData, setKeyData] = useState<string>('');

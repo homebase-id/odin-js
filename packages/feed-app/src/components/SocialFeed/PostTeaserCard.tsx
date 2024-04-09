@@ -1,4 +1,4 @@
-import { Media, PostContent } from '@youfoundation/js-lib/public';
+import { PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
 import {
   AuthorImage,
@@ -10,23 +10,19 @@ import {
   useSocialChannel,
   ErrorBoundary,
   PostBody,
-  t,
-  LoadingBlock,
   useCheckIdentity,
+  LoadingBlock,
+  t,
 } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { UnreachableIdentity } from './UnreachableIdentity';
 
 interface PostTeaserCardProps {
   className?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   odinId?: string;
   showSummary?: boolean;
 }
@@ -94,6 +90,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
                 fileId={postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
                 lastModified={postFile.fileMetadata.updated}
+                payloads={postFile.fileMetadata.payloads}
               />
             </div>
           </div>
@@ -129,22 +126,14 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
   );
 };
 
-const MediaStillUploading = ({ postFile }: { postFile: NewDriveSearchResult<PostContent> }) => {
+const MediaStillUploading = ({ postFile }: { postFile: NewHomebaseFile<PostContent> }) => {
   if (postFile.fileId) return null;
   if (!postFile.fileMetadata.appData.content.primaryMediaFile) return null;
 
-  const mediaFiles = (postFile.fileMetadata.appData.content as Media).mediaFiles || [
-    postFile.fileMetadata.appData.content.primaryMediaFile,
-  ];
-
   return (
     <>
-      <div className={`relative ${mediaFiles?.length !== 1 ? 'grid grid-cols-2 gap-1' : ''}`}>
-        {mediaFiles
-          ?.slice(0, 4)
-          ?.map((_media, index) => (
-            <LoadingBlock key={index} className="aspect-square h-full w-full" />
-          ))}
+      <div className={`relative`}>
+        <LoadingBlock className="aspect-square h-full w-full" />
         <div className="absolute inset-0 flex animate-pulse items-center justify-center">
           <p>{t('Your media is being processed')}</p>
         </div>

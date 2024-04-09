@@ -22,7 +22,7 @@ const setupHtml = (isStandalone?: boolean) => {
           </label>
           <span class="invalid-msg">Invalid identity</span>
         </div>
-        <input type="text" name="homebase-id" id="homebase-id" required />
+        <input type="text" name="homebase-id" id="homebase-id" required inputmode="url" />
         <button class="login">Login</button>
       </form>
       <p class="my-3 text-center">or</p>
@@ -63,7 +63,12 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
     mainForm.classList.toggle(INVALID_CLASSNAME, !localDomainCheck(e.target.value));
   }, 500);
 
+  const replaceSpacesWithDots = () => {
+    dotyouInputBox.value = dotyouInputBox.value.replace(/\s/g, '.');
+  };
+
   dotyouInputBox.addEventListener('keydown', debouncedDomainValidator);
+  dotyouInputBox.addEventListener('keyup', replaceSpacesWithDots);
 
   const pingIdentity = async (identity: string) => {
     return await fetch(`https://${identity}/api/guest/v1/auth/ident`)

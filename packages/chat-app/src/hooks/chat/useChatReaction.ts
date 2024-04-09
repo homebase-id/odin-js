@@ -1,10 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  DriveSearchResult,
-  NewDriveSearchResult,
-  ReactionFile,
-  SecurityGroupType,
-} from '@youfoundation/js-lib/core';
+import { ReactionFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import {
   ChatDrive,
   Conversation,
@@ -12,14 +8,8 @@ import {
   SingleConversation,
 } from '../../providers/ConversationProvider';
 import { ChatMessage } from '../../providers/ChatProvider';
-import {
-  ChatReaction,
-  deleteReaction,
-  getReactions,
-  uploadReaction,
-} from '../../providers/ChatReactionProvider';
+import { deleteReaction, getReactions, uploadReaction } from '../../providers/ChatReactionProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
-import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const useChatReaction = (props?: {
   messageGlobalTransitId: string | undefined;
@@ -50,8 +40,8 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    message: DriveSearchResult<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
+    message: HomebaseFile<ChatMessage>;
     reaction: string;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
@@ -75,8 +65,8 @@ export const useChatReaction = (props?: {
     message,
     reaction,
   }: {
-    conversation: DriveSearchResult<Conversation>;
-    message: DriveSearchResult<ChatMessage>;
+    conversation: HomebaseFile<Conversation>;
+    message: HomebaseFile<ChatMessage>;
     reaction: ReactionFile;
   }) => {
     const conversationContent = conversation.fileMetadata.appData.content;
@@ -106,32 +96,7 @@ export const useChatReaction = (props?: {
     }),
     add: useMutation({
       mutationFn: addReaction,
-      // onMutate: async (variables) => {
-      //   const { message } = variables;
-      //   const previousReactions = queryClient.getQueryData<DriveSearchResult<ChatReaction>[]>([
-      //     'chat-reaction',
-      //     message.fileMetadata.appData.uniqueId,
-      //   ]);
 
-      //   if (!previousReactions) return;
-      //   const newReaction: NewDriveSearchResult<ChatReaction> = {
-      //     fileMetadata: {
-      //       appData: {
-      //         content: {
-      //           message: variables.reaction,
-      //         },
-      //       },
-      //     },
-      //     serverMetadata: {
-      //       accessControlList: { requiredSecurityGroup: SecurityGroupType.Connected },
-      //     },
-      //   };
-
-      //   queryClient.setQueryData(
-      //     ['chat-reaction', message.fileMetadata.appData.uniqueId],
-      //     [...previousReactions, newReaction]
-      //   );
-      // },
       onSettled: (data, error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['chat-reaction', variables.message.fileMetadata.globalTransitId],
@@ -140,20 +105,7 @@ export const useChatReaction = (props?: {
     }),
     remove: useMutation({
       mutationFn: removeReaction,
-      // onMutate: async (variables) => {
-      //   const { message, reaction } = variables;
-      //   const previousReactions = queryClient.getQueryData<DriveSearchResult<ChatReaction>[]>([
-      //     'chat-reaction',
-      //     message.fileMetadata.appData.uniqueId,
-      //   ]);
 
-      //   if (!previousReactions) return;
-
-      //   queryClient.setQueryData(
-      //     ['chat-reaction', message.fileMetadata.appData.uniqueId],
-      //     [...previousReactions.filter((r) => !stringGuidsEqual(r.fileId, reaction.fileId))]
-      //   );
-      // },
       onSettled: (data, error, variables) => {
         queryClient.invalidateQueries({
           queryKey: ['chat-reaction', variables.message.fileMetadata.globalTransitId],

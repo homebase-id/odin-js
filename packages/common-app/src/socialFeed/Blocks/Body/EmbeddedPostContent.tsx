@@ -80,6 +80,7 @@ export const EmbeddedPostContent = ({
                 fileId={content.fileId}
                 globalTransitId={content.globalTransitId}
                 lastModified={content.lastModified}
+                payloads={content.payloads}
               />
 
               {shouldHideMedia && content.primaryMediaFile ? (
@@ -96,6 +97,7 @@ export const EmbeddedPostContent = ({
               globalTransitId: content.globalTransitId,
               lastModified: content.lastModified,
               content,
+              payloads: content.payloads,
               previewThumbnail: content.previewThumbnail,
               isEncrypted: isChannelPublic,
             }}

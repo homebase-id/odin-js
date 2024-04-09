@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   CODE_BLOCK_LANGUAGES,
   CODE_BLOCK_LANGUAGES_POPULAR,
@@ -45,7 +45,7 @@ export function CodeBlockCombobox() {
           {state.value
             ? languages.find((language) => language.value === state.value)?.label
             : 'Plain Text'}
-          <Icons.chevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <Icons.chevronsUpDown className="ml-2 h-5 w-5 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -66,7 +66,7 @@ export function CodeBlockCombobox() {
               >
                 <Icons.check
                   className={cn(
-                    'mr-2 h-4 w-4',
+                    'mr-2 h-5 w-5',
                     state.value === language.value ? 'opacity-100' : 'opacity-0'
                   )}
                 />

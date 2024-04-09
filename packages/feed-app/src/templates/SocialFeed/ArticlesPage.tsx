@@ -17,7 +17,7 @@ import { t } from '@youfoundation/common-app';
 
 import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ROOT_PATH } from '../../app/App';
 
@@ -99,9 +99,9 @@ const PublishedArticlesView = () => {
     pageSize: PAGE_SIZE,
   });
 
-  const flattenedPosts = flattenInfinteData<DriveSearchResult<Article>>(
+  const flattenedPosts = flattenInfinteData<HomebaseFile<Article>>(
     articleData as InfiniteData<{
-      results: DriveSearchResult<Article>[];
+      results: HomebaseFile<Article>[];
       cursorState: unknown;
     }>,
     PAGE_SIZE

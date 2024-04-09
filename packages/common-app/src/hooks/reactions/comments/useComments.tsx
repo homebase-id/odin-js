@@ -1,12 +1,12 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getComments, ReactionContext } from '@youfoundation/js-lib/public';
 import { useDotYouClient } from '../../../..';
-import { DriveSearchResult, ReactionFile } from '@youfoundation/js-lib/core';
+import { HomebaseFile, ReactionFile } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 
 export interface UseCommentsVal {
-  comments: DriveSearchResult<ReactionFile>[];
+  comments: HomebaseFile<ReactionFile>[];
   cursorState: string | undefined;
 }
 
@@ -23,7 +23,7 @@ export const useComments = ({ context }: { context: ReactionContext }) => {
     pageParam?: string;
   }): Promise<UseCommentsVal> => {
     if (!context.authorOdinId || !context.channelId || !context.target.globalTransitId)
-      return { comments: [] as DriveSearchResult<ReactionFile>[], cursorState: undefined };
+      return { comments: [] as HomebaseFile<ReactionFile>[], cursorState: undefined };
 
     const response = await getComments(dotYouClient, context, PAGE_SIZE, pageParam);
     setTimeout(() => {

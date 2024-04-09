@@ -1,19 +1,17 @@
 import {
-  ActionButton,
   ActionGroup,
-  ActionLink,
   Times,
   UserX,
   t,
   useDotYouClient,
   useManageSocialFeed,
 } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 
 interface UnreachableIdentityProps {
   className?: string;
-  postFile: DriveSearchResult<PostContent>;
+  postFile: HomebaseFile<PostContent>;
   odinId: string;
 }
 

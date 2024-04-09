@@ -1,11 +1,4 @@
-import {
-  ChannelDefinition,
-  Article,
-  getChannelDrive,
-  NewMediaFile,
-  appendPostMedia,
-  removePostMedia,
-} from '@youfoundation/js-lib/public';
+import { ChannelDefinition, Article, getChannelDrive } from '@youfoundation/js-lib/public';
 import { lazy, useState } from 'react';
 import {
   t,
@@ -14,39 +7,57 @@ import {
   ActionButton,
   Arrow,
   Textarea,
-  useDotYouClient,
   useImage,
 } from '@youfoundation/common-app';
 
 import { ImageSelector } from '@youfoundation/common-app';
-import { DriveSearchResult, NewDriveSearchResult, RichText } from '@youfoundation/js-lib/core';
+import {
+  HomebaseFile,
+  NewHomebaseFile,
+  RichText,
+  MediaFile,
+  NewMediaFile,
+} from '@youfoundation/js-lib/core';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
+const POST_MEDIA_RTE_PAYLOAD_KEY = 'pst_rte';
+
 export const InnerFieldEditors = ({
   postFile,
   channel,
-  primaryMediaFile,
+  files,
+
   onChange,
-  updateVersionTag,
+
   disabled,
+  setFiles,
 }: {
-  postFile: DriveSearchResult<Article> | NewDriveSearchResult<Article>;
-  channel: NewDriveSearchResult<ChannelDefinition>;
-  primaryMediaFile: NewMediaFile | undefined | null;
-  onChange: (e: { target: { name: string; value: string | Blob | RichText | undefined } }) => void;
-  updateVersionTag: (versionTag: string) => void;
+  postFile: HomebaseFile<Article> | NewHomebaseFile<Article>;
+  channel: NewHomebaseFile<ChannelDefinition>;
+  files: (NewMediaFile | MediaFile)[];
+
+  onChange: (e: {
+    target: {
+      name: string;
+      value: string | { fileKey: string; type: string } | RichText | undefined;
+    };
+  }) => void;
   disabled?: boolean;
+  setFiles: (newFiles: (NewMediaFile | MediaFile)[]) => void;
 }) => {
   const [isEditTeaser, setIsEditTeaser] = useState(false);
   const { data: imageData } = useImage({
-    imageFileId: postFile.fileMetadata.appData.content.primaryMediaFile?.fileId || postFile.fileId,
+    imageFileId: postFile.fileId,
     imageFileKey: postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey,
     imageDrive: getChannelDrive(channel.fileMetadata.appData.uniqueId as string),
-    lastModified: (postFile as DriveSearchResult<unknown>)?.fileMetadata?.updated,
+    lastModified: (postFile as HomebaseFile<unknown>)?.fileMetadata?.updated,
   }).fetch;
 
-  const dotYouClient = useDotYouClient().getDotYouClient();
+  const pendingFile = files.find(
+    (f) => 'file' in f && f.key === postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
+  ) as NewMediaFile | null;
+
   const targetDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
 
   return (
@@ -80,7 +91,7 @@ export const InnerFieldEditors = ({
             >
               {isEditTeaser ? t('Collapse') : t('Expand')}{' '}
               <Arrow
-                className={`h-4 w-4 transition-transform ${
+                className={`h-5 w-5 transition-transform ${
                   isEditTeaser ? '-rotate-90' : 'rotate-90'
                 }`}
               />
@@ -88,7 +99,7 @@ export const InnerFieldEditors = ({
           </div>
 
           {isEditTeaser ? (
-            <div className="border-t pt-4 md:mt-4">
+            <div className="border-t pb-4 pt-4 md:mt-4">
               <div className="m-1">
                 <Label className="mb-1 text-gray-700 dark:text-gray-300">{t('Summary')}</Label>
                 <Textarea
@@ -107,15 +118,39 @@ export const InnerFieldEditors = ({
                   id="post_image"
                   name="primaryImageFileId"
                   defaultValue={
-                    primaryMediaFile === null
-                      ? imageData?.url || undefined
-                      : primaryMediaFile === undefined
-                      ? undefined
-                      : primaryMediaFile?.file || imageData?.url || undefined
+                    pendingFile?.file ||
+                    imageData?.url ||
+                    postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
                   }
-                  onChange={(e) =>
-                    onChange(e as { target: { name: string; value: Blob | undefined } })
-                  }
+                  onChange={async (e) => {
+                    if (!e.target.value) {
+                      setFiles(
+                        files.filter(
+                          (f) =>
+                            f.key !==
+                            postFile.fileMetadata.appData.content.primaryMediaFile?.fileKey
+                        )
+                      );
+
+                      onChange({
+                        target: {
+                          name: 'primaryMediaFile',
+                          value: undefined,
+                        },
+                      });
+                      return;
+                    }
+
+                    const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
+
+                    setFiles([...files, { file: e.target.value as Blob, key: fileKey }]);
+                    onChange({
+                      target: {
+                        name: 'primaryMediaFile',
+                        value: { fileKey: fileKey, type: 'image' },
+                      },
+                    });
+                  }}
                   sizeClass={`${
                     !postFile.fileMetadata.appData.content.primaryMediaFile
                       ? 'aspect-[16/9] md:aspect-[5/1]'
@@ -135,51 +170,26 @@ export const InnerFieldEditors = ({
             <RichTextEditor
               defaultValue={(postFile.fileMetadata.appData.content as Article)?.body}
               placeholder={t('Start writing...')}
-              mediaOptions={
-                postFile.fileId
-                  ? {
-                      fileId: postFile.fileId,
-                      mediaDrive: targetDrive,
-                      onAppend: async (file) => {
-                        const result = await appendPostMedia(
-                          dotYouClient,
-                          targetDrive,
-                          postFile.fileId as string,
-                          file
-                        );
-                        if (!result) return null;
-                        updateVersionTag(result.newVersionTag);
+              mediaOptions={{
+                fileId: postFile.fileId || '',
+                mediaDrive: targetDrive,
+                pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
+                onAppend: async (file) => {
+                  const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
 
-                        return { fileId: postFile.fileId as string, fileKey: result.fileKey };
-                      },
-                      onRemove: async ({
-                        fileId,
-                        fileKey,
-                      }: {
-                        fileId: string;
-                        fileKey: string;
-                      }) => {
-                        if (!postFile.fileMetadata.versionTag) return null;
-
-                        const result = await removePostMedia(
-                          dotYouClient,
-                          targetDrive,
-                          fileId,
-                          fileKey,
-                          postFile.fileMetadata.versionTag
-                        );
-                        if (!result) return null;
-
-                        updateVersionTag(result.newVersionTag);
-                        return result;
-                      },
-                    }
-                  : undefined
-              }
+                  setFiles([...files, { file: file, key: fileKey }]);
+                  return { fileId: postFile.fileId || '', fileKey: fileKey };
+                },
+                onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
+                  setFiles(files.filter((f) => f.key !== fileKey));
+                  return true;
+                },
+              }}
               name="body"
               onChange={onChange}
               className="min-h-[50vh]"
               disabled={disabled}
+              key={postFile.fileId ? 'editor' : 'editor-new'}
             />
           </ErrorBoundary>
         </div>

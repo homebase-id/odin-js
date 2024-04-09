@@ -1,24 +1,12 @@
 import {
   DotYouClient,
-  DriveSearchResult,
-  FileQueryParams,
-  GetBatchQueryResultOptions,
-  NewDriveSearchResult,
+  HomebaseFile,
   ReactionFile,
-  ScheduleOptions,
-  SecurityGroupType,
-  SendContents,
   TargetDrive,
-  UploadFileMetadata,
-  UploadInstructionSet,
-  deleteFile,
   getContentFromHeaderOrPayload,
-  queryBatch,
-  uploadFile,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
-import { appId } from '../hooks/auth/useAuth';
-import { getNewId, jsonStringify64, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 
 export const ChatReactionFileType = 7979;
 const PAGE_SIZE = 100;
@@ -27,34 +15,6 @@ export interface ChatReaction {
   // Content of the reaction
   message: string;
 }
-
-// export const getReactions = async (
-//   dotYouClient: DotYouClient,
-//   messageGlobalTransitId: string,
-// ) => {
-//   const params: FileQueryParams = {
-//     targetDrive: ChatDrive,
-//     groupId: [messageId],
-//   };
-
-//   const ro: GetBatchQueryResultOptions = {
-//     maxRecords: PAGE_SIZE,
-//     cursorState: undefined,
-//     includeMetadataHeader: true,
-//   };
-
-//   const response = await queryBatch(dotYouClient, params, ro);
-//   return {
-//     ...response,
-//     searchResults: (
-//       await Promise.all(
-//         response.searchResults.map(
-//           async (result) => await dsrToReaction(dotYouClient, result, ChatDrive, true)
-//         )
-//       )
-//     ).filter(Boolean) as DriveSearchResult<ChatReaction>[],
-//   };
-// };
 
 interface ServerReactionsListWithCursor {
   reactions: {
@@ -152,10 +112,10 @@ export const deleteReaction = async (
 
 export const dsrToReaction = async (
   dotYouClient: DotYouClient,
-  dsr: DriveSearchResult,
+  dsr: HomebaseFile,
   targetDrive: TargetDrive,
   includeMetadataHeader: boolean
-): Promise<DriveSearchResult<ChatReaction> | null> => {
+): Promise<HomebaseFile<ChatReaction> | null> => {
   try {
     const attrContent = await getContentFromHeaderOrPayload<ChatReaction>(
       dotYouClient,
@@ -165,7 +125,7 @@ export const dsrToReaction = async (
     );
     if (!attrContent) return null;
 
-    const chatReaction: DriveSearchResult<ChatReaction> = {
+    const chatReaction: HomebaseFile<ChatReaction> = {
       ...dsr,
       fileMetadata: {
         ...dsr.fileMetadata,

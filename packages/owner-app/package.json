@@ -9,16 +9,15 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "lint": "eslint src",
-    "type": "tsc",
-    "dotyoucore_build": "rm -rf ../../../dotyoucore/services/Youverse.Hosting/client/owner-app && VITE_VERSION=$(date +%s) vite build --outDir ../../../dotyoucore/services/Youverse.Hosting/client/owner-app/"
+    "type": "tsc"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/YouFoundation/dotyoucore-js.git"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.25.0",
-    "@tanstack/react-virtual": "^3.0.0-beta.68",
+    "@tanstack/react-query": "5.27.5",
+    "@tanstack/react-virtual": "3.1.3",
     "@youfoundation/common-app": "*",
     "@youfoundation/feed-app": "0.1.0",
     "@youfoundation/js-lib": "*",
@@ -31,7 +30,7 @@
     "react-dom": "^18.2.0",
     "react-helmet-async": "2.0.3",
     "react-json-pretty": "^2.2.0",
-    "react-router-dom": "^6.10.0",
+    "react-router-dom": "^6.22.3",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

@@ -1,12 +1,12 @@
 import { useDotYouClient, SubtleCheck, Clock } from '@youfoundation/common-app';
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { ChatMessage, ChatDeliveryStatus } from '../../../providers/ChatProvider';
 
 export const ChatDeliveryIndicator = ({
   msg,
   className,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
+  msg: HomebaseFile<ChatMessage>;
   className?: string;
 }) => {
   const identity = useDotYouClient().getIdentity();
@@ -35,8 +35,8 @@ export const InnerDeliveryIndicator = ({
         isRead ? 'text-blue-600 ' : 'text-foreground/50'
       } ${className || ''}`}
     >
-      {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-4 w-4" /> : null}
-      {isSent ? <SubtleCheck className="h-4 w-4" /> : <Clock className="h-4 w-4 pb-1" />}
+      {isDelivered ? <SubtleCheck className="relative -right-2 z-10 h-5 w-5" /> : null}
+      {isSent ? <SubtleCheck className="h-5 w-5" /> : <Clock className="h-5 w-5 pb-1" />}
     </div>
   );
 };

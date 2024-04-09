@@ -1,4 +1,4 @@
-import { DriveSearchResult } from '@youfoundation/js-lib/core';
+import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { useChatReaction } from '../../../hooks/chat/useChatReaction';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
@@ -17,8 +17,8 @@ export const ChatReactions = ({
   msg,
   conversation,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation: DriveSearchResult<Conversation> | undefined;
+  msg: HomebaseFile<ChatMessage>;
+  conversation: HomebaseFile<Conversation> | undefined;
 }) => {
   const [showDetail, setShowDetail] = useState(false);
 
@@ -61,8 +61,8 @@ const ChatReactionsDetail = ({
   conversation,
   onClose,
 }: {
-  msg: DriveSearchResult<ChatMessage>;
-  conversation: DriveSearchResult<Conversation> | undefined;
+  msg: HomebaseFile<ChatMessage>;
+  conversation: HomebaseFile<Conversation> | undefined;
   onClose: () => void;
 }) => {
   const target = usePortal('modal-container');

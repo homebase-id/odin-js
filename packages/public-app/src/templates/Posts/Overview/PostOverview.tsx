@@ -19,7 +19,7 @@ import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
 import { LoadingBlock } from '@youfoundation/common-app';
-import { DriveSearchResult, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {
@@ -54,11 +54,11 @@ const PostOverview = () => {
     ? activeChannel.fileMetadata.appData.content.template === ChannelTemplate.LargeCards
       ? CardPostOverview
       : activeChannel.fileMetadata.appData.content.template === ChannelTemplate.MasonryLayout
-      ? MasonryPostOverview
-      : ListPostOverview
+        ? MasonryPostOverview
+        : ListPostOverview
     : ListPostOverview;
 
-  const blogPosts = flattenInfinteData<DriveSearchResult<PostContent>>(
+  const blogPosts = flattenInfinteData<HomebaseFile<PostContent>>(
     data,
     PAGE_SIZE,
     (a, b) =>

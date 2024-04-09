@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { usePortal, ActionButton, ActionButtonState, t, Arrow } from '@youfoundation/common-app';
+import {
+  usePortal,
+  ActionButton,
+  ActionButtonState,
+  t,
+  Arrow,
+  CheckboxToggle,
+} from '@youfoundation/common-app';
 import { useApps } from '../../../hooks/apps/useApps';
 import { useApp } from '../../../hooks/apps/useApp';
-import CheckboxToggle from '../../Form/CheckboxToggle';
 import AppPermissionView from '../../PermissionViews/AppPermissionView/AppPermissionView';
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
