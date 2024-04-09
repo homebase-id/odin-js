@@ -121,7 +121,13 @@ const useChatWebsocket = (isEnabled: boolean) => {
           ChatDrive,
           true
         );
-        if (!updatedChatMessage) return;
+        if (
+          !updatedChatMessage ||
+          Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+          return;
+        }
 
         const extistingMessages = queryClient.getQueryData<
           InfiniteData<{
@@ -139,8 +145,16 @@ const useChatWebsocket = (isEnabled: boolean) => {
               ...page,
               searchResults: isNewFile
                 ? index === 0
-                  ? [updatedChatMessage, ...page.searchResults]
-                  : page.searchResults
+                  ? [
+                      updatedChatMessage,
+                      // There shouldn't be any duplicates, but just in case
+                      ...page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                      ),
+                    ]
+                  : page.searchResults.filter(
+                      (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ) // There shouldn't be any duplicates, but just in case
                 : page.searchResults.map((msg) =>
                     stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
                       ? updatedChatMessage

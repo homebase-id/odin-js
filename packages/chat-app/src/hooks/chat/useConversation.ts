@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
   Conversation,
@@ -16,7 +16,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
+import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
@@ -60,6 +60,26 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }
 
     return null;
+  };
+
+  const fetchSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
+    const queryData = queryClient.getQueryData<
+      InfiniteData<{
+        searchResults: HomebaseFile<Conversation>[];
+        cursorState: string;
+        queryTime: number;
+        includeMetadataHeader: boolean;
+      }>
+    >(['conversations']);
+
+    const conversationFromCache = queryData?.pages
+      .flatMap((page) => page.searchResults)
+      .find((conversation) =>
+        stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId)
+      );
+    if (conversationFromCache) return conversationFromCache;
+
+    return await getSingleConversation(dotYouClient, conversationId);
   };
 
   const createConversation = async ({
@@ -181,7 +201,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   return {
     single: useQuery({
       queryKey: ['conversation', conversationId],
-      queryFn: () => getSingleConversation(dotYouClient, conversationId),
+      queryFn: () => fetchSingleConversation(dotYouClient, conversationId as string),
       enabled: !!conversationId,
     }),
     create: useMutation({

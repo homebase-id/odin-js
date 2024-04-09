@@ -56,7 +56,6 @@ const localStoragePersister = createSyncStoragePersister({
 const INCLUDED_QUERY_KEYS = [
   'chat-message',
   'chat-messages',
-  'conversation',
   'conversations',
   'chat-reaction',
   'connectionDetails',

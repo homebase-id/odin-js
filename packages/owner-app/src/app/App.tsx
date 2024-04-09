@@ -51,6 +51,7 @@ const Settings = lazy(() => import('../templates/Settings/Settings'));
 
 const DemoData = lazy(() => import('../templates/DemoData/DemoData'));
 const Debug = lazy(() => import('../templates/Debug/Debug'));
+const SixDebug = lazy(() => import('../templates/Debug/SixDebug'));
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -183,6 +184,7 @@ function App() {
 
             <Route path="demo-data" element={<DemoData />}></Route>
             <Route path="debug" element={<Debug />}></Route>
+            <Route path="six-debug" element={<SixDebug />}></Route>
           </Route>
 
           <Route
