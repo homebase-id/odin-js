@@ -5,7 +5,6 @@ import {
   ActionButton,
   Trash,
   Archive,
-  Refresh,
   t,
   Envelope,
   EnvelopeOpen,
@@ -148,7 +147,7 @@ export const MailConversationItem = ({
                       type="mute"
                       icon={Trash}
                       onClick={doRemove}
-                      state={removeThreadStatus}
+                      state={removeThreadStatus == 'success' ? undefined : removeThreadStatus}
                       isDisabled={isTrash}
                       title={t('Remove')}
                       className="opacity-60 transition-opacity hover:opacity-100"
@@ -157,7 +156,7 @@ export const MailConversationItem = ({
                       type="mute"
                       icon={Archive}
                       onClick={doArchive}
-                      state={archiveThreadStatus}
+                      state={archiveThreadStatus == 'success' ? undefined : archiveThreadStatus}
                       isDisabled={isArchived}
                       title={t('Archive')}
                       className="opacity-60 transition-opacity hover:opacity-100"
@@ -167,7 +166,7 @@ export const MailConversationItem = ({
                         type="mute"
                         icon={EnvelopeOpen}
                         onClick={doMarkAsRead}
-                        state={markAsReadStatus}
+                        state={markAsReadStatus == 'success' ? undefined : markAsReadStatus}
                         title={t('Mark as read')}
                         className="opacity-60 transition-opacity hover:opacity-100"
                       />
@@ -176,7 +175,7 @@ export const MailConversationItem = ({
                         type="mute"
                         icon={Envelope}
                         onClick={doMarkAsUnread}
-                        state={markAsUnreadStatus}
+                        state={markAsUnreadStatus == 'success' ? undefined : markAsUnreadStatus}
                         title={t('Mark as unread')}
                         className="opacity-60 transition-opacity hover:opacity-100"
                       />
