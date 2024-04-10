@@ -128,7 +128,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
 
 const MediaStillUploading = ({ postFile }: { postFile: NewHomebaseFile<PostContent> }) => {
   if (postFile.fileId) return null;
-  if (!postFile.fileMetadata.appData.content.primaryMediaFile) return null;
+  if (!postFile.fileMetadata.appData.content.primaryMediaFile?.fileId) return null;
 
   return (
     <>
