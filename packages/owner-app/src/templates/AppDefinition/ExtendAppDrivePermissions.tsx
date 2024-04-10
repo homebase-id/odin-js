@@ -32,10 +32,10 @@ const ExtendAppPermissions = () => {
   const c = searchParams.get('c');
   const circleIds = c ? circleToCircleIds(c) : undefined;
 
-  // const cp = searchParams.get('cp');
-  // const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
-  // const cd = searchParams.get('cd');
-  // const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
+  const cp = searchParams.get('cp');
+  const circlePermissionSet = cp ? permissionParamToPermissionSet(cp) : undefined;
+  const cd = searchParams.get('cd');
+  const circleDriveGrants = cd ? drivesParamToDriveGrantRequest(cd) : undefined;
 
   const {
     fetch: { data: appRegistration },
@@ -59,7 +59,31 @@ const ExtendAppPermissions = () => {
     if (circleIds?.length)
       updateCircles({
         appId: appRegistration.appId,
-        circleMemberPermissionGrant: appRegistration.circleMemberPermissionSetGrantRequest,
+        circleMemberPermissionGrant: {
+          drives: [
+            ...(appRegistration.circleMemberPermissionSetGrantRequest?.drives?.filter(
+              (existingGrant) =>
+                !circleDriveGrants?.some(
+                  (grant) =>
+                    stringGuidsEqual(
+                      grant.permissionedDrive.drive.alias,
+                      existingGrant.permissionedDrive.drive.alias
+                    ) &&
+                    stringGuidsEqual(
+                      grant.permissionedDrive.drive.type,
+                      existingGrant.permissionedDrive.drive.type
+                    )
+                )
+            ) || []),
+            ...(circleDriveGrants || []),
+          ],
+          permissionSet: {
+            keys: [
+              ...(appRegistration.circleMemberPermissionSetGrantRequest?.permissionSet?.keys || []),
+              ...(circlePermissionSet?.keys || []),
+            ],
+          },
+        },
         circleIds: [...(appRegistration?.authorizedCircles || []), ...(circleIds || [])],
       });
 
@@ -200,6 +224,35 @@ const ExtendAppPermissions = () => {
                       return <CirclePermissionView circleDef={circleDef} key={circleId} />;
                     })}
                   </>
+                </Section>
+              </>
+            ) : null}
+
+            {circlePermissionSet?.keys?.length ? (
+              <>
+                <p>{t('Requests these circles to receive the following access within')}</p>
+                <Section>
+                  <div className="-my-4">
+                    {circlePermissionSet.keys.map((permissionLevel) => (
+                      <PermissionView key={`${permissionLevel}`} permission={permissionLevel} />
+                    ))}
+                  </div>
+                </Section>
+              </>
+            ) : null}
+
+            {circleDriveGrants?.length ? (
+              <>
+                <p>{t('Requests these circles to receive the following drive access')}</p>
+                <Section>
+                  <div className="flex flex-col gap-4">
+                    {circleDriveGrants.map((grant) => (
+                      <DrivePermissionRequestView
+                        key={`${grant.permissionedDrive.drive.alias}-${grant.permissionedDrive.drive.type}`}
+                        driveGrant={grant}
+                      />
+                    ))}
+                  </div>
                 </Section>
               </>
             ) : null}
