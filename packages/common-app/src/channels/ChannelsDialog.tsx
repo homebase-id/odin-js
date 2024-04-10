@@ -115,6 +115,7 @@ export const ChannelItem = ({
   const [newDescription, setNewDescription] = useState(chnl?.description);
   const [newTemplateId, setNewTemplateId] = useState(chnl?.templateId);
   const [newShowOnHomePage, setNewShowOnHomePage] = useState(chnl?.showOnHomePage);
+  const [othersCanWrite, setOthersCanWrite] = useState(chnl?.othersCanWrite);
   const [newAcl, setNewAcl] = useState(
     chnlDsr?.serverMetadata?.accessControlList ?? {
       requiredSecurityGroup: SecurityGroupType.Anonymous,
@@ -146,144 +147,152 @@ export const ChannelItem = ({
             </span>
           }
           {isAclEdit ? (
-            <>
-              <AclWizard
-                acl={newAcl}
-                onConfirm={(newAcl) => {
-                  setIsAclEdit(false);
-                  setNewAcl(newAcl);
-                }}
-                onCancel={() => {
-                  setIsAclEdit(false);
-                  if (isNew) onClose && onClose();
-                }}
-              />
-            </>
+            <AclWizard
+              acl={newAcl}
+              onConfirm={(newAcl) => {
+                setIsAclEdit(false);
+                setNewAcl(newAcl);
+              }}
+              onCancel={() => {
+                setIsAclEdit(false);
+                if (isNew) onClose && onClose();
+              }}
+            />
           ) : (
-            <>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-                  if (!e.currentTarget.reportValidity()) return;
+                if (!e.currentTarget.reportValidity()) return;
 
-                  const uploadResult = await saveChannel({
-                    ...chnlDsr,
-                    fileMetadata: {
-                      ...chnlDsr?.fileMetadata,
-                      appData: {
-                        ...chnlDsr?.fileMetadata.appData,
-                        content: {
-                          ...chnlDsr?.fileMetadata.appData.content,
-                          name: newName ?? '',
-                          slug: newSlug ?? '',
-                          description: newDescription ?? '',
-                          showOnHomePage: newShowOnHomePage ?? false,
-                          templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
-                        },
+                const uploadResult = await saveChannel({
+                  ...chnlDsr,
+                  fileMetadata: {
+                    ...chnlDsr?.fileMetadata,
+                    appData: {
+                      ...chnlDsr?.fileMetadata.appData,
+                      content: {
+                        ...chnlDsr?.fileMetadata.appData.content,
+                        name: newName ?? '',
+                        slug: newSlug ?? '',
+                        description: newDescription ?? '',
+                        showOnHomePage: newShowOnHomePage ?? false,
+                        templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
+                        othersCanWrite: othersCanWrite ?? false,
                       },
                     },
-                    serverMetadata: {
-                      ...chnlDsr?.serverMetadata,
-                      accessControlList: newAcl,
-                    },
-                  });
-                  if (uploadResult) {
+                  },
+                  serverMetadata: {
+                    ...chnlDsr?.serverMetadata,
+                    accessControlList: newAcl,
+                  },
+                });
+                if (uploadResult) {
+                  setIsEdit(false);
+                  onClose && onClose();
+                }
+                return false;
+              }}
+              className="flex w-full flex-col"
+            >
+              <div className="mb-5">
+                <Label htmlFor="name">{t('Name')}</Label>
+                <Input
+                  id="name"
+                  defaultValue={chnl?.name}
+                  required={true}
+                  onChange={(e) => {
+                    setNewName(e.target.value);
+                    setNewSlug(slugify(e.target.value));
+                  }}
+                />
+              </div>
+              <div className="mb-5">
+                <Label htmlFor="description">{t('Description')}</Label>
+                <Textarea
+                  id="description"
+                  defaultValue={chnl?.description}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                />
+              </div>
+              <div className="mb-5 flex flex-row items-center gap-5">
+                <Label htmlFor="showOnHomepage" className="mb-0">
+                  {t('Include posts from this channel on your feed')}
+                </Label>
+                <CheckboxToggle
+                  id="showOnHomepage"
+                  defaultChecked={chnl?.showOnHomePage}
+                  onChange={(e) => setNewShowOnHomePage(e.target.checked)}
+                />
+              </div>
+              <div className="mb-5 flex flex-row items-center gap-5">
+                <Label htmlFor="canWrite" className="mb-0">
+                  {t('People with access can post to this channel')}
+                </Label>
+                <CheckboxToggle
+                  id="canWrite"
+                  defaultChecked={chnl?.othersCanWrite}
+                  onChange={(e) => setOthersCanWrite(e.target.checked)}
+                  disabled={!!chnlDsr?.fileId}
+                />
+              </div>
+              <div className="mb-5">
+                <Label htmlFor="template">{t('Template')}</Label>
+                <ChannelTemplateSelector
+                  name="templateId"
+                  defaultValue={(chnl?.templateId ?? ChannelTemplate.ClassicBlog) + ''}
+                  onChange={(e) => setNewTemplateId(parseInt(e.target.value))}
+                />
+              </div>
+              <div className="-m-2 flex flex-row-reverse">
+                <ActionButton className="m-2" state={saveStatus}>
+                  {isNew && !chnl ? t('Create Drive & Save') : t('Save')}
+                </ActionButton>
+                <ActionButton
+                  type="secondary"
+                  className="m-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     setIsEdit(false);
                     onClose && onClose();
-                  }
-                  return false;
-                }}
-                className="flex w-full flex-col"
-              >
-                <div className="mb-5">
-                  <Label htmlFor="name">{t('Name')}</Label>
-                  <Input
-                    id="name"
-                    defaultValue={chnl?.name}
-                    required={true}
-                    onChange={(e) => {
-                      setNewName(e.target.value);
-                      setNewSlug(slugify(e.target.value));
-                    }}
-                  />
-                </div>
-                <div className="mb-5">
-                  <Label htmlFor="description">{t('Description')}</Label>
-                  <Textarea
-                    id="description"
-                    defaultValue={chnl?.description}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                  />
-                </div>
-                <div className="mb-5 flex flex-row items-center gap-5">
-                  <Label htmlFor="showOnHomepage" className="mb-0">
-                    {t('Include posts from this channel on your feed')}
-                  </Label>
-                  <CheckboxToggle
-                    id="showOnHomepage"
-                    defaultChecked={chnl?.showOnHomePage}
-                    onChange={(e) => setNewShowOnHomePage(e.target.checked)}
-                  />
-                </div>
-                <div className="mb-5">
-                  <Label htmlFor="template">{t('Template')}</Label>
-                  <ChannelTemplateSelector
-                    name="templateId"
-                    defaultValue={(chnl?.templateId ?? ChannelTemplate.ClassicBlog) + ''}
-                    onChange={(e) => setNewTemplateId(parseInt(e.target.value))}
-                  />
-                </div>
-                <div className="-m-2 flex flex-row-reverse">
-                  <ActionButton className="m-2" state={saveStatus}>
-                    {isNew && !chnl ? t('Create Drive & Save') : t('Save')}
-                  </ActionButton>
+                    return false;
+                  }}
+                >
+                  {t('Cancel')}
+                </ActionButton>
+                {chnlDsr &&
+                chnlDsr.fileId &&
+                !stringGuidsEqual(
+                  chnlDsr.fileMetadata.appData.uniqueId,
+                  BlogConfig.PublicChannelId
+                ) ? (
                   <ActionButton
-                    type="secondary"
-                    className="m-2"
-                    onClick={(e) => {
+                    className="m-2 mr-auto"
+                    state={removeStatus}
+                    type="remove"
+                    icon={Trash}
+                    onClick={async (e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      setIsEdit(false);
-                      onClose && onClose();
+                      await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
                       return false;
                     }}
+                    confirmOptions={{
+                      type: 'info',
+                      title: t('Remove channel'),
+                      body: t(
+                        'Are you sure you want to remove this channel, this action cannot be undone. All posts published on this channel will also be unpublished.'
+                      ),
+                      buttonText: t('Remove'),
+                    }}
                   >
-                    {t('Cancel')}
+                    {t('Remove')}
                   </ActionButton>
-                  {chnlDsr &&
-                  chnlDsr.fileId &&
-                  !stringGuidsEqual(
-                    chnlDsr.fileMetadata.appData.uniqueId,
-                    BlogConfig.PublicChannelId
-                  ) ? (
-                    <ActionButton
-                      className="m-2 mr-auto"
-                      state={removeStatus}
-                      type="remove"
-                      icon={Trash}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
-                        return false;
-                      }}
-                      confirmOptions={{
-                        type: 'info',
-                        title: t('Remove channel'),
-                        body: t(
-                          'Are you sure you want to remove this channel, this action cannot be undone. All posts published on this channel will also be unpublished.'
-                        ),
-                        buttonText: t('Remove'),
-                      }}
-                    >
-                      {t('Remove')}
-                    </ActionButton>
-                  ) : null}
-                </div>
-              </form>
-            </>
+                ) : null}
+              </div>
+            </form>
           )}
         </>
       ) : (

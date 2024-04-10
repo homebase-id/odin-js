@@ -33,7 +33,8 @@ const getExtendAuthorizationUrl = (
   targetDrive: TargetDrive,
   returnUrl: string,
   allowAnonymousReads?: boolean,
-  allowSubscriptions?: boolean
+  allowSubscriptions?: boolean,
+  circlesWithWritePermission?: string[]
 ) => {
   const drives = [
     {
@@ -54,6 +55,8 @@ const getExtendAuthorizationUrl = (
   const params = {
     appId: FEED_APP_ID,
     d: JSON.stringify(drives),
+    c: circlesWithWritePermission?.join(','),
+    cd: circlesWithWritePermission?.length ? JSON.stringify(drives) : undefined,
   };
 
   return `https://${identity}/owner/appupdate?${stringifyToQueryParams(
@@ -139,7 +142,10 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         targetDrive,
         returnUrl,
         true,
-        true
+        true,
+        channelDef.fileMetadata.appData.content.othersCanWrite
+          ? channelDef.serverMetadata?.accessControlList.circleIdList || undefined
+          : undefined
       );
     };
 

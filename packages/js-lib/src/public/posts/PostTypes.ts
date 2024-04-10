@@ -15,6 +15,7 @@ export interface ChannelDefinition {
   description: string;
   showOnHomePage: boolean;
   templateId?: number;
+  othersCanWrite?: boolean;
 }
 
 export enum ChannelTemplate {
