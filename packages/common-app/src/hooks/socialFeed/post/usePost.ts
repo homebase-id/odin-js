@@ -104,7 +104,12 @@ export const usePost = () => {
           ],
         });
 
-        queryClient.removeQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', '', ''],
+        });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
@@ -209,7 +214,12 @@ export const usePost = () => {
           ],
         });
 
-        queryClient.removeQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', '', ''],
+        });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
@@ -253,7 +263,13 @@ export const usePost = () => {
         } else {
           queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', '', ''],
+        });
       },
     }),
   };

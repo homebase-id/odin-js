@@ -21,6 +21,7 @@ import { useDotYouClient } from '../../../..';
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
   const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const loggedInIdentity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
 
@@ -50,7 +51,7 @@ export const usePostComposer = () => {
           appData: {
             userDate: new Date().getTime(),
             content: {
-              authorOdinId: dotYouClient.getIdentity(),
+              authorOdinId: loggedInIdentity || dotYouClient.getIdentity(),
               type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
               caption: caption?.trim() || '',
               id: postId,
