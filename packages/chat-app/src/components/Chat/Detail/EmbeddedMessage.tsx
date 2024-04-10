@@ -14,36 +14,40 @@ export const EmbeddedMessageWithId = ({
   className?: string;
 }) => {
   const { data: msg } = useChatMessage({ messageId: msgId }).get;
-  if (!msg) return null;
-
-  return <EmbeddedMessage msg={msg} className={className} />;
+  return <EmbeddedMessage msg={msg || undefined} className={className} />;
 };
 
 export const EmbeddedMessage = ({
   msg,
   className,
 }: {
-  msg: HomebaseFile<ChatMessage>;
+  msg: HomebaseFile<ChatMessage> | undefined;
   className?: string;
 }) => {
-  const hasMedia = !!msg.fileMetadata.payloads?.length;
+  const hasMedia = msg && !!msg.fileMetadata.payloads?.length;
 
   return (
     <div
       className={`w-full flex-grow overflow-hidden rounded-lg  bg-primary/10 ${className || ''}`}
     >
       <div className="flex flex-row items-center gap-2 border-l-4 border-l-primary p-1 ">
-        <div className="px-2">
-          <p className="font-semibold">
-            {msg.fileMetadata.senderOdinId ? (
-              <ConnectionName odinId={msg.fileMetadata.senderOdinId} />
-            ) : (
-              t('You')
-            )}
-          </p>
-          <p className="text-foreground">{msg.fileMetadata.appData.content.message}</p>
-        </div>
-        {hasMedia ? <EmbeddedMessageMedia msg={msg} className="h-16 w-16" /> : null}
+        {msg ? (
+          <>
+            <div className="px-2">
+              <p className="font-semibold">
+                {msg.fileMetadata.senderOdinId ? (
+                  <ConnectionName odinId={msg.fileMetadata.senderOdinId} />
+                ) : (
+                  t('You')
+                )}
+              </p>
+              <p className="text-foreground">{msg.fileMetadata.appData.content.message}</p>
+            </div>
+            {hasMedia ? <EmbeddedMessageMedia msg={msg} className="h-16 w-16" /> : null}
+          </>
+        ) : (
+          <p className="px-2 italic text-slate-400">{t('Message not found')}</p>
+        )}
       </div>
     </div>
   );
