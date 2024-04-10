@@ -143,7 +143,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         returnUrl,
         true,
         true,
-        channelDef.fileMetadata.appData.content.othersCanWrite
+        channelDef.fileMetadata.appData.content.isGroupChannel
           ? channelDef.serverMetadata?.accessControlList.circleIdList || undefined
           : undefined
       );

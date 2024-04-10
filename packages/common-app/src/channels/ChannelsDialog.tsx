@@ -115,7 +115,7 @@ export const ChannelItem = ({
   const [newDescription, setNewDescription] = useState(chnl?.description);
   const [newTemplateId, setNewTemplateId] = useState(chnl?.templateId);
   const [newShowOnHomePage, setNewShowOnHomePage] = useState(chnl?.showOnHomePage);
-  const [othersCanWrite, setOthersCanWrite] = useState(chnl?.othersCanWrite);
+  const [isGroupChannel, setIsGroupChannel] = useState(chnl?.isGroupChannel);
   const [newAcl, setNewAcl] = useState(
     chnlDsr?.serverMetadata?.accessControlList ?? {
       requiredSecurityGroup: SecurityGroupType.Anonymous,
@@ -179,7 +179,7 @@ export const ChannelItem = ({
                         description: newDescription ?? '',
                         showOnHomePage: newShowOnHomePage ?? false,
                         templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
-                        othersCanWrite: othersCanWrite ?? false,
+                        isGroupChannel: isGroupChannel ?? false,
                       },
                     },
                   },
@@ -232,8 +232,8 @@ export const ChannelItem = ({
                 </Label>
                 <CheckboxToggle
                   id="canWrite"
-                  defaultChecked={chnl?.othersCanWrite}
-                  onChange={(e) => setOthersCanWrite(e.target.checked)}
+                  defaultChecked={chnl?.isGroupChannel}
+                  onChange={(e) => setIsGroupChannel(e.target.checked)}
                   disabled={!!chnlDsr?.fileId}
                 />
               </div>
