@@ -151,6 +151,7 @@ const markChatAsRead = async (
   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
   const conversationId = markAsReadRequest.conversationId;
   const chatGlobalTransIds = markAsReadRequest.messageIds;
+  console.log('chatGlobalTransIds', chatGlobalTransIds);
 
   if (!conversationId || !chatGlobalTransIds) return null;
 
@@ -163,9 +164,9 @@ const markChatAsRead = async (
   if (!recipients.filter(Boolean)?.length) return null;
 
   const chatMessages = await Promise.all(
-    Array.from(new Set(...chatGlobalTransIds)).map((msgId) =>
-      getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId)
-    )
+    Array.from(new Set(chatGlobalTransIds)).map((msgId) => {
+      return getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId);
+    })
   );
   const updateSuccess = await Promise.all(
     chatMessages
@@ -206,7 +207,7 @@ const markChatAsRead = async (
       })
   );
 
-  queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+  // queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
   if (updateSuccess.every((success) => success)) return command.id;
   return null;
 };
