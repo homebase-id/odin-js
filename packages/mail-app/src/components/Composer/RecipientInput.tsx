@@ -95,7 +95,10 @@ export const RecipientInput = ({
           onChange={(e) => setQuery(e.currentTarget.value)}
           onKeyDown={onKeyDown}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => {
+            // Small delay to allow click events to fire first;
+            setTimeout(() => setIsFocused(false), 200);
+          }}
           key={inputStateIndex}
           id={id}
           autoFocus={autoFocus}
