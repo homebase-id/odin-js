@@ -17,16 +17,19 @@ import {
   useBlogPostsInfinite,
   useDotYouClient,
   useSecurityContext,
+  useChannel,
+  PostComposer,
+  flattenInfinteData,
+  useIntersection,
+  LoadingBlock,
 } from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
 import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOverview/MasonryPostOverview';
-import { useChannel } from '@youfoundation/common-app';
-import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
+
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-import { LoadingBlock } from '@youfoundation/common-app';
 import {
   ApiType,
   DrivePermissionType,
@@ -34,7 +37,6 @@ import {
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import PostComposer from '@youfoundation/feed-app/src/components/SocialFeed/PostComposer';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {

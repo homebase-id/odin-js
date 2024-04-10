@@ -39,12 +39,12 @@ import {
   SecurityGroupType,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
-import { ROOT_PATH } from '../../app/App';
+
+const FEED_ROOT_PATH = '/apps/feed';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
-// TODO: Move to common-app
-const PostComposer = ({
+export const PostComposer = ({
   onPost,
   embeddedPost,
   forcedChannel,
@@ -205,12 +205,12 @@ const PostComposer = ({
                     ? [
                         {
                           label: t('Convert to an article'),
-                          href: `${ROOT_PATH}/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
+                          href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
                           icon: Article,
                         },
                         {
                           label: t('See my drafts'),
-                          href: `${ROOT_PATH}/articles`,
+                          href: `${FEED_ROOT_PATH}/articles`,
                           icon: Pencil,
                         },
                       ]

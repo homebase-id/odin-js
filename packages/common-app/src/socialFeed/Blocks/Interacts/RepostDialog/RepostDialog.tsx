@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { t } from '../../../../helpers';
 import { usePortal } from '../../../../hooks';
 import { DialogWrapper } from '../../../../ui';
-import PostComposer from '@youfoundation/feed-app/src/components/SocialFeed/PostComposer';
 import { EmbeddedPost } from '@youfoundation/js-lib/public';
+import PostComposer from '../../../Composer/PostComposer';
 
 export const RepostDialog = ({
   embeddedPost,

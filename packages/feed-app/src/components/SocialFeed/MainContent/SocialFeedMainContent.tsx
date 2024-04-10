@@ -2,12 +2,14 @@ import { PostContent } from '@youfoundation/js-lib/public';
 import { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
-import { flattenInfinteData } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
-import PostComposer from '../PostComposer';
+import {
+  flattenInfinteData,
+  t,
+  LoadingBlock,
+  PostComposer,
+  useSocialFeed,
+} from '@youfoundation/common-app';
 import PostTeaserCard, { NewPostTeaserCard } from '../PostTeaserCard';
-import { useSocialFeed } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 
 const PAGE_SIZE = 15; // We could increase this one, but also might not, as on mobile 10 items are rather far, and on desktop fetching more is fast...
