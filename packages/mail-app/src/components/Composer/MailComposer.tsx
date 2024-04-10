@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionButton,
   ErrorBoundary,
@@ -15,6 +15,7 @@ import {
   getTextRootsRecursive,
   t,
   useAllContacts,
+  useOutsideTrigger,
 } from '@youfoundation/common-app';
 import {
   NewHomebaseFile,
@@ -61,6 +62,7 @@ export const MailComposer = ({
 
   onDone: () => void;
 }) => {
+  const [expanded, setExpanded] = useState(!forwardedMailThread || !currentRecipients?.length);
   const identity = useDotYouClientContext().getIdentity();
   const [autosavedDsr, setAutosavedDsr] = useState<
     NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>
@@ -209,58 +211,90 @@ export const MailComposer = ({
     [contacts]
   );
 
+  const detailsRef = useRef<HTMLDivElement>(null);
+  useOutsideTrigger(
+    detailsRef,
+    useCallback(
+      () =>
+        autosavedDsr.fileMetadata.appData.content.recipients?.length &&
+        autosavedDsr.fileMetadata.appData.content.subject &&
+        setExpanded(false),
+      [autosavedDsr]
+    )
+  );
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
       <form onSubmit={doSend}>
         <div className="flex flex-col gap-2 ">
-          <div>
-            <Label htmlFor="recipients">{t('To')}</Label>
-            <RecipientInput
-              id="recipients"
-              autoFocus={true}
-              recipients={autosavedDsr.fileMetadata.appData.content.recipients}
-              setRecipients={(newRecipients) =>
-                setAutosavedDsr({
-                  ...autosavedDsr,
-                  fileMetadata: {
-                    ...autosavedDsr.fileMetadata,
-                    appData: {
-                      ...autosavedDsr.fileMetadata.appData,
-                      content: {
-                        ...autosavedDsr.fileMetadata.appData.content,
-                        recipients: newRecipients,
-                      },
-                    },
-                  },
-                })
-              }
-            />
+          <div ref={detailsRef} className="contents">
+            {expanded ? (
+              <>
+                <div>
+                  <Label htmlFor="recipients">{t('To')}</Label>
+                  <RecipientInput
+                    id="recipients"
+                    autoFocus={expanded}
+                    recipients={autosavedDsr.fileMetadata.appData.content.recipients}
+                    setRecipients={(newRecipients) =>
+                      setAutosavedDsr({
+                        ...autosavedDsr,
+                        fileMetadata: {
+                          ...autosavedDsr.fileMetadata,
+                          appData: {
+                            ...autosavedDsr.fileMetadata.appData,
+                            content: {
+                              ...autosavedDsr.fileMetadata.appData.content,
+                              recipients: newRecipients,
+                            },
+                          },
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="subject">{t('Subject')}</Label>
+                  <Input
+                    id="subject"
+                    required
+                    defaultValue={autosavedDsr.fileMetadata.appData.content.subject}
+                    onChange={(e) =>
+                      setAutosavedDsr({
+                        ...autosavedDsr,
+                        fileMetadata: {
+                          ...autosavedDsr.fileMetadata,
+                          appData: {
+                            ...autosavedDsr.fileMetadata.appData,
+                            content: {
+                              ...autosavedDsr.fileMetadata.appData.content,
+                              subject: e.currentTarget.value,
+                            },
+                          },
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <hr className="my-2" />
+              </>
+            ) : (
+              <div
+                onClick={() => setExpanded(true)}
+                className="cursor-pointer text-sm opacity-50 transition-opacity hover:opacity-100"
+              >
+                <p>
+                  <span className="font-semibold">{t('To')}</span>:{' '}
+                  {autosavedDsr.fileMetadata.appData.content.recipients.join(', ')}
+                </p>
+                <p>
+                  <span className="font-semibold">{t('Subject')}</span>:{' '}
+                  {autosavedDsr.fileMetadata.appData.content.subject}
+                </p>
+              </div>
+            )}
           </div>
-          <div>
-            <Label htmlFor="subject">{t('Subject')}</Label>
-            <Input
-              id="subject"
-              required
-              defaultValue={autosavedDsr.fileMetadata.appData.content.subject}
-              onChange={(e) =>
-                setAutosavedDsr({
-                  ...autosavedDsr,
-                  fileMetadata: {
-                    ...autosavedDsr.fileMetadata,
-                    appData: {
-                      ...autosavedDsr.fileMetadata.appData,
-                      content: {
-                        ...autosavedDsr.fileMetadata.appData.content,
-                        subject: e.currentTarget.value,
-                      },
-                    },
-                  },
-                })
-              }
-            />
-          </div>
-          <hr className="my-2" />
           <div
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
@@ -342,7 +376,7 @@ export const MailComposer = ({
           </div>
         </div>
 
-        <div className="mt-3 flex flex-row-reverse gap-2">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row-reverse">
           <ActionButton type="primary" icon={PaperPlane} state={sendMailStatus}>
             {t('Send')}
           </ActionButton>
@@ -360,9 +394,10 @@ export const MailComposer = ({
             {t('Save as draft')}
           </ActionButton>
 
-          <div className="mr-auto flex flex-row gap-2">
+          <div className="flex flex-row gap-2 sm:mr-auto">
             <ActionButton
               type="secondary"
+              className="flex-grow"
               onClick={(e) => {
                 e.preventDefault();
                 onDone();
