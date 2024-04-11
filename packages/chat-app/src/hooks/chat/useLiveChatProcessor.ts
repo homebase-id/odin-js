@@ -27,7 +27,7 @@ import {
   dsrToMessage,
 } from '../../providers/ChatProvider';
 import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { getSingleConversation, useConversation } from './useConversation';
+import { getConversationQueryOptions, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
@@ -95,19 +95,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
         const isNewFile = notification.notificationType === 'fileAdded';
-        const sender = notification.header.fileMetadata.senderOdinId;
-
-        if (!sender || sender === identity) {
-          // Ignore messages sent by the current user
-          return;
-        }
 
         if (isNewFile) {
           // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
-            queryKey: ['conversation', conversationId],
-            queryFn: () => getSingleConversation(dotYouClient, conversationId),
-          });
+          const conversation = await queryClient.fetchQuery(
+            getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+          );
 
           if (!conversation) {
             console.error('Orphaned message received', notification.header.fileId, conversation);

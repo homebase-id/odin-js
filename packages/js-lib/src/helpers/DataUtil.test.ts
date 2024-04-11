@@ -17,6 +17,7 @@ import {
   stringifyToQueryParams,
   stringifyArrayToQueryParams,
   tryJsonParse,
+  getQueryModifiedCursorFromTime,
 } from './DataUtil';
 import { SecurityGroupType } from '../core/DriveData/File/DriveFileTypes';
 
@@ -230,4 +231,8 @@ test('JSON.parse', () => {
 
   const objectwithArray = { test: 'test', deeperLevelArray: ['testDeeper', 'even further down'] };
   expect(tryJsonParse(JSON.stringify(objectwithArray))).toEqual(objectwithArray);
+});
+
+test('getQueryModifiedCursorFromTime', () => {
+  expect(getQueryModifiedCursorFromTime(1712833436831)).toEqual(112252252116156420);
 });
