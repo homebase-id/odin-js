@@ -137,26 +137,32 @@ const useChatWebsocket = (isEnabled: boolean) => {
         if (extistingMessages) {
           const newData = {
             ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page, index) => ({
-              ...page,
-              searchResults: isNewFile
-                ? index === 0
-                  ? [
-                      updatedChatMessage,
-                      // There shouldn't be any duplicates for a fileAdded, but just in case
-                      ...page.searchResults.filter(
-                        (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                      ),
-                    ]
-                  : page.searchResults.filter(
-                      (msg) => !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                    ) // There shouldn't be any duplicates for a fileAdded, but just in case
-                : page.searchResults.map((msg) =>
-                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                      ? updatedChatMessage
-                      : msg
-                  ),
-            })),
+            pages: extistingMessages?.pages?.map((page, index) => {
+              if (isNewFile) {
+                const filteredSearchResults = page.searchResults.filter(
+                  // Remove messages without a fileId, as the optimistic mutations should be removed when there's actual data coming over the websocket;
+                  //   And There shouldn't be any duplicates, but just in case
+                  (msg) => msg?.fileId && !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                );
+
+                return {
+                  ...page,
+                  searchResults:
+                    index === 0
+                      ? [updatedChatMessage, ...filteredSearchResults]
+                      : filteredSearchResults,
+                };
+              }
+
+              return {
+                ...page,
+                searchResults: page.searchResults.map((msg) =>
+                  msg?.fileId && stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ? updatedChatMessage
+                    : msg
+                ),
+              };
+            }),
           };
           queryClient.setQueryData(['chat-messages', conversationId], newData);
         }
