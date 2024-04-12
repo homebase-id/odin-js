@@ -54,10 +54,10 @@ export const RecipientInput = ({
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((i) => ((i || 0) + 1) % contactResults.length);
+        setSelectedIndex((i) => (i + 1) % contactResults.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex((i) => ((i || 0) - 1 + contactResults.length) % contactResults.length);
+        setSelectedIndex((i) => (i - 1 + contactResults.length) % contactResults.length);
       } else if ((e.key === 'Enter' || e.key === 'Tab') && query.length && contactResults.length) {
         e.preventDefault();
         doInsertRecipient(contactResults[selectedIndex].odinId as string);
