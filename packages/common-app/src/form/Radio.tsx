@@ -1,4 +1,4 @@
-const Radio = (
+export const Radio = (
   props: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 ) => {
   return (
@@ -9,5 +9,3 @@ const Radio = (
     />
   );
 };
-
-export default Radio;

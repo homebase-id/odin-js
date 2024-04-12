@@ -11,9 +11,12 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import {
   ChatDrive,
   Conversation,
+  ConversationFileType,
+  GroupConversationFileType,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
+  dsrToConversation,
 } from '../../providers/ConversationProvider';
 import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useCallback, useEffect, useRef } from 'react';
@@ -24,7 +27,7 @@ import {
   dsrToMessage,
 } from '../../providers/ChatProvider';
 import { hasDebugFlag, stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { getSingleConversation, useConversation } from './useConversation';
+import { getConversationQueryOptions, useConversation } from './useConversation';
 import { processCommand } from '../../providers/ChatCommandProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
 import { ChatReactionFileType } from '../../providers/ChatReactionProvider';
@@ -92,19 +95,12 @@ const useChatWebsocket = (isEnabled: boolean) => {
       if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
         const isNewFile = notification.notificationType === 'fileAdded';
-        const sender = notification.header.fileMetadata.senderOdinId;
-
-        if (!sender || sender === identity) {
-          // Ignore messages sent by the current user
-          return;
-        }
 
         if (isNewFile) {
           // Check if the message is orphaned from a conversation
-          const conversation = await queryClient.fetchQuery<HomebaseFile<Conversation> | null>({
-            queryKey: ['conversation', conversationId],
-            queryFn: () => getSingleConversation(dotYouClient, conversationId),
-          });
+          const conversation = await queryClient.fetchQuery(
+            getConversationQueryOptions(dotYouClient, queryClient, conversationId)
+          );
 
           if (!conversation) {
             console.error('Orphaned message received', notification.header.fileId, conversation);
@@ -121,7 +117,13 @@ const useChatWebsocket = (isEnabled: boolean) => {
           ChatDrive,
           true
         );
-        if (!updatedChatMessage) return;
+        if (
+          !updatedChatMessage ||
+          Object.keys(updatedChatMessage.fileMetadata.appData.content).length === 0
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+          return;
+        }
 
         const extistingMessages = queryClient.getQueryData<
           InfiniteData<{
@@ -135,18 +137,32 @@ const useChatWebsocket = (isEnabled: boolean) => {
         if (extistingMessages) {
           const newData = {
             ...extistingMessages,
-            pages: extistingMessages?.pages?.map((page, index) => ({
-              ...page,
-              searchResults: isNewFile
-                ? index === 0
-                  ? [updatedChatMessage, ...page.searchResults]
-                  : page.searchResults
-                : page.searchResults.map((msg) =>
-                    stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
-                      ? updatedChatMessage
-                      : msg
-                  ),
-            })),
+            pages: extistingMessages?.pages?.map((page, index) => {
+              if (isNewFile) {
+                const filteredSearchResults = page.searchResults.filter(
+                  // Remove messages without a fileId, as the optimistic mutations should be removed when there's actual data coming over the websocket;
+                  //   And There shouldn't be any duplicates, but just in case
+                  (msg) => msg?.fileId && !stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                );
+
+                return {
+                  ...page,
+                  searchResults:
+                    index === 0
+                      ? [updatedChatMessage, ...filteredSearchResults]
+                      : filteredSearchResults,
+                };
+              }
+
+              return {
+                ...page,
+                searchResults: page.searchResults.map((msg) =>
+                  msg?.fileId && stringGuidsEqual(msg?.fileId, updatedChatMessage.fileId)
+                    ? updatedChatMessage
+                    : msg
+                ),
+              };
+            }),
           };
           queryClient.setQueryData(['chat-messages', conversationId], newData);
         }
@@ -158,6 +174,65 @@ const useChatWebsocket = (isEnabled: boolean) => {
       } else if (notification.header.fileMetadata.appData.fileType === ChatReactionFileType) {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
+      } else if (
+        notification.header.fileMetadata.appData.fileType === ConversationFileType ||
+        notification.header.fileMetadata.appData.fileType === GroupConversationFileType
+      ) {
+        const isNewFile = notification.notificationType === 'fileAdded';
+
+        const updatedConversation = await dsrToConversation(
+          dotYouClient,
+          notification.header,
+          ChatDrive,
+          true
+        );
+
+        if (
+          !updatedConversation ||
+          Object.keys(updatedConversation.fileMetadata.appData.content).length === 0
+        ) {
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          return;
+        }
+
+        const extistingConversations = queryClient.getQueryData<
+          InfiniteData<{
+            searchResults: HomebaseFile<Conversation>[];
+            cursorState: string;
+            queryTime: number;
+            includeMetadataHeader: boolean;
+          }>
+        >(['conversations']);
+
+        if (extistingConversations) {
+          const newData = {
+            ...extistingConversations,
+            pages: extistingConversations.pages.map((page, index) => ({
+              ...page,
+              searchResults: isNewFile
+                ? index === 0
+                  ? [
+                      updatedConversation,
+                      // There shouldn't be any duplicates for a fileAdded, but just in case
+                      ...page.searchResults.filter(
+                        (msg) => !stringGuidsEqual(msg?.fileId, updatedConversation.fileId)
+                      ),
+                    ]
+                  : page.searchResults.filter(
+                      (msg) => !stringGuidsEqual(msg?.fileId, updatedConversation.fileId)
+                    ) // There shouldn't be any duplicates for a fileAdded, but just in case
+                : page.searchResults.map((conversation) =>
+                    stringGuidsEqual(
+                      conversation.fileMetadata.appData.uniqueId,
+                      updatedConversation.fileMetadata.appData.uniqueId
+                    )
+                      ? updatedConversation
+                      : conversation
+                  ),
+            })),
+          };
+          queryClient.setQueryData(['conversations'], newData);
+        }
       } else if (
         [
           JOIN_CONVERSATION_COMMAND,

@@ -187,7 +187,7 @@ const SearchConversation = ({
           const content = conversation.fileMetadata.appData.content;
           return (
             (content as GroupConversation).recipients?.some((recipient) =>
-              recipient.toLowerCase().includes(query)
+              recipient?.toLowerCase().includes(query)
             ) ||
             (content as GroupConversation).title?.toLowerCase().includes(query) ||
             (content as SingleConversation).recipient?.toLowerCase().includes(query)
@@ -203,7 +203,7 @@ const SearchConversation = ({
             (contact) =>
               contact.odinId &&
               (contact.odinId?.toLowerCase().includes(query) ||
-                contact.name?.displayName.toLowerCase().includes(query))
+                contact.name?.displayName?.toLowerCase().includes(query))
           )
       : [];
 
@@ -221,7 +221,7 @@ const SearchConversation = ({
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="flex flex-row gap-1 px-2 pb-2 pt-1 lg:px-5 lg:pb-5 lg:pt-3">
           <Input
-            onChange={(e) => setQuery(e.target.value.toLowerCase())}
+            onChange={(e) => setQuery(e.target.value?.toLowerCase())}
             key={stateIndex}
             defaultValue={query}
             placeholder={t('Search or start a new chat')}
@@ -249,7 +249,7 @@ const SearchConversation = ({
               isActive={false}
             >
               <div className="rounded-full bg-primary/20 p-4">
-                <Persons className="h-4 w-4" />
+                <Persons className="h-5 w-5" />
               </div>
               {t('New group')}
             </ConversationListItemWrapper>

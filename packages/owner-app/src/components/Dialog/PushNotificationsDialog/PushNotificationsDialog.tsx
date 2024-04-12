@@ -53,7 +53,7 @@ const PushNotificationsDialog = ({ isOpen, onClose }: { isOpen: boolean; onClose
         className={`mt-5 flex flex-row items-center ${isDetails ? 'font-bold' : 'text-sm italic'}`}
       >
         {t('All devices')}{' '}
-        <Arrow className={`ml-2 h-4 w-4 transition-transform ${isDetails ? 'rotate-90' : ''}`} />
+        <Arrow className={`ml-2 h-5 w-5 transition-transform ${isDetails ? 'rotate-90' : ''}`} />
       </button>
       {isDetails ? <AllDevicesDetail className="mt-5" /> : null}
     </DialogWrapper>

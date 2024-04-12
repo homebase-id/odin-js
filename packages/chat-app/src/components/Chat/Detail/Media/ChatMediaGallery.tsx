@@ -107,7 +107,7 @@ export const ChatMediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) =>
               onClick={onClose}
               className={`absolute left-4 top-4 rounded-full border border-primary/50 bg-background p-3 text-foreground hover:brightness-90 hover:filter dark:border-primary/50`}
             >
-              <Times className="h-4 w-4" />
+              <Times className="h-5 w-5" />
             </button>
           ) : null}
 

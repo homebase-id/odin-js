@@ -95,7 +95,7 @@ const DnsSettingsView = ({
               href="https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/"
             >
               Cloudflare {t('Documentation')}
-              <Arrow className="ml-auto h-4 w-4" />
+              <Arrow className="ml-auto h-5 w-5" />
             </a>
           </div>
           <div className="mb-5">
@@ -107,7 +107,7 @@ const DnsSettingsView = ({
               href="https://help.one.com/hc/en-us/articles/360000803517-How-do-I-create-a-CNAME-record-"
             >
               One.com {t('Documentation')}
-              <Arrow className="ml-auto h-4 w-4" />
+              <Arrow className="ml-auto h-5 w-5" />
             </a>
           </div>
         </>
@@ -310,7 +310,7 @@ const RecordView = ({
             onClick={isInCorrectvalue ? () => setShowBadValue(true) : undefined}
           >
             {isGood ? (
-              <Check className="h-4 w-4" />
+              <Check className="h-5 w-5" />
             ) : (
               <>
                 {isInCorrectvalue
@@ -320,7 +320,7 @@ const RecordView = ({
                     : simpleStatus === 'multipleRecordsNotSupported'
                       ? 'Multiple A or CNAME records are not supported'
                       : 'Record not found'}
-                <Exclamation className="h-4 w-4" />
+                <Exclamation className="h-5 w-5" />
               </>
             )}
           </div>

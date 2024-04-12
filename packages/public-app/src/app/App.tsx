@@ -62,10 +62,10 @@ function App() {
             }
           >
             <Route index={true} element={<Home />} />
-            <Route path="about" element={<Home tab="about" />} />
-            <Route path="links" element={<Home tab="links" />} />
-            <Route path="posts" element={<Home tab="posts" />} />
-            <Route path="connections" element={<Home tab="connections" />} />
+            <Route path="about" element={<Home />} />
+            <Route path="links" element={<Home />} />
+            <Route path="posts" element={<Home />} />
+            <Route path="connections" element={<Home />} />
 
             <Route path="posts/:channelKey" element={<PostOverview />} />
             <Route path="posts/:channelKey/:postKey" element={<PostDetail />} />

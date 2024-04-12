@@ -1,4 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryClient,
+  UndefinedInitialDataOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
   Conversation,
@@ -16,7 +23,7 @@ import {
   NewHomebaseFile,
   SecurityGroupType,
 } from '@youfoundation/js-lib/core';
-import { getNewId, getNewXorId } from '@youfoundation/js-lib/helpers';
+import { getNewId, getNewXorId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useConversations } from './useConversations';
 import { deleteAllChatMessages } from '../../providers/ChatProvider';
 import { useDotYouClientContext } from '../auth/useDotYouClientContext';
@@ -179,11 +186,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   };
 
   return {
-    single: useQuery({
-      queryKey: ['conversation', conversationId],
-      queryFn: () => getSingleConversation(dotYouClient, conversationId),
-      enabled: !!conversationId,
-    }),
+    single: useQuery(getConversationQueryOptions(dotYouClient, queryClient, conversationId)),
     create: useMutation({
       mutationFn: createConversation,
       onSettled: async (_data) => {
@@ -253,3 +256,43 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
   };
 };
+
+const fetchSingleConversation = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  conversationId: string
+) => {
+  const queryData = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: HomebaseFile<Conversation>[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(['conversations']);
+
+  const conversationFromCache = queryData?.pages
+    .flatMap((page) => page.searchResults)
+    .find((conversation) =>
+      stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId)
+    );
+  if (conversationFromCache) return conversationFromCache;
+
+  return await getSingleConversation(dotYouClient, conversationId);
+};
+
+export const getConversationQueryOptions: (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  conversationId: string | undefined
+) => UndefinedInitialDataOptions<HomebaseFile<Conversation> | null> = (
+  dotYouClient,
+  queryClient,
+  conversationId
+) => ({
+  queryKey: ['conversation', conversationId],
+  queryFn: () => fetchSingleConversation(dotYouClient, queryClient, conversationId as string),
+  refetchOnMount: false,
+  staleTime: 1000 * 60 * 60, // 1 hour
+  enabled: !!conversationId,
+});

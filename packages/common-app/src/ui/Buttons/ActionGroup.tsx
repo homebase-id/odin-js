@@ -152,7 +152,7 @@ const ActionOption = ({
           }
           className="flex w-full flex-row px-5 py-3 md:px-3 md:py-2"
         >
-          {icon && icon({ className: 'h-4 w-4 my-auto mr-2 flex-shrink-0' })}
+          {icon && icon({ className: 'h-5 w-5 my-auto mr-2 flex-shrink-0' })}
           <span className={''}>{label}</span>
         </FakeAnchor>
       </li>

@@ -1,6 +1,5 @@
 import ProfileHero from '../Common/ProfileHero/ProfileHero';
 import NavPills from '../../../components/ui/Submenu/NavPills';
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import VerticalPosts from '../Common/Posts/VerticalPosts';
@@ -9,20 +8,12 @@ import About from '../Common/About/About';
 import Channels from '../Common/Posts/Channels';
 import Connections from '../Common/Connections/Connections';
 import { useTabs } from '../../../hooks/tabs/useTabs';
-import { HOME_ROOT_PATH, ThemeWithTabsSettings } from '@youfoundation/common-app';
+import { HOME_ROOT_PATH } from '@youfoundation/common-app';
 
-const HomeClassic = (props: { templateSettings: ThemeWithTabsSettings; tab?: string }) => {
-  const { tabs, isTabs } = useTabs();
-
+const HomeClassic = () => {
   /// Tabs
+  const { tabs, isTabs, activeTab } = useTabs();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(props.tab || (isTabs ? tabs[0] : null));
-
-  useEffect(() => {
-    if (isTabs && props.tab !== activeTab) {
-      setActiveTab(props.tab ?? tabs[0].key);
-    }
-  }, [props.tab]);
   /// End tabs
 
   return (
@@ -38,9 +29,11 @@ const HomeClassic = (props: { templateSettings: ThemeWithTabsSettings; tab?: str
                     onChange={(newTab) =>
                       navigate(`${HOME_ROOT_PATH}${newTab}`, { preventScrollReset: true })
                     }
-                    items={tabs.map((tab) => {
-                      return { ...tab, isActive: tab.key === activeTab };
-                    })}
+                    items={tabs.map((tab) => ({
+                      ...tab,
+                      isActive: tab.key === activeTab,
+                      href: `${HOME_ROOT_PATH}${tab.key}`,
+                    }))}
                     disallowWrap={true}
                   />
                 </div>

@@ -13,7 +13,7 @@ const hostConfig = {
 export default defineConfig({
   plugins: [
     react(),
-    splitVendorChunkPlugin(),
+    // splitVendorChunkPlugin(),
     VitePWA({
       srcDir: 'src',
       filename: 'sw.ts',
@@ -52,19 +52,19 @@ export default defineConfig({
         warn(warning);
       },
       output: {
-        manualChunks(id) {
-          if (
-            id.includes('lucide-react') ||
-            id.includes('@radix-ui') ||
-            id.includes('react-remove-scroll') ||
-            id.includes('react-style-singleton') ||
-            id.includes('rich-text-editor') ||
-            id.includes('@floating-ui') ||
-            id.includes('rich-text-editor')
-          ) {
-            return 'rich-text-editor';
-          }
-        },
+        // manualChunks(id) {
+        //   if (
+        //     id.includes('lucide-react') ||
+        //     id.includes('@radix-ui') ||
+        //     id.includes('react-remove-scroll') ||
+        //     id.includes('react-style-singleton') ||
+        //     id.includes('rich-text-editor') ||
+        //     id.includes('@floating-ui') ||
+        //     id.includes('rich-text-editor')
+        //   ) {
+        //     return 'rich-text-editor';
+        //   }
+        // },
       },
     },
   },

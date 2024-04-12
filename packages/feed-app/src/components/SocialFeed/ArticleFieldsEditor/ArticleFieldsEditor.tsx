@@ -91,7 +91,7 @@ export const InnerFieldEditors = ({
             >
               {isEditTeaser ? t('Collapse') : t('Expand')}{' '}
               <Arrow
-                className={`h-4 w-4 transition-transform ${
+                className={`h-5 w-5 transition-transform ${
                   isEditTeaser ? '-rotate-90' : 'rotate-90'
                 }`}
               />

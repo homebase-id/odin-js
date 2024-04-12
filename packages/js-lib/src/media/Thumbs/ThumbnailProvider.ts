@@ -91,7 +91,8 @@ export const createThumbnails = async (
 
   if (
     applicableThumbSizes.length !== (thumbSizes || baseThumbSizes).length &&
-    !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth)
+    !applicableThumbSizes.some((thumbSize) => thumbSize.width === naturalSize.pixelWidth) &&
+    tinyThumb.pixelWidth !== naturalSize.pixelWidth // if the tinyThumb is the same size as the naturalSize we don't need to add it again
   ) {
     // Source image is too small for some of the requested sizes so we add the source dimensions as exact size
     applicableThumbSizes.push({

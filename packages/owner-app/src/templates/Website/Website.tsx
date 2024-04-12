@@ -87,7 +87,7 @@ const PublishOptions = () => {
       <Section
         title={
           <>
-            <Cloud className="inline-block h-4 w-4" /> {t('Clear cache')}
+            <Cloud className="inline-block h-5 w-5" /> {t('Clear cache')}
           </>
         }
       >

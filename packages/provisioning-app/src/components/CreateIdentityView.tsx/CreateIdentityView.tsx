@@ -85,7 +85,7 @@ const CreateIdentityView = ({ domain, email, planId, invitationCode }: Props) =>
                 >
                   {t('Details')}
                   <Arrow
-                    className={`h-4 w-4 transition-transform ${
+                    className={`h-5 w-5 transition-transform ${
                       showDetails ? '-rotate-90' : 'rotate-90'
                     }`}
                   />

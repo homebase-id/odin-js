@@ -114,7 +114,9 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
         console.error('Error removing messages', error);
       },
       onSettled: () => {
-        //
+        // TODO: This can be optimized to use the uploadResults to update the versionTag;
+        //   Just not sure if it should live here, or be part fo the websocket connection?
+        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       },
     }),
     archive: useMutation({
@@ -163,7 +165,9 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
         console.error('Error archiving messages', error);
       },
       onSettled: () => {
-        //
+        // TODO: This can be optimized to use the uploadResults to update the versionTag;
+        //   Just not sure if it should live here, or be part fo the websocket connection?
+        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       },
     }),
     restore: useMutation({
@@ -212,7 +216,9 @@ export const useMailThread = (props?: { threadId: string | undefined }) => {
         console.error('Error restoring messages', error);
       },
       onSettled: () => {
-        //
+        // TODO: This can be optimized to use the uploadResults to update the versionTag;
+        //   Just not sure if it should live here, or be part fo the websocket connection?
+        queryClient.invalidateQueries({ queryKey: ['mail-conversations'] });
       },
     }),
   };

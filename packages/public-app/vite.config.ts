@@ -10,7 +10,10 @@ const hostConfig = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), splitVendorChunkPlugin()],
+  plugins: [
+    react(),
+    // splitVendorChunkPlugin()
+  ],
   server: {
     ...hostConfig,
     https: {
@@ -29,21 +32,21 @@ export default defineConfig({
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
         warn(warning);
       },
-      output: {
-        manualChunks(id) {
-          if (
-            id.includes('lucide-react') ||
-            id.includes('@radix-ui') ||
-            id.includes('react-remove-scroll') ||
-            id.includes('react-style-singleton') ||
-            id.includes('rich-text-editor') ||
-            id.includes('@floating-ui') ||
-            id.includes('rich-text-editor')
-          ) {
-            return 'rich-text-editor';
-          }
-        },
-      },
+      // output: {
+      //   manualChunks(id) {
+      //     if (
+      //       id.includes('lucide-react') ||
+      //       id.includes('@radix-ui') ||
+      //       id.includes('react-remove-scroll') ||
+      //       id.includes('react-style-singleton') ||
+      //       id.includes('rich-text-editor') ||
+      //       id.includes('@floating-ui') ||
+      //       id.includes('rich-text-editor')
+      //     ) {
+      //       return 'rich-text-editor';
+      //     }
+      //   },
+      // },
     },
   },
 });

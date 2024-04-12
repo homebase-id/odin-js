@@ -21,7 +21,7 @@ const LoginNav = () => {
               rounded-full bg-slate-300
             dark:bg-slate-500`}
         >
-          <Times className="h-4 w-4" />
+          <Times className="h-5 w-5" />
         </button>
       ) : (
         <button
@@ -32,7 +32,7 @@ const LoginNav = () => {
           {isAuthenticated && identity ? (
             <ConnectionImage odinId={identity} className="h-8 w-8 rounded-full" size="custom" />
           ) : (
-            <Person className="h-4 w-4" />
+            <Person className="h-5 w-5" />
           )}
         </button>
       )}

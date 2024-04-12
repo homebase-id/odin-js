@@ -192,7 +192,7 @@ const ParagraphWithLinks = ({ text, className }: { text: string; className?: str
 export const MessageDeletedInnerBody = () => {
   return (
     <div className="flex select-none flex-row items-center gap-2 text-foreground/50">
-      <Block className="h-4 w-4" />
+      <Block className="h-5 w-5" />
       <p>{t('This message was deleted')}</p>
     </div>
   );
@@ -224,7 +224,17 @@ const ChatMediaMessageBody = ({
     <>
       <div className={`ml-2 mt-auto flex flex-row-reverse gap-2 ${className || ''}`}>
         <ChatDeliveryIndicator msg={msg} />
-        <ChatSentTimeIndicator msg={msg} className={hasACaption ? undefined : 'invert'} />
+        <ChatSentTimeIndicator
+          msg={msg}
+          className={
+            msg.fileMetadata.payloads.some(
+              (payload) =>
+                payload.contentType.includes('image/') || payload.contentType.includes('video/')
+            )
+              ? 'invert'
+              : undefined
+          }
+        />
       </div>
       <ContextMenu chatActions={chatActions} msg={msg} conversation={conversation} />
     </>

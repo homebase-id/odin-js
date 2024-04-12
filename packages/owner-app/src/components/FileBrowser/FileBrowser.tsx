@@ -182,7 +182,7 @@ const File = ({
                 requiredSecurityGroup: SecurityGroupType.Owner,
               }
             }
-            className="mr-1 h-4 w-4"
+            className="mr-1 h-5 w-5"
           />
           <AclSummary
             acl={

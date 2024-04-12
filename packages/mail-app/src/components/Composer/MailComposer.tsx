@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionButton,
   ErrorBoundary,
@@ -11,8 +11,11 @@ import {
   Plus,
   Save,
   Trash,
+  getImagesFromPasteEvent,
   getTextRootsRecursive,
   t,
+  useAllContacts,
+  useOutsideTrigger,
 } from '@youfoundation/common-app';
 import {
   NewHomebaseFile,
@@ -33,6 +36,8 @@ import {
 import { RecipientInput } from './RecipientInput';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
+import { useBlocker } from 'react-router-dom';
+import { BlockerDialog } from './BlockerDialog';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -57,6 +62,7 @@ export const MailComposer = ({
 
   onDone: () => void;
 }) => {
+  const [expanded, setExpanded] = useState(!forwardedMailThread || !currentRecipients?.length);
   const identity = useDotYouClientContext().getIdentity();
   const [autosavedDsr, setAutosavedDsr] = useState<
     NewHomebaseFile<MailConversation> | HomebaseFile<MailConversation>
@@ -178,58 +184,127 @@ export const MailComposer = ({
     return () => window.removeEventListener('beforeunload', handler);
   });
 
+  // Block navigating elsewhere when data has been entered into the input
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !!getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
+      currentLocation.pathname !== nextLocation.pathname &&
+      sendMailStatus !== 'success' &&
+      removeDraftStatus !== 'success' &&
+      sendMailStatus !== 'pending' && // We include pending state, as the status might not have updated through to the blocker;
+      removeDraftStatus !== 'pending'
+  );
+
+  const { data: contacts } = useAllContacts(true);
+  const mentionables: { key: string; text: string }[] = useMemo(
+    () =>
+      (contacts
+        ?.map((contact) =>
+          contact.fileMetadata.appData.content.odinId
+            ? {
+                key: contact.fileMetadata.appData.content.odinId,
+                text: contact.fileMetadata.appData.content.odinId,
+              }
+            : undefined
+        )
+        .filter(Boolean) as { key: string; text: string }[]) || [],
+    [contacts]
+  );
+
+  const detailsRef = useRef<HTMLDivElement>(null);
+  useOutsideTrigger(
+    detailsRef,
+    useCallback(
+      () =>
+        autosavedDsr.fileMetadata.appData.content.recipients?.length &&
+        autosavedDsr.fileMetadata.appData.content.subject &&
+        setExpanded(false),
+      [autosavedDsr]
+    )
+  );
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
       <form onSubmit={doSend}>
         <div className="flex flex-col gap-2 ">
-          <div>
-            <Label htmlFor="recipients">{t('To')}</Label>
-            <RecipientInput
-              id="recipients"
-              recipients={autosavedDsr.fileMetadata.appData.content.recipients}
-              setRecipients={(newRecipients) =>
-                setAutosavedDsr({
-                  ...autosavedDsr,
-                  fileMetadata: {
-                    ...autosavedDsr.fileMetadata,
-                    appData: {
-                      ...autosavedDsr.fileMetadata.appData,
-                      content: {
-                        ...autosavedDsr.fileMetadata.appData.content,
-                        recipients: newRecipients,
-                      },
-                    },
-                  },
-                })
-              }
-            />
+          <div ref={detailsRef} className="contents">
+            {expanded ? (
+              <>
+                <div>
+                  <Label htmlFor="recipients">{t('To')}</Label>
+                  <RecipientInput
+                    id="recipients"
+                    autoFocus={expanded}
+                    recipients={autosavedDsr.fileMetadata.appData.content.recipients}
+                    setRecipients={(newRecipients) =>
+                      setAutosavedDsr({
+                        ...autosavedDsr,
+                        fileMetadata: {
+                          ...autosavedDsr.fileMetadata,
+                          appData: {
+                            ...autosavedDsr.fileMetadata.appData,
+                            content: {
+                              ...autosavedDsr.fileMetadata.appData.content,
+                              recipients: newRecipients,
+                            },
+                          },
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="subject">{t('Subject')}</Label>
+                  <Input
+                    id="subject"
+                    required
+                    defaultValue={autosavedDsr.fileMetadata.appData.content.subject}
+                    onChange={(e) =>
+                      setAutosavedDsr({
+                        ...autosavedDsr,
+                        fileMetadata: {
+                          ...autosavedDsr.fileMetadata,
+                          appData: {
+                            ...autosavedDsr.fileMetadata.appData,
+                            content: {
+                              ...autosavedDsr.fileMetadata.appData.content,
+                              subject: e.currentTarget.value,
+                            },
+                          },
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <hr className="my-2" />
+              </>
+            ) : (
+              <div
+                onClick={() => setExpanded(true)}
+                className="cursor-pointer text-sm opacity-50 transition-opacity hover:opacity-100"
+              >
+                <p>
+                  <span className="font-semibold">{t('To')}</span>:{' '}
+                  {autosavedDsr.fileMetadata.appData.content.recipients.join(', ')}
+                </p>
+                <p>
+                  <span className="font-semibold">{t('Subject')}</span>:{' '}
+                  {autosavedDsr.fileMetadata.appData.content.subject}
+                </p>
+              </div>
+            )}
           </div>
-          <div>
-            <Label htmlFor="subject">{t('Subject')}</Label>
-            <Input
-              id="subject"
-              required
-              defaultValue={autosavedDsr.fileMetadata.appData.content.subject}
-              onChange={(e) =>
-                setAutosavedDsr({
-                  ...autosavedDsr,
-                  fileMetadata: {
-                    ...autosavedDsr.fileMetadata,
-                    appData: {
-                      ...autosavedDsr.fileMetadata.appData,
-                      content: {
-                        ...autosavedDsr.fileMetadata.appData.content,
-                        subject: e.currentTarget.value,
-                      },
-                    },
-                  },
-                })
+          <div
+            onPaste={(e) => {
+              const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
+
+              if (mediaFiles.length) {
+                setFiles([...(files ?? []), ...mediaFiles]);
+                e.preventDefault();
               }
-            />
-          </div>
-          <hr className="my-2" />
-          <div>
+            }}
+          >
             <Label className="sr-only">{t('Message')}</Label>
             <ErrorBoundary>
               <RichTextEditor
@@ -269,8 +344,9 @@ export const MailComposer = ({
                     return true;
                   },
                 }}
+                mentionables={mentionables}
                 placeholder="Your message"
-                className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-7 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
               />
             </ErrorBoundary>
           </div>
@@ -285,7 +361,7 @@ export const MailComposer = ({
               className="mb-2"
             >
               <span className="flex flex-row items-center gap-2">
-                {t('Attachments')} <Plus className="h-4 w-4" />
+                {t('Attachments')} <Plus className="h-5 w-5" />
               </span>
             </FileSelector>
             <FileOverview
@@ -300,7 +376,7 @@ export const MailComposer = ({
           </div>
         </div>
 
-        <div className="mt-3 flex flex-row-reverse gap-2">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row-reverse">
           <ActionButton type="primary" icon={PaperPlane} state={sendMailStatus}>
             {t('Send')}
           </ActionButton>
@@ -318,9 +394,10 @@ export const MailComposer = ({
             {t('Save as draft')}
           </ActionButton>
 
-          <div className="mr-auto flex flex-row gap-2">
+          <div className="flex flex-row gap-2 sm:mr-auto">
             <ActionButton
               type="secondary"
+              className="flex-grow"
               onClick={(e) => {
                 e.preventDefault();
                 onDone();
@@ -351,6 +428,16 @@ export const MailComposer = ({
           </div>
         </div>
       </form>
+      {blocker && blocker.reset && blocker.proceed ? (
+        <BlockerDialog
+          isOpen={blocker.state === 'blocked'}
+          onCancel={blocker.reset}
+          onProceed={blocker.proceed}
+          title={t('You have unsaved changes')}
+        >
+          <p>{t('Are you sure you want to leave this page? Your changes will be lost.')}</p>
+        </BlockerDialog>
+      ) : null}
     </>
   );
 };

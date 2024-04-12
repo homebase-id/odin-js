@@ -44,7 +44,7 @@ const NotificationProblems = () => {
             >
               {t('Info for iOS')}{' '}
               <Arrow
-                className={`ml-2 h-4 w-4 transition-transform ${isShowiOS ? 'rotate-90' : ''}`}
+                className={`ml-2 h-5 w-5 transition-transform ${isShowiOS ? 'rotate-90' : ''}`}
               />
             </button>
           ) : null}
