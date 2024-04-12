@@ -14,7 +14,7 @@ export const RecipientInput = ({
   autoFocus?: boolean;
 }) => {
   const [query, setQuery] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [inputStateIndex, setInputStateIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -34,6 +34,7 @@ export const RecipientInput = ({
       if (!recipients.includes(odinId)) {
         setRecipients(recipients.includes(odinId) ? recipients : [...recipients, odinId]);
         // Reset input
+        setSelectedIndex(0);
         setInputStateIndex((stateIndex) => stateIndex + 1);
         setQuery('');
         setIsFocused(false);
@@ -53,11 +54,11 @@ export const RecipientInput = ({
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((i) => (i + 1) % contactResults.length);
+        setSelectedIndex((i) => ((i || 0) + 1) % contactResults.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedIndex((i) => (i - 1 + contactResults.length) % contactResults.length);
-      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        setSelectedIndex((i) => ((i || 0) - 1 + contactResults.length) % contactResults.length);
+      } else if ((e.key === 'Enter' || e.key === 'Tab') && query.length && contactResults.length) {
         e.preventDefault();
         doInsertRecipient(contactResults[selectedIndex].odinId as string);
       }
@@ -102,6 +103,7 @@ export const RecipientInput = ({
           key={inputStateIndex}
           id={id}
           autoFocus={autoFocus}
+          autoComplete="off"
         />
       </div>
       {query.length ? (
