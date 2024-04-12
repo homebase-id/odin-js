@@ -5,7 +5,13 @@ import {
   buildFormData,
   buildManifest,
 } from '../../../core/DriveData/Upload/UploadHelpers';
-import { UploadFileMetadata, ThumbnailFile, TransferStatus, PayloadFile } from '../../../core/core';
+import {
+  UploadFileMetadata,
+  ThumbnailFile,
+  TransferStatus,
+  PayloadFile,
+  PriorityOptions,
+} from '../../../core/core';
 import { TransitInstructionSet, TransitUploadResult } from '../PeerTypes';
 import { hasDebugFlag } from '../../../helpers/BrowserUtil';
 import { getRandom16ByteArray } from '../../../helpers/DataUtil';
@@ -36,7 +42,7 @@ export const uploadFileOverPeer = async (
     transferIv: instructions.transferIv,
     overwriteGlobalTransitFileId: instructions.overwriteGlobalTransitFileId,
     remoteTargetDrive: instructions.remoteTargetDrive,
-    schedule: instructions.schedule,
+    priority: PriorityOptions.Medium,
     recipients: instructions.recipients,
   };
 
@@ -80,8 +86,11 @@ export const uploadFileOverPeer = async (
     .then((response) => {
       const recipientStatus = response.data.recipientStatus;
       Object.keys(recipientStatus).forEach((key) => {
-        if (failedTransferStatuses.includes(recipientStatus[key].toLowerCase()))
+        if (
+          recipientStatus[key].toString().toLowerCase() === TransferStatus.FailedToEnqueueOutbox
+        ) {
           throw new Error(`Recipient ${key} failed to receive file`);
+        }
       });
 
       return response.data;
@@ -100,9 +109,3 @@ export const uploadFileOverPeer = async (
 
   return response;
 };
-
-const failedTransferStatuses = [
-  TransferStatus?.FileDoesNotAllowDistribution.toString().toLowerCase(),
-  TransferStatus?.RecipientReturnedAccessDenied.toString().toLowerCase(),
-  TransferStatus?.TotalRejectionClientShouldRetry.toString().toLowerCase(),
-];

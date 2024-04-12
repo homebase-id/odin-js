@@ -9,7 +9,6 @@ import {
   KeyHeader,
   NewHomebaseFile,
   PayloadFile,
-  ScheduleOptions,
   SecurityGroupType,
   SendContents,
   TargetDrive,
@@ -25,7 +24,8 @@ import {
   uploadFile,
   uploadHeader,
   NewMediaFile,
-  UploadTransferStatus,
+  PriorityOptions,
+  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import {
   ChatDrive,
@@ -190,7 +190,7 @@ export const uploadChatMessage = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
           useAppNotification: true,
@@ -279,7 +279,7 @@ export const uploadChatMessage = async (
     recipients.some(
       (recipient) =>
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        UploadTransferStatus.FailedToEnqueueOutbox
+        TransferStatus.FailedToEnqueueOutbox
     )
   ) {
     message.fileMetadata.appData.content.deliveryStatus = ChatDeliveryStatus.Failed;
@@ -287,7 +287,7 @@ export const uploadChatMessage = async (
     for (const recipient of recipients) {
       message.fileMetadata.appData.content.deliveryDetails[recipient] =
         uploadResult.recipientStatus?.[recipient].toLowerCase() ===
-        UploadTransferStatus.FailedToEnqueueOutbox
+        TransferStatus.FailedToEnqueueOutbox
           ? ChatDeliveryStatus.Failed
           : ChatDeliveryStatus.Delivered;
     }
@@ -321,7 +321,7 @@ export const updateChatMessage = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
         }

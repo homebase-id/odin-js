@@ -4,7 +4,6 @@ import {
   FileQueryParams,
   GetBatchQueryResultOptions,
   NewHomebaseFile,
-  ScheduleOptions,
   SecurityGroupType,
   SendContents,
   TargetDrive,
@@ -14,6 +13,7 @@ import {
   getContentFromHeaderOrPayload,
   queryBatch,
   uploadFile,
+  PriorityOptions,
 } from '@youfoundation/js-lib/core';
 import { ChatDrive } from './ConversationProvider';
 import { appId } from '../hooks/auth/useAuth';
@@ -73,7 +73,7 @@ export const uploadReaction = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendNowAwaitResponse,
+          priority: PriorityOptions.High,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
           useAppNotification: true,

@@ -6,7 +6,7 @@ import {
 } from '../../core/DriveData/Upload/DriveFileUploadProvider';
 import {
   AppendInstructionSet,
-  ScheduleOptions,
+  PriorityOptions,
   SendContents,
   UploadFileMetadata,
   UploadInstructionSet,
@@ -177,7 +177,7 @@ const uploadPost = async <T extends PostContent>(
     transitOptions: {
       useGlobalTransitId: true,
       recipients: [],
-      schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };
@@ -265,7 +265,7 @@ const uploadPostHeader = async <T extends PostContent>(
     transitOptions: {
       useGlobalTransitId: true,
       recipients: [],
-      schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All, // TODO: Should this be header only?
     },
   };

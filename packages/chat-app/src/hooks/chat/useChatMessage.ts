@@ -5,7 +5,6 @@ import {
   HomebaseFile,
   NewHomebaseFile,
   SecurityGroupType,
-  TransferStatus,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';

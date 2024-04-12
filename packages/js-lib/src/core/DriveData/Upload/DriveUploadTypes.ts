@@ -38,7 +38,7 @@ interface BaseTransitOptions {
   recipients: string[];
   isTransient?: boolean; // File is removed after it's received by all recipients
   useGlobalTransitId?: boolean | undefined;
-  schedule: ScheduleOptions;
+  priority: PriorityOptions;
   sendContents: SendContents;
   remoteTargetDrive?: TargetDrive;
 }
@@ -69,9 +69,10 @@ export enum SendContents {
   All = Thumbnails | Payload,
 }
 
-export enum ScheduleOptions {
-  SendNowAwaitResponse = 'sendNowAwaitResponse',
-  SendLater = 'sendLater',
+export enum PriorityOptions {
+  High = 1,
+  Medium = 2,
+  Low = 3,
 }
 
 export interface UploadFileDescriptor {
@@ -109,7 +110,7 @@ export interface UploadResult {
   keyHeader: KeyHeader | undefined;
   file: ExternalFileIdentifier;
   globalTransitIdFileIdentifier: GlobalTransitIdFileIdentifier;
-  recipientStatus: { [key: string]: UploadTransferStatus };
+  recipientStatus: { [key: string]: TransferStatus };
   newVersionTag: string;
 }
 
@@ -117,19 +118,8 @@ export interface AppendResult {
   newVersionTag: string;
 }
 
-export enum UploadTransferStatus {
+export enum TransferStatus {
   FailedToEnqueueOutbox = 'failedtoenqueueoutbox',
   Queued = 'queued',
   Delivered = 'delivered',
-}
-
-export enum TransferStatus {
-  AwaitingTransferKey = 'awaitingtransferkey',
-  TransferKeyCreated = 'transferkeycreated',
-  DeliveredToInbox = 'deliveredtoinbox',
-  DeliveredToTargetDrive = 'deliveredtotargetdrive',
-  PendingRetry = 'pendingretry',
-  TotalRejectionClientShouldRetry = 'totalrejectionclientshouldretry',
-  FileDoesNotAllowDistribution = 'filedoesnotallowdistribution',
-  RecipientReturnedAccessDenied = 'recipientreturnedaccessdenied',
 }

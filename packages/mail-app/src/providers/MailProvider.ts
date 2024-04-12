@@ -10,7 +10,7 @@ import {
   NewHomebaseFile,
   PayloadFile,
   RichText,
-  ScheduleOptions,
+  PriorityOptions,
   SecurityGroupType,
   SendContents,
   TargetDrive,
@@ -27,7 +27,7 @@ import {
   uploadHeader,
   MediaFile,
   NewMediaFile,
-  UploadTransferStatus,
+  TransferStatus,
 } from '@youfoundation/js-lib/core';
 import { getNewId, jsonStringify64, makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
@@ -132,7 +132,7 @@ export const uploadMail = async (
     transitOptions: distribute
       ? {
           recipients: [...recipients],
-          schedule: ScheduleOptions.SendLater,
+          priority: PriorityOptions.Low,
           sendContents: SendContents.All,
           useGlobalTransitId: true,
           useAppNotification: true,
@@ -287,7 +287,7 @@ export const uploadMail = async (
       recipients.some(
         (recipient) =>
           (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          UploadTransferStatus.FailedToEnqueueOutbox
+          TransferStatus.FailedToEnqueueOutbox
       )
     ) {
       conversation.fileMetadata.appData.content.deliveryStatus = MailDeliveryStatus.Failed;
@@ -295,7 +295,7 @@ export const uploadMail = async (
       for (const recipient of recipients) {
         conversation.fileMetadata.appData.content.deliveryDetails[recipient] =
           (uploadResult as UploadResult).recipientStatus?.[recipient].toLowerCase() ===
-          UploadTransferStatus.FailedToEnqueueOutbox
+          TransferStatus.FailedToEnqueueOutbox
             ? MailDeliveryStatus.Failed
             : MailDeliveryStatus.Delivered;
       }

@@ -1,8 +1,9 @@
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
-import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import { DEFAULT_PAYLOAD_KEY } from '../../core/DriveData/Upload/UploadHelpers';
+import { PriorityOptions } from '../../core/DriveData/Upload/DriveUploadTypes';
+import { ApiType, DotYouClient } from '../../core/DotYouClient';
 import {
   getDrivesByType,
   FileQueryParams,
@@ -12,7 +13,6 @@ import {
   UploadResult,
   SecurityGroupType,
   UploadInstructionSet,
-  ScheduleOptions,
   SendContents,
   UploadFileMetadata,
   uploadFile,
@@ -24,6 +24,7 @@ import {
   getSecurityContext,
   ensureDrive,
 } from '../../core/core';
+
 import {
   getRandom16ByteArray,
   jsonStringify64,
@@ -163,7 +164,7 @@ export const saveChannelDefinition = async (
     transitOptions: {
       useGlobalTransitId: true,
       recipients: [],
-      schedule: ScheduleOptions.SendLater,
+      priority: PriorityOptions.Medium,
       sendContents: SendContents.All,
     },
   };
