@@ -1,4 +1,11 @@
-import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  InfiniteData,
+  QueryClient,
+  UndefinedInitialDataOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useDotYouClient } from '@youfoundation/common-app';
 import {
   Conversation,
@@ -60,26 +67,6 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }
 
     return null;
-  };
-
-  const fetchSingleConversation = async (dotYouClient: DotYouClient, conversationId: string) => {
-    const queryData = queryClient.getQueryData<
-      InfiniteData<{
-        searchResults: HomebaseFile<Conversation>[];
-        cursorState: string;
-        queryTime: number;
-        includeMetadataHeader: boolean;
-      }>
-    >(['conversations']);
-
-    const conversationFromCache = queryData?.pages
-      .flatMap((page) => page.searchResults)
-      .find((conversation) =>
-        stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId)
-      );
-    if (conversationFromCache) return conversationFromCache;
-
-    return await getSingleConversation(dotYouClient, conversationId);
   };
 
   const createConversation = async ({
@@ -199,11 +186,7 @@ export const useConversation = (props?: { conversationId?: string | undefined })
   };
 
   return {
-    single: useQuery({
-      queryKey: ['conversation', conversationId],
-      queryFn: () => fetchSingleConversation(dotYouClient, conversationId as string),
-      enabled: !!conversationId,
-    }),
+    single: useQuery(getConversationQueryOptions(dotYouClient, queryClient, conversationId)),
     create: useMutation({
       mutationFn: createConversation,
       onSettled: async (_data) => {
@@ -273,3 +256,43 @@ export const useConversation = (props?: { conversationId?: string | undefined })
     }),
   };
 };
+
+const fetchSingleConversation = async (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  conversationId: string
+) => {
+  const queryData = queryClient.getQueryData<
+    InfiniteData<{
+      searchResults: HomebaseFile<Conversation>[];
+      cursorState: string;
+      queryTime: number;
+      includeMetadataHeader: boolean;
+    }>
+  >(['conversations']);
+
+  const conversationFromCache = queryData?.pages
+    .flatMap((page) => page.searchResults)
+    .find((conversation) =>
+      stringGuidsEqual(conversation.fileMetadata.appData.uniqueId, conversationId)
+    );
+  if (conversationFromCache) return conversationFromCache;
+
+  return await getSingleConversation(dotYouClient, conversationId);
+};
+
+export const getConversationQueryOptions: (
+  dotYouClient: DotYouClient,
+  queryClient: QueryClient,
+  conversationId: string | undefined
+) => UndefinedInitialDataOptions<HomebaseFile<Conversation> | null> = (
+  dotYouClient,
+  queryClient,
+  conversationId
+) => ({
+  queryKey: ['conversation', conversationId],
+  queryFn: () => fetchSingleConversation(dotYouClient, queryClient, conversationId as string),
+  refetchOnMount: false,
+  staleTime: 1000 * 60 * 60, // 1 hour
+  enabled: !!conversationId,
+});

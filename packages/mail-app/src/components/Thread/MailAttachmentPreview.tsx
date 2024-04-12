@@ -15,6 +15,8 @@ import { MailDrive } from '../../providers/MailProvider';
 import { useMailAttachment, useMailConversation } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
 import { OdinImage } from '@youfoundation/ui-lib';
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
+import { bytesToSize } from '../../templates/Mail/MailAttachmentsInfo';
 
 export const MailAttachmentPreview = ({
   messageId,
@@ -108,8 +110,41 @@ export const MailAttachmentPreview = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col overflow-auto bg-page-background bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
+      className={`fixed inset-0 z-50 flex flex-col overflow-auto bg-slate-900 bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
     >
+      <div className="flex w-full flex-row flex-wrap bg-slate-950 px-3 py-3 text-white">
+        {payloadDescriptor ? (
+          <>
+            <div className="flex flex-row items-center gap-2">
+              <ActionButton
+                icon={Times}
+                onClick={doClose}
+                className="rounded-full p-3"
+                size="square"
+              />
+
+              <p>
+                {payloadDescriptor.descriptorContent || payloadDescriptor.key}
+                <span className="ml-3 border-l border-slate-400 pl-3">
+                  {formatDateExludingYearIfCurrent(new Date(payloadDescriptor.lastModified))}
+                </span>
+              </p>
+            </div>
+            <div className="ml-auto flex flex-row items-center gap-2">
+              <p className="text-sm text-slate-400">
+                {bytesToSize(payloadDescriptor.bytesWritten)}
+              </p>
+
+              <ActionButton
+                icon={Download}
+                onClick={doDownload}
+                className="rounded-full p-3"
+                size="square"
+              />
+            </div>
+          </>
+        ) : null}
+      </div>
       <div
         className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center justify-center"
         ref={wrapperRef}
@@ -118,19 +153,6 @@ export const MailAttachmentPreview = ({
           <Loader className="h-20 w-20" />
         ) : (
           <>
-            <ActionButton
-              icon={Times}
-              onClick={doClose}
-              className="fixed left-2 top-2 rounded-full p-3"
-              size="square"
-            />
-            <ActionButton
-              icon={Download}
-              onClick={doDownload}
-              className="fixed right-2 top-2 rounded-full p-3"
-              size="square"
-            />
-
             {payloadDescriptor.contentType.startsWith('image/') ? (
               <OdinImage
                 dotYouClient={dotYouClient}
@@ -143,7 +165,7 @@ export const MailAttachmentPreview = ({
             ) : (
               <ExtensionThumbnail
                 contentType={payloadDescriptor.contentType}
-                className="h-32 w-32"
+                className="h-32 w-32 text-white"
               />
             )}
 

@@ -146,7 +146,7 @@ const FileGroup = ({
   );
 };
 
-const bytesToSize = (bytes: number) => {
+export const bytesToSize = (bytes: number) => {
   return bytes < 1024
     ? `${bytes} B`
     : bytes < 1024 * 1024

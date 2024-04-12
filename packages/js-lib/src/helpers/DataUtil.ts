@@ -297,6 +297,15 @@ export const getQueryBatchCursorFromTime = (fromUnixTimeInMs: number, toUnixTime
   return uint8ArrayToBase64(bytes);
 };
 
+export const getQueryModifiedCursorFromTime = (unixTimeInMs: number) => {
+  // Example top 48 bits and bottom 16 bits as BigInts
+  const topBits = BigInt(unixTimeInMs); // Replace with your top 48 bits
+  const bottomBits = BigInt(4); // Replace with your bottom 16 bits
+
+  // Combine the top and bottom bits using bitwise left shift and bitwise OR operation
+  return Number((topBits << BigInt(16)) | bottomBits);
+};
+
 export const tryJsonParse = <T>(json: string): T => {
   try {
     if (typeof json === 'object') return json as T;
