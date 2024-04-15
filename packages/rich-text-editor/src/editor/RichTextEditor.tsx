@@ -308,7 +308,6 @@ const RichTextEditor = memo(({ defaultValue, onChange, ...props }: RTEProps) => 
   const [activeDefaultValue, setActiveDefaultValue] = useState(defaultValue);
   useEffect(() => {
     if (!activeDefaultValue) {
-      console.log('set default value');
       setActiveDefaultValue(defaultValue);
     }
   }, [defaultValue]);
