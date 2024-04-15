@@ -6,20 +6,23 @@ import {
   AclSummary,
   AclWizard,
   ActionButton,
+  ActionGroup,
   ChannelDefinitionVm,
   CheckboxToggle,
   Pencil,
+  Persons,
   Textarea,
   Trash,
   useChannels,
+  t,
+  useChannel,
+  usePortal,
+  Input,
+  Label,
+  DialogWrapper,
+  Plus,
+  Quote,
 } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { useChannel } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-import { Input } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
-import { DialogWrapper, Plus } from '@youfoundation/common-app';
-import { Quote } from '@youfoundation/common-app';
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
 import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
 import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -106,6 +109,14 @@ export const ChannelItem = ({
   const {
     save: { mutateAsync: saveChannel, status: saveStatus },
     remove: { mutateAsync: removeChannel, status: removeStatus },
+    convertToCollaborativeChannel: {
+      mutateAsync: convertToCollaborativeChannel,
+      status: convertToCollaborativeChannelStatus,
+    },
+    convertToPrivateChannel: {
+      mutateAsync: convertToPrivateChannel,
+      status: convertToPrivateChannelStatus,
+    },
   } = useChannel({});
 
   const chnl = chnlDsr?.fileMetadata.appData.content;
@@ -144,6 +155,61 @@ export const ChannelItem = ({
                 {chnl?.name || `"${t('New channel')}"`}{' '}
                 <small className="block text-xs">{<AclSummary acl={newAcl} />}</small>
               </span>
+
+              {chnlDsr &&
+              chnlDsr.fileId &&
+              !stringGuidsEqual(
+                chnlDsr.fileMetadata.appData.uniqueId,
+                BlogConfig.PublicChannelId
+              ) ? (
+                <ActionGroup
+                  type="mute"
+                  className="ml-auto"
+                  options={[
+                    chnlDsr.fileMetadata.appData.content.isGroupChannel
+                      ? {
+                          label: t('Convert into a private channel'),
+                          icon: Persons,
+                          onClick: async (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            convertToPrivateChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
+                            return false;
+                          },
+                        }
+                      : {
+                          label: t('Convert into a group channel'),
+                          icon: Persons,
+                          onClick: async (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            convertToCollaborativeChannel(
+                              chnlDsr as HomebaseFile<ChannelDefinitionVm>
+                            );
+                            return false;
+                          },
+                        },
+                    {
+                      label: t('Remove channel'),
+                      confirmOptions: {
+                        type: 'info',
+                        title: t('Remove channel'),
+                        body: t(
+                          'Are you sure you want to remove this channel, this action cannot be undone. All posts published on this channel will also be unpublished.'
+                        ),
+                        buttonText: t('Remove'),
+                      },
+                      icon: Trash,
+                      onClick: async (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
+                        return false;
+                      },
+                    },
+                  ]}
+                ></ActionGroup>
+              ) : null}
             </span>
           }
           {isAclEdit ? (
@@ -226,17 +292,6 @@ export const ChannelItem = ({
                   onChange={(e) => setNewShowOnHomePage(e.target.checked)}
                 />
               </div>
-              <div className="mb-5 flex flex-row items-center gap-5">
-                <Label htmlFor="canWrite" className="mb-0">
-                  {t('People with access can post to this channel')}
-                </Label>
-                <CheckboxToggle
-                  id="canWrite"
-                  defaultChecked={chnl?.isGroupChannel}
-                  onChange={(e) => setIsGroupChannel(e.target.checked)}
-                  disabled={!!chnlDsr?.fileId}
-                />
-              </div>
               <div className="mb-5">
                 <Label htmlFor="template">{t('Template')}</Label>
                 <ChannelTemplateSelector
@@ -245,13 +300,12 @@ export const ChannelItem = ({
                   onChange={(e) => setNewTemplateId(parseInt(e.target.value))}
                 />
               </div>
-              <div className="-m-2 flex flex-row-reverse">
-                <ActionButton className="m-2" state={saveStatus}>
+              <div className="gap-2 flex flex-row-reverse">
+                <ActionButton state={saveStatus}>
                   {isNew && !chnl ? t('Create Drive & Save') : t('Save')}
                 </ActionButton>
                 <ActionButton
                   type="secondary"
-                  className="m-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
@@ -262,35 +316,6 @@ export const ChannelItem = ({
                 >
                   {t('Cancel')}
                 </ActionButton>
-                {chnlDsr &&
-                chnlDsr.fileId &&
-                !stringGuidsEqual(
-                  chnlDsr.fileMetadata.appData.uniqueId,
-                  BlogConfig.PublicChannelId
-                ) ? (
-                  <ActionButton
-                    className="m-2 mr-auto"
-                    state={removeStatus}
-                    type="remove"
-                    icon={Trash}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      await removeChannel(chnlDsr as HomebaseFile<ChannelDefinitionVm>);
-                      return false;
-                    }}
-                    confirmOptions={{
-                      type: 'info',
-                      title: t('Remove channel'),
-                      body: t(
-                        'Are you sure you want to remove this channel, this action cannot be undone. All posts published on this channel will also be unpublished.'
-                      ),
-                      buttonText: t('Remove'),
-                    }}
-                  >
-                    {t('Remove')}
-                  </ActionButton>
-                ) : null}
               </div>
             </form>
           )}

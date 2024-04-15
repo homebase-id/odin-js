@@ -7,6 +7,7 @@ import {
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { useAuth } from '../auth/useAuth';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
   const { targetDrive } = props || {};
@@ -19,8 +20,8 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
     if (allDrivesInCache) {
       const foundDrive = allDrivesInCache.find(
         (drive) =>
-          drive.targetDriveInfo.alias === targetDrive.alias &&
-          drive.targetDriveInfo.type === targetDrive.type
+          stringGuidsEqual(drive.targetDriveInfo.alias, targetDrive.alias) &&
+          stringGuidsEqual(drive.targetDriveInfo.type, targetDrive.type)
       );
       if (foundDrive) return foundDrive;
     }
@@ -30,8 +31,8 @@ export const useDrive = (props?: { targetDrive?: TargetDrive }) => {
     return (
       allDrives.find(
         (drive) =>
-          drive.targetDriveInfo.alias === targetDrive.alias &&
-          drive.targetDriveInfo.type === targetDrive.type
+          stringGuidsEqual(drive.targetDriveInfo.alias, targetDrive.alias) &&
+          stringGuidsEqual(drive.targetDriveInfo.type, targetDrive.type)
       ) || null
     );
   };

@@ -61,6 +61,39 @@ const getExtendAuthorizationUrl = (
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
 
+const getExtendCirclePermissionUrl = (
+  identity: string,
+  name: string,
+  description: string,
+  targetDrive: TargetDrive,
+  circleIds: string[],
+  returnUrl: string
+) => {
+  const drives = [
+    {
+      a: targetDrive.alias,
+      t: targetDrive.type,
+      p:
+        DrivePermissionType.Read +
+        DrivePermissionType.Write +
+        DrivePermissionType.React +
+        DrivePermissionType.Comment, // Permission
+      n: name,
+      d: description,
+    },
+  ];
+
+  const params = {
+    appId: FEED_APP_ID,
+    cd: JSON.stringify(drives),
+    c: circleIds.join(','),
+  };
+
+  return `https://${identity}/owner/apprequest?${stringifyToQueryParams(
+    params
+  )}&return=${encodeURIComponent(returnUrl)}`;
+};
+
 export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
   const { getDotYouClient, isOwner } = useDotYouClient();
   const dotYouClient = getDotYouClient();
@@ -148,6 +181,39 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
   const removeChannel = async (channelDef: HomebaseFile<ChannelDefinition>) => {
     await removeChannelDefinition(dotYouClient, channelDef.fileMetadata.appData.uniqueId as string);
+  };
+
+  const makeChannelCollaborative = async (channelDef: HomebaseFile<ChannelDefinition>) => {
+    if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
+
+    const collaborativeCircleIds = channelDef.serverMetadata?.accessControlList.circleIdList || [];
+    if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
+
+    const identity = dotYouClient.getIdentity();
+    const returnUrl = `${ROOT_PATH}/channels`;
+
+    const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
+
+    const collaborativeChannelDef = { ...channelDef };
+    collaborativeChannelDef.fileMetadata.appData.content.isGroupChannel = true;
+    await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
+
+    window.location.href = getExtendCirclePermissionUrl(
+      identity,
+      channelDef.fileMetadata.appData.content.name,
+      t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
+      targetDrive,
+      collaborativeCircleIds,
+      returnUrl
+    );
+  };
+
+  const makeChannelPrivate = async (channelDef: HomebaseFile<ChannelDefinition>) => {
+    if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
+
+    const collaborativeChannelDef = { ...channelDef };
+    collaborativeChannelDef.fileMetadata.appData.content.isGroupChannel = false;
+    return await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
   };
 
   return {
@@ -262,6 +328,12 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         queryClient.invalidateQueries({ queryKey: ['channels'] });
         publishStaticFiles('channel');
       },
+    }),
+    convertToCollaborativeChannel: useMutation({
+      mutationFn: makeChannelCollaborative,
+    }),
+    convertToPrivateChannel: useMutation({
+      mutationFn: makeChannelPrivate,
     }),
   };
 };
