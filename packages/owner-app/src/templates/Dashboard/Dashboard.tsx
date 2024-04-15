@@ -55,8 +55,8 @@ const Dashboard = () => {
         <PhotoApp />
       </div>
 
-      <div className="mt-10 flex max-w-2xl flex-row flex-wrap gap-4">
-        <FeedTeaser />
+      <div className="mt-10 flex w-full max-w-2xl flex-row flex-wrap gap-4">
+        <FeedTeaser className="w-full" />
       </div>
     </>
   );
@@ -254,15 +254,16 @@ const FeedTeaser = ({ className }: { className?: string }) => {
       <div className="mb-4 flex flex-row items-center justify-between">
         <p className="text-2xl">{t('What has everyone been up to?')}</p>
       </div>
-      <FakeAnchor href={hasPosts ? `/apps/feed` : `/owner/connections`}>
-        <div className="pointer-events-none flex flex-col gap-4">
+      <FakeAnchor className="w-full" href={hasPosts ? `/apps/feed` : `/owner/connections`}>
+        <div className="pointer-events-none flex w-full flex-col gap-4">
           {hasPosts ? (
             latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (
               <div
-                className={`rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
+                className={`w-full rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
                 key={post.fileId}
               >
                 <EmbeddedPostContent
+                  className="w-full"
                   content={{
                     ...post.fileMetadata.appData.content,
                     payloads: post.fileMetadata.payloads,
