@@ -15,7 +15,7 @@ export interface ChannelDefinition {
   description: string;
   showOnHomePage: boolean;
   templateId?: number;
-  isGroupChannel?: boolean;
+  isCollaborative?: boolean;
 }
 
 export enum ChannelTemplate {

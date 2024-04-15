@@ -108,15 +108,9 @@ export const ChannelItem = ({
   const [isAclEdit, setIsAclEdit] = useState(isNew);
   const {
     save: { mutateAsync: saveChannel, status: saveStatus },
-    remove: { mutateAsync: removeChannel, status: removeStatus },
-    convertToCollaborativeChannel: {
-      mutateAsync: convertToCollaborativeChannel,
-      status: convertToCollaborativeChannelStatus,
-    },
-    convertToPrivateChannel: {
-      mutateAsync: convertToPrivateChannel,
-      status: convertToPrivateChannelStatus,
-    },
+    remove: { mutateAsync: removeChannel },
+    convertToCollaborativeChannel: { mutateAsync: convertToCollaborativeChannel },
+    convertToPrivateChannel: { mutateAsync: convertToPrivateChannel },
   } = useChannel({});
 
   const chnl = chnlDsr?.fileMetadata.appData.content;
@@ -126,7 +120,6 @@ export const ChannelItem = ({
   const [newDescription, setNewDescription] = useState(chnl?.description);
   const [newTemplateId, setNewTemplateId] = useState(chnl?.templateId);
   const [newShowOnHomePage, setNewShowOnHomePage] = useState(chnl?.showOnHomePage);
-  const [isGroupChannel, setIsGroupChannel] = useState(chnl?.isGroupChannel);
   const [newAcl, setNewAcl] = useState(
     chnlDsr?.serverMetadata?.accessControlList ?? {
       requiredSecurityGroup: SecurityGroupType.Anonymous,
@@ -143,7 +136,7 @@ export const ChannelItem = ({
       {isEdit || !chnl ? (
         <>
           {
-            <span className="mb-5 flex flex-row">
+            <span className="mb-5 flex flex-row items-center">
               <button
                 title={newAcl.requiredSecurityGroup}
                 className={`mr-2 inline-block`}
@@ -155,6 +148,12 @@ export const ChannelItem = ({
                 {chnl?.name || `"${t('New channel')}"`}{' '}
                 <small className="block text-xs">{<AclSummary acl={newAcl} />}</small>
               </span>
+              <span className="ml-auto"></span>
+              {chnl?.isCollaborative ? (
+                <p title={t('Collaborative')}>
+                  <Persons className="w-5 h-5" />
+                </p>
+              ) : null}
 
               {chnlDsr &&
               chnlDsr.fileId &&
@@ -164,9 +163,8 @@ export const ChannelItem = ({
               ) ? (
                 <ActionGroup
                   type="mute"
-                  className="ml-auto"
                   options={[
-                    chnlDsr.fileMetadata.appData.content.isGroupChannel
+                    chnlDsr.fileMetadata.appData.content.isCollaborative
                       ? {
                           label: t('Convert into a private channel'),
                           icon: Persons,
@@ -245,7 +243,6 @@ export const ChannelItem = ({
                         description: newDescription ?? '',
                         showOnHomePage: newShowOnHomePage ?? false,
                         templateId: newTemplateId ?? ChannelTemplate.ClassicBlog,
-                        isGroupChannel: isGroupChannel ?? false,
                       },
                     },
                   },
@@ -321,12 +318,18 @@ export const ChannelItem = ({
           )}
         </>
       ) : (
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center gap-2">
           <h2 className="text-lg">
             {chnl?.name} <small className="text-xs">({<AclSummary acl={newAcl} />})</small>
             <small className="text-md block">{chnl.description}</small>
           </h2>
-          <ActionButton icon={Pencil} size="square" className="ml-auto" type="mute"></ActionButton>
+          <span className="ml-auto"></span>
+          {chnl?.isCollaborative ? (
+            <p title={t('Collaborative')}>
+              <Persons className="w-5 h-5" />
+            </p>
+          ) : null}
+          <ActionButton icon={Pencil} size="square" type="mute"></ActionButton>
         </div>
       )}
     </div>

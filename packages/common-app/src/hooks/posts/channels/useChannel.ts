@@ -195,7 +195,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
 
     const collaborativeChannelDef = { ...channelDef };
-    collaborativeChannelDef.fileMetadata.appData.content.isGroupChannel = true;
+    collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = true;
     await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
 
     window.location.href = getExtendCirclePermissionUrl(
@@ -212,7 +212,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
 
     const collaborativeChannelDef = { ...channelDef };
-    collaborativeChannelDef.fileMetadata.appData.content.isGroupChannel = false;
+    collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = false;
     return await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
   };
 
