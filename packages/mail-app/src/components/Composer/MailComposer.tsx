@@ -23,6 +23,7 @@ import {
   HomebaseFile,
   NewMediaFile,
   MediaFile,
+  RichText,
 } from '@youfoundation/js-lib/core';
 import { getNewId } from '@youfoundation/js-lib/helpers';
 import { useMailConversation, useMailDraft } from '../../hooks/mail/useMailConversation';
@@ -38,6 +39,7 @@ import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext'
 import { RichTextEditor } from '@youfoundation/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
 import { BlockerDialog } from './BlockerDialog';
+import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -223,6 +225,48 @@ export const MailComposer = ({
     )
   );
 
+  const handleRTEChange = useCallback(
+    (e: {
+      target: {
+        name: string;
+        value: RichText;
+      };
+    }) =>
+      setAutosavedDsr((currentDsr) => ({
+        ...currentDsr,
+        fileMetadata: {
+          ...currentDsr.fileMetadata,
+          appData: {
+            ...currentDsr.fileMetadata.appData,
+            content: {
+              ...currentDsr.fileMetadata.appData.content,
+              message: e.target.value,
+            },
+          },
+        },
+      })),
+    [setAutosavedDsr]
+  );
+
+  const mediaOptions: MediaOptions = useMemo(
+    () => ({
+      fileId: autosavedDsr.fileId || '',
+      mediaDrive: MailDrive,
+      pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
+      onAppend: async (file) => {
+        const fileKey = `${MAIL_MESSAGE_PAYLOAD_KEY}i${files.length}`;
+
+        setFiles([...files, { file: file, key: fileKey }]);
+        return { fileId: autosavedDsr.fileId || '', fileKey: fileKey };
+      },
+      onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
+        setFiles(files.filter((f) => f.key !== fileKey));
+        return true;
+      },
+    }),
+    [setFiles, autosavedDsr.fileId, files]
+  );
+
   return (
     <>
       <ErrorNotification error={removeDraftError || saveDraftError || sendMailError} />
@@ -314,36 +358,8 @@ export const MailComposer = ({
                     ? autosavedDsr.fileMetadata.appData.content.message
                     : undefined
                 }
-                onChange={(e) =>
-                  setAutosavedDsr({
-                    ...autosavedDsr,
-                    fileMetadata: {
-                      ...autosavedDsr.fileMetadata,
-                      appData: {
-                        ...autosavedDsr.fileMetadata.appData,
-                        content: {
-                          ...autosavedDsr.fileMetadata.appData.content,
-                          message: e.target.value,
-                        },
-                      },
-                    },
-                  })
-                }
-                mediaOptions={{
-                  fileId: autosavedDsr.fileId || '',
-                  mediaDrive: MailDrive,
-                  pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
-                  onAppend: async (file) => {
-                    const fileKey = `${MAIL_MESSAGE_PAYLOAD_KEY}i${files.length}`;
-
-                    setFiles([...files, { file: file, key: fileKey }]);
-                    return { fileId: autosavedDsr.fileId || '', fileKey: fileKey };
-                  },
-                  onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
-                    setFiles(files.filter((f) => f.key !== fileKey));
-                    return true;
-                  },
-                }}
+                onChange={handleRTEChange}
+                mediaOptions={mediaOptions}
                 mentionables={mentionables}
                 placeholder="Your message"
                 className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-7 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
