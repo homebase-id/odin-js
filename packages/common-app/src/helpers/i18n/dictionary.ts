@@ -47,7 +47,8 @@ const enLocale = [
 
 const internalDict: Map<string, string> = new Map(enLocale);
 
-const t = (key: string, ...args: (string | number)[]) => {
+const t = (key: string | undefined, ...args: (string | number)[]) => {
+  if (!key) return '';
   const localizedKey = internalDict.get(key.toLowerCase()) ?? key;
 
   return localizedKey.replaceAll(/{(\d+)}/g, (match, number) => {
