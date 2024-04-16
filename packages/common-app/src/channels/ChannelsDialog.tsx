@@ -173,18 +173,21 @@ export const ChannelItem = ({
                             return false;
                           },
                         }
-                      : {
-                          label: t('Convert into a group channel'),
-                          icon: Persons,
-                          onClick: async (e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            convertToCollaborativeChannel(
-                              chnlDsr as HomebaseFile<ChannelDefinitionVm>
-                            );
-                            return false;
-                          },
-                        },
+                      : chnlDsr.serverMetadata?.accessControlList.requiredSecurityGroup ===
+                          SecurityGroupType.Connected
+                        ? {
+                            label: t('Convert into a group channel'),
+                            icon: Persons,
+                            onClick: async (e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              convertToCollaborativeChannel(
+                                chnlDsr as HomebaseFile<ChannelDefinitionVm>
+                              );
+                              return false;
+                            },
+                          }
+                        : undefined,
                     {
                       label: t('Remove channel'),
                       confirmOptions: {

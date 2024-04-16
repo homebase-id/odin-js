@@ -18,9 +18,11 @@ import {
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
+  SecurityGroupType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '@youfoundation/feed-app/src/app/App';
+import { ALL_CONNECTIONS_CIRCLE_ID } from '@youfoundation/js-lib/network';
 
 type useChannelsProps = {
   channelSlug?: string;
@@ -188,7 +190,12 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
     if (!channelDef.serverMetadata) throw new Error('Channel is not access as the owner');
 
-    const collaborativeCircleIds = channelDef.serverMetadata?.accessControlList.circleIdList || [];
+    const collaborativeCircleIds =
+      channelDef.serverMetadata?.accessControlList.circleIdList ||
+      channelDef.serverMetadata?.accessControlList.requiredSecurityGroup ===
+        SecurityGroupType.Connected
+        ? [ALL_CONNECTIONS_CIRCLE_ID]
+        : [];
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
 
     const identity = dotYouClient.getIdentity();
@@ -217,6 +224,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
     const collaborativeChannelDef = { ...channelDef };
     collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (collaborativeChannelDef.fileMetadata.appData.content as any).acl;
     return await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
   };

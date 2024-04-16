@@ -25,7 +25,7 @@ export interface ActionGroupOptionProps {
 
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   buttonClassName?: string;
-  options: ActionGroupOptionProps[];
+  options: (ActionGroupOptionProps | undefined)[];
 }
 
 export const ActionGroup = ({
@@ -54,7 +54,7 @@ export const ActionGroup = ({
       } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
     >
       <ul className={`block`}>
-        {options.map((option) => {
+        {(options.filter(Boolean) as ActionGroupOptionProps[]).map((option) => {
           return (
             <ActionOption
               {...option}
