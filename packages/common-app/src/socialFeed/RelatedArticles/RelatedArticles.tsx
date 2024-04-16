@@ -43,6 +43,7 @@ export const RelatedArticles = ({
                 key={postFile.fileMetadata.appData.content.id}
                 className={`p-1 sm:w-1/2 md:w-1/3`}
                 forceAspectRatio={true}
+                showAuthor={channel?.fileMetadata.appData.content.isCollaborative}
               />
             );
           })}

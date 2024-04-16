@@ -7,9 +7,11 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 const ListPostOverview = ({
   blogPosts,
   showChannel,
+  showAuthor,
 }: {
   blogPosts: HomebaseFile<PostContent>[];
   showChannel?: boolean;
+  showAuthor: boolean;
 }) => {
   const [isLogin, setIsLogin] = useState(false);
 
@@ -26,6 +28,7 @@ const ListPostOverview = ({
               showChannel={showChannel}
               allowExpand={true}
               login={() => setIsLogin(true)}
+              showAuthor={showAuthor}
             />
           );
         })}

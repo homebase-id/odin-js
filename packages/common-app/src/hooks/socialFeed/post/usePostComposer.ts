@@ -12,6 +12,7 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
+  CollaborativeChannelDefinition,
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
@@ -67,7 +68,14 @@ export const usePostComposer = () => {
           ? {
               accessControlList: overrideAcl,
             }
-          : channel.serverMetadata || {
+          : channel.serverMetadata ||
+            ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+              ? {
+                  accessControlList: (
+                    channel.fileMetadata.appData.content as CollaborativeChannelDefinition
+                  ).acl,
+                }
+              : undefined) || {
               accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
             },
       };

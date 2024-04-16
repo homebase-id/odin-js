@@ -3,7 +3,13 @@ import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useCallback, useEffect, useState } from 'react';
 
-const MasonryPostOverview = ({ blogPosts }: { blogPosts: HomebaseFile<PostContent>[] }) => {
+const MasonryPostOverview = ({
+  blogPosts,
+  showAuthor,
+}: {
+  blogPosts: HomebaseFile<PostContent>[];
+  showAuthor: boolean;
+}) => {
   const [cols, setCols] = useState(1);
 
   /// Function to reorder the array to make it fit in the masonry layout which by
@@ -49,6 +55,7 @@ const MasonryPostOverview = ({ blogPosts }: { blogPosts: HomebaseFile<PostConten
             postFile={postFile}
             hideImageWhenNone={true}
             hideEmbeddedPostMedia={true}
+            showAuthor={showAuthor}
           />
         );
       })}

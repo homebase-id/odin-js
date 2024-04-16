@@ -40,9 +40,7 @@ export const ChannelsDialog = ({
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
   const [isAddNew, setIsAddNew] = useState(false);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
   const dialog = (
     <DialogWrapper

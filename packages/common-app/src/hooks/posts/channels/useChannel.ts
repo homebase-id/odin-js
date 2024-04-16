@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChannelDefinition,
+  CollaborativeChannelDefinition,
   GetTargetDriveFromChannelId,
   getChannelDefinition,
   getChannelDefinitionBySlug,
@@ -185,6 +186,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
   const makeChannelCollaborative = async (channelDef: HomebaseFile<ChannelDefinition>) => {
     if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
+    if (!channelDef.serverMetadata) throw new Error('Channel is not access as the owner');
 
     const collaborativeCircleIds = channelDef.serverMetadata?.accessControlList.circleIdList || [];
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
@@ -196,6 +198,8 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
     const collaborativeChannelDef = { ...channelDef };
     collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = true;
+    (collaborativeChannelDef.fileMetadata.appData.content as CollaborativeChannelDefinition).acl =
+      channelDef.serverMetadata.accessControlList;
     await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
 
     window.location.href = getExtendCirclePermissionUrl(
@@ -213,6 +217,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
     const collaborativeChannelDef = { ...channelDef };
     collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = false;
+    delete (collaborativeChannelDef.fileMetadata.appData.content as any).acl;
     return await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
   };
 

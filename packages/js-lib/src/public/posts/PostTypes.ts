@@ -6,6 +6,7 @@ import {
   ReactionFile,
   NewHomebaseFile,
   SecurityGroupType,
+  AccessControlList,
 } from '../../core/core';
 import { toGuidId } from '../../helpers/helpers';
 
@@ -16,6 +17,11 @@ export interface ChannelDefinition {
   showOnHomePage: boolean;
   templateId?: number;
   isCollaborative?: boolean;
+}
+
+export interface CollaborativeChannelDefinition extends ChannelDefinition {
+  isCollaborative?: true;
+  acl: AccessControlList;
 }
 
 export enum ChannelTemplate {

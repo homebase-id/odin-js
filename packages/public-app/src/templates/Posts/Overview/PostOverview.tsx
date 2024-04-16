@@ -134,7 +134,10 @@ const PostOverview = () => {
               <LoadingBlock className="my-2 h-24 w-full bg-background" />
             </>
           ) : blogPosts?.length && (!channelKey || activeChannel) ? (
-            <ListComponent blogPosts={blogPosts} />
+            <ListComponent
+              blogPosts={blogPosts}
+              showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative}
+            />
           ) : (
             <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
           )}
@@ -162,7 +165,6 @@ const PublicPostComposer = ({
   activeChannel: HomebaseFile<ChannelDefinitionVm>;
 }) => {
   const dotYouClient = useDotYouClient().getDotYouClient();
-
   const { data: securityContext } = useSecurityContext().fetch;
 
   const channelDrive =
@@ -170,19 +172,24 @@ const PublicPostComposer = ({
       ? GetTargetDriveFromChannelId(activeChannel.fileMetadata.appData.uniqueId)
       : undefined;
 
+  const isOwner = dotYouClient.getType() === ApiType.Owner;
+
   const hasWriteAccess =
     channelDrive &&
-    (dotYouClient.getType() === ApiType.Owner ||
-      securityContext?.permissionContext.permissionGroups.some((group) =>
-        group.driveGrants.some(
-          (driveGrant) =>
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, channelDrive.alias) &&
-            stringGuidsEqual(driveGrant.permissionedDrive.drive.type, channelDrive.type) &&
-            driveGrant.permissionedDrive.permission.includes(DrivePermissionType.Write)
-        )
-      ));
+    securityContext?.permissionContext.permissionGroups.some((group) =>
+      group.driveGrants.some(
+        (driveGrant) =>
+          stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, channelDrive.alias) &&
+          stringGuidsEqual(driveGrant.permissionedDrive.drive.type, channelDrive.type) &&
+          driveGrant.permissionedDrive.permission.includes(DrivePermissionType.Write)
+      )
+    );
 
-  if (!hasWriteAccess) return null;
+  if (
+    (!hasWriteAccess && !isOwner) ||
+    (!activeChannel.fileMetadata.appData.content.isCollaborative && !isOwner)
+  )
+    return null;
 
   return (
     <div className="mb-8 max-w-xl">
