@@ -4,7 +4,6 @@ import {
   Arrow,
   CirclePermissionView,
   ErrorNotification,
-  mergeStates,
   t,
   useCircle,
   useCircles,
@@ -12,10 +11,10 @@ import {
 import Section from '../../components/ui/Sections/Section';
 import DrivePermissionRequestView from '../../components/PermissionViews/DrivePermissionRequestView/DrivePermissionRequestView';
 import { useApp } from '../../hooks/apps/useApp';
-import { drivesParamToDriveGrantRequest, permissionParamToPermissionSet } from './RegisterApp';
-import PermissionView from '../../components/PermissionViews/PermissionView/PermissionView';
+import { drivesParamToDriveGrantRequest } from './RegisterApp';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { DriveGrant } from '@youfoundation/js-lib/network';
+import { useEffect } from 'react';
 
 const ExtendCirclePermissionsFromApp = () => {
   // Read the queryString
@@ -81,13 +80,46 @@ const ExtendCirclePermissionsFromApp = () => {
         });
       })
     );
-    window.location.href = returnUrl || '/';
+
+    doRedirectBack();
   };
 
-  const doCancel = async () => {
+  const doRedirectBack = async () => {
     // Redirect
     window.location.href = returnUrl || '/';
   };
+
+  useEffect(() => {
+    // Check if the circles already have the permissions:
+    if (applicableCircles?.length && circleDriveGrants?.length) {
+      //
+      const isSomeCircleMissingThePermission = applicableCircles.some((circle) => {
+        const isSomeDriveGrantMissing = circleDriveGrants?.some((driveGrant) => {
+          const hasPermissions = circle.driveGrants?.some(
+            (existinGrant) =>
+              stringGuidsEqual(
+                existinGrant.permissionedDrive.drive.alias,
+                driveGrant.permissionedDrive.drive.alias
+              ) &&
+              stringGuidsEqual(
+                existinGrant.permissionedDrive.drive.type,
+                driveGrant.permissionedDrive.drive.type
+              ) &&
+              existinGrant.permissionedDrive.permission.every((perm) =>
+                driveGrant.permissionedDrive.permission.includes(perm)
+              )
+          );
+          if (!hasPermissions) return true;
+        });
+
+        if (isSomeDriveGrantMissing) return true;
+      });
+
+      if (!isSomeCircleMissingThePermission) {
+        doRedirectBack();
+      }
+    }
+  }, [circles]);
 
   return (
     <>
@@ -148,7 +180,7 @@ const ExtendCirclePermissionsFromApp = () => {
                 {t('Allow')}
               </ActionButton>
 
-              <ActionButton type="secondary" onClick={() => doCancel()}>
+              <ActionButton type="secondary" onClick={doRedirectBack}>
                 {t('Cancel')}
               </ActionButton>
             </div>
