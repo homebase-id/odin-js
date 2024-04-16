@@ -22,6 +22,7 @@ import {
   flattenInfinteData,
   useIntersection,
   LoadingBlock,
+  NotFound,
 } from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
@@ -41,7 +42,7 @@ import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 const PAGE_SIZE = 30;
 const PostOverview = () => {
   const { channelKey } = useParams();
-  const { data: activeChannel } = useChannel(
+  const { data: activeChannel, isFetched: channelFetched } = useChannel(
     channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannelId }
   ).fetch;
 
@@ -88,6 +89,8 @@ const PostOverview = () => {
       SecurityGroupType.Anonymous &&
     activeChannel?.serverMetadata?.accessControlList?.requiredSecurityGroup !==
       SecurityGroupType.Authenticated;
+
+  if (channelFetched && !activeChannel) return <NotFound />;
 
   return (
     <>
@@ -136,7 +139,7 @@ const PostOverview = () => {
           ) : blogPosts?.length && (!channelKey || activeChannel) ? (
             <ListComponent
               blogPosts={blogPosts}
-              showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative}
+              showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative || false}
             />
           ) : (
             <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
