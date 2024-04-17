@@ -39,7 +39,7 @@ export const useContact = ({
       if (!id) return;
 
       //Direct fetch with id:
-      return await getContactByUniqueId(dotYouClient, id);
+      return (await getContactByUniqueId(dotYouClient, id)) || undefined;
     }
 
     // Direct fetch with odinId:
