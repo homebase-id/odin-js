@@ -129,7 +129,7 @@ const ChatApp = () => {
   const unreadCount = useUnreadPushNotificationsCount({ appId: CHAT_APP_ID });
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
-  // const isIos = os === 'iOS';
+  const isIos = os.name === 'iOS';
 
   return (
     <AppWrapper
@@ -151,7 +151,15 @@ const ChatApp = () => {
                 href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
               },
             ]
-          : []),
+          : isIos
+            ? [
+                {
+                  label: t('Install on iOS'),
+                  icon: Download,
+                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
+                },
+              ]
+            : []),
       ]}
     />
   );
@@ -182,6 +190,7 @@ const FeedApp = () => {
   const unreadCount = useUnreadPushNotificationsCount({ appId: FEED_APP_ID });
   const os = getOperatingSystem();
   const isAndroid = os.name === 'Android';
+  const isIos = os.name === 'iOS';
 
   return (
     <AppWrapper
@@ -203,7 +212,15 @@ const FeedApp = () => {
                 href: `https://play.google.com/store/apps/details?id=id.homebase.feed`,
               },
             ]
-          : []),
+          : isIos
+            ? [
+                {
+                  label: t('Install on iOS'),
+                  icon: Download,
+                  href: `https://apps.apple.com/us/app/homebase-secure-feed/id6468971238`,
+                },
+              ]
+            : []),
       ]}
     />
   );
