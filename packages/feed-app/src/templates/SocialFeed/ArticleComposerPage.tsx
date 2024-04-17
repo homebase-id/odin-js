@@ -15,13 +15,13 @@ import {
   Trash,
   useDebounce,
   usePortal,
+  t,
+  ChannelOrAclSelector,
 } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
-import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';

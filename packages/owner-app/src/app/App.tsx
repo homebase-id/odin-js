@@ -21,6 +21,9 @@ const RegisterApp = lazy(() => import('../templates/AppDefinition/RegisterApp'))
 const ExtendAppDrivePermissions = lazy(
   () => import('../templates/AppDefinition/ExtendAppDrivePermissions')
 );
+const ExtendCirclePermissionsFromApp = lazy(
+  () => import('../templates/AppDefinition/ExtendCirclePermissionsFromApp')
+);
 const Login = lazy(() => import('../templates/Login/Login'));
 const AccountRecovery = lazy(() => import('../templates/AccountRecovery/AccountRecovery'));
 const FirstRun = lazy(() => import('../templates/FirstRun/FirstRun'));
@@ -131,6 +134,7 @@ function App() {
           >
             <Route path="appreg" element={<RegisterApp />} />
             <Route path="appupdate" element={<ExtendAppDrivePermissions />} />
+            <Route path="apprequest" element={<ExtendCirclePermissionsFromApp />} />
           </Route>
 
           <Route

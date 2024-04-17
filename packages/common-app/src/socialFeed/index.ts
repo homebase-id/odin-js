@@ -24,6 +24,8 @@ export * from './Blocks/Body/EmbeddedPostContent';
 
 export * from './Blocks/Meta/Meta';
 
+export * from './Composer/PostComposer';
+
 export * from './EditPostDialog/EditPostDialog';
 export * from './RelatedArticles/RelatedArticles';
 

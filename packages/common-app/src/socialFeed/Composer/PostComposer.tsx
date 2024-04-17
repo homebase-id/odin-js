@@ -39,17 +39,20 @@ import {
   SecurityGroupType,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
-import { ROOT_PATH } from '../../app/App';
+
+const FEED_ROOT_PATH = '/apps/feed';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
-const PostComposer = ({
+export const PostComposer = ({
   onPost,
   embeddedPost,
+  forcedChannel,
   className,
 }: {
   onPost?: () => void;
   embeddedPost?: EmbeddedPost;
+  forcedChannel?: HomebaseFile<ChannelDefinition>;
   className?: string;
 }) => {
   const { isOwner } = useDotYouClient();
@@ -61,7 +64,7 @@ const PostComposer = ({
   const [caption, setCaption] = useState<string>('');
   const [channel, setChannel] = useState<
     HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
-  >(BlogConfig.PublicChannelNewDsr);
+  >(forcedChannel || BlogConfig.PublicChannelNewDsr);
   const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
   const [files, setFiles] = useState<NewMediaFile[]>();
 
@@ -202,12 +205,12 @@ const PostComposer = ({
                     ? [
                         {
                           label: t('Convert to an article'),
-                          href: `${ROOT_PATH}/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
+                          href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
                           icon: Article,
                         },
                         {
                           label: t('See my drafts'),
-                          href: `${ROOT_PATH}/articles`,
+                          href: `${FEED_ROOT_PATH}/articles`,
                           icon: Pencil,
                         },
                       ]
@@ -216,19 +219,22 @@ const PostComposer = ({
               />
             </>
           ) : null}
-          <ChannelOrAclSelector
-            className="ml-auto max-w-[35%] flex-shrink"
-            defaultChannelValue={
-              channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
-            }
-            defaultAcl={customAcl}
-            onChange={(channel, acl) => {
-              channel && setChannel(channel);
-              setCustomAcl(acl);
-            }}
-            excludeMore={true}
-            ref={selectRef}
-          />
+          <div className="ml-auto"></div>
+          {!forcedChannel ? (
+            <ChannelOrAclSelector
+              className="max-w-[35%] flex-shrink"
+              defaultChannelValue={
+                channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+              }
+              defaultAcl={customAcl}
+              onChange={(channel, acl) => {
+                channel && setChannel(channel);
+                setCustomAcl(acl);
+              }}
+              excludeMore={true}
+              ref={selectRef}
+            />
+          ) : null}
           <ActionButton
             className={`w-full md:w-auto ${
               canPost ? '' : 'pointer-events-none hidden opacity-20 grayscale md:flex'
