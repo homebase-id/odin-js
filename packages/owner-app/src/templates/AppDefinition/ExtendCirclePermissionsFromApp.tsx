@@ -92,7 +92,6 @@ const ExtendCirclePermissionsFromApp = () => {
   useEffect(() => {
     // Check if the circles already have the permissions:
     if (applicableCircles?.length && circleDriveGrants?.length) {
-      //
       const isSomeCircleMissingThePermission = applicableCircles.some((circle) => {
         const isSomeDriveGrantMissing = circleDriveGrants?.some((driveGrant) => {
           const hasPermissions = circle.driveGrants?.some(
@@ -105,9 +104,11 @@ const ExtendCirclePermissionsFromApp = () => {
                 existinGrant.permissionedDrive.drive.type,
                 driveGrant.permissionedDrive.drive.type
               ) &&
-              existinGrant.permissionedDrive.permission.every((perm) =>
+              (existinGrant.permissionedDrive.permission.every((perm) =>
                 driveGrant.permissionedDrive.permission.includes(perm)
-              )
+              ) ||
+                existinGrant.permissionedDrive.permission.reduce((acc, perm) => acc + perm, 0) ===
+                  driveGrant.permissionedDrive.permission.reduce((acc, perm) => acc + perm, 0))
           );
           if (!hasPermissions) return true;
         });

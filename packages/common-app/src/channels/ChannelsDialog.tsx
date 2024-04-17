@@ -176,7 +176,7 @@ export const ChannelItem = ({
                       : chnlDsr.serverMetadata?.accessControlList.requiredSecurityGroup ===
                           SecurityGroupType.Connected
                         ? {
-                            label: t('Convert into a group channel'),
+                            label: t('Convert into a collaborative channel'),
                             icon: Persons,
                             onClick: async (e) => {
                               e.stopPropagation();
