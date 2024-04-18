@@ -38,7 +38,7 @@ import { useAutofixDefaultConfig } from '../../hooks/useAutofixDefaultConfig';
 
 export const SocialFeed = () => {
   const { identityKey, channelKey, postKey, attachmentKey } = useParams();
-  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
+  const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
 
   useRemoveNotifications({ appId: FEED_APP_ID });
   useAutofixDefaultConfig();

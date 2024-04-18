@@ -34,7 +34,7 @@ const Layout: FC<LayoutProps> = ({ children, noShadedBg }) => {
   const [searchParams] = useSearchParams();
   const uiSetting = searchParams.get('ui');
   const { logout } = useAuth();
-  const isReactNative = window.localStorage.getItem('client_type') === 'react-native';
+  const isReactNative = window.localStorage.getItem('client_type')?.startsWith('react-native');
 
   if (uiSetting === 'none') {
     return <NoLayout>{children}</NoLayout>;
