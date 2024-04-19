@@ -185,18 +185,19 @@ export interface NewHomebaseFile<T = string> {
   serverMetadata: Omit<ServerMetaData, 'doNotIndex' | 'allowDistribution'> | undefined;
 }
 
-export interface NewFileMetadata<T = string> {
+export interface NewFileMetadata<T = string>
+  extends Omit<Partial<FileMetadata<T>>, 'appData' | 'payloads'> {
   contentType?: string;
   appData: NewAppFileMetaData<T>;
   versionTag?: string;
+
+  payloads?: NewPayloadDescriptor[];
 }
 
-export interface NewAppFileMetaData<T = string> {
+export interface NewAppFileMetaData<T = string> extends Partial<AppFileMetaData<T>> {
   content: T;
-  previewThumbnail?: EmbeddedThumb;
-  fileType?: number;
-  userDate?: number;
-  tags?: string[];
-  uniqueId?: string;
-  groupId?: string;
+}
+
+export interface NewPayloadDescriptor extends Partial<PayloadDescriptor> {
+  pendingFile?: File | Blob;
 }
