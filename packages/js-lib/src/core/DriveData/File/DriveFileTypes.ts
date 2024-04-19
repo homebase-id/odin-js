@@ -176,21 +176,15 @@ export interface DeletedHomebaseFile<T = string> extends BaseHomebaseFile<T> {
   fileState: 'deleted';
 }
 
-export interface NewHomebaseFile<T = string> {
-  fileId?: string;
-
-  fileSystemType?: SystemFileType;
-
+export interface NewHomebaseFile<T = string>
+  extends Omit<Partial<BaseHomebaseFile<T>>, 'fileMetadata' | 'serverMetadata'> {
   fileMetadata: NewFileMetadata<T>;
   serverMetadata: Omit<ServerMetaData, 'doNotIndex' | 'allowDistribution'> | undefined;
 }
 
 export interface NewFileMetadata<T = string>
   extends Omit<Partial<FileMetadata<T>>, 'appData' | 'payloads'> {
-  contentType?: string;
   appData: NewAppFileMetaData<T>;
-  versionTag?: string;
-
   payloads?: NewPayloadDescriptor[];
 }
 
