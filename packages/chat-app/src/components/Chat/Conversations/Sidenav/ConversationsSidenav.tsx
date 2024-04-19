@@ -222,6 +222,7 @@ const SearchConversation = ({
         <div className="flex flex-row gap-1 px-2 pb-2 pt-1 lg:px-5 lg:pb-5 lg:pt-3">
           <Input
             onChange={(e) => setQuery(e.target.value?.toLowerCase())}
+            onKeyDown={(e) => e.key === 'Escape' && setIsSearchActive(false)}
             key={stateIndex}
             defaultValue={query}
             placeholder={t('Search or start a new chat')}
