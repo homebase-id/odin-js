@@ -1,9 +1,11 @@
 import {
   ActionButton,
+  ActionLink,
   ErrorBoundary,
   Input,
   MagnifyingGlass,
   Persons,
+  Plus,
   SubtleMessage,
   Times,
   t,
@@ -87,24 +89,39 @@ const ConversationList = ({
 }) => {
   return (
     <div className="flex flex-grow flex-col">
-      <ConversationListItemWithYourself
-        onClick={() => openConversation(ConversationWithYourselfId)}
-        isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
-      />
-      {!conversations?.length ? (
-        <SubtleMessage className="px-5">{t('No conversations found')}</SubtleMessage>
-      ) : null}
-      {conversations?.map((conversation) => (
-        <ConversationListItem
-          key={conversation.fileId}
-          conversation={conversation}
-          onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
-          isActive={stringGuidsEqual(
-            activeConversationId,
-            conversation.fileMetadata.appData.uniqueId
-          )}
+      <div className="flex flex-grow flex-col">
+        <ConversationListItemWithYourself
+          onClick={() => openConversation(ConversationWithYourselfId)}
+          isActive={stringGuidsEqual(activeConversationId, ConversationWithYourselfId)}
         />
-      ))}
+        {!conversations?.length ? (
+          <div className="order-2 flex flex-row flex-wrap px-5">
+            <SubtleMessage className="">{t('No conversations found')}</SubtleMessage>
+
+            <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary" className="ml-auto">
+              {t('New conversation')}
+            </ActionLink>
+          </div>
+        ) : null}
+        {conversations?.map((conversation) => (
+          <ConversationListItem
+            key={conversation.fileId}
+            conversation={conversation}
+            onClick={() => openConversation(conversation.fileMetadata.appData.uniqueId)}
+            isActive={stringGuidsEqual(
+              activeConversationId,
+              conversation.fileMetadata.appData.uniqueId
+            )}
+          />
+        ))}
+      </div>
+      {conversations?.length && conversations?.length < 15 ? (
+        <div className="flex flex-row justify-center p-5">
+          <ActionLink href={`${CHAT_ROOT}/new`} icon={Plus} type="secondary">
+            {t('New conversation')}
+          </ActionLink>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -222,6 +239,7 @@ const SearchConversation = ({
         <div className="flex flex-row gap-1 px-2 pb-2 pt-1 lg:px-5 lg:pb-5 lg:pt-3">
           <Input
             onChange={(e) => setQuery(e.target.value?.toLowerCase())}
+            onKeyDown={(e) => e.key === 'Escape' && setIsSearchActive(false)}
             key={stateIndex}
             defaultValue={query}
             placeholder={t('Search or start a new chat')}

@@ -1,5 +1,4 @@
 import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { t } from '@youfoundation/common-app';
 import { ChatDeliveryStatus, ChatMessage, getChatMessage } from '../../providers/ChatProvider';
 import {
   HomebaseFile,
@@ -130,11 +129,15 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             appData: {
               groupId: conversation.fileMetadata.appData.uniqueId,
               content: {
-                message: message || (files?.length ? `📷 ${t('Media')}` : ''),
+                message: message,
                 deliveryStatus: ChatDeliveryStatus.Sending,
                 replyId: replyId,
               },
             },
+            payloads: files?.map((file) => ({
+              contentType: file.file.type,
+              pendingFile: file.file,
+            })),
           },
           serverMetadata: {
             accessControlList: {
@@ -142,6 +145,7 @@ export const useChatMessage = (props?: { messageId: string | undefined }) => {
             },
           },
         };
+
         const newData = {
           ...existingData,
           pages: existingData?.pages?.map((page, index) => ({

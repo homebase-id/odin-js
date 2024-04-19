@@ -176,27 +176,22 @@ export interface DeletedHomebaseFile<T = string> extends BaseHomebaseFile<T> {
   fileState: 'deleted';
 }
 
-export interface NewHomebaseFile<T = string> {
-  fileId?: string;
-
-  fileSystemType?: SystemFileType;
-
+export interface NewHomebaseFile<T = string>
+  extends Omit<Partial<BaseHomebaseFile<T>>, 'fileMetadata' | 'serverMetadata'> {
   fileMetadata: NewFileMetadata<T>;
   serverMetadata: Omit<ServerMetaData, 'doNotIndex' | 'allowDistribution'> | undefined;
 }
 
-export interface NewFileMetadata<T = string> {
-  contentType?: string;
+export interface NewFileMetadata<T = string>
+  extends Omit<Partial<FileMetadata<T>>, 'appData' | 'payloads'> {
   appData: NewAppFileMetaData<T>;
-  versionTag?: string;
+  payloads?: NewPayloadDescriptor[];
 }
 
-export interface NewAppFileMetaData<T = string> {
+export interface NewAppFileMetaData<T = string> extends Partial<AppFileMetaData<T>> {
   content: T;
-  previewThumbnail?: EmbeddedThumb;
-  fileType?: number;
-  userDate?: number;
-  tags?: string[];
-  uniqueId?: string;
-  groupId?: string;
+}
+
+export interface NewPayloadDescriptor extends Partial<PayloadDescriptor> {
+  pendingFile?: File | Blob;
 }
