@@ -100,7 +100,9 @@ export const useActiveConnections = (
       initialPageParam: undefined as number | undefined,
       queryFn: ({ pageParam }) => fetchConnections({ pageSize: activePageSize, cursor: pageParam }),
       getNextPageParam: (lastPage) =>
-        lastPage.results?.length >= activePageSize ? lastPage.cursor : undefined,
+        lastPage.results?.length >= activePageSize && lastPage.cursor !== 0
+          ? lastPage.cursor
+          : undefined,
       refetchOnWindowFocus: false,
     }),
   };
