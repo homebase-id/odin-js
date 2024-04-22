@@ -8,9 +8,6 @@ import {
   HybridLink,
   ActionGroupOptionProps,
   Download,
-  EmbeddedPostContent,
-  FakeAnchor,
-  useSocialFeed,
   useUnreadPushNotificationsCount,
   CHAT_APP_ID,
   FEED_APP_ID,
@@ -21,6 +18,7 @@ import {
 import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyImage';
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { FeedTeaser } from './FeedTeaser';
 
 const Dashboard = () => {
   return (
@@ -256,52 +254,6 @@ const PhotoApp = () => {
           : []),
       ]}
     />
-  );
-};
-
-const POSTS_TO_SHOW = 2;
-const FeedTeaser = ({ className }: { className?: string }) => {
-  const { data: posts } = useSocialFeed({ pageSize: POSTS_TO_SHOW }).fetchAll;
-  const latestPosts = posts?.pages?.[0]?.results;
-
-  const hasPosts = latestPosts && latestPosts?.length;
-
-  return (
-    <div className={className}>
-      <div className="mb-4 flex flex-row items-center justify-between">
-        <p className="text-2xl">{t('What has everyone been up to?')}</p>
-      </div>
-      <FakeAnchor className="w-full" href={hasPosts ? `/apps/feed` : `/owner/connections`}>
-        <div className="pointer-events-none flex w-full flex-col gap-4">
-          {hasPosts ? (
-            latestPosts.slice(0, POSTS_TO_SHOW).map((post, index) => (
-              <div
-                className={`w-full rounded-md bg-background ${index !== 0 ? 'hidden lg:block' : ''}`}
-                key={post.fileId}
-              >
-                <EmbeddedPostContent
-                  className="w-full"
-                  content={{
-                    ...post.fileMetadata.appData.content,
-                    payloads: post.fileMetadata.payloads,
-                    userDate: post.fileMetadata.appData.userDate || post.fileMetadata.created,
-                    lastModified: post.fileMetadata.updated,
-                    permalink: '',
-                    previewThumbnail: post.fileMetadata.appData.previewThumbnail,
-                    fileId: post.fileId as string,
-                    globalTransitId: post.fileMetadata.globalTransitId,
-                  }}
-                />
-              </div>
-            ))
-          ) : (
-            <p className="rounded-md bg-background px-4 py-4 text-slate-400">
-              {t('Fill up your feed, by following people, or connecting with other identtiies')}
-            </p>
-          )}
-        </div>
-      </FakeAnchor>
-    </div>
   );
 };
 

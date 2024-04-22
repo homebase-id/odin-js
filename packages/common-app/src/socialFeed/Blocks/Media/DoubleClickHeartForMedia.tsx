@@ -22,7 +22,7 @@ export const DoubleClickHeartForMedia = ({
   postFile: HomebaseFile<PostContent>;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
-  onClick: (e: React.MouseEvent, index: number) => void;
+  onClick: ((e: React.MouseEvent, index: number) => void) | undefined;
   className?: string;
 }) => {
   const wrapperRef = useRef<HTMLSpanElement>(null);
