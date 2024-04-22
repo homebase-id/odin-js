@@ -2,7 +2,15 @@ import { base64ToUint8Array } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { WelcomeData } from '../../templates/Setup/Setup';
 import { fallbackProfileImage } from '../../templates/Setup/fallbackImage';
-import { ActionButton, Arrow, Input, Label, Person, t } from '@youfoundation/common-app';
+import {
+  ActionButton,
+  Arrow,
+  Input,
+  Label,
+  Person,
+  getOdinIdColor,
+  t,
+} from '@youfoundation/common-app';
 import { ImageUploadAndCrop } from '@youfoundation/common-app';
 
 const defaultData: WelcomeData = {
@@ -47,10 +55,15 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
     const dataToUse = { ...data };
 
     // Set fallback image:
-    if (!data.profile.imageData)
-      dataToUse.profile.imageData = new Blob([base64ToUint8Array(fallbackProfileImage(initials))], {
-        type: 'image/svg+xml',
-      });
+    if (!data.profile.imageData) {
+      const backgroundColor = getOdinIdColor(window.location.hostname).darkTheme;
+      dataToUse.profile.imageData = new Blob(
+        [base64ToUint8Array(fallbackProfileImage(initials, backgroundColor))],
+        {
+          type: 'image/svg+xml',
+        }
+      );
+    }
 
     // Set fallback name:
     if (!data.profile.givenName && !data.profile.surname) {
@@ -87,7 +100,10 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
             <div className="mx-auto sm:max-w-[15rem]">
               <div className="relative">
                 {!data.profile['imageData'] ? (
-                  <div className="flex aspect-square w-full bg-slate-100 dark:bg-slate-700">
+                  <div
+                    className="flex aspect-square w-full bg-slate-100 dark:bg-slate-700"
+                    style={{ backgroundColor: getOdinIdColor(window.location.hostname).darkTheme }}
+                  >
                     {initials?.length ? (
                       <span className="m-auto text-[95px] font-light">
                         {initials.toUpperCase()}

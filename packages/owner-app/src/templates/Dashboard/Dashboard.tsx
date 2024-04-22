@@ -19,8 +19,11 @@ import { CompanyImage } from '../../components/Connection/CompanyImage/CompanyIm
 import { getOperatingSystem } from '@youfoundation/js-lib/auth';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 import { FeedTeaser } from './FeedTeaser';
+import { useAutofixDefaultConfig } from '../../hooks/useAutoFixDefaultConfig';
 
 const Dashboard = () => {
+  useAutofixDefaultConfig();
+
   return (
     <>
       <PageMeta title={t('Dashboard')} icon={House} />
