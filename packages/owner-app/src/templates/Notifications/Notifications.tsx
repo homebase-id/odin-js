@@ -160,7 +160,7 @@ const NotificationAppGroup = ({
       ? 'Homebase'
       : stringGuidsEqual(appId, FEED_APP_ID)
         ? 'Homebase - Feed'
-        : 'Unknown');
+        : `Unknown (${appId})`);
 
   const groupedByTypeNotifications =
     notifications.reduce(
