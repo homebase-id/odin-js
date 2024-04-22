@@ -5,6 +5,8 @@ import {
   GetBatchQueryResultOptions,
   queryBatch,
   HomebaseFile,
+  decryptKeyHeader,
+  decryptJsonContent,
 } from '../../core/core';
 import { tryJsonParse } from '../../helpers/DataUtil';
 import {
@@ -53,6 +55,7 @@ export const getSocialFeed = async (
   };
 
   const result = await queryBatch(dotYouClient, queryParams, ro);
+
   // Parse results and do getPayload (In most cases, data should be there in content, and nothing in actual payload);
   const allPostFiles = (
     await Promise.all(
@@ -216,7 +219,12 @@ const dsrToPostFile = async <T extends PostContent>(
   try {
     if (!dsr.fileMetadata.globalTransitId) return undefined;
     // The header as a mimimum should have the channel id
-    const parsedHeaderContent = tryJsonParse<PostContent>(dsr.fileMetadata.appData.content);
+    const keyHeader = dsr.fileMetadata.isEncrypted
+      ? await decryptKeyHeader(dotYouClient, dsr.sharedSecretEncryptedKeyHeader)
+      : undefined;
+    const decryptedJsonContent = await decryptJsonContent(dsr.fileMetadata, keyHeader);
+
+    const parsedHeaderContent = tryJsonParse<PostContent>(decryptedJsonContent);
     const targetDrive =
       getChannelDrive(parsedHeaderContent?.channelId) || BlogConfig.PublicChannelDrive;
 
