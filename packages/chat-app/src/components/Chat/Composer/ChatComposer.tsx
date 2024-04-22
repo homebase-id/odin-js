@@ -45,8 +45,9 @@ export const ChatComposer = ({
   const conversationContent = conversation?.fileMetadata.appData.content;
   const doSend = (forcedVal?: string) => {
     const trimmedVal = (forcedVal || message)?.trim();
+
     if (
-      (!trimmedVal && !files) ||
+      (!trimmedVal && !files?.length) ||
       !conversationContent ||
       !conversation.fileMetadata.appData.uniqueId
     )
