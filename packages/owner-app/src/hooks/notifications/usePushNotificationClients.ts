@@ -11,7 +11,9 @@ import {
   RemoveRegisteredDevice,
 } from '../../provider/notifications/PushClientProvider';
 import { SendNotification } from '@youfoundation/js-lib/core';
+import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
 
+const isDebug = hasDebugFlag();
 const TestGuid = '00000000-0000-0000-0000-000000000000';
 export const usePushNotificationClient = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -21,7 +23,7 @@ export const usePushNotificationClient = () => {
   useEffect(() => {
     navigator.serviceWorker.ready.then(() => {
       setIsReady(true);
-      console.log('Service Worker is ready :)');
+      isDebug && console.debug('Service Worker is ready :)');
     });
   }, []);
 
