@@ -1,5 +1,5 @@
 import { HomebaseFile } from '../DriveData/File/DriveFileTypes';
-import { TargetDrive, ExternalFileIdentifier } from '../core';
+import { TargetDrive, ExternalFileIdentifier, PushNotification } from '../core';
 
 export interface EstablishConnectionRequest {
   drives: TargetDrive[];
@@ -16,6 +16,7 @@ export type NotificationType =
   | 'connectionRequestReceived'
   | 'connectionRequestAccepted'
   | 'transitFileReceived'
+  | 'appNotificationAdded'
   | 'error'
   | 'unknown';
 
@@ -39,6 +40,10 @@ export interface ClientDeviceNotification extends ClientNotification {
   notificationType: 'deviceHandshakeSuccess' | 'deviceConnected' | 'deviceDisconnected';
 }
 
+export interface AppNotification extends ClientNotification, PushNotification {
+  notificationType: 'appNotificationAdded';
+}
+
 export interface ClientConnectionNotification extends ClientNotification {
   notificationType: 'connectionRequestReceived' | 'connectionRequestAccepted';
   sender: string;
@@ -54,7 +59,8 @@ export type TypedConnectionNotification =
   | ClientFileNotification
   | ClientDeviceNotification
   | ClientConnectionNotification
-  | ClientUnknownNotification;
+  | ClientUnknownNotification
+  | AppNotification;
 
 export interface WebsocketCommand {
   command: string;

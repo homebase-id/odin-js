@@ -27,8 +27,9 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['push-notifications', props?.appId],
+      queryKey: ['push-notifications', props?.appId || ''],
       queryFn: () => getNotifications(undefined),
+      staleTime: Infinity, // Always keep notifications; The websocket will update them; And we don't persist them across page loads
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,

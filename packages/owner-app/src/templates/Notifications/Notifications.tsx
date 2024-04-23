@@ -31,6 +31,7 @@ const Notifications = () => {
   const [params] = useSearchParams();
 
   const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
+
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   const [toOpenNotification, setToOpenNotification] = useState<string | undefined>(
