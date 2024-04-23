@@ -191,11 +191,11 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     if (!channelDef.serverMetadata) throw new Error('Channel is not access as the owner');
 
     const collaborativeCircleIds =
-      channelDef.serverMetadata?.accessControlList.circleIdList ||
       channelDef.serverMetadata?.accessControlList.requiredSecurityGroup ===
-        SecurityGroupType.Connected
-        ? [ALL_CONNECTIONS_CIRCLE_ID]
-        : [];
+        SecurityGroupType.Connected && channelDef.serverMetadata?.accessControlList.circleIdList
+        ? channelDef.serverMetadata?.accessControlList.circleIdList
+        : [ALL_CONNECTIONS_CIRCLE_ID];
+
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
 
     const identity = dotYouClient.getIdentity();

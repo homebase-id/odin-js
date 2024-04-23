@@ -12,6 +12,7 @@ import {
   EstablishConnectionRequest,
   NotificationType,
   TypedConnectionNotification,
+  AppNotification,
 } from './WebsocketTypes';
 
 let webSocketClient: WebSocket | undefined;
@@ -85,6 +86,18 @@ const ParseRawClientNotification = (
       notificationType: notification.notificationType,
       data: data,
     } as ClientDeviceNotification;
+  }
+
+  if (['appNotificationAdded'].includes(notification.notificationType)) {
+    return {
+      notificationType: notification.notificationType,
+
+      id: data.id,
+      senderId: data.senderId,
+      unread: true,
+      created: data.timestamp,
+      options: data.appNotificationOptions,
+    } as AppNotification;
   }
 
   return {
