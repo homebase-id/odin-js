@@ -9,6 +9,7 @@ import { ReactNode, useCallback, useState } from 'react';
 import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 interface Notification {
   title: string;
@@ -74,15 +75,21 @@ export const useNotifications = () => {
       const existingNotificationData = queryClient.getQueryData<{
         results: PushNotification[];
         cursor: number;
-      }>(['push-notifications', '']);
+      }>(['push-notifications']);
 
       if (!existingNotificationData) return;
       const newNotificationData = {
         ...existingNotificationData,
-        results: [clientNotification, ...existingNotificationData.results],
+        results: [
+          clientNotification,
+          ...existingNotificationData.results.filter(
+            (notification) =>
+              !stringGuidsEqual(notification.options.tagId, clientNotification.options.tagId)
+          ),
+        ],
       };
 
-      queryClient.setQueryData(['push-notifications', ''], newNotificationData);
+      queryClient.setQueryData(['push-notifications'], newNotificationData);
     }
   }, []);
 
