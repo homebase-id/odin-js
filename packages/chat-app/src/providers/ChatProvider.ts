@@ -113,18 +113,6 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return fileHeader;
 };
 
-// It's a hack... This needs to change to a better way of getting the message
-export const getChatMessageByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
-  conversationId: string,
-  messageGlobalTransitId: string
-) => {
-  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-  return allChatMessages?.searchResults?.find((chat) =>
-    stringGuidsEqual(chat?.fileMetadata.globalTransitId, messageGlobalTransitId)
-  );
-};
-
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
@@ -356,11 +344,11 @@ export interface MarkAsReadRequest {
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<Conversation>,
-  chatGlobalTransitIds: string[]
+  chatUniqueIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
     conversationId: conversation.fileMetadata.appData.uniqueId as string,
-    messageIds: chatGlobalTransitIds,
+    messageIds: chatUniqueIds,
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;
