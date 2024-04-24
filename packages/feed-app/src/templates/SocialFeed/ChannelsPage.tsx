@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   ChannelDefinitionVm,
   ChannelItem,
+  CollaborativeChannelItem,
   Plus,
   useCollaborativeChannels,
 } from '@youfoundation/common-app';
@@ -40,14 +41,15 @@ export const ChannelsPage = () => {
       />
       <section className="pb-10">
         <div className="px-2 sm:px-10">
-          <div className="-m-2">
+          {collaborativeChannels?.length ? <h2 className="mb-2">{t('Your channels')}</h2> : null}
+          <div className="flex flex-col gap-2">
             {channels?.map((chnl) => (
-              <div className="p-2" key={chnl.fileId}>
+              <div key={chnl.fileId}>
                 <ChannelItem chnl={chnl} className="bg-background" />
               </div>
             ))}
             {isAddNew ? (
-              <div className="p-2" key={'new'}>
+              <div key={'new'}>
                 <ChannelItem
                   chnl={newChannelDefinition}
                   isDefaultEdit={!!newChannelDefinition}
@@ -60,7 +62,7 @@ export const ChannelsPage = () => {
                 />
               </div>
             ) : (
-              <div className="p-2" key={'new'}>
+              <div key={'new'}>
                 <div
                   onClick={() => setIsAddNew(true)}
                   className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
@@ -73,24 +75,36 @@ export const ChannelsPage = () => {
         </div>
       </section>
 
-      <section className="pb-10">
-        <div className="px-2 sm:px-10">
-          <div className="-m-2">
-            {collaborativeChannels?.map((collaborative) => {
-              return (
-                <React.Fragment key={collaborative.odinId}>
-                  <h2>{collaborative.odinId}</h2>
-                  {collaborative.channels.map((channel) => (
-                    <div className="p-2" key={channel.fileId}>
-                      <ChannelItem chnl={channel} className="bg-background" />
-                    </div>
-                  ))}
-                </React.Fragment>
-              );
-            })}
+      {collaborativeChannels?.length ? (
+        <section className="pb-10">
+          <div className="px-2 sm:px-10">
+            <h2 className="mb-2">
+              {t('Collaborative channels')}
+              <small className="block text-sm text-slate-400">
+                {t(
+                  'You have permissions to write to these channels that are owned by another identity'
+                )}
+              </small>
+            </h2>
+            <div className="flex flex-col gap-2">
+              {collaborativeChannels?.map((collaborative) => {
+                return (
+                  <React.Fragment key={collaborative.odinId}>
+                    {collaborative.channels.map((channel) => (
+                      <CollaborativeChannelItem
+                        key={channel.fileId}
+                        odinId={collaborative.odinId}
+                        chnl={channel}
+                        className="bg-background"
+                      />
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
     </>
   );
 };

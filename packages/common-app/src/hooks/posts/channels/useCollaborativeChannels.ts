@@ -7,9 +7,8 @@ import {
   HomebaseFile,
   getSecurityContextOverPeer,
 } from '@youfoundation/js-lib/core';
-import { getChannelDrive } from '@youfoundation/js-lib/public';
+import { ChannelDefinition, getChannelDrive } from '@youfoundation/js-lib/public';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
 
 export const useCollaborativeChannels = (enabled?: boolean) => {
   const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(enabled || false);
@@ -19,7 +18,7 @@ export const useCollaborativeChannels = (enabled?: boolean) => {
     const collaborativeChannelsByOdinId = await Promise.all(
       (alllContacts || []).map(async (contact) => {
         const odinId = contact.fileMetadata.appData.content.odinId;
-        if (!odinId) return { odinId, channels: [] };
+        if (!odinId) return undefined;
 
         const securityContext = await getSecurityContextOverPeer(dotYouClient, odinId);
         const allChannels = await getChannelsOverPeer(dotYouClient, odinId);
@@ -42,32 +41,17 @@ export const useCollaborativeChannels = (enabled?: boolean) => {
               );
 
               return hasWriteAccess;
-            })
-            .map(
-              (channel) =>
-                ({
-                  ...channel,
-                  fileMetadata: {
-                    ...channel.fileMetadata,
-                    appData: {
-                      ...channel.fileMetadata.appData,
-                      content: {
-                        ...channel.fileMetadata.appData.content,
-                        template: parseChannelTemplate(
-                          channel?.fileMetadata?.appData?.content?.templateId
-                        ),
-                      },
-                    },
-                  },
-                }) as HomebaseFile<ChannelDefinitionVm>
-            ),
+            }),
         };
       })
     );
 
     return collaborativeChannelsByOdinId.filter(
-      (collaborativeChannels) => collaborativeChannels.channels.length > 0
-    );
+      (collaborativeChannels) => collaborativeChannels && collaborativeChannels.channels.length > 0
+    ) as {
+      odinId: string;
+      channels: HomebaseFile<ChannelDefinition>[];
+    }[];
   };
 
   return {
