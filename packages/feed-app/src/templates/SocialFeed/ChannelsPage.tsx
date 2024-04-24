@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react';
-import { ChannelDefinitionVm, ChannelItem, Plus } from '@youfoundation/common-app';
+import {
+  ChannelDefinitionVm,
+  ChannelItem,
+  Plus,
+  useCollaborativeChannels,
+} from '@youfoundation/common-app';
 import { Quote } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { useChannels } from '@youfoundation/common-app';
@@ -8,6 +13,7 @@ import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
 import { NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import React from 'react';
 
 export const ChannelsPage = () => {
   const [params, setSearchParams] = useSearchParams();
@@ -22,6 +28,8 @@ export const ChannelsPage = () => {
 
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
   const [isAddNew, setIsAddNew] = useState(!!newChannelDefinition);
+
+  const { data: collaborativeChannels } = useCollaborativeChannels(true).fetch;
 
   return (
     <>
@@ -61,6 +69,25 @@ export const ChannelsPage = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      <section className="pb-10">
+        <div className="px-2 sm:px-10">
+          <div className="-m-2">
+            {collaborativeChannels?.map((collaborative) => {
+              return (
+                <React.Fragment key={collaborative.odinId}>
+                  <h2>{collaborative.odinId}</h2>
+                  {collaborative.channels.map((channel) => (
+                    <div className="p-2" key={channel.fileId}>
+                      <ChannelItem chnl={channel} className="bg-background" />
+                    </div>
+                  ))}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
       </section>
