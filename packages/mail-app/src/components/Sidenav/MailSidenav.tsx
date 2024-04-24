@@ -21,7 +21,6 @@ const ROOT_PATH = '/apps/mail';
 export const MailSidenav = () => {
   const { logout } = useAuth();
 
-  // TODO: Check if we should move it up the render tree to have common coverage of detail views
   const isOnline = useLiveMailProcessor();
   useRemoveNotifications({ appId: MAIL_APP_ID });
 
