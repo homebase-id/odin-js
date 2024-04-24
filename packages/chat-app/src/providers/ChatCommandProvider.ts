@@ -19,7 +19,7 @@ import {
   ChatDeliveryStatus,
   MARK_CHAT_READ_COMMAND,
   MarkAsReadRequest,
-  getChatMessageByGlobalTransitId,
+  getChatMessage,
   updateChatMessage,
 } from './ChatProvider';
 import { getSingleConversation } from '../hooks/chat/useConversation';
@@ -150,9 +150,9 @@ const markChatAsRead = async (
 ) => {
   const markAsReadRequest = tryJsonParse<MarkAsReadRequest>(command.clientJsonMessage);
   const conversationId = markAsReadRequest.conversationId;
-  const chatGlobalTransIds = markAsReadRequest.messageIds;
+  const chatUniqueIds = markAsReadRequest.messageIds;
 
-  if (!conversationId || !chatGlobalTransIds) return null;
+  if (!conversationId || !chatUniqueIds) return null;
 
   const conversation = await getConversation(dotYouClient, conversationId);
   if (!conversation) return null;
@@ -161,12 +161,10 @@ const markChatAsRead = async (
     (conversationContent as SingleConversation).recipient,
   ];
   if (!recipients.filter(Boolean)?.length) return null;
-
   const chatMessages = await Promise.all(
-    Array.from(new Set(chatGlobalTransIds)).map((msgId) => {
-      return getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId);
-    })
+    Array.from(new Set(chatUniqueIds)).map((msgId) => getChatMessage(dotYouClient, msgId))
   );
+  console.log('marking as read', chatMessages);
 
   const updateSuccess = await Promise.all(
     chatMessages
