@@ -1,9 +1,12 @@
 import { FC, ReactNode, useState } from 'react';
-import { ConfirmDialog, ConfirmDialogProps } from '@youfoundation/common-app';
-import { IconProps, Loader, Check, Exclamation } from '@youfoundation/common-app';
 
 export type ActionButtonState = 'pending' | 'loading' | 'success' | 'error' | 'idle';
 import { ButtonColors } from './ColorConfig';
+import { ConfirmDialogProps, ConfirmDialog } from '../../dialogs';
+import { Check } from '../Icons/Check';
+import { Exclamation } from '../Icons/Exclamation';
+import { Loader } from '../Icons/Loader';
+import { IconProps } from '../Icons/Types';
 
 export interface ActionButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;

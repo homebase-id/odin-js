@@ -1,7 +1,8 @@
 import { ChannelTemplate } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
-import { t } from '@youfoundation/common-app';
-import { TemplateList, TemplateMasonry, TemplateGrid, IconProps } from '@youfoundation/common-app';
+import { TemplateGrid, TemplateList, TemplateMasonry } from '../ui/Icons/Templates';
+import { t } from '../helpers/i18n/dictionary';
+import { IconProps } from '../ui/Icons/Types';
 
 export const ChannelTemplateSelector = ({
   name,

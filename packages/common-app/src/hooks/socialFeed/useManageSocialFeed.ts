@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { BlogConfig, PostContent } from '@youfoundation/js-lib/public';
 
-import { useDotYouClient } from '@youfoundation/common-app';
 import { HomebaseFile, deleteFile } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export const useManageSocialFeed = (props?: { odinId: string }) => {
   const odinId = props?.odinId;

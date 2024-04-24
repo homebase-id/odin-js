@@ -1,6 +1,8 @@
-import { CanReactInfo, CommentComposer, t, useComments } from '@youfoundation/common-app';
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { Comment } from '../Comment';
+import { t } from '../../../../../helpers';
+import { CanReactInfo, useComments } from '../../../../../hooks';
+import { CommentComposer } from '../CommentComposer';
 
 export const CommentThread = ({
   context,

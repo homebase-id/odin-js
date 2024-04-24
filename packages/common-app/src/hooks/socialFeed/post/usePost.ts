@@ -6,13 +6,14 @@ import {
   removePost,
 } from '@youfoundation/js-lib/public';
 import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/core';
-import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
   HomebaseFile,
   MultiRequestCursoredResult,
   NewHomebaseFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../auth/useDotYouClient';
+import { getRichTextFromString } from '../../../helpers/richTextHelper';
 
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();

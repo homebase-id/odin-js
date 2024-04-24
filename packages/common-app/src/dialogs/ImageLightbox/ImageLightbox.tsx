@@ -1,9 +1,12 @@
 import { createPortal } from 'react-dom';
-import { usePortal, Times } from '@youfoundation/common-app';
+
 import { EmbeddedThumb, TargetDrive } from '@youfoundation/js-lib/core';
-import { Image } from '@youfoundation/common-app';
+
 import { useEffect } from 'react';
 import { ButtonColors } from '../../ui/Buttons/ColorConfig';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { Times } from '../../ui/Icons/Times';
+import { Image } from '../../media/Image';
 
 export const ImageLightbox = ({
   targetDrive,

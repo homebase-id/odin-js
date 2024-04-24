@@ -1,8 +1,9 @@
 import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
-import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
-import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { PostTeaser } from '../PostListItem/PostTeaser';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { useBlogPostsInfinite } from '../../hooks/posts/useBlogPostsInfinite';
+import { ChannelDefinitionVm } from '../../hooks/posts/channels/useChannels';
+import { t } from '../../helpers/i18n/dictionary';
 
 export const RelatedArticles = ({
   blog,

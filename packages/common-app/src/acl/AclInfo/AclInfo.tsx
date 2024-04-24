@@ -1,8 +1,10 @@
 import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
-import { ellipsisAtMaxChar } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
-import { Lock, OpenLock, useCircles } from '@youfoundation/common-app';
+import { useCircles } from '../../hooks/circles/useCircles';
+import { t } from '../../helpers/i18n/dictionary';
+import { ellipsisAtMaxChar } from '../../helpers/common';
+import { OpenLock } from '../../ui/Icons/OpenLock';
+import { Lock } from '../../ui/Icons/Lock';
 
 export const AclSummary = ({
   acl,
@@ -22,14 +24,14 @@ export const AclSummary = ({
       {!acl || acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Anonymous.toLowerCase()
         ? t('Public')
         : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Authenticated.toLowerCase()
-        ? t('Authenticated')
-        : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
-        ? acl.circleIdList?.length
-          ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
-          : t('Connections')
-        : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Owner.toLowerCase()
-        ? t('Owner')
-        : t('Owner')}
+          ? t('Authenticated')
+          : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Connected.toLowerCase()
+            ? acl.circleIdList?.length
+              ? `${t('Circles')}: ${ellipsisAtMaxChar(circlesDetails?.join(', '), maxLength)}`
+              : t('Connections')
+            : acl.requiredSecurityGroup.toLowerCase() === SecurityGroupType.Owner.toLowerCase()
+              ? t('Owner')
+              : t('Owner')}
     </>
   );
 };

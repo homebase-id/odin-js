@@ -1,14 +1,12 @@
 import { useRef, useState } from 'react';
-import {
-  SocialReactionsBar,
-  t,
-  useDotYouClient,
-  useOutsideTrigger,
-  useReaction,
-} from '@youfoundation/common-app';
 
 import { ReactionContext } from '@youfoundation/js-lib/public';
-import { ErrorNotification } from '@youfoundation/common-app';
+import { useDotYouClient } from '../../../../../hooks/auth/useDotYouClient';
+import { useReaction } from '../../../../../hooks/reactions/useReaction';
+import { useOutsideTrigger } from '../../../../../hooks/clickedOutsideTrigger/useClickedOutsideTrigger';
+import { SocialReactionsBar } from '../../Reactions/ReactionsBar';
+import { ErrorNotification } from '../../../../../ui/Alert/ErrorNotification';
+import { t } from '../../../../../helpers/i18n/dictionary';
 
 export const CommentLikeButton = ({ threadContext }: { threadContext: ReactionContext }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);

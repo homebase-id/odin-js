@@ -1,9 +1,8 @@
 import { AccessControlList } from '@youfoundation/js-lib/core';
 import { createPortal } from 'react-dom';
-import { AclWizard } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-
-import { DialogWrapper } from '@youfoundation/common-app';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
+import { AclWizard } from '../AclWizard/AclWizard';
 
 export const AclDialog = ({
   title,

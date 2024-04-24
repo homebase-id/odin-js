@@ -9,9 +9,8 @@ import {
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
 
-import { FEED_APP_ID, t, useStaticFiles } from '@youfoundation/common-app';
 import { ChannelDefinitionVm, parseChannelTemplate } from './useChannels';
-import { useDotYouClient } from '../../../..';
+import { FEED_APP_ID, t, useDotYouClient, useStaticFiles } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams, toGuidId } from '@youfoundation/js-lib/helpers';
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
 import {
@@ -21,7 +20,7 @@ import {
   SecurityGroupType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
-import { ROOT_PATH } from '@youfoundation/feed-app/src/app/App';
+const FEED_ROOT_PATH = '/apps/feed';
 import { ALL_CONNECTIONS_CIRCLE_ID } from '@youfoundation/js-lib/network';
 
 type useChannelsProps = {
@@ -164,7 +163,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         throw new Error('Channel unique id is not set');
 
       const identity = dotYouClient.getIdentity();
-      const returnUrl = `${ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
+      const returnUrl = `${FEED_ROOT_PATH}/channels?new=${JSON.stringify(channelDef)}`;
 
       const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
 
@@ -199,7 +198,7 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
 
     const identity = dotYouClient.getIdentity();
-    const returnUrl = `${ROOT_PATH}/channels`;
+    const returnUrl = `${FEED_ROOT_PATH}/channels`;
 
     const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
 

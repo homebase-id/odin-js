@@ -1,9 +1,8 @@
-import { getOdinIdColor, useDotYouClient, useSiteData } from '@youfoundation/common-app';
+import { getOdinIdColor, useDotYouClient } from '@youfoundation/common-app';
 import {
   base64ToUint8Array,
   byteArrayToString,
   stringToUint8Array,
-  uint8ArrayToBase64,
 } from '@youfoundation/js-lib/helpers';
 import {
   BuiltInAttributes,

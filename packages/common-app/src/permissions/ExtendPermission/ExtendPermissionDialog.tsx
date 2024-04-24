@@ -1,7 +1,10 @@
-import { ActionLink, DialogWrapper, Shield, t, usePortal } from '@youfoundation/common-app';
 import { createPortal } from 'react-dom';
 import { AppPermissionType } from '@youfoundation/js-lib/network';
 import { useMissingPermissions } from '../../hooks/auth/useMissingPermissions';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
+import { t } from '../../helpers';
+import { ActionLink, Shield } from '../../ui';
 
 export const ExtendPermissionDialog = ({
   appId,

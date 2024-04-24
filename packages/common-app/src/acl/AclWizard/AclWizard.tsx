@@ -1,6 +1,8 @@
 import { AccessControlList, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
-import { ActionButton, CircleSelector, t } from '@youfoundation/common-app';
+import { CircleSelector } from '../../form/CircleSelector';
+import { t } from '../../helpers/i18n/dictionary';
+import { ActionButton } from '../../ui/Buttons/ActionButton';
 
 export const AclWizard = ({
   acl,

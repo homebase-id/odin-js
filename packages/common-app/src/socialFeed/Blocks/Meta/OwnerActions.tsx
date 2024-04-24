@@ -1,14 +1,15 @@
 import { PostContent } from '@youfoundation/js-lib/public';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { t } from '@youfoundation/common-app';
-import { useChannel } from '@youfoundation/common-app';
 import { usePost } from '../../../hooks/socialFeed/post/usePost';
-import { ErrorNotification, ActionGroup, ActionGroupOptionProps } from '@youfoundation/common-app';
-import { Pencil } from '@youfoundation/common-app';
-import { Trash } from '@youfoundation/common-app';
-import { EditPostDialog } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useChannel } from '../../../hooks/posts/channels/useChannel';
+import { ErrorNotification } from '../../../ui/Alert/ErrorNotification';
+import { ActionGroup, ActionGroupOptionProps } from '../../../ui/Buttons/ActionGroup';
+import { Pencil } from '../../../ui/Icons/Pencil';
+import { t } from '../../../helpers/i18n/dictionary';
+import { Trash } from '../../../ui';
+import { EditPostDialog } from '../../EditPostDialog/EditPostDialog';
 
 export const OwnerActions = ({ postFile }: { postFile: HomebaseFile<PostContent> }) => {
   const postContent = postFile.fileMetadata.appData.content;

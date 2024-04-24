@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ActionButtonState, t } from '@youfoundation/common-app';
-
-import { Alert } from '@youfoundation/common-app';
 import { formatToTimeAgo } from '../../helpers/timeago';
+import { t } from '../../helpers';
+import { Alert } from '../Alert/Alert';
+import { ActionButtonState } from './ActionButton';
 
 export const SaveStatus = ({
   className,

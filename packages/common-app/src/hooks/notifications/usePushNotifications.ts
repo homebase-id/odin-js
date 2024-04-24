@@ -1,5 +1,3 @@
-import { useDotYouClient } from '@youfoundation/common-app';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DeleteNotifications,
@@ -8,6 +6,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
 import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 const isDebug = hasDebugFlag();
 const PAGE_SIZE = 50;

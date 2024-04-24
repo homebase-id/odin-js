@@ -1,6 +1,7 @@
 import { getChannelDrive, PrimaryMediaFile } from '@youfoundation/js-lib/public';
 import { EmbeddedThumb } from '@youfoundation/js-lib/core';
-import { Image, Video, VideoClickToLoad } from '@youfoundation/common-app';
+import { Image } from '../../../media/Image';
+import { Video, VideoClickToLoad } from '../../../media/Video';
 
 export const PrimaryMedia = ({
   odinId,

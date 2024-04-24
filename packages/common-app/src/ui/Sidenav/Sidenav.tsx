@@ -1,47 +1,40 @@
 import { FC, ReactNode, useEffect, useRef, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-
-import {
-  CHAT_APP_ID,
-  ChatBubble,
-  Cloud,
-  Envelope,
-  FEED_APP_ID,
-  HOME_ROOT_PATH,
-  House,
-  MAIL_APP_ID,
-  MiniDarkModeToggle,
-  Persons,
-  Pin,
-  ellipsisAtMaxChar,
-  getVersion,
-  t,
-  useUnreadPushNotificationsCount,
-} from '@youfoundation/common-app';
-import { useDarkMode } from '@youfoundation/common-app';
-import { useProfiles } from '@youfoundation/common-app';
 import { BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { OwnerImage } from '@youfoundation/common-app';
-import {
-  Bars,
-  Times,
-  Feed,
-  AddressBook,
-  Circles,
-  useOutsideTrigger,
-  Ellipsis,
-  Person,
-  Cog,
-  Scissors,
-  HardDrive,
-  Grid,
-  Wallet,
-  IconProps,
-  Heart,
-  ArrowDown,
-  Bell,
-} from '@youfoundation/common-app';
 import { hasDebugFlag, isTouchDevice } from '@youfoundation/js-lib/helpers';
+import { FEED_APP_ID, CHAT_APP_ID, MAIL_APP_ID } from '../../constants';
+import { HOME_ROOT_PATH } from '../../core';
+import { getVersion, t, ellipsisAtMaxChar } from '../../helpers';
+import {
+  useOutsideTrigger,
+  useDarkMode,
+  useProfiles,
+  useUnreadPushNotificationsCount,
+} from '../../hooks';
+import { OwnerImage } from '../../socialFeed';
+import { MiniDarkModeToggle } from '../DarkModeToggle/DarkModeToggle';
+import { AddressBook } from '../Icons/AddressBook';
+import { ArrowDown } from '../Icons/Arrow';
+import { Bars } from '../Icons/Bars';
+import { Bell } from '../Icons/Bell';
+import { ChatBubble } from '../Icons/ChatBubble';
+import { Circles } from '../Icons/Circles';
+import { Cloud } from '../Icons/Cloud';
+import { Cog } from '../Icons/Cog';
+import { Ellipsis } from '../Icons/Ellipsis';
+import { Envelope } from '../Icons/Envelope';
+import { Feed } from '../Icons/Feed';
+import { Grid } from '../Icons/Grid';
+import { HardDrive } from '../Icons/HardDrive';
+import { Heart } from '../Icons/Heart';
+import { House } from '../Icons/House';
+import { Person } from '../Icons/Person';
+import { Persons } from '../Icons/Persons';
+import { Pin } from '../Icons/Pin';
+import { Scissors } from '../Icons/Scissors';
+import { Times } from '../Icons/Times';
+import { IconProps } from '../Icons/Types';
+import { Wallet } from '../Icons/Wallet';
 
 const STORAGE_KEY = 'isOpen';
 

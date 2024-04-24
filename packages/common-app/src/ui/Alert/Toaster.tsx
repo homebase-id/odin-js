@@ -1,22 +1,19 @@
 import { createPortal } from 'react-dom';
 import { ReactNode, useState } from 'react';
-import {
-  ActionButton,
-  DialogWrapper,
-  Exclamation,
-  OWNER_ROOT,
-  Times,
-  t,
-  useDotYouClient,
-  useNotifications,
-  usePortal,
-  useErrors,
-  Clipboard,
-} from '@youfoundation/common-app';
-import type { Error } from '../../hooks/errors/useErrors';
+import { useErrors, type Error } from '../../hooks/errors/useErrors';
 import { useNavigate } from 'react-router-dom';
 import { formatToTimeAgoWithRelativeDetail } from '../../helpers/timeago/format';
 import { ApiType } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { useNotifications } from '../../hooks/notifications/useNotifications';
+import { t } from '../../helpers/i18n/dictionary';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { OWNER_ROOT } from '../../core';
+import { ActionButton } from '../Buttons/ActionButton';
+import { DialogWrapper } from '../Dialog/DialogWrapper';
+import { Exclamation } from '../Icons/Exclamation';
+import { Times } from '../Icons/Times';
+import { Clipboard } from '../Icons/Clipboard';
 
 export const Toaster = ({ errorOnly }: { errorOnly?: boolean }) => {
   const { getApiType } = useDotYouClient();

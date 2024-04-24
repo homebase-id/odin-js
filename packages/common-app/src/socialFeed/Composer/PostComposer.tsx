@@ -6,31 +6,6 @@ import {
 } from '@youfoundation/js-lib/public';
 import React, { Ref, useEffect, useMemo } from 'react';
 import { useRef, useState } from 'react';
-import {
-  ActionButton,
-  Arrow,
-  ChannelsDialog,
-  EmbeddedPostContent,
-  EmojiSelector,
-  FileOverview,
-  FileSelector,
-  Globe,
-  VolatileInput,
-  getImagesFromPasteEvent,
-  getVideosFromPasteEvent,
-  t,
-  usePostComposer,
-  useChannels,
-  ErrorNotification,
-  Article,
-  Lock,
-  ActionGroup,
-  AclSummary,
-  AclIcon,
-  Pencil,
-  useDotYouClient,
-  AclDialog,
-} from '@youfoundation/common-app';
 import { base64ToUint8Array, isTouchDevice, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import {
   AccessControlList,
@@ -39,6 +14,23 @@ import {
   SecurityGroupType,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
+import { AclIcon, AclSummary, AclDialog } from '../../acl';
+import { ChannelsDialog } from '../../channels';
+import { VolatileInput, FileOverview, FileSelector } from '../../form';
+import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
+import { useDotYouClient, usePostComposer, useChannels } from '../../hooks';
+import {
+  ActionGroup,
+  Globe,
+  Article,
+  Pencil,
+  ActionButton,
+  Arrow,
+  ErrorNotification,
+  Lock,
+} from '../../ui';
+import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
+import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 
 const FEED_ROOT_PATH = '/apps/feed';
 
