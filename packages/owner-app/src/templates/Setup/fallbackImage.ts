@@ -5,7 +5,7 @@ export const fallbackProfileImage = (initials?: string, backgroundColor?: string
   if (!initials || !initials.length) return anonymousFallbackImage;
 
   return window.btoa(
-    `<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="300" fill="${backgroundColor || '#F1F5F9'}"/><text x="150" y="150" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" fill="black" font-family="ui-sans-serif, system-ui, sans-serif" font-size="120" font-weight="300" letter-spacing="0em">${initials.toUpperCase()}</text></svg>`
+    `<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="300" height="300" fill="${backgroundColor || '#F1F5F9'}"/><text x="150" y="150" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="ui-sans-serif, system-ui, sans-serif" font-size="120" font-weight="300" letter-spacing="0em">${initials.toUpperCase()}</text></svg>`
   );
 };
 
