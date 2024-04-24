@@ -367,7 +367,12 @@ export const MailComposer = ({
                   defaultValue={
                     autosavedDsr.fileMetadata.appData.content.message?.length
                       ? autosavedDsr.fileMetadata.appData.content.message
-                      : mailSettings?.fileMetadata.appData.content.mailFooter || undefined
+                      : mailSettings?.fileMetadata.appData.content.mailFooter
+                        ? [
+                            { type: 'paragraph', children: [{ text: '' }] },
+                            ...mailSettings.fileMetadata.appData.content.mailFooter,
+                          ]
+                        : undefined
                   }
                   onChange={handleRTEChange}
                   mediaOptions={mediaOptions}
