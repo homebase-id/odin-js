@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 import {
   Archive,
+  Cog,
   Envelope,
   IconProps,
   MAIL_APP_ID,
@@ -20,7 +21,6 @@ const ROOT_PATH = '/apps/mail';
 export const MailSidenav = () => {
   const { logout } = useAuth();
 
-  // TODO: Check if we should move it up the render tree to have common coverage of detail views
   const isOnline = useLiveMailProcessor();
   useRemoveNotifications({ appId: MAIL_APP_ID });
 
@@ -58,6 +58,7 @@ export const MailSidenav = () => {
           <div className="mt-auto flex flex-col px-5">
             <NavItem to={`${ROOT_PATH}/trash`} icon={Trash} label={t('Trash')} />
             <NavItem to={`${ROOT_PATH}/archive`} icon={Archive} label={t('Archive')} />
+            <NavItem to={`${ROOT_PATH}/settings`} icon={Cog} label={t('Settings')} />
           </div>
         </div>
       </div>

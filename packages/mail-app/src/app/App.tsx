@@ -13,9 +13,7 @@ import { QueryClient } from '@tanstack/react-query';
 import {
   PersistQueryClientOptions,
   PersistQueryClientProvider,
-  removeOldestQuery,
 } from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 
 import Layout, { MinimalLayout } from '../components/ui/Layout/Layout';
 
@@ -31,6 +29,11 @@ const MailThread = lazy(() =>
 const MailComposerPage = lazy(() =>
   import('../templates/Mail/MailComposerPage').then((mailApp) => ({
     default: mailApp.MailComposerPage,
+  }))
+);
+const MailSettings = lazy(() =>
+  import('../templates/Mail/MailSettings').then((mailApp) => ({
+    default: mailApp.MailSettingsPage,
   }))
 );
 const DebugDataPage = lazy(() =>
@@ -70,6 +73,7 @@ const INCLUDED_QUERY_KEYS = [
   'push-notifications',
   'siteData',
   'connectionDetails',
+  'mail-settings',
 
   // Small data (blobs to local file Uri)
   'image',
@@ -136,6 +140,7 @@ function App() {
             />
             <Route path="new" element={<MailComposerPage />} />
             <Route path="new/:draftKey" element={<MailComposerPage />} />
+            <Route path="settings" element={<MailSettings />} />
             <Route path="debug" element={<DebugDataPage />} />
           </Route>
 

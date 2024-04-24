@@ -40,6 +40,7 @@ import { RichTextEditor } from '@youfoundation/rich-text-editor';
 import { useBlocker } from 'react-router-dom';
 import { BlockerDialog } from './BlockerDialog';
 import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
+import { useMailSettings } from '../../hooks/mail/useMailSettings';
 
 const FIFTY_MEGA_BYTES = 50 * 1024 * 1024;
 
@@ -64,6 +65,8 @@ export const MailComposer = ({
 
   onDone: () => void;
 }) => {
+  const { data: mailSettings, isFetched: mailSettingsFetched } = useMailSettings().get;
+
   const [expanded, setExpanded] = useState(!forwardedMailThread || !currentRecipients?.length);
   const identity = useDotYouClientContext().getIdentity();
   const [autosavedDsr, setAutosavedDsr] = useState<
@@ -108,6 +111,7 @@ export const MailComposer = ({
       status: saveDraftStatus,
       error: saveDraftError,
       data: saveDraftReturn,
+      reset: resetSaveDraft,
     },
     removeDraft: { mutate: removeDraft, status: removeDraftStatus, error: removeDraftError },
   } = useMailDraft();
@@ -119,6 +123,7 @@ export const MailComposer = ({
 
   const doAutoSave = () => {
     if (saveDraftStatus === 'pending') return;
+    resetSaveDraft();
 
     const newSavedDsr = { ...autosavedDsr };
     newSavedDsr.fileMetadata.appData.content = {
@@ -175,7 +180,10 @@ export const MailComposer = ({
   // Show browser specific message when trying to close the tab with unsaved changes
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length) {
+      if (
+        getTextRootsRecursive(autosavedDsr.fileMetadata.appData.content.message).length &&
+        saveDraftStatus !== 'success'
+      ) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -194,7 +202,9 @@ export const MailComposer = ({
       sendMailStatus !== 'success' &&
       removeDraftStatus !== 'success' &&
       sendMailStatus !== 'pending' && // We include pending state, as the status might not have updated through to the blocker;
-      removeDraftStatus !== 'pending'
+      removeDraftStatus !== 'pending' &&
+      saveDraftStatus !== 'success' &&
+      saveDraftStatus !== 'pending'
   );
 
   const { data: contacts } = useAllContacts(true);
@@ -351,19 +361,26 @@ export const MailComposer = ({
           >
             <Label className="sr-only">{t('Message')}</Label>
             <ErrorBoundary>
-              <RichTextEditor
-                name="composer"
-                defaultValue={
-                  autosavedDsr.fileMetadata.appData.content.message?.length
-                    ? autosavedDsr.fileMetadata.appData.content.message
-                    : undefined
-                }
-                onChange={handleRTEChange}
-                mediaOptions={mediaOptions}
-                mentionables={mentionables}
-                placeholder="Your message"
-                className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-7 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-              />
+              {mailSettingsFetched ? (
+                <RichTextEditor
+                  name="composer"
+                  defaultValue={
+                    autosavedDsr.fileMetadata.appData.content.message?.length
+                      ? autosavedDsr.fileMetadata.appData.content.message
+                      : mailSettings?.fileMetadata.appData.content.mailFooter
+                        ? [
+                            { type: 'paragraph', children: [{ text: '' }] },
+                            ...mailSettings.fileMetadata.appData.content.mailFooter,
+                          ]
+                        : undefined
+                  }
+                  onChange={handleRTEChange}
+                  mediaOptions={mediaOptions}
+                  mentionables={mentionables}
+                  placeholder="Your message"
+                  className="min-h-56 w-full rounded border border-gray-300 bg-white px-3 py-1 text-base leading-7 text-gray-700 outline-none transition-colors duration-200 ease-in-out dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                />
+              ) : null}
             </ErrorBoundary>
           </div>
 
