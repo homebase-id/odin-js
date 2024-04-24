@@ -56,7 +56,7 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
 
     // Set fallback image:
     if (!data.profile.imageData) {
-      const backgroundColor = getOdinIdColor(window.location.hostname).darkTheme;
+      const backgroundColor = getOdinIdColor(window.location.hostname).lightTheme;
       dataToUse.profile.imageData = new Blob(
         [base64ToUint8Array(fallbackProfileImage(initials, backgroundColor))],
         {
@@ -102,10 +102,10 @@ const SetupWizard = ({ doInitWithData }: { doInitWithData: (data: WelcomeData) =
                 {!data.profile['imageData'] ? (
                   <div
                     className="flex aspect-square w-full bg-slate-100 dark:bg-slate-700"
-                    style={{ backgroundColor: getOdinIdColor(window.location.hostname).darkTheme }}
+                    style={{ backgroundColor: getOdinIdColor(window.location.hostname).lightTheme }}
                   >
                     {initials?.length ? (
-                      <span className="m-auto text-[95px] font-light">
+                      <span className="m-auto text-[95px] font-light text-white">
                         {initials.toUpperCase()}
                       </span>
                     ) : (

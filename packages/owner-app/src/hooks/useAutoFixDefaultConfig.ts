@@ -48,7 +48,7 @@ export const useAutofixDefaultConfig = () => {
             )
               return;
 
-            const odinIdBackgroundColor = getOdinIdColor(window.location.hostname).darkTheme;
+            const odinIdBackgroundColor = getOdinIdColor(window.location.hostname).lightTheme;
             const replacedSvgString = decodedAsString
               .replace(`fill="#F1F5F9"/>`, `fill="${odinIdBackgroundColor || '#F1F5F9'}" />`)
               .replace(
@@ -59,7 +59,8 @@ export const useAutofixDefaultConfig = () => {
                 `font-family="sans-serif"`,
                 `font-family="ui-sans-serif, system-ui, sans-serif"`
               )
-              .replace(`font-weight="300"`, `font-weight="400"`);
+              .replace(`font-weight="300"`, `font-weight="400"`)
+              .replace(`fill="black" `, `fill="white" `);
 
             const blob = new Blob([stringToUint8Array(replacedSvgString)], {
               type: 'image/svg+xml',
