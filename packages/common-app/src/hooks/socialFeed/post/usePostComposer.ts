@@ -12,6 +12,7 @@ import {
   BlogConfig,
   EmbeddedPost,
   ReactAccess,
+  CollaborativeChannelDefinition,
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
@@ -21,6 +22,7 @@ import { useDotYouClient } from '../../../..';
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
   const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const loggedInIdentity = useDotYouClient().getIdentity();
   const dotYouClient = useDotYouClient().getDotYouClient();
   const { mutateAsync: savePostFile, error: savePostError } = usePost().save;
 
@@ -50,7 +52,7 @@ export const usePostComposer = () => {
           appData: {
             userDate: new Date().getTime(),
             content: {
-              authorOdinId: dotYouClient.getIdentity(),
+              authorOdinId: loggedInIdentity || dotYouClient.getIdentity(),
               type: mediaFiles && mediaFiles.length > 1 ? 'Media' : 'Tweet',
               caption: caption?.trim() || '',
               id: postId,
@@ -66,7 +68,14 @@ export const usePostComposer = () => {
           ? {
               accessControlList: overrideAcl,
             }
-          : channel.serverMetadata || {
+          : channel.serverMetadata ||
+            ((channel.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+              ? {
+                  accessControlList: (
+                    channel.fileMetadata.appData.content as CollaborativeChannelDefinition
+                  ).acl,
+                }
+              : undefined) || {
               accessControlList: { requiredSecurityGroup: SecurityGroupType.Owner },
             },
       };

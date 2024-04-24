@@ -1,6 +1,7 @@
 import { PayloadDescriptor, TargetDrive } from '@youfoundation/js-lib/core';
 import React, { ReactNode } from 'react';
-import { ActionLink, Image } from '@youfoundation/common-app';
+import { Image } from '../../media/Image';
+import { ActionLink } from '../../ui/Buttons/ActionLink';
 
 export const RichTextRenderer = ({
   body,

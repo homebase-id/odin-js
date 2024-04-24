@@ -1,8 +1,8 @@
 import { GetTargetDriveFromProfileId, BuiltInProfiles } from '@youfoundation/js-lib/profile';
-import { Image, t } from '@youfoundation/common-app';
-import { useSiteData } from '@youfoundation/common-app';
-
-import { Person } from '@youfoundation/common-app';
+import { Image } from '../../../media/Image';
+import { t } from '../../../helpers/i18n/dictionary';
+import { Person } from '../../../ui/Icons/Person';
+import { useSiteData } from '../../../hooks/siteData/useSiteData';
 
 interface ImageProps {
   className?: string;

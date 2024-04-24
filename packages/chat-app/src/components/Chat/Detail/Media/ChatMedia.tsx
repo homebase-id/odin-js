@@ -1,4 +1,10 @@
-import { HomebaseFile, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import {
+  HomebaseFile,
+  EmbeddedThumb,
+  PayloadDescriptor,
+  NewHomebaseFile,
+  NewPayloadDescriptor,
+} from '@youfoundation/js-lib/core';
 import { OdinImage, OdinThumbnailImage, OdinAudio, OdinAudioWaveForm } from '@youfoundation/ui-lib';
 import { ChatMessage } from '../../../../providers/ChatProvider';
 import { ChatDrive } from '../../../../providers/ConversationProvider';
@@ -7,10 +13,16 @@ import { useNavigate } from 'react-router-dom';
 import { useDotYouClientContext } from '../../../../hooks/auth/useDotYouClientContext';
 import { useMemo, useState } from 'react';
 
-export const ChatMedia = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
+export const ChatMedia = ({
+  msg,
+}: {
+  msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
+}) => {
   const payloads = msg.fileMetadata.payloads;
-  const isGallery = payloads.length >= 2;
+  const isGallery = payloads && payloads.length >= 2;
   const navigate = useNavigate();
+
+  if (!payloads) return null;
 
   if (isGallery) return <MediaGallery msg={msg} />;
 
@@ -37,19 +49,19 @@ const MediaItem = ({
   previewThumbnail,
   onLoad,
 }: {
-  fileId: string;
-  fileLastModified: number;
-  payload: PayloadDescriptor;
+  fileId: string | undefined;
+  fileLastModified: number | undefined;
+  payload: PayloadDescriptor | NewPayloadDescriptor;
   fit?: 'contain' | 'cover';
   children?: React.ReactNode;
-  onClick: () => void;
+  onClick: (() => void) | undefined;
   previewThumbnail?: EmbeddedThumb;
   onLoad?: () => void;
 }) => {
   const { isDarkMode } = useDarkMode();
   const dotYouClient = useDotYouClientContext();
-  const isVideo = payload.contentType.startsWith('video');
-  const isAudio = payload.contentType.startsWith('audio');
+  const isVideo = payload.contentType?.startsWith('video');
+  const isAudio = payload.contentType?.startsWith('audio');
 
   return (
     <div
@@ -57,70 +69,113 @@ const MediaItem = ({
       onClick={onClick}
       data-thumb={!!previewThumbnail}
     >
-      {isVideo ? (
-        <>
-          <OdinThumbnailImage
-            dotYouClient={dotYouClient}
-            fileId={fileId}
-            fileKey={payload.key}
-            lastModified={payload.lastModified || fileLastModified}
-            targetDrive={ChatDrive}
-            className={`w-full blur-sm`}
-            loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Triangle className="h-16 w-16 text-background" />
-          </div>
-        </>
-      ) : isAudio ? (
-        <>
-          <OdinAudio
-            dotYouClient={dotYouClient}
-            fileId={fileId}
-            fileKey={payload.key}
-            lastModified={payload.lastModified || fileLastModified}
-            targetDrive={ChatDrive}
-            onLoad={onLoad}
-            className="w-full"
-          />
-          <OdinAudioWaveForm
-            dotYouClient={dotYouClient}
-            fileId={fileId}
-            fileKey={payload.key}
-            lastModified={payload.lastModified || fileLastModified}
-            targetDrive={ChatDrive}
-            onLoad={onLoad}
-            isDarkMode={isDarkMode}
-            className="my-3"
-          />
-        </>
+      {!fileId ? (
+        <PendingFile payload={payload} className={`h-full w-auto`} fit={fit} onLoad={onLoad} />
       ) : (
-        <OdinImage
-          dotYouClient={dotYouClient}
-          fileId={fileId}
-          fileKey={payload.key}
-          lastModified={payload.lastModified || fileLastModified}
-          targetDrive={ChatDrive}
-          avoidPayload={isVideo}
-          previewThumbnail={previewThumbnail}
-          className={`h-full w-auto`}
-          fit={fit}
-          onLoad={onLoad}
-        />
+        <>
+          {isVideo ? (
+            <>
+              <OdinThumbnailImage
+                dotYouClient={dotYouClient}
+                fileId={fileId}
+                fileKey={payload.key}
+                lastModified={payload.lastModified || fileLastModified}
+                targetDrive={ChatDrive}
+                className={`w-full blur-sm`}
+                loadSize={{ pixelWidth: 1920, pixelHeight: 1080 }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Triangle className="h-16 w-16 text-background" />
+              </div>
+            </>
+          ) : isAudio ? (
+            <>
+              <OdinAudio
+                dotYouClient={dotYouClient}
+                fileId={fileId}
+                fileKey={payload.key}
+                lastModified={payload.lastModified || fileLastModified}
+                targetDrive={ChatDrive}
+                onLoad={onLoad}
+                className="w-full"
+              />
+              <OdinAudioWaveForm
+                dotYouClient={dotYouClient}
+                fileId={fileId}
+                fileKey={payload.key}
+                lastModified={payload.lastModified || fileLastModified}
+                targetDrive={ChatDrive}
+                onLoad={onLoad}
+                isDarkMode={isDarkMode}
+                className="my-3"
+              />
+            </>
+          ) : (
+            <OdinImage
+              dotYouClient={dotYouClient}
+              fileId={fileId}
+              fileKey={payload.key}
+              lastModified={payload.lastModified || fileLastModified}
+              targetDrive={ChatDrive}
+              avoidPayload={isVideo}
+              previewThumbnail={previewThumbnail}
+              className={`h-full w-auto`}
+              fit={fit}
+              onLoad={onLoad}
+            />
+          )}
+        </>
       )}
       {children ? <>{children}</> : null}
     </div>
   );
 };
 
+const PendingFile = ({
+  payload,
+  fit,
+  className,
+  onLoad,
+}: {
+  payload: NewPayloadDescriptor;
+  fit?: 'contain' | 'cover';
+  className?: string;
+  onLoad?: () => void;
+}) => {
+  const fileUrl = useMemo(
+    () =>
+      payload.pendingFile && payload.contentType?.includes('image/')
+        ? URL.createObjectURL(payload.pendingFile)
+        : '',
+    [payload.pendingFile]
+  );
+
+  if (!fileUrl)
+    return (
+      <div className="aspect-square h-full w-full animate-pulse bg-slate-400 dark:bg-slate-200"></div>
+    );
+
+  return (
+    <img
+      src={fileUrl}
+      className={`${fit === 'cover' ? 'h-full w-full object-cover' : ''} ${className || ''}`}
+      onLoad={onLoad}
+    />
+  );
+};
+
 const getEmbeddedThumbUrl = (previewThumbnail: EmbeddedThumb) =>
   `data:${previewThumbnail.contentType};base64,${previewThumbnail.content}`;
 
-const MediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
+const MediaGallery = ({
+  msg,
+}: {
+  msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
+}) => {
   const payloads = msg.fileMetadata.payloads;
-  const totalCount = payloads.length;
+  const totalCount = (payloads && payloads.length) || 0;
   const maxVisible = 4;
-  const countExcludedFromView = payloads.length - maxVisible;
+  const countExcludedFromView = (payloads && payloads.length - maxVisible) || 0;
   const navigate = useNavigate();
 
   const previewThumbnail = msg.fileMetadata.appData.previewThumbnail;
@@ -140,11 +195,15 @@ const MediaGallery = ({ msg }: { msg: HomebaseFile<ChatMessage> }) => {
       <div className={`${tinyThumbUrl ? 'absolute inset-0' : ''} grid grid-cols-2 gap-1`}>
         {msg.fileMetadata.payloads?.slice(0, 4)?.map((payload, index) => (
           <MediaGalleryItem
-            key={payload.key}
+            key={payload.key || index}
             payload={payload}
             msg={msg}
-            onClick={() => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)}
-            isColSpan2={payloads.length === 3 && index === 2}
+            onClick={
+              msg.fileId
+                ? () => navigate(`${msg.fileMetadata.appData.uniqueId}/${payload.key}`)
+                : undefined
+            }
+            isColSpan2={!!payloads && payloads.length === 3 && index === 2}
           >
             {index === maxVisible - 1 && countExcludedFromView > 0 ? (
               <div className="absolute inset-0 flex flex-col justify-center bg-black bg-opacity-40 text-6xl font-light text-white">
@@ -165,11 +224,11 @@ const MediaGalleryItem = ({
   children,
   onClick,
 }: {
-  payload: PayloadDescriptor;
-  msg: HomebaseFile<ChatMessage>;
+  payload: PayloadDescriptor | NewPayloadDescriptor;
+  msg: HomebaseFile<ChatMessage> | NewHomebaseFile<ChatMessage>;
   isColSpan2: boolean;
   children?: React.ReactNode;
-  onClick: () => void;
+  onClick: (() => void) | undefined;
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   return (

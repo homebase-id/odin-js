@@ -1,14 +1,10 @@
-import {
-  useReaction,
-  useDotYouClient,
-  PostMedia,
-  ErrorNotification,
-  useDoubleTap,
-} from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import React, { useMemo } from 'react';
 import { useRef } from 'react';
+import { useReaction, useDotYouClient, useDoubleTap } from '../../../hooks';
+import { ErrorNotification } from '../../../ui';
+import { PostMedia } from './Media';
 
 export const DoubleClickHeartForMedia = ({
   odinId,
@@ -22,7 +18,7 @@ export const DoubleClickHeartForMedia = ({
   postFile: HomebaseFile<PostContent>;
   showFallback?: boolean;
   forceAspectRatio?: boolean;
-  onClick: (e: React.MouseEvent, index: number) => void;
+  onClick: ((e: React.MouseEvent, index: number) => void) | undefined;
   className?: string;
 }) => {
   const wrapperRef = useRef<HTMLSpanElement>(null);

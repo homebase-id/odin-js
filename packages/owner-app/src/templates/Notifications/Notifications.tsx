@@ -31,6 +31,7 @@ const Notifications = () => {
   const [params] = useSearchParams();
 
   const { data: notifications, isFetching: fetchingNotifications } = usePushNotifications().fetch;
+
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   const [toOpenNotification, setToOpenNotification] = useState<string | undefined>(
@@ -160,7 +161,7 @@ const NotificationAppGroup = ({
       ? 'Homebase'
       : stringGuidsEqual(appId, FEED_APP_ID)
         ? 'Homebase - Feed'
-        : 'Unknown');
+        : `Unknown (${appId})`);
 
   const groupedByTypeNotifications =
     notifications.reduce(
@@ -278,7 +279,7 @@ const NotificationItem = ({
 
   const title = useMemo(() => `${appName}`, [appName]);
   const body = useMemo(
-    () => bodyFormer(notification, true, appName, senderName),
+    () => bodyFormer(notification, false, appName, senderName),
     [notification, senderName, appName]
   );
 

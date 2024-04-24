@@ -65,6 +65,7 @@ const MailHomeHeaderSearch = ({ className }: { className?: string }) => {
             if (e.target.value.length) setSearchParams({ q: e.target.value });
             else setSearchParams({});
           }}
+          onKeyDown={(e) => e.key === 'Escape' && setSearchParams({})}
         />
         {query?.length ? (
           <ActionButton

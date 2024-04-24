@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { getHighestPrioAttributesFromMultiTypes, useDotYouClient } from '@youfoundation/common-app';
 import {
   BuiltInAttributes,
   BuiltInProfiles,
@@ -15,6 +14,8 @@ import {
   ResponseEntry,
 } from '@youfoundation/js-lib/public';
 import { HomebaseFile, EmbeddedThumb, queryBatchCollection } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../auth/useDotYouClient';
+import { getHighestPrioAttributesFromMultiTypes } from '../../helpers/common';
 
 interface DefaultTemplateSettings {
   imageFileId: string;

@@ -1,16 +1,6 @@
 import { useState } from 'react';
-import {
-  AuthorImage,
-  AuthorName,
-  CanReactInfo,
-  ErrorNotification,
-  t,
-  useReaction,
-} from '@youfoundation/common-app';
-
 import { RawReactionContent, ReactionContext } from '@youfoundation/js-lib/public';
 
-import { ellipsisAtMaxChar } from '@youfoundation/common-app';
 import { CommentHead } from './Parts/CommentHead';
 import { CommentBody } from './Parts/CommentBody';
 import { CommentMeta } from './Parts/CommentMeta';
@@ -21,6 +11,13 @@ import {
   NewHomebaseFile,
   ReactionFile,
 } from '@youfoundation/js-lib/core';
+import { CanReactInfo } from '../../../../hooks/reactions/useCanReact';
+import { useReaction } from '../../../../hooks/reactions/useReaction';
+import { ErrorNotification } from '../../../../ui/Alert/ErrorNotification';
+import { AuthorImage } from '../../Author/Image';
+import { AuthorName } from '../../Author/Name';
+import { ellipsisAtMaxChar } from '../../../../helpers/common';
+import { t } from '../../../../helpers/i18n/dictionary';
 
 export interface CommentProps {
   context: ReactionContext;

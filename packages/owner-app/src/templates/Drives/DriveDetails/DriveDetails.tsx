@@ -137,11 +137,21 @@ const DriveDetails = () => {
         >
           <ul className="flex flex-col items-start gap-4">
             {circlesWithAGrantOnThis.map((circle) => {
-              const matchingGrant = circle.driveGrants?.find(
-                (grant) =>
-                  grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
-                  grant.permissionedDrive.drive.type === targetDriveInfo.type
-              );
+              const matchingGrant = circle.driveGrants
+                ?.filter(
+                  (grant) =>
+                    grant.permissionedDrive.drive.alias === targetDriveInfo.alias &&
+                    grant.permissionedDrive.drive.type === targetDriveInfo.type
+                )
+                .reduce(
+                  (prev, current) =>
+                    !prev ||
+                    current.permissionedDrive.permission.length >
+                      prev.permissionedDrive.permission.length
+                      ? current
+                      : prev,
+                  circle.driveGrants[0]
+                );
               return (
                 <CirclePermissionView
                   circleDef={circle}

@@ -1,18 +1,12 @@
 import { ReactionContext } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ActionButton,
-  AuthorImage,
-  AuthorName,
-  t,
-  useEmojiReactions,
-  useEmojiSummary,
-} from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-
-import { DialogWrapper } from '@youfoundation/common-app';
 import { ReactionFile } from '@youfoundation/js-lib/core';
+import { t } from '../../../../helpers';
+import { usePortal, useEmojiReactions, useEmojiSummary } from '../../../../hooks';
+import { DialogWrapper, ActionButton } from '../../../../ui';
+import { AuthorImage } from '../../Author/Image';
+import { AuthorName } from '../../Author/Name';
 
 export const ReactionDetailsDialog = ({
   context,

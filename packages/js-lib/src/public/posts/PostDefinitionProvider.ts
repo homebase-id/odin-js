@@ -32,7 +32,7 @@ import {
   stringToUint8Array,
   toGuidId,
 } from '../../helpers/helpers';
-import { ChannelDefinition, BlogConfig } from './PostTypes';
+import { ChannelDefinition, BlogConfig, CollaborativeChannelDefinition } from './PostTypes';
 
 export const getChannelDefinitions = async (
   dotYouClient: DotYouClient
@@ -171,7 +171,9 @@ export const saveChannelDefinition = async (
 
   const payloadJson: string = jsonStringify64({
     ...definition.fileMetadata.appData.content,
-    acl: undefined,
+    acl: definition.fileMetadata.appData.content.isCollaborative
+      ? (definition.fileMetadata.appData.content as CollaborativeChannelDefinition).acl
+      : undefined,
   });
   const payloadBytes = stringToUint8Array(payloadJson);
 

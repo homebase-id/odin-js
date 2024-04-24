@@ -1,5 +1,3 @@
-import { useDotYouClient } from '@youfoundation/common-app';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DeleteNotifications,
@@ -7,7 +5,8 @@ import {
   MarkNotificationsAsRead,
 } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
-import { hasDebugFlag } from '@youfoundation/js-lib/helpers';
+import { hasDebugFlag, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 const isDebug = hasDebugFlag();
 const PAGE_SIZE = 50;
@@ -16,7 +15,7 @@ export const usePushNotifications = (props?: { appId?: string }) => {
   const queryClient = useQueryClient();
 
   const getNotifications = async (cursor: number | undefined) => {
-    return await GetNotifications(dotYouClient, props?.appId, PAGE_SIZE, cursor);
+    return await GetNotifications(dotYouClient, undefined, PAGE_SIZE, cursor);
   };
 
   const markAsRead = async (notificationIds: string[]) =>
@@ -27,8 +26,15 @@ export const usePushNotifications = (props?: { appId?: string }) => {
 
   return {
     fetch: useQuery({
-      queryKey: ['push-notifications', props?.appId],
+      queryKey: ['push-notifications'],
       queryFn: () => getNotifications(undefined),
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      select: (data) => ({
+        ...data,
+        results: data.results.filter(
+          (n) => !props?.appId || stringGuidsEqual(n.options.appId, props.appId)
+        ),
+      }),
     }),
     markAsRead: useMutation({
       mutationFn: markAsRead,

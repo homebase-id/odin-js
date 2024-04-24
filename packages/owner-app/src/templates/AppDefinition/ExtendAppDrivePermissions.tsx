@@ -213,7 +213,12 @@ const ExtendAppPermissions = () => {
 
             {circleIds?.length ? (
               <>
-                <p>{t('Requests these circles to be allowed')}</p>
+                <p>
+                  {t(
+                    'Requests these circles to interact with you via {0}',
+                    appRegistration?.name || ''
+                  )}
+                </p>
                 <Section>
                   <>
                     {circleIds.map((circleId) => {
@@ -230,7 +235,7 @@ const ExtendAppPermissions = () => {
 
             {circlePermissionSet?.keys?.length ? (
               <>
-                <p>{t('Requests these circles to receive the following access within')}</p>
+                <p>{t('Requests circles that can interact to have the following access within')}</p>
                 <Section>
                   <div className="-my-4">
                     {circlePermissionSet.keys.map((permissionLevel) => (
@@ -243,7 +248,7 @@ const ExtendAppPermissions = () => {
 
             {circleDriveGrants?.length ? (
               <>
-                <p>{t('Requests these circles to receive the following drive access')}</p>
+                <p>{t('Requests circles that can interact to have the following drive access')}</p>
                 <Section>
                   <div className="flex flex-col gap-4">
                     {circleDriveGrants.map((grant) => (

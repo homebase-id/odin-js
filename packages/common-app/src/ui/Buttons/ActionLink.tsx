@@ -1,8 +1,8 @@
-import { IconProps } from '@youfoundation/common-app';
 import { FC, ReactNode } from 'react';
 import { HybridLink } from './HybridLink';
 
 import { ButtonColors } from './ColorConfig';
+import { IconProps } from '../Icons/Types';
 export type ActionLinkState = 'loading' | 'success' | 'error' | 'idle';
 
 type ActionLinkProps = {

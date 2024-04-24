@@ -1,30 +1,48 @@
 import { Helmet } from 'react-helmet-async';
 
 import { useParams } from 'react-router-dom';
-import { BlogConfig, ChannelTemplate, PostContent } from '@youfoundation/js-lib/public';
+import {
+  BlogConfig,
+  ChannelTemplate,
+  GetTargetDriveFromChannelId,
+  PostContent,
+} from '@youfoundation/js-lib/public';
 import { useRef } from 'react';
 import {
   AclIcon,
+  ChannelDefinitionVm,
   HOME_ROOT_PATH,
   SubtleMessage,
   t,
   useBlogPostsInfinite,
+  useDotYouClient,
+  useSecurityContext,
+  useChannel,
+  PostComposer,
+  flattenInfinteData,
+  useIntersection,
+  LoadingBlock,
+  NotFound,
 } from '@youfoundation/common-app';
 
 import CardPostOverview from '../../../components/Post/Overview/CardPostOverview/CardPostOverview';
 import ListPostOverview from '../../../components/Post/Overview/ListPostOverview/ListPostOverview';
 import MasonryPostOverview from '../../../components/Post/Overview/MasonryPostOverview/MasonryPostOverview';
-import { useChannel } from '@youfoundation/common-app';
-import { flattenInfinteData, useIntersection } from '@youfoundation/common-app';
+
 import FollowLink from '../../../components/ConnectionActions/FollowLink/FollowLink';
 import Breadcrumbs from '../../../components/ui/Layout/Breadcrumbs/Breadcrumbs';
-import { LoadingBlock } from '@youfoundation/common-app';
-import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import {
+  ApiType,
+  DrivePermissionType,
+  HomebaseFile,
+  SecurityGroupType,
+} from '@youfoundation/js-lib/core';
+import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
 const PAGE_SIZE = 30;
 const PostOverview = () => {
   const { channelKey } = useParams();
-  const { data: activeChannel } = useChannel(
+  const { data: activeChannel, isFetched: channelFetched } = useChannel(
     channelKey ? { channelSlug: channelKey } : { channelId: BlogConfig.PublicChannelId }
   ).fetch;
 
@@ -72,6 +90,8 @@ const PostOverview = () => {
     activeChannel?.serverMetadata?.accessControlList?.requiredSecurityGroup !==
       SecurityGroupType.Authenticated;
 
+  if (channelFetched && !activeChannel) return <NotFound />;
+
   return (
     <>
       <Helmet>
@@ -107,6 +127,9 @@ const PostOverview = () => {
             </div>
             <FollowLink className="sm:ml-auto" channel={activeChannel || undefined} />
           </div>
+
+          {activeChannel ? <PublicPostComposer activeChannel={activeChannel} /> : null}
+
           {isLoading ? (
             <>
               <LoadingBlock className="my-2 h-24 w-full bg-background" />
@@ -114,7 +137,10 @@ const PostOverview = () => {
               <LoadingBlock className="my-2 h-24 w-full bg-background" />
             </>
           ) : blogPosts?.length && (!channelKey || activeChannel) ? (
-            <ListComponent blogPosts={blogPosts} />
+            <ListComponent
+              blogPosts={blogPosts}
+              showAuthor={activeChannel?.fileMetadata.appData.content.isCollaborative || false}
+            />
           ) : (
             <SubtleMessage>{t('Nothing has been posted yet')}</SubtleMessage>
           )}
@@ -133,6 +159,48 @@ const PostOverview = () => {
         </div>
       </section>
     </>
+  );
+};
+
+const PublicPostComposer = ({
+  activeChannel,
+}: {
+  activeChannel: HomebaseFile<ChannelDefinitionVm>;
+}) => {
+  const dotYouClient = useDotYouClient().getDotYouClient();
+  const { data: securityContext } = useSecurityContext().fetch;
+
+  const channelDrive =
+    activeChannel && activeChannel.fileMetadata.appData.uniqueId
+      ? GetTargetDriveFromChannelId(activeChannel.fileMetadata.appData.uniqueId)
+      : undefined;
+
+  const isOwner = dotYouClient.getType() === ApiType.Owner;
+
+  const hasWriteAccess =
+    channelDrive &&
+    securityContext?.permissionContext.permissionGroups.some((group) =>
+      group.driveGrants.some(
+        (driveGrant) =>
+          stringGuidsEqual(driveGrant.permissionedDrive.drive.alias, channelDrive.alias) &&
+          stringGuidsEqual(driveGrant.permissionedDrive.drive.type, channelDrive.type) &&
+          driveGrant.permissionedDrive.permission.includes(DrivePermissionType.Write)
+      )
+    );
+
+  if (
+    (!hasWriteAccess && !isOwner) ||
+    (!activeChannel.fileMetadata.appData.content.isCollaborative && !isOwner)
+  )
+    return null;
+
+  return (
+    <div className="mb-8 max-w-xl">
+      <PostComposer
+        forcedChannel={activeChannel || undefined}
+        className="mb-2 w-full rounded-md border-gray-200 border-opacity-60 bg-background p-4 shadow-sm dark:border-gray-800 lg:border"
+      />
+    </div>
   );
 };
 

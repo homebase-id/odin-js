@@ -1,11 +1,7 @@
 import { FC, useRef, useState } from 'react';
-import {
-  ActionButton,
-  ActionButtonProps,
-  ArrowDown,
-  useMostSpace,
-  useOutsideTrigger,
-} from '@youfoundation/common-app';
+import { useOutsideTrigger, useMostSpace } from '../../hooks';
+import { ArrowDown } from '../Icons/Arrow';
+import { ActionButtonProps, ActionButton } from './ActionButton';
 
 interface ActionButtonWithOptionsProps extends Omit<Omit<ActionButtonProps, 'icon'>, 'onClick'> {
   options: { value: string; name: string; group?: string }[];

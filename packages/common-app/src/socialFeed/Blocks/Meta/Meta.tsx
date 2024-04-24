@@ -1,27 +1,14 @@
 import { Suspense } from 'react';
 import { ChannelDefinition, EmbeddedPost, PostContent } from '@youfoundation/js-lib/public';
-import {
-  AclSummary,
-  ActionGroupOptionProps,
-  Block,
-  Flag,
-  Lock,
-  Times,
-  useIsConnected,
-  useManageSocialFeed,
-} from '@youfoundation/common-app';
-
-import {
-  ChannelDefinitionVm,
-  HOME_ROOT_PATH,
-  t,
-  useDotYouClient,
-  ActionGroup,
-  UserX,
-} from '@youfoundation/common-app';
 import { OwnerActions } from './OwnerActions';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
 import { aclEqual } from '@youfoundation/js-lib/helpers';
+import { ChannelDefinitionVm } from '../../../hooks/posts/channels/useChannels';
+import { AclSummary } from '../../../acl';
+import { HOME_ROOT_PATH } from '../../../core';
+import { t } from '../../../helpers';
+import { useDotYouClient, useIsConnected, useManageSocialFeed } from '../../../hooks';
+import { ActionGroupOptionProps, UserX, Times, Lock, Flag, Block, ActionGroup } from '../../../ui';
 
 interface PostMetaWithPostFileProps {
   odinId?: string;

@@ -67,24 +67,31 @@ import { RichText } from '@youfoundation/js-lib/core';
 import { useDarkMode } from '@youfoundation/common-app';
 
 import { createImagePlugin, ELEMENT_IMAGE, MediaOptions } from './ImagePlugin/ImagePlugin';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { autoformatRules } from '../lib/autoFormatRules';
 import { EmojiCombobox } from './Combobox/EmojiCombobox';
 import { createMentionPlugin, ELEMENT_MENTION } from '@udecode/plate-mention';
 import { MentionCombobox } from './Combobox/MentionCombobox';
 import { MentionElement } from '../components/plate-ui/mention-element';
 
-export const RichTextEditor = ({
-  defaultValue,
-  placeholder,
-  mediaOptions,
-  mentionables,
-  name = 'richText',
-  onChange,
-  className,
-  disabled,
-  uniqueId,
-}: {
+// import React from 'react';
+// const useTraceUpdate = (props: any) => {
+//   const prev = React.useRef(props);
+//   React.useEffect(() => {
+//     const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+//       if (prev.current[k] !== v) {
+//         ps[k] = [prev.current[k], v];
+//       }
+//       return ps;
+//     }, {});
+//     if (Object.keys(changedProps).length > 0) {
+//       console.log('Changed props:', changedProps);
+//     }
+//     prev.current = props;
+//   });
+// };
+
+interface RTEProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any[] | string | undefined;
   placeholder?: string;
@@ -95,108 +102,142 @@ export const RichTextEditor = ({
   className?: string;
   disabled?: boolean;
   uniqueId?: string;
-}) => {
+}
+
+const InnerRichTextEditor = memo((props: RTEProps) => {
+  // useTraceUpdate(props);
+  const {
+    defaultValue,
+    placeholder,
+    mediaOptions,
+    mentionables,
+    name = 'richText',
+    onChange,
+    className,
+    disabled,
+    uniqueId,
+  } = props;
+
   const { isDarkMode } = useDarkMode();
 
-  const plugins = createPlugins(
-    [
-      createParagraphPlugin(),
-      createHeadingPlugin(),
-      createBlockquotePlugin(),
-      createCodeBlockPlugin(),
-      createLinkPlugin({
-        renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
-      }),
-      createListPlugin(),
-      createBoldPlugin(),
-      createItalicPlugin(),
-      createUnderlinePlugin(),
-      createStrikethroughPlugin(),
-      createCodePlugin(),
-      createKbdPlugin(),
-      createAutoformatPlugin({
-        options: {
-          rules: autoformatRules,
-          enableUndoOnDelete: true,
-        },
-      }),
-      createBlockSelectionPlugin({
-        options: {
-          sizes: {
-            top: 0,
-            bottom: 0,
-          },
-        },
-      }),
-      createExitBreakPlugin({
-        options: {
-          rules: [
-            {
-              hotkey: 'mod+enter',
+  const defaultValAsRichText: TElement[] | undefined = useMemo(
+    () =>
+      defaultValue && Array.isArray(defaultValue)
+        ? (defaultValue as TElement[])
+        : defaultValue && typeof defaultValue === 'string'
+          ? ([
+              {
+                type: 'paragraph',
+                children: [{ text: defaultValue ?? '' }] as TDescendant[],
+              },
+            ] as TElement[])
+          : undefined,
+    [defaultValue]
+  );
+
+  const plugins = useMemo(
+    () =>
+      createPlugins(
+        [
+          createParagraphPlugin(),
+          createHeadingPlugin(),
+          createBlockquotePlugin(),
+          createCodeBlockPlugin(),
+          createLinkPlugin({
+            renderAfterEditable: LinkFloatingToolbar as RenderAfterEditable,
+          }),
+          createListPlugin(),
+          createBoldPlugin(),
+          createItalicPlugin(),
+          createUnderlinePlugin(),
+          createStrikethroughPlugin(),
+          createCodePlugin(),
+          createKbdPlugin(),
+          createAutoformatPlugin({
+            options: {
+              rules: autoformatRules,
+              enableUndoOnDelete: true,
             },
-            {
-              hotkey: 'mod+shift+enter',
-              before: true,
+          }),
+          createBlockSelectionPlugin({
+            options: {
+              sizes: {
+                top: 0,
+                bottom: 0,
+              },
             },
-          ],
-        },
-      }),
-      createNodeIdPlugin(),
-      createResetNodePlugin({
-        options: {
-          rules: [
-            // Usage: https://platejs.org/docs/reset-node
-          ],
-        },
-      }),
-      createSelectOnBackspacePlugin({
-        options: {
-          query: {
-            allow: [ELEMENT_IMAGE],
+          }),
+          createExitBreakPlugin({
+            options: {
+              rules: [
+                {
+                  hotkey: 'mod+enter',
+                },
+                {
+                  hotkey: 'mod+shift+enter',
+                  before: true,
+                },
+              ],
+            },
+          }),
+          createNodeIdPlugin(),
+          createResetNodePlugin({
+            options: {
+              rules: [
+                // Usage: https://platejs.org/docs/reset-node
+              ],
+            },
+          }),
+          createSelectOnBackspacePlugin({
+            options: {
+              query: {
+                allow: [ELEMENT_IMAGE],
+              },
+            },
+          }),
+          createSoftBreakPlugin({
+            options: {
+              rules: [{ hotkey: 'shift+enter' }],
+            },
+          }),
+          createTabbablePlugin(),
+          createTrailingBlockPlugin({
+            options: { type: ELEMENT_PARAGRAPH },
+          }),
+          createDeserializeHtmlPlugin(),
+          createDeserializeMdPlugin(),
+          createComboboxPlugin(),
+          createEmojiPlugin(),
+          createMentionPlugin(),
+          createImagePlugin({ options: mediaOptions }),
+        ],
+        {
+          components: {
+            [ELEMENT_BLOCKQUOTE]: BlockquoteElement,
+            [ELEMENT_CODE_BLOCK]: CodeBlockElement,
+            [ELEMENT_CODE_LINE]: CodeLineElement,
+            [ELEMENT_LINK]: LinkElement,
+            [ELEMENT_H1]: withProps(HeadingElement, { variant: 'h1' }),
+            [ELEMENT_H2]: withProps(HeadingElement, { variant: 'h2' }),
+            [ELEMENT_UL]: withProps(ListElement, { variant: 'ul' }),
+            [ELEMENT_OL]: withProps(ListElement, { variant: 'ol' }),
+            [ELEMENT_LI]: withProps(PlateElement, { as: 'li' }),
+            [ELEMENT_PARAGRAPH]: ParagraphElement,
+            [MARK_BOLD]: withProps(PlateLeaf, { as: 'strong' }),
+            [MARK_CODE]: CodeLeaf,
+            [MARK_ITALIC]: withProps(PlateLeaf, { as: 'em' }),
+            [MARK_KBD]: KbdLeaf,
+            [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: 's' }),
+            [MARK_UNDERLINE]: withProps(PlateLeaf, { as: 'u' }),
+            [ELEMENT_MENTION]: MentionElement,
           },
-        },
-      }),
-      createSoftBreakPlugin({
-        options: {
-          rules: [{ hotkey: 'shift+enter' }],
-        },
-      }),
-      createTabbablePlugin(),
-      createTrailingBlockPlugin({
-        options: { type: ELEMENT_PARAGRAPH },
-      }),
-      createDeserializeHtmlPlugin(),
-      createDeserializeMdPlugin(),
-      createComboboxPlugin(),
-      createEmojiPlugin(),
-      createMentionPlugin(),
-      createImagePlugin({ options: mediaOptions }),
-    ],
-    {
-      components: {
-        [ELEMENT_BLOCKQUOTE]: BlockquoteElement,
-        [ELEMENT_CODE_BLOCK]: CodeBlockElement,
-        [ELEMENT_CODE_LINE]: CodeLineElement,
-        [ELEMENT_LINK]: LinkElement,
-        [ELEMENT_H1]: withProps(HeadingElement, { variant: 'h1' }),
-        [ELEMENT_H2]: withProps(HeadingElement, { variant: 'h2' }),
-        [ELEMENT_UL]: withProps(ListElement, { variant: 'ul' }),
-        [ELEMENT_OL]: withProps(ListElement, { variant: 'ol' }),
-        [ELEMENT_LI]: withProps(PlateElement, { as: 'li' }),
-        [ELEMENT_PARAGRAPH]: ParagraphElement,
-        [MARK_BOLD]: withProps(PlateLeaf, { as: 'strong' }),
-        [MARK_CODE]: CodeLeaf,
-        [MARK_ITALIC]: withProps(PlateLeaf, { as: 'em' }),
-        [MARK_KBD]: KbdLeaf,
-        [MARK_STRIKETHROUGH]: withProps(PlateLeaf, { as: 's' }),
-        [MARK_UNDERLINE]: withProps(PlateLeaf, { as: 'u' }),
-        [ELEMENT_MENTION]: MentionElement,
-      },
-    }
+        }
+      ),
+    [mediaOptions]
   );
 
   const [innerEditor, setInnerEditor] = useState<PlateEditor<Value>>();
-  const EditorExposer = () => {
+  const EditorExposer = useCallback(() => {
     const editor = useEditorRef(usePlateId());
 
     useEffect(() => {
@@ -204,19 +245,18 @@ export const RichTextEditor = ({
     }, [editor]);
 
     return null;
-  };
+  }, []);
 
-  const defaultValAsRichText: TElement[] | undefined =
-    defaultValue && Array.isArray(defaultValue)
-      ? (defaultValue as TElement[])
-      : defaultValue && typeof defaultValue === 'string'
-        ? ([
-            {
-              type: 'paragraph',
-              children: [{ text: defaultValue ?? '' }] as TDescendant[],
-            },
-          ] as TElement[])
-        : undefined;
+  const handleChange = useCallback(
+    (newValue: TElement[]) => {
+      const isActualChange = innerEditor?.operations.some(
+        (op: { type: string }) => 'set_selection' !== op.type
+      );
+
+      if (isActualChange) onChange({ target: { name: name, value: newValue } });
+    },
+    [innerEditor, onChange]
+  );
 
   return (
     <>
@@ -243,13 +283,7 @@ export const RichTextEditor = ({
           id={uniqueId}
           initialValue={defaultValAsRichText}
           plugins={plugins}
-          onChange={(newValue) => {
-            const isActualChange = innerEditor?.operations.some(
-              (op: { type: string }) => 'set_selection' !== op.type
-            );
-
-            if (isActualChange) onChange({ target: { name: name, value: newValue } });
-          }}
+          onChange={handleChange}
           readOnly={disabled}
           // Switch keys to reset the editor when going to enabled
           key={disabled ? 'disabled' : undefined}
@@ -267,81 +301,31 @@ export const RichTextEditor = ({
       </section>
     </>
   );
-};
+});
+InnerRichTextEditor.displayName = 'InnerRichTextEditor';
 
-// const MENTIONABLES: TComboboxItem[] = [
-//   { key: '0', text: 'Aayla Secura' },
-//   { key: '1', text: 'Adi Gallia' },
-//   {
-//     key: '2',
-//     text: 'Admiral Dodd Rancit',
-//   },
-//   {
-//     key: '3',
-//     text: 'Admiral Firmus Piett',
-//   },
-//   {
-//     key: '4',
-//     text: 'Admiral Gial Ackbar',
-//   },
-//   { key: '5', text: 'Admiral Ozzel' },
-//   { key: '6', text: 'Admiral Raddus' },
-//   {
-//     key: '7',
-//     text: 'Admiral Terrinald Screed',
-//   },
-//   { key: '8', text: 'Admiral Trench' },
-//   {
-//     key: '9',
-//     text: 'Admiral U.O. Statura',
-//   },
-//   { key: '10', text: 'Agen Kolar' },
-//   { key: '11', text: 'Agent Kallus' },
-//   {
-//     key: '12',
-//     text: 'Aiolin and Morit Astarte',
-//   },
-//   { key: '13', text: 'Aks Moe' },
-//   { key: '14', text: 'Almec' },
-//   { key: '15', text: 'Alton Kastle' },
-//   { key: '16', text: 'Amee' },
-//   { key: '17', text: 'AP-5' },
-//   { key: '18', text: 'Armitage Hux' },
-//   { key: '19', text: 'Artoo' },
-//   { key: '20', text: 'Arvel Crynyd' },
-//   { key: '21', text: 'Asajj Ventress' },
-//   { key: '22', text: 'Aurra Sing' },
-//   { key: '23', text: 'AZI-3' },
-//   { key: '24', text: 'Bala-Tik' },
-//   { key: '25', text: 'Barada' },
-//   { key: '26', text: 'Bargwill Tomder' },
-//   { key: '27', text: 'Baron Papanoida' },
-//   { key: '28', text: 'Barriss Offee' },
-//   { key: '29', text: 'Baze Malbus' },
-//   { key: '30', text: 'Bazine Netal' },
-//   { key: '31', text: 'BB-8' },
-//   { key: '32', text: 'BB-9E' },
-//   { key: '33', text: 'Ben Quadinaros' },
-//   { key: '34', text: 'Berch Teller' },
-//   { key: '35', text: 'Beru Lars' },
-//   { key: '36', text: 'Bib Fortuna' },
-//   {
-//     key: '37',
-//     text: 'Biggs Darklighter',
-//   },
-//   { key: '38', text: 'Black Krrsantan' },
-//   { key: '39', text: 'Bo-Katan Kryze' },
-//   { key: '40', text: 'Boba Fett' },
-//   { key: '41', text: 'Bobbajo' },
-//   { key: '42', text: 'Bodhi Rook' },
-//   { key: '43', text: 'Borvo the Hutt' },
-//   { key: '44', text: 'Boss Nass' },
-//   { key: '45', text: 'Bossk' },
-//   {
-//     key: '46',
-//     text: 'Breha Antilles-Organa',
-//   },
-//   { key: '47', text: 'Bren Derlin' },
-//   { key: '48', text: 'Brendol Hux' },
-//   { key: '49', text: 'BT-1' },
-// ];
+const RichTextEditor = memo(({ defaultValue, onChange, ...props }: RTEProps) => {
+  const [activeDefaultValue, setActiveDefaultValue] = useState(defaultValue);
+  useEffect(() => {
+    if (!activeDefaultValue) {
+      setActiveDefaultValue(defaultValue);
+    }
+  }, [defaultValue]);
+
+  const handleChange = useCallback(
+    (e: {
+      target: {
+        name: string;
+        value: RichText;
+      };
+    }) => onChange(e),
+    [onChange]
+  );
+
+  return (
+    <InnerRichTextEditor {...props} defaultValue={activeDefaultValue} onChange={handleChange} />
+  );
+});
+
+RichTextEditor.displayName = 'RichTextEditor';
+export { RichTextEditor };

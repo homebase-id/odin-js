@@ -1,18 +1,12 @@
 import { FC, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ActionButton,
-  ActionButtonProps,
-  ConfirmDialogProps,
-  Ellipsis,
-  FakeAnchor,
-  t,
-  useMostSpace,
-  usePortal,
-} from '@youfoundation/common-app';
-import { ConfirmDialog } from '@youfoundation/common-app';
-
-import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
+import { ConfirmDialogProps, ConfirmDialog } from '../../dialogs';
+import { t } from '../../helpers';
+import { usePortal, useOutsideTrigger, useMostSpace } from '../../hooks';
+import { Ellipsis } from '../Icons/Ellipsis';
+import { IconProps } from '../Icons/Types';
+import { ActionButtonProps, ActionButton } from './ActionButton';
+import { FakeAnchor } from './FakeAnchor';
 
 export interface ActionGroupOptionProps {
   icon?: FC<IconProps>;
@@ -25,7 +19,7 @@ export interface ActionGroupOptionProps {
 
 export interface ActionGroupProps extends Omit<ActionButtonProps, 'onClick'> {
   buttonClassName?: string;
-  options: ActionGroupOptionProps[];
+  options: (ActionGroupOptionProps | undefined)[];
 }
 
 export const ActionGroup = ({
@@ -54,7 +48,7 @@ export const ActionGroup = ({
       } overflow-auto rounded-md border-gray-200 border-opacity-80 shadow-md dark:border-gray-700`}
     >
       <ul className={`block`}>
-        {options.map((option) => {
+        {(options.filter(Boolean) as ActionGroupOptionProps[]).map((option) => {
           return (
             <ActionOption
               {...option}

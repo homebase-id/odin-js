@@ -32,6 +32,7 @@ export const useReaction = () => {
       | Omit<NewHomebaseFile<RawReactionContent>, 'serverMetadata'>;
   }) => {
     return await saveComment(dotYouClient, context, {
+      ...commentData,
       fileMetadata: {
         ...commentData.fileMetadata,
         appData: {
@@ -105,7 +106,7 @@ export const useReaction = () => {
                     comment.fileMetadata.globalTransitId ===
                     (toSaveCommentData.commentData as HomebaseFile<ReactionFile>).fileMetadata
                       .globalTransitId
-                      ? toSaveCommentData
+                      ? toSaveCommentData.commentData
                       : comment
                   ) as HomebaseFile<ReactionFile>[],
                 };

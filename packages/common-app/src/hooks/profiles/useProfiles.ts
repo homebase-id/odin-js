@@ -5,8 +5,8 @@ import {
   removeProfileDefinition,
   saveProfileDefinition,
 } from '@youfoundation/js-lib/profile';
-import { useDotYouClient } from '@youfoundation/common-app';
 import { slugify } from '@youfoundation/js-lib/helpers';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export interface ProfileDefinitionVm extends ProfileDefinition {
   slug: string;

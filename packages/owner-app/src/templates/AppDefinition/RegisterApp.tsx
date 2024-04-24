@@ -357,7 +357,11 @@ export const permissionParamToPermissionSet = (
   queryParamVal: string | undefined
 ): PermissionSet => {
   return {
-    keys: queryParamVal?.split(',').map((str) => parseInt(str)) ?? [],
+    keys:
+      queryParamVal
+        ?.split(',')
+        .map((str) => parseInt(str))
+        .filter((val) => !!val) ?? [],
   };
 };
 

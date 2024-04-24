@@ -4,6 +4,7 @@ import {
   ConnectionName,
   Block,
   t,
+  getOdinIdColor,
 } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
@@ -132,7 +133,7 @@ const ChatTextMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? (
-        <p className="font-semibold">
+        <p className={`font-semibold`} style={{ color: getOdinIdColor(authorOdinId).darkTheme }}>
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}
@@ -247,7 +248,7 @@ const ChatMediaMessageBody = ({
       }`}
     >
       {isGroupChat && !messageFromMe ? (
-        <p className="font-semibold">
+        <p className={`font-semibold`} style={{ color: getOdinIdColor(authorOdinId).darkTheme }}>
           <ConnectionName odinId={authorOdinId} />
         </p>
       ) : null}

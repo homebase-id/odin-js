@@ -167,15 +167,17 @@ const markChatAsRead = async (
       return getChatMessageByGlobalTransitId(dotYouClient, conversationId, msgId);
     })
   );
+
   const updateSuccess = await Promise.all(
     chatMessages
       // Only update messages from the current user
       .filter(
         (chatMessage) =>
-          !chatMessage?.fileMetadata.senderOdinId || chatMessage?.fileMetadata.senderOdinId === ''
+          chatMessage &&
+          (!chatMessage?.fileMetadata.senderOdinId || chatMessage?.fileMetadata.senderOdinId === '')
       )
       .map(async (chatMessage) => {
-        if (!chatMessage) return false;
+        if (!chatMessage) return true;
 
         chatMessage.fileMetadata.appData.content.deliveryDetails = {
           ...chatMessage.fileMetadata.appData.content.deliveryDetails,
@@ -207,6 +209,7 @@ const markChatAsRead = async (
   );
 
   queryClient.invalidateQueries({ queryKey: ['chat-messages', conversationId] });
+
   if (updateSuccess.every((success) => success)) return command.id;
   return null;
 };

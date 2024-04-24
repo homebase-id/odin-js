@@ -6,13 +6,14 @@ import {
   removePost,
 } from '@youfoundation/js-lib/public';
 import { NewMediaFile, MediaFile } from '@youfoundation/js-lib/core';
-import { getRichTextFromString, useDotYouClient } from '@youfoundation/common-app';
 import {
   HomebaseFile,
   MultiRequestCursoredResult,
   NewHomebaseFile,
   UploadResult,
 } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../auth/useDotYouClient';
+import { getRichTextFromString } from '../../../helpers/richTextHelper';
 
 export const usePost = () => {
   const dotYouClient = useDotYouClient().getDotYouClient();
@@ -104,7 +105,12 @@ export const usePost = () => {
           ],
         });
 
-        queryClient.removeQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', '', ''],
+        });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
@@ -209,7 +215,12 @@ export const usePost = () => {
           ],
         });
 
-        queryClient.removeQueries({ queryKey: ['blogs'] });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', '', ''],
+        });
 
         // Update versionTag of post in social feeds cache
         const previousFeed:
@@ -253,7 +264,13 @@ export const usePost = () => {
         } else {
           queryClient.invalidateQueries({ queryKey: ['blog'] });
         }
-        queryClient.invalidateQueries({ queryKey: ['blogs'] });
+
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', variables.postFile.fileMetadata.appData.content.channelId || '', ''],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['blogs', '', ''],
+        });
       },
     }),
   };

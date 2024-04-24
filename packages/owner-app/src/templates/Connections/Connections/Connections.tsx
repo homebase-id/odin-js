@@ -198,7 +198,7 @@ const ActiveConnectionSection = ({
     hasNextPage: activeHasNextPageOnServer,
     fetchNextPage: fetchNextActivePage,
   } = useActiveConnections({
-    pageSize: 6,
+    pageSize: 18,
   }).fetch;
 
   useEffect(() => {

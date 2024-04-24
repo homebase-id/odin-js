@@ -1,18 +1,17 @@
 import { PostContent } from '@youfoundation/js-lib/public';
 import { FC } from 'react';
-import {
-  ErrorBoundary,
-  FakeAnchor,
-  HOME_ROOT_PATH,
-  PostBody,
-  PostInteracts,
-  useDotYouClient,
-} from '@youfoundation/common-app';
-import { useChannel } from '@youfoundation/common-app';
 import { PostMeta } from '../Blocks/Meta/Meta';
-import { DoubleClickHeartForMedia } from '@youfoundation/common-app';
 import { useNavigate } from 'react-router-dom';
 import { HomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { useChannel } from '../../hooks/posts/channels/useChannel';
+import { HOME_ROOT_PATH } from '../../core';
+import { useDotYouClient } from '../../hooks';
+import { FakeAnchor, ErrorBoundary } from '../../ui';
+import { AuthorImage } from '../Blocks/Author/Image';
+import { AuthorName } from '../Blocks/Author/Name';
+import { PostBody } from '../Blocks/Body/Body';
+import { PostInteracts } from '../Blocks/Interacts/PostInteracts';
+import { DoubleClickHeartForMedia } from '../Blocks/Media/DoubleClickHeartForMedia';
 
 interface PostTeaserProps {
   className?: string;
@@ -23,6 +22,7 @@ interface PostTeaserProps {
   allowExpand?: boolean;
   hideEmbeddedPostMedia?: boolean;
   login?: () => void;
+  showAuthor?: boolean;
 }
 
 export const PostTeaser: FC<PostTeaserProps> = ({
@@ -34,6 +34,7 @@ export const PostTeaser: FC<PostTeaserProps> = ({
   allowExpand,
   hideEmbeddedPostMedia,
   login,
+  showAuthor,
 }) => {
   const post = postFile.fileMetadata.appData.content;
   const { data: channel } = useChannel({ channelId: post.channelId }).fetch;
@@ -72,7 +73,20 @@ export const PostTeaser: FC<PostTeaserProps> = ({
               }}
             />
             <div className="p-4">
-              <div className="text-foreground/60 flex flex-row">
+              <div className="text-foreground/60 flex flex-row items-center">
+                {showAuthor ? (
+                  <>
+                    <AuthorImage
+                      odinId={post.authorOdinId}
+                      className="h-10 w-10 rounded-full sm:h-12 sm:w-12 md:h-[2rem] md:w-[2rem]"
+                    />
+                    <h2 className="ml-2">
+                      <AuthorName odinId={post.authorOdinId} />
+                    </h2>
+                    <span className="hidden px-2 leading-4 md:block">·</span>
+                  </>
+                ) : null}
+
                 {channel && post ? (
                   <PostMeta postFile={postFile} channel={showChannel ? channel : undefined} />
                 ) : null}

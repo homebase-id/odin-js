@@ -1,5 +1,5 @@
 import { ChannelDefinition, Article, getChannelDrive } from '@youfoundation/js-lib/public';
-import { lazy, useState } from 'react';
+import { lazy, useMemo, useState } from 'react';
 import {
   t,
   ErrorBoundary,
@@ -18,6 +18,7 @@ import {
   MediaFile,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
+import { MediaOptions } from '@youfoundation/rich-text-editor/src/editor/ImagePlugin/ImagePlugin';
 const RichTextEditor = lazy(() =>
   import('@youfoundation/rich-text-editor').then((m) => ({ default: m.RichTextEditor }))
 );
@@ -59,6 +60,24 @@ export const InnerFieldEditors = ({
   ) as NewMediaFile | null;
 
   const targetDrive = getChannelDrive(channel.fileMetadata.appData.uniqueId as string);
+  const mediaOptions: MediaOptions = useMemo(
+    () => ({
+      fileId: postFile.fileId || '',
+      mediaDrive: targetDrive,
+      pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
+      onAppend: async (file) => {
+        const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
+
+        setFiles([...files, { file: file, key: fileKey }]);
+        return { fileId: postFile.fileId || '', fileKey: fileKey };
+      },
+      onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
+        setFiles(files.filter((f) => f.key !== fileKey));
+        return true;
+      },
+    }),
+    [postFile.fileId, files, setFiles]
+  );
 
   return (
     <>
@@ -170,21 +189,7 @@ export const InnerFieldEditors = ({
             <RichTextEditor
               defaultValue={(postFile.fileMetadata.appData.content as Article)?.body}
               placeholder={t('Start writing...')}
-              mediaOptions={{
-                fileId: postFile.fileId || '',
-                mediaDrive: targetDrive,
-                pendingUploadFiles: files.filter((f) => 'file' in f) as NewMediaFile[],
-                onAppend: async (file) => {
-                  const fileKey = `${POST_MEDIA_RTE_PAYLOAD_KEY}i${files.length}`;
-
-                  setFiles([...files, { file: file, key: fileKey }]);
-                  return { fileId: postFile.fileId || '', fileKey: fileKey };
-                },
-                onRemove: async ({ fileKey }: { fileId: string; fileKey: string }) => {
-                  setFiles(files.filter((f) => f.key !== fileKey));
-                  return true;
-                },
-              }}
+              mediaOptions={mediaOptions}
               name="body"
               onChange={onChange}
               className="min-h-[50vh]"

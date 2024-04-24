@@ -1,8 +1,9 @@
 import { ChannelDefinition, PostContent } from '@youfoundation/js-lib/public';
-import { t, useBlogPostsInfinite } from '@youfoundation/common-app';
-import { ChannelDefinitionVm } from '@youfoundation/common-app';
 import { PostTeaser } from '../PostListItem/PostTeaser';
 import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { useBlogPostsInfinite } from '../../hooks/posts/useBlogPostsInfinite';
+import { ChannelDefinitionVm } from '../../hooks/posts/channels/useChannels';
+import { t } from '../../helpers/i18n/dictionary';
 
 export const RelatedArticles = ({
   blog,
@@ -43,6 +44,7 @@ export const RelatedArticles = ({
                 key={postFile.fileMetadata.appData.content.id}
                 className={`p-1 sm:w-1/2 md:w-1/3`}
                 forceAspectRatio={true}
+                showAuthor={channel?.fileMetadata.appData.content.isCollaborative}
               />
             );
           })}

@@ -24,7 +24,7 @@ const ProfileHero = ({ hideLinks }: { hideLinks?: boolean }) => {
   return (
     <>
       <section className="bg-background">
-        <div className="relative min-h-[10rem] bg-slate-50">
+        <div className="relative min-h-[10rem] bg-background">
           <Image
             fileId={(home?.templateSettings as ThemeLinksSettings)?.imageFileId}
             fileKey={(home?.templateSettings as ThemeLinksSettings)?.headerImageKey}

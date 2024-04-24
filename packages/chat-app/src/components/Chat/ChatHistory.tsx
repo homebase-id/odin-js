@@ -131,8 +131,8 @@ export const ChatHistory = ({
                     key={item.key}
                     data-index={item.index}
                     ref={virtualizer.measureElement}
-                    className="sm:min-h-[10rem]"
-                    // h-10rem keeps space for the context menu of the first item; otherwise the context menu would be cut off by the overflow-hidden
+                    className="sm:min-h-[22rem]"
+                    // h-22rem keeps space for the context menu/emoji selector of the first item; otherwise the context menu would be cut off by the overflow-hidden
                   >
                     {hasMoreMessages || isFetchingNextPage ? (
                       <div className="animate-pulse" key={'loading'}>

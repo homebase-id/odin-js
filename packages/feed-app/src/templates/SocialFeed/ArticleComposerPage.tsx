@@ -15,14 +15,14 @@ import {
   Trash,
   useDebounce,
   usePortal,
+  t,
+  ChannelOrAclSelector,
 } from '@youfoundation/common-app';
-import { t } from '@youfoundation/common-app';
 import { InnerFieldEditors } from '../../components/SocialFeed/ArticleFieldsEditor/ArticleFieldsEditor';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { Article, ChannelDefinition, ReactAccess } from '@youfoundation/js-lib/public';
 import { useArticleComposer } from '@youfoundation/common-app';
-import { ChannelOrAclSelector } from '../../components/SocialFeed/PostComposer';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { HomebaseFile, NewHomebaseFile, RichText } from '@youfoundation/js-lib/core';
 import { ROOT_PATH } from '../../app/App';
@@ -122,6 +122,48 @@ export const ArticleComposerPage = () => {
     );
   };
 
+  const handleRTEChange = useCallback(
+    (e: {
+      target: {
+        name: string;
+        value: string | { fileKey: string; type: string } | RichText | undefined;
+      };
+    }) => {
+      setPostFile((oldPostFile) => {
+        const dirtyPostFile = { ...oldPostFile };
+
+        if (e.target.name === 'abstract') {
+          dirtyPostFile.fileMetadata.appData.content.abstract = (e.target.value as string).trim();
+        } else if (e.target.name === 'caption') {
+          dirtyPostFile.fileMetadata.appData.content.caption = (e.target.value as string).trim();
+        } else if (e.target.name === 'primaryMediaFile') {
+          if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
+            dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
+              fileId: undefined,
+              fileKey: e.target.value.fileKey,
+              type: e.target.value.type,
+            };
+          } else {
+            dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
+          }
+        } else if (e.target.name === 'body') {
+          dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
+        }
+
+        return {
+          ...dirtyPostFile,
+          fileMetadata: {
+            ...dirtyPostFile.fileMetadata,
+            versionTag: oldPostFile.fileMetadata.versionTag,
+          },
+        };
+      });
+
+      debouncedSave();
+    },
+    [setPostFile, debouncedSave]
+  );
+
   return (
     <>
       <PageMeta
@@ -198,39 +240,7 @@ export const ArticleComposerPage = () => {
               channel={channel}
               files={files}
               setFiles={setFiles}
-              onChange={(e) => {
-                const dirtyPostFile = { ...postFile };
-                if (e.target.name === 'abstract') {
-                  dirtyPostFile.fileMetadata.appData.content.abstract = (
-                    e.target.value as string
-                  ).trim();
-                } else if (e.target.name === 'caption') {
-                  dirtyPostFile.fileMetadata.appData.content.caption = (
-                    e.target.value as string
-                  ).trim();
-                } else if (e.target.name === 'primaryMediaFile') {
-                  if (typeof e.target.value === 'object' && 'fileKey' in e.target.value) {
-                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = {
-                      fileId: undefined,
-                      fileKey: e.target.value.fileKey,
-                      type: e.target.value.type,
-                    };
-                  } else {
-                    dirtyPostFile.fileMetadata.appData.content.primaryMediaFile = undefined;
-                  }
-                } else if (e.target.name === 'body') {
-                  dirtyPostFile.fileMetadata.appData.content.body = e.target.value as RichText;
-                }
-
-                setPostFile((oldPostFile) => ({
-                  ...dirtyPostFile,
-                  fileMetadata: {
-                    ...dirtyPostFile.fileMetadata,
-                    versionTag: oldPostFile.fileMetadata.versionTag,
-                  },
-                }));
-                debouncedSave();
-              }}
+              onChange={handleRTEChange}
             />
 
             <div className="mb-5 flex md:hidden">

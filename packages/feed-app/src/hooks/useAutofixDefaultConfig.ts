@@ -2,7 +2,7 @@ import { useChannel } from '@youfoundation/common-app';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 import { useEffect } from 'react';
 
-export const useAutofixDefaultConfig = () => {
+const useFixMissingPublicChannel = () => {
   const { data: publicChannel, isFetched } = useChannel({
     channelId: BlogConfig.PublicChannelId,
   }).fetch;
@@ -14,4 +14,8 @@ export const useAutofixDefaultConfig = () => {
       saveChannel(BlogConfig.PublicChannelNewDsr);
     }
   }, [isFetched]);
+};
+
+export const useAutofixDefaultConfig = () => {
+  useFixMissingPublicChannel();
 };
