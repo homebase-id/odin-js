@@ -49,11 +49,16 @@ const POST_MEDIA_PAYLOAD_KEY = 'pst_mdi';
 export const savePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
   file: HomebaseFile<T> | NewHomebaseFile<T>,
+  odinId: string | undefined,
   channelId: string,
   toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult> => {
+  if (odinId) {
+    throw new Error('[PostUploadProvider] savePost: odinId is not implemented yet');
+  }
+
   if (!file.fileMetadata.appData.content.id) {
     // The content id is set once, and then never updated to keep the permalinks correct at all times; Even when the slug changes
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug

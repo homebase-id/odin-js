@@ -18,7 +18,12 @@ import { AclIcon, AclSummary, AclDialog } from '../../acl';
 import { ChannelsDialog } from '../../channels';
 import { VolatileInput, FileOverview, FileSelector } from '../../form';
 import { t, getImagesFromPasteEvent, getVideosFromPasteEvent } from '../../helpers';
-import { useDotYouClient, usePostComposer, useChannels } from '../../hooks';
+import {
+  useDotYouClient,
+  usePostComposer,
+  useChannels,
+  useCollaborativeChannels,
+} from '../../hooks';
 import {
   ActionGroup,
   Globe,
@@ -54,10 +59,14 @@ export const PostComposer = ({
   const selectRef = useRef<HTMLSelectElement>(null);
 
   const [caption, setCaption] = useState<string>('');
-  const [channel, setChannel] = useState<
-    HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>
-  >(forcedChannel || BlogConfig.PublicChannelNewDsr);
-  const [customAcl, setCustomAcl] = useState<AccessControlList | undefined>(undefined);
+
+  const [targetChannel, setTargetChannel] = useState<{
+    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+    overrideAcl?: AccessControlList | undefined;
+    odinId?: string | undefined;
+  }>({
+    channel: forcedChannel || BlogConfig.PublicChannelNewDsr,
+  });
   const [files, setFiles] = useState<NewMediaFile[]>();
 
   const [reactAccess, setReactAccess] = useState<ReactAccess | undefined>(undefined);
@@ -66,7 +75,7 @@ export const PostComposer = ({
 
   const doPost = async () => {
     if (isPosting) return;
-    await savePost(caption, files, embeddedPost, channel, reactAccess, customAcl);
+    await savePost(caption, files, embeddedPost, targetChannel, reactAccess);
     resetUi();
     onPost && onPost();
   };
@@ -197,7 +206,7 @@ export const PostComposer = ({
                     ? [
                         {
                           label: t('Convert to an article'),
-                          href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${channel.fileMetadata.appData.uniqueId}`,
+                          href: `${FEED_ROOT_PATH}/new?caption=${caption}&channel=${targetChannel.channel.fileMetadata.appData.uniqueId}`,
                           icon: Article,
                         },
                         {
@@ -216,12 +225,15 @@ export const PostComposer = ({
             <ChannelOrAclSelector
               className="max-w-[35%] flex-shrink"
               defaultChannelValue={
-                channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
+                targetChannel.channel?.fileMetadata?.appData?.uniqueId || BlogConfig.PublicChannelId
               }
-              defaultAcl={customAcl}
-              onChange={(channel, acl) => {
-                channel && setChannel(channel);
-                setCustomAcl(acl);
+              defaultAcl={targetChannel.overrideAcl}
+              onChange={(newTargetChannel) => {
+                setTargetChannel((current) => ({
+                  ...current,
+                  ...newTargetChannel,
+                  channel: newTargetChannel.channel || current.channel,
+                }));
               }}
               excludeMore={true}
               ref={selectRef}
@@ -233,17 +245,25 @@ export const PostComposer = ({
             } ${postState === 'uploading' ? 'pointer-events-none animate-pulse' : ''}`}
             icon={Arrow}
           >
-            {channel.serverMetadata?.accessControlList && canPost ? (
+            {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
               <AclIcon
                 className="mr-3 h-5 w-5"
-                acl={customAcl || channel.serverMetadata?.accessControlList}
+                acl={
+                  targetChannel.overrideAcl ||
+                  targetChannel.channel.serverMetadata?.accessControlList
+                }
               />
             ) : null}
             <span className="flex flex-col">
               {t('Post')}{' '}
-              {channel.serverMetadata?.accessControlList && canPost ? (
+              {targetChannel.channel.serverMetadata?.accessControlList && canPost ? (
                 <small className="flex flex-row items-center gap-1 leading-none">
-                  <AclSummary acl={customAcl || channel.serverMetadata?.accessControlList} />{' '}
+                  <AclSummary
+                    acl={
+                      targetChannel.overrideAcl ||
+                      targetChannel.channel.serverMetadata?.accessControlList
+                    }
+                  />{' '}
                 </small>
               ) : null}
             </span>
@@ -266,21 +286,25 @@ export const ChannelOrAclSelector = React.forwardRef(
       disabled,
       excludeMore,
       excludeCustom,
+      excludeCollaborative,
     }: {
       className?: string;
       defaultChannelValue?: string;
       defaultAcl?: AccessControlList;
-      onChange: (
-        channel: HomebaseFile<ChannelDefinition> | undefined,
-        acl: AccessControlList | undefined
-      ) => void;
+      onChange: (data: {
+        odinId: string | undefined;
+        channel: HomebaseFile<ChannelDefinition> | undefined;
+        acl: AccessControlList | undefined;
+      }) => void;
       disabled?: boolean;
       excludeMore?: boolean;
       excludeCustom?: boolean;
+      excludeCollaborative?: boolean;
     },
     ref: Ref<HTMLSelectElement>
   ) => {
     const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
+    const { data: collaborativeChannels } = useCollaborativeChannels(!excludeCollaborative).fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
     const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
 
@@ -319,14 +343,34 @@ export const ChannelOrAclSelector = React.forwardRef(
         e.target.value = getDefaultChannel();
       } else if (e.target.value === 'custom') {
         setIsCustomAclOpen(true);
-        // e.target.value = getPublicChannel();
       } else {
-        onChange(
-          channels.find((chnl) =>
-            stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, e.target.value)
-          ),
-          undefined
+        const localChannel = channels.find((chnl) =>
+          stringGuidsEqual(chnl.fileMetadata.appData.uniqueId, e.target.value)
         );
+        if (localChannel) {
+          onChange({
+            channel: localChannel,
+            acl: undefined,
+            odinId: undefined,
+          });
+          return;
+        }
+
+        const collaborativeChannel = collaborativeChannels?.find((collaborative) =>
+          collaborative.channels.find((channel) =>
+            stringGuidsEqual(channel.fileMetadata.appData.uniqueId, e.target.value)
+          )
+        );
+        if (collaborativeChannel) {
+          onChange({
+            channel: collaborativeChannel.channels.find((channel) =>
+              stringGuidsEqual(channel.fileMetadata.appData.uniqueId, e.target.value)
+            ),
+            acl: undefined,
+            odinId: collaborativeChannel.odinId,
+          });
+          return;
+        }
       }
     };
 
@@ -357,6 +401,23 @@ export const ChannelOrAclSelector = React.forwardRef(
             ))}
           </optgroup>
 
+          {!excludeCollaborative && collaborativeChannels?.length ? (
+            <>
+              {collaborativeChannels?.map((collaborative) => (
+                <optgroup label={collaborative.odinId} key={collaborative.odinId}>
+                  {collaborative.channels.map((channel) => (
+                    <option
+                      value={channel.fileMetadata.appData.uniqueId}
+                      key={channel.fileMetadata.appData.uniqueId}
+                    >
+                      {channel.fileMetadata.appData.content.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </>
+          ) : null}
+
           {!excludeMore || !excludeCustom ? (
             <optgroup label={t('Advanced')}>
               {!excludeMore ? (
@@ -382,7 +443,7 @@ export const ChannelOrAclSelector = React.forwardRef(
           }
           title={t('Who can see your post?')}
           onConfirm={(acl) => {
-            onChange(publicChannel, acl);
+            onChange({ channel: publicChannel, acl, odinId: undefined });
             setIsCustomAclOpen(false);
           }}
           isOpen={isCustomAclOpen}

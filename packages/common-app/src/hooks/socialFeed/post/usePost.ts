@@ -21,15 +21,19 @@ export const usePost = () => {
 
   const savePost = async ({
     postFile,
+    odinId,
     channelId,
     mediaFiles,
     onUpdate,
   }: {
     postFile: NewHomebaseFile<PostContent> | HomebaseFile<PostContent>;
+    odinId?: string;
     channelId: string;
     mediaFiles?: (NewMediaFile | MediaFile)[];
     onUpdate?: (progress: number) => void;
   }) => {
+    console.log('savePost', odinId);
+
     return new Promise<UploadResult>((resolve, reject) => {
       const onVersionConflict = async () => {
         const serverPost = await getPost<PostContent>(
@@ -52,7 +56,7 @@ export const usePost = () => {
             },
           },
         };
-        savePostFile(dotYouClient, newPost, channelId, mediaFiles, onVersionConflict).then(
+        savePostFile(dotYouClient, newPost, odinId, channelId, mediaFiles, onVersionConflict).then(
           (result) => {
             if (result) resolve(result);
           }
@@ -62,7 +66,15 @@ export const usePost = () => {
       postFile.fileMetadata.appData.content.captionAsRichText = getRichTextFromString(
         postFile.fileMetadata.appData.content.caption.trim()
       );
-      savePostFile(dotYouClient, postFile, channelId, mediaFiles, onVersionConflict, onUpdate)
+      savePostFile(
+        dotYouClient,
+        postFile,
+        odinId,
+        channelId,
+        mediaFiles,
+        onVersionConflict,
+        onUpdate
+      )
         .then((result) => {
           if (result) resolve(result);
         })

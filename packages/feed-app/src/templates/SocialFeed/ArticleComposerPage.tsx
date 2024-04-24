@@ -350,10 +350,11 @@ const OptionsDialog = ({
           <ChannelOrAclSelector
             className={`w-full rounded border border-gray-300 px-3 py-1 focus:border-indigo-500 dark:border-gray-700`}
             defaultChannelValue={postFile.fileMetadata.appData.content?.channelId}
-            onChange={setNewChannel}
+            onChange={({ channel }) => setNewChannel(channel)}
             disabled={isPublished}
             excludeMore={true}
             excludeCustom={true}
+            excludeCollaborative={true}
           />
         </div>
         <div className="flex flex-row-reverse gap-2 py-3">

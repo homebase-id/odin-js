@@ -30,12 +30,16 @@ export const usePostComposer = () => {
     caption: string | undefined,
     mediaFiles: NewMediaFile[] | undefined,
     embeddedPost: EmbeddedPost | undefined,
-    channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>,
-    reactAccess: ReactAccess | undefined,
-    overrideAcl: AccessControlList | undefined
+    targetChannel: {
+      channel: HomebaseFile<ChannelDefinition> | NewHomebaseFile<ChannelDefinition>;
+      overrideAcl?: AccessControlList;
+      odinId?: string;
+    },
+    reactAccess: ReactAccess | undefined
   ) => {
     if (!mediaFiles && !caption && !embeddedPost) return;
 
+    const { channel, overrideAcl, odinId } = targetChannel;
     if (
       overrideAcl &&
       !stringGuidsEqual(channel.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
@@ -82,6 +86,7 @@ export const usePostComposer = () => {
 
       await savePostFile({
         postFile: postFile,
+        odinId: odinId,
         channelId: channel.fileMetadata.appData.uniqueId as string,
         mediaFiles: mediaFiles,
         onUpdate: (progress) => setProcessingProgress(progress),
