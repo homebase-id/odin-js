@@ -5,11 +5,12 @@ import {
   TypedConnectionNotification,
 } from '@youfoundation/js-lib/core';
 import { ReactNode, useCallback, useState } from 'react';
-
-import { DomainHighlighter, t, useNotificationSubscriber } from '@youfoundation/common-app';
 import { useQueryClient } from '@tanstack/react-query';
 import { BlogConfig } from '@youfoundation/js-lib/public';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { t } from '../../helpers/i18n/dictionary';
+import { DomainHighlighter } from '../../ui/DomainHighlighter/DomainHighlighter';
+import { useNotificationSubscriber } from '../transitProcessor/useNotificationSubscriber';
 
 interface Notification {
   title: string;

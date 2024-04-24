@@ -1,31 +1,28 @@
 import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  AclIcon,
-  AclSummary,
-  AclWizard,
-  ActionButton,
-  ActionGroup,
-  ChannelDefinitionVm,
-  CheckboxToggle,
-  Pencil,
-  Persons,
-  Textarea,
-  Trash,
-  useChannels,
-  t,
-  useChannel,
-  usePortal,
-  Input,
-  Label,
-  DialogWrapper,
-  Plus,
-  Quote,
-} from '@youfoundation/common-app';
+
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
 import { BlogConfig, ChannelTemplate } from '@youfoundation/js-lib/public';
 import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { usePortal } from '../hooks/portal/usePortal';
+import { ChannelDefinitionVm, useChannels } from '../hooks/posts/channels/useChannels';
+import { DialogWrapper } from '../ui/Dialog/DialogWrapper';
+import { Quote } from '../ui/Icons/Quote';
+import { ActionButton } from '../ui/Buttons/ActionButton';
+import { Plus } from '../ui/Icons/Plus';
+import { t } from '../helpers/i18n/dictionary';
+import { useChannel } from '../hooks/posts/channels/useChannel';
+import { AclIcon, AclSummary } from '../acl/AclInfo/AclInfo';
+import { Persons } from '../ui/Icons/Persons';
+import { ActionGroup } from '../ui/Buttons/ActionGroup';
+import { Trash } from '../ui/Icons/Trash';
+import { AclWizard } from '../acl/AclWizard/AclWizard';
+import { Label } from '../form/Label';
+import { Input } from '../form/Input';
+import { Textarea } from '../form/Textarea';
+import { CheckboxToggle } from '../form/CheckboxToggle';
+import { Pencil } from '../ui/Icons/Pencil';
 
 export const ChannelsDialog = ({
   isOpen,

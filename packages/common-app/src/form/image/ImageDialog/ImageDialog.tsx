@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DialogWrapper } from '@youfoundation/common-app';
 import { ImageUploadAndCrop } from '../ImageUploadAndCrop';
-import { ActionButton, CropperRef, GetCroppedData, t, usePortal } from '@youfoundation/common-app';
+import { t } from '../../../helpers';
+import { usePortal } from '../../../hooks';
+import { DialogWrapper, ActionButton } from '../../../ui';
+import { CropperRef, GetCroppedData } from './ImageCropper';
 
 export const ImageDialog = ({
   title,

@@ -1,14 +1,10 @@
 import { EmbeddedThumb, MediaFile } from '@youfoundation/js-lib/core';
 import { useState, useRef, useMemo } from 'react';
-import {
-  Image,
-  useIntersection,
-  useDarkMode,
-  Triangle,
-  useDotYouClient,
-} from '@youfoundation/common-app';
+import { Image } from '../../../media/Image';
 import { getChannelDrive } from '@youfoundation/js-lib/public';
 import { useImageCache } from '@youfoundation/ui-lib';
+import { useIntersection, useDotYouClient, useDarkMode } from '../../../hooks';
+import { Triangle } from '../../../ui';
 
 interface MediaGalleryProps {
   odinId?: string;

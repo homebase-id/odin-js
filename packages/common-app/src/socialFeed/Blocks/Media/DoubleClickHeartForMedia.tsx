@@ -1,14 +1,10 @@
-import {
-  useReaction,
-  useDotYouClient,
-  PostMedia,
-  ErrorNotification,
-  useDoubleTap,
-} from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
 import { PostContent, ReactionContext } from '@youfoundation/js-lib/public';
 import React, { useMemo } from 'react';
 import { useRef } from 'react';
+import { useReaction, useDotYouClient, useDoubleTap } from '../../../hooks';
+import { ErrorNotification } from '../../../ui';
+import { PostMedia } from './Media';
 
 export const DoubleClickHeartForMedia = ({
   odinId,

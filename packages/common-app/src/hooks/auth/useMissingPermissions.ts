@@ -1,10 +1,11 @@
-import { useDotYouClient, useSecurityContext } from '@youfoundation/common-app';
 import {
   stringifyToQueryParams,
   getUniqueDrivesWithHighestPermission,
   stringGuidsEqual,
 } from '@youfoundation/js-lib/helpers';
 import { ALL_CONNECTIONS_CIRCLE_ID, AppPermissionType } from '@youfoundation/js-lib/network';
+import { useSecurityContext } from '../securityContext/useSecurityContext';
+import { useDotYouClient } from './useDotYouClient';
 
 const getExtendAuthorizationUrl = (
   identity: string,

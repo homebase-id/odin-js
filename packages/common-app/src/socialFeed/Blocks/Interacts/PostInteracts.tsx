@@ -13,11 +13,10 @@ import {
   CanReactInfo,
 } from '../../../..';
 
-import { CommentTeaser } from './Comments/Comment';
+import { CommentTeaser, Comment } from './Comments/Comment';
 import { CommentComposer } from './Comments/CommentComposer';
 import { LikeButton } from './Reactions/LikeButton';
 
-import { Comment } from '@youfoundation/common-app';
 import { ReactionDetailsDialog } from './ReactionDetailsDialog/ReactionDetailsDialog';
 import { RepostDialog } from './RepostDialog/RepostDialog';
 import { ShareDialog } from './ShareDialog/ShareDialog';

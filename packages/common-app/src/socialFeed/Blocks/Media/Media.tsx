@@ -1,6 +1,7 @@
 import { PostContent } from '@youfoundation/js-lib/public';
-import { MediaGallery, PrimaryMedia } from '@youfoundation/common-app';
 import { DEFAULT_PAYLOAD_KEY, EmbeddedThumb, PayloadDescriptor } from '@youfoundation/js-lib/core';
+import { MediaGallery } from './MediaGallery';
+import { PrimaryMedia } from './PrimaryMedia';
 
 export const PostMedia = ({
   odinId,

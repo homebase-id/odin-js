@@ -1,18 +1,12 @@
 import { FC, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  ActionButton,
-  ActionButtonProps,
-  ConfirmDialogProps,
-  Ellipsis,
-  FakeAnchor,
-  t,
-  useMostSpace,
-  usePortal,
-} from '@youfoundation/common-app';
-import { ConfirmDialog } from '@youfoundation/common-app';
-
-import { IconProps, useOutsideTrigger } from '@youfoundation/common-app';
+import { ConfirmDialogProps, ConfirmDialog } from '../../dialogs';
+import { t } from '../../helpers';
+import { usePortal, useOutsideTrigger, useMostSpace } from '../../hooks';
+import { Ellipsis } from '../Icons/Ellipsis';
+import { IconProps } from '../Icons/Types';
+import { ActionButtonProps, ActionButton } from './ActionButton';
+import { FakeAnchor } from './FakeAnchor';
 
 export interface ActionGroupOptionProps {
   icon?: FC<IconProps>;

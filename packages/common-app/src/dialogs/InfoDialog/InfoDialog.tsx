@@ -1,6 +1,10 @@
 import { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { t, usePortal, DialogWrapper, Question, ActionButton } from '@youfoundation/common-app';
+import { DialogWrapper } from '../../ui/Dialog/DialogWrapper';
+import { usePortal } from '../../hooks/portal/usePortal';
+import { Question } from '../../ui/Icons/Question';
+import { ActionButton } from '../../ui/Buttons/ActionButton';
+import { t } from '../../helpers/i18n/dictionary';
 
 export const InfoDialog = ({
   title,

@@ -1,8 +1,9 @@
 import Cropper from 'react-cropper';
 import './cropper.css';
 import { useEffect, useRef, useState } from 'react';
-import { t, useDebounce } from '@youfoundation/common-app';
-import { Label } from '@youfoundation/common-app';
+import { t } from '../../../helpers';
+import { useDebounce } from '../../../hooks';
+import { Label } from '../../Label';
 
 interface ImageCropperProps {
   imageUrl: string;

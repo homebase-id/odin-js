@@ -1,10 +1,12 @@
 import { CircleDefinition } from '@youfoundation/js-lib/network';
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { t, useCircle, useDotYouClient } from '@youfoundation/common-app';
-import { Arrow } from '@youfoundation/common-app';
-import { Circles } from '@youfoundation/common-app';
-import { LoadingBlock } from '@youfoundation/common-app';
+import { useCircle } from '../../hooks/circles/useCircle';
+import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { Circles } from '../../ui/Icons/Circles';
+import { LoadingBlock } from '../../ui/LoadingBlock/LoadingBlock';
+import { Arrow } from '../../ui/Icons/Arrow';
+import { t } from '../../helpers/i18n/dictionary';
 
 export const CirclePermissionView = ({
   circleDef,
@@ -48,8 +50,8 @@ export const CirclePermissionView = ({
   const checkedClasses = isChecked
     ? 'border-indigo-500 dark:border-indigo-800'
     : isChecked === false
-    ? 'border-slate-100 dark:border-slate-800'
-    : '';
+      ? 'border-slate-100 dark:border-slate-800'
+      : '';
 
   return (
     <LinkWrapper

@@ -1,11 +1,6 @@
 import { PostContent, getChannelDrive } from '@youfoundation/js-lib/public';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ActionButton, FileOverview, Save, VolatileInput, t } from '@youfoundation/common-app';
-import { usePortal } from '@youfoundation/common-app';
-
-import { ErrorNotification } from '@youfoundation/common-app';
-import { DialogWrapper } from '@youfoundation/common-app';
 import { usePost } from '../../hooks/socialFeed/post/usePost';
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -13,6 +8,10 @@ import {
   MediaFile,
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
+import { VolatileInput, FileOverview } from '../../form';
+import { t } from '../../helpers';
+import { usePortal } from '../../hooks';
+import { ErrorNotification, DialogWrapper, ActionButton, Save } from '../../ui';
 
 export const EditPostDialog = ({
   postFile: incomingPostFile,

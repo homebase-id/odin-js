@@ -1,11 +1,4 @@
 import { useMemo } from 'react';
-import {
-  ActionButton,
-  Triangle,
-  Trash,
-  useDotYouClient,
-  ExtensionThumbnail,
-} from '@youfoundation/common-app';
 
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -14,6 +7,11 @@ import {
   NewMediaFile,
 } from '@youfoundation/js-lib/core';
 import { OdinThumbnailImage } from '@youfoundation/ui-lib';
+import { useDotYouClient } from '../../hooks/auth/useDotYouClient';
+import { Triangle } from '../../ui/Icons/Triangle';
+import { ExtensionThumbnail } from './ExtensionThumbnail';
+import { ActionButton } from '../../ui/Buttons/ActionButton';
+import { Trash } from '../../ui/Icons/Trash';
 
 type NewFileArray = NewMediaFile[];
 interface FileOverViewProps {

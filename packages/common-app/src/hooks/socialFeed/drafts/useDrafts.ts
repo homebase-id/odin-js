@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Article, PostContent, getPosts, removePost } from '@youfoundation/js-lib/public';
-import { useChannels, useDotYouClient } from '@youfoundation/common-app';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useChannels } from '../../posts/channels/useChannels';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 
 export const useDrafts = () => {
   const queryClient = useQueryClient();
