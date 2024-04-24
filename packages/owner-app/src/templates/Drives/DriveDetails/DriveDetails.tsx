@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ActionButton, Pencil, t } from '@youfoundation/common-app';
+import { ActionButton, ActionGroup, HeartBeat, Pencil, t } from '@youfoundation/common-app';
 import { useDrive } from '../../../hooks/drives/useDrive';
 
 import { HardDrive } from '@youfoundation/common-app';
@@ -20,6 +20,7 @@ import { PageMeta } from '../../../components/ui/PageMeta/PageMeta';
 import { getDrivePermissionFromNumber, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { TRANSIENT_TEMP_DRIVE_ALIAS } from '@youfoundation/js-lib/core';
 import DriveMetadataEditDialog from '../../../components/Dialog/DriveCircleAccessDialog/DriveMetadataEditDialog';
+import { DriveStatusDialog } from '../../../components/Dialog/DriveStatusDialog/DriveStatusDialog';
 
 const DriveDetails = () => {
   const { driveKey } = useParams();
@@ -41,6 +42,7 @@ const DriveDetails = () => {
   const [isDriveEditOpen, setIsDriveEditOpen] = useState(false);
   const [isCircleSelectorOpen, setIsCircleSelectorOpen] = useState(false);
   const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
+  const [isShowDriveStatus, setIsShowDriveStatus] = useState(false);
 
   if (driveDefLoading) return <LoadingDetailPage />;
 
@@ -79,14 +81,22 @@ const DriveDetails = () => {
         title={`${driveDef.name}`}
         actions={
           <>
-            <ActionButton
-              onClick={async () => doDownload(await exportUnencrypted(driveDef))}
+            <ActionGroup
+              options={[
+                {
+                  label: 'Export',
+                  icon: Download,
+                  onClick: async () => doDownload(await exportUnencrypted(driveDef)),
+                },
+                {
+                  label: 'Drive Status',
+                  icon: HeartBeat,
+                  onClick: () => setIsShowDriveStatus(true),
+                },
+              ]}
               state={exportStatus}
               type="secondary"
-              icon={Download}
-            >
-              {t('Export')}
-            </ActionButton>
+            />
           </>
         }
         breadCrumbs={[
@@ -210,6 +220,12 @@ const DriveDetails = () => {
         onCancel={() => setIsAppSelectorOpen(false)}
         onConfirm={() => setIsAppSelectorOpen(false)}
         title={`${t('Edit access on')} ${driveDef.name}`}
+      />
+
+      <DriveStatusDialog
+        targetDrive={targetDriveInfo}
+        isOpen={isShowDriveStatus}
+        onClose={() => setIsShowDriveStatus(false)}
       />
     </>
   );
