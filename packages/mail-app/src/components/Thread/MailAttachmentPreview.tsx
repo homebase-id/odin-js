@@ -111,6 +111,7 @@ export const MailAttachmentPreview = ({
   return (
     <div
       className={`fixed inset-0 z-50 flex flex-col overflow-auto bg-slate-900 bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
+      ref={wrapperRef}
     >
       <div className="flex w-full flex-row flex-wrap bg-slate-950 px-3 py-3 text-white">
         {payloadDescriptor ? (
@@ -145,10 +146,7 @@ export const MailAttachmentPreview = ({
           </>
         ) : null}
       </div>
-      <div
-        className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center justify-center"
-        ref={wrapperRef}
-      >
+      <div className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center justify-center">
         {mailMessageLoading || !payloadDescriptor ? (
           <Loader className="h-20 w-20" />
         ) : (
