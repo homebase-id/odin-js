@@ -10,6 +10,7 @@ import {
   CheckboxToggle,
   mergeStates,
   Input,
+  DictionaryEditor,
 } from '@youfoundation/common-app';
 import { ErrorNotification } from '@youfoundation/common-app';
 import { DialogWrapper } from '@youfoundation/common-app';
@@ -46,7 +47,13 @@ const DriveMetadataEditDialog = ({
       mutate: updateDescription,
       error: updateDescriptionError,
       status: updateDescriptionStatus,
-      reset: resetDesescription,
+      reset: resetDescription,
+    },
+    editAttributes: {
+      mutate: updateAttributes,
+      error: updateAttributesError,
+      status: updateAttributesStatus,
+      reset: resetAttributes,
     },
   } = useDrive();
 
@@ -54,21 +61,29 @@ const DriveMetadataEditDialog = ({
     driveDefinition.allowAnonymousReads
   );
   const [metadata, setMetadata] = useState(driveDefinition.metadata);
+  const [attributes, setAttributes] = useState(driveDefinition.attributes);
 
   useEffect(() => {
-    if (updateAnonymousReadStatus === 'success' && updateDescriptionStatus === 'success') {
+    if (
+      updateAnonymousReadStatus === 'success' &&
+      updateDescriptionStatus === 'success' &&
+      updateAttributesStatus === 'success'
+    ) {
       resetAnonymousRead();
-      resetDesescription();
+      resetDescription();
+      resetAttributes();
       onConfirm();
     }
-  }, [updateAnonymousReadStatus, updateDescriptionStatus]);
+  }, [updateAnonymousReadStatus, updateDescriptionStatus, updateAttributesStatus]);
 
   if (!isOpen) return null;
 
   const dialog = (
     <DialogWrapper title={title} onClose={onCancel}>
       <>
-        <ErrorNotification error={updateAnonymousReadError || updateDescriptionError} />
+        <ErrorNotification
+          error={updateAnonymousReadError || updateDescriptionError || updateAttributesError}
+        />
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -82,6 +97,11 @@ const DriveMetadataEditDialog = ({
             updateDescription({
               targetDrive: driveDefinition.targetDriveInfo,
               newDescription: metadata,
+            });
+
+            updateAttributes({
+              targetDrive: driveDefinition.targetDriveInfo,
+              newAttributes: attributes,
             });
 
             return false;
@@ -111,6 +131,14 @@ const DriveMetadataEditDialog = ({
               <Input
                 defaultValue={driveDefinition.metadata}
                 onChange={(e) => setMetadata(e.currentTarget.value)}
+              />
+            </div>
+
+            <div>
+              <Label>{t('Attributes')}</Label>
+              <DictionaryEditor
+                defaultValue={attributes}
+                onChange={(newRecords) => setAttributes(newRecords)}
               />
             </div>
           </div>

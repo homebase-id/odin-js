@@ -118,6 +118,15 @@ const DriveDetails = () => {
           {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
           <li>Alias: {driveDef.targetDriveInfo.alias}</li>
           <li>Type: {driveDef.targetDriveInfo.type}</li>
+          {driveDef?.attributes ? (
+            <>
+              {Object.keys(driveDef.attributes).map((attrKey) => (
+                <li key={attrKey}>
+                  {attrKey}: {driveDef.attributes[attrKey]}
+                </li>
+              ))}
+            </>
+          ) : null}
         </ul>
       </Section>
 
