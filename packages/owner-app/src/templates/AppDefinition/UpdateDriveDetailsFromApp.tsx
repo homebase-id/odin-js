@@ -70,7 +70,6 @@ const UpdateDriveDetailsFromApp = () => {
 
             {driveGrants?.length ? (
               <>
-                <p>{t('And requests these drive settings')}</p>
                 <Section>
                   <div className="flex flex-col gap-4">
                     {driveGrants.map((grant) => (
