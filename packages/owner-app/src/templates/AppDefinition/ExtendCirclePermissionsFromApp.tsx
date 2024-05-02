@@ -45,7 +45,7 @@ const ExtendCirclePermissionsFromApp = () => {
 
     await Promise.all(
       applicableCircles.map(async (circle) => {
-        const newCircleGrants: DriveGrant[] = circle.driveGrants || [];
+        let newCircleGrants: DriveGrant[] = circle.driveGrants || [];
 
         circleDriveGrants?.forEach(async (newGrant) => {
           const existinGrant = circle.driveGrants?.find(
@@ -59,18 +59,23 @@ const ExtendCirclePermissionsFromApp = () => {
                 newGrant.permissionedDrive.drive.type
               )
           );
+
           if (!existinGrant) {
             newCircleGrants.push(newGrant);
           } else {
-            newCircleGrants.push({
-              permissionedDrive: {
-                drive: newGrant.permissionedDrive.drive,
-                permission: [
-                  ...existinGrant.permissionedDrive.permission,
-                  ...newGrant.permissionedDrive.permission,
-                ],
-              },
-            });
+            newCircleGrants = newCircleGrants.map((grant) =>
+              grant === existinGrant
+                ? {
+                    permissionedDrive: {
+                      drive: newGrant.permissionedDrive.drive,
+                      permission: [
+                        // ...existinGrant.permissionedDrive.permission,
+                        ...newGrant.permissionedDrive.permission,
+                      ],
+                    },
+                  }
+                : grant
+            );
           }
         });
 
