@@ -63,6 +63,32 @@ const getExtendAuthorizationUrl = (
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
 
+const getExtendDriveDetailsUrl = (
+  identity: string,
+  targetDrive: TargetDrive,
+  returnUrl: string,
+  allowAnonymousReads?: boolean,
+  attributes?: Record<string, string>
+) => {
+  const drives = [
+    {
+      a: targetDrive.alias,
+      t: targetDrive.type,
+      r: allowAnonymousReads,
+      at: JSON.stringify(attributes),
+    },
+  ];
+
+  const params = {
+    appId: FEED_APP_ID,
+    d: JSON.stringify(drives),
+  };
+
+  return `https://${identity}/owner/apprequest-drives?${stringifyToQueryParams(
+    params
+  )}&return=${encodeURIComponent(returnUrl)}`;
+};
+
 const getExtendCirclePermissionUrl = (
   identity: string,
   name: string,
@@ -91,7 +117,7 @@ const getExtendCirclePermissionUrl = (
     c: circleIds.join(','),
   };
 
-  return `https://${identity}/owner/apprequest?${stringifyToQueryParams(
+  return `https://${identity}/owner/apprequest-circles?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
@@ -208,13 +234,21 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
       channelDef.serverMetadata.accessControlList;
     await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
 
+    const intermediaReturnUrl = getExtendDriveDetailsUrl(
+      identity,
+      targetDrive,
+      returnUrl,
+      undefined,
+      { IsCollaborativeChannel: 'true' }
+    );
+
     window.location.href = getExtendCirclePermissionUrl(
       identity,
       channelDef.fileMetadata.appData.content.name,
       t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
       targetDrive,
       collaborativeCircleIds,
-      returnUrl
+      intermediaReturnUrl
     );
   };
 
@@ -225,7 +259,16 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
     collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = false;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (collaborativeChannelDef.fileMetadata.appData.content as any).acl;
-    return await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
+    await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
+
+    const identity = dotYouClient.getIdentity();
+    const returnUrl = `${FEED_ROOT_PATH}/channels`;
+
+    const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
+
+    window.location.href = getExtendDriveDetailsUrl(identity, targetDrive, returnUrl, undefined, {
+      IsCollaborativeChannel: 'false',
+    });
   };
 
   return {
