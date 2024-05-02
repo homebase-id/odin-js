@@ -18,7 +18,12 @@ const ChannelTeaser: FC<ChannelTeaserProps> = ({ className, channel }) => {
   });
 
   const flattenedPosts = blogPosts ? blogPosts?.pages?.flatMap((page) => page.results) : [];
-  if (blogPostsFetched && !flattenedPosts?.length) return null;
+  if (
+    blogPostsFetched &&
+    !flattenedPosts?.length &&
+    !channel.fileMetadata.appData.content.isCollaborative
+  )
+    return null;
 
   const targetHref = `${HOME_ROOT_PATH}posts/${channel.fileMetadata.appData.content.slug ?? '#'}`;
 

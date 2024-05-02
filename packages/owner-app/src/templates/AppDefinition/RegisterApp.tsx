@@ -337,14 +337,14 @@ export const drivesParamToDriveGrantRequest = (
             alias: d.a,
             type: d.t,
           },
-          // I know, probably not really "safe" to do this... But hey, the drivePermission are hard
-          permission: [parseInt(d.p)],
+          permission: [d.p ? (Number.isNaN(parseInt(d.p)) ? 0 : parseInt(d.p)) : 0],
         },
         driveMeta: {
           name: d.n,
           description: d.d,
           allowAnonymousReads: d.r || false,
           allowSubscriptions: d.s || false,
+          attributes: (d.at && tryJsonParse(d.at)) || undefined,
         },
       };
     });

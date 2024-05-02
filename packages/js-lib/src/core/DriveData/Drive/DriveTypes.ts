@@ -29,6 +29,7 @@ export interface DriveDefinition {
   allowAnonymousReads: boolean;
   allowSubscriptions: boolean;
   ownerOnly: boolean;
+  attributes: { [key: string]: string };
 }
 
 export interface QueryParams {

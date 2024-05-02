@@ -1,4 +1,13 @@
-import { Label, Input, Select, ActionButton, Times, t, Plus } from '@youfoundation/common-app';
+import {
+  Label,
+  Input,
+  Select,
+  ActionButton,
+  Times,
+  t,
+  Plus,
+  DictionaryEditor,
+} from '@youfoundation/common-app';
 import { useAuth } from '../../hooks/auth/useAuth';
 import { useRef, useState } from 'react';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
@@ -54,8 +63,8 @@ const Debug = () => {
           </div>
         </div>
 
-        <RecordsEntry title="Headers" records={headers || {}} setRecords={setHeaders} />
-        <RecordsEntry title="Params" records={params || {}} setRecords={setParams} />
+        <DictionaryEditor title="Headers" defaultValue={headers || {}} onChange={setHeaders} />
+        <DictionaryEditor title="Params" defaultValue={params || {}} onChange={setParams} />
 
         <div className="flex flex-row-reverse justify-between">
           <ActionButton onClick={doRequest}>Send</ActionButton>
@@ -67,95 +76,6 @@ const Debug = () => {
         <hr className="my-10" />
 
         <textarea value={outputText} readOnly className="min-h-[20rem] w-full flex-grow" />
-      </div>
-    </>
-  );
-};
-
-const RecordsEntry = ({
-  title,
-  records,
-  setRecords,
-}: {
-  title: string;
-  records: Record<string, string>;
-  setRecords: (newRecords: Record<string, string>) => void;
-}) => {
-  const keyInput = useRef<HTMLInputElement>(null);
-  const valueInput = useRef<HTMLInputElement>(null);
-
-  const keys = Object.keys(records);
-  const newRecords = { ...records };
-
-  const [newkey, setNewKey] = useState<string>('');
-  const [newValue, setNewValue] = useState<string>('');
-
-  return (
-    <>
-      <div className="relative mb-5 mt-2 rounded-lg border p-3">
-        <h2 className="absolute -top-4 left-3 inline bg-page-background italic">{title}</h2>
-
-        <div className="mb-2 flex flex-row items-center gap-4 font-semibold">
-          <div className="w-2/5 flex-grow">{t('Key')}</div>
-          <div className="w-2/5 flex-grow">{t('Value')}</div>
-          <div className="w-8"></div>
-        </div>
-
-        {keys?.map((key, index) => (
-          <div key={index} className="flex flex-row items-center gap-4">
-            <div className="w-2/5 flex-grow">{key}</div>
-            <div className="w-2/5 flex-grow">{records[key]}</div>
-            <div>
-              <ActionButton
-                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700"
-                onClick={() => {
-                  delete newRecords[key];
-                  setRecords(newRecords);
-                }}
-                icon={Times}
-                size="square"
-                type="secondary"
-              />
-            </div>
-          </div>
-        ))}
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-
-            newRecords[newkey] = newValue;
-            setRecords(newRecords);
-            setNewKey('');
-            if (keyInput.current) keyInput.current.value = '';
-            setNewValue('');
-            if (valueInput.current) valueInput.current.value = '';
-          }}
-        >
-          <div className="flex flex-row items-center gap-4">
-            <div className="w-2/5 flex-grow">
-              <Input
-                id="key"
-                name="key"
-                onChange={(e) => setNewKey(e.target.value)}
-                ref={keyInput}
-                defaultValue={newkey}
-              />
-            </div>
-            <div className="w-2/5 flex-grow">
-              <Input
-                id="value"
-                name="value"
-                onChange={(e) => setNewValue(e.target.value)}
-                ref={valueInput}
-                defaultValue={newValue}
-              />
-            </div>
-            <div>
-              <ActionButton type="secondary" icon={Plus} size="square" className="mb-2 mt-auto" />
-            </div>
-          </div>
-        </form>
       </div>
     </>
   );

@@ -156,6 +156,29 @@ export const editDriveAllowAnonymousRead = async (
     });
 };
 
+export const editDriveAttributes = async (
+  dotYouClient: DotYouClient,
+  targetDrive: TargetDrive,
+  newAttributes: { [key: string]: string }
+) => {
+  assertIfDefined('targetDrive', targetDrive);
+  assertIfDefined('newAttributes', newAttributes);
+
+  const client = dotYouClient.createAxiosClient();
+  const data = {
+    targetDrive: targetDrive,
+    attributes: newAttributes,
+  };
+
+  return client
+    .post('/drive/mgmt/updateattributes', data)
+    .then((response) => response.status === 200)
+    .catch((error) => {
+      console.error('[DotYouCore-js:editDriveAttributes]', error);
+      throw error;
+    });
+};
+
 export interface DriveStatus {
   inbox: {
     oldestItemTimestamp: number;

@@ -40,6 +40,19 @@ const DrivePermissionRequestView = ({
             {!isNew
               ? `: ${t(getDrivePermissionFromNumber(driveGrant.permissionedDrive.permission))}`
               : null}
+
+            {driveGrant.driveMeta?.attributes ? (
+              <div className="pt-2">
+                <span className="text-slate-400">
+                  {t('Attributes')}:{' '}
+                  {Object.keys(driveGrant.driveMeta.attributes).map((attrKey) => (
+                    <span key={attrKey} className="mr-1 italic">
+                      {attrKey}: {(driveGrant.driveMeta?.attributes || {})[attrKey]}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            ) : null}
           </p>
           {permissionTree && <small className="ml-1">{permissionTree}</small>}
         </div>

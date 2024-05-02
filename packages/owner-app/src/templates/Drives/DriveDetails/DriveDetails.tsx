@@ -116,6 +116,16 @@ const DriveDetails = () => {
         <ul>
           {driveDef.allowAnonymousReads ? <li>{t('Allow Anonymous Reads')}</li> : null}
           {driveDef.ownerOnly ? <li>{t('Owner only')}</li> : null}
+          {driveDef?.attributes ? (
+            <>
+              {Object.keys(driveDef.attributes).map((attrKey) => (
+                <li key={attrKey}>
+                  {attrKey}: {driveDef.attributes[attrKey]}
+                </li>
+              ))}
+            </>
+          ) : null}
+          <li className="my-3 border-b border-slate-200 dark:border-slate-800"></li>
           <li>Alias: {driveDef.targetDriveInfo.alias}</li>
           <li>Type: {driveDef.targetDriveInfo.type}</li>
         </ul>
