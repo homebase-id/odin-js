@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import {
@@ -10,7 +10,6 @@ import {
   Loader,
   Times,
 } from '@youfoundation/common-app';
-import { useOutsideTrigger } from '@youfoundation/common-app';
 import { MailDrive } from '../../providers/MailProvider';
 import { useMailAttachment, useMailConversation } from '../../hooks/mail/useMailConversation';
 import { useDotYouClientContext } from '../../hooks/auth/useDotYouClientContext';
@@ -91,9 +90,6 @@ export const MailAttachmentPreview = ({
     };
   }, [mailMessage, doSlide]);
 
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  useOutsideTrigger(wrapperRef, () => doClose());
-
   const getFileUrl = useMailAttachment().fetchAttachment;
   const doDownload = async () => {
     const url = await getFileUrl(messageId, payloadKey, payloadDescriptor?.contentType as string);
@@ -110,9 +106,13 @@ export const MailAttachmentPreview = ({
 
   return (
     <div
+      onClick={doClose}
       className={`fixed inset-0 z-50 flex flex-col overflow-auto bg-slate-900 bg-opacity-90 backdrop-blur-sm lg:overflow-hidden`}
     >
-      <div className="flex w-full flex-row flex-wrap bg-slate-950 px-3 py-3 text-white">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex w-full flex-row flex-wrap bg-slate-950 px-3 py-3 text-white"
+      >
         {payloadDescriptor ? (
           <>
             <div className="flex flex-row items-center gap-2">
@@ -146,8 +146,8 @@ export const MailAttachmentPreview = ({
         ) : null}
       </div>
       <div
+        onClick={(e) => e.stopPropagation()}
         className="mx-auto my-auto flex w-full max-w-3xl flex-col items-center justify-center"
-        ref={wrapperRef}
       >
         {mailMessageLoading || !payloadDescriptor ? (
           <Loader className="h-20 w-20" />

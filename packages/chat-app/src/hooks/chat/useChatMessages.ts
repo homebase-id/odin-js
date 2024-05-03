@@ -37,9 +37,9 @@ export const useChatMessages = (props?: { conversationId: string | undefined }) 
         (msg) =>
           msg.fileMetadata.appData.content.deliveryStatus !== ChatDeliveryStatus.Read &&
           msg.fileMetadata.senderOdinId &&
-          msg.fileMetadata.globalTransitId
+          msg.fileMetadata.appData.uniqueId
       )
-      .map((msg) => msg.fileMetadata.globalTransitId) as string[];
+      .map((msg) => msg.fileMetadata.appData.uniqueId) as string[];
 
     return await requestMarkAsRead(dotYouClient, conversation, messagesToMarkAsRead);
   };

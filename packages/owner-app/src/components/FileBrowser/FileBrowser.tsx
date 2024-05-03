@@ -1,9 +1,9 @@
 import { AttributeConfig, ProfileConfig } from '@youfoundation/js-lib/profile';
-import { useEffect, useState } from 'react';
-import { AclIcon, AclSummary, Trash, t } from '@youfoundation/common-app';
+import { useEffect, useMemo, useState } from 'react';
+import { AclIcon, AclSummary, ExtensionThumbnail, Trash, t } from '@youfoundation/common-app';
 import { useFile, useFiles } from '../../hooks/files/useFiles';
 import Section from '../ui/Sections/Section';
-import { Clipboard, File as FileIcon, Pager } from '@youfoundation/common-app';
+import { Clipboard, Pager } from '@youfoundation/common-app';
 import { ActionButton } from '@youfoundation/common-app';
 import { Download, Image } from '@youfoundation/common-app';
 import {
@@ -15,14 +15,7 @@ import {
 } from '@youfoundation/js-lib/core';
 import { BlogConfig, ReactionConfig } from '@youfoundation/js-lib/public';
 import { ContactConfig } from '@youfoundation/js-lib/network';
-
-const dateFormat: Intl.DateTimeFormatOptions = {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-};
+import { formatDateExludingYearIfCurrent } from '@youfoundation/common-app/src/helpers/timeago/format';
 
 const FileBrowser = ({
   targetDrive,
@@ -81,6 +74,14 @@ const FileBrowser = ({
   );
 };
 
+export const bytesToSize = (bytes: number) => {
+  return bytes < 1024
+    ? `${bytes} B`
+    : bytes < 1024 * 1024
+      ? `${(bytes / 1024).toFixed(2)} KB`
+      : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+};
+
 const File = ({
   targetDrive,
   file,
@@ -90,9 +91,15 @@ const File = ({
 }) => {
   const fileType = file.fileMetadata.appData.fileType;
   const firstPayload = file.fileMetadata.payloads?.[0];
-  const contentType = firstPayload?.contentType;
-  const isImage = ['image/webp', 'image/jpeg', 'image/svg+xml', 'image/gif'].includes(contentType);
+  const contentType = firstPayload?.contentType || 'application/json';
+  const isImage = ['image/webp', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/gif'].includes(
+    contentType
+  );
   const contentTypeExtension = (contentType || 'application/json').split('/')[1];
+  const totalSize = useMemo(
+    () => file.fileMetadata.payloads?.reduce((acc, payload) => acc + payload.bytesWritten, 0),
+    [file]
+  );
 
   const fetchFile = useFile({ targetDrive }).fetchFile;
   const { mutate: deleteFile } = useFile({
@@ -109,8 +116,9 @@ const File = ({
   };
 
   return (
-    <div className="relative flex flex-col rounded-lg bg-slate-100 p-5 dark:bg-slate-900">
+    <div className="relative flex flex-col rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950">
       <span className="absolute right-2 top-2 z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800">
+        {totalSize ? <>{bytesToSize(totalSize || 0)} | </> : null}
         {contentTypeExtension}
       </span>
 
@@ -170,11 +178,30 @@ const File = ({
           </div>
         ) : (
           <div className="flex aspect-square overflow-hidden p-2">
-            <FileIcon className="m-auto h-auto w-full max-w-[2rem] opacity-50" />
+            <ExtensionThumbnail
+              contentType={firstPayload?.contentType || 'application/json'}
+              className="m-auto h-auto w-full max-w-[2rem] opacity-50"
+            />
           </div>
         )}
       </div>
       <div className="mt-auto">
+        {getLabelFromFileType(fileType)}
+
+        <p className="mt-2 text-xs leading-tight">
+          {t('Created')}:
+          <span className="block">
+            {formatDateExludingYearIfCurrent(new Date(file.fileMetadata.created))}
+          </span>
+        </p>
+        <p className="mt-2 text-xs leading-tight">
+          {t('Modified')}:
+          <span className="block">
+            {formatDateExludingYearIfCurrent(new Date(file.fileMetadata.updated))}
+          </span>
+        </p>
+
+        <CopyToClipboardInput textToCopy={file.fileId} />
         <p className="flex flex-row items-center text-sm">
           <AclIcon
             acl={
@@ -182,7 +209,7 @@ const File = ({
                 requiredSecurityGroup: SecurityGroupType.Owner,
               }
             }
-            className="mr-1 h-5 w-5"
+            className="mr-1 h-4 w-4 opacity-60"
           />
           <AclSummary
             acl={
@@ -192,20 +219,16 @@ const File = ({
             }
           />
         </p>
-        {getLabelFromFileType(fileType)}
-        <p className="mt-2 text-xs leading-tight">
-          {t('Created')}:
-          <span className="block">
-            {new Date(file.fileMetadata.created).toLocaleDateString(undefined, dateFormat)}
-          </span>
-        </p>
-
-        <CopyToClipboardInput textToCopy={file.fileId} />
       </div>
     </div>
   );
 };
 
+const CHAT_MESSAGE_FILE_TYPE = 7878;
+const CHAT_CONVERSATION_FILE_TYPE = 8888;
+
+const MAIL_DRAFT_CONVERSATION_FILE_TYPE = 9001;
+const MAIL_CONVERSATION_FILE_TYPE = 9000;
 const getLabelFromFileType = (fileType: number) => {
   switch (fileType) {
     // Profile
@@ -232,6 +255,18 @@ const getLabelFromFileType = (fileType: number) => {
     case ContactConfig.ContactFileType:
       return `Contact`;
 
+    // Chat:
+    case CHAT_MESSAGE_FILE_TYPE:
+      return 'Chat Message';
+    case CHAT_CONVERSATION_FILE_TYPE:
+      return 'Chat Conversation';
+
+    // Mail:
+    case MAIL_CONVERSATION_FILE_TYPE:
+      return 'Mail Conversation';
+    case MAIL_DRAFT_CONVERSATION_FILE_TYPE:
+      return 'Draft Mail Conversation';
+
     // Assets
     case 0:
       return 'Asset';
@@ -246,15 +281,16 @@ export default FileBrowser;
 const CopyToClipboardInput = ({ textToCopy }: { textToCopy: string }) => {
   return (
     <div className="relative w-full">
-      <input readOnly className="w-full bg-transparent pl-6" value={textToCopy} />
+      <input readOnly className="w-full bg-transparent pl-6 text-sm" value={textToCopy} />
       <div className="absolute bottom-0 left-0 top-0 flex flex-col justify-center">
         <ActionButton
           onClick={() => navigator.clipboard.writeText(textToCopy)}
           type="mute"
-          size="square"
-          className="-ml-2 opacity-60 hover:opacity-100"
-          icon={Clipboard}
-        />
+          size="none"
+          className="opacity-60 hover:opacity-100"
+        >
+          <Clipboard className="h-4 w-4" />
+        </ActionButton>
       </div>
     </div>
   );

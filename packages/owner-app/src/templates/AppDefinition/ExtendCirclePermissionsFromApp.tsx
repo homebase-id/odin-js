@@ -45,38 +45,49 @@ const ExtendCirclePermissionsFromApp = () => {
 
     await Promise.all(
       applicableCircles.map(async (circle) => {
-        const newCircleGrants: DriveGrant[] = circle.driveGrants || [];
-
-        circleDriveGrants?.forEach(async (newGrant) => {
-          const existinGrant = circle.driveGrants?.find(
-            (grant) =>
+        const newReducedCircleGrants = [
+          ...(circle.driveGrants || []),
+          ...(circleDriveGrants || []),
+        ].reduce((acc, grant) => {
+          const existingGrant = acc.find(
+            (g) =>
               stringGuidsEqual(
-                grant.permissionedDrive.drive.alias,
-                newGrant.permissionedDrive.drive.alias
+                g.permissionedDrive.drive.alias,
+                grant.permissionedDrive.drive.alias
               ) &&
-              stringGuidsEqual(
-                grant.permissionedDrive.drive.type,
-                newGrant.permissionedDrive.drive.type
-              )
+              stringGuidsEqual(g.permissionedDrive.drive.type, grant.permissionedDrive.drive.type)
           );
-          if (!existinGrant) {
-            newCircleGrants.push(newGrant);
+
+          if (existingGrant) {
+            // If both have only one permission, take the highest one as they are probably combined bits
+            if (
+              existingGrant.permissionedDrive.permission.length === 1 &&
+              grant.permissionedDrive.permission.length === 1
+            ) {
+              existingGrant.permissionedDrive.permission = [
+                Math.max(
+                  existingGrant.permissionedDrive.permission[0],
+                  grant.permissionedDrive.permission[0]
+                ),
+              ];
+            } else {
+              existingGrant.permissionedDrive.permission = [
+                ...new Set([
+                  ...existingGrant.permissionedDrive.permission,
+                  ...grant.permissionedDrive.permission,
+                ]),
+              ];
+            }
           } else {
-            newCircleGrants.push({
-              permissionedDrive: {
-                drive: newGrant.permissionedDrive.drive,
-                permission: [
-                  ...existinGrant.permissionedDrive.permission,
-                  ...newGrant.permissionedDrive.permission,
-                ],
-              },
-            });
+            acc.push(grant);
           }
-        });
+
+          return acc;
+        }, [] as DriveGrant[]);
 
         return await updateCircle({
           ...circle,
-          driveGrants: newCircleGrants,
+          driveGrants: newReducedCircleGrants,
         });
       })
     );
