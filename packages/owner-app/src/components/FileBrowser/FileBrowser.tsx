@@ -116,7 +116,7 @@ const File = ({
   };
 
   return (
-    <div className="relative flex flex-col rounded-lg bg-slate-100 p-3 dark:bg-slate-900">
+    <div className="relative flex flex-col rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950">
       <span className="absolute right-2 top-2 z-10 bg-indigo-200 p-1 text-[0.7rem] uppercase dark:bg-indigo-800">
         {totalSize ? <>{bytesToSize(totalSize || 0)} | </> : null}
         {contentTypeExtension}
