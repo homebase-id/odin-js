@@ -183,7 +183,7 @@ export const AttachmentFile = ({ file }: { file: ExtendedFile }) => {
           fileKey={file.key}
           targetDrive={MailDrive}
           lastModified={file.lastModified}
-          className="h-12 w-12"
+          className="h-12 w-12 object-cover"
         />
       ) : (
         <ExtensionThumbnail contentType={file.contentType} className="h-12 w-12" />
