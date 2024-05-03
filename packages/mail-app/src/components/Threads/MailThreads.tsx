@@ -153,6 +153,7 @@ export const MailThreads = ({
                     data-index={virtualRow.index}
                     ref={virtualizer.measureElement}
                     data-fileid={lastConversation.fileId}
+                    className="group"
                   >
                     <MailConversationItem
                       query={query}

@@ -99,7 +99,7 @@ export const MailConversationItem = ({
     markAsUnread({ mailConversations: [lastReceivedConversation || lastConversation] });
   };
 
-  const quickActionsClassName = 'hover:bg-primary/20 dark:hover:bg-primary/50 p-1 rounded-md';
+  const quickActionsClassName = 'hover:bg-primary/20 dark:hover:bg-primary/50 px-2 py-1 rounded-md';
 
   return (
     <>
@@ -113,12 +113,11 @@ export const MailConversationItem = ({
             : `${pathPrefix || ''}${threadId}`,
           search: window.location.search,
         }}
-        className="group"
       >
         <div
-          className={`relative flex flex-col gap-2 border-b border-b-slate-100 p-4 py-3 transition-colors group-last-of-type:border-0 dark:border-b-slate-700
+          className={`relative flex flex-col gap-2 border-t border-t-slate-100 p-4 py-3 transition-colors group-first-of-type:border-0 dark:border-t-slate-700
             ${isSelected ? 'bg-primary/20 dark:bg-primary/50' : ''}
-            ${!isSelected ? `group-hover:bg-slate-50 dark:group-hover:bg-slate-800 ${isUnread ? 'bg-slate-50 dark:bg-slate-700' : 'border-b-slate-200 bg-background dark:bg-background'}` : ''}`}
+            ${!isSelected ? `group-hover:bg-slate-50 dark:group-hover:bg-slate-800 ${isUnread ? 'bg-slate-50 dark:bg-slate-700' : 'bg-background dark:bg-background'}` : ''}`}
         >
           <div className={`flex flex-row items-center justify-between gap-4 md:gap-8`}>
             <button
@@ -153,6 +152,7 @@ export const MailConversationItem = ({
                       isDisabled={isTrash}
                       title={t('Remove')}
                       className={quickActionsClassName}
+                      size="none"
                     />
                     <ActionButton
                       type="mute"
@@ -162,6 +162,7 @@ export const MailConversationItem = ({
                       isDisabled={isArchived}
                       title={t('Archive')}
                       className={quickActionsClassName}
+                      size="none"
                     />
                     {isUnread ? (
                       <ActionButton
@@ -171,6 +172,7 @@ export const MailConversationItem = ({
                         state={markAsReadStatus == 'success' ? undefined : markAsReadStatus}
                         title={t('Mark as read')}
                         className={quickActionsClassName}
+                        size="none"
                       />
                     ) : (
                       <ActionButton
@@ -180,6 +182,7 @@ export const MailConversationItem = ({
                         state={markAsUnreadStatus == 'success' ? undefined : markAsUnreadStatus}
                         title={t('Mark as unread')}
                         className={quickActionsClassName}
+                        size="none"
                       />
                     )}
                   </div>

@@ -11,8 +11,8 @@ import { processInbox } from '@youfoundation/js-lib/peer';
 import {
   ChatDrive,
   Conversation,
-  ConversationFileType,
-  GroupConversationFileType,
+  CHAT_CONVERSATION_FILE_TYPE,
+  GroupCHAT_CONVERSATION_FILE_TYPE,
   JOIN_CONVERSATION_COMMAND,
   JOIN_GROUP_CONVERSATION_COMMAND,
   UPDATE_GROUP_CONVERSATION_COMMAND,
@@ -22,7 +22,7 @@ import { useDotYouClient, useNotificationSubscriber } from '@youfoundation/commo
 import { useCallback, useEffect, useRef } from 'react';
 import {
   ChatMessage,
-  ChatMessageFileType,
+  CHAT_MESSAGE_FILE_TYPE,
   MARK_CHAT_READ_COMMAND,
   dsrToMessage,
 } from '../../providers/ChatProvider';
@@ -92,7 +92,7 @@ const useChatWebsocket = (isEnabled: boolean) => {
       stringGuidsEqual(notification.targetDrive?.alias, ChatDrive.alias) &&
       stringGuidsEqual(notification.targetDrive?.type, ChatDrive.type)
     ) {
-      if (notification.header.fileMetadata.appData.fileType === ChatMessageFileType) {
+      if (notification.header.fileMetadata.appData.fileType === CHAT_MESSAGE_FILE_TYPE) {
         const conversationId = notification.header.fileMetadata.appData.groupId;
         const isNewFile = notification.notificationType === 'fileAdded';
 
@@ -175,8 +175,8 @@ const useChatWebsocket = (isEnabled: boolean) => {
         const messageId = notification.header.fileMetadata.appData.groupId;
         queryClient.invalidateQueries({ queryKey: ['chat-reaction', messageId] });
       } else if (
-        notification.header.fileMetadata.appData.fileType === ConversationFileType ||
-        notification.header.fileMetadata.appData.fileType === GroupConversationFileType
+        notification.header.fileMetadata.appData.fileType === CHAT_CONVERSATION_FILE_TYPE ||
+        notification.header.fileMetadata.appData.fileType === GroupCHAT_CONVERSATION_FILE_TYPE
       ) {
         const isNewFile = notification.notificationType === 'fileAdded';
 

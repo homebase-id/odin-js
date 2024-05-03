@@ -19,8 +19,8 @@ import {
 import { jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { ImageSource } from '@youfoundation/ui-lib';
 
-export const ConversationFileType = 8888;
-export const GroupConversationFileType = 8890;
+export const CHAT_CONVERSATION_FILE_TYPE = 8888;
+export const GroupCHAT_CONVERSATION_FILE_TYPE = 8890;
 export const ConversationWithYourselfId = 'e4ef2382-ab3c-405d-a8b5-ad3e09e980dd';
 export const CONVERSATION_PAYLOAD_KEY = 'convo_pk';
 
@@ -35,7 +35,7 @@ export const ConversationWithYourself: HomebaseFile<SingleConversation> = {
     senderOdinId: '',
     appData: {
       uniqueId: ConversationWithYourselfId,
-      fileType: ConversationFileType,
+      fileType: CHAT_CONVERSATION_FILE_TYPE,
       dataType: 0,
       content: {
         title: 'You',
@@ -78,7 +78,7 @@ export const getConversations = async (
 ) => {
   const params: FileQueryParams = {
     targetDrive: ChatDrive,
-    fileType: [ConversationFileType, GroupConversationFileType],
+    fileType: [CHAT_CONVERSATION_FILE_TYPE, GroupCHAT_CONVERSATION_FILE_TYPE],
   };
 
   const ro: GetBatchQueryResultOptions = {
@@ -167,7 +167,7 @@ export const uploadConversation = async (
     allowDistribution: false,
     appData: {
       uniqueId: conversation.fileMetadata.appData.uniqueId,
-      fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
+      fileType: conversation.fileMetadata.appData.fileType || CHAT_CONVERSATION_FILE_TYPE,
       content: payloadJson,
     },
     isEncrypted: true,
@@ -207,7 +207,7 @@ export const updateConversation = async (
     appData: {
       archivalStatus: conversation.fileMetadata.appData.archivalStatus,
       uniqueId: conversation.fileMetadata.appData.uniqueId,
-      fileType: conversation.fileMetadata.appData.fileType || ConversationFileType,
+      fileType: conversation.fileMetadata.appData.fileType || CHAT_CONVERSATION_FILE_TYPE,
       content: payloadJson,
     },
     isEncrypted: true,
