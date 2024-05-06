@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChannelDefinition,
-  CollaborativeChannelDefinition,
   GetTargetDriveFromChannelId,
   getChannelDefinition,
   getChannelDefinitionBySlug,
@@ -17,11 +16,9 @@ import {
   DrivePermissionType,
   HomebaseFile,
   NewHomebaseFile,
-  SecurityGroupType,
   TargetDrive,
 } from '@youfoundation/js-lib/core';
 const FEED_ROOT_PATH = '/apps/feed';
-import { ALL_CONNECTIONS_CIRCLE_ID } from '@youfoundation/js-lib/network';
 
 type useChannelsProps = {
   channelSlug?: string;
@@ -59,65 +56,6 @@ const getExtendAuthorizationUrl = (
   };
 
   return `https://${identity}/owner/appupdate?${stringifyToQueryParams(
-    params
-  )}&return=${encodeURIComponent(returnUrl)}`;
-};
-
-const getExtendDriveDetailsUrl = (
-  identity: string,
-  targetDrive: TargetDrive,
-  returnUrl: string,
-  allowAnonymousReads?: boolean,
-  attributes?: Record<string, string>
-) => {
-  const drives = [
-    {
-      a: targetDrive.alias,
-      t: targetDrive.type,
-      r: allowAnonymousReads,
-      at: JSON.stringify(attributes),
-    },
-  ];
-
-  const params = {
-    appId: FEED_APP_ID,
-    d: JSON.stringify(drives),
-  };
-
-  return `https://${identity}/owner/apprequest-drives?${stringifyToQueryParams(
-    params
-  )}&return=${encodeURIComponent(returnUrl)}`;
-};
-
-const getExtendCirclePermissionUrl = (
-  identity: string,
-  name: string,
-  description: string,
-  targetDrive: TargetDrive,
-  circleIds: string[],
-  returnUrl: string
-) => {
-  const drives = [
-    {
-      a: targetDrive.alias,
-      t: targetDrive.type,
-      p:
-        DrivePermissionType.Read +
-        DrivePermissionType.Write +
-        DrivePermissionType.React +
-        DrivePermissionType.Comment, // Permission
-      n: name,
-      d: description,
-    },
-  ];
-
-  const params = {
-    appId: FEED_APP_ID,
-    cd: JSON.stringify(drives),
-    c: circleIds.join(','),
-  };
-
-  return `https://${identity}/owner/apprequest-circles?${stringifyToQueryParams(
     params
   )}&return=${encodeURIComponent(returnUrl)}`;
 };
@@ -209,66 +147,6 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
 
   const removeChannel = async (channelDef: HomebaseFile<ChannelDefinition>) => {
     await removeChannelDefinition(dotYouClient, channelDef.fileMetadata.appData.uniqueId as string);
-  };
-
-  const makeChannelCollaborative = async (channelDef: HomebaseFile<ChannelDefinition>) => {
-    if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
-    if (!channelDef.serverMetadata) throw new Error('Channel is not access as the owner');
-
-    const collaborativeCircleIds =
-      channelDef.serverMetadata?.accessControlList.requiredSecurityGroup ===
-        SecurityGroupType.Connected && channelDef.serverMetadata?.accessControlList.circleIdList
-        ? channelDef.serverMetadata?.accessControlList.circleIdList
-        : [ALL_CONNECTIONS_CIRCLE_ID];
-
-    if (!collaborativeCircleIds.length) throw new Error('No circles found for channel');
-
-    const identity = dotYouClient.getIdentity();
-    const returnUrl = `${FEED_ROOT_PATH}/channels`;
-
-    const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
-
-    const collaborativeChannelDef = { ...channelDef };
-    collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = true;
-    (collaborativeChannelDef.fileMetadata.appData.content as CollaborativeChannelDefinition).acl =
-      channelDef.serverMetadata.accessControlList;
-    await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
-
-    const intermediaReturnUrl = getExtendDriveDetailsUrl(
-      identity,
-      targetDrive,
-      returnUrl,
-      undefined,
-      { IsCollaborativeChannel: 'true' }
-    );
-
-    window.location.href = getExtendCirclePermissionUrl(
-      identity,
-      channelDef.fileMetadata.appData.content.name,
-      t('Drive for "{0}" channel posts', channelDef.fileMetadata.appData.content.name),
-      targetDrive,
-      collaborativeCircleIds,
-      intermediaReturnUrl
-    );
-  };
-
-  const makeChannelPrivate = async (channelDef: HomebaseFile<ChannelDefinition>) => {
-    if (!channelDef.fileMetadata.appData.uniqueId) throw new Error('Channel unique id is not set');
-
-    const collaborativeChannelDef = { ...channelDef };
-    collaborativeChannelDef.fileMetadata.appData.content.isCollaborative = false;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (collaborativeChannelDef.fileMetadata.appData.content as any).acl;
-    await saveChannelDefinition(dotYouClient, collaborativeChannelDef);
-
-    const identity = dotYouClient.getIdentity();
-    const returnUrl = `${FEED_ROOT_PATH}/channels`;
-
-    const targetDrive = GetTargetDriveFromChannelId(channelDef.fileMetadata.appData.uniqueId);
-
-    window.location.href = getExtendDriveDetailsUrl(identity, targetDrive, returnUrl, undefined, {
-      IsCollaborativeChannel: 'false',
-    });
   };
 
   return {
@@ -383,12 +261,6 @@ export const useChannel = ({ channelSlug, channelId }: useChannelsProps) => {
         queryClient.invalidateQueries({ queryKey: ['channels'] });
         publishStaticFiles('channel');
       },
-    }),
-    convertToCollaborativeChannel: useMutation({
-      mutationFn: makeChannelCollaborative,
-    }),
-    convertToPrivateChannel: useMutation({
-      mutationFn: makeChannelPrivate,
     }),
   };
 };
