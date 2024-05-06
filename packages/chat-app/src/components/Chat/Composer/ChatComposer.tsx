@@ -53,6 +53,12 @@ export const ChatComposer = ({
     )
       return;
 
+    console.log({
+      conversation,
+      message: trimmedVal || '',
+      replyId: replyMsg?.fileMetadata?.appData?.uniqueId,
+      files,
+    });
     sendMessage({
       conversation,
       message: trimmedVal || '',
@@ -76,9 +82,9 @@ export const ChatComposer = ({
     if (replyMsg) setFiles([]);
   }, [replyMsg]);
 
-  useEffect(() => {
-    if (files?.length) clearReplyMsg();
-  }, [files]);
+  // useEffect(() => {
+  //   if (files?.length) clearReplyMsg();
+  // }, [files]);
 
   return (
     <>
