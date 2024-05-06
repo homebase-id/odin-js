@@ -8,6 +8,7 @@ import { Quote } from '../ui/Icons/Quote';
 import { ActionButton } from '../ui/Buttons/ActionButton';
 import { Plus } from '../ui/Icons/Plus';
 import { t } from '../helpers/i18n/dictionary';
+import { ChannelItem } from './ChannelItem';
 
 export const ChannelsDialog = ({
   isOpen,
