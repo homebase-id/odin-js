@@ -58,7 +58,9 @@ export const savePost = async <T extends PostContent>(
   onUpdate?: (progress: number) => void
 ): Promise<UploadResult | TransitUploadResult> => {
   if (odinId && file.fileId) {
-    throw new Error('[PostUploadProvider] savePost: odinId is not implemented yet');
+    throw new Error(
+      '[PostUploadProvider] Editing a post to a group channel is not supported (yet)'
+    );
   }
 
   if (!file.fileMetadata.appData.content.id) {
