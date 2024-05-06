@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  ActionButton,
   ChannelDefinitionVm,
   ChannelItem,
   CollaborativeChannelItem,
@@ -30,7 +31,9 @@ export const ChannelsPage = () => {
   const { data: channels } = useChannels({ isAuthenticated: true, isOwner: true });
   const [isAddNew, setIsAddNew] = useState(!!newChannelDefinition);
 
-  const { data: collaborativeChannels } = useCollaborativeChannels(true).fetch;
+  const [discoverCollaborativeChannels, setDiscoverCollaborativeChannels] = useState(false);
+  const { data: collaborativeChannels, status: collaborativeChannelStatus } =
+    useCollaborativeChannels(discoverCollaborativeChannels).fetch;
 
   return (
     <>
@@ -75,17 +78,17 @@ export const ChannelsPage = () => {
         </div>
       </section>
 
-      {collaborativeChannels?.length ? (
-        <section className="pb-10">
-          <div className="px-2 sm:px-10">
-            <h2 className="mb-2">
-              {t('Collaborative channels')}
-              <small className="block text-sm text-slate-400">
-                {t(
-                  'You have permissions to write to these channels that are owned by another identity'
-                )}
-              </small>
-            </h2>
+      <section className="pb-10">
+        <div className="px-2 sm:px-10">
+          <h2 className="mb-2">
+            {t('Collaborative channels')}
+            <small className="block text-sm text-slate-400">
+              {t(
+                'You have permissions to write to these channels that are owned by another identity'
+              )}
+            </small>
+          </h2>
+          {collaborativeChannels?.length || discoverCollaborativeChannels ? (
             <div className="flex flex-col gap-2">
               {collaborativeChannels?.map((collaborative) => {
                 return (
@@ -102,9 +105,19 @@ export const ChannelsPage = () => {
                 );
               })}
             </div>
+          ) : null}
+          <div className="flex cursor-pointer flex-row items-center gap-2 rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800">
+            <p>{t('Missing any channels?')}</p>
+            <ActionButton
+              type="secondary"
+              onClick={() => setDiscoverCollaborativeChannels(true)}
+              state={discoverCollaborativeChannels ? collaborativeChannelStatus : undefined}
+            >
+              {t(`Discover collaborative channels`)}
+            </ActionButton>
           </div>
-        </section>
-      ) : null}
+        </div>
+      </section>
     </>
   );
 };
