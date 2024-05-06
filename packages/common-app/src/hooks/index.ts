@@ -15,6 +15,7 @@ export * from './errors/useErrors';
 export * from './follow/useFollowers';
 export * from './follow/useFollowing';
 export * from './follow/useIdentityIFollow';
+export * from './file/useFile';
 export * from './image/useImage';
 export * from './intersection/useIntersection';
 export * from './intersection/useMostSpace';

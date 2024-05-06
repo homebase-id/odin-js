@@ -12,6 +12,7 @@ import {
   Times,
   ArrowLeft,
   Arrow,
+  BoringFile,
 } from '../../..';
 import {
   DEFAULT_PAYLOAD_KEY,
@@ -46,13 +47,7 @@ export const PostImageDetailCard = ({
   const currIndex = attachmentKey ? parseInt(attachmentKey) : 0;
   const post = postFile?.fileMetadata.appData.content;
 
-  const mediaFiles = postFile?.fileMetadata.payloads
-    ?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
-    .map((p) => ({
-      fileId: undefined,
-      fileKey: p.key,
-      type: p.contentType,
-    }));
+  const mediaFiles = postFile?.fileMetadata.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY);
 
   const doSlide = (dir: 1 | -1) => {
     const dirtyIndex = currIndex + dir;
@@ -108,13 +103,13 @@ export const PostImageDetailCard = ({
           >
             {!post ? (
               <Loader className="m-auto h-10 w-10 text-white" />
-            ) : currentMediaFile?.type !== 'video' ? (
+            ) : currentMediaFile?.contentType.startsWith('image') ? (
               <Image
                 odinId={odinId}
                 className={`absolute inset-0 flex max-h-[60vh] lg:max-h-full lg:w-full lg:static`}
-                fileId={currentMediaFile?.fileId || postFile.fileId}
+                fileId={postFile.fileId}
                 globalTransitId={postFile.fileMetadata.globalTransitId}
-                fileKey={currentMediaFile?.fileKey}
+                fileKey={currentMediaFile?.key}
                 targetDrive={getChannelDrive(post.channelId)}
                 lastModified={postFile.fileMetadata.updated}
                 alt="post"
@@ -125,18 +120,15 @@ export const PostImageDetailCard = ({
                     : undefined
                 }
                 probablyEncrypted={postFile.fileMetadata.isEncrypted}
-                key={
-                  (currentMediaFile?.fileId || postFile.fileId || '') +
-                  (currentMediaFile?.fileKey || currIndex)
-                }
+                key={(postFile.fileId || '') + (currentMediaFile?.key || currIndex)}
               />
-            ) : (
+            ) : currentMediaFile?.contentType.startsWith('video') ? (
               <div className="absolute inset-0 flex items-center justify-center">
                 <Video
-                  fileId={currentMediaFile?.fileId || postFile.fileId}
+                  fileId={postFile.fileId}
                   globalTransitId={postFile.fileMetadata.globalTransitId}
                   lastModified={postFile.fileMetadata.updated}
-                  fileKey={currentMediaFile?.fileKey}
+                  fileKey={currentMediaFile?.key}
                   className={`object-contain max-h-full`}
                   targetDrive={getChannelDrive(post.channelId)}
                   previewThumbnail={
@@ -148,7 +140,15 @@ export const PostImageDetailCard = ({
                   probablyEncrypted={postFile.fileMetadata.isEncrypted}
                 />
               </div>
-            )}
+            ) : currentMediaFile ? (
+              <BoringFile
+                odinId={odinId}
+                targetDrive={getChannelDrive(post.channelId)}
+                fileId={postFile.fileId}
+                file={currentMediaFile}
+                canDownload={true}
+              />
+            ) : null}
             <ActionButton
               icon={Times}
               onClick={doClose}

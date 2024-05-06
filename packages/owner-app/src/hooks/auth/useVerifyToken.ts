@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { hasValidToken } from '../../provider/auth/AuthenticationProvider';
+import { hasValidOwnerToken } from '@youfoundation/common-app';
 
 const MINUTE_IN_MS = 60000;
 
 export const useVerifyToken = () => {
   const fetchData = async () => {
-    return await hasValidToken();
+    return await hasValidOwnerToken();
   };
   return useQuery({
     queryKey: ['verifyToken'],
