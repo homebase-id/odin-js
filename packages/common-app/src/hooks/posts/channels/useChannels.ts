@@ -5,9 +5,9 @@ import {
   getChannelDefinitions,
 } from '@youfoundation/js-lib/public';
 
-import { useDotYouClient } from '../../../..';
 import { fetchCachedPublicChannels } from '../cachedDataHelpers';
 import { HomebaseFile } from '@youfoundation/js-lib/core';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 export interface ChannelDefinitionVm extends ChannelDefinition {
   template: ChannelTemplate;
 }

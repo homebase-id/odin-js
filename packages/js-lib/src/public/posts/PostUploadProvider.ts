@@ -66,7 +66,7 @@ export const savePost = async <T extends PostContent>(
     file.fileMetadata.appData.content.id = file.fileMetadata.appData.content.slug
       ? toGuidId(file.fileMetadata.appData.content.slug)
       : getNewId();
-  } else if (!file.fileId) {
+  } else if (!file.fileId && !odinId) {
     // Check if fileMetadata.appData.content.id exists and with which fileId
     file.fileId =
       (await getPost(dotYouClient, channelId, file.fileMetadata.appData.content.id))?.fileId ??
@@ -197,20 +197,22 @@ const uploadPost = async <T extends PostContent>(
     },
   };
 
-  const existingPostWithThisSlug = await getPostBySlug(
-    dotYouClient,
-    channelId,
-    file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
-  );
+  if (!odinId) {
+    const existingPostWithThisSlug = await getPostBySlug(
+      dotYouClient,
+      channelId,
+      file.fileMetadata.appData.content.slug ?? file.fileMetadata.appData.content.id
+    );
 
-  if (
-    existingPostWithThisSlug &&
-    !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
-  ) {
-    // There is clash with an existing slug
-    file.fileMetadata.appData.content.slug = `${
-      file.fileMetadata.appData.content.slug
-    }-${new Date().getTime()}`;
+    if (
+      existingPostWithThisSlug &&
+      !stringGuidsEqual(existingPostWithThisSlug?.fileId, file.fileId)
+    ) {
+      // There is clash with an existing slug
+      file.fileMetadata.appData.content.slug = `${
+        file.fileMetadata.appData.content.slug
+      }-${new Date().getTime()}`;
+    }
   }
 
   const uniqueId = file.fileMetadata.appData.content.slug

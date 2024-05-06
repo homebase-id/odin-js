@@ -56,7 +56,7 @@ const PostTeaserCard: FC<PostTeaserCardProps> = ({ className, odinId, postFile, 
     return <UnreachableIdentity postFile={postFile} className={className} odinId={odinId} />;
 
   return (
-    <div className={`w-full break-words rounded-lg ${className ?? ''}`}>
+    <div className={`w-full break-words rounded-lg ${className ?? ''}`} data-odin-id={odinId}>
       <ErrorBoundary>
         <FakeAnchor
           href={clickable ? postPath : undefined}

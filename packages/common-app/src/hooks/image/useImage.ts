@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ImageSize, TargetDrive } from '@youfoundation/js-lib/core';
 import { getDecryptedImageUrl } from '@youfoundation/js-lib/media';
 import { getDecryptedImageUrlOverPeer } from '@youfoundation/js-lib/peer';
-
-import { useDotYouClient } from '../../..';
+import { useDotYouClient } from '../auth/useDotYouClient';
 
 export interface ImageData {
   url: string;

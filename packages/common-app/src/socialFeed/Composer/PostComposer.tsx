@@ -38,7 +38,6 @@ import { EmbeddedPostContent } from '../Blocks/Body/EmbeddedPostContent';
 import { EmojiSelector } from '../Blocks/Interacts/EmojiPicker/EmojiSelector';
 
 const FEED_ROOT_PATH = '/apps/feed';
-
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
 
 export const PostComposer = ({

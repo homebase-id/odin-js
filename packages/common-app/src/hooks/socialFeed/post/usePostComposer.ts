@@ -17,7 +17,7 @@ import {
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
 import { usePost } from './usePost';
-import { useDotYouClient } from '../../../..';
+import { useDotYouClient } from '../../auth/useDotYouClient';
 
 export const usePostComposer = () => {
   const [postState, setPostState] = useState<'uploading' | 'encrypting' | 'error' | undefined>();
