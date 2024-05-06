@@ -7,7 +7,6 @@ import {
   setFirstPassword as setFirstOwnerPassword,
   resetPassword as resetOwnerPassword,
   changePassword as setNewOwnerPassword,
-  logout as logoutOwner,
 } from '../../provider/auth/AuthenticationProvider';
 import { uint8ArrayToBase64 } from '@youfoundation/js-lib/helpers';
 import {
@@ -15,6 +14,7 @@ import {
   HOME_SHARED_SECRET,
   OWNER_SHARED_SECRET,
   STORAGE_IDENTITY_KEY,
+  logoutOwner,
   useDotYouClient,
 } from '@youfoundation/common-app';
 

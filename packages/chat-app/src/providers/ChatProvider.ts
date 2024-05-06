@@ -32,12 +32,12 @@ import {
   GroupConversation,
   SingleConversation,
 } from './ConversationProvider';
-import { getNewId, jsonStringify64, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
+import { getNewId, jsonStringify64 } from '@youfoundation/js-lib/helpers';
 import { makeGrid } from '@youfoundation/js-lib/helpers';
 import { appId } from '../hooks/auth/useAuth';
 import { createThumbnails, processVideoFile } from '@youfoundation/js-lib/media';
 
-export const ChatMessageFileType = 7878;
+export const CHAT_MESSAGE_FILE_TYPE = 7878;
 export const ChatDeletedArchivalStaus = 2;
 
 export enum ChatDeliveryStatus {
@@ -113,18 +113,6 @@ export const getChatMessage = async (dotYouClient: DotYouClient, chatMessageId: 
   return fileHeader;
 };
 
-// It's a hack... This needs to change to a better way of getting the message
-export const getChatMessageByGlobalTransitId = async (
-  dotYouClient: DotYouClient,
-  conversationId: string,
-  messageGlobalTransitId: string
-) => {
-  const allChatMessages = await getChatMessages(dotYouClient, conversationId, undefined, 2000);
-  return allChatMessages?.searchResults?.find((chat) =>
-    stringGuidsEqual(chat?.fileMetadata.globalTransitId, messageGlobalTransitId)
-  );
-};
-
 export const dsrToMessage = async (
   dotYouClient: DotYouClient,
   dsr: HomebaseFile,
@@ -198,7 +186,7 @@ export const uploadChatMessage = async (
       uniqueId: message.fileMetadata.appData.uniqueId,
       groupId: message.fileMetadata.appData.groupId,
       userDate: message.fileMetadata.appData.userDate,
-      fileType: ChatMessageFileType,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
       content: jsonContent,
     },
     isEncrypted: true,
@@ -300,7 +288,7 @@ export const updateChatMessage = async (
       groupId: message.fileMetadata.appData.groupId,
       archivalStatus: (message.fileMetadata.appData as AppFileMetaData<ChatMessage>).archivalStatus,
       previewThumbnail: message.fileMetadata.appData.previewThumbnail,
-      fileType: ChatMessageFileType,
+      fileType: CHAT_MESSAGE_FILE_TYPE,
       content: payloadJson,
     },
     senderOdinId: (message.fileMetadata as FileMetadata<ChatMessage>).senderOdinId,
@@ -356,11 +344,11 @@ export interface MarkAsReadRequest {
 export const requestMarkAsRead = async (
   dotYouClient: DotYouClient,
   conversation: HomebaseFile<Conversation>,
-  chatGlobalTransitIds: string[]
+  chatUniqueIds: string[]
 ) => {
   const request: MarkAsReadRequest = {
     conversationId: conversation.fileMetadata.appData.uniqueId as string,
-    messageIds: chatGlobalTransitIds,
+    messageIds: chatUniqueIds,
   };
 
   const conversationContent = conversation.fileMetadata.appData.content;

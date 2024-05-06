@@ -69,7 +69,7 @@ export const PostMedia = ({
     <div className={`relative ${className || ''}`}>
       <PrimaryMedia
         fit="contain"
-        primaryMediaFile={post.primaryMediaFile}
+        file={mediaFiles[0]}
         channelId={post.channelId}
         fileId={postInfo.fileId}
         globalTransitId={postInfo.globalTransitId}

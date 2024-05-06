@@ -65,6 +65,7 @@ export interface DriveGrantRequest {
     description: string;
     allowAnonymousReads?: boolean;
     allowSubscriptions?: boolean;
+    attributes?: { [key: string]: string };
   };
 }
 

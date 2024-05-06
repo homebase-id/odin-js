@@ -113,7 +113,7 @@ export const savePost = async <T extends PostContent>(
       if (tinyThumb) previewThumbnails.push(tinyThumb);
 
       onUpdate?.((i + 1) / newMediaFiles.length);
-    } else {
+    } else if (newMediaFile.file.type.startsWith('image/')) {
       const { additionalThumbnails, tinyThumb } = await createThumbnails(
         newMediaFile.file,
         payloadKey
@@ -127,6 +127,12 @@ export const savePost = async <T extends PostContent>(
       });
 
       if (tinyThumb) previewThumbnails.push(tinyThumb);
+    } else {
+      payloads.push({
+        key: payloadKey,
+        payload: newMediaFile.file,
+        descriptorContent: (newMediaFile.file as File).name || newMediaFile.file.type,
+      });
     }
     onUpdate?.((i + 1) / newMediaFiles.length);
   }

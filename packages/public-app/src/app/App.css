@@ -6,6 +6,10 @@
   background-color: black;
 }
 
+.dark select optgroup {
+  background-color: black;
+}
+
 .dark {
   color-scheme: dark;
 }

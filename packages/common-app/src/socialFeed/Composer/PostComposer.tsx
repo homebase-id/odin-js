@@ -175,7 +175,7 @@ export const PostComposer = ({
                   onChange={(mediaFiles) =>
                     setFiles([...(files ?? []), ...mediaFiles.map((file) => ({ file }))])
                   }
-                  accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4"
+                  accept="image/png, image/jpeg, image/tiff, image/webp, image/svg+xml, image/gif, video/mp4, application/pdf"
                   className="text-foreground hover:text-opacity-70"
                   maxSize={HUNDRED_MEGA_BYTES}
                 />

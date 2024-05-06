@@ -22,7 +22,7 @@ const setupHtml = (isStandalone?: boolean) => {
           </label>
           <span class="invalid-msg">Invalid identity</span>
         </div>
-        <input type="text" name="homebase-id" id="homebase-id" required inputmode="url" />
+        <input type="text" name="homebase-id" id="homebase-id" inputmode="url" />
         <button class="login">Login</button>
       </form>
       <p class="my-3 text-center">or</p>
@@ -80,6 +80,23 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   const storagePartioned = await checkStorageAccess();
   mainForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    if (dotyouInputBox.value === '' && window.top) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const parentUrl = urlParams.get('client_id');
+
+      if (parentUrl) {
+        const isParentAnIdentity = await pingIdentity(parentUrl);
+        if (isParentAnIdentity) {
+          window.top.location.href = `https://${stripIdentity(parentUrl)}/owner/login?returnUrl=/owner`;
+          return;
+        }
+      }
+    }
+
+    if (!(mainForm as HTMLFormElement).reportValidity()) {
+      return;
+    }
 
     if (!localDomainCheck(dotyouInputBox.value)) return;
     mainForm.classList.add(LOADING_CLASSNAME);
