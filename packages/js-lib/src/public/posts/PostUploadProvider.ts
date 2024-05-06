@@ -40,6 +40,8 @@ import { PostContent, BlogConfig, postTypeToDataType } from './PostTypes';
 import { makeGrid } from '../../helpers/ImageMerger';
 import { processVideoFile } from '../../media/Video/VideoProcessor';
 import { createThumbnails } from '../../media/media';
+import { uploadFileOverPeer } from '../../peer/peer';
+import { TransitInstructionSet, TransitUploadResult } from '../../peer/peerData/PeerTypes';
 const OdinBlob: typeof Blob =
   (typeof window !== 'undefined' && 'CustomBlob' in window && (window.CustomBlob as typeof Blob)) ||
   Blob;
@@ -54,8 +56,8 @@ export const savePost = async <T extends PostContent>(
   toSaveFiles?: (NewMediaFile | MediaFile)[] | NewMediaFile[],
   onVersionConflict?: () => void,
   onUpdate?: (progress: number) => void
-): Promise<UploadResult> => {
-  if (odinId) {
+): Promise<UploadResult | TransitUploadResult> => {
+  if (odinId && file.fileId) {
     throw new Error('[PostUploadProvider] savePost: odinId is not implemented yet');
   }
 
@@ -72,7 +74,7 @@ export const savePost = async <T extends PostContent>(
   }
 
   if (file.fileId) {
-    return await updatePost(dotYouClient, file as HomebaseFile<T>, channelId, toSaveFiles);
+    return await updatePost(dotYouClient, odinId, file as HomebaseFile<T>, channelId, toSaveFiles);
   } else {
     if (toSaveFiles?.some((file) => 'fileKey' in file)) {
       throw new Error(
@@ -153,6 +155,7 @@ export const savePost = async <T extends PostContent>(
 
   return await uploadPost(
     dotYouClient,
+    odinId,
     file,
     payloads,
     thumbnails,
@@ -165,6 +168,7 @@ export const savePost = async <T extends PostContent>(
 
 const uploadPost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
+  odinId: string | undefined,
   file: HomebaseFile<T> | NewHomebaseFile<T>,
   payloads: PayloadFile[],
   thumbnails: ThumbnailFile[],
@@ -247,18 +251,39 @@ const uploadPost = async <T extends PostContent>(
     accessControlList: file.serverMetadata?.accessControlList,
   };
 
-  const result = await uploadFile(
-    dotYouClient,
-    instructionSet,
-    metadata,
-    payloads,
-    thumbnails,
-    encrypt,
-    onVersionConflict
-  );
-  if (!result) throw new Error(`Upload failed`);
+  if (!odinId) {
+    const result = await uploadFile(
+      dotYouClient,
+      instructionSet,
+      metadata,
+      payloads,
+      thumbnails,
+      encrypt,
+      onVersionConflict
+    );
 
-  return result;
+    if (!result) throw new Error(`Upload failed`);
+    return result;
+  } else {
+    const transitInstructionSet: TransitInstructionSet = {
+      transferIv: getRandom16ByteArray(),
+      remoteTargetDrive: targetDrive,
+      schedule: ScheduleOptions.SendNowAwaitResponse,
+      recipients: [odinId],
+    };
+
+    const result: TransitUploadResult = await uploadFileOverPeer(
+      dotYouClient,
+      transitInstructionSet,
+      metadata,
+      payloads,
+      thumbnails,
+      encrypt
+    );
+
+    if (!result) throw new Error(`Upload over peer failed`);
+    return result;
+  }
 };
 
 const uploadPostHeader = async <T extends PostContent>(
@@ -379,6 +404,7 @@ const uploadPostHeader = async <T extends PostContent>(
 
 const updatePost = async <T extends PostContent>(
   dotYouClient: DotYouClient,
+  odinId: string | undefined,
   file: HomebaseFile<T>,
   channelId: string,
   existingAndNewMediaFiles?: (NewMediaFile | MediaFile)[]
