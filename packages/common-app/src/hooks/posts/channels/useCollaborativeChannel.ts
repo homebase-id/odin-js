@@ -6,7 +6,7 @@ import {
   saveChannelDefinition,
 } from '@youfoundation/js-lib/public';
 
-import { FEED_APP_ID, t, useCircle, useCircles, useDotYouClient } from '../../../..';
+import { FEED_APP_ID, t, useCircles, useDotYouClient } from '../../../..';
 import { stringGuidsEqual, stringifyToQueryParams } from '@youfoundation/js-lib/helpers';
 import {
   DrivePermissionType,
@@ -17,6 +17,7 @@ import {
 const FEED_ROOT_PATH = '/apps/feed';
 import { useChannel } from './useChannel';
 import { ALL_CONNECTIONS_CIRCLE_ID } from '@youfoundation/js-lib/network';
+import { useChannelDrives } from '../../socialFeed/useChannelDrives';
 
 const getExtendDriveDetailsUrl = (
   identity: string,
@@ -84,6 +85,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
 
   const { data: channelDef, isFetched: isChannelFetched } = useChannel({ channelId }).fetch;
   const { data: circles } = useCircles().fetch;
+  const { data: channelDrives } = useChannelDrives(true);
 
   const validateCollaborativeChannel = () => {
     if (!channelId || !channelDef?.fileMetadata.appData.content.isCollaborative) return null;
@@ -113,10 +115,18 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     });
 
     if (circlesWithMissingPermissions.length) {
-      return circlesWithMissingPermissions;
+      return { invalidDrivePermission: true };
     }
 
-    // TODO: Check the drive attribute
+    // We don't have to check both.. As one fail is enough
+    const channelDrive = channelDrives?.find(
+      (d) =>
+        stringGuidsEqual(d.targetDriveInfo.alias, targetDrive.alias) &&
+        stringGuidsEqual(d.targetDriveInfo.type, targetDrive.type)
+    );
+    if (channelDrive?.attributes.IsCollaborativeChannel !== 'true') {
+      return { invalidDriveAttribute: true };
+    }
 
     return null;
   };
@@ -185,7 +195,7 @@ export const useCollaborativeChannel = (props?: { channelId: string }) => {
     validate: useQuery({
       queryKey: ['validate-collaborative', channelId],
       queryFn: validateCollaborativeChannel,
-      enabled: !!isChannelFetched && !!circles,
+      enabled: !!isChannelFetched && !!circles && !!channelDrives,
     }),
     convertToCollaborativeChannel: useMutation({
       mutationFn: makeChannelCollaborative,
