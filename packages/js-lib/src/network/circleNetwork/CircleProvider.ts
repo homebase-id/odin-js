@@ -80,7 +80,8 @@ export const getCircles = async (
   const url =
     root +
     '/list' +
-    (dotYouClient.getType() === ApiType.Owner && !excludeSystemCircles
+    ((dotYouClient.getType() === ApiType.Owner || dotYouClient.getType() === ApiType.App) &&
+    !excludeSystemCircles
       ? '?includeSystemCircle=true'
       : '');
 
