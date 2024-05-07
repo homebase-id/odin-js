@@ -4,6 +4,8 @@ import {
   ChannelDefinitionVm,
   ChannelItem,
   CollaborativeChannelItem,
+  Loader,
+  MagnifyingGlass,
   Plus,
   useCollaborativeChannels,
 } from '@youfoundation/common-app';
@@ -88,33 +90,37 @@ export const ChannelsPage = () => {
               )}
             </small>
           </h2>
-          {collaborativeChannels?.length || discoverCollaborativeChannels ? (
-            <div className="flex flex-col gap-2">
-              {collaborativeChannels?.map((collaborative) => {
-                return (
-                  <React.Fragment key={collaborative.odinId}>
-                    {collaborative.channels.map((channel) => (
-                      <CollaborativeChannelItem
-                        key={channel.fileId}
-                        odinId={collaborative.odinId}
-                        chnl={channel}
-                        className="bg-background"
-                      />
-                    ))}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          ) : null}
-          <div className="flex cursor-pointer flex-row items-center gap-2 rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800">
-            <p>{t('Missing any channels?')}</p>
-            <ActionButton
-              type="secondary"
+
+          <div className="flex flex-col gap-2">
+            {collaborativeChannels?.length || discoverCollaborativeChannels ? (
+              <>
+                {collaborativeChannels?.map((collaborative) => {
+                  return (
+                    <React.Fragment key={collaborative.odinId}>
+                      {collaborative.channels.map((channel) => (
+                        <CollaborativeChannelItem
+                          key={channel.fileId}
+                          odinId={collaborative.odinId}
+                          chnl={channel}
+                          className="bg-background"
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+              </>
+            ) : null}
+            <div
               onClick={() => setDiscoverCollaborativeChannels(true)}
-              state={discoverCollaborativeChannels ? collaborativeChannelStatus : undefined}
+              className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
             >
+              {collaborativeChannelStatus === 'pending' ? (
+                <Loader className="mr-2 h-5 w-5" />
+              ) : (
+                <MagnifyingGlass className="mr-2 h-5 w-5" />
+              )}{' '}
               {t(`Discover collaborative channels`)}
-            </ActionButton>
+            </div>
           </div>
         </div>
       </section>
