@@ -15,7 +15,7 @@ import { HomebaseFile, NewMediaFile } from '@youfoundation/js-lib/core';
 import { useChatMessage } from '../../../hooks/chat/useChatMessage';
 import { ChatMessage } from '../../../providers/ChatProvider';
 import { Conversation } from '../../../providers/ConversationProvider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
@@ -32,6 +32,7 @@ export const ChatComposer = ({
   clearReplyMsg: () => void;
   onSend?: () => void;
 }) => {
+  const volatileRef = useRef<HTMLDivElement>(null);
   const [message, setMessage] = useState<string | undefined>();
   const [files, setFiles] = useState<NewMediaFile[]>();
 
@@ -79,12 +80,9 @@ export const ChatComposer = ({
   }, [sendMessageState]);
 
   useEffect(() => {
-    if (replyMsg) setFiles([]);
+    // When replying to a message, focus the input
+    if (replyMsg) volatileRef.current?.focus();
   }, [replyMsg]);
-
-  // useEffect(() => {
-  //   if (files?.length) clearReplyMsg();
-  // }, [files]);
 
   return (
     <>
@@ -117,6 +115,7 @@ export const ChatComposer = ({
             className="w-8 flex-grow rounded-md border bg-background p-2 dark:border-slate-800"
             onChange={(newVal) => setMessage(newVal)}
             autoFocus={!isTouchDevice()}
+            ref={volatileRef}
             onPaste={(e) => {
               const mediaFiles = [...getImagesFromPasteEvent(e)].map((file) => ({ file }));
 
