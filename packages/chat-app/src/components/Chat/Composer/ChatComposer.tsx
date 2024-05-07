@@ -20,6 +20,7 @@ import { EmbeddedMessage } from '../Detail/EmbeddedMessage';
 import { isTouchDevice } from '@youfoundation/js-lib/helpers';
 
 const HUNDRED_MEGA_BYTES = 100 * 1024 * 1024;
+const CHAT_DRAFTS_KEY = 'CHAT_LOCAL_DRAFTS';
 
 export const ChatComposer = ({
   conversation,
@@ -33,8 +34,21 @@ export const ChatComposer = ({
   onSend?: () => void;
 }) => {
   const volatileRef = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState<string | undefined>();
+
+  const drafts = JSON.parse(localStorage.getItem(CHAT_DRAFTS_KEY) || '{}');
+  const [message, setMessage] = useState<string | undefined>(
+    conversation?.fileMetadata.appData.uniqueId
+      ? drafts[conversation.fileMetadata.appData.uniqueId] || undefined
+      : undefined
+  );
   const [files, setFiles] = useState<NewMediaFile[]>();
+
+  useEffect(() => {
+    if (conversation?.fileMetadata.appData.uniqueId) {
+      drafts[conversation.fileMetadata.appData.uniqueId] = message;
+      localStorage.setItem(CHAT_DRAFTS_KEY, JSON.stringify(drafts));
+    }
+  }, [conversation, message]);
 
   const {
     mutate: sendMessage,
