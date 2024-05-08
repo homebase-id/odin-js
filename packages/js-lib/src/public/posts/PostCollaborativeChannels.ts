@@ -64,7 +64,7 @@ export const saveChannelLink = async (
     appData: {
       uniqueId: definition.fileMetadata.appData.uniqueId,
       tags: [definition.fileMetadata.appData.uniqueId],
-      fileType: BlogConfig.ChannelDefinitionFileType,
+      fileType: BlogConfig.RemoteChannelDefinitionFileType,
       content: payloadJson,
     },
     isEncrypted: encrypt,

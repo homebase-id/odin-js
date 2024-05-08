@@ -114,7 +114,7 @@ export const ChannelsPage = () => {
           </h2>
 
           <div className="flex flex-col gap-2">
-            {collaborativeChannels?.length ? (
+            {mergedCollaborativeChannels?.length ? (
               <>
                 {mergedCollaborativeChannels?.map((chnlLink) => {
                   return (
