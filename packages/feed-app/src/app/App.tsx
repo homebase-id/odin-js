@@ -26,6 +26,9 @@ const SocialFeed = lazy(() => import('../templates/SocialFeed/SocialFeed'));
 const ArticleComposerPage = lazy(() => import('../templates/SocialFeed/ArticleComposerPage'));
 const ArticlesPage = lazy(() => import('../templates/SocialFeed/ArticlesPage'));
 const ChannelsPage = lazy(() => import('../templates/SocialFeed/ChannelsPage'));
+const IncomingCollaborativeChannelPage = lazy(
+  () => import('../templates/SocialFeed/IncomingCollaborativeChannelPage')
+);
 
 import '@youfoundation/ui-lib/dist/style.css';
 import './App.css';
@@ -112,6 +115,11 @@ function App() {
             <Route path="articles" element={<ArticlesPage />} />
             <Route path="channels" element={<ChannelsPage />} />
             <Route path="edit/:channelKey/:postKey" element={<ArticleComposerPage />} />
+
+            <Route
+              path="channels/incoming-collaborative"
+              element={<IncomingCollaborativeChannelPage />}
+            />
           </Route>
 
           <Route

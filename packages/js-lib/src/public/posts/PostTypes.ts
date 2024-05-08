@@ -24,6 +24,10 @@ export interface CollaborativeChannelDefinition extends ChannelDefinition {
   acl: AccessControlList;
 }
 
+export interface RemoteCollaborativeChannelDefinition extends CollaborativeChannelDefinition {
+  odinId: string;
+}
+
 export enum ChannelTemplate {
   MasonryLayout = 0,
   LargeCards = 101,

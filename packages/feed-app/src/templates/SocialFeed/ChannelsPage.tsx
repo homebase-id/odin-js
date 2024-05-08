@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import {
-  ActionButton,
   ChannelDefinitionVm,
   ChannelItem,
   CollaborativeChannelItem,
