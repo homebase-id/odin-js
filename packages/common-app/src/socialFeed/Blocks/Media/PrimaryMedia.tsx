@@ -118,6 +118,8 @@ export const BoringFile = ({
     link.click();
   };
 
+  if (!file) return null;
+
   return (
     <div
       onClick={

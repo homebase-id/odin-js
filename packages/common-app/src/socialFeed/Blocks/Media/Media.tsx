@@ -28,12 +28,12 @@ export const PostMedia = ({
 }) => {
   const { content: post, previewThumbnail } = postInfo;
 
+  // Fo articles we only want the primary media file
   const mediaFiles =
     postInfo?.content.type !== 'Article'
-      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
-      : [];
+      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY)
+      : postInfo?.payloads?.filter((p) => p.key === postInfo.content.primaryMediaFile?.fileKey);
 
-  // const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (
