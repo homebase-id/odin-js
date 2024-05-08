@@ -2,7 +2,13 @@ import { HomebaseFile, NewHomebaseFile, SecurityGroupType } from '@youfoundation
 import { useState } from 'react';
 
 import { ChannelTemplateSelector } from './ChannelTemplateSelector';
-import { BlogConfig, ChannelDefinition, ChannelTemplate } from '@youfoundation/js-lib/public';
+import {
+  BlogConfig,
+  ChannelDefinition,
+  ChannelTemplate,
+  CollaborativeChannelDefinition,
+  RemoteCollaborativeChannelDefinition,
+} from '@youfoundation/js-lib/public';
 import { slugify, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { ChannelDefinitionVm } from '../hooks/posts/channels/useChannels';
 import { ActionButton } from '../ui/Buttons/ActionButton';
@@ -270,14 +276,12 @@ export const ChannelItem = ({
 export const CollaborativeChannelItem = ({
   odinId,
   className,
-  chnl: chnlDsr,
+  chnl,
 }: {
   odinId: string;
   className?: string;
-  chnl: HomebaseFile<ChannelDefinitionVm | ChannelDefinition>;
+  chnl: CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition;
 }) => {
-  const chnl = chnlDsr?.fileMetadata.appData.content;
-
   return (
     <div
       className={`${
@@ -287,11 +291,7 @@ export const CollaborativeChannelItem = ({
       <div className="flex flex-row items-center gap-2">
         <h2 className="text-lg">
           {chnl.name}{' '}
-          {chnlDsr?.serverMetadata?.accessControlList ? (
-            <small className="text-xs">
-              ({<AclSummary acl={chnlDsr?.serverMetadata?.accessControlList} />})
-            </small>
-          ) : null}
+          {/* {chnl.acl ? <small className="text-xs">({<AclSummary acl={chnl.acl} />})</small> : null} */}
           <small className="text-xs">({odinId})</small>
           <small className="text-md block">{chnl.description}</small>
         </h2>

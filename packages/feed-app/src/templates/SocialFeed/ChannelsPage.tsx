@@ -14,9 +14,9 @@ import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
-import { NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
-import React from 'react';
+import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { RemoteCollaborativeChannelDefinition } from '@youfoundation/js-lib/public';
 
 export const ChannelsPage = () => {
   const [params, setSearchParams] = useSearchParams();
@@ -33,8 +33,31 @@ export const ChannelsPage = () => {
   const [isAddNew, setIsAddNew] = useState(!!newChannelDefinition);
 
   const [discoverCollaborativeChannels, setDiscoverCollaborativeChannels] = useState(false);
-  const { data: collaborativeChannels, status: collaborativeChannelStatus } =
-    useCollaborativeChannels(discoverCollaborativeChannels).fetch;
+  const {
+    fetch: { data: collaborativeChannelLinks },
+    discover: { data: collaborativeChannels, status: collaborativeChannelStatus },
+  } = useCollaborativeChannels(discoverCollaborativeChannels);
+
+  const mergedCollaborativeChannels = useMemo(() => {
+    const allCollaborativeChannels =
+      collaborativeChannels?.flatMap((collab) => collab.channels) || [];
+    return [...(collaborativeChannelLinks || []), ...allCollaborativeChannels].reduce(
+      (acc, curr) => {
+        const existing = acc.find((a) =>
+          stringGuidsEqual(
+            a.fileMetadata.appData.content.uniqueId || a.fileMetadata.appData.uniqueId,
+            curr.fileMetadata.appData.content.uniqueId || curr.fileMetadata.appData.uniqueId
+          )
+        );
+        if (existing) {
+          return acc;
+        } else {
+          return [...acc, curr];
+        }
+      },
+      [] as HomebaseFile<RemoteCollaborativeChannelDefinition>[]
+    );
+  }, [collaborativeChannelLinks, collaborativeChannels]);
 
   return (
     <>
@@ -45,7 +68,7 @@ export const ChannelsPage = () => {
       />
       <section className="pb-10">
         <div className="px-2 sm:px-10">
-          {collaborativeChannels?.length ? <h2 className="mb-2">{t('Your channels')}</h2> : null}
+          <h2 className="mb-2">{t('Your channels')}</h2>
           <div className="flex flex-col gap-2">
             {channels?.map((chnl) => (
               <div key={chnl.fileId}>
@@ -91,20 +114,16 @@ export const ChannelsPage = () => {
           </h2>
 
           <div className="flex flex-col gap-2">
-            {collaborativeChannels?.length || discoverCollaborativeChannels ? (
+            {collaborativeChannels?.length ? (
               <>
-                {collaborativeChannels?.map((collaborative) => {
+                {mergedCollaborativeChannels?.map((chnlLink) => {
                   return (
-                    <React.Fragment key={collaborative.odinId}>
-                      {collaborative.channels.map((channel) => (
-                        <CollaborativeChannelItem
-                          key={channel.fileId}
-                          odinId={collaborative.odinId}
-                          chnl={channel}
-                          className="bg-background"
-                        />
-                      ))}
-                    </React.Fragment>
+                    <CollaborativeChannelItem
+                      key={chnlLink.fileId}
+                      odinId={chnlLink.fileMetadata.appData.content.odinId}
+                      chnl={chnlLink.fileMetadata.appData.content}
+                      className="bg-background"
+                    />
                   );
                 })}
               </>
@@ -113,7 +132,7 @@ export const ChannelsPage = () => {
               onClick={() => setDiscoverCollaborativeChannels(true)}
               className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
             >
-              {collaborativeChannelStatus === 'pending' ? (
+              {collaborativeChannelStatus === 'pending' && discoverCollaborativeChannels ? (
                 <Loader className="mr-2 h-5 w-5" />
               ) : (
                 <MagnifyingGlass className="mr-2 h-5 w-5" />

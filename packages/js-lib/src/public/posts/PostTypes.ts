@@ -26,6 +26,7 @@ export interface CollaborativeChannelDefinition extends ChannelDefinition {
 
 export interface RemoteCollaborativeChannelDefinition extends CollaborativeChannelDefinition {
   odinId: string;
+  uniqueId?: string;
 }
 
 export enum ChannelTemplate {
@@ -38,6 +39,7 @@ export class BlogConfig {
   static readonly PostFileType: number = 101;
   static readonly DraftPostFileType: number = 102;
   static readonly ChannelDefinitionFileType: number = 103;
+  static readonly RemoteChannelDefinitionFileType: number = 107;
   static readonly DriveType: string = '8f448716e34cedf9014145e043ca6612'; //toGuidId('channel_drive');
 
   static readonly PublicChannelId = toGuidId('public_channel_drive');

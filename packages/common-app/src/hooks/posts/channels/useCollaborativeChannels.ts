@@ -7,14 +7,20 @@ import {
   HomebaseFile,
   getSecurityContextOverPeer,
 } from '@youfoundation/js-lib/core';
-import { ChannelDefinition, getChannelDrive } from '@youfoundation/js-lib/public';
+import {
+  RemoteCollaborativeChannelDefinition,
+  getChannelDrive,
+  getChannelLinkDefinitions,
+} from '@youfoundation/js-lib/public';
 import { stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 
-export const useCollaborativeChannels = (enabled?: boolean) => {
-  const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(enabled || false);
+export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
+  const { data: alllContacts, isFetched: fetchedAllContacts } = useAllContacts(
+    enableDiscovery || false
+  );
   const dotYouClient = useDotYouClient().getDotYouClient();
 
-  const fetchCollaborativeChannels = async () => {
+  const discoverCollaborativeChannels = async () => {
     const collaborativeChannelsByOdinId = await Promise.all(
       (alllContacts || []).map(async (contact) => {
         const odinId = contact.fileMetadata.appData.content.odinId;
@@ -41,6 +47,21 @@ export const useCollaborativeChannels = (enabled?: boolean) => {
               );
 
               return hasWriteAccess;
+            })
+            .map((chnl) => {
+              return {
+                ...chnl,
+                fileMetadata: {
+                  ...chnl.fileMetadata,
+                  appData: {
+                    ...chnl.fileMetadata.appData,
+                    content: {
+                      ...chnl.fileMetadata.appData.content,
+                      odinId: odinId,
+                    },
+                  },
+                },
+              };
             }),
         };
       })
@@ -50,16 +71,24 @@ export const useCollaborativeChannels = (enabled?: boolean) => {
       (collaborativeChannels) => collaborativeChannels && collaborativeChannels.channels.length > 0
     ) as {
       odinId: string;
-      channels: HomebaseFile<ChannelDefinition>[];
+      channels: HomebaseFile<RemoteCollaborativeChannelDefinition>[];
     }[];
   };
 
+  const fetchCollaborativeChannels = async () => {
+    return await getChannelLinkDefinitions(dotYouClient);
+  };
+
   return {
+    discover: useQuery({
+      queryKey: ['collaborative-channels-discovery'],
+      queryFn: () => discoverCollaborativeChannels(),
+      enabled: enableDiscovery && fetchedAllContacts,
+      staleTime: Infinity,
+    }),
     fetch: useQuery({
       queryKey: ['collaborative-channels'],
       queryFn: () => fetchCollaborativeChannels(),
-      enabled: enabled && fetchedAllContacts,
-      staleTime: Infinity,
     }),
   };
 };
