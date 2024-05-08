@@ -27,13 +27,8 @@ export const PostMedia = ({
   className?: string;
 }) => {
   const { content: post, previewThumbnail } = postInfo;
+  const mediaFiles = postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || [];
 
-  const mediaFiles =
-    postInfo?.content.type !== 'Article'
-      ? postInfo?.payloads?.filter((p) => p.key !== DEFAULT_PAYLOAD_KEY) || []
-      : [];
-
-  // const mediaFiles = (post as Media).mediaFiles;
   if (!post.primaryMediaFile) {
     if (showFallback) {
       return (
