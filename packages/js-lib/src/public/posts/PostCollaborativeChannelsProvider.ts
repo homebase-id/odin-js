@@ -43,8 +43,9 @@ export const saveChannelLink = async (
   const channelContent = definition.fileMetadata.appData.content;
 
   if (!definition.fileMetadata.appData.uniqueId) {
-    definition.fileMetadata.appData.uniqueId =
-      channelContent.uniqueId || toGuidId(channelContent.name);
+    definition.fileMetadata.appData.uniqueId = toGuidId(
+      `${channelContent.odinId}-${channelContent.name}`
+    );
   }
   const encrypt = true;
 
