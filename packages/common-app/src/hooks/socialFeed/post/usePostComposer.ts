@@ -13,6 +13,7 @@ import {
   EmbeddedPost,
   ReactAccess,
   CollaborativeChannelDefinition,
+  RemoteCollaborativeChannelDefinition,
 } from '@youfoundation/js-lib/public';
 import { getNewId, stringGuidsEqual } from '@youfoundation/js-lib/helpers';
 import { useState } from 'react';
@@ -40,10 +41,11 @@ export const usePostComposer = () => {
     if (!mediaFiles && !caption && !embeddedPost) return;
 
     const { channel, overrideAcl, odinId } = targetChannel;
-    if (
-      overrideAcl &&
-      !stringGuidsEqual(channel.fileMetadata.appData.uniqueId, BlogConfig.PublicChannelId)
-    ) {
+    const channelId =
+      (channel.fileMetadata.appData.content as RemoteCollaborativeChannelDefinition).uniqueId ||
+      channel.fileMetadata.appData.uniqueId ||
+      BlogConfig.PublicChannelId;
+    if (overrideAcl && !stringGuidsEqual(channelId, BlogConfig.PublicChannelId)) {
       throw new Error('Custom ACLs are only allowed for public channels');
     }
     try {
@@ -61,7 +63,7 @@ export const usePostComposer = () => {
               caption: caption?.trim() || '',
               id: postId,
               slug: postId,
-              channelId: channel.fileMetadata.appData.uniqueId || BlogConfig.PublicChannelId,
+              channelId: channelId,
               reactAccess: reactAccess,
 
               embeddedPost: embeddedPost,
@@ -87,7 +89,7 @@ export const usePostComposer = () => {
       await savePostFile({
         postFile: postFile,
         odinId: odinId,
-        channelId: channel.fileMetadata.appData.uniqueId as string,
+        channelId: channelId,
         mediaFiles: mediaFiles,
         onUpdate: (progress) => setProcessingProgress(progress),
       });

@@ -115,6 +115,7 @@ const dsrToChannelLink = async (
         content: definitionContent,
       },
     },
+    serverMetadata: undefined,
   };
 
   return file;
