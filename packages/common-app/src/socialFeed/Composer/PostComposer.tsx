@@ -303,7 +303,7 @@ export const ChannelOrAclSelector = React.forwardRef(
     ref: Ref<HTMLSelectElement>
   ) => {
     const { data: channels, isLoading } = useChannels({ isAuthenticated: true, isOwner: true });
-    const { data: collaborativeChannels } = useCollaborativeChannels(!excludeCollaborative).fetch;
+    const { data: collaborativeChannels } = useCollaborativeChannels().fetch;
     const [isChnlMgmtOpen, setIsChnlMgmtOpen] = useState(false);
     const [isCustomAclOpen, setIsCustomAclOpen] = useState(false);
 

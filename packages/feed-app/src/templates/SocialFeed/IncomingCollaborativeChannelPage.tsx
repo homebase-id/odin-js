@@ -8,10 +8,11 @@ import {
 import { t } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { RemoteCollaborativeChannelDefinition } from '@youfoundation/js-lib/public';
 import { NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
+import { useEffect } from 'react';
 
 export const IncomingCollaborativeChannelPage = () => {
   const [params] = useSearchParams();
@@ -20,10 +21,16 @@ export const IncomingCollaborativeChannelPage = () => {
   const incomingChannel =
     channelParam && tryJsonParse<RemoteCollaborativeChannelDefinition>(channelParam);
 
-  if (!incomingChannel) return null;
-  console.log('incomingChannel', incomingChannel);
-
   const { mutate: saveCollaborativeChannel, status: saveStatus } = useCollaborativeChannel().save;
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (saveStatus === 'success') {
+      navigate(`${ROOT_PATH}/channels`);
+    }
+  }, [saveStatus]);
+
+  if (!incomingChannel) return null;
   const doSave = () => {
     const newChannel: NewHomebaseFile<RemoteCollaborativeChannelDefinition> = {
       fileMetadata: {
@@ -38,6 +45,8 @@ export const IncomingCollaborativeChannelPage = () => {
 
     saveCollaborativeChannel(newChannel);
   };
+
+  console.log('incomingChannel', incomingChannel);
 
   return (
     <>

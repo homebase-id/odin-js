@@ -14,9 +14,9 @@ import { useChannels } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useSearchParams } from 'react-router-dom';
-import { HomebaseFile, NewHomebaseFile } from '@youfoundation/js-lib/core';
-import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
-import { RemoteCollaborativeChannelDefinition } from '@youfoundation/js-lib/public';
+import { NewHomebaseFile } from '@youfoundation/js-lib/core';
+import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import React from 'react';
 
 export const ChannelsPage = () => {
   const [params, setSearchParams] = useSearchParams();
@@ -34,30 +34,10 @@ export const ChannelsPage = () => {
 
   const [discoverCollaborativeChannels, setDiscoverCollaborativeChannels] = useState(false);
   const {
-    fetch: { data: collaborativeChannelLinks },
-    discover: { data: collaborativeChannels, status: collaborativeChannelStatus },
-  } = useCollaborativeChannels(discoverCollaborativeChannels);
-
-  const mergedCollaborativeChannels = useMemo(() => {
-    const allCollaborativeChannels =
-      collaborativeChannels?.flatMap((collab) => collab.channels) || [];
-    return [...(collaborativeChannelLinks || []), ...allCollaborativeChannels].reduce(
-      (acc, curr) => {
-        const existing = acc.find((a) =>
-          stringGuidsEqual(
-            a.fileMetadata.appData.content.uniqueId || a.fileMetadata.appData.uniqueId,
-            curr.fileMetadata.appData.content.uniqueId || curr.fileMetadata.appData.uniqueId
-          )
-        );
-        if (existing) {
-          return acc;
-        } else {
-          return [...acc, curr];
-        }
-      },
-      [] as HomebaseFile<RemoteCollaborativeChannelDefinition>[]
-    );
-  }, [collaborativeChannelLinks, collaborativeChannels]);
+    data: collaborativeChannels,
+    refetch: refetchCollaborativeChannels,
+    isRefetching: isRefetchingCollaborativeChannels,
+  } = useCollaborativeChannels(discoverCollaborativeChannels).fetch;
 
   return (
     <>
@@ -114,25 +94,32 @@ export const ChannelsPage = () => {
           </h2>
 
           <div className="flex flex-col gap-2">
-            {mergedCollaborativeChannels?.length ? (
+            {collaborativeChannels?.length ? (
               <>
-                {mergedCollaborativeChannels?.map((chnlLink) => {
+                {collaborativeChannels?.map((identityLink) => {
                   return (
-                    <CollaborativeChannelItem
-                      key={chnlLink.fileId}
-                      odinId={chnlLink.fileMetadata.appData.content.odinId}
-                      chnl={chnlLink.fileMetadata.appData.content}
-                      className="bg-background"
-                    />
+                    <React.Fragment key={identityLink.odinId}>
+                      {identityLink.channels.map((chnlLink) => (
+                        <CollaborativeChannelItem
+                          key={chnlLink.fileId}
+                          odinId={chnlLink.fileMetadata.appData.content.odinId}
+                          chnl={chnlLink.fileMetadata.appData.content}
+                          className="bg-background"
+                        />
+                      ))}
+                    </React.Fragment>
                   );
                 })}
               </>
             ) : null}
             <div
-              onClick={() => setDiscoverCollaborativeChannels(true)}
+              onClick={() => {
+                setDiscoverCollaborativeChannels(true);
+                setTimeout(() => refetchCollaborativeChannels(), 100);
+              }}
               className="flex cursor-pointer flex-row items-center rounded-md border border-slate-100 bg-background px-4 py-4 dark:border-slate-800"
             >
-              {collaborativeChannelStatus === 'pending' && discoverCollaborativeChannels ? (
+              {isRefetchingCollaborativeChannels && discoverCollaborativeChannels ? (
                 <Loader className="mr-2 h-5 w-5" />
               ) : (
                 <MagnifyingGlass className="mr-2 h-5 w-5" />

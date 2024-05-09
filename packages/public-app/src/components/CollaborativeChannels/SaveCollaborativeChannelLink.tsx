@@ -35,6 +35,7 @@ export const SaveCollaborativeChannelLink = ({
       ? (channel.fileMetadata.appData.content as CollaborativeChannelDefinition)
       : channel.fileMetadata.appData.content),
     odinId: identity,
+    uniqueId: channel.fileMetadata.appData.uniqueId,
     isCollaborative: true,
   };
 
