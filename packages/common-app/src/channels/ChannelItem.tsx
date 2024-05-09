@@ -24,6 +24,7 @@ import { Input } from '../form/Input';
 import { Textarea } from '../form/Textarea';
 import { CheckboxToggle } from '../form/CheckboxToggle';
 import { Pencil } from '../ui/Icons/Pencil';
+import { useCollaborativeChannel } from '../hooks';
 
 export const ChannelItem = ({
   chnl: chnlDsr,
@@ -273,14 +274,53 @@ export const ChannelItem = ({
   );
 };
 
+export const ManageCollaborativeChannelItem = ({
+  odinId,
+  className,
+  chnlLink,
+}: {
+  odinId: string;
+  className?: string;
+  chnlLink: HomebaseFile<RemoteCollaborativeChannelDefinition>;
+}) => {
+  const { mutate: removeCollaborativeChannel } = useCollaborativeChannel().remove;
+
+  return (
+    <CollaborativeChannelItem
+      odinId={odinId}
+      className={className}
+      chnl={chnlLink.fileMetadata.appData.content}
+    >
+      {chnlLink.fileId !== '' ? (
+        <ActionGroup
+          options={[
+            {
+              label: t('Delete Link'),
+              icon: Trash,
+              onClick: () => removeCollaborativeChannel(chnlLink),
+            },
+          ]}
+          type="mute"
+        />
+      ) : (
+        <p className="rounded-lg bg-slate-200 px-2 py-1 text-sm dark:bg-slate-600">
+          {t('Auto discovered')}
+        </p>
+      )}
+    </CollaborativeChannelItem>
+  );
+};
+
 export const CollaborativeChannelItem = ({
   odinId,
   className,
   chnl,
+  children,
 }: {
   odinId: string;
   className?: string;
   chnl: CollaborativeChannelDefinition | RemoteCollaborativeChannelDefinition;
+  children?: React.ReactNode;
 }) => {
   return (
     <div
@@ -296,11 +336,12 @@ export const CollaborativeChannelItem = ({
           <small className="text-md block">{chnl.description}</small>
         </h2>
         <span className="ml-auto"></span>
+        {children}
         {chnl?.isCollaborative ? (
           <p title={t('Collaborative')}>
             <Persons className="w-5 h-5" />
           </p>
-        ) : null}{' '}
+        ) : null}
       </div>
     </div>
   );

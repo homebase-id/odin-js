@@ -51,6 +51,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
             .map((chnl) => {
               return {
                 ...chnl,
+                fileId: '',
                 fileMetadata: {
                   ...chnl.fileMetadata,
                   appData: {
@@ -106,7 +107,7 @@ export const useCollaborativeChannels = (enableDiscovery?: boolean) => {
     const discoveredByOdinId = enableDiscovery ? await discoverByOdinId() : [];
     const linksByOdinId = await getLinksByOdinId();
 
-    const mergedLinks = [...discoveredByOdinId, ...linksByOdinId].reduce(
+    const mergedLinks = [...linksByOdinId, ...discoveredByOdinId].reduce(
       (acc, curr) => {
         if (!curr) return acc;
 

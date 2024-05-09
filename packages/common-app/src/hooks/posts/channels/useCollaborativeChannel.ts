@@ -27,13 +27,13 @@ export const useCollaborativeChannel = () => {
     save: useMutation({
       mutationFn: saveCollaborativeChannel,
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['collaborative-channel'] });
+        queryClient.invalidateQueries({ queryKey: ['collaborative-channels'] });
       },
     }),
     remove: useMutation({
       mutationFn: removeCollaborativeChannel,
       onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ['collaborative-channel'] });
+        queryClient.invalidateQueries({ queryKey: ['collaborative-channels'] });
       },
     }),
   };

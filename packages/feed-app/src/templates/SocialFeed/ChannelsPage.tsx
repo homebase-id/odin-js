@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react';
 import {
   ChannelDefinitionVm,
   ChannelItem,
-  CollaborativeChannelItem,
   Loader,
   MagnifyingGlass,
+  ManageCollaborativeChannelItem,
   Plus,
   useCollaborativeChannels,
 } from '@youfoundation/common-app';
@@ -99,11 +99,11 @@ export const ChannelsPage = () => {
                 {collaborativeChannels?.map((identityLink) => {
                   return (
                     <React.Fragment key={identityLink.odinId}>
-                      {identityLink.channels.map((chnlLink) => (
-                        <CollaborativeChannelItem
-                          key={chnlLink.fileId}
+                      {identityLink.channels.map((chnlLink, index) => (
+                        <ManageCollaborativeChannelItem
+                          key={chnlLink.fileMetadata.appData.uniqueId || index}
                           odinId={chnlLink.fileMetadata.appData.content.odinId}
-                          chnl={chnlLink.fileMetadata.appData.content}
+                          chnlLink={chnlLink}
                           className="bg-background"
                         />
                       ))}

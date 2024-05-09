@@ -4,12 +4,13 @@ import {
   Quote,
   Save,
   useCollaborativeChannel,
+  useCollaborativeChannels,
 } from '@youfoundation/common-app';
 import { t } from '@youfoundation/common-app';
 import { PageMeta } from '../../components/ui/PageMeta/PageMeta';
 import { ROOT_PATH } from '../../app/App';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { tryJsonParse } from '@youfoundation/js-lib/helpers';
+import { stringGuidsEqual, tryJsonParse } from '@youfoundation/js-lib/helpers';
 import { RemoteCollaborativeChannelDefinition } from '@youfoundation/js-lib/public';
 import { NewHomebaseFile, SecurityGroupType } from '@youfoundation/js-lib/core';
 import { useEffect } from 'react';
@@ -22,6 +23,7 @@ export const IncomingCollaborativeChannelPage = () => {
     channelParam && tryJsonParse<RemoteCollaborativeChannelDefinition>(channelParam);
 
   const { mutate: saveCollaborativeChannel, status: saveStatus } = useCollaborativeChannel().save;
+  const { data: existingChannelLinks } = useCollaborativeChannels().fetch;
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -46,7 +48,19 @@ export const IncomingCollaborativeChannelPage = () => {
     saveCollaborativeChannel(newChannel);
   };
 
-  console.log('incomingChannel', incomingChannel);
+  useEffect(() => {
+    const exists = existingChannelLinks?.some(
+      (c) =>
+        c.odinId === incomingChannel.odinId &&
+        c.channels.some((ch) =>
+          stringGuidsEqual(ch.fileMetadata.appData.content.uniqueId, incomingChannel.uniqueId)
+        )
+    );
+
+    if (exists) {
+      navigate(`${ROOT_PATH}/channels`);
+    }
+  }, [existingChannelLinks]);
 
   return (
     <>
