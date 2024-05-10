@@ -92,7 +92,7 @@ export const usePushNotificationClient = () => {
           new Promise<void>((_resolve, reject) =>
             setTimeout(() => {
               reject(`We can't enable notifications at the moment, please refresh and try again`);
-            }, 1000 * 60)
+            }, 1000 * 30)
           ),
         ]).catch((error) => {
           throw new Error(error);

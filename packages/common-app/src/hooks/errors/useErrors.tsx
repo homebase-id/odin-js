@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { t } from '../../helpers';
+import axios, { AxiosError } from 'axios';
 
 export interface Error {
   type: 'warning' | 'critical';
@@ -115,19 +116,19 @@ const getKnownErrorMessages = (error: unknown): string | undefined => {
   if (errorCode === 'registrationStatusNotReadyForFinalization')
     return t('Registration status not ready for finalization');
 
-  // TODO: Can be extended with more user friendly error messages
-
   console.error('[useErrors] Unknown error code', errorCode);
   return t('Something went wrong, please try again later');
 };
 
 const getDetails = (error: unknown) => {
   return {
-    title: (error as any)?.response?.data.title,
-    stackTrace: (error as any)?.response?.data?.stackTrace,
-    correlationId:
-      (error as any)?.response?.headers?.['odin-correlation-id'] ||
-      (error as any)?.response?.data?.correlationId,
+    title: axios.isAxiosError(error) ? (error?.response?.data as any)?.title : (error as any)?.name,
+    stackTrace: axios.isAxiosError(error)
+      ? (error?.response?.data as any)?.stackTrace
+      : (error as any)?.stack,
+    correlationId: axios.isAxiosError(error)
+      ? error?.response?.headers?.['odin-correlation-id'] || error?.response?.data?.correlationId
+      : undefined,
     domain: window.location.hostname,
   };
 };
@@ -153,7 +154,7 @@ export const useErrors = () => {
         message:
           knownErrorMessage ||
           (error instanceof Error
-            ? error.message
+            ? error.toString()
             : t('Something went wrong, please try again later')),
         details,
       };
