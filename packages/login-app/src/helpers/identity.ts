@@ -16,7 +16,8 @@ export const checkStorageAccess = async () => {
   if (hasAccess) {
     try {
       const permission = await navigator.permissions.query({
-        name: 'storage-access',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        name: 'storage-access' as any,
       });
 
       console.debug('document.hasStorageAccess', permission.state);
