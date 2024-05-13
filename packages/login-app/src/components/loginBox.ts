@@ -150,7 +150,7 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
   if (storagePartioned) {
     dotyouInputBox.addEventListener('click', async (e) => {
-      if (!e.target || 'value' in e.target) return;
+      if (!e.target || !('value' in e.target)) return;
       if ((e.target as HTMLInputElement).value) return;
 
       requestStorageAccess().then(() => fillIdentityFromStorage());
