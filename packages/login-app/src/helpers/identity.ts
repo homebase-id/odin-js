@@ -41,19 +41,30 @@ export const requestStorageAccess = async () => {
   });
 };
 
-export const getIdentityFromStorage = () => {
+export const getIdentityFromStorage: () => string[] = () => {
   try {
-    const previousIdentity = window.localStorage.getItem(LOCAL_STORAGE_PREV_IDENTITY_KEY);
-    return previousIdentity;
+    const storageValue = window.localStorage.getItem(LOCAL_STORAGE_PREV_IDENTITY_KEY);
+    if (!storageValue) return [];
+    try {
+      const identties: string[] = JSON.parse(storageValue);
+      if (Array.isArray(identties)) return identties;
+    } catch (ex) {
+      //
+    }
+    return [storageValue];
   } catch (ex) {
     console.debug('window.localStorage is not accessible');
-    return '';
+    return [];
   }
 };
 
 export const storeIdentity = (identity: string) => {
   try {
-    window.localStorage.setItem(LOCAL_STORAGE_PREV_IDENTITY_KEY, identity);
+    const previousIdentities = getIdentityFromStorage();
+    window.localStorage.setItem(
+      LOCAL_STORAGE_PREV_IDENTITY_KEY,
+      JSON.stringify([...new Set([...previousIdentities, identity])])
+    );
   } catch (ex) {
     console.debug('window.localStorage is not accessible');
   }

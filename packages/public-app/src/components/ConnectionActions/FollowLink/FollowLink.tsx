@@ -37,7 +37,7 @@ const FollowLink = ({
         href={
           (identity
             ? `https://${identity}/owner/follow/following/${window.location.hostname}`
-            : `https://anon.homebase.id/redirect/follow/following/${window.location.hostname}`) +
+            : `${import.meta.env.VITE_CENTRAL_LOGIN_HOST}/follow/following/${window.location.hostname}`) +
           (channel ? `?chnl=${channel.fileMetadata.appData.uniqueId}` : '')
         }
         icon={alreadyFollowingThis ? Check : Feed}

@@ -22,7 +22,10 @@ const setupHtml = (isStandalone?: boolean) => {
           </label>
           <span class="invalid-msg">Invalid identity</span>
         </div>
-        <input type="text" name="homebase-id" id="homebase-id" inputmode="url" />
+        <div id="selectable-wrapper">
+          <input type="text" name="homebase-id" list="homebase-identities" id="homebase-id" inputmode="url" autoComplete="off" />
+          <ul id="homebase-identities"></ul>
+        </div>
         <button class="login">Login</button>
       </form>
       <p class="my-3 text-center">or</p>
@@ -38,7 +41,10 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
     'homebase-id'
   ) as HTMLInputElement;
 
-  if (!mainForm || !dotyouInputBox) return;
+  const selectableWrapper = document.getElementById('selectable-wrapper') as HTMLDivElement;
+  const homebaseIdentities = document.getElementById('homebase-identities') as HTMLUListElement;
+
+  if (!mainForm || !dotyouInputBox || !selectableWrapper || !homebaseIdentities) return;
 
   const localDomainComplete = (domain: string) => {
     const strippedIdentity = stripIdentity(domain);
@@ -117,8 +123,28 @@ export const LoginBox = async (onSubmit: (identity: string) => void, isStandalon
   });
 
   const fillIdentityFromStorage = () => {
-    const previousIdentity = getIdentityFromStorage();
-    if (!dotyouInputBox.value && previousIdentity) dotyouInputBox.value = previousIdentity;
+    if (dotyouInputBox.value) return;
+
+    const previousIdentities = getIdentityFromStorage();
+    if (previousIdentities?.length === 1) dotyouInputBox.value = previousIdentities[0];
+    if (previousIdentities?.length > 1) {
+      selectableWrapper.classList.add('selectable-input');
+      homebaseIdentities.innerHTML = previousIdentities
+        .map((identity) => `<li class="option" data-identity="${identity}">${identity}</li>`)
+        .join('');
+
+      homebaseIdentities.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!e.target || !('attributes' in e.target)) return;
+        const identity = (e.target as HTMLElement).getAttribute('data-identity');
+        dotyouInputBox.value = identity || '';
+        selectableWrapper.classList.remove('show');
+      });
+
+      dotyouInputBox.addEventListener('focus', () => selectableWrapper.classList.add('show'));
+    }
   };
 
   // If storage is partioned, onclick of the input box, requestAccess to fill in with a previous known identity
